@@ -4,23 +4,23 @@
 /*
  This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
  Michael O. McCracken. All rights reserved.
-
+ 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
  are met:
-
+ 
  - Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
+ notice, this list of conditions and the following disclaimer.
+ 
  - Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the
-    distribution.
-
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 
  - Neither the name of Michael O. McCracken nor the names of any
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
+ contributors may be used to endorse or promote products derived
+ from this software without specific prior written permission.
+ 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -81,6 +81,8 @@
 #import "BDSKCitationFormatter.h"
 #import "BDSKNotesWindowController.h"
 #import "BDSKSkimReader.h"
+#import "BDSKSplitView.h"
+#import <FileView/FileView.h>
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -111,6 +113,46 @@ enum{
 
 @implementation BibEditor
 
+- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [_files count]; }
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
+{
+    return [_files objectAtIndex:idx];
+}
+
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
+{
+    NSArray *toMove = [[_files objectsAtIndexes:aSet] copy];
+    [_files removeObjectsAtIndexes:aSet];
+    
+    aSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(anIndex, [aSet count])];
+    [_files insertObjects:toMove atIndexes:aSet];
+    [toMove release];
+    return YES;
+}
+
+- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
+{
+    if ([_files count] > [aSet count]) {
+        [_files replaceObjectsAtIndexes:aSet withObjects:newURLs];
+        return YES;
+    }
+    return NO;
+}
+
+- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+{
+    if ([_files count] >= [indexSet count]) {
+        [_files removeObjectsAtIndexes:indexSet];
+        return YES;
+    }
+    return NO;
+}
+
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
+{
+    [_files insertObjects:absoluteURLs atIndexes:aSet];
+}
+
 - (NSString *)windowNibName{
     return @"BibEditor";
 }
@@ -129,6 +171,8 @@ enum{
         
         forceEndEditing = NO;
         didSetupForm = NO;
+        _files = [NSMutableArray new];
+        [_files addObjectsFromArray:[aBib valueForKey:@"allFilePaths"]];
     }
     return self;
 }
@@ -186,16 +230,14 @@ enum{
 	[statusBar setDelegate:self];
     [statusBar setTextOffset:NSMaxX([actionButton frame])];
     
-    [self setWindowFrameAutosaveNameOrCascade:BDSKBibEditorFrameAutosaveName];
-    
-    // Setup the splitview autosave frame, should be done after the statusBar is setup
-    [splitView setPositionAutosaveName:@"OASplitView Position BibEditor"];
-    // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
-    if ([self windowFrameAutosaveName] == nil)
-        [splitView setPositionAutosaveName:nil];
+    // Insert the tabView in the main window
+    BDSKEdgeView *edgeView = [[mainSplitView subviews] objectAtIndex:0];
+    [[tabView superview] setFrame:[edgeView frame]];
+    [edgeView addSubview:tabView];
+	[edgeView setEdges:BDSKMaxXEdgeMask];
     
     // Setup the form and the matrix
-	BDSKEdgeView *edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:0];
+	edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:0];
 	[edgeView setEdges:BDSKMinYEdgeMask];
     NSRect ignored, frame;
     NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
@@ -204,12 +246,37 @@ enum{
     // don't know why, but this is broken
     [bibTypeButton setNextKeyView:bibFields];
     
-    edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:1];
-	[edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
+    edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:1];
+    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
     NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
     [[extraBibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[extraBibFields enclosingScrollView]];
-
+    
+    edgeView = (BDSKEdgeView *)[[[notesView enclosingScrollView] superview] superview];
+    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
+    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+    edgeView = (BDSKEdgeView *)[[[abstractView enclosingScrollView] superview] superview];
+    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
+    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+    edgeView = (BDSKEdgeView *)[[[rssDescriptionView enclosingScrollView] superview] superview];
+    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
+    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+    
+    [fileSplitView setDrawEnd:YES];
+    
+    [self setWindowFrameAutosaveNameOrCascade:BDSKBibEditorFrameAutosaveName];
+    
+    // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
+    [mainSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorMainSplitView"];
+    [fieldSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFieldSplitView"];
+    [fileSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFileSplitView"];
+    if ([self windowFrameAutosaveName] == nil) {
+        // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
+        [mainSplitView setPositionAutosaveName:nil];
+        [fieldSplitView setPositionAutosaveName:nil];
+        [fileSplitView setPositionAutosaveName:nil];
+    }
+    
     formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication owner] macroResolver]];
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
@@ -231,7 +298,7 @@ enum{
 	// Setup the toolbar buttons.
     // The popupbutton needs to be set before fixURLs is called, and -windowDidLoad gets sent after awakeFromNib.
     [self setupButtons];
-
+    
     [authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
     
     // Setup the textviews
@@ -288,10 +355,11 @@ enum{
 		// we must be loading the drawer
 		[self setupDrawer];
 	}
-    
+    [fileView setDataSource:self];
 }
 
 - (void)dealloc{
+    [_files release];
     [publication release];
 	[authorTableView setDelegate:nil];
     [authorTableView setDataSource:nil];
@@ -329,7 +397,7 @@ enum{
 // note that we don't want the - document accessor! It messes us up by getting called for other stuff.
 
 - (void)finalizeChangesPreservingSelection:(BOOL)shouldPreserveSelection{
-
+    
     NSResponder *firstResponder = [[self window] firstResponder];
     
 	// need to finalize text field cells being edited or the abstract/annote text views, since the text views bypass the normal undo mechanism for speed, and won't cause the doc to be marked dirty on subsequent edits
@@ -339,7 +407,7 @@ enum{
 		id textDelegate = [textView delegate];
         if(textDelegate == bibFields || textDelegate == citeKeyField)
             firstResponder = textDelegate; // the text field or the form (textView is the field editor)
-
+        
 		forceEndEditing = YES; // make sure the validation will always allow the end of the edit
 		didSetupForm = NO; // if we we rebuild the form, the selection will become meaningless
         
@@ -364,7 +432,7 @@ enum{
                 selection = NSMakeRange([[textView string] length],0);
             [textView setSelectedRange:selection];
         }
-            
+        
 	}
 }
 
@@ -373,7 +441,7 @@ enum{
 }
 
 - (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleBelowView:[tabView superview] offset:1.0];
+	[statusBar toggleBelowView:mainSplitView offset:1.0];
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowEditorStatusBarKey];
 }
 
@@ -393,17 +461,17 @@ enum{
 		field = BDSKLocalUrlString;
 	
     BOOL err = NO;
-
+    
     if(![sw openLinkedFile:[publication localFilePathForField:field]]){
-            err = YES;
+        err = YES;
     }
     if(err)
         NSBeginAlertSheet(NSLocalizedString(@"Can't Open Local File", @"Message in alert dialog when unable to open local file"),
-                              NSLocalizedString(@"OK", @"Button title"),
-                              nil,nil, [self window],self, NULL, NULL, NULL,
-                              NSLocalizedString(@"Sorry, the contents of the Local-Url Field are neither a valid file path nor a valid URL.",
-                                                @"Informative text in alert dialog"), nil);
-
+                          NSLocalizedString(@"OK", @"Button title"),
+                          nil,nil, [self window],self, NULL, NULL, NULL,
+                          NSLocalizedString(@"Sorry, the contents of the Local-Url Field are neither a valid file path nor a valid URL.",
+                                            @"Informative text in alert dialog"), nil);
+    
 }
 
 - (IBAction)moveLinkedFile:(id)sender{
@@ -426,7 +494,7 @@ enum{
 
 - (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSString *field = (NSString *)contextInfo;
-
+    
     if(returnCode == NSOKButton){
         NSString *oldPath = [publication localFilePathForField:field];
         NSString *newPath = [sheet filename];
@@ -454,10 +522,10 @@ enum{
         
         if([NSString isEmptyString:rurl])
             return;
-    
+        
         if([rurl rangeOfString:@"://"].location == NSNotFound)
             rurl = [@"http://" stringByAppendingString:rurl];
-
+        
         url = [NSURL URLWithString:rurl];
     }
     
@@ -562,7 +630,7 @@ enum{
             
             if(idx++ > 0)
                 [menu addItem:[NSMenuItem separatorItem]];
-
+            
             item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@",@"Menu item title"), field]
                                    action:@selector(openLinkedFile:)
                             keyEquivalent:@""];
@@ -572,7 +640,7 @@ enum{
             theURL = [publication URLForField:field];
             if(nil != theURL){
                 [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Menu item title"),[ field localizedFieldName]]
-                        andSubmenuOfApplicationsForURL:theURL];
+        andSubmenuOfApplicationsForURL:theURL];
             }
             
 			item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Reveal %@ in Finder",@"Menu item title"), [field localizedFieldName]]
@@ -606,7 +674,7 @@ enum{
         item = [menu addItemWithTitle:NSLocalizedString(@"Safari Recent Downloads", @"Menu item title")
                          submenuTitle:@"safariRecentDownloadsMenu"
                       submenuDelegate:self];
-
+        
         // get recent downloads (Tiger only) by searching the system downloads directory
         // should work for browsers other than Safari, if they use IC to get/set the download directory
         // don't create this in the delegate method; it needs to start working in the background
@@ -633,7 +701,7 @@ enum{
             theURL = [publication URLForField:field];
             if(nil != theURL){
                 [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With", @"Menu item title"), [field localizedFieldName]]
-                        andSubmenuOfApplicationsForURL:theURL];
+        andSubmenuOfApplicationsForURL:theURL];
             }
 		}
 		
@@ -674,7 +742,7 @@ enum{
     Boolean success;
     CFReadStreamRef readStream = CFReadStreamCreateWithFile(alloc, downloadPlistURL);
     success = readStream != NULL;
-        
+    
     if(success)
         success = CFReadStreamOpen(readStream);
     
@@ -701,7 +769,7 @@ enum{
 
 - (void)updateSafariRecentDownloadsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
-		
+    
 	unsigned int i = 0;
 	unsigned numberOfItems = [historyArray count];
     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -800,7 +868,7 @@ enum{
     NSMenuItem *item;
     
     [menu removeAllItems];
-
+    
     // now add all of the items from Preview, which are most likely what we want
     e = [previewRecentPaths objectEnumerator];
     while(filePath = [e nextObject]){
@@ -817,7 +885,7 @@ enum{
     // add a separator between Preview and global recent items, unless Preview has never been used
     if([previewRecentPaths count])
         [menu addItem:[NSMenuItem separatorItem]];
-
+    
     // now add all of the items that /were not/ in Preview's recent items path; this works for files opened from Preview's open panel, as well as from the Finder
     e = [globalRecentPaths objectEnumerator];
     while(filePath = [e nextObject]){
@@ -835,7 +903,7 @@ enum{
     if ([globalRecentPaths count] == 0) {
         [menu addItemWithTitle:NSLocalizedString(@"No Recent Documents", @"Menu item title") action:NULL keyEquivalent:@""];
     }
-        
+    
     [globalRecentPaths release];
     [previewRecentPaths release];
 }
@@ -1019,7 +1087,7 @@ enum{
              theAction == @selector(setRemoteURLFromMenuItem:)) {
         return isEditable;
     }
-
+    
 	return YES;
 }
 
@@ -1077,10 +1145,10 @@ enum{
     NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
     if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
         NSAlert *nsAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key", @"Message in alert dialog when failing to generate cite key") 
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The cite key for \"%@\" could not be generated because the generated key would be the same as the crossref key.", @"Informative text in alert dialog"), oldKey];
+                                           defaultButton:nil
+                                         alternateButton:nil
+                                             otherButton:nil
+                               informativeTextWithFormat:NSLocalizedString(@"The cite key for \"%@\" could not be generated because the generated key would be the same as the crossref key.", @"Informative text in alert dialog"), oldKey];
         [nsAlert beginSheetModalForWindow:[self window]
                             modalDelegate:nil
                            didEndSelector:NULL
@@ -1111,7 +1179,7 @@ enum{
                                  informativeTextWithFormat:NSLocalizedString(@"This action will generate a new cite key for the publication.  This action is undoable.", @"Informative text in alert dialog")];
         [alert setHasCheckButton:YES];
         [alert setCheckValue:NO];
-           
+        
         // use didDismissSelector or else we can have sheets competing for the window
         [alert beginSheetModalForWindow:[self window] 
                           modalDelegate:self 
@@ -1193,7 +1261,7 @@ enum{
 	NSString *field = [cell representedObject];
 	int oldRating = [publication ratingValueOfField:field];
 	int newRating = [cell rating];
-		
+    
 	if(newRating != oldRating) {
 		[publication setField:field toRatingValue:newRating];
         [self userChangedField:field from:[NSString stringWithFormat:@"%i", oldRating] to:[NSString stringWithFormat:@"%i", newRating]];
@@ -1242,18 +1310,18 @@ enum{
 	[fieldsPopUpButton selectItemWithTitle:BDSKLocalUrlString];
 	if ([localFileFields count] > 1) 
 		[oPanel setAccessoryView:fieldsAccessoryView];
-
+    
     [oPanel beginSheetForDirectory:nil 
                               file:nil 
                     modalForWindow:[self window] 
                      modalDelegate:self 
                     didEndSelector:@selector(chooseLocalURLPanelDidEnd:returnCode:contextInfo:) 
                        contextInfo:nil];
-  
+    
 }
 
 - (void)chooseLocalURLPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-
+    
     if(returnCode == NSOKButton){
         NSString *fileURLString = [[NSURL fileURLWithPath:[[sheet filenames] objectAtIndex:0]] absoluteString];
 		NSString *field = [fieldsPopUpButton titleOfSelectedItem];
@@ -1365,7 +1433,7 @@ enum{
         }
     }else{
         int i, numRows = [bibFields numberOfRows];
-
+        
         for (i = 0; i < numRows; i++) {
             if ([[[bibFields cellAtIndex:i] representedObject] isEqualToString:fieldName]) {
                 [bibFields selectTextAtIndex:i];
@@ -1705,7 +1773,7 @@ enum{
 				return forceEndEditing;
 			}
 		}
-        		
+        
 	} else if (control == citeKeyField) {
 		
         NSString *message = nil;
@@ -1742,7 +1810,7 @@ enum{
             
             if (forceEndEditing || rv == NSAlertAlternateReturn) {
                 return YES;
-             } else {
+            } else {
                 [control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];
                 return NO;
             }
@@ -1765,7 +1833,7 @@ enum{
         NSString *title = [cell representedObject];
         NSString *value = [cell stringValue];
         NSString *prevValue = [publication valueOfField:title];
-
+        
         if ([prevValue isInherited] &&
             ([value isEqualAsComplexString:prevValue] || [value isEqualAsComplexString:@""]) ) {
             // make sure we keep the original inherited string value
@@ -1778,7 +1846,7 @@ enum{
         [formCellFormatter setEditAsComplexString:NO];
         
 	} else if (control == citeKeyField) {
-
+        
         NSString *newKey = [control stringValue];
         NSString *oldKey = [[[publication citeKey] retain] autorelease];
         
@@ -1822,7 +1890,7 @@ enum{
                                            alternateButton:NSLocalizedString(@"No", @"Button title") 
                                                otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked file to the new location?", @"Informative text in alert dialog when changing a local file field") ];
-
+            
             // info is released in callback
             NSArray *info = [[NSDictionary alloc] initWithObjectsAndKeys:publication, @"paper", [oldURL path], @"oldPath", newPath, @"newPath", fieldName, @"fieldName", nil];
             [alert beginSheetModalForWindow:[self window]
@@ -1935,7 +2003,7 @@ enum{
 }
 
 - (void)bibDidChange:(NSNotification *)notification{
-// unused	BibItem *notifBib = [notification object];
+    // unused	BibItem *notifBib = [notification object];
 	NSDictionary *userInfo = [notification userInfo];
 	NSString *changeType = [userInfo objectForKey:@"type"];
 	NSString *changeKey = [userInfo objectForKey:@"key"];
@@ -1950,7 +2018,7 @@ enum{
     // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
 	if (sender != publication && !parentDidChange)
 		return;
-
+    
 	if([changeType isEqualToString:@"Add/Del Field"]){
 		if(![[pw stringArrayForKey:BDSKRatingFieldsKey] containsObject:changeKey] &&
 		   ![[pw stringArrayForKey:BDSKBooleanFieldsKey] containsObject:changeKey] &&
@@ -1975,7 +2043,7 @@ enum{
 		[self fixURLs];
 		return;
 	}
-
+    
 	if([changeKey isEqualToString:BDSKPubTypeString]){
 		[self setupForm];
 		[self updateTypePopup];
@@ -2057,9 +2125,9 @@ enum{
             [[self window] makeFirstResponder:[self window]];
         [rssDescriptionViewUndoManager removeAllActions];
     }
-            
+    
 }
-	
+
 - (void)bibWasAddedOrRemoved:(NSNotification *)notification{
 	NSEnumerator *pubEnum = [[[notification userInfo] objectForKey:@"pubs"] objectEnumerator];
 	id pub;
@@ -2074,14 +2142,14 @@ enum{
 		return;
 	}
 }
- 
+
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
     // ensure that the pub updates first, since it observes this notification also
     [publication typeInfoDidChange:aNotification];
 	[self setupTypePopUp];
 	[self setupForm];
 }
- 
+
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
     // ensure that the pub updates first, since it observes this notification also
     [publication customFieldsDidChange:aNotification];
@@ -2150,7 +2218,7 @@ enum{
                                        alternateButton:nil
                                            otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"Informative text in alert dialog")];
-    
+        
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         return NO;
     }
@@ -2173,7 +2241,7 @@ enum{
                                        alternateButton:nil
                                            otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"The value you entered contains unbalanced braces. If you save you might not be able to reopen the file.", @"Informative text in alert dialog")];
-    
+        
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
 }
@@ -2188,14 +2256,14 @@ enum{
 }
 
 #pragma mark document interaction
-	
+
 - (void)bibWillBeRemoved:(NSNotification *)notification{
 	NSArray *pubs = [[notification userInfo] objectForKey:@"pubs"];
 	
 	if ([pubs containsObject:publication])
 		[self close];
 }
-	
+
 - (void)groupWillBeRemoved:(NSNotification *)notification{
 	NSArray *groups = [[notification userInfo] objectForKey:@"groups"];
 	
@@ -2312,12 +2380,12 @@ enum{
 		return charRange;
 	} else if ([macroTextFieldWC isEditing]) {
 		return [[NSApp delegate] rangeForUserCompletion:charRange 
-								  forBibTeXString:[textView string]];
+                                        forBibTeXString:[textView string]];
 	} else {
 		return [[NSApp delegate] entry:[[bibFields selectedCell] representedObject] 
 				rangeForUserCompletion:charRange 
 							  ofString:[textView string]];
-
+        
 	}
 }
 
@@ -2332,7 +2400,7 @@ enum{
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
 		return [[NSApp delegate] possibleMatches:[[[publication owner] macroResolver] allMacroDefinitions] 
-						   forBibTeXString:[textView string] 
+                                 forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:idx];
 	} else {
@@ -2341,7 +2409,7 @@ enum{
 				   forPartialWordRange:charRange 
 							  ofString:[textView string] 
 				   indexOfSelectedItem:idx];
-
+        
 	}
 }
 
@@ -2503,7 +2571,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             
             [self userChangedField:field from:oldValue to:remoteURLString];
 			[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-
+            
 			return YES;
 			
 		} else if ([dragType isEqualToString:NSURLPboardType]) {
@@ -2579,7 +2647,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                                                  defaultButton:NSLocalizedString(@"OK", @"Button title")
                                                alternateButton:nil
                                                    otherButton:nil
-                                      informativeTextWithFormat:message];
+                                     informativeTextWithFormat:message];
                 [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
                 return NO;
             }
@@ -2645,7 +2713,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if([pbString contentStringType] == BDSKUnknownStringType)
             return NSDragOperationNone;
     }
-
+    
     NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
     // get the correct cursor depending on the modifiers
 	if( ([NSApp currentModifierFlags] & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask) ){
@@ -2685,7 +2753,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         return NO;
 	
 	BibItem *tempBI = [draggedPubs objectAtIndex:0]; // no point in dealing with multiple pubs for a single editor
-
+    
 	// Test a keyboard mask so that we can override all fields when dragging into the editor window (option)
 	// create a crossref (cmd-option), or fill empty fields (no modifiers)
 	unsigned modifierFlags = [NSApp currentModifierFlags]; // use the Carbon function since [NSApp currentModifierFlags] won't work if we're not the front app
@@ -2712,7 +2780,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                                              defaultButton:NSLocalizedString(@"OK", @"Button title")
                                            alternateButton:nil
                                                otherButton:nil
-                                  informativeTextWithFormat:message];
+                                 informativeTextWithFormat:message];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return NO;
 		}
@@ -2726,7 +2794,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         return YES;
         
 	} else {
-	
+        
         // we aren't linking, so here we decide which fields to overwrite, and just copy values over
         NSEnumerator *newKeyE = [[tempBI allFieldNames] objectEnumerator];
         NSString *key = nil;
@@ -2785,7 +2853,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 #pragma mark dragging source delegate methods
 
 - (BOOL)writeDataToPasteboard:(NSPasteboard *)pboard forField:(NSString *)field {
-
+    
     NSURL *url = [publication URLForField:field];
 	
 	if (url == nil)
@@ -2923,7 +2991,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     if(drawerState & BDSKDrawerStateOpenMask)
         return [documentSnoopDrawer edge];
-        
+    
     NSRect screenFrame = [[[self window] screen] visibleFrame];
     NSRect windowFrame = [[self window] frame];
     
@@ -2952,8 +3020,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	drawerButtonState = state;
 	
 	if ( (state & BDSKDrawerStateOpenMask) || 
-		 ((state & BDSKDrawerStateWebMask) && rurl) ||
-		 (!(state & BDSKDrawerStateWebMask) && lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]) ) {
+        ((state & BDSKDrawerStateWebMask) && rurl) ||
+        (!(state & BDSKDrawerStateWebMask) && lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]) ) {
 		
 		NSImage *drawerImage = [NSImage imageNamed:@"drawerRight"];
 		NSImage *arrowImage = [NSImage imageNamed:@"drawerArrow"];
@@ -3021,11 +3089,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (void)updateSnoopDrawerContent{
     NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
     NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:lurl];
-
+    
 	if ([[documentSnoopDrawer contentView] isEqual:pdfSnoopContainerView]) {
-
+        
 		if (!lurl || pdfSnoopViewLoaded) return;
-
+        
         // see what type this is; we can open PDF or PS
         // check the UTI instead of the file extension (10.4 only)
         
@@ -3191,12 +3259,12 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	// we shouldn't check external items
     if (isEditable == NO)
         return YES;
-        
+    
     // User may have started editing some field, e.g. deleted the citekey and not tabbed out; if the user then chooses to discard, the finalizeChangesPreservingSelection: in windowWillClose: ultimately results in a crash due to OAApplication's sheet queue interaction with modal BDSKAlerts.  Hence, we need to call it earlier.  
     [self finalizeChangesPreservingSelection:NO];
     
     // @@ Some of this might be handled automatically for us if we didn't use endEditingFor: to basically override formatter return values.  Forcing the field editor to end editing has always been problematic (see the comments in some of the sheet callbacks).  Perhaps we should just return NO here if [[self window] makeFirstResponder:[self window]] fails, rather than using finalizeChangesPreservingSelection:'s brute force behavior.
-
+    
     // finalizeChangesPreservingSelection: may end up triggering other sheets, as well (move file, for example; bug #1565645), and we don't want to close the window when it has a sheet attached, since it's waiting for user input at that point.  This is sort of a hack, but there's too much state for us to keep track of and decide if the window should really close.
     if ([[self window] attachedSheet] != nil)
         return NO;
@@ -3207,18 +3275,18 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // case 1: the item has not been edited
     if(![publication hasBeenEdited]){
         errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to keep it?", @"Informative text in alert dialog");
-    // case 2: cite key hasn't been set, and paper needs to be filed
+        // case 2: cite key hasn't been set, and paper needs to be filed
     }else if([publication hasEmptyOrDefaultCiteKey] && [publication needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
-    // case 3: only the paper needs to be filed
+        // case 3: only the paper needs to be filed
     }else if([publication needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
-    // case 4: only the cite key needs to be set
+        // case 4: only the cite key needs to be set
     }else if([publication hasEmptyOrDefaultCiteKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to cancel and edit the cite key, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
-	// case 5: good to go
+        // case 5: good to go
     }else{
         return YES;
     }
@@ -3234,7 +3302,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                       NULL,
                       errMsg);
     return NO; // this method returns before the callback
-
+    
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
@@ -3274,10 +3342,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 			NSURL *linkURL = [element objectForKey:WebElementLinkURLKey];
 			
             [menuItems addObject:item];
-        
+            
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Link As Local File",@"Save link as local file") stringByAppendingEllipsis]
-                                            action:@selector(downloadLinkedFileAsLocalUrl:)
-                                     keyEquivalent:@""];
+                                                                        action:@selector(downloadLinkedFileAsLocalUrl:)
+                                                                 keyEquivalent:@""];
 			[item setTarget:self];
 			[item setRepresentedObject:linkURL];
 			[menuItems addObject:[item autorelease]];
@@ -3287,40 +3355,40 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		[menuItems addObject:[NSMenuItem separatorItem]];
 	
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Back", @"Menu item title")
-									  action:@selector(goBack:)
-							   keyEquivalent:@""];
+                                                                action:@selector(goBack:)
+                                                         keyEquivalent:@""];
 	[menuItems addObject:[item autorelease]];
 	
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Forward", @"Menu item title")
-									  action:@selector(goForward:)
-							   keyEquivalent:@""];
+                                                                action:@selector(goForward:)
+                                                         keyEquivalent:@""];
 	[menuItems addObject:[item autorelease]];
 	
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reload", @"Menu item title")
-									  action:@selector(reload:)
-							   keyEquivalent:@""];
+                                                                action:@selector(reload:)
+                                                         keyEquivalent:@""];
 	[menuItems addObject:[item autorelease]];
 	
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Stop", @"Menu item title")
-									  action:@selector(stopLoading:)
-							   keyEquivalent:@""];
+                                                                action:@selector(stopLoading:)
+                                                         keyEquivalent:@""];
 	[menuItems addObject:[item autorelease]];
 	
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Increase Text Size", @"Menu item title")
-									  action:@selector(makeTextLarger:)
-							   keyEquivalent:@""];
+                                                                action:@selector(makeTextLarger:)
+                                                         keyEquivalent:@""];
 	[menuItems addObject:[item autorelease]];
 	
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size", @"Menu item title")
-									  action:@selector(makeTextSmaller:)
-							   keyEquivalent:@""];
+                                                                action:@selector(makeTextSmaller:)
+                                                         keyEquivalent:@""];
 	[menuItems addObject:[item autorelease]];
 	
 	[menuItems addObject:[NSMenuItem separatorItem]];
 	
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Save as Local File", @"Menu item title")
-									  action:@selector(saveFileAsLocalUrl:)
-							   keyEquivalent:@""];
+                                                                action:@selector(saveFileAsLocalUrl:)
+                                                         keyEquivalent:@""];
 	[item setTarget:self];
 	[menuItems addObject:[item autorelease]];
 	
@@ -3355,7 +3423,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	
 	NSString *filename = [[[dataSource request] URL] lastPathComponent];
 	NSString *extension = [filename pathExtension];
-   
+    
 	NSSavePanel *sPanel = [NSSavePanel savePanel];
     if (NO != [extension isEqualToString:@""]) 
 		[sPanel setRequiredFileType:extension];
@@ -3444,7 +3512,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)download:(NSURLDownload *)theDownload decideDestinationWithSuggestedFilename:(NSString *)filename{
 	NSString *extension = [filename pathExtension];
-   
+    
 	NSSavePanel *sPanel = [NSSavePanel savePanel];
     if (NO == [extension isEqualToString:@""]) 
 		[sPanel setRequiredFileType:extension];
@@ -3492,7 +3560,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (void)download:(NSURLDownload *)theDownload didFailWithError:(NSError *)error
 {
     [self setDownloading:NO];
-        
+    
     NSString *errorDescription = [error localizedDescription];
     if (nil == errorDescription) {
         errorDescription = NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
@@ -3514,7 +3582,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (NSUndoManager *)undoManager {
 	return [[self document] undoManager];
 }
-    
+
 // we want to have the same undoManager as our document, so we use this 
 // NSWindow delegate method to return the doc's undomanager ...
 - (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
@@ -3575,57 +3643,156 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 #pragma mark Splitview delegate methods
 
 - (void)splitViewDoubleClick:(OASplitView *)sender{
-    NSView *form = [[splitView subviews] objectAtIndex:0]; // form
-    NSView *matrix = [[splitView subviews] objectAtIndex:1]; // matrix
-    NSRect formFrame = [form frame];
-    NSRect matrixFrame = [matrix frame];
-    
-    if(NSHeight([matrix frame]) > 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-        lastMatrixHeight = NSHeight(matrixFrame); // cache this
-        formFrame.size.height += lastMatrixHeight;
-        matrixFrame.size.height = 0;
-    } else {
-        if(lastMatrixHeight <= 0)
-            lastMatrixHeight = NSHeight([extraBibFields frame]); // a reasonable value to start
-		matrixFrame.size.height = lastMatrixHeight;
-        formFrame.size.height = NSHeight([splitView frame]) - lastMatrixHeight - [splitView dividerThickness];
-		if (NSHeight(formFrame) < 1.0) {
-			formFrame.size.height = 1.0;
-			matrixFrame.size.height = NSHeight([splitView frame]) - [splitView dividerThickness] - 1.0;
-			lastMatrixHeight = NSHeight(matrixFrame);
-		}
+    if ([sender isEqual:mainSplitView]) {
+        NSView *tabs = [[mainSplitView subviews] objectAtIndex:0]; // tabs
+        NSView *files = [[mainSplitView subviews] objectAtIndex:1]; // files+authors
+        NSRect tabsFrame = [tabs frame];
+        NSRect filesFrame = [files frame];
+        
+        if(NSWidth(filesFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+            lastFileViewWidth = NSWidth(filesFrame); // cache this
+            tabsFrame.size.width += lastFileViewWidth;
+            filesFrame.size.width = 0.0;
+        } else {
+            if(lastFileViewWidth <= 0.0)
+                lastFileViewWidth = 150.0; // a reasonable value to start
+            filesFrame.size.width = lastFileViewWidth;
+            tabsFrame.size.width = NSWidth([mainSplitView frame]) - lastFileViewWidth - [mainSplitView dividerThickness];
+            if (NSWidth(tabsFrame) < 390.0) {
+                tabsFrame.size.width = 390.0;
+                filesFrame.size.width = NSWidth([mainSplitView frame]) - [mainSplitView dividerThickness] - 390.0;
+                lastFileViewWidth = NSWidth(filesFrame);
+            }
+        }
+        [tabs setFrame:tabsFrame];
+        [files setFrame:filesFrame];
+        [mainSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
+    } else if ([sender isEqual:fieldSplitView]) {
+        NSView *form = [[fieldSplitView subviews] objectAtIndex:0]; // form
+        NSView *matrix = [[fieldSplitView subviews] objectAtIndex:1]; // matrix
+        NSRect formFrame = [form frame];
+        NSRect matrixFrame = [matrix frame];
+        
+        if(NSHeight(matrixFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+            lastMatrixHeight = NSHeight(matrixFrame); // cache this
+            formFrame.size.height += lastMatrixHeight;
+            matrixFrame.size.height = 0.0;
+        } else {
+            if(lastMatrixHeight <= 0.0)
+                lastMatrixHeight = NSHeight([extraBibFields frame]); // a reasonable value to start
+            matrixFrame.size.height = lastMatrixHeight;
+            formFrame.size.height = NSHeight([fieldSplitView frame]) - lastMatrixHeight - [fieldSplitView dividerThickness];
+            if (NSHeight(formFrame) < 1.0) {
+                formFrame.size.height = 1.0;
+                matrixFrame.size.height = NSHeight([fieldSplitView frame]) - [fieldSplitView dividerThickness] - 1.0;
+                lastMatrixHeight = NSHeight(matrixFrame);
+            }
+        }
+        [form setFrame:formFrame];
+        [matrix setFrame:matrixFrame];
+        [fieldSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fieldSplitView];
+    } else if ([sender isEqual:fileSplitView]) {
+        NSView *files = [[fileSplitView subviews] objectAtIndex:0]; // files
+        NSView *authors = [[fileSplitView subviews] objectAtIndex:1]; // authors
+        NSRect filesFrame = [files frame];
+        NSRect authorsFrame = [authors frame];
+        
+        if(NSHeight(authorsFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+            lastAuthorsHeight = NSHeight(authorsFrame); // cache this
+            filesFrame.size.height += lastMatrixHeight;
+            authorsFrame.size.height = 0.0;
+        } else {
+            if(lastAuthorsHeight <= 0.0)
+                lastAuthorsHeight = 150.0; // a reasonable value to start
+            authorsFrame.size.height = lastAuthorsHeight;
+            filesFrame.size.height = NSHeight([fileSplitView frame]) - lastAuthorsHeight - [fileSplitView dividerThickness];
+            if (NSHeight(filesFrame) < 0.0) {
+                filesFrame.size.height = 0.0;
+                authorsFrame.size.height = NSHeight([fileSplitView frame]) - [fileSplitView dividerThickness];
+                lastAuthorsHeight = NSHeight(authorsFrame);
+            }
+        }
+        [files setFrame:filesFrame];
+        [authors setFrame:authorsFrame];
+        [fileSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fileSplitView];
     }
-    [form setFrame:formFrame];
-    [matrix setFrame:matrixFrame];
-    [splitView adjustSubviews];
-	// fix for NSSplitView bug, which doesn't send this in adjustSubviews
-	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:splitView];
 }
 
 - (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
-	// don't lose the top edge of the splitter
-	return proposedMin + 1.0;
+    if ([sender isEqual:mainSplitView]) {
+        return fmaxf(proposedMin, 390.0);
+    } else if ([sender isEqual:fieldSplitView]) {
+        // don't lose the top edge of the splitter
+        return proposedMin + 1.0;
+    }
+    return proposedMin;
 }
 
 - (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize{
-    // keeps the matrix view at the same size and resizes the form view
-	NSView *form = [[sender subviews] objectAtIndex:0]; // form
-    NSView *matrix = [[sender subviews] objectAtIndex:1]; // matrix
-    NSRect formFrame = [form frame];
-    NSRect matrixFrame = [matrix frame];
-	NSSize newSize = [sender frame].size;
-	
-	formFrame.size.height += newSize.height - oldSize.height;
-	if (NSHeight(formFrame) < 1.0) {
-		formFrame.size.height = 1.0;
-		matrixFrame.size.height = newSize.height - [splitView dividerThickness] - 1.0;
-		lastMatrixHeight = NSHeight(matrixFrame);
-	}
-    [form setFrame:formFrame];
-    [matrix setFrame:matrixFrame];
-    [splitView adjustSubviews];
-	// fix for NSSplitView bug, which doesn't send this in adjustSubviews
-	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:splitView];
+    if ([sender isEqual:mainSplitView]) {
+        NSView *tabs = [[sender subviews] objectAtIndex:0]; // tabview
+        NSView *files = [[sender subviews] objectAtIndex:1]; // files+authors
+        NSRect tabsFrame = [tabs frame];
+        NSRect filesFrame = [files frame];
+        NSSize newSize = [sender frame].size;
+        
+        tabsFrame.size.width += newSize.width - oldSize.width;
+        if (NSWidth(tabsFrame) < 390.0) {
+            tabsFrame.size.width = 390.0;
+            filesFrame.size.width = newSize.width - [mainSplitView dividerThickness] - 390.0;
+            lastFileViewWidth = NSWidth(filesFrame);
+        }
+        [tabs setFrame:tabsFrame];
+        [files setFrame:filesFrame];
+        [mainSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
+    } else if ([sender isEqual:fieldSplitView]) {
+        // keeps the matrix view at the same size and resizes the form view
+        NSView *form = [[sender subviews] objectAtIndex:0]; // form
+        NSView *matrix = [[sender subviews] objectAtIndex:1]; // matrix
+        NSRect formFrame = [form frame];
+        NSRect matrixFrame = [matrix frame];
+        NSSize newSize = [sender frame].size;
+        
+        formFrame.size.height += newSize.height - oldSize.height;
+        if (NSHeight(formFrame) < 1.0) {
+            formFrame.size.height = 1.0;
+            matrixFrame.size.height = newSize.height - [fieldSplitView dividerThickness] - 1.0;
+            lastMatrixHeight = NSHeight(matrixFrame);
+        }
+        [form setFrame:formFrame];
+        [matrix setFrame:matrixFrame];
+        [fieldSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fieldSplitView];
+    } else if ([sender isEqual:fileSplitView]) {
+        NSView *files = [[sender subviews] objectAtIndex:0]; // files
+        NSView *authors = [[sender subviews] objectAtIndex:1]; // authors
+        NSRect filesFrame = [files frame];
+        NSRect authorsFrame = [authors frame];
+        NSSize newSize = [sender frame].size;
+        
+        filesFrame.size.height += newSize.height - oldSize.height;
+        if (NSHeight(filesFrame) < 0.0) {
+            filesFrame.size.height = 0.0;
+            authorsFrame.size.height = newSize.height - [fileSplitView dividerThickness];
+            lastAuthorsHeight = NSHeight(authorsFrame);
+        }
+        [files setFrame:filesFrame];
+        [authors setFrame:authorsFrame];
+        [fileSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fileSplitView];
+    } else {
+        [sender adjustSubviews];
+    }
 }
 
 @end
@@ -3699,21 +3866,21 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }    
 
 #define AddFormEntries(fields, attrs) \
-    e = [fields objectEnumerator]; \
-    while(tmp = [e nextObject]){ \
-        if ([ignoredKeys containsObject:tmp]) continue; \
-		[ignoredKeys addObject:tmp]; \
-		entry = [bibFields insertEntry:[tmp localizedFieldName] usingTitleFont:requiredFont attributesForTitle:attrs indexAndTag:i objectValue:[publication valueOfField:tmp]]; \
-		[entry setRepresentedObject:tmp]; \
-        if ([tmp isEqualToString:BDSKCrossrefString]) \
-			[entry setFormatter:crossrefFormatter]; \
-        else if ([tmp isCitationField]) \
-			[entry setFormatter:citationFormatter]; \
-		else \
-			[entry setFormatter:formCellFormatter]; \
-		if([editedTitle isEqualToString:tmp]) editedRow = i; \
-		i++; \
-    }
+e = [fields objectEnumerator]; \
+while(tmp = [e nextObject]){ \
+if ([ignoredKeys containsObject:tmp]) continue; \
+[ignoredKeys addObject:tmp]; \
+entry = [bibFields insertEntry:[tmp localizedFieldName] usingTitleFont:requiredFont attributesForTitle:attrs indexAndTag:i objectValue:[publication valueOfField:tmp]]; \
+[entry setRepresentedObject:tmp]; \
+if ([tmp isEqualToString:BDSKCrossrefString]) \
+[entry setFormatter:crossrefFormatter]; \
+else if ([tmp isCitationField]) \
+[entry setFormatter:citationFormatter]; \
+else \
+[entry setFormatter:formCellFormatter]; \
+if([editedTitle isEqualToString:tmp]) editedRow = i; \
+i++; \
+}
 
 - (void)setupForm{
     static NSFont *requiredFont = nil;
@@ -3751,19 +3918,19 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSArray *ratingFields = [pw stringArrayForKey:BDSKRatingFieldsKey];
 	NSArray *booleanFields = [pw stringArrayForKey:BDSKBooleanFieldsKey];
 	NSArray *triStateFields = [pw stringArrayForKey:BDSKTriStateFieldsKey];
-
+    
 	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects: BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, BDSKDateAddedString, BDSKDateModifiedString, nil];
     [ignoredKeys addObjectsFromArray:ratingFields];
     [ignoredKeys addObjectsFromArray:booleanFields];
     [ignoredKeys addObjectsFromArray:triStateFields];
-
+    
     NSDictionary *reqAtt = [[NSDictionary alloc] initWithObjects:[NSArray arrayWithObjects:[NSColor redColor],nil]
                                                          forKeys:[NSArray arrayWithObjects:NSForegroundColorAttributeName,nil]];
 	
 	// set up for adding all items 
     // remove all items in the NSForm
     [bibFields removeAllEntries];
-
+    
     // make two passes to get the required entries at top.
     i=0;
     sKeys = [[publication allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
@@ -3792,7 +3959,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // align the cite key field with the form cells
     if([bibFields numberOfRows] > 0){
         [bibFields drawRect:NSZeroRect];// this forces the calculation of the titleWidth
-        float offset = [[bibFields cellAtIndex:0] titleWidth] + NSMinX([splitView frame]) + FORM_OFFSET + 4.0;
+        float offset = [[bibFields cellAtIndex:0] titleWidth] + NSMinX([fieldSplitView frame]) + FORM_OFFSET + 4.0;
         NSRect frame = [citeKeyField frame];
         if(offset >= NSMaxX([citeKeyTitle frame]) + 8.0){
             frame.size.width = NSMaxX(frame) - offset;
@@ -3808,18 +3975,18 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 #define AddMatrixEntries(fields, cell) \
-    e = [fields objectEnumerator]; \
-    while(tmp = [e nextObject]){ \
-		NSButtonCell *buttonCell = [cell copy]; \
-		[buttonCell setTitle:[tmp localizedFieldName]]; \
-		[buttonCell setRepresentedObject:tmp]; \
-		[buttonCell setIntValue:[publication intValueOfField:tmp]]; \
-        cellWidth = fmaxf(cellWidth, [buttonCell cellSize].width); \
-        [cells addObject:buttonCell]; \
-		[buttonCell release]; \
-		if([editedTitle isEqualToString:tmp]) \
-			editedIndex = [cells count] - 1; \
-    }
+e = [fields objectEnumerator]; \
+while(tmp = [e nextObject]){ \
+NSButtonCell *buttonCell = [cell copy]; \
+[buttonCell setTitle:[tmp localizedFieldName]]; \
+[buttonCell setRepresentedObject:tmp]; \
+[buttonCell setIntValue:[publication intValueOfField:tmp]]; \
+cellWidth = fmaxf(cellWidth, [buttonCell cellSize].width); \
+[cells addObject:buttonCell]; \
+[buttonCell release]; \
+if([editedTitle isEqualToString:tmp]) \
+editedIndex = [cells count] - 1; \
+}
 
 - (void)setupMatrix{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
@@ -3893,7 +4060,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (void)setupTypePopUp{
     [bibTypeButton removeAllItems];
     [bibTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] bibTypesForFileType:[publication fileType]]];
-
+    
     [bibTypeButton selectItemWithTitle:[publication pubType]];
 }
 
@@ -3973,7 +4140,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [viewLocalToolbarItem setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"Tool tip message")];
         [[self window] setRepresentedFilename:@""];
     }
-
+    
     NSURL *remoteURL = [publication remoteURL];
     if(remoteURL != nil){
         icon = [NSImage imageForURL:remoteURL];
