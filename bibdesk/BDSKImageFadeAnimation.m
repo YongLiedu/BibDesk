@@ -47,7 +47,6 @@
     if (self) {
         filter = [[CIFilter filterWithName:@"CIDissolveTransition"] retain];
         [filter setDefaults];
-        bitmapData = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
     }
     return self;
 }
@@ -55,7 +54,6 @@
 - (void)dealloc
 {
     [filter release];
-    CFRelease(bitmapData);
     [super dealloc];
 }
 
@@ -107,22 +105,12 @@
     CIImage *image = [filter valueForKey:@"outputImage"];
     CGRect rect = [image extent];
     
-    // Numerous ways to convert the CIImage to an NSImage, but this method is fast and reasonably simple.  Note that drawing into an offscreen context will cause major leakage (and the animation stutters).
-    CGImageRef cgImage = [[[NSGraphicsContext currentContext] CIContext] createCGImage:image fromRect:rect];
-    
-    // truncate the mutable data
-    CFDataSetLength(bitmapData, 0);
-    
-    CGImageDestinationRef imDest = CGImageDestinationCreateWithData(bitmapData, kUTTypeTIFF, 1, NULL);
-    CGImageDestinationAddImage(imDest, cgImage, NULL);
-    CGImageDestinationFinalize(imDest);
-    CFRelease(imDest);
-    CGImageRelease(cgImage);
- 
-    NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithData:(NSData *)bitmapData];
-    NSImage *nsImage = [[NSImage alloc] initWithSize:((NSRect *)&rect)->size];  
-    [nsImage addRepresentation:imageRep];
-    [imageRep release];
+    NSImage *nsImage = [[NSImage alloc] initWithSize:((NSRect *)&rect)->size];
+    [nsImage lockFocus];
+    CIContext *ciContext = [[NSGraphicsContext currentContext] CIContext];
+    CGRect r = CGRectMake(0,0,rect.size.width, rect.size.height);
+    [ciContext drawImage:image inRect:r fromRect:r];
+    [nsImage unlockFocus];
     
     return [nsImage autorelease];
 }

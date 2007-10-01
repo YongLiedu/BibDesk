@@ -151,7 +151,6 @@ static NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEdit
     [item release];
     
     // Authors
-    /*
 	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"Authors", @"Toolbar item label") 
 											                action:NULL
                                                      keyEquivalent:@""] autorelease];
@@ -169,7 +168,6 @@ static NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEdit
     [item setMenuFormRepresentation:menuItem];
     [toolbarItems setObject:item forKey:BibEditorToolbarAuthorTableItemIdentifier];
     [item release];
-     */
     
     // Delete
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarDeleteItemIdentifier];
@@ -246,7 +244,7 @@ static NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEdit
 		BibEditorToolbarViewRemoteItemIdentifier,
 		BibEditorToolbarSnoopDrawerItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
-		/*BibEditorToolbarAuthorTableItemIdentifier,*/ nil];
+		BibEditorToolbarAuthorTableItemIdentifier, nil];
 }
 
 
@@ -255,7 +253,7 @@ static NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEdit
 		BibEditorToolbarViewLocalItemIdentifier,
 		BibEditorToolbarViewRemoteItemIdentifier,
 		BibEditorToolbarSnoopDrawerItemIdentifier,
-		/*BibEditorToolbarAuthorTableItemIdentifier,*/
+		BibEditorToolbarAuthorTableItemIdentifier,
         BibEditorToolbarActionItemIdentifier,
 		BibEditorToolbarDeleteItemIdentifier,
 		BibEditorToolbarAddWithCrossrefItemIdentifier,

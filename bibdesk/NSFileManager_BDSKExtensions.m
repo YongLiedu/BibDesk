@@ -304,9 +304,12 @@ static void createTemporaryDirectory()
 	ICFileSpec spec;
     
 	static CFURLRef pathURL = NULL;
+    static BOOL alreadyTried = NO;
     
-    
-    if (NULL == pathURL) {
+    if (NO == alreadyTried) {
+        
+        alreadyTried = YES;
+        
         long size = sizeof(ICFileSpec);
         FSRef pathRef;
         

@@ -1,7 +1,7 @@
 //
-//  BDSKHCiteParser.h
+//  BDSKCiteULikeParser.m
 //
-//  Created by Michael McCracken on 11/1/06.
+//  Created by Michael O. McCracken on 9/26/07.
 /*
  This software is Copyright (c) 2007
  Michael O. McCracken. All rights reserved.
@@ -35,12 +35,57 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
-#import "BDSKWebParser.h"
-#import "NSXMLNode_BDSKExtensions.h"
+#import "BDSKCiteULikeParser.h"
+#import <WebKit/WebKit.h>
+#import "BibItem.h"
+#import "BDSKBibTeXParser.h"
 
+@implementation BDSKCiteULikeParser
 
-@interface BDSKHCiteParser : BDSKWebParser
-@end
++ (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
+    
+    if (! [[url host] isEqualToString:@"www.citeulike.org"]){
+        return NO;
+    }
+    
+    
+    NSString *containsPreNode = @".//pre";
+   
+    NSError *error = nil;    
 
+    bool nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsPreNode error:&error] count] > 0;
+
+    return nodecountisok;
+}
+
++ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
+
+    NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
+    
+    
+    NSString *prePath = @".//pre";
+    
+    NSError *error = nil;    
+
+    NSArray *preNodes = [[xmlDocument rootElement] nodesForXPath:prePath
+                                                    error:&error];
+    
+    if ([preNodes count] < 1) return items;
+    
+    NSString *preString = [[preNodes objectAtIndex:0] stringValue];
+    
+    BOOL isPartialData = NO;
+    
+    NSArray* bibtexItems = [BDSKBibTeXParser itemsFromString:preString document:nil isPartialData:&isPartialData error:&error];
+    if (bibtexItems == nil){
+        if(outError) *outError = error;
+        return nil;
+    }
+    [items addObjectsFromArray:bibtexItems];
+
+    return items;  
+    
+}
+
+@end 
 

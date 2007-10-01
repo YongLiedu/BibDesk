@@ -115,6 +115,16 @@
 		457538310B70170D00C0E49B /* BDSKWebGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 4575382B0B70170D00C0E49B /* BDSKWebGroup.m */; };
 		457538330B70170D00C0E49B /* BDSKWebGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */; };
 		457538460B701ECD00C0E49B /* BDSKWebGroupView.nib in Resources */ = {isa = PBXBuildFile; fileRef = 457538400B701ECD00C0E49B /* BDSKWebGroupView.nib */; };
+		45BB77530CAC74AE00F6299B /* BDSKGoogleScholarParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */; };
+		45BB77540CAC74AE00F6299B /* BDSKGoogleScholarParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45BB77520CAC74AE00F6299B /* BDSKGoogleScholarParser.m */; };
+		45DB3E4D0CAADFC3001EACDA /* BDSKACMDLParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E470CAADFC3001EACDA /* BDSKACMDLParser.h */; };
+		45DB3E4E0CAADFC3001EACDA /* BDSKACMDLParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E480CAADFC3001EACDA /* BDSKACMDLParser.m */; };
+		45DB3E4F0CAADFC3001EACDA /* BDSKCiteULikeParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E490CAADFC3001EACDA /* BDSKCiteULikeParser.h */; };
+		45DB3E500CAADFC3001EACDA /* BDSKCiteULikeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */; };
+		45DB3E510CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */; };
+		45DB3E520CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E4C0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m */; };
+		45DB3E8E0CAAFED5001EACDA /* BDSKHubmedParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */; };
+		45DB3E8F0CAAFED5001EACDA /* BDSKHubmedParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -230,8 +240,6 @@
 		CEBA63D80A7CA0B500588BB7 /* BDSKCrossrefFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */; };
 		CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEBB8D8709C8B0D90074C79E /* Font.tiff */; };
 		CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */; };
-		CEC4A0DC0CA7133F00299397 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEC4A0DB0CA7133F00299397 /* FileView.framework */; };
-		CEC4A0E20CA7135600299397 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEC4A0DB0CA7133F00299397 /* FileView.framework */; };
 		CED65AB70906BCC6003EED90 /* BDSKScriptHook.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */; };
 		CED65AB90906BCC6003EED90 /* BDSKScriptHookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */; };
 		CED65AC00906BE1F003EED90 /* BibPref_ScriptHooks.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65ABE0906BE1F003EED90 /* BibPref_ScriptHooks.m */; };
@@ -751,13 +759,17 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				CEC4A0E20CA7135600299397 /* FileView.framework in CopyFiles */,
 				F9B801930B41E8D600A5A615 /* yaz.framework in CopyFiles */,
 				F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */,
 				F9022FB107580A9600C3F701 /* AGRegex.framework in CopyFiles */,
 				F9022FB207580A9600C3F701 /* OmniAppKit.framework in CopyFiles */,
 				F9022FB307580A9600C3F701 /* OmniBase.framework in CopyFiles */,
 				F9022FB407580A9600C3F701 /* OmniFoundation.framework in CopyFiles */,
+				45DB3E4D0CAADFC3001EACDA /* BDSKACMDLParser.h in CopyFiles */,
+				45DB3E4F0CAADFC3001EACDA /* BDSKCiteULikeParser.h in CopyFiles */,
+				45DB3E510CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h in CopyFiles */,
+				45DB3E8E0CAAFED5001EACDA /* BDSKHubmedParser.h in CopyFiles */,
+				45BB77530CAC74AE00F6299B /* BDSKGoogleScholarParser.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -875,6 +887,16 @@
 		4575382C0B70170D00C0E49B /* BDSKWebGroupViewController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKWebGroupViewController.h; sourceTree = "<group>"; };
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
+		45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGoogleScholarParser.h; sourceTree = "<group>"; };
+		45BB77520CAC74AE00F6299B /* BDSKGoogleScholarParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGoogleScholarParser.m; sourceTree = "<group>"; };
+		45DB3E470CAADFC3001EACDA /* BDSKACMDLParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKACMDLParser.h; sourceTree = "<group>"; };
+		45DB3E480CAADFC3001EACDA /* BDSKACMDLParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKACMDLParser.m; sourceTree = "<group>"; };
+		45DB3E490CAADFC3001EACDA /* BDSKCiteULikeParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCiteULikeParser.h; sourceTree = "<group>"; };
+		45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCiteULikeParser.m; sourceTree = "<group>"; };
+		45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSXMLNode_BDSKExtensions.h; sourceTree = "<group>"; };
+		45DB3E4C0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSXMLNode_BDSKExtensions.m; sourceTree = "<group>"; };
+		45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKHubmedParser.h; sourceTree = "<group>"; };
+		45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKHubmedParser.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
@@ -1063,7 +1085,6 @@
 		CEBB8D8709C8B0D90074C79E /* Font.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Font.tiff; path = Images/Font.tiff; sourceTree = "<group>"; };
 		CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroupViewController.h; sourceTree = "<group>"; };
 		CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroupViewController.m; sourceTree = "<group>"; };
-		CEC4A0DB0CA7133F00299397 /* FileView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FileView.framework; path = vendorsrc/amaxwell/FileView.framework; sourceTree = "<group>"; };
 		CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHook.h; sourceTree = "<group>"; };
 		CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptHook.m; sourceTree = "<group>"; };
 		CED65AB40906BCC6003EED90 /* BDSKScriptHookManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHookManager.h; sourceTree = "<group>"; };
@@ -1158,7 +1179,7 @@
 		F9022C69075802E300C3F701 /* BDSKFiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKFiler.h; sourceTree = "<group>"; };
 		F9022C6A075802E300C3F701 /* BDSKFiler.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKFiler.m; sourceTree = "<group>"; };
 		F9022C6D075802E300C3F701 /* BibItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibItem.h; sourceTree = "<group>"; };
-		F9022C6E075802E300C3F701 /* BibItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibItem.m; sourceTree = "<group>"; wrapsLines = 1; };
+		F9022C6E075802E300C3F701 /* BibItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibItem.m; sourceTree = "<group>"; };
 		F9022C71075802E300C3F701 /* BDSKPersonController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPersonController.h; sourceTree = "<group>"; };
 		F9022C72075802E300C3F701 /* BDSKPersonController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPersonController.m; sourceTree = "<group>"; };
 		F9022C73075802E300C3F701 /* BibPref_AutoFile.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPref_AutoFile.h; sourceTree = "<group>"; };
@@ -1597,7 +1618,6 @@
 				F9DF3BC209B7605E00342ADE /* SystemConfiguration.framework in Frameworks */,
 				F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */,
 				F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */,
-				CEC4A0DC0CA7133F00299397 /* FileView.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1797,7 +1817,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				CEC4A0DB0CA7133F00299397 /* FileView.framework */,
 				F9B801830B41E89500A5A615 /* yaz.framework */,
 				F95ED6910B07BA4E00000BBF /* ExceptionHandling.framework */,
 				F92ECB6B09DEF86500A244D0 /* Security.framework */,
@@ -1930,6 +1949,7 @@
 		CE38FA7E091D235700BCB69D /* Foundation Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				45DB3E4C0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m */,
 				F90B09400C283B5100144F1B /* BDSKLogUtilities.m */,
 				F9025F2F0969D66F008A551C /* CFString_BDSKExtensions.m */,
 				F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */,
@@ -2092,6 +2112,11 @@
 		CE38FA8D091D267A00BCB69D /* Parsers */ = {
 			isa = PBXGroup;
 			children = (
+				45BB77520CAC74AE00F6299B /* BDSKGoogleScholarParser.m */,
+				45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */,
+				45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */,
+				45DB3E480CAADFC3001EACDA /* BDSKACMDLParser.m */,
+				45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */,
 				F9022C960758038000C3F701 /* BDSKBibTeXParser.m */,
 				457538290B70170D00C0E49B /* BDSKHCiteParser.m */,
 				F9022C3B0758027800C3F701 /* BDSKConverter.m */,
@@ -2246,6 +2271,10 @@
 		F918104307583A6E00CF822D /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */,
+				45DB3E470CAADFC3001EACDA /* BDSKACMDLParser.h */,
+				45DB3E490CAADFC3001EACDA /* BDSKCiteULikeParser.h */,
+				45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */,
 				457538280B70170D00C0E49B /* BDSKHCiteParser.h */,
 				4575382A0B70170D00C0E49B /* BDSKWebGroup.h */,
 				4575382C0B70170D00C0E49B /* BDSKWebGroupViewController.h */,
@@ -2749,6 +2778,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
@@ -3547,6 +3577,11 @@
 				F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */,
 				F90C4ACE0C7395FC0035DD50 /* BDSKSciFinderParser.m in Sources */,
 				CEF83F380C77911F00A3AD51 /* BDSKBookmarkController.m in Sources */,
+				45DB3E4E0CAADFC3001EACDA /* BDSKACMDLParser.m in Sources */,
+				45DB3E500CAADFC3001EACDA /* BDSKCiteULikeParser.m in Sources */,
+				45DB3E520CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m in Sources */,
+				45DB3E8F0CAAFED5001EACDA /* BDSKHubmedParser.m in Sources */,
+				45BB77540CAC74AE00F6299B /* BDSKGoogleScholarParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4181,13 +4216,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 882;
+				CURRENT_PROJECT_VERSION = 891;
 				DEBUG_INFORMATION_FORMAT = stabs;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/vendorsrc/amaxwell\"";
+				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_DEBUGGING_SYMBOLS = default;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
@@ -4235,13 +4266,8 @@
 					i386,
 				);
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 882;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/vendorsrc/amaxwell\"";
+				CURRENT_PROJECT_VERSION = 891;
+				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -4294,13 +4320,8 @@
 		F993F1BF08553A61007A7657 /* Test */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 882;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/vendorsrc/amaxwell\"";
+				CURRENT_PROJECT_VERSION = 891;
+				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -4646,7 +4667,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH)";
-				CURRENT_PROJECT_VERSION = 882;
+				CURRENT_PROJECT_VERSION = 891;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";

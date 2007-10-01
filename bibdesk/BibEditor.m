@@ -81,8 +81,6 @@
 #import "BDSKCitationFormatter.h"
 #import "BDSKNotesWindowController.h"
 #import "BDSKSkimReader.h"
-#import "BDSKSplitView.h"
-#import <FileView/FileView.h>
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -113,46 +111,6 @@ enum{
 
 @implementation BibEditor
 
-- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [_files count]; }
-- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
-{
-    return [_files objectAtIndex:idx];
-}
-
-- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
-{
-    NSArray *toMove = [[_files objectsAtIndexes:aSet] copy];
-    [_files removeObjectsAtIndexes:aSet];
-    
-    aSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(anIndex, [aSet count])];
-    [_files insertObjects:toMove atIndexes:aSet];
-    [toMove release];
-    return YES;
-}
-
-- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
-{
-    if ([_files count] > [aSet count]) {
-        [_files replaceObjectsAtIndexes:aSet withObjects:newURLs];
-        return YES;
-    }
-    return NO;
-}
-
-- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
-{
-    if ([_files count] >= [indexSet count]) {
-        [_files removeObjectsAtIndexes:indexSet];
-        return YES;
-    }
-    return NO;
-}
-
-- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
-{
-    [_files insertObjects:absoluteURLs atIndexes:aSet];
-}
-
 - (NSString *)windowNibName{
     return @"BibEditor";
 }
@@ -171,8 +129,6 @@ enum{
         
         forceEndEditing = NO;
         didSetupForm = NO;
-        _files = [NSMutableArray new];
-        [_files addObjectsFromArray:[aBib valueForKey:@"allFilePaths"]];
     }
     return self;
 }
@@ -230,14 +186,16 @@ enum{
 	[statusBar setDelegate:self];
     [statusBar setTextOffset:NSMaxX([actionButton frame])];
     
-    // Insert the tabView in the main window
-    BDSKEdgeView *edgeView = [[mainSplitView subviews] objectAtIndex:0];
-    [[tabView superview] setFrame:[edgeView frame]];
-    [edgeView addSubview:tabView];
-	[edgeView setEdges:BDSKMaxXEdgeMask];
+    [self setWindowFrameAutosaveNameOrCascade:BDSKBibEditorFrameAutosaveName];
+    
+    // Setup the splitview autosave frame, should be done after the statusBar is setup
+    [splitView setPositionAutosaveName:@"OASplitView Position BibEditor"];
+    // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
+    if ([self windowFrameAutosaveName] == nil)
+        [splitView setPositionAutosaveName:nil];
     
     // Setup the form and the matrix
-	edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:0];
+	BDSKEdgeView *edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:0];
 	[edgeView setEdges:BDSKMinYEdgeMask];
     NSRect ignored, frame;
     NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
@@ -246,37 +204,12 @@ enum{
     // don't know why, but this is broken
     [bibTypeButton setNextKeyView:bibFields];
     
-    edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:1];
-    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
+    edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:1];
+	[edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
     NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
     [[extraBibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[extraBibFields enclosingScrollView]];
-    
-    edgeView = (BDSKEdgeView *)[[[notesView enclosingScrollView] superview] superview];
-    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
-    edgeView = (BDSKEdgeView *)[[[abstractView enclosingScrollView] superview] superview];
-    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
-    edgeView = (BDSKEdgeView *)[[[rssDescriptionView enclosingScrollView] superview] superview];
-    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
-    
-    [fileSplitView setDrawEnd:YES];
-    
-    [self setWindowFrameAutosaveNameOrCascade:BDSKBibEditorFrameAutosaveName];
-    
-    // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
-    [mainSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorMainSplitView"];
-    [fieldSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFieldSplitView"];
-    [fileSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFileSplitView"];
-    if ([self windowFrameAutosaveName] == nil) {
-        // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
-        [mainSplitView setPositionAutosaveName:nil];
-        [fieldSplitView setPositionAutosaveName:nil];
-        [fileSplitView setPositionAutosaveName:nil];
-    }
-    
+
     formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication owner] macroResolver]];
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
@@ -355,11 +288,10 @@ enum{
 		// we must be loading the drawer
 		[self setupDrawer];
 	}
-    [fileView setDataSource:self];
+    
 }
 
 - (void)dealloc{
-    [_files release];
     [publication release];
 	[authorTableView setDelegate:nil];
     [authorTableView setDataSource:nil];
@@ -441,7 +373,7 @@ enum{
 }
 
 - (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleBelowView:mainSplitView offset:1.0];
+	[statusBar toggleBelowView:[tabView superview] offset:1.0];
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowEditorStatusBarKey];
 }
 
@@ -3643,156 +3575,57 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 #pragma mark Splitview delegate methods
 
 - (void)splitViewDoubleClick:(OASplitView *)sender{
-    if ([sender isEqual:mainSplitView]) {
-        NSView *tabs = [[mainSplitView subviews] objectAtIndex:0]; // tabs
-        NSView *files = [[mainSplitView subviews] objectAtIndex:1]; // files+authors
-        NSRect tabsFrame = [tabs frame];
-        NSRect filesFrame = [files frame];
-        
-        if(NSWidth(filesFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-            lastFileViewWidth = NSWidth(filesFrame); // cache this
-            tabsFrame.size.width += lastFileViewWidth;
-            filesFrame.size.width = 0.0;
-        } else {
-            if(lastFileViewWidth <= 0.0)
-                lastFileViewWidth = 150.0; // a reasonable value to start
-            filesFrame.size.width = lastFileViewWidth;
-            tabsFrame.size.width = NSWidth([mainSplitView frame]) - lastFileViewWidth - [mainSplitView dividerThickness];
-            if (NSWidth(tabsFrame) < 390.0) {
-                tabsFrame.size.width = 390.0;
-                filesFrame.size.width = NSWidth([mainSplitView frame]) - [mainSplitView dividerThickness] - 390.0;
-                lastFileViewWidth = NSWidth(filesFrame);
-            }
-        }
-        [tabs setFrame:tabsFrame];
-        [files setFrame:filesFrame];
-        [mainSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
-    } else if ([sender isEqual:fieldSplitView]) {
-        NSView *form = [[fieldSplitView subviews] objectAtIndex:0]; // form
-        NSView *matrix = [[fieldSplitView subviews] objectAtIndex:1]; // matrix
-        NSRect formFrame = [form frame];
-        NSRect matrixFrame = [matrix frame];
-        
-        if(NSHeight(matrixFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-            lastMatrixHeight = NSHeight(matrixFrame); // cache this
-            formFrame.size.height += lastMatrixHeight;
-            matrixFrame.size.height = 0.0;
-        } else {
-            if(lastMatrixHeight <= 0.0)
-                lastMatrixHeight = NSHeight([extraBibFields frame]); // a reasonable value to start
-            matrixFrame.size.height = lastMatrixHeight;
-            formFrame.size.height = NSHeight([fieldSplitView frame]) - lastMatrixHeight - [fieldSplitView dividerThickness];
-            if (NSHeight(formFrame) < 1.0) {
-                formFrame.size.height = 1.0;
-                matrixFrame.size.height = NSHeight([fieldSplitView frame]) - [fieldSplitView dividerThickness] - 1.0;
-                lastMatrixHeight = NSHeight(matrixFrame);
-            }
-        }
-        [form setFrame:formFrame];
-        [matrix setFrame:matrixFrame];
-        [fieldSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fieldSplitView];
-    } else if ([sender isEqual:fileSplitView]) {
-        NSView *files = [[fileSplitView subviews] objectAtIndex:0]; // files
-        NSView *authors = [[fileSplitView subviews] objectAtIndex:1]; // authors
-        NSRect filesFrame = [files frame];
-        NSRect authorsFrame = [authors frame];
-        
-        if(NSHeight(authorsFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-            lastAuthorsHeight = NSHeight(authorsFrame); // cache this
-            filesFrame.size.height += lastMatrixHeight;
-            authorsFrame.size.height = 0.0;
-        } else {
-            if(lastAuthorsHeight <= 0.0)
-                lastAuthorsHeight = 150.0; // a reasonable value to start
-            authorsFrame.size.height = lastAuthorsHeight;
-            filesFrame.size.height = NSHeight([fileSplitView frame]) - lastAuthorsHeight - [fileSplitView dividerThickness];
-            if (NSHeight(filesFrame) < 0.0) {
-                filesFrame.size.height = 0.0;
-                authorsFrame.size.height = NSHeight([fileSplitView frame]) - [fileSplitView dividerThickness];
-                lastAuthorsHeight = NSHeight(authorsFrame);
-            }
-        }
-        [files setFrame:filesFrame];
-        [authors setFrame:authorsFrame];
-        [fileSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fileSplitView];
+    NSView *form = [[splitView subviews] objectAtIndex:0]; // form
+    NSView *matrix = [[splitView subviews] objectAtIndex:1]; // matrix
+    NSRect formFrame = [form frame];
+    NSRect matrixFrame = [matrix frame];
+    
+    if(NSHeight([matrix frame]) > 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+        lastMatrixHeight = NSHeight(matrixFrame); // cache this
+        formFrame.size.height += lastMatrixHeight;
+        matrixFrame.size.height = 0;
+    } else {
+        if(lastMatrixHeight <= 0)
+            lastMatrixHeight = NSHeight([extraBibFields frame]); // a reasonable value to start
+		matrixFrame.size.height = lastMatrixHeight;
+        formFrame.size.height = NSHeight([splitView frame]) - lastMatrixHeight - [splitView dividerThickness];
+		if (NSHeight(formFrame) < 1.0) {
+			formFrame.size.height = 1.0;
+			matrixFrame.size.height = NSHeight([splitView frame]) - [splitView dividerThickness] - 1.0;
+			lastMatrixHeight = NSHeight(matrixFrame);
+		}
     }
+    [form setFrame:formFrame];
+    [matrix setFrame:matrixFrame];
+    [splitView adjustSubviews];
+	// fix for NSSplitView bug, which doesn't send this in adjustSubviews
+	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:splitView];
 }
 
 - (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
-    if ([sender isEqual:mainSplitView]) {
-        return fmaxf(proposedMin, 390.0);
-    } else if ([sender isEqual:fieldSplitView]) {
-        // don't lose the top edge of the splitter
-        return proposedMin + 1.0;
-    }
-    return proposedMin;
+	// don't lose the top edge of the splitter
+	return proposedMin + 1.0;
 }
 
 - (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize{
-    if ([sender isEqual:mainSplitView]) {
-        NSView *tabs = [[sender subviews] objectAtIndex:0]; // tabview
-        NSView *files = [[sender subviews] objectAtIndex:1]; // files+authors
-        NSRect tabsFrame = [tabs frame];
-        NSRect filesFrame = [files frame];
-        NSSize newSize = [sender frame].size;
-        
-        tabsFrame.size.width += newSize.width - oldSize.width;
-        if (NSWidth(tabsFrame) < 390.0) {
-            tabsFrame.size.width = 390.0;
-            filesFrame.size.width = newSize.width - [mainSplitView dividerThickness] - 390.0;
-            lastFileViewWidth = NSWidth(filesFrame);
-        }
-        [tabs setFrame:tabsFrame];
-        [files setFrame:filesFrame];
-        [mainSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
-    } else if ([sender isEqual:fieldSplitView]) {
-        // keeps the matrix view at the same size and resizes the form view
-        NSView *form = [[sender subviews] objectAtIndex:0]; // form
-        NSView *matrix = [[sender subviews] objectAtIndex:1]; // matrix
-        NSRect formFrame = [form frame];
-        NSRect matrixFrame = [matrix frame];
-        NSSize newSize = [sender frame].size;
-        
-        formFrame.size.height += newSize.height - oldSize.height;
-        if (NSHeight(formFrame) < 1.0) {
-            formFrame.size.height = 1.0;
-            matrixFrame.size.height = newSize.height - [fieldSplitView dividerThickness] - 1.0;
-            lastMatrixHeight = NSHeight(matrixFrame);
-        }
-        [form setFrame:formFrame];
-        [matrix setFrame:matrixFrame];
-        [fieldSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fieldSplitView];
-    } else if ([sender isEqual:fileSplitView]) {
-        NSView *files = [[sender subviews] objectAtIndex:0]; // files
-        NSView *authors = [[sender subviews] objectAtIndex:1]; // authors
-        NSRect filesFrame = [files frame];
-        NSRect authorsFrame = [authors frame];
-        NSSize newSize = [sender frame].size;
-        
-        filesFrame.size.height += newSize.height - oldSize.height;
-        if (NSHeight(filesFrame) < 0.0) {
-            filesFrame.size.height = 0.0;
-            authorsFrame.size.height = newSize.height - [fileSplitView dividerThickness];
-            lastAuthorsHeight = NSHeight(authorsFrame);
-        }
-        [files setFrame:filesFrame];
-        [authors setFrame:authorsFrame];
-        [fileSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fileSplitView];
-    } else {
-        [sender adjustSubviews];
-    }
+    // keeps the matrix view at the same size and resizes the form view
+	NSView *form = [[sender subviews] objectAtIndex:0]; // form
+    NSView *matrix = [[sender subviews] objectAtIndex:1]; // matrix
+    NSRect formFrame = [form frame];
+    NSRect matrixFrame = [matrix frame];
+	NSSize newSize = [sender frame].size;
+	
+	formFrame.size.height += newSize.height - oldSize.height;
+	if (NSHeight(formFrame) < 1.0) {
+		formFrame.size.height = 1.0;
+		matrixFrame.size.height = newSize.height - [splitView dividerThickness] - 1.0;
+		lastMatrixHeight = NSHeight(matrixFrame);
+	}
+    [form setFrame:formFrame];
+    [matrix setFrame:matrixFrame];
+    [splitView adjustSubviews];
+	// fix for NSSplitView bug, which doesn't send this in adjustSubviews
+	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:splitView];
 }
 
 @end
@@ -3959,7 +3792,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // align the cite key field with the form cells
     if([bibFields numberOfRows] > 0){
         [bibFields drawRect:NSZeroRect];// this forces the calculation of the titleWidth
-        float offset = [[bibFields cellAtIndex:0] titleWidth] + NSMinX([fieldSplitView frame]) + FORM_OFFSET + 4.0;
+        float offset = [[bibFields cellAtIndex:0] titleWidth] + NSMinX([splitView frame]) + FORM_OFFSET + 4.0;
         NSRect frame = [citeKeyField frame];
         if(offset >= NSMaxX([citeKeyTitle frame]) + 8.0){
             frame.size.width = NSMaxX(frame) - offset;

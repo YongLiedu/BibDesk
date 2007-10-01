@@ -43,7 +43,6 @@
 @interface BDSKImageFadeAnimation : NSAnimation
 {
     CIFilter *filter;
-    CFMutableDataRef bitmapData;
 }
 
 // set the final image, after transition is complete

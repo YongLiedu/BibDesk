@@ -11,17 +11,27 @@
 
 enum {
 	BDSKUnknownWebType = -1, 
-    BDSKHCiteWebType
+    BDSKHCiteWebType,
+    BDSKCiteULikeWebType,
+    BDSKACMDLWebType,
+    BDSKHubmedWebType,
+    BDSKGoogleScholarWebType
 };
 
 @interface BDSKWebParser : NSObject
 
-+ (int)webTypeOfDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url;
-
-+ (BOOL)canParseDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url ofType:(int)webType;
-+ (BOOL)canParseDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url;
-
-+ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url ofType:(int)webType error:(NSError **)outError;
+// IMPORTANT NOTE:
+// Use this method as the main interface to this class. It will build the XMLDocument and figure out the type for you:
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError;
+
+
++ (int)webTypeOfDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url;
+
++ (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url ofType:(int)webType;
++ (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url;
+
++ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url ofType:(int)webType error:(NSError **)outError;
++ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
+
 
 @end
