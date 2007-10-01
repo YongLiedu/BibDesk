@@ -496,6 +496,7 @@
 		F9E43AD808AD8BDB00A0354B /* BDSKErrorObjectController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E43AD608AD8BDB00A0354B /* BDSKErrorObjectController.m */; };
 		F9E43B1308AD918800A0354B /* BDSKErrorPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9E43B1108AD918800A0354B /* BDSKErrorPanel.nib */; };
 		F9E5F6D90A96ABF1004A6D79 /* BDSKFile.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E5F6D80A96ABF1004A6D79 /* BDSKFile.m */; };
+		F9E7A9200CB194AF00D47CE5 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9E7A91F0CB194AF00D47CE5 /* FileView.framework */; };
 		F9EA8FCB0ADE01F9005EFBE4 /* BDSKUpdateChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EA8FC90ADE01F9005EFBE4 /* BDSKUpdateChecker.m */; };
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B908B1572600AAC9A9 /* BDSKScrollableTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */; };
@@ -1554,6 +1555,7 @@
 		F9E6C5970999323D00A8B97D /* BDSKStringParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringParser.h; sourceTree = "<group>"; };
 		F9E6C935099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSFileManager_ExtendedAttributes.h; sourceTree = "<group>"; };
 		F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSFileManager_ExtendedAttributes.m; sourceTree = "<group>"; };
+		F9E7A91F0CB194AF00D47CE5 /* FileView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FileView.framework; path = vendorsrc/amaxwell/FileView.framework; sourceTree = "<group>"; };
 		F9EA8FC80ADE01F9005EFBE4 /* BDSKUpdateChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKUpdateChecker.h; sourceTree = "<group>"; };
 		F9EA8FC90ADE01F9005EFBE4 /* BDSKUpdateChecker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKUpdateChecker.m; sourceTree = "<group>"; };
 		F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextField.h; sourceTree = "<group>"; };
@@ -1618,6 +1620,7 @@
 				F9DF3BC209B7605E00342ADE /* SystemConfiguration.framework in Frameworks */,
 				F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */,
 				F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */,
+				F9E7A9200CB194AF00D47CE5 /* FileView.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1817,6 +1820,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F9E7A91F0CB194AF00D47CE5 /* FileView.framework */,
 				F9B801830B41E89500A5A615 /* yaz.framework */,
 				F95ED6910B07BA4E00000BBF /* ExceptionHandling.framework */,
 				F92ECB6B09DEF86500A244D0 /* Security.framework */,
@@ -4218,7 +4222,11 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 891;
 				DEBUG_INFORMATION_FORMAT = stabs;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/vendorsrc/amaxwell\"";
 				GCC_DEBUGGING_SYMBOLS = default;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
@@ -4267,7 +4275,11 @@
 				);
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 891;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/vendorsrc/amaxwell\"";
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -4321,7 +4333,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 891;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/vendorsrc/amaxwell\"";
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
