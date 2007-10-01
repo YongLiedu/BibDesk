@@ -143,6 +143,10 @@ static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey
 static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
 static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
+@interface NSFileWrapper (BDSKExtensions)
+- (id)initWithContentsOfURL:(NSURL *)fileURL;
+@end
+
 @interface NSDocument (BDSKPrivateExtensions)
 // declare a private NSDocument method so we can override it
 - (void)changeSaveType:(id)sender;
@@ -1344,7 +1348,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return [fileTemplate RTFDFileWrapperFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
 }
 
-
 - (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
@@ -1363,11 +1366,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         while (field = [fieldEnum nextObject]) {
             NSURL *url = [item URLForField:field];
             if (url) {
-                NSString *fileName = [[url path] lastPathComponent];
-                NSData *data = [NSData dataWithContentsOfURL:url];
-                NSFileWrapper *fw = [[[NSFileWrapper alloc] initRegularFileWithContents:data] autorelease];
-                [fw setPreferredFilename:fileName];
+                NSFileWrapper *fw = [[NSFileWrapper alloc] initWithContentsOfURL:url];
                 [fileWrapper addFileWrapper:fw];
+                [fw release];
             }
         }
     }
@@ -3311,6 +3312,40 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (BOOL)isDocument{
     return YES;
+}
+
+@end
+
+#pragma mark -
+
+@implementation NSFileWrapper (BDSKExtensions)
+
+- (id)initWithContentsOfURL:(NSURL *)fileURL {
+    NSString *path = [fileURL path];
+    NSFileWrapper *fileWrapper = nil;
+    BOOL isDir;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir]) {
+        if (isDir) {
+            NSMutableDictionary *subfileWrappers = [[NSMutableDictionary alloc] init];
+            NSEnumerator *fileEnum = [[[NSFileManager defaultManager] subpathsAtPath:path] objectEnumerator];
+            NSString *file;
+            
+            while (file = [fileEnum nextObject]) {
+                NSFileWrapper *subfileWrapper = [[[self class] alloc] initWithContentsOfURL:[NSURL fileURLWithPath:[path stringByAppendingPathComponent:file]]];
+                if (subfileWrapper) {
+                    [subfileWrapper setPreferredFilename:file];
+                    [subfileWrappers setObject:subfileWrapper forKey:file];
+                    [subfileWrapper release];
+                }
+            }
+            fileWrapper = [self initDirectoryWithFileWrappers:subfileWrappers];
+            [subfileWrappers release];
+        } else {
+            fileWrapper = [self initRegularFileWithContents:[NSData dataWithContentsOfURL:fileURL]];
+        }
+        [fileWrapper setPreferredFilename:[path lastPathComponent]];
+    }
+    return fileWrapper;
 }
 
 @end
