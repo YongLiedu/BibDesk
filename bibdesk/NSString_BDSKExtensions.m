@@ -221,9 +221,13 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 }
 
 - (NSString *)stringByRemovingTeX{
-    NSMutableString *mutableString = [[self mutableCopy] autorelease];
     NSRange searchRange = NSMakeRange(0, [self length]);
-    NSRange foundRange = [mutableString rangeOfTeXCommandInRange:searchRange];
+    NSRange foundRange = [self rangeOfTeXCommandInRange:searchRange];
+    
+    if (foundRange.length == 0)
+        return self;
+    
+    NSMutableString *mutableString = [[self mutableCopy] autorelease];
     while(foundRange.length){
         [mutableString replaceCharactersInRange:foundRange withString:@""];
         searchRange.location = foundRange.location;
