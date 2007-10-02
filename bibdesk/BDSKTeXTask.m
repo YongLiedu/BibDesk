@@ -70,7 +70,7 @@
 
 - (void)writeHelperFiles;
 
-- (BOOL)writeTeXFileForCiteKeys:(NSArray *)citeKeys isLTB:(BOOL)ltb{
+- (BOOL)writeTeXFileForCiteKeys:(NSArray *)citeKeys isLTB:(BOOL)ltb;
 
 - (BOOL)writeBibTeXFile:(NSString *)bibStr;
 
@@ -482,7 +482,7 @@
     
     if (nil != texFile) {
         
-        NSString *keys = citeKeys ? [citeKeys componentsJoinedByString:@","] : "*";
+        NSString *keys = citeKeys ? [citeKeys componentsJoinedByString:@","] : @"*";
         
         [texFile replaceOccurrencesOfString:@"<<File>>" withString:[texPath baseNameWithoutExtension] options:NSCaseInsensitiveSearch range:NSMakeRange(0,[texFile length])];
         [texFile replaceOccurrencesOfString:@"<<Style>>" withString:style options:NSCaseInsensitiveSearch range:NSMakeRange(0,[texFile length])];
