@@ -97,6 +97,7 @@ typedef enum {
     @param bibStr The bibtex string source
 */
 - (void)updateWithBibTeXString:(NSString *)bibStr;
+- (void)updateWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys;
 
 /*!
     @method     displayPreviewsForState:

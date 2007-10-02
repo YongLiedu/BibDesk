@@ -2594,7 +2594,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 - (void)updatePreviewer:(BDSKPreviewer *)aPreviewer{
     NSArray *items = [self selectedPublications];
     NSString *bibString = [items count] ? [self previewBibTeXStringForPublications:items] : nil;
-    [aPreviewer updateWithBibTeXString:bibString];
+    [aPreviewer updateWithBibTeXString:bibString citeKeys:[items valueForKey:@"citeKey"]];
 }
 
 - (void)displayTeXPreviewInPreviewPane{

@@ -76,7 +76,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
 - (BDSKTeXTask *)texTask;
-- (void)runTeXTaskInBackgroundWithString:(NSString *)string;
+- (void)runTeXTaskInBackgroundWithInfo:(NSDictionary *)info;
 
 @end
 
@@ -430,17 +430,21 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 #pragma mark TeX Tasks
 
 - (void)updateWithBibTeXString:(NSString *)bibStr{
+    [self updateWithBibTeXString:bibStr citeKeys:nil];
+}
+
+- (void)updateWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys{
     
 	if([NSString isEmptyString:bibStr]){
 		// reset, also removes any waiting tasks from the queue
         [self displayPreviewsForState:BDSKEmptyPreviewState success:YES];
         // clean the server
-        [server runTeXTaskInBackgroundWithString:nil];
+        [server runTeXTaskInBackgroundWithInfo:nil];
     } else {
 		// this will start the spinning wheel
         [self displayPreviewsForState:BDSKWaitingPreviewState success:YES];
         // run the tex task in the background
-        [server runTeXTaskInBackgroundWithString:bibStr];
+        [server runTeXTaskInBackgroundWithInfo:[NSDictionary dictionaryWithObjectsAndKeys:bibStr, @"bibTeXString", citeKeys, @"citeKeys", nil]];
 	}	
 }
 
@@ -560,13 +564,13 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     return texTask;
 }
 
-- (void)runTeXTaskInBackgroundWithString:(NSString *)string{
+- (void)runTeXTaskInBackgroundWithInfo:(NSDictionary *)info{
     // the delayed perform is because [self serverOnServerThread] returns nil the first time this is received, since the server thread hasn't had time to set up completely
     id server = [self serverOnServerThread];
     if (server){
-        if(string){
+        if(info){
             [queueLock lock];
-            [queue addObject:string];
+            [queue addObject:info];
             [queueLock unlock];
             // If it's still working, we don't have to do anything; sending too many of these messages just piles them up in the DO queue until the port starts dropping them.
             if(isProcessing == 0)
@@ -578,7 +582,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
             OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&notifyWhenDone);
         }
     }else{
-        [self performSelector:_cmd withObject:string afterDelay:0.1];
+        [self performSelector:_cmd withObject:info afterDelay:0.1];
     }
 }
 
@@ -587,21 +591,21 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 - (oneway void)processQueueUntilEmpty{
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isProcessing);
     
-    NSString *btString = nil;
+    NSDictionary *dict = nil;
     [queueLock lock];
     NSDate *distantFuture = [NSDate distantFuture];
     NSRunLoop *rl = [NSRunLoop currentRunLoop];
     
     do { 
         // we're only interested in the latest addition to the queue
-        btString = [[queue lastObject] retain];
+        dict = [[queue lastObject] retain];
         
         // get rid of everything in the queue, then allow the main thread to keep putting strings in it
         [queue removeAllObjects];
         [queueLock unlock];
         
         BOOL success = YES;
-        if (btString) {
+        if (dict) {
             BOOL didRun = YES;
             if ([texTask isProcessing]) {
                 // poll the runloop while the task is still running
@@ -612,14 +616,14 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
                 // get the latest string; the queue may have changed while we waited for this task to finish (doesn't seem to be the case in practice)
                 [queueLock lock];
                 if ([queue count]) {
-                    [btString release];
-                    btString = [[queue lastObject] retain];
+                    [dict release];
+                    dict = [[queue lastObject] retain];
                 }
                 [queueLock unlock];
             }
             // previous task is done, so we can start a new one
-            success = [texTask runWithBibTeXString:btString];
-            [btString release];
+            success = [texTask runWithBibTeXString:[dict objectForKey:@"bibTeXString"]  citeKeys:[dict objectForKey:@"citeKeys"]];
+            [dict release];
         }
         
         // always lock going into the top of the loop for checking count
