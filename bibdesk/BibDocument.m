@@ -3157,32 +3157,34 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 	NSRect zerothFrame = zerothView ? [zerothView frame] : NSZeroRect;
 	NSRect firstFrame = [firstView frame];
 	NSRect secondFrame = [secondView frame];
-    float factor = (NSWidth([sender frame]) - [sender dividerThickness]) / (oldSize.width - [sender dividerThickness]);
 	
 	if (sender == splitView) {
 		// first = table, second = preview, zeroth = web
-        factor = (NSHeight([sender frame]) - i * [sender dividerThickness]) / (oldSize.height - i * [sender dividerThickness]);
+        float contentHeight = NSHeight([sender frame]) - i * [sender dividerThickness];
+        float factor = contentHeight / (oldSize.height - i * [sender dividerThickness]);
         secondFrame.size.height *= factor;
         if (NSHeight(secondFrame) < 1.0)
             secondFrame.size.height = 0.0;
         secondFrame = NSIntegralRect(secondFrame);
         zerothFrame.size.height *= factor;
         zerothFrame = NSIntegralRect(zerothFrame);
-        firstFrame.size.height = NSHeight([sender frame]) - NSHeight(secondFrame) - NSHeight(zerothFrame) - i * [sender dividerThickness];
+        firstFrame.size.height = contentHeight - NSHeight(secondFrame) - NSHeight(zerothFrame);
         if (NSHeight(firstFrame) < 0.0) {
             firstFrame.size.height = 0.0;
-            secondFrame.size.height = NSHeight([sender frame]) - NSHeight(firstFrame) - NSHeight(zerothFrame) - i * [sender dividerThickness];
+            secondFrame.size.height = contentHeight - NSHeight(firstFrame) - NSHeight(zerothFrame);
         }
 	} else {
 		// first = group, second = table+preview
+        float contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
+        float factor = contentWidth / (oldSize.width - [sender dividerThickness]);
         firstFrame.size.width *= factor;
         if (NSWidth(firstFrame) < 1.0)
             firstFrame.size.width = 0.0;
         firstFrame = NSIntegralRect(firstFrame);
-        secondFrame.size.width = NSWidth([sender frame]) - NSWidth(firstFrame) - [sender dividerThickness];
+        secondFrame.size.width = contentWidth - NSWidth(firstFrame);
         if (NSWidth(firstFrame) < 0.0) {
             secondFrame.size.width = 0.0;
-            firstFrame.size.width = NSWidth([sender frame]) - NSWidth(secondFrame) - [sender dividerThickness];
+            firstFrame.size.width = contentWidth - NSWidth(secondFrame);
         }
     }
 	
