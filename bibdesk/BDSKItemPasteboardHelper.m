@@ -48,6 +48,7 @@
 - (NSMutableArray *)promisedTypesForPasteboard:(NSPasteboard *)pboard;
 - (int)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard;
 - (NSString *)promisedBibTeXStringForPasteboard:(NSPasteboard *)pboard;
+- (NSString *)promisedCiteKeysForPasteboard:(NSPasteboard *)pboard;
 - (void)removePromisedType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
 - (void)removePromisedTypesForPasteboard:(NSPasteboard *)pboard;
 - (void)provideAllPromisedTypes;
@@ -146,32 +147,36 @@
         [pboard setData:data forType:BDSKBibItemPboardType];
     }else{
         NSString *bibString = nil;
-        if(items != nil)
+        NSArray *citeKeys = nil;
+        if(items != nil){
             bibString = [delegate pasteboardHelper:self bibTeXStringForItems:items];
-        else
+            citeKeys = [items valueForKey:@"citeKey"];
+        }else{
             bibString = [self promisedBibTeXStringForPasteboard:pboard];
+            citeKeys = [self promisedCiteKeysForPasteboard:pboard];
+        }
         if(bibString != nil){
             int dragCopyType = [self promisedDragCopyTypeForPasteboard:pboard];
             if([type isEqualToString:NSPDFPboardType]){
                 OBASSERT(dragCopyType == BDSKPDFDragCopyType);
                 NSData *data = nil;
-                if([texTask runWithBibTeXString:bibString generatedTypes:BDSKGeneratePDF])
+                if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGeneratePDF])
                     data = [texTask PDFData];
                 [pboard setData:data forType:NSPDFPboardType];
             }else if([type isEqualToString:NSRTFPboardType]){
                 OBASSERT(dragCopyType == BDSKRTFDragCopyType);
                 NSData *data = nil;
-                if([texTask runWithBibTeXString:bibString generatedTypes:BDSKGenerateRTF])
+                if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGenerateRTF])
                     data = [texTask RTFData];
                 [pboard setData:data forType:NSRTFPboardType];
             }else if([type isEqualToString:NSStringPboardType]){
                 OBASSERT(dragCopyType == BDSKLTBDragCopyType || dragCopyType == BDSKLaTeXDragCopyType);
                 NSString *string = nil;
                 if(dragCopyType == BDSKLTBDragCopyType){
-                    if([texTask runWithBibTeXString:bibString generatedTypes:BDSKGenerateLTB])
+                    if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGenerateLTB])
                         string = [texTask LTBString];
                 }else if(dragCopyType == BDSKLaTeXDragCopyType){
-                    if([texTask runWithBibTeXString:bibString generatedTypes:BDSKGenerateLaTeX])
+                    if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGenerateLaTeX])
                         string = [texTask LaTeXString];
                 }
                 [pboard setString:string forType:NSStringPboardType];
@@ -264,6 +269,10 @@
 	return [self pasteboardIsValid:pboard] ? [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"bibTeXString"] : nil;
 }
 
+- (NSString *)promisedCiteKeysForPasteboard:(NSPasteboard *)pboard {
+	return [self pasteboardIsValid:pboard] ? [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"citeKeys"] : nil;
+}
+
 - (void)removePromisedType:(NSString *)type forPasteboard:(NSPasteboard *)pboard {
 	NSMutableArray *types = [self promisedTypesForPasteboard:pboard];
 	[types removeObject:type];
@@ -317,8 +326,9 @@
                 bibString = [delegate pasteboardHelper:self bibTeXStringForItems:items];
             if(bibString != nil){
                 NSMutableDictionary *dict = [promisedPboardTypes objectForKey:name];
-                [dict removeObjectForKey:@"items"];
                 [dict setObject:bibString forKey:@"bibTeXString"];
+                [dict setObject:[items valueForKey:@"citeKey"] forKey:@"citeKeys"];
+                [dict removeObjectForKey:@"items"];
             }else{
                 [self clearPromisedTypesForPasteboard:pboard];
             }

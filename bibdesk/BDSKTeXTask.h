@@ -82,7 +82,9 @@ typedef struct _BDSKTeXTaskFlags {
 // the next few methods are thread-unsafe
 
 - (BOOL)runWithBibTeXString:(NSString *)bibStr;
+- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys;
 - (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(int)flag;
+- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(int)flag;
 
 - (void)terminate;
 

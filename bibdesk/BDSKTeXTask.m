@@ -70,7 +70,7 @@
 
 - (void)writeHelperFiles;
 
-- (BOOL)writeTeXFile:(BOOL)ltb;
+- (BOOL)writeTeXFileForCiteKeys:(NSArray *)citeKeys isLTB:(BOOL)ltb;
 
 - (BOOL)writeBibTeXFile:(NSString *)bibStr;
 
@@ -206,10 +206,18 @@
 #pragma mark TeX Tasks
 
 - (BOOL)runWithBibTeXString:(NSString *)bibStr{
-	return [self runWithBibTeXString:bibStr generatedTypes:BDSKGenerateRTF];
+	return [self runWithBibTeXString:bibStr citeKeys:nil generatedTypes:BDSKGenerateRTF];
+}
+
+- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys{
+	return [self runWithBibTeXString:bibStr citeKeys:citeKeys generatedTypes:BDSKGenerateRTF];
 }
 
 - (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(int)flag{
+	return [self runWithBibTeXString:bibStr citeKeys:nil generatedTypes:flag];
+}
+
+- (BOOL)runWithBibTeXString:(NSString *)bibStr citeKeys:(NSArray *)citeKeys generatedTypes:(int)flag{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     int rv = 0;
 
@@ -249,7 +257,7 @@
             setenv("PATH", [new_path fileSystemRepresentation], 1);
         }
         
-        if([self writeTeXFile:(flag == BDSKGenerateLTB)]){
+        if([self writeTeXFileForCiteKeys:citeKeys isLTB:(flag == BDSKGenerateLTB)]){
             if([self writeBibTeXFile:bibStr]){
                 rv = [self runTeXTasksForLaTeX];
             }else{
@@ -458,7 +466,7 @@
     }
 }
 
-- (BOOL)writeTeXFile:(BOOL)ltb{
+- (BOOL)writeTeXFileForCiteKeys:(NSArray *)citeKeys isLTB:(BOOL)ltb{
     
     NSMutableString *texFile = nil;
     NSString *style = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey];
@@ -473,10 +481,16 @@
     }
     
     if (nil != texFile) {
-	
+        
+        NSString *keys = citeKeys ? [citeKeys componentsJoinedByString:@","] : @"*";
+        
         [texFile replaceOccurrencesOfString:@"<<File>>" withString:[texPath baseNameWithoutExtension] options:NSCaseInsensitiveSearch range:NSMakeRange(0,[texFile length])];
         [texFile replaceOccurrencesOfString:@"<<Style>>" withString:style options:NSCaseInsensitiveSearch range:NSMakeRange(0,[texFile length])];
-
+        if ([texFile rangeOfString:@"<<CiteKeys>>"].length)
+            [texFile replaceOccurrencesOfString:@"<<CiteKeys>>" withString:keys options:NSCaseInsensitiveSearch range:NSMakeRange(0,[texFile length])];
+        else
+            [texFile replaceOccurrencesOfString:@"\\nocite{*}" withString:[NSString stringWithFormat:@"\\nocite{%@}", keys] options:NSCaseInsensitiveSearch range:NSMakeRange(0,[texFile length])];
+        
         // overwrites the old tmpbib.tex file, replacing the previous bibliographystyle
         didWrite = [[texFile dataUsingEncoding:encoding] writeToFile:[texPath texFilePath] atomically:YES];
         if(NO == didWrite)
