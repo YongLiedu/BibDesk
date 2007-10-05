@@ -3621,6 +3621,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		matrixFrame.size.height = newSize.height - [splitView dividerThickness] - 1.0;
 		lastMatrixHeight = NSHeight(matrixFrame);
 	}
+    formFrame.size.width = matrixFrame.size.width = NSWidth([splitView frame]);
     [form setFrame:formFrame];
     [matrix setFrame:matrixFrame];
     [splitView adjustSubviews];

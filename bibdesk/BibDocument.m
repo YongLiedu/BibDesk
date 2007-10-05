@@ -3173,6 +3173,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             firstFrame.size.height = 0.0;
             secondFrame.size.height = contentHeight - NSHeight(firstFrame) - NSHeight(zerothFrame);
         }
+        zerothFrame.size.width = firstFrame.size.width = secondFrame.size.width = NSWidth([sender frame]);
 	} else {
 		// first = group, second = table+preview
         float contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
@@ -3186,6 +3187,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             secondFrame.size.width = 0.0;
             firstFrame.size.width = contentWidth - NSWidth(secondFrame);
         }
+        zerothFrame.size.height = firstFrame.size.height = secondFrame.size.height = NSHeight([sender frame]);
     }
 	
 	[zerothView setFrame:zerothFrame];
