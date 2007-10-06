@@ -2032,7 +2032,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                     
             // next best metadata source: if the filename is purely decimal digits, try getting it from PubMed
             NSString *lastPathComponent = [[fnStr lastPathComponent] stringByDeletingPathExtension];
-            if(newBI == nil && [lastPathComponent containsCharacterInSet:[NSCharacterSet nonDecimalDigitCharacterSet]] == NO)
+            BOOL tryPubMed = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePubMedMetadata];
+            if(newBI == nil && tryPubMed && [lastPathComponent containsCharacterInSet:[NSCharacterSet nonDecimalDigitCharacterSet]] == NO)
                 newBI = [BibItem itemWithPMID:lastPathComponent];
             
             // fall back on the least reliable metadata source (hidden pref)

@@ -873,6 +873,8 @@
 					<true/>
 					<key>BDSKShouldUsePDFMetadata</key>
 					<false/>
+					<key>BDSKShouldUsePubMedMetadata</key>
+					<true/>
 					<key>BDSKShouldWritePDFMetadata</key>
 					<false/>
 					<key>BDSKSpotlightVersionInfo</key>
