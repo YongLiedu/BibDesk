@@ -70,6 +70,7 @@ NSString *BDSKEditorFormShouldAutoCompleteKey = @"BDSKEditorFormShouldAutoComple
 NSString *BDSKReadExtendedAttributesKey = @"BDSKReadExtendedAttributesKey";
 NSString *BDSKShouldUsePDFMetadata = @"BDSKShouldUsePDFMetadata";
 NSString *BDSKShouldWritePDFMetadata = @"BDSKShouldWritePDFMetadata";
+NSString *BDSKShouldUsePubMedMetadata = @"BDSKShouldUsePubMedMetadata";
 NSString *BDSKIntersectGroupsKey = @"BDSKIntersectGroupsKey";
 NSString *BDSKSearchGroupBookmarksKey = @"BDSKSearchGroupBookmarksKey";
 NSString *BDSKSearchMenuTagKey = @"BDSKSearchMenuTagKey";
@@ -361,6 +362,7 @@ NSString *BDSKSkimNotesString = @"SkimNotes";
  BDSKAddISIXMLStringToAnnote                     bool    false
  BDSKDisableISITitleCasing                       bool    false
  BDSKDefaultArrayJoinString                      string  "/"
+ BDSKShouldUsePubMedMetadata                     bool    true    // treat filename as PMID
 
  */
 

@@ -3,23 +3,23 @@
 /*
  This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
  Michael O. McCracken. All rights reserved.
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
  are met:
- 
+
  - Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
+   notice, this list of conditions and the following disclaimer.
+
  - Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
  - Neither the name of Michael O. McCracken nor the names of any
- contributors may be used to endorse or promote products derived
- from this software without specific prior written permission.
- 
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -70,6 +70,7 @@
 #import "NSData_BDSKExtensions.h"
 #import "BDSKSkimReader.h"
 #import "BDSKCitationFormatter.h"
+
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -301,7 +302,7 @@ static CFDictionaryRef selectorTable = NULL;
         // set to YES initially so the first save after opening a file always writes the metadata, since we don't know beforehand if it's been written
         spotlightMetadataChanged = YES;
     }
-    
+
     return self;
 }
 
@@ -368,7 +369,7 @@ static CFDictionaryRef selectorTable = NULL;
     [people release];
 	[groups release];
     [cachedURLs release];
-    
+
     [pubType release];
     [fileType release];
     [citeKey release];
@@ -377,7 +378,7 @@ static CFDictionaryRef selectorTable = NULL;
     [dateModified release];
     [fileOrder release];
     [identifierURL release];
-    [allFilePaths release];
+    [allFiles release];
     [super dealloc];
 }
 
@@ -474,7 +475,7 @@ static CFDictionaryRef selectorTable = NULL;
 	[keys addObjectsFromArray:[aBI allFieldNames]];
 	NSEnumerator *keyEnum = [keys objectEnumerator];
     [keys release];
-    
+
 	NSString *key, *value1, *value2;
 	
 	while (key = [keyEnum nextObject]) {
@@ -498,7 +499,7 @@ static CFDictionaryRef selectorTable = NULL;
     // optimized hash from http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html
     // note that BibItems are used in hashing collections and so -hash must not depend on mutable state
     return( ((unsigned int) self >> 4) | 
-           (unsigned int) self << (32 - 4));
+            (unsigned int) self << (32 - 4));
 }
 
 #pragma mark -
@@ -747,7 +748,7 @@ static CFDictionaryRef selectorTable = NULL;
         if(idx != count - 1)
             [names appendString:@" and "];
     }
-    
+
 	return names;
 }
 
@@ -833,8 +834,8 @@ static CFDictionaryRef selectorTable = NULL;
 	} else if ( [type isEqualToString:BDSKArticleString] ) {
 		c = [self valueOfField:BDSKJournalString];
 	} else if ( [type isEqualToString:BDSKIncollectionString] || 
-               [type isEqualToString:BDSKInproceedingsString] ||
-               [type isEqualToString:BDSKConferenceString] ) {
+				[type isEqualToString:BDSKInproceedingsString] ||
+				[type isEqualToString:BDSKConferenceString] ) {
 		c = [self valueOfField:BDSKBooktitleString];
 	} else if ( [type isEqualToString:BDSKCommentedString] ){
 		c = [self valueOfField:BDSKVolumetitleString];
@@ -946,7 +947,7 @@ static CFDictionaryRef selectorTable = NULL;
 		[pubFields removeObjectForKey:BDSKDateModifiedString];
 	}
 	[self updateMetadataForKey:BDSKPubTypeString];
-    
+		
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newType, @"value", BDSKPubTypeString, @"key", @"Change", @"type", owner, @"owner", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
@@ -979,7 +980,7 @@ static CFDictionaryRef selectorTable = NULL;
 
 - (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarDate *)date{
     NSString *oldCiteKey = [[self citeKey] retain];
-    
+
     if ([self undoManager]) {
 		[[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:oldCiteKey 
 															  withModDate:[self dateModified]];
@@ -992,9 +993,9 @@ static CFDictionaryRef selectorTable = NULL;
 		[pubFields removeObjectForKey:BDSKDateModifiedString];
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
-    
+		
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", oldCiteKey, @"oldCiteKey", owner, @"owner", nil];
-    
+
     [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
     [oldCiteKey release];
     
@@ -1085,7 +1086,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSString *)citation{
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+       OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     return [NSString stringWithFormat:@"\\%@%@", [pw stringForKey:BDSKCiteStringKey],
             [pw stringForKey:BDSKCiteStartBracketKey], [self citeKey], [pw stringForKey:BDSKCiteEndBracketKey]];
 }
@@ -1136,10 +1137,10 @@ static CFDictionaryRef selectorTable = NULL;
 		NSCalendarDate *oldModDate = [self dateModified];
 		
 		[[[self undoManager] prepareWithInvocationTarget:self] setField:key 
-                                                                toValue:oldValue
-                                                            withModDate:oldModDate];
+														 toValue:oldValue
+													 withModDate:oldModDate];
 	}
-    
+    	
     if(value != nil){
 		[pubFields setObject:value forKey:key];
 		// to allow autocomplete:
@@ -1200,7 +1201,7 @@ static CFDictionaryRef selectorTable = NULL;
 - (void)addField:(NSString *)key withModDate:(NSCalendarDate *)date{
 	if ([self undoManager]) {
 		[[[self undoManager] prepareWithInvocationTarget:self] removeField:key
-                                                               withModDate:[self dateModified]];
+														withModDate:[self dateModified]];
 	}
 	
 	NSString *defaultValue = nil;
@@ -1222,7 +1223,7 @@ static CFDictionaryRef selectorTable = NULL;
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
-    
+
 }
 
 - (void)removeField: (NSString *)key{
@@ -1250,7 +1251,7 @@ static CFDictionaryRef selectorTable = NULL;
 		[pubFields removeObjectForKey:BDSKDateModifiedString];
 	}
 	[self updateMetadataForKey:key];
-    
+
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type", owner, @"owner", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
@@ -1269,7 +1270,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSString *)stringValueOfField:(NSString *)field inherit:(BOOL)inherit {
-    
+		
 	if([field isRatingField]){
 		return [NSString stringWithFormat:@"%i", [self ratingValueOfField:field]];
 	}else if([field isBooleanField]){
@@ -1310,7 +1311,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (int)intValueOfField:(NSString *)field {
-    
+		
 	if([field isRatingField]){
 		return [self ratingValueOfField:field];
 	}else if([field isBooleanField]){
@@ -1466,7 +1467,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             return [self ratingValueOfField:field] == [substring intValue];
         }
     }
-    
+
     // must be a string of some kind...
     NSString *value = NULL == selector ? [self stringValueOfField:field] : [self performSelector:selector];
     return stringContainsLossySubstring(value, substring, searchOptions, flag);
@@ -1508,16 +1509,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [info setObject:value forKey:@"net_sourceforge_bibdesk_citekey"];
     
     [info setObject:@"BibDesk" forKey:(NSString *)kMDItemCreator];
-    
+
     // A given item is not guaranteed to have all of these, so make sure they are non-nil
     if(value = [self displayTitle])
         [info setObject:value forKey:(NSString *)kMDItemTitle];
     
     // this is what shows up in search results
     [info setObject:value ? value : @"Unknown" forKey:(NSString *)kMDItemDisplayName];
-    
+
     [info setObject:[self pubAuthorsAsStrings] forKey:(NSString *)kMDItemAuthors];
-    
+
     if(value = [[self valueOfField:BDSKAbstractString] stringByRemovingTeX])
         [info setObject:value forKey:(NSString *)kMDItemDescription];
     
@@ -1529,34 +1530,34 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     if(date = [self date])
         [info setObject:date forKey:@"net_sourceforge_bibdesk_publicationdate"];
-    
+
     if(date = [self dateModified])
         [info setObject:date forKey:(NSString *)kMDItemContentModificationDate];
-    
+
     if(date = [self dateAdded])
         [info setObject:date forKey:(NSString *)kMDItemContentCreationDate];
-    
+
     // keywords is supposed to be a CFArray type, so we'll use the group splitting code
     if(array = [[self groupsForField:BDSKKeywordsString] allObjects])
         [info setObject:array forKey:(NSString *)kMDItemKeywords];
-    
+
     if(rating = [self rating])
         [info setObject:[NSNumber numberWithInt:rating] forKey:(NSString *)kMDItemStarRating];
-    
+
     // properly supporting tri-state fields will need a new key of type CFNumber; it will only show up as a number in get info, though, which is not particularly useful
     if([BDSKReadString isBooleanField])
         [info setObject:(id)([self boolValueOfField:BDSKReadString] ? kCFBooleanTrue : kCFBooleanFalse) forKey:@"net_sourceforge_bibdesk_itemreadstatus"];
     else if([BDSKReadString isTriStateField])
         [info setObject:(id)([self triStateValueOfField:BDSKReadString] == NSOnState ? kCFBooleanTrue : kCFBooleanFalse) forKey:@"net_sourceforge_bibdesk_itemreadstatus"];
-    
+
     // kMDItemWhereFroms is the closest we get to a URL field, so add our standard fields if available
     NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity:2];
-    
+
     if(value = [[self URLForField:BDSKUrlString] absoluteString]) 
         [mutableArray addObject:value];
     if(value = [[self localFileURLForField:BDSKLocalUrlString] absoluteString])
         [mutableArray addObject:value];
-    
+
     [info setObject:mutableArray forKey:(NSString *)kMDItemWhereFroms];
     [mutableArray release];
     
@@ -1586,8 +1587,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     // passing this as an NSString causes a "more significant bytes than room to hold them" exception in the client
     value = [self valueOfField:BDSKYearString];
     if([NSString isEmptyString:value] == NO &&
-       (value = [NSNumber numberWithInt:[value intValue]]))
-        [dict setObject:value forKey:@"year"];
+        (value = [NSNumber numberWithInt:[value intValue]]))
+    [dict setObject:value forKey:@"year"];
     
     return dict;
 }    
@@ -1627,7 +1628,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	e = [keys objectEnumerator];
 	[keys release];
-    
+
     //build BibTeX entry:
     [s appendString:@"@"];
     
@@ -1700,12 +1701,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	e = [keys objectEnumerator];
 	[keys release];
-    
+
     //build BibTeX entry:
     isOK = [data appendDataFromString:@"@" encoding:encoding error:&error] &&
-    [data appendDataFromString:type encoding:encoding error:&error] &&
-    [data appendDataFromString:@"{" encoding:encoding error:&error] &&
-    [data appendDataFromString:[self citeKey] encoding:encoding error:&error];
+           [data appendDataFromString:type encoding:encoding error:&error] &&
+           [data appendDataFromString:@"{" encoding:encoding error:&error] &&
+           [data appendDataFromString:[self citeKey] encoding:encoding error:&error];
     if(isOK == NO) {
         error = [[error mutableCopy] autorelease];
         [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert cite key of item with cite key \"%@\".", @"string encoding error context"), [self citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -1729,7 +1730,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         if(shouldTeXify && ![urlKeys containsObject:field]){
             value = [value stringByTeXifyingString];
         }                
-        
+                
         if(NO == [value isEqualToString:@""] || [fieldsToWriteIfEmpty containsObject:field]){
             
             [data appendData:lineSeparator];
@@ -1779,29 +1780,29 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *key;
     NSEnumerator *e = [[[self allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
     NSDictionary *cachedFonts = [[NSFontManager sharedFontManager] cachedFontsForPreviewPane];
-    
+
     NSDictionary *titleAttributes =
-    [[NSDictionary alloc]  initWithObjectsAndKeys:[cachedFonts objectForKey:@"Title"], NSFontAttributeName, 
-     keyParagraphStyle, NSParagraphStyleAttributeName, nil];
-    
+        [[NSDictionary alloc]  initWithObjectsAndKeys:[cachedFonts objectForKey:@"Title"], NSFontAttributeName, 
+												      keyParagraphStyle, NSParagraphStyleAttributeName, nil];
+
     NSDictionary *typeAttributes =
-    [[NSDictionary alloc]  initWithObjectsAndKeys:[cachedFonts objectForKey:@"Type"], NSFontAttributeName, 
-     [NSColor colorWithCalibratedWhite:0.4 alpha:1.0], NSForegroundColorAttributeName, nil];
-    
+        [[NSDictionary alloc]  initWithObjectsAndKeys:[cachedFonts objectForKey:@"Type"], NSFontAttributeName, 
+		                                              [NSColor colorWithCalibratedWhite:0.4 alpha:1.0], NSForegroundColorAttributeName, nil];
+
     NSDictionary *keyAttributes =
-    [[NSDictionary alloc]  initWithObjectsAndKeys:[cachedFonts objectForKey:@"Key"], NSFontAttributeName, 
-     keyParagraphStyle, NSParagraphStyleAttributeName, nil];
-    
+        [[NSDictionary alloc]  initWithObjectsAndKeys:[cachedFonts objectForKey:@"Key"], NSFontAttributeName, 
+												      keyParagraphStyle, NSParagraphStyleAttributeName, nil];
+
     NSDictionary *bodyAttributes =
-    [[NSDictionary alloc]  initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, 
-     bodyParagraphStyle, NSParagraphStyleAttributeName, nil];
-    
+        [[NSDictionary alloc]  initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, 
+												      bodyParagraphStyle, NSParagraphStyleAttributeName, nil];
+
     NSMutableAttributedString* reqStr = [[NSMutableAttributedString alloc] init];
     NSMutableAttributedString* nonReqStr = [[NSMutableAttributedString alloc] init];
 	NSAttributedString *valueStr;
     
 	NSSet *reqKeys = [[NSSet alloc] initWithArray:[[BDSKTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
-    
+
     static NSDateFormatter *dateFormatter = nil;
     if(dateFormatter == nil) {
         dateFormatter = [[NSDateFormatter alloc] init];
@@ -1811,16 +1812,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     [reqStr appendString:[self citeKey] attributes:typeAttributes];
     [reqStr appendString:@"\n"];
-    
+
     // make sure we don't use -displayTitle here
     valueStr = [[NSAttributedString alloc] initWithTeXString:[self title]
                                                   attributes:titleAttributes
                                           collapseWhitespace:YES];
     [reqStr appendAttributedString:valueStr];
     [valueStr release];
-    
+
     [reqStr appendString:[NSString stringWithFormat:@" (%@)\n",[self pubType]] attributes:typeAttributes];
-    
+
     BDSKCitationFormatter *citationFormatter = nil;
     NSCalendarDate *date = nil;
     NSString *stringValue = nil;
@@ -1857,13 +1858,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                     valueStr = [[NSMutableAttributedString alloc] initWithString:([theURL isFileURL] ? [[theURL path] stringByAbbreviatingWithTildeInPath] : stringValue) attributes:bodyAttributes];
                     [(NSMutableAttributedString *)valueStr addAttribute:NSLinkAttributeName value:theURL range:NSMakeRange(0, [valueStr length])];
                 }
-                
+  
 			}else if([key isCitationField]){
                 // make valid cite keys clickable
                 if (citationFormatter == nil)
                     citationFormatter = [[[BDSKCitationFormatter alloc] initWithDelegate:self] autorelease];
                 valueStr = [[citationFormatter attributedStringForObjectValue:stringValue withDefaultAttributes:bodyAttributes] retain];
-                
+  
 			}else if([key isEqualToString:BDSKRatingString]){
 				int rating = [self ratingValueOfField:BDSKRatingString];
 				valueStr = [[NSAttributedString alloc] initWithString:[NSString ratingStringWithInteger:rating]
@@ -1877,7 +1878,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                                                       collapseWhitespace:notNote];
 			}
 			
-            
+                       
             // the valueStr will be an empty NSConcreteAttributedString if created with a nil argument, so we check for nil before creating it
 			if(valueStr){
 				
@@ -1912,7 +1913,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [nonReqStr appendString:@"\n"];
         [valueStr release];
     }
-    
+
     // now put them together
 	[reqStr appendAttributedString:nonReqStr];
 	[reqStr appendString:@" "];
@@ -1935,7 +1936,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [keys removeObject:BDSKDateAddedString];
     [keys removeObject:BDSKDateModifiedString];
     [keys removeObject:BDSKLocalUrlString];
-    
+
     BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     
     // get the type, which may exist in pubFields if this was originally an RIS import; we must have only _one_ TY field,
@@ -2017,14 +2018,14 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     AddXMLField(@"title",BDSKTitleString);
     [s appendString:@"\n</titleInfo>\n"];
     // note: may in the future want to output subtitles.
-    
+
     NSArray *pubAuthors = [self pubAuthors];
     
     foreach (author, pubAuthors){
         [s appendString:[author MODSStringWithRole:BDSKAuthorString]];
         [s appendString:@"\n"];
     }
-    
+
     // NOTE: this isn't always text. what are the special case pubtypes?
     [s appendString:@"<typeOfResource>text</typeOfResource>\n"];
     
@@ -2034,7 +2035,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             [s appendStrings:@"<genre>", [genresForSelf objectAtIndex:i], @"</genre>\n", nil];
         }
     }
-    
+
     // HOST INFO
     NSArray *genresForHost = [genreForTypeDict objectForKey:@"host"];
     if(genresForHost){
@@ -2056,7 +2057,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         
         [s appendString:@"</relatedItem>\n"];
     }
-    
+
     [s appendStrings:@"<identifier type=\"citekey\">", [[self citeKey] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</identifier>\n", nil];
     
     [s appendString:@"</mods>"];
@@ -2248,7 +2249,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     // no item template found, so do some custom  stuff
     
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
-    
+
     [s appendString:@"<item>\n<title>"];
 	[s appendString:[[self displayTitle] xmlString]];
     [s appendString:@"</title>\n<description>"];
@@ -2285,7 +2286,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [result appendString:@"|"];
     
     BibItem *parent = [self crossrefParent];
-    
+
     // if it has a parent, find all the available keys, and use valueOfField: to get either the
     // child object or parent object value. Inherit only the fields of the parent relevant for the item.
     if(parent){
@@ -2296,7 +2297,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             [result appendString:[self valueOfField:key inherit:YES]];
             [result appendString:@"|"];
         }
-        
+                
     } else {
         NSEnumerator *pubFieldsE = [thePubFields objectEnumerator];
         NSString *value = nil;
@@ -2404,19 +2405,19 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 
 - (NSArray *)allFilePaths
 {
-    if (nil == allFilePaths) {
+    if (nil == allFiles) {
         NSEnumerator *fe = [[[BDSKTypeManager sharedManager] allURLFieldsSet] objectEnumerator];
-        allFilePaths = [NSMutableArray new];
+        allFiles = [NSMutableArray new];
         NSString *field;
         NSURL *aURL;
         while (field = [fe nextObject]) {
             aURL = [self URLForField:field];
             if (aURL)
-                [allFilePaths addObject:aURL];
+                [allFiles addObject:aURL];
         }
-        [allFilePaths sortUsingFunction:sortURLsByType context:NULL];
+        [allFiles sortUsingFunction:sortURLsByType context:NULL];
     }
-    return allFilePaths;
+    return allFiles;
 }
 
 - (NSURL *)remoteURL{
@@ -2476,7 +2477,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
         if (NSNotFound != loc)
             value = [value substringWithRange:NSMakeRange(6, loc - 6)];
     }
-    
+
     returnURL = [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
     if (returnURL)
         [cachedURLs setObject:returnURL forKey:field];
@@ -2538,7 +2539,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
             localURLFieldValue = [basePath stringByAppendingPathComponent:localURLFieldValue];
             shouldCache = NO;
         }
-        
+
         localURL = [NSURL fileURLWithPath:[localURLFieldValue stringByStandardizingPath]];
     }
 	
@@ -2573,7 +2574,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
         oldPath = [oldPath substringFromIndex:[papersFolderPath length] + 1];
     else
         oldPath = nil;
-    
+      
 	NSString *relativeFile = [BDSKFormatParser parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self suggestion:oldPath];
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey]) {
 		relativeFile = [relativeFile lowercaseString];
@@ -2589,7 +2590,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 	
 	if (nil == requiredFields || 
         ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
-         [NSString isEmptyString:[[[owner fileURL] path] stringByDeletingLastPathComponent]]))
+		[NSString isEmptyString:[[[owner fileURL] path] stringByDeletingLastPathComponent]]))
 		return NO;
 	
 	NSEnumerator *fEnum = [requiredFields objectEnumerator];
@@ -2637,8 +2638,8 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
         OBASSERT([owner isDocument]);
         if ([owner isDocument]) {
             [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
-                                   fromDocument:(BibDocument *)owner
-                                          check:NO]; 
+                                  fromDocument:(BibDocument *)owner
+                                         check:NO]; 
             return YES;
 		} else {
             [self setNeedsToBeFiled:YES];
@@ -2665,7 +2666,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 	NSSet *groupSet = [groups objectForKey:field];
 	if(groupSet)
 		return groupSet;
-    
+
 	// otherwise build it if we have a value
     NSString *value = [self stringValueOfField:field];
 	if([value isComplex] || [value isInherited])
@@ -2739,7 +2740,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     // if the groupName is an empty object (author or string), use the empty string as description since stringValue would be "Empty field"
     NSString *groupDescription = ([@"" isEqual:groupName] || [[BibAuthor emptyAuthor] isEqual:groupName]) ? @"" : [group stringValue];
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[groupDescription length] + [oldString length] + 1];
-    
+
     // we set the type and journal field, add to other fields if needed
 	if(operation == BDSKOperationAppend){
         [string appendString:oldString];
@@ -2861,7 +2862,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 	int startLocation, endLocation;
 	
 	scannerScanUpToCharacterNotInOFCharacterSet(scanner, whitespaceCharSet);
-    
+
 	do {
 		addedToken = NO;
 		if(useDelimiters)
@@ -2982,7 +2983,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 	int startLocation, endLocation;
 	
 	scannerScanUpToCharacterNotInOFCharacterSet(scanner, whitespaceCharSet);
-    
+
 	do {
 		addedToken = NO;
 		if(useDelimiters)
@@ -3033,7 +3034,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
         isImported = flag;
     }
 }
-
+     
 @end
 
 #pragma mark -
@@ -3167,16 +3168,16 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
         
         // the URL cache is certainly invalid now
         [cachedURLs removeAllObjects];
-        [allFilePaths release];
-        allFilePaths = nil;
+        [allFiles release];
+        allFiles = nil;
 	}else if(key != nil){
 		[groups removeObjectForKey:key];
 	}
     
     if([key isURLField]) {
         [cachedURLs removeObjectForKey:key];
-        [allFilePaths release];
-        allFilePaths = nil;
+        [allFiles release];
+        allFiles = nil;
     }
 	
     NSCalendarDate *theDate = nil;

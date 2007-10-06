@@ -116,6 +116,7 @@ extern NSString *BDSKEditorFormShouldAutoCompleteKey;
 extern NSString *BDSKReadExtendedAttributesKey;
 extern NSString *BDSKShouldUsePDFMetadata;
 extern NSString *BDSKShouldWritePDFMetadata;
+extern NSString *BDSKShouldUsePubMedMetadata;
 extern NSString *BDSKIntersectGroupsKey;
 extern NSString *BDSKSearchGroupBookmarksKey;
 extern NSString *BDSKSearchMenuTagKey;

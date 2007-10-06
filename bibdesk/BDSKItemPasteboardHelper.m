@@ -48,7 +48,7 @@
 - (NSMutableArray *)promisedTypesForPasteboard:(NSPasteboard *)pboard;
 - (int)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard;
 - (NSString *)promisedBibTeXStringForPasteboard:(NSPasteboard *)pboard;
-- (NSString *)promisedCiteKeysForPasteboard:(NSPasteboard *)pboard;
+- (NSArray *)promisedCiteKeysForPasteboard:(NSPasteboard *)pboard;
 - (void)removePromisedType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
 - (void)removePromisedTypesForPasteboard:(NSPasteboard *)pboard;
 - (void)provideAllPromisedTypes;
@@ -262,14 +262,14 @@
 }
 
 - (int)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard {
-	return [self pasteboardIsValid:pboard] ? [[[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"dragCopyType"] intValue] : nil;
+	return [self pasteboardIsValid:pboard] ? [[[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"dragCopyType"] intValue] : -1;
 }
 
 - (NSString *)promisedBibTeXStringForPasteboard:(NSPasteboard *)pboard {
 	return [self pasteboardIsValid:pboard] ? [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"bibTeXString"] : nil;
 }
 
-- (NSString *)promisedCiteKeysForPasteboard:(NSPasteboard *)pboard {
+- (NSArray *)promisedCiteKeysForPasteboard:(NSPasteboard *)pboard {
 	return [self pasteboardIsValid:pboard] ? [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"citeKeys"] : nil;
 }
 

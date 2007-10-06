@@ -4,23 +4,23 @@
 /*
  This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
  Michael O. McCracken. All rights reserved.
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
  are met:
- 
+
  - Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
+   notice, this list of conditions and the following disclaimer.
+
  - Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
  - Neither the name of Michael O. McCracken nor the names of any
- contributors may be used to endorse or promote products derived
- from this software without specific prior written permission.
- 
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -35,8 +35,8 @@
  */
 
 /*! @header BibDocument.h
- @discussion This defines a subclass of NSDocument that reads and writes BibTeX entries. It handles the main document window.
- */
+    @discussion This defines a subclass of NSDocument that reads and writes BibTeX entries. It handles the main document window.
+*/
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroupTableView.h"
@@ -97,15 +97,15 @@ extern NSString *BDSKBibItemPboardType;
 extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc files
 
 /*!
- @class BibDocument
- @abstract Controller class for .bib files
- @discussion This is the document class. It keeps an array of BibItems (called (NSMutableArray *)publications) and handles the quick search box. It delegates PDF generation to a BDSKPreviewer.
- */
+    @class BibDocument
+    @abstract Controller class for .bib files
+    @discussion This is the document class. It keeps an array of BibItems (called (NSMutableArray *)publications) and handles the quick search box. It delegates PDF generation to a BDSKPreviewer.
+*/
 
 @interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView, BDSKOwner>
 {
 #pragma mark Main tableview pane variables
-    
+
     IBOutlet NSWindow* documentWindow;
     IBOutlet BDSKMainTableView *tableView;
     IBOutlet BDSKSplitView* splitView;
@@ -122,7 +122,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSDictionary *tableColumnWidths;
     
 #pragma mark Group pane variables
-    
+
     IBOutlet BDSKGroupTableView *groupTableView;
     IBOutlet BDSKSplitView *groupSplitView;
     IBOutlet BDSKImagePopUpButton *groupActionButton;
@@ -132,7 +132,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	NSString *currentGroupField;
     
 #pragma mark Preview variables
-    
+
     IBOutlet NSTextView *previewTextView;
     IBOutlet NSView *currentPreviewView;
     BDSKPreviewer *previewer;
@@ -149,47 +149,47 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	
 	IBOutlet BDSKImagePopUpButton * actionMenuButton;
 	IBOutlet BDSKImagePopUpButton * groupActionMenuButton;
-    
+		
 	IBOutlet NSSearchField *searchField;
-    
+
 #pragma mark Custom Cite-String drawer variables
     
     BDSKCustomCiteDrawerController *drawerController;
-    
+
 #pragma mark Sorting variables
-    
+
     NSString *sortKey;
     NSString *previousSortKey;
     NSString *sortGroupsKey;
     
 #pragma mark Menu variables
-    
+
 	IBOutlet NSMenu * groupMenu;
 	IBOutlet NSMenu * actionMenu;
-    
+
 #pragma mark Accessory view variables
-    
+
     IBOutlet NSView *saveAccessoryView;
     IBOutlet NSView *exportAccessoryView;
     IBOutlet BDSKEncodingPopUpButton *saveTextEncodingPopupButton;
     IBOutlet NSButton *exportSelectionCheckButton;
     
 #pragma mark Publications and Groups variables
-    
+
     BDSKPublicationsArray *publications;  // holds all the publications
     NSMutableArray *groupedPublications;  // holds publications in the selected groups
     NSMutableArray *shownPublications;    // holds the ones we want to show.
     // All display related operations should use shownPublications
-    
+   
     BDSKGroupsArray *groups;
 	
 #pragma mark Search group bookmarks
-    
+
     IBOutlet NSWindow *searchBookmarkSheet;
     IBOutlet NSTextField *searchBookmarkField;
-    
+
 #pragma mark Macros, Document Info and Front Matter variables
-    
+
     BDSKMacroResolver *macroResolver;
     BDSKMacroWindowController *macroWC;
 	
@@ -199,12 +199,12 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	NSMutableString *frontMatter;    // for preambles, and stuff
 	
 #pragma mark Copy & Drag related variables
-    
+
     NSString *promiseDragColumnIdentifier;
     BDSKItemPasteboardHelper *pboardHelper;
     
 #pragma mark Scalar state variables
-    
+
     struct _docState {
         float               lastPreviewHeight;  // for the splitview double-click handling
         float               lastGroupViewWidth;
@@ -223,7 +223,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 
 /*!
- @method     init
+@method     init
  @abstract   initializer
  @discussion Sets up initial values. Note that this is called before IBOutlet ivars are connected.
  If you need to set up initial values for those, use awakeFromNib instead.
@@ -236,10 +236,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (BOOL)isMainDocument;
 
 /*!
- @method     clearChangeCount
- @abstract   needed because of finalize changes in BibEditor
- @discussion (comprehensive description)
- */
+    @method     clearChangeCount
+    @abstract   needed because of finalize changes in BibEditor
+    @discussion (comprehensive description)
+*/
 - (void)clearChangeCount;
 
 - (NSFileWrapper *)fileWrapperOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError;
@@ -268,80 +268,80 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 // Responses to UI actions
 
 /*!
- @method updatePreviews
- @abstract Updates the document and/or shared previewer if needed. 
- @discussion The actual messages are queued and coalesced, so bulk actions will only update the previews once.
- 
- */
+    @method updatePreviews
+    @abstract Updates the document and/or shared previewer if needed. 
+    @discussion The actual messages are queued and coalesced, so bulk actions will only update the previews once.
+    
+*/
 - (void)updatePreviews;
 
 /*!
- @method updatePreviewer:
- @abstract Handles updating a previewer.
- @discussion -
- @param aPreviewer The previewer to update
- 
- */
+    @method updatePreviewer:
+    @abstract Handles updating a previewer.
+    @discussion -
+    @param aPreviewer The previewer to update
+    
+*/
 - (void)updatePreviewer:(BDSKPreviewer *)aPreviewer;
 
 /*!
- @method updatePreviewPane
- @abstract Handles writing the preview pane. (Not the PDF Preview)
- @discussion -
- 
- */
+    @method updatePreviewPane
+    @abstract Handles writing the preview pane. (Not the PDF Preview)
+    @discussion -
+    
+*/
 - (void)updatePreviewPane;
 
 /*!
- @method bibTeXStringForPublications
- @abstract auxiliary method for generating bibtex string for publication items
- @discussion generates appropriate bibtex string from the document's current selection by calling bibTeXStringDroppingInternal:droppingInternal:.
- */
+	@method bibTeXStringForPublications
+	@abstract auxiliary method for generating bibtex string for publication items
+	@discussion generates appropriate bibtex string from the document's current selection by calling bibTeXStringDroppingInternal:droppingInternal:.
+*/
 - (NSString *)bibTeXStringForPublications:(NSArray *)items;
 
 /*!
- @method bibTeXStringDroppingInternal:forPublications:
- @abstract auxiliary method for generating bibtex string for publication items
- @discussion generates appropriate bibtex string from given items.
- */
+	@method bibTeXStringDroppingInternal:forPublications:
+	@abstract auxiliary method for generating bibtex string for publication items
+	@discussion generates appropriate bibtex string from given items.
+*/
 - (NSString *)bibTeXStringDroppingInternal:(BOOL)drop forPublications:(NSArray *)items;
 
 /*!
- @method previewBibTeXStringForPublications:
- @abstract auxiliary method for generating bibtex string for publication items to use for generating RTF or PDF data
- @discussion generates appropriate bibtex string from given items.
- */
+	@method previewBibTeXStringForPublications:
+	@abstract auxiliary method for generating bibtex string for publication items to use for generating RTF or PDF data
+	@discussion generates appropriate bibtex string from given items.
+*/
 - (NSString *)previewBibTeXStringForPublications:(NSArray *)items;
 
 /*!
- @method RISStringForPublications:
- @abstract auxiliary method for generating RIS string for publication items
- @discussion generates appropriate RIS string from given items.
- */
+	@method RISStringForPublications:
+	@abstract auxiliary method for generating RIS string for publication items
+	@discussion generates appropriate RIS string from given items.
+*/
 - (NSString *)RISStringForPublications:(NSArray *)items;
 
 /*!
- @method citeStringForPublications:citeString:
- @abstract  method for generating cite string
- @discussion generates appropriate cite command from the given items 
- */
+	@method citeStringForPublications:citeString:
+	@abstract  method for generating cite string
+	@discussion generates appropriate cite command from the given items 
+*/
 
 - (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString;
 
 /*!
- @method setPublications
- @abstract Sets the publications array
- @discussion Simply replaces the publications array
- @param newPubs The new array.
- */
+    @method setPublications
+    @abstract Sets the publications array
+    @discussion Simply replaces the publications array
+    @param newPubs The new array.
+*/
 - (void)setPublications:(NSArray *)newPubs;
 
 /*!
- @method publications
+    @method publications
  @abstract Returns the publications array.
- @discussion Returns the publications array.
- 
- */
+    @discussion Returns the publications array.
+    
+*/
 - (BDSKPublicationsArray *)publications;
 - (NSArray *)shownPublications;
 
@@ -383,35 +383,35 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 // Private methods
 
 /*!
- @method updateStatus
- @abstract Updates the status message
- @discussion -
- */
+    @method updateStatus
+    @abstract Updates the status message
+    @discussion -
+*/
 - (void)updateStatus;
 
 /*!
- @method     sortPubsByKey:
- @abstract   Sorts the publications table by the given key.  Pass nil for the table column to re-sort the previously sorted column with the same order.
- @discussion (comprehensive description)
- @param      key (description)
- */
+    @method     sortPubsByKey:
+    @abstract   Sorts the publications table by the given key.  Pass nil for the table column to re-sort the previously sorted column with the same order.
+    @discussion (comprehensive description)
+    @param      key (description)
+*/
 - (void)sortPubsByKey:(NSString *)key;
 
 /*!
- @method     columnsMenu
- @abstract   Returnes the columns menu
- @discussion (comprehensive description)
- */
+    @method     columnsMenu
+    @abstract   Returnes the columns menu
+    @discussion (comprehensive description)
+*/
 - (NSMenu *)columnsMenu;
 
 - (void)registerForNotifications;
 
 /*!
- @method     handlePreviewDisplayChangedNotification:
- @abstract   only supposed to handle the pretty-printed preview, /not/ the TeX preview
- @discussion (comprehensive description)
- @param      notification (description)
- */
+    @method     handlePreviewDisplayChangedNotification:
+    @abstract   only supposed to handle the pretty-printed preview, /not/ the TeX preview
+    @discussion (comprehensive description)
+    @param      notification (description)
+*/
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification;
 - (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification;
 - (void)handleIgnoredSortTermsChangedNotification:(NSNotification *)notification;
@@ -423,38 +423,38 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 // notifications observed on behalf of owned BibItems for efficiency
 - (void)handleTypeInfoDidChangeNotification:(NSNotification *)notification;
 - (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification;
-
+    
 /*!
- @method     handleBibItemAddDelNotification:
- @abstract   this method gets called for setPublications: also
- @discussion (comprehensive description)
- @param      notification (description)
- */
+    @method     handleBibItemAddDelNotification:
+    @abstract   this method gets called for setPublications: also
+    @discussion (comprehensive description)
+    @param      notification (description)
+*/
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification;
 
-
+	
 /*!
- @method handleBibItemChangedNotification
- @abstract responds to changing bib data
- @discussion 
- */
+    @method handleBibItemChangedNotification
+	 @abstract responds to changing bib data
+	 @discussion 
+*/
 - (void)handleBibItemChangedNotification:(NSNotification *)notification;
 
 
 /*!
- @method     numberOfSelectedPubs
- @abstract   (description)
- @discussion (description)
- @result     the number of currently selected pubs in the doc
- */
+    @method     numberOfSelectedPubs
+    @abstract   (description)
+    @discussion (description)
+    @result     the number of currently selected pubs in the doc
+*/
 - (int)numberOfSelectedPubs;
 
 /*!
- @method     selectedPublications
- @abstract   (description)
- @discussion (description)
- @result     an array of the currently selected pubs in the doc
- */
+    @method     selectedPublications
+    @abstract   (description)
+    @discussion (description)
+    @result     an array of the currently selected pubs in the doc
+*/
 - (NSArray *)selectedPublications;
 
 - (BOOL)selectItemsForCiteKeys:(NSArray *)citeKeys selectLibrary:(BOOL)flag;
@@ -479,18 +479,18 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;
 
 /*!
- @method     saveSortOrder
- @abstract   Saves current sort order to preferences, to be restored on next launch/document open.
- @discussion (comprehensive description)
- */
+    @method     saveSortOrder
+    @abstract   Saves current sort order to preferences, to be restored on next launch/document open.
+    @discussion (comprehensive description)
+*/
 - (void)saveSortOrder;
 
 /*!
- @method     userChangedField:ofPublications:from:to:
- @abstract   Autofiles and generates citekey if we should and runs a script hook
- @discussion (comprehensive description)
- @result     Mask indicating what was autogenerated: 1 for autogenerating cite key, 2 for autofile
- */
+    @method     userChangedField:ofPublications:from:to:
+    @abstract   Autofiles and generates citekey if we should and runs a script hook
+    @discussion (comprehensive description)
+    @result     Mask indicating what was autogenerated: 1 for autogenerating cite key, 2 for autofile
+*/
 - (int)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues;
 
 @end
