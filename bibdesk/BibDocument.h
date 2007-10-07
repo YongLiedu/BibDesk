@@ -239,6 +239,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)clearChangeCount;
 
+- (BOOL)writeArchiveToURL:(NSURL *)fileURL forPublications:(NSArray *)items error:(NSError **)outError;
+
 - (NSFileWrapper *)fileWrapperOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError;
 - (NSData *)dataOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError;
 

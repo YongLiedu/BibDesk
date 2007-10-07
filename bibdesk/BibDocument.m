@@ -913,20 +913,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
     
     if ([docType isEqualToString:BDSKArchiveDocumentType]) {
-        if (success = nil != fileWrapper) {
-            NSString *path = [[fileURL path] stringByDeletingPathExtension];
-            if (success = [fileWrapper writeToFile:path atomically:NO updateFilenames:NO]) {
-                NSTask *task = [[[NSTask alloc] init] autorelease];
-                [task setLaunchPath:@"/usr/bin/tar"];
-                [task setArguments:[NSArray arrayWithObjects:@"czf", [[fileURL path] lastPathComponent], [path lastPathComponent], nil]];
-                [task setCurrentDirectoryPath:[path stringByDeletingLastPathComponent]];
-                [task launch];
-                if ([task isRunning])
-                    [task waitUntilExit];
-                success = [task terminationStatus] == 0;
-                [[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
-            }
-        }
+        success = [self writeArchiveToURL:fileURL forPublications:items error:outError];
     } else {
         success = nil == fileWrapper ? NO : [fileWrapper writeToFile:[fileURL path] atomically:NO updateFilenames:NO];
     }
@@ -961,6 +948,74 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)clearChangeCount{
 	[self updateChangeCount:NSChangeCleared];
+}
+
+- (BOOL)writeArchiveToURL:(NSURL *)fileURL forPublications:(NSArray *)items error:(NSError **)outError{
+    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
+    
+    NSString *path = [[fileURL path] stringByDeletingPathExtension];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSEnumerator *itemEnum = [items objectEnumerator];
+    BibItem *item;
+    NSSet *localFileFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
+    NSMutableSet *localFiles = [NSMutableSet set];
+    NSString *filePath;
+    NSString *commonParent = nil;
+    BOOL success = YES;
+    
+    if (success = [fm createDirectoryAtPath:path attributes:nil]) {
+        while (item = [itemEnum nextObject]) {
+            NSEnumerator *fieldEnum = [localFileFields objectEnumerator];
+            NSString *field;
+            while (field = [fieldEnum nextObject]) {
+                if (filePath = [item localFilePathForField:field]) {
+                    [localFiles addObject:filePath];
+                    if (commonParent)
+                        commonParent = [NSString commonRootPathOfFilename:[filePath stringByDeletingLastPathComponent] andFilename:commonParent];
+                    else
+                        commonParent = [filePath stringByDeletingLastPathComponent];
+                }
+            }
+        }
+        
+        NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
+        NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeTo:commonParent error:outError];
+        NSFileWrapper *fileWrapper = [[[NSFileWrapper alloc] initDirectoryWithFileWrappers:[NSDictionary dictionary]] autorelease];
+        NSString *bibtexPath = [[path stringByAppendingPathComponent:[path lastPathComponent]] stringByAppendingPathExtension:@"bib"];
+        
+        success = [bibtexData writeToFile:bibtexPath options:0 error:outError];
+        itemEnum = [localFiles objectEnumerator];
+        
+        while (success && (filePath = [itemEnum nextObject])) {
+            if ([fm fileExistsAtPath:filePath]) {
+                NSString *relativePath = commonParent ? [commonParent relativePathToFilename:filePath] : [filePath lastPathComponent];
+                NSString *targetPath = [path stringByAppendingPathComponent:relativePath];
+                
+                if ([fm fileExistsAtPath:targetPath])
+                    targetPath = [fm uniqueFilePathWithName:[targetPath stringByDeletingLastPathComponent] atPath:[targetPath lastPathComponent]];
+                @try { [fm createPathToFile:targetPath attributes:nil]; }
+                @catch (id exception) {
+                    success = NO;
+                    NSLog(@"Ignoring exception %@ while creating path to file", exception);
+                }
+                success = [fm copyPath:filePath toPath:targetPath handler:nil];
+            }
+        }
+        
+        if (success) {
+            NSTask *task = [[[NSTask alloc] init] autorelease];
+            [task setLaunchPath:@"/usr/bin/tar"];
+            [task setArguments:[NSArray arrayWithObjects:@"czf", [[fileURL path] lastPathComponent], [path lastPathComponent], nil]];
+            [task setCurrentDirectoryPath:[path stringByDeletingLastPathComponent]];
+            [task launch];
+            if ([task isRunning])
+                [task waitUntilExit];
+            success = [task terminationStatus] == 0;
+            [fm removeFileAtPath:path handler:nil];
+        }
+    }
+    
+    return success;
 }
 
 #pragma mark Data representations
