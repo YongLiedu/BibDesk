@@ -115,15 +115,10 @@
 		457538310B70170D00C0E49B /* BDSKWebGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 4575382B0B70170D00C0E49B /* BDSKWebGroup.m */; };
 		457538330B70170D00C0E49B /* BDSKWebGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */; };
 		457538460B701ECD00C0E49B /* BDSKWebGroupView.nib in Resources */ = {isa = PBXBuildFile; fileRef = 457538400B701ECD00C0E49B /* BDSKWebGroupView.nib */; };
-		45BB77530CAC74AE00F6299B /* BDSKGoogleScholarParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */; };
 		45BB77540CAC74AE00F6299B /* BDSKGoogleScholarParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45BB77520CAC74AE00F6299B /* BDSKGoogleScholarParser.m */; };
-		45DB3E4D0CAADFC3001EACDA /* BDSKACMDLParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E470CAADFC3001EACDA /* BDSKACMDLParser.h */; };
 		45DB3E4E0CAADFC3001EACDA /* BDSKACMDLParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E480CAADFC3001EACDA /* BDSKACMDLParser.m */; };
-		45DB3E4F0CAADFC3001EACDA /* BDSKCiteULikeParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E490CAADFC3001EACDA /* BDSKCiteULikeParser.h */; };
 		45DB3E500CAADFC3001EACDA /* BDSKCiteULikeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */; };
-		45DB3E510CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */; };
 		45DB3E520CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E4C0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m */; };
-		45DB3E8E0CAAFED5001EACDA /* BDSKHubmedParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */; };
 		45DB3E8F0CAAFED5001EACDA /* BDSKHubmedParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -380,7 +375,6 @@
 		F9025F310969D66F008A551C /* CFString_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9025F2F0969D66F008A551C /* CFString_BDSKExtensions.m */; };
 		F90261AE096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F90261AC096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m */; };
 		F90B09420C283B5100144F1B /* BDSKLogUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = F90B09400C283B5100144F1B /* BDSKLogUtilities.m */; };
-		F90B12840C298C2D00144F1B /* pdftotext in Resources */ = {isa = PBXBuildFile; fileRef = F90B12700C298A8900144F1B /* pdftotext */; };
 		F90B13030C298FE900144F1B /* latex2rtf in Resources */ = {isa = PBXBuildFile; fileRef = F90B13010C298FC900144F1B /* latex2rtf */; };
 		F90C4ACE0C7395FC0035DD50 /* BDSKSciFinderParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C4ACC0C7395FB0035DD50 /* BDSKSciFinderParser.m */; };
 		F90C64070AC62B7B008B2DDA /* BDSKShellCommandFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */; };
@@ -508,20 +502,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		F90B126F0C298A8900144F1B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8DD76F6C0486A84900D96B5E;
-			remoteInfo = pdftotext;
-		};
-		F90B12710C298A9F00144F1B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DD76F620486A84900D96B5E;
-			remoteInfo = pdftotext;
-		};
 		F90B13000C298FC900144F1B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */;
@@ -766,11 +746,6 @@
 				F9022FB207580A9600C3F701 /* OmniAppKit.framework in CopyFiles */,
 				F9022FB307580A9600C3F701 /* OmniBase.framework in CopyFiles */,
 				F9022FB407580A9600C3F701 /* OmniFoundation.framework in CopyFiles */,
-				45DB3E4D0CAADFC3001EACDA /* BDSKACMDLParser.h in CopyFiles */,
-				45DB3E4F0CAADFC3001EACDA /* BDSKCiteULikeParser.h in CopyFiles */,
-				45DB3E510CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h in CopyFiles */,
-				45DB3E8E0CAAFED5001EACDA /* BDSKHubmedParser.h in CopyFiles */,
-				45BB77530CAC74AE00F6299B /* BDSKGoogleScholarParser.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1289,7 +1264,6 @@
 		F90261AC096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFCharacterSet_BDSKExtensions.m; sourceTree = "<group>"; };
 		F90B093F0C283B5100144F1B /* BDSKLogUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKLogUtilities.h; sourceTree = "<group>"; };
 		F90B09400C283B5100144F1B /* BDSKLogUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKLogUtilities.m; sourceTree = "<group>"; };
-		F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pdftotext.xcodeproj; path = vendorsrc/foolabs/xpdf/xpdf/pdftotext.xcodeproj; sourceTree = "<group>"; };
 		F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = latex2rtf.xcodeproj; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/latex2rtf.xcodeproj; sourceTree = "<group>"; };
 		F90C4ACB0C7395FB0035DD50 /* BDSKSciFinderParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSciFinderParser.h; sourceTree = "<group>"; };
 		F90C4ACC0C7395FB0035DD50 /* BDSKSciFinderParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSciFinderParser.m; sourceTree = "<group>"; };
@@ -2256,14 +2230,6 @@
 			name = Images;
 			sourceTree = "<group>";
 		};
-		F90B126C0C298A8900144F1B /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F90B12700C298A8900144F1B /* pdftotext */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		F90B12FA0C298FC900144F1B /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -2584,7 +2550,6 @@
 			isa = PBXGroup;
 			children = (
 				F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */,
-				F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */,
 				F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */,
 				F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */,
 				F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */,
@@ -2767,7 +2732,6 @@
 				F9AF56360BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56380BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */,
-				F90B12720C298A9F00144F1B /* PBXTargetDependency */,
 				F90B13050C29900200144F1B /* PBXTargetDependency */,
 			);
 			name = BibDesk;
@@ -2820,10 +2784,6 @@
 					ProjectRef = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
 				},
 				{
-					ProductGroup = F90B126C0C298A8900144F1B /* Products */;
-					ProjectRef = F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */;
-				},
-				{
 					ProductGroup = F92BACEB0BCC00D2008D5BC3 /* Products */;
 					ProjectRef = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
 				},
@@ -2844,13 +2804,6 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		F90B12700C298A8900144F1B /* pdftotext */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = pdftotext;
-			remoteRef = F90B126F0C298A8900144F1B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		F90B13010C298FC900144F1B /* latex2rtf */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -3079,7 +3032,6 @@
 				F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */,
 				CEEC72F7093BDCA200A64F54 /* BibDesk.sdef in Resources */,
 				F92BACF50BCC0140008D5BC3 /* SkimNotesAgent in Resources */,
-				F90B12840C298C2D00144F1B /* pdftotext in Resources */,
 				F90B13030C298FE900144F1B /* latex2rtf in Resources */,
 				F9022DBD0758088000C3F701 /* Action_Pressed.tiff in Resources */,
 				F9022DBE0758088000C3F701 /* Action.tiff in Resources */,
@@ -3592,11 +3544,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		F90B12720C298A9F00144F1B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = pdftotext;
-			targetProxy = F90B12710C298A9F00144F1B /* PBXContainerItemProxy */;
-		};
 		F90B13050C29900200144F1B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = latex2rtf;
