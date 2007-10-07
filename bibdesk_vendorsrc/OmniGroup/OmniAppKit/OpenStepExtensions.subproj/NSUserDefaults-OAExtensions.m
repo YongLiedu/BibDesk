@@ -23,7 +23,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
     value = [self stringForKey:defaultName];
     if ([value length] > 1) {
-        sscanf([value cString], "%f%f%f%f", &r, &g, &b, &a);
+        sscanf([value UTF8String], "%f%f%f%f", &r, &g, &b, &a);
         return [NSColor colorWithCalibratedRed:r green:g blue:b alpha:a];
     } else
         return nil;
@@ -73,7 +73,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
     value = [self stringValue];
     if ([value length] > 1) {
-        sscanf([value cString], "%f%f%f%f", &r, &g, &b, &a);
+        sscanf([value UTF8String], "%f%f%f%f", &r, &g, &b, &a);
         return [NSColor colorWithCalibratedRed:r green:g blue:b alpha:a];
     } else
         return nil;
@@ -124,7 +124,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     if ([value length] <= 1)
         return nil;
         
-    sscanf([value cString], "%f%f%f%f", &r, &g, &b, &a);
+    sscanf([value UTF8String], "%f%f%f%f", &r, &g, &b, &a);
     return [NSColor colorWithCalibratedRed:r green:g blue:b alpha:a];
 }
 

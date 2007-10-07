@@ -199,9 +199,9 @@ static NSString *blackColorString;
                 size = 12.0;
             else if ([tagString hasPrefix:@"font size="] || [tagString hasPrefix:@"font size ="]) {
                 float foo;
-                if (sscanf([tagString cString], "font size = +%f", &foo) == 1)
+                if (sscanf([tagString UTF8String], "font size = +%f", &foo) == 1)
                     size += foo + 9;
-                else if (sscanf([tagString cString], "font size = %f", &foo) == 1)
+                else if (sscanf([tagString UTF8String], "font size = %f", &foo) == 1)
                     size = foo + 9;
             }
         }

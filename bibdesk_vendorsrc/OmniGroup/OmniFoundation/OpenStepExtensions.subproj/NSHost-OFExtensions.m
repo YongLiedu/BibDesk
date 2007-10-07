@@ -17,7 +17,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 - (NSNumber *)addressNumber
 {
-    return [NSNumber numberWithUnsignedLong:inet_addr([[self address] cString])];
+    return [NSNumber numberWithUnsignedLong:inet_addr([[self address] UTF8String])];
 }
 
 @end

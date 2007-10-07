@@ -9,4 +9,4 @@
 
 #import <Foundation/NSByteOrder.h>
 
-typedef enum _NSByteOrder OFByteOrder;
+typedef enum __CFByteOrder OFByteOrder;

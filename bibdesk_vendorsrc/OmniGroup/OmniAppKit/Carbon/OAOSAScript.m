@@ -184,7 +184,7 @@ OSErr OAOSAActiveProc(long referenceValue)
     OSErr error;
 
     // build an AEDesc with the source
-    AECreateDesc(typeChar, [someSource cString], [someSource cStringLength], &descriptor);
+    AECreateDesc(typeChar, [someSource UTF8String], strlen([someSource UTF8String]), &descriptor);
 
     // compile
     error = OSACompile(OFAppleScriptComponent, &descriptor, kOSAModeNull, &scriptID);

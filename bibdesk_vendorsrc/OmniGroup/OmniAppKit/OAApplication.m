@@ -89,7 +89,7 @@ static unsigned int launchModifierFlags;
     if ([OAScriptMenuItem disabled]) {
 	unsigned int itemIndex = [mainMenu numberOfItems];
 	while (itemIndex--) {
-	    id <NSMenuItem> item = [mainMenu itemAtIndex:itemIndex];
+	    NSMenuItem *item = [mainMenu itemAtIndex:itemIndex];
 	    if ([item isKindOfClass:[OAScriptMenuItem class]])
 		[mainMenu removeItemAtIndex:itemIndex];
 	}
@@ -691,7 +691,7 @@ static NSArray *overrideWindows = nil;
     dynamicItemGroupRange = NSMakeRange(0, 0);
     itemCount = [aMenu numberOfItems];
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        id <NSMenuItem> currentItem;
+        NSMenuItem *currentItem;
 
         currentItem = [aMenu itemAtIndex:itemIndex];
         if ([currentItem hasSubmenu])

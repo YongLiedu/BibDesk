@@ -218,7 +218,7 @@ This can be used instead of +[NSThread isMultiThreaded].  The difference is that
                 
                 imps[impIndex](aClass, selectorToCall);
             } NS_HANDLER {
-                fprintf(stderr, "Exception raised by +[%s %s]: %s\n", aClass->name, sel_getName(selectorToCall), [[localException reason] cString]);
+                fprintf(stderr, "Exception raised by +[%s %s]: %s\n", aClass->name, sel_getName(selectorToCall), [[localException reason] UTF8String]);
             } NS_ENDHANDLER;
 #if defined(POSTLOADER_DEBUG)
             fprintf(stderr, "done\n");

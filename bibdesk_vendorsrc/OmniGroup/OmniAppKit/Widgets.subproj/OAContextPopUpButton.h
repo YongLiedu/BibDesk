@@ -12,7 +12,7 @@
 
 @interface OAContextPopUpButton : NSPopUpButton
 {
-    id <NSMenuItem> gearItem;
+    NSMenuItem *gearItem;
     id delegate;
 }
 

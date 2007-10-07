@@ -216,7 +216,7 @@ static UInt32 templateCode[6] = {0x3D800000, 0x618C0000, 0x800C0000, 0x804C0004,
     *name = nameLength;
     
     // Then up to 255 characters, plus NSString will add a null (which is useless here).
-    [symbolName getCString: (char *)&name[1] maxLength: nameLength];
+    [symbolName getCString: (char *)&name[1] maxLength: nameLength encoding:NSUTF8StringEncoding];
     
     err = FindSymbol(connectionID, name, &symbolAddress, symbolClass);
     if (err == cfragNoSymbolErr) {

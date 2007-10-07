@@ -101,7 +101,7 @@ static inline OFSimpleLockType *_lockForObject(OFObject *obj)
 
     if (NSKeepAllocationStatistics) {
         // Repord our allocation statistics to make OOM and oh happy
-        NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self, NULL, NULL, NULL);
+        NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self);
     }
     retainCount++;
     OFSimpleUnlock(lock);
@@ -117,7 +117,7 @@ static inline OFSimpleLockType *_lockForObject(OFObject *obj)
 
     if (NSKeepAllocationStatistics) {
         // Report our allocation statistics to make OOM and oh happy
-        NSRecordAllocationEvent(NSObjectInternalRefDecrementedEvent, self, NULL, NULL, NULL);
+        NSRecordAllocationEvent(NSObjectInternalRefDecrementedEvent, self);
     }
 
     if (retainCount == 0) {

@@ -35,7 +35,7 @@
 #define bool bool // So <c.h> won't try to define the 'bool' type (with true and false)
 // OK, now it's safe to #import <c.h>.
 #endif
-#import <c.h> // For MIN(), etc.
+//#import <c.h> // For MIN(), etc.
 #import <unistd.h>
 #import <math.h> // For floor(), etc.
 

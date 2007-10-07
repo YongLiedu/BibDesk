@@ -444,7 +444,7 @@ static NSFont *smallSystemFont;
         [scalePopUpButton setFont:[NSFont systemFontOfSize:10]];
 	for (scaleIndex = 0; startingScales[scaleIndex] != 0; scaleIndex++) {
 	    NSString *title;
-	    id <NSMenuItem> scaleCell;
+	    NSMenuItem *scaleCell;
 
 	    title = [NSString stringWithFormat:@"%d%%", startingScales[scaleIndex]];
 	    [scalePopUpButton addItemWithTitle:title];

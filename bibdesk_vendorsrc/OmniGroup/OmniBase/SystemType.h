@@ -9,8 +9,8 @@
 
 
 // We only support Mac OS X currently but we'll keep the macros defined here.
-
-#import <sys/version.h>
-
-#define OBOperatingSystemMajorVersion KERNEL_MAJOR_VERSION
-#define OBOperatingSystemMinorVersion KERNEL_MINOR_VERSION
+//
+//#import <sys/version.h>
+//
+//#define OBOperatingSystemMajorVersion KERNEL_MAJOR_VERSION
+//#define OBOperatingSystemMinorVersion KERNEL_MINOR_VERSION

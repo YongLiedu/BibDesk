@@ -28,7 +28,7 @@ void OFLog(NSString *messageFormat, ...)
     message = [[[NSString alloc] initWithFormat:messageFormat arguments:argList] autorelease];
     va_end(argList);
 
-    fputs([message cString], stdout);
+    fputs([message UTF8String], stdout);
 }
 
 NSString *OFGetInput(NSString *promptFormat, ...)
@@ -42,7 +42,7 @@ NSString *OFGetInput(NSString *promptFormat, ...)
     prompt = [[[NSString alloc] initWithFormat:promptFormat arguments:argList] autorelease];
     va_end(argList);
 
-    printf("%s", [prompt cString]);
+    printf("%s", [prompt UTF8String]);
     input = [NSString string];
     while (!ferror(stdin)) {
         memset(buf, 0, sizeof(buf));
@@ -65,7 +65,7 @@ void OFSetIvar(NSObject *object, NSString *ivarName, NSObject *ivarValue)
 
     // TODO:At some point, this function should take a void * and should look at the type of the ivar and deal with scalar values correctly.
 
-    ivar = class_getInstanceVariable(*(Class *) object, [ivarName cString]);
+    ivar = class_getInstanceVariable(*(Class *) object, [ivarName UTF8String]);
     OBASSERT(ivar);
 
     ivarSlot = (id *)((char *)object + ivar->ivar_offset);
@@ -81,7 +81,7 @@ NSObject *OFGetIvar(NSObject *object, NSString *ivarName)
     Ivar ivar;
     id *ivarSlot;
 
-    ivar = class_getInstanceVariable(*(Class *) object, [ivarName cString]);
+    ivar = class_getInstanceVariable(*(Class *) object, [ivarName UTF8String]);
     OBASSERT(ivar);
 
     ivarSlot = (id *)((char *)object + ivar->ivar_offset);
@@ -276,7 +276,7 @@ unsigned int OFLocalIPv4Address(void)
             unsigned long int address;
 
             ipAddressString = [ipAddresses objectAtIndex:0];
-            address = inet_addr([ipAddressString cString]);
+            address = inet_addr([ipAddressString UTF8String]);
             if (address != (unsigned int)-1)
                 return address;
         }

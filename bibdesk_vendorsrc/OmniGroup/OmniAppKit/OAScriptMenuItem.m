@@ -117,7 +117,7 @@ static NSImage *scriptImage;
         if ([scriptName isEqualToString:@"OAAboutScriptsMenu"])
             scriptName = NSLocalizedStringFromTableInBundle(@"About the Scripts Menu", @"OmniAppKit", [OAScriptMenuItem bundle], "Scripts menu item");
 
-        id <NSMenuItem> item = [menu addItemWithTitle:scriptName action:@selector(_executeScript:) keyEquivalent:@""];
+        NSMenuItem *item = [menu addItemWithTitle:scriptName action:@selector(_executeScript:) keyEquivalent:@""];
         [item setTarget:self];
         [item setEnabled:YES];
         [item setRepresentedObject:scriptFilename];
