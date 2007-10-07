@@ -144,7 +144,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
 @interface NSFileWrapper (BDSKExtensions)
-- (id)initWithContentsOfURL:(NSURL *)fileURL;
+- (NSFileWrapper *)addFileWrapperWithPath:(NSString *)path relativeTo:(NSString *)basePath recursive:(BOOL)recursive;
 @end
 
 @interface NSDocument (BDSKPrivateExtensions)
@@ -1025,11 +1025,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
-        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO error:&error];
+        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeTo:nil error:&error];
     }else if ([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
         data = [self RISDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKMinimalBibTeXDocumentType]){
-        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES error:&error];
+        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES relativeTo:nil error:&error];
     }else if ([aType isEqualToString:BDSKLTBDocumentType]){
         data = [self LTBDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKEndNoteDocumentType]){
@@ -1139,7 +1139,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return d;
 }
 
-- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop error:(NSError **)outError{
+- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeTo:(NSString *)basePath error:(NSError **)outError{
     NSParameterAssert(encoding != 0);
 
     NSEnumerator *e = [items objectEnumerator];
@@ -1207,7 +1207,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
     while(isOK && (pub = [e nextObject])){
-        pubData = [pub bibTeXDataDroppingInternal:drop encoding:encoding error:&error];
+        pubData = [pub bibTeXDataDroppingInternal:drop relativeTo:basePath encoding:encoding error:&error];
         if(isOK = pubData != nil){
             [outputData appendData:doubleNewlineData];
             [outputData appendData:pubData];
@@ -1351,27 +1351,36 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
-    NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO error:NULL];
-    NSFileWrapper *bibtexFileWrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:bibtexData] autorelease];
-    NSFileWrapper *fileWrapper = [[[NSFileWrapper alloc] initDirectoryWithFileWrappers:[NSDictionary dictionaryWithObjectsAndKeys:bibtexFileWrapper, @"bibliography.bib", nil]] autorelease];
-    
     NSEnumerator *itemEnum = [items objectEnumerator];
     BibItem *item;
-    NSSet *URLFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
+    NSSet *localFileFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
+    NSMutableArray *localFiles = [NSMutableArray array];
+    NSString *path;
+    NSString *commonParent = nil;
     
     while (item = [itemEnum nextObject]) {
-        NSEnumerator *fieldEnum = [URLFields objectEnumerator];
+        NSEnumerator *fieldEnum = [localFileFields objectEnumerator];
         NSString *field;
         while (field = [fieldEnum nextObject]) {
-            NSURL *url = [item URLForField:field];
-            if (url) {
-                NSFileWrapper *fw = [[NSFileWrapper alloc] initWithContentsOfURL:url];
-                [fileWrapper addFileWrapper:fw];
-                [fw release];
+            if (path = [item localFilePathForField:field]) {
+                [localFiles addObject:path];
+                if (commonParent)
+                    commonParent = [NSString commonRootPathOfFilename:[path stringByDeletingLastPathComponent] andFilename:commonParent];
+                else
+                    commonParent = [path stringByDeletingLastPathComponent];
             }
         }
     }
+    
+    NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
+    NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeTo:commonParent error:NULL];
+    NSFileWrapper *fileWrapper = [[[NSFileWrapper alloc] initDirectoryWithFileWrappers:[NSDictionary dictionary]] autorelease];
+    
+    itemEnum = [localFiles objectEnumerator];
+    while (path = [itemEnum nextObject])
+        [fileWrapper addFileWrapperWithPath:path relativeTo:commonParent recursive:YES];
+    [fileWrapper addRegularFileWithContents:bibtexData preferredFilename:@"bibliography.bib"];
+    
     return fileWrapper;
 }
 
@@ -3325,30 +3334,34 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 @implementation NSFileWrapper (BDSKExtensions)
 
-- (id)initWithContentsOfURL:(NSURL *)fileURL {
-    NSString *path = [fileURL path];
+- (NSFileWrapper *)addFileWrapperWithPath:(NSString *)path relativeTo:(NSString *)basePath recursive:(BOOL)recursive {
     NSFileWrapper *fileWrapper = nil;
     BOOL isDir;
     if ([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir]) {
-        if (isDir) {
-            NSMutableDictionary *subfileWrappers = [[NSMutableDictionary alloc] init];
+        NSString *filename = [path lastPathComponent];
+        NSString *relativePath = basePath ? [basePath relativePathToFilename:path] : filename;
+        NSFileWrapper *container = self;
+        
+        if ([relativePath isEqualToString:filename] == NO)
+            container = [self addFileWrapperWithPath:[path stringByDeletingLastPathComponent] relativeTo:basePath recursive:NO];
+        
+        fileWrapper = [[container fileWrappers] objectForKey:filename];
+        if (fileWrapper == nil || [fileWrapper isDirectory] != isDir) {
+            if (isDir)
+                fileWrapper = [[NSFileWrapper alloc] initDirectoryWithFileWrappers:[NSDictionary dictionary]];
+            else
+                fileWrapper = [[NSFileWrapper alloc] initRegularFileWithContents:[NSData dataWithContentsOfFile:path]];
+            [fileWrapper setPreferredFilename:filename];
+            [container addFileWrapper:fileWrapper];
+            [fileWrapper release];
+        }
+        
+        if (isDir && recursive) {
             NSEnumerator *fileEnum = [[[NSFileManager defaultManager] subpathsAtPath:path] objectEnumerator];
             NSString *file;
-            
-            while (file = [fileEnum nextObject]) {
-                NSFileWrapper *subfileWrapper = [[[self class] alloc] initWithContentsOfURL:[NSURL fileURLWithPath:[path stringByAppendingPathComponent:file]]];
-                if (subfileWrapper) {
-                    [subfileWrapper setPreferredFilename:file];
-                    [subfileWrappers setObject:subfileWrapper forKey:file];
-                    [subfileWrapper release];
-                }
-            }
-            fileWrapper = [self initDirectoryWithFileWrappers:subfileWrappers];
-            [subfileWrappers release];
-        } else {
-            fileWrapper = [self initRegularFileWithContents:[NSData dataWithContentsOfURL:fileURL]];
+            while (file = [fileEnum nextObject])
+                [self addFileWrapperWithPath:[path stringByAppendingPathComponent:file] relativeTo:path recursive:YES];
         }
-        [fileWrapper setPreferredFilename:[path lastPathComponent]];
     }
     return fileWrapper;
 }

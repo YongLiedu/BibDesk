@@ -1664,11 +1664,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return s;
 }
 
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop encoding:(NSStringEncoding)encoding error:(NSError **)outError{
+- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeTo:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     BOOL shouldTeXify = [pw boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 	NSMutableSet *knownKeys = nil;
 	NSSet *urlKeys = nil;
+	NSSet *localFileKeys = nil;
 	NSString *field;
     NSString *value;
     NSMutableData *data = [NSMutableData dataWithCapacity:200];
@@ -1697,6 +1698,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	}
 	if(shouldTeXify)
         urlKeys = [[BDSKTypeManager sharedManager] allURLFieldsSet];
+	if(basePath)
+        localFileKeys = [[BDSKTypeManager sharedManager] localFileFieldsSet];
 	
 	e = [keys objectEnumerator];
 	[keys release];
@@ -1720,7 +1723,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         if (drop && ![knownKeys containsObject:field])
             continue;
         
-        value = [pubFields objectForKey:field];
+        if(basePath && [localFileKeys containsObject:field]){
+            value = [basePath relativePathToFilename:[self localFilePathForField:field]];
+            if (value == nil)
+                value = [pubFields objectForKey:field];
+        }else{
+            value = [pubFields objectForKey:field];
+        }
         
         if([personFields containsObject:field] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
             value = [self bibTeXNameStringForField:field normalized:YES inherit:NO];
@@ -1729,7 +1738,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         if(shouldTeXify && ![urlKeys containsObject:field]){
             value = [value stringByTeXifyingString];
         }                
-                
+        
         if(NO == [value isEqualToString:@""] || [fieldsToWriteIfEmpty containsObject:field]){
             
             [data appendData:lineSeparator];

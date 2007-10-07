@@ -251,7 +251,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSData *)atomDataForPublications:(NSArray *)items;
 - (NSData *)MODSDataForPublications:(NSArray *)items;
 - (NSData *)endNoteDataForPublications:(NSArray *)items;
-- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop error:(NSError **)outError;
+- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeTo:(NSString *)basePath error:(NSError **)outError;
 - (NSData *)RISDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error;
 - (NSData *)LTBDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error;
 

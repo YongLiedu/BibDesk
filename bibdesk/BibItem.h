@@ -683,7 +683,7 @@ enum {
 */
 - (NSString *)bibTeXStringDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify;
 
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop encoding:(NSStringEncoding)encoding error:(NSError **)outError;
+- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeTo:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
 /*!
     @method     RISStringValue
