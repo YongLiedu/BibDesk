@@ -11,39 +11,18 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class AMButtonBarCell, AMButtonBar;
 
-@interface AMButtonBarItem : NSObject <NSCoding> {
-	id target;
-	SEL action;
-	BOOL enabled;
-	BOOL mouseOver;
+@interface AMButtonBarItem : NSButton <NSCoding> {
 	BOOL active;
 	BOOL separatorItem;
 	BOOL overflowItem;
-	int state;
 	NSString *itemIdentifier;
-	int tag;
-	NSString *toolTip;
-	NSString *title;
-	NSString *alternateTitle;
-	NSMenu *overflowMenu;
-	NSRect frame;
-	NSTrackingRectTag trackingRectTag;
+    NSMenu *overflowMenu;
+    AMButtonBar *buttonBar;
 }
 
 - (id)initWithIdentifier:(NSString *)identifier;
-
-- (id)target;
-- (void)setTarget:(id)value;
-
-- (SEL)action;
-- (void)setAction:(SEL)value;
-
-- (BOOL)isEnabled;
-- (void)setEnabled:(BOOL)value;
-
-- (BOOL)isMouseOver;
-- (void)setMouseOver:(BOOL)value;
 
 - (BOOL)isActive;
 - (void)setActive:(BOOL)value;
@@ -54,34 +33,12 @@
 - (BOOL)isOverflowItem;
 - (void)setOverflowItem:(BOOL)value;
 
-- (int)state;
-- (void)setState:(int)value;
-
 - (NSString *)itemIdentifier;
 - (void)setItemIdentifier:(NSString *)value;
-
-- (int)tag;
-- (void)setTag:(int)value;
-
-- (NSString *)toolTip;
-- (void)setToolTip:(NSString *)value;
-
-- (NSString *)title;
-- (void)setTitle:(NSString *)value;
-
-- (NSString *)alternateTitle;
-- (void)setAlternateTitle:(NSString *)value;
 
 - (NSMenu *)overflowMenu;
 - (void)setOverflowMenu:(NSMenu *)value;
 
-- (NSTrackingRectTag)trackingRectTag;
-- (void)setTrackingRectTag:(NSTrackingRectTag)value;
-
-- (NSRect)frame;
-- (void)setFrame:(NSRect)value;
-
-- (void)setFrameOrigin:(NSPoint)origin;
-
+- (void)setButtonBar:(AMButtonBar *)aBar;
 
 @end

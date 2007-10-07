@@ -20,48 +20,10 @@
 
 #import <AppKit/AppKit.h>
 
-@interface AMButtonBarCell : NSButtonCell {
-	BOOL am_mouseOver;
-	BOOL am_mouseDown;
-	// private: basic layout and geometry data
-	NSBezierPath *am_controlPath;
-	NSBezierPath *am_innerControlPath;
-	NSSize am_lastFrameSize;
-	NSRect am_textRect;
-	SEL am_getBackgroundSelector;
+@interface AMButtonBarCell : NSButtonCell
+{
+    BOOL isMouseOver;
 }
-
-+ (NSColor *)offControlColor;
-+ (NSColor *)offTextColor;
-+ (NSShadow *)offTextShadow;
-
-+ (NSColor *)offMouseOverControlColor;
-+ (NSColor *)offMouseOverTextColor;
-+ (NSShadow *)offMouseOverTextShadow;
-
-+ (NSColor *)onControlColor;
-+ (NSShadow *)onControlUpperShadow;
-+ (NSShadow *)onControlLowerShadow;
-+ (NSColor *)onTextColor;
-+ (NSShadow *)onTextShadow;
-
-+ (NSColor *)onMouseOverControlColor;
-+ (NSShadow *)onMouseOverControlUpperShadow;
-+ (NSShadow *)onMouseOverControlLowerShadow;
-+ (NSColor *)onMouseOverTextColor;
-+ (NSShadow *)onMouseOverTextShadow;
-
-+ (NSColor *)mouseDownControlColor;
-+ (NSShadow *)mouseDownControlUpperShadow;
-+ (NSShadow *)mouseDownControlLowerShadow;
-+ (NSColor *)mouseDownTextColor;
-+ (NSShadow *)mouseDownTextShadow;
-
-- (BOOL)mouseOver;
-- (void)setMouseOver:(BOOL)newMouseOver;
-
-- (BOOL)mouseDown;
-- (void)setMouseDown:(BOOL)newMouseDown;
 
 - (float)widthForFrame:(NSRect)frameRect;
 
