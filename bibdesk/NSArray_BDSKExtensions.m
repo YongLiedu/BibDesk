@@ -93,22 +93,22 @@
 
 - (NSArray *)firstTwoObjects;
 {
-    return [self count] > 1 ? [self objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 2)] : self;
+    return [self count] > 2 ? [self subarrayWithRange:NSMakeRange(0, 2)] : self;
 }
 
 - (NSArray *)firstThreeObjects;
 {
-    return [self count] > 2 ? [self objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 3)] : self;
+    return [self count] > 3 ? [self subarrayWithRange:NSMakeRange(0, 3)] : self;
 }
 
 - (NSArray *)firstFourObjects;
 {
-    return [self count] > 3 ? [self objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 4)] : self;
+    return [self count] > 4 ? [self subarrayWithRange:NSMakeRange(0, 4)] : self;
 }
 
 - (NSArray *)firstFiveObjects;
 {
-    return [self count] > 4 ? [self objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 5)] : self;
+    return [self count] > 5 ? [self subarrayWithRange:NSMakeRange(0, 5)] : self;
 }
 
 - (NSArray *)arrayDroppingFirstObject;
