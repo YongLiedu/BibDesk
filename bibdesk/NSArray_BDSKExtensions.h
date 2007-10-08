@@ -42,7 +42,21 @@
 @interface NSArray (BDSKExtensions)
 
 - (id)firstObject;
+- (id)secondObject;
+- (id)thirdObject;
+- (id)fourthObject;
+- (id)fifthObject;
+- (id)sixthObject;
+- (id)seventhObject;
+- (id)eighthObject;
+- (id)ninthObject;
+- (id)tenthObject;
+- (NSArray *)firstTwoObjects;
+- (NSArray *)firstThreeObjects;
+- (NSArray *)firstFourObjects;
+- (NSArray *)firstFiveObjects;
 - (NSArray *)arrayDroppingFirstObject;
+- (NSArray *)arrayDroppingLastObject;
 - (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;

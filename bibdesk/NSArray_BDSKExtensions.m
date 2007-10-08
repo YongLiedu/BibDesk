@@ -46,9 +46,79 @@
     return [self count] ? [self objectAtIndex:0] : nil;
 }
 
+- (id)secondObject;
+{
+    return [self count] > 1 ? [self objectAtIndex:1] : nil;
+}
+
+- (id)thirdObject;
+{
+    return [self count] > 2 ? [self objectAtIndex:2] : nil;
+}
+
+- (id)fourthObject;
+{
+    return [self count] > 3 ? [self objectAtIndex:3] : nil;
+}
+
+- (id)fifthObject;
+{
+    return [self count] > 4 ? [self objectAtIndex:4] : nil;
+}
+
+- (id)sixthObject;
+{
+    return [self count] > 5 ? [self objectAtIndex:5] : nil;
+}
+
+- (id)seventhObject;
+{
+    return [self count] > 6 ? [self objectAtIndex:6] : nil;
+}
+
+- (id)eighthObject;
+{
+    return [self count] > 7 ? [self objectAtIndex:7] : nil;
+}
+
+- (id)ninthObject;
+{
+    return [self count] > 8 ? [self objectAtIndex:8] : nil;
+}
+
+- (id)tenthObject;
+{
+    return [self count] > 9 ? [self objectAtIndex:9] : nil;
+}
+
+- (NSArray *)firstTwoObjects;
+{
+    return [self count] > 1 ? [self objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 2)] : self;
+}
+
+- (NSArray *)firstThreeObjects;
+{
+    return [self count] > 2 ? [self objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 3)] : self;
+}
+
+- (NSArray *)firstFourObjects;
+{
+    return [self count] > 3 ? [self objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 4)] : self;
+}
+
+- (NSArray *)firstFiveObjects;
+{
+    return [self count] > 4 ? [self objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 5)] : self;
+}
+
 - (NSArray *)arrayDroppingFirstObject;
 {
     return [self count] ? [self subarrayWithRange:NSMakeRange(1, [self count] - 1)] : self;
+}
+
+- (NSArray *)arrayDroppingLastObject;
+{
+    return [self count] ? [self subarrayWithRange:NSMakeRange(0, [self count] - 1)] : self;
 }
 
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
