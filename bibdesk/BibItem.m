@@ -70,7 +70,7 @@
 #import "NSData_BDSKExtensions.h"
 #import "BDSKSkimReader.h"
 #import "BDSKCitationFormatter.h"
-
+#import "BDSKFile.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -287,6 +287,7 @@ static CFDictionaryRef selectorTable = NULL;
 		
 		groups = [[NSMutableDictionary alloc] initWithCapacity:5];
         cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
+        [self _createFilesArray];
 		
         templateFields = nil;
         // updateMetadataForKey with a nil argument will set the dates properly if we read them from a file
@@ -328,6 +329,7 @@ static CFDictionaryRef selectorTable = NULL;
             [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
+            files = [[coder decodeObjectForKey:@"files"] retain];
             // set by the document, which we don't archive
             owner = nil;
             fileOrder = nil;
@@ -353,6 +355,7 @@ static CFDictionaryRef selectorTable = NULL;
         [coder encodeObject:pubType forKey:@"pubType"];
         [coder encodeObject:pubFields forKey:@"pubFields"];
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
+        [coder encodeObject:files forKey:@"files"];
     } else {
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
     }        
@@ -378,7 +381,8 @@ static CFDictionaryRef selectorTable = NULL;
     [dateModified release];
     [fileOrder release];
     [identifierURL release];
-    [allFiles release];
+    [sortedURLs release];
+    [files release];
     [super dealloc];
 }
 
@@ -1596,6 +1600,24 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 #pragma mark -
 #pragma mark BibTeX strings
 
+- (NSString *)filesAsBibTeXFragment
+{
+    // !!! inherit
+    NSUInteger i, iMax = [files count];
+    
+    NSMutableString *string = nil;
+    if (iMax > 0) {
+        string = [NSMutableString string];
+        for (i = 0; i < iMax; i++) {
+            NSString *key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
+            NSString *value = [[files objectAtIndex:i] base64StringRelativeTo:@""];
+            OBPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
+            [string appendFormat:@",\n\t%@ = {%@}", key, value];
+        }
+    }
+    return string;
+}
+
 - (NSString *)bibTeXStringDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSMutableSet *knownKeys = nil;
@@ -1658,6 +1680,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             [s appendString:@" = "];
             [s appendString:[value stringAsBibTeXString]];
         }
+    }
+    if (!drop) {
+        value = [self filesAsBibTeXFragment];
+        if (value) [s appendString:value];
     }
     [knownKeys release];
     [s appendString:@"}"];
@@ -1747,6 +1773,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
     }
     [knownKeys release];
+    if(isOK && !drop) {
+        value = [self filesAsBibTeXFragment];
+        // assumes encoding is ascii-compatible, but btparse does as well
+        if (value) [data appendDataFromString:value encoding:encoding error:&error];
+    }
     if(isOK)
         isOK = [data appendDataFromString:@"}" encoding:encoding error:&error];
     
@@ -2403,21 +2434,91 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     else return NSOrderedDescending;
 }
 
-- (NSArray *)allFilePaths
+static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
-    if (nil == allFiles) {
-        NSEnumerator *fe = [[[BDSKTypeManager sharedManager] allURLFieldsSet] objectEnumerator];
-        allFiles = [NSMutableArray new];
-        NSString *field;
-        NSURL *aURL;
-        while (field = [fe nextObject]) {
-            aURL = [self URLForField:field];
-            if (aURL)
-                [allFiles addObject:aURL];
-        }
-        [allFiles sortUsingFunction:sortURLsByType context:NULL];
+    BibItem *self = (BibItem *)context;
+    NSURL *value = [self localFileURLForField:(id)key];
+    if (value) {
+        BDSKFile *aFile = [[BDSKFile alloc] initWithURL:value];
+        [self->files addObject:aFile];
+        [aFile release];
     }
-    return allFiles;
+}
+
+- (void)_createFilesArray
+{
+    files = [NSMutableArray new];
+    NSUInteger i = 0;
+    NSString *value, *key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
+    
+    NSMutableArray *keysToRemove = [NSMutableArray array];
+
+    while ((value = [pubFields objectForKey:key]) != nil) {
+        // !!! relative to what?
+        BDSKFile *aFile = [[BDSKFile alloc] initWithBase64String:value relativeTo:@""];
+        if (aFile) {
+            [files addObject:aFile];
+            [aFile release];
+            [keysToRemove addObject:key];
+        }
+        else {
+            NSLog(@"*** error *** -[BDSKFile initWithBase64String:relativeTo:] failed (%@ of %@)", key, [self citeKey]);
+        }
+        
+        // next key in the sequence; increment i first, so it's guaranteed correct
+        i++;
+        key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
+    }
+    
+    // !!! get these out of pubFields for now to avoid duplication when saving
+    [pubFields removeObjectsForKeys:keysToRemove];
+    
+    // @@ temporary hack to create an array of BDSKFiles from Local-Urls
+    if ([files count] == 0) {
+        CFSetRef fileSet = (CFSetRef)[[BDSKTypeManager sharedManager] localFileFieldsSet];
+        CFSetApplyFunction(fileSet, addURLForFieldToArrayIfNotNil, self);
+    }
+}
+
+- (NSUInteger)countOfFiles { return [files count]; }
+
+- (BDSKFile *)fileAtIndex:(NSUInteger)idx
+{
+    return [files objectAtIndex:idx];
+}
+
+- (void)insertObject:(BDSKFile *)aFile inFilesAtIndex:(NSUInteger)idx
+{
+    [files insertObject:aFile atIndex:idx];
+}
+
+- (void)removeObjectFromFilesAtIndex:(NSUInteger)idx
+{
+    [files removeObjectAtIndex:idx];
+}
+
+- (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx
+{
+    NSArray *toMove = [[files objectsAtIndexes:aSet] copy];
+    [files removeObjectsAtIndexes:aSet];
+    [files insertObjects:toMove atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(idx, [toMove count])]];
+    [toMove release];
+}
+
+- (NSArray *)sortedURLs
+{
+    NSMutableArray *combinedURLs = [NSMutableArray array];
+    NSEnumerator *fe = [[[BDSKTypeManager sharedManager] remoteURLFieldsSet] objectEnumerator];
+    NSString *field;
+    NSURL *aURL;
+    while (field = [fe nextObject]) {
+        aURL = [self remoteURLForField:field];
+        if (aURL)
+            [combinedURLs addObject:aURL];
+    }
+    [combinedURLs addObjectsFromArray:[self valueForKeyPath:@"files.fileURL"]];
+    [combinedURLs sortUsingFunction:sortURLsByType context:NULL];
+    return combinedURLs;
 }
 
 - (NSURL *)remoteURL{
@@ -3168,16 +3269,16 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
         
         // the URL cache is certainly invalid now
         [cachedURLs removeAllObjects];
-        [allFiles release];
-        allFiles = nil;
+        [sortedURLs release];
+        sortedURLs = nil;
 	}else if(key != nil){
 		[groups removeObjectForKey:key];
 	}
     
     if([key isURLField]) {
         [cachedURLs removeObjectForKey:key];
-        [allFiles release];
-        allFiles = nil;
+        [sortedURLs release];
+        sortedURLs = nil;
     }
 	
     NSCalendarDate *theDate = nil;

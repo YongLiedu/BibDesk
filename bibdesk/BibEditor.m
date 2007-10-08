@@ -83,6 +83,7 @@
 #import "BDSKSkimReader.h"
 #import "BDSKSplitView.h"
 #import <FileView/FileView.h>
+#import "BDSKFile.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -113,44 +114,58 @@ enum{
 
 @implementation BibEditor
 
-- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [_files count]; }
+- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
-    return [_files objectAtIndex:idx];
+    return [[publication fileAtIndex:idx] fileURL];
 }
 
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
 {
-    NSArray *toMove = [[_files objectsAtIndexes:aSet] copy];
-    [_files removeObjectsAtIndexes:aSet];
-    
-    aSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(anIndex, [aSet count])];
-    [_files insertObjects:toMove atIndexes:aSet];
-    [toMove release];
+    [publication moveFilesAtIndexes:aSet toIndex:anIndex];
     return YES;
 }
 
 - (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
 {
-    if ([_files count] > [aSet count]) {
-        [_files replaceObjectsAtIndexes:aSet withObjects:newURLs];
-        return YES;
+    BDSKFile *aFile;
+    NSEnumerator *enumerator = [newURLs objectEnumerator];
+    NSURL *aURL;
+    NSUInteger idx = [aSet firstIndex];
+    while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
+        aFile = [BDSKFile fileWithURL:aURL];
+        if (aFile) {
+            [publication removeObjectFromFilesAtIndex:idx];
+            [publication insertObject:aFile inFilesAtIndex:idx];
+        }
+        idx = [aSet indexGreaterThanIndex:idx];
     }
-    return NO;
+    return YES;
 }
 
 - (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 {
-    if ([_files count] >= [indexSet count]) {
-        [_files removeObjectsAtIndexes:indexSet];
-        return YES;
+    NSUInteger idx = [indexSet firstIndex];
+    while (NSNotFound != idx) {
+        [publication removeObjectFromFilesAtIndex:idx];
+        idx = [indexSet indexGreaterThanIndex:idx];
     }
-    return NO;
+    return YES;
 }
 
 - (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
 {
-    [_files insertObjects:absoluteURLs atIndexes:aSet];
+    BDSKFile *aFile;
+    NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
+    NSURL *aURL;
+    NSUInteger idx = [aSet firstIndex];
+    while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
+        aFile = [BDSKFile fileWithURL:aURL];
+        if (aFile) {
+            [publication insertObject:aFile inFilesAtIndex:idx];
+        }
+        idx = [aSet indexGreaterThanIndex:idx];
+    }
 }
 
 - (NSString *)windowNibName{
@@ -3145,6 +3160,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         pdfSnoopViewLoaded = YES;
 	}
 	else if ([[documentSnoopDrawer contentView] isEqual:textSnoopContainerView]) {
+#warning remove this
 		NSMutableString *path = [[[lurl path] mutableCopy] autorelease];
         
         if([NSString isEmptyString:path] == NO && [theUTI isEqualToUTI:(NSString *)kUTTypePDF]){

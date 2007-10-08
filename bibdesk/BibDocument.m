@@ -2659,7 +2659,7 @@ static void addValueFromArrayToBag(const void *value, void *context)
 
 static void addAllURLsToBag(const void *value, void *context)
 {
-    CFArrayRef fpaths = (CFArrayRef)[(BibItem *)value allFilePaths];
+    CFArrayRef fpaths = (CFArrayRef)[(BibItem *)value sortedURLs];
     CFArrayApplyFunction(fpaths, CFRangeMake(0, CFArrayGetCount(fpaths)), addValueFromArrayToBag, context);
 }
 
@@ -2682,7 +2682,7 @@ static void addValueFromArrayToArray(const void *value, void *context)
 
 static void addAllURLsToArray(const void *value, void *context)
 {
-    CFArrayRef fpaths = (CFArrayRef)[(BibItem *)value allFilePaths];
+    CFArrayRef fpaths = (CFArrayRef)[(BibItem *)value sortedURLs];
     CFArrayApplyFunction(fpaths, CFRangeMake(0, CFArrayGetCount(fpaths)), addValueFromArrayToArray, context);
 }
 
@@ -2751,6 +2751,7 @@ static void addAllURLsToArray(const void *value, void *context)
         [statusBar addSubview:fileviewSlider];
         [fileviewSlider setMinValue:0.5];
         [fileviewSlider setMaxValue:20];
+        [fileviewSlider setAutoresizingMask:NSViewMinXMargin];
     }
     view = fileviewBox;
     if (currentPreviewView != view) {
