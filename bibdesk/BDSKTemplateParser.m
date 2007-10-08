@@ -39,6 +39,7 @@
 #import "BDSKTemplateParser.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 #import "BibAuthor.h"
 
 #define STARTTAG_OPEN_DELIM @"<$"
@@ -810,14 +811,14 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 @implementation NSArray (BDSKTemplateParser)
 
-- (NSString *)componentsJoinedByAnd
-{
-    return [self componentsJoinedByString:@" and "];
-}
-
 - (BOOL)isNotEmpty
 {
     return [self count] > 0;
+}
+
+- (NSString *)componentsJoinedByAnd
+{
+    return [self componentsJoinedByString:@" and "];
 }
 
 - (NSString *)componentsJoinedByForwardSlash
@@ -828,6 +829,26 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 - (NSString *)componentsJoinedByDefaultJoinString
 {
     return [self componentsJoinedByString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultArrayJoinStringKey]];
+}
+
+- (NSString *)componentsWithEtAlAfterOne
+{
+    return [self count] > 1 ? [[self firstObject] stringByAppendingString:@", et al."] : [self firstObject];
+}
+
+- (NSString *)componentsJoinedByAndWithEtAlAfterOne
+{
+    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@", et al."] : [self componentsJoinedByAnd];
+}
+
+- (NSString *)componentsJoinedByAndWithEtAlAfterTwo
+{
+    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@", et al."] : [self componentsJoinedByAnd];
+}
+
+- (NSString *)componentsJoinedByCommaAndAndWithEtAlAfterThree
+{
+    return [self count] > 3 ? [[self firstObject] stringByAppendingString:@", et al."] : [self componentsJoinedByCommaAndAnd];
 }
 
 @end
