@@ -128,6 +128,8 @@ static Class BDSKFileClass = Nil;
 
 - (id)initWithBase64String:(NSString *)base64String relativeTo:(NSString *)basePath;
 {
+    NSParameterAssert(nil != base64String);
+    NSParameterAssert(nil != basePath);
     NSData *data = [[NSData alloc] initWithBase64String:base64String];
 	NSPropertyListFormat format = NSPropertyListBinaryFormat_v1_0;
     NSString *error;
@@ -223,6 +225,7 @@ static Class BDSKFileClass = Nil;
 
 - (NSString *)base64StringRelativeTo:(NSString *)basePath;
 {
+    NSParameterAssert(nil != basePath);
     NSString *fullPath = [self path];
     NSString *relPath = [fullPath relativePathToFilename:basePath];
     FSRef *fsRef = (FSRef *)[self fsRef];
@@ -232,7 +235,7 @@ static Class BDSKFileClass = Nil;
         alias = [[BDAlias alloc] initWithFSRef:fsRef];
     else
         alias = [[BDAlias alloc] initWithPath:fullPath];
-    NSDictionary *dict = [[NSDictionary alloc] initWithObjects:relPath, @"relativePath", [alias aliasData], @"aliasData", nil];
+    NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:relPath, @"relativePath", [alias aliasData], @"aliasData", nil];
     NSString *error;
     NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict format:NSPropertyListBinaryFormat_v1_0 errorDescription:&error];
     [alias release];
