@@ -58,16 +58,24 @@
 
 + (CIColor *)startColor{
     static CIColor *startColor = nil;
-    if (startColor == nil)
-        startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
+    if (startColor == nil) {
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+            startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
+        else
+            startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
+    }
     return startColor;
 }
 
 + (CIColor *)endColor{
     static CIColor *endColor = nil;
-    if (endColor == nil)
-        endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
-   return endColor;
+    if (endColor == nil) {
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+            endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
+        else
+            endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
+    }
+    return endColor;
 }
 
 - (id)initWithFrame:(NSRect)frameRect{
@@ -79,11 +87,13 @@
 
 - (void)drawBlendedJoinEndAtBottomInRect:(NSRect)rect {
     // this blends us smoothly with the status bar
+    CIColor *vertFrom = floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 ? [BDSKStatusBar upperColor] : [BDSKStatusBar lowerColor];
+    CIColor *vertTo = floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 ? [BDSKStatusBar lowerColor] : [BDSKStatusBar upperColor];
     [[NSBezierPath bezierPathWithRect:rect] fillPathWithHorizontalGradientFromColor:[[self class] startColor]
                                                                             toColor:[[self class] endColor]
                                                                          blendedAtTop:NO
-                                                        ofVerticalGradientFromColor:[BDSKStatusBar lowerColor]
-                                                                            toColor:[BDSKStatusBar upperColor]];
+                                                        ofVerticalGradientFromColor:vertFrom
+                                                                            toColor:vertTo];
 }
 
 - (void)drawDividerInRect:(NSRect)aRect {

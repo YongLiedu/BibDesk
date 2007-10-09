@@ -65,7 +65,14 @@
 - (void)drawRect:(NSRect)aRect
 {
     // fill entire view, not just the (possibly clipped) aRect
-    [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self upperColor] endColor:[self lowerColor]];
+    
+    // see http://lists.apple.com/archives/Quartz-dev/2007/Sep/msg00060.html ; thanks, Apple...
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self lowerColor] endColor:[self upperColor]];
+    }
+    else {
+        [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self upperColor] endColor:[self lowerColor]];
+    }
 }
 
 // -[CIColor initWithColor:] fails (returns nil) with +[NSColor gridColor] rdar://problem/4789043
