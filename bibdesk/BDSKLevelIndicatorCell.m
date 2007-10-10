@@ -68,21 +68,84 @@
 
 - (float)indicatorHeight { return maxHeight; }
 
-    /*
-     This method and -drawingRectForBounds: are never called as of 10.4.8 rdar://problem/4998206
-     
-     - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-     {
-         log_method();
-         NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
-         [super drawInteriorWithFrame:r inView:controlView];
-     }
-     */
+// DigitalColor Meter indicates 0.7 and 0.5 are the approximate values for a deselected level indicator cell (relevancy mode).  This looks really bad when selected in a gradient tableview, though, particularly when the table doesn't have focus.
+- (NSImage *)deselectedRelevancyImage
+{
+    static NSImage *image = nil;
+    if (nil == image) {
+        NSRect r = NSMakeRect(0, 0, 2, [self indicatorHeight]);
+        image = [[NSImage alloc] initWithSize:r.size];
+        [image lockFocus];
+        [image setBackgroundColor:[NSColor clearColor]];
+        [[NSColor colorWithCalibratedWhite:0.7 alpha:1.0] setFill];
+        NSRectFill(NSMakeRect(0, 0, 1, [self indicatorHeight]));
+        [[NSColor colorWithCalibratedWhite:0.5 alpha:1.0] setFill];
+        NSRectFill(NSMakeRect(1, 0, 1, [self indicatorHeight]));
+        [image unlockFocus];
+    }
+    return image;
+}
 
-- (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
+- (NSImage *)selectedRelevancyImage
+{
+    static NSImage *image = nil;
+    if (nil == image) {
+        NSRect r = NSMakeRect(0, 0, 2, [self indicatorHeight]);
+        image = [[NSImage alloc] initWithSize:r.size];
+        [image lockFocus];
+        [image setBackgroundColor:[NSColor clearColor]];
+        [[NSColor colorWithCalibratedWhite:0.7 alpha:1.0] setFill];
+        NSRectFill(NSMakeRect(0, 0, 1, [self indicatorHeight]));
+        [[NSColor colorWithCalibratedWhite:0.9 alpha:1.0] setFill];
+        NSRectFill(NSMakeRect(1, 0, 1, [self indicatorHeight]));
+        [image unlockFocus];
+    }
+    return image;    
+}
+
+/*
+ This method and -drawingRectForBounds: are never called as of 10.4.8 rdar://problem/4998206
+ 
+ - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
+ {
+     log_method();
+     NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
+     [super drawInteriorWithFrame:r inView:controlView];
+ }
+ 
+ The necessary override point is this method, with variants for other styles.
+ Since we now do all drawing manually, this is no longer necessary unless we
+ want to use other indicator styles.
+ - (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView 
+ */
+
+- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
     NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
-    [super _drawRelevancyWithFrame:r inView:controlView];
+    unsigned i, iMax = floor([self doubleValue] / [self maxValue] * (NSWidth(r) / 2));
+    NSImage *toDraw;
+    
+    // @@ fixme; better way to do this on 10.5
+    if ([self isHighlighted])
+        toDraw = [self selectedRelevancyImage];
+    else
+        toDraw = [self deselectedRelevancyImage];
+    
+    CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
+    CGContextSaveGState(ctxt);
+    if ([controlView isFlipped]) {
+        CGContextTranslateCTM(ctxt, 0, NSMaxY(r));
+        CGContextScaleCTM(ctxt, 1, -1);
+        r.origin.y = 0;
+    }
+    
+    NSRect drawRect = r;
+    drawRect.size.width = 2;
+    for (i = 0; i < iMax; i++) {
+        drawRect.origin.x += 2;
+        [toDraw drawInRect:drawRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    }
+    CGContextRestoreGState(ctxt);
 }
 
 @end
