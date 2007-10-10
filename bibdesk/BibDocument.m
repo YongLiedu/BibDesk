@@ -937,7 +937,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [nsError setValue:errMsg forKey:NSLocalizedRecoverySuggestionErrorKey];        
     }
     // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
-    else if (docState.currentSaveOperationType != NSAutosaveOperation)
+    else if (docState.currentSaveOperationType != NSAutosaveOperation && docState.currentSaveOperationType != NSSaveToOperation)
         [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
     
     // setting to nil is okay
