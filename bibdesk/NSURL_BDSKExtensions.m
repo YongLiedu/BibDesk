@@ -191,7 +191,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     
     // we need to validate URL strings, as some DOI URL's contain characters that need to be escaped
     // CFURLCreateStringByAddingPercentEscapes incorrectly escapes fragment separators, so we'll ignore those
-    urlString = CFURLCreateStringByAddingPercentEscapes(allocator, unescapedString, CFSTR("#&"), NULL, kCFStringEncodingUTF8);
+    urlString = CFURLCreateStringByAddingPercentEscapes(allocator, unescapedString, CFSTR("#"), NULL, kCFStringEncodingUTF8);
     CFRelease(unescapedString);
     
     CFURLRef theURL = CFURLCreateWithString(allocator, urlString, (CFURLRef)baseURL);
