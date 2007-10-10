@@ -357,6 +357,8 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                             subTemplate = [subTemplate substringToIndex:wsRange.location];
                         
                         subTemplates = [[NSMutableArray alloc] init];
+                        if ([matchString hasPrefix:@"$"])
+                            matchString = [object safeValueForKeyPath:[matchString substringFromIndex:1]];
                         matchStrings = [[NSMutableArray alloc] initWithObjects:matchString ? matchString : @"", nil];
                         
                         if (matchType != BDSKConditionTagMatchOther) {
@@ -364,7 +366,9 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                             altTagRange = altTemplateTagRange(subTemplate, altTag, CONDITIONTAG_CLOSE_DELIM, &matchString);
                             while (altTagRange.location != NSNotFound) {
                                 [subTemplates addObject:[subTemplate substringToIndex:altTagRange.location]];
-                                [matchStrings addObject:matchString];
+                                if ([matchString hasPrefix:@"$"])
+                                    matchString = [object safeValueForKeyPath:[matchString substringFromIndex:1]];
+                                [matchStrings addObject:matchString ? matchString : @""];
                                 subTemplate = [subTemplate substringFromIndex:NSMaxRange(altTagRange)];
                                 altTagRange = altTemplateTagRange(subTemplate, altTag, CONDITIONTAG_CLOSE_DELIM, &matchString);
                             }
@@ -585,6 +589,8 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                         subTemplate = [template attributedSubstringFromRange:NSMakeRange(start, [subTemplateString length] - wsRange.length)];
                         
                         subTemplates = [[NSMutableArray alloc] init];
+                        if ([matchString hasPrefix:@"$"])
+                            matchString = [object safeValueForKeyPath:[matchString substringFromIndex:1]];
                         matchStrings = [[NSMutableArray alloc] initWithObjects:matchString ? matchString : @"", nil];
                         
                         if (matchType != BDSKConditionTagMatchOther) {
@@ -592,7 +598,9 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                             altTagRange = altTemplateTagRange([subTemplate string], altTag, CONDITIONTAG_CLOSE_DELIM, &matchString);
                             while (altTagRange.location != NSNotFound) {
                                 [subTemplates addObject:[subTemplate attributedSubstringFromRange:NSMakeRange(0, altTagRange.location)]];
-                                [matchStrings addObject:matchString];
+                                if ([matchString hasPrefix:@"$"])
+                                    matchString = [object safeValueForKeyPath:[matchString substringFromIndex:1]];
+                                [matchStrings addObject:matchString ? matchString : @""];
                                 subTemplate = [subTemplate attributedSubstringFromRange:NSMakeRange(NSMaxRange(altTagRange), [subTemplate length] - NSMaxRange(altTagRange))];
                                 altTagRange = altTemplateTagRange([subTemplate string], altTag, CONDITIONTAG_CLOSE_DELIM, &matchString);
                             }
