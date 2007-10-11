@@ -599,7 +599,12 @@ static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardTy
 
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification {
     NSTextView *textView = [notification object];
-    if (textView == [itemTemplateTokenField currentEditor] || textView == [specialTokenField currentEditor] || textView == [requiredTokenField currentEditor] || textView == [optionalTokenField currentEditor]) {
+    if (textView == [itemTemplateTokenField currentEditor] ||
+        textView == [specialTokenField currentEditor] ||
+        textView == [requiredTokenField currentEditor] ||
+        textView == [optionalTokenField currentEditor] ||
+        textView == [defaultTokenField currentEditor]) {
+        
         BDSKToken *token = nil;
         NSArray *selRanges = [textView selectedRanges];
         if ([selRanges count] == 1) {
