@@ -55,6 +55,7 @@
 #import "BDSKSearchGroup.h"
 #import "BDSKGroupsArray.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BDSKTemplateDocument.h"
 
 @implementation BDSKDocumentController
 
@@ -118,7 +119,7 @@
 - (void)noteNewRecentDocument:(NSDocument *)aDocument{
     
     // may need to revisit this for new document classes
-    OBASSERT([aDocument isKindOfClass:[BibDocument class]]);
+    //OBASSERT([aDocument isKindOfClass:[BibDocument class]]);
     
     if ([aDocument respondsToSelector:@selector(documentStringEncoding)]) {
         NSStringEncoding encoding = [(BibDocument *)aDocument documentStringEncoding];
@@ -432,6 +433,20 @@
     }
     
     return document;
+}
+
+- (IBAction)newTemplateDocument:(id)sender {
+    [self openUntitledDocumentOfType:BDSKTextTemplateDocumentType display:YES];
+    NSDocument *document = [[[BDSKTemplateDocument alloc] init] autorelease];
+
+    if (document == nil)
+        return;
+
+    [self addDocument:document];
+    if ([self shouldCreateUI]) {
+        [document makeWindowControllers];
+        [document showWindows];
+    }
 }
 
 #pragma mark Document types

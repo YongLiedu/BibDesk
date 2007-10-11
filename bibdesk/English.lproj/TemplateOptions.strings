@@ -1,0 +1,65 @@
+/*
+ This file is hand generated (not via 'genstrings').
+ */
+
+"None" = "None";
+
+"Capitalized" = "Capitalized";
+"Lowercase" = "Lowercase";
+"Uppercase" = "Uppercase";
+"Uppercase First" = "Uppercase First";
+"Lowercase First" = "Lowercase First";
+"Title Capitalize" = "Title Capitalize";
+
+"Remove TeX" = "Remove TeX";
+"Remove curly braces" = "Remove curly braces";
+"Remove surrounding spaces" = "Remove surrounding spaces";
+"Collapse spaces" = "Collapse spaces";
+"Remove spaces" = "Remove spaces";
+"Remove newlines" = "Remove newlines";
+"TeXify" = "TeXify";
+"DeteXify" = "DeteXify";
+"HTML escape" = "HTML escape";
+"XML escape" = "XML escape";
+"CSV escape" = "CSV escape";
+"TSV escape" = "TSV escape";
+
+"Append space" = "Append space";
+"Append double space" = "Append double space";
+"Append comma and space" = "Append comma and space";
+"Append period and space" = "Append period and space";
+"Append comma" = "Append comma";
+"Append period" = "Append period";
+"Prepend space" = "Prepend space";
+"Prepend comma and space" = "Prepend comma and space";
+"Prepend period and space" = "Prepend period and space";
+"Parenthesize" = "Parenthesize";
+"Surround with space" = "Surround with space";
+
+"File URL" = "File URL";
+"Full path" = "Full path";
+"File name" = "File name";
+"Container path" = "Container path";
+"Path extension" = "Path extension";
+"Tilde abbreviated path" = "Tilde abbreviated path";
+"Path without extension" = "Path without extension";
+"Resolved path" = "Resolved path";
+"Standardized path" = "Standardized path";
+"Normalized path" = "Normalized path";
+
+"First Middle von Last, Jr." = "First Middle von Last, Jr.";
+"von Last, Jr., First Middle" = "von Last, Jr., First Middle";
+"F.M. von Last, Jr." = "F.M. von Last, Jr.";
+"von Last, Jr., F.M." = "von Last, Jr., F.M.";
+"von Last, Jr." = "von Last, Jr.";
+"Last" = "Last";
+
+"Comma" = "Comma";
+"Comma and And" = "Comma and And";
+"And" = "And";
+"Forward Slash" = "Forward Slash";
+"Default style" = "Default style";
+"Et al. after 1" = "Et al. after 1";
+"And, Et al. after 1" = "And, Et al. after 1";
+"And, Et al. after 2" = "And, Et al. after 2";
+"Comma and and, Et al. after 3" = "Comma and and, Et al. after 3";

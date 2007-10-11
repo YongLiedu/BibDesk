@@ -1,0 +1,252 @@
+{
+    capitalization = (
+        {
+            displayName = "None";
+            key = "<None>";
+        },
+        {
+            displayName = "Capitalized";
+            key = capitalizedString;
+        },
+        {
+            displayName = "Lowercase";
+            key = lowercaseString;
+        },
+        {
+            displayName = "Uppercase";
+            key = uppercaseString;
+        },
+        {
+            displayName = "Uppercase First";
+            key = uppercaseFirst;
+        },
+        {
+            displayName = "Lowercase First";
+            key = lowercaseFirst;
+        },
+        {
+            displayName = "Title Capitalize";
+            key = titleCapitalizedString;
+        }
+    );
+    cleaning = (
+        {
+            displayName = "None";
+            key = "<None>";
+        },
+        {
+            displayName = "Remove TeX";
+            key = stringByRemovingTeX;
+        },
+        {
+            displayName = "Remove curly braces";
+            key = stringByRemovingCurlyBraces;
+        },
+        {
+            displayName = "Remove surrounding spaces";
+            key = stringByRemovingSurroundingWhitespace;
+        },
+        {
+            displayName = "Collapse spaces";
+            key = stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
+        },
+        {
+            displayName = "Remove spaces";
+            key = stringByRemovingWhitespace;
+        },
+        {
+            displayName = "Remove newlines";
+            key = stringByRemovingReturns;
+        },
+        {
+            displayName = "TeXify";
+            key = stringByTeXifyingString;
+        },
+        {
+            displayName = "DeteXify";
+            key = stringByDeTeXifyingString;
+        },
+        {
+            displayName = "HTML escape";
+            key = htmlString;
+        },
+        {
+            displayName = "XML escape";
+            key = xmlString;
+        },
+        {
+            displayName = "CSV escape";
+            key = csvString;
+        },
+        {
+            displayName = "TSV escape";
+            key = tsvString;
+        }
+    );
+    appending = (
+        {
+            displayName = "None";
+            key = "<None>";
+        },
+        {
+            displayName = "Append space";
+            key = stringByAppendingSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Append double space";
+            key = stringByAppendingDoubleSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Append comma and space";
+            key = stringByAppendingCommaAndSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Append period and space";
+            key = stringByAppendingFullStopAndSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Append comma";
+            key = stringByAppendingCommaIfNotEmpty;
+        },
+        {
+            displayName = "Append period";
+            key = stringByAppendingFullStopIfNotEmpty;
+        },
+        {
+            displayName = "Prepend space";
+            key = stringByPrependingSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Prepend comma and space";
+            key = stringByPrependingCommaAndSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Prepend period and space";
+            key = stringByPrependingFullStopAndSpaceIfNotEmpty;
+        },
+        {
+            displayName = "Parenthesize";
+            key = parenthesizedStringIfNotEmpty;
+        },
+        {
+            displayName = "Surround with space";
+            key = stringBySurroundingWithSpacesIfNotEmpty;
+        }
+    );
+    urlFormat = (
+        {
+            displayName = "URL";
+            key = "<None>";
+        },
+        {
+            displayName = "Path";
+            key = "path";
+        }
+    );
+    fileFormat = (
+        {
+            displayName = "File URL";
+            key = "<None>";
+        },
+        {
+            displayName = "Full path";
+            key = "path.lastPathComponent";
+        },
+        {
+            displayName = "File name";
+            key = "path.lastPathComponent";
+        },
+        {
+            displayName = "Container path";
+            key = "path.stringByDeletingLastPathComponent";
+        },
+        {
+            displayName = "Path extension";
+            key = "path.pathExtension";
+        },
+        {
+            displayName = "Tilde abbreviated path";
+            key = "path.stringByAbbreviatingWithTildeInPath";
+        },
+        {
+            displayName = "Path without extension";
+            key = "path.stringByDeletingPathExtension";
+        },
+        {
+            displayName = "Resolved path";
+            key = "path.stringByResolvingSymlinksInPath";
+        },
+        {
+            displayName = "Standardized path";
+            key = "path.stringByStandardizingPath";
+        },
+        {
+            displayName = "Normalized path";
+            key = "path.stringByNormalizingPath";
+        }
+    );
+    name = (
+        {
+            displayName = "First Middle von Last, Jr.";
+            key = name;
+        },
+        {
+            displayName = "von Last, Jr., First Middle";
+            key = normalizedName;
+        },
+        {
+            displayName = "F.M. von Last, Jr.";
+            key = abbreviatedName;
+        },
+        {
+            displayName = "von Last, Jr., F.M.";
+            key = abbreviatedNormalizedName;
+        },
+        {
+            displayName = "von Last, Jr.";
+            key = fullLastName;
+        },
+        {
+            displayName = "Last";
+            key = lastName;
+        }
+    );
+    joining = (
+        {
+            displayName = "Comma";
+            key = "@componentsJoinedByComma";
+        },
+        {
+            displayName = "Comma and And";
+            key = "@componentsJoinedByCommaAndAnd";
+        },
+        {
+            displayName = "And";
+            key = "@componentsJoinedByAnd";
+        },
+        {
+            displayName = "Forward Slash";
+            key = "@componentsJoinedByForwardSlash";
+        },
+        {
+            displayName = "Default style";
+            key = "@componentsJoinedByDefaultJoinString";
+        },
+        {
+            displayName = "Et al. after 1";
+            key = "@componentsWithEtAlAfterOne";
+        },
+        {
+            displayName = "And, Et al. after 1";
+            key = "@componentsJoinedByAndWithEtAlAfterOne";
+        },
+        {
+            displayName = "And, Et al. after 2";
+            key = "@componentsJoinedByAndWithEtAlAfterTwo";
+        },
+        {
+            displayName = "Comma and and, Et al. after 3";
+            key = "@componentsJoinedByCommaAndAndWithEtAlAfterThree";
+        }
+    );
+}

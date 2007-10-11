@@ -95,4 +95,6 @@
 
 - (void)handleWindowDidBecomeMainNotification:(NSNotification *)notification;
 
+- (IBAction)newTemplateDocument:(id)sender;
+
 @end

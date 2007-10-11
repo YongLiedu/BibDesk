@@ -1,0 +1,62 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {addField = id; dismissAddFieldSheet = id; }; 
+            CLASS = BDSKTemplateDocument; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                addFieldButton = NSButton; 
+                addFieldField = NSTextField; 
+                addFieldSheet = NSWindow; 
+                altTextField = NSTextField; 
+                appendingOptionsView = NSView; 
+                appendingPopUp = NSPopUpButton; 
+                boldCheckButton = NSButton; 
+                capitalizationPopUp = NSPopUpButton; 
+                cleaningPopUp = NSPopUpButton; 
+                defaultTokenField = NSTokenField; 
+                defaultTypePopUp = NSPopUpButton; 
+                fieldBoldCheckButton = NSButton; 
+                fieldField = NSTextField; 
+                fieldFontNamePopUp = NSPopUpButton; 
+                fieldFontSizeComboBox = NSComboBox; 
+                fieldItalicCheckButton = NSButton; 
+                fieldOptionsView = NSView; 
+                fileOptionsView = NSView; 
+                fontNamePopUp = NSPopUpButton; 
+                fontOptionsView = NSView; 
+                fontSizeComboBox = NSComboBox; 
+                italicCheckButton = NSButton; 
+                itemTemplateTokenField = NSTokenField; 
+                joinStylePopUp = NSPopUpButton; 
+                nameStylePopUp = NSPopUpButton; 
+                optionalTokenField = NSTokenField; 
+                ownerController = NSObjectController; 
+                pathPopUp = NSPopUpButton; 
+                personOptionsView = NSView; 
+                prefixField = NSTextField; 
+                prefixTemplateTextView = NSTextView; 
+                previewTextView = NSTextView; 
+                requiredTokenField = NSTokenField; 
+                richTextCheckButton = NSButton; 
+                separatorTemplateTextView = NSTextView; 
+                specialTokenField = NSTokenField; 
+                suffixField = NSTextField; 
+                suffixTemplateTextView = NSTextView; 
+                tabView = NSTabView; 
+                tableView = NSTableView; 
+                templateArrayController = NSArrayController; 
+                textField = NSTextField; 
+                textOptionsView = NSView; 
+                tokenObjectController = NSObjectController; 
+                tokenOptionsBox = NSBox; 
+                urlOptionsView = NSView; 
+                urlPopUp = NSPopUpButton; 
+            }; 
+            SUPERCLASS = NSDocument; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSSegmentedControl; LANGUAGE = ObjC; SUPERCLASS = NSControl; }
+    ); 
+    IBVersion = 1; 
+}

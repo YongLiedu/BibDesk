@@ -1,0 +1,178 @@
+//
+//  BDSKTemplateDocument.h
+//  Bibdesk
+//
+//  Created by Christiaan Hofman on 10/8/07.
+/*
+ This software is Copyright (c) 2007
+ Christiaan Hofman. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Christiaan Hofman nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+
+#import <Cocoa/Cocoa.h>
+
+extern NSString *BDSKTextTemplateDocumentType;
+extern NSString *BDSKRTFTemplateDocumentType;
+
+@class BDSKToken, BDSKTypeTemplate;
+
+@interface BDSKTemplateDocument : NSDocument
+{
+    IBOutlet NSObjectController *ownerController;
+    
+    IBOutlet NSTextView *previewTextView;
+    IBOutlet NSTabView *tabView;
+    
+    IBOutlet NSPopUpButton *defaultTypePopUp;
+    IBOutlet NSButton *richTextCheckButton;
+    IBOutlet NSPopUpButton *fontNamePopUp;
+    IBOutlet NSComboBox *fontSizeComboBox;
+    IBOutlet NSButton *boldCheckButton;
+    IBOutlet NSButton *italicCheckButton;
+    IBOutlet NSTextView *prefixTemplateTextView;
+    IBOutlet NSTextView *separatorTemplateTextView;
+    IBOutlet NSTextView *suffixTemplateTextView;
+    
+    IBOutlet NSTableView *tableView;
+    IBOutlet NSArrayController *templateArrayController;
+    IBOutlet NSObjectController *tokenObjectController;
+    IBOutlet NSTokenField *specialTokenField;
+    IBOutlet NSTokenField *requiredTokenField;
+    IBOutlet NSTokenField *optionalTokenField;
+    IBOutlet NSTokenField *defaultTokenField;
+    IBOutlet NSTokenField *itemTemplateTokenField;
+    IBOutlet NSButton *addFieldButton;
+    IBOutlet NSBox *tokenOptionsBox;
+    
+    IBOutlet NSView *fieldOptionsView;
+    IBOutlet NSView *fontOptionsView;
+    IBOutlet NSView *appendingOptionsView;
+    IBOutlet NSView *fileOptionsView;
+    IBOutlet NSView *urlOptionsView;
+    IBOutlet NSView *personOptionsView;
+    IBOutlet NSView *textOptionsView;
+    IBOutlet NSPopUpButton *fieldFontNamePopUp;
+    IBOutlet NSComboBox *fieldFontSizeComboBox;
+    IBOutlet NSButton *fieldBoldCheckButton;
+    IBOutlet NSButton *fieldItalicCheckButton;
+    IBOutlet NSPopUpButton *appendingPopUp;
+    IBOutlet NSTextField *prefixField;
+    IBOutlet NSTextField *suffixField;
+    IBOutlet NSPopUpButton *capitalizationPopUp;
+    IBOutlet NSPopUpButton *cleaningPopUp;
+    IBOutlet NSPopUpButton *pathPopUp;
+    IBOutlet NSPopUpButton *urlPopUp;
+    IBOutlet NSPopUpButton *nameStylePopUp;
+    IBOutlet NSPopUpButton *joinStylePopUp;
+    IBOutlet NSTextField *textField;
+    IBOutlet NSTextField *fieldField;
+    IBOutlet NSTextField *altTextField;
+    
+    IBOutlet NSWindow *addFieldSheet;
+    IBOutlet NSTextField *addFieldField;
+    
+    NSArray *fonts;
+    NSArray *tokenFonts;
+    NSDictionary *templateOptions;
+    NSMutableArray *typeTemplates;
+    NSMutableArray *specialTokens;
+    NSMutableArray *defaultTokens;
+    NSMutableDictionary *fieldTokens;
+    NSMutableAttributedString *prefixTemplate;
+    NSMutableAttributedString *suffixTemplate;
+    NSMutableAttributedString *separatorTemplate;
+    BOOL richText;
+    NSString *fontName;
+    float fontSize;
+    BOOL bold;
+    BOOL italic;
+    BDSKToken *selectedToken;
+    int defaultTypeIndex;
+    
+    CFArrayRef editors;
+}
+
+- (BDSKToken *)tokenForField:(NSString *)field;
+
+- (NSArray *)typeTemplates;
+- (void)setTypeTemplates:(NSArray *)newTypeTemplates;
+- (unsigned)countOfTypeTemplates;
+- (id)objectInTypeTemplatesAtIndex:(unsigned)index;
+- (void)insertObject:(id)obj inTypeTemplatesAtIndex:(unsigned)index;
+- (void)removeObjectFromTypeTemplatesAtIndex:(unsigned)index;
+
+- (NSArray *)specialTokens;
+- (void)setSpecialTokens:(NSArray *)newSpecialTokens;
+
+- (NSArray *)defaultTokens;
+- (void)setDefaultTokens:(NSArray *)newDefaultTokens;
+
+- (NSAttributedString *)prefixTemplate;
+- (void)setPrefixTemplate:(NSAttributedString *)newPrefixTemplate;
+
+- (NSAttributedString *)suffixTemplate;
+- (void)setSuffixTemplate:(NSAttributedString *)newSuffixTemplate;
+
+- (NSAttributedString *)separatorTemplate;
+- (void)setSeparatorTemplate:(NSAttributedString *)newSeparatorTemplate;
+
+- (BOOL)isRichText;
+- (void)setRichText:(BOOL)newRichText;
+
+- (NSString *)fontName;
+- (void)setFontName:(NSString *)newFontName;
+
+- (float)fontSize;
+- (void)setFontSize:(float)newFontSize;
+
+- (BOOL)isBold;
+- (void)setBold:(BOOL)newBold;
+
+- (BOOL)isItalic;
+- (void)setItalic:(BOOL)newItalic;
+
+- (BDSKToken *)selectedToken;
+- (void)setSelectedToken:(BDSKToken *)newSelectedToken;
+
+- (int)defaultTypeIndex;
+- (void)setDefaultTypeIndex:(int)newDefaultTypeIndex;
+
+- (NSAttributedString *)attributedString;
+- (NSString *)string;
+
+- (NSAttributedString *)previewAttributedString;
+
+- (IBAction)addField:(id)sender;
+- (IBAction)dismissAddFieldSheet:(id)sender;
+
+- (BOOL)commitEditing;
+
+@end
