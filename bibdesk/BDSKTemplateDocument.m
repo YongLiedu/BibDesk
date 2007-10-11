@@ -41,6 +41,7 @@
 #import "BDSKTypeTemplate.h"
 #import "BDSKTypeManager.h"
 #import "BDSKStringConstants.h"
+#import "BDSKFieldNameFormatter.h"
 
 NSString *BDSKTextTemplateDocumentType = @"Text Template";
 NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
@@ -186,6 +187,9 @@ static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardTy
     [itemTemplateTokenField setTokenizingCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@""]];
     
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil]];
+    
+	[fieldField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
+	[addFieldField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
     
     [ownerController setContent:self];
     
