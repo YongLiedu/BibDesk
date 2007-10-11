@@ -96,9 +96,6 @@ extern NSString *BDSKRTFTemplateDocumentType;
     IBOutlet NSTextField *fieldField;
     IBOutlet NSTextField *altTextField;
     
-    IBOutlet NSWindow *addFieldSheet;
-    IBOutlet NSTextField *addFieldField;
-    
     NSArray *fonts;
     NSArray *tokenFonts;
     NSDictionary *templateOptions;
@@ -171,7 +168,6 @@ extern NSString *BDSKRTFTemplateDocumentType;
 - (NSAttributedString *)previewAttributedString;
 
 - (IBAction)addField:(id)sender;
-- (IBAction)dismissAddFieldSheet:(id)sender;
 
 - (BOOL)commitEditing;
 

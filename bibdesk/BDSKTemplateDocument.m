@@ -42,6 +42,7 @@
 #import "BDSKTypeManager.h"
 #import "BDSKStringConstants.h"
 #import "BDSKFieldNameFormatter.h"
+#import "BDSKFieldSheetController.h"
 
 NSString *BDSKTextTemplateDocumentType = @"Text Template";
 NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
@@ -189,7 +190,6 @@ static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardTy
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil]];
     
 	[fieldField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
-	[addFieldField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
     
     [ownerController setContent:self];
     
@@ -577,26 +577,23 @@ static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardTy
 
 #pragma mark Actions
 
-- (void)addFieldSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
-        BDSKToken *token = [self tokenForField:[[addFieldField stringValue] capitalizedString]];
+        BDSKToken *token = [self tokenForField:[addFieldController field]];
         [self setDefaultTokens:[[self defaultTokens] arrayByAddingObject:token]];
         [defaultTokenField setObjectValue:[self defaultTokens]];
     }
 }
 
 - (IBAction)addField:(id)sender {
-    [addFieldField setStringValue:@""];
-	[NSApp beginSheet:addFieldSheet
-	   modalForWindow:[self windowForSheet]
-		modalDelegate:self
-	   didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-		  contextInfo:NULL];
-}
-
-- (IBAction)dismissAddFieldSheet:(id)sender {
-    [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
-    [addFieldSheet orderOut:self];
+    NSArray *allFields = [[BDSKTypeManager sharedManager] allFieldNamesIncluding:nil excluding:nil];
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field:", @"Label for adding a field for a template")
+                                                                                              fieldsArray:allFields];
+	[addFieldController beginSheetModalForWindow:[self windowForSheet]
+                                   modalDelegate:self
+                                  didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
+                                     contextInfo:NULL];
+    [addFieldController release];
 }
 
 #pragma mark Notification handlers

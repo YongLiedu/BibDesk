@@ -1763,7 +1763,6 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				CE8962240CBEBAAC00EA2D98 /* TemplateDocument.nib */,
 				F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */,
 				F9022DDA0758089500C3F701 /* Images */,
 				3D8A54F6082D1F86008E818C /* BibDesk Help */,
@@ -1814,6 +1813,7 @@
 				F9022CE70758050E00C3F701 /* Previewer.nib */,
 				CEF7295B09CC890400802D48 /* RemoveFieldSheet.nib */,
 				CE3A1A560B19C2F700233208 /* SelectEncodingsPanel.nib */,
+				CE8962240CBEBAAC00EA2D98 /* TemplateDocument.nib */,
 				27AFAFA8080D1E5B0096F5D2 /* TextImport.nib */,
 				F9B88C060B7CF60F00D5D42C /* FileMatcher.nib */,
 				F9BE68330B80F92800B2597C /* FileMatcherConfigSheet.nib */,
