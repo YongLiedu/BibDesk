@@ -30,8 +30,6 @@
 		<string>``</string>
 		<key>•</key>
 		<string>*</string>
-		<key>…</key>
-		<string>{\ldots}</string>
 		<key>ﬀ</key>
 		<string>ff</string>
 		<key>ﬁ</key>
@@ -211,6 +209,8 @@
 		<string>{\d Z}</string>
 		<key>ẓ</key>
 		<string>{\d z}</string>
+		<key>…</key>
+		<string>{\ldots}</string>
 		<key>™</key>
 		<string>{\texttrademark}</string>
 	</dict>
@@ -387,6 +387,8 @@
 		<string>ṭ</string>
 		<key>{\d z}</key>
 		<string>ẓ</string>
+		<key>{\ldots}</key>
+		<string>…</string>
 		<key>{\l}</key>
 		<string>ł</string>
 		<key>{\oe}</key>
