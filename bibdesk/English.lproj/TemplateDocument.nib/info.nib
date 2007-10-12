@@ -37,18 +37,18 @@
 	</array>
 	<key>IBOpenObjects</key>
 	<array>
+		<integer>811</integer>
+		<integer>804</integer>
 		<integer>5</integer>
 		<integer>130</integer>
-		<integer>804</integer>
-		<integer>1305</integer>
-		<integer>358</integer>
-		<integer>811</integer>
-		<integer>1308</integer>
-		<integer>1311</integer>
+		<integer>144</integer>
 		<integer>88</integer>
 		<integer>1314</integer>
-		<integer>144</integer>
+		<integer>1311</integer>
+		<integer>1305</integer>
 		<integer>589</integer>
+		<integer>358</integer>
+		<integer>1308</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>8R218</string>
