@@ -849,6 +849,11 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
     return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByAnd];
 }
 
+- (NSString *)componentsJoinedByCommaAndAndWithEtAlAfterOne
+{
+    return [self count] > 3 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByCommaAndAnd];
+}
+
 - (NSString *)componentsJoinedByAndWithEtAlAfterTwo
 {
     return [self count] > 2 ? [[[self firstTwoObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByAnd];

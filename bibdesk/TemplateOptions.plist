@@ -213,39 +213,43 @@
     );
     joining = (
         {
-            displayName = "Comma";
+            displayName = "A, B, C";
             key = "@componentsJoinedByComma";
         },
         {
-            displayName = "Comma and And";
+            displayName = "A, B, and C";
             key = "@componentsJoinedByCommaAndAnd";
         },
         {
-            displayName = "And";
+            displayName = "A and B and C";
             key = "@componentsJoinedByAnd";
         },
         {
-            displayName = "Forward Slash";
+            displayName = "A/B/C";
             key = "@componentsJoinedByForwardSlash";
         },
         {
-            displayName = "Default style";
+            displayName = "Default separator";
             key = "@componentsJoinedByDefaultJoinString";
         },
         {
-            displayName = "Et al. after 1";
+            displayName = "A; A et al.";
             key = "@componentsWithEtAlAfterOne";
         },
         {
-            displayName = "And, Et al. after 1";
+            displayName = "A and B; A et al.";
             key = "@componentsJoinedByAndWithEtAlAfterOne";
         },
         {
-            displayName = "And, Et al. after 2";
+            displayName = "A, B, and C; A et al.";
+            key = "@componentsJoinedByCommaAndAndWithEtAlAfterOne";
+        },
+        {
+            displayName = "A and B; A, B, et al.";
             key = "@componentsJoinedByAndWithEtAlAfterTwo";
         },
         {
-            displayName = "Comma and and, Et al. after 3";
+            displayName = "A, B, and C; A, B, C, et al.";
             key = "@componentsJoinedByCommaAndAndWithEtAlAfterThree";
         }
     );

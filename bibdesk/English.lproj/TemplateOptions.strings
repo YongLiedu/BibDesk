@@ -54,12 +54,4 @@
 "von Last, Jr." = "von Last, Jr.";
 "Last" = "Last";
 
-"Comma" = "Comma";
-"Comma and And" = "Comma and And";
-"And" = "And";
-"Forward Slash" = "Forward Slash";
-"Default style" = "Default style";
-"Et al. after 1" = "Et al. after 1";
-"And, Et al. after 1" = "And, Et al. after 1";
-"And, Et al. after 2" = "And, Et al. after 2";
-"Comma and and, Et al. after 3" = "Comma and and, Et al. after 3";
+"Default separator" = "Default separator";
