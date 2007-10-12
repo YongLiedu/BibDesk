@@ -289,6 +289,8 @@
 		CEF94342092656BB00750FFA /* BDSKPathIconTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94340092656BB00750FFA /* BDSKPathIconTransformer.m */; };
 		CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */; };
 		CEFA07F50AF0E52100A3B4B1 /* BDSKApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */; };
+		CEFA2F120CC0272C002A8262 /* BDSKTag.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEFA2F100CC0272C002A8262 /* BDSKTag.h */; };
+		CEFA2F130CC0272C002A8262 /* BDSKTag.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA2F110CC0272C002A8262 /* BDSKTag.m */; };
 		CEFD45890BFFC1F80027B933 /* NSWindow+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */; };
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
 		CEFDBDC60AEA86F0009EE99D /* BDSKStaticGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */; };
@@ -782,6 +784,7 @@
 				CE8961890CBEB59800EA2D98 /* BDSKToken.h in CopyFiles */,
 				CE89618B0CBEB59800EA2D98 /* BDSKTypeTemplate.h in CopyFiles */,
 				CE8961BC0CBEB5AC00EA2D98 /* BDSKTemplateDocument.h in CopyFiles */,
+				CEFA2F120CC0272C002A8262 /* BDSKTag.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1159,6 +1162,8 @@
 		CEFA07F20AF0E52100A3B4B1 /* BDSKApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKApplication.h; sourceTree = "<group>"; };
 		CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKApplication.m; sourceTree = "<group>"; };
 		CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOwnerProtocol.h; sourceTree = "<group>"; };
+		CEFA2F100CC0272C002A8262 /* BDSKTag.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTag.h; sourceTree = "<group>"; };
+		CEFA2F110CC0272C002A8262 /* BDSKTag.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTag.m; sourceTree = "<group>"; };
 		CEFD45860BFFC1F80027B933 /* NSWindow+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSWindow+Scripting.h"; sourceTree = "<group>"; };
 		CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSWindow+Scripting.m"; sourceTree = "<group>"; };
 		CEFDBDBB0AEA86BA009EE99D /* BDSKSmartGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSmartGroup.h; sourceTree = "<group>"; };
@@ -2078,6 +2083,7 @@
 				CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */,
 				CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */,
 				F9025DAA0969AB69008A551C /* BDSKStringNode.m */,
+				CEFA2F110CC0272C002A8262 /* BDSKTag.m */,
 				F98DB3160A23C7730040D347 /* BDSKTemplate.m */,
 				CE95AF160ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m */,
 				CE8F83470AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.m */,
@@ -2453,6 +2459,7 @@
 				F9025DA90969AB69008A551C /* BDSKStringNode.h */,
 				F9E6C5970999323D00A8B97D /* BDSKStringParser.h */,
 				CEF94412092668EA00750FFA /* BDSKTableSortDescriptor.h */,
+				CEFA2F100CC0272C002A8262 /* BDSKTag.h */,
 				F98DB3150A23C7730040D347 /* BDSKTemplate.h */,
 				CE8961BA0CBEB5AC00EA2D98 /* BDSKTemplateDocument.h */,
 				CEAC484E0A96589A00B8DF43 /* BDSKTemplatedTextCommand.h */,
@@ -3619,6 +3626,7 @@
 				CE89618A0CBEB59800EA2D98 /* BDSKToken.m in Sources */,
 				CE89618C0CBEB59800EA2D98 /* BDSKTypeTemplate.m in Sources */,
 				CE8961BD0CBEB5AC00EA2D98 /* BDSKTemplateDocument.m in Sources */,
+				CEFA2F130CC0272C002A8262 /* BDSKTag.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

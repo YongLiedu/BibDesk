@@ -65,8 +65,15 @@ The keys should be valid key paths (i.e. only letters and dots) and spaces are n
 
 + (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object;
 + (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
++ (NSArray *)arrayByParsingTemplateString:(NSString *)template;
++ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object;
++ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
+
 + (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object;
 + (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
++ (NSArray *)arrayByParsingTemplateAttributedString:(NSAttributedString *)template;
++ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object;
++ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
 
 @end
 
