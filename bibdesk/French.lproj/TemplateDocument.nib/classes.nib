@@ -1,13 +1,11 @@
 {
     IBClasses = (
         {
-            ACTIONS = {addField = id; dismissAddFieldSheet = id; }; 
+            ACTIONS = {addField = id; }; 
             CLASS = BDSKTemplateDocument; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 addFieldButton = NSButton; 
-                addFieldField = NSTextField; 
-                addFieldSheet = NSWindow; 
                 altTextField = NSTextField; 
                 appendingOptionsView = NSView; 
                 appendingPopUp = NSPopUpButton; 
