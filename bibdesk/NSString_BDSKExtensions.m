@@ -230,8 +230,8 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     NSMutableString *mutableString = [[self mutableCopy] autorelease];
     while(foundRange.length){
         [mutableString replaceCharactersInRange:foundRange withString:@""];
+        searchRange.length = NSMaxRange(searchRange) - NSMaxRange(foundRange);
         searchRange.location = foundRange.location;
-        searchRange.length -= foundRange.length;
         foundRange = [mutableString rangeOfTeXCommandInRange:searchRange];
     }
     [mutableString deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
