@@ -79,6 +79,10 @@ extern NSString *BDSKRTFTemplateDocumentType;
     IBOutlet NSView *urlOptionsView;
     IBOutlet NSView *personOptionsView;
     IBOutlet NSView *textOptionsView;
+    IBOutlet NSMenu *fieldOptionsMenu;
+    IBOutlet NSMenu *fileOptionsMenu;
+    IBOutlet NSMenu *urlOptionsMenu;
+    IBOutlet NSMenu *personOptionsMenu;
     IBOutlet NSPopUpButton *fieldFontNamePopUp;
     IBOutlet NSComboBox *fieldFontSizeComboBox;
     IBOutlet NSButton *fieldBoldCheckButton;
@@ -112,6 +116,7 @@ extern NSString *BDSKRTFTemplateDocumentType;
     BOOL bold;
     BOOL italic;
     BDSKToken *selectedToken;
+    BDSKToken *menuToken;
     int defaultTypeIndex;
     
     CFArrayRef editors;
@@ -168,6 +173,13 @@ extern NSString *BDSKRTFTemplateDocumentType;
 - (NSAttributedString *)previewAttributedString;
 
 - (IBAction)addField:(id)sender;
+
+- (IBAction)changeAppending:(id)sender;
+- (IBAction)changeCasing:(id)sender;
+- (IBAction)changeCleaning:(id)sender;
+- (IBAction)changeNameStyle:(id)sender;
+- (IBAction)changeJoinStyle:(id)sender;
+- (IBAction)changeUrlFormat:(id)sender;
 
 - (BOOL)commitEditing;
 

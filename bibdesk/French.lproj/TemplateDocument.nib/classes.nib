@@ -1,7 +1,15 @@
 {
     IBClasses = (
         {
-            ACTIONS = {addField = id; }; 
+            ACTIONS = {
+                addField = id; 
+                changeAppending = id; 
+                changeCasing = id; 
+                changeCleaning = id; 
+                changeJoinStyle = id; 
+                changeNameStyle = id; 
+                changeUrlFormat = id; 
+            }; 
             CLASS = BDSKTemplateDocument; 
             LANGUAGE = ObjC; 
             OUTLETS = {
@@ -19,7 +27,9 @@
                 fieldFontNamePopUp = NSPopUpButton; 
                 fieldFontSizeComboBox = NSComboBox; 
                 fieldItalicCheckButton = NSButton; 
+                fieldOptionsMenu = NSMenu; 
                 fieldOptionsView = NSView; 
+                fileOptionsMenu = NSMenu; 
                 fileOptionsView = NSView; 
                 fontNamePopUp = NSPopUpButton; 
                 fontOptionsView = NSView; 
@@ -31,6 +41,7 @@
                 optionalTokenField = NSTokenField; 
                 ownerController = NSObjectController; 
                 pathPopUp = NSPopUpButton; 
+                personOptionsMenu = NSMenu; 
                 personOptionsView = NSView; 
                 prefixField = NSTextField; 
                 prefixTemplateTextView = NSTextView; 
@@ -48,6 +59,7 @@
                 textOptionsView = NSView; 
                 tokenObjectController = NSObjectController; 
                 tokenOptionsBox = NSBox; 
+                urlOptionsMenu = NSMenu; 
                 urlOptionsView = NSView; 
                 urlPopUp = NSPopUpButton; 
             }; 

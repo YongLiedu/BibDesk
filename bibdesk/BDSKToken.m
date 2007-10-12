@@ -406,7 +406,7 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 
 - (id)initWithTitle:(NSString *)aTitle {
     if (self = [super initWithTitle:aTitle]) {
-        capitalizationKey = nil;
+        casingKey = nil;
         cleaningKey = nil;
     }
     return self;
@@ -415,10 +415,10 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
         if ([decoder allowsKeyedCoding]) {
-            capitalizationKey = [[decoder decodeObjectForKey:@"capitalizationKey"] retain];
+            casingKey = [[decoder decodeObjectForKey:@"casingKey"] retain];
             cleaningKey = [[decoder decodeObjectForKey:@"cleaningKey"] retain];
         } else {
-            capitalizationKey = [[decoder decodeObject] retain];
+            casingKey = [[decoder decodeObject] retain];
             cleaningKey = [[decoder decodeObject] retain];
         }
     }
@@ -428,30 +428,30 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
     if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:capitalizationKey forKey:@"capitalizationKey"];
+        [encoder encodeObject:casingKey forKey:@"casingKey"];
         [encoder encodeObject:cleaningKey forKey:@"cleaningKey"];
     } else {
-        [encoder encodeObject:capitalizationKey];
+        [encoder encodeObject:casingKey];
         [encoder encodeObject:cleaningKey];
     }
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
     BDSKFieldTagToken *copy = [super copyWithZone:aZone];
-    copy->capitalizationKey = [capitalizationKey retain];
+    copy->casingKey = [casingKey retain];
     copy->cleaningKey = [cleaningKey retain];
     return copy;
 }
 
 - (void)dealloc {
-    [capitalizationKey release];
+    [casingKey release];
     [cleaningKey release];
     [super dealloc];
 }
 /*
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
-           EQUAL_OR_NIL_STRINGS(capitalizationKey, [other capitalizationKey]) &&
+           EQUAL_OR_NIL_STRINGS(casingKey, [other casingKey]) &&
            EQUAL_OR_NIL_STRINGS(cleaningKey, [other cleaningKey]);
 }
 */
@@ -459,15 +459,15 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
     return BDSKFieldTokenType;
 }
 
-- (NSString *)capitalizationKey {
-    return capitalizationKey;
+- (NSString *)casingKey {
+    return casingKey;
 }
 
-- (void)setCapitalizationKey:(NSString *)newCapitalizationKey {
-    if (capitalizationKey != newCapitalizationKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setCapitalizationKey:capitalizationKey];
-        [capitalizationKey release];
-        capitalizationKey = [newCapitalizationKey retain];
+- (void)setCasingKey:(NSString *)newCasingKey {
+    if (casingKey != newCasingKey) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setCasingKey:casingKey];
+        [casingKey release];
+        casingKey = [newCasingKey retain];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
@@ -495,8 +495,8 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
         [keys addObject:@"fields"];
         [keys addObject:title];
     }
-    if ([capitalizationKey length])
-        [keys addObject:capitalizationKey];
+    if ([casingKey length])
+        [keys addObject:casingKey];
     if ([cleaningKey length])
         [keys addObject:cleaningKey];
     if ([appendingKey length])

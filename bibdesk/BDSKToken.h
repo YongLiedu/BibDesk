@@ -43,7 +43,6 @@ enum {
     BDSKURLTokenType,
     BDSKFileTokenType,
     BDSKPersonTokenType,
-    BDSKSpecialTokenType,
     BDSKTextTokenType
 };
 
@@ -118,12 +117,12 @@ extern NSString *BDSKTokenDidChangeNotification;
 #pragma mark -
 
 @interface BDSKFieldTagToken : BDSKTagToken {
-    NSString *capitalizationKey;
+    NSString *casingKey;
     NSString *cleaningKey;
 }
 
-- (NSString *)capitalizationKey;
-- (void)setCapitalizationKey:(NSString *)newCapitalizationKey;
+- (NSString *)casingKey;
+- (void)setCasingKey:(NSString *)newCasingKey;
 
 - (NSString *)cleaningKey;
 - (void)setCleaningKey:(NSString *)newCleaningKey;

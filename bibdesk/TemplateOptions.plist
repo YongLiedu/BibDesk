@@ -1,5 +1,5 @@
 {
-    capitalization = (
+    casing = (
         {
             displayName = "None";
             key = "<None>";
@@ -185,7 +185,7 @@
             key = "path.stringByNormalizingPath";
         }
     );
-    name = (
+    nameStyle = (
         {
             displayName = "First Middle von Last, Jr.";
             key = name;
@@ -211,7 +211,7 @@
             key = lastName;
         }
     );
-    joining = (
+    joinStyle = (
         {
             displayName = "A, B, C";
             key = "@componentsJoinedByComma";

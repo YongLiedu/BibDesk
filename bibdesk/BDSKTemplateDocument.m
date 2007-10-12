@@ -50,6 +50,7 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
 static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardType";
+static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 @interface BDSKValueOrNoneTransformer : NSValueTransformer @end
 
@@ -57,7 +58,7 @@ static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardTy
 
 + (void)initialize {
 	[NSValueTransformer setValueTransformer:[[[BDSKValueOrNoneTransformer alloc] init] autorelease]
-									forName:@"BDSKValueOrNone"];
+									forName:BDSKValueOrNoneTransformerName];
 }
 
 + (NSArray *)writableTypes {
@@ -170,8 +171,39 @@ static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardTy
     return @"TemplateDocument";
 }
 
+#define SETUP_SUBMENU(parentMenu, index, key, selector) { \
+    menu = [[parentMenu itemAtIndex:index] submenu]; \
+    dictEnum = [[templateOptions valueForKey:key] objectEnumerator]; \
+    while (dict = [dictEnum nextObject]) { \
+        item = [menu addItemWithTitle:NSLocalizedStringFromTable([dict objectForKey:@"displayName"], @"TemplateOptions", @"") \
+                               action:selector keyEquivalent:@""]; \
+        [item setTarget:self]; \
+        [item setRepresentedObject:[dict objectForKey:@"key"]]; \
+    } \
+}
+
+- (void)setupOptionsMenus {
+    NSMenu *menu;
+    NSMenuItem *item;
+    NSEnumerator *dictEnum;
+    NSDictionary *dict;
+    
+    SETUP_SUBMENU(fieldOptionsMenu, 0, @"casing", @selector(changeCasing:));
+    SETUP_SUBMENU(fieldOptionsMenu, 1, @"cleaning", @selector(changeCleaning:));
+    SETUP_SUBMENU(fieldOptionsMenu, 2, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(fileOptionsMenu, 0, @"fileFormat", @selector(changeUrlFormat:));
+    SETUP_SUBMENU(fileOptionsMenu, 1, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(urlOptionsMenu, 0, @"urlFormat", @selector(changeUrlFormat:));
+    SETUP_SUBMENU(urlOptionsMenu, 1, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(personOptionsMenu, 0, @"nameStyle", @selector(changeNameStyle:));
+    SETUP_SUBMENU(personOptionsMenu, 1, @"joinStyle", @selector(changeJoinStyle:));
+    SETUP_SUBMENU(personOptionsMenu, 2, @"appending", @selector(changeAppending:));
+}
+
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController {
     [super windowControllerDidLoadNib:aController];
+    
+    [self setupOptionsMenus];
     
     [requiredTokenField setEditable:NO];
     [requiredTokenField setBezeled:NO];
@@ -253,9 +285,6 @@ static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardTy
                 break;
             case BDSKPersonTokenType:
                 view = personOptionsView;
-                break;
-            case BDSKSpecialTokenType:
-                view = fieldOptionsView;
                 break;
             case BDSKTextTokenType:
                 view = textOptionsView;
@@ -596,6 +625,70 @@ static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardTy
     [addFieldController release];
 }
 
+- (IBAction)changeAppending:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"appendingKey"];
+}
+
+- (IBAction)changeCasing:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"casingKey"];
+}
+
+- (IBAction)changeCleaning:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"cleaningKey"];
+}
+
+- (IBAction)changeNameStyle:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"nameStyleKey"];
+}
+
+- (IBAction)changeJoinStyle:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"joinmStyleKey"];
+}
+
+- (IBAction)changeUrlFormat:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"urlFormatKey"];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    SEL action = [menuItem action];
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    if (action == @selector(changeAppending:)) {
+        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"appendingKey"]] isEqualToString:[menuItem representedObject]]];
+        return YES;
+    } else if (action == @selector(changeCasing:)) {
+        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"casingKey"]] isEqualToString:[menuItem representedObject]]];
+        return YES;
+    } else if (action == @selector(changeCleaning:)) {
+        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"cleaningKey"]] isEqualToString:[menuItem representedObject]]];
+        return YES;
+    } else if (action == @selector(changeNameStyle:)) {
+        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"nameStyleKey"]] isEqualToString:[menuItem representedObject]]];
+        return YES;
+    } else if (action == @selector(changeJoinStyle:)) {
+        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"joinStyleKey"]] isEqualToString:[menuItem representedObject]]];
+        return YES;
+    } else if (action == @selector(changeUrlFormat:)) {
+        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"urlFormatKey"]] isEqualToString:[menuItem representedObject]]];
+        return YES;
+    } else if ([[BDSKTemplateDocument superclass] instancesRespondToSelector:_cmd]) {
+        return [super validateMenuItem:menuItem];
+    } else {
+        return YES;
+    }
+}
+
 #pragma mark Notification handlers
 
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification {
@@ -673,6 +766,25 @@ static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardTy
     else if ([representedObject isKindOfClass:[NSString class]])
         return NSPlainTextTokenStyle;
     return NSRoundedTokenStyle;
+}
+
+- (BOOL)tokenField:(NSTokenField *)tokenField hasMenuForRepresentedObject:(id)representedObject {
+    return [representedObject isKindOfClass:[BDSKToken class]] && [(BDSKToken *)representedObject type] != BDSKTextTokenType;
+}
+
+- (NSMenu *)tokenField:(NSTokenField *)tokenField menuForRepresentedObject:(id)representedObject {
+    NSMenu *menu = nil;
+    if ([representedObject isKindOfClass:[BDSKToken class]]) {
+        menuToken = representedObject;
+        switch ([(BDSKToken *)representedObject type]) {
+            case BDSKFieldTokenType: menu = fieldOptionsMenu; break;
+            case BDSKURLTokenType: menu = urlOptionsMenu; break;
+            case BDSKFileTokenType: menu = fileOptionsMenu; break;
+            case BDSKPersonTokenType: menu = personOptionsMenu; break;
+            case BDSKTextTokenType: menu = nil; break;
+        }
+    }
+    return menu;
 }
 
 - (NSArray *)tokenField:(NSTokenField *)tokenField shouldAddObjects:(NSArray *)tokens atIndex:(unsigned)idx {
