@@ -145,7 +145,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 }
 
 - (id)init
-{
+{NSLog(@"%@",[@"start \\command{1} \\command{2} end" stringByRemovingTeX]);
     if(self = [super init]){
         autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
         requiredFieldsForCiteKey = nil;
