@@ -118,14 +118,31 @@
     BDSKTemplateFormat format = [template templateFormat];
     id returnString = nil;
     NSAutoreleasePool *pool = nil;
+    NSMutableDictionary *subtemplates = [NSMutableDictionary dictionary];
+    NSArray *subtemplate;
     
     if (format & BDSKTextTemplateFormat) {
         
         returnString = [NSMutableString stringWithString:@""];        
         while(pub = [e nextObject]){
             pool = [NSAutoreleasePool new];
+            subtemplate = [subtemplates objectForKey:[pub pubType]];
+            if (subtemplate == nil) {
+                if ([template templateURLForType:[pub pubType]]) {
+                    subtemplate = [BDSKTemplateParser arrayByParsingTemplateString:[template stringForType:[pub pubType]]];
+                } else {
+                    subtemplate = [subtemplates objectForKey:BDSKTemplateDefaultItemString];
+                    if (template == nil) {
+                        subtemplate = [BDSKTemplateParser arrayByParsingTemplateString:[template stringForType:BDSKTemplateDefaultItemString]];
+                        [subtemplates setObject:subtemplate forKey:BDSKTemplateDefaultItemString];
+                    }
+                }
+                [subtemplates setObject:subtemplate forKey:[pub pubType]];
+            }
             [pub setItemIndex:++currentIndex];
-            [returnString appendString:[pub stringValueUsingTemplate:template]];
+            [pub prepareForTemplateParsing];
+            [returnString appendString:[BDSKTemplateParser stringFromTemplateArray:subtemplate usingObject:pub]];
+            [pub cleanupAfterTemplateParsing];
             [pool release];
         }
         
@@ -136,6 +153,23 @@
             pool = [NSAutoreleasePool new];
             [pub setItemIndex:++currentIndex];
             [returnString appendAttributedString:[pub attributedStringValueUsingTemplate:template]];
+            subtemplate = [subtemplates objectForKey:[pub pubType]];
+            if (subtemplate == nil) {
+                if ([template templateURLForType:[pub pubType]]) {
+                    subtemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[template attributedStringForType:[pub pubType]]];
+                } else {
+                    subtemplate = [subtemplates objectForKey:BDSKTemplateDefaultItemString];
+                    if (template == nil) {
+                        subtemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[template attributedStringForType:BDSKTemplateDefaultItemString]];
+                        [subtemplates setObject:subtemplate forKey:BDSKTemplateDefaultItemString];
+                    }
+                }
+                [subtemplates setObject:subtemplate forKey:[pub pubType]];
+            }
+            [pub setItemIndex:++currentIndex];
+            [pub prepareForTemplateParsing];
+            [returnString appendAttributedString:[BDSKTemplateParser attributedStringFromTemplateArray:subtemplate usingObject:pub]];
+            [pub cleanupAfterTemplateParsing];
             [pool release];
         }
     }
