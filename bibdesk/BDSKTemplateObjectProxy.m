@@ -134,10 +134,13 @@
                     subtemplate = [subtemplates objectForKey:BDSKTemplateDefaultItemString];
                     if (template == nil) {
                         subtemplate = [BDSKTemplateParser arrayByParsingTemplateString:[template stringForType:BDSKTemplateDefaultItemString]];
+                        OBPRECONDITION(nil != subtemplate);
                         [subtemplates setObject:subtemplate forKey:BDSKTemplateDefaultItemString];
                     }
                 }
-                [subtemplates setObject:subtemplate forKey:[pub pubType]];
+                OBPRECONDITION(nil != subtemplate);
+                if (subtemplate)
+                    [subtemplates setObject:subtemplate forKey:[pub pubType]];
             }
             [pub setItemIndex:++currentIndex];
             [pub prepareForTemplateParsing];
