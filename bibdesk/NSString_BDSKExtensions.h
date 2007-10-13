@@ -473,7 +473,9 @@ An inline buffer is used for speed in accessing each character.
 - (NSRange)rangeOfLeadingEmptyLine;
 - (NSRange)rangeOfLeadingEmptyLineInRange:(NSRange)range;
 - (NSRange)rangeOfTrailingEmptyLine;
+- (NSRange)rangeOfTrailingEmptyLine:(BOOL *)onlyWhite;
 - (NSRange)rangeOfTrailingEmptyLineInRange:(NSRange)range;
+- (NSRange)rangeOfTrailingEmptyLine:(BOOL *)onlyWhite range:(NSRange)range;
 
 #pragma mark Some convenience keys for templates
 

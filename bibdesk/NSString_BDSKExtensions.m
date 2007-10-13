@@ -1437,9 +1437,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     NSRange firstCharRange = [self rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:0 range:range];
     NSRange wsRange = NSMakeRange(NSNotFound, 0);
     unsigned int start = range.location;
-    if (firstCharRange.location == NSNotFound) {
-        wsRange = range;
-    } else {
+    if (firstCharRange.location != NSNotFound) {
         unichar firstChar = [self characterAtIndex:firstCharRange.location];
         unsigned int rangeEnd = NSMaxRange(firstCharRange);
         if([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
@@ -1454,20 +1452,30 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 // whitespace at the end of the string from the beginning or after a newline
 - (NSRange)rangeOfTrailingEmptyLine {
-    return [self rangeOfTrailingEmptyLineInRange:NSMakeRange(0, [self length])];
+    return [self rangeOfTrailingEmptyLine:NULL];
 }
 
+- (NSRange)rangeOfTrailingEmptyLine:(BOOL *)onlyWhite {
+    return [self rangeOfTrailingEmptyLine:onlyWhite range:NSMakeRange(0, [self length])];
+}
 - (NSRange)rangeOfTrailingEmptyLineInRange:(NSRange)range {
+    return [self rangeOfTrailingEmptyLine:NULL range:NSMakeRange(0, [self length])];
+}
+
+- (NSRange)rangeOfTrailingEmptyLine:(BOOL *)onlyWhite range:(NSRange)range {
     NSRange lastCharRange = [self rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:NSBackwardsSearch range:range];
     NSRange wsRange = NSMakeRange(NSNotFound, 0);
     unsigned int end = NSMaxRange(range);
     if (lastCharRange.location == NSNotFound) {
-        wsRange = range;
+        if (onlyWhite)
+            *onlyWhite = YES;
     } else {
         unichar lastChar = [self characterAtIndex:lastCharRange.location];
         unsigned int rangeEnd = NSMaxRange(lastCharRange);
         if (rangeEnd < end && [[NSCharacterSet newlineCharacterSet] characterIsMember:lastChar]) 
             wsRange = NSMakeRange(rangeEnd, end - rangeEnd);
+        if (onlyWhite)
+            *onlyWhite = NO;
     }
     return wsRange;
 }
