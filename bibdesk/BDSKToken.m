@@ -384,17 +384,18 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 }
 
 - (NSString *)string {
+    NSString *keyPath = [[self keys] componentsJoinedByString:@"."];
     if ([prefix length] || [suffix length]) {
-        NSMutableString *string = [NSMutableString stringWithFormat:@"<$%@?>", title];
+        NSMutableString *string = [NSMutableString stringWithFormat:@"<$%@?>", keyPath];
         if ([prefix length])
             [string appendString:prefix];
-        [string appendFormat:@"<$%@/>", [[self keys] componentsJoinedByString:@"."]];
+        [string appendFormat:@"<$%@/>", keyPath];
         if ([suffix length])
             [string appendString:suffix];
-        [string appendFormat:@"</$%@?>", title];
+        [string appendFormat:@"</$%@?>", keyPath];
         return string;
     } else {
-        return [NSString stringWithFormat:@"<$%@/>", [[self keys] componentsJoinedByString:@"."]];
+        return [NSString stringWithFormat:@"<$%@/>", keyPath];
     }
 }
 
