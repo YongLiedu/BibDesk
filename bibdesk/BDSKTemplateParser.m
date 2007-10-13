@@ -761,7 +761,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             
         } else if (type == BDSKCollectionTagType) {
             
-            keyValue = [object safeValueForKeyPath:tag];
+            keyValue = [object safeValueForKeyPath:[tag keyPath]];
             if ([keyValue respondsToSelector:@selector(objectEnumerator)]) {
                 NSEnumerator *itemE = [keyValue objectEnumerator];
                 id nextItem, item = [itemE nextObject];
@@ -787,7 +787,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             unsigned int i, count = [matchStrings count];
             NSArray *subtemplate = nil;
             
-            keyValue = [object safeValueForKeyPath:tag];
+            keyValue = [object safeValueForKeyPath:[tag keyPath]];
             count = [matchStrings count];
             subtemplate = nil;
             for (i = 0; i < count; i++) {
@@ -853,6 +853,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 - (id)safeValueForKeyPath:(NSString *)keyPath {
     id value = nil;
+    OBPRECONDITION([keyPath isKindOfClass:[NSString class]]);
     @try{ value = [self valueForKeyPath:keyPath]; }
     @catch (id exception) { value = nil; }
     return value;
