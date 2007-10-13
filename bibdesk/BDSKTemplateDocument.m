@@ -118,7 +118,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         while (type = [typeEnum nextObject]) {
             [typeTemplates addObject:[[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease]];
         }
-        [[typeTemplates objectAtIndex:defaultTypeIndex] setIncluded:YES];
+        defaultTypeIndex = [[typeTemplates valueForKey:@"pubType"] indexOfObject:BDSKArticleString];
+        if (defaultTypeIndex == NSNotFound)
+            defaultTypeIndex = 0;
         
         NSMutableArray *tmpFonts = [NSMutableArray array];
         NSMutableArray *fontNames = [[[[NSFontManager sharedFontManager] availableFontFamilies] mutableCopy] autorelease];
@@ -490,11 +492,11 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     }
 }
 
-- (int)defaultTypeIndex {
+- (unsigned int)defaultTypeIndex {
     return defaultTypeIndex;
 }
 
-- (void)setDefaultTypeIndex:(int)newDefaultTypeIndex {
+- (void)setDefaultTypeIndex:(unsigned int)newDefaultTypeIndex {
     if (defaultTypeIndex != newDefaultTypeIndex) {
         [[[self undoManager] prepareWithInvocationTarget:self] setDefaultTypeIndex:defaultTypeIndex];
         defaultTypeIndex = newDefaultTypeIndex;

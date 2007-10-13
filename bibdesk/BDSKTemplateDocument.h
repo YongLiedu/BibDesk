@@ -117,7 +117,7 @@ extern NSString *BDSKRTFTemplateDocumentType;
     BOOL italic;
     BDSKToken *selectedToken;
     BDSKToken *menuToken;
-    int defaultTypeIndex;
+    unsigned int defaultTypeIndex;
     
     CFArrayRef editors;
 }
@@ -164,8 +164,8 @@ extern NSString *BDSKRTFTemplateDocumentType;
 - (BDSKToken *)selectedToken;
 - (void)setSelectedToken:(BDSKToken *)newSelectedToken;
 
-- (int)defaultTypeIndex;
-- (void)setDefaultTypeIndex:(int)newDefaultTypeIndex;
+- (unsigned int)defaultTypeIndex;
+- (void)setDefaultTypeIndex:(unsigned int)newDefaultTypeIndex;
 
 - (NSAttributedString *)attributedString;
 - (NSString *)string;
