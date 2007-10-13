@@ -49,7 +49,9 @@
 @implementation BDSKValueTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath {
-    return [self initWithKeyPath:aKeyPath];
+    if (self = [super init])
+        keyPath = [aKeyPath copy];
+    return self;
 }
 
 - (void)dealloc {
