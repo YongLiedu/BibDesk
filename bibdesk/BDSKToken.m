@@ -715,9 +715,9 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
     }
     if ([nameStyleKey length])
         [keys addObject:nameStyleKey];
-    [keys addObject:joinStyleKey];
     if ([appendingKey length])
         [keys addObject:appendingKey];
+    [keys addObject:joinStyleKey];
     return keys;
 }
 
