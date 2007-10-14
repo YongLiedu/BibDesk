@@ -85,7 +85,7 @@
 
 - (NSImage *)finalImage;
 {
-    NSNumber *inputTime = [filter valueForKey:@"inputTime"];
+    NSNumber *inputTime = [[[filter valueForKey:@"inputTime"] retain] autorelease];
     
     [filter setValue:[NSNumber numberWithInt:1] forKey:@"inputTime"];
     NSImage *currentImage = [self currentImage];
@@ -102,16 +102,18 @@
 
 - (NSImage *)currentImage;
 { 
+    NSImage *nsImage = nil;
     CIImage *image = [filter valueForKey:@"outputImage"];
-    CGRect rect = [image extent];
-    
-    NSImage *nsImage = [[NSImage alloc] initWithSize:((NSRect *)&rect)->size];
-    [nsImage lockFocus];
-    CIContext *ciContext = [[NSGraphicsContext currentContext] CIContext];
-    CGRect r = CGRectMake(0,0,rect.size.width, rect.size.height);
-    [ciContext drawImage:image inRect:r fromRect:r];
-    [nsImage unlockFocus];
-    
+    if (nil != image) {
+        CGRect rect = [image extent];
+        
+        nsImage = [[NSImage alloc] initWithSize:((NSRect *)&rect)->size];
+        [nsImage lockFocus];
+        CIContext *ciContext = [[NSGraphicsContext currentContext] CIContext];
+        CGRect r = CGRectMake(0,0,rect.size.width, rect.size.height);
+        [ciContext drawImage:image inRect:r fromRect:r];
+        [nsImage unlockFocus];
+    }
     return [nsImage autorelease];
 }
 
