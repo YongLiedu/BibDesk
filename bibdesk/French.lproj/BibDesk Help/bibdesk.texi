@@ -3914,7 +3914,7 @@ Or you can use @emph{collection value keys}. As these returns a single value, it
 
 Collection value keys can only appear at the end of the key path. Also most collection modifier keys 
 can only appear at the end of the key path. However four collection modifer keys 
-(@code{@unionOfObjects}, @code{@distinctUnionOfObjects}, @code{@unionOfArrays}, and @code{@distinctUnionOfArrays}) 
+(@code{@@unionOfObjects}, @code{@@distinctUnionOfObjects}, @code{@@unionOfArrays}, and @code{@@distinctUnionOfArrays}) 
 require a property key path for the items of the collection to the right of it.
 Moreover, there can be only a single modifier key starting with @code{@@} in a key path.
 
@@ -3961,7 +3961,7 @@ template for substring match
 In these conditions the alternate template tags (starting with @code{<?$}) are optional. 
 There can be an arbitrary number of alternate matches. Matches are case insensitive.
 
-Apart from @code{=} and @{~}, also @code{<} and @code{<=} are available as comparison operators. 
+Apart from @code{=} and @code{~}, also @code{< } and @code{<= } are available as comparison operators. 
 All alternate tags must have the same comparison operator as the initial tag.
 
 As for collection template tags, if a condition template tag appears by itself on a further empty line, 
