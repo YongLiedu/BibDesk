@@ -710,6 +710,10 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                 id attachment = [attrs objectForKey:NSAttachmentAttributeName];
                 if ([attachment respondsToSelector:@selector(representedObject)] && [[attachment representedObject] isKindOfClass:[BDSKToken class]]) {
                     token = [attachment representedObject];
+                } else if ([[attachment attachmentCell] respondsToSelector:@selector(representedObject)]) {
+                    token = [(NSCell *)[attachment attachmentCell] representedObject];
+                    if ([token isKindOfClass:[BDSKToken class]] == NO)
+                        token = nil;
                 }
             }
         }
