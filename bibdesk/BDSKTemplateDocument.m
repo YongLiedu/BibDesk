@@ -49,6 +49,7 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
+static NSString *BDSKTemplateTokensPboardType = @"BDSKTemplateTokensPboardType";
 static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardType";
 static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
@@ -707,11 +708,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
             NSRange range = [[selRanges lastObject] rangeValue];
             if (range.length == 1) {
                 NSDictionary *attrs = [[textView textStorage] attributesAtIndex:range.location effectiveRange:NULL];
-                id attachment = [attrs objectForKey:NSAttachmentAttributeName];
-                if ([attachment respondsToSelector:@selector(representedObject)] && [[attachment representedObject] isKindOfClass:[BDSKToken class]]) {
-                    token = [attachment representedObject];
-                } else if ([[attachment attachmentCell] respondsToSelector:@selector(representedObject)]) {
-                    token = [(NSCell *)[attachment attachmentCell] representedObject];
+                id attachmentCell = [[attrs objectForKey:NSAttachmentAttributeName] attachmentCell];
+                if ([attachmentCell respondsToSelector:@selector(representedObject)]) {
+                    token = [attachmentCell representedObject];
                     if ([token isKindOfClass:[BDSKToken class]] == NO)
                         token = nil;
                 }
@@ -760,20 +759,31 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 // implement pasteboard delegate methods as a workaround for not doing the string->token transformation of tokenField:representedObjectForEditingString: (apparently needed for drag-and-drop on post-10.4 systems)
 - (BOOL)tokenField:(NSTokenField *)tokenField writeRepresentedObjects:(NSArray *)objects toPasteboard:(NSPasteboard *)pboard {
-    // only add NSStringPboardType to fool the field editor into accepting the drop on 10.4
-    [pboard declareTypes:[NSArray arrayWithObjects:[super description], NSStringPboardType, nil] owner:nil];
+    NSMutableString *string = [NSMutableString string];
+    NSEnumerator *objectEnum = [objects objectEnumerator];
+    id object;
+    
+    while (object = [objectEnum nextObject])
+        [string appendString:[self tokenField:tokenField displayStringForRepresentedObject:object]];
+    
+    [pboard declareTypes:[NSArray arrayWithObjects:BDSKTemplateTokensPboardType, NSStringPboardType, nil] owner:nil];
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:objects];
-    [pboard setData:data forType:[super description]];
-    [pboard setString:@"NSBrokenField" forType:NSStringPboardType];
+    [pboard setData:data forType:BDSKTemplateTokensPboardType];
+    [pboard setString:string forType:NSStringPboardType];
     return nil != data;
 }
 
 - (NSArray *)tokenField:(NSTokenField *)tokenField readFromPasteboard:(NSPasteboard *)pboard {
-    if ([[pboard types] containsObject:[super description]] == NO)
-        return nil;
-    
-    NSData *data = [pboard dataForType:[super description]];
-    return [NSKeyedUnarchiver unarchiveObjectWithData:data];
+    if (tokenField == itemTemplateTokenField) {
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTemplateTokensPboardType, NSStringPboardType, nil]];
+        if ([type isEqualToString:BDSKTemplateTokensPboardType]) {
+            NSData *data = [pboard dataForType:BDSKTemplateTokensPboardType];
+            return [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        } else if ([type isEqualToString:NSStringPboardType]) {
+            return [NSArray arrayWithObjects:[pboard stringForType:NSStringPboardType], nil];
+        }
+    }
+    return nil;
 }
 
 - (NSString *)tokenField:(NSTokenField *)tokenField displayStringForRepresentedObject:(id)representedObject {
