@@ -754,6 +754,24 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 #pragma mark NSTokenField delegate
 
+// implement pasteboard delegate methods as a workaround for not doing the string->token transformation of tokenField:representedObjectForEditingString: (apparently needed for drag-and-drop on post-10.4 systems)
+- (BOOL)tokenField:(NSTokenField *)tokenField writeRepresentedObjects:(NSArray *)objects toPasteboard:(NSPasteboard *)pboard {
+    // only add NSStringPboardType to fool the field editor into accepting the drop on 10.4
+    [pboard declareTypes:[NSArray arrayWithObjects:[super description], NSStringPboardType, nil] owner:nil];
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:objects];
+    [pboard setData:data forType:[super description]];
+    [pboard setString:@"NSBrokenField" forType:NSStringPboardType];
+    return nil != data;
+}
+
+- (NSArray *)tokenField:(NSTokenField *)tokenField readFromPasteboard:(NSPasteboard *)pboard {
+    if ([[pboard types] containsObject:[super description]] == NO)
+        return nil;
+    
+    NSData *data = [pboard dataForType:[super description]];
+    return [NSKeyedUnarchiver unarchiveObjectWithData:data];
+}
+
 - (NSString *)tokenField:(NSTokenField *)tokenField displayStringForRepresentedObject:(id)representedObject {
     if ([representedObject isKindOfClass:[BDSKToken class]])
         return [representedObject title];
@@ -905,7 +923,11 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 @implementation BDSKTokenFieldCell
 
 + (void)load {
-    [BDSKTokenFieldCell poseAsClass:[NSTokenFieldCell class]];
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    // in later versions, messing with the binding info causes an infinite loop and crash 
+    if (floor(NSAppKitVersionNumber) <= 824 /* 10.4 */)
+        [BDSKTokenFieldCell poseAsClass:NSClassFromString(@"NSTokenFieldCell")];
+    [pool release];
 }
 
 - (void)setObjectValue:(id)value {
