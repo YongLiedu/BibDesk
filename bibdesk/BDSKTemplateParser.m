@@ -299,8 +299,8 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                     
                     sepTagRange = altTemplateTagRange(itemTemplate, sepMultiTagWithTag(tag), nil, NULL);
                     if (sepTagRange.location != NSNotFound) {
-                        itemTemplate = [itemTemplate substringToIndex:sepTagRange.location];
                         separatorTemplate = [itemTemplate substringFromIndex:NSMaxRange(sepTagRange)];
+                        itemTemplate = [itemTemplate substringToIndex:sepTagRange.location];
                     }
                     
                     currentTag = [[BDSKCollectionTag alloc] initWithKeyPath:tag itemTemplateString:itemTemplate separatorTemplateString:separatorTemplate];
@@ -602,8 +602,8 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                     
                     sepTagRange = altTemplateTagRange([itemTemplate string], sepMultiTagWithTag(tag), nil, NULL);
                     if (sepTagRange.location != NSNotFound) {
-                        itemTemplate = [itemTemplate attributedSubstringFromRange:NSMakeRange(0, sepTagRange.location)];
                         separatorTemplate = [itemTemplate attributedSubstringFromRange:NSMakeRange(NSMaxRange(sepTagRange), [itemTemplate length] - NSMaxRange(sepTagRange))];
+                        itemTemplate = [itemTemplate attributedSubstringFromRange:NSMakeRange(0, sepTagRange.location)];
                     }
                     
                     currentTag = [[BDSKRichCollectionTag alloc] initWithKeyPath:tag itemTemplateAttributedString:itemTemplate separatorTemplateAttributedString:separatorTemplate];
