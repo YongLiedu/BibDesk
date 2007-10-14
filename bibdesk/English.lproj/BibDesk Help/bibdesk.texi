@@ -3912,6 +3912,12 @@ Or you can use @emph{collection value keys}. As these returns a single value, it
 <$collectionKey.@@collectionValueKey/>
 @end example
 
+Collection value keys can only appear at the end of the key path. Also most collection modifier keys 
+can only appear at the end of the key path. However four collection modifer keys 
+(@code{@unionOfObjects}, @code{@distinctUnionOfObjects}, @code{@@unionOfArrays}, and @code{@@distinctUnionOfArrays}) 
+require a property key path for the items of the collection to the right of it. 
+Moreover, there can be only a single modifier key starting with @code{@@} in a key path.
+
 @subheading Condition tags
 
 Another template tag is used to include part of a template depending on whether a value is empty or not. 
@@ -3954,6 +3960,9 @@ template for substring match
 
 In these conditions the alternate template tags (starting with @code{<?$}) are optional. 
 There can be an arbitrary number of alternate matches. Matches are case insensitive.
+
+Apart from @code{=} and @{~}, also @code{<} and @code{<=} are available as comparison operators. 
+All alternate tags must have the same comparison operator as the initial tag.
 
 As for collection template tags, if a condition template tag appears by itself on a further empty line, 
 this whole line will be ignored, including the newline at the end of the line. Moreover you can use 
@@ -4304,17 +4313,25 @@ Below are lists of collection keys that could be used in BibDesk export template
 
 @subheading General
 
-@multitable {@@distinctUnionOfArrays} {}
+@multitable {@@arrayDroppingFirstObject} {}
 @headitem Key @tab Description
 @item @@unionOfObjects
-@tab 
+@tab Requires additional value key
 @item @@distinctUnionOfObjects
-@tab 
+@tab Requires additional value key
 @item @@unionOfArrays
-@tab 
+@tab Requires additional collection key
 @item @@distinctUnionOfArrays
-@tab 
+@tab Requires additional vcollection key
 @item @@arrayDroppingFirstObject
+@tab 
+@item @@firstTwoObjects
+@tab 
+@item @@firstThreeObjects
+@tab 
+@item @@firstFourObjects
+@tab 
+@item @@firstFiveObjects
 @tab 
 @end multitable
 
@@ -4332,9 +4349,25 @@ Below are lists of collection keys that could be used in BibDesk export template
 
 @subheading General
 
-@multitable {@@componentsJoinedByCommaAndAnd} {}
+@multitable {@@componentsJoinedByCommaAndAndWithEtAlAfterThree} {}
 @headitem Key @tab Description
 @item @@firstObject
+@tab 
+@item @@secondObject
+@tab 
+@item @@thirdObject
+@tab 
+@item @@fourthObject
+@tab 
+@item @@fifthObject
+@tab 
+@item @@seventhObject
+@tab 
+@item @@eighthObject
+@tab 
+@item @@ninthObject
+@tab 
+@item @@tenthObject
 @tab 
 @item @@lastObject
 @tab 
@@ -4350,6 +4383,14 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab
 @item @@componentsJoinedByDefaultJoinString
 @tab
+@item @@componentsWithEtAlAfterOne
+@tab 
+@item @@componentsJoinedByAndWithEtAlAfterOne
+@tab 
+@item @@componentsJoinedByAndWithEtAlAfterTwo
+@tab 
+@item @@componentsJoinedByCommaAndAndWithEtAlAfterThree
+@tab 
 @end multitable
 
 
