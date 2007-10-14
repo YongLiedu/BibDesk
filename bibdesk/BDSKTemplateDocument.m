@@ -52,14 +52,19 @@ static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 1
 static NSString *BDSKTemplateTokensPboardType = @"BDSKTemplateTokensPboardType";
 static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardType";
 static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
+static NSString *BDSKDisabledTextColorTransformerName = @"BDSKDisabledTextColor";
 
 @interface BDSKValueOrNoneTransformer : NSValueTransformer @end
+
+@interface BDSKDisabledTextColorTransformer : NSValueTransformer @end
 
 @implementation BDSKTemplateDocument
 
 + (void)initialize {
 	[NSValueTransformer setValueTransformer:[[[BDSKValueOrNoneTransformer alloc] init] autorelease]
 									forName:BDSKValueOrNoneTransformerName];
+	[NSValueTransformer setValueTransformer:[[[BDSKDisabledTextColorTransformer alloc] init] autorelease]
+									forName:BDSKDisabledTextColorTransformerName];
 }
 
 + (NSArray *)writableTypes {
@@ -500,7 +505,12 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (void)setDefaultTypeIndex:(unsigned int)newDefaultTypeIndex {
     if (defaultTypeIndex != newDefaultTypeIndex) {
         [[[self undoManager] prepareWithInvocationTarget:self] setDefaultTypeIndex:defaultTypeIndex];
+        unsigned int oldDefaultTypeIndex = defaultTypeIndex;
+        [[typeTemplates objectAtIndex:oldDefaultTypeIndex] willChangeValueForKey:@"default"];
+        [[typeTemplates objectAtIndex:newDefaultTypeIndex] willChangeValueForKey:@"default"];
         defaultTypeIndex = newDefaultTypeIndex;
+        [[typeTemplates objectAtIndex:oldDefaultTypeIndex] didChangeValueForKey:@"default"];
+        [[typeTemplates objectAtIndex:newDefaultTypeIndex] didChangeValueForKey:@"default"];
         [self updatePreview];
     }
 }
@@ -976,6 +986,24 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 - (id)reverseTransformedValue:(id)string {
 	return [string isEqualToString:@"<None>"] ? nil : string;
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKDisabledTextColorTransformer
+
++ (Class)transformedValueClass {
+    return [NSColor class];
+}
+
++ (BOOL)allowsReverseTransformation {
+    return NO;
+}
+
+- (id)transformedValue:(id)flag {
+	return [flag boolValue] ? [NSColor disabledControlTextColor] : [NSColor controlTextColor];
 }
 
 @end

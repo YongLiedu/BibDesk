@@ -106,8 +106,12 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
     }
 }
 
-- (BOOL)empty {
+- (BOOL)isEmpty {
     return [itemTemplate count] == 0;
+}
+
+- (BOOL)isDefault {
+    return [[[document typeTemplates] objectAtIndex:[document defaultTypeIndex]] isEqual:self];
 }
 
 - (NSArray *)requiredTokens {

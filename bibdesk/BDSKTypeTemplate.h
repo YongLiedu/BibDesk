@@ -59,6 +59,9 @@ extern NSString *BDSKTemplateDidChangeNotification;
 - (BOOL)isIncluded;
 - (void)setIncluded:(BOOL)newIncluded;
 
+- (BOOL)isEmpty;
+- (BOOL)isDefault;
+
 - (NSArray *)requiredTokens;
 - (void)setRequiredTokens:(NSArray *)newRequiredTokens;
 
