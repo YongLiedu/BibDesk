@@ -212,7 +212,19 @@ static NSString *BDSKDisabledTextColorTransformerName = @"BDSKDisabledTextColor"
     [prefixTemplateTextView setRichText:[self isRichText]];
     [separatorTemplateTextView setRichText:[self isRichText]];
     [suffixTemplateTextView setRichText:[self isRichText]];
-    if ([self isRichText] == NO) {
+    if ([self isRichText]) {
+        NSFont *font = [NSFont fontWithName:[self fontName] size:[self fontSize]];
+        if ([self isBold])
+            font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
+        if ([self isItalic])
+            font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSItalicFontMask];
+        if ([[prefixTemplateTextView string] length] == 0)
+            [prefixTemplateTextView setFont:font];
+        if ([[separatorTemplateTextView string] length] == 0)
+            [separatorTemplateTextView setFont:font];
+        if ([[suffixTemplateTextView string] length] == 0)
+            [suffixTemplateTextView setFont:font];
+    } else {
         [prefixTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
         [separatorTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
         [suffixTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
@@ -460,6 +472,7 @@ static NSString *BDSKDisabledTextColorTransformerName = @"BDSKDisabledTextColor"
         [fontName release];
         fontName = [newFontName retain];
         [self updatePreview];
+        [self updateTextViews];
     }
 }
 
@@ -472,6 +485,7 @@ static NSString *BDSKDisabledTextColorTransformerName = @"BDSKDisabledTextColor"
         [[[self undoManager] prepareWithInvocationTarget:self] setFontSize:fontSize];
         fontSize = newFontSize;
         [self updatePreview];
+        [self updateTextViews];
     }
 }
 
@@ -484,6 +498,7 @@ static NSString *BDSKDisabledTextColorTransformerName = @"BDSKDisabledTextColor"
         [(BDSKTemplateDocument *)[[self undoManager] prepareWithInvocationTarget:self] setBold:bold];
         bold = newBold;
         [self updatePreview];
+        [self updateTextViews];
     }
 }
 
@@ -496,6 +511,7 @@ static NSString *BDSKDisabledTextColorTransformerName = @"BDSKDisabledTextColor"
         [(BDSKTemplateDocument *)[[self undoManager] prepareWithInvocationTarget:self] setItalic:italic];
         italic = newItalic;
         [self updatePreview];
+        [self updateTextViews];
     }
 }
 
