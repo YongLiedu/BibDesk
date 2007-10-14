@@ -747,10 +747,13 @@ static NSString *BDSKDisabledTextColorTransformerName = @"BDSKDisabledTextColor"
             NSRange range = [[selRanges lastObject] rangeValue];
             if (range.length == 1) {
                 NSDictionary *attrs = [[textView textStorage] attributesAtIndex:range.location effectiveRange:NULL];
-                id attachmentCell = [[attrs objectForKey:NSAttachmentAttributeName] attachmentCell];
-                if ([attachmentCell respondsToSelector:@selector(representedObject)]) {
-                    token = [attachmentCell representedObject];
-                    if ([token isKindOfClass:[BDSKToken class]] == NO)
+                id attachment = [attrs objectForKey:NSAttachmentAttributeName];
+                if (attachment) {
+                    if ([attachment respondsToSelector:@selector(representedObject)])
+                        token = [attachment representedObject];
+                    else if ([[attachment attachmentCell] respondsToSelector:@selector(representedObject)])
+                        token = [(id)[attachment attachmentCell] representedObject];
+                    if (token && [token isKindOfClass:[BDSKToken class]] == NO)
                         token = nil;
                 }
             }
