@@ -208,10 +208,22 @@ static NSString *BDSKDisabledTextColorTransformerName = @"BDSKDisabledTextColor"
     SETUP_SUBMENU(personOptionsMenu, 2, @"appending", @selector(changeAppending:));
 }
 
+- (void)updateTextViews {
+    [prefixTemplateTextView setRichText:[self isRichText]];
+    [separatorTemplateTextView setRichText:[self isRichText]];
+    [suffixTemplateTextView setRichText:[self isRichText]];
+    if ([self isRichText] == NO) {
+        [prefixTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
+        [separatorTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
+        [suffixTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
+    }
+}
+
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController {
     [super windowControllerDidLoadNib:aController];
     
     [self setupOptionsMenus];
+    [self updateTextViews];
     
     [requiredTokenField setEditable:NO];
     [requiredTokenField setBezeled:NO];
@@ -432,6 +444,7 @@ static NSString *BDSKDisabledTextColorTransformerName = @"BDSKDisabledTextColor"
         
         [self updatePreview];
         [self updateOptionView];
+        [self updateTextViews];
         [self setFileURL:nil];
         [self setFileType:richText ? @"RTFTemplate" : @"TextTemplate"];
     }
