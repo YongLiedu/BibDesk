@@ -154,8 +154,6 @@
         returnString = [[[NSMutableAttributedString alloc] init] autorelease];
         while(pub = [e nextObject]){
             pool = [NSAutoreleasePool new];
-            [pub setItemIndex:++currentIndex];
-            [returnString appendAttributedString:[pub attributedStringValueUsingTemplate:template]];
             parsedTemplate = [parsedTemplates objectForKey:[pub pubType]];
             if (parsedTemplate == nil) {
                 if ([template templateURLForType:[pub pubType]]) {
