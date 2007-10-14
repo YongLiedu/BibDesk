@@ -129,9 +129,10 @@ enum {
 
 - (void)awakeFromNib{
     BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
-    NSArray *fields = [btm allFieldNamesIncluding:[[btm noteFieldsSet] allObjects] excluding:nil];
+    NSMutableArray *extraFields = [NSMutableArray arrayWithObjects:BDSKCiteKeyString, BDSKPubTypeString, nil];
+    [extraFields addObjectsFromArray:[[btm noteFieldsSet] allObjects]];
 	[fieldToSearchComboBox removeAllItems];
-	[fieldToSearchComboBox addItemsWithObjectValues:fields];
+	[fieldToSearchComboBox addItemsWithObjectValues:[btm allFieldNamesIncluding:extraFields excluding:nil]];
 
     // make sure we enter valid field names
     BDSKFieldNameFormatter *formatter = [[BDSKFieldNameFormatter alloc] init];
