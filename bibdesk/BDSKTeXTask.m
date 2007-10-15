@@ -90,8 +90,16 @@
 
 @end
 
+static double runLoopTimeout = 30;
 
 @implementation BDSKTeXTask
+
++ (void)initialize
+{
+    // returns 0 if the key doesn't exist
+    if ([[NSUserDefaults standardUserDefaults] floatForKey:@"BDSKTeXTaskRunLoopTimeout"] > 1)
+        runLoopTimeout = [[NSUserDefaults standardUserDefaults] floatForKey:@"BDSKTeXTaskRunLoopTimeout"];
+}
 
 - (id)init{
     NSString *tmpDirPath = [[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:@"tmpbib"];
@@ -689,12 +697,15 @@
     }
     
     if (rv == 0) {
-        NSDate *limitDate = [NSDate dateWithTimeIntervalSinceNow:30.0f];
+        NSTimeInterval stopTime = [NSDate timeIntervalSinceReferenceDate] + runLoopTimeout;
+        NSDate *limitDate = [NSDate dateWithTimeIntervalSinceReferenceDate:stopTime];
         
         // we're basically doing what -[NSTask waitUntilExit] does, with the additional twist of a hard limit on the time a process can run (30 seconds for a LaTeX run is a long time, even on a slow machine)
         BOOL run;    
+        NSRunLoop *rl = [NSRunLoop currentRunLoop];
         do {
-            run = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:limitDate] && [currentTask isRunning];
+            NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+            run = [currentTask isRunning] && now < stopTime && [rl runMode:NSDefaultRunLoopMode beforeDate:limitDate];
         } while (run);
         
         // isRunning may return NO before the task has terminated, so we need to make sure it's done, or else NSTask raises an exception and our status flags are hosed
