@@ -980,7 +980,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
         NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
         NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeTo:commonParent error:outError];
-        NSFileWrapper *fileWrapper = [[[NSFileWrapper alloc] initDirectoryWithFileWrappers:[NSDictionary dictionary]] autorelease];
         NSString *bibtexPath = [[path stringByAppendingPathComponent:[path lastPathComponent]] stringByAppendingPathExtension:@"bib"];
         
         success = [bibtexData writeToFile:bibtexPath options:0 error:outError];

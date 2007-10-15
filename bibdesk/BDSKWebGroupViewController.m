@@ -114,7 +114,6 @@
 }
 
 - (IBAction)changeURL:(id)sender {
-	NSString *currentURLString = [[[[[webView mainFrame] dataSource] request] URL] absoluteString];
     NSString *newURLString = [sender stringValue];
     
     if ([NSString isEmptyString:newURLString]) return;

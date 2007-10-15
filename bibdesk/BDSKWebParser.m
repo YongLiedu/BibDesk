@@ -18,7 +18,6 @@
 
 static Class webParserClassForType(int stringType)
 {
-    Class parserClass = Nil;
     switch(stringType){
         case BDSKGoogleScholarWebType:
             return [BDSKGoogleScholarParser class];
