@@ -1070,8 +1070,8 @@
 		CE8961BB0CBEB5AC00EA2D98 /* BDSKTemplateDocument.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplateDocument.m; sourceTree = "<group>"; };
 		CE8962250CBEBAAC00EA2D98 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/TemplateDocument.nib; sourceTree = "<group>"; };
 		CE8962B10CBEBFD200EA2D98 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/TemplateDocument.nib; sourceTree = "<group>"; };
-		CE8962C50CBEC0C500EA2D98 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/TemplateOptions.strings; sourceTree = "<group>"; };
-		CE8962C90CBEC0D600EA2D98 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/TemplateOptions.strings; sourceTree = "<group>"; };
+		CE8962C50CBEC0C500EA2D98 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/TemplateOptions.strings; sourceTree = "<group>"; };
+		CE8962C90CBEC0D600EA2D98 /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/TemplateOptions.strings; sourceTree = "<group>"; };
 		CE8962CA0CBEC10700EA2D98 /* TemplateOptions.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist; path = TemplateOptions.plist; sourceTree = "<group>"; };
 		CE8C731C0B0CA6C500E31E5A /* NSObject_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSObject_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSObject_BDSKExtensions.m; sourceTree = "<group>"; };
@@ -1256,7 +1256,7 @@
 		F9022CDC0758050E00C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibPref_General.nib; sourceTree = SOURCE_ROOT; };
 		F9022CDE0758050E00C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibPref_InputManager.nib; sourceTree = SOURCE_ROOT; };
 		F9022CE20758050E00C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibPref_TeX.nib; sourceTree = SOURCE_ROOT; };
-		F9022CE40758050E00C3F701 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/BibTeXKeys.strings; sourceTree = SOURCE_ROOT; };
+		F9022CE40758050E00C3F701 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/BibTeXKeys.strings; sourceTree = SOURCE_ROOT; };
 		F9022CE60758050E00C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = English; path = English.lproj/Credits.rtf; sourceTree = SOURCE_ROOT; };
 		F9022CE80758050E00C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/Previewer.nib; sourceTree = SOURCE_ROOT; };
 		F9022D150758066000C3F701 /* CharacterConversion.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = CharacterConversion.plist; sourceTree = "<group>"; };
@@ -1540,10 +1540,10 @@
 		F9C7D3F70BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/SearchButtonView.nib; sourceTree = "<group>"; };
 		F9C7D3F80BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/SelectEncodingsPanel.nib; sourceTree = "<group>"; };
 		F9C7D3FA0BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/TextImport.nib; sourceTree = "<group>"; };
-		F9C7D3FD0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/BibTeXKeys.strings; sourceTree = SOURCE_ROOT; };
+		F9C7D3FD0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/BibTeXKeys.strings; sourceTree = SOURCE_ROOT; };
 		F9C7D3FE0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F9C7D3FF0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F9C7D4000BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Preferences.strings; sourceTree = "<group>"; };
+		F9C7D3FF0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F9C7D4000BE9280F00D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Preferences.strings; sourceTree = "<group>"; };
 		F9C7D4040BE9282000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = French; path = French.lproj/PreferenceSearchTerms.plist; sourceTree = "<group>"; };
 		F9C7D4090BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/Credits.rtf; sourceTree = SOURCE_ROOT; };
 		F9C7D40A0BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/ReadMe.rtf; sourceTree = "<group>"; };

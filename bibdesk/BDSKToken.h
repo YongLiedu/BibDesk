@@ -43,6 +43,7 @@ enum {
     BDSKURLTokenType,
     BDSKFileTokenType,
     BDSKPersonTokenType,
+    BDSKDateTokenType,
     BDSKNumberTokenType,
     BDSKTextTokenType
 };
@@ -159,6 +160,17 @@ extern NSString *BDSKTokenDidChangeNotification;
 
 - (NSString *)joinStyleKey;
 - (void)setJoinStyleKey:(NSString *)newJoinStyleKey;
+
+@end
+
+#pragma mark -
+
+@interface BDSKDateTagToken : BDSKTagToken {
+    NSString *dateFormatKey;
+}
+
+- (NSString *)dateFormatKey;
+- (void)setDateFormatKey:(NSString *)newDateFormatKey;
 
 @end
 

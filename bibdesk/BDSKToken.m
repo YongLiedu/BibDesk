@@ -65,6 +65,14 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
             [tag setKey:@"remoteURL"];
     } else if ([field isEqualToString:@"Rich Text"]) {
         tag = [[BDSKTextToken alloc] initWithTitle:field];
+    } else if ([field isEqualToString:BDSKDateAddedString] || [field isEqualToString:BDSKDateModifiedString] || [field isEqualToString:BDSKPubDateString]) {
+        tag = [[BDSKDateTagToken alloc] initWithTitle:field];
+        if ([field isEqualToString:BDSKDateAddedString])
+            [tag setKey:@"dateAdded"];
+        else if ([field isEqualToString:BDSKDateModifiedString])
+            [tag setKey:@"dateModified"];
+        if ([field isEqualToString:BDSKPubDateString])
+            [tag setKey:@"date"];
     } else if ([field isEqualToString:@"Item Index"]) {
         tag = [[BDSKNumberTagToken alloc] initWithTitle:field];
         if ([field isEqualToString:@"Item Index"])
@@ -714,6 +722,88 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
     if ([appendingKey length])
         [keys addObject:appendingKey];
     [keys addObject:joinStyleKey];
+    return keys;
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKDateTagToken
+
+- (id)initWithTitle:(NSString *)aTitle {
+    if (self = [super initWithTitle:aTitle]) {
+        dateFormatKey = [@"description" retain];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        if ([decoder allowsKeyedCoding]) {
+            dateFormatKey = [[decoder decodeObjectForKey:@"dateFormatKey"] retain];
+        } else {
+            dateFormatKey = [[decoder decodeObject] retain];
+        }
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+    [super encodeWithCoder:encoder];
+    if ([encoder allowsKeyedCoding]) {
+        [encoder encodeObject:dateFormatKey forKey:@"dateFormatKey"];
+    } else {
+        [encoder encodeObject:dateFormatKey];
+    }
+}
+
+- (id)copyWithZone:(NSZone *)aZone {
+    BDSKDateTagToken *copy = [super copyWithZone:aZone];
+    copy->dateFormatKey = [dateFormatKey retain];
+    return copy;
+}
+
+- (void)dealloc {
+    [dateFormatKey release];
+    [super dealloc];
+}
+/*
+- (BOOL)isEqual:(id)other {
+    return [super isEqual:other] &&
+           EQUAL_OR_NIL_STRINGS(dateFormatKey, [other dateFormatKey]);
+}
+*/
+- (int)type {
+    return BDSKDateTokenType;
+}
+
+- (NSString *)dateFormatKey {
+    return dateFormatKey;
+}
+
+- (void)setDateFormatKey:(NSString *)newDateFormatKey {
+    if (dateFormatKey != newDateFormatKey) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setKey:dateFormatKey];
+        [dateFormatKey release];
+        dateFormatKey = [newDateFormatKey retain];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
+    }
+}
+
+- (NSArray *)keys {
+    NSMutableArray *keys = [NSMutableArray array];
+    
+    if (key) {
+        [keys addObject:key];
+    } else {
+        [keys addObject:@"fields"];
+        [keys addObject:title];
+    }
+    if ([dateFormatKey length])
+        [keys addObject:dateFormatKey];
+    if ([appendingKey length])
+        [keys addObject:appendingKey];
     return keys;
 }
 

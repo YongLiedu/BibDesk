@@ -253,4 +253,22 @@
             key = "@componentsJoinedByCommaAndAndWithEtAlAfterThree";
         }
     );
+    dateFormat = (
+        {
+            displayName = "Standard";
+            key = "description";
+        },
+        {
+            displayName = "Default";
+            key = "dateDescription";
+        },
+        {
+            displayName = "Short Default";
+            key = "shortDateDescription";
+        },
+        {
+            displayName = "RSS";
+            key = "rssDescription";
+        }
+    );
 }

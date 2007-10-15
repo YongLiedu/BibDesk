@@ -146,6 +146,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         [specialTokens addObject:[self tokenForField:BDSKPubTypeString]];
         [specialTokens addObject:[self tokenForField:BDSKCiteKeyString]];
         [specialTokens addObject:[self tokenForField:@"Item Index"]];
+        [specialTokens addObject:[self tokenForField:BDSKDateAddedString]];
+        [specialTokens addObject:[self tokenForField:BDSKDateModifiedString]];
+        [specialTokens addObject:[self tokenForField:BDSKPubDateString]];
         [specialTokens addObject:[self tokenForField:@"Rich Text"]];
     }
     return self;
@@ -200,6 +203,8 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     SETUP_SUBMENU(personOptionsMenu, 0, @"nameStyle", @selector(changeNameStyle:));
     SETUP_SUBMENU(personOptionsMenu, 1, @"joinStyle", @selector(changeJoinStyle:));
     SETUP_SUBMENU(personOptionsMenu, 2, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(dateOptionsMenu, 0, @"dateFormat", @selector(changeDateFormat:));
+    SETUP_SUBMENU(dateOptionsMenu, 1, @"appending", @selector(changeAppending:));
 }
 
 - (void)updateTextViews {
@@ -309,6 +314,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                 break;
             case BDSKPersonTokenType:
                 optionViews = [NSArray arrayWithObjects:personOptionsView, appendingOptionsView, nil];
+                break;
+            case BDSKDateTokenType:
+                optionViews = [NSArray arrayWithObjects:dateOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKTextTokenType:
                 optionViews = [NSArray arrayWithObjects:textOptionsView, nil];
@@ -690,6 +698,12 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [menuToken setValue:newValue forKey:@"urlFormatKey"];
 }
 
+- (IBAction)changeDateFormat:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"dateFormatKey"];
+}
+
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     SEL action = [menuItem action];
     NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
@@ -710,6 +724,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         return YES;
     } else if (action == @selector(changeUrlFormat:)) {
         [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"urlFormatKey"]] isEqualToString:[menuItem representedObject]]];
+        return YES;
+    } else if (action == @selector(changeDateFormat:)) {
+        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"dateFormatKey"]] isEqualToString:[menuItem representedObject]]];
         return YES;
     } else if ([[BDSKTemplateDocument superclass] instancesRespondToSelector:_cmd]) {
         return [super validateMenuItem:menuItem];
@@ -844,6 +861,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
             case BDSKURLTokenType: menu = urlOptionsMenu; break;
             case BDSKFileTokenType: menu = fileOptionsMenu; break;
             case BDSKPersonTokenType: menu = personOptionsMenu; break;
+            case BDSKDateTokenType: menu = dateOptionsMenu; break;
             default: menu = nil; break;
         }
     }
