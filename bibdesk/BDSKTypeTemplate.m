@@ -47,7 +47,7 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 @implementation BDSKTypeTemplate
 
 + (void)initialize {
-    [self setKeys:[NSArray arrayWithObjects:@"itemTemplate", nil] triggerChangeNotificationsForDependentKey:@"empty"];
+    [self setKeys:[NSArray arrayWithObjects:@"itemTemplate", @"included", @"default", nil] triggerChangeNotificationsForDependentKey:@"textColor"];
 }
 
 - (id)initWithPubType:(NSString *)aPubType forDocument:(BDSKTemplateDocument *)aDocument {
@@ -101,17 +101,25 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
 
 - (void)setIncluded:(BOOL)newIncluded {
     if (included != newIncluded) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setIncluded:included];
         included = newIncluded;
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTemplateDidChangeNotification object:self];
     }
 }
 
-- (BOOL)isEmpty {
-    return [itemTemplate count] == 0;
-}
-
 - (BOOL)isDefault {
     return [[[document typeTemplates] objectAtIndex:[document defaultTypeIndex]] isEqual:self];
+}
+
+- (NSColor *)textColor {
+    NSColor *color = [NSColor controlTextColor];
+    if ([[self itemTemplate] count] == 0) {
+        if ([self isIncluded] || [self isDefault])
+            color = [NSColor redColor];
+        else
+            color = [NSColor disabledControlTextColor];
+    }
+    return color;
 }
 
 - (NSArray *)requiredTokens {
