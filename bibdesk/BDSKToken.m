@@ -51,20 +51,30 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
     id tag = nil;
     if ([field isPersonField]) {
         tag = [[BDSKPersonTagToken alloc] initWithTitle:field];
+        if ([field isEqualToString:BDSKAuthorString])
+            [tag setKey:@"authors"];
+        else if ([field isEqualToString:BDSKEditorString])
+            [tag setKey:@"editors"];
     } else if ([field isLocalFileField]) {
         tag = [[BDSKFileTagToken alloc] initWithTitle:field];
+        if ([field isEqualToString:BDSKLocalUrlString])
+            [tag setKey:@"localURL"];
     } else if ([field isRemoteURLField]) {
         tag = [[BDSKURLTagToken alloc] initWithTitle:field];
+        if ([field isEqualToString:BDSKUrlString])
+            [tag setKey:@"remoteURL"];
     } else if ([field isEqualToString:@"Rich Text"]) {
         tag = [[BDSKTextToken alloc] initWithTitle:field];
+    } else if ([field isEqualToString:@"Item Index"]) {
+        tag = [[BDSKNumberTagToken alloc] initWithTitle:field];
+        if ([field isEqualToString:@"Item Index"])
+            [tag setKey:@"itemIndex"];
     } else {
         tag = [[BDSKFieldTagToken alloc] initWithTitle:field];
         if ([field isEqualToString:BDSKPubTypeString])
             [tag setKey:@"pubType"];
         else  if ([field isEqualToString:BDSKCiteKeyString])
             [tag setKey:@"citeKey"];
-        else  if ([field isEqualToString:@"Item Index"])
-            [tag setKey:@"itemIndex"];
     }
     
     return [tag autorelease];
@@ -519,9 +529,7 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 
 - (id)initWithTitle:(NSString *)aTitle {
     if (self = [super initWithTitle:aTitle]) {
-        urlFormatKey = nil;
-        if ([title isEqualToString:BDSKUrlString])
-            key = @"remoteURL";
+        urlFormatKey = [@"absoluteString" retain];
     }
     return self;
 }
@@ -601,14 +609,6 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 
 @implementation BDSKFileTagToken
 
-- (id)initWithTitle:(NSString *)aTitle {
-    if (self = [super initWithTitle:aTitle]) {
-        if ([title isEqualToString:BDSKLocalUrlString])
-            key = @"localURL";
-    }
-    return self;
-}
-
 - (int)type {
     return BDSKFileTokenType;
 }
@@ -623,10 +623,6 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
     if (self = [super initWithTitle:aTitle]) {
         nameStyleKey = [@"name" retain];
         joinStyleKey = [@"@componentsJoinedByCommaAndAnd" retain];
-        if ([title isEqualToString:BDSKAuthorString])
-            key = [@"authors" retain];
-        else if ([title isEqualToString:BDSKEditorString])
-            key = [@"editors" retain];
     }
     return self;
 }
@@ -719,6 +715,16 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
         [keys addObject:appendingKey];
     [keys addObject:joinStyleKey];
     return keys;
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKNumberTagToken
+
+- (int)type {
+    return BDSKNumberTokenType;
 }
 
 @end

@@ -294,43 +294,36 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     NSArray *optionViews = [[[tokenOptionsBox contentView] subviews] copy];
     [optionViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [optionViews release];
+    optionViews = nil;
     
-    if (selectedToken) {
-        int type = [selectedToken isKindOfClass:[BDSKToken class]] ? [selectedToken type] : -1;
-        NSView *view = nil;
-        
-        switch (type) {
+    if (selectedToken && [selectedToken isKindOfClass:[BDSKToken class]]) {
+        switch ([selectedToken type]) {
             case BDSKFieldTokenType:
-                view = fieldOptionsView;
+                optionViews = [NSArray arrayWithObjects:fieldOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKFileTokenType:
-                view = fileOptionsView;
+                optionViews = [NSArray arrayWithObjects:fileOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKURLTokenType:
-                view = urlOptionsView;
+                optionViews = [NSArray arrayWithObjects:urlOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKPersonTokenType:
-                view = personOptionsView;
+                optionViews = [NSArray arrayWithObjects:personOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKTextTokenType:
-                view = textOptionsView;
+                optionViews = [NSArray arrayWithObjects:textOptionsView, nil];
                 break;
         }
+        NSEnumerator *viewEnum = [optionViews objectEnumerator];
+        NSView *view;
         NSRect frame = [[tokenOptionsBox contentView] bounds];
         NSPoint point = NSMakePoint(NSMinX(frame) + 7.0, NSMaxY(frame) - 7.0);
-        if (view) {
+        while (view = [viewEnum nextObject]) {
             frame = [view frame];
             point.y -= NSHeight(frame);
             frame.origin = point;
             [view setFrame:frame];
             [[tokenOptionsBox contentView] addSubview:view];
-        }
-        if (type != BDSKTextTokenType) {
-            frame = [appendingOptionsView frame];
-            point.y -= NSHeight(frame);
-            frame.origin = point;
-            [appendingOptionsView setFrame:frame];
-            [[tokenOptionsBox contentView] addSubview:appendingOptionsView];
         }
         if (richText) {
             frame = [fontOptionsView frame];
@@ -839,7 +832,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 }
 
 - (BOOL)tokenField:(NSTokenField *)tokenField hasMenuForRepresentedObject:(id)representedObject {
-    return [representedObject isKindOfClass:[BDSKToken class]] && [(BDSKToken *)representedObject type] != BDSKTextTokenType;
+    return [representedObject isKindOfClass:[BDSKToken class]] && [(BDSKToken *)representedObject type] != BDSKTextTokenType && [(BDSKToken *)representedObject type] != BDSKNumberTokenType;
 }
 
 - (NSMenu *)tokenField:(NSTokenField *)tokenField menuForRepresentedObject:(id)representedObject {
@@ -851,7 +844,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
             case BDSKURLTokenType: menu = urlOptionsMenu; break;
             case BDSKFileTokenType: menu = fileOptionsMenu; break;
             case BDSKPersonTokenType: menu = personOptionsMenu; break;
-            case BDSKTextTokenType: menu = nil; break;
+            default: menu = nil; break;
         }
     }
     return menu;

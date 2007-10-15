@@ -43,6 +43,7 @@ enum {
     BDSKURLTokenType,
     BDSKFileTokenType,
     BDSKPersonTokenType,
+    BDSKNumberTokenType,
     BDSKTextTokenType
 };
 
@@ -159,6 +160,12 @@ extern NSString *BDSKTokenDidChangeNotification;
 - (NSString *)joinStyleKey;
 - (void)setJoinStyleKey:(NSString *)newJoinStyleKey;
 
+@end
+
+#pragma mark -
+
+@interface BDSKNumberTagToken : BDSKTagToken {
+}
 @end
 
 #pragma mark -

@@ -136,7 +136,7 @@
     urlFormat = (
         {
             displayName = "URL";
-            key = "<None>";
+            key = "absoluteString";
         },
         {
             displayName = "Path";
@@ -146,11 +146,11 @@
     fileFormat = (
         {
             displayName = "File URL";
-            key = "<None>";
+            key = "absoluteString";
         },
         {
             displayName = "Full path";
-            key = "path.lastPathComponent";
+            key = "path";
         },
         {
             displayName = "File name";
