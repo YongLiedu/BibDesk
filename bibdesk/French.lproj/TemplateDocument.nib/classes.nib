@@ -20,6 +20,9 @@
                 boldCheckButton = NSButton; 
                 capitalizationPopUp = NSPopUpButton; 
                 cleaningPopUp = NSPopUpButton; 
+                dateOptionsMenu = NSMenu; 
+                dateOptionsView = NSView; 
+                datePopUp = NSPopUpButton; 
                 defaultTokenField = NSTokenField; 
                 defaultTypePopUp = NSPopUpButton; 
                 fieldBoldCheckButton = NSButton; 
