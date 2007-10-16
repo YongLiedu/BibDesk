@@ -52,7 +52,18 @@ static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 1
 static NSString *BDSKTemplateTokensPboardType = @"BDSKTemplateTokensPboardType";
 static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardType";
 static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
+
 @interface BDSKValueOrNoneTransformer : NSValueTransformer @end
+
+@interface BDSKFlippedClipView : NSClipView @end
+
+@interface BDSKTemplateDocument (BDSKPrivate)
+- (void)updateTextViews;
+- (void)updateTokenFields;
+- (void)updatePreview;
+- (void)updateOptionView;
+- (void)setupOptionsMenus;
+@end
 
 @implementation BDSKTemplateDocument
 
@@ -176,79 +187,40 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     return @"TemplateDocument";
 }
 
-#define SETUP_SUBMENU(parentMenu, index, key, selector) { \
-    menu = [[parentMenu itemAtIndex:index] submenu]; \
-    dictEnum = [[templateOptions valueForKey:key] objectEnumerator]; \
-    while (dict = [dictEnum nextObject]) { \
-        item = [menu addItemWithTitle:NSLocalizedStringFromTable([dict objectForKey:@"displayName"], @"TemplateOptions", @"") \
-                               action:selector keyEquivalent:@""]; \
-        [item setTarget:self]; \
-        [item setRepresentedObject:[dict objectForKey:@"key"]]; \
-    } \
-}
-
-- (void)setupOptionsMenus {
-    NSMenu *menu;
-    NSMenuItem *item;
-    NSEnumerator *dictEnum;
-    NSDictionary *dict;
-    
-    SETUP_SUBMENU(fieldOptionsMenu, 0, @"casing", @selector(changeCasing:));
-    SETUP_SUBMENU(fieldOptionsMenu, 1, @"cleaning", @selector(changeCleaning:));
-    SETUP_SUBMENU(fieldOptionsMenu, 2, @"appending", @selector(changeAppending:));
-    SETUP_SUBMENU(fileOptionsMenu, 0, @"fileFormat", @selector(changeUrlFormat:));
-    SETUP_SUBMENU(fileOptionsMenu, 1, @"appending", @selector(changeAppending:));
-    SETUP_SUBMENU(urlOptionsMenu, 0, @"urlFormat", @selector(changeUrlFormat:));
-    SETUP_SUBMENU(urlOptionsMenu, 1, @"appending", @selector(changeAppending:));
-    SETUP_SUBMENU(personOptionsMenu, 0, @"nameStyle", @selector(changeNameStyle:));
-    SETUP_SUBMENU(personOptionsMenu, 1, @"joinStyle", @selector(changeJoinStyle:));
-    SETUP_SUBMENU(personOptionsMenu, 2, @"appending", @selector(changeAppending:));
-    SETUP_SUBMENU(dateOptionsMenu, 0, @"dateFormat", @selector(changeDateFormat:));
-    SETUP_SUBMENU(dateOptionsMenu, 1, @"appending", @selector(changeAppending:));
-}
-
-- (void)updateTextViews {
-    [prefixTemplateTextView setRichText:[self isRichText]];
-    [separatorTemplateTextView setRichText:[self isRichText]];
-    [suffixTemplateTextView setRichText:[self isRichText]];
-    if ([self isRichText]) {
-        NSFont *font = [NSFont fontWithName:[self fontName] size:[self fontSize]];
-        if ([self isBold])
-            font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
-        if ([self isItalic])
-            font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSItalicFontMask];
-        if ([[prefixTemplateTextView string] length] == 0)
-            [prefixTemplateTextView setFont:font];
-        if ([[separatorTemplateTextView string] length] == 0)
-            [separatorTemplateTextView setFont:font];
-        if ([[suffixTemplateTextView string] length] == 0)
-            [suffixTemplateTextView setFont:font];
-    } else {
-        [prefixTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
-        [separatorTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
-        [suffixTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
-    }
-}
-
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController {
     [super windowControllerDidLoadNib:aController];
-    
-    [self setupOptionsMenus];
-    [self updateTextViews];
     
     [requiredTokenField setEditable:NO];
     [requiredTokenField setBezeled:NO];
     [requiredTokenField setDrawsBackground:NO];
+    [requiredTokenField setObjectValue:[[typeTemplates objectAtIndex:defaultTypeIndex] requiredTokens]];
     [optionalTokenField setEditable:NO];
     [optionalTokenField setBezeled:NO];
     [optionalTokenField setDrawsBackground:NO];
+    [optionalTokenField setObjectValue:[[typeTemplates objectAtIndex:defaultTypeIndex] optionalTokens]];
     [defaultTokenField setEditable:NO];
     [defaultTokenField setBezeled:NO];
     [defaultTokenField setDrawsBackground:NO];
+    [defaultTokenField setObjectValue:defaultTokens];
     [specialTokenField setEditable:NO];
     [specialTokenField setBezeled:NO];
     [specialTokenField setDrawsBackground:NO];
+    [specialTokenField setObjectValue:specialTokens];
     [itemTemplateTokenField setTokenizingCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@""]];
+    
+    NSScrollView *scrollView = [specialTokenField enclosingScrollView];
+    NSView *documentView = [[scrollView documentView] retain];
+    NSClipView *clipView = [[BDSKFlippedClipView alloc] initWithFrame:[[scrollView contentView] frame]];
+    [clipView setDrawsBackground:NO];
+    [scrollView setContentView:clipView];
+    [scrollView setDocumentView:documentView];
+    [clipView release];
+    [documentView release];
+    
+    [self updateTokenFields];
+    [self updateTextViews];
+    
+    [self setupOptionsMenus];
     
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKTypeTemplateRowsPboardType, nil]];
     
@@ -288,59 +260,6 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     if (outError)
         *outError = [NSError errorWithDomain:@"BDSKTemplateDocumentErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to open file.", @"Error description"), NSLocalizedDescriptionKey, NSLocalizedString(@"BibDesk is currently unable to read templates.", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, nil]];
     return NO;
-}
-
-- (void)updatePreview {
-    [self willChangeValueForKey:@"previewAttributedString"];
-    [self didChangeValueForKey:@"previewAttributedString"];
-}
-
-- (void)updateOptionView {
-    NSArray *optionViews = [[[tokenOptionsBox contentView] subviews] copy];
-    [optionViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [optionViews release];
-    optionViews = nil;
-    
-    if (selectedToken && [selectedToken isKindOfClass:[BDSKToken class]]) {
-        switch ([selectedToken type]) {
-            case BDSKFieldTokenType:
-                optionViews = [NSArray arrayWithObjects:fieldOptionsView, appendingOptionsView, nil];
-                break;
-            case BDSKFileTokenType:
-                optionViews = [NSArray arrayWithObjects:fileOptionsView, appendingOptionsView, nil];
-                break;
-            case BDSKURLTokenType:
-                optionViews = [NSArray arrayWithObjects:urlOptionsView, appendingOptionsView, nil];
-                break;
-            case BDSKPersonTokenType:
-                optionViews = [NSArray arrayWithObjects:personOptionsView, appendingOptionsView, nil];
-                break;
-            case BDSKDateTokenType:
-                optionViews = [NSArray arrayWithObjects:dateOptionsView, appendingOptionsView, nil];
-                break;
-            case BDSKTextTokenType:
-                optionViews = [NSArray arrayWithObjects:textOptionsView, nil];
-                break;
-        }
-        NSEnumerator *viewEnum = [optionViews objectEnumerator];
-        NSView *view;
-        NSRect frame = [[tokenOptionsBox contentView] bounds];
-        NSPoint point = NSMakePoint(NSMinX(frame) + 7.0, NSMaxY(frame) - 7.0);
-        while (view = [viewEnum nextObject]) {
-            frame = [view frame];
-            point.y -= NSHeight(frame);
-            frame.origin = point;
-            [view setFrame:frame];
-            [[tokenOptionsBox contentView] addSubview:view];
-        }
-        if (richText) {
-            frame = [fontOptionsView frame];
-            point.y -= NSHeight(frame);
-            frame.origin = point;
-            [fontOptionsView setFrame:frame];
-            [[tokenOptionsBox contentView] addSubview:fontOptionsView];
-        }
-    }
 }
 
 - (BDSKToken *)tokenForField:(NSString *)field {
@@ -735,6 +654,128 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     }
 }
 
+#pragma mark Setup and Update
+
+#define SETUP_SUBMENU(parentMenu, index, key, selector) { \
+    menu = [[parentMenu itemAtIndex:index] submenu]; \
+    dictEnum = [[templateOptions valueForKey:key] objectEnumerator]; \
+    while (dict = [dictEnum nextObject]) { \
+        item = [menu addItemWithTitle:NSLocalizedStringFromTable([dict objectForKey:@"displayName"], @"TemplateOptions", @"") \
+                               action:selector keyEquivalent:@""]; \
+        [item setTarget:self]; \
+        [item setRepresentedObject:[dict objectForKey:@"key"]]; \
+    } \
+}
+
+- (void)setupOptionsMenus {
+    NSMenu *menu;
+    NSMenuItem *item;
+    NSEnumerator *dictEnum;
+    NSDictionary *dict;
+    
+    SETUP_SUBMENU(fieldOptionsMenu, 0, @"casing", @selector(changeCasing:));
+    SETUP_SUBMENU(fieldOptionsMenu, 1, @"cleaning", @selector(changeCleaning:));
+    SETUP_SUBMENU(fieldOptionsMenu, 2, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(fileOptionsMenu, 0, @"fileFormat", @selector(changeUrlFormat:));
+    SETUP_SUBMENU(fileOptionsMenu, 1, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(urlOptionsMenu, 0, @"urlFormat", @selector(changeUrlFormat:));
+    SETUP_SUBMENU(urlOptionsMenu, 1, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(personOptionsMenu, 0, @"nameStyle", @selector(changeNameStyle:));
+    SETUP_SUBMENU(personOptionsMenu, 1, @"joinStyle", @selector(changeJoinStyle:));
+    SETUP_SUBMENU(personOptionsMenu, 2, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(dateOptionsMenu, 0, @"dateFormat", @selector(changeDateFormat:));
+    SETUP_SUBMENU(dateOptionsMenu, 1, @"appending", @selector(changeAppending:));
+}
+
+- (void)updateTextViews {
+    [prefixTemplateTextView setRichText:[self isRichText]];
+    [separatorTemplateTextView setRichText:[self isRichText]];
+    [suffixTemplateTextView setRichText:[self isRichText]];
+    if ([self isRichText]) {
+        NSFont *font = [NSFont fontWithName:[self fontName] size:[self fontSize]];
+        if ([self isBold])
+            font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
+        if ([self isItalic])
+            font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSItalicFontMask];
+        if ([[prefixTemplateTextView string] length] == 0)
+            [prefixTemplateTextView setFont:font];
+        if ([[separatorTemplateTextView string] length] == 0)
+            [separatorTemplateTextView setFont:font];
+        if ([[suffixTemplateTextView string] length] == 0)
+            [suffixTemplateTextView setFont:font];
+    } else {
+        [prefixTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
+        [separatorTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
+        [suffixTemplateTextView setFont:[NSFont userFontOfSize:0.0]];
+    }
+}
+
+- (void)updateTokenFields {
+    [specialTokenField sizeToFit];
+    [requiredTokenField sizeToFit];
+    [optionalTokenField sizeToFit];
+    [defaultTokenField sizeToFit];
+    
+    NSRect frame = [[specialTokenField superview] frame];
+    frame.size.width = fmaxf(NSWidth([specialTokenField frame]), fmaxf(NSWidth([requiredTokenField frame]), fmaxf(NSWidth([optionalTokenField frame]), NSWidth([defaultTokenField frame]))));
+    [[specialTokenField superview] setFrame:frame];
+    
+    [[specialTokenField enclosingScrollView] setNeedsDisplay:YES];
+}
+
+- (void)updatePreview {
+    [self willChangeValueForKey:@"previewAttributedString"];
+    [self didChangeValueForKey:@"previewAttributedString"];
+}
+
+- (void)updateOptionView {
+    NSArray *optionViews = [[[tokenOptionsBox contentView] subviews] copy];
+    [optionViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [optionViews release];
+    optionViews = nil;
+    
+    if (selectedToken && [selectedToken isKindOfClass:[BDSKToken class]]) {
+        switch ([selectedToken type]) {
+            case BDSKFieldTokenType:
+                optionViews = [NSArray arrayWithObjects:fieldOptionsView, appendingOptionsView, nil];
+                break;
+            case BDSKFileTokenType:
+                optionViews = [NSArray arrayWithObjects:fileOptionsView, appendingOptionsView, nil];
+                break;
+            case BDSKURLTokenType:
+                optionViews = [NSArray arrayWithObjects:urlOptionsView, appendingOptionsView, nil];
+                break;
+            case BDSKPersonTokenType:
+                optionViews = [NSArray arrayWithObjects:personOptionsView, appendingOptionsView, nil];
+                break;
+            case BDSKDateTokenType:
+                optionViews = [NSArray arrayWithObjects:dateOptionsView, appendingOptionsView, nil];
+                break;
+            case BDSKTextTokenType:
+                optionViews = [NSArray arrayWithObjects:textOptionsView, nil];
+                break;
+        }
+        NSEnumerator *viewEnum = [optionViews objectEnumerator];
+        NSView *view;
+        NSRect frame = [[tokenOptionsBox contentView] bounds];
+        NSPoint point = NSMakePoint(NSMinX(frame) + 7.0, NSMaxY(frame) - 7.0);
+        while (view = [viewEnum nextObject]) {
+            frame = [view frame];
+            point.y -= NSHeight(frame);
+            frame.origin = point;
+            [view setFrame:frame];
+            [[tokenOptionsBox contentView] addSubview:view];
+        }
+        if (richText) {
+            frame = [fontOptionsView frame];
+            point.y -= NSHeight(frame);
+            frame.origin = point;
+            [fontOptionsView setFrame:frame];
+            [[tokenOptionsBox contentView] addSubview:fontOptionsView];
+        }
+    }
+}
+
 #pragma mark Notification handlers
 
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification {
@@ -887,6 +928,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 - (void)tableViewSelectionDidChange:(NSNotification *)notification {
     [self setSelectedToken:nil];
+    [self updateTokenFields];
 }
 
 - (int)numberOfRowsInTableView:(NSTableView *)tv{ return 0; }
@@ -1003,6 +1045,12 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 	}
 }
 
+@end
+
+#pragma mark -
+
+@implementation BDSKFlippedClipView
+- (BOOL)isFlipped { return YES; }
 @end
 
 #pragma mark -
