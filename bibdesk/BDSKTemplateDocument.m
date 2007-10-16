@@ -52,6 +52,8 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 static NSString *BDSKTemplateDocumentFrameAutosaveName = @"BDSKTemplateDocument";
 
+static NSString *BDSKTextViewDidChangeSelectionNotification = @"BDSKTextViewDidChangeSelectionNotification";
+
 static NSString *BDSKTemplateTokensPboardType = @"BDSKTemplateTokensPboardType";
 static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardType";
 static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
@@ -66,6 +68,11 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (void)updatePreview;
 - (void)updateOptionView;
 - (void)setupOptionsMenus;
+- (void)handleDidChangeSelectionNotification:(NSNotification *)notification;
+- (void)handleDelayedDidChangeSelectionNotification:(NSNotification *)notification;
+- (void)handleDidEndEditingNotification:(NSNotification *)notification;
+- (void)handleTokenDidChangeNotification:(NSNotification *)notification;
+- (void)handleTemplateDidChangeNotification:(NSNotification *)notification;
 @end
 
 @implementation BDSKTemplateDocument
@@ -239,6 +246,8 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
                                                  name:NSTextViewDidChangeSelectionNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDelayedDidChangeSelectionNotification:) 
+                                                 name:BDSKTextViewDidChangeSelectionNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidEndEditingNotification:) 
                                                  name:NSControlTextDidEndEditingNotification object:itemTemplateTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTokenDidChangeNotification:) 
@@ -799,6 +808,18 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 #pragma mark Notification handlers
 
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification {
+    NSTextView *textView = [notification object];
+    if (textView == [itemTemplateTokenField currentEditor] ||
+        textView == [specialTokenField currentEditor] ||
+        textView == [requiredTokenField currentEditor] ||
+        textView == [optionalTokenField currentEditor] ||
+        textView == [defaultTokenField currentEditor]) {
+        NSNotification *note = [NSNotification notificationWithName:BDSKTextViewDidChangeSelectionNotification object:textView];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
+    }
+}
+
+- (void)handleDelayedDidChangeSelectionNotification:(NSNotification *)notification {
     NSTextView *textView = [notification object];
     if (textView == [itemTemplateTokenField currentEditor] ||
         textView == [specialTokenField currentEditor] ||
