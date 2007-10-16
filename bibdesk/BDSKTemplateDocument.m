@@ -567,6 +567,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         BDSKToken *token = [self tokenForField:[addFieldController field]];
         [self setDefaultTokens:[[self defaultTokens] arrayByAddingObject:token]];
         [defaultTokenField setObjectValue:[self defaultTokens]];
+        [self updateTokenFields];
     }
 }
 
