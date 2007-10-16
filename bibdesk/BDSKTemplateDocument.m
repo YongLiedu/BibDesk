@@ -748,49 +748,50 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 }
 
 - (void)updateOptionView {
-    NSArray *optionViews = [[[tokenOptionsBox contentView] subviews] copy];
-    [optionViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [optionViews release];
-    optionViews = nil;
+    NSArray *currentOptionViews = [[tokenOptionsBox contentView] subviews];
+    NSMutableArray *optionViews = nil;
     
     if (selectedToken && [selectedToken isKindOfClass:[BDSKToken class]]) {
         switch ([selectedToken type]) {
             case BDSKFieldTokenType:
-                optionViews = [NSArray arrayWithObjects:fieldOptionsView, appendingOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:fieldOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKFileTokenType:
-                optionViews = [NSArray arrayWithObjects:fileOptionsView, appendingOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:fileOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKURLTokenType:
-                optionViews = [NSArray arrayWithObjects:urlOptionsView, appendingOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:urlOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKPersonTokenType:
-                optionViews = [NSArray arrayWithObjects:personOptionsView, appendingOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:personOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKDateTokenType:
-                optionViews = [NSArray arrayWithObjects:dateOptionsView, appendingOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:dateOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKTextTokenType:
-                optionViews = [NSArray arrayWithObjects:textOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:textOptionsView, nil];
                 break;
         }
+        if (richText)
+            [optionViews addObject:fontOptionsView];
+    }
+    
+    if ([optionViews isEqualToArray:currentOptionViews] == NO) {
         NSEnumerator *viewEnum = [optionViews objectEnumerator];
         NSView *view;
         NSRect frame = [[tokenOptionsBox contentView] bounds];
         NSPoint point = NSMakePoint(NSMinX(frame) + 7.0, NSMaxY(frame) - 7.0);
+        
+        [currentOptionViews retain];
+        [currentOptionViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+        [currentOptionViews release];
+        
         while (view = [viewEnum nextObject]) {
             frame = [view frame];
             point.y -= NSHeight(frame);
             frame.origin = point;
             [view setFrame:frame];
             [[tokenOptionsBox contentView] addSubview:view];
-        }
-        if (richText) {
-            frame = [fontOptionsView frame];
-            point.y -= NSHeight(frame);
-            frame.origin = point;
-            [fontOptionsView setFrame:frame];
-            [[tokenOptionsBox contentView] addSubview:fontOptionsView];
         }
     }
 }
