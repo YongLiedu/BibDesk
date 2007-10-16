@@ -711,21 +711,24 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 }
 
 - (void)updateTokenFields {
-    [specialTokenField sizeToFit];
-    [requiredTokenField sizeToFit];
-    [optionalTokenField sizeToFit];
-    [defaultTokenField sizeToFit];
+    NSRect frame;
+    float width = 0.0;
+    NSEnumerator *tfEnum = [[NSArray arrayWithObjects:specialTokenField, requiredTokenField, optionalTokenField, defaultTokenField, nil] objectEnumerator];
+    NSTokenField *tokenField;
+    
+    while (tokenField = [tfEnum nextObject]) {
+        [tokenField sizeToFit];
+        frame = [tokenField frame];
+        width = fmaxf(width, NSWidth(frame));
+        // NSTokenField bug: add 10px to the width, because otherwise the tracking rect for the last token is broken
+        frame.size.width += 10.0;
+        [tokenField setFrame:frame];
+    }
     
     NSScrollView *scrollView = [specialTokenField enclosingScrollView];
-    NSRect frame = [[scrollView documentView] frame];
-    frame.size.width = fmaxf(NSWidth([specialTokenField frame]), fmaxf(NSWidth([requiredTokenField frame]), fmaxf(NSWidth([optionalTokenField frame]), NSWidth([defaultTokenField frame]))));
+    frame = [[scrollView documentView] frame];
+    frame.size.width = width;
     [[scrollView documentView] setFrame:frame];
-    
-    [specialTokenField resetCursorRects];
-    [requiredTokenField resetCursorRects];
-    [optionalTokenField resetCursorRects];
-    [defaultTokenField resetCursorRects];
-    
     [scrollView setNeedsDisplay:YES];
 }
 
