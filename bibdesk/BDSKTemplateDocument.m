@@ -157,10 +157,10 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         [specialTokens addObject:[self tokenForField:BDSKPubTypeString]];
         [specialTokens addObject:[self tokenForField:BDSKCiteKeyString]];
         [specialTokens addObject:[self tokenForField:@"Item Index"]];
+        [specialTokens addObject:[self tokenForField:NSLocalizedString(@"Rich Text", @"Name for template token")]];
         [specialTokens addObject:[self tokenForField:BDSKDateAddedString]];
         [specialTokens addObject:[self tokenForField:BDSKDateModifiedString]];
         [specialTokens addObject:[self tokenForField:BDSKPubDateString]];
-        [specialTokens addObject:[self tokenForField:@"Rich Text"]];
     }
     return self;
 }
@@ -716,11 +716,17 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [optionalTokenField sizeToFit];
     [defaultTokenField sizeToFit];
     
-    NSRect frame = [[specialTokenField superview] frame];
+    NSScrollView *scrollView = [specialTokenField enclosingScrollView];
+    NSRect frame = [[scrollView documentView] frame];
     frame.size.width = fmaxf(NSWidth([specialTokenField frame]), fmaxf(NSWidth([requiredTokenField frame]), fmaxf(NSWidth([optionalTokenField frame]), NSWidth([defaultTokenField frame]))));
-    [[specialTokenField superview] setFrame:frame];
+    [[scrollView documentView] setFrame:frame];
     
-    [[specialTokenField enclosingScrollView] setNeedsDisplay:YES];
+    [specialTokenField resetCursorRects];
+    [requiredTokenField resetCursorRects];
+    [optionalTokenField resetCursorRects];
+    [defaultTokenField resetCursorRects];
+    
+    [scrollView setNeedsDisplay:YES];
 }
 
 - (void)updatePreview {
