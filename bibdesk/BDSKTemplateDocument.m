@@ -195,6 +195,10 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     
     [aController setWindowFrameAutosaveNameOrCascade:BDSKTemplateDocumentFrameAutosaveName];
     
+    NSRect frame = [itemTemplateTokenField frame];
+    frame.size.height = 39.0;
+    [itemTemplateTokenField setFrame:frame];
+    
     [requiredTokenField setEditable:NO];
     [requiredTokenField setBezeled:NO];
     [requiredTokenField setDrawsBackground:NO];
