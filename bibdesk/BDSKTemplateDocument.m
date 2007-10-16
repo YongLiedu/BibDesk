@@ -43,11 +43,14 @@
 #import "BDSKStringConstants.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKFieldSheetController.h"
+#import "NSWindowController_BDSKExtensions.h"
+
+static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
 NSString *BDSKTextTemplateDocumentType = @"Text Template";
 NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
-static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
+static NSString *BDSKTemplateDocumentFrameAutosaveName = @"BDSKTemplateDocument";
 
 static NSString *BDSKTemplateTokensPboardType = @"BDSKTemplateTokensPboardType";
 static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardType";
@@ -189,6 +192,8 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController {
     [super windowControllerDidLoadNib:aController];
+    
+    [aController setWindowFrameAutosaveNameOrCascade:BDSKTemplateDocumentFrameAutosaveName];
     
     [requiredTokenField setEditable:NO];
     [requiredTokenField setBezeled:NO];
