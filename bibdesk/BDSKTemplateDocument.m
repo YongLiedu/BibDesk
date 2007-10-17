@@ -62,6 +62,10 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 @interface BDSKFlippedClipView : NSClipView @end
 
+@interface NSTokenFieldCell (BDSKPrivateDeclarations)
++ (id)_sharedFieldEditor;
+@end
+
 @interface BDSKTemplateDocument (BDSKPrivate)
 - (void)updateTextViews;
 - (void)updateTokenFields;
@@ -244,7 +248,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     
     [ownerController setContent:self];
     
-    id fieldEditor = [NSTokenFieldCell respondsToSelector:@selector(_sharedFieldEditor)] ? [NSTokenFieldCell performSelector:@selector(_sharedFieldEditor)] : nil;
+    id fieldEditor = [NSTokenFieldCell respondsToSelector:@selector(_sharedFieldEditor)] ? [NSTokenFieldCell _sharedFieldEditor] : nil;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
                                                  name:NSTextViewDidChangeSelectionNotification object:fieldEditor];
