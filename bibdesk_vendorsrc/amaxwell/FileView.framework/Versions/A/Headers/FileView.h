@@ -27,7 +27,6 @@
     NSMutableDictionary    *_iconCache;
     NSColor                *_backgroundColor;
     CFRunLoopTimerRef       _zombieTimer;
-    NSString               *_localDragType;
     NSMutableIndexSet      *_selectedIndexes;
     NSRect                  _rubberBandRect;
     NSRect                  _dropRectForHighlight;
