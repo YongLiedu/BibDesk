@@ -92,6 +92,11 @@
 */
 - (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding;
 
+- (IBAction)newTemplateDocument:(id)sender;
+
+- (IBAction)openTemplateDocument:(id)sender;
+
+- (id)openTemplateDocumentWithContentsOfURL:(NSURL *)fileURL;
 
 - (void)handleWindowDidBecomeMainNotification:(NSNotification *)notification;
 

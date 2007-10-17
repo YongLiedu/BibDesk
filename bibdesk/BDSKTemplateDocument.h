@@ -40,7 +40,7 @@
 #import <Cocoa/Cocoa.h>
 
 extern NSString *BDSKTextTemplateDocumentType;
-extern NSString *BDSKRTFTemplateDocumentType;
+extern NSString *BDSKRichTextTemplateDocumentType;
 
 @class BDSKToken, BDSKTypeTemplate;
 

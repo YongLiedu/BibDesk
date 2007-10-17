@@ -435,6 +435,8 @@
     return document;
 }
 
+#pragma mark Template documents
+
 - (IBAction)newTemplateDocument:(id)sender {
     [self openUntitledDocumentOfType:BDSKTextTemplateDocumentType display:YES];
     NSDocument *document = [[[BDSKTemplateDocument alloc] init] autorelease];
@@ -447,6 +449,47 @@
         [document makeWindowControllers];
         [document showWindows];
     }
+}
+
+- (IBAction)openTemplateDocument:(id)sender {
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAllowsMultipleSelection:YES];
+    [oPanel setDirectory:[self currentDirectory]];
+		
+    int result = [self runModalOpenPanel:oPanel forTypes:[NSArray arrayWithObjects:@"txt", @"rtf", nil]];
+    if(result == NSOKButton){
+        NSStringEncoding encoding;
+        NSEnumerator *urlEnum = [[oPanel URLs] objectEnumerator];
+        NSURL *aURL;
+
+        while (aURL = [urlEnum nextObject]) {
+            if (nil == [self openTemplateDocumentWithContentsOfURL:aURL])
+                break;
+        }
+    }
+}
+
+- (id)openTemplateDocumentWithContentsOfURL:(NSURL *)fileURL{
+	// first see if we already have this document open
+    id doc = [self documentForURL:fileURL];
+    
+    if(doc == nil){
+        NSError *error;
+        NSString *type = [[[fileURL path] pathExtension] caseInsensitiveCompare:@"rtf"] == NSOrderedSame ? BDSKRichTextTemplateDocumentType : BDSKTextTemplateDocumentType;
+        doc = [[[BDSKTemplateDocument alloc] initWithContentsOfURL:fileURL ofType:type error:&error] autorelease];
+        
+        if (nil == doc) {
+            [self presentError:error];
+            return nil;
+        }
+        
+        [self addDocument:doc];
+        
+        [doc makeWindowControllers];
+    }
+    [doc showWindows];
+    
+    return doc;
 }
 
 #pragma mark Document types

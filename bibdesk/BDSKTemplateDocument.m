@@ -44,6 +44,9 @@
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKFieldSheetController.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "BDSKTemplateParser.h"
+#import "BDSKTag.h"
+#import "NSString_BDSKExtensions.h"
 
 static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
@@ -77,6 +80,13 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (void)handleDidEndEditingNotification:(NSNotification *)notification;
 - (void)handleTokenDidChangeNotification:(NSNotification *)notification;
 - (void)handleTemplateDidChangeNotification:(NSNotification *)notification;
+- (NSDictionary *)convertPubTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont;
+- (NSArray *)convertItemTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont;
+- (NSArray *)tokensForTextTag:(BDSKTag *)tag allowText:(BOOL)allowText defaultFont:(NSFont *)defaultFont;
+- (id)tokenForConditionTag:(BDSKConditionTag *)tag defaultFont:(NSFont *)defaultFont;
+- (id)tokenForValueTag:(BDSKValueTag *)tag defaultFont:(NSFont *)defaultFont;
+- (NSString *)propertyForKey:(NSString *)key tokenType:(int)type;
+- (void)setFont:(NSFont *)font ofToken:(BDSKToken *)token defaultFont:(NSFont *)defaultFont;
 @end
 
 @implementation BDSKTemplateDocument
@@ -280,9 +290,123 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     return data;
 }
 
+#define MAKE_RANGE(start, end) NSMakeRange(start, end - start)
+
 - (BOOL)readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError {
-    if (outError)
-        *outError = [NSError errorWithDomain:@"BDSKTemplateDocumentErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to open file.", @"Error description"), NSLocalizedDescriptionKey, NSLocalizedString(@"BibDesk is currently unable to read templates.", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, nil]];
+    NSArray *parsedTemplate = nil;
+    NSDictionary *templateDict = nil;
+    NSFont *font = nil;
+    NSAttributedString *attrString = nil;
+    NSString *string = nil;
+    NSRange startRange, endRange, sepRange, wsRange;
+    unsigned int length, startLoc = NSNotFound;
+    BOOL onlyWs;
+    
+    [self setRichText:[typeName isEqualToString:BDSKRichTextTemplateDocumentType]];
+    
+    if ([self isRichText]) {
+        attrString = [[[NSAttributedString alloc] initWithData:data options:nil documentAttributes:NULL error:NULL] autorelease];
+        string = [attrString string];
+    } else {
+        string = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    }
+    
+    if (string) {
+        length = [string length];
+        
+        startRange = [string rangeOfString:@"<$publications>"];
+        
+        if (startRange.location != NSNotFound) {
+            startLoc = startRange.location;
+            
+            wsRange = [string rangeOfTrailingEmptyLine:&onlyWs range:MAKE_RANGE(0, startRange.location)];
+            if (wsRange.location != NSNotFound)
+                startRange = MAKE_RANGE(wsRange.location, NSMaxRange(startRange));
+            else if (onlyWs)
+                startRange = MAKE_RANGE(0, NSMaxRange(startRange));
+            wsRange = [string rangeOfLeadingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), length)];
+            if (wsRange.location != NSNotFound)
+                startRange = MAKE_RANGE(startRange.location, NSMaxRange(wsRange));
+            
+            endRange = [string rangeOfString:@"</$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), length)];
+            
+            if (endRange.location != NSNotFound) {
+                wsRange = [string rangeOfTrailingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
+                if (wsRange.location != NSNotFound)
+                    endRange = MAKE_RANGE(wsRange.location, NSMaxRange(endRange));
+                wsRange = [string rangeOfLeadingEmptyLine:&onlyWs range:MAKE_RANGE(NSMaxRange(endRange), length)];
+                if (wsRange.location != NSNotFound)
+                    endRange = MAKE_RANGE(endRange.location, NSMaxRange(wsRange));
+                else if (onlyWs)
+                    endRange = MAKE_RANGE(endRange.location, length);
+                
+                sepRange = [string rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
+                if (sepRange.location != NSNotFound) {
+                    wsRange = [string rangeOfTrailingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), sepRange.location)];
+                    if (wsRange.location != NSNotFound)
+                        sepRange = MAKE_RANGE(wsRange.location, NSMaxRange(sepRange));
+                    wsRange = [string rangeOfLeadingEmptyLineInRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)];
+                    if (wsRange.location != NSNotFound)
+                        sepRange = MAKE_RANGE(sepRange.location, NSMaxRange(wsRange));
+                }
+            }
+        }
+        
+        if (endRange.location != NSNotFound) {
+            if ([self isRichText]) {
+                if (startRange.location > 0)
+                   [self setPrefixTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(0, startRange.location)]];
+                if (NSMaxRange(endRange) < length)
+                    [self setSuffixTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(endRange), length)]];
+                if (NSMaxRange(sepRange) < endRange.location)
+                    [self setSeparatorTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)]];
+                if (sepRange.location != NSNotFound)
+                
+                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(startRange), sepRange.location == NSNotFound ? endRange.location : sepRange.location)]];
+                
+                font = [attrString attribute:NSFontAttributeName atIndex:startLoc effectiveRange:NULL];
+                if (font == nil)
+                    font = [NSFont userFontOfSize:0.0];
+                int traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
+                [self setFontName:[font familyName]];
+                [self setFontSize:[font pointSize]];
+                [self setBold:(traits & NSBoldFontMask) != 0];
+                [self setItalic:(traits & NSItalicFontMask) != 0];
+            } else {
+                NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil];
+                if (startRange.location > 0)
+                    [self setPrefixTemplate:[[[NSAttributedString alloc] initWithString:[string substringWithRange:MAKE_RANGE(0, startRange.location)] attributes:attrs] autorelease]];
+                if (NSMaxRange(endRange) < length)
+                    [self setSuffixTemplate:[[[NSAttributedString alloc] initWithString:[string substringWithRange:MAKE_RANGE(NSMaxRange(endRange), length)] attributes:attrs] autorelease]];
+                if (NSMaxRange(sepRange) < endRange.location)
+                    [self setSeparatorTemplate:[[[NSAttributedString alloc] initWithString:[string substringWithRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)] attributes:attrs] autorelease]];
+                
+                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[string substringWithRange:MAKE_RANGE(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
+            }
+        }
+    }
+    
+    if (parsedTemplate && (templateDict = [self convertPubTemplate:parsedTemplate defaultFont:font])) {
+        NSArray *itemTemplate = [templateDict objectForKey:@""];
+        NSEnumerator *typeEnum = [typeTemplates objectEnumerator];
+        BDSKTypeTemplate *template;
+        
+        if (itemTemplate)
+            [[typeTemplates objectAtIndex:defaultTypeIndex] setItemTemplate:itemTemplate];
+        
+        while (template = [typeEnum nextObject]) {
+            if (itemTemplate = [templateDict objectForKey:[template pubType]])
+                [template setItemTemplate:itemTemplate];
+        }
+        
+        [[self undoManager] removeAllActions];
+        [self updateChangeCount:NSChangeCleared];
+        
+        return YES;
+        
+    } else if (outError) {
+        *outError = [NSError errorWithDomain:@"BDSKTemplateDocumentErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to open file.", @"Error description"), NSLocalizedDescriptionKey, NSLocalizedString(@"This template cannot be opened by BibDesk. You should edit it manually.", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, nil]];
+    }
     return NO;
 }
 
@@ -1061,6 +1185,264 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 			return NO;
     
     return YES;
+}
+
+#pragma mark Reading
+
+- (NSDictionary *)convertPubTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont {
+    NSMutableDictionary *result = [NSMutableDictionary dictionary];
+    NSArray *itemTemplate;
+    BDSKTag *tag = [templateArray count] ? [templateArray objectAtIndex:0] : nil;
+    
+    if ([tag type] == BDSKConditionTagType && [[(BDSKConditionTag *)tag keyPath] isEqualToString:@"pubType"]) {
+        if ([(BDSKConditionTag *)tag matchType] != 1)
+            return nil;
+        
+        NSArray *matchStrings = [(BDSKConditionTag *)tag matchStrings];
+        unsigned int i = 0, count = [matchStrings count];
+        
+        for (i = 0; i < count; i++) {
+            if (itemTemplate = [self convertItemTemplate:[(BDSKConditionTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont])
+                [result setObject:itemTemplate forKey:[matchStrings objectAtIndex:i]];
+            else
+                return nil;
+        }
+        if ([[(BDSKConditionTag *)tag subtemplates] count] > count && (itemTemplate = [self convertItemTemplate:[(BDSKConditionTag *)tag subtemplateAtIndex:count] defaultFont:defaultFont]))
+            [result setObject:itemTemplate forKey:@""];
+        else
+            return nil;
+            
+    } else {
+        if (itemTemplate = [self convertItemTemplate:templateArray defaultFont:defaultFont])
+            [result setObject:itemTemplate forKey:@""];
+        else
+            return nil;
+    }
+    
+    return result;
+}
+
+- (NSArray *)convertItemTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont {
+    NSMutableArray *result = [NSMutableArray array];
+    int type;
+    NSEnumerator *tagEnum = [templateArray objectEnumerator];
+    BDSKTag *tag;
+    id token;
+    
+    while (tag = [tagEnum nextObject]) {
+        type = [(BDSKTag *)tag type];
+        
+        if (type == BDSKTextTagType) {
+            if (token = [self tokensForTextTag:tag allowText:YES defaultFont:defaultFont])
+                [result addObjectsFromArray:token];
+            else
+                return nil;
+        } else if (type == BDSKValueTagType) {
+            if (token = [self tokenForValueTag:(BDSKValueTag *)tag defaultFont:defaultFont])
+                [result addObject:token];
+            else
+                return nil;
+        } else if (type == BDSKConditionTagType) {
+            if (token = [self tokenForConditionTag:(BDSKConditionTag *)tag defaultFont:defaultFont])
+                [result addObject:token];
+            else
+                return nil;
+        }
+    }
+    
+    return result;
+}
+
+- (NSArray *)tokensForTextTag:(BDSKTag *)tag allowText:(BOOL)allowText defaultFont:(NSFont *)defaultFont {
+    NSMutableArray *tokens = [NSMutableArray array];
+    if (defaultFont) {
+        NSAttributedString *text = [(BDSKRichTextTag *)tag attributedText];
+        unsigned int length = [text length];
+        NSRange range = NSMakeRange(0, 0);
+        
+        while (NSMaxRange(range) < length) {
+            id token;
+            NSFont *font = [text attribute:NSFontAttributeName atIndex:range.location longestEffectiveRange:&range inRange:NSMakeRange(range.location, length - range.location)];
+            if (allowText && [font isEqual:defaultFont]) {
+                token = [[(BDSKRichTextTag *)tag attributedText] string];
+            } else {
+                token = [[[BDSKTextToken alloc] initWithTitle:[text string]] autorelease];
+                [self setFont:font ofToken:token defaultFont:defaultFont];
+            }
+            [tokens addObject:token];
+        }
+    } else if (allowText) {
+        [tokens addObject:[(BDSKTextTag *)tag text]];
+    } else {
+        [tokens addObject:[[[BDSKTextToken alloc] initWithTitle:[(BDSKTextTag *)tag text]] autorelease]];
+    }
+    return tokens;
+}
+
+- (id)tokenForConditionTag:(BDSKConditionTag *)tag defaultFont:(NSFont *)defaultFont {
+    int count = [[tag subtemplates] count];
+    if ([(BDSKConditionTag *)tag matchType] != 0 || count > 2)
+        return nil;
+    
+    NSArray *nonemptyTemplate = [tag subtemplateAtIndex:0];
+    NSArray *emptyTemplate = count > 1 ? [tag subtemplateAtIndex:1] : nil;
+    id token = nil;
+    
+    if ([nonemptyTemplate count] == 1 && [(BDSKTag *)[nonemptyTemplate lastObject] type] == BDSKTextTagType) {
+        NSArray *keys = [[tag keyPath] componentsSeparatedByString:@"."];
+        NSArray *tokens;
+        if ([keys count] != 2 || [[keys objectAtIndex:0] isEqualToString:@"fields"] == NO) {
+            return nil;
+        }
+        if (tokens = [self tokensForTextTag:tag allowText:NO defaultFont:defaultFont]) {
+            if ([tokens count] == 1) {
+                token = [tokens lastObject];
+                [token setField:[keys lastObject]];
+                if ([emptyTemplate count]) {
+                    id textTag = [emptyTemplate lastObject];
+                    if ([(BDSKTag *)textTag type] != BDSKTextTagType)
+                        return nil;
+                    [token setAltText:defaultFont ? [[(BDSKRichTextTag *)textTag attributedText] string] : [(BDSKTextTag *)textTag text]];
+                }
+            } else {
+                return nil;
+            }
+        } else {
+            return nil;
+        }
+    } else if ([emptyTemplate count] == 0 && [nonemptyTemplate count] < 3) {
+        int i = 0;
+        BDSKTag *subtag = [nonemptyTemplate objectAtIndex:i];
+        NSString *prefix, *suffix;
+        count = [nonemptyTemplate count];
+        
+        if ([subtag type] == BDSKTextTagType) {
+            prefix = defaultFont ? [[(BDSKRichTextTag *)subtag attributedText] string] : [(BDSKTextTag *)subtag text];
+            subtag = ++i < count ? [nonemptyTemplate objectAtIndex:i] : nil;
+        }
+        if ([subtag type] == BDSKValueTagType && [[(BDSKValueTag *)subtag keyPath] isEqualToString:[tag keyPath]]) {
+            token = [self tokenForValueTag:(BDSKValueTag *)subtag defaultFont:defaultFont];
+            subtag = ++i < count ? [nonemptyTemplate objectAtIndex:i] : nil;
+        } else
+            return nil;
+        if (subtag) {
+            if ([subtag type] == BDSKTextTagType) {
+                suffix = defaultFont ? [[(BDSKRichTextTag *)subtag attributedText] string] : [(BDSKTextTag *)subtag text];
+            } else
+                return nil;
+        }
+        if (prefix)
+            [token setPrefix:prefix];
+        if (suffix)
+            [token setSuffix:suffix];
+    } else
+        return nil;
+    
+    return token;
+}
+
+- (id)tokenForValueTag:(BDSKValueTag *)tag defaultFont:(NSFont *)defaultFont {
+    NSArray *keys = [[tag keyPath] componentsSeparatedByString:@"."];
+    NSString *key = [keys count] ? [keys objectAtIndex:0] : nil;
+    BDSKToken *token = nil;
+    int type;
+    NSString *field = nil;
+    int i = 0;
+    
+    if ([key isEqualToString:@"fields"] || [key isEqualToString:@"urls"] || [key isEqualToString:@"persons"])
+        field = [keys objectAtIndex:++i];
+    else if ([key isEqualToString:@"citeKey"])
+        field = BDSKCiteKeyString;
+    else if ([key isEqualToString:@"pubType"])
+        field = BDSKPubTypeString;
+    else if ([key isEqualToString:@"itemIndex"])
+        field = @"Item Index";
+    else if ([key isEqualToString:@"authors"])
+        field = BDSKAuthorString;
+    else if ([key isEqualToString:@"editors"])
+        field = BDSKEditorString;
+    else
+        return nil;
+    
+    token = [BDSKToken tokenWithField:field];
+    type = [(BDSKToken *)token type];
+    keys = [keys subarrayWithRange:NSMakeRange(++i, [keys count] - i)];
+    int count = [keys count];
+    NSString *property;
+    
+    if (type == BDSKPersonTokenType && [keys firstObjectCommonWithArray:[templateOptions valueForKeyPath:@"joinStyle.key"]] == nil)
+        return nil;
+    
+    for (i = 0; i < count; i++) {
+        key = [keys objectAtIndex:i];
+        if (type == BDSKFileTokenType && [key isEqualToString:@"path"] && i <= count) {
+            key = [@"path." stringByAppendingString:[keys objectAtIndex:i + 1]];
+            if ([self propertyForKey:key tokenType:type])
+                i++;
+            else
+                key = @"path";
+        }
+        if (property = [self propertyForKey:key tokenType:type])
+            [token setValue:key forKey:property];
+        else
+            return nil;
+    }
+    
+    if (defaultFont) {
+        NSFont *font = [[(BDSKRichValueTag *)tag attributes] objectForKey:NSFontAttributeName];
+        [self setFont:font ofToken:token defaultFont:defaultFont];
+    }
+    
+    return token;
+}
+
+- (NSString *)propertyForKey:(NSString *)key tokenType:(int)type {
+    if (type == BDSKFieldTokenType) {
+        if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
+            return @"casingKey";
+        if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])
+            return @"cleaningKey";
+        if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
+            return @"appendingKey";
+    } else if (type == BDSKURLTokenType) {
+        if ([[templateOptions valueForKeyPath:@"urlFormat.key"] containsObject:key])
+            return @"urlFormatKey";
+        if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
+            return @"appendingKey";
+    } else if (type == BDSKFileTokenType) {
+        if ([[templateOptions valueForKeyPath:@"fileFormat.key"] containsObject:key])
+            return @"fileFormatKey";
+        if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
+            return @"appendingKey";
+    } else if (type == BDSKPersonTokenType) {
+        if ([[templateOptions valueForKeyPath:@"nameStyle.key"] containsObject:key])
+            return @"nameStyleKey";
+        if ([[templateOptions valueForKeyPath:@"joinStyle.key"] containsObject:key])
+            return @"joinStyleKey";
+        if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
+            return @"appendingKey";
+    }
+    return nil;
+}
+
+- (void)setFont:(NSFont *)font ofToken:(BDSKToken *)token defaultFont:(NSFont *)defaultFont{
+    if ([font isEqual:defaultFont] == NO) {
+        int defaultTraits = [[NSFontManager sharedFontManager] traitsOfFont:defaultFont];
+        int traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
+        BOOL defaultBold = (defaultTraits & NSBoldFontMask) != 0;
+        BOOL defaultItalic = (defaultTraits & NSItalicFontMask) != 0;
+        BOOL isBold = (traits & NSBoldFontMask) != 0;
+        BOOL isItalic = (traits & NSItalicFontMask) != 0;
+        
+        if ([[font familyName] isEqualToString:[defaultFont familyName]] == NO)
+            [token setFontName:[font familyName]];
+        if (fabsf([font pointSize] - [defaultFont pointSize]) > 0.0)
+            [token setFontSize:[font pointSize]];
+        if (isBold != defaultBold)
+            [token setBold:isBold];
+        if (isItalic != defaultItalic)
+            [token setItalic:isItalic];
+    }
 }
 
 @end

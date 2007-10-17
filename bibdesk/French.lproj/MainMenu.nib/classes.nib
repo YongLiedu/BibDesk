@@ -147,10 +147,12 @@
                 mergeInExternalPublications = id; 
                 newBDSKLibrary = id; 
                 newPub = id; 
+                newTemplateDocument = id; 
                 openDocumentUsingFilter = id; 
                 openDocumentUsingPhonyCiteKeys = id; 
                 openLinkedFile = id; 
                 openRemoteURL = id; 
+                openTemplateDocument = id; 
                 refreshAllExternalGroups = id; 
                 refreshScriptGroups = id; 
                 refreshSharedBrowsing = id; 
