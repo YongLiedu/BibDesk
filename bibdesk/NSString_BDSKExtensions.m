@@ -1428,7 +1428,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 #pragma mark Empty lines
 
-// whitespace at the beginning of the string up to the end or until (and including) a newline
+// whitespace at the beginning of the string up to and including a newline
 - (NSRange)rangeOfLeadingEmptyLine {
     return [self rangeOfLeadingEmptyLine:NULL];
 }
@@ -1463,7 +1463,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return wsRange;
 }
 
-// whitespace at the end of the string from the beginning or after a newline
+// whitespace at the end of the string after a newline
 - (NSRange)rangeOfTrailingEmptyLine {
     return [self rangeOfTrailingEmptyLine:NULL];
 }
@@ -1485,12 +1485,8 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     } else {
         unichar lastChar = [self characterAtIndex:lastCharRange.location];
         unsigned int rangeEnd = NSMaxRange(lastCharRange);
-        if (rangeEnd < end && [[NSCharacterSet newlineCharacterSet] characterIsMember:lastChar]) {
-            if (lastChar == '\n' && rangeEnd - 1 > range.location && [self characterAtIndex:rangeEnd - 2] == '\r')
-                wsRange = NSMakeRange(rangeEnd - 1, end - rangeEnd + 1);
-            else
-                wsRange = NSMakeRange(rangeEnd, end - rangeEnd);
-        }
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:lastChar])
+            wsRange = NSMakeRange(rangeEnd, end - rangeEnd);
         if (onlyWhite)
             *onlyWhite = NO;
     }
