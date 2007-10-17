@@ -298,7 +298,7 @@
 {
     isRetrieving = NO;
     failedDownload = NO;
-    NSError *error = nil;
+    NSError *presentableError;
     
     if (URLDownload) {
         [URLDownload release];
@@ -310,9 +310,12 @@
     NSArray *pubs = nil;
     if (nil == contentString) {
         failedDownload = YES;
+        presentableError = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Empty search result", @"error when pubmed search fails")];
+        [presentableError setValue:NSLocalizedString(@"Either the server didn't return any data, or BibDesk was unable to read it as text.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
     } else {
         int type = [contentString contentStringType];
         BOOL isPartialData = NO;
+        NSError *error;
         if (type == BDSKBibTeXStringType) {
             NSMutableString *frontMatter = [NSMutableString string];
             pubs = [BDSKBibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath document:group encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
@@ -321,9 +324,15 @@
         }
         if (pubs == nil || isPartialData) {
             failedDownload = YES;
-            [NSApp presentError:error];
         }
+        presentableError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Incorrect result type", @"error when pubmed parse fails")];
+        [presentableError setValue:NSLocalizedString(@"The server did not return a recognized data format.  This is likely a server problem.", @"error when pubmed parse fails") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        [presentableError embedError:error];
     }
+    
+    if (failedDownload)
+        [NSApp presentError:presentableError];
+
     [group addPublications:pubs];
 }
 
