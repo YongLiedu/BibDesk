@@ -298,7 +298,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     NSFont *font = nil;
     NSAttributedString *attrString = nil;
     NSString *string = nil;
-    NSRange startRange, endRange, sepRange, wsRange;
+    NSRange startRange, endRange = { NSNotFound, 0 }, sepRange = { NSNotFound, 0 }, wsRange;
     unsigned int length, startLoc = NSNotFound;
     BOOL onlyWs;
     
@@ -1313,7 +1313,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     } else if ([emptyTemplate count] == 0 && [nonemptyTemplate count] < 3) {
         int i = 0;
         BDSKTag *subtag = [nonemptyTemplate objectAtIndex:i];
-        NSString *prefix, *suffix;
+        NSString *prefix = nil, *suffix = nil;
         count = [nonemptyTemplate count];
         
         if ([subtag type] == BDSKTextTagType) {
