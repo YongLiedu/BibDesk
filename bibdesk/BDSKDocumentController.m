@@ -119,17 +119,16 @@
 - (void)noteNewRecentDocument:(NSDocument *)aDocument{
     
     // may need to revisit this for new document classes
-    //OBASSERT([aDocument isKindOfClass:[BibDocument class]]);
     
     if ([aDocument respondsToSelector:@selector(documentStringEncoding)]) {
+        OBPRECONDITION([aDocument isKindOfClass:[BibDocument class]]);
+        
         NSStringEncoding encoding = [(BibDocument *)aDocument documentStringEncoding];
         
         // only add it to the list of recent documents if it can be opened without manually selecting an encoding
         if(encoding == NSASCIIStringEncoding || encoding == [BDSKStringEncodingManager defaultEncoding])
             [super noteNewRecentDocument:aDocument]; 
 
-    } else {
-        [super noteNewRecentDocument:aDocument];
     }
 }
 
