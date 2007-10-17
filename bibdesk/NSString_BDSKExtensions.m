@@ -1472,7 +1472,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [self rangeOfTrailingEmptyLine:onlyWhite range:NSMakeRange(0, [self length])];
 }
 - (NSRange)rangeOfTrailingEmptyLineInRange:(NSRange)range {
-    return [self rangeOfTrailingEmptyLine:NULL range:NSMakeRange(0, [self length])];
+    return [self rangeOfTrailingEmptyLine:NULL range:range];
 }
 
 - (NSRange)rangeOfTrailingEmptyLine:(BOOL *)onlyWhite range:(NSRange)range {
