@@ -458,7 +458,6 @@
 		
     int result = [self runModalOpenPanel:oPanel forTypes:[NSArray arrayWithObjects:@"txt", @"rtf", nil]];
     if(result == NSOKButton){
-        NSStringEncoding encoding;
         NSEnumerator *urlEnum = [[oPanel URLs] objectEnumerator];
         NSURL *aURL;
 
