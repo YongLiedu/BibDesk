@@ -123,7 +123,6 @@
 		45DB3E500CAADFC3001EACDA /* BDSKCiteULikeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */; };
 		45DB3E510CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */; };
 		45DB3E520CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E4C0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m */; };
-		45DB3E8E0CAAFED5001EACDA /* BDSKHubmedParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */; };
 		45DB3E8F0CAAFED5001EACDA /* BDSKHubmedParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -227,7 +226,6 @@
 		CE89618A0CBEB59800EA2D98 /* BDSKToken.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961860CBEB59800EA2D98 /* BDSKToken.m */; };
 		CE89618B0CBEB59800EA2D98 /* BDSKTypeTemplate.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE8961870CBEB59800EA2D98 /* BDSKTypeTemplate.h */; };
 		CE89618C0CBEB59800EA2D98 /* BDSKTypeTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961880CBEB59800EA2D98 /* BDSKTypeTemplate.m */; };
-		CE8961BC0CBEB5AC00EA2D98 /* BDSKTemplateDocument.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE8961BA0CBEB5AC00EA2D98 /* BDSKTemplateDocument.h */; };
 		CE8961BD0CBEB5AC00EA2D98 /* BDSKTemplateDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961BB0CBEB5AC00EA2D98 /* BDSKTemplateDocument.m */; };
 		CE89622A0CBEBAAC00EA2D98 /* TemplateDocument.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE8962240CBEBAAC00EA2D98 /* TemplateDocument.nib */; };
 		CE8962C60CBEC0C500EA2D98 /* TemplateOptions.strings in Resources */ = {isa = PBXBuildFile; fileRef = CE8962C40CBEC0C500EA2D98 /* TemplateOptions.strings */; };
@@ -780,11 +778,9 @@
 				45DB3E4D0CAADFC3001EACDA /* BDSKACMDLParser.h in CopyFiles */,
 				45DB3E4F0CAADFC3001EACDA /* BDSKCiteULikeParser.h in CopyFiles */,
 				45DB3E510CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h in CopyFiles */,
-				45DB3E8E0CAAFED5001EACDA /* BDSKHubmedParser.h in CopyFiles */,
 				45BB77530CAC74AE00F6299B /* BDSKGoogleScholarParser.h in CopyFiles */,
 				CE8961890CBEB59800EA2D98 /* BDSKToken.h in CopyFiles */,
 				CE89618B0CBEB59800EA2D98 /* BDSKTypeTemplate.h in CopyFiles */,
-				CE8961BC0CBEB5AC00EA2D98 /* BDSKTemplateDocument.h in CopyFiles */,
 				CEFA2F120CC0272C002A8262 /* BDSKTag.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

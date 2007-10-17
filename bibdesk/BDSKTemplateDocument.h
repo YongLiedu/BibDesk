@@ -49,7 +49,6 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     IBOutlet NSObjectController *ownerController;
     
     IBOutlet NSTextView *previewTextView;
-    IBOutlet NSTabView *tabView;
     
     IBOutlet NSPopUpButton *defaultTypePopUp;
     IBOutlet NSButton *richTextCheckButton;

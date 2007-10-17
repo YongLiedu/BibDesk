@@ -55,7 +55,6 @@
                 specialTokenField = NSTokenField; 
                 suffixField = NSTextField; 
                 suffixTemplateTextView = NSTextView; 
-                tabView = NSTabView; 
                 tableView = NSTableView; 
                 templateArrayController = NSArrayController; 
                 textField = NSTextField; 
