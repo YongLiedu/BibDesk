@@ -244,10 +244,12 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     
     [ownerController setContent:self];
     
+    id fieldEditor = [NSTokenFieldCell respondsToSelector:@selector(_sharedFieldEditor)] ? [NSTokenFieldCell performSelector:@selector(_sharedFieldEditor)] : nil;
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
-                                                 name:NSTextViewDidChangeSelectionNotification object:nil];
+                                                 name:NSTextViewDidChangeSelectionNotification object:fieldEditor];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDelayedDidChangeSelectionNotification:) 
-                                                 name:BDSKTextViewDidChangeSelectionNotification object:nil];
+                                                 name:BDSKTextViewDidChangeSelectionNotification object:fieldEditor];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidEndEditingNotification:) 
                                                  name:NSControlTextDidEndEditingNotification object:itemTemplateTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTokenDidChangeNotification:) 
