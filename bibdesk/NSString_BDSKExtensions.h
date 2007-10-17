@@ -471,7 +471,9 @@ An inline buffer is used for speed in accessing each character.
 #pragma mark Empty lines
 
 - (NSRange)rangeOfLeadingEmptyLine;
+- (NSRange)rangeOfLeadingEmptyLine:(BOOL *)onlyWhite;
 - (NSRange)rangeOfLeadingEmptyLineInRange:(NSRange)range;
+- (NSRange)rangeOfLeadingEmptyLine:(BOOL *)onlyWhite range:(NSRange)range;
 - (NSRange)rangeOfTrailingEmptyLine;
 - (NSRange)rangeOfTrailingEmptyLine:(BOOL *)onlyWhite;
 - (NSRange)rangeOfTrailingEmptyLineInRange:(NSRange)range;
