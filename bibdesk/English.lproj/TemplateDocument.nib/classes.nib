@@ -56,9 +56,11 @@
                 suffixField = NSTextField; 
                 suffixTemplateTextView = NSTextView; 
                 tableView = NSTableView; 
+                tableViewSplitView = NSSplitView; 
                 templateArrayController = NSArrayController; 
                 textField = NSTextField; 
                 textOptionsView = NSView; 
+                textViewSplitView = NSSplitView; 
                 tokenObjectController = NSObjectController; 
                 tokenOptionsBox = NSBox; 
                 urlOptionsMenu = NSMenu; 
@@ -67,7 +69,9 @@
             }; 
             SUPERCLASS = NSDocument; 
         }, 
+        {CLASS = BDSKTokenField; LANGUAGE = ObjC; SUPERCLASS = NSTokenField; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }, 
         {CLASS = NSSegmentedControl; LANGUAGE = ObjC; SUPERCLASS = NSControl; }
     ); 
     IBVersion = 1; 

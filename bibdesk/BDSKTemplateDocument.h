@@ -50,6 +50,9 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     
     IBOutlet NSTextView *previewTextView;
     
+    IBOutlet NSSplitView *textViewSplitView;
+    IBOutlet NSSplitView *tableViewSplitView;
+    
     IBOutlet NSPopUpButton *defaultTypePopUp;
     IBOutlet NSButton *richTextCheckButton;
     IBOutlet NSPopUpButton *fontNamePopUp;
@@ -190,9 +193,6 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 #pragma mark -
 
 @interface BDSKTokenField : NSTokenField
-@end
-
-@interface BDSKTokenFieldCell : NSTokenFieldCell
 @end
 
 @interface NSObject (BDSKTokenFieldDelegate)
