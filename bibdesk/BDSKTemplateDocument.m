@@ -263,10 +263,10 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:specialTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:requiredTokenField];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidEndEditingNotification:) 
-                                                 name:NSControlTextDidEndEditingNotification object:itemTemplateTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:defaultTokenField];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidEndEditingNotification:) 
+                                                 name:NSControlTextDidEndEditingNotification object:itemTemplateTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTokenDidChangeNotification:) 
                                                  name:BDSKTokenDidChangeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTemplateDidChangeNotification:) 
@@ -1079,7 +1079,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 - (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView {
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:textView, @"NSFieldEditor", nil];
-    NSNotification *note = [NSNotification notificationWithName:BDSKTokenFieldDidChangeSelectionNotification object:textView userInfo:userInfo];
+    NSNotification *note = [NSNotification notificationWithName:BDSKTokenFieldDidChangeSelectionNotification object:tokenField userInfo:userInfo];
     [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
 }
 
