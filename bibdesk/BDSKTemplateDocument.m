@@ -1390,7 +1390,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     
     token = [BDSKToken tokenWithField:field];
     type = [(BDSKToken *)token type];
-    keys = [keys subarrayWithRange:NSMakeRange(++i, [keys count] - i)];
+    keys = [keys subarrayWithRange:NSMakeRange(i + 1, [keys count] - i - 1)];
     int count = [keys count];
     NSString *property;
     
