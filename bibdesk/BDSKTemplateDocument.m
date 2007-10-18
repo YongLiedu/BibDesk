@@ -1223,24 +1223,17 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
             return nil;
         
         NSArray *matchStrings = [(BDSKConditionTag *)tag matchStrings];
-        unsigned int i = 0, count = [matchStrings count];
+        unsigned int i = 0, keyCount = [matchStrings count], count = [[(BDSKConditionTag *)tag subtemplates] count];
         
         for (i = 0; i < count; i++) {
             if (itemTemplate = [self convertItemTemplate:[(BDSKConditionTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont])
-                [result setObject:itemTemplate forKey:[matchStrings objectAtIndex:i]];
-            else
-                return nil;
+                [result setObject:itemTemplate forKey:i < keyCount ? [matchStrings objectAtIndex:i] : @""];
+            else return nil;
         }
-        if ([[(BDSKConditionTag *)tag subtemplates] count] > count && (itemTemplate = [self convertItemTemplate:[(BDSKConditionTag *)tag subtemplateAtIndex:count] defaultFont:defaultFont]))
-            [result setObject:itemTemplate forKey:@""];
-        else
-            return nil;
-            
     } else {
         if (itemTemplate = [self convertItemTemplate:templateArray defaultFont:defaultFont])
             [result setObject:itemTemplate forKey:@""];
-        else
-            return nil;
+        else return nil;
     }
     
     return result;
@@ -1248,28 +1241,28 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 - (NSArray *)convertItemTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont {
     NSMutableArray *result = [NSMutableArray array];
-    int type;
     NSEnumerator *tagEnum = [templateArray objectEnumerator];
     BDSKTag *tag;
     id token;
     
     while (tag = [tagEnum nextObject]) {
-        type = [(BDSKTag *)tag type];
-        
-        if (type == BDSKTextTagType) {
-            if (token = [self tokensForTextTag:tag allowText:YES defaultFont:defaultFont])
-                [result addObjectsFromArray:token];
-            else
-                return nil;
-        } else if (type == BDSKValueTagType) {
-            if (token = [self tokenForValueTag:(BDSKValueTag *)tag defaultFont:defaultFont])
-                [result addObject:token];
-            else
-                return nil;
-        } else if (type == BDSKConditionTagType) {
-            if (token = [self tokenForConditionTag:(BDSKConditionTag *)tag defaultFont:defaultFont])
-                [result addObject:token];
-            else
+        switch ([(BDSKTag *)tag type]) {
+            case BDSKTextTagType:
+                if (token = [self tokensForTextTag:tag allowText:YES defaultFont:defaultFont])
+                    [result addObjectsFromArray:token];
+                else return nil;
+                break;
+            case BDSKValueTagType:
+                if (token = [self tokenForValueTag:(BDSKValueTag *)tag defaultFont:defaultFont])
+                    [result addObject:token];
+                else return nil;
+                break;
+            case BDSKConditionTagType:
+                if (token = [self tokenForConditionTag:(BDSKConditionTag *)tag defaultFont:defaultFont])
+                    [result addObject:token];
+                else return nil;
+                break;
+            default:
                 return nil;
         }
     }
@@ -1315,9 +1308,8 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     if ([nonemptyTemplate count] == 1 && [(BDSKTag *)[nonemptyTemplate lastObject] type] == BDSKTextTagType) {
         NSArray *keys = [[tag keyPath] componentsSeparatedByString:@"."];
         NSArray *tokens;
-        if ([keys count] != 2 || [[keys objectAtIndex:0] isEqualToString:@"fields"] == NO) {
+        if ([keys count] != 2 || [[keys objectAtIndex:0] isEqualToString:@"fields"] == NO)
             return nil;
-        }
         if (tokens = [self tokensForTextTag:tag allowText:NO defaultFont:defaultFont]) {
             if ([tokens count] == 1) {
                 token = [tokens lastObject];
@@ -1328,12 +1320,8 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                         return nil;
                     [token setAltText:defaultFont ? [[(BDSKRichTextTag *)textTag attributedText] string] : [(BDSKTextTag *)textTag text]];
                 }
-            } else {
-                return nil;
-            }
-        } else {
-            return nil;
-        }
+            } else return nil;
+        } else return nil;
     } else if ([emptyTemplate count] == 0 && [nonemptyTemplate count] < 3) {
         int i = 0;
         BDSKTag *subtag = [nonemptyTemplate objectAtIndex:i];
@@ -1347,20 +1335,17 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         if ([subtag type] == BDSKValueTagType && [[(BDSKValueTag *)subtag keyPath] isEqualToString:[tag keyPath]]) {
             token = [self tokenForValueTag:(BDSKValueTag *)subtag defaultFont:defaultFont];
             subtag = ++i < count ? [nonemptyTemplate objectAtIndex:i] : nil;
-        } else
-            return nil;
+        } else return nil;
         if (subtag) {
             if ([subtag type] == BDSKTextTagType) {
                 suffix = defaultFont ? [[(BDSKRichTextTag *)subtag attributedText] string] : [(BDSKTextTag *)subtag text];
-            } else
-                return nil;
+            } else return nil;
         }
         if (prefix)
             [token setPrefix:prefix];
         if (suffix)
             [token setSuffix:suffix];
-    } else
-        return nil;
+    } else return nil;
     
     return token;
 }
@@ -1408,8 +1393,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         }
         if (property = [self propertyForKey:key tokenType:type])
             [token setValue:key forKey:property];
-        else
-            return nil;
+        else return nil;
     }
     
     if (defaultFont) {
@@ -1421,32 +1405,38 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 }
 
 - (NSString *)propertyForKey:(NSString *)key tokenType:(int)type {
-    if (type == BDSKFieldTokenType) {
-        if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
-            return @"casingKey";
-        if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])
-            return @"cleaningKey";
-        if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
-            return @"appendingKey";
-    } else if (type == BDSKURLTokenType) {
-        if ([[templateOptions valueForKeyPath:@"urlFormat.key"] containsObject:key])
-            return @"urlFormatKey";
-        if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
-            return @"appendingKey";
-    } else if (type == BDSKFileTokenType) {
-        if ([[templateOptions valueForKeyPath:@"fileFormat.key"] containsObject:key])
-            return @"fileFormatKey";
-        if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
-            return @"appendingKey";
-    } else if (type == BDSKPersonTokenType) {
-        if ([[templateOptions valueForKeyPath:@"nameStyle.key"] containsObject:key])
-            return @"nameStyleKey";
-        if ([[templateOptions valueForKeyPath:@"joinStyle.key"] containsObject:key])
-            return @"joinStyleKey";
-        if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
-            return @"appendingKey";
+    switch (type) {
+        case BDSKFieldTokenType:
+            if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
+                return @"casingKey";
+            if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])
+                return @"cleaningKey";
+            if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
+                return @"appendingKey";
+            return nil;
+        case BDSKURLTokenType:
+            if ([[templateOptions valueForKeyPath:@"urlFormat.key"] containsObject:key])
+                return @"urlFormatKey";
+            if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
+                return @"appendingKey";
+            return nil;
+        case BDSKFileTokenType:
+            if ([[templateOptions valueForKeyPath:@"fileFormat.key"] containsObject:key])
+                return @"fileFormatKey";
+            if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
+                return @"appendingKey";
+            return nil;
+        case BDSKPersonTokenType:
+            if ([[templateOptions valueForKeyPath:@"nameStyle.key"] containsObject:key])
+                return @"nameStyleKey";
+            if ([[templateOptions valueForKeyPath:@"joinStyle.key"] containsObject:key])
+                return @"joinStyleKey";
+            if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
+                return @"appendingKey";
+            return nil;
+        default:
+            return nil;
     }
-    return nil;
 }
 
 - (void)setFont:(NSFont *)font ofToken:(BDSKToken *)token defaultFont:(NSFont *)defaultFont{
