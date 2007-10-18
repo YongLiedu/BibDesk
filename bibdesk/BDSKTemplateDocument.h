@@ -186,3 +186,15 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 - (BOOL)commitEditing;
 
 @end
+
+#pragma mark -
+
+@interface BDSKTokenField : NSTokenField
+@end
+
+@interface BDSKTokenFieldCell : NSTokenFieldCell
+@end
+
+@interface NSObject (BDSKTokenFieldDelegate)
+- (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView;
+@end

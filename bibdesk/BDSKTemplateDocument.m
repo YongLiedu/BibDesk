@@ -55,7 +55,7 @@ NSString *BDSKRichTextTemplateDocumentType = @"Rich Text Template";
 
 static NSString *BDSKTemplateDocumentFrameAutosaveName = @"BDSKTemplateDocument";
 
-static NSString *BDSKTextViewDidChangeSelectionNotification = @"BDSKTextViewDidChangeSelectionNotification";
+static NSString *BDSKTokenFieldDidChangeSelectionNotification = @"BDSKTokenFieldDidChangeSelectionNotification";
 
 static NSString *BDSKTemplateTokensPboardType = @"BDSKTemplateTokensPboardType";
 static NSString *BDSKTypeTemplateRowsPboardType = @"BDSKTypeTemplateRowsPboardType";
@@ -76,7 +76,6 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (void)updateOptionView;
 - (void)setupOptionsMenus;
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification;
-- (void)handleDelayedDidChangeSelectionNotification:(NSNotification *)notification;
 - (void)handleDidEndEditingNotification:(NSNotification *)notification;
 - (void)handleTokenDidChangeNotification:(NSNotification *)notification;
 - (void)handleTemplateDidChangeNotification:(NSNotification *)notification;
@@ -258,14 +257,16 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     
     [ownerController setContent:self];
     
-    id fieldEditor = [NSTokenFieldCell respondsToSelector:@selector(_sharedFieldEditor)] ? [NSTokenFieldCell _sharedFieldEditor] : nil;
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
-                                                 name:NSTextViewDidChangeSelectionNotification object:fieldEditor];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDelayedDidChangeSelectionNotification:) 
-                                                 name:BDSKTextViewDidChangeSelectionNotification object:fieldEditor];
+                                                 name:BDSKTokenFieldDidChangeSelectionNotification object:itemTemplateTokenField];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
+                                                 name:BDSKTokenFieldDidChangeSelectionNotification object:specialTokenField];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
+                                                 name:BDSKTokenFieldDidChangeSelectionNotification object:requiredTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidEndEditingNotification:) 
                                                  name:NSControlTextDidEndEditingNotification object:itemTemplateTokenField];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
+                                                 name:BDSKTokenFieldDidChangeSelectionNotification object:defaultTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTokenDidChangeNotification:) 
                                                  name:BDSKTokenDidChangeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTemplateDidChangeNotification:) 
@@ -938,44 +939,25 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 #pragma mark Notification handlers
 
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification {
-    NSTextView *textView = [notification object];
-    if (textView == [itemTemplateTokenField currentEditor] ||
-        textView == [specialTokenField currentEditor] ||
-        textView == [requiredTokenField currentEditor] ||
-        textView == [optionalTokenField currentEditor] ||
-        textView == [defaultTokenField currentEditor]) {
-        NSNotification *note = [NSNotification notificationWithName:BDSKTextViewDidChangeSelectionNotification object:textView];
-        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
-    }
-}
-
-- (void)handleDelayedDidChangeSelectionNotification:(NSNotification *)notification {
-    NSTextView *textView = [notification object];
-    if (textView == [itemTemplateTokenField currentEditor] ||
-        textView == [specialTokenField currentEditor] ||
-        textView == [requiredTokenField currentEditor] ||
-        textView == [optionalTokenField currentEditor] ||
-        textView == [defaultTokenField currentEditor]) {
-        
-        BDSKToken *token = nil;
-        NSArray *selRanges = [textView selectedRanges];
-        if ([selRanges count] == 1) {
-            NSRange range = [[selRanges lastObject] rangeValue];
-            if (range.length == 1) {
-                NSDictionary *attrs = [[textView textStorage] attributesAtIndex:range.location effectiveRange:NULL];
-                id attachment = [attrs objectForKey:NSAttachmentAttributeName];
-                if (attachment) {
-                    if ([attachment respondsToSelector:@selector(representedObject)])
-                        token = [attachment representedObject];
-                    else if ([[attachment attachmentCell] respondsToSelector:@selector(representedObject)])
-                        token = [(id)[attachment attachmentCell] representedObject];
-                    if (token && [token isKindOfClass:[BDSKToken class]] == NO)
-                        token = nil;
-                }
+    NSTextView *textView = [[notification userInfo] objectForKey:@"NSFieldEditor"];
+    BDSKToken *token = nil;
+    NSArray *selRanges = [textView selectedRanges];
+    if ([selRanges count] == 1) {
+        NSRange range = [[selRanges lastObject] rangeValue];
+        if (range.length == 1) {
+            NSDictionary *attrs = [[textView textStorage] attributesAtIndex:range.location effectiveRange:NULL];
+            id attachment = [attrs objectForKey:NSAttachmentAttributeName];
+            if (attachment) {
+                if ([attachment respondsToSelector:@selector(representedObject)])
+                    token = [attachment representedObject];
+                else if ([[attachment attachmentCell] respondsToSelector:@selector(representedObject)])
+                    token = [(id)[attachment attachmentCell] representedObject];
+                if (token && [token isKindOfClass:[BDSKToken class]] == NO)
+                    token = nil;
             }
         }
-        [self setSelectedToken:token];
     }
+    [self setSelectedToken:token];
 }
 
 - (void)handleDidEndEditingNotification:(NSNotification *)notification {
@@ -1093,6 +1075,12 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     }
     
     return tokens;
+}
+
+- (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView {
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:textView, @"NSFieldEditor", nil];
+    NSNotification *note = [NSNotification notificationWithName:BDSKTokenFieldDidChangeSelectionNotification object:textView userInfo:userInfo];
+    [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
 }
 
 #pragma mark NSTableView delegate and dataSource
@@ -1449,8 +1437,22 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 #pragma mark -
 
-@interface BDSKTokenFieldCell : NSTokenFieldCell
+@implementation BDSKTokenField
+
++ (void)load {
+    [BDSKTokenField poseAsClass:[NSTokenField class]];
+}
+
+- (void)textViewDidChangeSelection:(NSNotification *)notification {
+    if ([[BDSKTokenField superclass] instancesRespondToSelector:_cmd])
+        [super textViewDidChangeSelection:notification];
+    if ([[self delegate] respondsToSelector:@selector(tokenField:textViewDidChangeSelection:)])
+        [[self delegate] tokenField:self textViewDidChangeSelection:[notification object]];
+}
+
 @end
+
+#pragma mark -
 
 @implementation BDSKTokenFieldCell
 
