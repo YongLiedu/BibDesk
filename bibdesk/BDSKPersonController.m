@@ -345,37 +345,31 @@
 #pragma mark Splitview delegate methods
 
 - (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
-    NSView *pickerView = [[splitView subviews] objectAtIndex:0];
-    NSView *pubsView = [[splitView subviews] objectAtIndex:1];
-    NSRect pubsFrame = [pubsView frame];
-    NSRect pickerFrame = [pickerView frame];
-    float factor = (NSWidth([sender frame]) - [sender dividerThickness]) / (oldSize.width - [sender dividerThickness]);
-	
-	if (sender == splitView) {
-		// pubs = table, picker = preview
-        pickerFrame.size.width *= factor;
-        if (NSWidth(pickerFrame) < 1.0)
-            pickerFrame.size.width = 0.0;
-        pickerFrame = NSIntegralRect(pickerFrame);
-        pubsFrame.size.width = NSWidth([sender frame]) - NSWidth(pickerFrame) - [sender dividerThickness];
-        if (NSWidth(pubsFrame) < 0.0) {
-            pubsFrame.size.width = 0.0;
-            pickerFrame.size.width = NSWidth([sender frame]) - NSWidth(pubsFrame) - [sender dividerThickness];
-        }
-	} else {
-        pubsFrame.size.width *= factor;
-        if (NSWidth(pubsFrame) < 1.0)
-            pubsFrame.size.width = 0.0;
-        pubsFrame = NSIntegralRect(pubsFrame);
-        pickerFrame.size.width = NSWidth([sender frame]) - NSWidth(pubsFrame) - [sender dividerThickness];
-        if (NSWidth(pubsFrame) < 0.0) {
-            pickerFrame.size.width = 0.0;
-            pubsFrame.size.width = NSWidth([sender frame]) - NSWidth(pickerFrame) - [sender dividerThickness];
+    NSView *views[2];
+    NSRect frames[2];
+    float contentHeight = NSHeight([sender frame]) - [sender dividerThickness];
+    float factor = contentHeight / (oldSize.width - [sender dividerThickness]);
+    int i, gap;
+    
+    [[sender subviews] getObjects:views];
+    for (i = 0; i < 2; i++) {
+        frames[i] = [views[i] frame];
+        frames[i].size.height = floorf(factor * NSHeight(frames[i]));
+    }
+    
+    // randomly divide the remaining gap over the two views; NSSplitView dumps it all over the last view, which grows that one more than the others
+    gap = contentHeight - NSHeight(frames[0]) - NSHeight(frames[1]);
+    while (gap > 0) {
+        i = floor(2.0f * rand() / RAND_MAX);
+        if (NSHeight(frames[i]) > 0.0) {
+            frames[i].size.height += 1.0;
+            gap--;
         }
     }
-	
-	[pubsView setFrame:pubsFrame];
-	[pickerView setFrame:pickerFrame];
+    frames[0].origin.y = NSMaxY(frames[1]) + [sender dividerThickness];
+    
+    for (i = 0; i < 2; i++)
+        [views[i] setFrame:frames[i]];
     [sender adjustSubviews];
 }
 

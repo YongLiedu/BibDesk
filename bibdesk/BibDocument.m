@@ -3213,33 +3213,46 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 #pragma mark SplitView delegate
 
 - (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
-    int i = [[sender subviews] count] - 2;
-    OBASSERT(i >= 0);
-	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
-	NSView *firstView = [[sender subviews] objectAtIndex:i];
-	NSView *secondView = [[sender subviews] objectAtIndex:++i];
-	NSRect zerothFrame = zerothView ? [zerothView frame] : NSZeroRect;
-	NSRect firstFrame = [firstView frame];
-	NSRect secondFrame = [secondView frame];
-	
 	if (sender == splitView) {
-		// first = table, second = preview, zeroth = web
-        float contentHeight = NSHeight([sender frame]) - i * [sender dividerThickness];
-        float factor = contentHeight / (oldSize.height - i * [sender dividerThickness]);
-        secondFrame.size.height *= factor;
-        if (NSHeight(secondFrame) < 1.0)
-            secondFrame.size.height = 0.0;
-        secondFrame = NSIntegralRect(secondFrame);
-        zerothFrame.size.height *= factor;
-        zerothFrame = NSIntegralRect(zerothFrame);
-        firstFrame.size.height = contentHeight - NSHeight(secondFrame) - NSHeight(zerothFrame);
-        if (NSHeight(firstFrame) < 0.0) {
-            firstFrame.size.height = 0.0;
-            secondFrame.size.height = contentHeight - NSHeight(firstFrame) - NSHeight(zerothFrame);
+		// (web), table, preview
+        int n = [[sender subviews] count];
+        NSView *views[n];
+        NSRect frames[n];
+        float contentHeight = NSHeight([sender frame]) - (n - 1) * [sender dividerThickness];
+        float factor = contentHeight / (oldSize.height - (n - 1) * [sender dividerThickness]);
+        float viewHeight = 0.0;
+        int i, gap;
+        
+        [[sender subviews] getObjects:views];
+        for (i = 0; i < n; i++) {
+            frames[i] = [views[i] frame];
+            frames[i].size.height = floorf(factor * NSHeight(frames[i]));
+            viewHeight += NSHeight(frames[i]);
         }
-        zerothFrame.size.width = firstFrame.size.width = secondFrame.size.width = NSWidth([sender frame]);
+        
+        // randomly divide the remaining gap over the three views; NSSplitView dumps it all over the last view, which grows that one more than the others
+        gap = contentHeight - viewHeight;
+        while (gap > 0) {
+            i = floor((float) n * rand() / RAND_MAX);
+            if (NSHeight(frames[i]) > 0.0) {
+                frames[i].size.height += 1.0;
+                gap--;
+            }
+        }
+        
+        for (i = 0; i < n; i++) {
+            if (i == 0)
+                frames[0].origin.y = NSMaxY([sender bounds]) - NSHeight(frames[0]);
+            else
+                frames[i].origin.y = NSMinY(frames[i - 1]) - NSHeight(frames[i]) - [sender dividerThickness];
+            [views[i] setFrame:frames[i]];
+        }
 	} else {
 		// first = group, second = table+preview
+        NSView *firstView = [[sender subviews] objectAtIndex:0];
+        NSView *secondView = [[sender subviews] objectAtIndex:1];
+        NSRect firstFrame = [firstView frame];
+        NSRect secondFrame = [secondView frame];
         float contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
         float factor = contentWidth / (oldSize.width - [sender dividerThickness]);
         firstFrame.size.width *= factor;
@@ -3251,12 +3264,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             secondFrame.size.width = 0.0;
             firstFrame.size.width = contentWidth - NSWidth(secondFrame);
         }
-        zerothFrame.size.height = firstFrame.size.height = secondFrame.size.height = NSHeight([sender frame]);
+        [firstView setFrame:firstFrame];
+        [secondView setFrame:secondFrame];
     }
-	
-	[zerothView setFrame:zerothFrame];
-	[firstView setFrame:firstFrame];
-	[secondView setFrame:secondFrame];
     [sender adjustSubviews];
 }
 
