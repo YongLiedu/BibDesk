@@ -264,6 +264,8 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:requiredTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
+                                                 name:BDSKTokenFieldDidChangeSelectionNotification object:optionalTokenField];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidChangeSelectionNotification:) 
                                                  name:BDSKTokenFieldDidChangeSelectionNotification object:defaultTokenField];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDidEndEditingNotification:) 
                                                  name:NSControlTextDidEndEditingNotification object:itemTemplateTokenField];
