@@ -55,12 +55,10 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
             [tag setKey:@"authors"];
         else if ([field isEqualToString:BDSKEditorString])
             [tag setKey:@"editors"];
-    } else if ([field isLocalFileField]) {
-        tag = [[BDSKFileTagToken alloc] initWithTitle:field];
+    } else if ([field isURLField]) {
+        tag = [[BDSKURLTagToken alloc] initWithTitle:field];
         if ([field isEqualToString:BDSKLocalUrlString])
             [tag setKey:@"localURL"];
-    } else if ([field isRemoteURLField]) {
-        tag = [[BDSKURLTagToken alloc] initWithTitle:field];
         if ([field isEqualToString:BDSKUrlString])
             [tag setKey:@"remoteURL"];
     } else if ([field isEqualToString:@"Rich Text"]) {
@@ -616,16 +614,6 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
     if ([appendingKey length])
         [keys addObject:appendingKey];
     return keys;
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKFileTagToken
-
-- (int)type {
-    return BDSKFileTokenType;
 }
 
 @end

@@ -828,15 +828,19 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     SETUP_SUBMENU(fieldOptionsMenu, 0, @"casing", @selector(changeCasing:));
     SETUP_SUBMENU(fieldOptionsMenu, 1, @"cleaning", @selector(changeCleaning:));
     SETUP_SUBMENU(fieldOptionsMenu, 2, @"appending", @selector(changeAppending:));
-    SETUP_SUBMENU(fileOptionsMenu, 0, @"fileFormat", @selector(changeUrlFormat:));
-    SETUP_SUBMENU(fileOptionsMenu, 1, @"appending", @selector(changeAppending:));
     SETUP_SUBMENU(urlOptionsMenu, 0, @"urlFormat", @selector(changeUrlFormat:));
-    SETUP_SUBMENU(urlOptionsMenu, 1, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(urlOptionsMenu, 1, @"cleaning", @selector(changeCleaning:));
+    SETUP_SUBMENU(urlOptionsMenu, 2, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(urlOptionsMenu, 3, @"appending", @selector(changeAppending:));
     SETUP_SUBMENU(personOptionsMenu, 0, @"nameStyle", @selector(changeNameStyle:));
     SETUP_SUBMENU(personOptionsMenu, 1, @"joinStyle", @selector(changeJoinStyle:));
-    SETUP_SUBMENU(personOptionsMenu, 2, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(personOptionsMenu, 2, @"cleaning", @selector(changeCleaning:));
+    SETUP_SUBMENU(personOptionsMenu, 3, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(personOptionsMenu, 4, @"appending", @selector(changeAppending:));
     SETUP_SUBMENU(dateOptionsMenu, 0, @"dateFormat", @selector(changeDateFormat:));
-    SETUP_SUBMENU(dateOptionsMenu, 1, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(dateOptionsMenu, 1, @"cleaning", @selector(changeCleaning:));
+    SETUP_SUBMENU(dateOptionsMenu, 2, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(dateOptionsMenu, 3, @"appending", @selector(changeAppending:));
 }
 
 - (void)updateTextViews {
@@ -897,9 +901,6 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         switch ([selectedToken type]) {
             case BDSKFieldTokenType:
                 optionViews = [NSMutableArray arrayWithObjects:fieldOptionsView, nil];
-                break;
-            case BDSKFileTokenType:
-                optionViews = [NSMutableArray arrayWithObjects:fileOptionsView, fieldOptionsView, nil];
                 break;
             case BDSKURLTokenType:
                 optionViews = [NSMutableArray arrayWithObjects:urlOptionsView, fieldOptionsView, nil];
@@ -1057,7 +1058,6 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         switch ([(BDSKToken *)representedObject type]) {
             case BDSKFieldTokenType: menu = fieldOptionsMenu; break;
             case BDSKURLTokenType: menu = urlOptionsMenu; break;
-            case BDSKFileTokenType: menu = fileOptionsMenu; break;
             case BDSKPersonTokenType: menu = personOptionsMenu; break;
             case BDSKDateTokenType: menu = dateOptionsMenu; break;
             default: menu = nil; break;
@@ -1386,7 +1386,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     
     for (i = 0; i < count; i++) {
         key = [keys objectAtIndex:i];
-        if (type == BDSKFileTokenType && [key isEqualToString:@"path"] && i <= count) {
+        if (type == BDSKURLTokenType && [key isEqualToString:@"path"] && i <= count) {
             key = [@"path." stringByAppendingString:[keys objectAtIndex:i + 1]];
             if ([self propertyForKey:key tokenType:type])
                 i++;
@@ -1419,16 +1419,6 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         case BDSKURLTokenType:
             if ([[templateOptions valueForKeyPath:@"urlFormat.key"] containsObject:key])
                 return @"urlFormatKey";
-            if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
-                return @"casingKey";
-            if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])
-                return @"cleaningKey";
-            if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
-                return @"appendingKey";
-            return nil;
-        case BDSKFileTokenType:
-            if ([[templateOptions valueForKeyPath:@"fileFormat.key"] containsObject:key])
-                return @"fileFormatKey";
             if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
                 return @"casingKey";
             if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])

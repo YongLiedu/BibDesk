@@ -6,12 +6,8 @@
 	<string>37 90 548 311 0 0 1440 938 </string>
 	<key>IBEditorPositions</key>
 	<dict>
-		<key>130</key>
-		<string>552 605 335 72 0 0 1440 938 </string>
 		<key>1305</key>
 		<string>31 365 138 87 0 0 1440 938 </string>
-		<key>1308</key>
-		<string>48 474 138 68 0 0 1440 938 </string>
 		<key>1311</key>
 		<string>37 406 138 68 0 0 1440 938 </string>
 		<key>1314</key>
@@ -39,19 +35,17 @@
 	</array>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>1419</integer>
-		<integer>589</integer>
-		<integer>130</integer>
-		<integer>1314</integer>
 		<integer>1311</integer>
-		<integer>144</integer>
-		<integer>1305</integer>
-		<integer>1308</integer>
+		<integer>1419</integer>
 		<integer>358</integer>
-		<integer>1425</integer>
-		<integer>88</integer>
-		<integer>804</integer>
+		<integer>1314</integer>
+		<integer>1305</integer>
+		<integer>589</integer>
+		<integer>144</integer>
 		<integer>5</integer>
+		<integer>1425</integer>
+		<integer>804</integer>
+		<integer>88</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>8R218</string>

@@ -31,8 +31,6 @@
                 fieldItalicCheckButton = NSButton; 
                 fieldOptionsMenu = NSMenu; 
                 fieldOptionsView = NSView; 
-                fileOptionsMenu = NSMenu; 
-                fileOptionsView = NSView; 
                 fontNamePopUp = NSPopUpButton; 
                 fontOptionsView = NSView; 
                 fontSizeComboBox = NSComboBox; 
@@ -42,7 +40,6 @@
                 nameStylePopUp = NSPopUpButton; 
                 optionalTokenField = NSTokenField; 
                 ownerController = NSObjectController; 
-                pathPopUp = NSPopUpButton; 
                 personOptionsMenu = NSMenu; 
                 personOptionsView = NSView; 
                 prefixField = NSTextField; 

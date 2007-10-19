@@ -41,7 +41,6 @@
 enum {
     BDSKFieldTokenType,
     BDSKURLTokenType,
-    BDSKFileTokenType,
     BDSKPersonTokenType,
     BDSKDateTokenType,
     BDSKNumberTokenType,
@@ -140,12 +139,6 @@ extern NSString *BDSKTokenDidChangeNotification;
 - (NSString *)urlFormatKey;
 - (void)setUrlFormatKey:(NSString *)newUrlFormatKey;
 
-@end
-
-#pragma mark -
-
-@interface BDSKFileTagToken : BDSKURLTagToken {
-}
 @end
 
 #pragma mark -

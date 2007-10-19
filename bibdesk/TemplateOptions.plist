@@ -141,16 +141,6 @@
         {
             displayName = "Path";
             key = "path";
-        }
-    );
-    fileFormat = (
-        {
-            displayName = "File URL";
-            key = "absoluteString";
-        },
-        {
-            displayName = "Full path";
-            key = "path";
         },
         {
             displayName = "File name";
