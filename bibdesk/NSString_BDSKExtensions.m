@@ -729,7 +729,6 @@ http://home.planet.nl/~faase009/GNU.txt
                                         case '@' : [mString appendFormat:@"{\\char64}"]; break;
 					case '[' :
 					case ']' : [mString appendFormat:@"{$%c$}", ch]; break;
-					case '"' : [mString appendString:@"{\\tt{}\"{}}"]; break;
 					case '~' : [mString appendString:@"\\~{}"]; break;
                                         case '^' : [mString appendString:@"\\^{}"]; break;
 					case '|' : [mString appendString:@"{$|$}"]; break;
