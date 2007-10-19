@@ -76,7 +76,6 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     
     IBOutlet NSView *fieldOptionsView;
     IBOutlet NSView *fontOptionsView;
-    IBOutlet NSView *appendingOptionsView;
     IBOutlet NSView *fileOptionsView;
     IBOutlet NSView *urlOptionsView;
     IBOutlet NSView *personOptionsView;

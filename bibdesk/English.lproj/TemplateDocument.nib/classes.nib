@@ -15,7 +15,6 @@
             OUTLETS = {
                 addFieldButton = NSButton; 
                 altTextField = NSTextField; 
-                appendingOptionsView = NSView; 
                 appendingPopUp = NSPopUpButton; 
                 boldCheckButton = NSButton; 
                 capitalizationPopUp = NSPopUpButton; 

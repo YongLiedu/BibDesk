@@ -95,22 +95,10 @@ extern NSString *BDSKTokenDidChangeNotification;
 
 @interface BDSKTagToken : BDSKToken {
     NSString *key;
-    NSString *appendingKey;
-    NSString *prefix;
-    NSString *suffix;
 }
 
 - (NSString *)key;
 - (void)setKey:(NSString *)newKey;
-
-- (NSString *)appendingKey;
-- (void)setAppendingKey:(NSString *)newAppendingKey;
-
-- (NSString *)prefix;
-- (void)setPrefix:(NSString *)newPrefix;
-
-- (NSString *)suffix;
-- (void)setSuffix:(NSString *)newSuffix;
 
 - (NSArray *)keys;
 
@@ -121,6 +109,9 @@ extern NSString *BDSKTokenDidChangeNotification;
 @interface BDSKFieldTagToken : BDSKTagToken {
     NSString *casingKey;
     NSString *cleaningKey;
+    NSString *appendingKey;
+    NSString *prefix;
+    NSString *suffix;
 }
 
 - (NSString *)casingKey;
@@ -129,11 +120,20 @@ extern NSString *BDSKTokenDidChangeNotification;
 - (NSString *)cleaningKey;
 - (void)setCleaningKey:(NSString *)newCleaningKey;
 
+- (NSString *)appendingKey;
+- (void)setAppendingKey:(NSString *)newAppendingKey;
+
+- (NSString *)prefix;
+- (void)setPrefix:(NSString *)newPrefix;
+
+- (NSString *)suffix;
+- (void)setSuffix:(NSString *)newSuffix;
+
 @end
 
 #pragma mark -
 
-@interface BDSKURLTagToken : BDSKTagToken {
+@interface BDSKURLTagToken : BDSKFieldTagToken {
     NSString *urlFormatKey;
 }
 
@@ -150,7 +150,7 @@ extern NSString *BDSKTokenDidChangeNotification;
 
 #pragma mark -
 
-@interface BDSKPersonTagToken : BDSKTagToken {
+@interface BDSKPersonTagToken : BDSKFieldTagToken {
     NSString *nameStyleKey;
     NSString *joinStyleKey;
 }
@@ -165,7 +165,7 @@ extern NSString *BDSKTokenDidChangeNotification;
 
 #pragma mark -
 
-@interface BDSKDateTagToken : BDSKTagToken {
+@interface BDSKDateTagToken : BDSKFieldTagToken {
     NSString *dateFormatKey;
 }
 

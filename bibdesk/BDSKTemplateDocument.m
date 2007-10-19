@@ -896,23 +896,25 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     if (selectedToken && [selectedToken isKindOfClass:[BDSKToken class]]) {
         switch ([selectedToken type]) {
             case BDSKFieldTokenType:
-                optionViews = [NSMutableArray arrayWithObjects:fieldOptionsView, appendingOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:fieldOptionsView, nil];
                 break;
             case BDSKFileTokenType:
-                optionViews = [NSMutableArray arrayWithObjects:fileOptionsView, appendingOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:fileOptionsView, fieldOptionsView, nil];
                 break;
             case BDSKURLTokenType:
-                optionViews = [NSMutableArray arrayWithObjects:urlOptionsView, appendingOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:urlOptionsView, fieldOptionsView, nil];
                 break;
             case BDSKPersonTokenType:
-                optionViews = [NSMutableArray arrayWithObjects:personOptionsView, appendingOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:personOptionsView, fieldOptionsView, nil];
                 break;
             case BDSKDateTokenType:
-                optionViews = [NSMutableArray arrayWithObjects:dateOptionsView, appendingOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:dateOptionsView, fieldOptionsView, nil];
                 break;
             case BDSKTextTokenType:
                 optionViews = [NSMutableArray arrayWithObjects:textOptionsView, nil];
                 break;
+            default:
+                optionViews = [NSMutableArray array];
         }
         if (richText)
             [optionViews addObject:fontOptionsView];
@@ -1417,12 +1419,20 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         case BDSKURLTokenType:
             if ([[templateOptions valueForKeyPath:@"urlFormat.key"] containsObject:key])
                 return @"urlFormatKey";
+            if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
+                return @"casingKey";
+            if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])
+                return @"cleaningKey";
             if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
                 return @"appendingKey";
             return nil;
         case BDSKFileTokenType:
             if ([[templateOptions valueForKeyPath:@"fileFormat.key"] containsObject:key])
                 return @"fileFormatKey";
+            if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
+                return @"casingKey";
+            if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])
+                return @"cleaningKey";
             if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
                 return @"appendingKey";
             return nil;
@@ -1431,6 +1441,10 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                 return @"nameStyleKey";
             if ([[templateOptions valueForKeyPath:@"joinStyle.key"] containsObject:key])
                 return @"joinStyleKey";
+            if ([[templateOptions valueForKeyPath:@"casing.key"] containsObject:key])
+                return @"casingKey";
+            if ([[templateOptions valueForKeyPath:@"cleaning.key"] containsObject:key])
+                return @"cleaningKey";
             if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
                 return @"appendingKey";
             return nil;
