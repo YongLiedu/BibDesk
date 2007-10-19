@@ -40,6 +40,16 @@ BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList);
 #define NSLog BDSKLog
 #define NSLogv BDSKLogv
 
+#ifndef NSINTEGER_DEFINED
+#define NSUInteger unsigned
+#define NSInteger int
+#define CGFloat float
+#endif
+
+#ifndef NSAppKitVersionNumber10_4
+#define NSAppKitVersionNumber10_4 824
+#endif
+
 #if defined (OMNI_ASSERTIONS_ON)
 
 #define log_method() \
