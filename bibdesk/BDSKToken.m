@@ -538,7 +538,7 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 
 - (id)initWithTitle:(NSString *)aTitle {
     if (self = [super initWithTitle:aTitle]) {
-        urlFormatKey = [@"absoluteString" retain];
+        urlFormatKey = [([aTitle isLocalFileField] ? @"path" : @"absoluteString" ) retain];
     }
     return self;
 }
