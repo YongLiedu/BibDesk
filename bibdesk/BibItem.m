@@ -2439,7 +2439,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     BibItem *self = (BibItem *)context;
     NSURL *value = [self localFileURLForField:(id)key];
     if (value) {
-        BDSKFile *aFile = [[BDSKFile alloc] initWithURL:value];
+        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithURL:value relativeToURL:[[self owner] fileURL]];
         [self->files addObject:aFile];
         [aFile release];
     }
@@ -2454,15 +2454,14 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSMutableArray *keysToRemove = [NSMutableArray array];
 
     while ((value = [pubFields objectForKey:key]) != nil) {
-        // !!! relative to what?
-        BDSKFile *aFile = [[BDSKFile alloc] initWithBase64String:value relativeTo:@""];
+        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithBase64String:value];
         if (aFile) {
             [files addObject:aFile];
             [aFile release];
             [keysToRemove addObject:key];
         }
         else {
-            NSLog(@"*** error *** -[BDSKFile initWithBase64String:relativeTo:] failed (%@ of %@)", key, [self citeKey]);
+            NSLog(@"*** error *** -[BDSKAliasFile initWithBase64String:] failed (%@ of %@)", key, [self citeKey]);
         }
         
         // next key in the sequence; increment i first, so it's guaranteed correct
@@ -2473,7 +2472,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     // !!! get these out of pubFields for now to avoid duplication when saving
     [pubFields removeObjectsForKeys:keysToRemove];
     
-    // @@ temporary hack to create an array of BDSKFiles from Local-Urls
+    // @@ temporary hack to create an array of BDSKAliasFiles from Local-Urls
     if ([files count] == 0) {
         CFSetRef fileSet = (CFSetRef)[[BDSKTypeManager sharedManager] localFileFieldsSet];
         CFSetApplyFunction(fileSet, addURLForFieldToArrayIfNotNil, self);
@@ -2482,12 +2481,12 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (NSUInteger)countOfFiles { return [files count]; }
 
-- (BDSKFile *)fileAtIndex:(NSUInteger)idx
+- (BDSKAliasFile *)fileAtIndex:(NSUInteger)idx
 {
     return [files objectAtIndex:idx];
 }
 
-- (void)insertObject:(BDSKFile *)aFile inFilesAtIndex:(NSUInteger)idx
+- (void)insertObject:(BDSKAliasFile *)aFile inFilesAtIndex:(NSUInteger)idx
 {
     [files insertObject:aFile atIndex:idx];
 }
@@ -2516,7 +2515,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         if (aURL)
             [combinedURLs addObject:aURL];
     }
-    [combinedURLs addObjectsFromArray:[self valueForKeyPath:@"files.fileURL"]];
+    fe = [files objectEnumerator];
+    BDSKAliasFile *file;
+    while (file = [fe nextObject])
+        if (aURL = [file fileURLRelativeToURL:[[self owner] fileURL]])
+            [combinedURLs addObject:aURL];
     [combinedURLs sortUsingFunction:sortURLsByType context:NULL];
     return combinedURLs;
 }

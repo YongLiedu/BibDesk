@@ -395,11 +395,6 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 
 @implementation BDSKAliasFile
 
-+ (id)allocWithZone:(NSZone *)aZone
-{
-    return NSAllocateObject(self, 0, aZone);
-}
-
 // guaranteed to be called with a non-nil alias
 - (id)initWithAlias:(BDAlias *)anAlias;
 {
@@ -440,6 +435,11 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
     }
     [anAlias release];
     return self;
+}
+
+- (id)initWithPath:(NSURL *)aURL relativeToURL:(NSURL *)baseURL;
+{
+    return [self initWithPath:[aURL path] relativeToPath:[baseURL path]];
 }
 
 - (id)initWithCoder:(NSCoder *)coder

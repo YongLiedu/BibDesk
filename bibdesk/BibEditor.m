@@ -117,7 +117,7 @@ enum{
 - (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
-    return [[publication fileAtIndex:idx] fileURL];
+    return [[publication fileAtIndex:idx] fileURLRelativeToURL:[[publication owner] fileURL]];
 }
 
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
@@ -128,15 +128,16 @@ enum{
 
 - (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
 {
-    BDSKFile *aFile;
+    BDSKAliasFile *aFile;
     NSEnumerator *enumerator = [newURLs objectEnumerator];
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex];
     while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [BDSKFile fileWithURL:aURL];
+        aFile = [[BDSKAliasFile alloc] initWithURL:aURL relativeToURL:[[publication owner] fileURL]];
         if (aFile) {
             [publication removeObjectFromFilesAtIndex:idx];
             [publication insertObject:aFile inFilesAtIndex:idx];
+            [aFile release];
         }
         idx = [aSet indexGreaterThanIndex:idx];
     }
@@ -155,14 +156,15 @@ enum{
 
 - (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
 {
-    BDSKFile *aFile;
+    BDSKAliasFile *aFile;
     NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex];
     while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [BDSKFile fileWithURL:aURL];
+        aFile = [[BDSKAliasFile alloc] initWithURL:aURL relativeToURL:[[publication owner] fileURL]];
         if (aFile) {
             [publication insertObject:aFile inFilesAtIndex:idx];
+            [aFile release];
         }
         idx = [aSet indexGreaterThanIndex:idx];
     }
