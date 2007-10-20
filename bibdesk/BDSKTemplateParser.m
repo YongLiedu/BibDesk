@@ -70,14 +70,6 @@
                or: <$key<=value?> <?$key?> </$key?>
 */
 
-enum {
-    BDSKConditionTagMatchOther,
-    BDSKConditionTagMatchEqual,
-    BDSKConditionTagMatchContain,
-    BDSKConditionTagMatchSmaller,
-    BDSKConditionTagMatchSmallerOrEqual,
-};
-
 @implementation BDSKTemplateParser
 
 
@@ -315,7 +307,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             } else {
                 
                 NSString *matchString = nil;
-                int matchType = BDSKConditionTagMatchOther;
+                int matchType = BDSKConditionTagMatchNotEmpty;
                 
                 if ([scanner scanString:CONDITIONTAG_EQUAL intoString:nil]) {
                     if([scanner scanUpToString:CONDITIONTAG_CLOSE_DELIM intoString:&matchString] == NO)
@@ -369,7 +361,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                         subTemplates = [[NSMutableArray alloc] init];
                         matchStrings = [[NSMutableArray alloc] initWithObjects:matchString ? matchString : @"", nil];
                         
-                        if (matchType != BDSKConditionTagMatchOther) {
+                        if (matchType != BDSKConditionTagMatchNotEmpty) {
                             altTag = compareConditionTagWithTag(tag, matchType);
                             altTagRange = altTemplateTagRange(subTemplate, altTag, CONDITIONTAG_CLOSE_DELIM, &matchString);
                             while (altTagRange.location != NSNotFound) {
@@ -618,7 +610,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             } else {
                 
                 NSString *matchString = nil;
-                int matchType = BDSKConditionTagMatchOther;
+                int matchType = BDSKConditionTagMatchNotEmpty;
                 
                 if ([scanner scanString:CONDITIONTAG_EQUAL intoString:nil]) {
                     if([scanner scanUpToString:CONDITIONTAG_CLOSE_DELIM intoString:&matchString] == NO)
@@ -674,7 +666,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                         subTemplates = [[NSMutableArray alloc] init];
                         matchStrings = [[NSMutableArray alloc] initWithObjects:matchString ? matchString : @"", nil];
                         
-                        if (matchType != BDSKConditionTagMatchOther) {
+                        if (matchType != BDSKConditionTagMatchNotEmpty) {
                             altTag = compareConditionTagWithTag(tag, matchType);
                             altTagRange = altTemplateTagRange([subTemplate string], altTag, CONDITIONTAG_CLOSE_DELIM, &matchString);
                             while (altTagRange.location != NSNotFound) {

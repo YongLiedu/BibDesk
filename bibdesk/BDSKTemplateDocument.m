@@ -1221,7 +1221,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     BDSKTag *tag = [templateArray count] ? [templateArray objectAtIndex:0] : nil;
     
     if ([tag type] == BDSKConditionTagType && [[(BDSKConditionTag *)tag keyPath] isEqualToString:@"pubType"]) {
-        if ([(BDSKConditionTag *)tag matchType] != 1)
+        if ([(BDSKConditionTag *)tag matchType] != BDSKConditionTagMatchEqual)
             return nil;
         
         NSArray *matchStrings = [(BDSKConditionTag *)tag matchStrings];
@@ -1300,7 +1300,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 - (id)tokenForConditionTag:(BDSKConditionTag *)tag defaultFont:(NSFont *)defaultFont {
     int count = [[tag subtemplates] count];
-    if ([(BDSKConditionTag *)tag matchType] != 0 || count > 2)
+    if ([(BDSKConditionTag *)tag matchType] != BDSKConditionTagMatchNotEmpty || count > 2)
         return nil;
     
     NSArray *nonemptyTemplate = [tag subtemplateAtIndex:0];
