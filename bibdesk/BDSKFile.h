@@ -38,12 +38,12 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDAlias;
 
 @interface BDSKFile : NSObject <NSCopying, NSCoding>
 
 - (id)initWithFSRef:(FSRef *)aRef;
 - (id)initWithPath:(NSString *)aPath;
-- (id)initWithBase64String:(NSString *)base64String relativeTo:(NSString *)basePath;
 - (id)initWithURL:(NSURL *)aURL;
 + (id)fileWithURL:(NSURL *)aURL;
 
@@ -53,6 +53,35 @@
 
 - (NSString *)path;
 - (NSString *)tildePath;
-- (NSString *)base64StringRelativeTo:(NSString *)basePath;
+
+@end
+
+
+@interface BDSKAliasFile : NSObject <NSCopying, NSCoding>
+{
+    BDAlias *alias;
+    const FSRef *fileRef;
+}
+
+- (id)initWithAlias:(BDAlias *)anAlias;
+- (id)initWithData:(NSData *)data;
+- (id)initWithBase64String:(NSString *)base64String;
+- (id)initWithPath:(NSString *)aPath relativeToPath:(NSString *)basePath;
+
+- (const FSRef *)fsRefRelativeToToURL:(NSString *)baseURL update:(BOOL)update;
+- (const FSRef *)fsRefRelativeToToURL:(NSString *)baseURL;
+- (const FSRef *)fsRef;
+
+- (NSURL *)fileURLRelativeToURL:(NSURL *)baseURL;
+- (NSURL *)fileURLRelativeToURLNoUpdate:(NSURL *)baseURL;
+- (NSURL *)fileURL;
+
+- (NSString *)pathRelativeToPath:(NSString *)basePath;
+- (NSString *)pathRelativeToPathNoUpdate:(NSString *)basePath;
+- (NSString *)path;
+
+- (BDAlias *)aliasRelativeToPath:(NSString *)basePath;
+- (NSData *)aliasDataRelativeToPath:(NSString *)basePath;
+- (NSString *)base64StringRelativeToPath:(NSString *)basePath;
 
 @end
