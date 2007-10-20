@@ -1691,7 +1691,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return s;
 }
 
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop encoding:(NSStringEncoding)encoding error:(NSError **)outError{
+- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     BOOL shouldTeXify = [pw boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 	NSMutableSet *knownKeys = nil;
@@ -1774,8 +1774,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
     [knownKeys release];
     if(isOK && !drop) {
-        // for Save As and Export we need to know the real base path, which is different from our own
-        value = [self filesAsBibTeXFragmentRelativeToPath:[self basePath]];
+        value = [self filesAsBibTeXFragmentRelativeToPath:basePath];
         // assumes encoding is ascii-compatible, but btparse does as well
         if (value) [data appendDataFromString:value encoding:encoding error:&error];
     }

@@ -838,7 +838,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (NSSaveAsOperation == saveOperation && [saveTextEncodingPopupButton encoding] != 0)
         [self setDocumentStringEncoding:[saveTextEncodingPopupButton encoding]];
     
+    saveTargetURL = [absoluteURL release];
+    
     BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
+    
+    [saveTargetURL release];
+    saveTargetURL = nil;
     
     // reset the encoding popup so we know when it wasn't shown to the user next time
     [saveTextEncodingPopupButton setEncoding:0];
@@ -914,7 +919,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
         items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
     
-    NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
+    if ([docType isEqualToString:BDSKArchiveDocumentType]) {
+        success = [self writeArchiveToURL:fileURL forPublications:items error:outError];
+    } else {
+        NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
+        success = nil == fileWrapper ? NO : [fileWrapper writeToFile:[fileURL path] atomically:NO updateFilenames:NO];
+    }
     
     if ([docType isEqualToString:BDSKArchiveDocumentType]) {
         if (success = nil != fileWrapper) {
@@ -965,6 +975,73 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)clearChangeCount{
 	[self updateChangeCount:NSChangeCleared];
+}
+
+- (BOOL)writeArchiveToURL:(NSURL *)fileURL forPublications:(NSArray *)items error:(NSError **)outError{
+    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
+    
+    NSString *path = [[fileURL path] stringByDeletingPathExtension];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSEnumerator *itemEnum = [items objectEnumerator];
+    BibItem *item;
+    NSSet *localFileFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
+    NSMutableSet *localFiles = [NSMutableSet set];
+    NSString *filePath;
+    NSString *commonParent = nil;
+    BOOL success = YES;
+    
+    if (success = [fm createDirectoryAtPath:path attributes:nil]) {
+        while (item = [itemEnum nextObject]) {
+            NSEnumerator *fieldEnum = [localFileFields objectEnumerator];
+            NSString *field;
+            while (field = [fieldEnum nextObject]) {
+                if (filePath = [item localFilePathForField:field]) {
+                    [localFiles addObject:filePath];
+                    if (commonParent)
+                        commonParent = [NSString commonRootPathOfFilename:[filePath stringByDeletingLastPathComponent] andFilename:commonParent];
+                    else
+                        commonParent = [filePath stringByDeletingLastPathComponent];
+                }
+            }
+        }
+        
+        NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
+        NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:commonParent error:outError];
+        NSString *bibtexPath = [[path stringByAppendingPathComponent:[path lastPathComponent]] stringByAppendingPathExtension:@"bib"];
+        
+        success = [bibtexData writeToFile:bibtexPath options:0 error:outError];
+        itemEnum = [localFiles objectEnumerator];
+        
+        while (success && (filePath = [itemEnum nextObject])) {
+            if ([fm fileExistsAtPath:filePath]) {
+                NSString *relativePath = commonParent ? [commonParent relativePathToFilename:filePath] : [filePath lastPathComponent];
+                NSString *targetPath = [path stringByAppendingPathComponent:relativePath];
+                
+                if ([fm fileExistsAtPath:targetPath])
+                    targetPath = [fm uniqueFilePathWithName:[targetPath stringByDeletingLastPathComponent] atPath:[targetPath lastPathComponent]];
+                @try { [fm createPathToFile:targetPath attributes:nil]; }
+                @catch (id exception) {
+                    success = NO;
+                    NSLog(@"Ignoring exception %@ while creating path to file", exception);
+                }
+                success = [fm copyPath:filePath toPath:targetPath handler:nil];
+            }
+        }
+        
+        if (success) {
+            NSTask *task = [[[NSTask alloc] init] autorelease];
+            [task setLaunchPath:@"/usr/bin/tar"];
+            [task setArguments:[NSArray arrayWithObjects:@"czf", [[fileURL path] lastPathComponent], [path lastPathComponent], nil]];
+            [task setCurrentDirectoryPath:[path stringByDeletingLastPathComponent]];
+            [task launch];
+            if ([task isRunning])
+                [task waitUntilExit];
+            success = [task terminationStatus] == 0;
+            [fm removeFileAtPath:path handler:nil];
+        }
+    }
+    
+    return success;
 }
 
 #pragma mark Data representations
@@ -1029,11 +1106,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
-        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO error:&error];
+        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
     }else if ([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
         data = [self RISDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKMinimalBibTeXDocumentType]){
-        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES error:&error];
+        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
     }else if ([aType isEqualToString:BDSKLTBDocumentType]){
         data = [self LTBDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKEndNoteDocumentType]){
@@ -1144,7 +1221,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return d;
 }
 
-- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop error:(NSError **)outError{
+- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError{
     NSParameterAssert(encoding != 0);
 
     NSEnumerator *e = [items objectEnumerator];
@@ -1212,7 +1289,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
     while(isOK && (pub = [e nextObject])){
-        pubData = [pub bibTeXDataDroppingInternal:drop encoding:encoding error:&error];
+        pubData = [pub bibTeXDataDroppingInternal:drop relativeToPath:basePath encoding:encoding error:&error];
         if(isOK = pubData != nil){
             [outputData appendData:doubleNewlineData];
             [outputData appendData:pubData];
@@ -1351,33 +1428,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:&docAttributes];
     
     return [fileTemplate RTFDFileWrapperFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
-}
-
-- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items{
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
-    NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
-    NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO error:NULL];
-    NSFileWrapper *bibtexFileWrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:bibtexData] autorelease];
-    NSFileWrapper *fileWrapper = [[[NSFileWrapper alloc] initDirectoryWithFileWrappers:[NSDictionary dictionaryWithObjectsAndKeys:bibtexFileWrapper, @"bibliography.bib", nil]] autorelease];
-    
-    NSEnumerator *itemEnum = [items objectEnumerator];
-    BibItem *item;
-    NSSet *URLFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
-    
-    while (item = [itemEnum nextObject]) {
-        NSEnumerator *fieldEnum = [URLFields objectEnumerator];
-        NSString *field;
-        while (field = [fieldEnum nextObject]) {
-            NSURL *url = [item URLForField:field];
-            if (url) {
-                NSFileWrapper *fw = [[NSFileWrapper alloc] initWithContentsOfURL:url];
-                [fileWrapper addFileWrapper:fw];
-                [fw release];
-            }
-        }
-    }
-    return fileWrapper;
 }
 
 #pragma mark -

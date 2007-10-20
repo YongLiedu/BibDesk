@@ -216,6 +216,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         BOOL                isDocumentClosed;
     } docState;
     
+    NSURL *saveTargetURL;
+    
     BDSKItemSearchIndexes *searchIndexes;
     BDSKSearchButtonController *searchButtonController;
     
@@ -242,6 +244,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)clearChangeCount;
 
+- (BOOL)writeArchiveToURL:(NSURL *)fileURL forPublications:(NSArray *)items error:(NSError **)outError;
+
 - (NSFileWrapper *)fileWrapperOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError;
 - (NSData *)dataOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError;
 
@@ -249,12 +253,11 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSData *)attributedStringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
 - (NSData *)dataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
 - (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
-- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items;
 
 - (NSData *)atomDataForPublications:(NSArray *)items;
 - (NSData *)MODSDataForPublications:(NSArray *)items;
 - (NSData *)endNoteDataForPublications:(NSArray *)items;
-- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop error:(NSError **)outError;
+- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError;
 - (NSData *)RISDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error;
 - (NSData *)LTBDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error;
 
