@@ -910,11 +910,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
         items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
     
-    NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
-    
     if ([docType isEqualToString:BDSKArchiveDocumentType]) {
         success = [self writeArchiveToURL:fileURL forPublications:items error:outError];
     } else {
+        NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
         success = nil == fileWrapper ? NO : [fileWrapper writeToFile:[fileURL path] atomically:NO updateFilenames:NO];
     }
     
@@ -1042,11 +1041,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
         }
     }else if ([aType isEqualToString:BDSKArchiveDocumentType]){
-        fileWrapper = [self fileWrapperForPublications:items];
-        if(fileWrapper == nil){
-            if (outError) 
-                *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
-        }
+        OBASSERT_NOT_REACHED("Should not save a fileWrapper for archive");
     }else{
         NSError *error = nil;
         NSData *data = [self dataOfType:aType forPublications:items error:&error];
@@ -1400,42 +1395,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:&docAttributes];
     
     return [fileTemplate RTFDFileWrapperFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
-}
-
-- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items{
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
-    NSEnumerator *itemEnum = [items objectEnumerator];
-    BibItem *item;
-    NSSet *localFileFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
-    NSMutableArray *localFiles = [NSMutableArray array];
-    NSString *path;
-    NSString *commonParent = nil;
-    
-    while (item = [itemEnum nextObject]) {
-        NSEnumerator *fieldEnum = [localFileFields objectEnumerator];
-        NSString *field;
-        while (field = [fieldEnum nextObject]) {
-            if (path = [item localFilePathForField:field]) {
-                [localFiles addObject:path];
-                if (commonParent)
-                    commonParent = [NSString commonRootPathOfFilename:[path stringByDeletingLastPathComponent] andFilename:commonParent];
-                else
-                    commonParent = [path stringByDeletingLastPathComponent];
-            }
-        }
-    }
-    
-    NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
-    NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeTo:commonParent error:NULL];
-    NSFileWrapper *fileWrapper = [[[NSFileWrapper alloc] initDirectoryWithFileWrappers:[NSDictionary dictionary]] autorelease];
-    
-    itemEnum = [localFiles objectEnumerator];
-    while (path = [itemEnum nextObject])
-        [fileWrapper addFileWrapperWithPath:path relativeTo:commonParent recursive:YES];
-    [fileWrapper addRegularFileWithContents:bibtexData preferredFilename:@"bibliography.bib"];
-    
-    return fileWrapper;
 }
 
 #pragma mark -
