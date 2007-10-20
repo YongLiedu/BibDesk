@@ -117,7 +117,7 @@ enum{
 - (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
-    return [[publication fileAtIndex:idx] fileURLRelativeToURL:[[publication owner] fileURL]];
+    return [[publication fileAtIndex:idx] fileURLRelativeToURL:[publication baseURL]];
 }
 
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
@@ -133,7 +133,7 @@ enum{
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex];
     while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [[BDSKAliasFile alloc] initWithURL:aURL relativeToURL:[[publication owner] fileURL]];
+        aFile = [[BDSKAliasFile alloc] initWithURL:aURL relativeToURL:[publication baseURL]];
         if (aFile) {
             [publication removeObjectFromFilesAtIndex:idx];
             [publication insertObject:aFile inFilesAtIndex:idx];
@@ -146,10 +146,10 @@ enum{
 
 - (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 {
-    NSUInteger idx = [indexSet firstIndex];
+    NSUInteger idx = [indexSet lastIndex];
     while (NSNotFound != idx) {
         [publication removeObjectFromFilesAtIndex:idx];
-        idx = [indexSet indexGreaterThanIndex:idx];
+        idx = [indexSet indexSmallerThanIndex:idx];
     }
     return YES;
 }
@@ -159,12 +159,15 @@ enum{
     BDSKAliasFile *aFile;
     NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
     NSURL *aURL;
-    NSUInteger idx = [aSet firstIndex];
+    NSUInteger idx = [aSet firstIndex], offset = 0;
     while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [[BDSKAliasFile alloc] initWithURL:aURL relativeToURL:[[publication owner] fileURL]];
+        aFile = [[BDSKAliasFile alloc] initWithURL:aURL relativeToURL:[publication baseURL]];
         if (aFile) {
-            [publication insertObject:aFile inFilesAtIndex:idx];
+            [publication insertObject:aFile inFilesAtIndex:idx - offset];
             [aFile release];
+        } else {
+            // the indexes in aSet assume that we inserted the file
+            offset++;
         }
         idx = [aSet indexGreaterThanIndex:idx];
     }

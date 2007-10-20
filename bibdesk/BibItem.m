@@ -1600,7 +1600,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 #pragma mark -
 #pragma mark BibTeX strings
 
-- (NSString *)filesAsBibTeXFragment
+- (NSString *)filesAsBibTeXFragmentRelativeToPath:(NSString *)basePath
 {
     // !!! inherit
     NSUInteger i, iMax = [files count];
@@ -1610,7 +1610,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         string = [NSMutableString string];
         for (i = 0; i < iMax; i++) {
             NSString *key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
-            NSString *value = [[files objectAtIndex:i] base64StringRelativeTo:@""];
+            NSString *value = [[files objectAtIndex:i] base64StringRelativeToPath:basePath];
             OBPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
             [string appendFormat:@",\n\t%@ = {%@}", key, value];
         }
@@ -1682,7 +1682,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
     }
     if (!drop) {
-        value = [self filesAsBibTeXFragment];
+        value = [self filesAsBibTeXFragmentRelativeToPath:[self basePath]];
         if (value) [s appendString:value];
     }
     [knownKeys release];
@@ -1774,7 +1774,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
     [knownKeys release];
     if(isOK && !drop) {
-        value = [self filesAsBibTeXFragment];
+        // for Save As and Export we need to know the real base path, which is different from our own
+        value = [self filesAsBibTeXFragmentRelativeToPath:[self basePath]];
         // assumes encoding is ascii-compatible, but btparse does as well
         if (value) [data appendDataFromString:value encoding:encoding error:&error];
     }
@@ -2422,6 +2423,14 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 #pragma mark -
 #pragma mark URL handling
 
+- (NSString *)basePath {
+    return [[[[self owner] fileURL] path] stringByDeletingLastPathComponent];
+}
+
+- (NSURL *)baseURL {
+    return [NSURL fileURLWithPath:[self basePath]];
+}
+
 static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unused)
 {
     BOOL firstIsFile = [first isFileURL];
@@ -2439,7 +2448,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     BibItem *self = (BibItem *)context;
     NSURL *value = [self localFileURLForField:(id)key];
     if (value) {
-        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithURL:value relativeToURL:[[self owner] fileURL]];
+        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithURL:value relativeToURL:[self baseURL]];
         [self->files addObject:aFile];
         [aFile release];
     }
@@ -2518,7 +2527,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     fe = [files objectEnumerator];
     BDSKAliasFile *file;
     while (file = [fe nextObject])
-        if (aURL = [file fileURLRelativeToURL:[[self owner] fileURL]])
+        if (aURL = [file fileURLRelativeToURL:[self baseURL]])
             [combinedURLs addObject:aURL];
     [combinedURLs sortUsingFunction:sortURLsByType context:NULL];
     return combinedURLs;

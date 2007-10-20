@@ -83,6 +83,8 @@ enum {
     NSMutableArray *sortedURLs;
 }
 
+- (NSString *)basePath;
+- (NSURL *)baseURL;
 - (NSUInteger)countOfFiles;
 - (BDSKAliasFile *)fileAtIndex:(NSUInteger)idx;
 - (void)insertObject:(BDSKAliasFile *)aFile inFilesAtIndex:(NSUInteger)idx;
