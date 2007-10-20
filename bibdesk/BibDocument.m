@@ -1069,11 +1069,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
         }
     }else if ([aType isEqualToString:BDSKArchiveDocumentType]){
-        fileWrapper = [self fileWrapperForPublications:items];
-        if(fileWrapper == nil){
-            if (outError) 
-                *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
-        }
+        OBASSERT_NOT_REACHED("Should not save a fileWrapper for archive");
     }else{
         NSError *error = nil;
         NSData *data = [self dataOfType:aType forPublications:items error:&error];
