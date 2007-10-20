@@ -398,9 +398,10 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 // guaranteed to be called with a non-nil alias
 - (id)initWithAlias:(BDAlias *)anAlias;
 {
-    self = [super init];
-    fileRef = NULL; // this is updated lazily, as we don't know the base path at this point
-    alias = [anAlias retain];
+    if (self = [super init]) {
+        fileRef = NULL; // this is updated lazily, as we don't know the base path at this point
+        alias = [anAlias retain];
+    }
     return self;    
 }
 
@@ -433,7 +434,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
     if (anAlias) {
         if ((self = [self initWithAlias:anAlias]) && basePath) {
             // this initalizes the FSRef and update the alias
-            [self fsRefRelativeToURL:[bNSURL fileURLWithPath:basePath] update:YES];
+            [self fsRefRelativeToURL:[NSURL fileURLWithPath:basePath] update:YES];
         }
         [anAlias release];
     } else {
@@ -476,30 +477,29 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 
 - (const FSRef *)fsRefRelativeToURL:(NSString *)baseURL update:(BOOL)update;
 {
-    FSRef *aRef = fileRef;
-    
-    if (aRef == NULL && alias) {
-        FSRef *baseRef = NULL;
+    if (fileRef == NULL && alias) {
+        FSRef aRef;
+        FSRef baseRef;
         short aliasCount = 1;
         boolean requireUpdate;
         OSStatus anErr;
         
         if (baseURL)
-            CFURLGetFSRef((CFURLRef)baseURL, baseRef);
+            CFURLGetFSRef((CFURLRef)baseURL, &baseRef);
         
         if (update)
-            anErr = FSResolveAliasWithMountFlags(&relPathRef, _alias, &tempRef, &requireUpdate, kResolveAliasFileNoUI);
+            anErr = FSResolveAliasWithMountFlags(&baseRef, _alias, &tempRef, &requireUpdate, kResolveAliasFileNoUI);
         else // I think these options reproduce the behavior of FSResolveAliasWithMountFlags
-            anErr = FSMatchAliasNoUI(baseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias aliasHandle], aliasCount, aRef, &requireUpdate, NULL, NULL);
+            anErr = FSMatchAliasNoUI(&baseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias aliasHandle], aliasCount, &aRef, &requireUpdate, NULL, NULL);
         
-        if (annErr == noErr) {
+        if (anErr == noErr) {
             FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
             if(newRef)
-                bcopy(aRef, newRef, sizeof(FSRef));
+                bcopy(&aRef, newRef, sizeof(FSRef));
             fileRef = newRef;
         }
     }
-    return aRef;
+    return fileRef;
 }
 
 - (const FSRef *)fsRefRelativeToToURL:(NSString *)baseURL;
@@ -569,15 +569,15 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
     
     NSString *fullPath = [self path];
     FSRef *fsRef = (FSRef *)[self fsRefRelativeToToURL:[NSURL fileURLWithPath:basePath] update:NO];
-    FSRef *baseRef;
+    FSRef baseRef;
     NSURL *baseURL;
     BDAlias *anAlias = nil;
     NSData *data = nil;
     
     if (fsRef) {
         baseURL = [NSURL fileURLWithPath:basePath];
-        if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, baseRef))
-            anAlias = [[[BDAlias alloc] initWithFSRef:fsRef relativeToFSRef:baseRef] autorelease];
+        if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef))
+            anAlias = [[[BDAlias alloc] initWithFSRef:fsRef relativeToFSRef:&baseRef] autorelease];
         else
             anAlias = [[[BDAlias alloc] initWithFSRef:fsRef] autorelease];
     } else {
