@@ -261,6 +261,7 @@ extern NSString *BDSKPhDThesisString;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKFinalizeChangesNotification;
+extern NSString *BDSKDocumentFileURLDidChangeNotification;
 extern NSString *BDSKPreviewDisplayChangedNotification;
 extern NSString *BDSKTableSelectionChangedNotification;
 extern NSString *BDSKGroupTableSelectionChangedNotification;

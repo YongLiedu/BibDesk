@@ -2507,6 +2507,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 - (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx
 {
     NSArray *toMove = [[files objectsAtIndexes:aSet] copy];
+    unsigned anIdx = [aSet indexLessThanIndex:idx];
+    while (anIdx != NSNotfound) {
+        idx--;
+        anIdx = [aSet indexLessThanIndex:anIdx];
+    }
     [files removeObjectsAtIndexes:aSet];
     [files insertObjects:toMove atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(idx, [toMove count])]];
     [toMove release];

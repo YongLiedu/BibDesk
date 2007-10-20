@@ -916,6 +916,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSError *nsError = nil;
     NSArray *items = publications;
     
+    // first we make sure all edits are committed
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
+    
     if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
         items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
     
@@ -1053,11 +1058,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSFileWrapper *)fileWrapperOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError
 {
-    // first we make sure all edits are committed
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
-    
     NSFileWrapper *fileWrapper = nil;
     
     // check if we need a fileWrapper; only needed for RTFD templates
@@ -3476,6 +3476,9 @@ static void addAllURLsToArray(const void *value, void *context)
     [self willChangeValueForKey:@"displayName"];
     [super setFileURL:absoluteURL];
     [self didChangeValueForKey:@"displayName"];
+    
+    [self updatePreviews];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentFileURLDidChangeNotification object:self];
 }
 
 // just create this setter to avoid a run time warning

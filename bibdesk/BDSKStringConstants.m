@@ -275,6 +275,7 @@ NSString *BDSKPhDThesisString = @"phdthesis";
 
 #pragma mark ||  Notification name strings
 NSString *BDSKFinalizeChangesNotification = @"Finalize Changes Notification";
+NSString *BDSKDocumentFileURLDidChangeNotification = @"BDSKDocumentFileURLDidChangeNotification";
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
 NSString *BDSKTableSelectionChangedNotification = @"TableSelectionChangedNotification";
 NSString *BDSKGroupTableSelectionChangedNotification = @"GroupTableSelectionChangedNotification";

@@ -433,6 +433,7 @@
 - (void)bibDidChange:(NSNotification *)notification;
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
 - (void)customFieldsDidChange:(NSNotification *)aNotification;
+- (void)fileURLDidChange:(NSNotification *)notification;
 
 - (void)bibWillBeRemoved:(NSNotification *)notification;
 - (void)groupWillBeRemoved:(NSNotification *)notification;

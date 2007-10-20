@@ -115,6 +115,7 @@ enum{
 @implementation BibEditor
 
 - (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
+
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
     return [[publication fileAtIndex:idx] fileURLRelativeToURL:[publication baseURL]];
@@ -2197,6 +2198,10 @@ enum{
 	}    
 }
 
+- (void)fileURLDidChange:(NSNotification *)notification{
+    [fileView reloadIcons];
+}
+
 #pragma mark annote/abstract/rss
 
 - (void)textDidBeginEditing:(NSNotification *)aNotification{
@@ -4114,6 +4119,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(finalizeChanges:)
 												 name:BDSKFinalizeChangesNotification
+											   object:[self document]];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(fileURLDidChange:)
+												 name:BDSKDocumentFileURLDidChangeNotification
 											   object:[self document]];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(typeInfoDidChange:)
