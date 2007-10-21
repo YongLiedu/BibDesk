@@ -85,10 +85,9 @@ static Class BDSKFileClass = Nil;
     }
 }
 
-// alloc always returns a placeholder, so concrete subclasses must override it
 + (id)allocWithZone:(NSZone *)aZone
 {
-    return defaultPlaceholderFile;
+    return BDSKFileClass == self ? defaultPlaceholderFile : NSAllocateObject(self, 0, aZone);
 }
 
 // designated initializer for the class cluster is -init; all subclasses should call it
@@ -128,6 +127,12 @@ static Class BDSKFileClass = Nil;
 
 + (id)fileWithURL:(NSURL *)aURL { 
     return [[[self allocWithZone:NULL] initWithURL:aURL] autorelease]; 
+}
+
+- (void)dealloc
+{
+    if ([self class] != BDSKFileClass)
+        [super dealloc];
 }
 
 - (NSString *)description
@@ -209,11 +214,6 @@ static Class BDSKFileClass = Nil;
 
 @implementation BDSKURLFile
 
-+ (id)allocWithZone:(NSZone *)aZone
-{
-    return NSAllocateObject(self, 0, aZone);
-}
-
 - (id)initWithURL:(NSURL *)aURL;
 {
     self = [super init];
@@ -279,11 +279,6 @@ static Class BDSKFileClass = Nil;
 #pragma mark FSRef-based concrete subclass
 
 @implementation BDSKFSRefFile
-
-+ (id)allocWithZone:(NSZone *)aZone
-{
-    return NSAllocateObject(self, 0, aZone);
-}
 
 // guaranteed to be called with a non-NULL FSRef
 - (id)initWithFSRef:(FSRef *)aRef;
