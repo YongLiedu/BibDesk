@@ -211,6 +211,10 @@
             key = "@componentsJoinedByCommaAndAnd";
         },
         {
+            displayName = "A, B, & C";
+            key = "@componentsJoinedByCommaAndAmpersand";
+        },
+        {
             displayName = "A and B and C";
             key = "@componentsJoinedByAnd";
         },

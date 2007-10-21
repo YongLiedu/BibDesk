@@ -997,6 +997,21 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
     return [self componentsJoinedByString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultArrayJoinStringKey]];
 }
 
+- (NSString *)componentsJoinedByCommaAndAmpersand
+{
+    unsigned count = [self count];
+    switch (count) {
+        case 0:
+            return @"";
+        case 1:
+            return [self objectAtIndex:0];
+        case 2:
+            return [NSString stringWithFormat:@"%@ & %@", [self objectAtIndex:0], [self objectAtIndex:1]];
+        default:
+            return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[self lastObject]];
+    }
+}
+
 - (NSString *)componentsWithEtAlAfterOne
 {
     return [self count] > 1 ? [[self firstObject] stringByAppendingString:@" et al."] : [self firstObject];
