@@ -2247,6 +2247,7 @@ in the @ref{System Service} help topic.
 @menu
 * Export Templates::       How to export a BibTeX database using templates. 
 * Customizing Templates::  How to customize the templates used for Export and Service features.
+* Template Editor::        How to edit templates using the built-in Template Editor.
 @end menu
 
 @c --------------------------------------------------------------------------------------
@@ -2278,7 +2279,7 @@ This allows you to choose a template from a popup button in the save dialog wind
 @cindex templates, customize
 
 The default templates that BibDesk uses for Export and Services can be found in the folder 
-~/Library/Application Support/Bibdesk/Templates. You can modify these templates to suit your preferences. 
+~/Library/Application Support/BibDesk/Templates. You can modify these templates to suit your preferences. 
 If you remove any of the default templates, BibDesk will automatically replace it with the latest version 
 on the next startup. 
 
@@ -2304,6 +2305,57 @@ For example for HTML export, this could be an external CSS style file.
 If you want to use separate item template files, your Main Page template should 
 contain the @code{<$publicationsUsingTemplate/>} tag. Otherwise, the Main Page template should contain the 
 @code{<$publications>...</$publications>} collection tags.
+
+You can use the @ref{Template Editor} to create some basic templates without the need to know the template syntax.
+
+@c --------------------------------------------------------------------------------------
+
+@node Template Editor
+@section Template Editor
+@abstract{How to edit templates used for citations.}
+
+@cindex templates, customize, template editor
+
+BibDesk has a built-in template editor that allows you to create basic templates, without the need to know the template syntax. 
+It is most suitable for citation and bibliography templates. It may be less suitable for preview and export templates, 
+as it does not support more complex collection and condition tags. To create a new template using the template editor, 
+choose @menutitle{File > New Template}.
+
+The basic work flow to create a new template using the template editor is as follows.
+
+First, choose whether you want a plain text or rich text template. In the latter case, choose a font. 
+
+Then choose a default type. This is either the type of most of your publication items, e.g. @code{article}, 
+or a generic type, e.g. @code{misc}. The latter could be useful only if you add separate styles for a few types, 
+as described below.
+
+Next edit the prefix, to be added before the items, the suffix, to be added after the items, and the item separator, 
+to be used between the items.
+
+Then you edit the item template or the item templates. You can either add a single template for a single (default) type,
+or you can include different item templates for several publication types in a addition to a default item templates. 
+In the latter case, check the types for whic you want to add special templates in the table. The types for which a required 
+item template has not been set yet are displayed in red. The default template is dislayed in the table using a bold font. 
+Next you select the different types for which you want to add an item template, and edit the template.
+
+You edit an item template by dragging blue bubbles from the available fields to the item template field.
+You can also type text between the bubbles. After you select a bubble, you can change some options for the field.
+The Appending, Prefix, and Suffix options are added only when the value of the field is not empty.
+The Rich Text bubble can be used to add text with font that is different from the rest of the template, 
+or to add text that is conditional on whether a particular field is set, or not set.
+In the font options of the bubbles, any font setting can be inherited from the main body of the template.
+For the font name, simply choose @samp{Same as body}, for the font size, choose @samp{Inherit} or 0 for this behavior. 
+To inherit the Bold or Italic setting from the main body, choose a @samp{-} in the check button.
+
+It may be useful to first change the options for some of the available fields before editing the item templates.
+Options set for the available field bubbles will later be copied to the item templates. Note that editing the 
+options of an available field will not affect the options for bubbles already included in an item template.
+However these options will be shared between different types.
+
+You can copy an item template for one type to another type by dragging a row in the table and dropping it on another row.
+
+At the end you save the template. You could then edit the template in a text editor such as TextEdit for some final touches,
+or to add template tags not supported by the template editor.
 
 @c ======================================================================================
 
@@ -3986,8 +4038,9 @@ property of a document.
 @end example
 This simple template will write out all the titles of the publications in the document. 
 
-For BibDesk there are essentially four types of objects. The top level @emph{document}, 
-a @emph{publication} item, a @emph{field} of a publication and an @emph{author} of a publication. 
+For BibDesk there are essentially five types of objects. The top level @emph{document}, 
+a @emph{publication} item, a @emph{field} of a publication, an @emph{author} of a publication, 
+and a @emph{macro}. 
 
 
 @heading Template Keys
@@ -4015,8 +4068,6 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item publicationsUsingTemplate
 @tab 
-@item publicationsASHTML
-@tab deprecated
 @item currentDate
 @tab 
 @item InfoKey
@@ -4141,15 +4192,11 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item allFields
 @tab Drops already used fields
 @item persons.FieldName
-@tab FieldName can be Author or Editor
+@tab FieldName can be any person field
 @item authors
 @tab 
 @item editors
 @tab 
-@item pubFields
-@tab deprecated
-@item pubAuthors
-@tab deprecated
 @end multitable
 
 
@@ -4281,8 +4328,6 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @item absoluteString
 @tab 
-@item fullyEncodeAsIURI
-@tab 
 @end multitable
 
 @subheading Dates
@@ -4326,7 +4371,7 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item @@unionOfArrays
 @tab Requires additional collection key
 @item @@distinctUnionOfArrays
-@tab Requires additional vcollection key
+@tab Requires additional collection key
 @item @@arrayDroppingFirstObject
 @tab 
 @item @@firstTwoObjects
