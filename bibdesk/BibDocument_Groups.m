@@ -1662,6 +1662,7 @@ The groupedPublications array is a subset of the publications array, developed b
     NSMutableData *data = [NSMutableData data];
     NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
     NSArray *newPubs;
+    NSMutableArray *importedItems = [NSMutableArray array];
     
     [archiver encodeObject:[NSArray arrayWithObjects:pub, nil] forKey:@"publications"];
     [archiver finishEncoding];
@@ -1670,6 +1671,13 @@ The groupedPublications array is a subset of the publications array, developed b
     newPubs = [self newPublicationsFromArchivedData:data];
     
 	[self addPublications:newPubs];
+    
+    if (docState.didImport)
+        [importedItems addObjectsFromArray:[[groups lastImportGroup] publications]];
+    else
+        docState.didImport = YES;
+    [importedItems addObjectsFromArray:newPubs];
+    [groups setLastImportedPublications:importedItems];
     
     BOOL autoGenerate = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey];
     NSMutableArray *generatePubs = [NSMutableArray arrayWithCapacity:[newPubs count]];

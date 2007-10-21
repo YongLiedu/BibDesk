@@ -186,6 +186,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         currentGroupField = nil;
         docState.sortDescending = NO;
         docState.sortGroupsDescending = NO;
+        docState.didImport = NO;
         
         // these are created lazily when needed
         fileSearchController = nil;

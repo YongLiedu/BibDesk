@@ -235,6 +235,7 @@
 	}else if(tv == groupTableView){
         NSNotification *note = [NSNotification notificationWithName:BDSKGroupTableSelectionChangedNotification object:self];
         [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
+        docState.didImport = NO;
     }
 }
 

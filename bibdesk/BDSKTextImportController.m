@@ -65,6 +65,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKBookmarkController.h"
+#import "BDSKGroupsArray.h"
 
 @interface BDSKTextImportController (Private)
 
@@ -796,8 +797,11 @@
     [webView setFrameLoadDelegate:nil];
     [webView setUIDelegate:nil];
 	// select the items we just added
-	[document selectPublications:itemsAdded];
-	[itemsAdded removeAllObjects];
+	if ([itemsAdded count]) {
+        [document selectPublications:itemsAdded];
+        [[document groups] setLastImportedPublications:itemsAdded];
+	}
+    [itemsAdded removeAllObjects];
     
     [super didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
 }

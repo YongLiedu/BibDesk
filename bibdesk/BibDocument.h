@@ -211,6 +211,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         BOOL                sortGroupsDescending;
         BOOL                dragFromExternalGroups;
         BOOL                isDocumentClosed;
+        BOOL                didImport;
     } docState;
     
     BDSKItemSearchIndexes *searchIndexes;
