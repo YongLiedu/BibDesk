@@ -241,6 +241,10 @@
         {
             displayName = "A, B, and C; A, B, C, et al.";
             key = "@componentsJoinedByCommaAndAndWithEtAlAfterThree";
+        },
+        {
+            displayName = "First name only";
+            key = "@firstObject";
         }
     );
     dateFormat = (
