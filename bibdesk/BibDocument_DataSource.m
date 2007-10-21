@@ -910,7 +910,7 @@
                 }
             }
             
-            return [self addPublicationsFromPasteboard:pboard selectLibrary:YES error:NULL];
+            return [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
         }
     } else if(tv == groupTableView){
         NSArray *pubs = nil;
@@ -923,7 +923,7 @@
         BOOL shouldSelect = row == -1 || [[self selectedGroups] containsObject:group];
 		
 		if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups && row == 0) {
-            return [self addPublicationsFromPasteboard:pboard selectLibrary:NO error:NULL];
+            return [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
         } else if(isDragFromGroupTable || isDragFromDrawer || (row >= 0 && [group isValidDropTarget] == NO)) {
             return NO;
         } else if(isDragFromMainTable){
@@ -932,7 +932,7 @@
 			pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
         } else {
             
-            if([self addPublicationsFromPasteboard:pboard selectLibrary:YES error:NULL] == NO)
+            if([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL] == NO)
                 return NO;
             
             pubs = [self selectedPublications];            
@@ -965,7 +965,7 @@
             
             [self addPublications:pubs toGroup:group];
             
-            // Reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group).  Don't use row, because we might have added the Last Import group.  Also, note that a side effect of addPublicationsFromPasteboard:selectLibrary: may create a new group (if dropping on a selected category group), so [groups indexOfObjectIdenticalTo:group] == NSNotFound.
+            // Reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group).  Don't use row, because we might have added the Last Import group.  Also, note that a side effect of addPublicationsFromPasteboard:selectLibrary:verbose:error: may create a new group (if dropping on a selected category group), so [groups indexOfObjectIdenticalTo:group] == NSNotFound.
             if(shouldSelect) 
                 [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:[groups indexOfObject:group]] byExtendingSelection:NO];
         }
@@ -1105,7 +1105,7 @@
 	}
 
     NSError *error = nil;
-	if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES error:&error] == NO) {
+	if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&error] == NO) {
         [tv presentError:error];
 	}
 }

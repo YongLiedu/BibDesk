@@ -1790,7 +1790,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self reportTemporaryCiteKeys:tmpCiteKey forNewDocument:NO];
 }
 
-- (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)shouldSelect error:(NSError **)outError{
+- (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)shouldSelect verbose:(BOOL)verbose error:(NSError **)outError{
 	// these are the types we support, the order here is important!
     NSString *type = [pb availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     NSArray *newPubs = nil;
@@ -1804,20 +1804,20 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     } else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){ // pasteboard type from Reference Miner, determined using Pasteboard Peeker
         NSString *pbString = [pb stringForType:BDSKReferenceMinerStringPboardType]; 	
         // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
-		newPubs = [self newPublicationsForString:pbString type:BDSKReferenceMinerStringType error:&error];
+		newPubs = [self newPublicationsForString:pbString type:BDSKReferenceMinerStringType verbose:verbose error:&error];
         if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
             error = nil; // accept temporary cite keys, but show a warning later
     }else if([type isEqualToString:NSStringPboardType]){
         NSString *pbString = [pb stringForType:NSStringPboardType]; 	
 		// sniff the string to see what its type is
-		newPubs = [self newPublicationsForString:pbString type:BDSKUnknownStringType error:&error];
+		newPubs = [self newPublicationsForString:pbString type:BDSKUnknownStringType verbose:verbose error:&error];
         if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
             error = nil; // accept temporary cite keys, but show a warning later
     }else if([type isEqualToString:NSFilenamesPboardType]){
 		NSArray *pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
         // try this first, in case these files are a type we can open
         NSMutableArray *unparseableFiles = [[NSMutableArray alloc] initWithCapacity:[pbArray count]];
-        newPubs = [self extractPublicationsFromFiles:pbArray unparseableFiles:unparseableFiles error:&error];
+        newPubs = [self extractPublicationsFromFiles:pbArray unparseableFiles:unparseableFiles verbose:verbose error:&error];
 		if(temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"])
             error = nil; // accept temporary cite keys, but show a warning later
         if ([unparseableFiles count] > 0) {
@@ -1851,10 +1851,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return YES;
 }
 
-- (BOOL)addPublicationsFromFile:(NSString *)fileName error:(NSError **)outError{
+- (BOOL)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError{
     NSError *error = nil;
     NSString *temporaryCiteKey = nil;
-    NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:nil error:&error];
+    NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:nil verbose:verbose error:&error];
     
     if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
         error = nil; // accept temporary cite keys, but show a warning later
@@ -1884,7 +1884,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 // pass BDSKUnkownStringType to allow BDSKStringParser to sniff the text and determine the format
-- (NSArray *)newPublicationsForString:(NSString *)string type:(int)type error:(NSError **)outError {
+- (NSArray *)newPublicationsForString:(NSString *)string type:(int)type verbose:(BOOL)verbose error:(NSError **)outError {
     NSArray *newPubs = nil;
     NSError *parseError = nil;
     BOOL isPartialData = NO;
@@ -1904,55 +1904,59 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
 	if(nil == newPubs || isPartialData) {
         
-        // @@ should just be able to create an alert from the NSError, unless it's unknown type
-        NSString *message = nil;
-        NSString *defaultButton = NSLocalizedString(@"Cancel", @"");
-        NSString *alternateButton = nil;
-        NSString *otherButton = nil;
-        NSString *alertTitle = NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string");
-        int errorCode = [parseError code];
-        
-        // the partial data alert only applies to BibTeX; we could show the editor window for non-BibTeX data (I think...), but we also have to deal with alerts being shown twice if NSError is involved
-        if(type == BDSKBibTeXStringType || type == BDSKNoKeyBibTeXStringType){
-            // here we want to display an alert, but don't propagate a nil/error back up, since it's not a failure
-            if (errorCode == kBDSKParserIgnoredFrontMatter) {
-                message = [parseError localizedRecoverySuggestion];
-                alertTitle = [parseError localizedDescription];
-                defaultButton = nil;
-                // @@ fixme: NSError
-                parseError = nil;
-            } else {
-                // this was BibTeX, but the user may want to try going with partial data
-                message = NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog");
-                alternateButton = NSLocalizedString(@"Edit data", @"Button title");
-                otherButton = NSLocalizedString(@"Keep going", @"Button title");
+        if (verbose) {
+            // @@ should just be able to create an alert from the NSError, unless it's unknown type
+            NSString *message = nil;
+            NSString *defaultButton = NSLocalizedString(@"Cancel", @"");
+            NSString *alternateButton = nil;
+            NSString *otherButton = nil;
+            NSString *alertTitle = NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string");
+            int errorCode = [parseError code];
+            
+            // the partial data alert only applies to BibTeX; we could show the editor window for non-BibTeX data (I think...), but we also have to deal with alerts being shown twice if NSError is involved
+            if(type == BDSKBibTeXStringType || type == BDSKNoKeyBibTeXStringType){
+                // here we want to display an alert, but don't propagate a nil/error back up, since it's not a failure
+                if (errorCode == kBDSKParserIgnoredFrontMatter) {
+                    message = [parseError localizedRecoverySuggestion];
+                    alertTitle = [parseError localizedDescription];
+                    defaultButton = nil;
+                    // @@ fixme: NSError
+                    parseError = nil;
+                } else {
+                    // this was BibTeX, but the user may want to try going with partial data
+                    message = NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog");
+                    alternateButton = NSLocalizedString(@"Edit data", @"Button title");
+                    otherButton = NSLocalizedString(@"Keep going", @"Button title");
+                }
+                
+                // run a modal dialog asking if we want to use partial data or give up
+                NSAlert *alert = [NSAlert alertWithMessageText:alertTitle
+                                                 defaultButton:defaultButton
+                                               alternateButton:alternateButton
+                                                   otherButton:otherButton
+                                     informativeTextWithFormat:message];
+                int rv = [alert runModal];
+                
+                if(rv == NSAlertDefaultReturn && errorCode != kBDSKParserIgnoredFrontMatter){
+                    // the user said to give up
+                    newPubs = nil;
+                }else if (rv == NSAlertAlternateReturn){
+                    // they said to edit the file.
+                    [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
+                    newPubs = nil;	
+                }else if(rv == NSAlertOtherReturn){
+                    // the user said to keep going, so if they save, they might clobber data...
+                    // @@ should we ignore the error as well?
+                }
+                
             }
             
-            // run a modal dialog asking if we want to use partial data or give up
-            NSAlert *alert = [NSAlert alertWithMessageText:alertTitle
-                                             defaultButton:defaultButton
-                                           alternateButton:alternateButton
-                                               otherButton:otherButton
-                                 informativeTextWithFormat:message];
-            int rv = [alert runModal];
-            
-            if(rv == NSAlertDefaultReturn && errorCode != kBDSKParserIgnoredFrontMatter){
-                // the user said to give up
-                newPubs = nil;
-            }else if (rv == NSAlertAlternateReturn){
-                // they said to edit the file.
-                [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
-                newPubs = nil;	
-            }else if(rv == NSAlertOtherReturn){
-                // the user said to keep going, so if they save, they might clobber data...
-                // @@ should we ignore the error as well?
-            }
-            
+            // if not BibTeX, it's an unknown type or failed due to parser error; in either case, we must have a valid NSError since the parser returned nil
+            // no partial data here since that only applies to BibTeX parsing; all we can do is just return nil and propagate the error back up, although I suppose we could display the error editor...
+		} else {
+            newPubs = nil;
         }
         
-        // if not BibTeX, it's an unknown type or failed due to parser error; in either case, we must have a valid NSError since the parser returned nil
-        // no partial data here since that only applies to BibTeX parsing; all we can do is just return nil and propagate the error back up, although I suppose we could display the error editor...
-		
 	}else if(type == BDSKNoKeyBibTeXStringType){
         
         OBASSERT(parseError == nil);
@@ -1967,7 +1971,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 // sniff the contents of each file, returning them in an array of BibItems, while unparseable files are added to the mutable array passed as a parameter
-- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles error:(NSError **)outError {
+- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles verbose:(BOOL)verbose error:(NSError **)outError {
     NSEnumerator *e = [filenames objectEnumerator];
     NSString *fileName;
     NSString *contentString;
@@ -2005,7 +2009,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                     type = [contentString contentStringType];
                 
                 NSError *parseError = nil;
-                NSArray *contentArray = (type == BDSKUnknownStringType) ? nil : [self newPublicationsForString:contentString type:type error:&parseError];
+                NSArray *contentArray = (type == BDSKUnknownStringType) ? nil : [self newPublicationsForString:contentString type:type verbose:verbose error:&parseError];
                 
                 if(contentArray == nil){
                     // unable to parse, we link the file and can ignore the error

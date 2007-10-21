@@ -1189,7 +1189,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     id doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:NULL];
     NSError *nsError = nil;
     
-    if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES error:&nsError] == NO){
+    if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&nsError] == NO){
         if(error)
             *error = [nsError localizedDescription];
         [doc presentError:nsError];
@@ -1207,7 +1207,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [self newDocumentFromSelection:pboard userData:userData error:error];
 	} else {
         NSError *addError = nil;
-        if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES error:&addError] == NO || addError != nil)
+        if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&addError] == NO || addError != nil)
         if(error) *error = [addError localizedDescription];
     }
 }

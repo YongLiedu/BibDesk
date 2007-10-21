@@ -813,7 +813,7 @@
     if (returnCode == NSOKButton) {
         NSString *fileName = [sheet filename];
         // first try to parse the file
-        if([document addPublicationsFromFile:fileName error:NULL]){
+        if([document addPublicationsFromFile:fileName verbose:NO error:NULL]){
             // succeeded to parse the file, we return immediately
             [self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
         }else{
@@ -1847,14 +1847,14 @@
     [itemTableView reloadData];
 }
 
-- (void)autoDiscoverDataFromString:(NSString *)string{
+- (void)autoDiscoverDataFromString:(NSString *)string{return;
     int type = [string contentStringType];
     
     if(type == BDSKUnknownStringType)
         return;
 		
     NSError *error = nil;
-    NSArray *pubs = [document newPublicationsForString:string type:type error:&error];
+    NSArray *pubs = [document newPublicationsForString:string type:type verbose:NO error:&error];
     
     // ignore warnings for parsing with temporary citekeys, as we're not interested in the cite key
     if ([[error userInfo] valueForKey:@"temporaryCiteKey"] != nil)
