@@ -64,11 +64,11 @@ NSString *BDSKTemplateDidChangeNotification = @"BDSKTemplateDidChangeNotificatio
         
         fieldEnum = [[tm requiredFieldsForType:pubType] objectEnumerator];
         while (field = [fieldEnum nextObject])
-            [requiredTokens addObject:[BDSKToken tokenWithField:field]];
+            [requiredTokens addObject:[document tokenForField:field]];
         
         fieldEnum = [[tm optionalFieldsForType:pubType] objectEnumerator];
         while (field = [fieldEnum nextObject])
-            [optionalTokens addObject:[BDSKToken tokenWithField:field]];
+            [optionalTokens addObject:[document tokenForField:field]];
         
     }
     return self;
