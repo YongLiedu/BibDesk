@@ -945,24 +945,31 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification {
     NSTextView *textView = [[notification userInfo] objectForKey:@"NSFieldEditor"];
-    BDSKToken *token = nil;
-    NSArray *selRanges = [textView selectedRanges];
-    if ([selRanges count] == 1) {
-        NSRange range = [[selRanges lastObject] rangeValue];
-        if (range.length == 1) {
-            NSDictionary *attrs = [[textView textStorage] attributesAtIndex:range.location effectiveRange:NULL];
-            id attachment = [attrs objectForKey:NSAttachmentAttributeName];
-            if (attachment) {
-                if ([attachment respondsToSelector:@selector(representedObject)])
-                    token = [attachment representedObject];
-                else if ([[attachment attachmentCell] respondsToSelector:@selector(representedObject)])
-                    token = [(id)[attachment attachmentCell] representedObject];
-                if (token && [token isKindOfClass:[BDSKToken class]] == NO)
-                    token = nil;
+    
+    // we shouldn't remove the selectedToken when the focus turns to a text field
+    if ([textView delegate]) {
+        BDSKToken *token = nil;
+        NSArray *selRanges = [textView selectedRanges];
+        
+        if ([selRanges count] == 1) {
+            NSRange range = [[selRanges lastObject] rangeValue];
+            
+            if (range.length == 1) {
+                NSDictionary *attrs = [[textView textStorage] attributesAtIndex:range.location effectiveRange:NULL];
+                id attachment = [attrs objectForKey:NSAttachmentAttributeName];
+                
+                if (attachment) {
+                    if ([attachment respondsToSelector:@selector(representedObject)])
+                        token = [attachment representedObject];
+                    else if ([[attachment attachmentCell] respondsToSelector:@selector(representedObject)])
+                        token = [(id)[attachment attachmentCell] representedObject];
+                    if (token && [token isKindOfClass:[BDSKToken class]] == NO)
+                        token = nil;
+                }
             }
         }
+        [self setSelectedToken:token];
     }
-    [self setSelectedToken:token];
 }
 
 - (void)handleDidEndEditingNotification:(NSNotification *)notification {
@@ -1084,7 +1091,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (void)tokenField:(NSTokenField *)tokenField textViewDidChangeSelection:(NSTextView *)textView {
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:textView, @"NSFieldEditor", nil];
     NSNotification *note = [NSNotification notificationWithName:BDSKTokenFieldDidChangeSelectionNotification object:tokenField userInfo:userInfo];
-    [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
+    [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostASAP coalesceMask:NSNotificationCoalescingOnName forModes:nil];
 }
 
 #pragma mark NSTableView delegate and dataSource
