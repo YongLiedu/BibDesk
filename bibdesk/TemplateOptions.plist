@@ -232,11 +232,11 @@
         },
         {
             displayName = "A and B; A et al.";
-            key = "@componentsJoinedByAndWithEtAlAfterOne";
+            key = "@componentsJoinedByAndWithSingleEtAlAfterTwo";
         },
         {
             displayName = "A, B, and C; A et al.";
-            key = "@componentsJoinedByCommaAndAndWithEtAlAfterOne";
+            key = "@componentsJoinedByCommaAndAndWithSingleEtAlAfterThree";
         },
         {
             displayName = "A and B; A, B, et al.";
@@ -245,6 +245,14 @@
         {
             displayName = "A, B, and C; A, B, C, et al.";
             key = "@componentsJoinedByCommaAndAndWithEtAlAfterThree";
+        },
+        {
+            displayName = "A, B, C, D, & E; A, et al.";
+            key = "@componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive";
+        },
+        {
+            displayName = "A, B, C, D, E, & F; A, B, C, D, E, F, et al.";
+            key = "@componentsJoinedByCommaAndAmpersandWithEtAlAfterSix";
         },
         {
             displayName = "First name only";

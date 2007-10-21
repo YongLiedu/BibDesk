@@ -1017,12 +1017,12 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
     return [self count] > 1 ? [[self firstObject] stringByAppendingString:@" et al."] : [self firstObject];
 }
 
-- (NSString *)componentsJoinedByAndWithEtAlAfterOne
+- (NSString *)componentsJoinedByAndWithSingleEtAlAfterTwo
 {
     return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByAnd];
 }
 
-- (NSString *)componentsJoinedByCommaAndAndWithEtAlAfterOne
+- (NSString *)componentsJoinedByCommaAndAndWithSingleEtAlAfterThree
 {
     return [self count] > 3 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByCommaAndAnd];
 }
@@ -1035,6 +1035,16 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 - (NSString *)componentsJoinedByCommaAndAndWithEtAlAfterThree
 {
     return [self count] > 3 ? [[[self firstThreeObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByCommaAndAnd];
+}
+
+- (NSString *)componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive
+{
+    return [self count] > 5 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByCommaAndAmpersand];
+}
+
+- (NSString *)componentsJoinedByCommaAndAmpersandWithEtAlAfterSix
+{
+    return [self count] > 6 ? [[[self firstSixObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByCommaAndAmpersand];
 }
 
 @end

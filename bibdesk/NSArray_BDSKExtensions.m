@@ -111,6 +111,11 @@
     return [self count] > 5 ? [self subarrayWithRange:NSMakeRange(0, 5)] : self;
 }
 
+- (NSArray *)firstSixObjects;
+{
+    return [self count] > 6 ? [self subarrayWithRange:NSMakeRange(0, 6)] : self;
+}
+
 - (NSArray *)arrayDroppingFirstObject;
 {
     return [self count] ? [self subarrayWithRange:NSMakeRange(1, [self count] - 1)] : self;

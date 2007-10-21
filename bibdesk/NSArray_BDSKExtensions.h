@@ -55,6 +55,7 @@
 - (NSArray *)firstThreeObjects;
 - (NSArray *)firstFourObjects;
 - (NSArray *)firstFiveObjects;
+- (NSArray *)firstSixObjects;
 - (NSArray *)arrayDroppingFirstObject;
 - (NSArray *)arrayDroppingLastObject;
 - (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
