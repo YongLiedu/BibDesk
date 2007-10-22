@@ -333,7 +333,10 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 }
 
 - (NSArray *)keys {
-    return nil;
+    if (key)
+        return [NSArray arrayWithObjects:key, nil];
+    else
+        return [NSArray arrayWithObjects:@"fields", title, nil];
 }
 
 - (NSString *)string {

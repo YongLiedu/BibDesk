@@ -1374,7 +1374,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     else if ([key isEqualToString:@"pubType"])
         field = BDSKPubTypeString;
     else if ([key isEqualToString:@"itemIndex"])
-        field = @"Item Index";
+        field = BDSKItemNumberString;
     else if ([key isEqualToString:@"authors"])
         field = BDSKAuthorString;
     else if ([key isEqualToString:@"editors"])
