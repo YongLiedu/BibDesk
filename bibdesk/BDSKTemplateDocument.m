@@ -1097,6 +1097,12 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [self updateTokenFields];
 }
 
+- (NSString *)tableView:(NSTableView *)tableView toolTipForCell:(NSCell *)cell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation {
+    if ([[tableColumn identifier] isEqualToString:@"included"])
+        return NSLocalizedString(@"Check to include an item template for this type", @"Tool tip message");
+    return nil;
+}
+
 - (int)numberOfRowsInTableView:(NSTableView *)tv{ return 0; }
 
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row { return nil; }
