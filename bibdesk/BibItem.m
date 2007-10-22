@@ -287,7 +287,6 @@ static CFDictionaryRef selectorTable = NULL;
 		
 		groups = [[NSMutableDictionary alloc] initWithCapacity:5];
         cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
-        [self _createFilesArray];
 		
         templateFields = nil;
         // updateMetadataForKey with a nil argument will set the dates properly if we read them from a file
@@ -329,7 +328,8 @@ static CFDictionaryRef selectorTable = NULL;
             [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
-            files = [[coder decodeObjectForKey:@"files"] retain];
+            // !!! TODO 
+            // files = [[coder decodeObjectForKey:@"files"] retain];
             // set by the document, which we don't archive
             owner = nil;
             fileOrder = nil;
@@ -355,7 +355,8 @@ static CFDictionaryRef selectorTable = NULL;
         [coder encodeObject:pubType forKey:@"pubType"];
         [coder encodeObject:pubFields forKey:@"pubFields"];
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
-        [coder encodeObject:files forKey:@"files"];
+        // !!! TODO 
+        // [coder encodeObject:files forKey:@"files"];
     } else {
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
     }        
@@ -530,6 +531,8 @@ static CFDictionaryRef selectorTable = NULL;
 - (void)setOwner:(id<BDSKOwner>)newOwner {
     if (owner != newOwner) {
 		owner = newOwner;
+        // !!! TODO: check this
+        [self _createFilesArray];
 	}
 }
 
@@ -2427,7 +2430,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSURL *)baseURL {
-    return [NSURL fileURLWithPath:[self basePath]];
+    NSString *basePath = [self basePath];
+    return basePath ? [NSURL fileURLWithPath:[self basePath]] : nil;
 }
 
 static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unused)
@@ -2455,7 +2459,9 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (void)_createFilesArray
 {
+    [files release];
     files = [NSMutableArray new];
+    
     NSUInteger i = 0;
     NSString *value, *key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
     
