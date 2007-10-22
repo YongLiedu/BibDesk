@@ -150,7 +150,7 @@ enum{
     NSUInteger idx = [indexSet lastIndex];
     while (NSNotFound != idx) {
         [publication removeObjectFromFilesAtIndex:idx];
-        idx = [indexSet indexSmallerThanIndex:idx];
+        idx = [indexSet indexLessThanIndex:idx];
     }
     return YES;
 }

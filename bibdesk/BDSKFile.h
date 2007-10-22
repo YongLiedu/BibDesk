@@ -67,10 +67,10 @@
 - (id)initWithData:(NSData *)data;
 - (id)initWithBase64String:(NSString *)base64String;
 - (id)initWithPath:(NSString *)aPath relativeToPath:(NSString *)basePath;
-- (id)initWithPath:(NSURL *)aURL relativeToURL:(NSURL *)baseURL;
+- (id)initWithURL:(NSURL *)aURL relativeToURL:(NSURL *)baseURL;
 
-- (const FSRef *)fsRefRelativeToToURL:(NSString *)baseURL update:(BOOL)update;
-- (const FSRef *)fsRefRelativeToToURL:(NSString *)baseURL;
+- (const FSRef *)fsRefRelativeToURL:(NSURL *)baseURL update:(BOOL)update;
+- (const FSRef *)fsRefRelativeToURL:(NSURL *)baseURL;
 - (const FSRef *)fsRef;
 
 - (NSURL *)fileURLRelativeToURL:(NSURL *)baseURL;

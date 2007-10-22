@@ -2508,7 +2508,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
     NSArray *toMove = [[files objectsAtIndexes:aSet] copy];
     unsigned anIdx = [aSet indexLessThanIndex:idx];
-    while (anIdx != NSNotfound) {
+    while (anIdx != NSNotFound) {
+#warning noop
         idx--;
         anIdx = [aSet indexLessThanIndex:anIdx];
     }

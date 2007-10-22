@@ -838,7 +838,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (NSSaveAsOperation == saveOperation && [saveTextEncodingPopupButton encoding] != 0)
         [self setDocumentStringEncoding:[saveTextEncodingPopupButton encoding]];
     
-    saveTargetURL = [absoluteURL release];
+    saveTargetURL = [absoluteURL copy];
     
     BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
     
@@ -924,10 +924,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
         items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
     
+    NSFileWrapper *fileWrapper = nil;
+    
     if ([docType isEqualToString:BDSKArchiveDocumentType]) {
         success = [self writeArchiveToURL:fileURL forPublications:items error:outError];
     } else {
-        NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
+        fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
         success = nil == fileWrapper ? NO : [fileWrapper writeToFile:[fileURL path] atomically:NO updateFilenames:NO];
     }
     
