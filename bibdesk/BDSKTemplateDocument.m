@@ -322,11 +322,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         if (startRange.location != NSNotFound) {
             startLoc = startRange.location;
             
-            wsRange = [string rangeOfTrailingEmptyLine:&onlyWs range:MAKE_RANGE(0, startRange.location)];
+            wsRange = [string rangeOfTrailingEmptyLineRequiringNewline:NO range:MAKE_RANGE(0, startRange.location)];
             if (wsRange.location != NSNotFound)
                 startRange = MAKE_RANGE(wsRange.location, NSMaxRange(startRange));
-            else if (onlyWs)
-                startRange = MAKE_RANGE(0, NSMaxRange(startRange));
             wsRange = [string rangeOfLeadingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), length)];
             if (wsRange.location != NSNotFound)
                 startRange = MAKE_RANGE(startRange.location, NSMaxRange(wsRange));
@@ -337,11 +335,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                 wsRange = [string rangeOfTrailingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
                 if (wsRange.location != NSNotFound)
                     endRange = MAKE_RANGE(wsRange.location, NSMaxRange(endRange));
-                wsRange = [string rangeOfLeadingEmptyLine:&onlyWs range:MAKE_RANGE(NSMaxRange(endRange), length)];
+                wsRange = [string rangeOfLeadingEmptyLineRequiringNewline:NO range:MAKE_RANGE(NSMaxRange(endRange), length)];
                 if (wsRange.location != NSNotFound)
                     endRange = MAKE_RANGE(endRange.location, NSMaxRange(wsRange));
-                else if (onlyWs)
-                    endRange = MAKE_RANGE(endRange.location, length);
                 
                 sepRange = [string rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
                 if (sepRange.location != NSNotFound) {
