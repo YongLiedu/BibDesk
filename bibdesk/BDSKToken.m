@@ -71,9 +71,9 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
             [tag setKey:@"dateModified"];
         if ([field isEqualToString:BDSKPubDateString])
             [tag setKey:@"date"];
-    } else if ([field isEqualToString:@"Item Index"]) {
+    } else if ([field isEqualToString:BDSKItemNumberString]) {
         tag = [[BDSKNumberTagToken alloc] initWithTitle:field];
-        if ([field isEqualToString:@"Item Index"])
+        if ([field isEqualToString:BDSKItemNumberString])
             [tag setKey:@"itemIndex"];
     } else {
         tag = [[BDSKFieldTagToken alloc] initWithTitle:field];
