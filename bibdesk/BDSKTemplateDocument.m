@@ -179,7 +179,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         
         [specialTokens addObject:[self tokenForField:BDSKPubTypeString]];
         [specialTokens addObject:[self tokenForField:BDSKCiteKeyString]];
-        [specialTokens addObject:[self tokenForField:@"Item Index"]];
+        [specialTokens addObject:[self tokenForField:BDSKItemNumberString]];
         [specialTokens addObject:[self tokenForField:NSLocalizedString(@"Rich Text", @"Name for template token")]];
         [specialTokens addObject:[self tokenForField:BDSKDateAddedString]];
         [specialTokens addObject:[self tokenForField:BDSKDateModifiedString]];
