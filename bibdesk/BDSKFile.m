@@ -476,18 +476,18 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
         FSRef aRef;
         FSRef baseRef;
         short aliasCount = 1;
-        Boolean requireUpdate;
+        Boolean shouldUpdate;
         OSStatus anErr;
         
         if (baseURL)
             CFURLGetFSRef((CFURLRef)baseURL, &baseRef);
         
-        if (update)
-            anErr = FSResolveAliasWithMountFlags(&baseRef, [alias alias], &aRef, &requireUpdate, kResolveAliasFileNoUI);
-        else // I think these options reproduce the behavior of FSResolveAliasWithMountFlags
-            anErr = FSMatchAliasNoUI(&baseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &requireUpdate, NULL, NULL);
+        anErr = FSMatchAliasNoUI(&baseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
         
         if (anErr == noErr) {
+            if (update && shouldUpdate)
+                FSUpdateAlias(baseRef, aRef, alias, &shouldUpdate);
+            
             FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
             if(newRef)
                 bcopy(&aRef, newRef, sizeof(FSRef));
