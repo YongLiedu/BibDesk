@@ -510,11 +510,14 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 - (NSURL *)fileURLRelativeToURL:(NSURL *)baseURL;
 {
     BOOL hadFileRef = fileRef != NULL;
-    NSURL *aURL = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), [self fsRefRelativeToURL:baseURL]) autorelease];
+    const FSRef *aRef = [self fsRefRelativeToURL:baseURL];
+    NSURL *aURL = aRef == NULL ? nil : [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), aRef) autorelease];
     if (aURL == nil && hadFileRef) {
         NSZoneFree([self zone], (void *)fileRef);
         fileRef = NULL;
-        aURL = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), [self fsRefRelativeToURL:baseURL]) autorelease];
+        aRef = [self fsRefRelativeToURL:baseURL];
+        if (aRef != NULL)
+            aURL = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), aRef) autorelease];
     }
     return aURL;
 }
@@ -522,11 +525,14 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 - (NSURL *)fileURLRelativeToURLNoUpdate:(NSURL *)baseURL;
 {
     BOOL hadFileRef = fileRef != NULL;
-    NSURL *aURL = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), [self fsRefRelativeToURL:baseURL update:NO]) autorelease];
+    const FSRef *aRef = [self fsRefRelativeToURL:baseURL update:NO];
+    NSURL *aURL = aRef == NULL ? nil : [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), aRef) autorelease];
     if (aURL == nil && hadFileRef) {
         NSZoneFree([self zone], (void *)fileRef);
         fileRef = NULL;
-        aURL = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), [self fsRefRelativeToURL:baseURL update:NO]) autorelease];
+        aRef = [self fsRefRelativeToURL:baseURL update:NO];
+        if (aRef != NULL)
+            aURL = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), aRef) autorelease];
     }
     return aURL;
 }
@@ -562,7 +568,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
     // make sure the fileRef is valid
     [self fileURLRelativeToURLNoUpdate:[NSURL fileURLWithPath:basePath]];
     
-    const FSRef *fsRef = [self fsRefRelativeToURL:[NSURL fileURLWithPath:basePath] update:NO];
+    FSRef *fsRef = (FSRef *)[self fsRefRelativeToURL:[NSURL fileURLWithPath:basePath] update:NO];
     FSRef baseRef, tempRef = *fsRef;
     NSURL *baseURL;
     BDAlias *anAlias = nil;
@@ -570,9 +576,9 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
     if (fsRef) {
         baseURL = [NSURL fileURLWithPath:basePath];
         if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef))
-            anAlias = [[[BDAlias alloc] initWithFSRef:&tempRef relativeToFSRef:&baseRef] autorelease];
+            anAlias = [[[BDAlias alloc] initWithFSRef:fsRef relativeToFSRef:&baseRef] autorelease];
         else
-            anAlias = [[[BDAlias alloc] initWithFSRef:&tempRef] autorelease];
+            anAlias = [[[BDAlias alloc] initWithFSRef:fsRef] autorelease];
     } else {
        anAlias = alias;
     }
