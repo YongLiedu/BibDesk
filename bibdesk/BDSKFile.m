@@ -486,7 +486,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
         
         if (anErr == noErr) {
             if (update && shouldUpdate)
-                FSUpdateAlias(baseRef, aRef, alias, &shouldUpdate);
+                FSUpdateAlias(&baseRef, &aRef, [alias alias], &shouldUpdate);
             
             FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
             if(newRef)
