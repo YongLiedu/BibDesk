@@ -118,7 +118,11 @@ enum{
 
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
-    return [[publication fileAtIndex:idx] fileURLRelativeToURL:[publication baseURL]];
+    BDSKAliasFile *file = [publication fileAtIndex:idx];
+    NSURL *aURL = [file fileURLRelativeToURL:[publication baseURL]];
+    if (aURL == nil && [file relativePath])
+        aURL = [NSURL fileURLWithPath:[file relativePath]];
+    return aURL;
 }
 
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;

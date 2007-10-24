@@ -61,28 +61,24 @@
 {
     BDAlias *alias;
     const FSRef *fileRef;
+    NSString *relativePath;
 }
 
-- (id)initWithAlias:(BDAlias *)anAlias;
-- (id)initWithData:(NSData *)data;
 - (id)initWithBase64String:(NSString *)base64String;
 - (id)initWithPath:(NSString *)aPath relativeToPath:(NSString *)basePath;
 - (id)initWithURL:(NSURL *)aURL relativeToURL:(NSURL *)baseURL;
 
-- (const FSRef *)fsRefRelativeToURL:(NSURL *)baseURL update:(BOOL)update;
 - (const FSRef *)fsRefRelativeToURL:(NSURL *)baseURL;
 - (const FSRef *)fsRef;
 
 - (NSURL *)fileURLRelativeToURL:(NSURL *)baseURL;
-- (NSURL *)fileURLRelativeToURLNoUpdate:(NSURL *)baseURL;
 - (NSURL *)fileURL;
 
 - (NSString *)pathRelativeToPath:(NSString *)basePath;
-- (NSString *)pathRelativeToPathNoUpdate:(NSString *)basePath;
 - (NSString *)path;
 
-- (BDAlias *)aliasRelativeToPath:(NSString *)basePath;
-- (NSData *)aliasDataRelativeToPath:(NSString *)basePath;
-- (NSString *)base64StringRelativeToPath:(NSString *)basePath;
+- (NSString *)base64StringRelativeToPath:(NSString *)basePath convertedRelativeToPath:(NSString *)newBasePath;
+
+- (NSString *)relativePath;
 
 @end

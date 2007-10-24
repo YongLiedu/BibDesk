@@ -391,20 +391,21 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 @implementation BDSKAliasFile
 
 // guaranteed to be called with a non-nil alias
-- (id)initWithAlias:(BDAlias *)anAlias;
+- (id)initWithAlias:(BDAlias *)anAlias relativePath:(NSString *)relPath;
 {
     if (self = [super init]) {
         fileRef = NULL; // this is updated lazily, as we don't know the base path at this point
         alias = [anAlias retain];
+        relativePath = nil;
     }
     return self;    
 }
 
-- (id)initWithData:(NSData *)data;
+- (id)initWithAliasData:(NSData *)data relativePath:(NSString *)relPath;
 {
     NSParameterAssert(nil != data);
     BDAlias *anAlias = [[BDAlias alloc] initWithData:data];
-    self = [self initWithAlias:anAlias];
+    self = [self initWithAlias:anAlias relativePath:relPath];
     [anAlias release];
     return self;
 }
@@ -413,23 +414,28 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 {
     NSParameterAssert(nil != base64String);
     NSData *data = [[NSData alloc] initWithBase64String:base64String];
-    self = [self initWithData:data];
+    NSDictionary *dictionary = [NSKeyedUnarchiver unarchiveObjectWithData:data];
     [data release];
-    return self;
+    return [self initWithAliasData:[dictionary objectForKey:@"aliasData"] relativePath:[dictionary objectForKey:@"relativePath"]];
 }
 
 - (id)initWithPath:(NSString *)aPath relativeToPath:(NSString *)basePath;
 {
     BDAlias *anAlias = nil;
+    NSURL *baseURL;
+    NSString *relPath = nil;
     // BDAlias has a different interpretation of aPath, which is inconsistent with the way it handles FSRef
-    if (basePath)
-        anAlias = [[BDAlias alloc] initWithPath:[basePath relativePathToFilename:aPath] relativeToPath:basePath];
-    else
+    if (basePath) {
+        anAlias = [[BDAlias alloc] initWithPath:aPath relativeToPath:basePath];
+        relPath = [basePath relativePathToFilename:aPath];
+    } else {
         anAlias = [[BDAlias alloc] initWithPath:aPath];
+    }
     if (anAlias) {
-        if ((self = [self initWithAlias:anAlias]) && basePath) {
-            // this initalizes the FSRef and update the alias
-            [self fsRefRelativeToURL:[NSURL fileURLWithPath:basePath] update:YES];
+        if ((self = [self initWithAlias:anAlias relativePath:relPath])) {
+            if (basePath && (baseURL = [NSURL fileURLWithPath:basePath]))
+                // this initalizes the FSRef and update the alias
+                [self fsRefRelativeToURL:baseURL];
         }
         [anAlias release];
     } else {
@@ -446,19 +452,21 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 - (id)initWithCoder:(NSCoder *)coder
 {
     OBASSERT_NOT_REACHED("BDSKAliasFile needs a base path for encoding");
-    return [self initWithData:[coder decodeObject]];
+    return [self initWithAliasData:[coder decodeObject] relativePath:[coder decodeObject]];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     OBASSERT_NOT_REACHED("BDSKAliasFile needs a base path for encoding");
-    [coder encodeObject:[self aliasDataRelativeToPath:nil]];
+    [coder encodeObject:[alias aliasData]];
+    [coder encodeObject:relativePath];
 }
 
 - (void)dealloc
 {
     NSZoneFree([self zone], (void *)fileRef);
     [alias release];
+    [relativePath release];
     [super dealloc];
 }
 
@@ -470,24 +478,46 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 
 // Should we implement -isEqual: and -hash?
 
-- (const FSRef *)fsRefRelativeToURL:(NSURL *)baseURL update:(BOOL)update;
+- (const FSRef *)fsRefRelativeToURL:(NSURL *)baseURL;
 {
-    if (fileRef == NULL && alias) {
+    if (fileRef == NULL) {
         FSRef aRef;
         FSRef baseRef;
         short aliasCount = 1;
-        Boolean shouldUpdate;
-        OSStatus anErr;
+        Boolean shouldUpdate = false;
+        Boolean success = false;
         
-        if (baseURL)
-            CFURLGetFSRef((CFURLRef)baseURL, &baseRef);
-        
-        anErr = FSMatchAliasNoUI(&baseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
-        
-        if (anErr == noErr) {
-            if (update && shouldUpdate)
-                FSUpdateAlias(&baseRef, &aRef, [alias alias], &shouldUpdate);
+        if (baseURL && relativePath) {
+            NSString *path = [[baseURL path] stringByAppendingPathComponent:relativePath];
+            NSURL *theURL = [NSURL fileURLWithPath:path];
             
+            if (theURL != NULL) {
+                shouldUpdate = success = CFURLGetFSRef((CFURLRef)theURL, &aRef);
+            }
+        }
+        
+        if (success == false && alias) {
+            if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef)) {
+                success = noErr == FSMatchAliasNoUI(&baseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
+            } else {
+                success = noErr == FSMatchAliasNoUI(NULL, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
+                shouldUpdate = false;
+            }
+        }
+        
+        if (success && shouldUpdate) {
+            FSUpdateAlias(&baseRef, &aRef, [alias alias], &shouldUpdate);
+            if (baseURL) {
+                CFURLRef tmpURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &aRef);
+                if (tmpURL) {
+                    [relativePath release];
+                    relativePath = [[[baseURL path] relativePathToFilename:[(NSURL *)tmpURL path]] retain];
+                    CFRelease(tmpURL);
+                }
+            }
+        }
+        
+        if (success) {
             FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
             if(newRef)
                 bcopy(&aRef, newRef, sizeof(FSRef));
@@ -497,14 +527,9 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
     return fileRef;
 }
 
-- (const FSRef *)fsRefRelativeToURL:(NSURL *)baseURL;
-{
-    return [self fsRefRelativeToURL:baseURL update:YES];
-}
-
 - (const FSRef *)fsRef;
 {
-    return [self fsRefRelativeToURL:nil update:NO];
+    return [self fsRefRelativeToURL:nil];
 }
 
 - (NSURL *)fileURLRelativeToURL:(NSURL *)baseURL;
@@ -522,29 +547,14 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
     return aURL;
 }
 
-- (NSURL *)fileURLRelativeToURLNoUpdate:(NSURL *)baseURL;
-{
-    BOOL hadFileRef = fileRef != NULL;
-    const FSRef *aRef = [self fsRefRelativeToURL:baseURL update:NO];
-    NSURL *aURL = aRef == NULL ? nil : [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), aRef) autorelease];
-    if (aURL == nil && hadFileRef) {
-        NSZoneFree([self zone], (void *)fileRef);
-        fileRef = NULL;
-        aRef = [self fsRefRelativeToURL:baseURL update:NO];
-        if (aRef != NULL)
-            aURL = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), aRef) autorelease];
-    }
-    return aURL;
-}
-
 - (NSURL *)fileURL;
 {
-    return [self fileURLRelativeToURLNoUpdate:nil];
+    return [self fileURLRelativeToURL:nil];
 }
 
 - (NSString *)fileName;
 {
-    return [(NSString *)copyFileNameFromFSRef([self fsRef]) autorelease];
+    return [[self path] lastPathComponent];
 }
 
 - (NSString *)path;
@@ -554,46 +564,66 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 
 - (NSString *)pathRelativeToPath:(NSString *)basePath;
 {
-    return [[self fileURLRelativeToURL:[NSURL fileURLWithPath:basePath]] path];
+    return [[self fileURLRelativeToURL:basePath ? [NSURL fileURLWithPath:basePath] : nil] path];
 }
 
-- (NSString *)pathRelativeToPathNoUpdate:(NSString *)basePath;
+- (BDAlias *)aliasRelativeToPath:(NSString *)basePath convertedRelativeToPath:(NSString *)newBasePath;
 {
-    return [[self fileURLRelativeToURLNoUpdate:[NSURL fileURLWithPath:basePath]] path];
-}
-
-- (BDAlias *)aliasRelativeToPath:(NSString *)basePath;
-{
-    NSParameterAssert(nil != basePath);
     // make sure the fileRef is valid
-    [self fileURLRelativeToURLNoUpdate:[NSURL fileURLWithPath:basePath]];
+    [self fileURLRelativeToURL:basePath ? [NSURL fileURLWithPath:basePath] : nil];
     
-    FSRef *fsRef = (FSRef *)[self fsRefRelativeToURL:[NSURL fileURLWithPath:basePath] update:NO];
-    FSRef baseRef, tempRef = *fsRef;
+    FSRef *fsRef = (FSRef *)[self fsRefRelativeToURL:basePath ? [NSURL fileURLWithPath:basePath] : nil];
+    FSRef baseRef;
     NSURL *baseURL;
     BDAlias *anAlias = nil;
     
     if (fsRef) {
-        baseURL = [NSURL fileURLWithPath:basePath];
+        baseURL = newBasePath ? [NSURL fileURLWithPath:newBasePath] : nil;
         if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef))
             anAlias = [[[BDAlias alloc] initWithFSRef:fsRef relativeToFSRef:&baseRef] autorelease];
         else
             anAlias = [[[BDAlias alloc] initWithFSRef:fsRef] autorelease];
     } else {
-       anAlias = alias;
+        anAlias = alias;
     }
     
     return anAlias;
 }
 
-- (NSData *)aliasDataRelativeToPath:(NSString *)basePath;
+- (NSData *)aliasDataRelativeToPath:(NSString *)basePath convertedRelativeToPath:(NSString *)newBasePath;
 {
-    return [[self aliasRelativeToPath:basePath] aliasData];
+    // make sure the fileRef is valid
+    [self fileURLRelativeToURL:basePath ? [NSURL fileURLWithPath:basePath] : nil];
+    
+    FSRef *fsRef = (FSRef *)[self fsRefRelativeToURL:basePath ? [NSURL fileURLWithPath:basePath] : nil];
+    FSRef baseRef;
+    NSURL *baseURL;
+    BDAlias *anAlias = nil;
+    
+    if (fsRef) {
+        baseURL = newBasePath ? [NSURL fileURLWithPath:newBasePath] : nil;
+        if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef))
+            anAlias = [[[BDAlias alloc] initWithFSRef:fsRef relativeToFSRef:&baseRef] autorelease];
+        else
+            anAlias = [[[BDAlias alloc] initWithFSRef:fsRef] autorelease];
+    } else {
+        anAlias = alias;
+    }
+    
+    return [anAlias aliasData];
 }
 
-- (NSString *)base64StringRelativeToPath:(NSString *)basePath;
+- (NSString *)base64StringRelativeToPath:(NSString *)basePath convertedRelativeToPath:(NSString *)newBasePath;
 {
-    return [[self aliasDataRelativeToPath:basePath] base64String];
+    NSData *data = [self aliasDataRelativeToPath:basePath convertedRelativeToPath:newBasePath];
+    NSString *path = [self pathRelativeToPath:basePath];
+    path = path && newBasePath ? [newBasePath relativePathToFilename:path] : relativePath;
+    NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil];
+    return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
+}
+
+- (NSString *)relativePath {
+    return relativePath;
 }
 
 @end
