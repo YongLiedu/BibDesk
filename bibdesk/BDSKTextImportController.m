@@ -211,9 +211,8 @@
 	[bookmarkPopUpButton removeAllItems];
 	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Menu item title for Bookmarks popup")];
 	while (bm = [bEnum nextObject]) {
-        BDSKBookmark *bm = [bookmarks objectAtIndex:i];
-		NSMenuItem *item = [[bookmarkPopUpButton menu] addItemWithTitle:[bm name] action:NULL keyEquivalent:@""];
-        [item setRepresentedObject:[bm urlString]];
+		NSMenuItem *menuItem = [[bookmarkPopUpButton menu] addItemWithTitle:[bm name] action:NULL keyEquivalent:@""];
+        [menuItem setRepresentedObject:[bm urlString]];
 	}
 	
 	// remember the arguments to pass in the callback later
@@ -345,8 +344,8 @@
 	[bookmarkPopUpButton removeAllItems];
 	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks", @"Menu item title for Bookmarks popup")];
 	while (bm = [bEnum nextObject]) {
-		NSMenuItem *item = [[bookmarkPopUpButton menu] addItemWithTitle:[bm name] action:NULL keyEquivalent:@""];
-        [item setRepresentedObject:[bm urlString]];
+		NSMenuItem *menuItem = [[bookmarkPopUpButton menu] addItemWithTitle:[bm name] action:NULL keyEquivalent:@""];
+        [menuItem setRepresentedObject:[bm urlString]];
 	}
 	
 	[NSApp beginSheet:urlSheet
