@@ -205,15 +205,15 @@
 	[self setShowingWebView:YES];
 	
 	// load the popup buttons with our bookmarks
-	NSArray *bookmarks = [[BDSKBookmarkController sharedBookmarkController] bookmarks];
-	int i, count = [bookmarks count];
+	NSEnumerator *bEnum = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] objectEnumerator];
+	BDSKBookmark *bm;
     
 	[bookmarkPopUpButton removeAllItems];
 	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Menu item title for Bookmarks popup")];
-	for (i = 0; i < count; i++) {
+	while (bm = [bEnum nextObject]) {
         BDSKBookmark *bm = [bookmarks objectAtIndex:i];
-		[bookmarkPopUpButton addItemWithTitle:[bm name]];
-        [[bookmarkPopUpButton itemAtIndex:i + 1] setTag:i];
+		NSMenuItem *item = [[bookmarkPopUpButton menu] addItemWithTitle:[bm name] action:NULL keyEquivalent:@""];
+        [item setRepresentedObject:[bm urlString]];
 	}
 	
 	// remember the arguments to pass in the callback later
@@ -345,7 +345,8 @@
 	[bookmarkPopUpButton removeAllItems];
 	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks", @"Menu item title for Bookmarks popup")];
 	while (bm = [bEnum nextObject]) {
-		[bookmarkPopUpButton addItemWithTitle:[bm name]];
+		NSMenuItem *item = [[bookmarkPopUpButton menu] addItemWithTitle:[bm name] action:NULL keyEquivalent:@""];
+        [item setRepresentedObject:[bm urlString]];
 	}
 	
 	[NSApp beginSheet:urlSheet
@@ -375,8 +376,7 @@
 }
 
 - (IBAction)chooseBookmarkAction:(id)sender{
-	int idx = [[bookmarkPopUpButton selectedItem] tag];
-	NSString *URLString = [[[BDSKBookmarkController sharedBookmarkController] objectInBookmarksAtIndex:idx] urlString];
+	NSString *URLString = [[bookmarkPopUpButton selectedItem] representedObject];
 	[urlTextField setStringValue:URLString];
     
 	[urlSheet orderOut:sender];
