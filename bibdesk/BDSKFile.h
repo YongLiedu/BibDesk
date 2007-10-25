@@ -80,3 +80,8 @@
 - (void)update;
 
 @end
+
+
+@interface NSObject (BDSKAliasFileDelegate)
+- (NSURL *)baseURLForAliasFile:(BDSKAliasFile *)file;
+@end
