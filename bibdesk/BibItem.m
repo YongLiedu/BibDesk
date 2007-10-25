@@ -1613,7 +1613,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         string = [NSMutableString string];
         for (i = 0; i < iMax; i++) {
             NSString *key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
-            NSString *value = [[files objectAtIndex:i] base64StringRelativeToPath:basePath];
+            NSString *value = [[files objectAtIndex:i] base64StringRelativeToPath:basePath convertedRelativeToPath:nil];
             OBPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
             [string appendFormat:@",\n\t%@ = {%@}", key, value];
         }
@@ -2451,9 +2451,13 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     BibItem *self = (BibItem *)context;
     NSURL *value = [self localFileURLForField:(id)key];
     if (value) {
-        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithURL:value relativeToURL:[self baseURL]];
-        [self->files addObject:aFile];
-        [aFile release];
+        // !!! file URLs are always absolute but the init method here always returns nil, which probably means that we should do the first initialization with relative paths instead of expending them first
+        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithURL:value relativeToURL:nil];
+        if (aFile) {
+            [self->files addObject:aFile];
+            [aFile release];
+        }
+        else NSLog(@"*** Unable to create alias to %@", value);
     }
 }
 
