@@ -397,7 +397,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
     if (self = [super init]) {
         fileRef = NULL; // this is updated lazily, as we don't know the base path at this point
         alias = [anAlias retain];
-        relativePath = nil;
+        relativePath = [relPath copy];
         delegate = aDelegate;
     }
     return self;    
