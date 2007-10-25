@@ -574,29 +574,6 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
     return [[self fileURLRelativeToURL:basePath ? [NSURL fileURLWithPath:basePath] : nil] path];
 }
 
-- (BDAlias *)aliasRelativeToPath:(NSString *)basePath convertedRelativeToPath:(NSString *)newBasePath;
-{
-    // make sure the fileRef is valid
-    [self fileURLRelativeToURL:basePath ? [NSURL fileURLWithPath:basePath] : nil];
-    
-    FSRef *fsRef = (FSRef *)[self fsRefRelativeToURL:basePath ? [NSURL fileURLWithPath:basePath] : nil];
-    FSRef baseRef;
-    NSURL *baseURL;
-    BDAlias *anAlias = nil;
-    
-    if (fsRef) {
-        baseURL = newBasePath ? [NSURL fileURLWithPath:newBasePath] : nil;
-        if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef))
-            anAlias = [[[BDAlias alloc] initWithFSRef:fsRef relativeToFSRef:&baseRef] autorelease];
-        else
-            anAlias = [[[BDAlias alloc] initWithFSRef:fsRef] autorelease];
-    } else {
-        anAlias = alias;
-    }
-    
-    return anAlias;
-}
-
 - (NSData *)aliasDataRelativeToPath:(NSString *)basePath convertedRelativeToPath:(NSString *)newBasePath;
 {
     // make sure the fileRef is valid
