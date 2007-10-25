@@ -64,22 +64,19 @@
     NSString *relativePath;
 }
 
-- (id)initWithBase64String:(NSString *)base64String;
-- (id)initWithPath:(NSString *)aPath relativeToPath:(NSString *)basePath;
-- (id)initWithURL:(NSURL *)aURL relativeToURL:(NSURL *)baseURL;
+- (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
+- (id)initWithPath:(NSString *)aPath delegate:(id)aDelegate;
+- (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
 
-- (const FSRef *)fsRefRelativeToURL:(NSURL *)baseURL;
 - (const FSRef *)fsRef;
-
-- (NSURL *)fileURLRelativeToURL:(NSURL *)baseURL;
 - (NSURL *)fileURL;
-
-- (NSString *)pathRelativeToPath:(NSString *)basePath;
 - (NSString *)path;
 
-- (NSString *)base64StringRelativeToPath:(NSString *)basePath convertedRelativeToPath:(NSString *)newBasePath;
+- (NSString *)base64StringRelativeToPath:(NSString *)newBasePath;
 
 - (NSString *)relativePath;
 - (void)setRelativePath:(NSString *)newRelativePath;
+
+- (void)update;
 
 @end

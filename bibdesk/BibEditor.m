@@ -119,9 +119,10 @@ enum{
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
     BDSKAliasFile *file = [publication fileAtIndex:idx];
-    NSURL *aURL = [file fileURLRelativeToURL:[publication baseURL]];
-    if (aURL == nil && [file relativePath])
-        aURL = [NSURL fileURLWithPath:[file relativePath]];
+    NSURL *aURL = [file fileURL];
+    NSString *relativePath;
+    if (aURL == nil && (relativePath = [file relativePath]))
+        aURL = [NSURL fileURLWithPath:relativePath];
     return aURL;
 }
 
@@ -138,7 +139,7 @@ enum{
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex];
     while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [[BDSKAliasFile alloc] initWithURL:aURL relativeToURL:[publication baseURL]];
+        aFile = [[BDSKAliasFile alloc] initWithURL:aURL delegate:publication];
         if (aFile) {
             [publication removeObjectFromFilesAtIndex:idx];
             [publication insertObject:aFile inFilesAtIndex:idx];
@@ -166,7 +167,7 @@ enum{
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex], offset = 0;
     while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [[BDSKAliasFile alloc] initWithURL:aURL relativeToURL:[publication baseURL]];
+        aFile = [[BDSKAliasFile alloc] initWithURL:aURL delegate:publication];
         if (aFile) {
             [publication insertObject:aFile inFilesAtIndex:idx - offset];
             [aFile release];

@@ -1613,7 +1613,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         string = [NSMutableString string];
         for (i = 0; i < iMax; i++) {
             NSString *key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
-            NSString *value = [[files objectAtIndex:i] base64StringRelativeToPath:[self basePath] convertedRelativeToPath:basePath];
+            NSString *value = [[files objectAtIndex:i] base64StringRelativeToPath:basePath];
             OBPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
             [string appendFormat:@",\n\t%@ = {%@}", key, value];
         }
@@ -1685,7 +1685,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
     }
     if (!drop) {
-        value = [self filesAsBibTeXFragmentRelativeToPath:[self basePath]];
+        value = [self filesAsBibTeXFragmentRelativeToPath:[self baseURLForAliasFile:nil]];
         if (value) [s appendString:value];
     }
     [knownKeys release];
@@ -2425,13 +2425,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 #pragma mark -
 #pragma mark URL handling
 
-- (NSString *)basePath {
-    return [[[[self owner] fileURL] path] stringByDeletingLastPathComponent];
-}
-
-- (NSURL *)baseURL {
-    NSString *basePath = [self basePath];
-    return basePath ? [NSURL fileURLWithPath:[self basePath]] : nil;
+- (NSString *)baseURLForAliasFile:(BDSKAliasFile *)file {
+    NSString *basePath = [[[[self owner] fileURL] path] stringByDeletingLastPathComponent];
+    return basePath ? [NSURL fileURLWithPath:basePath] : nil;
 }
 
 static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unused)
@@ -2452,7 +2448,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSURL *value = [self localFileURLForField:(id)key];
     if (value) {
         // !!! file URLs are always absolute but the init method here always returns nil, which probably means that we should do the first initialization with relative paths instead of expending them first
-        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithURL:value relativeToURL:nil];
+        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithURL:value delegate:self];
         if (aFile) {
             [self->files addObject:aFile];
             [aFile release];
@@ -2472,14 +2468,14 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSMutableArray *keysToRemove = [NSMutableArray array];
 
     while ((value = [pubFields objectForKey:key]) != nil) {
-        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithBase64String:value];
+        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithBase64String:value delegate:self];
         if (aFile) {
             [files addObject:aFile];
             [aFile release];
             [keysToRemove addObject:key];
         }
         else {
-            NSLog(@"*** error *** -[BDSKAliasFile initWithBase64String:] failed (%@ of %@)", key, [self citeKey]);
+            NSLog(@"*** error *** -[BDSKAliasFile initWithBase64String:delegate:] failed (%@ of %@)", key, [self citeKey]);
         }
         
         // next key in the sequence; increment i first, so it's guaranteed correct
@@ -2507,10 +2503,12 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 - (void)insertObject:(BDSKAliasFile *)aFile inFilesAtIndex:(NSUInteger)idx
 {
     [files insertObject:aFile atIndex:idx];
+    [aFile setDelegate:self];
 }
 
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx
 {
+    [[files objectAtIndex:idx] setDelegate:nil];
     [files removeObjectAtIndex:idx];
 }
 
@@ -2518,8 +2516,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
     NSArray *toMove = [[files objectsAtIndexes:aSet] copy];
     unsigned anIdx = [aSet indexLessThanIndex:idx];
+    // reduce idx by the number of smaller indexes in aSet
     while (anIdx != NSNotFound) {
-#warning noop
         idx--;
         anIdx = [aSet indexLessThanIndex:anIdx];
     }
@@ -2541,9 +2539,12 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
     fe = [files objectEnumerator];
     BDSKAliasFile *file;
-    while (file = [fe nextObject])
-        if (aURL = [file fileURLRelativeToURL:[self baseURL]])
+    NSString *relPath;
+    while (file = [fe nextObject]) {
+        if ((aURL = [file fileURL]) || 
+            ((relPath = [file relativePath]) && (aURL = [NSURL fileURLWithPath:relPath])))
             [combinedURLs addObject:aURL];
+    }
     [combinedURLs sortUsingFunction:sortURLsByType context:NULL];
     return combinedURLs;
 }
