@@ -1613,7 +1613,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         string = [NSMutableString string];
         for (i = 0; i < iMax; i++) {
             NSString *key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
-            NSString *value = [[files objectAtIndex:i] base64StringRelativeToPath:basePath convertedRelativeToPath:nil];
+            NSString *value = [[files objectAtIndex:i] base64StringRelativeToPath:[self basePath] convertedRelativeToPath:basePath];
             OBPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
             [string appendFormat:@",\n\t%@ = {%@}", key, value];
         }
