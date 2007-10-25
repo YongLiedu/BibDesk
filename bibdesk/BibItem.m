@@ -328,8 +328,8 @@ static CFDictionaryRef selectorTable = NULL;
             [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
-            // !!! TODO 
-            // files = [[coder decodeObjectForKey:@"files"] retain];
+            files = [[coder decodeObjectForKey:@"files"] mutableCopy];
+            [files makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
             // set by the document, which we don't archive
             owner = nil;
             fileOrder = nil;
@@ -355,8 +355,7 @@ static CFDictionaryRef selectorTable = NULL;
         [coder encodeObject:pubType forKey:@"pubType"];
         [coder encodeObject:pubFields forKey:@"pubFields"];
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
-        // !!! TODO 
-        // [coder encodeObject:files forKey:@"files"];
+        [coder encodeObject:files forKey:@"files"];
     } else {
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
     }        
@@ -2459,8 +2458,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (void)_createFilesArray
 {
-    [files release];
-    files = [NSMutableArray new];
+    if (files == nil)
+        files = [NSMutableArray new];
     
     NSUInteger i = 0;
     NSString *value, *key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
