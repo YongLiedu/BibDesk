@@ -80,5 +80,6 @@
 - (NSString *)base64StringRelativeToPath:(NSString *)basePath convertedRelativeToPath:(NSString *)newBasePath;
 
 - (NSString *)relativePath;
+- (void)setRelativePath:(NSString *)newRelativePath;
 
 @end

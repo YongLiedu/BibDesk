@@ -421,13 +421,14 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 
 - (id)initWithPath:(NSString *)aPath relativeToPath:(NSString *)basePath;
 {
+    NSParameterAssert(nil != aPath);
     BDAlias *anAlias = nil;
     NSURL *baseURL;
     NSString *relPath = nil;
     // BDAlias has a different interpretation of aPath, which is inconsistent with the way it handles FSRef
     if (basePath) {
-        anAlias = [[BDAlias alloc] initWithPath:aPath relativeToPath:basePath];
         relPath = [basePath relativePathToFilename:aPath];
+        anAlias = [[BDAlias alloc] initWithPath:relPath relativeToPath:basePath];
     } else {
         anAlias = [[BDAlias alloc] initWithPath:aPath];
     }
@@ -480,50 +481,56 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 
 - (const FSRef *)fsRefRelativeToURL:(NSURL *)baseURL;
 {
+    FSRef baseRef;
+    Boolean hasBaseRef = baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef);
+    Boolean shouldUpdate = false;
+    
     if (fileRef == NULL) {
         FSRef aRef;
-        FSRef baseRef;
         short aliasCount = 1;
-        Boolean shouldUpdate = false;
-        Boolean success = false;
+        Boolean hasRef = false;
         
         if (baseURL && relativePath) {
             NSString *path = [[baseURL path] stringByAppendingPathComponent:relativePath];
-            NSURL *theURL = [NSURL fileURLWithPath:path];
+            NSURL *tmpURL = [NSURL fileURLWithPath:path];
             
-            if (theURL != NULL) {
-                shouldUpdate = success = CFURLGetFSRef((CFURLRef)theURL, &aRef);
-            }
+            shouldUpdate = hasRef = hasBaseRef && tmpURL && CFURLGetFSRef((CFURLRef)tmpURL, &aRef);
         }
         
-        if (success == false && alias) {
-            if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef)) {
-                success = noErr == FSMatchAliasNoUI(&baseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
+        if (hasRef == false && alias) {
+            if (hasBaseRef) {
+                hasRef = noErr == FSMatchAliasNoUI(&baseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
+                shouldUpdate = shouldUpdate && succes;
             } else {
-                success = noErr == FSMatchAliasNoUI(NULL, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
+                hasRef = noErr == FSMatchAliasNoUI(NULL, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
                 shouldUpdate = false;
             }
         }
         
-        if (success && shouldUpdate) {
-            FSUpdateAlias(&baseRef, &aRef, [alias alias], &shouldUpdate);
-            if (baseURL) {
-                CFURLRef tmpURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &aRef);
-                if (tmpURL) {
-                    [relativePath release];
-                    relativePath = [[[baseURL path] relativePathToFilename:[(NSURL *)tmpURL path]] retain];
-                    CFRelease(tmpURL);
-                }
-            }
-        }
-        
-        if (success) {
+        if (hasRef) {
             FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
             if(newRef)
                 bcopy(&aRef, newRef, sizeof(FSRef));
             fileRef = newRef;
         }
+    } else if (relativePath == nil) {
+        shouldUpdate = hasBaseRef;
     }
+    
+    if (shouldUpdate) {
+        if (alias)
+            FSUpdateAlias(&baseRef, fileRef, [alias alias], &shouldUpdate);
+        else
+            alias = [[BDAlias alloc] initWithFSRef:(FSRef *)fileRef relativeToFSRef:&baseRef];
+        if (baseURL) {
+            CFURLRef tmpURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), fileRef);
+            if (tmpURL) {
+                [self setRelativePath:[[baseURL path] relativePathToFilename:[(NSURL *)tmpURL path]]];
+                CFRelease(tmpURL);
+            }
+        }
+    }
+    
     return fileRef;
 }
 
@@ -624,6 +631,13 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 
 - (NSString *)relativePath {
     return relativePath;
+}
+
+- (void)setRelativePath:(NSString *)newRelativePath {
+    if (relativePath != newRelativePath) {
+        [relativePath release];
+        relativePath = [newRelativePath retain];
+    }
 }
 
 @end
