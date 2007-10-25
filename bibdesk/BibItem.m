@@ -1684,7 +1684,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
     }
     if (!drop) {
-        value = [self filesAsBibTeXFragmentRelativeToPath:[self baseURLForAliasFile:nil]];
+        value = [self filesAsBibTeXFragmentRelativeToPath:[self basePathForAliasFile:nil]];
         if (value) [s appendString:value];
     }
     [knownKeys release];
@@ -2424,7 +2424,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 #pragma mark -
 #pragma mark URL handling
 
-- (NSString *)baseURLForAliasFile:(BDSKAliasFile *)file {
+- (NSString *)basePathForAliasFile:(BDSKAliasFile *)file {
+    return [[[[self owner] fileURL] path] stringByDeletingLastPathComponent];
+}
+
+- (NSURL *)baseURLForAliasFile:(BDSKAliasFile *)file {
     NSString *basePath = [[[[self owner] fileURL] path] stringByDeletingLastPathComponent];
     return basePath ? [NSURL fileURLWithPath:basePath] : nil;
 }

@@ -62,22 +62,27 @@
     BDAlias *alias;
     const FSRef *fileRef;
     NSString *relativePath;
+    id delegate;
 }
 
 - (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
 - (id)initWithPath:(NSString *)aPath delegate:(id)aDelegate;
 - (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
 
-- (const FSRef *)fsRef;
+- (const FSRef *)fileRef;
 - (NSURL *)fileURL;
 - (NSString *)path;
 
 - (NSString *)base64StringRelativeToPath:(NSString *)newBasePath;
+- (NSData *)aliasDataRelativeToPath:(NSString *)newBasePath;
 
 - (NSString *)relativePath;
 - (void)setRelativePath:(NSString *)newRelativePath;
 
 - (void)update;
+
+- (void)setDelegate:(id)aDelegate;
+- (id)delegate;
 
 @end
 

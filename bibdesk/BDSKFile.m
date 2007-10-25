@@ -529,7 +529,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
     }
     FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
     if (newRef) {
-        bcopy(fsRef, newRef, sizeof(FSRef));
+        bcopy(newFileRef, newRef, sizeof(FSRef));
         fileRef = newRef;
     }
 }
