@@ -563,7 +563,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     
     // kSKProximityIndexing is unused for now, since it slows things down and caused a crash on one of my files rdar://problem/4988691
     // CFDictionaryAddValue(opts, kSKProximityIndexing, kCFBooleanTrue);
-    searchIndex = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, NULL);
+    searchIndex = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, opts);
     CFRelease(opts);
     CFRelease(indexData);
 }   
