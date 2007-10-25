@@ -393,7 +393,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 // guaranteed to be called with a non-nil alias
 - (id)initWithAlias:(BDAlias *)anAlias relativePath:(NSString *)relPath delegate:(id)aDelegate;
 {
-    NSParameterAssert(nil == aDelegate || [aDelegate repondsToSelector:@selector(baseURLForAliasFile:));
+    NSParameterAssert(nil == aDelegate || [aDelegate respondsToSelector:@selector(baseURLForAliasFile:)]);
     if (self = [super init]) {
         fileRef = NULL; // this is updated lazily, as we don't know the base path at this point
         alias = [anAlias retain];
@@ -424,7 +424,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 - (id)initWithPath:(NSString *)aPath delegate:(id)aDelegate;
 {
     NSParameterAssert(nil != aPath);
-    NSParameterAssert(nil == aDelegate || [aDelegate repondsToSelector:@selector(baseURLForAliasFile:));
+    NSParameterAssert(nil == aDelegate || [aDelegate respondsToSelector:@selector(baseURLForAliasFile:)]);
     BDAlias *anAlias = nil;
     NSURL *baseURL = [aDelegate baseURLForAliasFile:self];
     NSString *basePath = [baseURL path];
@@ -440,7 +440,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
         if ((self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate])) {
             if (baseURL)
                 // this initalizes the FSRef and update the alias
-                [self fsRefRelativeToURL:baseURL];
+                [self fsRef];
         }
         [anAlias release];
     } else {
@@ -463,7 +463,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     OBASSERT_NOT_REACHED("BDSKAliasFile needs a base path for encoding");
-    [coder encodeObject:[alias aliasData]];
+    [coder encodeObject:[self aliasDataRelativeToPath:[[delegate baseURLForAliasFile:self] path]]];
     [coder encodeObject:relativePath];
 }
 
@@ -527,7 +527,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
         if (hasRef == false && alias) {
             if (hasBaseRef) {
                 hasRef = noErr == FSMatchAliasNoUI(&baseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
-                shouldUpdate = shouldUpdate && succes;
+                shouldUpdate = shouldUpdate && hasRef;
             } else {
                 hasRef = noErr == FSMatchAliasNoUI(NULL, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
                 shouldUpdate = false;
@@ -629,7 +629,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 }
 
 - (void)setDelegate:(id)newDelegate {
-    NSParameterAssert(nil == aDelegate || [aDelegate repondsToSelector:@selector(baseURLForAliasFile:));
+    NSParameterAssert(nil == newDelegate || [newDelegate respondsToSelector:@selector(baseURLForAliasFile:)]);
     delegate = newDelegate;
 }
 
