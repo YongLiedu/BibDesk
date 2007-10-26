@@ -2487,7 +2487,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
     
     if ([owner fileURL])
-        [files makeObjectPerformSelector:@selector(update)];
+        [files makeObjectsPerformSelector:@selector(update)];
     
     // !!! get these out of pubFields for now to avoid duplication when saving
     [pubFields removeObjectsForKeys:keysToRemove];
@@ -2511,7 +2511,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     [files insertObject:aFile atIndex:idx];
     [aFile setDelegate:self];
     if ([owner fileURL])
-        [file update];
+        [aFile update];
 }
 
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx
