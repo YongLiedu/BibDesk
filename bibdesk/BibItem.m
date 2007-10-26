@@ -2486,6 +2486,9 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
     }
     
+    if ([owner fileURL])
+        [files makeObjectPerformSelector:@selector(update)];
+    
     // !!! get these out of pubFields for now to avoid duplication when saving
     [pubFields removeObjectsForKeys:keysToRemove];
     
@@ -2498,7 +2501,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (NSUInteger)countOfFiles { return [files count]; }
 
-- (BDSKAliasFile *)fileAtIndex:(NSUInteger)idx
+- (BDSKAliasFile *)objectInFilesAtIndex:(NSUInteger)idx
 {
     return [files objectAtIndex:idx];
 }
@@ -2507,6 +2510,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
     [files insertObject:aFile atIndex:idx];
     [aFile setDelegate:self];
+    if ([owner fileURL])
+        [file update];
 }
 
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx

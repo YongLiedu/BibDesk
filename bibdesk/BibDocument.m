@@ -3479,6 +3479,8 @@ static void addAllURLsToArray(const void *value, void *context)
     [super setFileURL:absoluteURL];
     [self didChangeValueForKey:@"displayName"];
     
+    if (absoluteURL)
+        [[publications valueForKeyPath:@"@unionOfArrays.files"]  makeObjectsPerformSelector:@selector(update)];
     [self updatePreviews];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentFileURLDidChangeNotification object:self];
 }

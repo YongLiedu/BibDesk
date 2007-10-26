@@ -84,7 +84,7 @@ enum {
 }
 
 - (NSUInteger)countOfFiles;
-- (BDSKAliasFile *)fileAtIndex:(NSUInteger)idx;
+- (BDSKAliasFile *)objectInFilesAtIndex:(NSUInteger)idx;
 - (void)insertObject:(BDSKAliasFile *)aFile inFilesAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx;
 - (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx;

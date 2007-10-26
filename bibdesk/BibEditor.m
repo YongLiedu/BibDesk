@@ -118,7 +118,7 @@ enum{
 
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
-    BDSKAliasFile *file = [publication fileAtIndex:idx];
+    BDSKAliasFile *file = [publication objectInFilesAtIndex:idx];
     NSURL *aURL = [file fileURL];
     NSString *relativePath;
     if (aURL == nil && (relativePath = [file relativePath]))

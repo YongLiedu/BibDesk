@@ -508,7 +508,7 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
         // this does the updating if possible
         [self fileRef];
     } else {
-        CFURLRef aURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), aRef);
+        CFURLRef aURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), fileRef);
         if (aURL == NULL) {
             // the fileRef was invalid, reset it and update
             [self setFileRef:NULL];
