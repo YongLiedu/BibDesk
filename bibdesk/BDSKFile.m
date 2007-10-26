@@ -499,23 +499,35 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 
 // Should we implement -isEqual: and -hash?
 
+// this could be called when the document fileURL changes
 - (void)update {
     NSURL *baseURL = [delegate baseURLForAliasFile:self];
     FSRef baseRef;
+    
     if (fileRef == NULL) {
         // this does the updating if possible
         [self fileRef];
-    } else if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef)) {
-        Boolean didUpdate;
-        if (alias)
-            FSUpdateAlias(&baseRef, fileRef, [alias alias], &didUpdate);
-        else
-            alias = [[BDAlias alloc] initWithFSRef:(FSRef *)fileRef relativeToFSRef:&baseRef];
-        if (baseURL) {
-            CFURLRef tmpURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), fileRef);
-            if (tmpURL) {
-                [self setRelativePath:[[baseURL path] relativePathToFilename:[(NSURL *)tmpURL path]]];
-                CFRelease(tmpURL);
+    } else {
+        CFURLRef aURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), aRef);
+        if (aURL == NULL) {
+            // the fileRef was invalid, reset it and update
+            [self setFileRef:NULL];
+            [self fileRef];
+        } else {
+            CFRelease(aURL);
+            if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef)) {
+                Boolean didUpdate;
+                if (alias)
+                    FSUpdateAlias(&baseRef, fileRef, [alias alias], &didUpdate);
+                else
+                    alias = [[BDAlias alloc] initWithFSRef:(FSRef *)fileRef relativeToFSRef:&baseRef];
+                if (baseURL) {
+                    CFURLRef tmpURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), fileRef);
+                    if (tmpURL) {
+                        [self setRelativePath:[[baseURL path] relativePathToFilename:[(NSURL *)tmpURL path]]];
+                        CFRelease(tmpURL);
+                    }
+                }
             }
         }
     }
