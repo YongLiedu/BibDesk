@@ -2525,9 +2525,10 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSArray *toMove = [[files objectsAtIndexes:aSet] copy];
     unsigned anIdx = [aSet indexLessThanIndex:idx];
     // reduce idx by the number of smaller indexes in aSet
-    while (anIdx != NSNotFound) {
-        idx--;
-        anIdx = [aSet indexLessThanIndex:anIdx];
+    if (idx > 0) {
+        NSRange range = NSMakeRange(0, idx);
+        unsigned int buffer[idx];
+        idx -= [aSet getIndexes:buffer maxCount:idx inIndexRange:&range];
     }
     [files removeObjectsAtIndexes:aSet];
     [files insertObjects:toMove atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(idx, [toMove count])]];
