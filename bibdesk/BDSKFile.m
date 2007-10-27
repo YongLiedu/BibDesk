@@ -633,9 +633,11 @@ static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
             anAlias = [[[BDAlias alloc] initWithFSRef:fsRef relativeToFSRef:&baseRef] autorelease];
         else
             anAlias = [[[BDAlias alloc] initWithFSRef:fsRef] autorelease];
-    } else {
-        anAlias = alias;
+    } else if (relativePath && newBasePath) {
+        anAlias = [[[BDAlias alloc] initWithPath:relativePath relativeToPath:newBasePath] autorelease];
     }
+    if (anAlias == nil)
+        anAlias = alias;
     
     return [anAlias aliasData];
 }
