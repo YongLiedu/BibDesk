@@ -6,7 +6,7 @@
 //  Copyright (c) 2004 Andreas Mayer. All rights reserved.
 
 #import "AMButtonBarCell.h"
-#import </usr/include/math.h>
+#import <math.h>
 
 static float am_backgroundInset = 1.5;
 static float am_textGap = 1.5;
