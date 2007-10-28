@@ -59,14 +59,14 @@
 + (CIColor *)startColor{
     static CIColor *startColor = nil;
     if (startColor == nil)
-        startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
+        startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
     return startColor;
 }
 
 + (CIColor *)endColor{
     static CIColor *endColor = nil;
     if (endColor == nil)
-        endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
+        endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
    return endColor;
 }
 
@@ -79,11 +79,12 @@
 
 - (void)drawBlendedJoinEndAtBottomInRect:(NSRect)rect {
     // this blends us smoothly with the status bar
+    // note that we are flipped, so we have to reverse the status bar colors
     [[NSBezierPath bezierPathWithRect:rect] fillPathWithHorizontalGradientFromColor:[[self class] startColor]
                                                                             toColor:[[self class] endColor]
                                                                          blendedAtTop:NO
-                                                        ofVerticalGradientFromColor:[BDSKStatusBar lowerColor]
-                                                                            toColor:[BDSKStatusBar upperColor]];
+                                                        ofVerticalGradientFromColor:[BDSKStatusBar upperColor]
+                                                                            toColor:[BDSKStatusBar lowerColor]];
 }
 
 - (void)drawDividerInRect:(NSRect)aRect {
@@ -96,7 +97,7 @@
             [self drawBlendedJoinEndAtBottomInRect:endRect];
         } else {
             NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, NSMinXEdge);
-            [[NSBezierPath bezierPathWithRect:endRect] fillPathVertically:[self isVertical] withStartColor:[CIColor clearColor] endColor:[[self class] startColor]];
+            [[NSBezierPath bezierPathWithRect:endRect] fillPathVertically:[self isVertical] withStartColor:[[self class] endColor] endColor:[CIColor clearColor]];
         }
     }
     // Draw dimple

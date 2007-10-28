@@ -57,32 +57,32 @@
 
 - (void)dealloc
 {
-    [endColor release];
-    [startColor release];
+    [lowerColor release];
+    [upperColor release];
     [super dealloc];
 }
 
 - (void)drawRect:(NSRect)aRect
 {
     // fill entire view, not just the (possibly clipped) aRect
-    [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self upperColor] endColor:[self lowerColor]];
+    [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self lowerColor] endColor:[self upperColor]];
 }
 
 // -[CIColor initWithColor:] fails (returns nil) with +[NSColor gridColor] rdar://problem/4789043
 - (void)setLowerColor:(NSColor *)color
 {
-    [endColor autorelease];
-    endColor = [[CIColor colorWithNSColor:color] retain];
+    [lowerColor autorelease];
+    lowerColor = [[CIColor colorWithNSColor:color] retain];
 }
 
 - (void)setUpperColor:(NSColor *)color
 {
-    [startColor autorelease];
-    startColor = [[CIColor colorWithNSColor:color] retain];
+    [upperColor autorelease];
+    upperColor = [[CIColor colorWithNSColor:color] retain];
 }    
 
-- (CIColor *)lowerColor { return endColor; }
-- (CIColor *)upperColor { return startColor; }
+- (CIColor *)lowerColor { return lowerColor; }
+- (CIColor *)upperColor { return upperColor; }
 
 // required in order for redisplay to work properly with the controls
 - (BOOL)isOpaque{  return YES; }

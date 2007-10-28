@@ -793,9 +793,9 @@ static NSColor *fillColor = nil;
 
         NSBezierPath *p = [NSBezierPath bezierPathWithRect:[self rectOfRow:rowIndex]];
         if ([self isFlipped])
-            [p fillPathVerticallyWithStartColor:bottomColor endColor:topColor];
-        else
             [p fillPathVerticallyWithStartColor:topColor endColor:bottomColor];
+        else
+            [p fillPathVerticallyWithStartColor:bottomColor endColor:topColor];
     }
     [super drawRow:rowIndex clipRect:clipRect];
 }
