@@ -124,6 +124,7 @@ enum {
 - (NSString *)jrPart;
 - (NSString *)abbreviatedName;
 - (NSString *)abbreviatedNormalizedName;
+- (NSArray *)firstNames;
 
 - (NSString *)MODSStringWithRole:(NSString *)rel;
 

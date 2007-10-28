@@ -1568,6 +1568,10 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return returnString;
 }
 
+- (NSString *)firstLetter{
+    return [self length] ? [self substringToIndex:1] : nil;
+}
+
 @end
 
 

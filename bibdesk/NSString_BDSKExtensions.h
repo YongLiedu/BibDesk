@@ -492,6 +492,8 @@ An inline buffer is used for speed in accessing each character.
 
 - (NSString *)titleCapitalizedString;
 
+- (NSString *)firstLetter;
+
 @end
 
 @interface NSMutableString (BDSKExtensions)
