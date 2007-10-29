@@ -75,6 +75,7 @@ enum {
     NSString *sortableName;
     NSString *abbreviatedName;
     NSString *abbreviatedNormalizedName;
+    NSString *unpunctuatedAbbreviatedNormalizedName;
     BDSKPersonController *personController; // unretained
     BibItem *publication;
     unsigned hash;
@@ -124,6 +125,7 @@ enum {
 - (NSString *)jrPart;
 - (NSString *)abbreviatedName;
 - (NSString *)abbreviatedNormalizedName;
+- (NSString *)unpunctuatedAbbreviatedNormalizedName;
 - (NSArray *)firstNames;
 
 - (NSString *)MODSStringWithRole:(NSString *)rel;

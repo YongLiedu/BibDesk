@@ -185,12 +185,16 @@
             key = normalizedName;
         },
         {
-            displayName = "F.M. von Last, Jr.";
+            displayName = "F. M. von Last, Jr.";
             key = abbreviatedName;
         },
         {
-            displayName = "von Last, Jr., F.M.";
+            displayName = "von Last, Jr., F. M.";
             key = abbreviatedNormalizedName;
+        },
+        {
+            displayName = "von Last FM Jr";
+            key = unpunctuatedAbbreviatedNormalizedName;
         },
         {
             displayName = "von Last, Jr.";

@@ -132,6 +132,7 @@ static BibAuthor *emptyAuthorInstance = nil;
     [sortableName release];
     [abbreviatedName release];
     [abbreviatedNormalizedName release];
+    [unpunctuatedAbbreviatedNormalizedName release];
     [firstNames release];
     [fuzzyName release];
     [super dealloc];
@@ -341,6 +342,13 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     if(abbreviatedNormalizedName == nil)
         [self setupAbbreviatedNames];
     return abbreviatedNormalizedName;
+}
+
+// Given a normalized name of "von Last, Jr, First Middle", this will return "von Last FM Jr"
+- (NSString *)unpunctuatedAbbreviatedNormalizedName{
+    if(unpunctuatedAbbreviatedNormalizedName == nil)
+        [self setupAbbreviatedNames];
+    return unpunctuatedAbbreviatedNormalizedName;
 }
 
 - (NSString *)MODSStringWithRole:(NSString *)role{
@@ -685,6 +693,13 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     }
 }
 
+- (void)setUnpunctuatedAbbreviatedNormalizedName:(NSString *)aName{
+    if(aName != unpunctuatedAbbreviatedNormalizedName){
+        [unpunctuatedAbbreviatedNormalizedName release];
+        unpunctuatedAbbreviatedNormalizedName = [aName copy];
+    }
+}
+
 // Bug #1436631 indicates that "Pomies, M.-P." was displayed as "M. -. Pomies", so we'll grab the first letter character instead of substringToIndex:1.  The technically correct solution may be to use "M. Pomies" in this case, but we split the first name at "." boundaries to generate the firstNames array.
 static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, CFStringRef string)
 {
@@ -707,11 +722,13 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
     // use fixed-size mutable strings; allow for extra ". "
     CFMutableStringRef abbrevName = CFStringCreateMutable(alloc, nameLength + firstNameMaxLength);
     CFMutableStringRef abbrevFirstName = NULL;
+    CFMutableStringRef shortAbbrevFirstName = NULL;
     
     if(flags.hasFirst){
         
         // allow for ". " around each character
         abbrevFirstName = CFStringCreateMutable(alloc, firstNameMaxLength);
+        shortAbbrevFirstName = CFStringCreateMutable(alloc, firstNameMaxLength);
         
         // loop through the first name parts (which includes middle names)
         CFIndex lastIdx = firstNameCount - 1;
@@ -721,6 +738,7 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
             if (firstLetter != nil) {
                 CFStringAppend(abbrevFirstName, firstLetter);
                 CFStringAppend(abbrevFirstName, (idx < lastIdx ? CFSTR(". ") : CFSTR(".")) );
+                CFStringAppend(shortAbbrevFirstName, firstLetter);
                 CFRelease(firstLetter);
             }
         }
@@ -748,6 +766,31 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
     }
     
     [self setAbbreviatedNormalizedName:(NSString *)abbrevName];
+    
+    // now for the unpunctuated normalized abbreviated form
+    CFStringReplaceAll(abbrevName, CFSTR(""));
+    
+    if(flags.hasVon){
+        CFStringAppend(abbrevName, (CFStringRef)vonPart);
+        CFStringAppend(abbrevName, CFSTR(" "));
+    }
+    
+    CFStringAppend(abbrevName, (CFStringRef)lastName);
+    
+    if(flags.hasFirst){
+        CFStringAppend(abbrevName, CFSTR(" "));
+        CFStringAppend(abbrevName, shortAbbrevFirstName);
+        
+        // first name was non-NULL, and we're done with it
+        CFRelease(shortAbbrevFirstName);
+    }
+    
+    if(flags.hasJr){
+        CFStringAppend(abbrevName, CFSTR(" "));
+        CFStringAppend(abbrevName, (CFStringRef)jrPart);
+    }
+    
+    [self setUnpunctuatedAbbreviatedNormalizedName:(NSString *)abbrevName];
     CFRelease(abbrevName);
 }
 
