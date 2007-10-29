@@ -224,11 +224,11 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 - (void)updateFontPanel:(NSNotification *)notification {
     NSString *fontNamePrefKey = [self fontNamePreferenceKey];
     NSString *fontSizePrefKey = [self fontSizePreferenceKey];
-    if (fontNamePrefKey != nil && fontSizePrefKey != nil) {
+    if ([[[self window] firstResponder] isEqual:self] && fontNamePrefKey != nil && fontSizePrefKey != nil) {
         NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
         float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
         [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
-	}
+    }
 }
 
 #pragma mark Convenience method
