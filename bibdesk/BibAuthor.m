@@ -775,7 +775,9 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
         CFStringAppend(abbrevName, CFSTR(" "));
     }
     
-    CFStringAppend(abbrevName, (CFStringRef)lastName);
+    if (flags.hasLast){
+        CFStringAppend(abbrevName, (CFStringRef)lastName);
+    }
     
     if(flags.hasFirst){
         CFStringAppend(abbrevName, CFSTR(" "));
