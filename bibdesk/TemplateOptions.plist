@@ -177,19 +177,19 @@
     );
     nameStyle = (
         {
-            displayName = "First Middle von Last, Jr.";
+            displayName = "First Middle von Last, Jr";
             key = name;
         },
         {
-            displayName = "von Last, Jr., First Middle";
+            displayName = "von Last, Jr, First Middle";
             key = normalizedName;
         },
         {
-            displayName = "F. M. von Last, Jr.";
+            displayName = "F. M. von Last, Jr";
             key = abbreviatedName;
         },
         {
-            displayName = "von Last, Jr., F. M.";
+            displayName = "von Last, Jr, F. M.";
             key = abbreviatedNormalizedName;
         },
         {
@@ -197,7 +197,7 @@
             key = unpunctuatedAbbreviatedNormalizedName;
         },
         {
-            displayName = "von Last, Jr.";
+            displayName = "von Last, Jr";
             key = fullLastName;
         },
         {
