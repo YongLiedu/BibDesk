@@ -303,7 +303,6 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     NSString *string = nil;
     NSRange startRange, endRange = { NSNotFound, 0 }, sepRange = { NSNotFound, 0 }, wsRange;
     unsigned int length, startLoc = NSNotFound;
-    BOOL onlyWs;
     
     [self setRichText:[typeName isEqualToString:BDSKRichTextTemplateDocumentType]];
     
