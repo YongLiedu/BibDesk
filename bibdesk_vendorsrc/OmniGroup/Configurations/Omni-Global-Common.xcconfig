@@ -4,7 +4,11 @@
 
 // Common settings
 
-SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk
+// for 10.5 
+SDKROOT = $(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk
+// for 10.4 (requires Xcode 2.5)
+// SDKROOT = $(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk
+
 MACOSX_DEPLOYMENT_TARGET = 10.4
 
 FRAMEWORK_SEARCH_PATHS = $(value) /Library/Frameworks
@@ -20,7 +24,7 @@ YACC = /usr/bin/bison
 YACCFLAGS = -y
 LEX_SUPPRESS_DEFAULT_RULE = YES
 
-WARNING_CFLAGS = -Wall -Wno-#warnings -Wno-trigraphs
+WARNING_CFLAGS = -Wall -Wno-#warnings -Wno-trigraphs -Wno-error
 GCC_OPTIMIZATION_LEVEL = 2
 GCC_MODEL_TUNING = G5
 GCC_GENERATE_DEBUGGING_SYMBOLS = YES
