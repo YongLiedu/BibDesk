@@ -24,6 +24,8 @@
 - (BOOL)canZoomIn;
 - (BOOL)canZoomOut;
 
+- (void)makeScalePopUpButton;
+
 @end
 
 

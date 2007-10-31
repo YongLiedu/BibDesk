@@ -7,6 +7,7 @@
 #import "BDSKZoomableScrollView.h"
 #import <OmniAppKit/NSView-OAExtensions.h>
 #import "BDSKHeaderPopUpButton.h"
+#import "NSScrollview_BDSKExtensions.h"
 
 @implementation BDSKZoomableScrollView
 
@@ -44,7 +45,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (void)awakeFromNib
 {
     // make sure we have a horizontal scroller to show the popup
-    [self setHasHorizontalScroller:YES];
+    [self makeScalePopUpButton];
     if([self respondsToSelector:@selector(setAutohidesScrollers:)])
        [self setAutohidesScrollers:NO];
 }
@@ -53,6 +54,8 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 - (void)makeScalePopUpButton {
     if (scalePopUpButton == nil) {
+        [self setAlwaysHasHorizontalScroller:YES];
+        
         // create it
         scalePopUpButton = [[BDSKHeaderPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
         [[scalePopUpButton cell] setControlSize:[[self horizontalScroller] controlSize]];
@@ -96,24 +99,8 @@ static float BDSKScaleMenuFontSize = 11.0;
 		[scalePopUpButton setRefusesFirstResponder:YES];
 
         // put it in the scrollview
-        [self addSubview:scalePopUpButton];
+        [self setSubcontrols:[NSArray arrayWithObject:scalePopUpButton]];
         [scalePopUpButton release];
-    }
-}
-
-- (void)drawRect:(NSRect)rect {
-    [super drawRect:rect];
-
-    if ([scalePopUpButton superview]) {
-        NSRect shadowRect = [scalePopUpButton frame];
-        shadowRect.origin.x -= 1.0;
-        shadowRect.origin.y -= 1.0;
-        shadowRect.size.width += 1.0;
-        shadowRect.size.height += 1.0;
-        if (NSIntersectsRect(rect, shadowRect)) {
-            [[NSColor colorWithCalibratedWhite:0.75 alpha:1.0] set];
-            NSRectFill(shadowRect);
-        }
     }
 }
 
@@ -210,35 +197,6 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (void)setHasHorizontalScroller:(BOOL)flag {
     if (!flag) [self setScaleFactor:1.0 adjustPopup:NO];
     [super setHasHorizontalScroller:flag];
-}
-
-- (void) tile
-{
-    // Let the superclass do most of the work.
-    [super tile];
-
-	if (![self hasHorizontalScroller]) {
-        if (scalePopUpButton) [scalePopUpButton removeFromSuperview];
-        scalePopUpButton = nil;
-    } else {
-		NSScroller *horizScroller;
-		NSRect horizScrollerFrame, buttonFrame;
-	
-        if (!scalePopUpButton) [self makeScalePopUpButton];
-
-        horizScroller = [self horizontalScroller];
-        horizScrollerFrame = [horizScroller frame];
-        buttonFrame = [scalePopUpButton frame];
-
-        // Now we'll just adjust the horizontal scroller size and set the button size and location.
-        horizScrollerFrame.size.width = horizScrollerFrame.size.width - buttonFrame.size.width - 1.0;
-        [horizScroller setFrameSize:horizScrollerFrame.size];
-
-        buttonFrame.origin.x = NSMaxX(horizScrollerFrame) + 1.0;
-        buttonFrame.origin.y = horizScrollerFrame.origin.y + 1.0;
-        buttonFrame.size.height = horizScrollerFrame.size.height - 1.0;
-        [scalePopUpButton setFrame:buttonFrame];
-    }
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{

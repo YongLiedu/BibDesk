@@ -43,67 +43,8 @@
 #import "NSString_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "NSURL_BDSKExtensions.h"
+#import "NSScrollView_BDSKExtensions.h"
 
-@interface NSScrollView (BDSKZoomablePDFViewExtensions) 
-- (void)replacementDealloc;
-- (BOOL)replacementHasHorizontalScroller;
-- (void)replacementSetHasHorizontalScroller:(BOOL)flag;
-
-// new API allows ignoring PDFView's attempts to remove the horizontal scroller
-- (void)setAlwaysHasHorizontalScroller:(BOOL)flag;
-
-@end
-
-@implementation NSScrollView (BDSKZoomablePDFViewExtensions)
-
-static IMP originalSetHasHorizontalScroller = NULL;
-static BOOL (*originalHasHorizontalScroller)(id, SEL) = NULL;
-static IMP originalDealloc = NULL;
-
-static CFMutableSetRef nonretainedScrollviews = NULL;
-
-+ (void)didLoad{
-    originalSetHasHorizontalScroller = OBReplaceMethodImplementationWithSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
-    originalHasHorizontalScroller = (typeof(originalHasHorizontalScroller))OBReplaceMethodImplementationWithSelector(self, @selector(hasHorizontalScroller), @selector(replacementHasHorizontalScroller));
-    originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
-    
-    // set doesn't retain, so no retain cycles; pointer equality used to compare views
-    nonretainedScrollviews = CFSetCreateMutable(CFAllocatorGetDefault(), 0, NULL);
-}
-
-- (void)replacementDealloc;
-{
-    CFSetRemoveValue(nonretainedScrollviews, self);
-    originalDealloc(self, _cmd);
-}
-
-- (void)setAlwaysHasHorizontalScroller:(BOOL)flag;
-{
-    if (flag) {
-        CFSetAddValue(nonretainedScrollviews, self);
-        [self setHasHorizontalScroller:YES];
-    } else {
-        CFSetRemoveValue(nonretainedScrollviews, self);
-    }
-}
-
-- (void)replacementSetHasHorizontalScroller:(BOOL)flag;
-{
-    if (CFSetContainsValue(nonretainedScrollviews, self))
-        flag = YES;
-    originalSetHasHorizontalScroller(self, _cmd, flag);
-}
-
-- (BOOL)replacementHasHorizontalScroller;
-{
-    return CFSetContainsValue(nonretainedScrollviews, self) ? YES : originalHasHorizontalScroller(self, _cmd);
-}
-
-@end
-
-@interface PDFView (BDSKApplePrivateOverride)
-- (void)adjustScrollbars:(id)obj;
-@end
 
 @implementation BDSKZoomablePDFView
 
@@ -124,6 +65,22 @@ static float BDSKDefaultScaleMenuFactors[] = {/* 0.0, */ 0, 0.1, 0.25, 0.5, 0.75
 static float BDSKScaleMenuFontSize = 11.0;
 
 #pragma mark Instance methods
+
+- (id)initWithFrame:(NSRect)frameRect {
+    if (self = [super initWithFrame:frameRect]) {
+        scalePopUpButton = nil;
+        [self makeScalePopUpButton];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        scalePopUpButton = nil;
+        [self makeScalePopUpButton];
+    }
+    return self;
+}
 
 #pragma mark Copying
 
@@ -280,26 +237,8 @@ static float BDSKScaleMenuFontSize = 11.0;
         [scalePopUpButton setAction:@selector(scalePopUpAction:)];
 
         // put it in the scrollview
-        [scrollView addSubview:scalePopUpButton];
+        [scrollView setSubcontrols:[NSArray arrayWithObject:scalePopUpButton]];
         [scalePopUpButton release];
-    }
-}
-
-- (void)drawRect:(NSRect)rect {
-    [self layoutScrollView];
-    [super drawRect:rect];
-
-    if ([scalePopUpButton superview]) {
-        NSRect shadowRect = [scalePopUpButton frame];
-        shadowRect.origin.x -= 1.0;
-        shadowRect.origin.y -= 1.0;
-        shadowRect.size.width += 1.0;
-        shadowRect.size.height += 1.0;
-		shadowRect = [self convertRect:shadowRect fromView:[scalePopUpButton superview]];
-        if (NSIntersectsRect(rect, shadowRect)) {
-            [[NSColor colorWithCalibratedWhite:0.75 alpha:1.0] set];
-            NSRectFill(shadowRect);
-        }
     }
 }
 
@@ -418,58 +357,5 @@ static float BDSKScaleMenuFontSize = 11.0;
         [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - controlSize]];
 	}
 }
-
-- (void)adjustScrollbars:(id)obj;
-{
-    // this private method is only called by PDFView, so super must implement it if it's called
-    [super adjustScrollbars:obj];
-    [self layoutScrollView];
-    // be careful here; check the comment in -layoutScrollView before changing anything
-}
-
-- (void)layoutScrollView;
-{
-    NSScrollView *scrollView = [self scrollView];
-    
-    // Don't force scroller display on the scrollview; PDFView apparently uses a timer to call adjustScrollbars:, and preventing autohide will cause an endless loop if you zoom so that the vertical scroller is not displayed (regardless of whether we swizzle -[NSScrollView tile] or override -[PDFView adjustScrollbars:]).  Therefore, we always display the button,  even though it looks stupid without the scrollers.  Since it's not really readable anyway at 25%, this probably isn't a big deal, since this isn't supposed to be a thumbnail view.
-    
-    NSControlSize controlSize = NSRegularControlSize;
-    
-    if ([scrollView hasHorizontalScroller])
-        controlSize = [[scrollView horizontalScroller] controlSize];
-    else if ([scrollView hasVerticalScroller])
-        controlSize = [[scrollView verticalScroller] controlSize];
-    
-    float scrollerWidth = [NSScroller scrollerWidthForControlSize:controlSize];
-    
-    if (!scalePopUpButton) [self makeScalePopUpButton];
-    
-    NSRect horizScrollerFrame, buttonFrame;
-    buttonFrame = [scalePopUpButton frame];
-    
-    NSScroller *horizScroller = [scrollView horizontalScroller];
-    
-    if (horizScroller) {
-        horizScrollerFrame = [horizScroller frame];
-        
-        // Now we'll just adjust the horizontal scroller size and set the button size and location.
-        // Set it based on our frame, not the scroller's frame, since this gets called repeatedly.
-        horizScrollerFrame.size.width = NSWidth([scrollView frame]) - NSWidth(buttonFrame) - scrollerWidth - 1.0;
-        [horizScroller setFrameSize:horizScrollerFrame.size];
-    }
-    buttonFrame.size.height = scrollerWidth - 1.0;
-
-    // @@ resolution independence: 2.0 may not work
-    if ([scrollView isFlipped]) {
-        buttonFrame.origin.x = NSMaxX([scrollView frame]) - scrollerWidth - NSWidth(buttonFrame);
-        buttonFrame.origin.y = NSMaxY([scrollView frame]) - NSHeight(buttonFrame);            
-    }
-    else {
-        buttonFrame.origin.x = NSMaxX([scrollView frame]) - scrollerWidth - NSWidth(buttonFrame);
-        buttonFrame.origin.y = NSMinY([scrollView frame]);
-    }
-    [scalePopUpButton setFrame:buttonFrame];
-}
-
 
 @end
