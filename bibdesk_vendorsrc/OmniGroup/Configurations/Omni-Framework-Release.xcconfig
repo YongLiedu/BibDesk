@@ -8,4 +8,7 @@
 // Common settings for Release configurations of Framework targets
 OMNI_FRAMEWORK_TARGET_PATH = @executable_path/../Frameworks
 DYLIB_INSTALL_NAME_BASE = $(OMNI_FRAMEWORK_TARGET_PATH)
-SKIP_INSTALL = NO
+SKIP_INSTALL = YES
+DEPLOYMENT_LOCATION = NO
+DSTROOT =
+INSTALL_PATH =
