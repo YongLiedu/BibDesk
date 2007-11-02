@@ -49,10 +49,6 @@
 			<string>BibTeX Database</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>net.sourceforge.bibdesk.bib</string>
-			</array>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 			<key>NSExportableAs</key>
@@ -77,10 +73,6 @@
 			<string>Minimal BibTeX Database</string>
 			<key>CFBundleTypeRole</key>
 			<string>None</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>net.sourceforge.bibdesk.bib</string>
-			</array>
 			<key>LSTypeIsPackage</key>
 			<true/>
 			<key>NSDocumentClass</key>
@@ -105,10 +97,6 @@
 			<string>RIS/Medline File</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>net.sourceforge.bibdesk.ris</string>
-			</array>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 			<key>NSExportableAs</key>
