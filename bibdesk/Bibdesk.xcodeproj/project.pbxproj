@@ -899,7 +899,7 @@
 		45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKHubmedParser.h; sourceTree = "<group>"; };
 		45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKHubmedParser.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Add_Small.tiff; path = Images/Add_Small.tiff; sourceTree = "<group>"; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
@@ -2809,6 +2809,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
@@ -4274,7 +4275,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 923;
-				DEBUG_INFORMATION_FORMAT = stabs;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_DEBUGGING_SYMBOLS = default;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -4324,6 +4325,7 @@
 				);
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 923;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
@@ -4378,6 +4380,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 923;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -4728,7 +4731,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = (
@@ -4743,10 +4746,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = ppc;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Release;
@@ -4755,8 +4759,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = ppc;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Test;
