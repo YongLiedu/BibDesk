@@ -37,7 +37,7 @@
 BDSK_PRIVATE_EXTERN void BDSKLog(NSString *format, ...);
 BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList);
 
-#ifndef MAC_OS_X_VERSION_10_5
+#ifndef NSAppKitVersionNumber10_4
 #define NSUInteger unsigned
 #define NSInteger int
 #define CGFloat float
