@@ -1,0 +1,36 @@
+//
+// Prefix header for all source files of the 'FileView' target in the 'FileView' project.
+//
+
+#ifdef __OBJC__
+#import <Cocoa/Cocoa.h>
+#endif
+
+// 10.4 compatibility
+#ifndef NSINTEGER_DEFINED
+#define NSUInteger unsigned
+#define NSInteger int
+#define CGFloat float
+// avoid redefinition in FileView.h
+#define NSINTEGER_DEFINED 1
+#endif
+
+// from 10.5 header
+#ifndef NSAppKitVersionNumber10_4
+#define NSAppKitVersionNumber10_4 824
+#endif
+
+// copied from AppKit
+#if defined(__MACH__)
+
+#ifdef __cplusplus
+#define FV_EXTERN		extern "C"
+#define FV_PRIVATE_EXTERN	__private_extern__
+#else
+#define FV_EXTERN		extern
+#define FV_PRIVATE_EXTERN	__private_extern__
+#endif
+
+#else
+#error Unsupported kernel
+#endif
