@@ -1047,6 +1047,8 @@
 				<string>Completion [SHORT]</string>
 				<key>title</key>
 				<string>Completion [LONG]</string>
+                <key>maximumOSVersion</key>
+                <string>10.4.11</string>
 			</dict>
 			<key>BibPref_ScriptHooks</key>
 			<dict>
