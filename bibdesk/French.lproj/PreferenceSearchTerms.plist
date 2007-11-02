@@ -2,12 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>bp_ScriptHooks</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.ScriptHooks</key>
 	<array>
 		<string>Script hook</string>
 		<string>AppleScript</string>
 	</array>
-	<key>bp_TeX</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.TeX</key>
 	<array>
 		<string>TeX</string>
 		<string>Path</string>
@@ -18,7 +18,7 @@
 		<string>Encoding</string>
 		<string>Preview</string>
 	</array>
-	<key>bp_autofile</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile</key>
 	<array>
 		<string>Papers folder</string>
 		<string>Format</string>
@@ -26,7 +26,7 @@
 		<string>PDF</string>
 		<string>Documents</string>
 	</array>
-	<key>bp_cite</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.cite</key>
 	<array>
 		<string>Drag and drop</string>
         <string>Copy and paste</string>
@@ -37,13 +37,13 @@
 		<string>Tilde</string>
 		<string>Cite drawer</string>
 	</array>
-	<key>bp_citekey</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.citekey</key>
 	<array>
 		<string>Auto generate</string>
 		<string>Format</string>
 		<string>Cite key</string>
 	</array>
-	<key>bp_crossref</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.crossref</key>
 	<array>
 		<string>Booktitle and title</string>
 		<string>Crossref</string>
@@ -54,7 +54,7 @@
 		<string>Saving</string>
 		<string>Ordering</string>
 	</array>
-	<key>bp_defaults</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.defaults</key>
 	<array>
 		<string>Custom fields</string>
 		<string>RSS</string>
@@ -62,7 +62,7 @@
 		<string>BibTeX</string>
 		<string>Types</string>
 	</array>
-	<key>bp_display</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.display</key>
 	<array>
 		<string>Sorting stop words</string>
 		<string>Fonts</string>
@@ -70,7 +70,7 @@
 		<string>Preview</string>
 		<string>Annote, abstract, details, template, PDF, text</string>
 	</array>
-	<key>bp_files</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.files</key>
 	<array>
 		<string>Save files</string>
         <string>Encoding (Unicode)</string>
@@ -81,7 +81,7 @@
 		<string>Backup file time</string>
 		<string>Warnings and errors</string>
 	</array>
-	<key>bp_general</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.general</key>
 	<array>
 		<string>Application launch</string>
 		<string>Check for updates</string>
@@ -91,7 +91,7 @@
 		<string>Warnings</string>
         <string>Groups</string>
 	</array>
-	<key>bp_inputmanager</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.inputmanager</key>
 	<array>
 		<string>InputManager (input manager)</string>
 		<string>External completion</string>
@@ -99,7 +99,7 @@
 		<string>TeXShop, iTeXMac, TextEdit, Xcode</string>
 		<string>Update or reinstall</string>
 	</array>
-	<key>bp_sharing</key>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.sharing</key>
 	<array>
 		<string>File sharing</string>
         <string>File browsing</string>
@@ -107,7 +107,7 @@
 		<string>Bonjour (Rendezvous)</string>
 		<string>Password</string>
 	</array>
-    <key>bp_export</key>
+    <key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.export</key>
     <array>
         <string>HTML files</string>
         <string>Templates</string>
