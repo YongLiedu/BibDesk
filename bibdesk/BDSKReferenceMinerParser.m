@@ -41,6 +41,7 @@
 #import "BDSKPubMedparser.h"
 #import "BDSKRISParser.h"
 #import "BDSKMARCParser.h"
+#import "NSError_BDSKExtensions.h"
 
 
 @interface NSString (ReferenceMinerExtensions)
@@ -83,7 +84,7 @@
         return [BDSKMARCParser itemsFromString:itemString error:outError];
     }else{
         if(outError)
-            OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown Reference Miner format.", @"Error description"), nil);
+            OFErrorWithInfo(outError, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown Reference Miner format.", @"Error description"), nil);
         return [NSArray array];
     }
 }

@@ -316,12 +316,7 @@ NSString *BDSKEncodingsListChangedNotification = @"BDSKEncodingsListChangedNotif
 NSString *BDSKComplexStringException = @"BDSKComplexStringException";
 NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
 
-#pragma mark Error name strings
-const char *BDSKParserError = "BDSKParserError";
-const char *BDSKNetworkError = "BDSKNetworkError";
-
 NSString *BDSKParserPasteDragString = @"Paste/Drag";
-
 NSString *BDSKAllFieldsString = @"AllFields";
 NSString *BDSKFileContentSearchString = @"FileContent";
 NSString *BDSKRelevanceString = @"Relevance";

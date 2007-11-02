@@ -563,13 +563,12 @@ static BDSKFiler *sharedFiler = nil;
             // get the Finder comment (spotlight comment)
             comment = [self commentForURL:[NSURL fileURLWithPath:resolvedPath]];
             NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
-            NS_DURING
-                [self createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
-            NS_HANDLER
-                NSLog(@"Ignoring exception %@ raised while creating path %@", [localException name], resolvedNewPath);
+ 
+            // create parent directories if necessary (OmniFoundation)
+            if (NO == [self createPathToFile:resolvedNewPath attributes:nil error:NULL]) {
                 status = NSLocalizedString(@"Unable to create parent directory.", @"AutoFile error message");
                 statusFlag = BDSKCannotCreateParentErrorMask;
-            NS_ENDHANDLER
+            }
             if(statusFlag == BDSKNoError){
                 if([fileType isEqualToString:NSFileTypeDirectory] && force == NO && 
                    [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnMoveFolderKey]){

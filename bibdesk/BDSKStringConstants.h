@@ -301,12 +301,8 @@ extern NSString *BDSKEncodingsListChangedNotification;
 extern NSString *BDSKComplexStringException;
 extern NSString *BDSKUnimplementedException;
 
-#pragma mark Error name strings
-extern const char *BDSKParserError;
-extern const char *BDSKNetworkError;
 
 extern NSString *BDSKParserPasteDragString;
-
 extern NSString *BDSKAllFieldsString;
 extern NSString *BDSKFileContentSearchString;
 extern NSString *BDSKRelevanceString;

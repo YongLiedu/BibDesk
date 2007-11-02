@@ -42,6 +42,7 @@
 #import "BibItem.h"
 #import "BDSKAppController.h"
 #import <OmniBase/assertions.h>
+#import "NSError_BDSKExtensions.h"
 
 //
 // Tag reference:
@@ -88,7 +89,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
     
 	NSRange startRange = [itemString rangeOfString:@"--------------------------------------------------------------------------------\n" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"JSTOR delimiter not found", @"Error description"), nil);
+        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"JSTOR delimiter not found", @"Error description"), nil);
         if(outError) *outError = error;
 		return returnArray;
     }
