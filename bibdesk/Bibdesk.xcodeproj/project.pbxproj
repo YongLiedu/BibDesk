@@ -469,8 +469,6 @@
 		F9B8019F0B41E91F00A5A615 /* BDSKZoomGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B8019D0B41E91F00A5A615 /* BDSKZoomGroupServer.m */; };
 		F9B88C080B7CF61000D5D42C /* FileMatcher.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9B88C060B7CF60F00D5D42C /* FileMatcher.nib */; };
 		F9B88D990B7D14B700D5D42C /* BDSKFileMatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B88D970B7D14B700D5D42C /* BDSKFileMatcher.m */; };
-		F9BC23960CB9DBB400A1C3B6 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9BC23950CB9DBB400A1C3B6 /* FileView.framework */; };
-		F9BC23AD0CB9DBD600A1C3B6 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9BC23950CB9DBB400A1C3B6 /* FileView.framework */; };
 		F9BE68350B80F92900B2597C /* FileMatcherConfigSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9BE68330B80F92800B2597C /* FileMatcherConfigSheet.nib */; };
 		F9BE68380B80F94000B2597C /* BDSKFileMatchConfigController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9BE68360B80F94000B2597C /* BDSKFileMatchConfigController.m */; };
 		F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */ = {isa = PBXBuildFile; fileRef = F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */; };
@@ -495,6 +493,7 @@
 		F9EA8FCB0ADE01F9005EFBE4 /* BDSKUpdateChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EA8FC90ADE01F9005EFBE4 /* BDSKUpdateChecker.m */; };
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B908B1572600AAC9A9 /* BDSKScrollableTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */; };
+		F9F22DC30CDACFFF00A9D449 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9F22DBC0CDACF7D00A9D449 /* FileView.framework */; };
 		F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */; };
 		F9F5ECD20AE5E7C8007EBB31 /* BDSKURLGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5ECD00AE5E7C8007EBB31 /* BDSKURLGroup.m */; };
 		F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */; };
@@ -720,6 +719,34 @@
 			remoteGlobalIDString = 8D57630D048677EA00EA77CD;
 			remoteInfo = BibImporter;
 		};
+		F9F22DBB0CDACF7D00A9D449 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9F22DB10CDACF7C00A9D449 /* FileView.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216 /* FileView.framework */;
+			remoteInfo = FileView;
+		};
+		F9F22DBD0CDACF7D00A9D449 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9F22DB10CDACF7C00A9D449 /* FileView.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F94692130CA56F4300AC2772 /* FileView-Leopard.bundle */;
+			remoteInfo = "FileView-Leopard";
+		};
+		F9F22DBF0CDACF7D00A9D449 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9F22DB10CDACF7C00A9D449 /* FileView.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F94692510CA575F000AC2772 /* FileView Program.app */;
+			remoteInfo = "FileView Program";
+		};
+		F9F22DC10CDACFCC00A9D449 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9F22DB10CDACF7C00A9D449 /* FileView.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* FileView */;
+			remoteInfo = FileView;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -741,7 +768,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				F9BC23AD0CB9DBD600A1C3B6 /* FileView.framework in CopyFiles */,
+				F9F22DC30CDACFFF00A9D449 /* FileView.framework in CopyFiles */,
 				F9B801930B41E8D600A5A615 /* yaz.framework in CopyFiles */,
 				F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */,
 				F9022FB107580A9600C3F701 /* AGRegex.framework in CopyFiles */,
@@ -1435,7 +1462,6 @@
 		F9B88D960B7D14B700D5D42C /* BDSKFileMatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileMatcher.h; sourceTree = "<group>"; };
 		F9B88D970B7D14B700D5D42C /* BDSKFileMatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileMatcher.m; sourceTree = "<group>"; };
 		F9B9E17E089479FC00C21B17 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
-		F9BC23950CB9DBB400A1C3B6 /* FileView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FileView.framework; path = vendorsrc/amaxwell/FileView.framework; sourceTree = "<group>"; };
 		F9BE68340B80F92800B2597C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/FileMatcherConfigSheet.nib; sourceTree = "<group>"; };
 		F9BE68360B80F94000B2597C /* BDSKFileMatchConfigController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileMatchConfigController.m; sourceTree = "<group>"; };
 		F9BE68370B80F94000B2597C /* BDSKFileMatchConfigController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileMatchConfigController.h; sourceTree = "<group>"; };
@@ -1540,6 +1566,7 @@
 		F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextFieldCell.m; sourceTree = "<group>"; };
 		F9F0856808247BC800812F2A /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDesk Help/postprocess-nontitle.py"; sourceTree = "<group>"; };
 		F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibDeskInputManager.xcodeproj; path = inputmanager/BibDeskInputManager.xcodeproj; sourceTree = "<group>"; };
+		F9F22DB10CDACF7C00A9D449 /* FileView.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = FileView.xcodeproj; path = vendorsrc/amaxwell/FileView/FileView.xcodeproj; sourceTree = "<group>"; };
 		F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSError_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSError_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9F5ECCF0AE5E7C8007EBB31 /* BDSKURLGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKURLGroup.h; sourceTree = "<group>"; };
@@ -1596,7 +1623,6 @@
 				F9DF3BC209B7605E00342ADE /* SystemConfiguration.framework in Frameworks */,
 				F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */,
 				F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */,
-				F9BC23960CB9DBB400A1C3B6 /* FileView.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1796,7 +1822,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F9BC23950CB9DBB400A1C3B6 /* FileView.framework */,
 				F9B801830B41E89500A5A615 /* yaz.framework */,
 				F95ED6910B07BA4E00000BBF /* ExceptionHandling.framework */,
 				F92ECB6B09DEF86500A244D0 /* Security.framework */,
@@ -2551,6 +2576,7 @@
 		F98F307A088E0F2800C1427D /* Subprojects */ = {
 			isa = PBXGroup;
 			children = (
+				F9F22DB10CDACF7C00A9D449 /* FileView.xcodeproj */,
 				F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */,
 				F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */,
 				F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */,
@@ -2627,6 +2653,16 @@
 			isa = PBXGroup;
 			children = (
 				F9C7E5950BEA3C9400D65C7F /* yaz.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F9F22DB20CDACF7C00A9D449 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F9F22DBC0CDACF7D00A9D449 /* FileView.framework */,
+				F9F22DBE0CDACF7D00A9D449 /* FileView-Leopard.bundle */,
+				F9F22DC00CDACF7D00A9D449 /* FileView Program.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2735,6 +2771,7 @@
 				F9AF56380BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */,
 				F90B13050C29900200144F1B /* PBXTargetDependency */,
+				F9F22DC20CDACFCC00A9D449 /* PBXTargetDependency */,
 			);
 			name = BibDesk;
 			productInstallPath = "$(HOME)/Applications";
@@ -2768,6 +2805,10 @@
 				{
 					ProductGroup = F9AF4DF10BEA3E5B009B16D5 /* Products */;
 					ProjectRef = F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */;
+				},
+				{
+					ProductGroup = F9F22DB20CDACF7C00A9D449 /* Products */;
+					ProjectRef = F9F22DB10CDACF7C00A9D449 /* FileView.xcodeproj */;
 				},
 				{
 					ProductGroup = F90B12FA0C298FC900144F1B /* Products */;
@@ -2944,6 +2985,27 @@
 			fileType = wrapper.framework;
 			path = yaz.framework;
 			remoteRef = F9C7E5940BEA3C9400D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9F22DBC0CDACF7D00A9D449 /* FileView.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = FileView.framework;
+			remoteRef = F9F22DBB0CDACF7D00A9D449 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9F22DBE0CDACF7D00A9D449 /* FileView-Leopard.bundle */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "FileView-Leopard.bundle";
+			remoteRef = F9F22DBD0CDACF7D00A9D449 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9F22DC00CDACF7D00A9D449 /* FileView Program.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "FileView Program.app";
+			remoteRef = F9F22DBF0CDACF7D00A9D449 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -3600,6 +3662,11 @@
 			isa = PBXTargetDependency;
 			name = BibImporter;
 			targetProxy = F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */;
+		};
+		F9F22DC20CDACFCC00A9D449 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = FileView;
+			targetProxy = F9F22DC10CDACFCC00A9D449 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -4642,8 +4709,8 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = (
 					"-Wall",
@@ -4660,8 +4727,8 @@
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Release;
 		};
@@ -4670,8 +4737,8 @@
 			buildSettings = {
 				ARCHS = ppc;
 				GCC_AUTO_VECTORIZATION = NO;
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Test;
 		};
