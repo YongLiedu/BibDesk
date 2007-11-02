@@ -933,6 +933,18 @@ static int _OAPreferenceControllerCompareCategoryNames(id name1, id name2, void 
 	    return;
     }
     
+    NSString *maximumOSVersionString = [description objectForKey:@"maximumOSVersion"];
+    if (![NSString isEmptyString:maximumOSVersionString]) {
+        OFVersionNumber *maximumOSVersion = [[OFVersionNumber alloc] initWithVersionString:maximumOSVersionString];
+        OFVersionNumber *currentOSVersion = [OFVersionNumber userVisibleOperatingSystemVersionNumber];
+        
+        BOOL yummy = ([currentOSVersion compareToVersionNumber:maximumOSVersion] == NSOrderedAscending);
+        
+        [maximumOSVersion release];
+        if (!yummy)
+            return;
+    }
+    
     titleEnglish = [description objectForKey:@"title"];
     if (titleEnglish == nil)
         titleEnglish = [NSString stringWithFormat:@"Localized Title for Preference Class %@", className];
