@@ -86,6 +86,7 @@
 		F9A2D3F50CCBE15C002F517B /* FVTextIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3F30CCBE15C002F517B /* FVTextIcon.m */; };
 		F9A2D3FF0CCBE321002F517B /* FVIcon_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3FE0CCBE321002F517B /* FVIcon_Private.h */; };
 		F9A2D4280CCBE6BA002F517B /* FVQLIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D4270CCBE6BA002F517B /* FVQLIcon.h */; };
+		F9F22DE90CDAD53300A9D449 /* License in Resources */ = {isa = PBXBuildFile; fileRef = F9F22DE80CDAD53300A9D449 /* License */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -195,6 +196,7 @@
 		F9A2D3F30CCBE15C002F517B /* FVTextIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVTextIcon.m; sourceTree = "<group>"; };
 		F9A2D3FE0CCBE321002F517B /* FVIcon_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVIcon_Private.h; sourceTree = "<group>"; };
 		F9A2D4270CCBE6BA002F517B /* FVQLIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVQLIcon.h; sourceTree = "<group>"; };
+		F9F22DE80CDAD53300A9D449 /* License */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -245,6 +247,7 @@
 		0867D691FE84028FC02AAC07 /* FileView */ = {
 			isa = PBXGroup;
 			children = (
+				F9F22DE80CDAD53300A9D449 /* License */,
 				F9A2D2D90CCA7670002F517B /* DTSource */,
 				08FB77AEFE84172EC02AAC07 /* Classes */,
 				32C88DFF0371C24200C91783 /* Other Sources */,
@@ -531,6 +534,7 @@
 				F946921F0CA5702A00AC2772 /* FileView-Leopard.bundle in Resources */,
 				8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */,
 				F94692A60CA5793B00AC2772 /* FVPreviewer.nib in Resources */,
+				F9F22DE90CDAD53300A9D449 /* License in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
