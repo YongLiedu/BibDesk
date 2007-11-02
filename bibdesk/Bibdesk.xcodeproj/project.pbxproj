@@ -494,6 +494,7 @@
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B908B1572600AAC9A9 /* BDSKScrollableTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */; };
 		F9F22DC30CDACFFF00A9D449 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9F22DBC0CDACF7D00A9D449 /* FileView.framework */; };
+		F9F22E090CDAD74700A9D449 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9F22DBC0CDACF7D00A9D449 /* FileView.framework */; };
 		F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */; };
 		F9F5ECD20AE5E7C8007EBB31 /* BDSKURLGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5ECD00AE5E7C8007EBB31 /* BDSKURLGroup.m */; };
 		F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */; };
@@ -1607,6 +1608,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9F22E090CDAD74700A9D449 /* FileView.framework in Frameworks */,
 				F9B801840B41E89500A5A615 /* yaz.framework in Frameworks */,
 				F9937E6C0AD82700001D1DFB /* QuartzCore.framework in Frameworks */,
 				F9937E4E0AD826EB001D1DFB /* Quartz.framework in Frameworks */,
