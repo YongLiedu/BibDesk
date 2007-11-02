@@ -12,7 +12,7 @@
 #import "NSBezierPath_AMAdditons.h"
 #import "NSColor_AMAdditions.h"
 #import "NSShadow_AMAdditions.h"
-#import </usr/include/math.h>
+#import <math.h>
 
 static float am_backgroundInset = 1.5;
 static float am_textGap = 1.5;

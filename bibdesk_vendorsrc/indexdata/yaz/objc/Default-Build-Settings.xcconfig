@@ -10,3 +10,7 @@ INSTALL_PATH = @executable_path/../Frameworks
 // Directory layout is implied here, where SRCROOT is the yaz/objc directory.
 
 HEADER_SEARCH_PATHS = /usr/include/libxml2 "$(SRCROOT)"/../include "$(SRCROOT)"/../src
+
+// Keep precomps in the build dir so that switching branches/products doesn't confuse the precomp builds
+SHARED_PRECOMPS_DIR = $(CONFIGURATION_BUILD_DIR)/SharedPrecompiledHeaders
+
