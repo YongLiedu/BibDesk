@@ -1478,7 +1478,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 @implementation BDSKTokenField
 
 + (void)load {
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
     [BDSKTokenField poseAsClass:[NSTokenField class]];
+    [pool release];
 }
 
 - (void)textViewDidChangeSelection:(NSNotification *)notification {
