@@ -836,12 +836,31 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current{
     NSParameterAssert(current != NULL);
     
-    // someone may be mad enough to install this in NSLocalDomain or NSNetworkDomain, but we don't support that
+    // Someone may be mad enough to install this in NSLocalDomain or NSNetworkDomain, but we don't support that since it would require admin rights.  As of 10.5, input managers must be installed in NSLocalDomain, and have certain permissions set.  Because of this, and because the input manager has been a PITA to support, we ignore it on 10.5.
     NSString *inputManagerBundlePath = [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"/InputManagers/BibDeskInputManager/BibDeskInputManager.bundle"];
 
     NSString *bundlePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"BibDeskInputManager/BibDeskInputManager.bundle"];
     NSString *bundledVersion = [[[NSBundle bundleWithPath:bundlePath] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
     NSString *installedVersion = [[[NSBundle bundleWithPath:inputManagerBundlePath] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
+    
+    // one-time alert when launching on Leopard
+    if (nil != installedVersion && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShowedLeopardInputManagerAlert"] == NO) {
+            
+            NSString *folderPath = [inputManagerBundlePath stringByDeletingLastPathComponent];
+            
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Completion Plugin is Disabled", @"Leopard warning") defaultButton:NSLocalizedString(@"Show", @"") alternateButton:NSLocalizedString(@"Ignore",@"") otherButton:nil informativeTextWithFormat:NSLocalizedString(@"Due to security restrictions in Mac OS X 10.5, the completion plugin located in %@ is now disabled and will no longer be supported.  Show in Finder?", @"input manager warning"), [folderPath stringByAbbreviatingWithTildeInPath]];
+            int rv = [alert runModal];
+            if (NSAlertDefaultReturn == rv)
+                [[NSWorkspace sharedWorkspace] selectFile:folderPath inFileViewerRootedAtPath:@""];
+        }
+        
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"BDSKShowedLeopardInputManagerAlert"];
+        
+        // set installed version to nil, so we never display an update alert
+        installedVersion = nil;
+    }
     
     *current = [bundledVersion isEqualToString:installedVersion];
     return installedVersion == nil ? NO : YES;
