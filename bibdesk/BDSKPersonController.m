@@ -373,7 +373,7 @@
     [sender adjustSubviews];
 }
 
-- (void)splitViewDoubleClick:(OASplitView *)sender{
+- (void)splitView:(OASplitView *)sender multipleClick:(NSEvent *)mouseEvent{
     NSView *pickerView = [[splitView subviews] objectAtIndex:0];
     NSView *pubsView = [[splitView subviews] objectAtIndex:1];
     NSRect pubsFrame = [pubsView frame];

@@ -3231,7 +3231,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [sender adjustSubviews];
 }
 
-- (void)splitViewDoubleClick:(OASplitView *)sender{
+- (void)splitView:(OASplitView *)sender multipleClick:(NSEvent *)mouseEvent{
     int i = [[sender subviews] count] - 2;
     OBASSERT(i >= 0);
 	NSView *firstView = [[sender subviews] objectAtIndex:i];

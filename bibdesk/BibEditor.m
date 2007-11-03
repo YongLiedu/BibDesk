@@ -3574,7 +3574,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark Splitview delegate methods
 
-- (void)splitViewDoubleClick:(OASplitView *)sender{
+- (void)splitView:(OASplitView *)sender multipleClick:(NSEvent *)mouseEvent{
     NSView *form = [[splitView subviews] objectAtIndex:0]; // form
     NSView *matrix = [[splitView subviews] objectAtIndex:1]; // matrix
     NSRect formFrame = [form frame];
