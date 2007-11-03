@@ -324,6 +324,9 @@ enum{
 
 - (void)show{
     [self showWindow:self];
+    
+    // windowDidLoad is too early for setting the window URL on 10.5 (bug #1825254)
+    [self fixURLs];
 }
 
 // note that we don't want the - document accessor! It messes us up by getting called for other stuff.
@@ -3967,6 +3970,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		[viewLocalButton setIconActionEnabled:YES];
 		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"Open the file or option-drag to copy it", @"Tool tip message")];
 		[[self window] setRepresentedFilename:[lurl path]];
+        
+        if ([[self window] respondsToSelector:@selector(setRepresentedURL:)])
+            [[self window] setRepresentedURL:lurl];
+        
 		if([documentSnoopDrawer contentView] != webSnoopContainerView)
 			drawerShouldReopen = drawerWasOpen;
     }else{
