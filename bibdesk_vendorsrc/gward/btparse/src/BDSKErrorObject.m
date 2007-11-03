@@ -39,6 +39,8 @@
 
 #import "BDSKErrorObject.h"
 
+#define BTPARSE_BUNDLE [NSBundle bundleWithIdentifier:@"net.sourceforge.bibdesk.btparse"]
+
 NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
 
 @implementation BDSKErrorObject
@@ -66,7 +68,7 @@ NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
 {
     id error = [[self alloc] init];
     // @@ localizing this is probably dangerous
-    [error setErrorClassName:NSLocalizedString(@"error", @"")];
+    [error setErrorClassName:NSLocalizedStringFromTableInBundle(@"error", @"BTParse", BTPARSE_BUNDLE, @"")];
     [error setFileName:filePath];
     [error setLineNumber:line];
     [error setErrorMessage:msg];
@@ -78,7 +80,7 @@ NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
 {
     id error = [[self alloc] init];
     // @@ localizing this is probably dangerous
-    [error setErrorClassName:NSLocalizedString(@"warning", @"")];
+    [error setErrorClassName:NSLocalizedStringFromTableInBundle(@"warning", @"BTParse", BTPARSE_BUNDLE, @"")];
     [error setFileName:filePath];
     [error setLineNumber:line];
     [error setErrorMessage:msg];
