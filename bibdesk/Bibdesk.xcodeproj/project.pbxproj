@@ -22,9 +22,11 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = F993F1EE08553A61007A7657 /* Build configuration list for PBXAggregateTarget "DiskImage" */;
 			buildPhases = (
+				F98C6FDC0CDD3171002FCAD8 /* CopyFiles */,
 				F98870D307580E94001D4D49 /* ShellScript */,
 			);
 			dependencies = (
+				F98C6FD20CDD30CE002FCAD8 /* PBXTargetDependency */,
 				F9AF5D8E0C8F3DB6005614AE /* PBXTargetDependency */,
 			);
 			name = DiskImage;
@@ -454,6 +456,7 @@
 		F97C9DBE0C44866F0002EE01 /* WSGeneratedObj.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */; };
 		F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */; };
 		F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */; };
+		F98C6FD80CDD3145002FCAD8 /* BibDesk.qlgenerator in CopyFiles */ = {isa = PBXBuildFile; fileRef = F98C6FD00CDD30A2002FCAD8 /* BibDesk.qlgenerator */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
 		F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */; };
 		F9937E230AD8268E001D1DFB /* BDSKZoomablePDFView.m in Sources */ = {isa = PBXBuildFile; fileRef = F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */; };
@@ -559,6 +562,20 @@
 			proxyType = 2;
 			remoteGlobalIDString = 8D576316048677EA00EA77CD;
 			remoteInfo = BibImporter;
+		};
+		F98C6FCF0CDD30A2002FCAD8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8D576316048677EA00EA77CD /* BibDesk.qlgenerator */;
+			remoteInfo = BibDesk;
+		};
+		F98C6FD10CDD30CE002FCAD8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D57630D048677EA00EA77CD /* BibDesk */;
+			remoteInfo = BibDesk;
 		};
 		F9AF4DF40BEA3E5B009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -798,6 +815,16 @@
 			dstSubfolderSpec = 1;
 			files = (
 				F9DE8DFB087F74D3006F0427 /* BibImporter.mdimporter in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F98C6FDC0CDD3171002FCAD8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = BibDesk.app/Contents/Library/QuickLook;
+			dstSubfolderSpec = 16;
+			files = (
+				F98C6FD80CDD3145002FCAD8 /* BibDesk.qlgenerator in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1438,6 +1465,7 @@
 		F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKImageFadeAnimation.m; sourceTree = "<group>"; };
 		F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextViewCompletionController.h; sourceTree = "<group>"; };
 		F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextViewCompletionController.m; sourceTree = "<group>"; };
+		F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "QuickLook-BibDesk.xcodeproj"; path = "QuickLook-BibDesk/QuickLook-BibDesk.xcodeproj"; sourceTree = "<group>"; };
 		F98DB3150A23C7730040D347 /* BDSKTemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTemplate.h; sourceTree = "<group>"; };
 		F98DB3160A23C7730040D347 /* BDSKTemplate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplate.m; sourceTree = "<group>"; };
 		F98F33C80892D4B700C1427D /* BDSKZoomablePDFView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKZoomablePDFView.h; sourceTree = "<group>"; };
@@ -2605,9 +2633,18 @@
 			name = Preferences;
 			sourceTree = "<group>";
 		};
+		F98C6FC90CDD30A2002FCAD8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F98C6FD00CDD30A2002FCAD8 /* BibDesk.qlgenerator */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		F98F307A088E0F2800C1427D /* Subprojects */ = {
 			isa = PBXGroup;
 			children = (
+				F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */,
 				F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */,
 				F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */,
 				F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */,
@@ -2849,6 +2886,10 @@
 					ProjectRef = F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */;
 				},
 				{
+					ProductGroup = F98C6FC90CDD30A2002FCAD8 /* Products */;
+					ProjectRef = F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */;
+				},
+				{
 					ProductGroup = F92BACEB0BCC00D2008D5BC3 /* Products */;
 					ProjectRef = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
 				},
@@ -2895,6 +2936,13 @@
 			fileType = wrapper.cfbundle;
 			path = BibImporter.mdimporter;
 			remoteRef = F95CC112087F54BF002C5694 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F98C6FD00CDD30A2002FCAD8 /* BibDesk.qlgenerator */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = BibDesk.qlgenerator;
+			remoteRef = F98C6FCF0CDD30A2002FCAD8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */ = {
@@ -3310,7 +3358,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "##\n## This takes a while to generate, so it's not worth\n## the wait for development builds.\n##\nif [ ${BUILD_STYLE} = \"Debug\" ]; then\n# Check to see if a previous version exists and create it\n# if not, or else pbxcp will complain.\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nexit 0\nfi\nfi\n#\n# Run the genstrings build phase\n#\ncd ${SOURCE_ROOT} && \\\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nmv English.lproj/Localizable.strings English.lproj/Localizable.strings.bak \nfi\n# skip OmniBase/macros.h because of genstrings crash\n/usr/bin/genstrings -o \"${SOURCE_ROOT}/English.lproj\" \\\n-skipTable BibTeXKeys -skipTable ZoomValues -skipTable OmniFoundation -skipTable OmniAppKit -skipTable DateProcessing -skipTable TemplateOptions \\\n`/usr/bin/find . -type file -name \"*.[mh]\" |grep -v \"macros\\.h\"`";
+			shellScript = "##\n## This takes a while to generate, so it's not worth\n## the wait for development builds.\n##\nif [ ${BUILD_STYLE} = \"Debug\" ]; then\n# Check to see if a previous version exists and create it\n# if not, or else pbxcp will complain.\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nexit 0\nfi\nfi\n#\n# Run the genstrings build phase\n#\ncd ${SOURCE_ROOT} && \\\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nmv English.lproj/Localizable.strings English.lproj/Localizable.strings.bak \nfi\n\n# skip OmniBase/macros.h because of genstrings crash\n# skip vendorsrc entirely? need to process .h files?\n\n/usr/bin/genstrings -o \"${SOURCE_ROOT}/English.lproj\" \\\n-skipTable BibTeXKeys -skipTable ZoomValues -skipTable OmniFoundation -skipTable OmniAppKit -skipTable DateProcessing -skipTable TemplateOptions \\\n`/usr/bin/find . -type file -name \"*.[cm]\" \\\n|grep -v \"vendorsrc\" \n|grep -v \"inputmanager\"\n|grep -v \"SkimNotesAgent\"\n|grep -v \"QuickLook-BibDesk\"`";
 		};
 		F9FF213B09E83BAB00BB1706 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3640,6 +3688,11 @@
 			isa = PBXTargetDependency;
 			name = SkimNotesAgent;
 			targetProxy = F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */;
+		};
+		F98C6FD20CDD30CE002FCAD8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BibDesk;
+			targetProxy = F98C6FD10CDD30CE002FCAD8 /* PBXContainerItemProxy */;
 		};
 		F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
