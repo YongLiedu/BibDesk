@@ -1246,8 +1246,9 @@
     [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
 }
 
-// select duplicates, then allow user to delete/copy/whatever
-- (IBAction)selectDuplicates:(id)sender{
+- (void)selectDuplicatesAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertAlternateReturn)
+        return;
     
 	[self setSearchString:@""]; // make sure we can see everything
     
@@ -1283,20 +1284,26 @@
         [pubsToRemove setArray:publications];
     }
     
-    NSSet *removeSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &callBacks);
-    NSZoneFree(zone, pubs);
-    
-    CFIndex idx = [pubsToRemove count];
-    
-    while(idx--){
-        if([removeSet containsObject:[pubsToRemove objectAtIndex:idx]] == NO)
-            [pubsToRemove removeObjectAtIndex:idx];
+    if (returnCode == NSAlertDefaultReturn) {
+        NSSet *removeSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &callBacks);
+        NSZoneFree(zone, pubs);
+        
+        CFIndex idx = [pubsToRemove count];
+        
+        while(idx--){
+            if([removeSet containsObject:[pubsToRemove objectAtIndex:idx]] == NO)
+                [pubsToRemove removeObjectAtIndex:idx];
+        }
+        
+        [removeSet release];
+        [self selectPublications:pubsToRemove];
+    } else {
+        [pubsToRemove release];
+        pubsToRemove = [[NSMutableArray alloc] initWithObjects:pubs count:countOfItems];
+        [self selectPublications:pubsToRemove];
     }
-    
-    [removeSet release];
-	[self selectPublications:pubsToRemove];
     [pubsToRemove release];
-
+    
     if(countOfItems)
         [tableView scrollRowToCenter:[tableView selectedRow]];  // make sure at least one item is visible
     else
@@ -1304,6 +1311,25 @@
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
     [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
+}
+
+// select duplicates, then allow user to delete/copy/whatever
+- (IBAction)selectDuplicates:(id)sender{
+    if ([self hasExternalGroupsSelected]) {
+        // for external groups we compare to the items in Library, so all duplicates should be selected
+        [self selectDuplicatesAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
+    } else {
+        // let the user decide if he wants to select all the duplicates, or randomly leave one duplicate out of the selection
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Select duplicates", @"Message in alert dialog when trying to find duplicates")
+                                         defaultButton:NSLocalizedString(@"All Candidates", @"Button title")
+                                      alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                          otherButton:NSLocalizedString(@"Only Duplicates", @"Button title")
+                            informativeTextWithFormat:NSLocalizedString(@"Do you want to select all duplicate items, or only strict duplicates? If you choose \"Only Duplicates\", one randomly selected duplicate will be not be selected." , @"Informative text in alert dialog")];
+        [alert beginSheetModalForWindow:documentWindow
+                          modalDelegate:self
+                         didEndSelector:@selector(selectDuplicatesAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+    }
 }
 
 - (IBAction)selectIncompletePublications:(id)sender{
