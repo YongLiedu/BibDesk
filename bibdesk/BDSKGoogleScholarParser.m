@@ -87,29 +87,34 @@
         NSString *bibTeXString = [NSString stringWithContentsOfURL:btURL 
                                                           encoding:NSUTF8StringEncoding
                                                              error:&error];
-        if (bibTeXString == nil){
-            if (outError) *outError = error;
-            return nil;
-        }
-        
         BOOL isPartialData = NO;
+        NSArray* bibtexItems = nil;
         
-        NSArray* bibtexItems = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error:&error];
+        if (nil != bibTeXString)
+            bibtexItems = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error:&error];
         
-        if ([bibtexItems count] == 0){
-            if(outError) *outError = error;
-            return nil;
+        if ([bibtexItems count] && NO == isPartialData) {
+            BibItem *bibtexItem = [bibtexItems objectAtIndex:0]; 
+            
+            // TODO: get a useful link for the URL field. 
+            // each item's title looks like <span class="w"><a href="link">title</a></span>
+            // but it'll take some xpath hacking to make sure we match title to bibtex link correctly.
+            
+            [items addObject:bibtexItem];
         }
-        
-        BibItem *bibtexItem = [bibtexItems objectAtIndex:0]; 
-        
-        // TODO: get a useful link for the URL field. 
-        // each item's title looks like <span class="w"><a href="link">title</a></span>
-        // but it'll take some xpath hacking to make sure we match title to bibtex link correctly.
-        
-        [items addObject:bibtexItem];
+        else {
+            // display a fake item in the table so the user knows one of the items failed to parse, but still gets the rest of the data
+            NSString *errMsg = NSLocalizedString(@"Unable to parse as BibTeX", @"google scholar error");
+            NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:errMsg, BDSKTitleString, [btURL absoluteString], BDSKUrlString, nil];
+            BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+            [items addObject:errorItem];
+            [errorItem release];
+        }
         
     }
+    
+    if (0 == [items count] && outError)
+        *outError = error;
     
     return items;  
     
