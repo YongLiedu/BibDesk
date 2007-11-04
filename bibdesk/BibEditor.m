@@ -95,6 +95,10 @@ enum{
 // offset of the form from the left window edge
 #define FORM_OFFSET 13.0
 
+@interface NSWindow (BDSKLeopardExtensions)
+- (void)setRepresentedURL:(NSURL *)aURL;
+@end
+
 @interface BibEditor (Private)
 
 - (void)setupDrawer;
