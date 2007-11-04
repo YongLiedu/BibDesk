@@ -119,7 +119,10 @@
 
 - (void)setSelectedRange:(NSRange)charRange {
     [super setSelectedRange:charRange];
-    [self updateLinks];
+    
+    // Fix bug #1825703.  On 10.5, this is called from -[NSTextStorage dealloc] with an empty range.  Our -delegate method returns a garbage pointer at that time, which causes a crash in -updateLinks.  The BDSKDragTextField (in the URL group sheet) was delegate, but the AppKit should be responsible for setting that to nil.
+    if ([self textStorage] != nil)
+        [self updateLinks];
 }
 
 - (void)didChangeText {
