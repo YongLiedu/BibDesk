@@ -44,7 +44,8 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if (! [[url host] isEqualToString:@"scholar.google.com"]){
+    // !!! other countries end up with e.g. scholar.google.be; checking for scholar.google.com may fail in those cases
+    if (! [[url host] hasPrefix:@"scholar.google."]){
         return NO;
     }
     
