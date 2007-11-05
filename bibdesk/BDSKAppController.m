@@ -825,6 +825,71 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     return theURLs;
 }
 
+- (NSArray *)publicationsForCiteKeys:(NSArray *)citeKeys {
+    NSMutableArray *pubs = [NSMutableArray array];
+    NSArray *docs = [NSApp orderedDocuments];
+    NSEnumerator *keyEnum = [citeKeys objectEnumerator];
+    NSString *key;
+    
+    while (key = [keyEnum nextObject]) {
+        NSEnumerator *docEnum = [docs objectEnumerator];
+        BibDocument *doc;
+        BibItem *pub;
+        
+        while (doc = [docEnum nextObject]) {
+            if (pub = [[doc publications] itemForCiteKey:key]) {
+                [pubs addObject:pub];
+                break;
+            }
+        }
+    }
+    
+    return pubs;
+}
+ 
+- (NSString *)citationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
+    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateName];
+    if ([template templateFormat] & BDSKTextTemplateFormat) {
+        NSArray *pubs = [self publicationsForCiteKeys:citeKeys];
+        return [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:pubs];
+    } else {
+        NSBeep();
+        return nil;
+    }
+}
+
+- (NSAttributedString *)attributedCitationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
+    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateName];
+    if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+        NSArray *pubs = [self publicationsForCiteKeys:citeKeys];
+        return [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:NULL];
+    } else {
+        NSBeep();
+        return nil;
+    }
+}
+
+- (NSData *)RTFCitationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
+    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateName];
+    if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+        NSArray *pubs = [self publicationsForCiteKeys:citeKeys];
+        NSDictionary *documentAttributes = nil;
+        NSAttributedString *attrString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:&documentAttributes];
+        return [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:documentAttributes];
+    } else {
+        NSBeep();
+        return nil;
+    }
+}
+
+- (NSArray *)textTemplateNames {
+    return [BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat];
+}
+
+- (NSArray *)richTextTemplateNames {
+    return [BDSKTemplate allStyleNamesForFormat:BDSKRichTextTemplateFormat];
+}
+
 #pragma mark Version checking
 
 - (IBAction)checkForUpdates:(id)sender{

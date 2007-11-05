@@ -61,6 +61,15 @@
 - (NSArray *)completionsForString:(NSString *)searchString;
 // Returns a list of URLs of currently opened documents
 - (NSArray *)orderedDocumentURLs;
+// Returns a citation for publications identified by cite keys using a plain text template
+- (NSString *)citationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName;
+// Returns a citation for publications identified by cite keys using a rich text template
+- (NSAttributedString *)attributedCitationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName;
+- (NSData *)RTFCitationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName;
+// Returns an array of available plain text templates
+- (NSArray *)textTemplateNames;
+// Returns an array of available rich text templates
+- (NSArray *)richTextTemplateNames;
 @end
 
 
