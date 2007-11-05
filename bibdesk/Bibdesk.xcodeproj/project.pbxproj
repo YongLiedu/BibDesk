@@ -22,15 +22,26 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = F993F1EE08553A61007A7657 /* Build configuration list for PBXAggregateTarget "DiskImage" */;
 			buildPhases = (
-				F98C6FDC0CDD3171002FCAD8 /* CopyFiles */,
 				F98870D307580E94001D4D49 /* ShellScript */,
 			);
 			dependencies = (
-				F98C6FD20CDD30CE002FCAD8 /* PBXTargetDependency */,
-				F9AF5D8E0C8F3DB6005614AE /* PBXTargetDependency */,
+				F9CA0C830CDF93F90059D36D /* PBXTargetDependency */,
 			);
 			name = DiskImage;
 			productName = DiskImage;
+		};
+		F9CA0C7A0CDF93D10059D36D /* BibDesk+QuickLook */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F9CA0C8A0CDF944C0059D36D /* Build configuration list for PBXAggregateTarget "BibDesk+QuickLook" */;
+			buildPhases = (
+				F9CA0C890CDF944C0059D36D /* CopyFiles */,
+			);
+			dependencies = (
+				F9CA0C7F0CDF93D80059D36D /* PBXTargetDependency */,
+				F9CA0C810CDF93E30059D36D /* PBXTargetDependency */,
+			);
+			name = "BibDesk+QuickLook";
+			productName = "BibDesk+QuickLook";
 		};
 /* End PBXAggregateTarget section */
 
@@ -456,7 +467,6 @@
 		F97C9DBE0C44866F0002EE01 /* WSGeneratedObj.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */; };
 		F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */; };
 		F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */; };
-		F98C6FD80CDD3145002FCAD8 /* BibDesk.qlgenerator in CopyFiles */ = {isa = PBXBuildFile; fileRef = F98C6FD00CDD30A2002FCAD8 /* BibDesk.qlgenerator */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
 		F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */; };
 		F9937E230AD8268E001D1DFB /* BDSKZoomablePDFView.m in Sources */ = {isa = PBXBuildFile; fileRef = F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */; };
@@ -485,6 +495,7 @@
 		F9BE68350B80F92900B2597C /* FileMatcherConfigSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9BE68330B80F92800B2597C /* FileMatcherConfigSheet.nib */; };
 		F9BE68380B80F94000B2597C /* BDSKFileMatchConfigController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9BE68360B80F94000B2597C /* BDSKFileMatchConfigController.m */; };
 		F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */ = {isa = PBXBuildFile; fileRef = F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */; };
+		F9CA0C870CDF94280059D36D /* BibDesk.qlgenerator in CopyFiles */ = {isa = PBXBuildFile; fileRef = F98C6FD00CDD30A2002FCAD8 /* BibDesk.qlgenerator */; };
 		F9CE58EC0842411D0072DF55 /* ArrowImage.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */; };
 		F9CEFCBC0A90090B00A0E54E /* BDSKOrphanedFileServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */; };
 		F9D0E5370BF92768001C6C22 /* BDSKMODSParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9D0E5350BF92768001C6C22 /* BDSKMODSParser.m */; };
@@ -571,13 +582,6 @@
 			remoteGlobalIDString = 8D576316048677EA00EA77CD;
 			remoteInfo = BibDesk;
 		};
-		F98C6FD10CDD30CE002FCAD8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D57630D048677EA00EA77CD;
-			remoteInfo = BibDesk;
-		};
 		F9AF4DF40BEA3E5B009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */;
@@ -633,13 +637,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = yaz;
-		};
-		F9AF5D8D0C8F3DB6005614AE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090;
-			remoteInfo = BibDesk;
 		};
 		F9C7E5460BEA3C0500D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -753,6 +750,27 @@
 			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = yaz;
 		};
+		F9CA0C7E0CDF93D80059D36D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D1107260486CEB800E47090 /* BibDesk */;
+			remoteInfo = BibDesk;
+		};
+		F9CA0C800CDF93E30059D36D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D57630D048677EA00EA77CD /* BibDesk */;
+			remoteInfo = BibDesk;
+		};
+		F9CA0C820CDF93F90059D36D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F9CA0C7A0CDF93D10059D36D /* BibDesk+QuickLook */;
+			remoteInfo = "BibDesk+QuickLook";
+		};
 		F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */;
@@ -819,13 +837,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F98C6FDC0CDD3171002FCAD8 /* CopyFiles */ = {
+		F9CA0C890CDF944C0059D36D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = BibDesk.app/Contents/Library/QuickLook;
 			dstSubfolderSpec = 16;
 			files = (
-				F98C6FD80CDD3145002FCAD8 /* BibDesk.qlgenerator in CopyFiles */,
+				F9CA0C870CDF94280059D36D /* BibDesk.qlgenerator in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2917,6 +2935,7 @@
 				F98870D407580E94001D4D49 /* DiskImage */,
 				275E270607838EE30070398A /* TestBibItem */,
 				27CD032307D82C7400806B7E /* TestComplexString */,
+				F9CA0C7A0CDF93D10059D36D /* BibDesk+QuickLook */,
 			);
 		};
 /* End PBXProject section */
@@ -3701,11 +3720,6 @@
 			name = SkimNotesAgent;
 			targetProxy = F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */;
 		};
-		F98C6FD20CDD30CE002FCAD8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = BibDesk;
-			targetProxy = F98C6FD10CDD30CE002FCAD8 /* PBXContainerItemProxy */;
-		};
 		F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = BTParse;
@@ -3741,10 +3755,20 @@
 			name = yaz;
 			targetProxy = F9AF56370BEA4160009B16D5 /* PBXContainerItemProxy */;
 		};
-		F9AF5D8E0C8F3DB6005614AE /* PBXTargetDependency */ = {
+		F9CA0C7F0CDF93D80059D36D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090 /* BibDesk */;
-			targetProxy = F9AF5D8D0C8F3DB6005614AE /* PBXContainerItemProxy */;
+			targetProxy = F9CA0C7E0CDF93D80059D36D /* PBXContainerItemProxy */;
+		};
+		F9CA0C810CDF93E30059D36D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BibDesk;
+			targetProxy = F9CA0C800CDF93E30059D36D /* PBXContainerItemProxy */;
+		};
+		F9CA0C830CDF93F90059D36D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F9CA0C7A0CDF93D10059D36D /* BibDesk+QuickLook */;
+			targetProxy = F9CA0C820CDF93F90059D36D /* PBXContainerItemProxy */;
 		};
 		F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4796,7 +4820,7 @@
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = (
 					"-Wall",
@@ -4815,7 +4839,7 @@
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Release;
 		};
@@ -4826,7 +4850,35 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Test;
+		};
+		F9CA0C7B0CDF93D20059D36D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "BibDesk+QuickLook";
+			};
+			name = Debug;
+		};
+		F9CA0C7C0CDF93D20059D36D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "BibDesk+QuickLook";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		F9CA0C7D0CDF93D20059D36D /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "BibDesk+QuickLook";
 			};
 			name = Test;
 		};
@@ -4889,6 +4941,16 @@
 				F993F20308553A61007A7657 /* Debug */,
 				F993F20408553A61007A7657 /* Release */,
 				F993F20508553A61007A7657 /* Test */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F9CA0C8A0CDF944C0059D36D /* Build configuration list for PBXAggregateTarget "BibDesk+QuickLook" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9CA0C7B0CDF93D20059D36D /* Debug */,
+				F9CA0C7C0CDF93D20059D36D /* Release */,
+				F9CA0C7D0CDF93D20059D36D /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
