@@ -94,7 +94,8 @@ static NSData *MODSToMARCXSLTData = nil;
 @implementation NSString (BDSKMODSParserExtensions)
 
 - (BOOL)isMODSString {
-    if ([self hasPrefix:@"<?xml "] == NO || [self rangeOfString:@"<mods"].location == NSNotFound)
+    // as of 5 November 2007, COPAC MODS no longer has an <?xml prefix, and starts with <mods xmlns:xlink="http://www.w3.org/1999/xlink"
+    if ([self rangeOfString:@"<mods"].location == NSNotFound)
         return NO;
     
     NSError *nsError;
