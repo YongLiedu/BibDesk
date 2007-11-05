@@ -62,10 +62,10 @@
 // Returns a list of URLs of currently opened documents
 - (NSArray *)orderedDocumentURLs;
 // Returns a citation for publications identified by cite keys using a plain text template
-- (NSString *)citationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName;
+- (NSString *)citationForItems:(NSArray *)citeKeys usingTemplate:(NSString *)templateName;
 // Returns a citation for publications identified by cite keys using a rich text template
-- (NSAttributedString *)attributedCitationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName;
-- (NSData *)RTFCitationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName;
+- (NSAttributedString *)attributedCitationForItems:(NSArray *)citeKeys usingTemplate:(NSString *)templateName;
+- (NSData *)RTFCitationForItems:(NSArray *)citeKeys usingTemplate:(NSString *)templateName;
 // Returns an array of available plain text templates
 - (NSArray *)textTemplateNames;
 // Returns an array of available rich text templates

@@ -847,34 +847,55 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     return pubs;
 }
  
-- (NSString *)citationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
+- (NSString *)citationForItems:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
     BDSKTemplate *template = [BDSKTemplate templateForStyle:templateName];
-    if ([template templateFormat] & BDSKTextTemplateFormat) {
+    if (template) {
         NSArray *pubs = [self publicationsForCiteKeys:citeKeys];
-        return [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:pubs];
+        id object = [[NSApp orderedDocuments] count] == 1 ? [[NSApp orderedDocuments] lastObject] : self;
+        
+        if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+            return [[BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:object publications:pubs documentAttributes:NULL] string];
+        } else {
+            return [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:object publications:pubs];
+        }
     } else {
         NSBeep();
         return nil;
     }
 }
 
-- (NSAttributedString *)attributedCitationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
+- (NSAttributedString *)attributedCitationForItems:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
     BDSKTemplate *template = [BDSKTemplate templateForStyle:templateName];
-    if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+    if (template) {
         NSArray *pubs = [self publicationsForCiteKeys:citeKeys];
-        return [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:NULL];
+        id object = [[NSApp orderedDocuments] count] == 1 ? [[NSApp orderedDocuments] lastObject] : self;
+        
+        if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+            return [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:NULL];
+        } else {
+            NSString *string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:object publications:pubs];
+            return [[[NSAttributedString alloc] initWithString:string attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:0.0]] autorelease];
+        }
     } else {
         NSBeep();
         return nil;
     }
 }
 
-- (NSData *)RTFCitationForPublications:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
+- (NSData *)RTFCitationForItems:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
     BDSKTemplate *template = [BDSKTemplate templateForStyle:templateName];
-    if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+    if (template) {
         NSArray *pubs = [self publicationsForCiteKeys:citeKeys];
         NSDictionary *documentAttributes = nil;
-        NSAttributedString *attrString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:&documentAttributes];
+        NSAttributedString *attrString = nil;
+        id object = [[NSApp orderedDocuments] count] == 1 ? [[NSApp orderedDocuments] lastObject] : self;
+        
+        if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+            attrString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:object publications:pubs documentAttributes:&documentAttributes];
+        } else {
+            NSString *string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:object publications:pubs];
+            attrString = [[[NSAttributedString alloc] initWithString:string attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:0.0]] autorelease];
+        }
         return [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:documentAttributes];
     } else {
         NSBeep();
