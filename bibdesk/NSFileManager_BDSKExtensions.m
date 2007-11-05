@@ -297,6 +297,21 @@ static void createTemporaryDirectory()
 // note: IC is not thread safe
 - (NSURL *)downloadFolderURL;
 {
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        
+        const OSType dlFolder = 'down'; // 10.5 Folders.h: kDownloadsFolderType = 'down' /* Refers to the ~/Downloads folder*/
+        FSRef folderRef;
+        OSStatus err = FSFindFolder(kUserDomain, dlFolder, TRUE, &folderRef);
+        CFURLRef folderURL = NULL;
+        if (noErr == err)
+            folderURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &folderRef);
+        
+        if (NULL != folderURL)
+            return [(id)folderURL autorelease];
+        
+        // otherwise continue and try IC, which has been deprecated for years and leaks like a sieve
+    }
+    
     NSAssert([NSThread inMainThread], @"InternetConfig is not thread safe");
     OSStatus err;
 	ICInstance inst;
