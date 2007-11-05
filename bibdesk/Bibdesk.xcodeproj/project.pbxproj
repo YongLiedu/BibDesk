@@ -4796,7 +4796,7 @@
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = (
 					"-Wall",
@@ -4815,7 +4815,7 @@
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Release;
 		};
@@ -4826,7 +4826,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Test;
 		};
