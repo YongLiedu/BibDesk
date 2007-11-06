@@ -306,14 +306,26 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleWebGroupUpdatedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
+    BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
+    
+    if ([[groups webGroup] isEqual:group] == NO)
+        return; // must be from another document
+    
     [groupTableView reloadData];
     if ([[self selectedGroups] containsObject:group])
         [self displaySelectedGroups];
+    
+    if (succeeded)
+        [self setImported:YES forPublications:publications inGroup:group];
 }
 
 
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
+    
+    if ([[groups staticGroups] containsObject:group] == NO)
+        return; /// must be from another document
+    
     [groupTableView reloadData];
     if ([[self selectedGroups] containsObject:group])
         [self displaySelectedGroups];
@@ -1630,6 +1642,8 @@ The groupedPublications array is a subset of the publications array, developed b
     if (aGroup) {
         [indexes addIndex:[groups indexOfObjectIdenticalTo:aGroup]];
     } else {
+        if ([groups webGroup])
+            [indexes addIndex:1];
         [indexes addIndexesInRange:[groups rangeOfSharedGroups]];
         [indexes addIndexesInRange:[groups rangeOfURLGroups]];
         [indexes addIndexesInRange:[groups rangeOfScriptGroups]];
