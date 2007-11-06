@@ -121,7 +121,9 @@
     if (! [newURLString hasPrefix:@"http://"]){
         newURLString = [NSString stringWithFormat:@"http://%@", newURLString];
     }
-    [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:newURLString]]];
+    NSURL *theURL = [NSURL URLWithString:newURLString];
+    if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO)
+        [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
 }
 
 - (IBAction)stopOrReloadAction:(id)sender {
