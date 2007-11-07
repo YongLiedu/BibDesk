@@ -262,6 +262,9 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     if ([qlTask isRunning]) {
         [qlTask terminate];
         [qlTask release];
+        
+        // set to nil, since we may alternate between QL and our own previewing
+        qlTask = nil;
     }
     
     if (absoluteURL) {
@@ -270,6 +273,9 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
         
         // Quick Look (qlmanage) handles more types than our setup, but you can't copy any content from PDF/text sources, which sucks; hence, we only use it as a fallback (basically a replacement for fvImageView).  There are some slight behavior mismatches, and we lose fullscreen (I think), but that's minor in comparison.
         if ([fvImageView isEqual:newView] && [absoluteURL isFileURL] && [[NSFileManager defaultManager] isExecutableFileAtPath:@"/usr/bin/qlmanage"]) {
+            
+            if ([[self window] isVisible])
+                [[[self window] animator] close];
 
             qlTask = [[NSTask alloc] init];
             [qlTask setLaunchPath:@"/usr/bin/qlmanage"];
@@ -283,10 +289,13 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             NSWindow *theWindow = [self window];
             NSArray *subviews = [[theWindow contentView] subviews];
             NSView *oldView = [subviews count] ? [subviews objectAtIndex:0] : nil;
+            
+            NSView *animator = [[theWindow contentView] respondsToSelector:@selector(animator)] ? [[theWindow contentView] animator] : [theWindow contentView];
+            
             if (oldView)
-                [[theWindow contentView] replaceSubview:oldView with:newView];
+                [animator replaceSubview:oldView with:newView];
             else
-                [[theWindow contentView] addSubview:newView];
+                [animator addSubview:newView];
             
             // Margins currently set for the HUD window on Leopard; Tiger uses NSPanel, which doesn't look as good
             NSRect frame = NSInsetRect([[theWindow contentView] frame], 1.0, 1.0);
@@ -294,7 +303,8 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
                 frame.size.height -= 20;
                 frame.origin.y += 20;
             }
-            [newView setFrame:frame];
+            animator = [newView respondsToSelector:@selector(animator)] ? [newView animator] : newView;
+            [animator setFrame:frame];
 
             // it's annoying to recenter if this is just in response to a selection change or something
             if (NO == [theWindow isVisible])
