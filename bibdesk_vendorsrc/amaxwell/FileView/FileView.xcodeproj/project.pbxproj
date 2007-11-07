@@ -6,6 +6,23 @@
 	objectVersion = 42;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F9F04CE80CE2612D00F28ED2 /* Build configuration list for PBXAggregateTarget "Framework + Plugin" */;
+			buildPhases = (
+				F9F04CE00CE260EB00F28ED2 /* CopyFiles */,
+			);
+			comments = "This target just copies the plugin into the framework's bundle, since the bundle needs to link against the framework.";
+			dependencies = (
+				F9F04CE50CE260F400F28ED2 /* PBXTargetDependency */,
+				F9F04CE70CE260FA00F28ED2 /* PBXTargetDependency */,
+			);
+			name = "Framework + Plugin";
+			productName = "Bundle QL plugin";
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
@@ -21,7 +38,6 @@
 		F946920B0CA56EC500AC2772 /* FVPreviewer.m in Sources */ = {isa = PBXBuildFile; fileRef = F94692000CA56EC500AC2772 /* FVPreviewer.m */; };
 		F946921D0CA5700800AC2772 /* FVQLIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F946921C0CA5700800AC2772 /* FVQLIcon.m */; };
 		F946921E0CA5701F00AC2772 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* FileView.framework */; };
-		F946921F0CA5702A00AC2772 /* FileView-Leopard.bundle in Resources */ = {isa = PBXBuildFile; fileRef = F94692130CA56F4300AC2772 /* FileView-Leopard.bundle */; };
 		F94692310CA5710500AC2772 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F946922D0CA5710500AC2772 /* QTKit.framework */; };
 		F94692320CA5710500AC2772 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F946922E0CA5710500AC2772 /* Quartz.framework */; };
 		F94692340CA5710500AC2772 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F94692300CA5710500AC2772 /* WebKit.framework */; };
@@ -86,17 +102,38 @@
 		F9A2D3F50CCBE15C002F517B /* FVTextIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3F30CCBE15C002F517B /* FVTextIcon.m */; };
 		F9A2D3FF0CCBE321002F517B /* FVIcon_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3FE0CCBE321002F517B /* FVIcon_Private.h */; };
 		F9A2D4280CCBE6BA002F517B /* FVQLIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D4270CCBE6BA002F517B /* FVQLIcon.h */; };
+		F9F04CEF0CE2618200F28ED2 /* FileView-Leopard.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = F94692130CA56F4300AC2772 /* FileView-Leopard.bundle */; };
 		F9F22DE90CDAD53300A9D449 /* License in Resources */ = {isa = PBXBuildFile; fileRef = F9F22DE80CDAD53300A9D449 /* License */; };
-		F9F22E190CDAD9B900A9D449 /* Notes in Resources */ = {isa = PBXBuildFile; fileRef = F9F22E180CDAD9B900A9D449 /* Notes */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		F94692950CA578FE00AC2772 /* PBXContainerItemProxy */ = {
+		F9F04CDA0CE260AC00F28ED2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* FileView */;
 			remoteInfo = FileView;
+		};
+		F9F04CE40CE260F400F28ED2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F94692120CA56F4300AC2772 /* FileView-Leopard */;
+			remoteInfo = "FileView-Leopard";
+		};
+		F9F04CE60CE260FA00F28ED2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* FileView */;
+			remoteInfo = FileView;
+		};
+		F9F04CFD0CE2624400F28ED2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */;
+			remoteInfo = "Framework + Plugin";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -108,6 +145,16 @@
 			dstSubfolderSpec = 10;
 			files = (
 				F94693FF0CA583A300AC2772 /* FileView.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9F04CE00CE260EB00F28ED2 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = FileView.framework/Resources;
+			dstSubfolderSpec = 16;
+			files = (
+				F9F04CEF0CE2618200F28ED2 /* FileView-Leopard.bundle in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -484,6 +531,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				F9F04CDB0CE260AC00F28ED2 /* PBXTargetDependency */,
 			);
 			name = "FileView-Leopard";
 			productName = "FileView-Leopard";
@@ -502,7 +550,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				F94692960CA578FE00AC2772 /* PBXTargetDependency */,
+				F9F04CFE0CE2624400F28ED2 /* PBXTargetDependency */,
 			);
 			name = "FileView Program";
 			productName = "FileView Program";
@@ -525,6 +573,7 @@
 				8DC2EF4F0486A6940098B216 /* FileView */,
 				F94692120CA56F4300AC2772 /* FileView-Leopard */,
 				F94692500CA575F000AC2772 /* FileView Program */,
+				F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */,
 			);
 		};
 /* End PBXProject section */
@@ -534,11 +583,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F946921F0CA5702A00AC2772 /* FileView-Leopard.bundle in Resources */,
 				8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */,
 				F94692A60CA5793B00AC2772 /* FVPreviewer.nib in Resources */,
 				F9F22DE90CDAD53300A9D449 /* License in Resources */,
-				F9F22E190CDAD9B900A9D449 /* Notes in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -615,10 +662,25 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		F94692960CA578FE00AC2772 /* PBXTargetDependency */ = {
+		F9F04CDB0CE260AC00F28ED2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8DC2EF4F0486A6940098B216 /* FileView */;
-			targetProxy = F94692950CA578FE00AC2772 /* PBXContainerItemProxy */;
+			targetProxy = F9F04CDA0CE260AC00F28ED2 /* PBXContainerItemProxy */;
+		};
+		F9F04CE50CE260F400F28ED2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F94692120CA56F4300AC2772 /* FileView-Leopard */;
+			targetProxy = F9F04CE40CE260F400F28ED2 /* PBXContainerItemProxy */;
+		};
+		F9F04CE70CE260FA00F28ED2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8DC2EF4F0486A6940098B216 /* FileView */;
+			targetProxy = F9F04CE60CE260FA00F28ED2 /* PBXContainerItemProxy */;
+		};
+		F9F04CFE0CE2624400F28ED2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */;
+			targetProxy = F9F04CFD0CE2624400F28ED2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -785,7 +847,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_PREFIX_HEADER = FileView_Prefix.pch;
 				INFOPLIST_FILE = "FileView-Leopard-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
@@ -852,6 +914,27 @@
 			};
 			name = Release;
 		};
+		F9F04CE20CE260EB00F28ED2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Bundle QL plugin";
+			};
+			name = Debug;
+		};
+		F9F04CE30CE260EB00F28ED2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Bundle QL plugin";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -887,6 +970,15 @@
 			buildConfigurations = (
 				F94692540CA575F100AC2772 /* Debug */,
 				F94692550CA575F100AC2772 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F9F04CE80CE2612D00F28ED2 /* Build configuration list for PBXAggregateTarget "Framework + Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9F04CE20CE260EB00F28ED2 /* Debug */,
+				F9F04CE30CE260EB00F28ED2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
