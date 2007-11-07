@@ -232,4 +232,45 @@
     [self setStatus:[aLink absoluteString]];
 }
 
+- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems;
+{
+	NSMutableArray *menuItems = [NSMutableArray arrayWithArray:defaultMenuItems];
+	NSMenuItem *item;
+	
+	if ([menuItems count] > 0) 
+		[menuItems addObject:[NSMenuItem separatorItem]];
+	
+	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Back", @"Menu item title")
+                                                                action:@selector(goBack:)
+                                                         keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Forward", @"Menu item title")
+                                                                action:@selector(goForward:)
+                                                         keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reload", @"Menu item title")
+                                                                action:@selector(reload:)
+                                                         keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Stop", @"Menu item title")
+                                                                action:@selector(stopLoading:)
+                                                         keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Increase Text Size", @"Menu item title")
+                                                                action:@selector(makeTextLarger:)
+                                                         keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size", @"Menu item title")
+                                                                action:@selector(makeTextSmaller:)
+                                                         keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	return menuItems;
+}
+
 @end
