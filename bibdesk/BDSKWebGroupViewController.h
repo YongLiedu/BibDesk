@@ -50,6 +50,8 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     IBOutlet NSButton *backButton;
     IBOutlet NSButton *forwardButton;
     IBOutlet NSButton *stopOrReloadButton;
+    IBOutlet NSTextField *bookmarkField;
+    IBOutlet NSPanel *addBookmarkSheet;
     
     BDSKWebGroup *group;
     BibDocument *document;
@@ -66,5 +68,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 
 - (IBAction)changeURL:(id)sender;
 - (IBAction)stopOrReloadAction:(id)sender;
+
+- (IBAction)dismissAddBookmarkSheet:(id)sender;
 
 @end

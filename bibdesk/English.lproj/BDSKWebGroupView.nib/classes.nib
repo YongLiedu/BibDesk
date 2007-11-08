@@ -26,11 +26,13 @@
             SUPERCLASS = NSWindowController; 
         }, 
         {
-            ACTIONS = {changeURL = id; stopOrReloadAction = id; }; 
+            ACTIONS = {changeURL = id; dismissAddBookmarkSheet = id; stopOrReloadAction = id; }; 
             CLASS = BDSKWebGroupViewController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                addBookmarkSheet = NSPanel; 
                 backButton = NSButton; 
+                bookmarkField = NSTextField; 
                 edgeView = BDSKEdgeView; 
                 forwardButton = NSButton; 
                 stopOrReloadButton = NSButton; 

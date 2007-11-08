@@ -150,6 +150,47 @@
     }
 }
 
+- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSString *URLString = (NSString *)contextInfo;
+	if (returnCode == NSOKButton) {
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString name:[bookmarkField stringValue]];
+	}
+	[URLString release]; //the contextInfo was retained
+}
+
+- (void)bookmarkPage:(id)sender{
+	WebDataSource *datasource = [[webView mainFrame] dataSource];
+	NSString *URLString = [[[datasource request] URL] absoluteString];
+	NSString *title = [datasource pageTitle];
+	if(title == nil) title = [URLString lastPathComponent];
+	
+	[bookmarkField setStringValue:title];
+	
+	[NSApp beginSheet:addBookmarkSheet
+       modalForWindow:[self window]
+        modalDelegate:self
+       didEndSelector:@selector(addBookmarkSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:[URLString retain]];
+}
+
+- (IBAction)dismissAddBookmarkSheet:(id)sender{
+    NSArray *bookmarkNames = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"name"];
+    if ([sender tag] == NSOKButton && [bookmarkNames containsObject:[bookmarkField stringValue]]) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Bookmark Name", @"Message in alert dialog") 
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"A bookmark with this name already exists.", @"Informative text in alert dialog")];
+        if (NSAlertAlternateReturn == [alert runModal]) {
+            [addBookmarkSheet orderOut:sender];
+            [NSApp endSheet:addBookmarkSheet returnCode:NSCancelButton];
+        }
+        return;
+    }
+    [addBookmarkSheet orderOut:sender];
+    [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
+}
+
 #pragma mark WebFrameLoadDelegate protocol
 
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
@@ -270,6 +311,15 @@
                                                          keyEquivalent:@""];
 	[menuItems addObject:[item autorelease]];
 	
+    [menuItems addObject:[NSMenuItem separatorItem]];
+        
+	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark This Page", @"Menu item title") stringByAppendingEllipsis]
+                                                                action:@selector(bookmarkPage:)
+                                                         keyEquivalent:@""];
+    [item setTarget:self];
+    [item setRepresentedObject:element];
+    [menuItems addObject:[item autorelease]];
+    
 	return menuItems;
 }
 
