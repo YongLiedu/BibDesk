@@ -754,21 +754,21 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090 /* BibDesk */;
+			remoteGlobalIDString = 8D1107260486CEB800E47090;
 			remoteInfo = BibDesk;
 		};
 		F9CA0C800CDF93E30059D36D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D57630D048677EA00EA77CD /* BibDesk */;
+			remoteGlobalIDString = 8D57630D048677EA00EA77CD;
 			remoteInfo = BibDesk;
 		};
 		F9CA0C820CDF93F90059D36D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F9CA0C7A0CDF93D10059D36D /* BibDesk+QuickLook */;
+			remoteGlobalIDString = F9CA0C7A0CDF93D10059D36D;
 			remoteInfo = "BibDesk+QuickLook";
 		};
 		F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */ = {
@@ -3376,7 +3376,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "####\n##\n## If you feel an undying urge to improve this,\n## discuss it with the poor slob that does the\n## releases first (and test it thoroughly)!\n##\n####\n\n# template image in source folder\nSRC_IMAGE=\"${SOURCE_ROOT}/BibDesk.dmg\"\n\n# temporary image\nDST_IMAGE=/tmp/BibDesk.dmg\n\n# final distribution image\nFINAL_IMAGE=\"$HOME/Desktop/BibDesk.dmg\"\n\n# see if this file already exists and bail\nif [ -f ${FINAL_IMAGE} ]; then\n\techo \"error: ${FINAL_IMAGE} exists\"\n\texit 1\nfi\n\n# see if a volume is already mounted or a\n# previous cp operation was botched\nif [ -e '/Volumes/BibDesk' ]; then\n\techo 'error: /Volumes/BibDesk exists'\n\techo 'warning: opening /Volumes in Finder'\n\t/usr/bin/open /Volumes/BibDesk\n\texit 1\nfi\n\n# remove temp image from a previous run\nif [ -f ${DST_IMAGE} ]; then\n\techo \"warning: removing ${DST_IMAGE}\"\n\t/bin/rm ${DST_IMAGE}\n\tif [ $? != 0 ]; then\n\t\techo \"error: failed to remove ${DST_IMAGE}\"\n\t\texit 1\n\tfi\nfi\n\n# stored zipped in svn, so unzip if needed\n# pass o to overwrite, or unzip waits for stdin\n# when trying to unpack the resource fork/EA\n\nif [ ! -f ${SRC_IMAGE} ]; then\n\t/usr/bin/unzip -uo ${SRC_IMAGE}.zip\n\tif [ $? != 0 ]; then\n\t\techo \"error: failed to unzip ${SRC_IMAGE}.zip\"\n\t\texit 1\n\tfi\nfi\n\n# copy empty image to /tmp\n/bin/cp ${SRC_IMAGE} /tmp\nif [ $? != 0 ]; then\n\techo \"error: failed to copy ${SRC_IMAGE} to /tmp\"\n\texit 1\nfi\n\n# mount image and use CpMac to copy all files\n/usr/bin/hdiutil attach ${DST_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to mount ${DST_IMAGE}\"\n\texit 1\nfi\n\n${SYSTEM_DEVELOPER_TOOLS}/CpMac -r ${BUILT_PRODUCTS_DIR}/BibDesk.app /Volumes/BibDesk\nif [ $? != 0 ]; then\n\techo \"error: failed to copy ${BUILT_PRODUCTS_DIR}/BibDesk.app\"\n\texit 1\nfi\n\n# tell finder to set the icon position\n/usr/bin/osascript -e \"tell application \\\"Finder\\\" to set the position of item 1 of the disk named \\\"BibDesk\\\" to {204, 148}\" && \\\nsleep 7; \\\n\nif [ $? != 0 ]; then\n\techo \"error: Finder failed to set position\"\n\texit 1\nfi\n\n# data is copied, so unmount the volume\n/usr/sbin/diskutil eject /Volumes/BibDesk\nif [ $? != 0 ]; then\n\techo \"error: failed to eject /Volumes/BibDesk\"\n\texit 1\nfi\n\n# convert image to read only and compress\n/usr/bin/hdiutil convert ${DST_IMAGE} -format UDZO -imagekey zlib-level=9 -o ${FINAL_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to convert ${DST_IMAGE}\"\n\texit 1\nfi\n\n# set internet-enable bit for Safari, even\n# though I dislike internet-enabled images...\n/usr/bin/hdiutil internet-enable -YES ${FINAL_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to internet-enable ${DST_IMAGE}\"\n\texit 1\nfi\n\nexit 0";
+			shellScript = "####\n##\n## If you feel an undying urge to improve this,\n## discuss it with the poor slob that does the\n## releases first (and test it thoroughly)!\n##\n####\n\n# template image in source folder\nSRC_IMAGE=\"${SOURCE_ROOT}/BibDesk.dmg\"\n\n# temporary image\nDST_IMAGE=/tmp/BibDesk.dmg\n\n# final distribution image\nFINAL_IMAGE=\"$HOME/Desktop/BibDesk.dmg\"\n\n# see if this file already exists and bail\nif [ -f ${FINAL_IMAGE} ]; then\n\techo \"error: ${FINAL_IMAGE} exists\"\n\texit 1\nfi\n\n# see if a volume is already mounted or a\n# previous cp operation was botched\nif [ -e '/Volumes/BibDesk' ]; then\n\techo 'error: /Volumes/BibDesk exists'\n\techo 'warning: opening /Volumes in Finder'\n\t/usr/bin/open /Volumes/BibDesk\n\texit 1\nfi\n\n# remove temp image from a previous run\nif [ -f ${DST_IMAGE} ]; then\n\techo \"warning: removing ${DST_IMAGE}\"\n\t/bin/rm ${DST_IMAGE}\n\tif [ $? != 0 ]; then\n\t\techo \"error: failed to remove ${DST_IMAGE}\"\n\t\texit 1\n\tfi\nfi\n\n# stored zipped in svn, so unzip if needed\n# pass o to overwrite, or unzip waits for stdin\n# when trying to unpack the resource fork/EA\n\nif [ ! -f ${SRC_IMAGE} ]; then\n\t/usr/bin/unzip -uo ${SRC_IMAGE}.zip\n\tif [ $? != 0 ]; then\n\t\techo \"error: failed to unzip ${SRC_IMAGE}.zip\"\n\t\texit 1\n\tfi\nfi\n\n# copy empty image to /tmp\n/bin/cp ${SRC_IMAGE} /tmp\nif [ $? != 0 ]; then\n\techo \"error: failed to copy ${SRC_IMAGE} to /tmp\"\n\texit 1\nfi\n\n# mount image and use CpMac to copy all files\n/usr/bin/hdiutil attach ${DST_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to mount ${DST_IMAGE}\"\n\texit 1\nfi\n\n${SYSTEM_DEVELOPER_TOOLS}/CpMac -r ${BUILT_PRODUCTS_DIR}/BibDesk.app /Volumes/BibDesk\nif [ $? != 0 ]; then\n\techo \"error: failed to copy ${BUILT_PRODUCTS_DIR}/BibDesk.app\"\n\texit 1\nfi\n\n# tell finder to set the icon position\n/usr/bin/osascript -e \"tell application \\\"Finder\\\" to set the position of item 1 of the disk named \\\"BibDesk\\\" to {204, 148}\"\n\nif [ $? != 0 ]; then\n\techo \"error: Finder failed to set position\"\n\texit 1\nfi\n\n# data is copied, so unmount the volume\n/usr/sbin/diskutil eject /Volumes/BibDesk\nif [ $? != 0 ]; then\n\techo \"error: failed to eject /Volumes/BibDesk\"\n\texit 1\nfi\n\n# convert image to read only and compress\n/usr/bin/hdiutil convert ${DST_IMAGE} -format UDZO -imagekey zlib-level=9 -o ${FINAL_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to convert ${DST_IMAGE}\"\n\texit 1\nfi\n\n# set internet-enable bit for Safari, even\n# though I dislike internet-enabled images...\n/usr/bin/hdiutil internet-enable -YES ${FINAL_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to internet-enable ${DST_IMAGE}\"\n\texit 1\nfi\n\nexit 0";
 		};
 		F9E0B071083E450C000109C6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4361,7 +4361,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 926;
+				CURRENT_PROJECT_VERSION = 927;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_DEBUGGING_SYMBOLS = default;
@@ -4410,8 +4410,8 @@
 					ppc,
 					i386,
 				);
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 926;
+				COPY_PHASE_STRIP = YES;
+				CURRENT_PROJECT_VERSION = 927;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_AUTO_VECTORIZATION = NO;
@@ -4467,7 +4467,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 926;
+				CURRENT_PROJECT_VERSION = 927;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
@@ -4815,7 +4815,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH)";
-				CURRENT_PROJECT_VERSION = 926;
+				CURRENT_PROJECT_VERSION = 927;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
@@ -4878,6 +4878,7 @@
 		F9CA0C7D0CDF93D20059D36D /* Test */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COPY_PHASE_STRIP = NO;
 				PRODUCT_NAME = "BibDesk+QuickLook";
 			};
 			name = Test;
