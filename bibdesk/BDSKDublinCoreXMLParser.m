@@ -59,6 +59,14 @@ static NSString *joinedArrayComponents(NSArray *arrayOfXMLNodes, NSString *separ
     return [strings componentsJoinedByString:separator];
 }
 
+static NSArray *dcProperties(NSXMLNode *node, NSString *key)
+{
+    NSArray *array = [node nodesForXPath:[NSString stringWithFormat:@"dc:%@", key] error:NULL];
+    if ([array count] == 0)
+        array = [node nodesForXPath:key error:NULL];
+    return [array count] ? array : nil;
+}
+
 + (NSArray *)itemsFromString:(NSString *)xmlString error:(NSError **)outError
 {
     if (nil == xmlString)
@@ -72,14 +80,22 @@ static NSString *joinedArrayComponents(NSArray *arrayOfXMLNodes, NSString *separ
     NSXMLElement *root = [doc rootElement];
     
     BOOL isOAI = [xmlString isOAIDublinCoreXMLString];
-    BOOL hasPrefix = NO;
-    
-    if (isOAI == NO && [[root nodesForXPath:@"//record-list" error:NULL] count] == 0 && [[root nodesForXPath:@"//dc:record-list" error:NULL] count] != 0)
-        hasPrefix = YES;
-    
-    NSString *recordsXPath = isOAI ? @"//ListRecords/record/metadata" : hasPrefix ? @"//dc:record-list/dc:dc-record" : @"//record-list/dc-record";
     NSMutableArray *arrayOfPubs = [NSMutableArray array];
-    NSEnumerator *nodeEnum = [[root nodesForXPath:recordsXPath error:NULL] objectEnumerator];
+    NSArray *records = nil;
+    
+    if (isOAI) {
+        records = [root nodesForXPath:@"//ListRecords/record/metadata" error:NULL];
+    } else {
+        records = [root nodesForXPath:@"//dc:record-list/dc:dc-record" error:NULL];
+        if ([records count] == 0)
+            records = [root nodesForXPath:@"//record-list/dc-record" error:NULL];
+        if ([records count] == 0)
+            records = [root nodesForXPath:@"//dc-record" error:NULL];
+        if ([records count] == 0)
+            records = [root nodesForXPath:@"//record" error:NULL];
+    }
+    
+    NSEnumerator *nodeEnum = [records objectEnumerator];
     NSXMLNode *node;
     
     while (node = [nodeEnum nextObject]) {
@@ -89,22 +105,25 @@ static NSString *joinedArrayComponents(NSArray *arrayOfXMLNodes, NSString *separ
             node = [node childAtIndex:0];
         
         NSMutableDictionary *pubDict = [[NSMutableDictionary alloc] initWithCapacity:5];
+        NSMutableArray *authors;
+        NSArray *array;
         
-        NSMutableArray *authors = [NSMutableArray arrayWithArray:[node nodesForXPath:hasPrefix ? @"dc:creator" : @"creator" error:NULL]];
-        [authors addObjectsFromArray:[node nodesForXPath:hasPrefix ? @"dc:contributor" : @"contributor" error:NULL]];
+        authors = [NSMutableArray array];
+        [authors addObjectsFromArray:dcProperties(node, @"creator")];
+        [authors addObjectsFromArray:dcProperties(node, @"contributor")];
         [pubDict setObject:joinedArrayComponents(authors, @" and ") forKey:BDSKAuthorString];
         
-        NSArray *array = [node nodesForXPath:hasPrefix ? @"dc:title" : @"title" error:NULL];
-        [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKTitleString];
+        if (array = dcProperties(node, @"title"))
+            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKTitleString];
         
-        array = [node nodesForXPath:hasPrefix ? @"dc:subject" : @"subject" error:NULL];
-        [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKKeywordsString];
+        if (array = dcProperties(node, @"subject"))
+            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKKeywordsString];
         
-        array = [node nodesForXPath:hasPrefix ? @"dc:publisher" : @"publisher" error:NULL];
-        [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKPublisherString];
+        if (array = dcProperties(node, @"publisher"))
+            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKPublisherString];
         
-        array = [node nodesForXPath:hasPrefix ? @"dc:location" : @"location" error:NULL];
-        [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:@"Location"];
+        if (array = dcProperties(node, @"location"))
+            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:@"Location"];
 
         BibItem *pub = [[BibItem alloc] initWithType:BDSKBookString
                                             fileType:BDSKBibtexString 
@@ -127,7 +146,7 @@ static NSString *joinedArrayComponents(NSArray *arrayOfXMLNodes, NSString *separ
 @implementation NSString (BDSKDublinCoreXMLParserExtensions)
 
 - (BOOL)isDublinCoreXMLString{
-    AGRegex *regex = [AGRegex regexWithPattern:@"<(dc:)?record-list>[ \t\n\r]*<(dc:)?dc-record>"];
+    AGRegex *regex = [AGRegex regexWithPattern:@"(<(dc:)?record-list>[ \t\n\r]*<(dc:)?dc-record>)|(<(dc:)?(dc-)?record>[ \t\n\r]*<dc:)"];
     
     return nil != [regex findInString:self];
 }
