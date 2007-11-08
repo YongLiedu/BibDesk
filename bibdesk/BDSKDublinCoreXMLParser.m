@@ -74,6 +74,10 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
     
     NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:xmlString options:0 error:outError];
     
+    if (nil == doc && [xmlString hasPrefix:@"<xml? "] == NO) {
+        xmlString = [NSString stringWithFormat:@"<?xml version=\"1.0\"?>\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">%@\n</rdf:RDF>", xmlString];
+        doc = [[NSXMLDocument alloc] initWithXMLString:xmlString options:0 error:outError];
+    }
     if (nil == doc)
         return nil;
     
@@ -86,9 +90,7 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
     if (isOAI) {
         records = [root nodesForXPath:@"//ListRecords/record/metadata" error:NULL];
     } else {
-        records = [root nodesForXPath:@"//dc:record-list/dc:dc-record" error:NULL];
-        if ([records count] == 0)
-            records = [root nodesForXPath:@"//record-list/dc-record" error:NULL];
+        records = [root nodesForXPath:@"//dc:dc-record" error:NULL];
         if ([records count] == 0)
             records = [root nodesForXPath:@"//dc-record" error:NULL];
         if ([records count] == 0)
