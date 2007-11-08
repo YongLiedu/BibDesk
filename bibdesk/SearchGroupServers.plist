@@ -102,6 +102,19 @@
                 resultEncoding = "utf-8";
             };
         },
+        /* ADS z39.50 connection */
+        /* Bastard DC XML output that's missing any XML header. */
+        /* http://adsabs.harvard.edu/abs_doc/ads_server.html    */
+        {
+            name = "ADS Astronomy";
+            database = "AST";
+            host = "z3950.adsabs.harvard.edu";
+            port = "210";
+            options = {
+                recordSyntax = "DC XML";
+                resultEncoding = "utf-8";
+            };
+        },
         /* University of Basel z39.50 connection */
         /* Example of a UTF-8 server which accepts diacritics */
         /* in search strings.                                 */
