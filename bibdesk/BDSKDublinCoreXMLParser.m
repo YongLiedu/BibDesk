@@ -115,6 +115,7 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
         [authors addObjectsFromArray:dcProperties(node, @"contributor")];
         [pubDict setObject:joinedArrayComponents(authors, @" and ") forKey:BDSKAuthorString];
         
+        // arm: most of these probably don't have to be arrays, at least for ADS
         if (array = dcProperties(node, @"title"))
             [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKTitleString];
         
@@ -126,8 +127,32 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
         
         if (array = dcProperties(node, @"location"))
             [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:@"Location"];
+        
+        if (array = dcProperties(node, @"date"))
+            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKDateString];
 
-        BibItem *pub = [[BibItem alloc] initWithType:BDSKBookString
+        if (array = dcProperties(node, @"description")) {
+            NSString *cleanString = joinedArrayComponents(array, @"; ");
+            cleanString = [cleanString fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines];
+            if (cleanString)
+                [pubDict setObject:cleanString forKey:BDSKAbstractString];
+        }
+        
+        if (array = dcProperties(node, @"relation"))
+            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKUrlString];
+
+        // ADS lumps Journal, Volume, Issue, pages into @"source", which is stupid;
+        // for conferences, it adds date/location/editors as well, so this is hopeless.
+        
+        // using @"Note" field is more sensible, but probably less obvious to the user
+        if (array = dcProperties(node, @"source"))
+            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKJournalString];
+
+        // this XML is a mess
+        [pubDict setObject:[node XMLString] forKey:BDSKAnnoteString];
+
+        // @article is most common for ADS
+        BibItem *pub = [[BibItem alloc] initWithType:BDSKArticleString
                                             fileType:BDSKBibtexString 
                                              citeKey:nil 
                                            pubFields:pubDict 
