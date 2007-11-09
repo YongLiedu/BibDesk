@@ -286,13 +286,12 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
 
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
     NSString *tcID = [tableColumn identifier];
-    NSDictionary *info = [item info];
     if ([tcID isEqualToString:@"label"]) {
         return [NSDictionary dictionaryWithObjectsAndKeys:[item label], OATextWithIconCellStringKey, [item icon], OATextWithIconCellImageKey, nil];
     } else if ([tcID isEqualToString:@"server"]) {
-        [info valueForKey:@"name"];
+        return [[item info] valueForKey:@"name"];
     } else if ([tcID isEqualToString:@"search term"]) {
-        [info valueForKey:@"search term"];
+        return [[item info] valueForKey:@"search term"];
     }
     return nil;
 }
