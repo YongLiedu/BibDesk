@@ -673,6 +673,18 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
     return [self initWithUrlString:[dictionary objectForKey:URL_KEY] name:[dictionary objectForKey:TITLE_KEY]];
+    if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeFolderString]) {
+        NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
+        NSDictionary *dict;
+        NSMutableArray *newChildren = [NSMutableArray array];
+        while (dict = [dictEnum nextObject])
+            [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
+        return [self initFolderWithChildren:newChildren name:[dictionary objectForKey:TITLE_KEY]];
+    } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeSeparatorString]) {
+        return [self initSeparator];
+    } else {
+        return [self initWithUrlString:[dictionary objectForKey:URL_KEY] name:[dictionary objectForKey:TITLE_KEY]];
+    }
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
