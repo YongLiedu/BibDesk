@@ -597,6 +597,10 @@
     return [self hasWebGroupSelected];
 }
 
+- (BOOL)validateAddBookmarkMenuItem:(NSMenuItem *)menuItem {
+    return [self hasWebGroupSelected];
+}
+
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 
@@ -788,6 +792,9 @@
     }
     else if (act == @selector(openBookmark:)){
         return [self validateOpenBookmarkMenuItem:menuItem];
+    }
+    else if (act == @selector(addBookmark:)){
+        return [self validateAddBookmarkMenuItem:menuItem];
     }
     else {
 		return [super validateMenuItem:menuItem];

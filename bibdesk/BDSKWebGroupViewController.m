@@ -134,6 +134,10 @@
 	}
 }
 
+- (IBAction)addBookmark:(id)sender {
+    [webView addBookmark:sender];
+}
+
 - (void)setRetrieving:(BOOL)retrieving {
     [group setRetrieving:retrieving];
     [backButton setEnabled:[webView canGoBack]];
