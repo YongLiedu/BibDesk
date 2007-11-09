@@ -39,9 +39,19 @@
 #import <Cocoa/Cocoa.h>
 
 
+enum {
+    BDSKSearchBookmarkTypeBookmark,
+    BDSKSearchBookmarkTypeFolder,
+    BDSKSearchBookmarkTypeSeparator
+};
+
+@class BDSKSearchBookmark;
+
 @interface BDSKSearchBookmarkController : NSWindowController {
-    IBOutlet NSTableView *tableView;
+    IBOutlet NSOutlineView *outlineView;
     NSMutableArray *bookmarks;
+    NSArray *draggedBookmarks;
+    NSMutableDictionary *toolbarItems;
     NSUndoManager *undoManager;
 }
 
@@ -54,12 +64,19 @@
 - (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)index;
 - (void)removeObjectFromBookmarksAtIndex:(unsigned)index;
 
-- (void)addBookmarkWithInfo:(NSDictionary *)info label:(NSString *)label;
+- (void)addBookmarkWithInfo:(NSDictionary *)info label:(NSString *)label toFolder:(BDSKSearchBookmark *)folder;
+
+- (IBAction)insertBookmarkFolder:(id)sender;
+- (IBAction)insertBookmarkSeparator:(id)sender;
+- (IBAction)deleteBookmark:(id)sender;
 
 - (void)saveBookmarks;
 - (void)handleSearchBookmarkChangedNotification:(NSNotification *)notification;
+- (void)handleSearchBookmarkWillBeRemovedNotification:(NSNotification *)notification;
 
 - (NSUndoManager *)undoManager;
+
+- (void)setupToolbar;
 
 @end
 
@@ -67,16 +84,40 @@
 @interface BDSKSearchBookmark : NSObject <NSCopying> {
     NSString *label;
     NSDictionary *info;
+    NSMutableArray *children;
+    BDSKSearchBookmark *parent;
+    int bookmarkType;
 }
 
+- (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel;
+- (id)initFolderWithLabel:(NSString *)aLabel;
+- (id)initSeparator;
 - (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel;
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 
 - (NSDictionary *)dictionaryValue;
+
+- (int)bookmarkType;
 
 - (NSDictionary *)info;
 
 - (NSString *)label;
 - (void)setLabel:(NSString *)newLabel;
 
+- (NSImage *)icon;
+
+- (BDSKSearchBookmark *)parent;
+- (void)setParent:(BDSKSearchBookmark *)newParent;
+- (NSArray *)children;
+- (void)insertChild:(BDSKSearchBookmark *)child atIndex:(unsigned int)index;
+- (void)addChild:(BDSKSearchBookmark *)child;
+- (void)removeChild:(BDSKSearchBookmark *)child;
+
+- (BOOL)isDescendantOf:(BDSKSearchBookmark *)bookmark;
+- (BOOL)isDescendantOfArray:(NSArray *)bookmarks;
+
+@end
+
+
+@interface BDSKBookmarkOutlineView : NSOutlineView
 @end

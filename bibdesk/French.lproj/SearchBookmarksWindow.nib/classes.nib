@@ -1,12 +1,28 @@
 {
     IBClasses = (
+        {
+            CLASS = BDSKBookmarkOutlineView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSOutlineView; 
+        }, 
+        {
+            CLASS = BDSKFilePathCell; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = BDSKTextWithIconCell; 
+        }, 
         {CLASS = BDSKSearchBookmark; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
+            ACTIONS = {
+                deleteBookmark = id; 
+                insertBookmarkFolder = id; 
+                insertBookmarkSeparator = id; 
+            }; 
             CLASS = BDSKSearchBookmarkController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {tableView = NSTableView; }; 
+            OUTLETS = {outlineView = NSOutlineView; }; 
             SUPERCLASS = NSWindowController; 
         }, 
+        {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
     ); 
     IBVersion = 1; 

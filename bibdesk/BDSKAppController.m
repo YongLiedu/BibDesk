@@ -527,6 +527,29 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 // implemented in order to prevent the Copy As > Template menu from being updated at every key event
 - (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action { return NO; }
 
+- (void)addMenuItemsForBookmarks:(NSArray *)bookmarks toMenu:(NSMenu *)menu {
+    int i, iMax = [bookmarks count];
+    for (i = 0; i < iMax; i++) {
+        BDSKSearchBookmark *bm = [bookmarks objectAtIndex:i];
+        if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
+            NSString *label = [bm label];
+            NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[bm label]] autorelease];
+            NSMenuItem *item = [menu addItemWithTitle:label ? label : @"" action:NULL keyEquivalent:@""];
+            [item setImage:[bm icon]];
+            [item setSubmenu:submenu];
+            [self addMenuItemsForBookmarks:[bm children] toMenu:submenu];
+        } else if ([bm bookmarkType] == BDSKSearchBookmarkTypeSeparator) {
+            [menu addItem:[NSMenuItem separatorItem]];
+        } else {
+            NSString *label = [bm label];
+            NSMenuItem *item = [menu addItemWithTitle:label ? label : @"" action:@selector(newSearchGroupFromBookmark:)  keyEquivalent:@""];
+            [item setTarget:self];
+            [item setRepresentedObject:[bm info]];
+            [item setImage:[bm icon]];
+        }
+    }
+}
+
 - (void)menuNeedsUpdate:(NSMenu *)menu {
     
     if ([menu isEqual:columnsMenu]) {
@@ -557,17 +580,13 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
     } else if ([menu isEqual:searchBookmarksMenu]) {
         
-        BDSKSearchBookmarkController *bmController = [BDSKSearchBookmarkController sharedBookmarkController];
-        int i = [menu numberOfItems], iMax = [bmController countOfBookmarks];
+        NSArray *bookmarks = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarks];
+        int i = [menu numberOfItems];
         while (--i > 2)
             [menu removeItemAtIndex:i];
-        if (iMax > 0)
+        if ([bookmarks count] > 0)
             [menu addItem:[NSMenuItem separatorItem]];
-        for (i = 0; i < iMax; i++) {
-            BDSKSearchBookmark *bm = [bmController objectInBookmarksAtIndex:i];
-            NSMenuItem *item = [menu addItemWithTitle:[bm label] action:@selector(newSearchGroupFromBookmark:)  keyEquivalent:@""];
-            [item setRepresentedObject:[bm info]];
-        }
+        [self addMenuItemsForBookmarks:bookmarks toMenu:menu];
         
     }
 }
