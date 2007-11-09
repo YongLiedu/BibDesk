@@ -139,8 +139,12 @@
         
     }
     
-    if (0 == [items count] && outError)
-        *outError = error;
+    if (0 == [items count]) {
+        // signal an error condition
+        items = nil;
+        if (outError)
+            *outError = error;
+    }
     
     return items;  
     
