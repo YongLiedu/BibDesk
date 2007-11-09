@@ -70,18 +70,27 @@
     NSArray *preNodes = [[xmlDocument rootElement] nodesForXPath:prePath
                                                     error:&error];
     
-    if ([preNodes count] < 1) return items;
+    if ([preNodes count] < 1) {
+        if (outError) *outError = error;
+        return nil;
+    }
     
     NSString *preString = [[preNodes objectAtIndex:0] stringValue];
     
     BOOL isPartialData = NO;
     
     NSArray* bibtexItems = [BDSKBibTeXParser itemsFromString:preString document:nil isPartialData:&isPartialData error:&error];
-    if (bibtexItems == nil){
-        if(outError) *outError = error;
-        return nil;
+    if ([bibtexItems count] == 0){
+        // display a fake item in the table rather than the annoying modal failure alert
+        NSString *errMsg = NSLocalizedString(@"Unable to parse as BibTeX", @"google scholar error");
+        NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:errMsg, BDSKTitleString, nil];
+        BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+        [items addObject:errorItem];
+        [errorItem release];
     }
-    [items addObjectsFromArray:bibtexItems];
+    else {
+        [items addObjectsFromArray:bibtexItems];
+    }
 
     return items;  
     

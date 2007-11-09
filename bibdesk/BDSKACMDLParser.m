@@ -74,7 +74,10 @@
     NSArray *BibTeXLinkNodes = [[xmlDocument rootElement] nodesForXPath:BibTexLinkNodePath
                                                     error:&error];
     
-    if ([BibTeXLinkNodes count] < 1) return items;
+    if ([BibTeXLinkNodes count] < 1) {
+        if (outError) *outError = error;
+        return nil;
+    }
     
     NSXMLNode *btlinknode = [BibTeXLinkNodes objectAtIndex:0];
     NSString *onClickValue = [btlinknode stringValueOfAttribute:@"onclick"];
@@ -94,20 +97,36 @@
     
     NSArray *preNodes = [[btxmlDoc rootElement] nodesForXPath:prePath
                                                            error:&error];
-    if ([preNodes count] < 1) return items;
+    if ([preNodes count] < 1) {
+        if (outError) *outError = error;
+        return nil;
+    }
     
-    NSString *preString = [[preNodes objectAtIndex:0] stringValue];
+    // see http://portal.acm.org/citation.cfm?id=1185814&coll=Portal&dl=GUIDE&CFID=42263270&CFTOKEN=40475994#
+    // which gives a bibtex string in two parts, each part enclosed in a <pre> tag (is it just me or does it look like a drunk made this site?)
+    NSString *preString;
+    if ([preNodes count] == 0)
+        preString = [[preNodes objectAtIndex:0] stringValue];
+    else
+        preString = [[preNodes arrayByPerformingSelector:@selector(stringValue)] componentsJoinedByString:@" "];
     
     
     BOOL isPartialData = NO;
     
     NSArray* bibtexItems = [BDSKBibTeXParser itemsFromString:preString document:nil isPartialData:&isPartialData error:&error];
-    if (bibtexItems == nil){
-        if(outError) *outError = error;
-        return nil;
+    if ([bibtexItems count] == 0){
+        // display a fake item in the table rather than the annoying modal failure alert
+        NSString *errMsg = NSLocalizedString(@"Unable to parse as BibTeX", @"google scholar error");
+        NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:errMsg, BDSKTitleString, nil];
+        BibItem *errorItem = [[BibItem alloc] initWithType:BDSKMiscString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+        [items addObject:errorItem];
+        [errorItem release];
+    }
+    else {
+        [items addObjectsFromArray:bibtexItems];
     }
     
-    BibItem *bibtexItem = [bibtexItems objectAtIndex:0]; 
+    BibItem *bibtexItem = [items objectAtIndex:0]; 
 
     // Get the PDF URL, if possible:
     
@@ -122,7 +141,6 @@
         [bibtexItem setField:BDSKUrlString toValue:pdfURLString];
     }
     
-    [items addObject:bibtexItem];
     return items;  
     
 }
