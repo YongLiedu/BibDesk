@@ -377,15 +377,19 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
     return [[tableColumn identifier] isEqualToString:@"label"] && [item bookmarkType] != BDSKSearchBookmarkTypeSeparator;
 }
 
-- (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items {
+- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows {
+    NSMutableArray *items = [NSMutableArray array];
+    NSEnumerator *rowEnum = [rows objectEnumerator];
+    NSNumber *row;
+    
+    while (row = [rowEnum nextObject])
+        [items addObject:[outlineView itemAtRow:[row intValue]]];
+    
     NSEnumerator *itemEnum = [[self minimumCoverForBookmarks:items] reverseObjectEnumerator];
     BDSKSearchBookmark *item;
+    
     while (item = [itemEnum  nextObject])
         [self removeChildBookmark:item];
-}
-
-- (BOOL)outlineView:(NSOutlineView *)ov canDeleteItems:(NSArray *)items {
-    return [items count] > 0;
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov drawSeparatorRowForItem:(id)item {
