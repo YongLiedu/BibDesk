@@ -186,6 +186,7 @@
     NSArray *newPubs = [BDSKWebParser itemsFromDocument:domDocument fromURL:url error:&error];
     if (nil == newPubs) {
 #warning remove for release
+        // !!! logs are here to help diagnose problems that users are reporting
         NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
         [NSApp presentError:error];
     }
@@ -200,13 +201,14 @@
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-#warning is this really a failure?
+#warning FIXME: is this really a failure?
+    // arm: I'm not sure what the provisional load failure implies; from the docs it sounds like things will continue loading, so do we really want to kill things here?  If anyone knows or has a test case for this, please comment.
     if (frame == loadingWebFrame) {
         [self setRetrieving:NO];
         [group addPublications:nil];
         loadingWebFrame = nil;
     }
-#warning remove for release
+    // !!! logs are here to help diagnose problems that users are reporting
     NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
 }
 
@@ -216,7 +218,7 @@
         [group addPublications:nil];
         loadingWebFrame = nil;
     }
-#warning remove for release
+    // !!! logs are here to help diagnose problems that users are reporting
     NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
     [NSApp presentError:error];
 }
