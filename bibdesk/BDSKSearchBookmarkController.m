@@ -364,15 +364,6 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
 
 #pragma mark NSOutlineView delegate methods
 
-- (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-    if ([[tableColumn identifier] isEqualToString:@"file"]) {
-        if ([item bookmarkType] == BDSKSearchBookmarkTypeFolder)
-            [cell setTextColor:[NSColor disabledControlTextColor]];
-        else
-            [cell setTextColor:[NSColor controlTextColor]];
-    }
-}
-
 - (BOOL)outlineView:(NSOutlineView *)ov shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item {
     return [[tableColumn identifier] isEqualToString:@"label"] && [item bookmarkType] != BDSKSearchBookmarkTypeSeparator;
 }
