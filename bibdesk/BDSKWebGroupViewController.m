@@ -180,6 +180,8 @@
     
     NSError *error = nil;
     NSArray *newPubs = [BDSKWebParser itemsFromDocument:domDocument fromURL:url error:&error];
+    if (nil == newPubs)
+        [NSApp presentError:error];
         
     if (frame == loadingWebFrame) {
         [self setRetrieving:NO];
@@ -196,6 +198,7 @@
         [group addPublications:nil];
         loadingWebFrame = nil;
     }
+    [NSApp presentError:error];
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
