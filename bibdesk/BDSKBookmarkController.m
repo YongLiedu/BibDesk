@@ -492,9 +492,9 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-    if ([item bookmarkType] != BDSKBookmarkTypeBookmark)
+    if ([item bookmarkType] == BDSKBookmarkTypeBookmark)
         return YES;
-    else if ([item bookmarkType] != BDSKBookmarkTypeFolder)
+    else if ([item bookmarkType] == BDSKBookmarkTypeFolder)
         return [[tableColumn identifier] isEqualToString:@"name"];
     return NO;
 }
