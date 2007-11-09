@@ -550,7 +550,8 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
         return [self initSeparator];
     } else {
         NSMutableDictionary *dict = [[dictionary mutableCopy] autorelease];
-        [dict removeObjectForKey:@"label"];
+        [dict removeObjectForKey:TYPE_KEY];
+        [dict removeObjectForKey:LABEL_KEY];
         return [self initWithInfo:dict label:[dictionary objectForKey:LABEL_KEY]];
     }
 }
