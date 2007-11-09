@@ -53,9 +53,9 @@ static NSString *BDSKSearchBookmarkTypeBookmarkString = @"bookmark";
 static NSString *BDSKSearchBookmarkTypeFolderString = @"folder";
 static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
 
-#define CHILDREN_KEY    @"children"
-#define LABEL_KEY       @"label"
-#define TYPE_KEY        @"type"
+#define CHILDREN_KEY        @"children"
+#define LABEL_KEY           @"label"
+#define BOOKMARK_TYPE_KEY   @"bookmarkType"
 
 @implementation BDSKSearchBookmarkController
 
@@ -539,18 +539,18 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
-    if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeFolderString]) {
+    if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeFolderString]) {
         NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
         NSDictionary *dict;
         NSMutableArray *newChildren = [NSMutableArray array];
         while (dict = [dictEnum nextObject])
             [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
         return [self initFolderWithChildren:newChildren label:[dictionary objectForKey:LABEL_KEY]];
-    } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeSeparatorString]) {
+    } else if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeSeparatorString]) {
         return [self initSeparator];
     } else {
         NSMutableDictionary *dict = [[dictionary mutableCopy] autorelease];
-        [dict removeObjectForKey:TYPE_KEY];
+        [dict removeObjectForKey:BOOKMARK_TYPE_KEY];
         [dict removeObjectForKey:LABEL_KEY];
         return [self initWithInfo:dict label:[dictionary objectForKey:LABEL_KEY]];
     }
@@ -585,11 +585,11 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
 - (NSDictionary *)dictionaryValue {
     NSMutableDictionary *dictionary = nil;
     if (bookmarkType == BDSKSearchBookmarkTypeFolder) {
-        dictionary = [NSDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeFolderString, TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, label, LABEL_KEY, nil];
+        dictionary = [NSDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeFolderString, BOOKMARK_TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, label, LABEL_KEY, nil];
     } else if (bookmarkType == BDSKSearchBookmarkTypeSeparator) {
-        dictionary = [NSDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeSeparatorString, TYPE_KEY, nil];
+        dictionary = [NSDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeSeparatorString, BOOKMARK_TYPE_KEY, nil];
     } else {
-        dictionary = [NSMutableDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeBookmarkString, TYPE_KEY, label, LABEL_KEY, nil];
+        dictionary = [NSMutableDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeBookmarkString, BOOKMARK_TYPE_KEY, label, LABEL_KEY, nil];
         [(NSMutableDictionary *)dictionary addEntriesFromDictionary:info];
     }
     return dictionary;
