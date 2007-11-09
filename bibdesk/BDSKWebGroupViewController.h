@@ -44,14 +44,12 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 @interface BDSKWebGroupViewController : NSWindowController {
     IBOutlet BDSKCollapsibleView *view;
     IBOutlet BDSKEdgeView *edgeView;
-    IBOutlet NSComboBox *urlComboBox;
+    IBOutlet NSTextField *urlField;
     IBOutlet BDSKEdgeView *webEdgeView;
     IBOutlet WebView *webView;
     IBOutlet NSButton *backButton;
     IBOutlet NSButton *forwardButton;
     IBOutlet NSButton *stopOrReloadButton;
-    IBOutlet NSTextField *bookmarkField;
-    IBOutlet NSPanel *addBookmarkSheet;
     
     BDSKWebGroup *group;
     BibDocument *document;
@@ -66,9 +64,9 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 - (BDSKWebGroup *)group;
 - (void)setGroup:(BDSKWebGroup *)newGroup;
 
+- (void)loadURL:(NSURL *)theURL;
+
 - (IBAction)changeURL:(id)sender;
 - (IBAction)stopOrReloadAction:(id)sender;
-
-- (IBAction)dismissAddBookmarkSheet:(id)sender;
 
 @end

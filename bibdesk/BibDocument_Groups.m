@@ -1300,6 +1300,13 @@ The groupedPublications array is a subset of the publications array, developed b
     else NSBeep();
 }
 
+- (IBAction)openBookmark:(id)sender{
+    if ([self hasWebGroupSelected]) {
+        [webGroupViewController loadURL:[sender representedObject]];
+    } else
+        NSBeep();
+}
+
 #pragma mark Add or remove items
 
 - (NSArray *)mergeInPublications:(NSArray *)items{

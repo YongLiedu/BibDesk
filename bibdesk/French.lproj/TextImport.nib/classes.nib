@@ -22,14 +22,12 @@
                 addItemAndCloseAction = id; 
                 addTextToCurrentFieldAction = id; 
                 bookmarkLink = id; 
-                bookmarkPage = id; 
                 changeTypeOfBibAction = id; 
-                chooseBookmarkAction = id; 
                 clearAction = id; 
                 closeAction = id; 
+                consolidateLinkedFiles = id; 
                 copyLinkedLocationAsRemoteUrl = id; 
                 copyLocationAsRemoteUrl = id; 
-                dismissAddBookmarkSheet = id; 
                 dismissUrlSheet = id; 
                 downloadLinkedFileAsLocalUrl = id; 
                 editSelectedFieldAsRawBibTeX = id; 
@@ -37,23 +35,19 @@
                 importFromFileAction = id; 
                 importFromPasteboardAction = id; 
                 importFromWebAction = id; 
-                redo = id; 
+                openBookmark = id; 
                 saveFileAsLocalUrl = id; 
                 showCiteKeyWarning = id; 
                 showHelpAction = id; 
                 stopOrReloadAction = id; 
-                undo = id; 
             }; 
             CLASS = BDSKTextImportController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 actionMenuButton = BDSKImagePopUpButton; 
                 addAndCloseButton = NSButton; 
-                addBookmarkSheet = NSPanel; 
                 addButton = NSButton; 
                 backButton = NSButton; 
-                bookmarkField = NSTextField; 
-                bookmarkPopUpButton = NSPopUpButton; 
                 citeKeyField = NSTextField; 
                 citeKeyWarningButton = NSButton; 
                 clearButton = NSButton; 
@@ -75,7 +69,15 @@
             }; 
             SUPERCLASS = BDSKSheetController; 
         }, 
+        {
+            ACTIONS = {openBookmark = id; }; 
+            CLASS = BDSKURLWindow; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {CancelButton = NSButton; OKButton = NSButton; URLField = NSTextField; }; 
+            SUPERCLASS = NSPanel; 
+        }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }, 
         {CLASS = TextImportItemTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }
     ); 
     IBVersion = 1; 

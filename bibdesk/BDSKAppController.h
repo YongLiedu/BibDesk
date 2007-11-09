@@ -61,6 +61,7 @@
 	IBOutlet NSMenu *groupSortMenu;
 	IBOutlet NSMenu *copyAsTemplateMenu;
 	IBOutlet NSMenu *searchBookmarksMenu;
+	IBOutlet NSMenu *bookmarksMenu;
 
     NSLock *metadataCacheLock;
     int32_t canWriteMetadata __attribute__ ((aligned (4)));

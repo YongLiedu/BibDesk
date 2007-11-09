@@ -9,8 +9,27 @@
 #import "BDSKBookmarkController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument.h"
+#import "NSImage+Toolbox.h"
 
 static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
+
+static NSString *BDSKBookmarksToolbarIdentifier = @"BDSKBookmarksToolbarIdentifier";
+static NSString *BDSKBookmarksNewBookmarkToolbarItemIdentifier = @"BDSKBookmarksNewBookmarkToolbarItemIdentifier";
+static NSString *BDSKBookmarksNewFolderToolbarItemIdentifier = @"BDSKBookmarksNewFolderToolbarItemIdentifier";
+static NSString *BDSKBookmarksNewSeparatorToolbarItemIdentifier = @"BDSKBookmarksNewSeparatorToolbarItemIdentifier";
+static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDeleteToolbarItemIdentifier";
+
+static NSString *BDSKBookmarkChangedNotification = @"BDSKBookmarkChangedNotification";
+static NSString *BDSKBookmarkWillBeRemovedNotification = @"BDSKBookmarkWillBeRemovedNotification";
+
+static NSString *BDSKBookmarkTypeBookmarkString = @"bookmark";
+static NSString *BDSKBookmarkTypeFolderString = @"folder";
+static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
+
+#define CHILDREN_KEY    @"Children"
+#define TITLE_KEY       @"Title"
+#define URL_KEY         @"URLString"
+#define TYPE_KEY        @"Type"
 
 @implementation BDSKBookmarkController
 
@@ -40,6 +59,8 @@ static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
 			}
             
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBookmarkChangedNotification:) name:BDSKBookmarkChangedNotification object:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBookmarkWillBeRemovedNotification:) name:BDSKBookmarkWillBeRemovedNotification object:nil];
 		}
     }
     return self;
@@ -54,8 +75,9 @@ static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
 - (NSString *)windowNibName { return @"BookmarksWindow"; }
 
 - (void)windowDidLoad {
+    [self setupToolbar];
     [self setWindowFrameAutosaveName:@"BDSKBookmarksWindow"];
-    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
+    [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
 }
 
 - (NSArray *)bookmarks {
@@ -81,18 +103,205 @@ static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
 - (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)idx {
     [[[self undoManager] prepareWithInvocationTarget:self] removeObjectFromBookmarksAtIndex:idx];
     [bookmarks insertObject:obj atIndex:idx];
+    [self handleBookmarkChangedNotification:nil];
 }
 
 - (void)removeObjectFromBookmarksAtIndex:(unsigned)idx {
     [[[self undoManager] prepareWithInvocationTarget:self] insertObject:[bookmarks objectAtIndex:idx] inBookmarksAtIndex:idx];
     [bookmarks removeObjectAtIndex:idx];
+    [self handleBookmarkChangedNotification:nil];
+}
+
+- (NSArray *)childrenOfBookmark:(BDSKBookmark *)bookmark {
+    return bookmark ? [bookmark children] : bookmarks;
+}
+
+- (unsigned int)indexOfChildBookmark:(BDSKBookmark *)bookmark {
+    return [[self childrenOfBookmark:[bookmark parent]] indexOfObject:bookmark];
+}
+
+- (void)bookmark:(BDSKBookmark *)bookmark insertChildBookmark:(BDSKBookmark *)child atIndex:(unsigned int)idx {
+    if (bookmark)
+        [bookmark insertChild:child atIndex:idx];
+    else
+        [self insertObject:child inBookmarksAtIndex:idx];
+}
+
+- (void)removeChildBookmark:(BDSKBookmark *)bookmark {
+    BDSKBookmark *parent = [bookmark parent];
+    if (parent)
+        [parent removeChild:bookmark];
+    else
+        [[self mutableArrayValueForKey:@"bookmarks"] removeObject:bookmark];
+}
+
+- (NSArray *)minimumCoverForBookmarks:(NSArray *)items {
+    NSEnumerator *bmEnum = [items objectEnumerator];
+    BDSKBookmark *bm;
+    BDSKBookmark *lastBm = nil;
+    NSMutableArray *minimalCover = [NSMutableArray array];
+    
+    while (bm = [bmEnum nextObject]) {
+        if ([bm isDescendantOf:lastBm] == NO) {
+            [minimalCover addObject:bm];
+            lastBm = bm;
+        }
+    }
+    return minimalCover;
+}
+
+- (NSArray *)draggedBookmarks {
+    return draggedBookmarks;
+}
+
+- (void)setDraggedBookmarks:(NSArray *)items {
+    if (draggedBookmarks != items) {
+        [draggedBookmarks release];
+        draggedBookmarks = [items retain];
+    }
 }
 
 - (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name {
-    BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithUrlString:urlString name:name];
-    [[self mutableArrayValueForKey:@"bookmarks"] addObject:bookmark];
-    [bookmark release];
+    [self addBookmarkWithUrlString:urlString name:name toFolder:nil];
 }
+
+- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name toFolder:(BDSKBookmark *)folder {
+    BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithUrlString:urlString name:name];
+    if (bookmark) {
+        [self bookmark:folder insertChildBookmark:bookmark atIndex:[[self childrenOfBookmark:folder] count]];
+        [bookmark release];
+    }
+}
+
+- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSString *urlString = (NSString *)contextInfo;
+	if (returnCode == NSOKButton) {
+        [self addBookmarkWithUrlString:urlString name:[bookmarkField stringValue] toFolder:[[folderPopUp selectedItem] representedObject]];
+	}
+    [urlString release]; //the contextInfo was retained
+}
+
+- (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(int)level toMenu:(NSMenu *)menu {
+    int i, iMax = [bookmarksArray count];
+    for (i = 0; i < iMax; i++) {
+        BDSKBookmark *bm = [bookmarksArray objectAtIndex:i];
+        if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
+            NSString *name = [bm name];
+            NSMenuItem *item = [menu addItemWithTitle:name ? name : @"" action:NULL keyEquivalent:@""];
+            [item setImage:[bm icon]];
+            [item setIndentationLevel:level];
+            [item setRepresentedObject:bm];
+            [self addMenuItemsForBookmarks:[bm children] level:level+1 toMenu:menu];
+        }
+    }
+}
+
+- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name modalForWindow:(NSWindow *)window {
+    [self window];
+    [bookmarkField setStringValue:name];
+    [folderPopUp removeAllItems];
+    NSMenuItem *item = [[folderPopUp menu] addItemWithTitle:NSLocalizedString(@"Bookmarks Menu", @"Menu item title") action:NULL keyEquivalent:@""];
+    [item setImage:[NSImage imageNamed:@"SmallMenu"]];
+    [self addMenuItemsForBookmarks:bookmarks level:1 toMenu:[folderPopUp menu]];
+    [folderPopUp selectItemAtIndex:0];
+	
+	[NSApp beginSheet:addBookmarkSheet
+       modalForWindow:window
+        modalDelegate:self
+       didEndSelector:@selector(addBookmarkSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:[urlString retain]];
+}
+
+- (IBAction)dismissAddBookmarkSheet:(id)sender {
+    [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
+    [addBookmarkSheet orderOut:self];
+}
+
+- (NSString *)uniqueName {
+    NSArray *names = [[self bookmarks] valueForKey:@"name"];
+    NSString *baseName = NSLocalizedString(@"New Boookmark", @"Default name for boookmark");
+    NSString *newName = baseName;
+    int i = 0;
+    while ([names containsObject:newName])
+        newName = [baseName stringByAppendingFormat:@" %i", ++i];
+    return newName;
+}
+
+#pragma mark Actions
+
+- (IBAction)insertBookmark:(id)sender {
+    BDSKBookmark *bookmark = [[[BDSKBookmark alloc] initWithUrlString:@"http://" name:[self uniqueName]] autorelease];
+    int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    BDSKBookmark *item = nil;
+    unsigned int idx = [bookmarks count];
+    
+    if (rowIndex != NSNotFound) {
+        BDSKBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
+        if ([outlineView isItemExpanded:selectedItem]) {
+            item = selectedItem;
+            idx = [[item children] count];
+        } else {
+            item = [selectedItem parent];
+            idx = [self indexOfChildBookmark:selectedItem] + 1;
+        }
+    }
+    [self bookmark:item insertChildBookmark:bookmark atIndex:idx];
+    
+    int row = [outlineView rowForItem:bookmark];
+    [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+    [outlineView editColumn:0 row:row withEvent:nil select:YES];
+}
+
+- (IBAction)insertBookmarkFolder:(id)sender {
+    BDSKBookmark *folder = [[[BDSKBookmark alloc] initFolderWithName:NSLocalizedString(@"Folder", @"default folder name")] autorelease];
+    int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    BDSKBookmark *item = nil;
+    unsigned int idx = [bookmarks count];
+    
+    if (rowIndex != NSNotFound) {
+        BDSKBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
+        if ([outlineView isItemExpanded:selectedItem]) {
+            item = selectedItem;
+            idx = [[item children] count];
+        } else {
+            item = [selectedItem parent];
+            idx = [self indexOfChildBookmark:selectedItem] + 1;
+        }
+    }
+    [self bookmark:item insertChildBookmark:folder atIndex:idx];
+    
+    int row = [outlineView rowForItem:folder];
+    [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+    [outlineView editColumn:0 row:row withEvent:nil select:YES];
+}
+
+- (IBAction)insertBookmarkSeparator:(id)sender {
+    BDSKBookmark *separator = [[[BDSKBookmark alloc] initSeparator] autorelease];
+    int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
+    BDSKBookmark *item = nil;
+    unsigned int idx = [bookmarks count];
+    
+    if (rowIndex != NSNotFound) {
+        BDSKBookmark *selectedItem = [outlineView itemAtRow:rowIndex];
+        if ([outlineView isItemExpanded:selectedItem]) {
+            item = selectedItem;
+            idx = [[item children] count];
+        } else {
+            item = [selectedItem parent];
+            idx = [self indexOfChildBookmark:selectedItem] + 1;
+        }
+    }
+    [self bookmark:item insertChildBookmark:separator atIndex:idx];
+    
+    int row = [outlineView rowForItem:separator];
+    [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+}
+
+- (IBAction)deleteBookmark:(id)sender {
+    [outlineView delete:sender];
+}
+
+#pragma mark Notification handlers
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification {
 	NSString *error = nil;
@@ -110,6 +319,15 @@ static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
 	[data writeToFile:bookmarksPath atomically:YES];
 }
 
+- (void)handleBookmarkWillBeRemovedNotification:(NSNotification *)notification  {
+    if ([outlineView editedRow] && [[self window] makeFirstResponder:outlineView] == NO)
+        [[self window] endEditingFor:nil];
+}
+
+- (void)handleBookmarkChangedNotification:(NSNotification *)notification {
+    [outlineView reloadData];
+}
+
 #pragma mark Undo support
 
 - (NSUndoManager *)undoManager {
@@ -122,80 +340,262 @@ static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
     return [self undoManager];
 }
 
-#pragma mark NSTableView datasource methods
+#pragma mark NSOutlineView datasource methods
 
-- (int)numberOfRowsInTableView:(NSTableView *)tv { return 0; }
+- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
+    return [[self childrenOfBookmark:item] count];
+}
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row { return nil; }
+- (BOOL)outlineView:(NSOutlineView *)ov isItemExpandable:(id)item {
+    return [item bookmarkType] == BDSKBookmarkTypeFolder;
+}
 
-- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
-    OBASSERT([rowIndexes count] == 1);
+- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item {
+    return [[self childrenOfBookmark:item] objectAtIndex:idx];
+}
+
+- (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
+    NSString *tcID = [tableColumn identifier];
+    if ([tcID isEqualToString:@"name"]) {
+        return [NSDictionary dictionaryWithObjectsAndKeys:[item name], OATextWithIconCellStringKey, [item icon], OATextWithIconCellImageKey, nil];
+    } else if ([tcID isEqualToString:@"url"]) {
+        if ([item bookmarkType] == BDSKBookmarkTypeFolder) {
+            int count = [[item children] count];
+            return count == 1 ? NSLocalizedString(@"1 item", @"Bookmark folder description") : [NSString stringWithFormat:NSLocalizedString(@"%i items", @"Bookmark folder description"), count];
+        } else {
+            return [item urlString];
+        }
+    }
+    return nil;
+}
+
+- (void)outlineView:(NSOutlineView *)ov setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
+    NSString *tcID = [tableColumn identifier];
+    if ([tcID isEqualToString:@"name"]) {
+        if (object == nil)
+            object = @"";
+        if ([object isEqualToString:[item name]] == NO)
+            [(BDSKBookmark *)item setName:object];
+    } else if ([tcID isEqualToString:@"url"]) {
+        if ([object length] == 0 || [NSURL URLWithString:object] == nil) {
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid URL", @"Message in alert dialog when setting an invalid URL") 
+                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"\"%@\" is not a valid URL.", @"Informative text in alert dialog"), object];
+            [alert beginSheetModalForWindow:[self window]
+                              modalDelegate:nil
+                             didEndSelector:NULL
+                                contextInfo:NULL];
+            [outlineView reloadData];
+        } else if ([object isEqualToString:[item urlString]] == NO) {
+            [(BDSKBookmark *)item setUrlString:object];
+        }
+    }
+}
+
+- (BOOL)outlineView:(NSOutlineView *)ov writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
+    [self setDraggedBookmarks:[self minimumCoverForBookmarks:items]];
     [pboard declareTypes:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, nil] owner:nil];
-    [pboard setPropertyList:[NSNumber numberWithUnsignedInt:[rowIndexes firstIndex]] forType:BDSKBookmarkRowsPboardType];
+    [pboard setData:[NSData data] forType:BDSKBookmarkRowsPboardType];
     return YES;
 }
 
-- (NSDragOperation)tableView:(NSTableView *)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
+- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, nil]];
     
-    if ([type isEqualToString:BDSKBookmarkRowsPboardType]) {
-        [tv setDropRow:row == -1 ? [tv numberOfRows] : row dropOperation:NSTableViewDropAbove];
-        return NSDragOperationMove;
-    } else if (type) {
-        return NSDragOperationEvery;
+    if (type) {
+        if (idx == NSOutlineViewDropOnItemIndex) {
+            if ([item bookmarkType] == BDSKBookmarkTypeFolder && [outlineView isItemExpanded:item]) {
+                [ov setDropItem:item dropChildIndex:0];
+            } else if ([item parent]) {
+                [ov setDropItem:[item parent] dropChildIndex:[[[item parent] children] indexOfObject:item] + 1];
+            } else if (item) {
+                [ov setDropItem:nil dropChildIndex:[bookmarks indexOfObject:item] + 1];
+            } else {
+                [ov setDropItem:nil dropChildIndex:[bookmarks count]];
+            }
+        }
+        return [item isDescendantOfArray:[self draggedBookmarks]] ? NSDragOperationNone : NSDragOperationMove;
     }
     return NSDragOperationNone;
 }
 
-
-- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op {
+- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, nil]];
     
-    if ([type isEqualToString:BDSKBookmarkRowsPboardType]) {
-        int draggedRow = [[pboard propertyListForType:BDSKBookmarkRowsPboardType] intValue];
-        BDSKBookmark *bookmark = [[bookmarks objectAtIndex:draggedRow] retain];
-        [self removeObjectFromBookmarksAtIndex:draggedRow];
-        [self insertObject:bookmark inBookmarksAtIndex:row < draggedRow ? row : row - 1];
-        [bookmark release];
-        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-        return YES;
-    } else if (type) {
-        NSString *urlString = nil;
-        if ([type isEqualToString:BDSKWeblocFilePboardType])
-            urlString = [pboard stringForType:BDSKWeblocFilePboardType];
-        else if ([type isEqualToString:NSURLPboardType])
-            urlString = [[NSURL URLFromPasteboard:pboard] absoluteString];
-        if (urlString == nil)
-            return NO;
-        if (op == NSTableViewDropOn && row != -1) {
-            [[bookmarks objectAtIndex:row] setUrlString:urlString];
-        } else {
-            if (row == -1)
-                row = [bookmarks count];
-            BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithUrlString:urlString name:[self uniqueName]];
-            [self insertObject:bookmark inBookmarksAtIndex:row];
-            [bookmark release];
-        }
+    if (type) {
+        NSEnumerator *bmEnum = [[self draggedBookmarks] objectEnumerator];
+        BDSKBookmark *bookmark;
+				
+		while (bookmark = [bmEnum nextObject]) {
+            int bookmarkIndex = [self indexOfChildBookmark:bookmark];
+            if (item == [bookmark parent]) {
+                if (idx > bookmarkIndex)
+                    idx--;
+                if (idx == bookmarkIndex)
+                    continue;
+            }
+            [self removeChildBookmark:bookmark];
+            [self bookmark:item insertChildBookmark:bookmark atIndex:idx++];
+		}
         return YES;
     }
     return NO;
 }
 
-- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows {
-    int row = [[rows lastObject] intValue];
-    [self removeObjectFromBookmarksAtIndex:row];
+- (void)outlineView:(NSOutlineView *)ov dragEndedWithOperation:(NSDragOperation)operation {
+    [self setDraggedBookmarks:nil];
 }
 
-- (NSString *)uniqueName {
-    NSArray *names = [[self bookmarks] valueForKey:@"name"];
-    NSString *baseName = NSLocalizedString(@"New Boookmark", @"Default name for boookmark");
-    NSString *newName = baseName;
-    int i = 0;
-    while ([names containsObject:newName])
-        newName = [baseName stringByAppendingFormat:@" %i", ++i];
-    return newName;
+#pragma mark NSOutlineView delegate methods
+
+- (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item {
+    if ([[tableColumn identifier] isEqualToString:@"url"]) {
+        if ([item bookmarkType] == BDSKBookmarkTypeFolder)
+            [cell setTextColor:[NSColor disabledControlTextColor]];
+        else
+            [cell setTextColor:[NSColor controlTextColor]];
+    }
+}
+
+- (BOOL)outlineView:(NSOutlineView *)ov shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item {
+    if ([item bookmarkType] != BDSKBookmarkTypeBookmark)
+        return YES;
+    else if ([item bookmarkType] != BDSKBookmarkTypeFolder)
+        return [[tableColumn identifier] isEqualToString:@"name"];
+    return NO;
+}
+
+- (NSString *)outlineView:(NSOutlineView *)ov toolTipForCell:(NSCell *)cell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tc item:(id)item mouseLocation:(NSPoint)mouseLocation {
+    NSString *tcID = [tc identifier];
+    
+    if ([tcID isEqualToString:@"name"]) {
+        return [item name];
+    } else if ([tcID isEqualToString:@"url"]) {
+        return [item urlString];
+    }
+    return nil;
+}
+
+- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows {
+    NSMutableArray *items = [NSMutableArray array];
+    NSEnumerator *rowEnum = [rows objectEnumerator];
+    NSNumber *row;
+    
+    while (row = [rowEnum nextObject])
+        [items addObject:[outlineView itemAtRow:[row intValue]]];
+    
+    NSEnumerator *itemEnum = [[self minimumCoverForBookmarks:items] reverseObjectEnumerator];
+    BDSKBookmark *item;
+    
+    while (item = [itemEnum  nextObject])
+        [self removeChildBookmark:item];
+}
+
+- (BOOL)outlineView:(NSOutlineView *)ov drawSeparatorRowForItem:(id)item {
+    return [item bookmarkType] == BDSKBookmarkTypeSeparator;
+}
+
+#pragma mark Toolbar
+
+- (void)setupToolbar {
+    // Create a new toolbar instance, and attach it to our document window
+    NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BDSKBookmarksToolbarIdentifier] autorelease];
+    OAToolbarItem *item;
+    
+    toolbarItems = [[NSMutableDictionary alloc] initWithCapacity:3];
+    
+    // Set up toolbar properties: Allow customization, give a default display mode, and remember state in user defaults
+    [toolbar setAllowsUserCustomization: YES];
+    [toolbar setAutosavesConfiguration: YES];
+    [toolbar setDisplayMode: NSToolbarDisplayModeDefault];
+    
+    // We are the delegate
+    [toolbar setDelegate: self];
+    
+    // Add template toolbar items
+    
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BDSKBookmarksNewBookmarkToolbarItemIdentifier];
+    [item setLabel:NSLocalizedString(@"New Bookmark", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"New Bookmark", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Add a New Bookmark", @"Tool tip message")];
+    [item setImage:[NSImage imageNamed:@"NewBookmark"]];
+    [item setTarget:self];
+    [item setAction:@selector(insertBookmark:)];
+    [toolbarItems setObject:item forKey:BDSKBookmarksNewBookmarkToolbarItemIdentifier];
+    [item release];
+    
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BDSKBookmarksNewFolderToolbarItemIdentifier];
+    [item setLabel:NSLocalizedString(@"New Folder", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"New Folder", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Add a New Folder", @"Tool tip message")];
+    [item setImage:[NSImage imageNamed:@"NewFolder"]];
+    [item setTarget:self];
+    [item setAction:@selector(insertBookmarkFolder:)];
+    [toolbarItems setObject:item forKey:BDSKBookmarksNewFolderToolbarItemIdentifier];
+    [item release];
+    
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BDSKBookmarksNewSeparatorToolbarItemIdentifier];
+    [item setLabel:NSLocalizedString(@"New Separator", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"New Separator", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Add a New Separator", @"Tool tip message")];
+    [item setImage:[NSImage imageNamed:@"NewSeparator"]];
+    [item setTarget:self];
+    [item setAction:@selector(insertBookmarkSeparator:)];
+    [toolbarItems setObject:item forKey:BDSKBookmarksNewSeparatorToolbarItemIdentifier];
+    [item release];
+    
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BDSKBookmarksDeleteToolbarItemIdentifier];
+    [item setLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Delete Selected Items", @"Tool tip message")];
+    [item setImage:[NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon]];
+    [item setTarget:self];
+    [item setAction:@selector(deleteBookmark:)];
+    [toolbarItems setObject:item forKey:BDSKBookmarksDeleteToolbarItemIdentifier];
+    [item release];
+    
+    // Attach the toolbar to the window
+    [[self window] setToolbar:toolbar];
+}
+
+- (NSToolbarItem *) toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL) willBeInserted {
+
+    NSToolbarItem *item = [toolbarItems objectForKey:itemIdent];
+    NSToolbarItem *newItem = [[item copy] autorelease];
+    return newItem;
+}
+
+- (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar *)toolbar {
+    return [NSArray arrayWithObjects:
+        BDSKBookmarksNewBookmarkToolbarItemIdentifier, 
+        BDSKBookmarksNewFolderToolbarItemIdentifier, 
+        BDSKBookmarksNewSeparatorToolbarItemIdentifier, 
+        BDSKBookmarksDeleteToolbarItemIdentifier, nil];
+}
+
+- (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar *)toolbar {
+    return [NSArray arrayWithObjects: 
+        BDSKBookmarksNewBookmarkToolbarItemIdentifier, 
+        BDSKBookmarksNewFolderToolbarItemIdentifier, 
+        BDSKBookmarksNewSeparatorToolbarItemIdentifier, 
+		BDSKBookmarksDeleteToolbarItemIdentifier, 
+        NSToolbarFlexibleSpaceItemIdentifier, 
+		NSToolbarSpaceItemIdentifier, 
+		NSToolbarSeparatorItemIdentifier, 
+		NSToolbarCustomizeToolbarItemIdentifier, nil];
+}
+
+- (BOOL)validateToolbarItem:(NSToolbarItem *)toolbarItem {
+    NSString *identifier = [toolbarItem itemIdentifier];
+    if ([identifier isEqualToString:BDSKBookmarksDeleteToolbarItemIdentifier]) {
+        return [outlineView numberOfSelectedRows] > 0;
+    } else {
+        return YES;
+    }
 }
 
 @end
@@ -205,8 +605,35 @@ static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
 
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
     if (self = [super init]) {
+        bookmarkType = BDSKBookmarkTypeBookmark;
         urlString = [aUrlString copy];
         name = [aName copy];
+        children = nil;
+    }
+    return self;
+}
+
+- (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
+    if (self = [super init]) {
+        bookmarkType = BDSKBookmarkTypeFolder;
+        urlString = nil;
+        name = [aName copy];
+        children = [aChildren mutableCopy];
+        [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
+    }
+    return self;
+}
+
+- (id)initFolderWithName:(NSString *)aName {
+    return [self initFolderWithChildren:[NSArray array] name:aName];
+}
+
+- (id)initSeparator {
+    if (self = [super init]) {
+        bookmarkType = BDSKBookmarkTypeSeparator;
+        urlString = nil;
+        name = nil;
+        children = nil;
     }
     return self;
 }
@@ -216,22 +643,46 @@ static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
-    return [self initWithUrlString:[dictionary objectForKey:@"URLString"] name:[dictionary objectForKey:@"Title"]];
+    return [self initWithUrlString:[dictionary objectForKey:URL_KEY] name:[dictionary objectForKey:TITLE_KEY]];
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-    return [[[self class] allocWithZone:aZone] initWithUrlString:urlString name:name];
+    if (bookmarkType == BDSKBookmarkTypeFolder)
+        return [[[self class] allocWithZone:aZone] initFolderWithChildren:[[[NSArray alloc] initWithArray:children copyItems:YES] autorelease] name:name];
+    else if (bookmarkType == BDSKBookmarkTypeSeparator)
+        return [[[self class] allocWithZone:aZone] initSeparator];
+    else
+        return [[[self class] allocWithZone:aZone] initWithUrlString:urlString name:name];
 }
 
 - (void)dealloc {
     [[[BDSKBookmarkController sharedBookmarkController] undoManager] removeAllActionsWithTarget:self];
     [urlString release];
     [name release];
+    [children release];
     [super dealloc];
 }
 
+- (NSString *)description {
+    if (bookmarkType == BDSKBookmarkTypeFolder)
+        return [NSString stringWithFormat:@"<%@: name=%@, children=%@>", [self class], name, children];
+    else if (bookmarkType == BDSKBookmarkTypeSeparator)
+        return [NSString stringWithFormat:@"<%@: separator>", [self class]];
+    else
+        return [NSString stringWithFormat:@"<%@: name=%@, URL=%@>", [self class], name, urlString];
+}
+
 - (NSDictionary *)dictionaryValue {
-    return [NSDictionary dictionaryWithObjectsAndKeys:urlString, @"URLString", name, @"Title", nil];
+    if (bookmarkType == BDSKBookmarkTypeFolder)
+        return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeFolderString, TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, name, TITLE_KEY, nil];
+    else if (bookmarkType == BDSKBookmarkTypeSeparator)
+        return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeSeparatorString, TYPE_KEY, nil];
+    else
+        return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeBookmarkString, TYPE_KEY, urlString, URL_KEY, name, TITLE_KEY, nil];
+}
+
+- (int)bookmarkType {
+    return bookmarkType;
 }
 
 - (NSURL *)URL {
@@ -291,6 +742,88 @@ static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
         return NO;
     }
     return YES;
+}
+
+- (NSImage *)icon {
+    if ([self bookmarkType] == BDSKBookmarkTypeFolder)
+        return [NSImage imageNamed:@"SmallFolder"];
+    else if (bookmarkType == BDSKBookmarkTypeSeparator)
+        return nil;
+    else
+        return [NSImage imageNamed:@"SmallBookmark"];
+}
+
+- (BDSKBookmark *)parent {
+    return parent;
+}
+
+- (void)setParent:(BDSKBookmark *)newParent {
+    parent = newParent;
+}
+
+- (NSArray *)children {
+    return children;
+}
+
+- (void)insertChild:(BDSKBookmark *)child atIndex:(unsigned int)idx {
+    NSUndoManager *undoManager = [[BDSKBookmarkController sharedBookmarkController] undoManager];
+    [(BDSKBookmark *)[undoManager prepareWithInvocationTarget:self] removeChild:child];
+    [children insertObject:child atIndex:idx];
+    [child setParent:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBookmarkChangedNotification object:self];
+}
+
+- (void)addChild:(BDSKBookmark *)child {
+    [self insertChild:child atIndex:[children count]];
+}
+
+- (void)removeChild:(BDSKBookmark *)child {
+    NSUndoManager *undoManager = [[BDSKBookmarkController sharedBookmarkController] undoManager];
+    [(BDSKBookmark *)[undoManager prepareWithInvocationTarget:self] insertChild:child atIndex:[[self children] indexOfObject:child]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBookmarkWillBeRemovedNotification object:self];
+    [child setParent:nil];
+    [children removeObject:child];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBookmarkChangedNotification object:self];
+}
+
+- (BOOL)isDescendantOf:(BDSKBookmark *)bookmark {
+    if (self == bookmark)
+        return YES;
+    NSEnumerator *childEnum = [[bookmark children] objectEnumerator];
+    BDSKBookmark *child;
+    while (child = [childEnum nextObject]) {
+        if ([self isDescendantOf:child])
+            return YES;
+    }
+    return NO;
+}
+
+- (BOOL)isDescendantOfArray:(NSArray *)bookmarks {
+    NSEnumerator *bmEnum = [bookmarks objectEnumerator];
+    BDSKBookmark *bm = nil;
+    while (bm = [bmEnum nextObject]) {
+        if ([self isDescendantOf:bm]) return YES;
+    }
+    return NO;
+}
+
+@end
+
+#pragma mark -
+
+@implementation WebView (BDSKExtensions)
+
+- (IBAction)addBookmark:(id)sender {
+	WebDataSource *datasource = [[self mainFrame] dataSource];
+	NSString *URLString = [[[datasource request] URL] absoluteString];
+	NSString *name = [datasource pageTitle];
+	if(name == nil) name = [URLString lastPathComponent];
+    NSWindow *window = [self window];
+    if ([window parentWindow] && [window isSheet] == NO)
+        window = [window parentWindow];
+    
+    if (URLString)
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString name:name modalForWindow:window];
 }
 
 @end

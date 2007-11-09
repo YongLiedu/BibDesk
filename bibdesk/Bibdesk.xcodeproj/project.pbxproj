@@ -163,6 +163,8 @@
 		CE2A19600CE4969900A0499B /* NewSeparator.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2A195E0CE4969800A0499B /* NewSeparator.tiff */; };
 		CE2A198E0CE499AD00A0499B /* SmallFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2A198C0CE499AD00A0499B /* SmallFolder.tiff */; };
 		CE2A198F0CE499AD00A0499B /* SmallMenu.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2A198D0CE499AD00A0499B /* SmallMenu.tiff */; };
+		CE2A1B6A0CE4D13600A0499B /* NewBookmark.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2A1B680CE4D13600A0499B /* NewBookmark.tiff */; };
+		CE2A1B6B0CE4D13700A0499B /* SmallBookmark.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2A1B690CE4D13600A0499B /* SmallBookmark.tiff */; };
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
 		CE2C18920A0A43BE006F0A73 /* importFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */; };
@@ -995,6 +997,8 @@
 		CE2A195E0CE4969800A0499B /* NewSeparator.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = NewSeparator.tiff; path = Images/NewSeparator.tiff; sourceTree = "<group>"; };
 		CE2A198C0CE499AD00A0499B /* SmallFolder.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = SmallFolder.tiff; path = Images/SmallFolder.tiff; sourceTree = "<group>"; };
 		CE2A198D0CE499AD00A0499B /* SmallMenu.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = SmallMenu.tiff; path = Images/SmallMenu.tiff; sourceTree = "<group>"; };
+		CE2A1B680CE4D13600A0499B /* NewBookmark.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = NewBookmark.tiff; path = Images/NewBookmark.tiff; sourceTree = "<group>"; };
+		CE2A1B690CE4D13600A0499B /* SmallBookmark.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = SmallBookmark.tiff; path = Images/SmallBookmark.tiff; sourceTree = "<group>"; };
 		CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGroupCell.h; sourceTree = "<group>"; };
 		CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupCell.m; sourceTree = "<group>"; };
 		CE2C16F80A0A149E006F0A73 /* gear2.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = gear2.tiff; path = Images/gear2.tiff; sourceTree = "<group>"; };
@@ -2270,6 +2274,8 @@
 		F9022DDA0758089500C3F701 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				CE2A1B680CE4D13600A0499B /* NewBookmark.tiff */,
+				CE2A1B690CE4D13600A0499B /* SmallBookmark.tiff */,
 				CE2A198C0CE499AD00A0499B /* SmallFolder.tiff */,
 				CE2A198D0CE499AD00A0499B /* SmallMenu.tiff */,
 				CE2A195D0CE4969800A0499B /* NewFolder.tiff */,
@@ -3272,6 +3278,8 @@
 				CE2A19600CE4969900A0499B /* NewSeparator.tiff in Resources */,
 				CE2A198E0CE499AD00A0499B /* SmallFolder.tiff in Resources */,
 				CE2A198F0CE499AD00A0499B /* SmallMenu.tiff in Resources */,
+				CE2A1B6A0CE4D13600A0499B /* NewBookmark.tiff in Resources */,
+				CE2A1B6B0CE4D13700A0499B /* SmallBookmark.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -103,9 +103,6 @@
 - (void)endTemporaryTypeSelectModeAndSet:(BOOL)set edit:(BOOL)edit;
 - (BOOL)isInTemporaryTypeSelectMode;
 
-- (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title;
-- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-
 - (BOOL)editSelectedCellAsMacro;
 - (void)autoDiscoverDataFromFrame:(WebFrame *)frame;
 - (void)autoDiscoverDataFromString:(NSString *)string;
@@ -203,17 +200,6 @@
 	// we start with a webview, so we first ask for the URL to load
 	NSParameterAssert([self window]); // make sure we loaded the nib
 	[self setShowingWebView:YES];
-	
-	// load the popup buttons with our bookmarks
-	NSEnumerator *bEnum = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] objectEnumerator];
-	BDSKBookmark *bm;
-    
-	[bookmarkPopUpButton removeAllItems];
-	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Menu item title for Bookmarks popup")];
-	while (bm = [bEnum nextObject]) {
-		NSMenuItem *menuItem = [[bookmarkPopUpButton menu] addItemWithTitle:[bm name] action:NULL keyEquivalent:@""];
-        [menuItem setRepresentedObject:[bm urlString]];
-	}
 	
 	// remember the arguments to pass in the callback later
 	theModalDelegate = modalDelegate;
@@ -338,16 +324,6 @@
 }
 
 - (IBAction)importFromWebAction:(id)sender{
-	NSEnumerator *bEnum = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] objectEnumerator];
-	BDSKBookmark *bm;
-	
-	[bookmarkPopUpButton removeAllItems];
-	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks", @"Menu item title for Bookmarks popup")];
-	while (bm = [bEnum nextObject]) {
-		NSMenuItem *menuItem = [[bookmarkPopUpButton menu] addItemWithTitle:[bm name] action:NULL keyEquivalent:@""];
-        [menuItem setRepresentedObject:[bm urlString]];
-	}
-	
 	[NSApp beginSheet:urlSheet
        modalForWindow:[self window]
         modalDelegate:self
@@ -374,30 +350,10 @@
                        contextInfo:nil];
 }
 
-- (IBAction)chooseBookmarkAction:(id)sender{
-	NSString *URLString = [[bookmarkPopUpButton selectedItem] representedObject];
-	[urlTextField setStringValue:URLString];
-    
-	[urlSheet orderOut:sender];
-    [NSApp endSheet:urlSheet returnCode:1];
-}
-
-- (IBAction)dismissAddBookmarkSheet:(id)sender{
-    NSArray *bookmarkNames = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"name"];
-    if ([sender tag] == NSOKButton && [bookmarkNames containsObject:[bookmarkField stringValue]]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Bookmark Name", @"Message in alert dialog") 
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"A bookmark with this name already exists.", @"Informative text in alert dialog")];
-        if (NSAlertAlternateReturn == [alert runModal]) {
-            [addBookmarkSheet orderOut:sender];
-            [NSApp endSheet:addBookmarkSheet returnCode:NSCancelButton];
-        }
-        return;
-    }
-    [addBookmarkSheet orderOut:sender];
-    [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
+- (IBAction)openBookmark:(id)sender{
+    NSURL *url = [sender representedObject];
+    [self setShowingWebView:YES];
+    [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
 }
 
 - (IBAction)stopOrReloadAction:(id)sender{
@@ -556,22 +512,13 @@
 	}
 }
 
-- (void)bookmarkPage:(id)sender{
-	WebDataSource *datasource = [[webView mainFrame] dataSource];
-	NSString *URLString = [[[datasource request] URL] absoluteString];
-	NSString *title = [datasource pageTitle];
-	if(title == nil) title = [URLString lastPathComponent];
-	
-	[self addBookmarkWithURLString:URLString title:title];
-}
-
 - (void)bookmarkLink:(id)sender{
 	NSDictionary *element = (NSDictionary *)[sender representedObject];
 	NSString *URLString = [(NSURL *)[element objectForKey:WebElementLinkURLKey] absoluteString];
 	NSString *title = [element objectForKey:WebElementLinkLabelKey];
 	if(title == nil) title = [URLString lastPathComponent];
 	
-	[self addBookmarkWithURLString:URLString title:title];
+    [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString name:title modalForWindow:[self window]];
 }
 
 #pragma mark UndoManager
@@ -987,26 +934,6 @@
     }
 }
 
-#pragma mark Bookmark methods
-
-- (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title{
-	[bookmarkField setStringValue:title];
-	
-	[NSApp beginSheet:addBookmarkSheet
-       modalForWindow:[self window]
-        modalDelegate:self
-       didEndSelector:@selector(addBookmarkSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:[URLString retain]];
-}
-
-- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSString *URLString = (NSString *)contextInfo;
-	if (returnCode == NSOKButton) {
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString name:[bookmarkField stringValue]];
-	}
-	[URLString release]; //the contextInfo was retained
-}
-
 #pragma mark Menu validation
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
@@ -1099,9 +1026,9 @@
 	[menuItems addObject:[menuItem autorelease]];
 	
 	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark This Page", @"Menu item title") stringByAppendingEllipsis]
-									  action:@selector(bookmarkPage:)
+									  action:@selector(addBookmark:)
 							   keyEquivalent:@""];
-	[menuItem setTarget:self];
+	[menuItem setTarget:webView];
 	[menuItems addObject:[menuItem autorelease]];
 	
 	// navigation items
@@ -1890,6 +1817,7 @@
 
 @end
 
+#pragma mark -
 
 @implementation TextImportItemTableView
 
@@ -2008,6 +1936,7 @@
 
 @end
 
+#pragma mark -
 
 @implementation BDSKImportTextView
 
@@ -2031,6 +1960,18 @@
     [menu addItemWithTitle:NSLocalizedString(@"Make Plain Text", @"Menu item title") action:@selector(makePlainText:) keyEquivalent:@""];
     
     return menu;
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKURLWindow
+
+- (IBAction)openBookmark:(id)sender {
+    NSString *urlString = [[sender representedObject] absoluteString];
+    [URLField setStringValue:urlString];
+    [OKButton performClick:OKButton];
 }
 
 @end

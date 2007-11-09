@@ -61,13 +61,10 @@
     IBOutlet NSView* webViewView;
     IBOutlet NSPanel* urlSheet;
     IBOutlet NSTextField* urlTextField;
-    IBOutlet NSPopUpButton* bookmarkPopUpButton;
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet NSButton *backButton;
     IBOutlet NSButton *forwardButton;
     IBOutlet NSButton *stopOrReloadButton;
-    IBOutlet NSTextField *bookmarkField;
-    IBOutlet NSPanel *addBookmarkSheet;
     IBOutlet NSButton *citeKeyWarningButton;
     
 	BibDocument* document;
@@ -115,9 +112,8 @@
 - (IBAction)importFromPasteboardAction:(id)sender;
 - (IBAction)importFromFileAction:(id)sender;
 - (IBAction)importFromWebAction:(id)sender;
-- (IBAction)chooseBookmarkAction:(id)sender;
+- (IBAction)openBookmark:(id)sender;
 - (IBAction)dismissUrlSheet:(id)sender;
-- (IBAction)dismissAddBookmarkSheet:(id)sender;
 - (IBAction)stopOrReloadAction:(id)sender;
 - (IBAction)addField:(id)sender;
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
@@ -129,22 +125,37 @@
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender;
 - (void)saveFileAsLocalUrl:(id)sender;
 - (void)downloadLinkedFileAsLocalUrl:(id)sender;
-- (void)bookmarkPage:(id)sender;
 - (void)bookmarkLink:(id)sender;
 
 @end
+
+#pragma mark -
 
 @interface TextImportItemTableView : NSTableView {
     BDSKTypeSelectHelper *typeSelectHelper;
 }
 @end
 
-@interface BDSKImportTextView : NSTextView {}
-- (IBAction)makePlainText:(id)sender;
-@end
+#pragma mark -
 
 @interface NSObject (TextImportItemTableViewDelegate)
 - (BOOL)tableView:(NSTableView *)tView textViewShouldLinkKeys:(NSTextView *)textView;
 - (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)textView isValidKey:(NSString *)key;
 - (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex;
+@end
+
+#pragma mark -
+
+@interface BDSKImportTextView : NSTextView {}
+- (IBAction)makePlainText:(id)sender;
+@end
+
+#pragma mark -
+
+@interface BDSKURLWindow : NSPanel {
+    IBOutlet NSTextField *URLField;
+    IBOutlet NSButton *OKButton;
+    IBOutlet NSButton *CancelButton;
+}
+- (IBAction)openBookmark:(id)sender;
 @end

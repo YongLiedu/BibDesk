@@ -527,7 +527,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 // implemented in order to prevent the Copy As > Template menu from being updated at every key event
 - (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action { return NO; }
 
-- (void)addMenuItemsForBookmarks:(NSArray *)bookmarks toMenu:(NSMenu *)menu {
+- (void)addMenuItemsForSearchBookmarks:(NSArray *)bookmarks toMenu:(NSMenu *)menu {
     int i, iMax = [bookmarks count];
     for (i = 0; i < iMax; i++) {
         BDSKSearchBookmark *bm = [bookmarks objectAtIndex:i];
@@ -537,7 +537,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             NSMenuItem *item = [menu addItemWithTitle:label ? label : @"" action:NULL keyEquivalent:@""];
             [item setImage:[bm icon]];
             [item setSubmenu:submenu];
-            [self addMenuItemsForBookmarks:[bm children] toMenu:submenu];
+            [self addMenuItemsForSearchBookmarks:[bm children] toMenu:submenu];
         } else if ([bm bookmarkType] == BDSKSearchBookmarkTypeSeparator) {
             [menu addItem:[NSMenuItem separatorItem]];
         } else {
@@ -545,6 +545,28 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             NSMenuItem *item = [menu addItemWithTitle:label ? label : @"" action:@selector(newSearchGroupFromBookmark:)  keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:[bm info]];
+            [item setImage:[bm icon]];
+        }
+    }
+}
+
+- (void)addMenuItemsForBookmarks:(NSArray *)bookmarks toMenu:(NSMenu *)menu {
+    int i, iMax = [bookmarks count];
+    for (i = 0; i < iMax; i++) {
+        BDSKBookmark *bm = [bookmarks objectAtIndex:i];
+        if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
+            NSString *name = [bm name];
+            NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[bm name]] autorelease];
+            NSMenuItem *item = [menu addItemWithTitle:name ? name : @"" action:NULL keyEquivalent:@""];
+            [item setImage:[bm icon]];
+            [item setSubmenu:submenu];
+            [self addMenuItemsForBookmarks:[bm children] toMenu:submenu];
+        } else if ([bm bookmarkType] == BDSKBookmarkTypeSeparator) {
+            [menu addItem:[NSMenuItem separatorItem]];
+        } else {
+            NSString *name = [bm name];
+            NSMenuItem *item = [menu addItemWithTitle:name ? name : @"" action:@selector(openBookmark:)  keyEquivalent:@""];
+            [item setRepresentedObject:[bm URL]];
             [item setImage:[bm icon]];
         }
     }
@@ -583,6 +605,16 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         NSArray *bookmarks = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarks];
         int i = [menu numberOfItems];
         while (--i > 2)
+            [menu removeItemAtIndex:i];
+        if ([bookmarks count] > 0)
+            [menu addItem:[NSMenuItem separatorItem]];
+        [self addMenuItemsForSearchBookmarks:bookmarks toMenu:menu];
+        
+    } else if ([menu isEqual:bookmarksMenu]) {
+        
+        NSArray *bookmarks = [[BDSKBookmarkController sharedBookmarkController] bookmarks];
+        int i = [menu numberOfItems];
+        while (--i > 1)
             [menu removeItemAtIndex:i];
         if ([bookmarks count] > 0)
             [menu addItem:[NSMenuItem separatorItem]];

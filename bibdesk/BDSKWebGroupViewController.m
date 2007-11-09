@@ -77,9 +77,6 @@
     [forwardButton setImage:[NSImage imageNamed:@"forward_small"]];
     [stopOrReloadButton setImagePosition:NSImageOnly];
     [stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
-	[urlComboBox removeAllItems];
-    [urlComboBox addItemsWithObjectValues:[[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"urlString"]];
-    [[urlComboBox cell] setPlaceholderString:NSLocalizedString(@"URL", @"Web group URL field placeholder")];
 }
 
 - (void)handleWebGroupUpdatedNotification:(NSNotification *)notification{
@@ -113,6 +110,11 @@
     }
 }
 
+- (void)loadURL:(NSURL *)theURL {
+    if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO)
+        [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
+}
+
 - (IBAction)changeURL:(id)sender {
     NSString *newURLString = [sender stringValue];
     
@@ -121,9 +123,7 @@
     if (! [newURLString hasPrefix:@"http://"]){
         newURLString = [NSString stringWithFormat:@"http://%@", newURLString];
     }
-    NSURL *theURL = [NSURL URLWithString:newURLString];
-    if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO)
-        [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
+    [self loadURL:[NSURL URLWithString:newURLString]];
 }
 
 - (IBAction)stopOrReloadAction:(id)sender {
@@ -150,47 +150,6 @@
     }
 }
 
-- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSString *URLString = (NSString *)contextInfo;
-	if (returnCode == NSOKButton) {
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString name:[bookmarkField stringValue]];
-	}
-	[URLString release]; //the contextInfo was retained
-}
-
-- (void)bookmarkPage:(id)sender{
-	WebDataSource *datasource = [[webView mainFrame] dataSource];
-	NSString *URLString = [[[datasource request] URL] absoluteString];
-	NSString *title = [datasource pageTitle];
-	if(title == nil) title = [URLString lastPathComponent];
-	
-	[bookmarkField setStringValue:title];
-	
-	[NSApp beginSheet:addBookmarkSheet
-       modalForWindow:[self window]
-        modalDelegate:self
-       didEndSelector:@selector(addBookmarkSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:[URLString retain]];
-}
-
-- (IBAction)dismissAddBookmarkSheet:(id)sender{
-    NSArray *bookmarkNames = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"name"];
-    if ([sender tag] == NSOKButton && [bookmarkNames containsObject:[bookmarkField stringValue]]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Bookmark Name", @"Message in alert dialog") 
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"A bookmark with this name already exists.", @"Informative text in alert dialog")];
-        if (NSAlertAlternateReturn == [alert runModal]) {
-            [addBookmarkSheet orderOut:sender];
-            [NSApp endSheet:addBookmarkSheet returnCode:NSCancelButton];
-        }
-        return;
-    }
-    [addBookmarkSheet orderOut:sender];
-    [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
-}
-
 #pragma mark WebFrameLoadDelegate protocol
 
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
@@ -204,7 +163,7 @@
         loadingWebFrame = frame;
         
         NSString *url = [[[[frame provisionalDataSource] request] URL] absoluteString];
-        [[urlComboBox cell] setStringValue:url];
+        [urlField setStringValue:url];
         
     } else if (loadingWebFrame == nil) {
         
@@ -250,7 +209,7 @@
 - (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{
     if (frame == loadingWebFrame){ 
         NSString *url = [[[[frame provisionalDataSource] request] URL] absoluteString];
-        [[urlComboBox cell] setStringValue:url];
+        [urlField setStringValue:url];
     }
 }
 
@@ -314,9 +273,9 @@
     [menuItems addObject:[NSMenuItem separatorItem]];
         
 	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark This Page", @"Menu item title") stringByAppendingEllipsis]
-                                                                action:@selector(bookmarkPage:)
+                                                                action:@selector(addBookmark:)
                                                          keyEquivalent:@""];
-    [item setTarget:self];
+    [item setTarget:webView];
     [item setRepresentedObject:element];
     [menuItems addObject:[item autorelease]];
     
