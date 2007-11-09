@@ -818,12 +818,9 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
 	NSString *URLString = [[[datasource request] URL] absoluteString];
 	NSString *name = [datasource pageTitle];
 	if(name == nil) name = [URLString lastPathComponent];
-    NSWindow *window = [self window];
-    if ([window parentWindow] && [window isSheet] == NO)
-        window = [window parentWindow];
     
     if (URLString)
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString name:name modalForWindow:window];
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString name:name modalForWindow:[self window]];
 }
 
 @end
