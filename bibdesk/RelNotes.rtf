@@ -41,6 +41,12 @@ Last update: 3 November 2007 (rev
 
 \f0\b\fs28 \cf0 \
 Changes since 1.3.10\
+\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\fs22 \cf0 IMPORTANT
+\b0 :  The input manager used for autocompletion in Cocoa applications is not supported on Mac OS X 10.5 (Leopard).
+\f0\b\fs28 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \i\fs26 \cf0 \
@@ -58,6 +64,9 @@ New Features\
 {\listtext	\'95	}Many more accessors and template keys added\
 {\listtext	\'95	}New GUI for creating custom export templates (File -> New Template)\
 {\listtext	\'95	}Duplicate selection now shows a sheet which asks how to select duplicates\
+{\listtext	\'95	}Quick Look plugin for Leopard users\
+{\listtext	\'95	}Leopard download location is respected in the editor window's recent download menu\
+{\listtext	\'95	}Added support for searching NASA ADS database via z39.50\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f0\i\b\fs26 \cf0 \
@@ -96,6 +105,10 @@ Bugs Fixed\
 {\listtext	\'95	}Gradients now display correctly on Leopard, since Apple messed up a bug fix\
 {\listtext	\'95	}Zoom button for PDF views now works on Leopard using a different evil hack\
 {\listtext	\'95	}Input manager pref pane is invisible on Leopard\
+{\listtext	\'95	}Warn if the input manager is installed in ~/Library on Leopard\
+{\listtext	\'95	}Fix bug #1825254, BibTeX document used for editor proxy icons instead of Local-Url on Leopard\
+{\listtext	\'95	}Fix bug #1825703, crash when closing some sheets on Leopard due to an Apple bug\
+{\listtext	\'95	}Don't check for <?xml on COPAC output, since their output has apparently changed again\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f0\b\fs28 \cf0 \
