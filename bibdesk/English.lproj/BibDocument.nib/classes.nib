@@ -146,6 +146,7 @@
                 saveAccessoryView = NSView; 
                 saveTextEncodingPopupButton = BDSKEncodingPopUpButton; 
                 searchBookmarkField = NSTextField; 
+                searchBookmarkPopUp = NSPopUpButton; 
                 searchBookmarkSheet = NSWindow; 
                 searchField = NSSearchField; 
                 splitView = BDSKSplitView; 

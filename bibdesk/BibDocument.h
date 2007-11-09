@@ -184,6 +184,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
     IBOutlet NSWindow *searchBookmarkSheet;
     IBOutlet NSTextField *searchBookmarkField;
+    IBOutlet NSPopUpButton *searchBookmarkPopUp;
 
 #pragma mark Macros, Document Info and Front Matter variables
 

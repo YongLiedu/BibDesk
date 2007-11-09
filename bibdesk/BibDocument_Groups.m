@@ -1009,7 +1009,23 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)searchBookmarkSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
         BDSKGroup *group = [[self selectedGroups] lastObject];
-        [[BDSKSearchBookmarkController sharedBookmarkController] addBookmarkWithInfo:[group dictionaryValue] label:[searchBookmarkField stringValue] toFolder:nil];
+        BDSKSearchBookmark *folder = [[searchBookmarkPopUp selectedItem] representedObject];
+        [[BDSKSearchBookmarkController sharedBookmarkController] addBookmarkWithInfo:[group dictionaryValue] label:[searchBookmarkField stringValue] toFolder:folder];
+    }
+}
+
+- (void)addMenuItemsForBookmarks:(NSArray *)bookmarksArray level:(int)level toMenu:(NSMenu *)menu {
+    int i, iMax = [bookmarksArray count];
+    for (i = 0; i < iMax; i++) {
+        BDSKSearchBookmark *bm = [bookmarksArray objectAtIndex:i];
+        if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
+            NSString *label = [bm label];
+            NSMenuItem *item = [menu addItemWithTitle:label ? label : @"" action:NULL keyEquivalent:@""];
+            [item setImage:[bm icon]];
+            [item setIndentationLevel:level];
+            [item setRepresentedObject:bm];
+            [self addMenuItemsForBookmarks:[bm children] level:level+1 toMenu:menu];
+        }
     }
 }
 
@@ -1021,6 +1037,12 @@ The groupedPublications array is a subset of the publications array, developed b
     
     BDSKSearchGroup *group = (BDSKSearchGroup *)[[self selectedGroups] lastObject];
 	[searchBookmarkField setStringValue:[NSString stringWithFormat:@"%@: %@", [[group serverInfo] name], [group name]]];
+    [searchBookmarkPopUp removeAllItems];
+    NSArray *bookmarks = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarks];
+    NSMenuItem *item = [[searchBookmarkPopUp menu] addItemWithTitle:NSLocalizedString(@"Bookmarks Menu", @"Menu item title") action:NULL keyEquivalent:@""];
+    [item setImage:[NSImage imageNamed:@"SmallMenu"]];
+    [self addMenuItemsForBookmarks:bookmarks level:1 toMenu:[searchBookmarkPopUp menu]];
+    [searchBookmarkPopUp selectItemAtIndex:0];
     
     [NSApp beginSheet:searchBookmarkSheet
        modalForWindow:[self windowForSheet]
