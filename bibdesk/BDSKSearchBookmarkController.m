@@ -83,7 +83,7 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
                                                      name:BDSKSearchBookmarkChangedNotification
                                                    object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleSearchBookmarkWillBeDeletedNotification:)
+                                                 selector:@selector(handleSearchBookmarkWillBeRemovedNotification:)
                                                      name:BDSKSearchBookmarkWillBeRemovedNotification
                                                    object:nil];
     }
