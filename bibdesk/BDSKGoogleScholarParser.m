@@ -74,6 +74,8 @@
 
     NSArray *BibTeXLinkNodes = [[xmlDocument rootElement] nodesForXPath:BibTexLinkNodePath
                                                     error:&error];
+    
+    
         
     unsigned int i;
     for(i=0; i < [BibTeXLinkNodes count]; i++){
@@ -85,9 +87,32 @@
         
         NSURL *btURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [url host], hrefValue]];
         
-        NSString *bibTeXString = [NSString stringWithContentsOfURL:btURL 
-                                                          encoding:NSUTF8StringEncoding
-                                                             error:&error];
+        NSURLRequest *request = [NSURLRequest requestWithURL:btURL];
+        NSURLResponse *response;
+        
+        NSData *theData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];   
+        NSString *bibTeXString = nil;
+        
+        // google actually provides this information; on my system it returns "macintosh" which gets converted to NSMacOSRomanStringEncoding
+        if (nil != theData) {
+            
+            NSString *encodingName = [response textEncodingName];
+            NSStringEncoding encoding = kCFStringEncodingInvalidId;
+            
+            if (nil != encodingName)
+                encoding = CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((CFStringRef)encodingName));
+
+            if (encoding != kCFStringEncodingInvalidId)
+                bibTeXString = [[NSString alloc] initWithData:theData encoding:encoding];
+            else
+                bibTeXString = [[NSString alloc] initWithData:theData encoding:NSUTF8StringEncoding];
+            
+            if (nil == bibTeXString)
+                bibTeXString = [[NSString alloc] initWithData:theData encoding:NSISOLatin1StringEncoding];
+            
+            [bibTeXString autorelease];
+        }
+
         BOOL isPartialData = NO;
         NSArray* bibtexItems = nil;
         
