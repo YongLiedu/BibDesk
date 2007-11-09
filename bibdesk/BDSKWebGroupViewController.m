@@ -180,8 +180,11 @@
     
     NSError *error = nil;
     NSArray *newPubs = [BDSKWebParser itemsFromDocument:domDocument fromURL:url error:&error];
-    if (nil == newPubs)
+    if (nil == newPubs) {
+#warning remove for release
+        NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
         [NSApp presentError:error];
+    }
         
     if (frame == loadingWebFrame) {
         [self setRetrieving:NO];
@@ -193,12 +196,14 @@
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
+#warning is this really a failure?
     if (frame == loadingWebFrame) {
         [self setRetrieving:NO];
         [group addPublications:nil];
         loadingWebFrame = nil;
     }
-    [NSApp presentError:error];
+#warning remove for release
+    NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
@@ -207,6 +212,9 @@
         [group addPublications:nil];
         loadingWebFrame = nil;
     }
+#warning remove for release
+    NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
+    [NSApp presentError:error];
 }
 
 - (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{

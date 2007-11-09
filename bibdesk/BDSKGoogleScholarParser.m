@@ -39,6 +39,7 @@
 #import <WebKit/WebKit.h>
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
+#import "NSError_BDSKExtensions.h"
 
 @implementation BDSKGoogleScholarParser
 
@@ -75,10 +76,23 @@
     NSArray *BibTeXLinkNodes = [[xmlDocument rootElement] nodesForXPath:BibTexLinkNodePath
                                                     error:&error];
     
+    // bail out with an XML error if the Xpath query fails
+    if (nil == BibTeXLinkNodes) {
+        if (outError) *outError = error;
+        return nil;
+    }
     
-        
-    unsigned int i;
-    for(i=0; i < [BibTeXLinkNodes count]; i++){
+    unsigned int i, iMax = [BibTeXLinkNodes count];
+    
+    // check the number of nodes first
+    if (0 == iMax) {
+        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"No BibTeX links found", @"Google scholar error")];
+        [error setValue:NSLocalizedString(@"Unable to parse this page.  Please report this to BibDesk's developers and provide the URL.", @"Google scholar error")];
+        if (outError) *outError = error;
+        return nil;
+    }
+    
+    for(i=0; i < iMax; i++){
         
         NSXMLNode *btlinknode = [BibTeXLinkNodes objectAtIndex:i];
         
@@ -140,7 +154,8 @@
     }
     
     if (0 == [items count]) {
-        // signal an error condition
+        // signal an error condition; this page had BibTeX links, but we were unable to parse anything
+        // the BibTeX parser /should/ have set the NSError
         items = nil;
         if (outError)
             *outError = error;
