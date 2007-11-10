@@ -22,7 +22,6 @@
             ACTIONS = {dismiss = id; }; 
             CLASS = BDSKSheetController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {}; 
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
