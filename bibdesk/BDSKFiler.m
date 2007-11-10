@@ -112,6 +112,7 @@ static BDSKFiler *sharedFiler = nil;
 	BibItem *paper = nil;
 	NSString *path = nil;
 	NSString *newPath = nil;
+	NSString *newRelativePath = nil;
 	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:numberOfPapers];
 	NSMutableDictionary *info = nil;
 	BOOL useRelativePath = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoFileUsesRelativePathKey];
@@ -176,6 +177,9 @@ static BDSKFiler *sharedFiler = nil;
 			paper = (BibItem *)paperInfo;
 			path = [paper localUrlPathInheriting:NO];
 			newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
+            newRelativePath = newPath;
+            if ([newPath hasPrefix:papersFolderPath])
+                newRelativePath = [newPath substringFromIndex:[papersFolderPath length]];
 		}else{
 			// an explicit move, possibly from undo: a list of info dictionaries
 			paper = [paperInfo objectForKey:@"paper"];
@@ -188,16 +192,22 @@ static BDSKFiler *sharedFiler = nil;
 			[progressIndicator displayIfNeeded];
 		}
 			
-		if([NSString isEmptyString:path] || [NSString isEmptyString:newPath] || 
-		   [path isEqualToString:newPath])
+		if([NSString isEmptyString:path] || [NSString isEmptyString:newPath]){
 			continue;
-		
+		}else if([path isEqualToString:newPath]){
+            // we still want to change the field when we change from full URL to relative path or v.v.
+            oldValue = [paper valueOfField:field inherit:NO];
+            BOOL wasRelative = [oldValue hasPrefix:@"file://"] == NO && [oldValue isAbsolutePath] == NO;
+            if (initial == NO || useRelativePath != wasRelative || [newRelativePath isAbsolutePath] == NO)
+                continue;
+        }
+        
 		info = [NSMutableDictionary dictionaryWithCapacity:6];
 		[info setObject:paper forKey:@"paper"];
         error = nil;
         oldValue  = [[NSURL fileURLWithPath:path] absoluteString]; // we don't use the field value, as we might have already changed it in undo or find/replace
         
-        if(check && ![paper canSetLocalUrl]){
+        if(check && NO == [paper canSetLocalUrl]){
             
             [info setObject:NSLocalizedString(@"Incomplete information to generate file name.",@"") forKey:@"status"];
             [info setObject:[NSNumber numberWithInt:BDSKIncompleteFieldsErrorMask] forKey:@"flag"];
@@ -206,7 +216,7 @@ static BDSKFiler *sharedFiler = nil;
             [info setObject:newPath forKey:@"newPath"];
             [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
             
-        }else if(![fm movePath:path toPath:newPath force:force error:&error]){ 
+        }else if(NO == [path isEqualToString:newPath] && NO == [fm movePath:path toPath:newPath force:force error:&error]){ 
             
             NSDictionary *errorInfo = [error userInfo];
             NSString *fix = [errorInfo objectForKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -222,14 +232,7 @@ static BDSKFiler *sharedFiler = nil;
 			
 			newValue  = [[NSURL fileURLWithPath:newPath] absoluteString];
 			if(initial) {// otherwise will be done by undo of setField:
-                if(useRelativePath){
-                    NSString *relativePath = newPath;
-                    if ([newPath hasPrefix:papersFolderPath])
-                        relativePath = [newPath substringFromIndex:[papersFolderPath length]];
-                    [paper setField:field toValue:relativePath];
-                }else{
-                    [paper setField:field toValue:newValue];
-                }
+                [paper setField:field toValue:useRelativePath ? newRelativePath : newValue];
 			}else{
                 // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
                 NSString *value = [paper valueOfField:field];
