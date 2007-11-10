@@ -241,15 +241,17 @@ static BDSKFiler *sharedFiler = nil;
                                                                     object:paper
                                                                   userInfo:notifInfo];
             }
-            if(scriptHook){
-				[papers addObject:paper];
-				[oldValues addObject:oldValue];
-				[newValues addObject:newValue];
-			}
-			// switch them as this is used in undo
-            [info setObject:path forKey:@"newPath"];
-            [info setObject:newPath forKey:@"oldPath"];
-			[fileInfoDicts addObject:info];
+            if(NO == [path isEqualToString:newPath]){
+                if(scriptHook){
+                    [papers addObject:paper];
+                    [oldValues addObject:oldValue];
+                    [newValues addObject:newValue];
+                }
+                // switch them as this is used in undo
+                [info setObject:path forKey:@"newPath"];
+                [info setObject:newPath forKey:@"oldPath"];
+                [fileInfoDicts addObject:info];
+            }
             
 		}
 	}
