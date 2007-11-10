@@ -2449,7 +2449,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
     BibItem *self = (BibItem *)context;
     NSURL *value = [self localFileURLForField:(id)key];
-    if (value) {
+    if (value && [[self valueForKeyPath:@"files.fileURL"] containsObject:value] == NO) {
         // !!! file URLs are always absolute but the init method here always returns nil, which probably means that we should do the first initialization with relative paths instead of expending them first
         BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithURL:value delegate:self];
         if (aFile) {
