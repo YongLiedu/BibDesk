@@ -19,6 +19,11 @@
             }; 
             SUPERCLASS = NSWindowController; 
         }, 
+        {
+            CLASS = BDSKBookmarkOutlineView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSOutlineView; 
+        }, 
         {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {
             ACTIONS = {startAnimation = id; stopAnimation = id; }; 

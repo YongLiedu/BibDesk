@@ -40,6 +40,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument.h"
 #import "NSImage+Toolbox.h"
+#import "BDSKBookmarkOutlineView.h"
 
 static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
 
@@ -106,6 +107,7 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
 - (void)windowDidLoad {
     [self setupToolbar];
     [self setWindowFrameAutosaveName:@"BDSKBookmarksWindow"];
+    [outlineView setAutoresizesOutlineColumn:NO];
     [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
 }
 
@@ -432,9 +434,9 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
 
 - (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, nil]];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
     
-    if (type) {
+    if ([type isEqualToString:BDSKBookmarkRowsPboardType]) {
         if (idx == NSOutlineViewDropOnItemIndex) {
             if ([item bookmarkType] == BDSKBookmarkTypeFolder && [outlineView isItemExpanded:item]) {
                 [ov setDropItem:item dropChildIndex:0];
@@ -447,15 +449,28 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
             }
         }
         return [item isDescendantOfArray:[self draggedBookmarks]] ? NSDragOperationNone : NSDragOperationMove;
+    } else if (type) {
+        if (idx == NSOutlineViewDropOnItemIndex && (item == nil || [item bookmarkType] != BDSKBookmarkTypeBookmark)) {
+            if ([item bookmarkType] == BDSKBookmarkTypeFolder && [outlineView isItemExpanded:item]) {
+                [ov setDropItem:item dropChildIndex:0];
+            } else if ([item parent]) {
+                [ov setDropItem:[item parent] dropChildIndex:[[[item parent] children] indexOfObject:item] + 1];
+            } else if (item) {
+                [ov setDropItem:nil dropChildIndex:[bookmarks indexOfObject:item] + 1];
+            } else {
+                [ov setDropItem:nil dropChildIndex:[bookmarks count]];
+            }
+        }
+        return NSDragOperationEvery;
     }
     return NSDragOperationNone;
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx {
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, nil]];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
     
-    if (type) {
+    if ([type isEqualToString:BDSKBookmarkRowsPboardType]) {
         NSEnumerator *bmEnum = [[self draggedBookmarks] objectEnumerator];
         BDSKBookmark *bookmark;
 				
@@ -471,11 +486,29 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
             [self bookmark:item insertChildBookmark:bookmark atIndex:idx++];
 		}
         return YES;
+    } else if (type) {
+        NSString *urlString = nil;
+        if ([type isEqualToString:BDSKWeblocFilePboardType])
+            urlString = [pboard stringForType:BDSKWeblocFilePboardType];
+        else if ([type isEqualToString:NSURLPboardType])
+            urlString = [[NSURL URLFromPasteboard:pboard] absoluteString];
+        if (urlString == nil)
+            return NO;
+        if (idx == NSOutlineViewDropOnItemIndex && item && [item bookmarkType] == BDSKBookmarkTypeBookmark) {
+            [item setUrlString:urlString];
+        } else {
+            BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithUrlString:urlString name:[self uniqueName]];
+            if (idx == NSOutlineViewDropOnItemIndex)
+                idx = [[self childrenOfBookmark:item] count];
+            [self bookmark:item insertChildBookmark:bookmark atIndex:idx];
+            [bookmark release];
+        }
+        return YES;
     }
     return NO;
 }
 
-- (void)outlineView:(NSOutlineView *)ov dragEndedWithOperation:(NSDragOperation)operation {
+- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation {
     [self setDraggedBookmarks:nil];
 }
 
@@ -672,7 +705,6 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
-    return [self initWithUrlString:[dictionary objectForKey:URL_KEY] name:[dictionary objectForKey:TITLE_KEY]];
     if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeFolderString]) {
         NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
         NSDictionary *dict;

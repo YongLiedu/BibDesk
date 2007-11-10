@@ -192,6 +192,8 @@
 		CE3B5E7D09CEDE470017D339 /* BDSKMacroResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */; };
 		CE3B682B09D1B0190017D339 /* BDSKImagePopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */; };
 		CE3B682D09D1B0190017D339 /* BDSKImagePopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */; };
+		CE416B750CE5E25B00AAB04C /* BDSKBookmarkOutlineView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE416B730CE5E25B00AAB04C /* BDSKBookmarkOutlineView.h */; };
+		CE416B760CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE416B740CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m */; };
 		CE42A26A0A99BE2400C62D85 /* BDSKErrorEditWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE42A2680A99BE2400C62D85 /* BDSKErrorEditWindow.nib */; };
 		CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */; };
 		CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE43865C0BB8274600A56987 /* SearchBookmarksWindow.nib */; };
@@ -811,6 +813,7 @@
 				F9022FB207580A9600C3F701 /* OmniAppKit.framework in CopyFiles */,
 				F9022FB307580A9600C3F701 /* OmniBase.framework in CopyFiles */,
 				F9022FB407580A9600C3F701 /* OmniFoundation.framework in CopyFiles */,
+				CE416B750CE5E25B00AAB04C /* BDSKBookmarkOutlineView.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1044,6 +1047,8 @@
 		CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButton.m; sourceTree = "<group>"; };
 		CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKImagePopUpButtonCell.h; sourceTree = "<group>"; };
 		CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButtonCell.m; sourceTree = "<group>"; };
+		CE416B730CE5E25B00AAB04C /* BDSKBookmarkOutlineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBookmarkOutlineView.h; sourceTree = "<group>"; };
+		CE416B740CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBookmarkOutlineView.m; sourceTree = "<group>"; };
 		CE42A2690A99BE2400C62D85 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKErrorEditWindow.nib; sourceTree = "<group>"; };
 		CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchBookmarkController.h; sourceTree = "<group>"; };
 		CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchBookmarkController.m; sourceTree = "<group>"; };
@@ -1967,6 +1972,7 @@
 			isa = PBXGroup;
 			children = (
 				3D824AA707D099C300FB2F67 /* BDSKBackgroundView.m */,
+				CE416B740CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m */,
 				2730077707CF20B500F2E485 /* BDSKBorderlessKeyWindow.m */,
 				F9A5B10A0B8CEA9600C52257 /* BDSKCenterScaledImageCell.m */,
 				CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */,
@@ -2386,6 +2392,7 @@
 				CE9DBEDD093CF2640008648B /* BDSKBibliographyCommand.h */,
 				F9022C950758038000C3F701 /* BDSKBibTeXParser.h */,
 				CEF83F350C77911F00A3AD51 /* BDSKBookmarkController.h */,
+				CE416B730CE5E25B00AAB04C /* BDSKBookmarkOutlineView.h */,
 				CEEA4C690B57B0D400434059 /* BDSKBooleanValueTransformer.h */,
 				2730077607CF20B500F2E485 /* BDSKBorderlessKeyWindow.h */,
 				CEFDBDDB0AEA87F8009EE99D /* BDSKCategoryGroup.h */,
@@ -2892,7 +2899,6 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
@@ -3723,6 +3729,7 @@
 				CE8961BD0CBEB5AC00EA2D98 /* BDSKTemplateDocument.m in Sources */,
 				CEFA2F130CC0272C002A8262 /* BDSKTag.m in Sources */,
 				CE6C962C0CD9014A0022D69F /* NSScrollView_BDSKExtensions.m in Sources */,
+				CE416B760CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

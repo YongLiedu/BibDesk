@@ -39,6 +39,7 @@
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKStringConstants.h"
 #import "NSImage+Toolbox.h"
+#import "BDSKBookmarkOutlineView.h"
 
 static NSString *BDSKSearchBookmarkRowsPboardType = @"BDSKSearchBookmarkRowsPboardType";
 static NSString *BDSKSearchBookmarkChangedNotification = @"BDSKSearchBookmarkChangedNotification";
@@ -101,6 +102,7 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
 - (void)windowDidLoad {
     [self setupToolbar];
     [self setWindowFrameAutosaveName:@"BDSKSearchBookmarksWindow"];
+    [outlineView setAutoresizesOutlineColumn:NO];
     [outlineView registerForDraggedTypes:[NSArray arrayWithObject:BDSKSearchBookmarkRowsPboardType]];
 }
 
@@ -358,7 +360,7 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
     return NO;
 }
 
-- (void)outlineView:(NSOutlineView *)ov dragEndedWithOperation:(NSDragOperation)operation {
+- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation {
     [self setDraggedBookmarks:nil];
 }
 
@@ -673,27 +675,6 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
         if ([self isDescendantOf:bm]) return YES;
     }
     return NO;
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKBookmarkOutlineView
-
-#define SEPARATOR_LEFT_INDENT 20.0
-#define SEPARATOR_RIGHT_INDENT 2.0
-
-- (void)drawRow:(int)rowIndex clipRect:(NSRect)clipRect {
-    if ([[self delegate] respondsToSelector:@selector(outlineView:drawSeparatorRowForItem:)] &&
-        [[self delegate] outlineView:self drawSeparatorRowForItem:[self itemAtRow:rowIndex]]) {
-        float indent = [self levelForItem:[self itemAtRow:rowIndex]] * [self indentationPerLevel];
-        NSRect rect = [self rectOfRow:rowIndex];
-        [[NSColor gridColor] setStroke];
-        [NSBezierPath strokeLineFromPoint:NSMakePoint(NSMinX(rect) + indent + SEPARATOR_LEFT_INDENT, floorf(NSMidY(rect)) + 0.5) toPoint:NSMakePoint(NSMaxX(rect) - SEPARATOR_RIGHT_INDENT, floorf(NSMidY(rect)) + 0.5)];
-    } else {
-        [super drawRow:rowIndex clipRect:clipRect];
-    }
 }
 
 @end

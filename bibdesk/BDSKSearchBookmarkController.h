@@ -117,7 +117,3 @@ enum {
 - (BOOL)isDescendantOfArray:(NSArray *)bookmarks;
 
 @end
-
-
-@interface BDSKBookmarkOutlineView : NSOutlineView
-@end
