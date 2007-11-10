@@ -121,6 +121,8 @@
 - (IBAction)refreshSearchGroups:(id)sender;
 - (IBAction)refreshAllExternalGroups:(id)sender;
 - (IBAction)refreshSelectedGroups:(id)sender;
+- (IBAction)openBookmark:(id)sender;
+- (IBAction)addBookmark:(id)sender;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
 - (void)sortGroupsByKey:(NSString *)key;
