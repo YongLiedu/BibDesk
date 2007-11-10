@@ -141,6 +141,18 @@
             // but it'll take some xpath hacking to make sure we match title to bibtex link correctly.
             
             [items addObject:bibtexItem];
+			
+			NSString *bracedTitle = [bibtexItem valueOfField:BDSKTitleString inherit:NO];
+			
+			// google scholar encloses titles in braces to force capitalization, but it's better to let styles handle that
+			if ([bracedTitle hasPrefix:@"{"] && [bracedTitle hasSuffix:@"}"]) {
+                NSMutableString *mutableTitle = [bracedTitle mutableCopy];
+                [mutableTitle replaceCharactersInRange:NSMakeRange([mutableTitle length] - 1, 1) withString:@""];
+				[mutableTitle replaceCharactersInRange:NSMakeRange(0, 1) withString:@""];
+				if ([mutableTitle isStringTeXQuotingBalancedWithBraces:YES connected:NO]) 
+					[bibtexItem setField:BDSKTitleString toValue:mutableTitle];
+				[mutableTitle release];
+			}				
         }
         else {
             // display a fake item in the table so the user knows one of the items failed to parse, but still gets the rest of the data
