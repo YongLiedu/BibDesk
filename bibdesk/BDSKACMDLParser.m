@@ -83,6 +83,15 @@
     NSString *onClickValue = [btlinknode stringValueOfAttribute:@"onclick"];
 
     // string should look like "window.open('.*');". Trim off the outer stuff:
+    
+    // check length in case this changes at some point in future, though!
+    if ([bibTeXWindowURLPath length] < 16) {
+        if (outError) {
+            *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Window URL path string shorter than expected", @"ACM parser error")];
+            return nil;
+        }
+    }
+    
     NSString *bibTeXWindowURLPath = [onClickValue substringWithRange:NSMakeRange(13, [onClickValue length] - 13 - 3)];
     
     NSURL *btwinURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/%@", [url host], bibTeXWindowURLPath]];
