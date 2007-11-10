@@ -39,6 +39,7 @@
 #import <WebKit/WebKit.h>
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
+#import "NSError_BDSKExtensions.h"
 
 @implementation BDSKACMDLParser
 
@@ -85,7 +86,7 @@
     // string should look like "window.open('.*');". Trim off the outer stuff:
     
     // check length in case this changes at some point in future, though!
-    if ([bibTeXWindowURLPath length] < 16) {
+    if ([onClickValue length] < 16) {
         if (outError) {
             *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Window URL path string shorter than expected", @"ACM parser error")];
             return nil;
