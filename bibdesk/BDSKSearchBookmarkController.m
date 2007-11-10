@@ -291,7 +291,12 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
     if ([tcID isEqualToString:@"label"]) {
         return [NSDictionary dictionaryWithObjectsAndKeys:[item label], OATextWithIconCellStringKey, [item icon], OATextWithIconCellImageKey, nil];
     } else if ([tcID isEqualToString:@"server"]) {
-        return [[item info] valueForKey:@"name"];
+        if ([item bookmarkType] == BDSKSearchBookmarkTypeFolder) {
+            int count = [[item children] count];
+            return count == 1 ? NSLocalizedString(@"1 item", @"Bookmark folder description") : [NSString stringWithFormat:NSLocalizedString(@"%i items", @"Bookmark folder description"), count];
+        } else {
+            return [[item info] valueForKey:@"name"];
+        }
     } else if ([tcID isEqualToString:@"search term"]) {
         return [[item info] valueForKey:@"search term"];
     }
@@ -365,6 +370,15 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
 }
 
 #pragma mark NSOutlineView delegate methods
+
+- (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item {
+    if ([[tableColumn identifier] isEqualToString:@"server"]) {
+        if ([item bookmarkType] == BDSKSearchBookmarkTypeFolder)
+            [cell setTextColor:[NSColor disabledControlTextColor]];
+        else
+            [cell setTextColor:[NSColor controlTextColor]];
+    }
+}
 
 - (BOOL)outlineView:(NSOutlineView *)ov shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item {
     return [[tableColumn identifier] isEqualToString:@"label"] && [item bookmarkType] != BDSKSearchBookmarkTypeSeparator;
