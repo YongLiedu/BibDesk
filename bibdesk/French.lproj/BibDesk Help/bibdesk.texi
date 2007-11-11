@@ -3690,9 +3690,9 @@ Possible format specifiers are given in the table below.
 @end multitable
 @noindent
 In the table above, @value{paramdescr} characters after the specifiers 
-indicate the optional parameters (the first number after an author specifier, 
-the number of authors, should be a single digit). Indicated in the table 
-are the parameter values that are used when they are not entered. 
+indicate the optional parameters. The first number after an author specifier, 
+the number of authors, should be a single digit. It can be negative to indicate last authors. 
+Indicated in the table are the parameter values that are used when they are not entered. 
 
 The special value of zero for an optional parameter is interpreted either as 
 @emph{all} (for the @samp{author}, @samp{title}, or @samp{field} specifiers), 
