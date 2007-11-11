@@ -40,6 +40,7 @@
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKTypeManager.h"
+#import "NSError_BDSKExtensions.h"
 
 static void mergePageNumbers(NSMutableDictionary *dict)
 {
@@ -155,7 +156,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     // for now, we'll only support version 1.0
     NSRange startRange = [itemString rangeOfString:@"VR 1.0\n" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"This Web of Science version is not supported", @"Error description"), nil);
+        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"This Web of Science version is not supported", @"Error description"), nil);
         if(outError) *outError = error;
 		return returnArray;
     }

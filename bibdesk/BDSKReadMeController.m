@@ -145,7 +145,8 @@ static NSString *hostInfoString()
         [ic launchMailTo:@"bibdesk-exceptions@lists.sourceforge.net"
               carbonCopy:nil 
                  subject:[NSString stringWithFormat:@"BibDesk %@ exception reported %@", version, [[NSDate date] description]]
-                    body:body];
+                    body:body
+                   error:NULL];
     }
     @catch(id exception){
         NSLog(@"caught exception %@ in exception viewer", exception);

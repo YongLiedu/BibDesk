@@ -44,6 +44,7 @@
 #import <OmniFoundation/NSScanner-OFExtensions.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <AGRegex/AGRegex.h>
+#import "NSError_BDSKExtensions.h"
 
 
 @interface NSString (BDSKMARCParserExtensions)
@@ -88,7 +89,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     
     if(match == nil){
         if(outError)
-            OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown MARC format.", @"Error description"), nil);
+            OFErrorWithInfo(outError, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown MARC format.", @"Error description"), nil);
         return [NSArray array];
     }
     
@@ -294,7 +295,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
         return [self itemsFromMARCXMLString:itemString error:outError];
     }else {
         if(outError)
-            OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown MARC format.", @"Error description"), nil);
+            OFErrorWithInfo(outError, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown MARC format.", @"Error description"), nil);
         return [NSArray array];
     }
 }
