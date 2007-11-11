@@ -49,75 +49,28 @@ enum {
 @end
 
 @implementation FVArrowButtonCell
-
-- (id)init
-{
-    self = [super init];
-    // handle highlight drawing manually, since NSButtonCell draws a rectangular background mask
-    [self setHighlightsBy:NSNoCellMask];
-    return self;
-}
-
-- (void)drawImage:(NSImage *)image withFrame:(NSRect)frame inView:(NSView *)controlView;
-{
-    if ([self isHighlighted]) {
-        // could check to see if [controlView isFlipped], but the icon is symmetric
-        [image drawInRect:frame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.5] setFill];
-        [[NSBezierPath bezierPathWithOvalInRect:frame] fill];
-    }
-    else {
-        [super drawImage:image withFrame:frame inView:controlView];
-        
-        if ([self isEnabled] == NO) {
-            [NSGraphicsContext saveGraphicsState];
-            [[NSColor colorWithCalibratedWhite:1.0 alpha:0.5] setFill];
-            [[NSBezierPath bezierPathWithOvalInRect:frame] fill];
-            [NSGraphicsContext restoreGraphicsState];
-        }
-    }
-}
-
 @end
 
 @implementation FVArrowButton
 
 + (Class)cellClass { return [FVArrowButtonCell class]; }
 
-- (NSImage *)rightArrowImage;
+- (NSImage *)arrowImage;
 {
     NSSize size = [self frame].size;
     NSImage *image = [[NSImage alloc] initWithSize:size];
-    [image lockFocus];
-    
-    NSRect arrowRect = NSZeroRect;
-    arrowRect.size = size;
-    
-    NSBezierPath *circle = [NSBezierPath bezierPathWithOvalInRect:arrowRect];
-    [[NSColor colorWithCalibratedWhite:0.0 alpha:0.3] setFill];
-    [circle fill];
-    
-    [[NSColor colorWithCalibratedWhite:1.0 alpha:0.7] setFill];
-    [rightArrowBezierPathWithSize(size) fill];
-    
-    [image unlockFocus];
-    return [image autorelease];
-}
-
-- (NSImage *)leftArrowImage;
-{
-    NSSize size = [self frame].size;
-    NSImage *image = [[NSImage alloc] initWithSize:size];
-    
+    NSLog(@"%@",NSStringFromSize(size));
     NSRect arrowRect = NSZeroRect;
     arrowRect.size = size;
     
     [image lockFocus];
     
     // reverse the CTM so the arrow points left
-    CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
-    CGContextTranslateCTM(ctxt, size.width, 0);
-    CGContextScaleCTM(ctxt, -1, 1);
+    if (FVArrowLeft == _arrowDirection) {
+        CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
+        CGContextTranslateCTM(ctxt, size.width, 0);
+        CGContextScaleCTM(ctxt, -1, 1);
+    }
     
     NSBezierPath *circle = [NSBezierPath bezierPathWithOvalInRect:arrowRect];
     [[NSColor colorWithCalibratedWhite:0.0 alpha:0.3] setFill];
@@ -131,31 +84,49 @@ enum {
     return [image autorelease];
 }
 
-+ (id)newLeftArrowWithSize:(NSSize)size;
+- (id)initLeftArrowWithFrame:(NSRect)frameRect
 {
-    FVArrowButton *button = [[self allocWithZone:[self zone]] initWithFrame:NSMakeRect(0,0,size.width,size.height)];
-    [button setImage:[button leftArrowImage]];
-    [button setImagePosition:NSImageOnly];
-    [button setBordered:NO];
-    button->_arrowDirection = FVArrowLeft;
-    return button;
+    if (self = [super initWithFrame:frameRect]) {
+        _arrowDirection = FVArrowLeft;
+        [self setImage:[self arrowImage]];
+        [self setImagePosition:NSImageOnly];
+        [self setBezelStyle:NSRegularSquareBezelStyle];
+        [self setBordered:NO];
+        [[self cell] setHighlightsBy:NSContentsCellMask];
+    }
+    return self;
 }
 
-+ (id)newRightArrowWithSize:(NSSize)size;
+- (id)initRightArrowWithFrame:(NSRect)frameRect
 {
-    FVArrowButton *button = [[self allocWithZone:[self zone]] initWithFrame:NSMakeRect(0,0,size.width,size.height)];
-    [button setImage:[button rightArrowImage]];
-    [button setImagePosition:NSImageOnly];
-    [button setBordered:NO];
-    button->_arrowDirection = FVArrowRight;
-    return button;    
+    if (self = [super initWithFrame:frameRect]) {
+        _arrowDirection = FVArrowRight;
+        [self setImage:[self arrowImage]];
+        [self setImagePosition:NSImageOnly];
+        [self setBezelStyle:NSRegularSquareBezelStyle];
+        [self setBordered:NO];
+        [[self cell] setHighlightsBy:NSContentsCellMask];
+    }
+    return self;
+}
+
+- (id)initWithFrame:(NSRect)frameRect {
+    return [self initRightArrowWithFrame:frameRect];
 }
 
 // any time the frame changes, create a new image at the correct size
 - (void)setFrame:(NSRect)aFrame
 {
     [super setFrame:aFrame];
-    [self setImage:(FVArrowLeft == _arrowDirection ? [self leftArrowImage] : [self rightArrowImage])];
+    if (NSEqualSizes(aFrame.size, [[self image] size]) == NO)
+        [self setImage:[self arrowImage]];
+}
+
+- (void)setFrameSize:(NSSize)aSize
+{
+    [super setFrameSize:aSize];
+    if (NSEqualSizes(aSize, [[self image] size]) == NO)
+        [self setImage:[self arrowImage]];
 }
 
 // Modify mouseDown: behavior slightly.  Wince this control is superimposed on another pseudo-control (the FileView), we want to avoid passing some events to the next responder.

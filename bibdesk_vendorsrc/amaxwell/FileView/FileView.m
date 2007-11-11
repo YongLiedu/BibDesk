@@ -152,11 +152,11 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     const CFDictionaryValueCallBacks integerValueCallBacks = { 0, NULL, NULL, intDesc, intEqual };
     _trackingRectMap = CFDictionaryCreateMutable(alloc, 0, &integerKeyCallBacks, &integerValueCallBacks);
     
-    _leftArrow = [FVArrowButton newLeftArrowWithSize:NSMakeSize(16, 16)];
+    _leftArrow = [[FVArrowButton alloc] initLeftArrowWithFrame:NSMakeRect(0.0, 0.0, 16.0, 16.0)];
     [_leftArrow setTarget:self];
     [_leftArrow setAction:@selector(leftArrowAction:)];
     
-    _rightArrow = [FVArrowButton newRightArrowWithSize:NSMakeSize(16, 16)];
+    _rightArrow = [[FVArrowButton alloc] initRightArrowWithFrame:NSMakeRect(0.0, 0.0, 16.0, 16.0)];
     [_rightArrow setTarget:self];
     [_rightArrow setAction:@selector(rightArrowAction:)];
     
@@ -1212,7 +1212,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
             NSRect leftRect = NSZeroRect, rightRect = NSZeroRect;
             
             // determine a min/max size for the arrow buttons
-            CGFloat side = NSHeight(iconRect) / 5;
+            CGFloat side = roundf(NSHeight(iconRect) / 5);
             side = MIN(side, 32);
             side = MAX(side, 10);
             leftRect.size = NSMakeSize(side, side);

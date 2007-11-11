@@ -44,7 +44,7 @@
     NSUInteger _arrowDirection;
 }
 
-+ (id)newLeftArrowWithSize:(NSSize)size;
-+ (id)newRightArrowWithSize:(NSSize)size;
+- (id)initLeftArrowWithFrame:(NSRect)frameRect;
+- (id)initRightArrowWithFrame:(NSRect)frameRect;
 
 @end
