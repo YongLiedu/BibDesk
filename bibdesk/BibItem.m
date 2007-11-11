@@ -1684,7 +1684,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
     }
     if (!drop) {
-        value = [self filesAsBibTeXFragmentRelativeToPath:[self basePathForAliasFile:nil]];
+        value = [self filesAsBibTeXFragmentRelativeToPath:[[self baseURLForAliasFile:nil] path]];
         if (value) [s appendString:value];
     }
     [knownKeys release];
