@@ -69,22 +69,20 @@
 - (id)initWithPath:(NSString *)aPath delegate:(id)aDelegate;
 - (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
 
-- (void)setFileRef:(const FSRef *)newFileRef;
+- (void)setDelegate:(id)aDelegate;
+- (id)delegate;
+
+- (NSString *)relativePath;
+- (void)setRelativePath:(NSString *)newRelativePath;
+
 - (const FSRef *)fileRef;
 - (NSURL *)fileURL;
 - (NSString *)path;
 
 - (NSData *)aliasDataRelativeToPath:(NSString *)newBasePath;
 - (NSString *)base64StringRelativeToPath:(NSString *)newBasePath;
-- (NSData *)aliasDataRelativeToPath:(NSString *)newBasePath;
-
-- (NSString *)relativePath;
-- (void)setRelativePath:(NSString *)newRelativePath;
 
 - (void)update;
-
-- (void)setDelegate:(id)aDelegate;
-- (id)delegate;
 
 @end
 
