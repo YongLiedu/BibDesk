@@ -59,7 +59,6 @@ enum {
 {
     NSSize size = [self frame].size;
     NSImage *image = [[NSImage alloc] initWithSize:size];
-    NSLog(@"%@",NSStringFromSize(size));
     NSRect arrowRect = NSZeroRect;
     arrowRect.size = size;
     
