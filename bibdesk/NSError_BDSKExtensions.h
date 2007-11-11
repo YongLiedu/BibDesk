@@ -53,6 +53,8 @@ enum {
     kBDSKFileNotFound,                           /* File not found (should have URL/path)   */
     kBDSKAppleScriptError,                       /* AppleScript failed                      */
     kBDSKParserIgnoredFrontMatter,               /* BDSKBibTeXParser ignored front matter       */
+    kBDSKParserFailed,                           /* Some parser failed for some reason      */
+    kBDSKFileOperationFailed,                    /* Generic file operation failure          */
 };
 
 extern NSString *BDSKUnderlyingItemErrorKey;

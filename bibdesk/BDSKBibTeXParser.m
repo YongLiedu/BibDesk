@@ -311,7 +311,7 @@ error:(NSError **)outError{
         
     // generic error message; the error tableview will have specific errors and context
     if(parsed_ok == 0 || hadProblems){
-        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description"), nil);
+        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description"), nil);
         
     // If no critical errors, warn about ignoring macros or frontmatter; callers can ignore this by passing a valid NSMutableString for frontmatter (or ignoring the partial data flag).  Mainly relevant for paste/drag on the document.
     } else if (ignoredMacros && ignoredFrontmatter) {
@@ -800,7 +800,7 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
             NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"Error description");            
             [BDSKErrorObject reportError:message forFile:filePath line:field->line];
             
-            OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @"Error description"), nil);
+            OFErrorWithInfo(error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @"Error description"), nil);
         }else if(nil != macroString){
             [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
         }else {
