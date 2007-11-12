@@ -997,10 +997,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                 CGContextTranslateCTM(cgContext, 0, NSMaxY(iconRect));
                 CGContextScaleCTM(cgContext, 1, -1);
                 iconRect.origin.y = 0;
+                
+                // Note: don't use integral rects here to avoid res independence issues (on Tiger, centerScanRect: just makes in integral rect).  The icons may create an integral bitmap context, but it'll still be drawn into this rect with correct scaling.
                 iconRect = [self centerScanRect:iconRect];
-                
-                // Note: let the icon handle making the rect integral and scaling the icon proportionally
-                
+                                
                 if (useFastDrawingPath)
                     [image fastDrawInRect:iconRect inCGContext:cgContext];
                 else
