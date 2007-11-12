@@ -113,7 +113,7 @@ static Class BDSKLinkedObjectClass = Nil;
 - (id)initWithURLString:(NSString *)aString;
 {
     OBASSERT(self == defaultPlaceholderLinkedObject);
-    return [[BDSKLinkedURL alloc] initWithString:aString];
+    return [[BDSKLinkedURL alloc] initWithURLString:aString];
 }
 
 - (id)copyWithZone:(NSZone *)aZone
