@@ -133,6 +133,12 @@ static Class BDSKLinkedObjectClass = Nil;
     OBRequestConcreteImplementation(self, _cmd);
 }
 
+- (void)dealloc
+{
+    if ([self class] != BDSKLinkedObjectClass)
+        [super dealloc];
+}
+
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@: URL=%@>", [self class], [self URL]];
 }
