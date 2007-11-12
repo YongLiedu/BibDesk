@@ -609,6 +609,18 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</responds-to>
 		</class>
 
+		<class name="linked URL" plural="linked URLs" code="URL " inherits="item"
+			description="A URL.">
+			<cocoa class="NSString"/>
+			<type type="text"/>
+		</class>
+
+		<class name="linked file" plural="linked files" code="File" inherits="item"
+			description="A file.">
+			<cocoa class="NSURL"/>
+			<type type="file"/>
+		</class>
+
 		<class name="publication" plural="publications" code="bibi" inherits="item"
 			description="A publication.">
             <cocoa class="BibItem"/>
@@ -617,8 +629,16 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="pubAuthors"/>
             </element>
             <element type="field"
-			description="The fields of the publication. These should be accessed by name.">
+                description="The fields of the publication. These should be accessed by name.">
                 <cocoa key="bibFields"/>
+            </element>
+            <element type="linked file"
+                description="The local files linked to the publication.">
+                <cocoa key="linkedFiles"/>
+            </element>
+            <element type="linked URL"
+                description="The remote URLs linked to the publication.">
+                <cocoa key="linkedURLs"/>
             </element>
             <property name="cite key" code="ckey" type="text"
                 description="Key for citing the publication.">

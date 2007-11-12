@@ -41,6 +41,7 @@
 #import "BibDocument.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKLinkedFile.h"
 
 /* ssp
 A Category on BibItem with a few additional methods to enable and enhance its scriptability beyond what comes for free with key value coding.
@@ -104,6 +105,64 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 		}
 	}
 	return nil;
+}
+
+- (NSArray *)linkedFiles {
+    NSMutableArray *linkedFiles = [NSMutableArray array];
+    NSEnumerator *fileEnum = [files objectEnumerator];
+    BDSKLinkedFile *file;
+    NSURL *aURL;
+    
+    while (file = [fileEnum nextObject]) {
+        if ([file isFile] && (aURL = [file URL]))
+            [linkedFiles addObject:aURL];
+    }
+    return linkedFiles;
+}
+
+- (void)insertInLinkedFiles:(NSURL *)newURL atIndex:(unsigned int)idx {
+    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
+    if (file) {
+        NSArray *linkedFiles = [self linkedFiles];
+        if (idx > 0)
+            idx = [files indexOfObject:[linkedFiles objectAtIndex:idx - 1]];
+        [self insertObject:file inFilesAtIndex:[files count]];
+    }
+}
+
+- (void)removeFromLinkedFilesAtIndex:(unsigned int)idx {
+    idx = [files indexOfObject:[[self linkedFiles] objectAtIndex:idx]];
+    [self removeObjectFromFilesAtIndex:idx];
+}
+
+- (NSArray *)linkedURLs {
+    NSMutableArray *linkedURLs = [NSMutableArray array];
+    NSEnumerator *fileEnum = [files objectEnumerator];
+    BDSKLinkedFile *file;
+    NSURL *aURL;
+    
+    while (file = [fileEnum nextObject]) {
+        if ([file isFile] == NO && (aURL = [file URL]))
+            [linkedURLs addObject:[aURL absoluteString]];
+    }
+    return linkedURLs;
+}
+
+- (void)insertInLinkedURLs:(NSString *)newURLString atIndex:(unsigned int)idx {
+    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURLString:newURLString] autorelease];
+    if (file) {
+        NSArray *linkedURLs = [self linkedURLs];
+        if (idx < [linkedURLs count])
+            idx = [files indexOfObject:[linkedURLs objectAtIndex:idx]];
+        else
+            idx = [files count];
+        [self insertObject:file inFilesAtIndex:[files count]];
+    }
+}
+
+- (void)removeFromLinkedURLsAtIndex:(unsigned int)idx {
+    idx = [files indexOfObject:[[self linkedURLs] objectAtIndex:idx]];
+    [self removeObjectFromFilesAtIndex:idx];
 }
 
 /* ssp: 2004-09-21
