@@ -49,6 +49,38 @@ enum {
 @end
 
 @implementation FVArrowButtonCell
+
+- (id)init
+{
+    self = [super init];
+    // handle highlight drawing manually, since NSButtonCell draws a rectangular background mask
+    [self setHighlightsBy:NSNoCellMask];
+    return self;
+}
+
+- (void)drawImage:(NSImage *)image withFrame:(NSRect)frame inView:(NSView *)controlView;
+{
+    // NSCell's highlight drawing does not look correct against a dark background, so override it completely
+    
+    if ([self isHighlighted]) {
+        // could check to see if [controlView isFlipped], but the icon is symmetric
+        [image drawInRect:frame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.5] setFill];
+        [[NSBezierPath bezierPathWithOvalInRect:frame] fill];
+    }
+    else {
+        [super drawImage:image withFrame:frame inView:controlView];
+        
+        // standard drawing is not a sufficient indicator of disabled state for this control
+        if ([self isEnabled] == NO) {
+            [NSGraphicsContext saveGraphicsState];
+            [[NSColor colorWithCalibratedWhite:1.0 alpha:0.5] setFill];
+            [[NSBezierPath bezierPathWithOvalInRect:frame] fill];
+            [NSGraphicsContext restoreGraphicsState];
+        }
+    }
+}
+
 @end
 
 @implementation FVArrowButton
