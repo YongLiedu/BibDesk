@@ -2049,6 +2049,10 @@ enum{
 			return;
 		}
 	}
+	else if([changeType isEqualToString:@"Add/Del File"]){
+        [fileView reloadIcons];
+        return;
+    }
 	
     // Rebuild the form if the crossref changed, or our parent's cite key changed.
 	if([changeKey isEqualToString:BDSKCrossrefString] || 

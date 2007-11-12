@@ -2459,30 +2459,44 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (void)insertObject:(BDSKLinkedFile *)aFile inFilesAtIndex:(NSUInteger)idx
 {
+    [[[self undoManager] prepareWithInvocationTarget:self] removeObjectFromFilesAtIndex:idx];
     [files insertObject:aFile atIndex:idx];
     [aFile setDelegate:self];
     if ([owner fileURL])
         [aFile update];
+	
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del File", @"type", owner, @"owner", nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+														object:self
+													  userInfo:notifInfo];
 }
 
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx
 {
-    [[files objectAtIndex:idx] setDelegate:nil];
+    BDSKLinkedFile *file = [files objectAtIndex:idx];
+    [[[self undoManager] prepareWithInvocationTarget:self] insertObject:file inFilesAtIndex:idx];
+    [file setDelegate:nil];
     [files removeObjectAtIndex:idx];
+	
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del File", @"type", owner, @"owner", nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+														object:self
+													  userInfo:notifInfo];
 }
 
 - (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx
 {
     NSArray *toMove = [[files objectsAtIndexes:aSet] copy];
     unsigned anIdx = [aSet indexLessThanIndex:idx];
+    NSMutableArray *observedFiles = [self mutableArrayValueForKey:@"files"];
     // reduce idx by the number of smaller indexes in aSet
     if (idx > 0) {
         NSRange range = NSMakeRange(0, idx);
         unsigned int buffer[idx];
         idx -= [aSet getIndexes:buffer maxCount:idx inIndexRange:&range];
     }
-    [files removeObjectsAtIndexes:aSet];
-    [files insertObjects:toMove atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(idx, [toMove count])]];
+    [observedFiles removeObjectsAtIndexes:aSet];
+    [observedFiles insertObjects:toMove atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(idx, [toMove count])]];
     [toMove release];
 }
 
