@@ -70,7 +70,7 @@
 #import "NSData_BDSKExtensions.h"
 #import "BDSKSkimReader.h"
 #import "BDSKCitationFormatter.h"
-#import "BDSKFile.h"
+#import "BDSKLinkedFile.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -1607,19 +1607,29 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (NSString *)filesAsBibTeXFragmentRelativeToPath:(NSString *)basePath
 {
     // !!! inherit
-    NSUInteger i, offset = 0, iMax = [files count];
-    NSString *key = [NSString stringWithFormat:@"Bdsk-File-%d", offset];
+    NSUInteger i, fileIndex = 0, urlIndex = 0, iMax = [files count];
+    NSString *key = [NSString stringWithFormat:@"Bdsk-File-%d", fileIndex];
     
     while ([pubFields objectForKey:key])
-        key = [NSString stringWithFormat:@"Bdsk-File-%d", ++offset];
+        key = [NSString stringWithFormat:@"Bdsk-File-%d", ++fileIndex];
+    
+    key = [NSString stringWithFormat:@"Bdsk-Url-%d", urlIndex];
+    
+    while ([pubFields objectForKey:key])
+        key = [NSString stringWithFormat:@"Bdsk-Url-%d", ++urlIndex];
     
     NSMutableString *string = nil;
     NSString *value;
+    BDSKLinkedFile *file;
     if (iMax > 0) {
         string = [NSMutableString string];
         for (i = 0; i < iMax; i++) {
-            key = [NSString stringWithFormat:@"Bdsk-File-%d", i + offset];
-            value = [[files objectAtIndex:i] base64StringRelativeToPath:basePath];
+            file = [files objectAtIndex:i];
+            if ([file isFile])
+                key = [NSString stringWithFormat:@"Bdsk-File-%d", fileIndex++];
+            else
+                key = [NSString stringWithFormat:@"Bdsk-Url-%d", urlIndex++];
+            value = [file stringRelativeToPath:basePath];
             OBPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
             [string appendFormat:@",\n\t%@ = {%@}", key, value];
         }
@@ -2435,19 +2445,19 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return [[[[self owner] fileURL] path] stringByDeletingLastPathComponent];
 }
 
-- (NSURL *)baseURLForAliasFile:(BDSKAliasFile *)file {
+- (NSURL *)baseURLForLinkedFile:(BDSKLinkedFile *)file {
     NSString *basePath = [self basePath];
     return basePath ? [NSURL fileURLWithPath:basePath] : nil;
 }
 
 - (NSUInteger)countOfFiles { return [files count]; }
 
-- (BDSKAliasFile *)objectInFilesAtIndex:(NSUInteger)idx
+- (BDSKLinkedFile *)objectInFilesAtIndex:(NSUInteger)idx
 {
     return [files objectAtIndex:idx];
 }
 
-- (void)insertObject:(BDSKAliasFile *)aFile inFilesAtIndex:(NSUInteger)idx
+- (void)insertObject:(BDSKLinkedFile *)aFile inFilesAtIndex:(NSUInteger)idx
 {
     [files insertObject:aFile atIndex:idx];
     [aFile setDelegate:self];
@@ -2483,6 +2493,8 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     
     if (firstIsFile && secondIsFile)
         return [[first lastPathComponent] caseInsensitiveCompare:[second lastPathComponent]];
+    else if (firstIsFile == NO && secondIsFile == NO)
+        return [[first absoluteString] caseInsensitiveCompare:[second absoluteString]];
     else if (firstIsFile)
         return NSOrderedAscending;
     else return NSOrderedDescending;
@@ -2491,20 +2503,12 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 - (NSArray *)sortedURLs
 {
     NSMutableArray *combinedURLs = [NSMutableArray array];
-    NSEnumerator *fe = [[[BDSKTypeManager sharedManager] remoteURLFieldsSet] objectEnumerator];
-    NSString *field;
+    NSEnumerator *fe = [files objectEnumerator];
     NSURL *aURL;
-    while (field = [fe nextObject]) {
-        aURL = [self remoteURLForField:field];
-        if (aURL)
-            [combinedURLs addObject:aURL];
-    }
-    fe = [files objectEnumerator];
-    BDSKAliasFile *file;
+    BDSKLinkedFile *file;
     NSString *relPath;
     while (file = [fe nextObject]) {
-        if ((aURL = [file fileURL]) || 
-            ((relPath = [file relativePath]) && (aURL = [NSURL fileURLWithPath:relPath])))
+        if (aURL = [file displayURL])
             [combinedURLs addObject:aURL];
     }
     [combinedURLs sortUsingFunction:sortURLsByType context:NULL];
@@ -3413,18 +3417,33 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     CFRelease(emptyFieldsToRemove);
 }
 
-static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
+static void addFileURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
     BibItem *self = (BibItem *)context;
     NSURL *value = [self localFileURLForField:(id)key];
-    if (value && [[self valueForKeyPath:@"files.fileURL"] containsObject:value] == NO) {
+    if (value && [[self valueForKeyPath:@"files.URL"] containsObject:value] == NO) {
         // !!! file URLs are always absolute but the init method here always returns nil, which probably means that we should do the first initialization with relative paths instead of expending them first
-        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithURL:value delegate:self];
+        BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithURL:value delegate:self];
         if (aFile) {
             [self->files addObject:aFile];
             [aFile release];
         }
         else NSLog(@"*** Unable to create alias to %@", value);
+    }
+}
+
+static void addRemoteURLForFieldToArrayIfNotNil(const void *key, void *context)
+{
+    BibItem *self = (BibItem *)context;
+    NSURL *value = [self remoteURLForField:(id)key];
+    if (value && [[self valueForKeyPath:@"files.URL"] containsObject:value] == NO) {
+        // !!! file URLs are always absolute but the init method here always returns nil, which probably means that we should do the first initialization with relative paths instead of expending them first
+        BDSKLinkedFile *aURL = [[BDSKLinkedFile alloc] initWithURL:value delegate:self];
+        if (aURL) {
+            [self->files addObject:aURL];
+            [aURL release];
+        }
+        else NSLog(@"*** Unable to create URL to %@", value);
     }
 }
 
@@ -3437,22 +3456,41 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSString *value, *key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
     
     NSMutableArray *keysToRemove = [NSMutableArray array];
-    NSMutableArray *unresolvedValues = [NSMutableArray array];
+    NSMutableArray *unresolvedFiles = [NSMutableArray array];
+    NSMutableArray *unresolvedURLs = [NSMutableArray array];
 
     while ((value = [pubFields objectForKey:key]) != nil) {
-        BDSKAliasFile *aFile = [[BDSKAliasFile alloc] initWithBase64String:value delegate:self];
+        BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithBase64String:value delegate:self];
         if (aFile) {
             [files addObject:aFile];
             [aFile release];
         }
         else {
-            [unresolvedValues addObject:value];
-            NSLog(@"*** error *** -[BDSKAliasFile initWithBase64String:delegate:] failed (%@ of %@)", key, [self citeKey]);
+            [unresolvedFiles addObject:value];
+            NSLog(@"*** error *** -[BDSKLinkedFile initWithBase64String:delegate:] failed (%@ of %@)", key, [self citeKey]);
         }
         [keysToRemove addObject:key];
         
         // next key in the sequence; increment i first, so it's guaranteed correct
         key = [NSString stringWithFormat:@"Bdsk-File-%d", ++i];
+    }
+    
+    key = [NSString stringWithFormat:@"Bdsk-Url-%d", i];
+
+    while ((value = [pubFields objectForKey:key]) != nil) {
+        BDSKLinkedFile *aURL = [[BDSKLinkedFile alloc] initWithURLString:value];
+        if (aURL) {
+            [files addObject:aURL];
+            [aURL release];
+        }
+        else {
+            [unresolvedURLs addObject:value];
+            NSLog(@"*** error *** -[BDSKLinkedFile initWithURLString:] failed (%@)", key);
+        }
+        [keysToRemove addObject:key];
+        
+        // next key in the sequence; increment i first, so it's guaranteed correct
+        key = [NSString stringWithFormat:@"Bdsk-Url-%d", ++i];
     }
     
     if ([owner fileURL])
@@ -3461,15 +3499,21 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     // !!! get these out of pubFields for now to avoid duplication when saving
     [pubFields removeObjectsForKeys:keysToRemove];
     // !!! make sure the remaining keys are contiguous
-    if (count = [unresolvedValues count]) {
+    if (count = [unresolvedFiles count]) {
         for (i = 0; i < count; i++)
-            [pubFields setObject:[unresolvedValues objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%d", i]];
+            [pubFields setObject:[unresolvedFiles objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%d", i]];
+    }
+    if (count = [unresolvedURLs count]) {
+        for (i = 0; i < count; i++)
+            [pubFields setObject:[unresolvedURLs objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-Url-%d", i]];
     }
     
-    // @@ temporary hack to create an array of BDSKAliasFiles from Local-Urls
+    // @@ temporary hack to create an array of BDSKLinkedFiles from Local Files and BDSKLinkedURLs from Remote URLs
     if ([files count] == 0) {
         CFSetRef fileSet = (CFSetRef)[[BDSKTypeManager sharedManager] localFileFieldsSet];
-        CFSetApplyFunction(fileSet, addURLForFieldToArrayIfNotNil, self);
+        CFSetApplyFunction(fileSet, addFileURLForFieldToArrayIfNotNil, self);
+        CFSetRef remoteURLSet = (CFSetRef)[[BDSKTypeManager sharedManager] remoteURLFieldsSet];
+        CFSetApplyFunction(remoteURLSet, addRemoteURLForFieldToArrayIfNotNil, self);
     }
 }
 

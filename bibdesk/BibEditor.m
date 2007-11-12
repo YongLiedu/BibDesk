@@ -83,7 +83,7 @@
 #import "BDSKSkimReader.h"
 #import "BDSKSplitView.h"
 #import <FileView/FileView.h>
-#import "BDSKFile.h"
+#import "BDSKLinkedFile.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -118,12 +118,7 @@ enum{
 
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
-    BDSKAliasFile *file = [publication objectInFilesAtIndex:idx];
-    NSURL *aURL = [file fileURL];
-    NSString *relativePath;
-    if (aURL == nil && (relativePath = [file relativePath]))
-        aURL = [NSURL fileURLWithPath:relativePath];
-    return aURL;
+    return [[publication objectInFilesAtIndex:idx] displayURL];
 }
 
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
@@ -134,12 +129,12 @@ enum{
 
 - (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
 {
-    BDSKAliasFile *aFile;
+    BDSKLinkedFile *aFile;
     NSEnumerator *enumerator = [newURLs objectEnumerator];
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex];
     while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [[BDSKAliasFile alloc] initWithURL:aURL delegate:publication];
+        aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
         if (aFile) {
             [publication removeObjectFromFilesAtIndex:idx];
             [publication insertObject:aFile inFilesAtIndex:idx];
@@ -162,12 +157,12 @@ enum{
 
 - (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
 {
-    BDSKAliasFile *aFile;
+    BDSKLinkedFile *aFile;
     NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex], offset = 0;
     while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [[BDSKAliasFile alloc] initWithURL:aURL delegate:publication];
+        aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
         if (aFile) {
             [publication insertObject:aFile inFilesAtIndex:idx - offset];
             [aFile release];

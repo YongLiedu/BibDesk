@@ -1,11 +1,11 @@
 //
-//  BDSKFile.h
+//  BDSKLinkedFile.h
 //  Bibdesk
 //
-//  Created by Adam Maxwell on 08/17/06.
+//  Created by Christiaan Hofman on 11/12/07.
 /*
- This software is Copyright (c) 2006,2007
- Adam Maxwell. All rights reserved.
+ This software is Copyright (c) 2007
+ Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -19,7 +19,7 @@
  the documentation and/or other materials provided with the
  distribution.
  
- - Neither the name of Adam Maxwell nor the names of any
+ - Neither the name of Christiaan Hofman nor the names of any
  contributors may be used to endorse or promote products derived
  from this software without specific prior written permission.
  
@@ -38,20 +38,36 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDAlias;
 
-@interface BDSKFile : NSObject <NSCopying, NSCoding>
+@interface BDSKLinkedFile : NSObject <NSCopying, NSCoding>
 
-- (id)initWithFSRef:(FSRef *)aRef;
-- (id)initWithPath:(NSString *)aPath;
-- (id)initWithURL:(NSURL *)aURL;
-+ (id)fileWithURL:(NSURL *)aURL;
+// creates a linked local file or remote URL object depending on the URL
+- (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
+// creates a linked local file
+- (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
+// creates a linked remote URL
+- (id)initWithURLString:(NSString *)aString;
 
-- (NSURL *)fileURL;
-- (const FSRef *)fsRef;
-- (NSString *)fileName;
+- (BOOL)isFile;
 
-- (NSString *)path;
-- (NSString *)tildePath;
+- (NSURL *)URL;
+- (NSURL *)displayURL;
 
+// string value to be saved as a field value, base64 encoded data for a local file or an absolute URL string for a remote URL
+- (NSString *)stringRelativeToPath:(NSString *)newBasePath;
+
+// the rest is only relevant for local files, but it's safe to call for any linked file object
+
+- (NSString *)relativePath;
+
+- (void)setDelegate:(id)aDelegate;
+- (id)delegate;
+
+- (void)update;
+
+@end
+
+
+@interface NSObject (BDSKLinkedFileDelegate)
+- (NSURL *)baseURLForLinkedFile:(BDSKLinkedFile *)file;
 @end

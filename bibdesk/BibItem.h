@@ -49,7 +49,7 @@ enum {
     BDSKIsCrossreffedCrossrefError
 };
 
-@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver, BDSKAliasFile;
+@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver, BDSKLinkedFile;
 @protocol BDSKParseableItem, BDSKOwner;
 
 /*!
@@ -84,11 +84,13 @@ enum {
 }
 
 - (NSUInteger)countOfFiles;
-- (BDSKAliasFile *)objectInFilesAtIndex:(NSUInteger)idx;
-- (void)insertObject:(BDSKAliasFile *)aFile inFilesAtIndex:(NSUInteger)idx;
+- (BDSKLinkedFile *)objectInFilesAtIndex:(NSUInteger)idx;
+- (void)insertObject:(BDSKLinkedFile *)aFile inFilesAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx;
 - (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx;
 - (NSArray *)sortedURLs;
+
+- (NSString *)basePath;
 
 /*!
      @method init
