@@ -40,9 +40,6 @@
 
 
 @interface FVArrowButton : NSButton
-{
-    NSUInteger _arrowDirection;
-}
 
 - (id)initLeftArrowWithFrame:(NSRect)frameRect;
 - (id)initRightArrowWithFrame:(NSRect)frameRect;
