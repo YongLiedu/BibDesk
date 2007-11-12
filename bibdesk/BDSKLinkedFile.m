@@ -133,6 +133,10 @@ static Class BDSKLinkedObjectClass = Nil;
     OBRequestConcreteImplementation(self, _cmd);
 }
 
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: URL=%@>", [self class], [self URL]];
+}
+
 - (NSURL *)URL
 {
     OBRequestConcreteImplementation(self, _cmd);
@@ -281,6 +285,10 @@ static Class BDSKLinkedObjectClass = Nil;
 }
 
 // Should we implement -isEqual: and -hash?
+
+- (NSString *)stringDescription {
+    return [self path];
+}
 
 - (BOOL)isFile
 {
@@ -530,6 +538,10 @@ static Class BDSKLinkedObjectClass = Nil;
 {
     [URL release];
     [super dealloc];
+}
+
+- (NSString *)stringDescription {
+    return [[self URL] absoluteString];
 }
 
 - (NSURL *)URL
