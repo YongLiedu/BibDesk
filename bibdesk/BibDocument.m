@@ -2760,11 +2760,19 @@ static void addAllURLsToArray(const void *value, void *context)
     [[self allURLsForFileView] getObjects:buffer range:aRange];
 }
 
+- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
+{
+    return [[[self selectedPublications] objectAtIndex:anIndex] displayTitle];
+}
+
+- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [self countOfFileViewURLs]; }
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex { return [self objectInFileViewURLsAtIndex:anIndex]; }
+
 - (void)displayLocalURLInPreviewPane{
     NSView *view = [previewTextView enclosingScrollView];
     [[previewer progressOverlay] remove];
     [previewer updateWithBibTeXString:nil];
-    [fileviewArrayController rearrangeObjects];
+    [[[fileviewBox contentView] documentView] reloadIcons];
     
     if (nil == fileviewBox) {
         NSScrollView *sv = [[NSScrollView alloc] initWithFrame:[view frame]];
@@ -2773,15 +2781,10 @@ static void addAllURLsToArray(const void *value, void *context)
         [sv setAutohidesScrollers:YES];
         FileView *fv = [[FileView alloc] initWithFrame:[view frame]];
         [fv setDelegate:nil];
-        [fv setDataSource:nil];
+        [fv setDataSource:self];
         [sv setDocumentView:fv];
         [fv setBackgroundColor:[NSColor whiteColor]];
         [fv release];
-        
-        fileviewArrayController = [[NSArrayController alloc] init];
-        [fileviewArrayController bind:@"content" toObject:self withKeyPath:@"self.fileViewURLs" options:nil];
-        [fv bind:@"iconURLs" toObject:fileviewArrayController withKeyPath:@"arrangedObjects" options:nil];
-        [fv bind:@"selectionIndexes" toObject:fileviewArrayController withKeyPath:@"selectionIndexes" options:nil];
         
         [sv setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
         fileviewBox = [[BDSKEdgeView alloc] initWithFrame:[view frame]];
