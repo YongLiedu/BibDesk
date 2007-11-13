@@ -144,6 +144,66 @@ static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey
 static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
 static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
+
+@interface BDSKFileViewObject : NSObject
+{
+    NSString *subtitle;
+    NSURL *URL;
+}
+- (id)initWithURL:(NSURL *)aURL subtitle:(NSString *)aString;
+- (NSString *)subtitle;
+- (void)setSubtitle:(NSString *)value;
+
+- (NSURL *)URL;
+- (void)setURL:(NSURL *)value;
+
+@end
+
+@implementation BDSKFileViewObject
+
+- (id)initWithURL:(NSURL *)aURL subtitle:(NSString *)aString;
+{
+    self = [super init];
+    if (self) {
+        [self setSubtitle:aString];
+        [self setURL:aURL];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [subtitle release];
+    [URL release];
+    [super dealloc];
+}
+
+- (NSString *)subtitle {
+    return subtitle;
+}
+
+- (void)setSubtitle:(NSString *)value {
+    if (subtitle != value) {
+        [subtitle release];
+        subtitle = [value copy];
+    }
+}
+
+- (NSURL *)URL {
+    return URL;
+}
+
+- (void)setURL:(NSURL *)value {
+    if (URL != value) {
+        [URL release];
+        URL = [value copy];
+    }
+}
+
+
+@end
+
+
 @interface NSFileWrapper (BDSKExtensions)
 - (id)initWithContentsOfURL:(NSURL *)fileURL;
 @end
@@ -2723,34 +2783,52 @@ static void addAllURLsToBag(const void *value, void *context)
     return cnt;
 }
 
+typedef struct _applierContext {
+    CFMutableArrayRef array;
+    BibItem *item;
+} applierContext;
+
 static void addValueFromArrayToArray(const void *value, void *context)
 {
-    CFArrayAppendValue(context, value);
+    applierContext *ctxt = context;
+    // value is NSURL *
+    BDSKFileViewObject *obj = [[BDSKFileViewObject alloc] initWithURL:(id)value subtitle:[ctxt->item displayTitle]];
+    CFArrayAppendValue(ctxt->array, obj);
+    [obj release];
 }
 
-static void addAllURLsToArray(const void *value, void *context)
+static void addAllObjectsForItemToArray(const void *value, void *context)
 {
-    CFArrayRef fpaths = (CFArrayRef)[(BibItem *)value sortedURLs];
-    CFArrayApplyFunction(fpaths, CFRangeMake(0, CFArrayGetCount(fpaths)), addValueFromArrayToArray, context);
+    CFArrayRef allURLs = (CFArrayRef)[(BibItem *)value sortedURLs];
+    applierContext ctxt;
+    ctxt.array = context;
+    ctxt.item = (id)value;
+    CFArrayApplyFunction(allURLs, CFRangeMake(0, CFArrayGetCount(allURLs)), addValueFromArrayToArray, &ctxt);
 }
 
 - (NSURL *)objectInFileViewURLsAtIndex:(NSUInteger)idx;
 {
     NSArray *selPubs = [self selectedPublications];
     if (nil == selPubs) return nil;
-    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, NULL);
-    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllURLsToArray, array);
-    NSString *path = [[(NSArray *)array objectAtIndex:idx] retain];    
+    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, array);
+    BDSKFileViewObject *obj = (id)CFArrayGetValueAtIndex(array, idx);
+    NSURL *URL = [[obj URL] retain];
     CFRelease(array);
-    return [path autorelease];
+    return [URL autorelease];
 }
 
 - (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
     // !!! with the present code here, there's no way to match title->URL if an item has multiple URLs; need to rework this
-    // probably best to have a dictionary or an object here that encapsulates URL and displayTitle
-    return @"Not fully implemented";
-    return [[[self selectedPublications] objectAtIndex:anIndex] displayTitle];
+    NSArray *selPubs = [self selectedPublications];
+    if (nil == selPubs) return nil;
+    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, array);
+    BDSKFileViewObject *obj = (id)CFArrayGetValueAtIndex(array, anIndex);
+    NSString *title = [[obj subtitle] retain];
+    CFRelease(array);
+    return [title autorelease];
 }
 
 - (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [self countOfFileViewURLs]; }
