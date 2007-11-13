@@ -20,16 +20,16 @@
 		<string>532 570 376 142 0 0 1440 938 </string>
 	</dict>
 	<key>IBFramework Version</key>
-	<string>446.1</string>
+	<string>489.0</string>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>702</integer>
-		<integer>433</integer>
-		<integer>923</integer>
-		<integer>661</integer>
 		<integer>819</integer>
-		<integer>5</integer>
 		<integer>1112</integer>
+		<integer>661</integer>
+		<integer>923</integer>
+		<integer>433</integer>
+		<integer>5</integer>
+		<integer>702</integer>
 		<integer>101126</integer>
 	</array>
 	<key>IBSystem Version</key>
