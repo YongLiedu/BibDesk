@@ -2745,23 +2745,11 @@ static void addAllURLsToArray(const void *value, void *context)
     return [path autorelease];
 }
 
-- (NSArray *)allURLsForFileView
-{
-    NSArray *selPubs = [self selectedPublications];
-    if (nil == selPubs) return nil;
-    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
-    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllURLsToArray, array);
-    return [(id)array autorelease];    
-}
-
-- (void)getFileViewURL:(NSURL **)buffer range:(NSRange)aRange
-{
-    log_method();
-    [[self allURLsForFileView] getObjects:buffer range:aRange];
-}
-
 - (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
+    // !!! with the present code here, there's no way to match title->URL if an item has multiple URLs; need to rework this
+    // probably best to have a dictionary or an object here that encapsulates URL and displayTitle
+    return @"Not fully implemented";
     return [[[self selectedPublications] objectAtIndex:anIndex] displayTitle];
 }
 
