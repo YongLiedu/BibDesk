@@ -64,6 +64,16 @@
     return ([[self window] isVisible] || [qlTask isRunning]);
 }
 
++ (void)setWebViewContextMenuDelegate:(id)anObject;
+{
+    [[self sharedInstance] setWebViewContextMenuDelegate:anObject];
+}
+
+- (void)setWebViewContextMenuDelegate:(id)anObject;
+{
+    webviewContextMenuDelegate = anObject;
+}
+
 - (id)init
 {
     // initWithWindowNibName searches the class' bundle automatically
@@ -86,6 +96,12 @@
     [fvImageView setAutoresizingMask:(NSViewWidthSizable|NSViewHeightSizable)];
     // forgot to set this in the nib; needed for viewing icons
     [[self window] setMinSize:[[self window] frame].size];
+    [[self window] setDelegate:self];
+}
+
+- (void)windowWillClose:(NSNotification *)notification
+{
+    [self setWebViewContextMenuDelegate:nil];
 }
 
 - (void)stopPreview:(NSNotification *)note
@@ -93,6 +109,7 @@
     if ([qlTask isRunning])
         [qlTask terminate];
     [[self window] orderOut:self];
+    [self setWebViewContextMenuDelegate:nil];
 }
 
 - (NSString *)windowNibName { return @"FVPreviewer"; }
@@ -254,6 +271,14 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
         [[mainFrame frameView] addSubview:spinner];
     }
     [spinner startAnimation:nil];
+}
+
+- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems
+{
+    if ([webviewContextMenuDelegate respondsToSelector:_cmd])
+        return [webviewContextMenuDelegate webView:sender contextMenuItemsForElement:element defaultMenuItems:defaultMenuItems];
+    else
+        return nil;
 }
 
 - (void)previewURL:(NSURL *)absoluteURL;

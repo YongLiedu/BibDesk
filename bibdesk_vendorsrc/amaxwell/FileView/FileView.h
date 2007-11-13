@@ -124,6 +124,13 @@
 
 @end
 
+@interface NSObject (FileViewDelegateContextMenu)
+
+// anIndex will be NSNotFound if there is not a URL at this location
+- (void)fileView:(FileView *)aFileView willDisplayContextMenu:(NSMenu *)aMenu forIconAtIndex:(NSUInteger)anIndex;
+
+@end
+
 @interface NSObject (FileViewDelegateDragAndDrop)
 
 // If a non-nil delegate is set, all methods in this informal protocol /must/ be implemented.

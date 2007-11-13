@@ -51,9 +51,11 @@
     IBOutlet WebView           *webView;
     IBOutlet FVScaledImageView *fvImageView;
     NSProgressIndicator        *spinner;
+    id                         webviewContextMenuDelegate;
     
     NSTask                     *qlTask;
 }
 + (void)previewURL:(NSURL *)absoluteURL;
 + (BOOL)isPreviewing;
++ (void)setWebViewContextMenuDelegate:(id)anObject;
 @end

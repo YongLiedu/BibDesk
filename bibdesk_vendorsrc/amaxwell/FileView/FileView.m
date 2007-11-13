@@ -185,8 +185,10 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath isEqualToString:@"selectionIndexes"]) {
-        if ([FVPreviewer isPreviewing] && NSNotFound != [_selectedIndexes firstIndex])
+        if ([FVPreviewer isPreviewing] && NSNotFound != [_selectedIndexes firstIndex]) {
+            [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
             [FVPreviewer previewURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]]];
+        }
         [self setNeedsDisplay:YES];
     }
 }
@@ -1872,6 +1874,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)previewAction:(id)sender;
 {
+    [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
     [FVPreviewer previewURL:[self URLForLastMouseDown]];
 }
 
@@ -1933,7 +1936,15 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
     _lastMouseDownLocInView = [self convertPoint:[event locationInWindow] fromView:nil];
-    return [super menuForEvent:event];
+    NSMenu *menu = [super menuForEvent:event];
+    
+    NSUInteger r,c,idx = NSNotFound;
+    if ([self _getGridRow:&r column:&c atPoint:_lastMouseDownLocInView])
+        idx = [self _indexForGridRow:r column:c];
+    
+    if ([[self delegate] respondsToSelector:@selector(fileView:willDisplayContextMenu:forIconAtIndex:)])
+        [[self delegate] fileView:self willDisplayContextMenu:menu forIconAtIndex:idx];
+    return menu;
 }
 
 + (NSMenu *)defaultMenu
