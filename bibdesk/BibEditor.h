@@ -93,14 +93,7 @@
     
     IBOutlet NSTextField* citeKeyField;
     IBOutlet NSTextField* citeKeyTitle;
-	IBOutlet BDSKImagePopUpButton *viewLocalButton;
-    IBOutlet BDSKImagePopUpButton *viewRemoteButton;
-    IBOutlet BDSKImagePopUpButton *documentSnoopButton;
 	IBOutlet BDSKImagePopUpButton *actionMenuButton;
-	NSToolbarItem *viewLocalToolbarItem;
-	NSToolbarItem *viewRemoteToolbarItem;
-	NSToolbarItem *documentSnoopToolbarItem;
-	NSToolbarItem *authorsToolbarItem;
 	IBOutlet BDSKImagePopUpButton *actionButton;
     IBOutlet NSMenu *actionMenu;
 	IBOutlet NSButton *addFieldButton;
@@ -108,23 +101,6 @@
     // ----------------------------------------------------------------------------------------
     BibItem *publication;
     BOOL isEditable;
-// ----------------------------------------------------------------------------------------
-// doc preview stuff
-// ----------------------------------------------------------------------------------------
-    IBOutlet NSDrawer* documentSnoopDrawer;
-	int drawerState;
-	int drawerButtonState;
-	// doc textpreview stuff
-    IBOutlet BDSKZoomablePDFView *documentSnoopPDFView;
-    IBOutlet NSView* pdfSnoopContainerView;
-	BOOL pdfSnoopViewLoaded;
-	// doc textpreview stuff
-    IBOutlet NSTextView *documentSnoopTextView;
-    IBOutlet NSView* textSnoopContainerView;
-	// remote webpreview stuff
-    IBOutlet WebView *remoteSnoopWebView;
-    IBOutlet NSView* webSnoopContainerView;
-	BOOL webSnoopViewLoaded;
 // ----------------------------------------------------------------------------------------
 // URL downlaod stuff
 // ----------------------------------------------------------------------------------------
@@ -156,7 +132,6 @@
 
 	// edit field stuff
 	BOOL forceEndEditing;
-    NSMutableDictionary *toolbarItems;
 
     BOOL didSetupForm;
 	
@@ -265,8 +240,6 @@
 
 - (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
-- (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view;
-
 /*!
     @method     updateSafariRecentDownloadsMenu:
     @abstract   Updates the menu of items for local paths of recent downloads from Safari.
@@ -364,27 +337,6 @@
 
 - (IBAction)changeRating:(id)sender;
 - (IBAction)changeFlag:(id)sender;
-
-/*!
-    @method     updateDocumentSnoopButton
-    @abstract   Updates the icon for the document snoop button. 
-    @discussion (comprehensive description)
-*/
-- (void)updateDocumentSnoopButton;
-
-/*!
-    @method     updateSnoopDrawerContent
-    @abstract   Updates the content of the document snoop drawer. This should be called just before opening the drawer. 
-    @discussion (comprehensive description)
-*/
-- (void)updateSnoopDrawerContent;
-
-/*!
-    @method     toggleSnoopDrawer:
-    @abstract   Action to toggle the state or contents of the document snoop drawer. The content view is taken from the represented object of the sender menu item.
-    @discussion (comprehensive description)
-*/
-- (void)toggleSnoopDrawer:(id)sender;
 
 /*!
     @method     saveFileAsLocalUrl:

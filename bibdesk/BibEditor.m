@@ -36,7 +36,6 @@
 
 
 #import "BibEditor.h"
-#import "BibEditor_Toolbar.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
@@ -44,7 +43,6 @@
 #import "NSImage+Toolbox.h"
 #import "BDSKComplexString.h"
 #import "BDSKScriptHookManager.h"
-#import "BDSKZoomablePDFView.h"
 #import "BDSKEdgeView.h"
 #import "KFAppleScriptHandlerAdditionsCore.h"
 #import "NSString_BDSKExtensions.h"
@@ -100,14 +98,12 @@ enum{
 
 @interface BibEditor (Private)
 
-- (void)setupDrawer;
 - (void)setupButtons;
 - (void)setupForm;
 - (void)setupMatrix;
 - (void)matrixFrameDidChange:(NSNotification *)notification;
 - (void)setupTypePopUp;
 - (void)registerForNotifications;
-- (void)fixURLs;
 - (void)breakTextStorageConnections;
 
 @end
@@ -185,13 +181,7 @@ enum{
         
         publication = [aBib retain];
         isEditable = [[publication owner] isDocument];
-        
-        // has to be before we call [self window] because that calls windowDidLoad:.
-        pdfSnoopViewLoaded = NO;
-        webSnoopViewLoaded = NO;
-        drawerState = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey] | BDSKDrawerStateRightMask;
-        drawerButtonState = BDSKDrawerUnknownState;
-        
+                
         forceEndEditing = NO;
         didSetupForm = NO;
         _files = [NSMutableArray new];
@@ -353,10 +343,6 @@ enum{
         [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
 	
     [self updateCiteKeyDuplicateWarning];
-    
-    [documentSnoopButton setIconImage:nil];
-    
-    [self fixURLs];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
@@ -374,10 +360,6 @@ enum{
 
 - (void)awakeFromNib{
 	
-	if (documentSnoopDrawer != nil) {
-		// we must be loading the drawer
-		[self setupDrawer];
-	}
     [fileView setDataSource:self];
 }
 
@@ -394,17 +376,8 @@ enum{
     [ratingButtonCell release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[dragFieldEditor release];
-	[viewLocalToolbarItem release];
-	[viewRemoteToolbarItem release];
-	[documentSnoopToolbarItem release];
-	[authorsToolbarItem release];
 	[statusBar release];
-	[toolbarItems release];
 	[macroTextFieldWC release];
-	[documentSnoopDrawer release];
-	[pdfSnoopContainerView release];
-	[textSnoopContainerView release];
-	[webSnoopContainerView release];
     [formCellFormatter release];
     [crossrefFormatter release];
     [citationFormatter release];
@@ -609,15 +582,7 @@ enum{
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
     NSString *menuTitle = [menu title];
-	if (menu == [[viewLocalToolbarItem menuFormRepresentation] submenu]) {
-        [self updateMenu:menu forImagePopUpButton:viewLocalButton];
-	} else if (menu == [[viewRemoteToolbarItem menuFormRepresentation] submenu]) {
-        [self updateMenu:menu forImagePopUpButton:viewRemoteButton];
-	} else if (menu == [[documentSnoopToolbarItem menuFormRepresentation] submenu]) {
-        [self updateMenu:menu forImagePopUpButton:documentSnoopButton];
-	} else if (menu == [[authorsToolbarItem menuFormRepresentation] submenu]) {
-        [self updateAuthorsToolbarMenu:menu];
-	} else if([menuTitle isEqualToString:@"previewRecentDocumentsMenu"]){
+    if([menuTitle isEqualToString:@"previewRecentDocumentsMenu"]){
         [self updatePreviewRecentDocumentsMenu:menu];
     } else if([menuTitle isEqualToString:@"safariRecentDownloadsMenu"]){
         [self updateSafariRecentDownloadsMenu:menu];
@@ -631,22 +596,16 @@ enum{
     return NO;
 }
 
-- (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
-	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
-    [self updateMenu:menu forImagePopUpButton:view];
-    return [menu autorelease];
-}
-
-- (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view{
+- (void)fileView:(FileView *)aFileView willDisplayContextMenu:(NSMenu *)menu forIconAtIndex:(NSUInteger)anIndex {
 	NSMenu *submenu;
 	NSMenuItem *item;
 	NSURL *theURL;
     
     int i = [menu numberOfItems];
-    while (i-- > 1)
-        [menu removeItemAtIndex:i];
+
+#warning add to FileView context menu?
     
-	if (view == viewLocalButton) {
+	if (1) {
 		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] objectEnumerator];
 		NSString *field = nil;
 		
@@ -713,6 +672,7 @@ enum{
                   submenuTitle:@"previewRecentDocumentsMenu"
                submenuDelegate:self];
 	}
+     /*
 	else if (view == viewRemoteButton) {
 		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] objectEnumerator];
 		NSString *field = nil;
@@ -737,23 +697,7 @@ enum{
                   submenuTitle:@"safariRecentURLsMenu"
                submenuDelegate:self];
 	}
-	else if (view == documentSnoopButton) {
-		
-		item = [menu addItemWithTitle:NSLocalizedString(@"View File in Drawer", @"Menu item title")
-                               action:@selector(toggleSnoopDrawer:)
-                        keyEquivalent:@""];
-		[item setTag:0];
-		
-		item = [menu addItemWithTitle:NSLocalizedString(@"View File as Text in Drawer", @"Menu item title")
-                               action:@selector(toggleSnoopDrawer:)
-                        keyEquivalent:@""];
-		[item setTag:BDSKDrawerStateTextMask];
-		
-		item = [menu addItemWithTitle:NSLocalizedString(@"View Remote URL in Drawer", @"Menu item title")
-                               action:@selector(toggleSnoopDrawer:)
-                        keyEquivalent:@""];
-		[item setTag:BDSKDrawerStateWebMask];
-	}
+     */
 }
 
 - (NSArray *)safariDownloadHistory{
@@ -1062,33 +1006,11 @@ enum{
 		return ([publication remoteURLForField:field] != nil);
 	}
     else if (theAction == @selector(saveFileAsLocalUrl:)) {
-		return (isEditable && [[[remoteSnoopWebView mainFrame] dataSource] isLoading] == NO);
+#warning fixme
+		return (isEditable /*&& [[[remoteSnoopWebView mainFrame] dataSource] isLoading] == NO */);
 	}
 	else if (theAction == @selector(downloadLinkedFileAsLocalUrl:)) {
 		return (isEditable && isDownloading == NO);
-	}
-	else if (theAction == @selector(toggleSnoopDrawer:)) {
-		int requiredContent = [menuItem tag];
-		int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
-		BOOL isCloseItem = ((currentContent == requiredContent) && (drawerState & BDSKDrawerStateOpenMask));
-		if (isCloseItem) {
-			[menuItem setTitle:NSLocalizedString(@"Close Drawer", @"Menu item title")];
-		} else if (requiredContent & BDSKDrawerStateWebMask) {
-			[menuItem setTitle:NSLocalizedString(@"View Remote URL in Drawer", @"Menu item title")];
-		} else if (requiredContent & BDSKDrawerStateTextMask) {
-			[menuItem setTitle:NSLocalizedString(@"View File as Text in Drawer", @"Menu item title")];
-		} else {
-			[menuItem setTitle:NSLocalizedString(@"View File in Drawer", @"Menu item title")];
-		}
-		if (isCloseItem) {
-			// always enable the close item
-			return YES;
-		} else if (requiredContent & BDSKDrawerStateWebMask) {
-			return ([publication remoteURL] != nil);
-		} else {
-            NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
-            return (lurl == nil ? NO : YES);
-		}
 	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)
@@ -1388,7 +1310,7 @@ enum{
 
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
-	
+    
 	[publication setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:path] absoluteString]];
 	[self autoFilePaper];
 	
@@ -2096,9 +2018,6 @@ enum{
 		[self setupForm];
 		[[self window] setTitle:[publication displayTitle]];
 		[authorTableView reloadData];
-		pdfSnoopViewLoaded = NO;
-		webSnoopViewLoaded = NO;
-		[self fixURLs];
 		return;
 	}
 
@@ -2141,15 +2060,7 @@ enum{
 		}
 	}
 	
-	if([changeKey isEqualToString:BDSKLocalUrlString]){
-		pdfSnoopViewLoaded = NO;
-		[self fixURLs];
-	}
-	else if([changeKey isEqualToString:BDSKUrlString]){
-		webSnoopViewLoaded = NO;
-		[self fixURLs];
-	}
-	else if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString]){
+    if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString]){
 		[[self window] setTitle:[publication displayTitle]];
 	}
 	else if([changeKey isPersonField]){
@@ -2530,11 +2441,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSString *dragSourceField = nil;
 	NSString *dragType;
 	
-    if(dragSource == viewLocalButton)
-        dragSourceField = BDSKLocalUrlString;
-    else if(dragSource == viewRemoteButton)
-        dragSourceField = BDSKUrlString;
-    else if(dragSource == bibFields)
+    if(dragSource == bibFields)
         dragSourceField = [[bibFields dragSourceCell] representedObject];
     
     if ([field isEqualToString:dragSourceField])
@@ -2729,26 +2636,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		// we don't at the moment support dropping on a textual field
 	}
 	return NO;
-}
-
-- (NSDragOperation)imagePopUpButton:(BDSKImagePopUpButton *)view canReceiveDrag:(id <NSDraggingInfo>)sender{
-	if (view == [sender draggingSource])
-		return NSDragOperationNone;
-	NSString *field = nil;
-	if (view == viewLocalButton)
-		field = BDSKLocalUrlString;
-	else if (view == viewRemoteButton)
-		field = BDSKUrlString;
-	return [self canReceiveDrag:sender forField:field];
-}
-
-- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view receiveDrag:(id <NSDraggingInfo>)sender{
-	NSString *field = nil;
-	if (view == viewLocalButton)
-		field = BDSKLocalUrlString;
-	else if (view == viewRemoteButton)
-		field = BDSKUrlString;
-	return [self receiveDrag:sender forField:field];
 }
 
 - (NSDragOperation)canReceiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
@@ -2990,38 +2877,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[self cleanUpAfterDragOperation:operation forField:field];
 }
 
-- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view writeDataToPasteboard:(NSPasteboard *)pasteboard {
-	NSString *field = nil;
-	if (view == viewLocalButton)
-		field = BDSKLocalUrlString;
-	else if (view == viewRemoteButton)
-		field = BDSKUrlString;
-	if (field != nil)
-		return [self writeDataToPasteboard:pasteboard forField:field];
-	return NO;
-}
-
-- (NSArray *)imagePopUpButton:(BDSKImagePopUpButton *)view namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination {
-	NSString *field = nil;
-	if (view == viewLocalButton)
-		field = BDSKLocalUrlString;
-	else if (view == viewRemoteButton)
-		field = BDSKUrlString;
-	if (field != nil)
-		return [self namesOfPromisedFilesDroppedAtDestination:dropDestination forField:field];
-	return nil;
-}
-
-- (void)imagePopUpButton:(BDSKImagePopUpButton *)view cleanUpAfterDragOperation:(NSDragOperation)operation {
-	NSString *field = nil;
-	if (view == viewLocalButton)
-		field = BDSKLocalUrlString;
-	else if (view == viewRemoteButton)
-		field = BDSKUrlString;
-	if (field != nil)
-		[self cleanUpAfterDragOperation:operation forField:field];
-}
-
 // used to cache the destination webloc file's URL
 - (void)setPromisedDragURL:(NSURL *)theURL{
     [theURL retain];
@@ -3035,274 +2890,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [promisedDragFilename release];
         promisedDragFilename = [theFilename copy];
     }
-}
-
-#pragma mark snoop drawer stuff
-
-// update the arrow image direction when the window changes
-- (void)windowDidMove:(NSNotification *)aNotification{
-    [self updateDocumentSnoopButton];
-}
-
-- (void)windowDidResize:(NSNotification *)notification{
-    [self updateDocumentSnoopButton];
-}
-
-// this correctly handles multiple displays and doesn't depend on the drawer being loaded
-- (NSRectEdge)preferredDrawerEdge{
-    
-    if(drawerState & BDSKDrawerStateOpenMask)
-        return [documentSnoopDrawer edge];
-        
-    NSRect screenFrame = [[[self window] screen] visibleFrame];
-    NSRect windowFrame = [[self window] frame];
-    
-    float midScreen = NSMidX(screenFrame);
-    float midWindow = NSMidX(windowFrame);
-    
-    return ( (midWindow - midScreen) < 0 ? NSMaxXEdge : NSMinXEdge);
-}
-
-- (void)updateDocumentSnoopButton
-{
-	int requiredContent = [[documentSnoopButton selectedItem] tag];
-	int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
-    NSString *lurl = [publication localUrlPath];
-    NSURL *rurl = [publication remoteURL];
-	int state = requiredContent;
-	
-	if ((requiredContent == currentContent) && (drawerState & BDSKDrawerStateOpenMask))
-		state |= BDSKDrawerStateOpenMask;
-	if ([self preferredDrawerEdge] == NSMaxXEdge)
-        state |= BDSKDrawerStateRightMask;
-	
-	if (state == drawerButtonState)
-		return; // we don't need to change the button
-	
-	drawerButtonState = state;
-	
-	if ( (state & BDSKDrawerStateOpenMask) || 
-		 ((state & BDSKDrawerStateWebMask) && rurl) ||
-		 (!(state & BDSKDrawerStateWebMask) && lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]) ) {
-		
-		NSImage *drawerImage = [NSImage imageNamed:@"drawerRight"];
-		NSImage *arrowImage = [NSImage imageNamed:@"drawerArrow"];
-		NSImage *badgeImage = nil;
-		
-		if (state & BDSKDrawerStateWebMask)
-			badgeImage = [NSImage genericInternetLocationImage];
-		else if (state & BDSKDrawerStateTextMask)
-			badgeImage = [NSImage imageForFileType:@"txt"];
-		else
-			badgeImage = [publication imageForURLField:BDSKLocalUrlString];
-		
-		NSRect iconRect = NSMakeRect(0, 0, 32, 32);
-		NSSize arrowSize = [arrowImage size];
-		NSRect arrowRect = {NSZeroPoint, arrowSize};
-		NSRect arrowDrawRect = NSMakeRect(29 - arrowSize.width, ceilf(0.5f * (32-arrowSize.height)), arrowSize.width, arrowSize.height);
-		NSRect badgeRect = {NSZeroPoint, [badgeImage size]};
-		NSRect badgeDrawRect = NSMakeRect(15, 0, 16, 16);
-		NSImage *image = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
-		
-		if (state & BDSKDrawerStateRightMask) {
-			if (state & BDSKDrawerStateOpenMask)
-				arrowImage = [arrowImage imageFlippedHorizontally];
-		} else {
-			arrowDrawRect.origin.x = 3;
-			badgeDrawRect.origin.x = 1;
-			drawerImage = [drawerImage imageFlippedHorizontally];
-			if (!(state & BDSKDrawerStateOpenMask))
-				arrowImage = [arrowImage imageFlippedHorizontally];
-		}
-		
-		[image lockFocus];
-		[drawerImage drawInRect:iconRect fromRect:iconRect  operation:NSCompositeSourceOver  fraction: 1.0];
-		[badgeImage drawInRect:badgeDrawRect fromRect:badgeRect  operation:NSCompositeSourceOver  fraction: 1.0];
-		[arrowImage drawInRect:arrowDrawRect fromRect:arrowRect  operation:NSCompositeSourceOver  fraction: 1.0];
-		[image unlockFocus];
-		
-        [documentSnoopButton fadeIconImageToImage:image];
-		
-		if (state & BDSKDrawerStateOpenMask) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close drawer", @"Tool tip message")];
-		} else if (state & BDSKDrawerStateWebMask) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View remote URL in drawer", @"Tool tip message")];
-		} else if (state & BDSKDrawerStateTextMask) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View file as text in drawer", @"Tool tip message")];
-		} else {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View file in drawer", @"Tool tip message")];
-		}
-		
-		[documentSnoopButton setIconActionEnabled:YES];
-	}
-	else {
-        [documentSnoopButton setIconImage:[NSImage imageNamed:@"drawerDisabled"]];
-		
-		if (state & BDSKDrawerStateOpenMask) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close drawer", @"Tool tip message")];
-		} else {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Choose content to view in drawer", @"Tool tip message")];
-		}
-		
-		[documentSnoopButton setIconActionEnabled:NO];
-	}
-}
-
-- (void)updateSnoopDrawerContent{
-    NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
-    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:lurl];
-
-	if ([[documentSnoopDrawer contentView] isEqual:pdfSnoopContainerView]) {
-
-		if (!lurl || pdfSnoopViewLoaded) return;
-
-        // see what type this is; we can open PDF or PS
-        // check the UTI instead of the file extension (10.4 only)
-        
-        NSError *readError = nil;
-        NSData *fileData = [NSData dataWithContentsOfURL:lurl options:NSUncachedRead error:&readError];
-        if(fileData == nil)
-            [[self window] presentError:readError];
-        
-        BOOL isPostScript = NO;
-        
-        if(theUTI == nil){
-            // some error occurred, so we'll assume it's PDF and carry on
-            NSLog(@"%@: error occurred getting UTI of %@", __FILENAMEASNSSTRING__, lurl);
-        } else if([theUTI isEqualToUTI:@"com.adobe.postscript"]){
-            isPostScript = YES;
-        } else if([theUTI isEqualToUTI:@"com.pkware.zip-archive"] || [theUTI isEqualToUTI:@"org.gnu.gnu-zip-archive"]){    
-            // OmniFoundation supports zip, gzip, and bzip2, AFAICT, but we have no UTI for bzip2
-            OBPRECONDITION([fileData mightBeCompressed]);
-            
-            // try to decompress; OmniFoundation raises a variety of exceptions if this fails, so we'll just discard all of them
-            @try {
-                fileData = [fileData decompressedData];
-            }
-            @catch( id exception ){
-                NSLog(@"discarding exception %@ raised while attempting to decompress file at %@", exception, [lurl path]);
-                fileData = nil;
-            }
-            
-            // since we don't have an actual file on disk, we can't rely on LS to return the file type, so fall back to checking the extension
-            NSString *nextToLastExtension = [[[lurl path] stringByDeletingPathExtension] pathExtension];
-            OBPRECONDITION([NSString isEmptyString:nextToLastExtension] == NO);
-            
-            theUTI = [[NSWorkspace sharedWorkspace] UTIForPathExtension:nextToLastExtension];
-            if([theUTI isEqualToUTI:@"com.adobe.postscript"])
-                isPostScript = YES;
-        }
-        
-        PDFDocument *pdfDocument = isPostScript ? [[PDFDocument alloc] initWithPostScriptData:fileData] : [[PDFDocument alloc] initWithData:fileData];
-        
-        // if unable to create a PDFDocument from the given URL, display a warning message
-        if(pdfDocument == nil){
-            NSData *pdfData = [[BDSKPreviewer sharedPreviewer] PDFDataWithString:NSLocalizedString(@"Unable to determine file type, or an error occurred reading the file.  Only PDF and PostScript files can be displayed in the drawer at present.", @"Message for Local-Url preview") color:[NSColor redColor]];
-            pdfDocument = [[PDFDocument alloc] initWithData:pdfData];
-        }
-        
-        id pdfView = [[pdfSnoopContainerView subviews] objectAtIndex:0];
-        [(BDSKZoomablePDFView *)pdfView setDocument:pdfDocument];
-        [pdfDocument release];
-        pdfSnoopViewLoaded = YES;
-	}
-	else if ([[documentSnoopDrawer contentView] isEqual:textSnoopContainerView]) {
-#warning remove this
-		NSMutableString *path = [[[lurl path] mutableCopy] autorelease];
-        
-        if([NSString isEmptyString:path] == NO && [theUTI isEqualToUTI:(NSString *)kUTTypePDF]){
-            // escape single quotes that may be in the path; other characters should be handled by quoting in the command string
-            [path replaceOccurrencesOfString:@"\'" withString:@"\\\'" options:0 range:NSMakeRange(0, [path length])];
-            
-            NSString *cmdString = [[NSBundle mainBundle] pathForResource:@"pdftotext" ofType:nil];
-            cmdString = [NSString stringWithFormat:@"%@ -f 1 -l 1 \'%@\' -", cmdString, path];
-            NSString *textSnoopString = [BDSKShellTask runShellCommand:cmdString withInputString:nil];
-            if([NSString isEmptyString:textSnoopString])
-                [documentSnoopTextView setString:NSLocalizedString(@"Unable to convert this file to text.  It may be a scanned image, or perhaps it's not a PDF file.", @"Message for Local-Url preview")];
-            else
-                [documentSnoopTextView setString:textSnoopString];
-        } else {
-            [documentSnoopTextView setString:NSLocalizedString(@"This entry does not have a Local-Url.", @"Message for Local-Url preview")];
-        }
-	}
-	else if ([[documentSnoopDrawer contentView] isEqual:webSnoopContainerView]) {
-		if (!webSnoopViewLoaded) {
-			NSURL *rurl = [publication remoteURL];
-			if (rurl == nil) return;
-			[[remoteSnoopWebView mainFrame] loadRequest:[NSURLRequest requestWithURL:rurl]];
-			webSnoopViewLoaded = YES;
-		}
-	}
-}
-
-- (void)toggleSnoopDrawer:(id)sender{
-	int requiredContent = [sender tag];
-	int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
-	
-	if (documentSnoopDrawer == nil) {
-		if ([NSBundle loadNibNamed:@"BibEditorDrawer" owner:self] == NO) {
-			[statusBar setStringValue:NSLocalizedString(@"Unable to load the drawer.", @"Message for Local-Url preview")];
-			return;
-		}
-	}
-	
-	// we force a reload, as the user might have browsed
-	if (requiredContent & BDSKDrawerStateWebMask) 
-		webSnoopViewLoaded = NO;
-	
-    // sometimes the drawer is determined to open on the side with less screen available, so we'll set the edge manually (sending -[NSDrawer setPreferredEdge:] is unreliable)
-    NSRectEdge edge = ([documentSnoopDrawer state] == NSDrawerOpenState ? [documentSnoopDrawer edge] : [self preferredDrawerEdge]);
-    
-    if (edge == NSMaxXEdge)
-		drawerState |= BDSKDrawerStateRightMask;
-    
-	drawerState = requiredContent;
-	
-	if (currentContent == requiredContent) {
-		if ([documentSnoopDrawer state] == NSDrawerClosedState || [documentSnoopDrawer state] == NSDrawerClosingState){
-			drawerState |= BDSKDrawerStateOpenMask;
-            [documentSnoopDrawer openOnEdge:edge];
-        } else {
-            [documentSnoopDrawer close:sender];
-        }
-	} else {
-		drawerState |= BDSKDrawerStateOpenMask;
-		if (requiredContent & BDSKDrawerStateTextMask) 
-			[documentSnoopDrawer setContentView:textSnoopContainerView];
-		else if (requiredContent & BDSKDrawerStateWebMask) 
-			[documentSnoopDrawer setContentView:webSnoopContainerView];
-		else
-			[documentSnoopDrawer setContentView:pdfSnoopContainerView];
-		[documentSnoopDrawer close:sender];
-		[documentSnoopDrawer openOnEdge:edge];
-	}
-	
-	// we remember the last item that was selected in the preferences, so it sticks between windows
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:[documentSnoopButton indexOfSelectedItem]
-													   forKey:BDSKSnoopDrawerContentKey];
-}
-
-- (void)drawerWillOpen:(NSNotification *)notification{
-	[self updateSnoopDrawerContent];
-	
-	if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSizeKey] != nil)
-        [documentSnoopDrawer setContentSize:NSSizeFromString([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSizeKey])];
-    [[[[documentSnoopDrawer contentView] subviews] firstObject] scrollToTop];
-    
-    [self updateDocumentSnoopButton];
-}
-
-- (void)drawerWillClose:(NSNotification *)notification{
-    id firstResponder = [[self window] firstResponder];
-    if([firstResponder respondsToSelector:@selector(window)] == NO || [firstResponder window] != [self window])
-        [[self window] makeFirstResponder:nil]; // this is necessary to avoid a crash after browsing
-	
-    [self updateDocumentSnoopButton];
-}
-
-- (NSSize)drawerWillResizeContents:(NSDrawer *)sender toSize:(NSSize)contentSize{
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:NSStringFromSize(contentSize) forKey:BDSKSnoopDrawerSavedSizeKey];
-    return contentSize;
 }
 
 - (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -3377,7 +2964,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     // close so it's not hanging around by itself; this works if the doc window closes, also
     [macroTextFieldWC close];
-    [documentSnoopDrawer close]; 
     
 	// this can give errors when the application quits when an editor window is open
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
@@ -3391,6 +2977,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [[self retain] autorelease];
 }
 
+#warning what about this?
+// could the quick look have a delegate method that picks this up?
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
 	NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:8];
 	NSMenuItem *item;
@@ -3460,7 +3048,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)savePanelDidEnd:(NSSavePanel *)savePanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if (returnCode == NSOKButton) {
-        WebDataSource *dataSource = [[remoteSnoopWebView mainFrame] dataSource];
+#warning fixme
+        WebDataSource *dataSource = nil; /*[[remoteSnoopWebView mainFrame] dataSource];*/
         if (nil == dataSource || [dataSource isLoading]) 
             return;
 		
@@ -3480,7 +3069,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)saveFileAsLocalUrl:(id)sender{
-	WebDataSource *dataSource = [[remoteSnoopWebView mainFrame] dataSource];
+    WebDataSource *dataSource = nil; /*[[remoteSnoopWebView mainFrame] dataSource];*/
 	if (nil == dataSource || [dataSource isLoading]) 
 		return;
 	
@@ -3862,54 +3451,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 @implementation BibEditor (Private)
 
-- (void)setupDrawer {
-    
-    [documentSnoopDrawer setParentWindow:[self window]];
-    if (drawerState & BDSKDrawerStateTextMask)
-        [documentSnoopDrawer setContentView:textSnoopContainerView];
-    else if (drawerState & BDSKDrawerStateWebMask)
-        [documentSnoopDrawer setContentView:webSnoopContainerView];
-    else
-        [documentSnoopDrawer setContentView:pdfSnoopContainerView];
-    
-    [documentSnoopPDFView setScrollerSize:NSSmallControlSize];    
-}
-
 - (void)setupButtons {
-    
-    // Set the properties of viewLocalButton that cannot be set in IB
-	[viewLocalButton setShowsMenuWhenIconClicked:NO];
-	[[viewLocalButton cell] setAltersStateOfSelectedItem:NO];
-	[[viewLocalButton cell] setAlwaysUsesFirstItemAsSelected:YES];
-	[[viewLocalButton cell] setUsesItemFromMenu:NO];
-	[viewLocalButton setRefreshesMenu:YES];
-	[viewLocalButton setDelegate:self];
-    if (isEditable)
-        [viewLocalButton registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
-    
-	[viewLocalButton setMenu:[self menuForImagePopUpButton:viewLocalButton]];
-    
-	// Set the properties of viewRemoteButton that cannot be set in IB
-	[viewRemoteButton setShowsMenuWhenIconClicked:NO];
-	[[viewRemoteButton cell] setAltersStateOfSelectedItem:NO];
-	[[viewRemoteButton cell] setAlwaysUsesFirstItemAsSelected:YES];
-	[[viewRemoteButton cell] setUsesItemFromMenu:NO];
-	[viewRemoteButton setRefreshesMenu:YES];
-	[viewRemoteButton setDelegate:self];
-    if (isEditable)
-        [viewRemoteButton registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
-    
-	[viewRemoteButton setMenu:[self menuForImagePopUpButton:viewRemoteButton]];
-    
-	// Set the properties of documentSnoopButton that cannot be set in IB
-	[documentSnoopButton setShowsMenuWhenIconClicked:NO];
-	[[documentSnoopButton cell] setAltersStateOfSelectedItem:YES];
-	[[documentSnoopButton cell] setAlwaysUsesFirstItemAsSelected:NO];
-	[[documentSnoopButton cell] setUsesItemFromMenu:NO];
-	[[documentSnoopButton cell] setRefreshesMenu:NO];
-	
-	[documentSnoopButton setMenu:[self menuForImagePopUpButton:documentSnoopButton]];
-	[documentSnoopButton selectItemAtIndex:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey]];
     
     // Set the properties of actionMenuButton that cannot be set in IB
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
@@ -4179,57 +3721,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 											   object:[extraBibFields enclosingScrollView]];
 }
 
-- (void)fixURLs{
-    NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
-    NSString *rurl = [publication valueOfField:BDSKUrlString];
-    NSImage *icon;
-    BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState ||
-						  [documentSnoopDrawer state] == NSDrawerOpeningState);
-	BOOL drawerShouldReopen = NO;
-	
-	// we need to reopen with the correct content
-    if(drawerWasOpen) [documentSnoopDrawer close];
-    
-    // either missing file or the document icon
-    icon = [publication imageForURLField:BDSKLocalUrlString];
-    if(icon == nil) // nil for an empty field; we use missing file icon for a placeholder in that case
-        icon = [NSImage missingFileImage];
-    [viewLocalButton setIconImage:icon];
-    
-    if (lurl){
-		[viewLocalButton setIconActionEnabled:YES];
-		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"Open the file or option-drag to copy it", @"Tool tip message")];
-		[[self window] setRepresentedFilename:[lurl path]];
-		if([documentSnoopDrawer contentView] != webSnoopContainerView)
-			drawerShouldReopen = drawerWasOpen;
-    }else{
-		[viewLocalButton setIconActionEnabled:NO];
-        [viewLocalToolbarItem setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"Tool tip message")];
-        [[self window] setRepresentedFilename:@""];
-    }
-
-    NSURL *remoteURL = [publication remoteURL];
-    if(remoteURL != nil){
-        icon = [NSImage imageForURL:remoteURL];
-		[viewRemoteButton setIconImage:icon];
-        [viewRemoteButton setIconActionEnabled:YES];
-        [viewRemoteToolbarItem setToolTip:rurl];
-		if([[documentSnoopDrawer contentView] isEqual:webSnoopContainerView])
-			drawerShouldReopen = drawerWasOpen;
-    }else{
-        [viewRemoteButton setIconImage:[NSImage imageNamed:@"WeblocFile_Disabled"]];
-		[viewRemoteButton setIconActionEnabled:NO];
-        [viewRemoteToolbarItem setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"Tool tip message")];
-    }
-	
-    drawerButtonState = BDSKDrawerUnknownState; // this makes sure the button will be updated
-    if (drawerShouldReopen){
-		// this takes care of updating the button and the drawer content
-		[documentSnoopDrawer open];
-	}else{
-		[self updateDocumentSnoopButton];
-	}
-}
 
 - (void)breakTextStorageConnections {
     

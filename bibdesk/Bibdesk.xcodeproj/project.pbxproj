@@ -107,7 +107,6 @@
 		3DAEA2EE07703F6000AF111A /* BDSKUndoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAEA2EC07703F6000AF111A /* BDSKUndoManager.m */; };
 		3DBB79C0081538CA0050C0CD /* stop_small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3DBB79BF081538CA0050C0CD /* stop_small.tiff */; };
 		3DD300F6075C054D003FD2D7 /* BDSKField.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DD300F5075C054D003FD2D7 /* BDSKField.m */; };
-		3DE3916807FEF5E600BE3AE7 /* BibEditor_Toolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3916607FEF5E600BE3AE7 /* BibEditor_Toolbar.m */; };
 		3DFF355F0816B5460052F37C /* back_small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3DFF355E0816B5460052F37C /* back_small.tiff */; };
 		3DFF35610816B55B0052F37C /* forward_small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3DFF35600816B55B0052F37C /* forward_small.tiff */; };
 		3DFF35630816B5780052F37C /* reload_small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3DFF35620816B5780052F37C /* reload_small.tiff */; };
@@ -195,7 +194,6 @@
 		CE601A4F0AF4C488000B5680 /* BDSKReferenceMinerParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE601A4D0AF4C488000B5680 /* BDSKReferenceMinerParser.m */; };
 		CE602A600AF65A9C000B5680 /* BDSKStringParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE602A5F0AF65A9C000B5680 /* BDSKStringParser.m */; };
 		CE6775170A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */; };
-		CE67E316092B569000410758 /* BibEditorDrawer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE67E314092B569000410758 /* BibEditorDrawer.nib */; };
 		CE6C04450BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */; };
 		CE6C04810BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6C047F0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m */; };
 		CE6C0CB90BEE4974007BF0B5 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE6C0CB80BEE4974007BF0B5 /* MainMenu.nib */; };
@@ -512,25 +510,11 @@
 			remoteGlobalIDString = 8DD76FB20486AB0100D96B5E;
 			remoteInfo = latex2rtf;
 		};
-		F90B13040C29900200144F1B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DD76FA90486AB0100D96B5E;
-			remoteInfo = latex2rtf;
-		};
 		F92BACF10BCC00D2008D5BC3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 8DD76FA10486AA7600D96B5E;
-			remoteInfo = SkimNotesAgent;
-		};
-		F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DD76F960486AA7600D96B5E;
 			remoteInfo = SkimNotesAgent;
 		};
 		F95CC112087F54BF002C5694 /* PBXContainerItemProxy */ = {
@@ -546,48 +530,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = BTParse;
-		};
-		F9AF562B0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
-			remoteInfo = BTParse;
-		};
-		F9AF562D0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 4A33D40608A0191B003A3FA5;
-			remoteInfo = OmniBase;
-		};
-		F9AF562F0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 4AA1E67A08AA764600E2FF6B;
-			remoteInfo = "OmniAppKit (Framework)";
-		};
-		F9AF56310BEA4160009B16D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 4A4E05FE08AA72B10098FF0F;
-			remoteInfo = OmniFoundation;
-		};
-		F9AF56330BEA4160009B16D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D5B49AC048680CD000E48DA;
-			remoteInfo = BibDeskInputManager;
-		};
-		F9AF56350BEA4160009B16D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F935665E0912D56F002B6957;
-			remoteInfo = AGRegex;
 		};
 		F9AF56370BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -714,13 +656,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = yaz;
-		};
-		F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D57630D048677EA00EA77CD;
-			remoteInfo = BibImporter;
 		};
 		F9F22DBB0CDACF7D00A9D449 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -884,8 +819,6 @@
 		3DBB79BF081538CA0050C0CD /* stop_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = stop_small.tiff; path = Images/stop_small.tiff; sourceTree = "<group>"; };
 		3DD300F3075C0532003FD2D7 /* BDSKField.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKField.h; sourceTree = "<group>"; };
 		3DD300F5075C054D003FD2D7 /* BDSKField.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKField.m; sourceTree = "<group>"; };
-		3DE3916507FEF5E600BE3AE7 /* BibEditor_Toolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibEditor_Toolbar.h; sourceTree = "<group>"; };
-		3DE3916607FEF5E600BE3AE7 /* BibEditor_Toolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibEditor_Toolbar.m; sourceTree = "<group>"; };
 		3DFF355E0816B5460052F37C /* back_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = back_small.tiff; path = Images/back_small.tiff; sourceTree = "<group>"; };
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
@@ -1022,7 +955,6 @@
 		CE602A5F0AF65A9C000B5680 /* BDSKStringParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKStringParser.m; sourceTree = "<group>"; };
 		CE6775140A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSDictionary_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSDictionary_BDSKExtensions.m; sourceTree = "<group>"; };
-		CE67E315092B569000410758 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibEditorDrawer.nib; sourceTree = "<group>"; };
 		CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSParagraphStyle_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSParagraphStyle_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6C047E0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSLayoutManager_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -1494,7 +1426,6 @@
 		F9C7D3D80BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKURLGroupSheet.nib; sourceTree = "<group>"; };
 		F9C7D3D90BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		F9C7D3DB0BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibEditor.nib; sourceTree = SOURCE_ROOT; };
-		F9C7D3DC0BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibEditorDrawer.nib; sourceTree = "<group>"; };
 		F9C7D3DE0BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_AutoFile.nib; sourceTree = SOURCE_ROOT; };
 		F9C7D3DF0BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_Cite.nib; sourceTree = SOURCE_ROOT; };
 		F9C7D3E00BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_CiteKey.nib; sourceTree = SOURCE_ROOT; };
@@ -1778,7 +1709,6 @@
 				CE7F64C20B41694A00A919D0 /* BDSKSearchGroupView.nib */,
 				CE4B5F0F0BF3DB0200A73E42 /* BibDocument.nib */,
 				F9022CC4075804A600C3F701 /* BibEditor.nib */,
-				CE67E314092B569000410758 /* BibEditorDrawer.nib */,
 				F9022CCD075804E400C3F701 /* BibPref_AutoFile.nib */,
 				F9022CCF075804E400C3F701 /* BibPref_Cite.nib */,
 				F9022CD1075804E400C3F701 /* BibPref_CiteKey.nib */,
@@ -2028,7 +1958,6 @@
 				CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */,
 				F9B800930B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m */,
 				F9022C68075802E300C3F701 /* BibEditor.m */,
-				3DE3916607FEF5E600BE3AE7 /* BibEditor_Toolbar.m */,
 				2730077A07CF20B500F2E485 /* BDSKMacroTextFieldWindowController.m */,
 				2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */,
 			);
@@ -2468,7 +2397,6 @@
 				F9E07C8D09202345007BCDD4 /* BibDocument_Search.h */,
 				F9022C8B0758034000C3F701 /* BibDocumentView_Toolbar.h */,
 				F9022C67075802E300C3F701 /* BibEditor.h */,
-				3DE3916507FEF5E600BE3AE7 /* BibEditor_Toolbar.h */,
 				F920DAFE075C2B69000C5FCA /* BibItem+Scripting.h */,
 				F9022C6D075802E300C3F701 /* BibItem.h */,
 				F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */,
@@ -2770,16 +2698,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */,
-				F9AF56340BEA4160009B16D5 /* PBXTargetDependency */,
-				F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */,
-				F9AF562E0BEA4160009B16D5 /* PBXTargetDependency */,
-				F9AF56320BEA4160009B16D5 /* PBXTargetDependency */,
-				F9AF56300BEA4160009B16D5 /* PBXTargetDependency */,
-				F9AF56360BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56380BEA4160009B16D5 /* PBXTargetDependency */,
-				F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */,
-				F90B13050C29900200144F1B /* PBXTargetDependency */,
 				F9F22DC20CDACFCC00A9D449 /* PBXTargetDependency */,
 			);
 			name = BibDesk;
@@ -3065,7 +2984,6 @@
 				CED65AC30906BE65003EED90 /* BibPref_ScriptHooks.nib in Resources */,
 				CE38FB94091D953900BCB69D /* BDSKFilter.nib in Resources */,
 				CE38FB97091D954E00BCB69D /* BDSKCondition.nib in Resources */,
-				CE67E316092B569000410758 /* BibEditorDrawer.nib in Resources */,
 				CE2209AB09363A05004D7D92 /* BDSKAlert.nib in Resources */,
 				CEF7295A09CC88EB00802D48 /* AddFieldSheet.nib in Resources */,
 				CEF7295D09CC890400802D48 /* RemoveFieldSheet.nib in Resources */,
@@ -3411,7 +3329,6 @@
 				3D824AA907D099C300FB2F67 /* BDSKBackgroundView.m in Sources */,
 				F9A6772E07D2D57F00782ACD /* MultiplePageView.m in Sources */,
 				F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */,
-				3DE3916807FEF5E600BE3AE7 /* BibEditor_Toolbar.m in Sources */,
 				3D8663400802C25800FF1724 /* BDSKTypeInfoEditor.m in Sources */,
 				3D866C2908031CEC00FF1724 /* BDSKCharacterConversion.m in Sources */,
 				27AFAF9D080D1E1B0096F5D2 /* BDSKTextImportController.m in Sources */,
@@ -3618,46 +3535,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		F90B13050C29900200144F1B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = latex2rtf;
-			targetProxy = F90B13040C29900200144F1B /* PBXContainerItemProxy */;
-		};
-		F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = SkimNotesAgent;
-			targetProxy = F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */;
-		};
-		F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = BTParse;
-			targetProxy = F9AF562B0BEA4160009B16D5 /* PBXContainerItemProxy */;
-		};
-		F9AF562E0BEA4160009B16D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = OmniBase;
-			targetProxy = F9AF562D0BEA4160009B16D5 /* PBXContainerItemProxy */;
-		};
-		F9AF56300BEA4160009B16D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "OmniAppKit (Framework)";
-			targetProxy = F9AF562F0BEA4160009B16D5 /* PBXContainerItemProxy */;
-		};
-		F9AF56320BEA4160009B16D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = OmniFoundation;
-			targetProxy = F9AF56310BEA4160009B16D5 /* PBXContainerItemProxy */;
-		};
-		F9AF56340BEA4160009B16D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = BibDeskInputManager;
-			targetProxy = F9AF56330BEA4160009B16D5 /* PBXContainerItemProxy */;
-		};
-		F9AF56360BEA4160009B16D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = AGRegex;
-			targetProxy = F9AF56350BEA4160009B16D5 /* PBXContainerItemProxy */;
-		};
 		F9AF56380BEA4160009B16D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = yaz;
@@ -3667,11 +3544,6 @@
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090 /* BibDesk */;
 			targetProxy = F9AF5D8D0C8F3DB6005614AE /* PBXContainerItemProxy */;
-		};
-		F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = BibImporter;
-			targetProxy = F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */;
 		};
 		F9F22DC20CDACFCC00A9D449 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3886,15 +3758,6 @@
 				F9C7D3D60BE927E000D65C7F /* French */,
 			);
 			name = BDSKTextViewFindPanel.nib;
-			sourceTree = "<group>";
-		};
-		CE67E314092B569000410758 /* BibEditorDrawer.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CE67E315092B569000410758 /* English */,
-				F9C7D3DC0BE927E100D65C7F /* French */,
-			);
-			name = BibEditorDrawer.nib;
 			sourceTree = "<group>";
 		};
 		CE6C0CB80BEE4974007BF0B5 /* MainMenu.nib */ = {
@@ -4720,7 +4583,7 @@
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = (
 					"-Wall",
@@ -4738,7 +4601,7 @@
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Release;
 		};
@@ -4748,7 +4611,7 @@
 				ARCHS = ppc;
 				GCC_AUTO_VECTORIZATION = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Test;
 		};
