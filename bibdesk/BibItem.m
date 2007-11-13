@@ -385,6 +385,7 @@ static CFDictionaryRef selectorTable = NULL;
     [identifierURL release];
     [sortedURLs release];
     [files release];
+    [filesToBeFiled release];
     [super dealloc];
 }
 
@@ -2445,8 +2446,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSURL *aURL;
     
     while (file = [fileEnum nextObject]) {
-        if ([file isFile] && (aURL = [file URL]))
-            [localFiles addObject:aURL];
+        if ([file isFile])
+            [localFiles addObject:file];
     }
     return localFiles;
 }
@@ -2458,8 +2459,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSURL *aURL;
     
     while (file = [fileEnum nextObject]) {
-        if ([file isFile] == NO && (aURL = [file URL]))
-            [remoteURLs addObject:aURL];
+        if ([file isFile] == NO)
+            [remoteURLs addObject:file];
     }
     return remoteURLs;
 }
@@ -2502,6 +2503,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     BDSKLinkedFile *file = [files objectAtIndex:idx];
     [[[self undoManager] prepareWithInvocationTarget:self] insertObject:file inFilesAtIndex:idx];
     [file setDelegate:nil];
+    [self removeFileToBeFiled:file];
     [files removeObjectAtIndex:idx];
 	
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del File", @"type", owner, @"owner", nil];
@@ -2765,6 +2767,8 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 
 - (BOOL)autoFilePaper
 {
+    // @@ AutoFile: deprecated
+    return NO;
     // we can't autofile if it's disabled or there is nothing to file
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [self localUrlPath] == nil)
 		return NO;
@@ -2781,6 +2785,90 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
         }
 	} else {
 		[self setNeedsToBeFiled:YES];
+	}
+	return NO;
+}
+
+- (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file
+{
+	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
+	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
+    
+	NSString *relativeFile = [BDSKFormatParser parseFormatForLinkedFile:file ofItem:self];
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
+		relativeFile = [relativeFile lowercaseString];
+	return [NSURL fileURLWithPath:[papersFolderPath stringByAppendingPathComponent:relativeFile]];
+}
+
+- (BOOL)canSetURLForLinkedFile:(BDSKLinkedFile *)file
+{
+    NSArray *requiredFields = [[NSApp delegate] requiredFieldsForLocalUrl];
+	
+	if (nil == requiredFields || 
+        ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
+		[NSString isEmptyString:[[[owner fileURL] path] stringByDeletingLastPathComponent]]))
+		return NO;
+	
+	NSEnumerator *fEnum = [requiredFields objectEnumerator];
+	NSString *fieldName;
+	
+	while (fieldName = [fEnum nextObject]) {
+		if ([fieldName isEqualToString:BDSKCiteKeyString]) {
+            if([self hasEmptyOrDefaultCiteKey])
+				return NO;
+		} else if ([fieldName isEqualToString:BDSKLocalUrlString]) {
+			if ([file URL] == nil)
+				return NO;
+		} else if ([fieldName isEqualToString:@"Document Filename"]) {
+			if ([NSString isEmptyString:[[owner fileURL] path]])
+				return NO;
+		} else if ([fieldName hasPrefix:@"Document: "]) {
+			if ([NSString isEmptyString:[owner documentInfoForKey:[fieldName substringFromIndex:10]]])
+				return NO;
+		} else if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
+			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
+				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
+				return NO;
+		} else {
+			if ([NSString isEmptyString:[self valueOfField:fieldName]]) 
+				return NO;
+		}
+	}
+	return YES;
+}
+
+- (NSSet *)filesToBeFiled { 
+	return filesToBeFiled; 
+}
+
+- (void)addFileToBeFiled:(BDSKLinkedFile *)file {
+    if (filesToBeFiled == nil)
+        filesToBeFiled = [[NSMutableSet alloc] init];
+    [filesToBeFiled addObject:file];
+}
+
+- (void)removeFileToBeFiled:(BDSKLinkedFile *)file {
+    [filesToBeFiled removeObject:file];
+}
+
+- (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file
+{
+    // we can't autofile if it's disabled or there is nothing to file
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [file URL] == nil)
+		return NO;
+	
+	if ([self canSetURLForLinkedFile:file]) {
+        OBASSERT([owner isDocument]);
+        if ([owner isDocument]) {
+            [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:file]
+                                  fromDocument:(BibDocument *)owner
+                                         check:NO]; 
+            return YES;
+		} else {
+            [self addFileToBeFiled:file];
+        }
+	} else {
+		[self addFileToBeFiled:file];
 	}
 	return NO;
 }

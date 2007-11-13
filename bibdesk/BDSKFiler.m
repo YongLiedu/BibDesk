@@ -46,6 +46,7 @@
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAlert.h"
+#import "BDSKLinkedFile.h"
 
 static BDSKFiler *sharedFiler = nil;
 
@@ -109,7 +110,8 @@ static BDSKFiler *sharedFiler = nil;
     int numberOfPapers = [paperInfos count];
 	NSEnumerator *paperEnum = [paperInfos objectEnumerator];
 	id paperInfo = nil;
-	BibItem *paper = nil;
+	BibItem *pub = nil;
+	BDSKLinkedFile *file = nil;
 	NSString *path = nil;
 	NSString *newPath = nil;
 	NSString *newRelativePath = nil;
@@ -143,28 +145,28 @@ static BDSKFiler *sharedFiler = nil;
 	}
 	
 	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillAutoFileScriptHookName];
-	NSMutableArray *papers = nil;
+	NSMutableArray *pubs = nil;
 	NSMutableArray *oldValues = nil;
 	NSMutableArray *newValues = nil;
 	NSString *oldValue = nil;
 	NSString *newValue = nil;
 	
 	if(scriptHook){
-		papers = [NSMutableArray arrayWithCapacity:[paperInfos count]];
+		pubs = [NSMutableArray arrayWithCapacity:[paperInfos count]];
 		while (paperInfo = [paperEnum nextObject]) {
 			if(initial)
-				[papers addObject:paperInfo];
+				[pubs addObject:[paperInfo delegate]];
 			else
-				[papers addObject:[paperInfo objectForKey:@"paper"]];
+				[pubs addObject:[paperInfo objectForKey:@"publication"]];
 		}
 		// we don't set the old/new values as the newValues are not reliable
 		[scriptHook setField:field];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers document:doc];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:pubs document:doc];
 	}
 	
 	scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidAutoFileScriptHookName];
 	if(scriptHook){
-		papers = [NSMutableArray arrayWithCapacity:[paperInfos count]];
+		pubs = [NSMutableArray arrayWithCapacity:[paperInfos count]];
 		oldValues = [NSMutableArray arrayWithCapacity:[paperInfos count]];
 		newValues = [NSMutableArray arrayWithCapacity:[paperInfos count]];
 	}
@@ -174,17 +176,19 @@ static BDSKFiler *sharedFiler = nil;
 		
 		if(initial){
 			// autofile action: an array of BibItems
-			paper = (BibItem *)paperInfo;
-			path = [paper localUrlPathInheriting:NO];
-			newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
+			file = (BDSKLinkedFile *)paperInfo;
+			pub = (BibItem *)[file delegate];
+			path = [[file URL] path];
+			newPath = [[pub suggestedURLForLinkedFile:file] path];
             newRelativePath = newPath;
             if ([newPath hasPrefix:papersFolderPath])
                 newRelativePath = [newPath substringFromIndex:[papersFolderPath length]];
 		}else{
 			// an explicit move, possibly from undo: a list of info dictionaries
-			paper = [paperInfo objectForKey:@"paper"];
-			path = [paperInfo objectForKey:@"oldPath"];
-			newPath = [paperInfo objectForKey:@"newPath"];
+			file = [paperInfo objectForKey:@"file"];
+			pub = [paperInfo objectForKey:@"publication"];
+			path = [[file URL] path];
+			newPath = [paperInfo objectForKey:@"path"];
 		}
 		
 		if(numberOfPapers > 1){
@@ -192,28 +196,21 @@ static BDSKFiler *sharedFiler = nil;
 			[progressIndicator displayIfNeeded];
 		}
 			
-		if([NSString isEmptyString:path] || [NSString isEmptyString:newPath]){
+		if([NSString isEmptyString:path] || [NSString isEmptyString:newPath] || [path isEqualToString:newPath])
 			continue;
-		}else if([path isEqualToString:newPath]){
-            // we still want to change the field when we change from full URL to relative path or v.v.
-            oldValue = [paper valueOfField:field inherit:NO];
-            BOOL wasRelative = [oldValue hasPrefix:@"file://"] == NO && [oldValue isAbsolutePath] == NO;
-            if (initial == NO || useRelativePath != wasRelative || [newRelativePath isAbsolutePath] == NO)
-                continue;
-        }
         
 		info = [NSMutableDictionary dictionaryWithCapacity:6];
-		[info setObject:paper forKey:@"paper"];
+		[info setObject:file forKey:@"file"];
+		[info setObject:pub forKey:@"publication"];
         error = nil;
         oldValue  = [[NSURL fileURLWithPath:path] absoluteString]; // we don't use the field value, as we might have already changed it in undo or find/replace
         
-        if(check && NO == [paper canSetLocalUrl]){
+        if(check && NO == [pub canSetURLForLinkedFile:file]){
             
             [info setObject:NSLocalizedString(@"Incomplete information to generate file name.",@"") forKey:@"status"];
             [info setObject:[NSNumber numberWithInt:BDSKIncompleteFieldsErrorMask] forKey:@"flag"];
             [info setObject:NSLocalizedString(@"Move anyway.",@"") forKey:@"fix"];
-            [info setObject:path forKey:@"oldPath"];
-            [info setObject:newPath forKey:@"newPath"];
+            [info setObject:newPath forKey:@"path"];
             [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
             
         }else if(NO == [path isEqualToString:newPath] && NO == [fm movePath:path toPath:newPath force:force error:&error]){ 
@@ -224,34 +221,25 @@ static BDSKFiler *sharedFiler = nil;
                 [info setObject:fix forKey:@"fix"];
             [info setObject:[errorInfo objectForKey:NSLocalizedDescriptionKey] forKey:@"status"];
             [info setObject:[NSNumber numberWithInt:[error code]] forKey:@"flag"];
-            [info setObject:path forKey:@"oldPath"];
-            [info setObject:newPath forKey:@"newPath"];
+            [info setObject:newPath forKey:@"path"];
             [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
             
 		}else{
 			
-			newValue  = [[NSURL fileURLWithPath:newPath] absoluteString];
-			if(initial) {// otherwise will be done by undo of setField:
-                [paper setField:field toValue:useRelativePath ? newRelativePath : newValue];
-			}else{
-                // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
-                NSString *value = [paper valueOfField:field];
-                NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", field, @"key", @"Change", @"type", doc, @"owner", value, @"oldValue", nil];
-                [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
-                                                                    object:paper
-                                                                  userInfo:notifInfo];
+            [file update];
+            // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
+            NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del File", @"type", [pub owner], @"owner", nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+                                                                object:pub
+                                                              userInfo:notifInfo];
+            if(scriptHook){
+                [pubs addObject:pub];
+                [oldValues addObject:path];
+                [newValues addObject:newPath];
             }
-            if(NO == [path isEqualToString:newPath]){
-                if(scriptHook){
-                    [papers addObject:paper];
-                    [oldValues addObject:oldValue];
-                    [newValues addObject:newValue];
-                }
-                // switch them as this is used in undo
-                [info setObject:path forKey:@"newPath"];
-                [info setObject:newPath forKey:@"oldPath"];
-                [fileInfoDicts addObject:info];
-            }
+            // switch them as this is used in undo
+            [info setObject:path forKey:@"path"];
+            [fileInfoDicts addObject:info];
             
 		}
 	}
@@ -260,7 +248,7 @@ static BDSKFiler *sharedFiler = nil;
 		[scriptHook setField:field];
 		[scriptHook setOldValues:oldValues];
 		[scriptHook setNewValues:newValues];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers document:doc];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:pubs document:doc];
 	}
 	
 	if(numberOfPapers > 1){
@@ -367,9 +355,9 @@ static BDSKFiler *sharedFiler = nil;
         [string appendStrings:NSLocalizedString(@"Publication key: ", @"Label for autofile dump"),
                               [[info objectForKey:@"paper"] citeKey], @"\n", 
                               NSLocalizedString(@"Original path: ", @"Label for autofile dump"),
-                              [info objectForKey:@"oldPath"], @"\n", 
+                              [[[info objectForKey:@"file"] URL] path], @"\n", 
                               NSLocalizedString(@"New path: ", @"Label for autofile dump"),
-                              [info objectForKey:@"newPath"], @"\n", 
+                              [info objectForKey:@"path"], @"\n", 
                               NSLocalizedString(@"Status: ",@"Label for autofile dump"),
                               [info objectForKey:@"status"], @"\n", 
                               NSLocalizedString(@"Fix: ", @"Label for autofile dump"),
@@ -464,13 +452,13 @@ static BDSKFiler *sharedFiler = nil;
         case 0:
             if(statusFlag & BDSKSourceFileDoesNotExistErrorMask)
                 return;
-            path = [[dict objectForKey:@"oldPath"] stringByExpandingTildeInPath];
+            path = [[[dict objectForKey:@"file"] URL] path];
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
             break;
         case 1:
             if(!(statusFlag & BDSKTargetFileExistsErrorMask))
                 return;
-            path = [[dict objectForKey:@"newPath"] stringByExpandingTildeInPath];
+            path = [dict objectForKey:@"path"];
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
             break;
         case 2:

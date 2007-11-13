@@ -138,6 +138,7 @@ enum{
         if (aFile) {
             [publication removeObjectFromFilesAtIndex:idx];
             [publication insertObject:aFile inFilesAtIndex:idx];
+            [publication autoFileLinkedFile:aFile];
             [aFile release];
         }
         idx = [aSet indexGreaterThanIndex:idx];
@@ -165,6 +166,7 @@ enum{
         aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
         if (aFile) {
             [publication insertObject:aFile inFilesAtIndex:idx - offset];
+            [publication autoFileLinkedFile:aFile];
             [aFile release];
         } else {
             // the indexes in aSet assume that we inserted the file
@@ -241,7 +243,7 @@ enum{
 	[cell release];
     
     // Setup the toolbar
-    [self setupToolbar];
+    //[self setupToolbar];
 	
     // Setup the statusbar
 	[statusBar retain]; // we need to retain, as we might remove it from the window
@@ -496,6 +498,9 @@ enum{
 }
 
 - (IBAction)moveLinkedFile:(id)sender{
+    // @@ AutoFile: deprecated
+    return;
+    
     NSString *field = [sender representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
@@ -1213,14 +1218,29 @@ enum{
 }
 
 - (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    NSArray *files = nil;
+    
     if (returnCode == NSAlertAlternateReturn){
         return;
     }else if(returnCode == NSAlertOtherReturn){
-        [publication setNeedsToBeFiled:YES];
-        return;
+        NSEnumerator *fileEnum = [[publication localFiles] objectEnumerator];
+        BDSKLinkedFile *file;
+        files = [NSMutableArray array];
+        
+        while(file = [fileEnum nextObject]){
+            if([publication canSetURLForLinkedFile:file] == NO)
+                [publication addFileToBeFiled:file];
+            else
+                [(NSMutableArray *)files addObject:file];
+        }
+    }else{
+        files = [publication localFiles];
     }
     
-	[[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:publication] fromDocument:[self document] check:NO];
+    if ([files count] == 0)
+        return;
+    
+	[[BDSKFiler sharedFiler] filePapers:files fromDocument:[self document] check:NO];
 	
 	[tabView selectFirstTabViewItem:self];
 	
@@ -1230,7 +1250,18 @@ enum{
 - (IBAction)consolidateLinkedFiles:(id)sender{
 	[self finalizeChangesPreservingSelection:YES];
 	
-	if (![publication canSetLocalUrl]){
+	BOOL canSet = YES;
+    NSEnumerator *fileEnum = [[publication localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    
+    while(file = [fileEnum nextObject]){
+        if([publication canSetURLForLinkedFile:file] == NO){
+            canSet = NO;
+            break;
+        }
+    }
+    
+	if (canSet == NO){
 		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?",@"");
 		NSString *otherButton = nil;
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
@@ -1903,6 +1934,8 @@ enum{
     
     int autoGenerateStatus = [self userChangedField:fieldName from:oldValue to:value];
 	
+    // @@ AutoFile: deprecated
+    /*
     if (isLocalFile && (autoGenerateStatus & 2) == 0) {
         NSString *newPath = [publication localFilePathForField:fieldName];
         if (oldURL != nil && newPath != nil && [[NSFileManager defaultManager] fileExistsAtPath:newPath] == NO) {
@@ -1920,7 +1953,7 @@ enum{
                                 contextInfo:info];
         }
     }
-	
+	*/
 	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 

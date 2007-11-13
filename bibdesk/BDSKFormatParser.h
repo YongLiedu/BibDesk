@@ -37,6 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKOwnerProtocol.h"
 
 @protocol BDSKParseableItem <NSObject>
 - (NSString *)fileType;
@@ -52,8 +53,10 @@
 - (NSString *)documentInfoForKey:(NSString *)key;
 - (BOOL)isValidCiteKey:(NSString *)key;
 - (BOOL)isValidLocalUrlPath:(NSString *)key;
+- (id<BDSKOwner>)owner;
 @end
 
+@class BDSKLinkedFile;
 
 @interface BDSKFormatParser : NSObject {
 }
@@ -70,6 +73,10 @@
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub;
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion;
+
++ (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub;
+
++ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion;
 
 /*!
     @method uniqueString:suffix:forField:ofItem:numberOfChars:from:to:force:

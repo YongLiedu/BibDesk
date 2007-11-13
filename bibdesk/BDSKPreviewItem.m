@@ -46,6 +46,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <OmniFoundation/NSArray-OFExtensions.h>
+#import "BDSKOwnerProtocol.h"
 
 
 @implementation BDSKPreviewItem
@@ -146,6 +147,8 @@
 		ck = [ck lowercaseString];
 	return ck;
 }
+
+- (id<BDSKOwner>)owner { return  nil; }
 
 - (NSString *)displayText {
     NSMutableArray *authors = [NSMutableArray arrayWithCapacity:[pubAuthors count]];

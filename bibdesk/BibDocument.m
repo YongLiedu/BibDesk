@@ -3420,7 +3420,7 @@ static void addAllURLsToArray(const void *value, void *context)
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *pub;
     NSMutableArray *generateKeyPubs = [NSMutableArray arrayWithCapacity:[pubs count]];
-    NSMutableArray *autofilePubs = [NSMutableArray arrayWithCapacity:[pubs count]];
+    NSMutableArray *autofileFiles = [NSMutableArray arrayWithCapacity:[pubs count]];
     
     while(pub = [pubEnum nextObject]){
         [[self editorForPublication:pub create:NO] finalizeChanges:nil];
@@ -3430,16 +3430,21 @@ static void addAllURLsToArray(const void *value, void *context)
             [generateKeyPubs addObject:pub];
         
         // autofile paper if we have enough information
-        if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [pub needsToBeFiled] && [pub canSetLocalUrl])
-            [autofilePubs addObject:pub];
+        if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+            NSEnumerator *fileEnum = [[pub localFiles] objectEnumerator];
+            BDSKLinkedFile *file;
+            while (file = [fileEnum nextObject])
+                if ([[pub filesToBeFiled] containsObject:file] && [pub canSetURLForLinkedFile:file])
+                    [autofileFiles addObject:file];
+        }
 	}
     
     if([generateKeyPubs count]){
         [self generateCiteKeysForPublications:generateKeyPubs];
         rv |= 1;
     }
-    if([autofilePubs count]){
-        [[BDSKFiler sharedFiler] filePapers:autofilePubs fromDocument:self check:NO];
+    if([autofileFiles count]){
+        [[BDSKFiler sharedFiler] filePapers:autofileFiles fromDocument:self check:NO];
         rv |= 2;
     }
     

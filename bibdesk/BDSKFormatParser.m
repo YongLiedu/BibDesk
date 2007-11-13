@@ -46,6 +46,8 @@
 #import "NSDate_BDSKExtensions.h"
 #import "NSScanner_BDSKExtensions.h"
 #import "BDSKStringNode.h"
+#import "BDSKLinkedFile.h"
+#import "BDSKAppController.h"
 
 @implementation BDSKFormatParser
 
@@ -55,6 +57,25 @@
 }
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion
+{
+    return [self parseFormat:format forField:fieldName linkedFile:nil ofItem:pub suggestion:suggestion];
+}
+
++ (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
+{
+	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
+	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
+    
+    NSString *oldPath = [[file URL] path];
+    if ([oldPath hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
+        oldPath = [oldPath substringFromIndex:[papersFolderPath length] + 1];
+    else
+        oldPath = nil;
+      
+    return [self parseFormat:localUrlFormat forField:BDSKLocalUrlString linkedFile:nil ofItem:pub suggestion:oldPath];
+}
+
++ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion
 {
 	static NSCharacterSet *nonLowercaseLetterCharSet = nil;
 	static NSCharacterSet *nonUppercaseLetterCharSet = nil;
@@ -347,7 +368,9 @@
 					break;
 				case 'l':
 					// old filename without extension
-					if ([fieldName isLocalFileField])
+					if (file)
+						string = [[file URL] path];
+                    else if ([fieldName isLocalFileField])
 						string = [pub localFilePathForField:fieldName];
 					else
 						string = [pub localFilePathForField:BDSKLocalUrlString];
@@ -359,7 +382,9 @@
 					break;
 				case 'L':
 					// old filename with extension
-					if ([fieldName isLocalFileField])
+					if (file)
+						string = [[file URL] path];
+                    else if ([fieldName isLocalFileField])
 						string = [pub localFilePathForField:fieldName];
 					else
 						string = [pub localFilePathForField:BDSKLocalUrlString];
@@ -371,7 +396,9 @@
 					break;
 				case 'e':
 					// old file extension
-					if ([fieldName isLocalFileField])
+					if (file)
+						string = [[file URL] path];
+                    else if ([fieldName isLocalFileField])
 						string = [pub localFilePathForField:fieldName];
 					else
 						string = [pub localFilePathForField:BDSKLocalUrlString];

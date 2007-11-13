@@ -980,8 +980,8 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
-
-    [[BDSKFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self check:check];
+    NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
+    [[BDSKFiler sharedFiler] filePapers:selectedFiles fromDocument:self check:check];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files", @"Undo action name")];
 }

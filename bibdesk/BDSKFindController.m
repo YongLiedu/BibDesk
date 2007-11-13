@@ -1000,8 +1000,9 @@ enum {
 		}
     }
 
-	if([paperInfos count])
-		[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+    // @@ AutoFile: deprecated
+	//if([paperInfos count])
+	//	[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	
 	return number;
 }
@@ -1058,8 +1059,9 @@ enum {
         }
     }
 	
-	if([paperInfos count])
-		[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+    // @@ AutoFile: deprecated
+	//if([paperInfos count])
+	//	[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	    
 	return number;
 }
@@ -1101,8 +1103,9 @@ enum {
 		}
     }
 	
-	if([paperInfos count])
-		[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+    // @@ AutoFile: deprecated
+	//if([paperInfos count])
+	//	[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	    
 	return number;
 }
@@ -1145,8 +1148,9 @@ enum {
         number++;
     }
 	
-	if([paperInfos count])
-		[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+    // @@ AutoFile: deprecated
+	//if([paperInfos count])
+	//	[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	    
 	return number;
 }
@@ -1189,8 +1193,9 @@ enum {
         number++;
     }
 	
-	if([paperInfos count])
-		[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+    // @@ AutoFile: deprecated
+	//if([paperInfos count])
+	//	[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	    
 	return number;
 }

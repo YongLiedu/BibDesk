@@ -71,6 +71,7 @@ enum {
     NSNumber * fileOrder;
     BOOL hasBeenEdited;
 	BOOL needsToBeFiled;
+    NSMutableSet *filesToBeFiled;
 	id<BDSKOwner> owner;
     BDSKFieldCollection *templateFields;
     int currentIndex;
@@ -91,6 +92,16 @@ enum {
 - (NSArray *)sortedURLs;
 
 - (NSString *)basePath;
+
+- (NSArray *)localFiles;
+- (NSArray *)remoteURLs;
+
+- (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file;
+- (BOOL)canSetURLForLinkedFile:(BDSKLinkedFile *)file;
+- (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file;
+- (NSSet *)filesToBeFiled;
+- (void)addFileToBeFiled:(BDSKLinkedFile *)file;
+- (void)removeFileToBeFiled:(BDSKLinkedFile *)file;
 
 /*!
      @method init

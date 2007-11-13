@@ -268,10 +268,19 @@
     
     if ([item hasEmptyOrDefaultCiteKey])
         [item setCiteKey:[item suggestedCiteKey]];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
-       [item needsToBeFiled] && [item canSetLocalUrl]){
-        [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
-        [item setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [[item filesToBeFiled] count]){
+        NSEnumerator *fileEnum = [[item filesToBeFiled] objectEnumerator];
+        BDSKLinkedFile *file;
+        NSMutableArray *files = [NSMutableArray array];
+        
+        while(file = [fileEnum nextObject]){
+            if([item canSetURLForLinkedFile:file] == NO)
+                continue;
+            [files addObject:file];
+            [item removeFileToBeFiled:file]; // unset the flag even when we fail, to avoid retrying at every edit
+        }
+        if ([files count])
+            [[BDSKFiler sharedFiler] filePapers:files fromDocument:document check:NO];
     }
     [item release];
     
@@ -463,14 +472,29 @@
 }
 
 - (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    NSArray *files = nil;
+    
     if (returnCode == NSAlertAlternateReturn){
         return;
     }else if(returnCode == NSAlertOtherReturn){
-        [item setNeedsToBeFiled:YES];
-        return;
+        NSEnumerator *fileEnum = [[item localFiles] objectEnumerator];
+        BDSKLinkedFile *file;
+        files = [NSMutableArray array];
+        
+        while(file = [fileEnum nextObject]){
+            if([item canSetURLForLinkedFile:file] == NO)
+                [item addFileToBeFiled:file];
+            else
+                [(NSMutableArray *)files addObject:file];
+        }
+    }else{
+        files = [item localFiles];
     }
     
-	[[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
+    if ([files count] == 0)
+        return;
+    
+    [[BDSKFiler sharedFiler] filePapers:files fromDocument:document check:NO];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
 }
@@ -478,8 +502,18 @@
 - (IBAction)consolidateLinkedFiles:(id)sender{
     // make the tableview stop editing:
     [self finalizeChangesPreservingSelection:YES];
-	
-	if ([item canSetLocalUrl] == NO){
+	BOOL canSet = YES;
+    NSEnumerator *fileEnum = [[item localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    
+    while(file = [fileEnum nextObject]){
+        if([item canSetURLForLinkedFile:file] == NO){
+            canSet = NO;
+            break;
+        }
+    }
+    
+	if (canSet == NO){
 		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?", @"Informative text in alert");
 		NSString *otherButton = nil;
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
@@ -1449,6 +1483,8 @@
 
 // we don't use the one from the item befcause it doesn't know about the document yet
 - (BOOL)autoFilePaper{
+    // @@ AutoFile: deprecated
+    return NO;
     // we can't autofile if it's disabled or there is nothing to file
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [item localUrlPath] == nil)
 		return NO;
@@ -1458,6 +1494,22 @@
 		return YES;
 	} else {
 		[item setNeedsToBeFiled:YES];
+	}
+	return NO;
+}
+
+// we don't use the one from the item befcause it doesn't know about the document yet
+- (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file
+{
+    // we can't autofile if it's disabled or there is nothing to file
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [file URL] == nil)
+		return NO;
+	
+	if ([item canSetURLForLinkedFile:file]) {
+        [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:file] fromDocument:document check:NO]; 
+        return YES;
+	} else {
+		[item addFileToBeFiled:file];
 	}
 	return NO;
 }
