@@ -2820,7 +2820,6 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 
 - (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
-    // !!! with the present code here, there's no way to match title->URL if an item has multiple URLs; need to rework this
     NSArray *selPubs = [self selectedPublications];
     if (nil == selPubs) return nil;
     CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
