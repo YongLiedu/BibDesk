@@ -44,6 +44,9 @@
     [_fileView setDataSource:nil];
     [_fileView bind:@"iconURLs" toObject:arrayController withKeyPath:@"arrangedObjects" options:nil];
     [_fileView bind:@"selectionIndexes" toObject:arrayController withKeyPath:@"selectionIndexes" options:nil];
+    
+    // for optional datasource method
+    [_fileView setDataSource:self];
 }
 
 - (void)dealloc
@@ -89,9 +92,9 @@
     [arrayController insertObjects:absoluteURLs atArrangedObjectIndexes:aSet];
 }
 
-- (BOOL)allowsEditingFileView:(FileView *)aView;
+- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
-    return YES;
+    return @"This is only a test.";
 }
 
 @end

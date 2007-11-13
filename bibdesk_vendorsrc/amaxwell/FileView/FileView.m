@@ -68,6 +68,12 @@ static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20"
 static const NSSize DEFAULT_ICON_SIZE = { 64, 64 };
 static const CGFloat DEFAULT_PADDING = 32;          // 16 per side
 
+static CGFloat _paddingForScale(CGFloat scale)
+{
+    // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
+    return DEFAULT_PADDING + DEFAULT_PADDING * scale / 7;
+}
+
 // don't bother removing icons from the cache if there are fewer than this value
 static const NSUInteger ZOMBIE_CACHE_THRESHOLD = 100;
 
@@ -78,7 +84,8 @@ static const NSUInteger RELEASE_CACHE_THRESHOLD = 25;
 static const CFTimeInterval ZOMBIE_TIMER_INTERVAL = 300.0;
 static void zombieTimerFired(CFRunLoopTimerRef timer, void *context);
 
-static NSDictionary *__textAttributes = nil;
+static NSDictionary *__titleAttributes = nil;
+static NSDictionary *__subtitleAttributes = nil;
 static NSShadow *__shadow = nil;
 
 @implementation FileView
@@ -88,11 +95,15 @@ static NSShadow *__shadow = nil;
     [ta setObject:[NSFont systemFontOfSize:12.0] forKey:NSFontAttributeName];
     [ta setObject:[NSColor darkGrayColor] forKey:NSForegroundColorAttributeName];
     NSMutableParagraphStyle *ps = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-    [ps setLineBreakMode:NSLineBreakByTruncatingMiddle];
+    // Apple uses this in IKImageBrowserView
+    [ps setLineBreakMode:NSLineBreakByTruncatingTail];
     [ps setAlignment:NSCenterTextAlignment];
     [ta setObject:ps forKey:NSParagraphStyleAttributeName];
     [ps release];
-    __textAttributes = [ta copy];
+    __titleAttributes = [ta copy];
+    
+    [ta setObject:[NSFont systemFontOfSize:10.0] forKey:NSFontAttributeName];
+    __subtitleAttributes = [ta copy];
     
     __shadow = [[NSShadow alloc] init];
     [__shadow setShadowOffset:NSMakeSize(2.0,-3.0)];
@@ -127,7 +138,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 - (void)_commonInit {
     _iconCache = [[NSMutableDictionary alloc] init];
     _iconSize = DEFAULT_ICON_SIZE;
-    _padding = DEFAULT_PADDING;
+    _padding = _paddingForScale(1.0);
     _lastMouseDownLocInView = NSZeroPoint;
     _dropRectForHighlight = NSZeroRect;
     _isRescaling = NO;
@@ -233,8 +244,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     NSParameterAssert(scale > 0);
     _iconSize.width = DEFAULT_ICON_SIZE.width * scale;
     _iconSize.height = DEFAULT_ICON_SIZE.height * scale;
-    // ??? magic number here...
-    _padding = DEFAULT_PADDING + DEFAULT_PADDING * scale / 7;
+    _padding = _paddingForScale(scale);
     
     // the full view will likely need repainting
     [self reloadIcons];
@@ -952,6 +962,8 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     
     BOOL useFastDrawingPath = (isResizing || _isRescaling || ([self _isFastScrolling] && _iconSize.height <= 256));
     
+    BOOL useSubtitle = [_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)];
+    
     // iterate each row/column to see if it's in the dirty rect, and evaluate the current cache state
     for (r = rMin, i = iMin; r < rMax; r++) 
     {
@@ -1023,12 +1035,18 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                 // draw text over the icon/shadow
                 NSString *name = [aURL isFileURL] ? [[aURL path] lastPathComponent] : [aURL absoluteString];
 #if 1
-                [name drawInRect:textRect withAttributes:__textAttributes];  
+                [name drawInRect:textRect withAttributes:__titleAttributes];  
+                if (useSubtitle) {
+                    CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
+                    textRect.origin.y += titleHeight;
+                    textRect.size.height -= titleHeight;
+                    [[_dataSource fileView:self subtitleAtIndex:i] drawInRect:textRect withAttributes:__subtitleAttributes];
+                }
 #else
                 NSRect tr = textRect;
                 textRect.origin.y += NSHeight(textRect);
                 NSStringDrawingOptions opts = NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine;
-                [name drawWithRect:tr options:opts attributes:__textAttributes];
+                [name drawWithRect:tr options:opts attributes:__titleAttributes];
 #endif
                 CGContextRestoreGState(cgContext);
             }            

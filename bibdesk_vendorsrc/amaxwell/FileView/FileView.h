@@ -117,7 +117,10 @@
 
 // delegate must return an NSURL or nil (a missing value) for each index < numberOfFiles
 - (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView;
-- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)index;
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex;
+
+// optional method for a subtitle
+- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 
 @end
 
