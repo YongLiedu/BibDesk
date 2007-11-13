@@ -2438,6 +2438,32 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return [[self localURL] richTextSkimNotes];
 }
 
+- (NSArray *)localFiles {
+    NSMutableArray *localFiles = [NSMutableArray array];
+    NSEnumerator *fileEnum = [files objectEnumerator];
+    BDSKLinkedFile *file;
+    NSURL *aURL;
+    
+    while (file = [fileEnum nextObject]) {
+        if ([file isFile] && (aURL = [file URL]))
+            [localFiles addObject:aURL];
+    }
+    return localFiles;
+}
+
+- (NSArray *)remoteURLs {
+    NSMutableArray *remoteURLs = [NSMutableArray array];
+    NSEnumerator *fileEnum = [files objectEnumerator];
+    BDSKLinkedFile *file;
+    NSURL *aURL;
+    
+    while (file = [fileEnum nextObject]) {
+        if ([file isFile] == NO && (aURL = [file URL]))
+            [remoteURLs addObject:aURL];
+    }
+    return remoteURLs;
+}
+
 #pragma mark -
 #pragma mark URL handling
 

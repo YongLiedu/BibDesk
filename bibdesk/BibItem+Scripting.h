@@ -62,10 +62,10 @@
 
 // more (pseudo) accessors for key-value coding
 - (NSString*)remoteURLString;
-- (void)setRemoteURL:(NSString*) newURL;
+- (void)setRemoteURLString:(NSString*) newURLString;
 
 - (NSString*)localURLString;
-- (void)setLocalURLString:(NSString*) newURL;
+- (void)setLocalURLString:(NSString*) newPath;
 
 - (NSString*)abstract;
 - (void)setAbstract:(NSString*) newAbstract;

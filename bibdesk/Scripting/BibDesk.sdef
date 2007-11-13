@@ -611,8 +611,8 @@ Having all three of these seems to work best for Panther. For Tiger include this
 
 		<class name="linked URL" plural="linked URLs" code="URL " inherits="item"
 			description="A URL.">
-			<cocoa class="NSString"/>
-			<type type="text"/>
+			<cocoa class="NSURL"/>
+			<type type="URL"/>
 		</class>
 
 		<class name="linked file" plural="linked files" code="File" inherits="item"
@@ -660,11 +660,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The publication's keywords.">
                 <cocoa key="keywords"/>
             </property>
-            <property name="local file" code="lURL" type="text"
+            <property name="local file" code="lURL" type="text" hidden="yes"
                 description="Location of a file containing the publication. This is a POSIX path.">
                 <cocoa key="localURLString"/>
             </property>  
-            <property name="URL" code="rURL" type="text"
+            <property name="URL" code="rURL" type="text" hidden="yes"
                 description="URL pointing to the publication.">
                 <cocoa key="remoteURLString"/>
             </property>  
