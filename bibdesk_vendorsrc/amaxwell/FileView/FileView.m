@@ -1936,7 +1936,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
     _lastMouseDownLocInView = [self convertPoint:[event locationInWindow] fromView:nil];
-    NSMenu *menu = [super menuForEvent:event];
+    NSMenu *menu = [[[[self class] defaultMenu] copyWithZone:[NSMenu menuZone]] autorelease];
     
     NSUInteger r,c,idx = NSNotFound;
     if ([self _getGridRow:&r column:&c atPoint:_lastMouseDownLocInView])
