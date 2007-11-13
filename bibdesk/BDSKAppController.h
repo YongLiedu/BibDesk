@@ -56,6 +56,7 @@
 	// auto generation format
 	NSArray *requiredFieldsForCiteKey;
 	NSArray *requiredFieldsForLocalUrl;
+    NSArray *requiredFieldsForLocalFile;
     
 	IBOutlet NSMenu *columnsMenu;
 	IBOutlet NSMenu *groupSortMenu;
@@ -76,6 +77,8 @@
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
 - (NSArray *)requiredFieldsForLocalUrl;
 - (void)setRequiredFieldsForLocalUrl:(NSArray *)newFields;
+- (NSArray *)requiredFieldsForLocalFile;
+- (void)setRequiredFieldsForLocalFile:(NSArray *)newFields;
 
 - (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner;
 

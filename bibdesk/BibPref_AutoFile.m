@@ -52,7 +52,7 @@
 @implementation BibPref_AutoFile
 
 // these should correspond to the items in the popups set in IB
-static NSString *presetFormatStrings[] = {@"%L", @"%l%n0%e", @"%a1/%Y%u0%e", @"%a1/%T5%e"};
+static NSString *presetFormatStrings[] = {@"%l%n0%e", @"%a1/%Y%u0%e", @"%a1/%T5%n0%e"};
 static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", @"%P0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%b", @"%f{}0", @"%s{}[][][]0", @"%c{}", @"%f{Cite Key}", @"%i{}0", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
 
 - (void)dealloc{
@@ -64,10 +64,10 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 
 - (void)awakeFromNib{
     [super awakeFromNib];
-	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:BDSKLocalUrlString fileType:BDSKBibtexString];
+	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:@"Local File" fileType:BDSKBibtexString];
     [formatSheetField setFormatter:formatter];
 	[formatter release];
-    coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:BDSKLocalUrlString fileType:BDSKBibtexString];
+    coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:@"Local File" fileType:BDSKBibtexString];
     [papersFolderLocationTextField setFormatter:[[[BDSKFolderPathFormatter alloc] init] autorelease]];
     [previewDisplay setStringValue:[[BDSKPreviewItem sharedItem] displayText]];
     [previewDisplay sizeToFit];
@@ -79,9 +79,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)updateUI{
-    NSString *formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
+    NSString *formatString = [defaults stringForKey:@"BDSKLocalFileFormat"];
 	NSAttributedString *attrFormat = nil;
-    int formatPresetChoice = [defaults integerForKey:BDSKLocalUrlFormatPresetKey];
+    int formatPresetChoice = [defaults integerForKey:@"BDSKLocalFileFormatPreset"];
 	BOOL custom = (formatPresetChoice == 0);
     NSString * error;
 	NSString *papersFolder = [[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath];
@@ -109,7 +109,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     [formatLowercaseCheckButton setState:[defaults boolForKey:BDSKLocalUrlLowercaseKey] ? NSOnState : NSOffState];
     [formatCleanRadio selectCellWithTag:[defaults integerForKey:BDSKLocalUrlCleanOptionKey]];
 	
-	if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
+	if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:@"Local File" inFileType:BDSKBibtexString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
 		
         [previewTextField setStringValue:[[BDSKPreviewItem sharedItem] suggestedLocalUrl]];
@@ -279,9 +279,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	
 	if (sender == formatPresetPopUp || sender == formatPresetSheetPopUp) {
 		presetChoice = [[sender selectedItem] tag];
-		if (presetChoice == [defaults integerForKey:BDSKLocalUrlFormatPresetKey]) 
+		if (presetChoice == [defaults integerForKey:@"BDSKLocalFileFormatPreset"]) 
 			return; // nothing changed
-		[defaults setInteger:presetChoice forKey:BDSKLocalUrlFormatPresetKey];
+		[defaults setInteger:presetChoice forKey:@"BDSKLocalFileFormatPreset"];
 		if (presetChoice > 0) {
 			formatString = presetFormatStrings[presetChoice - 1];
 		} else if (presetChoice == 0) {
@@ -292,15 +292,15 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 			return;
 		}
 		// this one is always valid
-		[defaults setObject:formatString forKey:BDSKLocalUrlFormatKey];
+		[defaults setObject:formatString forKey:@"BDSKLocalFileFormat"];
 	}
 	else { //changed the text field or added from the repository
 		NSString *error = nil;
 		NSAttributedString *attrFormat = nil;
 		formatString = [formatSheetField stringValue];
-		//if ([formatString isEqualToString:[defaults stringForKey:BDSKLocalUrlFormatKey]]) return; // nothing changed
-		if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
-			[defaults setObject:formatString forKey:BDSKLocalUrlFormatKey];
+		//if ([formatString isEqualToString:[defaults stringForKey:@"BDSKLocalFileFormat"]]) return; // nothing changed
+		if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:@"Local File" inFileType:BDSKBibtexString error:&error]) {
+			[defaults setObject:formatString forKey:@"BDSKLocalFileFormat"];
 		}
 		else {
 			[self setLocalUrlFormatInvalidWarning:YES message:error];
@@ -331,11 +331,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	if ([formatSheet makeFirstResponder:nil])
 		[formatSheet endEditingFor:nil];
 	
-	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) 
+	if ([BDSKFormatParser validateFormat:&formatString forField:@"Local File" inFileType:BDSKBibtexString error:&error]) 
 		return YES;
 	
-	formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
-	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:NULL]) {
+	formatString = [defaults stringForKey:@"BDSKLocalFileFormat"];
+	if ([BDSKFormatParser validateFormat:&formatString forField:@"Local File" inFileType:BDSKBibtexString error:NULL]) {
 		// The currently set local-url format is valid, so we can keep it 
 		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
 	}
@@ -351,8 +351,8 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[formatSheetField selectText:self];
 		return NO;
 	} else if (rv == NSAlertAlternateReturn){
-		formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
+		formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:@"BDSKLocalFileFormat"] defaultObjectValue];
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:@"BDSKLocalFileFormat"];
 		[[NSApp delegate] setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 	}
 	[self updateUI];

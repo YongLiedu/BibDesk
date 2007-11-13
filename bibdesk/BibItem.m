@@ -2791,7 +2791,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 
 - (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file
 {
-	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
+	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"BDSKLocalFileFormat"];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
     
 	NSString *relativeFile = [BDSKFormatParser parseFormatForLinkedFile:file ofItem:self];
@@ -2816,7 +2816,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 		if ([fieldName isEqualToString:BDSKCiteKeyString]) {
             if([self hasEmptyOrDefaultCiteKey])
 				return NO;
-		} else if ([fieldName isEqualToString:BDSKLocalUrlString]) {
+		} else if ([fieldName isEqualToString:@"Local File"]) {
 			if ([file URL] == nil)
 				return NO;
 		} else if ([fieldName isEqualToString:@"Document Filename"]) {

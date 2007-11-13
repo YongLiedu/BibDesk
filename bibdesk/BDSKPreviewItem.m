@@ -129,7 +129,7 @@
 
 - (NSString *)suggestedLocalUrl {
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSString *localUrlFormat = [pw objectForKey:BDSKLocalUrlFormatKey];
+	NSString *localUrlFormat = [pw objectForKey:@"BDSKLocalFileFormat"];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:nil];
 	NSString *relativeFile = [BDSKFormatParser parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self];
 	if ([pw boolForKey:BDSKLocalUrlLowercaseKey])

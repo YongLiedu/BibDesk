@@ -150,6 +150,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
         requiredFieldsForCiteKey = nil;
         requiredFieldsForLocalUrl = nil;
+        requiredFieldsForLocalFile = nil;
         
         metadataCacheLock = [[NSLock alloc] init];
         metadataMessageQueue = [[OFMessageQueue alloc] init];
@@ -259,7 +260,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
             [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_CiteKey"];
         }
     }
-    
+    /*
     formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
     error = nil;
     
@@ -276,6 +277,42 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
             formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];			
             [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
             [self setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+        }else{
+            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+        }
+    }
+    */
+    formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"BDSKLocalFileFormat"];
+    error = nil;
+    
+    if (formatString == nil) {
+        int formatPresetChoice = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKLocalUrlFormatPresetKey];
+        formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
+        if (formatPresetChoice != 0) {
+            if (formatPresetChoice == 1)
+                formatString = @"%l%n0%e";
+            else if (formatPresetChoice == 4)
+                formatString = @"%a1/%T5%n0%e";
+            formatPresetChoice = MAX(1, formatPresetChoice - 1);
+        }
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:@"BDSKLocalFileFormat"];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:formatPresetChoice forKey:@"BDSKLocalFileFormatPreset"];
+    }
+    
+    if ([BDSKFormatParser validateFormat:&formatString forField:@"Local File" inFileType:BDSKBibtexString error:&error]) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:@"BDSKLocalFileFormat"];
+        [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+    }else{
+        button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format"), 
+                                         @"%@",
+                                         NSLocalizedString(@"Go to Preferences", @"Button title"), 
+                                         NSLocalizedString(@"Revert to Default", @"Button title"), 
+                                         nil, [error safeFormatString], nil);
+        if (button == NSAlertAlternateReturn){
+            formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:@"BDSKLocalFileFormat"] defaultObjectValue];			
+            [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:@"BDSKLocalFileFormat"];
+            [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }else{
             [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
             [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
@@ -598,6 +635,15 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (void)setRequiredFieldsForLocalUrl:(NSArray *)newFields{
 	[requiredFieldsForLocalUrl autorelease];
 	requiredFieldsForLocalUrl = [newFields retain];
+}
+
+- (NSArray *)requiredFieldsForLocalFile{
+	return requiredFieldsForLocalFile;
+}
+
+- (void)setRequiredFieldsForLocalFile:(NSArray *)newFields{
+	[requiredFieldsForLocalFile autorelease];
+	requiredFieldsForLocalFile = [newFields retain];
 }
 
 - (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner {

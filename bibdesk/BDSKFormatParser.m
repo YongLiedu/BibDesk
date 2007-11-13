@@ -63,7 +63,7 @@
 
 + (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
 {
-	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
+	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"BDSKLocalFileFormat"];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
     
     NSString *oldPath = [[file URL] path];
@@ -72,7 +72,7 @@
     else
         oldPath = nil;
       
-    return [self parseFormat:localUrlFormat forField:BDSKLocalUrlString linkedFile:nil ofItem:pub suggestion:oldPath];
+    return [self parseFormat:localUrlFormat forField:@"Local File" linkedFile:nil ofItem:pub suggestion:oldPath];
 }
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion
@@ -99,7 +99,7 @@
 	NSScanner *wordScanner;
 	NSCharacterSet *slashCharSet = [NSCharacterSet characterSetWithCharactersInString:@"/"];
 	NSArray *localFileFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
-	BOOL isLocalFile = [localFileFields containsObject:fieldName];
+	BOOL isLocalFile = [localFileFields containsObject:fieldName] || [fieldName isEqualToString:@"Local File"];
 	
 	[scanner setCharactersToBeSkipped:nil];
 	
@@ -691,7 +691,7 @@
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
 		return [pub isValidCiteKey:proposedStr];
 	}
-	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]) {
+	else if ([fieldName isEqualToString:@"Local File"] || [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]) {
 		return [pub isValidLocalUrlPath:proposedStr];
 	}
 	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
@@ -721,7 +721,7 @@
 		
 		return newString;
 	}
-	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]) {
+	else if ([fieldName isEqualToString:@"Local File"] || [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]) {
 		
 		if ([NSString isEmptyString:string]) {
 			return @"";
@@ -772,7 +772,7 @@
 		
 		return newString;
 	}
-	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]) {
+	else if ([fieldName isEqualToString:@"Local File"] || [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]) {
 		cleanOption = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKLocalUrlCleanOptionKey];
 		
 		if (cleanOption >= 3)
@@ -950,6 +950,9 @@
 		}
 	}
 	
+    if (foundUnique == NO && [fieldName isEqualToString:@"Local File"] && errorMsg != nil)
+        errorMsg = NSLocalizedString(@"Format for local file requires a unique specifier.", @"Error description");
+    
 	if (errorMsg == nil) {
 		// change formatString
 		*formatString = [[sanitizedFormatString copy] autorelease];
@@ -1005,7 +1008,7 @@
 			case 'l':
 			case 'L':
 			case 'e':
-				[arr addObject:BDSKLocalUrlString];
+				[arr addObject:@"Local File"];
 				break;
 			case 'b':
 				[arr addObject:@"Document Filename"];
