@@ -533,23 +533,27 @@ enum{
 - (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
     
     NSURL *theURL = anIndex == NSNotFound ? nil : [[publication objectInFilesAtIndex:anIndex] URL];
-    int i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
 	NSMenu *submenu;
 	NSMenuItem *item;
+    int i;
     
     if (theURL) {
+        i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
         [menu insertItemWithTitle:[NSLocalizedString(@"Open With",@"Menu item title") stringByAppendingEllipsis]
-                andSubmenuOfApplicationsForURL:theURL atIndex:i + 1];
+                andSubmenuOfApplicationsForURL:theURL atIndex:++i];
     }
     if ([theURL isFileURL]) {
-        item = [menu addItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
+        i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
+        item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
                                   action:@selector(showNotesForLinkedFile:)
-                           keyEquivalent:@""];
+                           keyEquivalent:@""
+                                 atIndex:++i];
         [item setRepresentedObject:theURL];
         
-        item = [menu addItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
+        item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
                                   action:@selector(copyNotesForLinkedFile:)
-                           keyEquivalent:@""];
+                           keyEquivalent:@""
+                                 atIndex:++i];
         [item setRepresentedObject:theURL];
     }
 		
