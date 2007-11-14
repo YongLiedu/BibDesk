@@ -184,8 +184,6 @@ enum{
                 
         forceEndEditing = NO;
         didSetupForm = NO;
-        _files = [NSMutableArray new];
-        [_files addObjectsFromArray:[aBib valueForKey:@"allFilePaths"]];
     }
     return self;
 }
@@ -364,7 +362,6 @@ enum{
 }
 
 - (void)dealloc{
-    [_files release];
     [publication release];
 	[authorTableView setDelegate:nil];
     [authorTableView setDataSource:nil];
@@ -573,6 +570,7 @@ enum{
 
 // shouldn't this method return a menu rather than modifying one?
 - (NSMenu *)fileView:(FileView *)aFileView contextMenu:(NSMenu *)menu forIconAtIndex:(NSUInteger)anIndex {
+    
     NSURL *theURL = anIndex == NSNotFound ? nil : [[publication objectInFilesAtIndex:anIndex] URL];
     int i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
 	NSMenu *submenu;
@@ -3083,7 +3081,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)saveFileAsLocalUrl:(id)sender{
     WebDataSource *dataSource = nil; /*[[remoteSnoopWebView mainFrame] dataSource];*/
-	if (nil == dataSource || [dataSource isLoading]) 
+    if (nil == dataSource || [dataSource isLoading]) 
 		return;
 	
 	NSString *filename = [[[dataSource request] URL] lastPathComponent];

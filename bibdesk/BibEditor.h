@@ -141,7 +141,6 @@
     NSURL *promisedDragURL;
     
     IBOutlet FileView *fileView;
-    NSMutableArray *_files;
 }
 
 /*!
