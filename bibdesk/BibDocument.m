@@ -317,9 +317,6 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [webGroupViewController release];
     [searchIndexes release];
     [searchButtonController release];
-    [[[fileviewBox contentView] documentView] setDelegate:nil];
-    [fileviewBox release];
-    [fileviewSlider release];
     [super dealloc];
 }
 
@@ -2752,8 +2749,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
         currentPreviewView = view;
         [[previewer progressOverlay] overlayView:currentPreviewView];
-        if ([fileviewSlider superview])
-            [fileviewSlider removeFromSuperview];
+
     }
     [self updatePreviewer:previewer];
     
@@ -2769,8 +2765,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [view setFrame:[currentPreviewView frame]];
         [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
         currentPreviewView = view;
-        if ([fileviewSlider superview])
-            [fileviewSlider removeFromSuperview];
+
     }
     NSFont *font = [NSFontManager bodyFontForFamily:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey]];
     NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:errorMessage attributeName:NSFontAttributeName attributeValue:font];
@@ -2855,55 +2850,6 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     NSView *view = [previewTextView enclosingScrollView];
     [[previewer progressOverlay] remove];
     [previewer updateWithBibTeXString:nil];
-    [[[fileviewBox contentView] documentView] reloadIcons];
-    
-    if (nil == fileviewBox) {
-        NSScrollView *sv = [[NSScrollView alloc] initWithFrame:[view frame]];
-        [sv setHasHorizontalScroller:NO];
-        [sv setHasVerticalScroller:YES];
-        [sv setAutohidesScrollers:YES];
-        FileView *fv = [[FileView alloc] initWithFrame:[view frame]];
-        [fv setDelegate:nil];
-        [fv setDataSource:self];
-        [sv setDocumentView:fv];
-        [fv setBackgroundColor:[NSColor whiteColor]];
-        [fv release];
-        
-        [sv setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-        fileviewBox = [[BDSKEdgeView alloc] initWithFrame:[view frame]];
-        [fileviewBox setEdges:BDSKEveryEdgeMask];
-        [fileviewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
-        [fileviewBox setContentView:sv];
-        [sv release];
-        NSRect sliderFrame = [statusBar frame];
-        sliderFrame.size.height = 21;
-        sliderFrame.size.width = 100;
-        sliderFrame.origin.x = NSMaxX([statusBar frame]) - 120;
-        fileviewSlider = [[NSSlider alloc] initWithFrame:sliderFrame];
-        [[fileviewSlider cell] setControlSize:NSSmallControlSize];
-        [fileviewSlider bind:@"value" toObject:fv withKeyPath:@"iconScale" options:nil];
-        [statusBar addSubview:fileviewSlider];
-        [fileviewSlider setMinValue:0.5];
-        [fileviewSlider setMaxValue:20];
-        [fileviewSlider setAutoresizingMask:NSViewMinXMargin];
-    }
-    view = fileviewBox;
-    if (currentPreviewView != view) {
-        [view setFrame:[currentPreviewView frame]];
-        [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
-        currentPreviewView = view;
-        if ([fileviewSlider superview] == nil) {
-            NSRect sliderFrame = [statusBar frame];
-            sliderFrame.size.height = 21;
-            sliderFrame.size.width = 100;
-            sliderFrame.origin.x = NSMaxX([statusBar frame]) - 120;
-            
-            [statusBar addSubview:fileviewSlider];
-            [fileviewSlider setFloatValue:[[[fileviewBox contentView] documentView] iconScale]];
-        }
-    }
-    //[[[fileviewBox contentView] documentView] reloadIcons];
-    return;
     
     NSURL *url = [[[self selectedPublications] firstObject] localURL];
     BOOL isDir;
@@ -3016,8 +2962,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
         [view setFrame:[currentPreviewView frame]];
         [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
         currentPreviewView = view;
-        if ([fileviewSlider superview])
-            [fileviewSlider removeFromSuperview];
+
     }
     
     if(NSIsEmptyRect([previewTextView visibleRect]))

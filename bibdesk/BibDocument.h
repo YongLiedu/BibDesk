@@ -146,8 +146,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     BDSKEdgeView *previewerBox;
     BDSKZoomablePDFView *previewPdfView;
     BDSKEdgeView *previewBox;
-    BDSKEdgeView *fileviewBox;
-    NSSlider *fileviewSlider;
 	
 #pragma mark Toolbar variables
     
