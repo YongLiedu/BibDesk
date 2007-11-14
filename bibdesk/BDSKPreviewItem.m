@@ -125,9 +125,9 @@
 
 - (BOOL)isValidCiteKey:(NSString *)key { return YES; }
 
-- (BOOL)isValidLocalUrlPath:(NSString *)path { return YES; }
+- (BOOL)isValidLocalFilePath:(NSString *)path { return YES; }
 
-- (NSString *)suggestedLocalUrl {
+- (NSString *)suggestedLocalFilePath {
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *localUrlFormat = [pw objectForKey:@"BDSKLocalFileFormat"];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:nil];

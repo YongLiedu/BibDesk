@@ -52,7 +52,7 @@
 - (NSString *)documentFileName;
 - (NSString *)documentInfoForKey:(NSString *)key;
 - (BOOL)isValidCiteKey:(NSString *)key;
-- (BOOL)isValidLocalUrlPath:(NSString *)key;
+- (BOOL)isValidLocalFilePath:(NSString *)key;
 - (id<BDSKOwner>)owner;
 @end
 

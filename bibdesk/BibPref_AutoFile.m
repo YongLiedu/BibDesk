@@ -112,7 +112,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
 		
-        [previewTextField setStringValue:[[BDSKPreviewItem sharedItem] suggestedLocalUrl]];
+        [previewTextField setStringValue:[[BDSKPreviewItem sharedItem] suggestedLocalFilePath]];
 		[previewTextField sizeToFit];
 		frame = [previewTextField frame];
 		if (frame.size.width > MAX_PREVIEW_WIDTH) {

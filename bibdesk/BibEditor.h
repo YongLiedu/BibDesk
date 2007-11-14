@@ -102,15 +102,6 @@
     BibItem *publication;
     BOOL isEditable;
 // ----------------------------------------------------------------------------------------
-// URL downlaod stuff
-// ----------------------------------------------------------------------------------------
-	WebDownload *download;
-	BOOL isDownloading;
-	NSString *downloadFieldName;
-	NSString *downloadFileName;
-    int receivedContentLength;
-    int expectedContentLength;
-// ----------------------------------------------------------------------------------------
 // status bar stuff
 // ----------------------------------------------------------------------------------------
     IBOutlet BDSKStatusBar *statusBar;
@@ -158,12 +149,12 @@
 - (void)show;
 
 /*!
-    @method     chooseLocalURL:
+    @method     chooseLocalFile:
     @abstract   Action to choose a local file using the Open dialog. 
     @discussion (comprehensive description)
 */
-- (IBAction)chooseLocalURL:(id)sender;
-- (void)chooseLocalURLPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (IBAction)chooseLocalFile:(id)sender;
+- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)toggleStatusBar:(id)sender;
 
@@ -192,8 +183,6 @@
 - (void)needsToBeFiledDidChange:(NSNotification *)notification;
 
 - (void)updateCiteKeyAutoGenerateStatus;
-
-- (BOOL)autoFilePaper;
 
 - (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue;
 - (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(int)mask;
@@ -303,26 +292,6 @@
 
 - (IBAction)changeRating:(id)sender;
 - (IBAction)changeFlag:(id)sender;
-
-/*!
-    @method     saveFileAsLocalUrl:
-    @abstract   Action to save the current file in the web drawer and set the Local-Url to the saved location. 
-    @discussion (comprehensive description)
-*/
-- (void)saveFileAsLocalUrl:(id)sender;
-
-/*!
-    @method     downloadLinkedFileAsLocalUrl:
-    @abstract   Action to download a file linked in the web drawer and set the Local-Url to the saved location. 
-    @discussion (comprehensive description)
-*/
-- (void)downloadLinkedFileAsLocalUrl:(id)sender;
-
-- (void)downloadURL:(NSURL *)linkURL forField:(NSString *)fieldName;
-
-- (void)setDownloading:(BOOL)downloading;
-
-- (void)cancelDownload;
 
 /*!
     @method     generateCiteKey:

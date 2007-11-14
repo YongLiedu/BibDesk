@@ -378,8 +378,6 @@ enum{
     [formCellFormatter release];
     [crossrefFormatter release];
     [citationFormatter release];
-    [downloadFileName release];
-    [downloadFieldName release];
     [super dealloc];
 }
 
@@ -560,7 +558,7 @@ enum{
     [menu addItem:[NSMenuItem separatorItem]];
     
     [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]
-                    action:@selector(chooseLocalURL:)
+                    action:@selector(chooseLocalFile:)
              keyEquivalent:@""];
     
     // get Safari recent downloads
@@ -842,13 +840,6 @@ enum{
 		NSURL *theURL = (NSURL *)[menuItem representedObject];
 		return theURL != nil;
 	}
-    else if (theAction == @selector(saveFileAsLocalUrl:)) {
-#warning fixme
-		return (isEditable /*&& [[[remoteSnoopWebView mainFrame] dataSource] isLoading] == NO */);
-	}
-	else if (theAction == @selector(downloadLinkedFileAsLocalUrl:)) {
-		return (isEditable && isDownloading == NO);
-	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)
             return NO;
@@ -867,7 +858,7 @@ enum{
     else if (theAction == @selector(raiseAddField:) || 
              theAction == @selector(raiseDelField:) || 
              theAction == @selector(raiseChangeFieldName:) || 
-             theAction == @selector(chooseLocalURL:) || 
+             theAction == @selector(chooseLocalFile:) || 
              theAction == @selector(addLinkedFileFromMenuItem:) || 
              theAction == @selector(addRemoteURLFromMenuItem:)) {
         return isEditable;
@@ -1108,7 +1099,7 @@ enum{
 
 #pragma mark choose local-url or url support
 
-- (IBAction)chooseLocalURL:(id)sender{
+- (IBAction)chooseLocalFile:(id)sender{
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
@@ -1119,12 +1110,12 @@ enum{
                               file:nil 
                     modalForWindow:[self window] 
                      modalDelegate:self 
-                    didEndSelector:@selector(chooseLocalURLPanelDidEnd:returnCode:contextInfo:) 
+                    didEndSelector:@selector(chooseLocalFilePanelDidEnd:returnCode:contextInfo:) 
                        contextInfo:nil];
   
 }
 
-- (void)chooseLocalURLPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 
     if(returnCode == NSOKButton){
         NSURL *aURL = [[sheet URLs] objectAtIndex:0];
@@ -1809,13 +1800,6 @@ enum{
 	} else {
 		[statusBar removeIconWithIdentifier:@"NeedsToGenerateCiteKey"];
 	}
-}
-
-- (BOOL)autoFilePaper{
-	BOOL didFile = [publication autoFilePaper];
-    if(didFile)
-		[self setStatus:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
-    return didFile;
 }
 
 - (void)bibDidChange:(NSNotification *)notification{
@@ -2511,11 +2495,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if(![publication hasBeenEdited]){
         errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to keep it?", @"Informative text in alert dialog");
     // case 2: cite key hasn't been set, and paper needs to be filed
-    }else if([publication hasEmptyOrDefaultCiteKey] && [publication needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([publication hasEmptyOrDefaultCiteKey] && [[publication filesToBeFiled] count] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 3: only the paper needs to be filed
-    }else if([publication needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([[publication filesToBeFiled] count] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 4: only the cite key needs to be set
@@ -2541,9 +2525,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    // cancel download for local file
-    [self cancelDownload];
-    
     // @@ this finalizeChanges seems redundant now that it's in windowShouldClose:
 	[self finalizeChangesPreservingSelection:NO];
     
@@ -2560,258 +2541,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     // @@ problem here:  BibEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
     [[self retain] autorelease];
-}
-
-#warning what about this?
-// could the quick look have a delegate method that picks this up?
-- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
-	NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:8];
-	NSMenuItem *item;
-	
-	NSEnumerator *iEnum = [defaultMenuItems objectEnumerator];
-	while (item = [iEnum nextObject]) { 
-		if ([item tag] == WebMenuItemTagCopy ||
-			[item tag] == WebMenuItemTagCopyImageToClipboard) {
-			
-			[menuItems addObject:item];
-		} else if ([item tag] == WebMenuItemTagCopyLinkToClipboard) {
-			NSURL *linkURL = [element objectForKey:WebElementLinkURLKey];
-			
-            [menuItems addObject:item];
-        
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Link As Local File",@"Save link as local file") stringByAppendingEllipsis]
-                                            action:@selector(downloadLinkedFileAsLocalUrl:)
-                                     keyEquivalent:@""];
-			[item setTarget:self];
-			[item setRepresentedObject:linkURL];
-			[menuItems addObject:[item autorelease]];
-        }
-	}
-	if ([menuItems count] > 0) 
-		[menuItems addObject:[NSMenuItem separatorItem]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Back", @"Menu item title")
-									  action:@selector(goBack:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Forward", @"Menu item title")
-									  action:@selector(goForward:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reload", @"Menu item title")
-									  action:@selector(reload:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Stop", @"Menu item title")
-									  action:@selector(stopLoading:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Increase Text Size", @"Menu item title")
-									  action:@selector(makeTextLarger:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size", @"Menu item title")
-									  action:@selector(makeTextSmaller:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	[menuItems addObject:[NSMenuItem separatorItem]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Save as Local File", @"Menu item title")
-									  action:@selector(saveFileAsLocalUrl:)
-							   keyEquivalent:@""];
-	[item setTarget:self];
-	[menuItems addObject:[item autorelease]];
-	
-	return menuItems;
-}
-
-- (void)savePanelDidEnd:(NSSavePanel *)savePanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-#warning fixme
-        WebDataSource *dataSource = nil; /*[[remoteSnoopWebView mainFrame] dataSource];*/
-        if (nil == dataSource || [dataSource isLoading]) 
-            return;
-		
-        if ([[dataSource data] writeToFile:[savePanel filename] atomically:YES]) {
-			NSString *fileURLString = [[savePanel URL] absoluteString];
-            NSString *oldValue = [[[publication valueOfField:BDSKLocalUrlString inherit:NO] retain] autorelease];
-			
-			[publication setField:BDSKLocalUrlString toValue:fileURLString];
-			[self autoFilePaper];
-			
-            [self userChangedField:BDSKLocalUrlString from:oldValue to:fileURLString didAutoGenerate:0];
-			[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-		} else {
-			NSLog(@"Could not write file from web.");
-		}
-    }
-}
-
-- (void)saveFileAsLocalUrl:(id)sender{
-    WebDataSource *dataSource = nil; /*[[remoteSnoopWebView mainFrame] dataSource];*/
-    if (nil == dataSource || [dataSource isLoading]) 
-		return;
-	
-	NSString *filename = [[[dataSource request] URL] lastPathComponent];
-	NSString *extension = [filename pathExtension];
-   
-	NSSavePanel *sPanel = [NSSavePanel savePanel];
-    if (NO != [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
-	
-    [sPanel beginSheetForDirectory:nil
-                              file:filename
-                    modalForWindow:[self window]
-                     modalDelegate:self
-                    didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
-                       contextInfo:nil];
-}
-
-- (void)downloadLinkedFileAsLocalUrl:(id)sender{
-	NSURL *linkURL = (NSURL *)[sender representedObject];
-    [self downloadURL:linkURL forField:BDSKLocalUrlString];
-}
-
-#pragma mark URL downloading
-
-- (void)downloadURL:(NSURL *)linkURL forField:(NSString *)fieldName{
-    if (isDownloading)
-        return;
-	[downloadFieldName release];
-    downloadFieldName = [fieldName copy];
-    if (linkURL) {
-		download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self];
-	}
-	if (nil == download) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid or Unsupported URL", @"Message in alert dialog when unable to download file for Local-Url")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog")];
-        [alert beginSheetModalForWindow:[self window]
-                          modalDelegate:nil
-                         didEndSelector:NULL
-                            contextInfo:NULL];
-	}
-}
-
-- (void)setDownloading:(BOOL)downloading{
-    if (isDownloading != downloading) {
-        isDownloading = downloading;
-        if (isDownloading) {
-			NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Status message"), 0] stringByAppendingEllipsis];
-            [statusBar startAnimation:self];
-			[self setStatus:message];
-            [downloadFileName release];
-			downloadFileName = nil;
-        } else {
-            [statusBar stopAnimation:self];
-			[self setStatus:@""];
-            [download release];
-            download = nil;
-            receivedContentLength = 0;
-        }
-    }
-}
-
-- (void)cancelDownload{
-	[download cancel];
-	[self setDownloading:NO];
-}
-
-- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        [download setDestination:[sheet filename] allowOverwrite:YES];
-    } else {
-        [self cancelDownload];
-    }
-}
-
-#pragma mark NSURLDownloadDelegate methods
-
-- (void)downloadDidBegin:(NSURLDownload *)download{
-    [self setDownloading:YES];
-}
-
-- (NSWindow *)downloadWindowForAuthenticationSheet:(WebDownload *)download{
-    return [self window];
-}
-
-- (void)download:(NSURLDownload *)theDownload didReceiveResponse:(NSURLResponse *)response{
-    expectedContentLength = [response expectedContentLength];
-}
-
-- (void)download:(NSURLDownload *)theDownload decideDestinationWithSuggestedFilename:(NSString *)filename{
-	NSString *extension = [filename pathExtension];
-   
-	NSSavePanel *sPanel = [NSSavePanel savePanel];
-    if (NO == [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
-	
-    [sPanel beginSheetForDirectory:nil
-                              file:filename
-                    modalForWindow:[self window]
-                     modalDelegate:self
-                    didEndSelector:@selector(saveDownloadPanelDidEnd:returnCode:contextInfo:)
-                       contextInfo:nil];
-}
-
-- (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned)length{
-    if (expectedContentLength > 0) {
-        receivedContentLength += length;
-        int percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
-		NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Tool tip message"), percent] stringByAppendingEllipsis];
-		[self setStatus:message];
-    }
-}
-
-- (BOOL)download:(NSURLDownload *)download shouldDecodeSourceDataOfMIMEType:(NSString *)encodingType;{
-    return YES;
-}
-
-- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path{
-    [downloadFileName release];
-	downloadFileName = [path copy];
-}
-
-- (void)downloadDidFinish:(NSURLDownload *)theDownload{
-    [self setDownloading:NO];
-	
-	NSString *fileURLString = [[NSURL fileURLWithPath:downloadFileName] absoluteString];
-    NSString *oldValue = [[[publication valueOfField:downloadFieldName inherit:NO] retain] autorelease];
-    
-    [publication setField:downloadFieldName toValue:fileURLString];
-    if ([downloadFieldName isEqualToString:BDSKLocalUrlString])
-        [self autoFilePaper];
-    
-    [self userChangedField:downloadFieldName from:oldValue to:fileURLString didAutoGenerate:0];
-	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-}
-
-- (void)download:(NSURLDownload *)theDownload didFailWithError:(NSError *)error
-{
-    [self setDownloading:NO];
-        
-    NSString *errorDescription = [error localizedDescription];
-    if (nil == errorDescription) {
-        errorDescription = NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
-    }
-    
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:errorDescription];
-    [alert beginSheetModalForWindow:[self window]
-                      modalDelegate:nil
-                     didEndSelector:NULL
-                        contextInfo:NULL];
 }
 
 #pragma mark undo manager

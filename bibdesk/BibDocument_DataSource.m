@@ -71,6 +71,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKSearchGroup.h"
+#import "BDSKLinkedFile.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -846,15 +847,15 @@
                 theURL = [NSURL URLFromPasteboard:pboard];
             }else return NO;
             
-            NSString *field = ([theURL isFileURL]) ? BDSKLocalUrlString : BDSKUrlString;
-            
-            if(theURL == nil || [theURL isEqual:[pub URLForField:field]])
+            if(theURL == nil)
                 return NO;
             
-            [pub setField:field toValue:[theURL absoluteString]];
+            BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:theURL] autorelease];
+            if (file)
+                [pub insertObject:file inFilesAtIndex:0];
             
-            if([field isEqualToString:BDSKLocalUrlString])
-                [pub autoFilePaper];
+            if([file isFile])
+                [pub autoFileLinkedFile:file];
             
             [self selectPublication:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];

@@ -691,7 +691,7 @@
 		return [pub isValidCiteKey:proposedStr];
 	}
 	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
-		return [pub isValidLocalUrlPath:proposedStr];
+		return [pub isValidLocalFilePath:proposedStr];
 	}
 	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
 		if ([NSString isEmptyString:proposedStr])

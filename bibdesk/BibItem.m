@@ -284,8 +284,6 @@ static CFDictionaryRef selectorTable = NULL;
         [self setDate: nil];
         [self setDateAdded: nil];
         [self setDateModified: nil];
-        
-		[self setNeedsToBeFiled:NO];
 		
 		groups = [[NSMutableDictionary alloc] initWithCapacity:5];
         cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
@@ -1439,8 +1437,19 @@ static CFDictionaryRef selectorTable = NULL;
 - (float)searchScore { return searchScore; }
 
 - (NSString *)skimNotesForLocalURL{
-    NSURL *theURL = [self URLForField:BDSKLocalUrlString];
-    return theURL ? [[BDSKSkimReader sharedReader] textNotesAtURL:theURL] : nil;
+    NSMutableString *string = [NSMutableString string];
+    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    
+    while (file = [fileEnum nextObject]) {
+        NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:[file URL]];
+        if ([notes length] == 0)
+            continue;
+        if ([string length])
+            [string appendString:@"\n\n"];
+        [string appendString:notes];
+    }
+    return [string length] ? string : nil;
 }
 
 static inline 
@@ -2693,100 +2702,15 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     return returnURL;
 }
 
-- (BOOL)isValidLocalUrlPath:(NSString *)proposedPath{
+#pragma mark AutoFile support
+
+- (BOOL)isValidLocalFilePath:(NSString *)proposedPath{
     if ([NSString isEmptyString:proposedPath])
         return NO;
     NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
     if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
         proposedPath = [proposedPath lowercaseString];
     return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedPath]] == NO);
-}
-
-- (NSString *)suggestedLocalUrl{
-	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
-	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
-    
-    NSString *oldPath = [self localUrlPathInheriting:NO];
-    if ([oldPath hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
-        oldPath = [oldPath substringFromIndex:[papersFolderPath length] + 1];
-    else
-        oldPath = nil;
-      
-	NSString *relativeFile = [BDSKFormatParser parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self suggestion:oldPath];
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey]) {
-		relativeFile = [relativeFile lowercaseString];
-	}
-	NSURL *url = [NSURL fileURLWithPath:[papersFolderPath stringByAppendingPathComponent:relativeFile]];
-	
-	return [url absoluteString];
-}
-
-- (BOOL)canSetLocalUrl
-{
-    NSArray *requiredFields = [[NSApp delegate] requiredFieldsForLocalUrl];
-	
-	if (nil == requiredFields || 
-        ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
-		[NSString isEmptyString:[[[owner fileURL] path] stringByDeletingLastPathComponent]]))
-		return NO;
-	
-	NSEnumerator *fEnum = [requiredFields objectEnumerator];
-	NSString *fieldName;
-	
-	while (fieldName = [fEnum nextObject]) {
-		if ([fieldName isEqualToString:BDSKCiteKeyString]) {
-            if([self hasEmptyOrDefaultCiteKey])
-				return NO;
-		} else if ([fieldName isEqualToString:@"Document Filename"]) {
-			if ([NSString isEmptyString:[[owner fileURL] path]])
-				return NO;
-		} else if ([fieldName hasPrefix:@"Document: "]) {
-			if ([NSString isEmptyString:[owner documentInfoForKey:[fieldName substringFromIndex:10]]])
-				return NO;
-		} else if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
-			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
-				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
-				return NO;
-		} else {
-			if ([NSString isEmptyString:[self valueOfField:fieldName]]) 
-				return NO;
-		}
-	}
-	return YES;
-}
-
-- (BOOL)needsToBeFiled { 
-	return needsToBeFiled; 
-}
-
-- (void)setNeedsToBeFiled:(BOOL)flag {
-	needsToBeFiled = flag;
-	
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKNeedsToBeFiledChangedNotification object:self];
-}
-
-- (BOOL)autoFilePaper
-{
-    // @@ AutoFile: deprecated
-    return NO;
-    // we can't autofile if it's disabled or there is nothing to file
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [self localUrlPath] == nil)
-		return NO;
-	
-	if ([self canSetLocalUrl]) {
-        OBASSERT([owner isDocument]);
-        if ([owner isDocument]) {
-            [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
-                                  fromDocument:(BibDocument *)owner
-                                         check:NO]; 
-            return YES;
-		} else {
-            [self setNeedsToBeFiled:YES];
-        }
-	} else {
-		[self setNeedsToBeFiled:YES];
-	}
-	return NO;
 }
 
 - (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file
@@ -3370,7 +3294,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     }
 	
 	if([BDSKLocalUrlString isEqualToString:key]){
-		[self setNeedsToBeFiled:NO];
         // If the Finder comment from this file has a useful URL and our BibItem has an empty remote URL field, use the Finder comment as remote URL.  Do this before autofiling the paper, since we know the path to the file now (hidden user default).
         if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldUseSpotlightCommentForURL"]){
             NSString *possibleURLString = [[NSFileManager defaultManager] commentForURL:[self localURL]];

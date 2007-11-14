@@ -52,6 +52,7 @@
 #import "NSBezierPath_CoreImageExtensions.h"
 #import "CIImage_BDSKExtensions.h"
 #import "BDSKLevelIndicatorCell.h"
+#import "BDSKLinkedFile.h"
 
 #define MAX_SEARCHKIT_RESULTS 10
 static float LEAF_ROW_HEIGHT = 20.0;
@@ -284,21 +285,10 @@ static float GROUP_ROW_HEIGHT = 24.0;
         return NO;
     
     BibItem *pub = [item valueForKey:@"pub"];
-    if ([pub localURL]) {
-        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
-        [alert setMessageText:NSLocalizedString(@"Publication already has a file", @"")];
-        [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"")];
-        [alert addButtonWithTitle:NSLocalizedString(@"Overwrite", @"")];
-        [alert setInformativeText:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"The publication's file is", @""), [[[pub localURL] path] stringByAbbreviatingWithTildeInPath]]];
-        int rv = [alert runModal];
-        if (NSAlertSecondButtonReturn == rv) {
-            [pub setField:BDSKLocalUrlString toValue:[fileURL absoluteString]];
-            [pub autoFilePaper];
-            [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-        }
-    } else {
-        [pub setField:BDSKLocalUrlString toValue:[fileURL absoluteString]];
-        [pub autoFilePaper];
+    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:fileURL delegate:pub] autorelease];
+    if (file) {
+        [pub insertObject:file inFilesAtIndex:0];
+        [pub autoFileLinkedFile:file];
         [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }
     return YES;

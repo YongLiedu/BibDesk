@@ -70,7 +70,6 @@ enum {
 	NSMutableDictionary *groups;
     NSNumber * fileOrder;
     BOOL hasBeenEdited;
-	BOOL needsToBeFiled;
     NSMutableSet *filesToBeFiled;
 	id<BDSKOwner> owner;
     BDSKFieldCollection *templateFields;
@@ -850,43 +849,7 @@ enum {
 - (NSURL *)localFileURLForField:(NSString *)field;
 - (NSURL *)localFileURLForField:(NSString *)field inherit:(BOOL)inherit;
 
-/*!
-    @method suggestedLocalUrl
-    @abstract Returns a suggested local-url based on the receiver
-    @discussion Returns a suggested local-url based on the local-url format and the receivers publication  data. 
-    @result The suggested full path for the local file
-*/
-- (NSString *)suggestedLocalUrl;
-
-- (BOOL)isValidLocalUrlPath:(NSString *)proposedPath;
-
-/*!
-    @method canSetLocalUrl
-    @abstract Returns a boolean indicating whether all fields required for the generated local-url are set
-    @discussion - 
-*/
-- (BOOL)canSetLocalUrl;
-
-/*!
-    @method needsToBeFiled
-    @abstract Returns a boolean indicating whether the linked file should be automatically filed 
-    @discussion - 
-*/
-- (BOOL)needsToBeFiled;
-
-/*!
-    @method setNeedsToBeFiled:
-    @abstract Sets a boolean indicating whether the linked file should be automatically filed
-    @discussion - 
-*/
-- (void)setNeedsToBeFiled:(BOOL)flag;
-
-/*!
-    @method autoFilePaper
-    @abstract Automatically file a paper when all necessary fields are set, otherwise flags to be filed. Does nothing when the preference is set to not file automatically.  
-    @discussion - 
-*/
-- (BOOL)autoFilePaper;
+- (BOOL)isValidLocalFilePath:(NSString *)proposedPath;
 
 - (NSString *)documentFileName;
 - (NSString *)documentInfoForKey:(NSString *)key;

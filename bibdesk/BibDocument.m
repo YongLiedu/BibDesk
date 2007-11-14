@@ -119,6 +119,7 @@
 #import "BDSKItemSearchIndexes.h"
 #import "PDFDocument_BDSKExtensions.h"
 #import <FileView/FileView.h>
+#import "BDSKLinkedFile.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -1840,6 +1841,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark New publications from pasteboard
 
 - (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect{
+    NSEnumerator *pubEnum;
+    BibItem *pub;
+    
     if (shouldSelect)
         [self selectLibraryGroup:nil];    
 	[self addPublications:newPubs];
@@ -1847,13 +1851,15 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self selectPublications:newPubs];
 	if (pubsToAutoFile != nil){
         // tried checking [pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]] before using delay, but pb is a CFPasteboardUnique
-        [pubsToAutoFile makeObjectsPerformSelector:@selector(autoFilePaper)];
+        pubEnum = [pubsToAutoFile objectEnumerator];
+        while (pub = [pubEnum nextObject])
+            [pub performSelector:@selector(autoFileLinkedFile:) withObjectsFromArray:[pub localFiles]];
     }
     
     BOOL autoGenerate = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey];
     NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[newPubs count]];
-    NSEnumerator *pubEnum = [newPubs objectEnumerator];
-    BibItem *pub;
+    
+    pubEnum = [newPubs objectEnumerator];
     
     while (pub = [pubEnum nextObject]) {
         if ((autoGenerate == NO && [pub hasEmptyOrDefaultCiteKey]) ||
@@ -2156,7 +2162,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             if(newBI == nil)
                 newBI = [[[BibItem alloc] init] autorelease];
             
-            [newBI setField:BDSKLocalUrlString toValue:[url absoluteString]];
+            BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:url delegate:newBI] autorelease];
+            if (file)
+                [newBI insertObject:file inFilesAtIndex:0];
 			[newPubs addObject:newBI];
 		}
 	}
@@ -2172,7 +2180,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
 	BibItem *newBI = [[[BibItem alloc] init] autorelease];
     
-    [newBI setField:BDSKUrlString toValue:[url absoluteString]];
+    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:url delegate:newBI] autorelease];
+    if (file)
+        [newBI insertObject:file inFilesAtIndex:0];
     
 	return [NSArray arrayWithObject:newBI];
 }

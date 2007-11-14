@@ -45,7 +45,7 @@
 
 + (BDSKPreviewItem *)sharedItem;
 
-- (NSString *)suggestedLocalUrl;
+- (NSString *)suggestedLocalFilePath;
 - (NSString *)suggestedCiteKey;
 
 - (NSString *)displayText;
