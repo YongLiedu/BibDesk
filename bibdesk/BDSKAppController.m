@@ -328,6 +328,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     [self copyAllExportTemplatesToApplicationSupportAndOverwrite:NO];        
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"template.txt" overwrite:NO];   
+    [fileManager copyFileFromSharedSupportToApplicationSupport:@"Bookmarks.plist" overwrite:NO];   
     
     [self doSpotlightImportIfNeeded];
 }

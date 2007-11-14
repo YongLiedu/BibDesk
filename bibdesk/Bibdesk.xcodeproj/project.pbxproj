@@ -291,6 +291,8 @@
 		CEEFE2B30B03FAF500668BB0 /* BDSKScriptGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFE2B20B03FAF500668BB0 /* BDSKScriptGroupSheet.nib */; };
 		CEEFE2B70B03FB0100668BB0 /* BDSKURLGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFE2B60B03FB0100668BB0 /* BDSKURLGroupSheet.nib */; };
 		CEEFE6C20B0403E700668BB0 /* BDSKGroupsArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */; };
+		CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
+		CEF181BD0CEB711700716E85 /* Bookmarks.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF71ADB0B91BBCB003A2771 /* BDSKNotesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF71AD90B91BBCB003A2771 /* BDSKNotesWindowController.m */; };
 		CEF71B080B91BFFF003A2771 /* NotesWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF71B060B91BFFF003A2771 /* NotesWindow.nib */; };
 		CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7295509CC88AB00802D48 /* BDSKFieldSheetController.m */; };
@@ -828,6 +830,7 @@
 				CEE23BDD0BFBA781002B746B /* Templates in CopyFiles */,
 				CEE23BE40BFBA78F002B746B /* previewtemplate.tex in CopyFiles */,
 				CEE23BE50BFBA78F002B746B /* template.txt in CopyFiles */,
+				CEF181BD0CEB711700716E85 /* Bookmarks.plist in CopyFiles */,
 				CEE23BEF0BFBA827002B746B /* direct.cfg in CopyFiles */,
 				CEE23BF00BFBA827002B746B /* english.cfg in CopyFiles */,
 				CEE23BF10BFBA827002B746B /* fonts.cfg in CopyFiles */,
@@ -1198,6 +1201,7 @@
 		CEEFDE6B0B03EED300668BB0 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKScriptGroupSheet.nib; sourceTree = "<group>"; };
 		CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupsArray.m; sourceTree = "<group>"; };
 		CEEFE6C10B0403E700668BB0 /* BDSKGroupsArray.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGroupsArray.h; sourceTree = "<group>"; };
+		CEF1817E0CEB701F00716E85 /* Bookmarks.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Bookmarks.plist; sourceTree = "<group>"; };
 		CEF71AD80B91BBCB003A2771 /* BDSKNotesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKNotesWindowController.h; sourceTree = "<group>"; };
 		CEF71AD90B91BBCB003A2771 /* BDSKNotesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKNotesWindowController.m; sourceTree = "<group>"; };
 		CEF71B070B91BFFF003A2771 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/NotesWindow.nib; sourceTree = "<group>"; };
@@ -2259,6 +2263,7 @@
 				CE97A3B90A28F19A00CF2DF3 /* Templates */,
 				F91B5CC7076579830011ED22 /* previewtemplate.tex */,
 				F91B5CE407657A200011ED22 /* template.txt */,
+				CEF1817E0CEB701F00716E85 /* Bookmarks.plist */,
 				F9022D410758073E00C3F701 /* cfg */,
 			);
 			name = "Shared Support";
@@ -3288,6 +3293,7 @@
 				CE2A198F0CE499AD00A0499B /* SmallMenu.tiff in Resources */,
 				CE2A1B6A0CE4D13600A0499B /* NewBookmark.tiff in Resources */,
 				CE2A1B6B0CE4D13700A0499B /* SmallBookmark.tiff in Resources */,
+				CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
