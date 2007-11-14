@@ -56,7 +56,7 @@ Category on BDSKAppController making the papers folder readable for scripting
 	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteKeyFormatKey];
 }
 
-- (NSString *)localUrlFormat {
+- (NSString *)localFileFormat {
 	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKLocalFileFormatKey];
 }
 

@@ -511,8 +511,8 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				<cocoa key="citeKeyFormat"/>
 			</property>
 			<property name="local file format" code="LFmt" type="text" access="r"
-				description="Format for the Local-Url field as specified in the Auto File preference.">
-				<cocoa key="localUrlFormat"/>
+				description="Format for local file as specified in the Auto File preference.">
+				<cocoa key="localFileFormat"/>
 			</property>
 			<property name="all typenames" code="atyp" access="r"
 				description="All the known BibTeX publication types.">
