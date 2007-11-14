@@ -594,7 +594,7 @@
 }
 
 - (BOOL)validateOpenBookmarkMenuItem:(NSMenuItem *)menuItem {
-    return [self hasWebGroupSelected];
+    return YES;
 }
 
 - (BOOL)validateAddBookmarkMenuItem:(NSMenuItem *)menuItem {

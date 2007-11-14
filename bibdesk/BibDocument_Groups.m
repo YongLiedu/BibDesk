@@ -52,6 +52,7 @@
 #import "BDSKSmartGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKCategoryGroup.h"
+#import "BDSKWebGroup.h"
 #import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKCountedSet.h"
@@ -1323,10 +1324,8 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)openBookmark:(id)sender{
-    if ([self hasWebGroupSelected]) {
+    if ([self hasWebGroupSelected] || [self selectGroup:[groups webGroup]])
         [webGroupViewController loadURL:[sender representedObject]];
-    } else
-        NSBeep();
 }
 
 - (IBAction)addBookmark:(id)sender {
