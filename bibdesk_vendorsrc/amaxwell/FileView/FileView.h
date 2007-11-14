@@ -49,6 +49,14 @@
 #define NSAppKitVersionNumber10_4 824
 #endif
 
+enum {
+    FVZoomInMenuItemTag = 1001,
+    FVZoomOutMenuItemTag = 1002,
+    FVQuickLookMenuItemTag = 1003,
+    FVOpenMenuItemTag = 1004,
+    FVRevalMenuItemTag = 1005    
+};
+
 @interface FileView : NSView 
 {
 @private

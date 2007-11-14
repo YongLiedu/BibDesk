@@ -1972,21 +1972,26 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         sharedMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""];
         
         anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Reveal in Finder", @"") action:@selector(revealInFinder:) keyEquivalent:@""];
+        [anItem setTag:FVRevalMenuItemTag];
         [sharedMenu insertItem:anItem atIndex:0];
         [anItem release];
         anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Open File", @"") action:@selector(openURL:) keyEquivalent:@""];
+        [anItem setTag:FVOpenMenuItemTag];
         [sharedMenu insertItem:anItem atIndex:0];
         [anItem release];
         anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Quick Look", @"") action:@selector(previewAction:) keyEquivalent:@""];
+        [anItem setTag:FVQuickLookMenuItemTag];
         [sharedMenu insertItem:anItem atIndex:0];
         [anItem release];
         
         [sharedMenu insertItem:[NSMenuItem separatorItem] atIndex:0];
         
         anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Zoom Out", @"") action:@selector(zoomOut:) keyEquivalent:@""];
+        [anItem setTag:FVZoomOutMenuItemTag];
         [sharedMenu insertItem:anItem atIndex:0];
         [anItem release];
         anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Zoom In", @"") action:@selector(zoomIn:) keyEquivalent:@""];
+        [anItem setTag:FVZoomInMenuItemTag];
         [sharedMenu insertItem:anItem atIndex:0];
         [anItem release];
     }

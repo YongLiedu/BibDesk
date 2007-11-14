@@ -574,16 +574,13 @@ enum{
 // shouldn't this method return a menu rather than modifying one?
 - (NSMenu *)fileView:(FileView *)aFileView contextMenu:(NSMenu *)menu forIconAtIndex:(NSUInteger)anIndex {
     NSURL *theURL = anIndex == NSNotFound ? nil : [[publication objectInFilesAtIndex:anIndex] URL];
-    int i = [menu numberOfItems];
+    int i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
 	NSMenu *submenu;
 	NSMenuItem *item;
     
-// Need a better way to find the insertion locations
-// Or better, include this in FileView
-    
     if (theURL) {
         [menu insertItemWithTitle:[NSLocalizedString(@"Open With",@"Menu item title") stringByAppendingEllipsis]
-                andSubmenuOfApplicationsForURL:theURL atIndex:i - 1];
+                andSubmenuOfApplicationsForURL:theURL atIndex:i + 1];
     }
     if ([theURL isFileURL]) {
         item = [menu addItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
