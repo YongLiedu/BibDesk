@@ -212,7 +212,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 }
 
 - (void)checkFormatStrings {
-    OFPreferenceWrapper *pw = pw;
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     NSString *formatString = [pw objectForKey:BDSKCiteKeyFormatKey];
     NSString *error = nil;
     int button = 0;
