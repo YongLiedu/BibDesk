@@ -1334,7 +1334,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
         if ([_selectedIndexes containsIndex:i] == NO) {
             
             // deselect all if command key was not pressed, or i == NSNotFound
-            if ((flags & NSCommandKeyMask) == 0 || NSNotFound == i) {
+            if ((flags & (NSCommandKeyMask | NSShiftKeyMask)) == 0 || NSNotFound == i) {
                 [self setSelectionIndexes:[NSIndexSet indexSet]];
             }
             
