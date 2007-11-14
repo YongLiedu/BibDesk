@@ -127,7 +127,7 @@
 @interface NSObject (FileViewDelegateContextMenu)
 
 // anIndex will be NSNotFound if there is not a URL at this location
-- (void)fileView:(FileView *)aFileView willDisplayContextMenu:(NSMenu *)aMenu forIconAtIndex:(NSUInteger)anIndex;
+- (NSMenu *)fileView:(FileView *)aFileView contextMenu:(NSMenu *)aMenu forIconAtIndex:(NSUInteger)anIndex;
 
 @end
 

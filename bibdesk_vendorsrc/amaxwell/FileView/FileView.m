@@ -1930,7 +1930,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     else if (action == @selector(paste:))
         return [self isEditable];
     // need to handle print: and other actions
-    return ([self respondsToSelector:action]);
+    return (action && [self respondsToSelector:action]);
 }
 
 - (NSMenu *)menuForEvent:(NSEvent *)event
@@ -1938,12 +1938,28 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     _lastMouseDownLocInView = [self convertPoint:[event locationInWindow] fromView:nil];
     NSMenu *menu = [[[[self class] defaultMenu] copyWithZone:[NSMenu menuZone]] autorelease];
     
-    NSUInteger r,c,idx = NSNotFound;
+    NSUInteger i,r,c,idx = NSNotFound;
     if ([self _getGridRow:&r column:&c atPoint:_lastMouseDownLocInView])
         idx = [self _indexForGridRow:r column:c];
     
-    if ([[self delegate] respondsToSelector:@selector(fileView:willDisplayContextMenu:forIconAtIndex:)])
-        [[self delegate] fileView:self willDisplayContextMenu:menu forIconAtIndex:idx];
+    i = [menu numberOfItems];
+    BOOL wasSeparator = YES;
+    while (i--) {
+        if ([[menu itemAtIndex:i] isSeparatorItem]) {
+            if (wasSeparator)
+                [menu removeItemAtIndex:i];
+        } else if ([self validateMenuItem:[menu itemAtIndex:i]]) {
+            wasSeparator = NO;
+        } else {
+            [menu removeItemAtIndex:i];
+        }
+    }
+    if ([[menu itemAtIndex:0] isSeparatorItem])
+        [menu removeItemAtIndex:0];
+        
+    
+    if ([[self delegate] respondsToSelector:@selector(fileView:contextMenu:forIconAtIndex:)])
+        menu = [[self delegate] fileView:self contextMenu:menu forIconAtIndex:idx];
     return menu;
 }
 
@@ -1951,16 +1967,9 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 {
     static NSMenu *sharedMenu = nil;
     if (nil == sharedMenu) {
-        sharedMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""];
         NSMenuItem *anItem;
-        anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Zoom Out", @"") action:@selector(zoomOut:) keyEquivalent:@""];
-        [sharedMenu insertItem:anItem atIndex:0];
-        [anItem release];
-        anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Zoom In", @"") action:@selector(zoomIn:) keyEquivalent:@""];
-        [sharedMenu insertItem:anItem atIndex:0];
-        [anItem release];
         
-        [sharedMenu insertItem:[NSMenuItem separatorItem] atIndex:0];
+        sharedMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""];
         
         anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Reveal in Finder", @"") action:@selector(revealInFinder:) keyEquivalent:@""];
         [sharedMenu insertItem:anItem atIndex:0];
@@ -1969,6 +1978,15 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [sharedMenu insertItem:anItem atIndex:0];
         [anItem release];
         anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Quick Look", @"") action:@selector(previewAction:) keyEquivalent:@""];
+        [sharedMenu insertItem:anItem atIndex:0];
+        [anItem release];
+        
+        [sharedMenu insertItem:[NSMenuItem separatorItem] atIndex:0];
+        
+        anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Zoom Out", @"") action:@selector(zoomOut:) keyEquivalent:@""];
+        [sharedMenu insertItem:anItem atIndex:0];
+        [anItem release];
+        anItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Zoom In", @"") action:@selector(zoomIn:) keyEquivalent:@""];
         [sharedMenu insertItem:anItem atIndex:0];
         [anItem release];
     }

@@ -442,23 +442,18 @@ enum{
 }
 
 - (IBAction)revealLinkedFile:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
+	NSURL *fileURL = [sender representedObject];
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-	NSString *path = [publication localFilePathForField:field];
-	[sw selectFile:path inFileViewerRootedAtPath:nil];
+	[sw selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
 }
 
 - (IBAction)openLinkedFile:(id)sender{
+	NSURL *fileURL = [sender representedObject];
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
 	
     BOOL err = NO;
 
-    if(![sw openLinkedFile:[publication localFilePathForField:field]]){
+    if(![sw openLinkedFile:[fileURL path]]){
             err = YES;
     }
     if(err)
@@ -511,22 +506,8 @@ enum{
 }
 
 - (IBAction)openRemoteURL:(id)sender{
-	NSString *field = [sender representedObject];
-	if (field == nil)
-		field = BDSKUrlString;
+	NSURL *url = [sender representedObject];
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-    NSURL *url = [publication remoteURLForField:field];
-    if(url == nil){
-        NSString *rurl = [publication valueOfField:field];
-        
-        if([NSString isEmptyString:rurl])
-            return;
-    
-        if([rurl rangeOfString:@"://"].location == NSNotFound)
-            rurl = [@"http://" stringByAppendingString:rurl];
-
-        url = [NSURL URLWithString:rurl];
-    }
     
     if(url != nil)
         [sw openURL:url];
@@ -539,10 +520,7 @@ enum{
 }
 
 - (IBAction)showNotesForLinkedFile:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-	NSURL *fileURL = [publication localFileURLForField:field];
+	NSURL *fileURL = [sender representedObject];
     
     if (fileURL == nil) {
         NSBeep();
@@ -556,10 +534,7 @@ enum{
 }
 
 - (IBAction)copyNotesForLinkedFile:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-	NSURL *fileURL = [publication localFileURLForField:field];
+	NSURL *fileURL = [sender representedObject];
     
     if (fileURL == nil) {
         NSBeep();
@@ -596,7 +571,64 @@ enum{
     return NO;
 }
 
-- (void)fileView:(FileView *)aFileView willDisplayContextMenu:(NSMenu *)menu forIconAtIndex:(NSUInteger)anIndex {
+// shouldn't this method return a menu rather than modifying one?
+- (NSMenu *)fileView:(FileView *)aFileView contextMenu:(NSMenu *)menu forIconAtIndex:(NSUInteger)anIndex {
+    NSURL *theURL = anIndex == NSNotFound ? nil : [[publication objectInFilesAtIndex:anIndex] URL];
+    int i = [menu numberOfItems];
+	NSMenu *submenu;
+	NSMenuItem *item;
+    
+// Need a better way to find the insertion locations
+// Or better, include this in FileView
+    
+    if (theURL) {
+        [menu insertItemWithTitle:[NSLocalizedString(@"Open With",@"Menu item title") stringByAppendingEllipsis]
+                andSubmenuOfApplicationsForURL:theURL atIndex:i - 1];
+    }
+    if ([theURL isFileURL]) {
+        item = [menu addItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
+                                  action:@selector(showNotesForLinkedFile:)
+                           keyEquivalent:@""];
+        [item setRepresentedObject:theURL];
+        
+        item = [menu addItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
+                                  action:@selector(copyNotesForLinkedFile:)
+                           keyEquivalent:@""];
+        [item setRepresentedObject:theURL];
+    }
+		
+    [menu addItem:[NSMenuItem separatorItem]];
+    
+    [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]
+                    action:@selector(chooseLocalURL:)
+             keyEquivalent:@""];
+    
+    // get Safari recent downloads
+    item = [menu addItemWithTitle:NSLocalizedString(@"Safari Recent Downloads", @"Menu item title")
+                     submenuTitle:@"safariRecentDownloadsMenu"
+                  submenuDelegate:self];
+
+    // get recent downloads (Tiger only) by searching the system downloads directory
+    // should work for browsers other than Safari, if they use IC to get/set the download directory
+    // don't create this in the delegate method; it needs to start working in the background
+    if(submenu = [self recentDownloadsMenu]){
+        item = [menu addItemWithTitle:NSLocalizedString(@"Link to Recent Download", @"Menu item title") submenu:submenu];
+    }
+    
+    // get Preview recent documents
+    [menu addItemWithTitle:NSLocalizedString(@"Link to Recently Opened File", @"Menu item title")
+              submenuTitle:@"previewRecentDocumentsMenu"
+           submenuDelegate:self];
+    
+    // get Safari recent URLs
+    [menu addItem:[NSMenuItem separatorItem]];
+    [menu addItemWithTitle:NSLocalizedString(@"Link to Download URL", @"Menu item title")
+              submenuTitle:@"safariRecentURLsMenu"
+           submenuDelegate:self];
+
+    return menu;
+}
+     /*
 	NSMenu *submenu;
 	NSMenuItem *item;
 	NSURL *theURL;
@@ -672,7 +704,6 @@ enum{
                   submenuTitle:@"previewRecentDocumentsMenu"
                submenuDelegate:self];
 	}
-     /*
 	else if (view == viewRemoteButton) {
 		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] objectEnumerator];
 		NSString *field = nil;
@@ -697,8 +728,8 @@ enum{
                   submenuTitle:@"safariRecentURLsMenu"
                submenuDelegate:self];
 	}
-     */
 }
+*/
 
 - (NSArray *)safariDownloadHistory{
     static CFURLRef downloadPlistURL = NULL;
@@ -952,8 +983,7 @@ enum{
 		return isEditable;
 	}
 	else if (theAction == @selector(consolidateLinkedFiles:)) {
-		NSString *lurl = [publication localUrlPath];
-		return (isEditable && lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+		return (isEditable && [[publication localFiles] count]);
 	}
 	else if (theAction == @selector(duplicateTitleToBooktitle:)) {
 		return (isEditable && ![NSString isEmptyString:[publication valueOfField:BDSKTitleString]]);
@@ -965,45 +995,28 @@ enum{
         return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
 	}
 	else if (theAction == @selector(openLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		return (lurl == nil ? NO : YES);
+		NSURL *theURL = (NSURL *)[menuItem representedObject];
+		return theURL != nil;
 	}
 	else if (theAction == @selector(revealLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		return (lurl == nil ? NO : YES);
+		NSURL *theURL = (NSURL *)[menuItem representedObject];
+		return theURL != nil;
 	}
 	else if (theAction == @selector(moveLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		return (isEditable && lurl != nil);
+		NSURL *theURL = (NSURL *)[menuItem representedObject];
+		return (isEditable && theURL != nil);
 	}
 	else if (theAction == @selector(showNotesForLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		return (lurl == nil ? NO : YES);
+		NSURL *theURL = (NSURL *)[menuItem representedObject];
+		return theURL != nil;
 	}
 	else if (theAction == @selector(copyNotesForLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		return (lurl == nil ? NO : YES);
+		NSURL *theURL = (NSURL *)[menuItem representedObject];
+		return theURL != nil;
 	}
 	else if (theAction == @selector(openRemoteURL:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKUrlString;
-		return ([publication remoteURLForField:field] != nil);
+		NSURL *theURL = (NSURL *)[menuItem representedObject];
+		return theURL != nil;
 	}
     else if (theAction == @selector(saveFileAsLocalUrl:)) {
 #warning fixme
@@ -1278,13 +1291,6 @@ enum{
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
 	
-	NSArray *localFileFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
-	[fieldsPopUpButton removeAllItems];
-	[fieldsPopUpButton addItemsWithTitles:localFileFields];
-	[fieldsPopUpButton selectItemWithTitle:BDSKLocalUrlString];
-	if ([localFileFields count] > 1) 
-		[oPanel setAccessoryView:fieldsAccessoryView];
-
     [oPanel beginSheetForDirectory:nil 
                               file:nil 
                     modalForWindow:[self window] 
@@ -1297,30 +1303,40 @@ enum{
 - (void)chooseLocalURLPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 
     if(returnCode == NSOKButton){
-        NSString *fileURLString = [[NSURL fileURLWithPath:[[sheet filenames] objectAtIndex:0]] absoluteString];
-		NSString *field = [fieldsPopUpButton titleOfSelectedItem];
+        NSURL *aURL = [[sheet URLs] objectAtIndex:0];
+        BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
+        if (aFile) {
+            [publication insertObject:aFile inFilesAtIndex:0];
+            [publication autoFileLinkedFile:aFile];
+            [aFile release];
         
-		[publication setField:field toValue:fileURLString];
-		if ([field isEqualToString:BDSKLocalUrlString])
-			[self autoFilePaper];
-		
-		[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+        }
     }        
 }
 
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
-    
-	[publication setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:path] absoluteString]];
-	[self autoFilePaper];
+    NSURL *aURL = [NSURL fileURLWithPath:path];
+    BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
+    if (aFile) {
+        [publication insertObject:aFile inFilesAtIndex:0];
+        [publication autoFileLinkedFile:aFile];
+        [aFile release];
 	
-	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+    }
 }
 
 - (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender{
-	[publication setField:BDSKUrlString toValue:[sender representedObject]];
+    NSURL *aURL = [sender representedObject];
+    BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
+    if (aFile) {
+        [publication insertObject:aFile inFilesAtIndex:0];
+        [aFile release];
 	
-	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+    }
 }
 
 // ----------------------------------------------------------------------------------------
