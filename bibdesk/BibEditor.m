@@ -1757,7 +1757,7 @@ enum{
 		requiredFields = [[NSApp delegate] requiredFieldsForCiteKey];
 		tooltip = NSLocalizedString(@"The cite key needs to be generated.", @"Tool tip message");
 	} else if ([identifier isEqualToString:@"NeedsToBeFiled"]) {
-		requiredFields = [[NSApp delegate] requiredFieldsForLocalUrl];
+		requiredFields = [[NSApp delegate] requiredFieldsForLocalFile];
 		tooltip = NSLocalizedString(@"The linked file needs to be filed.", @"Tool tip message");
 	} else {
 		return nil;
@@ -1788,7 +1788,7 @@ enum{
 }
 
 - (void)needsToBeFiledDidChange:(NSNotification *)notification{
-	if ([publication needsToBeFiled] == YES) {
+	if ([[publication filesToBeFiled] count]) {
 		[self setStatus:NSLocalizedString(@"Linked file needs to be filed.",@"Linked file needs to be filed.")];
 		if ([[statusBar iconIdentifiers] containsObject:@"NeedsToBeFiled"] == NO) {
 			NSString *tooltip = NSLocalizedString(@"The linked file needs to be filed.", @"Tool tip message");

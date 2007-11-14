@@ -300,7 +300,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:formatPresetChoice forKey:@"BDSKLocalFileFormatPreset"];
     }
     
-    if ([BDSKFormatParser validateFormat:&formatString forField:@"Local File" inFileType:BDSKBibtexString error:&error]) {
+    if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:@"BDSKLocalFileFormat"];
         [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     }else{

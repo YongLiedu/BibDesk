@@ -196,6 +196,7 @@ extern NSString *BDSKDefaultArrayJoinStringKey;
 #pragma mark Field name strings
 
 extern NSString *BDSKCiteKeyString;
+extern NSString *BDSKLocalFileString;
 extern NSString *BDSKAnnoteString;
 extern NSString *BDSKAbstractString;
 extern NSString *BDSKRssDescriptionString;

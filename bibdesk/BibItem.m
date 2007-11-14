@@ -2816,7 +2816,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 		if ([fieldName isEqualToString:BDSKCiteKeyString]) {
             if([self hasEmptyOrDefaultCiteKey])
 				return NO;
-		} else if ([fieldName isEqualToString:@"Local File"]) {
+		} else if ([fieldName isEqualToString:BDSKLocalFileString]) {
 			if ([file URL] == nil)
 				return NO;
 		} else if ([fieldName isEqualToString:@"Document Filename"]) {
@@ -2845,10 +2845,14 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     if (filesToBeFiled == nil)
         filesToBeFiled = [[NSMutableSet alloc] init];
     [filesToBeFiled addObject:file];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKNeedsToBeFiledChangedNotification object:self];
 }
 
 - (void)removeFileToBeFiled:(BDSKLinkedFile *)file {
     [filesToBeFiled removeObject:file];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKNeedsToBeFiledChangedNotification object:self];
 }
 
 - (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file

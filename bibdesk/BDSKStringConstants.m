@@ -210,6 +210,7 @@ NSString *BDSKShouldShowWebGroupPrefKey = @"BDSKShouldShowWebGroup";
 #pragma mark Field name strings
 
 NSString *BDSKCiteKeyString = @"Cite Key";
+NSString *BDSKLocalFileString = @"Local File";
 NSString *BDSKAnnoteString = @"Annote";
 NSString *BDSKAbstractString = @"Abstract";
 NSString *BDSKRssDescriptionString = @"Rss-Description";
