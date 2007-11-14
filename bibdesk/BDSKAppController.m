@@ -543,7 +543,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         } else {
             NSString *label = [bm label];
             NSMenuItem *item = [menu addItemWithTitle:label ? label : @"" action:@selector(newSearchGroupFromBookmark:)  keyEquivalent:@""];
-            [item setTarget:self];
             [item setRepresentedObject:[bm info]];
             [item setImage:[bm icon]];
         }
