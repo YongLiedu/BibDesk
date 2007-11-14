@@ -1942,18 +1942,23 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     if ([self _getGridRow:&r column:&c atPoint:_lastMouseDownLocInView])
         idx = [self _indexForGridRow:r column:c];
     
+    // remove disabled items and double separators
     i = [menu numberOfItems];
     BOOL wasSeparator = YES;
     while (i--) {
         if ([[menu itemAtIndex:i] isSeparatorItem]) {
+            // see if this is a double separator, if so remove it
             if (wasSeparator)
                 [menu removeItemAtIndex:i];
         } else if ([self validateMenuItem:[menu itemAtIndex:i]]) {
+            // valid menu item, keep it, and it wasn't a separator
             wasSeparator = NO;
         } else {
+            // disabled menu item
             [menu removeItemAtIndex:i];
         }
     }
+    // remove a separator at index 0
     if ([[menu itemAtIndex:0] isSeparatorItem])
         [menu removeItemAtIndex:0];
         
