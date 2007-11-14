@@ -318,7 +318,7 @@ static CGImageRef FVCreateCGImageWithCharArray(DTCharArray array)
     return toReturn;
 }
 
-#ifndef MAC_OS_X_VERSION_10_5
+#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
 // public on Leopard, private on 10.4
 FV_EXTERN CFDataRef CGDataProviderCopyData(CGDataProviderRef provider);
 #endif
