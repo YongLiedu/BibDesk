@@ -1963,9 +1963,10 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [menu removeItemAtIndex:0];
         
     
-    if ([[self delegate] respondsToSelector:@selector(fileView:contextMenu:forIconAtIndex:)])
-        menu = [[self delegate] fileView:self contextMenu:menu forIconAtIndex:idx];
-    return menu;
+    if ([[self delegate] respondsToSelector:@selector(fileView:willPopUpMenu:onIconAtIndex:)])
+        [[self delegate] fileView:self willPopUpMenu:menu onIconAtIndex:idx];
+    
+    return [menu numberOfItems] > 0 ? menu : nil;
 }
 
 + (NSMenu *)defaultMenu

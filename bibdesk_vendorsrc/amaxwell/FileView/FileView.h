@@ -134,8 +134,10 @@ enum {
 
 @interface NSObject (FileViewDelegateContextMenu)
 
-// anIndex will be NSNotFound if there is not a URL at this location
-- (NSMenu *)fileView:(FileView *)aFileView contextMenu:(NSMenu *)aMenu forIconAtIndex:(NSUInteger)anIndex;
+/* 
+ Called immediately before display.   The anIndex parameter will be NSNotFound if there is not a URL at the mouse event location.  If you remove all items, the menu will not be shown.
+ */
+- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)aMenu onIconAtIndex:(NSUInteger)anIndex;
 
 @end
 

@@ -568,8 +568,7 @@ enum{
     return NO;
 }
 
-// shouldn't this method return a menu rather than modifying one?
-- (NSMenu *)fileView:(FileView *)aFileView contextMenu:(NSMenu *)menu forIconAtIndex:(NSUInteger)anIndex {
+- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
     
     NSURL *theURL = anIndex == NSNotFound ? nil : [[publication objectInFilesAtIndex:anIndex] URL];
     int i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
@@ -620,8 +619,6 @@ enum{
     [menu addItemWithTitle:NSLocalizedString(@"Link to Download URL", @"Menu item title")
               submenuTitle:@"safariRecentURLsMenu"
            submenuDelegate:self];
-
-    return menu;
 }
      /*
 	NSMenu *submenu;
