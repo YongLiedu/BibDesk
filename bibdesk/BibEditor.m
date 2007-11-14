@@ -294,7 +294,7 @@ enum{
     
     [self setupForm];
     if (isEditable)
-        [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+        [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
     
     // Setup the citekey textfield
     BDSKCiteKeyFormatter *citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
@@ -438,30 +438,6 @@ enum{
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowEditorStatusBarKey];
 }
 
-- (IBAction)revealLinkedFile:(id)sender{
-	NSURL *fileURL = [sender representedObject];
-    NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-	[sw selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
-}
-
-- (IBAction)openLinkedFile:(id)sender{
-	NSURL *fileURL = [sender representedObject];
-    NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-	
-    BOOL err = NO;
-
-    if(![sw openLinkedFile:[fileURL path]]){
-            err = YES;
-    }
-    if(err)
-        NSBeginAlertSheet(NSLocalizedString(@"Can't Open Local File", @"Message in alert dialog when unable to open local file"),
-                              NSLocalizedString(@"OK", @"Button title"),
-                              nil,nil, [self window],self, NULL, NULL, NULL,
-                              NSLocalizedString(@"Sorry, the contents of the Local-Url Field are neither a valid file path nor a valid URL.",
-                                                @"Informative text in alert dialog"), nil);
-
-}
-
 - (IBAction)moveLinkedFile:(id)sender{
     // @@ AutoFile: deprecated
     return;
@@ -500,20 +476,6 @@ enum{
     }
     
     [field release];
-}
-
-- (IBAction)openRemoteURL:(id)sender{
-	NSURL *url = [sender representedObject];
-    NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-    
-    if(url != nil)
-        [sw openURL:url];
-    else
-        NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Message in alert dialog when an error occurs"),
-                          nil, nil, nil, [self window], nil, nil, nil, nil,
-                          NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please check the URL field and try again.",
-                                            @"Informative text in alert dialog") );
-    
 }
 
 - (IBAction)showNotesForLinkedFile:(id)sender{
@@ -620,108 +582,6 @@ enum{
               submenuTitle:@"safariRecentURLsMenu"
            submenuDelegate:self];
 }
-     /*
-	NSMenu *submenu;
-	NSMenuItem *item;
-	NSURL *theURL;
-    
-    int i = [menu numberOfItems];
-
-#warning add to FileView context menu?
-    
-	if (1) {
-		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] objectEnumerator];
-		NSString *field = nil;
-		
-		// the first one has to be view Local-Url file, since it's also the button's action when you're clicking on the icon.
-        int idx = 0;
-		while (field = [e nextObject]) {
-            
-            if(idx++ > 0)
-                [menu addItem:[NSMenuItem separatorItem]];
-
-            item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@",@"Menu item title"), field]
-                                   action:@selector(openLinkedFile:)
-                            keyEquivalent:@""];
-            [item setTarget:self];
-            [item setRepresentedObject:field];
-            
-            theURL = [publication URLForField:field];
-            if(nil != theURL){
-                [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Menu item title"),[ field localizedFieldName]]
-                        andSubmenuOfApplicationsForURL:theURL];
-            }
-            
-			item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Reveal %@ in Finder",@"Menu item title"), [field localizedFieldName]]
-                                   action:@selector(revealLinkedFile:)
-                            keyEquivalent:@""];
-			[item setRepresentedObject:field];
-            
-			item = [menu addItemWithTitle:[[NSString stringWithFormat:NSLocalizedString(@"Move %@",@"Menu item title: Move Local-Url..."), [field localizedFieldName]] stringByAppendingEllipsis]
-                                   action:@selector(moveLinkedFile:)
-                            keyEquivalent:@""];
-			[item setRepresentedObject:field];
-            
-			item = [menu addItemWithTitle:[[NSString stringWithFormat:NSLocalizedString(@"Skim Notes For %@",@"Menu item title: Skim Notes For Local-Url..."), [field localizedFieldName]] stringByAppendingEllipsis]
-                                   action:@selector(showNotesForLinkedFile:)
-                            keyEquivalent:@""];
-			[item setRepresentedObject:field];
-            
-			item = [menu addItemWithTitle:[[NSString stringWithFormat:NSLocalizedString(@"Copy Skim Notes For %@",@"Menu item title: Copy Skim Notes For Local-Url..."), [field localizedFieldName]] stringByAppendingEllipsis]
-                                   action:@selector(copyNotesForLinkedFile:)
-                            keyEquivalent:@""];
-			[item setRepresentedObject:field];
-		}
-		
-		[menu addItem:[NSMenuItem separatorItem]];
-		
-		[menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]
-						action:@selector(chooseLocalURL:)
-				 keyEquivalent:@""];
-		
-		// get Safari recent downloads
-        item = [menu addItemWithTitle:NSLocalizedString(@"Safari Recent Downloads", @"Menu item title")
-                         submenuTitle:@"safariRecentDownloadsMenu"
-                      submenuDelegate:self];
-
-        // get recent downloads (Tiger only) by searching the system downloads directory
-        // should work for browsers other than Safari, if they use IC to get/set the download directory
-        // don't create this in the delegate method; it needs to start working in the background
-        if(submenu = [self recentDownloadsMenu]){
-            item = [menu addItemWithTitle:NSLocalizedString(@"Link to Recent Download", @"Menu item title") submenu:submenu];
-        }
-		
-		// get Preview recent documents
-        [menu addItemWithTitle:NSLocalizedString(@"Link to Recently Opened File", @"Menu item title")
-                  submenuTitle:@"previewRecentDocumentsMenu"
-               submenuDelegate:self];
-	}
-	else if (view == viewRemoteButton) {
-		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] objectEnumerator];
-		NSString *field = nil;
-		
-		// the first one has to be view Url in web brower, since it's also the button's action when you're clicking on the icon.
-		while (field = [e nextObject]) {
-			item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ in Web Browser", @"Menu item title"), [field localizedFieldName]]
-                                   action:@selector(openRemoteURL:)
-                            keyEquivalent:@""];
-			[item setRepresentedObject:field];
-            
-            theURL = [publication URLForField:field];
-            if(nil != theURL){
-                [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With", @"Menu item title"), [field localizedFieldName]]
-                        andSubmenuOfApplicationsForURL:theURL];
-            }
-		}
-		
-		// get Safari recent URLs
-        [menu addItem:[NSMenuItem separatorItem]];
-        [menu addItemWithTitle:NSLocalizedString(@"Link to Download URL", @"Menu item title")
-                  submenuTitle:@"safariRecentURLsMenu"
-               submenuDelegate:self];
-	}
-}
-*/
 
 - (NSArray *)safariDownloadHistory{
     static CFURLRef downloadPlistURL = NULL;
@@ -779,7 +639,7 @@ enum{
             filePath = [[itemDict objectForKey:@"DownloadEntryPostPath"] stringByStandardizingPath];
 		if([fileManager fileExistsAtPath:filePath]){
 			NSMenuItem *item = [menu addItemWithTitle:[filePath lastPathComponent]
-                                               action:@selector(setLocalURLPathFromMenuItem:)
+                                               action:@selector(addLinkedFileFromMenuItem:)
                                         keyEquivalent:@""];
 			[item setRepresentedObject:filePath];
 			[item setImageAndSize:[NSImage imageForFile:filePath]];
@@ -804,7 +664,7 @@ enum{
 		NSString *URLString = [itemDict objectForKey:@"DownloadEntryURL"];
 		if (![NSString isEmptyString:URLString] && [NSURL URLWithString:URLString]) {
 			NSMenuItem *item = [menu addItemWithTitle:URLString
-                                               action:@selector(setRemoteURLFromMenuItem:)
+                                               action:@selector(addRemoteURLFromMenuItem:)
                                         keyEquivalent:@""];
 			[item setRepresentedObject:URLString];
 			[item setImageAndSize:[NSImage genericInternetLocationImage]];
@@ -868,7 +728,7 @@ enum{
         if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
             fileName = [filePath lastPathComponent];            
             item = [menu addItemWithTitle:fileName
-                                   action:@selector(setLocalURLPathFromMenuItem:)
+                                   action:@selector(addLinkedFileFromMenuItem:)
                             keyEquivalent:@""];
             [item setRepresentedObject:filePath];
             [item setImageAndSize:[NSImage imageForFile:filePath]];
@@ -886,7 +746,7 @@ enum{
         if(![previewRecentPaths containsObject:filePath] && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
             fileName = [filePath lastPathComponent];            
             item = [menu addItemWithTitle:fileName
-                                   action:@selector(setLocalURLPathFromMenuItem:)
+                                   action:@selector(addLinkedFileFromMenuItem:)
                             keyEquivalent:@""];
             [item setRepresentedObject:filePath];
             [item setImageAndSize:[NSImage imageForFile:filePath]];
@@ -933,32 +793,12 @@ enum{
         
         while(filePath = [e nextObject]){            
             item = [menu addItemWithTitle:[filePath lastPathComponent]
-                                   action:@selector(setLocalURLPathFromMenuItem:)
+                                   action:@selector(addLinkedFileFromMenuItem:)
                             keyEquivalent:@""];
             [item setRepresentedObject:filePath];
             [item setImageAndSize:[NSImage imageForFile:filePath]];
         }
     }
-}
-
-- (void)updateAuthorsToolbarMenu:(NSMenu *)menu{
-    NSArray *thePeople = [publication sortedPeople];
-    int count = [thePeople count];
-    int i = [menu numberOfItems];
-    BibAuthor *person;
-    NSMenuItem *item = nil;
-    SEL selector = @selector(showPersonDetailCmd:);
-    while (i-- > 1)
-        [menu removeItemAtIndex:i];
-    if (count == 0)
-        return;
-    for (i = 0; i < count; i++) {
-        person = [thePeople objectAtIndex:i];
-        item = [menu addItemWithTitle:[person displayName] action:selector keyEquivalent:@""];
-        [item setTag:i];
-    }
-    item = [menu addItemWithTitle:NSLocalizedString(@"Show All", @"Menu item title") action:selector keyEquivalent:@""];
-    [item setTag:count];
 }
 
 - (void)dummy:(id)obj{}
@@ -986,14 +826,6 @@ enum{
 	else if (theAction == @selector(createNewPubUsingCrossrefAction:)) {
         return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
 	}
-	else if (theAction == @selector(openLinkedFile:)) {
-		NSURL *theURL = (NSURL *)[menuItem representedObject];
-		return theURL != nil;
-	}
-	else if (theAction == @selector(revealLinkedFile:)) {
-		NSURL *theURL = (NSURL *)[menuItem representedObject];
-		return theURL != nil;
-	}
 	else if (theAction == @selector(moveLinkedFile:)) {
 		NSURL *theURL = (NSURL *)[menuItem representedObject];
 		return (isEditable && theURL != nil);
@@ -1003,10 +835,6 @@ enum{
 		return theURL != nil;
 	}
 	else if (theAction == @selector(copyNotesForLinkedFile:)) {
-		NSURL *theURL = (NSURL *)[menuItem representedObject];
-		return theURL != nil;
-	}
-	else if (theAction == @selector(openRemoteURL:)) {
 		NSURL *theURL = (NSURL *)[menuItem representedObject];
 		return theURL != nil;
 	}
@@ -1036,8 +864,8 @@ enum{
              theAction == @selector(raiseDelField:) || 
              theAction == @selector(raiseChangeFieldName:) || 
              theAction == @selector(chooseLocalURL:) || 
-             theAction == @selector(setLocalURLPathFromMenuItem:) || 
-             theAction == @selector(setRemoteURLFromMenuItem:)) {
+             theAction == @selector(addLinkedFileFromMenuItem:) || 
+             theAction == @selector(addRemoteURLFromMenuItem:)) {
         return isEditable;
     }
 
@@ -1307,7 +1135,7 @@ enum{
     }        
 }
 
-- (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender{
+- (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
     NSURL *aURL = [NSURL fileURLWithPath:path];
     BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
@@ -1320,7 +1148,7 @@ enum{
     }
 }
 
-- (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender{
+- (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender{
     NSURL *aURL = [sender representedObject];
     BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
     if (aFile) {
@@ -2270,46 +2098,6 @@ enum{
     [[self document] createNewPubUsingCrossrefForItem:publication];
 }
 
-- (void)deletePubAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if (alert != nil && [alert checkValue] == YES) {
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnDeleteKey];
-	}
-    if (returnCode == NSAlertOtherReturn)
-        return;
-    
-	[[self undoManager] setActionName:NSLocalizedString(@"Delete Publication", @"Undo action name")];
-    [[self document] setStatus:NSLocalizedString(@"Deleted 1 publication",@"Status message") immediate:NO];
-	[[self document] removePublication:publication];
-}
-
-- (IBAction)deletePub:(id)sender{
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnDeleteKey]) {
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Delete Publication", @"Message in alert dialog when deleting a publication")
-											 defaultButton:NSLocalizedString(@"OK", @"Button title")
-										   alternateButton:nil
-											   otherButton:NSLocalizedString(@"Cancel", @"Button title")
-								 informativeTextWithFormat:NSLocalizedString(@"Are you sure you want to delete the current item?", @"Informative text in alert dialog")];
-		[alert setHasCheckButton:YES];
-		[alert setCheckValue:NO];
-        [alert beginSheetModalForWindow:[self window]
-                          modalDelegate:self
-                         didEndSelector:@selector(deletePubAlertDidEnd:returnCode:contextInfo:) 
-                            contextInfo:NULL];
-	} else {
-        [self deletePubAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
-    }
-}
-
-- (IBAction)editPreviousPub:(id)sender{
-    BibEditor *editor = [[self document] editPubBeforePub:publication];
-    [editor setKeyField:[self keyField]];
-}
-
-- (IBAction)editNextPub:(id)sender{
-    BibEditor *editor = [[self document] editPubAfterPub:publication];
-    [editor setKeyField:[self keyField]];
-}
-
 #pragma mark BDSKForm delegate methods
 
 - (void)doubleClickedTitleOfFormCell:(id)cell{
@@ -2321,39 +2109,9 @@ enum{
 	[self openParentItemForField:[field isEqualToString:BDSKCrossrefString] ? nil : field];
 }
 
-- (void)iconClickedInFormCell:(id)cell{
-    NSString *field = [cell representedObject];
-    if ([field isLocalFileField])
-        [[NSWorkspace sharedWorkspace] openLinkedFile:[publication localFilePathForField:field]];
-    else
-        [[NSWorkspace sharedWorkspace] openURL:[publication URLForField:field]];
-}
-
 - (BOOL)formCellHasArrowButton:(id)cell{
 	return ([[publication valueOfField:[cell representedObject]] isInherited] || 
 			([[cell representedObject] isEqualToString:BDSKCrossrefString] && [publication crossrefParent]));
-}
-
-- (BOOL)formCellHasFileIcon:(id)cell{
-    NSString *title = [cell representedObject];
-    if ([title isURLField]) {
-		// if we inherit a field, we don't show the file icon but the arrow button
-		NSString *url = [publication valueOfField:title inherit:NO];
-		// we could also check for validity here
-		if (![NSString isEmptyString:url])
-			return YES;
-	}
-	return NO;
-}
-
-- (NSImage *)fileIconForFormCell:(id)cell{
-    // we can assume that this cell should have a file icon
-    return [publication imageForURLField:[cell representedObject]];
-}
-
-- (NSImage *)dragIconForFormCell:(id)cell{
-    // we can assume that this cell should have a file icon
-    return [publication imageForURLField:[cell representedObject]];
 }
 
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
@@ -2443,7 +2201,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark dragging destination delegate methods
 
-- (NSDragOperation)canReceiveDrag:(id <NSDraggingInfo>)sender forField:(NSString *)field{
+- (NSDragOperation)dragOperation:(id <NSDraggingInfo>)sender forField:(NSString *)field{
 	NSPasteboard *pboard = [sender draggingPasteboard];
     id dragSource = [sender draggingSource];
     NSString *dragSourceField = nil;
@@ -2455,26 +2213,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if ([field isEqualToString:dragSourceField])
         return NSDragOperationNone;
     
-	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
-	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, BDSKBibItemPboardType, nil]];
+	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
 	
-	if ([field isLocalFileField]) {
-		if ([dragType isEqualToString:NSFilenamesPboardType] || [dragType isEqualToString:NSURLPboardType] || [dragType isEqualToString:BDSKWeblocFilePboardType]) {
-			return NSDragOperationEvery;
-		}
-		return NSDragOperationNone;
-	} else if ([field isRemoteURLField]){
-		if ([dragType isEqualToString:BDSKWeblocFilePboardType]) {
-			return NSDragOperationEvery;
-		} else if ([dragType isEqualToString:NSURLPboardType]) {
-			// a file puts NSFilenamesPboardType and NSURLPboardType on the pasteboard
-			// we really only want to receive webloc files for remote URLs, not file URLs
-			NSURL *remoteURL = [NSURL URLFromPasteboard:pboard];
-			if(remoteURL && ![remoteURL isFileURL])
-				return NSDragOperationEvery;
-		}
-        return NSDragOperationNone;
-	} else if ([field isCitationField]){
+    if ([field isCitationField]){
 		if ([dragType isEqualToString:BDSKBibItemPboardType]) {
 			return NSDragOperationEvery;
         }
@@ -2494,84 +2235,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSPasteboard *pboard = [sender draggingPasteboard];
 	NSString *dragType;
     
-	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
-	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, BDSKBibItemPboardType, nil]];
+	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
     
-	if ([field isLocalFileField]) {
-		// a file, we link the local file field
-		NSURL *theURL = nil;
-		
-		if ([dragType isEqualToString:NSFilenamesPboardType]) {
-			NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-			if ([fileNames count])
-				theURL = [NSURL fileURLWithPath:[[fileNames objectAtIndex:0] stringByExpandingTildeInPath]];
-		} else if ([dragType isEqualToString:BDSKWeblocFilePboardType]) {
-			NSString *theURLString = [pboard stringForType:BDSKWeblocFilePboardType];
-            theURL = [NSURL URLWithString:theURLString];
-		} else if ([dragType isEqualToString:NSURLPboardType]) {
-			theURL = [NSURL URLFromPasteboard:pboard];
-		}
-        
-        if (theURL == nil || [theURL isEqual:[publication URLForField:field]]) {
-			return NO;
-        } else if (NO == [theURL isFileURL]) {
-            [self downloadURL:theURL forField:field];
-            return YES;
-        }
-        
-        NSString *oldValue = [[[publication valueOfField:field] retain] autorelease];
-        NSString *newValue = [theURL absoluteString];
-        BOOL didFile = NO;
-        
-		[publication setField:field toValue:[theURL absoluteString]];
-		
-        if ([field isEqualToString:BDSKLocalUrlString])
-            didFile = [self autoFilePaper];
-        
-        [self userChangedField:field from:oldValue to:newValue didAutoGenerate:didFile ? 2 : 0];
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-        
-		return YES;
-		
-	} else if ([field isRemoteURLField]){
-		// Check first for webloc files because we want to treat them differently    
-		if ([dragType isEqualToString:BDSKWeblocFilePboardType]) {
-			
-			NSString *remoteURLString = [pboard stringForType:BDSKWeblocFilePboardType];
-            NSString *oldValue = [[[publication valueOfField:field] retain] autorelease];
-			
-			if (remoteURLString == nil ||
-				[[NSURL URLWithString:remoteURLString] isEqual:[publication remoteURLForField:field]])
-				return NO;
-			
-            [publication setField:field toValue:remoteURLString];
-            
-            [self userChangedField:field from:oldValue to:remoteURLString];
-			[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-
-			return YES;
-			
-		} else if ([dragType isEqualToString:NSURLPboardType]) {
-			// a URL but not a file, we link the remote Url field
-			NSURL *remoteURL = [NSURL URLFromPasteboard:pboard];
-			
-			if (remoteURL == nil || [remoteURL isFileURL] ||
-				[remoteURL isEqual:[publication remoteURLForField:field]])
-				return NO;
-			
-            NSString *oldValue = [[[publication valueOfField:field] retain] autorelease];
-            NSString *newValue = [remoteURL absoluteString];
-			
-			[publication setField:field toValue:newValue];
-            
-            [self userChangedField:field from:oldValue to:newValue];
-			[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-			
-			return YES;
-			
-		}
-		
-	} else if ([field isCitationField]){
+    if ([field isCitationField]){
         
 		if ([dragType isEqualToString:BDSKBibItemPboardType]) {
             
@@ -2646,9 +2312,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	return NO;
 }
 
-- (NSDragOperation)canReceiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
+- (NSDragOperation)dragOperation:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
 	NSString *field = [cell representedObject];
-	return [self canReceiveDrag:sender forField:field];
+	return [self dragOperation:sender forField:field];
 }
 
 - (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
@@ -2685,7 +2351,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (BOOL)dragWindow:(BDSKDragWindow *)window receiveDrag:(id <NSDraggingInfo>)sender{
     
     NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSURLPboardType, BDSKBibItemPboardType, NSStringPboardType, nil]];
+	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
 	NSArray *draggedPubs = nil;
     BOOL hasTemporaryCiteKey = NO;
     
@@ -2802,102 +2468,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	if (dragFieldEditor == nil) {
 		dragFieldEditor = [[BDSKFieldEditor alloc] init];
         if (isEditable)
-            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, BDSKBibItemPboardType, nil]];
+            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
 	}
 	return dragFieldEditor;
-}
-
-#pragma mark dragging source delegate methods
-
-- (BOOL)writeDataToPasteboard:(NSPasteboard *)pboard forField:(NSString *)field {
-
-    NSURL *url = [publication URLForField:field];
-	
-	if (url == nil)
-		return NO;
-	
-	[self setPromisedDragURL:url];
-	
-	NSArray *types = nil;
-	NSString *pathExtension = @"";
-	
-	if([url isFileURL]){
-		NSString *path = [url path];
-		pathExtension = [path pathExtension];
-		types = [NSArray arrayWithObjects:NSURLPboardType, NSFilesPromisePboardType, nil];
-		[pboard declareTypes:types owner:nil];
-		[url writeToPasteboard:pboard];
-		[self setPromisedDragFilename:[path lastPathComponent]];
-		[pboard setPropertyList:[NSArray arrayWithObject:promisedDragFilename] forType:NSFilesPromisePboardType];
-	} else {
-		NSString *filename = [publication displayTitle];
-		if ([NSString isEmptyString:filename])
-			filename = @"Remote URL";
-		pathExtension = @"webloc";
-		types = [NSArray arrayWithObjects:NSURLPboardType, NSFilesPromisePboardType, nil];
-		[pboard declareTypes:types owner:nil];
-		[url writeToPasteboard:pboard];
-		[self setPromisedDragFilename:[filename stringByAppendingPathExtension:@"webloc"]];
-		[pboard setPropertyList:[NSArray arrayWithObject:promisedDragFilename] forType:NSFilesPromisePboardType];
-	}
-	
-	return YES;
-}
-
-- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forField:(NSString *)field {
-    NSString *dstPath = [dropDestination path];
-    
-    // queue the file creation so we don't block while waiting for this method to return
-	// console warnings can occur but are harmless
-    if([promisedDragURL isFileURL]){
-        [[OFMessageQueue mainQueue] queueSelector:@selector(copyPath:toPath:handler:) 
-                                        forObject:[NSFileManager defaultManager]
-                                       withObject:[promisedDragURL path]
-                                       withObject:[dstPath stringByAppendingPathComponent:promisedDragFilename]
-                                       withObject:nil];
-    } else {
-        [[OFMessageQueue mainQueue] queueSelector:@selector(createWeblocFileAtPath:withURL:) 
-                                        forObject:[NSFileManager defaultManager]
-                                       withObject:[dstPath stringByAppendingPathComponent:promisedDragFilename]
-                                       withObject:promisedDragURL];
-    }
-    
-    return [NSArray arrayWithObject:promisedDragFilename];
-}
-
-- (void)cleanUpAfterDragOperation:(NSDragOperation)operation forField:(NSString *)field {
-    [self setPromisedDragURL:nil];
-    [self setPromisedDragFilename:nil];
-}
-
-- (BOOL)writeDataToPasteboard:(NSPasteboard *)pasteboard forFormCell:(id)cell {
-	NSString *field = [cell representedObject];
-	return [self writeDataToPasteboard:pasteboard forField:field];
-}
-
-- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forFormCell:(id)cell {
-	NSString *field = [cell representedObject];
-	return [self namesOfPromisedFilesDroppedAtDestination:dropDestination forField:field];
-}
-
-- (void)cleanUpAfterDragOperation:(NSDragOperation)operation forFormCell:(id)cell {
-	NSString *field = [cell representedObject];
-	[self cleanUpAfterDragOperation:operation forField:field];
-}
-
-// used to cache the destination webloc file's URL
-- (void)setPromisedDragURL:(NSURL *)theURL{
-    [theURL retain];
-    [promisedDragURL release];
-    promisedDragURL = theURL;
-}
-
-// used to cache the filename (not the full path) of the promised file
-- (void)setPromisedDragFilename:(NSString *)theFilename{
-    if(promisedDragFilename != theFilename){
-        [promisedDragFilename release];
-        promisedDragFilename = [theFilename copy];
-    }
 }
 
 - (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{

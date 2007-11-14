@@ -119,48 +119,10 @@
 			mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 			isInside = ([[self cellForButtonAtPoint:mouseLoc] isEqual:cell]);
 			switch ([theEvent type]) {
-				case NSLeftMouseDragged:
-					[cell setButtonHighlighted:isInside];
-                    if(isInside && [cell hasFileIcon]){
-                        
-                        NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-						
-						if([[self delegate] writeDataToPasteboard:pboard forFormCell:cell]){
-							NSImage *iconImage;
-							NSImage *dragImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0,32.0)];
-                            iconImage = [[self delegate] respondsToSelector:@selector(dragIconForFormCell:)] ? [[self delegate] dragIconForFormCell:cell] : [[self delegate] fileIconForFormCell:cell];
-                            
-                            // copy the image so we can resize the copy without affecting any cached images
-                            iconImage = [iconImage copy];
-                            [iconImage setScalesWhenResized:YES];
-                            [iconImage setSize:NSMakeSize(32.0, 32.0)];
-
-                            // composite for transparency
-							[dragImage lockFocus];
-							[iconImage compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.6];
-							[dragImage unlockFocus];
-                            
-                            [iconImage release];
-							
-							mouseLoc.x -= 16;
-							mouseLoc.y += 16;
-							
-							[self setDragSourceCell:cell];
-                            
-							[self dragImage:dragImage at:mouseLoc offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES];
-						}
-						
-						// we shouldn't follow the mouse events anymore
-                        [cell setButtonHighlighted:NO];
-						keepOn = NO;
-                    }
-					break;
 				case NSLeftMouseUp:
 					if (isInside){
                         if([cell hasArrowButton])
                             [[self delegate] arrowClickedInFormCell:cell];
-                        else if([cell hasFileIcon])
-                            [[self delegate] iconClickedInFormCell:cell];
                     }
 					[cell setButtonHighlighted:NO];
 					keepOn = NO;
@@ -269,7 +231,7 @@
 	} else {
         [self getRow:&row column:&column forPoint:mouseLoc];
         if (cell = [self cellAtRow:row column:0])
-            dragOp = [[self delegate] canReceiveDrag:sender forFormCell:cell];
+            dragOp = [[self delegate] dragOperation:sender forFormCell:cell];
         if (dragOp != NSDragOperationNone) {	
             if (row != dragRow) {
                 [self setNeedsDisplayInRect:[self cellFrameAtRow:row column:0]];
@@ -325,21 +287,6 @@
     return accept;
 }
 
-#pragma mark -
-#pragma mark NSDraggingSource protocol
-
-- (unsigned int)draggingSourceOperationMaskForLocal:(BOOL)isLocal{
-    return (isLocal) ? NSDragOperationEvery : NSDragOperationCopy;
-}
-
-- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination{
-	return [[self delegate] namesOfPromisedFilesDroppedAtDestination:dropDestination forFormCell:dragSourceCell];
-}
-
-- (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
-	[[self delegate] cleanUpAfterDragOperation:operation forFormCell:dragSourceCell];
-}
-
 @end
 
 @implementation BDSKForm (Private)
@@ -356,7 +303,7 @@
         // see if it is in the button rect
         if(cell = [self cellAtRow:row column:column]){ 
             // see if there is an arrow button
-            if([[self delegate] formCellHasArrowButton:cell] || [[self delegate] formCellHasFileIcon:cell]){
+            if([[self delegate] formCellHasArrowButton:cell]){
                 NSRect aRect = [self cellFrameAtRow:row column:column];
                 // check if point is in the button rect
                 if( NSMouseInRect(point, [cell buttonRectForBounds:aRect], [self isFlipped]) == NO)

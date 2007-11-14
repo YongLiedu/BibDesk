@@ -136,9 +136,6 @@
     BOOL didSetupForm;
 	
 	NSTextView *dragFieldEditor;
-	
-    NSString *promisedDragFilename;
-    NSURL *promisedDragURL;
     
     IBOutlet FileView *fileView;
 }
@@ -213,20 +210,6 @@
 - (void)finalizeChanges:(NSNotification *)aNotification;
 
 /*!
-    @method     openLinkedFile
-    @abstract   Action to view the local file in the default viewer.
-    @discussion (comprehensive description)
-*/
-- (IBAction)openLinkedFile:(id)sender;
-
-/*!
-    @method     revealLinkedFile
-    @abstract   Action to reveal the local file in the Finder.
-    @discussion (comprehensive description)
-*/
-- (IBAction)revealLinkedFile:(id)sender;
-
-/*!
     @method     moveLocalURL:
     @abstract   Action to move a local file using the Save dialog. 
     @discussion (comprehensive description)
@@ -276,35 +259,19 @@
 */
 - (void)updateRecentDownloadsMenu:(NSMenu *)menu;
 
-
 /*!
-    @method     updateAuthorsToolbarMenu:
-    @abstract   Updates the menu representatino of the Authors toolbar item.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (void)updateAuthorsToolbarMenu:(NSMenu *)menu;
-
-/*!
-    @method     setLocalURLPathFromMenuItem
+    @method     addLinkedFileFromMenuItem
     @abstract   Action to select a local file path from a menu item.
     @discussion (comprehensive description)
 */
-- (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender;
+- (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender;
 
 /*!
-    @method     setRemoteURLFromMenuItem
+    @method     addRemoteURLFromMenuItem
     @abstract   Action to select a remote URL from a menu item.
     @discussion (comprehensive description)
 */
-- (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender;
-
-/*!
-    @method     openRemoteURL
-    @abstract   Action to view the remote URL in the default browser.
-    @discussion (comprehensive description)
-*/
-- (IBAction)openRemoteURL:(id)sender;
+- (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender;
 
 /*!
     @method     showCiteKeyWarning:
@@ -399,11 +366,6 @@
 - (IBAction)selectCrossrefParentAction:(id)sender;
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;
 
-- (IBAction)deletePub:(id)sender;
-
-- (IBAction)editPreviousPub:(id)sender;
-- (IBAction)editNextPub:(id)sender;
-
 - (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (NSUndoManager *)undoManager;
@@ -417,11 +379,6 @@
 */
 - (IBAction)showPersonDetailCmd:(id)sender;
 - (void)showPersonDetail:(BibAuthor *)person;
-
-#pragma mark Drag and drop
-
-- (void)setPromisedDragURL:(NSURL *)theURL;
-- (void)setPromisedDragFilename:(NSString *)theFilename;
 
 #pragma mark Macro support
     
