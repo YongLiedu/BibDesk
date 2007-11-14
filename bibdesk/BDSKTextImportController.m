@@ -932,12 +932,8 @@
 		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
 			NSURL *fileURL = [NSURL fileURLWithPath:[sheet filename]];
 			
-            BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:fileURL delegate:item] autorelease];
-            if (file) {
-                [item insertObject:file inFilesAtIndex:0];
-                [self autoFileLinkedFile:file];
-                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-            }
+            [item addFileForURL:fileURL shouldAutoFile:YES];
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 		} else {
 			NSLog(@"Could not write downloaded file.");
 		}
@@ -982,12 +978,8 @@
 - (void)setLocalUrlFromDownload{
 	NSURL *fileURL = [NSURL fileURLWithPath:downloadFileName];
 	
-    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:fileURL delegate:item] autorelease];
-    if (file) {
-        [item insertObject:file inFilesAtIndex:0];
-        [self autoFileLinkedFile:file];
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    }
+    [item addFileForURL:fileURL shouldAutoFile:YES];
+    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
 - (void)setDownloading:(BOOL)downloading{

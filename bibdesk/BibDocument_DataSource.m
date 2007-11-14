@@ -850,12 +850,7 @@
             if(theURL == nil)
                 return NO;
             
-            BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:theURL] autorelease];
-            if (file)
-                [pub insertObject:file inFilesAtIndex:0];
-            
-            if([file isFile])
-                [pub autoFileLinkedFile:file];
+            [pub addFileForURL:theURL autoFile:YES];
             
             [self selectPublication:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];

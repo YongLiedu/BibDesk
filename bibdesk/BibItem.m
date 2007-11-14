@@ -2537,6 +2537,21 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [toMove release];
 }
 
+- (void)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile {
+    BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:self] autorelease];
+    if (aFile == nil)
+        return;
+    unsigned idx = [files count];
+    if ([aFile isFile]) {
+        NSArray *localFiles = [self localFiles];
+        if ([localFiles count])
+            idx = 1 + [files indexOfObject:[localFiles lastObject]];
+    }
+    [self insertObject:aFile inFilesAtIndex:idx];
+    if (shouldAutoFile && [aFile isFile])
+        [self autoFileLinkedFile:aFile];
+}
+
 static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unused)
 {
     BOOL firstIsFile = [first isFileURL];

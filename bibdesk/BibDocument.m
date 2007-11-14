@@ -2162,9 +2162,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             if(newBI == nil)
                 newBI = [[[BibItem alloc] init] autorelease];
             
-            BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:url delegate:newBI] autorelease];
-            if (file)
-                [newBI insertObject:file inFilesAtIndex:0];
+            [newBI addFileForURL:url autoFile:NO];
 			[newPubs addObject:newBI];
 		}
 	}
@@ -2180,9 +2178,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
 	BibItem *newBI = [[[BibItem alloc] init] autorelease];
     
-    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:url delegate:newBI] autorelease];
-    if (file)
-        [newBI insertObject:file inFilesAtIndex:0];
+    [newBI addFileForURL:url autoFile:NO];
     
 	return [NSArray arrayWithObject:newBI];
 }

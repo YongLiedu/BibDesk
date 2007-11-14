@@ -285,12 +285,8 @@ static float GROUP_ROW_HEIGHT = 24.0;
         return NO;
     
     BibItem *pub = [item valueForKey:@"pub"];
-    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:fileURL delegate:pub] autorelease];
-    if (file) {
-        [pub insertObject:file inFilesAtIndex:0];
-        [pub autoFileLinkedFile:file];
-        [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    }
+    [pub addFileForURL:fileURL shouldAutoFile:NO];
+    [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     return YES;
 }
 

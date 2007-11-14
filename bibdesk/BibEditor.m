@@ -1119,39 +1119,22 @@ enum{
 
     if(returnCode == NSOKButton){
         NSURL *aURL = [[sheet URLs] objectAtIndex:0];
-        BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
-        if (aFile) {
-            [publication insertObject:aFile inFilesAtIndex:0];
-            [publication autoFileLinkedFile:aFile];
-            [aFile release];
-        
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-        }
+        [publication addFileForURL:aURL autoFile:YES];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
 }
 
 - (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
     NSURL *aURL = [NSURL fileURLWithPath:path];
-    BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
-    if (aFile) {
-        [publication insertObject:aFile inFilesAtIndex:0];
-        [publication autoFileLinkedFile:aFile];
-        [aFile release];
-	
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    }
+    [publication addFileForURL:aURL autoFile:YES];
+    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
 - (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender{
     NSURL *aURL = [sender representedObject];
-    BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
-    if (aFile) {
-        [publication insertObject:aFile inFilesAtIndex:0];
-        [aFile release];
-	
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    }
+    [publication addFileForURL:aURL autoFile:YES];
+    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
 // ----------------------------------------------------------------------------------------

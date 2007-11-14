@@ -88,6 +88,9 @@ enum {
 - (void)insertObject:(BDSKLinkedFile *)aFile inFilesAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx;
 - (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx;
+
+- (void)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile;
+
 - (NSArray *)sortedURLs;
 
 - (NSString *)basePath;

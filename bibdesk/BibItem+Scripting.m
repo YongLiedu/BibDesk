@@ -108,24 +108,15 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (NSArray *)linkedFiles {
-    NSMutableArray *linkedFiles = [NSMutableArray array];
-    NSEnumerator *fileEnum = [files objectEnumerator];
-    BDSKLinkedFile *file;
-    NSURL *aURL;
-    
-    while (file = [fileEnum nextObject]) {
-        if ([file isFile] && (aURL = [file URL]))
-            [linkedFiles addObject:aURL];
-    }
-    return linkedFiles;
+    return [[self localFiles] valueForKey:@"URL"];
 }
 
 - (void)insertInLinkedFiles:(NSURL *)newURL atIndex:(unsigned int)idx {
     BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
     if (file) {
-        NSArray *linkedFiles = [self linkedFiles];
+        NSArray *localFiles = [self localFiles];
         if (idx > 0) {
-            idx = [[files valueForKey:@"URL"] indexOfObject:[linkedFiles objectAtIndex:idx - 1]];
+            idx = [files indexOfObject:[localFiles objectAtIndex:idx - 1]];
             if (idx == NSNotFound)
                 idx = 0;
         }
@@ -134,29 +125,19 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)removeFromLinkedFilesAtIndex:(unsigned int)idx {
-    idx = [[files valueForKey:@"URL"] indexOfObject:[[self linkedFiles] objectAtIndex:idx]];
-    [self removeObjectFromFilesAtIndex:idx];
+    [[self mutableArrayValueForKey:@"files"] removeObject:[[self localFiles] objectAtIndex:idx]];
 }
 
 - (NSArray *)linkedURLs {
-    NSMutableArray *linkedURLs = [NSMutableArray array];
-    NSEnumerator *fileEnum = [files objectEnumerator];
-    BDSKLinkedFile *file;
-    NSURL *aURL;
-    
-    while (file = [fileEnum nextObject]) {
-        if ([file isFile] == NO && (aURL = [file URL]))
-            [linkedURLs addObject:[aURL absoluteString]];
-    }
-    return linkedURLs;
+    return [[self remoteURLs] valueForKeyPath:@"URL.absoluteString"];
 }
 
 - (void)insertInLinkedURLs:(NSString *)newURLString atIndex:(unsigned int)idx {
     BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURLString:newURLString] autorelease];
     if (file) {
-        NSArray *linkedURLs = [self linkedURLs];
-        if (idx < [linkedURLs count]) {
-            idx = [[files valueForKeyPath:@"URL.absoluteString"] indexOfObject:[linkedURLs objectAtIndex:idx]];
+        NSArray *remoteURLs = [self remoteURLs];
+        if (idx < [remoteURLs count]) {
+            idx = [files indexOfObject:[remoteURLs objectAtIndex:idx]];
             if (idx == NSNotFound)
                 idx = [self countOfFiles];
         } else {
@@ -167,8 +148,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)removeFromLinkedURLsAtIndex:(unsigned int)idx {
-    idx = [[files valueForKeyPath:@"URL.absoluteString"] indexOfObject:[[self linkedURLs] objectAtIndex:idx]];
-    [self removeObjectFromFilesAtIndex:idx];
+    [[self mutableArrayValueForKey:@"files"] removeObject:[[self remoteURLs] objectAtIndex:idx]];
 }
 
 /* ssp: 2004-09-21
@@ -261,10 +241,10 @@ Extra wrapping of the created and modified date methods to
     BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURLString:newURLString] autorelease];
     if (file == nil)
         return;
-    NSArray *linkedURLs = [self linkedURLs];
+    NSArray *remoteURLs = [self remoteURLs];
     unsigned int idx = [self countOfFiles];
-    if ([linkedURLs count]) {
-        idx = [[files valueForKeyPath:@"URL.absoluteString"] indexOfObject:[linkedURLs objectAtIndex:0]];
+    if ([remoteURLs count]) {
+        idx = [files indexOfObject:[remoteURLs objectAtIndex:0]];
         if (idx == NSNotFound)
             idx = [self countOfFiles];
         else
@@ -286,10 +266,10 @@ Extra wrapping of the created and modified date methods to
     BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
     if (file == nil)
         return;
-    NSArray *linkedFiles = [self linkedFiles];
+    NSArray *localFiles = [self localFiles];
     unsigned int idx = 0;
-    if ([linkedFiles count]) {
-        idx = [[files valueForKey:@"URL"] indexOfObject:[linkedFiles objectAtIndex:0]];
+    if ([localFiles count]) {
+        idx = [files indexOfObject:[localFiles objectAtIndex:0]];
         if (idx == NSNotFound)
             idx = 0;
         else
