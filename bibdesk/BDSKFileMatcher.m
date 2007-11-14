@@ -285,7 +285,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
         return NO;
     
     BibItem *pub = [item valueForKey:@"pub"];
-    [pub addFileForURL:fileURL shouldAutoFile:NO];
+    [pub addFileForURL:fileURL autoFile:NO];
     [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     return YES;
 }

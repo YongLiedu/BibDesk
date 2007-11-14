@@ -57,7 +57,7 @@ Category on BDSKAppController making the papers folder readable for scripting
 }
 
 - (NSString *)localUrlFormat {
-	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKLocalUrlFormatKey];
+	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKLocalFileFormatKey];
 }
 
 - (NSArray *)allTypes {

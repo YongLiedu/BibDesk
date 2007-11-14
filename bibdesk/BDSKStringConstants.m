@@ -154,10 +154,10 @@ NSString *BDSKWarnOnRemovalFromGroupKey = @"BDSKWarnOnRemovalFromGroupKey";
 NSString *BDSKPapersFolderPathKey = @"Path to the papers folder";
 NSString *BDSKFilePapersAutomaticallyKey = @"File papers into the papers folder automatically";
 NSString *BDSKAutoFileUsesRelativePathKey = @"AutoFile uses relative path";
-NSString *BDSKLocalUrlFormatKey = @"Local-Url Format";
-NSString *BDSKLocalUrlFormatPresetKey = @"Local-Url Format Preset";
-NSString *BDSKLocalUrlLowercaseKey = @"Local-Url Generate Lowercase";
-NSString *BDSKLocalUrlCleanOptionKey = @"Local-Url Clean Braces or TeX";
+NSString *BDSKLocalFileFormatKey = @"BDSKLocalFileFormatKey";
+NSString *BDSKLocalFileFormatPresetKey = @"BDSKLocalFileFormatPresetKey";
+NSString *BDSKLocalFileLowercaseKey = @"BDSKLocalFileLowercaseKey";
+NSString *BDSKLocalFileCleanOptionKey = @"BDSKLocalFileCleanOptionKey";
 NSString *BDSKWarnOnMoveFolderKey = @"BDSKWarnOnMoveFolderKey";
 
 NSString *BDSKDuplicateBooktitleKey = @"Duplicate Booktitle for Crossref";

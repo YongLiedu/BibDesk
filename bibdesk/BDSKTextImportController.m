@@ -932,7 +932,7 @@
 		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
 			NSURL *fileURL = [NSURL fileURLWithPath:[sheet filename]];
 			
-            [item addFileForURL:fileURL shouldAutoFile:YES];
+            [item addFileForURL:fileURL autoFile:YES];
             [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 		} else {
 			NSLog(@"Could not write downloaded file.");
@@ -978,7 +978,7 @@
 - (void)setLocalUrlFromDownload{
 	NSURL *fileURL = [NSURL fileURLWithPath:downloadFileName];
 	
-    [item addFileForURL:fileURL shouldAutoFile:YES];
+    [item addFileForURL:fileURL autoFile:YES];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 

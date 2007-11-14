@@ -2723,25 +2723,24 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     if ([NSString isEmptyString:proposedPath])
         return NO;
     NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalFileLowercaseKey])
         proposedPath = [proposedPath lowercaseString];
     return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedPath]] == NO);
 }
 
 - (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file
 {
-	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"BDSKLocalFileFormat"];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
     
 	NSString *relativeFile = [BDSKFormatParser parseFormatForLinkedFile:file ofItem:self];
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalFileLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
 	return [NSURL fileURLWithPath:[papersFolderPath stringByAppendingPathComponent:relativeFile]];
 }
 
 - (BOOL)canSetURLForLinkedFile:(BDSKLinkedFile *)file
 {
-    NSArray *requiredFields = [[NSApp delegate] requiredFieldsForLocalUrl];
+    NSArray *requiredFields = [[NSApp delegate] requiredFieldsForLocalFile];
 	
 	if (nil == requiredFields || 
         ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 

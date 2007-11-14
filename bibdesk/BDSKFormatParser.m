@@ -63,7 +63,7 @@
 
 + (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
 {
-	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"BDSKLocalFileFormat"];
+	NSString *localFileFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalFileFormatKey];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
     
     NSString *oldPath = [[file URL] path];
@@ -72,7 +72,7 @@
     else
         oldPath = nil;
       
-    return [self parseFormat:localUrlFormat forField:BDSKLocalFileString linkedFile:nil ofItem:pub suggestion:oldPath];
+    return [self parseFormat:localFileFormat forField:BDSKLocalFileString linkedFile:nil ofItem:pub suggestion:oldPath];
 }
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion
@@ -772,7 +772,7 @@
 		return newString;
 	}
 	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
-		cleanOption = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKLocalUrlCleanOptionKey];
+		cleanOption = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKLocalFileCleanOptionKey];
 		
 		if (cleanOption >= 3)
 			invalidCharSet = [[BDSKTypeManager sharedManager] veryStrictInvalidCharactersForField:fieldName inFileType:type];

@@ -129,10 +129,10 @@
 
 - (NSString *)suggestedLocalFilePath {
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSString *localUrlFormat = [pw objectForKey:@"BDSKLocalFileFormat"];
+	NSString *localFileFormat = [pw objectForKey:BDSKLocalFileFormatKey];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:nil];
-	NSString *relativeFile = [BDSKFormatParser parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self];
-	if ([pw boolForKey:BDSKLocalUrlLowercaseKey])
+	NSString *relativeFile = [BDSKFormatParser parseFormat:localFileFormat forField:BDSKLocalUrlString ofItem:self];
+	if ([pw boolForKey:BDSKLocalFileLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
 	if ([pw boolForKey:BDSKAutoFileUsesRelativePathKey])
         return relativeFile;
