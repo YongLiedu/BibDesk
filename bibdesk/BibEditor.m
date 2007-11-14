@@ -577,9 +577,14 @@ enum{
     [menu addItemWithTitle:NSLocalizedString(@"Link to Recently Opened File", @"Menu item title")
               submenuTitle:@"previewRecentDocumentsMenu"
            submenuDelegate:self];
+		
+    [menu addItem:[NSMenuItem separatorItem]];
+    
+    [menu addItemWithTitle:[NSLocalizedString(@"Choose URL", @"Menu item title") stringByAppendingEllipsis]
+                    action:@selector(chooseRemoteURL:)
+             keyEquivalent:@""];
     
     // get Safari recent URLs
-    [menu addItem:[NSMenuItem separatorItem]];
     [menu addItemWithTitle:NSLocalizedString(@"Link to Download URL", @"Menu item title")
               submenuTitle:@"safariRecentURLsMenu"
            submenuDelegate:self];
@@ -1129,6 +1134,35 @@ enum{
     NSURL *aURL = [NSURL fileURLWithPath:path];
     [publication addFileForURL:aURL autoFile:YES];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+}
+
+- (IBAction)chooseRemoteURL:(id)sender{
+	[chooseURLField setStringValue:@"http://"];
+    
+    [NSApp beginSheet:chooseURLSheet
+       modalForWindow:[self window] 
+        modalDelegate:self 
+       didEndSelector:@selector(chooseRemoteURLSheetDidEnd:returnCode:contextInfo:) 
+          contextInfo:nil];
+}
+
+- (void)chooseRemoteURLSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+
+    if (returnCode == NSOKButton) {
+        NSString *aURLString = [chooseURLField stringValue];
+        if ([NSString isEmptyString:aURLString])
+            return;
+        NSURL *aURL = [NSURL URLWithString:aURLString];
+        if (aURL == nil)
+            return;
+        [publication addFileForURL:aURL autoFile:NO];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+    }        
+}
+
+- (IBAction)dismissChooseURLSheet:(id)sender{
+    [NSApp endSheet:chooseURLSheet returnCode:[sender tag]];
+    [chooseURLSheet orderOut:self];
 }
 
 - (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender{

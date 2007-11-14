@@ -70,7 +70,6 @@
     IBOutlet NSPopUpButton *bibTypeButton;
     IBOutlet BDSKForm *bibFields;
     IBOutlet NSMatrix *extraBibFields;
-	IBOutlet OASplitView *splitView;
     IBOutlet NSTabView *tabView;
     IBOutlet NSTextView *notesView;
     IBOutlet NSTextView *abstractView;
@@ -98,6 +97,9 @@
     IBOutlet NSMenu *actionMenu;
 	IBOutlet NSButton *addFieldButton;
 	
+	IBOutlet NSWindow *chooseURLSheet;
+	IBOutlet NSTextField *chooseURLField;
+    
     // ----------------------------------------------------------------------------------------
     BibItem *publication;
     BOOL isEditable;
@@ -116,7 +118,6 @@
     
 // Author tableView
 	IBOutlet NSTableView *authorTableView;
-	IBOutlet NSScrollView *authorScrollView;
 
     // Macro editing stuff
     MacroFormWindowController *macroTextFieldWC;
@@ -155,6 +156,10 @@
 */
 - (IBAction)chooseLocalFile:(id)sender;
 - (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+- (IBAction)chooseRemoteURL:(id)sender;
+- (IBAction)dismissChooseURLSheet:(id)sender;
+- (void)chooseRemoteURLSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)toggleStatusBar:(id)sender;
 
