@@ -456,7 +456,17 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
     [tableView registerForDraggedTypes:dragTypes];
     [groupTableView registerForDraggedTypes:dragTypes];
-
+    
+    [fileView setDataSource:self];
+    [fileView setBackgroundColor:[[fileView enclosingScrollView] backgroundColor]];
+    
+    [fileCollapsibleView setCollapseEdges:BDSKMinXEdgeMask];
+    [fileCollapsibleView setMinSize:NSMakeSize(100.0, 20.0)];
+    [fileGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+    [fileGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
+    
+    [fileViewSlider bind:@"value" toObject:fileView withKeyPath:@"iconScale" options:nil];
+    
 	// ImagePopUpButtons setup
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
@@ -2694,6 +2704,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
     OBASSERT([NSThread inMainThread]);
     
+    [fileView reloadIcons];
+    
     //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
     [self updatePreviewPane];
     
@@ -3423,18 +3435,18 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
         }
         zerothFrame.size.width = firstFrame.size.width = secondFrame.size.width = NSWidth([sender frame]);
 	} else {
-		// first = group, second = table+preview
-        float contentWidth = NSWidth([sender frame]) - [sender dividerThickness];
-        float factor = contentWidth / (oldSize.width - [sender dividerThickness]);
-        firstFrame.size.width *= factor;
-        if (NSWidth(firstFrame) < 1.0)
-            firstFrame.size.width = 0.0;
-        firstFrame = NSIntegralRect(firstFrame);
-        secondFrame.size.width = contentWidth - NSWidth(firstFrame);
-        if (NSWidth(firstFrame) < 0.0) {
+		// zeroth = group, first = table+preview, second = fileview
+        float contentWidth = NSWidth([sender frame]) - 2 * [sender dividerThickness];
+        float factor = contentWidth / (oldSize.width - 2 * [sender dividerThickness]);
+        zerothFrame.size.width *= factor;
+        if (NSWidth(zerothFrame) < 1.0)
+            zerothFrame.size.width = 0.0;
+        zerothFrame = NSIntegralRect(zerothFrame);
+        secondFrame.size.width *= factor;
+        if (NSWidth(secondFrame) < 1.0)
             secondFrame.size.width = 0.0;
-            firstFrame.size.width = contentWidth - NSWidth(secondFrame);
-        }
+        secondFrame = NSIntegralRect(secondFrame);
+        firstFrame.size.width = contentWidth - NSWidth(zerothFrame) - NSWidth(secondFrame);
         zerothFrame.size.height = firstFrame.size.height = secondFrame.size.height = NSHeight([sender frame]);
     }
 	

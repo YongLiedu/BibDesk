@@ -133,6 +133,10 @@
                 documentWindow = NSWindow; 
                 exportAccessoryView = NSView; 
                 exportSelectionCheckButton = NSButton; 
+                fileCollapsibleView = BDSKCollapsibleView; 
+                fileGradientView = BDSKGradientView; 
+                fileView = FileView; 
+                fileViewSlider = NSSlider; 
                 groupActionButton = BDSKImagePopUpButton; 
                 groupActionMenuButton = BDSKImagePopUpButton; 
                 groupAddButton = NSButton; 
@@ -155,6 +159,12 @@
             SUPERCLASS = NSDocument; 
         }, 
         {
+            ACTIONS = {delete = id; selectNextIcon = id; selectPreviousIcon = id; }; 
+            CLASS = FileView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSView; 
+        }, 
+        {
             ACTIONS = {
                 "" = id; 
                 changeSearchType = id; 
@@ -166,6 +176,7 @@
             SUPERCLASS = NSObject; 
         }, 
         {CLASS = MyTextField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }, 
         {CLASS = OAGradientTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
         {CLASS = OATextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }
