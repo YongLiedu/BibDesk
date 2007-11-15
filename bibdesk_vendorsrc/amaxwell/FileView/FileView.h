@@ -62,6 +62,7 @@ enum {
 @private
     id                      _delegate;
     id                      _dataSource;
+    id                      _dragDataSource;
     NSMutableDictionary    *_iconCache;
     NSColor                *_backgroundColor;
     CFRunLoopTimerRef       _zombieTimer;
@@ -98,9 +99,6 @@ enum {
 - (CGFloat)iconScale;
 - (void)setIconScale:(CGFloat)scale;
 
-// primarily for use with datasource methods
-- (void)setDataSource:(id)obj;
-- (id)dataSource;
 - (NSUInteger)numberOfRows;
 - (NSUInteger)numberOfColumns;
 - (void)reloadIcons;
@@ -113,6 +111,16 @@ enum {
 - (IBAction)selectNextIcon:(id)sender;
 - (IBAction)delete:(id)sender;
 
+- (BOOL)isEditable;
+
+// primarily for use with datasource methods
+- (void)setDataSource:(id)obj;
+- (id)dataSource;
+
+// primarily for use with datasource methods
+- (void)setDragDataSource:(id)obj;
+- (id)dragDataSource;
+
 // required for editing support (dropping files on the view, deleting)
 - (void)setDelegate:(id)obj;
 - (id)delegate;
@@ -120,7 +128,7 @@ enum {
 @end
 
 
-// datasource must conform to this
+// dataSource must conform to this
 @interface NSObject (FileViewDataSource)
 
 // delegate must return an NSURL or nil (a missing value) for each index < numberOfFiles
@@ -132,18 +140,8 @@ enum {
 
 @end
 
-@interface NSObject (FileViewDelegateContextMenu)
-
-/* 
- Called immediately before display.   The anIndex parameter will be NSNotFound if there is not a URL at the mouse event location.  If you remove all items, the menu will not be shown.
- */
-- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)aMenu onIconAtIndex:(NSUInteger)anIndex;
-
-@end
-
-@interface NSObject (FileViewDelegateDragAndDrop)
-
-// If a non-nil delegate is set, all methods in this informal protocol /must/ be implemented.
+// dragDataSource must conform to this
+@interface NSObject (FileViewDragDataSource)
 
 // implement to do something (or nothing) with the dropped URLs
 - (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
@@ -156,5 +154,15 @@ enum {
 
 // does not delete the file from disk; this is the delegate's responsibility
 - (BOOL)fileView:(FileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+
+@end
+
+// delegate must conform to this
+@interface NSObject (FileViewDelegate)
+
+// Called immediately before display.   The anIndex parameter will be NSNotFound if there is not a URL at the mouse event location.  If you remove all items, the menu will not be shown.
+- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)aMenu onIconAtIndex:(NSUInteger)anIndex;
+
+// In addition, it can be send the WebUIDelegate method webView:contextMenuItemsForElement:defaultMenuItems:
 
 @end

@@ -46,7 +46,6 @@
 // functions for dealing with multiple URLs and weblocs on the pasteboard
 static NSArray *URLSFromPasteboard(NSPasteboard *pboard);
 static BOOL writeURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard, PasteboardRef *pboardPtr);
-static BOOL pasteboardHasType(NSPasteboard *pboard, NSString *aType);
 
 @interface NSBezierPath (Leopard)
 + (NSBezierPath*)bezierPathWithRoundedRect:(NSRect)rect xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius;
@@ -64,6 +63,7 @@ enum {
 typedef NSUInteger FVDropOperation;
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
+static NSString *FVIconsPboardType = @"FVIconsPboardType";
 
 static const NSSize DEFAULT_ICON_SIZE = { 64, 64 };
 static const CGFloat DEFAULT_PADDING = 32;          // 16 per side
@@ -186,7 +186,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 {
     if ([keyPath isEqualToString:@"selectionIndexes"]) {
         if ([FVPreviewer isPreviewing] && NSNotFound != [_selectedIndexes firstIndex]) {
-            [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
+            [FVPreviewer setWebViewContextMenuDelegate:[self dragDataSource]];
             [FVPreviewer previewURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]]];
         }
         [self setNeedsDisplay:YES];
@@ -270,9 +270,9 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     if ([[FileView superclass] instancesRespondToSelector:@selector(awakeFromNib)])
         [super awakeFromNib];
     
-    // if the delegate connection is made in the nib, the drag type setup doesn't get done
-    [self setDelegate:[self delegate]];
-    [self setDataSource:[self dataSource]];
+    // if the dragDataSource connection is made in the nib, the drag type setup doesn't get done
+    if ([self isEditable])
+        [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, FVIconsPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, nil]];
 }
 
 - (void)setDataSource:(id)obj;
@@ -286,22 +286,18 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     [_iconCache removeAllObjects];
 }
 
-- (BOOL)isEditable { return nil != [self delegate]; }
+- (id)dataSource { return _dataSource; }
 
-// must be unique to this instance
-- (NSString *)_localDragType
-{
-    return [NSString stringWithFormat:@"com.mac.amaxwell.fileview.%p", self];
-}
+- (BOOL)isEditable { return nil != [self dragDataSource]; }
 
-- (void)setDelegate:(id)obj;
+- (void)setDragDataSource:(id)obj;
 {
     // assign before checking isEditable
-    _delegate = obj;
+    _dragDataSource = obj;
     
     if ([self isEditable]) {
         
-        [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, [self _localDragType], NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, nil]];
+        [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, FVIconsPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, nil]];
         
         const SEL selectors[] = { 
             @selector(fileView:insertURLs:atIndexes:), @selector(fileView:replaceURLsAtIndexes:withURLs:),
@@ -310,15 +306,21 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
         
         NSUInteger i = sizeof(selectors) / sizeof(SEL);
         while (i--)
-            NSAssert1([obj respondsToSelector:selectors[i]], @"delegate must implement %@", NSStringFromSelector(selectors[i]));
+            NSAssert1([obj respondsToSelector:selectors[i]], @"dragDataSource must implement %@", NSStringFromSelector(selectors[i]));
     }
     else {
-        // in case the view moved and/or we changed delegates
+        // in case the view moved and/or we changed dragDataSources
         [self registerForDraggedTypes:nil];
     }
 }
 
-- (id)dataSource { return _dataSource; }
+- (id)dragDataSource { return _dragDataSource; }
+
+- (void)setDelegate:(id)obj;
+{
+    _delegate = obj;
+}
+
 - (id)delegate { return _delegate; }
 
 - (NSUInteger)numberOfRows;
@@ -375,7 +377,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
                 NSTrackingRectTag tag = [self addTrackingRect:aRect owner:self userData:NULL assumeInside:NO];
                 CFDictionarySetValue(_trackingRectMap, (const void *)tag, (const void *)i);
                 
-                // don't pass the URL as owner, as it's not retained; use the delegate method instead
+                // don't pass the URL as owner, as it's not retained; use the dragDataSource method instead
                 [self addToolTipRect:aRect owner:self userData:NULL];
             }
         }    
@@ -390,7 +392,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 }
 
 /*  
-   10.4 docs say "You need never invoke this method directly; it’s invoked automatically before the receiver's cursor rectangles are reestablished using resetCursorRects."
+   10.4 docs say "You need never invoke this method directly; it‚Äö√Ñ√¥s invoked automatically before the receiver's cursor rectangles are reestablished using resetCursorRects."
    10.5 docs say "You need never invoke this method directly; neither is it typically invoked during the invalidation of cursor rectangles. [...] This method is invoked just before the receiver is removed from a window and when the receiver is deallocated."
  
    This is a pretty radical change that makes -discardCursorRects sound pretty useless.  Maybe that explains why cursor rects have always sucked in Apple's apps and views?  Anyway, I'm explicitly discarding before resetting, just to be safe.  I'm also telling the window to invalidate cursor rects for this view explicitly whenever the grid changes due to number of icons or resize.  Even though I don't use cursor rects right now, this is a convenient funnel point for tracking rect handling.
@@ -451,7 +453,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 {
     [_iconURLs autorelease];
     _iconURLs = [anArray copy];
-    // delegate/datasource methods all trigger a redisplay, so we have to do the same here
+    // dragDataSource/datasource methods all trigger a redisplay, so we have to do the same here
     [self reloadIcons];
 }
 
@@ -494,7 +496,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (FVIcon *)_cachedIconForURL:(NSURL *)aURL;
 {
-    // delegate returns nil for nonexistent paths, so cache that in the dictionary as a normal key
+    // dragDataSource returns nil for nonexistent paths, so cache that in the dictionary as a normal key
     if (nil == aURL)
         aURL = (id)[NSNull null];
     
@@ -563,7 +565,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (NSUInteger)_indexForGridRow:(NSUInteger)rowIndex column:(NSUInteger)colIndex;
 {
     // nc * (r-1) + c
-    // assumes all slots are filled, so check the length of the delegate's file array first
+    // assumes all slots are filled, so check the length of the dragDataSource's file array first
     NSUInteger fileIndex = rowIndex * [self numberOfColumns] + colIndex;
     return fileIndex >= [self numberOfIcons] ? NSNotFound : fileIndex;
 }
@@ -1117,7 +1119,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 {
     // only called if we originated the drag, so the row/column must be valid
     if ((operation & NSDragOperationDelete) != 0) {
-        [[self delegate] fileView:self deleteURLsAtIndexes:_selectedIndexes];
+        [[self dragDataSource] fileView:self deleteURLsAtIndexes:_selectedIndexes];
         [self setSelectionIndexes:[NSIndexSet indexSet]];
         [self reloadIcons];
     }
@@ -1478,8 +1480,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
                 CFDataRef data = (CFDataRef)[@"What are /you/ looking at, pervert?" dataUsingEncoding:NSUTF8StringEncoding];
                     
                 // any pointer type; private to the creating application
-                PasteboardItemID itemID = (void *)[self _localDragType];
-                PasteboardPutItemFlavor(carbonPboard, itemID, (CFStringRef)[self _localDragType], data, kPasteboardFlavorNoFlags);
+                PasteboardItemID itemID = (void *)FVIconsPboardType;
+                PasteboardPutItemFlavor(carbonPboard, itemID, (CFStringRef)FVIconsPboardType, data, kPasteboardFlavorNoFlags);
                 if (NULL != carbonPboard)
                     CFRelease(carbonPboard);
 
@@ -1512,7 +1514,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (BOOL)_isLocalDraggingInfo:(id <NSDraggingInfo>)sender
 {
-    return pasteboardHasType([sender draggingPasteboard], [self _localDragType]);
+    return [sender draggingSource] == self && 
+           nil != [[sender draggingPasteboard] availableTypeFromArray:[NSArray arrayWithObject:FVIconsPboardType]];
 }
 
 // get lots of updates for autoscrolling
@@ -1578,6 +1581,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSPoint dragLoc = [sender draggingLocation];
     dragLoc = [self convertPoint:dragLoc fromView:nil];
     NSDragOperation dragOp = NSDragOperationNone;
+    NSPasteboard *pboard = [sender draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, nil]];
     
     NSUInteger insertIndex;
     // this will set a default highlight based on geometry, but does no validation
@@ -1589,32 +1594,31 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
                 
             dragOp = NSDragOperationNone;
             _dropRectForHighlight = NSZeroRect;
-        }
-        else {
+        } else if (type) {
             dragOp = NSDragOperationLink;
         }
-    }
-    else if (FVDropOnView == dropOp) {
+    } else if (FVDropOnView == dropOp) {
         
         // drop on the whole view (add operation) makes no sense for a local drag
         if ([self _isLocalDraggingInfo:sender]) {
             
             dragOp = NSDragOperationNone;
             _dropRectForHighlight = NSZeroRect;
-        }
-        else {
+        } else if (type) {
             dragOp = NSDragOperationLink;
         }
-    }
-    else if (FVDropInsert == dropOp) {
+    } else if (FVDropInsert == dropOp) {
         
         // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection, but that needs to be examined more carefully
-        if ([self _isLocalDraggingInfo:sender] && [_selectedIndexes containsIndex:insertIndex]) {
-            dragOp = NSDragOperationNone;
-            _dropRectForHighlight = NSZeroRect;
-        }
-        else {
-            dragOp = [self _isLocalDraggingInfo:sender] ? NSDragOperationMove : NSDragOperationLink;
+        if ([self _isLocalDraggingInfo:sender]) {
+            if ([_selectedIndexes containsIndex:insertIndex]) {
+                dragOp = NSDragOperationNone;
+                _dropRectForHighlight = NSZeroRect;
+            } else {
+                dragOp = NSDragOperationMove;
+            }
+        } else if (type) {
+            dragOp = NSDragOperationLink;
         }
     }
     
@@ -1659,7 +1663,11 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 // this is called as soon as the mouse is moved to start a drag, or enters the window from outside
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
-    return NSDragOperationLink;
+    if ([self _isLocalDraggingInfo:sender] || 
+        nil != [[sender draggingPasteboard] availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, nil]])
+        return NSDragOperationLink;
+    else
+        return NSDragOperationNone;
 }
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender
@@ -1705,7 +1713,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             aURL = [NSURL fileURLWithPath:[[pboard propertyListForType:NSFilenamesPboardType] lastObject]];
         }
         if (aURL)
-            didPerform = [[self delegate] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:idx] withURLs:[NSArray arrayWithObject:aURL]];
+            didPerform = [[self dragDataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:idx] withURLs:[NSArray arrayWithObject:aURL]];
     }
     else if (FVDropInsert == dropOp) {
         
@@ -1722,12 +1730,11 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             else {
                 if (insertIndex > firstIndex && insertIndex >= [_selectedIndexes count])
                     insertIndex -= [_selectedIndexes count];
-                didPerform = [[self delegate] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex];
+                didPerform = [[self dragDataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex];
             }
-        }
-        else {
+        } else {
             NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertIndex, [allURLs count])];
-            [[self delegate] fileView:self insertURLs:allURLs atIndexes:insertSet];
+            [[self dragDataSource] fileView:self insertURLs:allURLs atIndexes:insertSet];
             didPerform = YES;
         }
     }
@@ -1736,7 +1743,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         // this must be an add operation, and only non-local drag sources can do that
         NSArray *allURLs = URLSFromPasteboard(pboard);
         NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [allURLs count])];
-        [[self delegate] fileView:self insertURLs:allURLs atIndexes:insertSet];
+        [[self dragDataSource] fileView:self insertURLs:allURLs atIndexes:insertSet];
         didPerform = YES;
 
     }
@@ -1886,7 +1893,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)delete:(id)sender;
 {
-    if (NO == [[self delegate] fileView:self deleteURLsAtIndexes:_selectedIndexes])
+    if (NO == [[self dragDataSource] fileView:self deleteURLsAtIndexes:_selectedIndexes])
         NSBeep();
     else
         [self reloadIcons];
@@ -1908,7 +1915,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     if ([self isEditable]) {
         NSArray *URLs = URLSFromPasteboard([NSPasteboard generalPasteboard]);
         if ([URLs count])
-            [[self delegate] fileView:self insertURLs:URLs atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [URLs count])]];
+            [[self dragDataSource] fileView:self insertURLs:URLs atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [URLs count])]];
         else
             NSBeep();
     }
@@ -1968,9 +1975,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     if ([[menu itemAtIndex:0] isSeparatorItem])
         [menu removeItemAtIndex:0];
         
-    
-    if ([[self delegate] respondsToSelector:@selector(fileView:willPopUpMenu:onIconAtIndex:)])
-        [[self delegate] fileView:self willPopUpMenu:menu onIconAtIndex:idx];
+    [[self delegate] fileView:self willPopUpMenu:menu onIconAtIndex:idx];
     
     if ([menu numberOfItems] == 0)
         menu = nil;
@@ -2045,48 +2050,6 @@ void CLog(NSString *format, ...)
 }
 
 #pragma mark Pasteboard URL functions
-
-static BOOL pasteboardHasType(NSPasteboard *pboard, NSString *aType)
-{
-    OSStatus err;
-    
-    PasteboardRef carbonPboard;
-    err = PasteboardCreate((CFStringRef)[pboard name], &carbonPboard);
-    
-    PasteboardSyncFlags syncFlags;
-#pragma unused(syncFlags)
-    if (noErr == err)
-        syncFlags = PasteboardSynchronize(carbonPboard);
-    
-    ItemCount itemCount, itemIndex;
-    if (noErr == err)
-        err = PasteboardGetItemCount(carbonPboard, &itemCount);
-    
-    BOOL hasType = NO;
-        
-    // wtf? this has 1-based indexing!
-    for (itemIndex = 1; noErr == err && itemIndex <= itemCount && NO == hasType; itemIndex++) {
-        
-        PasteboardItemID itemID;
-        CFArrayRef flavors;
-        
-        err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
-        
-        if (noErr == err)
-            err = PasteboardCopyItemFlavors(carbonPboard, itemID, &flavors);
-        
-        if (noErr == err)
-            hasType = CFArrayContainsValue(flavors, CFRangeMake(0, CFArrayGetCount(flavors)), (CFStringRef)aType);
-        
-        if (noErr == err && NULL != flavors)
-            CFRelease(flavors);
-        
-    }
-    
-    if (carbonPboard) CFRelease(carbonPboard);
-    
-    return hasType;
-}
 
 // NSPasteboard only lets us read a single webloc or NSURL instance from the pasteboard, which isn't very considerate of it.  Fortunately, we can create a Carbon pasteboard that isn't as fundamentally crippled (except in its moderately annoying API).  
 static NSArray *URLSFromPasteboard(NSPasteboard *pboard)

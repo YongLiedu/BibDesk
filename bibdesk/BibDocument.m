@@ -455,7 +455,6 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [tableView registerForDraggedTypes:dragTypes];
     [groupTableView registerForDraggedTypes:dragTypes];
     
-    [fileView setDataSource:self];
     [fileView setBackgroundColor:[[fileView enclosingScrollView] backgroundColor]];
     
     [fileCollapsibleView setCollapseEdges:BDSKMinXEdgeMask];
@@ -2846,6 +2845,16 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 
 - (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [self countOfFileViewURLs]; }
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex { return [self objectInFileViewURLsAtIndex:anIndex]; }
+
+- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
+    NSURL *theURL = anIndex == NSNotFound ? nil : [self objectInFileViewURLsAtIndex:anIndex];
+    int i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
+    
+    if (theURL && i != -1) {
+        [menu insertItemWithTitle:[NSLocalizedString(@"Open With", @"Menu item title") stringByAppendingEllipsis]
+                andSubmenuOfApplicationsForURL:theURL atIndex:++i];
+    }
+}
 
 - (void)displayLocalURLInPreviewPane{
     NSView *view = [previewTextView enclosingScrollView];

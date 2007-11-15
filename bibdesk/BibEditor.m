@@ -356,11 +356,6 @@ enum{
     return publication;
 }
 
-- (void)awakeFromNib{
-	
-    [fileView setDataSource:self];
-}
-
 - (void)dealloc{
     [publication release];
 	[authorTableView setDelegate:nil];
