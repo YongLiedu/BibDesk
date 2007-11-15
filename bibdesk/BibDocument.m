@@ -258,6 +258,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         toolbarItems = nil;
         docState.lastPreviewHeight = 0.0;
         docState.lastGroupViewWidth = 0.0;
+        docState.lastFileViewWidth = 0.0;
         
         // these are temporary state variables
         promiseDragColumnIdentifier = nil;
@@ -3401,40 +3402,56 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     [sender adjustSubviews];
 }
 
-- (void)splitViewDoubleClick:(OASplitView *)sender{
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
     int i = [[sender subviews] count] - 2;
     OBASSERT(i >= 0);
+	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
 	NSView *firstView = [[sender subviews] objectAtIndex:i];
 	NSView *secondView = [[sender subviews] objectAtIndex:++i];
+	NSRect zerothFrame = zerothView ? [zerothView frame] : NSZeroRect;
 	NSRect firstFrame = [firstView frame];
 	NSRect secondFrame = [secondView frame];
 	
-	if (sender == splitView) {
-		// first = table, second = preview
-		if(NSHeight([secondView frame]) > 0){ // can't use isSubviewCollapsed, because implementing splitView:canCollapseSubview: prevents uncollapsing
+	if (sender == splitView && offset == i - 1) {
+		// first = table, second = preview, zeroth = web
+		if(NSHeight(secondFrame) > 0){ // can't use isSubviewCollapsed, because implementing splitView:canCollapseSubview: prevents uncollapsing
 			docState.lastPreviewHeight = NSHeight(secondFrame); // cache this
 			firstFrame.size.height += docState.lastPreviewHeight;
 			secondFrame.size.height = 0;
 		} else {
 			if(docState.lastPreviewHeight <= 0)
-				docState.lastPreviewHeight = NSHeight([sender frame]) / 3; // a reasonable value for uncollapsing the first time
+				docState.lastPreviewHeight = floorf(NSHeight([sender frame]) / 3); // a reasonable value for uncollapsing the first time
 			firstFrame.size.height = NSHeight(firstFrame) + NSHeight(secondFrame) - docState.lastPreviewHeight;
 			secondFrame.size.height = docState.lastPreviewHeight;
 		}
-	} else {
-		// first = group, second = table+preview
-		if(NSWidth([firstView frame]) > 0){
-			docState.lastGroupViewWidth = NSWidth(firstFrame); // cache this
-			secondFrame.size.width += docState.lastGroupViewWidth;
-			firstFrame.size.width = 0;
-		} else {
-			if(docState.lastGroupViewWidth <= 0)
-				docState.lastGroupViewWidth = 120; // a reasonable value for uncollapsing the first time
-			secondFrame.size.width = NSWidth(firstFrame) + NSWidth(secondFrame) - docState.lastGroupViewWidth;
-			firstFrame.size.width = docState.lastGroupViewWidth;
-		}
-	}
+	} else if (sender == groupSplitView) {
+		// zeroth = group, first = table+preview, second = fileview
+        if (offset == 0) {
+            if(NSWidth(zerothFrame) > 0){
+                docState.lastGroupViewWidth = NSWidth(zerothFrame); // cache this
+                firstFrame.size.width += docState.lastGroupViewWidth;
+                zerothFrame.size.width = 0;
+            } else {
+                if(docState.lastGroupViewWidth <= 0)
+                    docState.lastGroupViewWidth = fminf(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
+                firstFrame.size.width -= docState.lastGroupViewWidth;
+                zerothFrame.size.width = docState.lastGroupViewWidth;
+            }
+        } else {
+            if(NSWidth(secondFrame) > 0){
+                docState.lastFileViewWidth = NSWidth(secondFrame); // cache this
+                firstFrame.size.width += docState.lastFileViewWidth;
+                secondFrame.size.width = 0;
+            } else {
+                if(docState.lastFileViewWidth <= 0)
+                    docState.lastFileViewWidth = fminf(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
+                firstFrame.size.width -= docState.lastFileViewWidth;
+                secondFrame.size.width = docState.lastFileViewWidth;
+            }
+        }
+	} else return;
 	
+	[zerothView setFrame:zerothFrame];
 	[firstView setFrame:firstFrame];
 	[secondView setFrame:secondFrame];
     [sender adjustSubviews];

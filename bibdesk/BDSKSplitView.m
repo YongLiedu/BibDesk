@@ -158,10 +158,14 @@
         }
     }
     
-    if (inDivider)
-        [super mouseDown:theEvent];
-    else
+    if (inDivider) {
+        if ([theEvent clickCount] > 1 && [[self delegate] respondsToSelector:@selector(splitView:doubleClickedDividerAt:)])
+            [[self delegate] splitView:self doubleClickedDividerAt:i];
+        else
+            [super mouseDown:theEvent];
+    } else {
         [[self nextResponder] mouseDown:theEvent];
+    }
 }
 
 

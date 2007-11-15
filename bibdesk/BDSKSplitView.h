@@ -48,3 +48,8 @@
 - (void)setDrawEnd:(BOOL)flag;
 
 @end
+
+
+@interface NSObject (BDSKSplitViewExtendedDelegate)
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset;
+@end
