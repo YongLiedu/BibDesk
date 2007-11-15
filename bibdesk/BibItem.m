@@ -1963,15 +1963,55 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
     }
     
-    NSURL *aURL = [self URLForField:BDSKLocalUrlString];
-    NSData *RTFData = nil;
-    if (aURL && (RTFData = [[BDSKSkimReader sharedReader] RTFNotesAtURL:aURL])) {
-        valueStr = [[NSAttributedString alloc] initWithRTF:RTFData documentAttributes:NULL];
+    NSArray *theFiles = [self localFiles];
+    NSEnumerator *fileEnum;
+    BDSKLinkedFile *file;
+    NSURL *aURL;
+    NSData *RTFData;
+    if ([theFiles count]) {
+        [nonReqStr appendString:NSLocalizedString(@"Local files", @"heading in preview for local files") attributes:keyAttributes];
+        [nonReqStr appendString:@"\n"];
+        fileEnum = [theFiles objectEnumerator];
+        while (file = [fileEnum nextObject]) {
+            if (aURL = [file URL]) {
+                valueStr = [[NSMutableAttributedString alloc] initWithString:[[aURL path] stringByAbbreviatingWithTildeInPath] attributes:bodyAttributes];
+                [(NSMutableAttributedString *)valueStr addAttribute:NSLinkAttributeName value:aURL range:NSMakeRange(0, [valueStr length])];
+                [nonReqStr appendAttributedString:valueStr];
+                [nonReqStr appendString:@"\n"];
+                [valueStr release];
+            }
+        }
+    }
+    
+    theFiles = [self remoteURLs];
+    if ([theFiles count]) {
+        [nonReqStr appendString:NSLocalizedString(@"Remote URLs", @"heading in preview for remote URLs") attributes:keyAttributes];
+        [nonReqStr appendString:@"\n"];
+        fileEnum = [theFiles objectEnumerator];
+        while (file = [fileEnum nextObject]) {
+            if (aURL = [file URL]) {
+                valueStr = [[NSMutableAttributedString alloc] initWithString:[aURL absoluteString] attributes:bodyAttributes];
+                [(NSMutableAttributedString *)valueStr addAttribute:NSLinkAttributeName value:aURL range:NSMakeRange(0, [valueStr length])];
+                [nonReqStr appendAttributedString:valueStr];
+                [nonReqStr appendString:@"\n"];
+                [valueStr release];
+            }
+        }
+    }
+    
+    theFiles = [self localFiles];
+    if ([theFiles count]) {
         [nonReqStr appendString:NSLocalizedString(@"Skim notes", @"heading in preview of notes from Skim") attributes:keyAttributes];
         [nonReqStr appendString:@"\n"];
-        [nonReqStr appendAttributedString:valueStr];
-        [nonReqStr appendString:@"\n"];
-        [valueStr release];
+        fileEnum = [theFiles objectEnumerator];
+        while (file = [fileEnum nextObject]) {
+            if ((aURL = [file URL]) && (RTFData = [[BDSKSkimReader sharedReader] RTFNotesAtURL:aURL])) {
+                valueStr = [[NSAttributedString alloc] initWithRTF:RTFData documentAttributes:NULL];
+                [nonReqStr appendAttributedString:valueStr];
+                [nonReqStr appendString:@"\n\n"];
+                [valueStr release];
+            }
+        }
     }
 
     // now put them together
