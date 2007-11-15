@@ -203,8 +203,8 @@ enum{
     // we should have a document at this point, as the nib is not loaded before -window is called, which shouldn't happen before the document shows us
     OBASSERT([self document]);
     
-	// The rest is called when we load the window
-	
+    [[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+    
     [[bibFields prototype] setEditable:isEditable];
     [bibTypeButton setEnabled:isEditable];
     [addFieldButton setEnabled:isEditable];
