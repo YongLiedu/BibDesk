@@ -3650,7 +3650,12 @@ static void addRemoteURLForFieldToArrayIfNotNil(const void *key, void *context)
         if (type == BDSKPersonFieldCollection) {
             value = (id)[item peopleArrayForField:key];
         } else if (type == BDSKURLFieldCollection) {
-            value = (id)[item URLForField:key];
+            if ([key isEqualToString:BDSKLocalUrlString])
+                value = [[[item localFiles] firstObject] URL];
+            else if ([key isEqualToString:BDSKUrlString])
+                value = [[[item remoteURLs] firstObject] URL];
+            else
+                value = (id)[item URLForField:key];
         } else {
             value = (id)[item stringValueOfField:key];
             if ([key isURLField] == NO && [key isBooleanField] == NO && [key isTriStateField] == NO && [key isRatingField] == NO && [key isCitationField] == NO)
