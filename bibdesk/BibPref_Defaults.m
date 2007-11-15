@@ -60,7 +60,7 @@ static NSSet *alwaysDisabledFields = nil;
 
 + (void)initialize {
     if (nil == alwaysDisabledFields)
-        alwaysDisabledFields = [[NSSet alloc] initWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAuthorString, BDSKEditorString, nil];
+        alwaysDisabledFields = [[NSSet alloc] initWithObjects:BDSKAuthorString, BDSKEditorString, nil];
 }
 
 - (id)initWithTitle:(NSString *)newTitle defaultsArray:(NSArray *)newDefaultsArray controller:(OAPreferenceController *)controller{
@@ -199,8 +199,8 @@ static NSSet *alwaysDisabledFields = nil;
 - (void)updatePrefs{
 	// we have to make sure that Local-Url and Url are the first in the list
 	NSMutableArray *defaultFields = [[NSMutableArray alloc] initWithCapacity:6];
-	NSMutableArray *localFileFields = [[NSMutableArray alloc] initWithObjects:BDSKLocalUrlString, nil];
-	NSMutableArray *remoteURLFields = [[NSMutableArray alloc] initWithObjects:BDSKUrlString, nil];
+	NSMutableArray *localFileFields = [[NSMutableArray alloc] initWithCapacity:1];
+	NSMutableArray *remoteURLFields = [[NSMutableArray alloc] initWithCapacity:1];
     NSMutableArray *ratingFields = [[NSMutableArray alloc] initWithCapacity:1];
     NSMutableArray *booleanFields = [[NSMutableArray alloc] initWithCapacity:1];
     NSMutableArray *triStateFields = [[NSMutableArray alloc] initWithCapacity:1];
@@ -221,12 +221,10 @@ static NSSet *alwaysDisabledFields = nil;
             case BDSKStringType:
                 break;
             case BDSKLocalFileType:
-				if(![field isEqualToString:BDSKLocalUrlString])
-					[localFileFields addObject:field];
+                [localFileFields addObject:field];
                 break;
             case BDSKRemoteURLType:
-				if(![field isEqualToString:BDSKUrlString])
-					[remoteURLFields addObject:field];
+                [remoteURLFields addObject:field];
                 break;
             case BDSKBooleanType:
                 [booleanFields addObject:field];
@@ -401,10 +399,7 @@ static NSSet *alwaysDisabledFields = nil;
         NSString *colID = [tableColumn identifier];
         NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
         
-        if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString])
-            return NO;
-        else if([field isEqualToString:BDSKRatingString] &&
-                ([colID isEqualToString:@"field"] || [colID isEqualToString:@"type"]))
+        if([field isEqualToString:BDSKRatingString] && ([colID isEqualToString:@"field"] || [colID isEqualToString:@"type"]))
             return NO;
         return YES;
     } else if (tableView == globalMacroFilesTableView) {

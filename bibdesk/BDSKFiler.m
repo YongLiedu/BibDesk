@@ -102,7 +102,7 @@ static BDSKFiler *sharedFiler = nil;
 	
     int mask = BDSKInitialAutoFileOptionMask;
     if (check == YES) mask |= BDSKCheckCompleteAutoFileOptionMask;
-	[self movePapers:papers forField:BDSKLocalUrlString fromDocument:doc options:mask];
+	[self movePapers:papers forField:BDSKLocalFileString fromDocument:doc options:mask];
 }
 
 - (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(int)mask{
@@ -128,8 +128,8 @@ static BDSKFiler *sharedFiler = nil;
 	if (numberOfPapers == 0)
 		return;
 	
-	if (initial && [field isEqualToString:BDSKLocalUrlString] == NO)
-        [NSException raise:BDSKUnimplementedException format:@"%@ is only implemented for the Local-Url field for initial moves.",NSStringFromSelector(_cmd)];
+	if (initial && [field isEqualToString:BDSKLocalFileString] == NO)
+        [NSException raise:BDSKUnimplementedException format:@"%@ is only implemented for local files for initial moves.",NSStringFromSelector(_cmd)];
 	
 	if (numberOfPapers > 1) {
         if (progressSheet == nil)

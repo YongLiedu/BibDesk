@@ -538,18 +538,20 @@
 #pragma mark WebView contextual menu actions
 
 - (void)copyLocationAsRemoteUrl:(id)sender{
-	NSString *URLString = [[[[[webView mainFrame] dataSource] request] URL] absoluteString];
+	NSURL *aURL = [[[[webView mainFrame] dataSource] request] URL];
 	
-	if (URLString) {
-        [self recordChangingField:BDSKUrlString toValue:URLString];
+	if (aURL) {
+        [item addFileForURL:aURL autoFile:YES];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 	}
 }
 
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender{
-	NSString *URLString = [(NSURL *)[sender representedObject] absoluteString];
+	NSURL *aURL = (NSURL *)[sender representedObject];
 	
-	if (URLString) {
-        [self recordChangingField:BDSKUrlString toValue:URLString];
+	if (aURL) {
+        [item addFileForURL:aURL autoFile:YES];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 	}
 }
 
@@ -819,7 +821,7 @@
 	
 	// the default fields can contain fields already contained in typeInfo
     [fields addNonDuplicateObjectsFromArray:[typeMan userDefaultFieldsForType:type]];
-    [fields addNonDuplicateObjectsFromArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAbstractString, BDSKAnnoteString, nil]];
+    [fields addNonDuplicateObjectsFromArray:[NSArray arrayWithObjects:BDSKAbstractString, BDSKAnnoteString, nil]];
 }
 
 #pragma mark Sheet callbacks

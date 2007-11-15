@@ -1284,7 +1284,7 @@ enum{
     NSString *currentType = [publication pubType];
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
 	NSMutableArray *removableFields = [[publication allFieldNames] mutableCopy];
-	[removableFields removeObjectsInArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil]];
+	[removableFields removeObjectsInArray:[NSArray arrayWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil]];
 	[removableFields removeObjectsInArray:[typeMan requiredFieldsForType:currentType]];
 	[removableFields removeObjectsInArray:[typeMan optionalFieldsForType:currentType]];
 	[removableFields removeObjectsInArray:[typeMan userDefaultFieldsForType:currentType]];
@@ -1329,7 +1329,7 @@ enum{
     
     NSString *currentType = [publication pubType];
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSMutableSet *nonNilFields = [NSMutableSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
+    NSMutableSet *nonNilFields = [NSMutableSet setWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
 	[nonNilFields addObjectsFromArray:[typeMan requiredFieldsForType:currentType]];
 	[nonNilFields addObjectsFromArray:[typeMan optionalFieldsForType:currentType]];
 	[nonNilFields addObjectsFromArray:[typeMan userDefaultFieldsForType:currentType]];
