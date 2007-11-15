@@ -3515,8 +3515,6 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     }
     
     // I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others as being non-nil:
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKLocalUrlString, pubFields, emptyFieldsToRemove);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKUrlString, pubFields, emptyFieldsToRemove);
     setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAnnoteString, pubFields, emptyFieldsToRemove);
     setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAbstractString, pubFields, emptyFieldsToRemove);
     setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKRssDescriptionString, pubFields, emptyFieldsToRemove);
