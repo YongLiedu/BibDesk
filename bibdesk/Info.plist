@@ -406,13 +406,13 @@
 					<true/>
 					<key>File papers into the papers folder automatically</key>
 					<false/>
-					<key>Local-Url Clean Braces or TeX</key>
+					<key>BDSKLocalFileCleanOptionKey</key>
 					<integer>2</integer>
-					<key>Local-Url Format</key>
+					<key>BDSKLocalFileFormatKey</key>
 					<string>%l%n0%e</string>
-					<key>Local-Url Format Preset</key>
-					<integer>2</integer>
-					<key>Local-Url Generate Lowercase</key>
+					<key>BDSKLocalFileFormatPresetKey</key>
+					<integer>1</integer>
+					<key>BDSKLocalFileLowercaseKey</key>
 					<false/>
 					<key>Path to the papers folder</key>
 					<string>~/Documents/Papers</string>
@@ -589,8 +589,6 @@
 					<key>Default Fields</key>
 					<array>
 						<string>Keywords</string>
-						<string>Local-Url</string>
-						<string>Url</string>
 					</array>
 					<key>Local File Fields</key>
 					<array>
