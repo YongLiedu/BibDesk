@@ -1366,7 +1366,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     BDSKToken *token = nil;
     int type;
     NSString *field = nil;
-    int i = 0;
+    int i = 0, j;
     
     if ([key isEqualToString:@"fields"] || [key isEqualToString:@"urls"] || [key isEqualToString:@"persons"])
         field = [keys objectAtIndex:++i];
@@ -1393,15 +1393,12 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         return nil;
     
     for (i = 0; i < count; i++) {
-        key = [keys objectAtIndex:i];
-        if (type == BDSKURLTokenType && [key isEqualToString:@"path"] && i <= count) {
-            key = [@"path." stringByAppendingString:[keys objectAtIndex:i + 1]];
-            if ([self propertyForKey:key tokenType:type])
-                i++;
-            else
-                key = @"path";
+        for (j = count; j > i; j--) {
+            key = [[keys subarrayWithRange:MAKE_RANGE(i, j)] componentsJoinedByString:@"."];
+            if (property = [self propertyForKey:key tokenType:type])
+                break;
         }
-        if (property = [self propertyForKey:key tokenType:type])
+        if (j > i)
             [token setValue:key forKey:property];
         else return nil;
     }
