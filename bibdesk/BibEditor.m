@@ -273,7 +273,7 @@ enum{
     [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
     [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
     
-    [fileSplitView setDrawEnd:YES];
+    [fileSplitView setBlendStyle:BDSKMinBlendStyleMask];
     
     [self setWindowFrameAutosaveNameOrCascade:BDSKBibEditorFrameAutosaveName];
     

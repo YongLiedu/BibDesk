@@ -408,8 +408,8 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [documentWindow makeFirstResponder:tableView];	
     
     // SplitViews setup
-    [groupSplitView setDrawEnd:YES];
-    [splitView setDrawEnd:YES];
+    [groupSplitView setBlendStyle:BDSKStatusBarBlendStyleMask];
+    [splitView setBlendStyle:BDSKMinBlendStyleMask | BDSKMaxBlendStyleMask];
     
     // set autosave names first
 	[splitView setPositionAutosaveName:@"OASplitView Position Main Window"];

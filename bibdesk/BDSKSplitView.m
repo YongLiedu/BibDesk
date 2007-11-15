@@ -80,7 +80,7 @@
 
 - (id)initWithFrame:(NSRect)frameRect{
     if (self = [super initWithFrame:frameRect]) {
-        drawEnd = NO;
+        blendStyle = NO;
     }
     return self;
 }
@@ -99,14 +99,19 @@
 - (void)drawDividerInRect:(NSRect)aRect {
     // Draw gradient
     [[NSBezierPath bezierPathWithRect:aRect] fillPathVertically:NO == [self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
-    if (drawEnd) {
+    if (blendStyle) {
         NSRect endRect, ignored;
-        if ([self isVertical]) {
+        if (blendStyle & BDSKMinBlendStyleMask) {
+            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, [self isVertical] ? NSMinYEdge : NSMinXEdge);
+            [[NSBezierPath bezierPathWithRect:endRect] fillPathVertically:[self isVertical] withStartColor:[CIColor clearColor] endColor:[[self class] startColor]];
+        }
+        if (blendStyle & BDSKMaxBlendStyleMask) {
+            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, [self isVertical] ? NSMaxYEdge : NSMaxXEdge);
+            [[NSBezierPath bezierPathWithRect:endRect] fillPathVertically:[self isVertical] withStartColor:[[self class] endColor] endColor:[CIColor clearColor]];
+        }
+        if ([self isVertical] && (blendStyle & BDSKStatusBarBlendStyleMask)) {
             NSDivideRect(aRect, &endRect, &ignored, END_JOIN_HEIGHT, NSMaxYEdge);
             [self drawBlendedJoinEndAtBottomInRect:endRect];
-        } else {
-            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, NSMinXEdge);
-            [[NSBezierPath bezierPathWithRect:endRect] fillPathVertically:[self isVertical] withStartColor:[CIColor clearColor] endColor:[[self class] startColor]];
         }
     }
     // Draw dimple
@@ -124,12 +129,12 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:self];
 }
 
-- (BOOL)drawEnd {
-    return drawEnd;
+- (int)blendStyle {
+    return blendStyle;
 }
 
-- (void)setDrawEnd:(BOOL)flag {
-    drawEnd = flag;
+- (void)setBlendStyle:(int)mask {
+    blendStyle = mask;
 }
 
 // arm: mouseDown: swallows mouseDragged: needlessly
