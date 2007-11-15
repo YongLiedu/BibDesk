@@ -1355,9 +1355,15 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
         }
         
         // change selection first, as Finder does
-        if ([event clickCount] > 1 && [self _URLAtPoint:p] != nil)
-            [[NSWorkspace sharedWorkspace] openURL:[self _URLAtPoint:p]];
-
+        if ([event clickCount] > 1 && [self _URLAtPoint:p] != nil) {
+            if (flags & NSAlternateKeyMask) {
+                [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
+                [FVPreviewer previewURL:[self _URLAtPoint:p]];
+            } else {
+                [[NSWorkspace sharedWorkspace] openURL:[self _URLAtPoint:p]];
+            }
+        }
+        
     }
     else if ([_selectedIndexes count]) {
         // deselect all, since we had a previous selection and clicked on a non-icon area
