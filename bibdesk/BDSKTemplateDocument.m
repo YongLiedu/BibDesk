@@ -1401,6 +1401,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         if (j > i)
             [token setValue:key forKey:property];
         else return nil;
+        i = j - 1;
     }
     
     if (defaultFont) {
