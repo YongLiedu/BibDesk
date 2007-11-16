@@ -217,7 +217,6 @@ The groupedPublications array is a subset of the publications array, developed b
         [splitView adjustSubviews];
         [splitView setNeedsDisplay:YES];
     }
-    [webGroupViewController setGroup:nil]; // see above re: "necessary"?
 }
 
 

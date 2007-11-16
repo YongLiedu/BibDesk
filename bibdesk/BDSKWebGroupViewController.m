@@ -80,10 +80,6 @@
     [stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
 }
 
-- (void)handleWebGroupUpdatedNotification:(NSNotification *)notification{
-    // ?
-}
-
 - (NSView *)view {
     [self window];
     return view;
@@ -100,14 +96,8 @@
 
 - (void)setGroup:(BDSKWebGroup *)newGroup {
     if (group != newGroup) {
-        if (group)
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKWebGroupUpdatedNotification object:group];
-        
         [group release];
         group = [newGroup retain];
-        
-        if (group)
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleWebGroupUpdatedNotification:) name:BDSKWebGroupUpdatedNotification object:group];
     }
 }
 
