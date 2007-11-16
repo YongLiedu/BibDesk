@@ -1324,8 +1324,19 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)openBookmark:(id)sender{
-    if ([self hasWebGroupSelected] || [self selectGroup:[groups webGroup]])
-        [webGroupViewController loadURL:[sender representedObject]];
+    // switch to the web group
+    if ([self hasWebGroupSelected] == NO) {
+        // make sure the controller and its nib are loaded
+        if (nil == webGroupViewController) {
+            webGroupViewController = [[BDSKWebGroupViewController alloc] initWithGroup:[groups webGroup] document:self];
+            [webGroupViewController window];
+        }
+        if ([self selectGroup:[groups webGroup]] == NO) {
+            NSBeep();
+            return;
+        }
+    }
+    [webGroupViewController loadURL:[sender representedObject]];
 }
 
 - (IBAction)addBookmark:(id)sender {
