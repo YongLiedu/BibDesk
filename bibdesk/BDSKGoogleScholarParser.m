@@ -50,7 +50,7 @@
         return NO;
     }
     
-    NSString *containsBibTexLinkNode = @"//a[contains(text(),'Import into BibTeX')]"; 
+    NSString *containsBibTexLinkNode = @"//a[contains(text(),'BibTeX')]"; 
     
     NSError *error = nil;    
 
@@ -69,7 +69,7 @@
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
     
-    NSString *BibTexLinkNodePath = @"//a[contains(text(),'Import into BibTeX')]";
+    NSString *BibTexLinkNodePath = @"//a[contains(text(),'BibTeX')]";
     
     NSError *error = nil;    
 
