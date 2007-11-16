@@ -18,5 +18,21 @@
 		<key>URLString</key>
 		<string>http://www.citeulike.org/</string>
 	</dict>
+	<dict>
+		<key>Title</key>
+		<string>HubMed</string>
+		<key>Type</key>
+		<string>bookmark</string>
+		<key>URLString</key>
+		<string>http://www.hubmed.org/</string>
+	</dict>
+	<dict>
+		<key>Title</key>
+		<string>ACM Portal</string>
+		<key>Type</key>
+		<string>bookmark</string>
+		<key>URLString</key>
+		<string>http://portal.acm.org/portal.cfm</string>
+	</dict>
 </array>
 </plist>
