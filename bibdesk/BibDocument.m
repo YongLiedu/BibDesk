@@ -256,6 +256,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [webGroupViewController release];
     [searchIndexes release];
     [searchButtonController release];
+    [UIUndoManager release];
     [super dealloc];
 }
 
@@ -464,6 +465,14 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 // this is needed for the BDSKOwner protocol
 - (NSUndoManager *)undoManager {
     return [super undoManager];
+}
+
+// this is used for controls in the main window. We don't want to use our undoManager here, as this does not change our model
+// this should be automatically provided by the window, but WebView ignores this and picks the wrong undo manager
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender {
+    if (UIUndoManager == nil)
+        UIUndoManager = [[NSUndoManager alloc] init];
+    return UIUndoManager;
 }
 
 - (BOOL)isMainDocument {
