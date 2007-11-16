@@ -40,6 +40,7 @@
 #import "BDSKWebGroupViewController.h"
 #import <WebKit/WebKit.h>
 #import "BDSKWebParser.h"
+#import "BDSKStringParser.h"
 #import "BDSKWebGroup.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKEdgeView.h"
@@ -185,10 +186,30 @@
     NSError *error = nil;
     NSArray *newPubs = [BDSKWebParser itemsFromDocument:domDocument fromURL:url error:&error];
     if (nil == newPubs) {
+        WebDataSource *dataSource = [frame dataSource];
+        if ([[[dataSource mainResource] MIMEType] isEqualToString:@"text/plain"]) { 
+            NSString *string = [[dataSource representation] documentSource];
+            if(string == nil) {
+                NSString *encodingName = [dataSource textEncodingName];
+                CFStringEncoding cfEncoding = kCFStringEncodingInvalidId;
+                NSStringEncoding nsEncoding = NSUTF8StringEncoding;
+                
+                if (encodingName != nil)
+                    cfEncoding = CFStringConvertIANACharSetNameToEncoding((CFStringRef)encodingName);
+                if (cfEncoding != kCFStringEncodingInvalidId)
+                    nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
+                string = [[[NSString alloc] initWithData:[dataSource data] encoding:nsEncoding] autorelease];
+            }
+            int type = [string contentStringType];
+            if(type != BDSKUnknownStringType)
+                newPubs = [document newPublicationsForString:string type:type verbose:NO error:&error];
+        }
+        if (nil == newPubs) {
 #warning remove for release
-        // !!! logs are here to help diagnose problems that users are reporting
-        NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
-        [NSApp presentError:error];
+            // !!! logs are here to help diagnose problems that users are reporting
+            NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
+            [NSApp presentError:error];
+        }
     }
         
     if (frame == loadingWebFrame) {
