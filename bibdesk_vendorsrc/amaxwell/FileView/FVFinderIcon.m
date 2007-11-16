@@ -214,8 +214,12 @@ static inline NSSize bestIntegralSizeForIconSize(NSSize aSize)
 - (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 {
     pthread_mutex_lock(&_mutex);
-    if (_imageRef)
-        CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _imageRef);
+    if (_imageRef == NULL) {
+        pthread_mutex_unlock(&_mutex);
+        [self renderOffscreen];
+        pthread_mutex_lock(&_mutex);
+    }
+    CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _imageRef);
     pthread_mutex_unlock(&_mutex);
 }
 
