@@ -1773,7 +1773,7 @@
     [itemTableView reloadData];
 }
 
-- (void)autoDiscoverDataFromString:(NSString *)string{return;
+- (void)autoDiscoverDataFromString:(NSString *)string{
     int type = [string contentStringType];
     
     if(type == BDSKUnknownStringType)
