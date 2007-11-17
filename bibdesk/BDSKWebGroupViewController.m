@@ -114,7 +114,7 @@
         [[NSGraphicsContext currentContext] saveGraphicsState];
         [[NSColor colorWithCalibratedWhite:0.1 alpha:1.0] setStroke];
         path = [NSBezierPath bezierPath];
-        [path moveToPoint:NSMakePoint(8.5, 10.5)];
+        [path moveToPoint:NSMakePoint(8.0, 11.0)];
         [path lineToPoint:NSMakePoint(16.0, 3.0)];
         [path moveToPoint:NSMakePoint(8.0, 3.0)];
         [path lineToPoint:NSMakePoint(16.0, 11.0)];
