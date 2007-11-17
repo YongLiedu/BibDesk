@@ -158,6 +158,7 @@
             ACTIONS = {delete = id; selectNextIcon = id; selectPreviousIcon = id; }; 
             CLASS = FileView; 
             LANGUAGE = ObjC; 
+            OUTLETS = {dataSource = id; delegate = id; dragDataSource = id; }; 
             SUPERCLASS = NSView; 
         }, 
         {

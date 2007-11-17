@@ -210,6 +210,12 @@
 */
 - (IBAction)moveLinkedFile:(id)sender;
 
+- (IBAction)openLinkedFile:(id)sender;
+
+- (IBAction)revealLinkedFile:(id)sender;
+
+- (IBAction)openLinkedURL:(id)sender;
+
 - (IBAction)showNotesForLinkedFile:(id)sender;
 
 - (IBAction)copyNotesForLinkedFile:(id)sender;

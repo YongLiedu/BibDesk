@@ -3524,25 +3524,10 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     CFRelease(emptyFieldsToRemove);
 }
 
-static void addFileURLForFieldToArrayIfNotNil(const void *key, void *context)
+static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
     BibItem *self = (BibItem *)context;
-    NSURL *value = [self localFileURLForField:(id)key];
-    if (value && [[self valueForKeyPath:@"files.URL"] containsObject:value] == NO) {
-        // !!! file URLs are always absolute but the init method here always returns nil, which probably means that we should do the first initialization with relative paths instead of expending them first
-        BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithURL:value delegate:self];
-        if (aFile) {
-            [self->files addObject:aFile];
-            [aFile release];
-        }
-        else NSLog(@"*** Unable to create alias to %@", value);
-    }
-}
-
-static void addRemoteURLForFieldToArrayIfNotNil(const void *key, void *context)
-{
-    BibItem *self = (BibItem *)context;
-    NSURL *value = [self remoteURLForField:(id)key];
+    NSURL *value = [self URLForField:(id)key];
     if (value && [[self valueForKeyPath:@"files.URL"] containsObject:value] == NO) {
         // !!! file URLs are always absolute but the init method here always returns nil, which probably means that we should do the first initialization with relative paths instead of expending them first
         BDSKLinkedFile *aURL = [[BDSKLinkedFile alloc] initWithURL:value delegate:self];
@@ -3550,7 +3535,7 @@ static void addRemoteURLForFieldToArrayIfNotNil(const void *key, void *context)
             [self->files addObject:aURL];
             [aURL release];
         }
-        else NSLog(@"*** Unable to create URL to %@", value);
+        else NSLog(@"*** Unable to create file for %@", value);
     }
 }
 
@@ -3617,10 +3602,10 @@ static void addRemoteURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     // @@ temporary hack to create an array of BDSKLinkedFiles from Local Files and BDSKLinkedURLs from Remote URLs
     if ([files count] == 0) {
-        CFSetRef fileSet = (CFSetRef)[[BDSKTypeManager sharedManager] localFileFieldsSet];
-        CFSetApplyFunction(fileSet, addFileURLForFieldToArrayIfNotNil, self);
-        CFSetRef remoteURLSet = (CFSetRef)[[BDSKTypeManager sharedManager] remoteURLFieldsSet];
-        CFSetApplyFunction(remoteURLSet, addRemoteURLForFieldToArrayIfNotNil, self);
+        CFArrayRef fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
+        CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, self);
+        fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey];
+        CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, self);
     }
 }
 

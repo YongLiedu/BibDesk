@@ -151,27 +151,29 @@
 - (IBAction)sendToLyX:(id)sender;
 - (IBAction)postItemToWeblog:(id)sender;
 
-#pragma mark | URL actions
+#pragma mark URL actions
+
+#pragma mark | URL Field actions
 
 /*!
-    @method openLinkedFile:
+    @method openLocalURL:
     @abstract Opens the linked file of the selected publication with the default application
     @discussion - 
     @param sender The sender. Not used.
 */
-- (IBAction)openLinkedFile:(id)sender;
+- (IBAction)openLocalURL:(id)sender;
 
-- (void)openLinkedFileForField:(NSString *)field;
+- (void)openLocalURLForField:(NSString *)field;
 
 /*!
-    @method revealLinkedFile:
+    @method revealLocalURL:
     @abstract Reveals the linked file of the selected publication in the Finder
     @discussion 
     @param sender The sender. Not used.
 */
-- (IBAction)revealLinkedFile:(id)sender;
+- (IBAction)revealLocalURL:(id)sender;
 
-- (void)revealLinkedFileForField:(NSString *)field;
+- (void)revealLocalURLForField:(NSString *)field;
 
 /*!
     @method openRemoteURL:
@@ -184,18 +186,30 @@
 - (void)openRemoteURLForField:(NSString *)field;
 
 /*!
-    @method showNotesForLinkedFile:
+    @method showNotesForLocalURL:
     @abstract Shows Skim notes of the selected publication in separate windows
     @discussion - 
     @param sender The sender. Not used.
 */
+- (IBAction)showNotesForLocalURL:(id)sender;
+
+- (void)showNotesForLocalURLForField:(NSString *)field;
+
+- (IBAction)copyNotesForLocalURL:(id)sender;
+
+- (void)copyNotesForLocalURLForField:(NSString *)field;
+
+#pragma mark | Linked File and URL actions
+
+- (IBAction)openLinkedFile:(id)sender;
+
+- (IBAction)revealLinkedFile:(id)sender;
+
+- (IBAction)openLinkedURL:(id)sender;
+
 - (IBAction)showNotesForLinkedFile:(id)sender;
 
-- (void)showNotesForLinkedFileForField:(NSString *)field;
-
 - (IBAction)copyNotesForLinkedFile:(id)sender;
-
-- (void)copyNotesForLinkedFileForField:(NSString *)field;
 
 #pragma mark View Actions
 

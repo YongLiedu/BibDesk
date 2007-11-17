@@ -2848,11 +2848,26 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 
 - (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
     NSURL *theURL = anIndex == NSNotFound ? nil : [self objectInFileViewURLsAtIndex:anIndex];
-    int i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
+    int i;
     
     if (theURL && i != -1) {
+        i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
         [menu insertItemWithTitle:[NSLocalizedString(@"Open With", @"Menu item title") stringByAppendingEllipsis]
                 andSubmenuOfApplicationsForURL:theURL atIndex:++i];
+    }
+    if ([theURL isFileURL]) {
+        i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
+        item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
+                                  action:@selector(showNotesForLinkedFile:)
+                           keyEquivalent:@""
+                                 atIndex:++i];
+        [item setRepresentedObject:theURL];
+        
+        item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
+                                  action:@selector(copyNotesForLinkedFile:)
+                           keyEquivalent:@""
+                                 atIndex:++i];
+        [item setRepresentedObject:theURL];
     }
 }
 

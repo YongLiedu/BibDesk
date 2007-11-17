@@ -304,16 +304,16 @@
 		if([tcId isURLField]){
             menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
             if([tcId isLocalFileField]){
-                item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"Menu item title") action:@selector(openLocalURL:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title") action:@selector(revealLinkedFile:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title") action:@selector(revealLocalURL:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title") action:@selector(showNotesForLinkedFile:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title") action:@selector(showNotesForLocalURL:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title") action:@selector(copyNotesForLinkedFile:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title") action:@selector(copyNotesForLocalURL:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
             }else{

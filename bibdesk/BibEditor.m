@@ -471,38 +471,100 @@ enum{
     [field release];
 }
 
-- (IBAction)showNotesForLinkedFile:(id)sender{
+- (IBAction)openLinkedFile:(id)sender{
+    NSEnumerator *urlEnum = nil;
 	NSURL *fileURL = [sender representedObject];
     
-    if (fileURL == nil) {
-        NSBeep();
-        return;
+    if (fileURL)
+        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+    else
+        urlEnum = [[publication valueForKeyPath:@"localFiles.URL"] objectEnumerator];
+    
+    while (fileURL = [urlEnum nextObject]) {
+        if ([fileURL isEqual:[NSNull null]] == NO) {
+            [[NSWorkspace sharedWorkspace] openLinkedFile:[fileURL path]];
+        }
     }
+}
+
+- (IBAction)revealLinkedFile:(id)sender{
+    NSEnumerator *urlEnum = nil;
+	NSURL *fileURL = [sender representedObject];
     
-    BDSKNotesWindowController *notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
+    if (fileURL)
+        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+    else
+        urlEnum = [[publication valueForKeyPath:@"remoteURLs.URL"] objectEnumerator];
     
-    [[self document] addWindowController:notesController];
-    [notesController showWindow:self];
+    while (fileURL = [urlEnum nextObject]) {
+        if ([fileURL isEqual:[NSNull null]] == NO) {
+            [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
+        }
+    }
+}
+
+- (IBAction)openLinkedURL:(id)sender{
+    NSEnumerator *urlEnum = nil;
+	NSURL *remoteURL = [sender representedObject];
+    
+    if (remoteURL)
+        urlEnum = [[NSArray arrayWithObject:remoteURL] objectEnumerator];
+    else
+        urlEnum = [[publication valueForKeyPath:@"remoteURLs.URL"] objectEnumerator];
+    
+    while (remoteURL = [urlEnum nextObject]) {
+        if ([remoteURL isEqual:[NSNull null]] == NO) {
+			[[NSWorkspace sharedWorkspace] openURL:remoteURL];
+        }
+    }
+}
+
+- (IBAction)showNotesForLinkedFile:(id)sender{
+    NSEnumerator *urlEnum = nil;
+	NSURL *fileURL = [sender representedObject];
+    
+    if (fileURL)
+        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+    else
+        urlEnum = [[publication valueForKeyPath:@"localFiles.URL"] objectEnumerator];
+    
+    while (fileURL = [urlEnum nextObject]) {
+        if ([fileURL isEqual:[NSNull null]] == NO) {
+            BDSKNotesWindowController *notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
+        
+            [[self document] addWindowController:notesController];
+            [notesController showWindow:self];
+        }
+    }
 }
 
 - (IBAction)copyNotesForLinkedFile:(id)sender{
+    NSEnumerator *urlEnum = nil;
 	NSURL *fileURL = [sender representedObject];
+    NSMutableString *string = [NSMutableString string];
     
-    if (fileURL == nil) {
-        NSBeep();
-        return;
+    if (fileURL)
+        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+    else
+        urlEnum = [[publication valueForKeyPath:@"localFiles.URL"] objectEnumerator];
+    
+    while (fileURL = [urlEnum nextObject]) {
+        if ([fileURL isEqual:[NSNull null]] == NO) {
+            NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
+            
+            if ([notes length]) {
+                if ([string length])
+                    [string appendString:@"\n\n"];
+                [string appendString:notes];
+            }
+            
+        }
     }
-    
-    NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
-    
-    if ([notes isEqualToString:@""]) {
-        NSBeep();
-        return;
+    if ([string length]) {
+        NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+        [pboard setString:string forType:NSStringPboardType];
     }
-    
-    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-    [pboard setString:notes forType:NSStringPboardType];
 }
 
 #pragma mark Menus
