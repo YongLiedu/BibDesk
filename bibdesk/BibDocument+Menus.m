@@ -154,7 +154,7 @@
     return NO;
 }
 
-- (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {
+- (BOOL) validateOpenLocalURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
@@ -170,7 +170,7 @@
     return NO;
 }	
 
-- (BOOL) validateRevealLinkedFileMenuItem:(NSMenuItem*) menuItem {
+- (BOOL) validateRevealLocalURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
@@ -189,6 +189,22 @@
 - (BOOL) validateOpenRemoteURLMenuItem:(NSMenuItem*) menuItem {
 	NSString *field = [menuItem representedObject];
     if (field == nil)
+		field = BDSKUrlString;
+    
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+	BibItem *pub = nil;
+    
+    while(pub = [e nextObject]){
+        NSURL *url = [pub remoteURLForField:field];
+        if (url)
+            return YES;
+    }
+    return NO;
+}	
+
+- (BOOL) validateShowNotesForLocalURLMenuItem:(NSMenuItem*) menuItem {
+	NSString *field = [menuItem representedObject];
+    if (field == nil)
 		field = BDSKLocalUrlString;
     
     NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -200,38 +216,42 @@
             return YES;
     }
     return NO;
+}	
+
+- (BOOL) validateCopyNotesForLocalURLMenuItem:(NSMenuItem*) menuItem {
+	NSString *field = [menuItem representedObject];
+    if (field == nil)
+		field = BDSKLocalUrlString;
+    
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+	BibItem *pub = nil;
+    
+    while(pub = [e nextObject]){
+        NSString *path = [pub localFilePathForField:field];
+        if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
+            return YES;
+    }
+    return NO;
+}	
+
+- (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {
+    return [menuItem representedObject] != nil || [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
+}	
+
+- (BOOL) validateRevealLinkedFileMenuItem:(NSMenuItem*) menuItem {
+    return [menuItem representedObject] != nil || [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
+}	
+
+- (BOOL) validateOpenLinkedURLMenuItem:(NSMenuItem*) menuItem {
+    return [menuItem representedObject] != nil || [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count] > 0;
 }	
 
 - (BOOL) validateShowNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-	NSString *field = [menuItem representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-    
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub = nil;
-    
-    while(pub = [e nextObject]){
-        NSString *path = [pub localFilePathForField:field];
-        if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
-            return YES;
-    }
-    return NO;
+    return [menuItem representedObject] != nil || [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
 }	
 
 - (BOOL) validateCopyNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-	NSString *field = [menuItem representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-    
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub = nil;
-    
-    while(pub = [e nextObject]){
-        NSString *path = [pub localFilePathForField:field];
-        if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
-            return YES;
-    }
-    return NO;
+    return [menuItem representedObject] != nil || [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
 }	
 
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
@@ -639,14 +659,29 @@
 	else if(act == @selector(sendToLyX:)) {
 		return [self validateSendToLyXMenuItem:menuItem];
 	}
+	else if(act == @selector(openLocalURL:)) {
+		return [self validateOpenLocalURLMenuItem:menuItem];
+	}
+	else if(act == @selector(revealLocalURL:)) {
+		return [self validateRevealLocalURLMenuItem:menuItem];
+	}
+	else if(act == @selector(openRemoteURL:)) {
+		return [self validateOpenRemoteURLMenuItem:menuItem];
+	}
+	else if(act == @selector(showNotesForLocalURL:)) {
+		return [self validateShowNotesForLocalURLMenuItem:menuItem];
+	}
+	else if(act == @selector(copyNotesForLocalURL:)) {
+		return [self validateCopyNotesForLocalURLMenuItem:menuItem];
+	}
 	else if(act == @selector(openLinkedFile:)) {
 		return [self validateOpenLinkedFileMenuItem:menuItem];
 	}
 	else if(act == @selector(revealLinkedFile:)) {
 		return [self validateRevealLinkedFileMenuItem:menuItem];
 	}
-	else if(act == @selector(openRemoteURL:)) {
-		return [self validateOpenRemoteURLMenuItem:menuItem];
+	else if(act == @selector(openLinkedURL:)) {
+		return [self validateOpenLinkedURLMenuItem:menuItem];
 	}
 	else if(act == @selector(showNotesForLinkedFile:)) {
 		return [self validateShowNotesForLinkedFileMenuItem:menuItem];

@@ -2849,6 +2849,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 - (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
     NSURL *theURL = anIndex == NSNotFound ? nil : [self objectInFileViewURLsAtIndex:anIndex];
     int i;
+    NSMenuItem *item;
     
     if (theURL && i != -1) {
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
