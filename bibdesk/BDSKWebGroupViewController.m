@@ -219,7 +219,7 @@
     if (retrieving) {
         [stopOrReloadButton setImage:[NSImage imageNamed:@"StopAdorn"]];
         [stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
-        [stopOrReloadButton setKeyEquivalent:@""];
+        [stopOrReloadButton setKeyEquivalent:@"."];
     } else {
         [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
         [stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
