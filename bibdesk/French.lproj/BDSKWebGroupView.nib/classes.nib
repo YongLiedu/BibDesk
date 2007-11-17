@@ -26,13 +26,17 @@
             SUPERCLASS = NSWindowController; 
         }, 
         {
-            ACTIONS = {changeURL = id; stopOrReloadAction = id; }; 
+            ACTIONS = {
+                addBookmark = id; 
+                changeURL = id; 
+                goBackForward = id; 
+                stopOrReloadAction = id; 
+            }; 
             CLASS = BDSKWebGroupViewController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                backButton = NSButton; 
+                backForwardButton = NSSegmentedControl; 
                 edgeView = BDSKEdgeView; 
-                forwardButton = NSButton; 
                 stopOrReloadButton = NSButton; 
                 urlField = NSTextField; 
                 view = BDSKCollapsibleView; 

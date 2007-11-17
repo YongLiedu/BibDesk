@@ -47,8 +47,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     IBOutlet NSTextField *urlField;
     IBOutlet BDSKEdgeView *webEdgeView;
     IBOutlet WebView *webView;
-    IBOutlet NSButton *backButton;
-    IBOutlet NSButton *forwardButton;
+    IBOutlet NSSegmentedControl *backForwardButton;
     IBOutlet NSButton *stopOrReloadButton;
     
     BDSKWebGroup *group;
@@ -67,6 +66,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 - (void)loadURL:(NSURL *)theURL;
 
 - (IBAction)changeURL:(id)sender;
+- (IBAction)goBackForward:(id)sender;
 - (IBAction)stopOrReloadAction:(id)sender;
 
 - (IBAction)addBookmark:(id)sender;
