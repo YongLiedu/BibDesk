@@ -891,16 +891,22 @@ enum{
         return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
 	}
 	else if (theAction == @selector(moveLinkedFile:)) {
-		NSURL *theURL = (NSURL *)[menuItem representedObject];
-		return (isEditable && theURL != nil);
+		return (isEditable && [menuItem representedObject] != nil);
+	}
+	else if (theAction == @selector(openLinkedFile:)) {
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
+	}
+	else if (theAction == @selector(revealLinkedFile:)) {
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
+	}
+	else if (theAction == @selector(openLinkedURL:)) {
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
 	else if (theAction == @selector(showNotesForLinkedFile:)) {
-		NSURL *theURL = (NSURL *)[menuItem representedObject];
-		return theURL != nil;
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
 	else if (theAction == @selector(copyNotesForLinkedFile:)) {
-		NSURL *theURL = (NSURL *)[menuItem representedObject];
-		return theURL != nil;
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)
