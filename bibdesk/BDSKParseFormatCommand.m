@@ -53,8 +53,11 @@
 	// the other parameters are either a field or a field name and a publication
 	NSDictionary *params = [self evaluatedArguments];
 	id field = [params objectForKey:@"for"];
+	NSNumber *indexNumber = [params objectForKey:@"index"];
 	BibItem *pub = [params objectForKey:@"from"];
 	BOOL check = [[params objectForKey:@"check"] boolValue];
+    unsigned int i = indexNumber ? [indexNumber unsignedIntValue] - 1 : 0;
+    BOOL isFile = field == nil;
     
 	if (formatString == nil || params == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
@@ -66,15 +69,13 @@
 	}
 	
 	if (field == nil) {
-		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-		return nil;
-	}
-	if ([field isKindOfClass:[BDSKField class]]) {
+        field = BDSKLocalFileString;
+    } else if ([field isKindOfClass:[BDSKField class]]) {
 		if (pub == nil) {
 			pub = [(BDSKField *)field publication];
 		}
 		field = [field name];
-	} else if ([field isKindOfClass:[NSString class]] == NO) {
+	} else if (field && [field isKindOfClass:[NSString class]] == NO) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		return nil;
 	} else if ([field isEqualToString:BDSKCiteKeyString] == NO) {
@@ -91,22 +92,26 @@
 	}
 	
 	NSString *error = nil;
-	
+    
 	if (NO == [BDSKFormatParser validateFormat:&formatString forField:field inFileType:BDSKBibtexString error:&error]) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		[self setScriptErrorString:[NSString stringWithFormat:@"Invalid format string: %@", error]]; 
 		return nil;
 	}
     
-    BOOL isLocalFile = [field isLocalFileField];
+    BOOL isFileField = [field isLocalFileField];
     NSString *papersFolderPath = nil;
-    if (isLocalFile)
+    if (isFileField || isFile)
         papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
 	
+    BDSKLinkedFile *file = nil;
+    if (isFile)
+        file = [[pub localFiles] objectAtIndex:i];
+    
     if (check) {
         NSArray *requiredFields = [BDSKFormatParser requiredFieldsForFormat:formatString];
         
-        if (isLocalFile &&
+        if ((isFileField || isFile) &&
             ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
              [NSString isEmptyString:[[[[pub owner] fileURL] path] stringByDeletingLastPathComponent]]))
             return [NSNull null];
@@ -117,6 +122,9 @@
         while (fieldName = [fEnum nextObject]) {
             if ([fieldName isEqualToString:BDSKCiteKeyString]) {
                 if([pub hasEmptyOrDefaultCiteKey])
+                    return [NSNull null];
+            } else if ([fieldName isEqualToString:BDSKLocalFileString]) {
+                if ((isFile && [file URL] == nil) || [pub localFileURLForField:field] == nil)
                     return [NSNull null];
             } else if ([fieldName isEqualToString:@"Document Filename"]) {
                 if ([NSString isEmptyString:[[[pub owner] fileURL] path]])
@@ -138,23 +146,29 @@
     NSString *suggestion = nil;
     if ([field isEqualToString:BDSKCiteKeyString]) {
         suggestion = [pub citeKey];
-    } else if (isLocalFile) {
+    } else if (isFileField) {
         suggestion = [[pub localFileURLForField:field inherit:NO] path];
         if ([suggestion hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
             suggestion = [suggestion substringFromIndex:[papersFolderPath length]];
         else
             suggestion = nil;
-    } else {
+    } else if (isFile == NO) {
         suggestion = [pub valueOfField:field inherit:NO];
     }
     
-	NSString *string = [BDSKFormatParser parseFormat:formatString forField:field ofItem:pub suggestion:suggestion];
+	NSString *string = nil;
+    
+    if (isFile)
+        string = [BDSKFormatParser parseFormatForLinkedFile:file ofItem:pub];
+    else
+        string = [BDSKFormatParser parseFormat:formatString forField:field ofItem:pub suggestion:suggestion];
 	
-	if (isLocalFile) {
+	if (isFileField)
 		return [[NSURL fileURLWithPath:[papersFolderPath stringByAppendingPathComponent:string]] absoluteString];
-	} 
-	
-	return string;
+	else if (isFile)
+		return [papersFolderPath stringByAppendingPathComponent:string];
+	else
+        return string;
 }
 
 @end
