@@ -113,7 +113,9 @@
         return 0;
 }
 
-- (NSString *)localFilePathForField:(NSString *)field { return [pubFields objectForKey:field]; }
+- (NSURL *)localFileURLForField:(NSString *)field {
+    return [NSURL fileURLWithPath:@"Local File Name.pdf"];
+}
 
 - (NSArray *)peopleArrayForField:(NSString *)field { 
     return ([field isEqualToString:BDSKAuthorString]) ? pubAuthors : [NSArray array];

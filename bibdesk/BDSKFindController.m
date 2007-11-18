@@ -104,12 +104,6 @@ enum {
 		shouldSetWhenEmpty = NO;
         operation = FCOperationFindAndReplace;
 		
-		NSString *field = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKFindControllerLastFindAndReplaceFieldKey];
-		if([field isLocalFileField])
-			shouldMove = NSMixedState;
-		else
-			shouldMove = NSOffState;
-		
 		replaceAllTooltip = [NSLocalizedString(@"Replace all matches.", @"Tool tip message") retain];
 		
         editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
@@ -242,10 +236,6 @@ enum {
 
 - (void)setField:(NSString *)newField {
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newField forKey:BDSKFindControllerLastFindAndReplaceFieldKey];
-	if([newField isLocalFileField])
-		shouldMove = NSMixedState;
-	else
-		shouldMove = NSOffState;
 }
 
 - (NSString *)findString {
@@ -927,19 +917,6 @@ enum {
 	return nil;
 }
 
-- (void)setField:field ofItem:bibItem toValue:newValue withInfos:(NSMutableArray *)paperInfos{
-	NSString *oldPath = nil;
-	NSString *newPath = nil;
-	if(shouldMove)
-		oldPath = [bibItem localFilePathForField:field];
-	[bibItem setField:field toValue:newValue];
-	if(shouldMove){
-		newPath = [bibItem localFilePathForField:field];
-		if([NSString isEmptyString:oldPath] == NO)
-			[paperInfos addObject:[NSDictionary dictionaryWithObjectsAndKeys:bibItem, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
-	}
-}
-
 - (unsigned int)stringFindAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
 	// find and replace using BDSKComplexString methods
     // first we setup all the search settings
@@ -971,11 +948,7 @@ enum {
     NSString *newStr;
 	unsigned int numRepl = 0;
 	unsigned number = 0;
-	NSMutableArray *paperInfos = nil;
 	
-	if(shouldMove)
-		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
-    
     while(bibItem = [pubE nextObject]){
         // don't touch external items
         if ([bibItem owner] != theDocument) 
@@ -988,22 +961,18 @@ enum {
 		
 		if(searchScope == FCWholeFieldSearch){
 			if([findStr compareAsComplexString:origStr options:searchOpts] == NSOrderedSame){
-				[self setField:field ofItem:bibItem toValue:replStr withInfos:paperInfos];
+                [bibItem setField:field toValue:replStr];
 				number++;
 			}
 		}else{
 			newStr = [origStr stringByReplacingOccurrencesOfString:findStr withString:replStr options:searchOpts replacements:&numRepl];
 			if(numRepl > 0){
-				[self setField:field ofItem:bibItem toValue:newStr withInfos:paperInfos];
+                [bibItem setField:field toValue:newStr];
 				number++;
 			}
 		}
     }
 
-    // @@ AutoFile: deprecated
-	//if([paperInfos count])
-	//	[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
-	
 	return number;
 }
 
@@ -1024,10 +993,6 @@ enum {
     NSString *origStr;
 	NSString *complexStr;
 	unsigned number = 0;
-	NSMutableArray *paperInfos = nil;
-	
-	if(shouldMove)
-		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 	
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1046,23 +1011,19 @@ enum {
 			if(replaceAsMacro || findAsMacro){
 				NS_DURING
 					complexStr = [NSString stringWithBibTeXString:origStr macroResolver:[theDocument macroResolver]];
-					[self setField:field ofItem:bibItem toValue:complexStr withInfos:paperInfos];
+                    [bibItem setField:field toValue:complexStr];
 					number++;
 				NS_HANDLER
 					if(![[localException name] isEqualToString:BDSKComplexStringException])
 						[localException raise];
 				NS_ENDHANDLER
 			} else {
-				[self setField:field ofItem:bibItem toValue:origStr withInfos:paperInfos];
+                [bibItem setField:field toValue:origStr];
 				number++;
 			}            
         }
     }
 	
-    // @@ AutoFile: deprecated
-	//if([paperInfos count])
-	//	[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
-	    
 	return number;
 }
 
@@ -1081,10 +1042,6 @@ enum {
     BibItem *bibItem;
     NSString *origStr;
 	unsigned number = 0;
-	NSMutableArray *paperInfos = nil;
-	
-	if(shouldMove)
-		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1098,15 +1055,11 @@ enum {
         }
         
 		if([replStr compareAsComplexString:origStr] != NSOrderedSame){
-			[self setField:field ofItem:bibItem toValue:replStr withInfos:paperInfos];
+            [bibItem setField:field toValue:replStr];
 			number++;
 		}
     }
 	
-    // @@ AutoFile: deprecated
-	//if([paperInfos count])
-	//	[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
-	    
 	return number;
 }
 
@@ -1128,10 +1081,6 @@ enum {
     BibItem *bibItem;
     NSString *origStr;
 	unsigned number = 0;
-	NSMutableArray *paperInfos = nil;
-	
-	if(shouldMove)
-		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1144,14 +1093,10 @@ enum {
             origStr = @"";
         }
         
-        [self setField:field ofItem:bibItem toValue:[replStr stringByAppendingString:origStr] withInfos:paperInfos];
+        [bibItem setField:field toValue:[replStr stringByAppendingString:origStr]];
         number++;
     }
 	
-    // @@ AutoFile: deprecated
-	//if([paperInfos count])
-	//	[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
-	    
 	return number;
 }
 
@@ -1173,10 +1118,6 @@ enum {
     BibItem *bibItem;
     NSString *origStr;
 	unsigned number = 0;
-	NSMutableArray *paperInfos = nil;
-	
-	if(shouldMove)
-		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 
     while(bibItem = [pubE nextObject]){
         // don't touch external items
@@ -1189,30 +1130,16 @@ enum {
             origStr = @"";
         }
         
-        [self setField:field ofItem:bibItem toValue:[origStr stringByAppendingString:replStr] withInfos:paperInfos];
+        [bibItem setField:field toValue:[origStr stringByAppendingString:replStr]];
         number++;
     }
 	
-    // @@ AutoFile: deprecated
-	//if([paperInfos count])
-	//	[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
-	    
 	return number;
 }
 
 - (unsigned int)findAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
-    unsigned number;
-	
-	if(shouldMove == NSMixedState){
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Linked Files?", @"Message in alert dialog when chnaging local file field")
-											 defaultButton:NSLocalizedString(@"Move", @"Button title")
-										   alternateButton:NSLocalizedString(@"Don't Move", @"Button title")
-											   otherButton:nil
-								 informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked files to the new location?", @"Informative text in alert dialog")];
-		int rv = [alert runSheetModalForWindow:[self window]];
-		shouldMove = (rv == NSAlertDefaultReturn) ? NSOnState : NSOffState;
-	}
-	
+	unsigned int number;
+    
 	if(FCOperationOverwrite == [self operation])
 		number = [self overwriteInItems:arrayOfPubs ofDocument:theDocument];
 	else if(FCOperationPrepend == [self operation])
@@ -1227,12 +1154,7 @@ enum {
 		number = 0;
 	
 	NSString *fieldString = (number == 1)? NSLocalizedString(@"field",@"field") : NSLocalizedString(@"fields",@"fields");
-	NSString *message = nil;
-	if(shouldMove)
-		message = NSLocalizedString(@"Replaced and moved for %i %@",@"Status message: Replaced and moved in [number] field(s)");
-	else
-		message = NSLocalizedString(@"Replaced in %i %@",@"Status message: Replaced in [number] field(s)");
-	[statusBar setStringValue:[NSString stringWithFormat:message, number, fieldString]];
+	[statusBar setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Replaced in %i %@",@"Status message: Replaced in [number] field(s)"), number, fieldString]];
 	
 	return number;
 }

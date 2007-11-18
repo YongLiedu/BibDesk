@@ -74,7 +74,7 @@
         field = [field fieldName];
 	}
     
-    NSString *oldPath = [pub localFilePathForField:field];    
+    NSString *oldPath = [[pub localFileURLForField:field] path];    
     NSArray *paperInfos = nil;
     
     if (oldPath) {
@@ -84,7 +84,7 @@
                 return nil;
             }
             [pub setField:field toValue:location];
-            NSString *newPath = [pub localFilePathForField:field];
+            NSString *newPath = [[pub localFileURLForField:field] path];
             paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:pub, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
         } else if ([field isEqualToString:BDSKLocalUrlString] == NO) {
             [self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 

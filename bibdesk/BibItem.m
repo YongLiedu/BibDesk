@@ -1493,14 +1493,15 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (NSDictionary *)searchIndexInfo{
     NSSet *urlFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
-    NSEnumerator *fieldEnumerator = [urlFields objectEnumerator];
-    NSString *urlFieldName = nil;
+    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    NSURL *aURL;
     
     // create an array of all local-URLs this object could have
     NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:5];
-    while(urlFieldName = [fieldEnumerator nextObject]){
-        NSURL *aURL = [self URLForField:urlFieldName];
-        if(aURL) [urls addObject:aURL];
+    while(file = [fileEnum nextObject]){
+        if (aURL = [file URL])
+            [urls addObject:aURL];
     }
     
     NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self citeKey], @"citeKey", [self displayTitle], @"title", urls, @"urls", nil];
@@ -1570,11 +1571,21 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
     // kMDItemWhereFroms is the closest we get to a URL field, so add our standard fields if available
     NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity:2];
-
-    if(value = [[self URLForField:BDSKUrlString] absoluteString]) 
-        [mutableArray addObject:value];
-    if(value = [[self localFileURLForField:BDSKLocalUrlString] absoluteString])
-        [mutableArray addObject:value];
+    NSEnumerator *fileEnum;
+    BDSKLinkedFile *file;
+    NSURL *url;
+    
+    fileEnum = [[self localFiles] objectEnumerator];
+    while (file = [fileEnum nextObject]) {
+        if (url = [file URL])
+            [mutableArray addObject:[url absoluteString]];
+    }
+    
+    fileEnum = [[self remoteURLs] objectEnumerator];
+    while (file = [fileEnum nextObject]) {
+        if (url = [file URL])
+            [mutableArray addObject:[url absoluteString]];
+    }
 
     [info setObject:mutableArray forKey:(NSString *)kMDItemWhereFroms];
     [mutableArray release];
@@ -2311,7 +2322,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     [s appendString:@"<urls>"];
     
-    fileE = [[self linkedFiles] objectEnumerator];
+    fileE = [[self localFiles] objectEnumerator];
     [s appendString:@"<pdf-urls>"];
     while (file = [fileE nextObject]){
         if (value = [[file URL] absoluteString])
@@ -2727,18 +2738,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     if (returnURL)
         [cachedURLs setObject:returnURL forKey:field];
     return returnURL;
-}
-
-- (NSString *)localUrlPathInheriting:(BOOL)inherit{
-	return [self localFilePathForField:BDSKLocalUrlString inherit:inherit];
-}
-
-- (NSString *)localFilePathForField:(NSString *)field{
-	return [self localFilePathForField:field inherit:YES];
-}
-
-- (NSString *)localFilePathForField:(NSString *)field inherit:(BOOL)inherit{
-    return [[self localFileURLForField:field inherit:inherit] path];
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field{

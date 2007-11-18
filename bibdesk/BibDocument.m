@@ -1067,10 +1067,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if (success = [fm createDirectoryAtPath:path attributes:nil]) {
         while (item = [itemEnum nextObject]) {
-            NSEnumerator *fieldEnum = [localFileFields objectEnumerator];
-            NSString *field;
-            while (field = [fieldEnum nextObject]) {
-                if (filePath = [item localFilePathForField:field]) {
+            NSEnumerator *fileEnum = [[item localFiles] objectEnumerator];
+            BDSKLinkedFile *file;
+            while (file = [fileEnum nextObject]) {
+                if (filePath = [[file URL] path]) {
                     [localFiles addObject:filePath];
                     if (commonParent)
                         commonParent = [NSString commonRootPathOfFilename:[filePath stringByDeletingLastPathComponent] andFilename:commonParent];

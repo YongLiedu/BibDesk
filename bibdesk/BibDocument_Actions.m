@@ -431,8 +431,9 @@
 
 - (IBAction)emailPubCmd:(id)sender{
     NSMutableArray *items = [[self selectedPublications] mutableCopy];
-    NSEnumerator *e = [[[self selectedPublications] valueForKeyPath:"@unionOfArrays.localFiles"] objectEnumerator];
+    NSEnumerator *e = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] objectEnumerator];
     BDSKLinkedFile *file;
+    BibItem *pub;
     
     NSFileManager *dfm = [NSFileManager defaultManager];
     NSString *path = nil;
@@ -447,7 +448,7 @@
     
     while (file = [e nextObject]) {
         if (path = [[file URL] path])
-            [files addObject:pubPath];
+            [files addObject:path];
     }
     
     if (template != nil && ([template templateFormat] & BDSKTextTemplateFormat)) {
@@ -585,9 +586,8 @@
         
         // the user said to go ahead
         while (pub = [e nextObject]) {
-            fileURL = [pub URLForField:field];
-            if(fileURL == nil) continue;
-            [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
+            if (fileURL = [pub localFileURLForField:field])
+                [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
         }
     }
     [field release];
@@ -624,9 +624,11 @@
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
         BibItem *pub;
+        NSURL *fileURL;
         
         while (pub = [e nextObject]) {
-            [[NSWorkspace sharedWorkspace]  selectFile:[pub localFilePathForField:field] inFileViewerRootedAtPath:nil];
+            if (fileURL = [pub localFileURLForField:field])
+                [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
         }
     }
     [field release];

@@ -431,46 +431,6 @@ enum{
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowEditorStatusBarKey];
 }
 
-- (IBAction)moveLinkedFile:(id)sender{
-    // @@ AutoFile: deprecated
-    return;
-    
-    NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-    
-    NSSavePanel *sPanel = [NSSavePanel savePanel];
-    [sPanel setPrompt:NSLocalizedString(@"Move", @"Save Panel prompt")];
-    [sPanel setNameFieldLabel:NSLocalizedString(@"Move To:", @"Move To: label")];
-    [sPanel setDirectory:[[publication localFilePathForField:field] stringByDeletingLastPathComponent]];
-	
-    [sPanel beginSheetForDirectory:nil 
-                              file:nil 
-                    modalForWindow:[self window] 
-                     modalDelegate:self 
-                    didEndSelector:@selector(moveLinkedFilePanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:[field retain]];
-}
-
-- (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSString *field = (NSString *)contextInfo;
-
-    if(returnCode == NSOKButton){
-        NSString *oldPath = [publication localFilePathForField:field];
-        NSString *newPath = [sheet filename];
-        if([NSString isEmptyString:oldPath] == NO){
-            NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:publication, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
-            
-            [publication setField:field toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
-            [[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:[self document] options:0];
-            
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-		}
-    }
-    
-    [field release];
-}
-
 - (IBAction)openLinkedFile:(id)sender{
     NSEnumerator *urlEnum = nil;
 	NSURL *fileURL = [sender representedObject];
@@ -889,9 +849,6 @@ enum{
 	}
 	else if (theAction == @selector(createNewPubUsingCrossrefAction:)) {
         return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
-	}
-	else if (theAction == @selector(moveLinkedFile:)) {
-		return (isEditable && [menuItem representedObject] != nil);
 	}
 	else if (theAction == @selector(openLinkedFile:)) {
 		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
@@ -1748,45 +1705,13 @@ enum{
     }
 }
 
-- (void)moveFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSDictionary *info = (NSDictionary *)contextInfo;
-    if (returnCode == NSAlertDefaultReturn) {
-        NSArray *paperInfos = [NSArray arrayWithObject:info];
-        NSString *fieldName = [info objectForKey:@"fieldName"];
-        [[BDSKFiler sharedFiler] movePapers:paperInfos forField:fieldName fromDocument:[self document] options:0];
-    }
-    [info release];
-}
-
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
     NSString *oldValue = [[[publication valueOfField:fieldName] copy] autorelease];
-    BOOL isLocalFile = [fieldName isLocalFileField];
-    NSURL *oldURL = (isLocalFile) ? [[publication URLForField:fieldName] fileURLByResolvingAliases] : nil;
     
     [publication setField:fieldName toValue:value];
     
-    int autoGenerateStatus = [self userChangedField:fieldName from:oldValue to:value];
+    [self userChangedField:fieldName from:oldValue to:value];
 	
-    // @@ AutoFile: deprecated
-    /*
-    if (isLocalFile && (autoGenerateStatus & 2) == 0) {
-        NSString *newPath = [publication localFilePathForField:fieldName];
-        if (oldURL != nil && newPath != nil && [[NSFileManager defaultManager] fileExistsAtPath:newPath] == NO) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move File?", @"Message in alert dialog when changing a local file field") 
-                                             defaultButton:NSLocalizedString(@"Yes", @"Button title") 
-                                           alternateButton:NSLocalizedString(@"No", @"Button title") 
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked file to the new location?", @"Informative text in alert dialog when changing a local file field") ];
-
-            // info is released in callback
-            NSArray *info = [[NSDictionary alloc] initWithObjectsAndKeys:publication, @"paper", [oldURL path], @"oldPath", newPath, @"newPath", fieldName, @"fieldName", nil];
-            [alert beginSheetModalForWindow:[self window]
-                              modalDelegate:self
-                             didEndSelector:@selector(moveFileAlertDidEnd:returnCode:contextInfo:)
-                                contextInfo:info];
-        }
-    }
-	*/
 	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 

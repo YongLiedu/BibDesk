@@ -489,7 +489,7 @@
 
                     while(row != NSNotFound){
                         pub = [shownPublications objectAtIndex:row];
-                        path = [pub localFilePathForField:dragColumnId];
+                        path = [[pub localFileURLForField:dragColumnId] path];
                         if(path != nil){
                             [filePaths addObject:path];
                             NSError *xerror = nil;
@@ -999,7 +999,7 @@
         while(rowIdx != NSNotFound){
             theBib = [shownPublications objectAtIndex:rowIdx];
             if(isLocalFile){
-                originalPath = [theBib localFilePathForField:fieldName];
+                originalPath = [[theBib localFileURLForField:fieldName] path];
                 fileName = [originalPath lastPathComponent];
                 NSParameterAssert(fileName);
                 fullPath = [basePath stringByAppendingPathComponent:fileName];

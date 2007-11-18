@@ -812,34 +812,6 @@ enum {
 - (NSString *)localUrlPath; 
 
 /*!
-    @method     localUrlPathInheriting:
-    @abstract   Calls localFilePathForField:relativeTo:inherit: with the Local-Url field and the path to the document.
-	@param      inherit Boolean, if set follows the Crossref to find inherited date.
-    @discussion -
-    @result     a complete path with no tildes, or nil if an error occurred.
-*/
-- (NSString *)localUrlPathInheriting:(BOOL)inherit;
-
-/*!
-    @method     localFilePathForField:
-    @abstract   Calls localFilePathForField:relativeTo:inherit: with the path to the document and inherit set to YES.
-    @discussion -
-    @param      field the field name linking the local file.
-    @result     a complete path with no tildes, or nil if an error occurred.
-*/
-- (NSString *)localFilePathForField:(NSString *)field; 
-
-/*!
-    @method     localFilePathForField:inherit:
-    @abstract   attempts to return a path to the local file linked through the field, relative to the base parameter
-    @discussion If the local-url field is a relative path, this will prepend base to it and return the path from building a URL with the result. If the value of local-url is a valid file url already, base is ignored. Base is also ignored if the value of local-url is an absolute path or has a tilde.
-    @param      field the field name linking the local file.
-	@param      inherit Boolean, if set follows the Crossref to find inherited date.
-    @result     a complete path with no tildes, or nil if an error occurred.
-*/
-- (NSString *)localFilePathForField:(NSString *)field inherit:(BOOL)inherit;
-
-/*!
     @method     imageForURLField:
     @abstract   Returns an icon representation of a URL field.
     @discussion (comprehensive description)

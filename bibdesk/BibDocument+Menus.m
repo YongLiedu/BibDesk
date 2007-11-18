@@ -163,7 +163,7 @@
 	BibItem *pub = nil;
     
     while(pub = [e nextObject]){
-        NSString *path = [pub localFilePathForField:field];
+        NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
     }
@@ -179,7 +179,7 @@
 	BibItem *pub = nil;
     
     while(pub = [e nextObject]){
-        NSString *path = [pub localFilePathForField:field];
+        NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
     }
@@ -211,7 +211,7 @@
 	BibItem *pub = nil;
     
     while(pub = [e nextObject]){
-        NSString *path = [pub localFilePathForField:field];
+        NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
     }
@@ -227,7 +227,7 @@
 	BibItem *pub = nil;
     
     while(pub = [e nextObject]){
-        NSString *path = [pub localFilePathForField:field];
+        NSString *path = [[pub localFileURLForField:field] path];
         if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
             return YES;
     }

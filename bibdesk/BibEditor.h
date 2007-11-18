@@ -203,13 +203,6 @@
 */
 - (void)finalizeChanges:(NSNotification *)aNotification;
 
-/*!
-    @method     moveLocalURL:
-    @abstract   Action to move a local file using the Save dialog. 
-    @discussion (comprehensive description)
-*/
-- (IBAction)moveLinkedFile:(id)sender;
-
 - (IBAction)openLinkedFile:(id)sender;
 
 - (IBAction)revealLinkedFile:(id)sender;
@@ -219,8 +212,6 @@
 - (IBAction)showNotesForLinkedFile:(id)sender;
 
 - (IBAction)copyNotesForLinkedFile:(id)sender;
-
-- (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 /*!
     @method     updateSafariRecentDownloadsMenu:

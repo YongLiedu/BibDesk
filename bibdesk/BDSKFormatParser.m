@@ -370,9 +370,9 @@
 					if (file)
 						string = [[file URL] path];
                     else if ([fieldName isLocalFileField])
-						string = [pub localFilePathForField:fieldName];
+						string = [[pub localFileURLForField:fieldName] path];
 					else
-						string = [pub localFilePathForField:BDSKLocalUrlString];
+						string = [[pub localFileURLForField:BDSKLocalUrlString] path];
 					if (string != nil) {
 						string = [[string lastPathComponent] stringByDeletingPathExtension];
 						string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
@@ -384,9 +384,9 @@
 					if (file)
 						string = [[file URL] path];
                     else if ([fieldName isLocalFileField])
-						string = [pub localFilePathForField:fieldName];
+						string = [[pub localFileURLForField:fieldName] path];
 					else
-						string = [pub localFilePathForField:BDSKLocalUrlString];
+						string = [[pub localFileURLForField:BDSKLocalUrlString] path];
 					if (string != nil) {
 						string = [string lastPathComponent];
 						string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
@@ -398,9 +398,9 @@
 					if (file)
 						string = [[file URL] path];
                     else if ([fieldName isLocalFileField])
-						string = [pub localFilePathForField:fieldName];
+						string = [[pub localFileURLForField:fieldName] path];
 					else
-						string = [pub localFilePathForField:BDSKLocalUrlString];
+						string = [[pub localFileURLForField:BDSKLocalUrlString] path];
 					if (string != nil) {
 						string = [string pathExtension];
 						if (![string isEqualToString:@""]) {
