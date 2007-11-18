@@ -169,6 +169,11 @@ static Class BDSKLinkedObjectClass = Nil;
 - (void)setDelegate:(id)aDelegate {}
 - (id)delegate { return nil; }
 
+// for templating
+- (id)valueForUndefinedKey:(NSString *)key {
+    return [[self URL] valueForKey:key];
+}
+
 @end
 
 #pragma mark -
