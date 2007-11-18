@@ -8,8 +8,6 @@
 
 #import "Controller.h"
 
-#define BASEPATH @"/Volumes/Local/Users/amaxwell/Desktop/"
-
 @implementation Controller
 
 - (id)init
@@ -40,8 +38,16 @@
 
 - (void)awakeFromNib
 {
-    [_fileView setDelegate:self];
-    [_fileView setDataSource:nil];
+    NSString *base = [@"~/Desktop" stringByStandardizingPath];
+    NSArray *files = [[NSFileManager defaultManager] directoryContentsAtPath:base];
+    NSString *path;
+    NSUInteger i, iMax = [files count];
+    for (i = 0; i < iMax; i++) {
+        path = [files objectAtIndex:i];
+        [arrayController addObject:[NSURL fileURLWithPath:[base stringByAppendingPathComponent:path]]];
+    }
+    [arrayController addObject:[NSURL URLWithString:@"http://www.apple.com/"]];
+    
     [_fileView bind:@"iconURLs" toObject:arrayController withKeyPath:@"arrangedObjects" options:nil];
     [_fileView bind:@"selectionIndexes" toObject:arrayController withKeyPath:@"selectionIndexes" options:nil];
     
