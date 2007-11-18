@@ -348,7 +348,7 @@ enum{
 }
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    NSString *fname = [publication localUrlPath];
+    NSString *fname = [[[publication localFiles] firstObject] path];
     return fname ? fname : @"";
 }
 

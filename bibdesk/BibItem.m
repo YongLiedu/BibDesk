@@ -2304,16 +2304,30 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [s appendString:@"<keywords>"];
     AddXMLField(@"keyword",BDSKKeywordsString);
     [s appendString:@"</keywords>"];
+    
+    NSEnumerator *fileE;
+    BDSKLinkedFile *file;
+    NSURL *url;
+    
     [s appendString:@"<urls>"];
+    
+    fileE = [[self linkedFiles] objectEnumerator];
     [s appendString:@"<pdf-urls>"];
-    value = [[self localURL] absoluteString];
-    if ([NSString isEmptyString:value] == NO)
-        [s appendStrings:@"<url>", value, @"</url>", nil];
+    while (file = [fileE nextObject]){
+        if (value = [[file URL] absoluteString])
+            [s appendStrings:@"<url>", value, @"</url>", nil];
+    }
     [s appendString:@"</pdf-urls>"];
+    
+    fileE = [[self remoteURLs] objectEnumerator];
     [s appendString:@"<related-urls>"];
-    AddXMLField(@"url",BDSKUrlString);
+    while (file = [fileE nextObject]){
+        if (value = [[file URL] absoluteString])
+            [s appendStrings:@"<url>", value, @"</url>", nil];
+    }
     [s appendString:@"</related-urls>"];
     [s appendString:@"</urls>"];
+    
     AddXMLField(@"abstract",BDSKAbstractString);
     AddXMLField(@"research-notes",BDSKAnnoteString);
     AddXMLField(@"notes",@"Note");
@@ -2481,11 +2495,45 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (NSCalendarDate *)currentDate{ return [NSCalendarDate date]; }
 
 - (NSString *)textSkimNotes {
-    return [[self localURL] textSkimNotes];
+    NSMutableString *string = [NSMutableString string];
+    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    NSURL *url;
+    NSString *notes;
+    
+    while (file = [fileEnum nextObject]) {
+        if (url = [file URL]) {
+            notes = [url textSkimNotes];
+            if ([notes length]) {
+                if ([string length])
+                    [string appendString:@"\n\n"];
+                [string appendString:notes];
+            }
+                
+        }
+    }
+    return string;
 }
 
 - (NSAttributedString *)richTextSkimNotes {
-    return [[self localURL] richTextSkimNotes];
+    NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:@""] autorelease];
+    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    NSURL *url;
+    NSAttributedString *notes;
+    NSAttributedString *seperatorString = [[[NSMutableAttributedString alloc] initWithString:@"\n\n"] autorelease];
+    
+    while (file = [fileEnum nextObject]) {
+        if (url = [file URL]) {
+            notes = [url richTextSkimNotes];
+            if ([notes length]) {
+                if ([attrString length])
+                    [attrString appendAttributedString:seperatorString];
+                [attrString appendAttributedString:notes];
+            }
+        }
+    }
+    return attrString;
 }
 
 - (NSArray *)localFiles {
@@ -2621,10 +2669,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     return combinedURLs;
 }
 
-- (NSURL *)remoteURL{
-	return [self remoteURLForField:BDSKUrlString];
-}
-
 - (NSImage *)imageForURLField:(NSString *)field{
     
     NSURL *url = [self URLForField:field];
@@ -2683,14 +2727,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     if (returnURL)
         [cachedURLs setObject:returnURL forKey:field];
     return returnURL;
-}
-
-- (NSURL *)localURL{
-	return [self localFileURLForField:BDSKLocalUrlString];
-}
-
-- (NSString *)localUrlPath{
-	return [self localUrlPathInheriting:YES];
 }
 
 - (NSString *)localUrlPathInheriting:(BOOL)inherit{
@@ -2755,6 +2791,20 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
         [cachedURLs setObject:returnURL forKey:field];
     
     return returnURL;
+}
+
+// Legacy redirect, deprecated, but could still be called from templates
+
+- (NSURL *)remoteURL{
+    return [[[self remoteURLs] firstObject] URL];
+}
+
+- (NSURL *)localURL{
+    return [[[self localFiles] firstObject] URL];
+}
+
+- (NSString *)localUrlPath{
+	return [[self localURL] path];
 }
 
 #pragma mark AutoFile support
@@ -3345,15 +3395,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     if (allFieldsChanged || [key isPersonField]) {
         [people release];
         people = nil;
-    }
-	
-	if([BDSKLocalUrlString isEqualToString:key]){
-        // If the Finder comment from this file has a useful URL and our BibItem has an empty remote URL field, use the Finder comment as remote URL.  Do this before autofiling the paper, since we know the path to the file now (hidden user default).
-        if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldUseSpotlightCommentForURL"]){
-            NSString *possibleURLString = [[NSFileManager defaultManager] commentForURL:[self localURL]];
-            if(possibleURLString && [NSURL URLWithString:possibleURLString]!= nil && [self remoteURL] == nil)
-                [self setField:BDSKUrlString toValue:possibleURLString];
-        }
     }
 	
     // see if we need to use the crossref workaround (BibTeX bug)

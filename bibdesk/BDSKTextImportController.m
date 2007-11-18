@@ -1064,8 +1064,7 @@
 		return YES;
 	} else if ([menuItem action] == @selector(consolidateLinkedFiles:)) {
 		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Menu item title")];
-		NSString *lurl = [item localUrlPath];
-		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+        return [[item localFiles] count] > 0;
 	}
 	return YES;
 }

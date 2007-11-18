@@ -431,11 +431,11 @@
 
 - (IBAction)emailPubCmd:(id)sender{
     NSMutableArray *items = [[self selectedPublications] mutableCopy];
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-    BibItem *pub = nil;
+    NSEnumerator *e = [[[self selectedPublications] valueForKeyPath:"@unionOfArrays.localFiles"] objectEnumerator];
+    BDSKLinkedFile *file;
     
     NSFileManager *dfm = [NSFileManager defaultManager];
-    NSString *pubPath = nil;
+    NSString *path = nil;
     NSMutableString *body = [NSMutableString string];
     NSMutableArray *files = [NSMutableArray array];
     
@@ -445,18 +445,9 @@
     if ([NSString isEmptyString:templateName] == NO)
         template = [BDSKTemplate templateForStyle:templateName];
     
-    while (pub = [e nextObject]) {
-        pubPath = [pub localUrlPath];
-        if([dfm fileExistsAtPath:pubPath])
+    while (file = [e nextObject]) {
+        if (path = [[file URL] path])
             [files addObject:pubPath];
-        
-        pub = [pub crossrefParent];
-        if (pub != nil && [items containsObject:pub] == NO) {
-            [items addObject:pub];
-            pubPath = [pub localUrlPath];
-            if([dfm fileExistsAtPath:pubPath])
-                [files addObject:pubPath];
-        }
     }
     
     if (template != nil && ([template templateFormat] & BDSKTextTemplateFormat)) {

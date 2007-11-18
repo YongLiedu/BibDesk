@@ -2877,7 +2877,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     [[previewer progressOverlay] remove];
     [previewer updateWithBibTeXString:nil];
     
-    NSURL *url = [[[self selectedPublications] firstObject] localURL];
+    NSURL *url = [[[[self selectedPublications] firstObject] localFiles] firstObject];
     BOOL isDir;
     BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:[url path] isDirectory:&isDir];
     // checking kUTTypeText would get RTF, HTML, XML, txt, but not RTFD or web archives; consequently, we'll just try loading anything and let NSAttributedString sort it out if it's not PDF or PS
