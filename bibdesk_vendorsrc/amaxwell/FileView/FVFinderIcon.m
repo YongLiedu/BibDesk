@@ -70,6 +70,11 @@ static IconRef __genericURLIcon;
     return NO;
 }
 
+- (void)renderOffscreen
+{
+    // no-op
+}
+
 - (id)initWithURLScheme:(NSString *)scheme;
 {
     NSParameterAssert(nil != scheme);

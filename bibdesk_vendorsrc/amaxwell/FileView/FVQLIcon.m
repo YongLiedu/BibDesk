@@ -109,7 +109,8 @@
         
         if (nil == _fallbackIcon)
             _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_fileURL];
-        [_fallbackIcon renderOffscreen];
+        if ([_fallbackIcon needsRenderForSize:_desiredSize])
+            [_fallbackIcon renderOffscreen];
     }
     else
         _fullSize = NSMakeSize(CGImageGetWidth(_imageRef), CGImageGetHeight(_imageRef));
