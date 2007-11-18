@@ -47,14 +47,6 @@
 static NSArray *URLSFromPasteboard(NSPasteboard *pboard);
 static BOOL writeURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard, PasteboardRef *pboardPtr);
 
-@interface NSBezierPath (Leopard)
-+ (NSBezierPath*)bezierPathWithRoundedRect:(NSRect)rect xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius;
-@end
-
-@interface NSBezierPath (RoundRect)
-+ (NSBezierPath*)bezierPathWithRoundRect:(NSRect)rect xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius;
-@end
-
 enum {
     FVDropOnIcon,
     FVDropOnView,
@@ -143,6 +135,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     _dropRectForHighlight = NSZeroRect;
     _isRescaling = NO;
     _selectedIndexes = [[NSMutableIndexSet alloc] init];
+    _lastClickedIndex = NSNotFound;
     _rubberBandRect = NSZeroRect;
     _iconURLs = nil;
     [self setBackgroundColor:[[self class] defaultBackgroundColor]];
@@ -333,7 +326,11 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 
 - (NSUInteger)numberOfColumns;
 {
-    return MAX(1, trunc((NSWidth([self frame]) - _padding) / [self _columnWidth]));
+    // compute width ignoring the width of the vertical scroller (if any), so we can get more symmetric empty space on either side
+    NSView *view = [self enclosingScrollView];
+    if (nil == view)
+        view = self;
+    return MAX(1, trunc((NSWidth([view frame]) - _padding / 2) / [self _columnWidth]));
 }
 
 // This is the square rect the icon is drawn in.  It doesn't include padding, so rects aren't contiguous.
@@ -1332,19 +1329,52 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
         
         // remember _indexForGridRow:column: returns NSNotFound if you're in an empty slot of an existing row/column, but that's a deselect event so we still need to remove all selection indexes and mark for redisplay
         i = [self _indexForGridRow:r column:c];
-        
+
         if ([_selectedIndexes containsIndex:i] == NO) {
             
-            // deselect all if command key was not pressed, or i == NSNotFound
+            // deselect all if modifier key was not pressed, or i == NSNotFound
             if ((flags & (NSCommandKeyMask | NSShiftKeyMask)) == 0 || NSNotFound == i) {
                 [self setSelectionIndexes:[NSIndexSet indexSet]];
             }
             
-            // add to the current selection (which we may have just reset)
+            // if there's an icon in this cell, add to the current selection (which we may have just reset)
             if (NSNotFound != i) {
-                [self willChangeValueForKey:@"selectionIndexes"];
-                [_selectedIndexes addIndex:i];
-                [self didChangeValueForKey:@"selectionIndexes"];
+                // add a single index for an unmodified or cmd-click
+                // add a single index for shift click only if there is no current selection
+                if ((flags & NSShiftKeyMask) == 0 || [_selectedIndexes count] == 0) {
+                    [self willChangeValueForKey:@"selectionIndexes"];
+                    [_selectedIndexes addIndex:i];
+                    [self didChangeValueForKey:@"selectionIndexes"];
+                }
+                else if ((flags & NSShiftKeyMask) != 0) {
+                    // Shift-click extends by a region; this is equivalent to iPhoto's grid view.  Finder treats shift-click like cmd-click in icon view, but we have a fixed layout, so this behavior is convenient and will be predictable.
+                    
+                    // at this point, we know that [_selectedIndexes count] > 0
+                    NSParameterAssert([_selectedIndexes count]);
+                    
+                    NSUInteger start = [_selectedIndexes firstIndex];
+                    NSUInteger end = [_selectedIndexes lastIndex];
+
+                    if (i < start) {
+                        [self willChangeValueForKey:@"selectionIndexes"];
+                        [_selectedIndexes addIndexesInRange:NSMakeRange(i, start - i)];
+                        [self didChangeValueForKey:@"selectionIndexes"];
+                    }
+                    else if (i > end) {
+                        [self willChangeValueForKey:@"selectionIndexes"];
+                        [_selectedIndexes addIndexesInRange:NSMakeRange(end + 1, i - end)];
+                        [self didChangeValueForKey:@"selectionIndexes"];
+                    }
+                    else if (NSNotFound != _lastClickedIndex) {
+                        // This handles the case of clicking in a deselected region between two selected regions.  We want to extend from the last click to the current one, instead of randomly picking an end to start from.
+                        [self willChangeValueForKey:@"selectionIndexes"];
+                        if (_lastClickedIndex > i)
+                            [_selectedIndexes addIndexesInRange:NSMakeRange(i, _lastClickedIndex - i)];
+                        else
+                            [_selectedIndexes addIndexesInRange:NSMakeRange(_lastClickedIndex + 1, i - _lastClickedIndex)];
+                        [self didChangeValueForKey:@"selectionIndexes"];
+                    }
+                }
                 [self setNeedsDisplay:YES];     
             }
         }
@@ -1355,6 +1385,9 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
             [self didChangeValueForKey:@"selectionIndexes"];
             [self setNeedsDisplay:YES];
         }
+        
+        // always reset this
+        _lastClickedIndex = i;
         
         // change selection first, as Finder does
         if ([event clickCount] > 1 && [self _URLAtPoint:p] != nil) {
@@ -2209,43 +2242,3 @@ static BOOL writeURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard, Pasteboar
     
     return noErr == err;
 }
-
-@implementation NSBezierPath (RoundRect)
-
-+ (NSBezierPath*)bezierPathWithRoundRect:(NSRect)rect xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius;
-{    
-    if ([self respondsToSelector:@selector(bezierPathWithRoundedRect:xRadius:yRadius:)])
-        return [self bezierPathWithRoundedRect:rect xRadius:xRadius yRadius:yRadius];
-    
-    // Make sure radius doesn't exceed a maximum size to avoid artifacts:
-    CGFloat mr = MIN(NSHeight(rect), NSWidth(rect));
-    CGFloat radius = MIN(xRadius, 0.5f * mr);
-    
-    // Make sure silly values simply lead to un-rounded corners:
-    if( radius <= 0 )
-        return [self bezierPathWithRect:rect];
-    
-    NSRect innerRect = NSInsetRect(rect, radius, radius); // Make rect with corners being centers of the corner circles.
-	static NSBezierPath *path = nil;
-    if(path == nil)
-        path = [[self bezierPath] retain];
-    
-    [path removeAllPoints];    
-    
-    // Now draw our rectangle:
-    [path moveToPoint: NSMakePoint(NSMinX(innerRect) - radius, NSMinY(innerRect))];
-    
-    // Bottom left (origin):
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(innerRect), NSMinY(innerRect)) radius:radius startAngle:180.0 endAngle:270.0];
-    // Bottom edge and bottom right:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(innerRect), NSMinY(innerRect)) radius:radius startAngle:270.0 endAngle:360.0];
-    // Left edge and top right:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(innerRect), NSMaxY(innerRect)) radius:radius startAngle:0.0  endAngle:90.0 ];
-    // Top edge and top left:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(innerRect), NSMaxY(innerRect)) radius:radius startAngle:90.0  endAngle:180.0];
-    // Left edge:
-    [path closePath];
-    
-    return path;
-}
-@end

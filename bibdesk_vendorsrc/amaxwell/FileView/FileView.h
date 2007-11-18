@@ -67,6 +67,7 @@ enum {
     NSColor                *_backgroundColor;
     CFRunLoopTimerRef       _zombieTimer;
     NSMutableIndexSet      *_selectedIndexes;
+    NSUInteger              _lastClickedIndex;
     NSRect                  _rubberBandRect;
     NSRect                  _dropRectForHighlight;
     CGFloat                 _padding;
