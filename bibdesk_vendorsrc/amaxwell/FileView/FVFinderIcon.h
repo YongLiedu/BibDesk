@@ -44,13 +44,8 @@
 {
 @private
     IconRef         _iconRef;
-    CGImageRef      _imageRef;
-    NSSize          _iconSize;
-    NSSize          _desiredSize;
     FVIconType      _iconType;
-    BOOL            _inDiskCache;
-    pthread_mutex_t _mutex;
 }
-- (id)initWithFinderIconOfURL:(NSURL *)theURL ofSize:(NSSize)iconSize;
-- (id)initWithURLScheme:(NSString *)scheme ofSize:(NSSize)iconSize;
+- (id)initWithFinderIconOfURL:(NSURL *)theURL;
+- (id)initWithURLScheme:(NSString *)scheme;
 @end

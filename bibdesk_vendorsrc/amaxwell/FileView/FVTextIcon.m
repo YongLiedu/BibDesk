@@ -171,10 +171,7 @@ static CGAffineTransform __paperTransform;
     }
     else {
         pthread_mutex_unlock(&_mutex);
-        CGContextSaveGState(context);
-        CGContextSetRGBFillColor(context, 1.0, 1.0, 1.0, FV_DUMMY_ICON_ALPHA);
-        CGContextFillRect(context, drawRect);
-        CGContextRestoreGState(context);
+        [self _drawPlaceholderInRect:dstRect inCGContext:context];
     }
 }
 

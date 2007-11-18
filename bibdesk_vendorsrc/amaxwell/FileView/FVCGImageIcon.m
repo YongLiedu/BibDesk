@@ -232,11 +232,19 @@ static inline BOOL isBigImage(CGImageRef image)
             CGImageRef image = (_fullImageRef ? _fullImageRef : _thumbnailRef);
             if (image)
                 CGContextDrawImage(context, drawRect, image);
+            else
+                [self _drawPlaceholderInRect:dstRect inCGContext:context];
         }
         else if (_thumbnailRef) {
             CGContextDrawImage(context, drawRect, _thumbnailRef);
         }
+        else {
+            [self _drawPlaceholderInRect:dstRect inCGContext:context];
+        }
         pthread_mutex_unlock(&_mutex);
+    }
+    else {
+        [self _drawPlaceholderInRect:dstRect inCGContext:context];
     }
 }
 

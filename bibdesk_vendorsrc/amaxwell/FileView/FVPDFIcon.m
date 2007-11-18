@@ -313,41 +313,20 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
     return needsRender;
 }
 
-- (void)_drawDefaultPageInRect:(NSRect)iconRect inCGContext:(CGContextRef)context;
-{
-    // this method is safe to use without acquiring the lock, since it uses the default size; our -size isn't safe outside the lock
-    NSSize s = __paperSize;
-    
-    CGFloat ratio = MIN(NSWidth(iconRect) / s.width, NSHeight(iconRect) / s.height);
-    CGRect dstRect = *(CGRect *)&iconRect;
-    dstRect.size.width = ratio * s.width;
-    dstRect.size.height = ratio * s.height;
-    
-    CGFloat dx = (iconRect.size.width - dstRect.size.width) / 2;
-    CGFloat dy = (iconRect.size.height - dstRect.size.height) / 2;
-    dstRect.origin.x += dx;
-    dstRect.origin.y += dy;
-    
-    CGContextSaveGState(context);
-    CGContextSetRGBFillColor(context, 1.0, 1.0, 1.0, FV_DUMMY_ICON_ALPHA);
-    CGContextFillRect(context, dstRect);
-    CGContextRestoreGState(context);    
-}
-
 /*
- For PDF/PS icons, we always use trylock and draw a blank page if that fails.  Otherwise the drawing thread will wait for rendering to relinquish the lock (which can be really slow for PDF).  This is a major problem when scrolling.  Other icon types aren't this slow, so we just hold the lock in those cases.
+ For PDF/PS icons, we always use trylock and draw a blank page if that fails.  Otherwise the drawing thread will wait for rendering to relinquish the lock (which can be really slow for PDF).  This is a major problem when scrolling.
  */
 
 - (void)fastDrawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context
 {    
     // draw thumbnail if present, regardless of the size requested
     if (pthread_mutex_trylock(&_mutex) != 0) {
-        // no lock, so just draw the blank page and bail out, so 
-        [self _drawDefaultPageInRect:dstRect inCGContext:context];
+        // no lock, so just draw the blank page and bail out
+        [self _drawPlaceholderInRect:dstRect inCGContext:context];
     }
     else if (NULL == _thumbnailRef) {
         pthread_mutex_unlock(&_mutex);
-        [self _drawDefaultPageInRect:dstRect inCGContext:context];
+        [self _drawPlaceholderInRect:dstRect inCGContext:context];
     }
     else if (_thumbnailRef) {
         CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnailRef);
@@ -363,7 +342,7 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
 - (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 {    
     if (pthread_mutex_trylock(&_mutex) != 0) {
-        [self _drawDefaultPageInRect:dstRect inCGContext:context];
+        [self _drawPlaceholderInRect:dstRect inCGContext:context];
     }
     else {
         
@@ -377,7 +356,7 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
             else {
                 // draw a blank page as a placeholder, and the real icon will get picked up next time around
                 // this path is hit fairly often, but is seldom actually drawn because of the callback rate
-                [self _drawDefaultPageInRect:dstRect inCGContext:context];
+                [self _drawPlaceholderInRect:dstRect inCGContext:context];
             }
             
         }

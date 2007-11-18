@@ -70,7 +70,9 @@
  - any changes to the CGContextRef are wrapped by CGContextSaveGState/CGContextRestoreGState
  - specific compositing operations should be set in the context before calling this method
  - shadow will be respected (the clip path is only changed when rendering text)
- - a placeholder icon may be drawn if -renderOffscreen has not been called or finished working
+ - needsRenderForSize: and renderOffscreen must be called first, to check/set size
+ - don't bother calling -renderOffscreen if -needsRenderForSize: returns NO
+ - a placeholder icon will be drawn if -renderOffscreen has not been called or finished working
  */
 - (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 
@@ -84,3 +86,9 @@
 - (void)showPreviousPage;
 
 @end
+
+
+@interface NSBezierPath (RoundRect)
++ (NSBezierPath*)bezierPathWithRoundRect:(NSRect)rect xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius;
+@end
+

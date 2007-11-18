@@ -108,7 +108,7 @@
     if (NULL == _imageRef) {
         
         if (nil == _fallbackIcon)
-            _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_fileURL ofSize:_desiredSize];
+            _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_fileURL];
         [_fallbackIcon renderOffscreen];
     }
     else
@@ -124,6 +124,9 @@
     }
     else if (nil != _fallbackIcon) {
         [_fallbackIcon drawInRect:dstRect inCGContext:context];
+    }
+    else {
+        [self _drawPlaceholderInRect:dstRect inCGContext:context];
     }
     pthread_mutex_unlock(&_mutex);
 }

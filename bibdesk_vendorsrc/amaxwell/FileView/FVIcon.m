@@ -106,10 +106,10 @@ static Class FVQLIconClass = Nil;
 {
     // special case for nil URL, since CFURLGetFSRef won't like it
     if (nil == representedURL || [representedURL isEqual:[NSNull null]]) {
-        return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil ofSize:iconSize] autorelease];
+        return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil] autorelease];
     }
     else if (NO == [representedURL isFileURL]) {
-        return [[[FVFinderIcon allocWithZone:[self zone]] initWithURLScheme:[representedURL scheme] ofSize:iconSize] autorelease];
+        return [[[FVFinderIcon allocWithZone:[self zone]] initWithURLScheme:[representedURL scheme]] autorelease];
     }
     
     OSStatus err = noErr;
@@ -118,7 +118,7 @@ static Class FVQLIconClass = Nil;
     
     // return missing file icon if we can't resolve the path
     if (FALSE == CFURLGetFSRef((CFURLRef)representedURL, &fileRef))
-        return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil ofSize:iconSize] autorelease];
+        return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil] autorelease];
     
     // kLSItemContentType returns a CFStringRef, according to the header
     CFStringRef theUTI = NULL;
@@ -155,7 +155,7 @@ static Class FVQLIconClass = Nil;
     }
     
     if (nil == anIcon)
-        anIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:representedURL ofSize:iconSize];
+        anIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:representedURL];
     
     [(id)theUTI release];
     
@@ -216,6 +216,30 @@ static Class FVQLIconClass = Nil;
     return dstRect;
 }
 
+- (void)_drawPlaceholderInRect:(NSRect)dstRect inCGContext:(CGContextRef)context
+{
+    NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:YES];
+    [NSGraphicsContext saveGraphicsState];
+    [NSGraphicsContext setCurrentContext:nsContext];
+    [nsContext saveGraphicsState];
+    
+    // get rid of any existing shadow, since the dashed line looks goofy with a shadow
+    NSShadow *aShadow = [[NSShadow alloc] init];
+    [aShadow set];
+    
+    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRect:dstRect xRadius:10 yRadius:10];
+    [path setLineWidth:2.0];
+    CGFloat pattern[2] = { 12.0, 6.0 };
+    
+    [path setLineDash:pattern count:2 phase:0.0];
+    [[NSColor lightGrayColor] setStroke];
+    [path stroke];
+    [nsContext restoreGraphicsState];
+    [aShadow release];
+    
+    [NSGraphicsContext restoreGraphicsState];
+}
+
 - (NSUInteger)pageCount { return 1; }
 - (NSUInteger)currentPageIndex { return 1; }
 - (void)showNextPage { /* do nothing */ }
@@ -244,4 +268,49 @@ FV_PRIVATE_EXTERN char * FVCreateDiskCacheNameWithURL(NSURL *fileURL)
     }
     return name;
 }
+
+
+@interface NSBezierPath (Leopard)
++ (NSBezierPath*)bezierPathWithRoundedRect:(NSRect)rect xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius;
+@end
+
+@implementation NSBezierPath (RoundRect)
+
++ (NSBezierPath*)bezierPathWithRoundRect:(NSRect)rect xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius;
+{    
+    if ([self respondsToSelector:@selector(bezierPathWithRoundedRect:xRadius:yRadius:)])
+        return [self bezierPathWithRoundedRect:rect xRadius:xRadius yRadius:yRadius];
+    
+    // Make sure radius doesn't exceed a maximum size to avoid artifacts:
+    CGFloat mr = MIN(NSHeight(rect), NSWidth(rect));
+    CGFloat radius = MIN(xRadius, 0.5f * mr);
+    
+    // Make sure silly values simply lead to un-rounded corners:
+    if( radius <= 0 )
+        return [self bezierPathWithRect:rect];
+    
+    NSRect innerRect = NSInsetRect(rect, radius, radius); // Make rect with corners being centers of the corner circles.
+	static NSBezierPath *path = nil;
+    if(path == nil)
+        path = [[self bezierPath] retain];
+    
+    [path removeAllPoints];    
+    
+    // Now draw our rectangle:
+    [path moveToPoint: NSMakePoint(NSMinX(innerRect) - radius, NSMinY(innerRect))];
+    
+    // Bottom left (origin):
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(innerRect), NSMinY(innerRect)) radius:radius startAngle:180.0 endAngle:270.0];
+    // Bottom edge and bottom right:
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(innerRect), NSMinY(innerRect)) radius:radius startAngle:270.0 endAngle:360.0];
+    // Left edge and top right:
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(innerRect), NSMaxY(innerRect)) radius:radius startAngle:0.0  endAngle:90.0 ];
+    // Top edge and top left:
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(innerRect), NSMaxY(innerRect)) radius:radius startAngle:90.0  endAngle:180.0];
+    // Left edge:
+    [path closePath];
+    
+    return path;
+}
+@end
 

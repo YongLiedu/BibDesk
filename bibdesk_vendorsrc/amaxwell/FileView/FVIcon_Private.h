@@ -59,6 +59,7 @@ typedef NSUInteger FVIconType;
 
 @interface FVIcon (Private)
 - (CGRect)_drawingRectWithRect:(NSRect)iconRect;
+- (void)_drawPlaceholderInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 @end
 
 FV_PRIVATE_EXTERN char * FVCreateDiskCacheNameWithURL(NSURL *fileURL);
