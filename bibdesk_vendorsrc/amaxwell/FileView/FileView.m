@@ -46,6 +46,8 @@
 // functions for dealing with multiple URLs and weblocs on the pasteboard
 static NSArray *URLSFromPasteboard(NSPasteboard *pboard);
 static BOOL writeURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard, PasteboardRef *pboardPtr);
+static BOOL pasteboardHasType(NSPasteboard *pboard, NSString *aType);
+static BOOL pasteboardHasURL(NSPasteboard *pboard);
 
 enum {
     FVDropOnIcon,
@@ -1547,8 +1549,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (BOOL)_isLocalDraggingInfo:(id <NSDraggingInfo>)sender
 {
-    return [sender draggingSource] == self && 
-           nil != [[sender draggingPasteboard] availableTypeFromArray:[NSArray arrayWithObject:FVIconsPboardType]];
+    return pasteboardHasType([sender draggingPasteboard], FVIconsPboardType);
 }
 
 // get lots of updates for autoscrolling
@@ -1615,7 +1616,6 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     dragLoc = [self convertPoint:dragLoc fromView:nil];
     NSDragOperation dragOp = NSDragOperationNone;
     NSPasteboard *pboard = [sender draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, nil]];
     
     NSUInteger insertIndex;
     // this will set a default highlight based on geometry, but does no validation
@@ -1627,7 +1627,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
                 
             dragOp = NSDragOperationNone;
             _dropRectForHighlight = NSZeroRect;
-        } else if (type) {
+        } else if (pasteboardHasURL(pboard)) {
             dragOp = NSDragOperationLink;
         }
     } else if (FVDropOnView == dropOp) {
@@ -1637,20 +1637,20 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             
             dragOp = NSDragOperationNone;
             _dropRectForHighlight = NSZeroRect;
-        } else if (type) {
+        } else if (pasteboardHasURL(pboard)) {
             dragOp = NSDragOperationLink;
         }
     } else if (FVDropInsert == dropOp) {
         
         // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection, but that needs to be examined more carefully
         if ([self _isLocalDraggingInfo:sender]) {
-            if ([_selectedIndexes containsIndex:insertIndex]) {
+            if ([_selectedIndexes containsIndex:insertIndex] || [_selectedIndexes containsIndex:insertIndex - 1]) {
                 dragOp = NSDragOperationNone;
                 _dropRectForHighlight = NSZeroRect;
             } else {
                 dragOp = NSDragOperationMove;
             }
-        } else if (type) {
+        } else if (pasteboardHasURL(pboard)) {
             dragOp = NSDragOperationLink;
         }
     }
@@ -1696,8 +1696,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 // this is called as soon as the mouse is moved to start a drag, or enters the window from outside
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
-    if ([self _isLocalDraggingInfo:sender] || 
-        nil != [[sender draggingPasteboard] availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, nil]])
+    if ([self _isLocalDraggingInfo:sender] || pasteboardHasURL([sender draggingPasteboard]))
         return NSDragOperationLink;
     else
         return NSDragOperationNone;
@@ -1721,7 +1720,6 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSPoint dragLoc = [sender draggingLocation];
     dragLoc = [self convertPoint:dragLoc fromView:nil];
     NSPasteboard *pboard = [sender draggingPasteboard];
-    NSArray *types = [pboard types];
     
     BOOL didPerform = NO;
     
@@ -1742,7 +1740,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         
         // only drop a single file on a given cell!
         
-        if (nil == aURL && [types containsObject:NSFilenamesPboardType]) {
+        if (nil == aURL && [[pboard types] containsObject:NSFilenamesPboardType]) {
             aURL = [NSURL fileURLWithPath:[[pboard propertyListForType:NSFilenamesPboardType] lastObject]];
         }
         if (aURL)
@@ -1755,14 +1753,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         // move is implemented as delete/insert
         if ([self _isLocalDraggingInfo:sender]) {
             
-            // if inserting after the ones we're removing, offset the insertion index accordingly
+            // if inserting after the ones we're removing, let the delegate handle the offset the insertion index if necessary
             NSUInteger firstIndex = [_selectedIndexes firstIndex];
-            if ([_selectedIndexes containsIndex:insertIndex]) {
+            if ([_selectedIndexes containsIndex:insertIndex] || [_selectedIndexes containsIndex:insertIndex - 1]) {
                 didPerform = NO;
             }
             else {
-                if (insertIndex > firstIndex && insertIndex >= [_selectedIndexes count])
-                    insertIndex -= [_selectedIndexes count];
                 didPerform = [[self dragDataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex];
             }
         } else {
@@ -2083,6 +2079,93 @@ void CLog(NSString *format, ...)
 }
 
 #pragma mark Pasteboard URL functions
+
+static BOOL pasteboardHasType(NSPasteboard *pboard, NSString *aType)
+{ 	 
+    OSStatus err; 	 
+    
+    PasteboardRef carbonPboard; 	 
+    err = PasteboardCreate((CFStringRef)[pboard name], &carbonPboard);
+    
+    PasteboardSyncFlags syncFlags;
+    #pragma unused(syncFlags)
+    if (noErr == err)
+        syncFlags = PasteboardSynchronize(carbonPboard);
+    
+    ItemCount itemCount, itemIndex;
+    if (noErr == err)
+        err = PasteboardGetItemCount(carbonPboard, &itemCount);
+    
+    BOOL hasType = NO;
+        
+    // wtf? this has 1-based indexing! 	 
+    for (itemIndex = 1; noErr == err && itemIndex <= itemCount && NO == hasType; itemIndex++) {
+    
+    PasteboardItemID itemID; 	 
+    CFArrayRef flavors;
+    
+    err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
+    
+    if (noErr == err)
+        err = PasteboardCopyItemFlavors(carbonPboard, itemID, &flavors);
+    
+    if (noErr == err)
+        hasType = CFArrayContainsValue(flavors, CFRangeMake(0, CFArrayGetCount(flavors)), (CFStringRef)aType);
+    
+    if (noErr == err && NULL != flavors)
+        CFRelease(flavors);
+    }
+    
+    if (carbonPboard) CFRelease(carbonPboard);
+    
+    return hasType;
+}
+
+static BOOL pasteboardHasURL(NSPasteboard *pboard)
+{ 	 
+    OSStatus err;
+    
+    PasteboardRef carbonPboard;
+    err = PasteboardCreate((CFStringRef)[pboard name], &carbonPboard);
+    
+    PasteboardSyncFlags syncFlags;
+    #pragma unused(syncFlags)
+    if (noErr == err)
+        syncFlags = PasteboardSynchronize(carbonPboard);
+    
+    ItemCount itemCount, itemIndex;
+    if (noErr == err)
+        err = PasteboardGetItemCount(carbonPboard, &itemCount);
+    
+    BOOL hasType = NO;
+    
+    // wtf? this has 1-based indexing! 	 
+    for (itemIndex = 1; noErr == err && itemIndex <= itemCount && NO == hasType; itemIndex++) {
+    
+    PasteboardItemID itemID; 	 
+    CFArrayRef flavors;
+    
+    err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
+    
+    if (noErr == err)
+        err = PasteboardCopyItemFlavors(carbonPboard, itemID, &flavors);
+    
+    if (noErr == err) {
+        CFIndex flavorIndex, flavorCount = CFArrayGetCount(flavors);
+        for (flavorIndex = 0; hasType == NO && flavorIndex < flavorCount; flavorIndex++) {
+            CFStringRef flavor = CFArrayGetValueAtIndex(flavors, flavorIndex);
+            hasType = UTTypeConformsTo(flavor, kUTTypeFileURL) || UTTypeConformsTo(flavor, kUTTypeURL);
+        }
+    }
+    
+    if (noErr == err && NULL != flavors)
+        CFRelease(flavors);
+    } 	 
+    
+    if (carbonPboard) CFRelease(carbonPboard);
+    
+    return hasType;
+}
 
 // NSPasteboard only lets us read a single webloc or NSURL instance from the pasteboard, which isn't very considerate of it.  Fortunately, we can create a Carbon pasteboard that isn't as fundamentally crippled (except in its moderately annoying API).  
 static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
