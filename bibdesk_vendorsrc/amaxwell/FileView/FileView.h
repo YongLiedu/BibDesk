@@ -62,7 +62,6 @@ enum {
 @private
     id                      _delegate;
     id                      _dataSource;
-    id                      _dragDataSource;
     NSMutableDictionary    *_iconCache;
     NSColor                *_backgroundColor;
     CFRunLoopTimerRef       _zombieTimer;
@@ -114,15 +113,10 @@ enum {
 
 - (BOOL)isEditable;
 
-// primarily for use with datasource methods
+// required for drag-and-drop support
 - (void)setDataSource:(id)obj;
 - (id)dataSource;
 
-// primarily for use with datasource methods
-- (void)setDragDataSource:(id)obj;
-- (id)dragDataSource;
-
-// required for editing support (dropping files on the view, deleting)
 - (void)setDelegate:(id)obj;
 - (id)delegate;
 
@@ -141,19 +135,19 @@ enum {
 
 @end
 
-// dragDataSource must conform to this
+// datasource must implement all of these methods or dropping/rearranging will be disabled
 @interface NSObject (FileViewDragDataSource)
 
 // implement to do something (or nothing) with the dropped URLs
 - (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
 
-// the delegate may replace the files at the given indexes
+// the datasource may replace the files at the given indexes
 - (BOOL)fileView:(FileView *)aFileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
 
 // rearranging files in the view
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
 
-// does not delete the file from disk; this is the delegate's responsibility
+// does not delete the file from disk; this is the datasource's responsibility
 - (BOOL)fileView:(FileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 
 @end
@@ -164,6 +158,6 @@ enum {
 // Called immediately before display.   The anIndex parameter will be NSNotFound if there is not a URL at the mouse event location.  If you remove all items, the menu will not be shown.
 - (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)aMenu onIconAtIndex:(NSUInteger)anIndex;
 
-// In addition, it can be send the WebUIDelegate method webView:contextMenuItemsForElement:defaultMenuItems:
+// In addition, it can be sent the WebUIDelegate method webView:contextMenuItemsForElement:defaultMenuItems:
 
 @end
