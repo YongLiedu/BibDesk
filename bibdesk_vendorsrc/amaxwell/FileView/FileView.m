@@ -1613,7 +1613,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     dragLoc = [self convertPoint:dragLoc fromView:nil];
     NSDragOperation dragOp = NSDragOperationNone;
     
-    NSUInteger insertIndexfirstIndex, endIndex;
+    NSUInteger insertIndex, firstIndex, endIndex;
     // this will set a default highlight based on geometry, but does no validation
     FVDropOperation dropOp = [self _dropOperationAtPointInView:dragLoc highlightRect:&_dropRectForHighlight insertionIndex:&insertIndex];
     
