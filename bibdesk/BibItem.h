@@ -96,6 +96,7 @@ enum {
 - (NSString *)basePath;
 
 - (NSArray *)localFiles;
+- (NSArray *)existingLocalFiles;
 - (NSArray *)remoteURLs;
 
 - (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file;

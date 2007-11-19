@@ -2557,6 +2557,18 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return localFiles;
 }
 
+- (NSArray *)existingLocalFiles {
+    NSMutableArray *localFiles = [NSMutableArray array];
+    NSEnumerator *fileEnum = [files objectEnumerator];
+    BDSKLinkedFile *file;
+    
+    while (file = [fileEnum nextObject]) {
+        if ([file isFile] && [file URL])
+            [localFiles addObject:file];
+    }
+    return localFiles;
+}
+
 - (NSArray *)remoteURLs {
     NSMutableArray *remoteURLs = [NSMutableArray array];
     NSEnumerator *fileEnum = [files objectEnumerator];
