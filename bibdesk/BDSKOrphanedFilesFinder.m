@@ -142,7 +142,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (NSSet *)knownFiles
 {
-    NSSet *localFileFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
     NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
     BibDocument *doc;
     NSEnumerator *pubEnum;
