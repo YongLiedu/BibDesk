@@ -117,7 +117,6 @@ static BDSKFiler *sharedFiler = nil;
 	NSString *newRelativePath = nil;
 	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:numberOfPapers];
 	NSMutableDictionary *info = nil;
-	BOOL useRelativePath = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoFileUsesRelativePathKey];
     NSString *papersFolderPath = [[[NSApp delegate] folderPathForFilingPapersFromDocument:doc] stringByAppendingString:@"/"];
 	NSError *error = nil;
     
@@ -149,7 +148,6 @@ static BDSKFiler *sharedFiler = nil;
 	NSMutableArray *oldValues = nil;
 	NSMutableArray *newValues = nil;
 	NSString *oldValue = nil;
-	NSString *newValue = nil;
 	
 	if(scriptHook){
 		pubs = [NSMutableArray arrayWithCapacity:[paperInfos count]];

@@ -237,7 +237,6 @@ Extra wrapping of the created and modified date methods to
 }
 
 - (void) setRemoteURLString:(NSString*) newURLString{
-    NSURL *newURL = [NSURL URLWithString:newURLString];
     BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURLString:newURLString] autorelease];
     if (file == nil)
         return;

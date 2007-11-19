@@ -901,6 +901,19 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
     
+#if !OMNI_FORCE_ASSERTIONS
+#warning Saving disabled
+    if (NSSaveOperation == saveOperation) {
+        if (outError) {
+            *outError = [NSError mutableLocalErrorWithCode:kBDSKFileOperationFailed localizedDescription:@"Only Save-As is supported for this build"];
+            [*outError setValue:@"In order to avoid data loss, overwriting is not allowed.  Use Save As or Export." forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
+        return NO;
+    }
+#else
+#warning Saving enabled
+#endif
+    
     // Set the string encoding according to the popup.  
     // NB: the popup has the incorrect encoding if it wasn't displayed, for example for the Save action and saving using AppleScript, so don't reset encoding unless we're actually modifying this document through a menu .
     if (NSSaveAsOperation == saveOperation && [saveTextEncodingPopupButton encoding] != 0)
@@ -1059,11 +1072,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSFileManager *fm = [NSFileManager defaultManager];
     NSEnumerator *itemEnum = [items objectEnumerator];
     BibItem *item;
-    NSSet *localFileFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
-    NSMutableSet *localFiles = [NSMutableSet set];
     NSString *filePath;
     NSString *commonParent = nil;
     BOOL success = YES;
+    NSMutableSet *localFiles = [NSMutableSet set];
     
     if (success = [fm createDirectoryAtPath:path attributes:nil]) {
         while (item = [itemEnum nextObject]) {
@@ -2851,7 +2863,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     int i;
     NSMenuItem *item;
     
-    if (theURL && i != -1) {
+    if (theURL) {
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
         [menu insertItemWithTitle:[NSLocalizedString(@"Open With", @"Menu item title") stringByAppendingEllipsis]
                 andSubmenuOfApplicationsForURL:theURL atIndex:++i];

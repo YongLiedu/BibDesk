@@ -435,7 +435,6 @@
     BDSKLinkedFile *file;
     BibItem *pub;
     
-    NSFileManager *dfm = [NSFileManager defaultManager];
     NSString *path = nil;
     NSMutableString *body = [NSMutableString string];
     NSMutableArray *files = [NSMutableArray array];

@@ -1492,7 +1492,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSDictionary *)searchIndexInfo{
-    NSSet *urlFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
     NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
     BDSKLinkedFile *file;
     NSURL *aURL;
@@ -2318,7 +2317,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     NSEnumerator *fileE;
     BDSKLinkedFile *file;
-    NSURL *url;
     
     [s appendString:@"<urls>"];
     
@@ -2551,7 +2549,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSMutableArray *localFiles = [NSMutableArray array];
     NSEnumerator *fileEnum = [files objectEnumerator];
     BDSKLinkedFile *file;
-    NSURL *aURL;
     
     while (file = [fileEnum nextObject]) {
         if ([file isFile])
@@ -2564,7 +2561,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSMutableArray *remoteURLs = [NSMutableArray array];
     NSEnumerator *fileEnum = [files objectEnumerator];
     BDSKLinkedFile *file;
-    NSURL *aURL;
     
     while (file = [fileEnum nextObject]) {
         if ([file isFile] == NO)
@@ -2623,7 +2619,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx
 {
     NSArray *toMove = [[files objectsAtIndexes:aSet] copy];
-    unsigned anIdx = [aSet indexLessThanIndex:idx];
     NSMutableArray *observedFiles = [self mutableArrayValueForKey:@"files"];
     // reduce idx by the number of smaller indexes in aSet
     if (idx > 0) {
@@ -2671,7 +2666,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     NSEnumerator *fe = [files objectEnumerator];
     NSURL *aURL;
     BDSKLinkedFile *file;
-    NSString *relPath;
     while (file = [fe nextObject]) {
         if (aURL = [file displayURL])
             [combinedURLs addObject:aURL];
