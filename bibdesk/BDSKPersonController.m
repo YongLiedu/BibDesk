@@ -89,6 +89,8 @@
 	if ([NSWindowController instancesRespondToSelector:@selector(awakeFromNib)]){
         [super awakeFromNib];
 	}
+    
+    [[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
 	
 	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
 	[imageView setDelegate:self];
