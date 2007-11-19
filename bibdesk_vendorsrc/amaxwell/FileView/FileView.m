@@ -1613,7 +1613,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     dragLoc = [self convertPoint:dragLoc fromView:nil];
     NSDragOperation dragOp = NSDragOperationNone;
     
-    NSUInteger insertIndex;
+    NSUInteger insertIndexfirstIndex, endIndex;
     // this will set a default highlight based on geometry, but does no validation
     FVDropOperation dropOp = [self _dropOperationAtPointInView:dragLoc highlightRect:&_dropRectForHighlight insertionIndex:&insertIndex];
     
@@ -1639,9 +1639,11 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         }
     } else if (FVDropInsert == dropOp) {
         
-        // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection, but that needs to be examined more carefully
+        // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection
         if ([self _isLocalDraggingInfo:sender]) {
-            if ([_selectedIndexes containsIndex:insertIndex] || [_selectedIndexes containsIndex:insertIndex - 1]) {
+            firstIndex = [_selectedIndexes firstIndex], endIndex = [_selectedIndexes lastIndex] + 1;
+            if ([_selectedIndexes containsIndexesInRange:NSMakeRange(firstIndex, endIndex - firstIndex)] &&
+                insertIndex >= firstIndex && insertIndex <= endIndex) {
                 dragOp = NSDragOperationNone;
                 _dropRectForHighlight = NSZeroRect;
             } else {
