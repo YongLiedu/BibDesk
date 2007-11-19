@@ -46,6 +46,7 @@
         path = [files objectAtIndex:i];
         [arrayController addObject:[NSURL fileURLWithPath:[base stringByAppendingPathComponent:path]]];
     }
+    [arrayController addObject:[NSNull null]];
     [arrayController addObject:[NSURL URLWithString:@"http://www.apple.com/"]];
     
     [_fileView bind:@"iconURLs" toObject:arrayController withKeyPath:@"arrangedObjects" options:nil];
