@@ -1942,6 +1942,11 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     [self setSelectionIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfIcons])]];
 }
 
+- (IBAction)deselectAll:(id)sender;
+{
+    [self setSelectionIndexes:[NSIndexSet indexSet]];
+}
+
 - (IBAction)copy:(id)sender;
 {
     if (NO == writeURLsToPasteboard([self _selectedURLs], [NSPasteboard generalPasteboard]))
