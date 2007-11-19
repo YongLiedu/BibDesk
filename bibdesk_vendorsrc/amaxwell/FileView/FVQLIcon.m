@@ -52,7 +52,10 @@
         _imageRef = NULL;
         _fullSize = NSZeroSize;
         _desiredSize = NSZeroSize;
-        _fallbackIcon = nil;
+        
+        // QL seems to fail a large percentage of the time on my system, and it's also pretty slow.  Since FVFinderIcon is now fast and relatively low overhead, preallocate the fallback icon to avoid waiting for QL to return NULL.
+        _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_fileURL];
+        _quickLookFailed = NO;
         int rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
             perror("pthread_mutex_init");
@@ -84,16 +87,14 @@
 {
     BOOL needsRender = NO;
     pthread_mutex_lock(&_mutex);
-    if (NULL == _imageRef || size.height > 1.2 * _fullSize.height) {
-        if (nil == _fallbackIcon) {
-            _desiredSize = size;
-            CGImageRelease(_imageRef);
-            _imageRef = NULL;
-            needsRender = YES;
-        }
-        else {
-            needsRender = [_fallbackIcon needsRenderForSize:size];
-        }
+    if (NO == _quickLookFailed && (NULL == _imageRef || size.height > 1.2 * _fullSize.height)) {
+        _desiredSize = size;
+        CGImageRelease(_imageRef);
+        _imageRef = NULL;
+        needsRender = YES;
+    }
+    else {
+        needsRender = [_fallbackIcon needsRenderForSize:size];
     }
     pthread_mutex_unlock(&_mutex);
     return needsRender;
@@ -103,24 +104,26 @@
 {        
     pthread_mutex_lock(&_mutex);
     CGImageRelease(_imageRef);
-    if (nil == _fallbackIcon)
+    
+    if (NO == _quickLookFailed)
         _imageRef = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, *(CGSize *)&_desiredSize, NULL);
+
     if (NULL == _imageRef) {
-        
-        if (nil == _fallbackIcon)
-            _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_fileURL];
-        if ([_fallbackIcon needsRenderForSize:_desiredSize])
-            [_fallbackIcon renderOffscreen];
+        _quickLookFailed = YES;
     }
-    else
+    else {
         _fullSize = NSMakeSize(CGImageGetWidth(_imageRef), CGImageGetHeight(_imageRef));
+    }
+    
+    if ([_fallbackIcon needsRenderForSize:_desiredSize])
+        [_fallbackIcon renderOffscreen];
     pthread_mutex_unlock(&_mutex);
 }    
 
 - (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 {
-    pthread_mutex_lock(&_mutex);
-    if (_imageRef) {
+    BOOL didLock = (pthread_mutex_trylock(&_mutex) == 0);
+    if (didLock && _imageRef) {
         CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _imageRef);
     }
     else if (nil != _fallbackIcon) {
@@ -129,7 +132,7 @@
     else {
         [self _drawPlaceholderInRect:dstRect inCGContext:context];
     }
-    pthread_mutex_unlock(&_mutex);
+    if (didLock) pthread_mutex_unlock(&_mutex);
 }
 
 @end
