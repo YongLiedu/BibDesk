@@ -49,6 +49,9 @@
 // Will determine the file type based on the absolute path and returns an instance of a concrete subclass, using the iconSize parameter as a size hint.
 + (id)iconWithPath:(NSString *)absolutePath size:(NSSize)iconSize;
 
+// Returns a URL that is appropriate for a missing file.  Don't rely on the scheme or path for anything.
++ (NSURL *)missingFileURL;
+
 // Will accept any URL type and return a file thumbnail, file icon, or appropriate icon for the given URL scheme.
 + (id)iconWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
 

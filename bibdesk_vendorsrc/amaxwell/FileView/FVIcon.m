@@ -51,6 +51,7 @@
 static FVIcon *defaultPlaceholderIcon = nil;
 static Class FVIconClass = Nil;
 static Class FVQLIconClass = Nil;
+static NSURL *missingFileURL = nil;
 
 @implementation FVIcon
 
@@ -64,6 +65,7 @@ static Class FVQLIconClass = Nil;
             FVQLIconClass = NSClassFromString(@"FVQLIcon");
         }
         defaultPlaceholderIcon = (FVIcon *)NSAllocateObject(FVIconClass, 0, [self zone]);
+        missingFileURL = [[NSURL alloc] initWithScheme:@"x-fileview" host:@"localhost" path:@"/missing"];
     }
 }
 
@@ -93,6 +95,11 @@ static Class FVQLIconClass = Nil;
     return nsImage;
 }
 
++ (NSURL *)missingFileURL;
+{
+    return missingFileURL;
+}
+
 + (id)iconWithPath:(NSString *)absolutePath size:(NSSize)iconSize;
 {
     // guaranteed to be a filesystem path or NSNull, so we can use fileURLWithPath:
@@ -104,8 +111,10 @@ static Class FVQLIconClass = Nil;
 
 + (id)iconWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
 {
-    // special case for nil URL, since CFURLGetFSRef won't like it
-    if (nil == representedURL || [representedURL isEqual:[NSNull null]]) {
+    // CFURLGetFSRef won't like a nil URL
+    NSParameterAssert(nil != representedURL);
+    
+    if ([representedURL isEqual:missingFileURL]) {
         return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil] autorelease];
     }
     else if (NO == [representedURL isFileURL]) {

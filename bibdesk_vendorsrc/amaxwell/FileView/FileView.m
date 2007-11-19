@@ -43,6 +43,13 @@
 #import "FVPreviewer.h"
 #import "FVArrowButton.h"
 
+@interface FileView (Private)
+// wrapper that calls bound array or datasource transparently; for internal use
+// clients should access the datasource or bound array directly
+- (NSURL *)iconURLAtIndex:(NSUInteger)anIndex;
+- (NSUInteger)numberOfIcons;
+@end
+
 // functions for dealing with multiple URLs and weblocs on the pasteboard
 static NSArray *URLSFromPasteboard(NSPasteboard *pboard);
 static BOOL writeURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard);
@@ -487,8 +494,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSURL *aURL = [[self iconURLs] objectAtIndex:anIndex];
     if (nil == aURL)
         aURL = [_dataSource fileView:self URLAtIndex:anIndex];
-    if ([[NSNull null] isEqual:aURL])
-        aURL = nil;
+    if (nil == aURL || [[NSNull null] isEqual:aURL])
+        aURL = [FVIcon missingFileURL];
     return aURL;
 }
 

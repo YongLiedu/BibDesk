@@ -91,10 +91,6 @@ enum {
 - (NSIndexSet *)selectionIndexes;
 - (void)setSelectionIndexes:(NSIndexSet *)indexSet;
 
-// wrapper that calls bound array or datasource transparently; mainly for internal use
-- (NSURL *)iconURLAtIndex:(NSUInteger)anIndex;
-- (NSUInteger)numberOfIcons;
-
 // bind a slider or other control to this
 - (CGFloat)iconScale;
 - (void)setIconScale:(CGFloat)scale;
