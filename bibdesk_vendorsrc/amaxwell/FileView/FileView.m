@@ -1251,16 +1251,20 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
             leftRect.origin = NSMakePoint(NSMidX(iconRect) - 2 - NSWidth(leftRect), NSMaxY(iconRect) - NSHeight(leftRect) - 4);
             rightRect.origin = NSMakePoint(NSMidX(iconRect) + 2, NSMaxY(iconRect) - NSHeight(rightRect) - 4);
             
-            [_leftArrow setFrame:leftRect];
-            [[_leftArrow cell] setRepresentedObject:anIcon];
-            [_rightArrow setFrame:rightRect];
-            [[_rightArrow cell] setRepresentedObject:anIcon];
-            
-            // set enabled states
-            [self _updateButtonsForIcon:anIcon];
-            [_leftArrow setHidden:NO];
-            [_rightArrow setHidden:NO];
-            // adding buttons as subviews here seems to kill the tooltips; maybe that's good, though...they can easily hide the arrow buttons, depending on where the mouse enters
+            // Could check to see if the icon is fully visible; NSSplitView is a bit weird about this, since we end up getting mouseEntered: for icons that are scrolled out of sight.  Full visibility isn't required to change pages, though.
+            if (NSContainsRect([self visibleRect], rightRect) && NSContainsRect([self visibleRect], leftRect)) {
+                
+                [_leftArrow setFrame:leftRect];
+                [[_leftArrow cell] setRepresentedObject:anIcon];
+                [_rightArrow setFrame:rightRect];
+                [[_rightArrow cell] setRepresentedObject:anIcon];
+                
+                // set enabled states
+                [self _updateButtonsForIcon:anIcon];
+                [_leftArrow setHidden:NO];
+                [_rightArrow setHidden:NO];
+                // adding buttons as subviews here seems to kill the tooltips; maybe that's good, though...they can easily hide the arrow buttons, depending on where the mouse enters
+            }
         }
     }
     
