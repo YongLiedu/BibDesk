@@ -2613,7 +2613,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark Splitview delegate methods
 
-- (void)splitViewDoubleClick:(OASplitView *)sender{
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
     if ([sender isEqual:mainSplitView]) {
         NSView *tabs = [[mainSplitView subviews] objectAtIndex:0]; // tabs
         NSView *files = [[mainSplitView subviews] objectAtIndex:1]; // files+authors
