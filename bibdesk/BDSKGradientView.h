@@ -44,6 +44,7 @@
     @private
     CIColor *startColor;
     CIColor *endColor;
+    id gradient;
 }
 
 - (void)setLowerColor:(NSColor *)color;

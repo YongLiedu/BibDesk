@@ -51,7 +51,15 @@
 - (id)initWithFrame:(NSRect)frame
 {
     self = [super initWithFrame:frame];
-    [self setDefaultColors];
+    if (self) {
+        [self setDefaultColors];
+        // arm: I was hoping this would fix the performance problems we apparently have with CIImages drawing gradients on 10.5 with some hardware, but the gradient here looks wrong (too dark).
+#if 0 && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+            gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCIColor:[self lowerColor]]
+                                                     endingColor:[NSColor colorWithCIColor:[self upperColor]]];
+#endif
+    }
     return self;
 }
 
@@ -59,6 +67,7 @@
 {
     [endColor release];
     [startColor release];
+    [gradient release];
     [super dealloc];
 }
 
@@ -68,7 +77,10 @@
     
     // see http://lists.apple.com/archives/Quartz-dev/2007/Sep/msg00060.html ; thanks, Apple...
     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self lowerColor] endColor:[self upperColor]];
+        if (gradient)
+            [gradient drawInRect:[self bounds] angle:90.0];
+        else
+            [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self lowerColor] endColor:[self upperColor]];
     }
     else {
         [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self upperColor] endColor:[self lowerColor]];
