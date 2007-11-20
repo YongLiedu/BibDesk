@@ -1953,6 +1953,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         NSBeep();
 }
 
+- (IBAction)cut:(id)sender;
+{
+    [self copy:sender];
+    [self delete:sender];
+}
+
 - (IBAction)paste:(id)sender;
 {
     if ([self isEditable]) {
@@ -1977,7 +1983,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [anItem setTitle:([aURL isFileURL] ? NSLocalizedString(@"Open File", @"") : NSLocalizedString(@"Open in Browser", @""))];
         return YES;
     }
-    else if (action == @selector(delete:) || action == @selector(copy:))
+    else if (action == @selector(delete:) || action == @selector(copy:) || action == @selector(cut:))
         return [self isEditable] && [_selectedIndexes count] > 0;
     else if (action == @selector(selectAll:))
         return ([self numberOfIcons] > 0);
