@@ -1720,6 +1720,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             [s appendString:[value stringAsBibTeXString]];
         }
     }
+    
+    // make sure to add these at the end to avoid problems with BibTeX's buffers
     if (!drop) {
         value = [self filesAsBibTeXFragmentRelativeToPath:[self basePath]];
         if (value) [s appendString:value];
@@ -1812,6 +1814,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
     }
     [knownKeys release];
+    
+    // make sure to add these at the end to avoid problems with BibTeX's buffers
     if(isOK && !drop) {
         value = [self filesAsBibTeXFragmentRelativeToPath:basePath];
         // assumes encoding is ascii-compatible, but btparse does as well
@@ -3613,6 +3617,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         key = [NSString stringWithFormat:@"Bdsk-File-%d", ++i];
     }
     
+    // reset i so we can get all of the remote URL types
+    i = 0;
     key = [NSString stringWithFormat:@"Bdsk-Url-%d", i];
 
     while ((value = [pubFields objectForKey:key]) != nil) {
