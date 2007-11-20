@@ -462,7 +462,9 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [fileGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     [fileGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
+    [fileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKMainFileViewIconScaleKey]];
     [fileViewSlider bind:@"value" toObject:fileView withKeyPath:@"iconScale" options:nil];
+    [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
     
 	// ImagePopUpButtons setup
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
@@ -2701,6 +2703,14 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [self updateSmartGroupsCountAndContent:YES];
     [self updateCategoryGroupsPreservingSelection:YES];
     [self updatePreviews];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (object == fileView && [keyPath isEqualToString:@"iconScale"]) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[fileView iconScale] forKey:BDSKMainFileViewIconScaleKey];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 #pragma mark -

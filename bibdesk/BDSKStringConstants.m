@@ -130,6 +130,9 @@ NSString *BDSKPreviewTemplateStyleKey = @"BDSKPreviewTemplateStyleKey";
 NSString *BDSKPreviewPDFScaleFactorKey = @"Preview PDF Scale Factor";
 NSString *BDSKPreviewRTFScaleFactorKey = @"Preview RTF Scale Factor";
 
+NSString *BDSKMainFileViewIconScaleKey = @"BDSKMainFileViewIconScaleKey";
+NSString *BDSKEditorFileViewIconScaleKey = @"BDSKEditorFileViewIconScaleKey";
+
 NSString *BDSKDefaultFieldsKey = @"Default Fields";
 NSString *BDSKLocalFileFieldsKey = @"Local File Fields";
 NSString *BDSKRemoteURLFieldsKey = @"Remote URL Fields";

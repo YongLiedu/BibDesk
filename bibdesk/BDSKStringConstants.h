@@ -193,6 +193,9 @@ extern NSString *BDSKSpotlightVersionInfo;
 extern NSString *BDSKShouldShowWebGroupPrefKey;
 extern NSString *BDSKDefaultArrayJoinStringKey;
 
+extern NSString *BDSKMainFileViewIconScaleKey;
+extern NSString *BDSKEditorFileViewIconScaleKey;
+
 #pragma mark Field name strings
 
 extern NSString *BDSKCiteKeyString;

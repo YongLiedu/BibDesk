@@ -172,6 +172,14 @@ enum{
     }
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (object == fileView && [keyPath isEqualToString:@"iconScale"]) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
 - (NSString *)windowNibName{
     return @"BibEditor";
 }
@@ -203,7 +211,7 @@ enum{
     // we should have a document at this point, as the nib is not loaded before -window is called, which shouldn't happen before the document shows us
     OBASSERT([self document]);
     
-    [[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+    [[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]];
     
     [[bibFields prototype] setEditable:isEditable];
     [bibTypeButton setEnabled:isEditable];
@@ -341,6 +349,9 @@ enum{
         [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
 	
     [self updateCiteKeyDuplicateWarning];
+    
+    [fileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFileViewIconScaleKey]];
+    [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
