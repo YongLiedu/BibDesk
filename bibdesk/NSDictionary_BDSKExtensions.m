@@ -53,7 +53,10 @@
 
 // ARM:  Apple's implementation of -[NSDictionary valueForKey:] doesn't check [key length]
 // before using characterAtIndex:, so an empty string will raise an exception.  We reimplement
-// it as specified in the docs to avoid this problem.  rdar://problem/4759413
+// it as specified in the docs to avoid this problem.  rdar://problem/4759413 (fixed on 10.5)
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning fixed on 10.5
+#endif
 
 - (id)valueForKey:(NSString *)key
 {

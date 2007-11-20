@@ -89,6 +89,11 @@ static CFDateFormatterRef numericDateFormatter = NULL;
     
 - (id)initWithMonthDayYearString:(NSString *)dateString;
 {    
+    // [[self init] release] is required prior to 10.5 due to a bug in NSDate when sending [self release]; Apple fixed this in 10.5
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning init-release not required
+#endif
+    
    [[self init] release];
     self = nil;
 

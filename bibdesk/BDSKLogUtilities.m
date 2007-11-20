@@ -108,6 +108,11 @@ static int new_default_asl_query(aslmsg *newQuery)
 NSString *BDSKStandardErrorString(void)
 {
     // sadly, repeated calls to asl_search() seem to corrupt memory on 10.4.9 rdar://problem/5276522
+    // this is fixed on 10.5, but will not be fixed on 10.4
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning Tiger ASL hack
+#endif
+    
     if (isTiger) return (disableASLLogging ? @"Re-enable ASL logging with `defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKDisableASLLogging -bool FALSE`" : tigerASLHackaround());
     
     aslmsg query, msg;

@@ -44,6 +44,11 @@ static NSDictionary *translator = nil;
 
 // The key names were taken from the Voyeur sample code, since the linker fails using the PDFKit constant names
 // rdar://problem/4450214
+// note: fixed in 10.5
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning use PDFKit constants
+#endif
+
 NSString *BDSKPDFDocumentTitleAttribute = @"Title";				        // NSString containing document title.
 NSString *BDSKPDFDocumentAuthorAttribute = @"Author";			        // NSString containing document author.
 NSString *BDSKPDFDocumentCreationDateAttribute = @"CreationDate";		// NSDate representing document creation date.
