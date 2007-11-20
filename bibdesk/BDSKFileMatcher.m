@@ -561,8 +561,9 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     // we generally shouldn't need to index the (default) first 2000 terms just to get title and author
     CFDictionaryAddValue(opts, kSKMaximumTerms, (CFNumberRef)[NSNumber numberWithInt:200]);
     
-    // kSKProximityIndexing is unused for now, since it slows things down and caused a crash on one of my files rdar://problem/4988691
-    // CFDictionaryAddValue(opts, kSKProximityIndexing, kCFBooleanTrue);
+    // kSKProximityIndexing is unused for now, since it slows things down and caused a crash on one of my files rdar://problem/4988691 (fixed in 10.5)
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+        CFDictionaryAddValue(opts, kSKProximityIndexing, kCFBooleanTrue);
     searchIndex = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, opts);
     CFRelease(opts);
     CFRelease(indexData);
@@ -590,7 +591,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     [self performSelectorOnMainThread:@selector(updateProgressIndicatorWithNumber:) withObject:[NSNumber numberWithDouble:(0.0)] waitUntilDone:NO];
     [statusField performSelectorOnMainThread:@selector(setStringValue:) withObject:[NSLocalizedString(@"Indexing files", @"") stringByAppendingEllipsis] waitUntilDone:NO];
     
-    // some HTML files cause a deadlock or crash in -[NSHTMLReader _loadUsingLibXML2] rdar://problem/4988303
+    // some HTML files cause a deadlock or crash in -[NSHTMLReader _loadUsingLibXML2] rdar://problem/4988303 (fixed in 10.5)
     BOOL shouldLog = [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldLogFilesAddedToMatchingSearchIndex"];
     
     while (0 == _matchFlags.shouldAbortThread && (url = [e nextObject])) {
