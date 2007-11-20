@@ -568,6 +568,8 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [pboardHelper release];
     pboardHelper = nil;
     
+    [fileView removeObserver:self forKeyPath:@"iconScale"];
+    
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
