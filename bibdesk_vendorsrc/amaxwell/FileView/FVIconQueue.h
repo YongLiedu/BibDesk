@@ -45,6 +45,7 @@
 @interface FVIconQueue : NSObject
 {
 @private
+    NSConditionLock        *_setupLock;
     NSLock                 *_taskLock;
     CFMutableDictionaryRef  _tasks;
     NSMutableSet           *_iconsToRelease;
@@ -54,6 +55,7 @@
 // these methods may be called from any thread, but the callback will be sent on the main thread
 // icon objects respond to -renderOffscreen and -releaseResources; this isn't a general purpose queue
 
+// for main thread only; create another instance per-thread if you need to (but it will leak)
 + (FVIconQueue *)sharedQueue;
 
 // sends -renderOffscreen to icons, invokes iconQueueUpdated at intervals

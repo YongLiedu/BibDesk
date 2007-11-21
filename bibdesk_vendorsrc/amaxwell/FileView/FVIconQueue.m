@@ -43,16 +43,16 @@
 
 static id sharedInstance = nil;
 
-// let the runtime handle our singleton initialization, since +initialize is thread safe and we can then avoid @synchronized
-+ (void)initialize
-{
+
+#define QUEUE_STARTUP 1
+#define QUEUE_STARTUP_COMPLETE 2
+
+// I was creating the sharedInstance in +initialize in order to avoid @synchronized and thread safety issues.  However, that led to problems when the _runCacheThread triggered a second main thread message to +initialize, but the main thread was already blocked on _setupLock waiting for _runCacheThread to unlock.  Since +sharedQueue is only used from the main thread, I'll ignore singleton threading issues for now.
++ (FVIconQueue *)sharedQueue;
+{  
     if (nil == sharedInstance) {
         sharedInstance = [[self alloc] init];
     }        
-}
-
-+ (FVIconQueue *)sharedQueue;
-{
     return sharedInstance;
 }
 
@@ -63,12 +63,23 @@ static id sharedInstance = nil;
         _taskLock = [[NSLock alloc] init];
         _tasks = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         _iconsToRelease = [NSMutableSet new];
+        _setupLock = [[NSConditionLock alloc] initWithCondition:QUEUE_STARTUP];
         
         // this causes a retain cycle, but we want the object to be persistent anyway
         [NSThread detachNewThreadSelector:@selector(_runCacheThread:) toTarget:self withObject:nil];
+        
+        // block until the NSMachPort is set up to receive messages, or callbacks won't be delivered properly
+        [_setupLock lockWhenCondition:QUEUE_STARTUP_COMPLETE];
+        [_setupLock unlock];
+        
+        // done with this lock, so get rid of it now
+        [_setupLock release];
+        _setupLock = nil;
     }
     return self;
 }
+
+// -dealloc is not implemented since these objects are overretained, and we only use one anyway
 
 - (void)enqueueReleaseResourcesForIcons:(NSArray *)icons
 {
@@ -81,6 +92,11 @@ static id sharedInstance = nil;
 - (void)enqueueRenderIcons:(NSArray *)icons forObject:(id)anObject;
 {
     [_taskLock lock];
+    
+    // give preference to rendering, since empty icon slots are more noticeable than memory issues
+    // the release will still take place, but it will be a bit later in time
+    [_iconsToRelease minusSet:[NSSet setWithArray:icons]];
+    
     // do not use toll-free bridging here, since setObject:forKey: will stupidly copy the key (a FileView instance)
     CFDictionarySetValue(_tasks, (void *)anObject, (void *)icons);
     [_taskLock unlock];
@@ -139,7 +155,7 @@ static id sharedInstance = nil;
 - (void)handleMachMessage:(void *)msg
 {    
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    
+
     [self _handleRenderTasks];
     [self _handleReleaseTasks];
     
@@ -150,10 +166,17 @@ static id sharedInstance = nil;
 {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
+    if ([NSThread instancesRespondToSelector:@selector(setName:)])
+        [[NSThread currentThread] setName:@"FVIconQueue thread"];
+    
+    [_setupLock lockWhenCondition:QUEUE_STARTUP];
+    
     NSRunLoop *rl = [NSRunLoop currentRunLoop];
     _threadPort = [[NSMachPort alloc] init];
     [_threadPort setDelegate:self];
     [_threadPort scheduleInRunLoop:rl forMode:NSDefaultRunLoopMode];
+    
+    [_setupLock unlockWithCondition:QUEUE_STARTUP_COMPLETE];
     
     NSDate *distantFuture = [[NSDate distantFuture] retain];
     BOOL didRun;
