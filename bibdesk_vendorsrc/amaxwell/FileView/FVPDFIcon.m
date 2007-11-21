@@ -111,7 +111,9 @@ static CGPDFDocumentRef createCGPDFDocumentWithPostScriptURL(NSURL *fileURL)
         
         // must be > 1 to be valid
         _currentPage = 1;
-        _pageCount = 1;
+        
+        // initialize to zero so we know whether to load the PDF document
+        _pageCount = 0;
         
         int rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
@@ -217,6 +219,28 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
     // hold the lock while initializing these variables, so we don't waste time trying to render again, since we may be returning YES from needsRender
     pthread_mutex_lock(&_mutex);
     
+    // only the first page is cached to disk; ignore this branch if we should be drawing a later page or if the size has changed
+    if (NULL == _thumbnailRef && 1 == _currentPage) {
+        
+        _thumbnailRef = [FVIconCache newImageNamed:_diskCacheName];
+        BOOL exitEarly = NO;
+        
+        
+        // This is an optimization to avoid loading the PDF document unless absolutely necessary.  If the icon was cached by a different FVPDFIcon instance, _pageCount won't be correct and we have to continue on and load the PDF document.  In that case, our sizes will be overwritten, but the thumbnail won't be recreated.  If we need to render something that's larger than the thumbnail by 20%, we have to continue on and make sure the PDF doc is loaded as well.
+        
+        if (NULL != _thumbnailRef) {
+            _thumbnailSize.width = CGImageGetWidth(_thumbnailRef);
+            _thumbnailSize.height = CGImageGetHeight(_thumbnailRef);
+            exitEarly = _thumbnailSize.height <= _desiredSize.height * 1.2 && _pageCount > 0;
+        }
+                
+        // !!! early return
+        if (exitEarly) {
+            pthread_mutex_unlock(&_mutex);    
+            return;
+        }
+    }    
+    
     if (NULL == _pdfPage) {
         
         if (NULL == _pdfDoc) {
@@ -241,31 +265,11 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
         _thumbnailSize.width = _fullSize.width / 2;
         _thumbnailSize.height = _fullSize.height / 2;
     }
-    
-    // only the first page is cached to disk; ignore this branch if we should be drawing a page
-    if (NULL == _thumbnailRef && 1 == _currentPage && _thumbnailSize.height <= _thumbnailSize.height * 1.2) {
-        
-        // the icon may have been cached by a different instance or datasource
-        _thumbnailRef = [FVIconCache newImageNamed:_diskCacheName];
-        BOOL didRead = NO;
-        if (NULL != _thumbnailRef) {
-            didRead = YES;
-            _thumbnailSize.width = CGImageGetWidth(_thumbnailRef);
-            _thumbnailSize.height = CGImageGetHeight(_thumbnailRef);
-        }
-        
-        pthread_mutex_unlock(&_mutex);
-        
-        // !!! early return
-        if (didRead) return;
-    }
-    
-    pthread_mutex_unlock(&_mutex);
-        
+                
     // Bitmap contexts for PDF files tend to be in the 2-5 MB range, and even a one point size difference in height or width (typical, even for the same page size) results in us creating a new context for each one if we use the context cache.  That sucks, so we'll just create and destroy them as needed, since drawing into a large cached context and then cropping doesn't work.
     
     // don't bother redrawing this if it already exists, since that's a big waste of time, and our thumbnail size is a fixed percentage of the document size so there's never a need to re-render it
-    pthread_mutex_lock(&_mutex);
+
     if (NULL == _thumbnailRef) {
         
         pthread_mutex_unlock(&_mutex);
