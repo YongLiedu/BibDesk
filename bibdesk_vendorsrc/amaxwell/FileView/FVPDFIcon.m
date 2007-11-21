@@ -217,24 +217,6 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
     // hold the lock while initializing these variables, so we don't waste time trying to render again, since we may be returning YES from needsRender
     pthread_mutex_lock(&_mutex);
     
-    // only the first page is cached to disk; ignore this branch if we should be drawing a page
-    if (NULL == _thumbnailRef && 1 == _currentPage && _thumbnailSize.height <= _thumbnailSize.height * 1.2) {
-        
-        // the icon may have been cached by a different instance or datasource
-        _thumbnailRef = [FVIconCache newImageNamed:_diskCacheName];
-        BOOL didRead = NO;
-        if (NULL != _thumbnailRef) {
-            didRead = YES;
-            _thumbnailSize.width = CGImageGetWidth(_thumbnailRef);
-            _thumbnailSize.height = CGImageGetHeight(_thumbnailRef);
-        }
-        
-        pthread_mutex_unlock(&_mutex);
-        
-        // !!! early return
-        if (didRead) return;
-    }
-    
     if (NULL == _pdfPage) {
         
         if (NULL == _pdfDoc) {
@@ -259,6 +241,25 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
         _thumbnailSize.width = _fullSize.width / 2;
         _thumbnailSize.height = _fullSize.height / 2;
     }
+    
+    // only the first page is cached to disk; ignore this branch if we should be drawing a page
+    if (NULL == _thumbnailRef && 1 == _currentPage && _thumbnailSize.height <= _thumbnailSize.height * 1.2) {
+        
+        // the icon may have been cached by a different instance or datasource
+        _thumbnailRef = [FVIconCache newImageNamed:_diskCacheName];
+        BOOL didRead = NO;
+        if (NULL != _thumbnailRef) {
+            didRead = YES;
+            _thumbnailSize.width = CGImageGetWidth(_thumbnailRef);
+            _thumbnailSize.height = CGImageGetHeight(_thumbnailRef);
+        }
+        
+        pthread_mutex_unlock(&_mutex);
+        
+        // !!! early return
+        if (didRead) return;
+    }
+    
     pthread_mutex_unlock(&_mutex);
         
     // Bitmap contexts for PDF files tend to be in the 2-5 MB range, and even a one point size difference in height or width (typical, even for the same page size) results in us creating a new context for each one if we use the context cache.  That sucks, so we'll just create and destroy them as needed, since drawing into a large cached context and then cropping doesn't work.
