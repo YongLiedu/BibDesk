@@ -87,11 +87,10 @@
 {
     BOOL needsRender = NO;
     pthread_mutex_lock(&_mutex);
-    if (NO == _quickLookFailed && (NULL == _imageRef || size.height > 1.2 * _fullSize.height)) {
-        _desiredSize = size;
-        CGImageRelease(_imageRef);
-        _imageRef = NULL;
-        needsRender = YES;
+    _desiredSize = size;
+    if (NO == _quickLookFailed) {
+        // Leave size out of the criteria.  It's not clear what sizes QL will return, and we don't want to go into a loop asking for a size it can't produce.
+        needsRender = (NULL == _imageRef);
     }
     else {
         needsRender = [_fallbackIcon needsRenderForSize:size];
@@ -104,19 +103,20 @@
 {        
     pthread_mutex_lock(&_mutex);
     CGImageRelease(_imageRef);
+    _imageRef = NULL;
     
     if (NO == _quickLookFailed)
         _imageRef = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, *(CGSize *)&_desiredSize, NULL);
 
     if (NULL == _imageRef) {
         _quickLookFailed = YES;
+        if ([_fallbackIcon needsRenderForSize:_desiredSize])
+            [_fallbackIcon renderOffscreen];
     }
     else {
         _fullSize = NSMakeSize(CGImageGetWidth(_imageRef), CGImageGetHeight(_imageRef));
     }
     
-    if ([_fallbackIcon needsRenderForSize:_desiredSize])
-        [_fallbackIcon renderOffscreen];
     pthread_mutex_unlock(&_mutex);
 }    
 
