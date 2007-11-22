@@ -1427,10 +1427,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
 static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSRect rect;
-    rect.origin.x = MIN(aPoint.x, bPoint.x);
-    rect.origin.y = MIN(aPoint.y, bPoint.y);
-    rect.size.width = MAX(aPoint.x, bPoint.x) - NSMinX(rect);
-    rect.size.height = MAX(aPoint.y, bPoint.y) - NSMinY(rect);
+    rect.origin.x = fminf(aPoint.x, bPoint.x);
+    rect.origin.y = fminf(aPoint.y, bPoint.y);
+    rect.size.width = fmaxf(3.0, fmaxf(aPoint.x, bPoint.x) - NSMinX(rect));
+    rect.size.height = fmaxf(3.0, fmaxf(aPoint.y, bPoint.y) - NSMinY(rect));
     return rect;
 }
 
