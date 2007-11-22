@@ -583,40 +583,42 @@ enum{
                                  atIndex:++i];
         [item setRepresentedObject:theURL];
     }
-		
-    [menu addItem:[NSMenuItem separatorItem]];
     
-    [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]
-                    action:@selector(chooseLocalFile:)
-             keyEquivalent:@""];
-    
-    // get Safari recent downloads
-    item = [menu addItemWithTitle:NSLocalizedString(@"Safari Recent Downloads", @"Menu item title")
-                     submenuTitle:@"safariRecentDownloadsMenu"
-                  submenuDelegate:self];
+    if (isEditable) {
+        [menu addItem:[NSMenuItem separatorItem]];
+        
+        [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]
+                        action:@selector(chooseLocalFile:)
+                 keyEquivalent:@""];
+        
+        // get Safari recent downloads
+        item = [menu addItemWithTitle:NSLocalizedString(@"Safari Recent Downloads", @"Menu item title")
+                         submenuTitle:@"safariRecentDownloadsMenu"
+                      submenuDelegate:self];
 
-    // get recent downloads (Tiger only) by searching the system downloads directory
-    // should work for browsers other than Safari, if they use IC to get/set the download directory
-    // don't create this in the delegate method; it needs to start working in the background
-    if(submenu = [self recentDownloadsMenu]){
-        item = [menu addItemWithTitle:NSLocalizedString(@"Link to Recent Download", @"Menu item title") submenu:submenu];
+        // get recent downloads (Tiger only) by searching the system downloads directory
+        // should work for browsers other than Safari, if they use IC to get/set the download directory
+        // don't create this in the delegate method; it needs to start working in the background
+        if(submenu = [self recentDownloadsMenu]){
+            item = [menu addItemWithTitle:NSLocalizedString(@"Link to Recent Download", @"Menu item title") submenu:submenu];
+        }
+        
+        // get Preview recent documents
+        [menu addItemWithTitle:NSLocalizedString(@"Link to Recently Opened File", @"Menu item title")
+                  submenuTitle:@"previewRecentDocumentsMenu"
+               submenuDelegate:self];
+            
+        [menu addItem:[NSMenuItem separatorItem]];
+        
+        [menu addItemWithTitle:[NSLocalizedString(@"Choose URL", @"Menu item title") stringByAppendingEllipsis]
+                        action:@selector(chooseRemoteURL:)
+                 keyEquivalent:@""];
+        
+        // get Safari recent URLs
+        [menu addItemWithTitle:NSLocalizedString(@"Link to Download URL", @"Menu item title")
+                  submenuTitle:@"safariRecentURLsMenu"
+               submenuDelegate:self];
     }
-    
-    // get Preview recent documents
-    [menu addItemWithTitle:NSLocalizedString(@"Link to Recently Opened File", @"Menu item title")
-              submenuTitle:@"previewRecentDocumentsMenu"
-           submenuDelegate:self];
-		
-    [menu addItem:[NSMenuItem separatorItem]];
-    
-    [menu addItemWithTitle:[NSLocalizedString(@"Choose URL", @"Menu item title") stringByAppendingEllipsis]
-                    action:@selector(chooseRemoteURL:)
-             keyEquivalent:@""];
-    
-    // get Safari recent URLs
-    [menu addItemWithTitle:NSLocalizedString(@"Link to Download URL", @"Menu item title")
-              submenuTitle:@"safariRecentURLsMenu"
-           submenuDelegate:self];
 }
 
 - (NSArray *)safariDownloadHistory{
