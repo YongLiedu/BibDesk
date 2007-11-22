@@ -49,6 +49,7 @@ static DTCharArray FVCharArrayWithCGImage(CGImageRef image);
 
 static DTDataFile *__dataFile = NULL;
 static char *__tempName = NULL;        /* only a file static for debugging */
+static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
 
 + (void)initialize
 {
@@ -91,12 +92,17 @@ static char *__tempName = NULL;        /* only a file static for debugging */
 
 + (void)handleAppTerminate:(NSNotification *)notification
 {    
+    // The only reason for this lock is to avoid a NULL pointer dereference in case a file is being cached while the app terminates.  DTDataFile itself is safe for reading/writing from multiple threads, but we get handleAppTerminate: on the main thread and are generally reading/writing from another thread.
+    pthread_mutex_lock(&__dataFileLock);
     
     // deleting the __dataFile will cause DTDataFile to close the FILE* pointer
     __dataFile->Flush();
     delete __dataFile;    
+    __dataFile = NULL;
     
-#if DEBUG
+    pthread_mutex_unlock(&__dataFileLock);
+    
+#ifdef DEBUG
     // print the file size, just because I'm curious about it (before unlinking the file, though!)
     struct stat sb;
     if (0 == stat(__tempName, &sb)) {
@@ -117,24 +123,34 @@ static char *__tempName = NULL;        /* only a file static for debugging */
 {
     CGImageRef toReturn = NULL;
     
-    // David suggested a periodic flush, though it doesn't seem to be needed
-    __dataFile->Flush();
+    pthread_mutex_lock(&__dataFileLock);
     
-    if (__dataFile->Contains(name)) {
-        DTCharArray array = __dataFile->ReadCharArray(name);
-        toReturn = FVCreateCGImageWithCharArray(array);
-#if DEBUG
-        if (NULL == toReturn)
-            NSLog(@"failed reading %s from cache", name);
+    if (__dataFile) {
+        // David suggested a periodic flush, though it doesn't seem to be needed
+        __dataFile->Flush();
+        
+        if (__dataFile->Contains(name)) {
+            DTCharArray array = __dataFile->ReadCharArray(name);
+            toReturn = FVCreateCGImageWithCharArray(array);
+#ifdef DEBUG
+            if (NULL == toReturn)
+                NSLog(@"failed reading %s from cache", name);
 #endif
+        }
     }
+    else {
+        NSLog(@"must be quitting; the cache file is already gone");
+    }
+    pthread_mutex_unlock(&__dataFileLock);
     return toReturn;
 }
 
 + (void)cacheCGImage:(CGImageRef)image withName:(const char *)name;
 {
     DTCharArray array = FVCharArrayWithCGImage(image);
+    pthread_mutex_lock(&__dataFileLock);
     __dataFile->Save(array, name);
+    pthread_mutex_unlock(&__dataFileLock);
 }
 
 @end
