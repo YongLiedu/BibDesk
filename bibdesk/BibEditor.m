@@ -589,6 +589,12 @@ enum{
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            
+            item = [menu insertItemWithTitle:NSLocalizedString(@"Move To Trash",@"Menu item title")
+                                      action:@selector(trashLocalFile:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
         }
     } else if (theURL && isEditable) {
         item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL",@"Menu item title: Replace File...") stringByAppendingEllipsis]
@@ -1198,6 +1204,17 @@ enum{
 	NSString *path = [sender representedObject];
     NSURL *aURL = [NSURL fileURLWithPath:path];
     [publication addFileForURL:aURL autoFile:YES];
+    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+}
+
+- (IBAction)trashLocalFile:(id)sender{
+    unsigned int anIndex = [[sender representedObject] unsignedIntValue];
+    NSString *path = [[[publication objectInFilesAtIndex:anIndex] URL] path];
+    NSString *folderPath = [path stringByDeletingLastPathComponent];
+    NSString *fileName = [path lastPathComponent];
+    int tag = 0;
+    [publication removeObjectFromFilesAtIndex:anIndex];
+    [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 

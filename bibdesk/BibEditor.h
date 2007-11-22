@@ -149,13 +149,10 @@
 */
 - (void)show;
 
-/*!
-    @method     chooseLocalFile:
-    @abstract   Action to choose a local file using the Open dialog. 
-    @discussion (comprehensive description)
-*/
 - (IBAction)chooseLocalFile:(id)sender;
 - (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+- (IBAction)trashLocalFile:(id)sender;
 
 - (IBAction)chooseRemoteURL:(id)sender;
 - (IBAction)dismissChooseURLSheet:(id)sender;
