@@ -146,6 +146,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     _lastClickedIndex = NSNotFound;
     _rubberBandRect = NSZeroRect;
     _iconURLs = nil;
+    _isEditable = NO;
     [self setBackgroundColor:[[self class] defaultBackgroundColor]];
         
     // pass NULL for retain/release/description callbacks, so the timer does not retain the target and create a retain cycle
@@ -265,15 +266,26 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 {
     return _iconSize.width / DEFAULT_ICON_SIZE.width;
 }
+    
+- (void)_registerForDraggedTypes
+{
+    if (_isEditable && _dataSource) {
+        NSParameterAssert([_dataSource respondsToSelector:@selector(fileView:insertURLs:atIndexes:)]);
+        NSParameterAssert([_dataSource respondsToSelector:@selector(fileView:replaceURLsAtIndexes:withURLs:)]);
+        NSParameterAssert([_dataSource respondsToSelector:@selector(fileView:moveURLsAtIndexes:toIndex:)]);
+        NSParameterAssert([_dataSource respondsToSelector:@selector(fileView:deleteURLsAtIndexes:)]);
+        [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, nil]];
+    } else {
+        [self registerForDraggedTypes:nil];
+    }
+}
 
 - (void)awakeFromNib
 {
     if ([[FileView superclass] instancesRespondToSelector:@selector(awakeFromNib)])
         [super awakeFromNib];
-    
     // if the datasource connection is made in the nib, the drag type setup doesn't get done
-    if ([self isEditable])
-        [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, nil]];
+    [self _registerForDraggedTypes];
 }
 
 - (void)setDataSource:(id)obj;
@@ -286,40 +298,23 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     // convenient time to do this, although the timer would also handle it
     [_iconCache removeAllObjects];
     
-    // assign _dataSource before checking this
-    if ([self isEditable]) {
-        
-        [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, nil]];
-    }
-    else {
-        // in case the view moved and/or we changed datasources
-        [self registerForDraggedTypes:nil];
-    }
+    [self _registerForDraggedTypes];
 }
 
 - (id)dataSource { return _dataSource; }
 
 - (BOOL)isEditable 
 { 
-    BOOL isEditable = NO;
-    if (nil != _dataSource) {
+    return _isEditable;
+}
+
+- (void)setEditable:(BOOL)flag 
+{
+    if (_isEditable != flag) {
+        _isEditable = flag;
         
-        const SEL selectors[] = { 
-            @selector(fileView:insertURLs:atIndexes:), @selector(fileView:replaceURLsAtIndexes:withURLs:),
-            @selector(fileView:deleteURLsAtIndexes:),  @selector(fileView:moveURLsAtIndexes:toIndex:)
-        };
-        
-        NSUInteger i = sizeof(selectors) / sizeof(SEL);
-        
-        // assume editable, but all selectors must be implemented for correct behavior
-        isEditable = YES;
-        
-        while (i--) {
-            if ([_dataSource respondsToSelector:selectors[i]] == NO)
-                isEditable = NO;
-        }
+        [self _registerForDraggedTypes];
     }
-    return isEditable;
 }
 
 - (void)setDelegate:(id)obj;

@@ -352,6 +352,7 @@ enum{
     
     [fileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFileViewIconScaleKey]];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
+    [fileView setEditable:isEditable];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{

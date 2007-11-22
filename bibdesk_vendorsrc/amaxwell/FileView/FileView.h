@@ -72,6 +72,7 @@ enum {
     CGFloat                 _padding;
     NSSize                  _iconSize;
     NSPoint                 _lastMouseDownLocInView;
+    BOOL                    _isEditable;
     BOOL                    _isRescaling;
     BOOL                    _isDrawingDragImage;
     CFAbsoluteTime          _timeOfLastOrigin;
@@ -108,6 +109,7 @@ enum {
 - (IBAction)delete:(id)sender;
 
 - (BOOL)isEditable;
+- (void)setEditable:(BOOL)flag;
 
 // required for drag-and-drop support
 - (void)setDataSource:(id)obj;
