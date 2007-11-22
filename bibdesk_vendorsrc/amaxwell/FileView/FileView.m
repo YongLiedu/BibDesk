@@ -1496,7 +1496,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
     // No previous rubber band selection, so check to see if we're dragging an icon at this point.
     // The condition is also false when we're getting a repeated call to mouseDragged: for rubber band drawing.
-    if (NSIsEmptyRect(_rubberBandRect) && nil != pointURL) {
+    if (NSEqualRects(_rubberBandRect, NSZeroRect) && nil != pointURL) {
                 
         // we may have a selection based on a previous rubber band, but only use that if we dragged one of the icons in it
         selectedURLs = [self _selectedURLs];
