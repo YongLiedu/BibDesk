@@ -582,6 +582,20 @@ enum{
                            keyEquivalent:@""
                                  atIndex:++i];
         [item setRepresentedObject:theURL];
+        
+        if (isEditable) {
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace File",@"Menu item title: Replace File...") stringByAppendingEllipsis]
+                                      action:@selector(chooseLocalFile:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+        }
+    } else if (theURL && isEditable) {
+        item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL",@"Menu item title: Replace File...") stringByAppendingEllipsis]
+                                  action:@selector(chooseRemoteURL:)
+                           keyEquivalent:@""
+                                 atIndex:++i];
+        [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
     }
     
     if (isEditable) {
@@ -1139,26 +1153,43 @@ enum{
 #pragma mark choose local-url or url support
 
 - (IBAction)chooseLocalFile:(id)sender{
+    unsigned int anIndex = NSNotFound;
+    NSNumber *indexNumber = [sender representedObject];
+    NSString *path = nil;
+    if (indexNumber) {
+        anIndex = [indexNumber unsignedIntValue];
+        path = [[[publication objectInFilesAtIndex:anIndex] URL] path];
+    }
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
 	
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
+    [oPanel beginSheetForDirectory:[path stringByDeletingLastPathComponent] 
+                              file:[path lastPathComponent] 
                     modalForWindow:[self window] 
                      modalDelegate:self 
                     didEndSelector:@selector(chooseLocalFilePanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
+                       contextInfo:(void *)anIndex];
   
 }
 
 - (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 
     if(returnCode == NSOKButton){
+        unsigned int anIndex = (unsigned int)contextInfo;
         NSURL *aURL = [[sheet URLs] objectAtIndex:0];
-        [publication addFileForURL:aURL autoFile:YES];
+        if (anIndex != NSNotFound) {
+            BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication] autorelease];
+            if (aFile == nil)
+                return;
+            [publication removeObjectFromFilesAtIndex:anIndex];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [publication autoFileLinkedFile:aFile];
+        } else {
+            [publication addFileForURL:aURL autoFile:YES];
+        }
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
 }
@@ -1171,13 +1202,20 @@ enum{
 }
 
 - (IBAction)chooseRemoteURL:(id)sender{
-	[chooseURLField setStringValue:@"http://"];
+    unsigned int anIndex = NSNotFound;
+    NSNumber *indexNumber = [sender representedObject];
+    NSString *urlString = @"http://";
+    if (indexNumber) {
+        anIndex = [indexNumber unsignedIntValue];
+        urlString = [[[publication objectInFilesAtIndex:anIndex] URL] absoluteString];
+    }
+	[chooseURLField setStringValue:urlString];
     
     [NSApp beginSheet:chooseURLSheet
        modalForWindow:[self window] 
         modalDelegate:self 
        didEndSelector:@selector(chooseRemoteURLSheetDidEnd:returnCode:contextInfo:) 
-          contextInfo:nil];
+          contextInfo:(void *)anIndex];
 }
 
 - (void)chooseRemoteURLSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -1186,10 +1224,22 @@ enum{
         NSString *aURLString = [chooseURLField stringValue];
         if ([NSString isEmptyString:aURLString])
             return;
+        if ([aURLString rangeOfString:@"://"].location == NSNotFound)
+            aURLString = [@"http://" stringByAppendingString:aURLString];
         NSURL *aURL = [NSURL URLWithString:aURLString];
         if (aURL == nil)
             return;
-        [publication addFileForURL:aURL autoFile:NO];
+        unsigned int anIndex = (unsigned int)contextInfo;
+        if (anIndex != NSNotFound) {
+            BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication] autorelease];
+            if (aFile == nil)
+                return;
+            [publication removeObjectFromFilesAtIndex:anIndex];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [publication autoFileLinkedFile:aFile];
+        } else {
+            [publication addFileForURL:aURL autoFile:NO];
+        }
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
 }
