@@ -52,20 +52,54 @@
 {
     self = [super initWithFrame:frame];
     [self setDefaultColors];
+    layer = NULL;
     return self;
 }
 
 - (void)dealloc
 {
+    CGLayerRelease(layer);
     [lowerColor release];
     [upperColor release];
     [super dealloc];
 }
 
+- (void)setBounds:(NSRect)aRect
+{
+    // since the gradient is vertical, we only have to reset the layer if the height changes; for most of our gradient views, this isn't likely to happen
+    if (ABS(NSHeight(aRect) - NSHeight([self bounds])) > 0.01) {
+        CGLayerRelease(layer);
+        layer = NULL;
+    }
+    [super setBounds:aRect];
+}
+
+// fill entire view, not just the (possibly clipped) aRect
+
 - (void)drawRect:(NSRect)aRect
 {
-    // fill entire view, not just the (possibly clipped) aRect
-    [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self lowerColor] endColor:[self upperColor]];
+    CGContextRef viewContext = [[NSGraphicsContext currentContext] graphicsPort];
+    NSRect bounds = [self bounds];
+    
+    // see bug #1834337; drawing the status bar gradient is apparently really expensive on some hardware
+    // suggestion from Scott Thompson on quartz-dev was to use a CGLayer; based on docs, this should be a good win
+    if (NULL == layer) {
+        NSSize layerSize = bounds.size;
+        layer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
+        
+        CGContextRef layerContext = CGLayerGetContext(layer);
+        [NSGraphicsContext saveGraphicsState];
+        [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:layerContext flipped:NO]];
+        NSRect layerRect = NSZeroRect;
+        layerRect.size = layerSize;
+        
+        [[NSBezierPath bezierPathWithRect:bounds] fillPathVerticallyWithStartColor:[self lowerColor] endColor:[self upperColor]];
+        [NSGraphicsContext restoreGraphicsState];
+    }
+    
+    // normal blend mode is copy
+    CGContextSetBlendMode(viewContext, kCGBlendModeNormal);
+    CGContextDrawLayerInRect(viewContext, *(CGRect *)&bounds, layer);
 }
 
 // -[CIColor initWithColor:] fails (returns nil) with +[NSColor gridColor] rdar://problem/4789043
