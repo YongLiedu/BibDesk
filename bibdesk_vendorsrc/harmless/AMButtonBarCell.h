@@ -25,7 +25,6 @@
     BOOL isMouseOver;
 }
 
-- (float)widthForFrame:(NSRect)frameRect;
 
 
 @end

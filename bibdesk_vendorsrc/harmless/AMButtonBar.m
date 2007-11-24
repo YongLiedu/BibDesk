@@ -204,7 +204,7 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 
 - (void)resetTrackingRects
 {
-    if (floor(NSAppKitVersionNumber) <= 824 /* NSAppKitVersionNumber10_4 */) {
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
         NSEnumerator *enumerator = [[self items] objectEnumerator];
         id item;
         while (item = [enumerator nextObject]) {
@@ -245,17 +245,13 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 	NSEnumerator *enumerator = [[self items] objectEnumerator];
 	id item;
 	while (item = [enumerator nextObject]) {
-        NSRect frame = [item frame];
-        frame.size.height = AM_BUTTON_HEIGHT;
-        frame.size.width = [(AMButtonBarCell *)[item cell] widthForFrame:frame];
-        [item setFrame:frame];
-        
+        [item sizeToFit];
 		[item setFrameOrigin:origin];
 		origin.x += [item frame].size.width;
 		origin.x += AM_BUTTON_GAP_WIDTH;
         
         [self removeTrackingRect:[item tag]];
-        int tag = [self addTrackingRect:frame owner:self userData:item assumeInside:NO];
+        int tag = [self addTrackingRect:[item frame] owner:self userData:item assumeInside:NO];
         [item setTag:tag];
 	}
 }

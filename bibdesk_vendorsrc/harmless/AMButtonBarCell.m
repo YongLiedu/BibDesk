@@ -31,8 +31,6 @@ static NSShadow *__darkShadow = nil;
 
 - (void)finishInit
 {
-    [self setControlSize:NSSmallControlSize];
-    [self setFont:[NSFont boldSystemFontOfSize:[NSFont systemFontSizeForControlSize:[self controlSize]]]];
     isMouseOver = NO;
 }
 
@@ -70,14 +68,14 @@ static NSShadow *__darkShadow = nil;
 
 - (void)drawBezelWithFrame:(NSRect)frame inView:(NSView*)controlView
 {
-	if (floor(NSAppKitVersionNumber) > 824 /* NSAppKitVersionNumber10_4 */ || [self state] == NSOnState || isMouseOver)
+	if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 || [self state] == NSOnState || isMouseOver)
 		[super drawBezelWithFrame:frame inView:controlView];	
 }
 
 - (NSRect)drawTitle:(NSAttributedString *)title withFrame:(NSRect)frame inView:(NSView *)controlView
 {
     id titleToDraw = title;
-    if (floor(NSAppKitVersionNumber) <= 824 /* NSAppKitVersionNumber10_4 */) {
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
 
         titleToDraw = [[title mutableCopy] autorelease];
         NSColor *color;
@@ -98,32 +96,13 @@ static NSShadow *__darkShadow = nil;
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    if (floor(NSAppKitVersionNumber) <= 824 /* NSAppKitVersionNumber10_4 */) {
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
         [self drawBezelWithFrame:cellFrame inView:controlView];
         [self drawTitle:[self attributedTitle] withFrame:cellFrame inView:controlView];
     }
     else {
         [super drawInteriorWithFrame:cellFrame inView:controlView];
     }
-}
-
-- (float)widthForFrame:(NSRect)frameRect
-{
-	float result;
-    result = ceilf([[self attributedTitle] size].width);
-
-	float radius = (frameRect.size.height/2.0)-am_backgroundInset;
-
-	float textInset;
-	float h = [[self font] ascender] / 2.0;
-	textInset = ceilf(radius - sqrt(radius * radius - h * h) + (radius * 0.25));
-
-	result += 2.0 * (textInset + am_backgroundInset + am_textGap);
-	if ([self menu] != nil) {
-		float arrowWidth = [[self font] pointSize] * 0.6;
-		result += (radius * 0.5) + arrowWidth;
-	}
-	return result;
 }
 
 @end

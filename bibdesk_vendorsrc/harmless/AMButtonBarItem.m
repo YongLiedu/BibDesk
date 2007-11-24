@@ -19,11 +19,12 @@
 	self = [super initWithFrame:NSZeroRect];
 	if (self != nil) {
 		[self setItemIdentifier:theIdentifier];
-		[self setFrame:NSZeroRect];
 		[self setEnabled:YES];
         [self setBezelStyle:NSRecessedBezelStyle];
-        [self setButtonType:NSPushOnPushOffButton];
         [self setShowsBorderOnlyWhileMouseInside:YES];
+        [self setButtonType:NSPushOnPushOffButton];
+        [[self cell] setControlSize:NSSmallControlSize];
+        [self setFont:[NSFont boldSystemFontOfSize:[NSFont systemFontSizeForControlSize:[[self cell] controlSize]]]];
 	}
 	return self;
 }
@@ -40,6 +41,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
+    [super encodeWithCoder:coder];
 	[coder encodeObject:itemIdentifier forKey:@"AMBBIItemIdentifier"];
 	[coder encodeBool:active forKey:@"AMBBIActive"];
 	[coder encodeBool:separatorItem forKey:@"AMBBISeparatorItem"];
@@ -120,6 +122,7 @@
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
+    // don't call super, since the button bar handles selecting/deselecting
     [buttonBar didClickItem:self];
 }
 
