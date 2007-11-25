@@ -388,9 +388,6 @@
 		F924FC020BC3FFFC00672839 /* AMButtonBar.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBF00BC3FFFC00672839 /* AMButtonBar.m */; };
 		F924FC040BC3FFFC00672839 /* AMButtonBarCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */; };
 		F924FC060BC3FFFC00672839 /* AMButtonBarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */; };
-		F924FC0C0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBFA0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m */; };
-		F924FC0E0BC3FFFC00672839 /* NSColor_AMAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBFC0BC3FFFC00672839 /* NSColor_AMAdditions.m */; };
-		F924FC120BC3FFFC00672839 /* NSShadow_AMAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FC000BC3FFFC00672839 /* NSShadow_AMAdditions.m */; };
 		F924FC310BC4322500672839 /* BDSKSearchButtonController.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FC2F0BC4322500672839 /* BDSKSearchButtonController.m */; };
 		F9252E2308F60D170045D563 /* BDSKFileContentSearchController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9252E2108F60D170045D563 /* BDSKFileContentSearchController.m */; };
 		F9252E2608F60D520045D563 /* BDSKFileContentSearch.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9252E2408F60D520045D563 /* BDSKFileContentSearch.nib */; };
@@ -1260,12 +1257,6 @@
 		F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarCell.m; path = vendorsrc/harmless/AMButtonBarCell.m; sourceTree = SOURCE_ROOT; };
 		F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarItem.h; path = vendorsrc/harmless/AMButtonBarItem.h; sourceTree = SOURCE_ROOT; };
 		F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarItem.m; path = vendorsrc/harmless/AMButtonBarItem.m; sourceTree = SOURCE_ROOT; };
-		F924FBF90BC3FFFC00672839 /* NSBezierPath_AMAdditons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSBezierPath_AMAdditons.h; path = vendorsrc/harmless/NSBezierPath_AMAdditons.h; sourceTree = SOURCE_ROOT; };
-		F924FBFA0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSBezierPath_AMAdditons.m; path = vendorsrc/harmless/NSBezierPath_AMAdditons.m; sourceTree = SOURCE_ROOT; };
-		F924FBFB0BC3FFFC00672839 /* NSColor_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSColor_AMAdditions.h; path = vendorsrc/harmless/NSColor_AMAdditions.h; sourceTree = SOURCE_ROOT; };
-		F924FBFC0BC3FFFC00672839 /* NSColor_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSColor_AMAdditions.m; path = vendorsrc/harmless/NSColor_AMAdditions.m; sourceTree = SOURCE_ROOT; };
-		F924FBFF0BC3FFFC00672839 /* NSShadow_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSShadow_AMAdditions.h; path = vendorsrc/harmless/NSShadow_AMAdditions.h; sourceTree = SOURCE_ROOT; };
-		F924FC000BC3FFFC00672839 /* NSShadow_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSShadow_AMAdditions.m; path = vendorsrc/harmless/NSShadow_AMAdditions.m; sourceTree = SOURCE_ROOT; };
 		F924FC2E0BC4322500672839 /* BDSKSearchButtonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchButtonController.h; sourceTree = "<group>"; };
 		F924FC2F0BC4322500672839 /* BDSKSearchButtonController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchButtonController.m; sourceTree = "<group>"; };
 		F924FC3A0BC4339600672839 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SearchButtonView.nib; sourceTree = "<group>"; };
@@ -2463,12 +2454,6 @@
 				F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */,
 				F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */,
 				F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */,
-				F924FBF90BC3FFFC00672839 /* NSBezierPath_AMAdditons.h */,
-				F924FBFA0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m */,
-				F924FBFB0BC3FFFC00672839 /* NSColor_AMAdditions.h */,
-				F924FBFC0BC3FFFC00672839 /* NSColor_AMAdditions.m */,
-				F924FBFF0BC3FFFC00672839 /* NSShadow_AMAdditions.h */,
-				F924FC000BC3FFFC00672839 /* NSShadow_AMAdditions.m */,
 			);
 			name = AMButtonBar;
 			sourceTree = "<group>";
@@ -3505,9 +3490,6 @@
 				F924FC020BC3FFFC00672839 /* AMButtonBar.m in Sources */,
 				F924FC040BC3FFFC00672839 /* AMButtonBarCell.m in Sources */,
 				F924FC060BC3FFFC00672839 /* AMButtonBarItem.m in Sources */,
-				F924FC0C0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m in Sources */,
-				F924FC0E0BC3FFFC00672839 /* NSColor_AMAdditions.m in Sources */,
-				F924FC120BC3FFFC00672839 /* NSShadow_AMAdditions.m in Sources */,
 				F924FC310BC4322500672839 /* BDSKSearchButtonController.m in Sources */,
 				F92405030BC5856900672839 /* BDSKLevelIndicatorCell.m in Sources */,
 				F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */,
