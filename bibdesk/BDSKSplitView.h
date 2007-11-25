@@ -42,6 +42,7 @@
 
 @interface BDSKSplitView : OASplitView {
     BOOL drawEnd;
+    CGLayerRef dividerLayer;
 }
 
 - (BOOL)drawEnd;

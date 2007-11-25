@@ -73,8 +73,14 @@
 - (id)initWithFrame:(NSRect)frameRect{
     if (self = [super initWithFrame:frameRect]) {
         drawEnd = NO;
+        dividerLayer = NULL;
     }
     return self;
+}
+
+- (void)dealloc {
+    CGLayerRelease(dividerLayer);
+    [super dealloc];
 }
 
 - (void)drawBlendedJoinEndAtBottomInRect:(NSRect)rect {
@@ -89,7 +95,20 @@
 
 - (void)drawDividerInRect:(NSRect)aRect {
     // Draw gradient
-    [[NSBezierPath bezierPathWithRect:aRect] fillPathVertically:NO == [self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
+    CGContextRef currentContext = [[NSGraphicsContext currentContext] graphicsPort];
+    if (NULL == dividerLayer) {
+        CGSize dividerSize = CGSizeMake(aRect.size.width, aRect.size.height);
+        dividerLayer = CGLayerCreateWithContext(currentContext, dividerSize, NULL);
+        [NSGraphicsContext saveGraphicsState];
+        NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(dividerLayer) flipped:NO];
+        [NSGraphicsContext setCurrentContext:nsContext];
+        NSRect rectToFill = aRect;
+        rectToFill.origin = NSZeroPoint;
+        [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:NO == [self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
+        [NSGraphicsContext restoreGraphicsState];
+    }
+    CGContextDrawLayerInRect(currentContext, *(CGRect *)&aRect, dividerLayer);
+    
     if (drawEnd) {
         NSRect endRect, ignored;
         if ([self isVertical]) {
