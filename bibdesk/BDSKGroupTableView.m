@@ -148,8 +148,13 @@
         return;
     NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
     float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
-    NSFont *font = [NSFont fontWithName:fontName size:fontSize];
-	
+    NSFont *font = nil;
+
+    if(nil != fontName)
+        font = [NSFont fontWithName:fontName size:fontSize];
+    if(nil == font)
+        font = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:[self cellControlSize]]];
+	NSParameterAssert(nil != font);
 	[self setFont:font];
     
     // This is how IB calculates row height based on font http://lists.apple.com/archives/cocoa-dev/2006/Mar/msg01591.html

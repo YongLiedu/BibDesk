@@ -55,6 +55,7 @@
 - (void)scrollRowToCenter:(unsigned int)row;
 - (NSArray *)tableColumnIdentifiers;
 - (IBAction)invertSelection:(id)sender;
+- (NSControlSize)cellControlSize;
 
 @end
 

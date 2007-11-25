@@ -312,13 +312,16 @@ textRect.origin.y += floorf(vOffset); \
     NSFont *font = [[self font] copy];
 	NSFont *countFont = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
     countFont = [[NSFontManager sharedFontManager] convertFont:countFont toSize:([countFont pointSize] - 1)];
-    
 	OBPRECONDITION(countFont);     
-    
+    if (nil == countFont)
+        countFont = [NSFont boldSystemFontOfSize:([font pointSize] - 1)];
+
 	[countAttributes removeAllObjects];
     [countAttributes setObject:[NSColor alternateSelectedControlTextColor] forKey:NSForegroundColorAttributeName];
-    [countAttributes setObject:countFont forKey:NSFontAttributeName];
-    [countAttributes setObject:font forKey:@"NSOriginalFont"];
+    if (countFont)
+        [countAttributes setObject:countFont forKey:NSFontAttributeName];
+    if (font)
+        [countAttributes setObject:font forKey:@"NSOriginalFont"];
     [countAttributes setObject:[NSNumber numberWithFloat:-1.0] forKey:NSKernAttributeName];
     [countAttributes setObject:[NSParagraphStyle defaultClippingParagraphStyle] forKey:NSParagraphStyleAttributeName];
 
