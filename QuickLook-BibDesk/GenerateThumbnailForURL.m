@@ -108,11 +108,12 @@ OSStatus GenerateThumbnailForURL(void *thisInterface, QLThumbnailRequestRef thum
                 attrString = [[BDSKSyntaxHighlighter highlightedStringWithBibTeXString:[btString substringToIndex:maxIndex]] mutableCopy];
                 [btString release];
             }
-            
+                        
             if (attrString) {
-                [attrString addAttribute:NSFontAttributeName value:[NSFont userFixedPitchFontOfSize:24.0f] range:NSMakeRange(0, [attrString length])];
+                [attrString addAttribute:NSFontAttributeName value:[NSFont userFixedPitchFontOfSize:20.0f] range:NSMakeRange(0, [attrString length])];
                 // same as [[NSPrintInfo sharedPrintInfo] paperSize], but NSPrintInfo must not be used in a non-main thread (and it's hellishly slow in some circumstances), so better to just make an approximate paper size
                 NSSize paperSize = NSMakeSize(612, 792);
+                
                 CGContextRef ctxt = QLThumbnailRequestCreateContext(thumbnail, *(CGSize *)&paperSize, FALSE, NULL);
                 NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:ctxt flipped:NO];
                 [NSGraphicsContext saveGraphicsState];
@@ -120,6 +121,18 @@ OSStatus GenerateThumbnailForURL(void *thisInterface, QLThumbnailRequestRef thum
                 [[NSColor whiteColor] setFill];
                 NSRect pageRect = NSMakeRect(0, 0, paperSize.width, paperSize.height);
                 NSRectFillUsingOperation(pageRect, NSCompositeSourceOver);
+                
+                NSString *iconPath = [BDSKGetQLMainBundle() pathForResource:@"FolderPenIcon" ofType:@"icns"];
+                NSImage *appIcon = [[NSImage alloc] initWithContentsOfFile:iconPath];
+
+                NSRect iconRect = NSZeroRect;
+                NSSize iconSize = NSMakeSize(paperSize.width * 0.9, paperSize.width * 0.9);
+                iconRect.size = iconSize;
+                iconRect.origin.x = (paperSize.width - iconSize.width) / 2;
+                iconRect.origin.y = (paperSize.height - iconSize.height) / 2;
+                [appIcon drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.3];
+                [appIcon release];
+                
                 [attrString drawInRect:NSInsetRect(pageRect, 20.0f, 20.0f)];
                 QLThumbnailRequestFlushContext(thumbnail, ctxt);
                 CGContextRelease(ctxt);

@@ -55,3 +55,5 @@
 
 @interface BDSKClearView : NSView
 @end
+
+extern NSBundle *BDSKGetQLMainBundle();
