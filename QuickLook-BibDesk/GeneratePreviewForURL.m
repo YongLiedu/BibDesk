@@ -117,7 +117,7 @@ OSStatus GeneratePreviewForURL(void *thisInterface, QLPreviewRequestRef preview,
         [mdItem release];
         [properties release];
         
-    } else if (UTTypeEqual(CFSTR("net.sourceforge.bibdesk.bib"), contentTypeUTI)) {
+    } else if (UTTypeConformsTo(contentTypeUTI, kUTTypePlainText)) {
         
         NSString *btString = [[NSString alloc] initWithContentsOfURL:(NSURL *)url encoding:NSUTF8StringEncoding error:NULL];
         if (nil == btString)
@@ -126,15 +126,31 @@ OSStatus GeneratePreviewForURL(void *thisInterface, QLPreviewRequestRef preview,
             btString = [[NSString alloc] initWithContentsOfURL:(NSURL *)url encoding:NSISOLatin1StringEncoding error:NULL];
         
         if (btString) {
-            CFDataRef data = (CFDataRef)[BDSKSyntaxHighlighter HTMLDataWithBibTeXString:btString];
-            NSDictionary *properties = [[NSDictionary alloc] initWithObjectsAndKeys:@"text/html", kQLPreviewPropertyMIMETypeKey, @"utf-8", kQLPreviewPropertyTextEncodingNameKey, nil];
-            if (data) {
-                QLPreviewRequestSetDataRepresentation(preview, data, kUTTypeHTML, (CFDictionaryRef)properties);
-            } else {
-                err = 2;
+            if (UTTypeEqual(CFSTR("net.sourceforge.bibdesk.bib"), contentTypeUTI)) {
+                CFDataRef data = (CFDataRef)[BDSKSyntaxHighlighter HTMLDataWithBibTeXString:btString];
+                NSDictionary *properties = [[NSDictionary alloc] initWithObjectsAndKeys:@"text/html", kQLPreviewPropertyMIMETypeKey, @"utf-8", kQLPreviewPropertyTextEncodingNameKey, nil];
+                if (data) {
+                    QLPreviewRequestSetDataRepresentation(preview, data, kUTTypeHTML, (CFDictionaryRef)properties);
+                } else {
+                    err = 2;
+                }
+                [properties release];
             }
+            else {
+                // some other plain text type...
+                CFDataRef data = (CFDataRef)[btString dataUsingEncoding:NSUnicodeStringEncoding];
+                // encoding must be a CF encoding
+                NSNumber *encoding = [NSNumber numberWithUnsignedInteger:CFStringConvertNSStringEncodingToEncoding(NSUnicodeStringEncoding)];
+                NSDictionary *properties = [[NSDictionary alloc] initWithObjectsAndKeys:encoding, kQLPreviewPropertyStringEncodingKey, nil];
+                if (data) {
+                    QLPreviewRequestSetDataRepresentation(preview, data, kUTTypePlainText, (CFDictionaryRef)properties);
+                } else {
+                    err = 2;
+                }
+                [properties release]; 
+            }
+                
             [btString release];
-            [properties release];
         } else {
             err = 3;
         }
