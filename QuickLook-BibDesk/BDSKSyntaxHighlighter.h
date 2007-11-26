@@ -44,6 +44,7 @@
 }
 
 + (NSData *)HTMLDataWithBibTeXString:(NSString *)aString;
++ (NSData *)RTFDataWithBibTeXString:(NSString *)aString;
 + (NSAttributedString *)highlightedStringWithBibTeXString:(NSString *)aString;
 
 @end

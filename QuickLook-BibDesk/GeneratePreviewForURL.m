@@ -127,14 +127,12 @@ OSStatus GeneratePreviewForURL(void *thisInterface, QLPreviewRequestRef preview,
         
         if (btString) {
             if (UTTypeEqual(CFSTR("net.sourceforge.bibdesk.bib"), contentTypeUTI)) {
-                CFDataRef data = (CFDataRef)[BDSKSyntaxHighlighter HTMLDataWithBibTeXString:btString];
-                NSDictionary *properties = [[NSDictionary alloc] initWithObjectsAndKeys:@"text/html", kQLPreviewPropertyMIMETypeKey, @"utf-8", kQLPreviewPropertyTextEncodingNameKey, nil];
+                CFDataRef data = (CFDataRef)[BDSKSyntaxHighlighter RTFDataWithBibTeXString:btString];
                 if (data) {
-                    QLPreviewRequestSetDataRepresentation(preview, data, kUTTypeHTML, (CFDictionaryRef)properties);
+                    QLPreviewRequestSetDataRepresentation(preview, data, kUTTypeRTF, NULL);
                 } else {
                     err = 2;
                 }
-                [properties release];
             }
             else {
                 // some other plain text type...

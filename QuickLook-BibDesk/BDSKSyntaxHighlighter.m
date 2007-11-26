@@ -43,8 +43,15 @@
 + (NSData *)HTMLDataWithBibTeXString:(NSString *)aString;
 {
     NSAttributedString *attrString = [self highlightedStringWithBibTeXString:aString];
-    NSDictionary *docAttrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:NSUTF8StringEncoding], NSCharacterEncodingDocumentAttribute, NSHTMLTextDocumentType, NSDocumentTypeDocumentAttribute, [NSColor whiteColor], NSBackgroundColorDocumentAttribute, /* ??? why doesn't this work? */ nil];
+    NSDictionary *docAttrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:NSUTF8StringEncoding], NSCharacterEncodingDocumentAttribute, NSHTMLTextDocumentType, NSDocumentTypeDocumentAttribute, [NSColor whiteColor], NSBackgroundColorDocumentAttribute, nil];
     return [attrString dataFromRange:NSMakeRange(0, [attrString length]) documentAttributes:docAttrs error:NULL];
+}
+
+// RTF wraps to the window and is simpler to return
++ (NSData *)RTFDataWithBibTeXString:(NSString *)aString;
+{
+    NSAttributedString *attrString = [self highlightedStringWithBibTeXString:aString];
+    return [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
 }
 
 static inline Boolean isLeftBrace(UniChar ch) { return ch == '{'; }
@@ -77,7 +84,7 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
     CFIndex lbmark, atmark, percmark;
     
     NSColor *braceColor = [NSColor blueColor];
-    NSColor *typeColor = [NSColor greenColor];
+    NSColor *typeColor = [NSColor purpleColor];
     NSColor *quotedColor = [NSColor brownColor];
     NSColor *commentColor = [NSColor grayColor];
     NSColor *hashColor = [NSColor magentaColor];
