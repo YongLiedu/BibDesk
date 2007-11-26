@@ -13,6 +13,8 @@
 			<array>
 				<string>net.sourceforge.bibdesk.bdskcache</string>
                 <string>net.sourceforge.bibdesk.bib</string>
+                <string>net.sourceforge.bibdesk.webofscience</string>
+                <string>net.sourceforge.bibdesk.ris</string>
 			</array>
 		</dict>
 	</array>
