@@ -1131,9 +1131,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
 - (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal
 {
-    NSDragOperation mask = NSDragOperationCopy;
+    // Adding NSDragOperationLink for non-local drags gives us behavior similar to the NSDocument proxy icon, allowing the receiving app to decide what is appropriate; hence, in Finder it now defaults to alias, and you can use option to force a copy.
+    NSDragOperation mask = NSDragOperationCopy | NSDragOperationLink;
     if (isLocal)
-        mask = NSDragOperationLink | NSDragOperationMove;
+        mask |= NSDragOperationMove;
     else if ([self isEditable])
         mask |= NSDragOperationDelete;
     return mask;
