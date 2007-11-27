@@ -205,7 +205,10 @@ void *setupThreading(void *anObject);
     }
     
     // final update to catch any leftovers
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+    
+    // it's possible that we've been told to stop, and the delegate is garbage; in that case, don't message it
+    if (flags.shouldKeepRunning == 1)
+        [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
     [pool release];
 }
 
@@ -221,7 +224,8 @@ void *setupThreading(void *anObject);
     
     // release these, since they're only used for the initial index creation
     [self setInitialObjectsToIndex:nil];
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
+    if (flags.shouldKeepRunning == 1)
+        [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
 }
 
 - (void)indexFilesForItem:(id)anItem

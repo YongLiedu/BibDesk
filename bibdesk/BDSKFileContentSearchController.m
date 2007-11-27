@@ -90,6 +90,10 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    // should already have been taken care of in -stopSearching
+    [searchIndex cancel];
+    [searchIndex setDelegate:nil];
+    [searchIndex release];
     [searchContentView release];
     [results release];
     [search release];
@@ -338,6 +342,7 @@
     
     // stops the search index runloop so it will release the document
     [searchIndex cancel];
+    [searchIndex setDelegate:nil];
     [searchIndex release];
     searchIndex = nil;
 }
