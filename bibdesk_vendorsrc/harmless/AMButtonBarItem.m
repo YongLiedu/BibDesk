@@ -14,28 +14,30 @@
 
 + (Class)cellClass { return [AMButtonBarCell class]; }
 
+- (void)commonInit
+{
+    [self setEnabled:YES];
+    [self setBezelStyle:NSRecessedBezelStyle];
+    [self setShowsBorderOnlyWhileMouseInside:YES];
+    [self setButtonType:NSPushOnPushOffButton];
+    [[self cell] setControlSize:NSSmallControlSize];
+    [self setFont:[NSFont boldSystemFontOfSize:[NSFont systemFontSizeForControlSize:[[self cell] controlSize]]]];    
+}
+
 - (id)initWithIdentifier:(NSString *)theIdentifier;
 {
 	self = [super initWithFrame:NSZeroRect];
-	if (self != nil) {
-		[self setItemIdentifier:theIdentifier];
-		[self setEnabled:YES];
-        [self setBezelStyle:NSRecessedBezelStyle];
-        [self setShowsBorderOnlyWhileMouseInside:YES];
-        [self setButtonType:NSPushOnPushOffButton];
-        [[self cell] setControlSize:NSSmallControlSize];
-        [self setFont:[NSFont boldSystemFontOfSize:[NSFont systemFontSizeForControlSize:[[self cell] controlSize]]]];
-	}
+    [self setItemIdentifier:theIdentifier];
+    [self commonInit];
 	return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
     self = [super initWithCoder:decoder];
-	itemIdentifier = [[decoder decodeObjectForKey:@"AMBBIItemIdentifier"] retain];
+    [self commonInit];
+    itemIdentifier = [[decoder decodeObjectForKey:@"AMBBIItemIdentifier"] retain];
 	active = [decoder decodeBoolForKey:@"AMBBIActive"];
-	separatorItem = [decoder decodeBoolForKey:@"AMBBISeparatorItem"];
-	overflowItem = [decoder decodeBoolForKey:@"AMBBIOverflowItem"];
 	return self;
 }
 
@@ -44,14 +46,11 @@
     [super encodeWithCoder:coder];
 	[coder encodeObject:itemIdentifier forKey:@"AMBBIItemIdentifier"];
 	[coder encodeBool:active forKey:@"AMBBIActive"];
-	[coder encodeBool:separatorItem forKey:@"AMBBISeparatorItem"];
-	[coder encodeBool:overflowItem forKey:@"AMBBIOverflowItem"];
 }
 
 
 - (void)dealloc
 {
-	[overflowMenu release];
 	[itemIdentifier release];
 	[super dealloc];
 }
@@ -68,30 +67,6 @@
 	}
 }
 
-- (BOOL)isSeparatorItem
-{
-	return separatorItem;
-}
-
-- (void)setSeparatorItem:(BOOL)value
-{
-	if (separatorItem != value) {
-		separatorItem = value;
-	}
-}
-
-- (BOOL)isOverflowItem
-{
-	return overflowItem;
-}
-
-- (void)setOverflowItem:(BOOL)value
-{
-	if (overflowItem != value) {
-		overflowItem = value;
-	}
-}
-
 - (NSString *)itemIdentifier
 {
 	return itemIdentifier;
@@ -102,20 +77,6 @@
 	if (itemIdentifier != value) {
 		id old = itemIdentifier;
 		itemIdentifier = [value retain];
-		[old release];
-	}
-}
-
-- (NSMenu *)overflowMenu
-{
-	return overflowMenu;
-}
-
-- (void)setOverflowMenu:(NSMenu *)value
-{
-	if (overflowMenu != value) {
-		id old = overflowMenu;
-		overflowMenu = [value retain];
 		[old release];
 	}
 }

@@ -227,11 +227,13 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 - (void)mouseEntered:(NSEvent *)event
 {
     [[(AMButtonBarItem *)[event userData] cell] mouseEntered:event];
+    [super mouseEntered:event];
 }
     
 - (void)mouseExited:(NSEvent *)event
 {
     [[(AMButtonBarItem *)[event userData] cell] mouseExited:event];
+    [super mouseExited:event];
 }
 
 - (void)layoutItems
@@ -249,11 +251,8 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 		[item setFrameOrigin:origin];
 		origin.x += [item frame].size.width;
 		origin.x += AM_BUTTON_GAP_WIDTH;
-        
-        [self removeTrackingRect:[item tag]];
-        int tag = [self addTrackingRect:[item frame] owner:self userData:item assumeInside:NO];
-        [item setTag:tag];
 	}
+    [self resetTrackingRects];
 }
 
 - (void)didClickItem:(AMButtonBarItem *)theItem

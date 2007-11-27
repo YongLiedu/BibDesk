@@ -6,27 +6,16 @@
 //  Copyright (c) 2004 Andreas Mayer. All rights reserved.
 
 #import "AMButtonBarCell.h"
-#import <math.h>
 
-static float am_backgroundInset = 1.5;
-static float am_textGap = 1.5;
-
-static NSShadow *__whiteShadow = nil;
-static NSShadow *__darkShadow = nil;
+static NSParagraphStyle *paragraphStyle = nil;
 
 @implementation AMButtonBarCell
 
 + (void) initialize
 {
-	__whiteShadow = [[NSShadow alloc] init];
-	[__whiteShadow setShadowOffset:NSMakeSize(0.0, -1.0)];
-	[__whiteShadow setShadowBlurRadius:1.0];
-	[__whiteShadow setShadowColor:[NSColor whiteColor]];
-    
-	__darkShadow = [[NSShadow alloc] init];
-	[__darkShadow setShadowOffset:NSMakeSize(0.0, -1.0)];
-	[__darkShadow setShadowBlurRadius:1.0];
-	[__darkShadow setShadowColor:[NSColor controlDarkShadowColor]];
+    NSMutableParagraphStyle *ps = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    [ps setAlignment:NSCenterTextAlignment];
+    paragraphStyle = [ps copy];
 }
 
 - (void)finishInit
@@ -60,49 +49,57 @@ static NSShadow *__darkShadow = nil;
     [super mouseExited:event];
 }
 
+- (void)drawBezelWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
+{
+    // this is called for each mouseEntered: event, and we have to perform the bezel adjustment for those as well
+    NSRect bezelFrame = cellFrame;
+    if ([controlView isFlipped])
+        bezelFrame.origin.y += 1;
+    else
+        bezelFrame.origin.y -= 1;
+    
+    // don't draw the bezel for mouseOver on a cell that already has NSOnState set
+    if (isMouseOver && [self state] != NSOnState)
+        [super drawBezelWithFrame:bezelFrame inView:controlView];
+}
+
 /*
- Don't customize drawing at all on 10.5 and later.  We only override these methods
- to fix some drawing glitches on 10.4 (white square drawn behind the button when it's
- supposed to only draw text).
+We can remove this class when compiling for 10.5 and greater.  With the 10.4 SDK, the button does not show on state when the mouse is outside the button.  Behavior changes at link time, which is not documented.  
+ 
+ Drawing while the mouse is inside still is not correct, as the background color shouldn't change, so we hack around that.  Additionally, text isn't perfectly centered in the vertical direction; there's more gap at the top than the bottom, so we add a 1 point vertical offset.
  */
-
-- (void)drawBezelWithFrame:(NSRect)frame inView:(NSView*)controlView
-{
-	if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 || [self state] == NSOnState || isMouseOver)
-		[super drawBezelWithFrame:frame inView:controlView];	
-}
-
-- (NSRect)drawTitle:(NSAttributedString *)title withFrame:(NSRect)frame inView:(NSView *)controlView
-{
-    id titleToDraw = title;
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
-
-        titleToDraw = [[title mutableCopy] autorelease];
-        NSColor *color;
-        NSShadow *textShadow;
-        if ([self state] == NSOnState || isMouseOver) {
-            color = [NSColor whiteColor];
-            textShadow = __darkShadow;
-        }
-        else {
-            color = [NSColor blackColor];
-            textShadow = __whiteShadow;
-    }
-        [titleToDraw addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, [titleToDraw length])];
-        [titleToDraw addAttribute:NSShadowAttributeName value:textShadow range:NSMakeRange(0, [titleToDraw length])];
-    }
-    return [super drawTitle:titleToDraw withFrame:frame inView:controlView];
-}
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
-        [self drawBezelWithFrame:cellFrame inView:controlView];
-        [self drawTitle:[self attributedTitle] withFrame:cellFrame inView:controlView];
-    }
-    else {
-        [super drawInteriorWithFrame:cellFrame inView:controlView];
-    }
+	NSFont *font = [self font];
+	NSColor *textColor;
+
+	if ([self state] == NSOnState || isMouseOver) {
+		
+        // in this case, offset the rect and call super, so we don't offset it again in our own implementation
+        if ([self state] == NSOnState) {
+            NSRect bezelFrame = cellFrame;
+            if ([controlView isFlipped])
+                bezelFrame.origin.y += 1;
+            else
+                bezelFrame.origin.y -= 1;
+            [super drawBezelWithFrame:bezelFrame inView:controlView];
+        }
+        else {
+            // this is a mouseOver in a cell that's off
+            [self drawBezelWithFrame:cellFrame inView:controlView];
+        }
+		textColor = [NSColor whiteColor];
+		
+	} else {
+		textColor = [NSColor blackColor];
+	}
+	    
+	NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, textColor, NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, nil]; 
+    NSAttributedString *title = [[NSAttributedString alloc] initWithString:[self title] attributes:attributes];
+    [self drawTitle:title withFrame:cellFrame inView:controlView];
+    [attributes release];
+    [title release];
 }
 
 @end

@@ -15,10 +15,7 @@
 
 @interface AMButtonBarItem : NSButton <NSCoding> {
 	BOOL active;
-	BOOL separatorItem;
-	BOOL overflowItem;
 	NSString *itemIdentifier;
-    NSMenu *overflowMenu;
     AMButtonBar *buttonBar;
 }
 
@@ -27,17 +24,8 @@
 - (BOOL)isActive;
 - (void)setActive:(BOOL)value;
 
-- (BOOL)isSeparatorItem;
-- (void)setSeparatorItem:(BOOL)value;
-
-- (BOOL)isOverflowItem;
-- (void)setOverflowItem:(BOOL)value;
-
 - (NSString *)itemIdentifier;
 - (void)setItemIdentifier:(NSString *)value;
-
-- (NSMenu *)overflowMenu;
-- (void)setOverflowMenu:(NSMenu *)value;
 
 - (void)setButtonBar:(AMButtonBar *)aBar;
 
