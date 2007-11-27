@@ -91,7 +91,7 @@ void *setupThreading(void *anObject);
         flags.shouldKeepRunning = 1;
         
         // repeated flushes will cause performance to suck, so don't inform the delegate of every added file
-        flags.updateGranularity = 20;
+        flags.updateGranularity = 10;
         
         // We need setupThreading to run in a separate thread, but +[NSThread detachNewThreadSelector...] retains self, so we end up with a retain cycle
         pthread_attr_t attr;
@@ -181,36 +181,51 @@ void *setupThreading(void *anObject);
 
 @implementation BDSKSearchIndex (Private)
 
-- (void)rebuildIndex
-{    
-#warning arm: why does this fail on G4/10.5
-    // !!! This assertion is failing on 10.5, but only on the G4; the G5 seems to work fine.  Since this method is only called from the worker thread, I'm not sure what's going on.
+- (void)indexFilesForItems:(NSArray *)items
+{
     NSAssert2(pthread_equal(notificationThread, pthread_self()), @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
-    
-    OBPRECONDITION(initialObjectsToIndex);
-    NSEnumerator *enumerator = [initialObjectsToIndex objectEnumerator];
+    NSEnumerator *enumerator = [items objectEnumerator];
     id anObject = nil;
-    double totalObjectCount = [initialObjectsToIndex count];
+    double totalObjectCount = [items count];
     double numberIndexed = 0;
+    
+    int32_t updateCount = flags.updateGranularity;
     
     // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-        
+    
     while((anObject = [enumerator nextObject]) && flags.shouldKeepRunning == 1) {
         [self indexFilesForItem:anObject];
-        [pool release];
-        pool = [NSAutoreleasePool new];
         numberIndexed++;
         @synchronized(self) {
             progressValue = (numberIndexed / totalObjectCount) * 100;
         }
+        
+        if (updateCount-- == 0) {
+            [pool release];
+            pool = [NSAutoreleasePool new];
+            
+            [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+            updateCount = flags.updateGranularity;
+        }
     }
-     
+    
     [pool release];
+    [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
+}
+
+- (void)rebuildIndex
+{    
+#warning arm: why does this fail on G4/10.5
+    // !!! This assertion is failing on 10.5, but only on the G4; the G5 seems to work fine.  Since this method is only called from the worker thread, I'm not sure what's going on.
+    OBASSERT([NSThread inMainThread] == NO);
+    NSAssert2(pthread_equal(notificationThread, pthread_self()), @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
+    
+    OBPRECONDITION(initialObjectsToIndex);
+    [self indexFilesForItems:initialObjectsToIndex];
     
     // release these, since they're only used for the initial index creation
     [self setInitialObjectsToIndex:nil];
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
 }
 
 - (void)indexFilesForItem:(id)anItem
@@ -227,7 +242,6 @@ void *setupThreading(void *anObject);
     swap = OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
     OBASSERT(swap);
     
-    int32_t updateCount = flags.updateGranularity;
     
     while(url = [urlEnumerator nextObject]){
                 
@@ -245,16 +259,11 @@ void *setupThreading(void *anObject);
         OBPOSTCONDITION(success);
         
         CFRelease(skDocument);
-        
-        if (updateCount-- == 0) {
-            [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
-            updateCount = flags.updateGranularity;
-        }
     }
     swap = OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     OBASSERT(swap);
     
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+    // the caller is responsible for updating the delegate, so we can throttle initial indexing
 }
 
 void *setupThreading(void *anObject)
@@ -348,9 +357,8 @@ void *setupThreading(void *anObject)
 	NSArray *searchIndexInfo = [[note userInfo] valueForKey:@"searchIndexInfo"];
     OBPRECONDITION(searchIndexInfo);
             
-    [self performSelector:@selector(indexFilesForItem:) withObjectsFromArray:searchIndexInfo];
-        
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+    // this will update the delegate when all is complete
+    [self indexFilesForItems:searchIndexInfo];        
 }
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
