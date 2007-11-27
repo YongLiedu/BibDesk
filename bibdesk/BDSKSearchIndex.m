@@ -210,8 +210,9 @@ void *setupThreading(void *anObject);
         }
     }
     
+    // final update to catch any leftovers
+    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
     [pool release];
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
 }
 
 - (void)rebuildIndex
@@ -226,6 +227,7 @@ void *setupThreading(void *anObject);
     
     // release these, since they're only used for the initial index creation
     [self setInitialObjectsToIndex:nil];
+    [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
 }
 
 - (void)indexFilesForItem:(id)anItem
