@@ -192,15 +192,22 @@ void *setupThreading(void *anObject);
     id anObject = nil;
     double totalObjectCount = [initialObjectsToIndex count];
     double numberIndexed = 0;
+    
+    // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
         
     while((anObject = [enumerator nextObject]) && flags.shouldKeepRunning == 1) {
         [self indexFilesForItem:anObject];
+        [pool release];
+        pool = [NSAutoreleasePool new];
         numberIndexed++;
         @synchronized(self) {
             progressValue = (numberIndexed / totalObjectCount) * 100;
         }
     }
      
+    [pool release];
+    
     // release these, since they're only used for the initial index creation
     [self setInitialObjectsToIndex:nil];
     [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
