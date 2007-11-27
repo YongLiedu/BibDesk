@@ -50,7 +50,6 @@ typedef struct _BDSKSearchIndexFlags
 {
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
     volatile int32_t isIndexing __attribute__ ((aligned (4)));  
-    volatile int32_t updateGranularity __attribute__ ((aligned (4)));
 } BDSKSearchIndexFlags;
 
 @interface BDSKSearchIndex : NSObject {
@@ -75,7 +74,6 @@ typedef struct _BDSKSearchIndexFlags
 - (void)cancel;
 - (BOOL)isIndexing;
 - (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject;
-- (void)setUpdateGranularity:(unsigned int)count;
 - (NSString *)titleForURL:(NSURL *)theURL;
 - (double)progressValue;
 

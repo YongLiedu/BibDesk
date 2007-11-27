@@ -90,9 +90,6 @@ void *setupThreading(void *anObject);
         flags.isIndexing = 0;
         flags.shouldKeepRunning = 1;
         
-        // repeated flushes will cause performance to suck, so don't inform the delegate of every added file
-        flags.updateGranularity = 10;
-        
         // We need setupThreading to run in a separate thread, but +[NSThread detachNewThreadSelector...] retains self, so we end up with a retain cycle
         pthread_attr_t attr;
         pthread_attr_init(&attr);
@@ -154,11 +151,6 @@ void *setupThreading(void *anObject);
     delegate = anObject;
 }
 
-- (void)setUpdateGranularity:(unsigned int)count
-{
-    OSAtomicCompareAndSwap32Barrier(flags.updateGranularity, count, (int32_t *)&flags.updateGranularity);
-}
-
 - (NSString *)titleForURL:(NSURL *)theURL
 {
     NSString *theTitle = nil;
@@ -189,7 +181,9 @@ void *setupThreading(void *anObject);
     double totalObjectCount = [items count];
     double numberIndexed = 0;
     
-    int32_t updateCount = flags.updateGranularity;
+    // This threshold is sort of arbitrary; for small batches, frequent updates are better if the delegate has a progress indicator, but for large batches (initial indexing), it can kill performance to be continually flushing and searching while indexing.
+    const int32_t flushInterval = [items count] > 20 ? 5 : 1;
+    int32_t countSinceLastFlush = flushInterval;
     
     // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
@@ -201,12 +195,12 @@ void *setupThreading(void *anObject);
             progressValue = (numberIndexed / totalObjectCount) * 100;
         }
         
-        if (updateCount-- == 0) {
+        if (countSinceLastFlush-- == 0) {
             [pool release];
             pool = [NSAutoreleasePool new];
             
             [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
-            updateCount = flags.updateGranularity;
+            countSinceLastFlush = flushInterval;
         }
     }
     
