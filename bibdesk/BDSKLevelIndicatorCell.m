@@ -73,7 +73,8 @@
 {
     static NSImage *image = nil;
     if (nil == image) {
-        NSRect r = NSMakeRect(0, 0, 2, [self indicatorHeight]);
+        OBASSERT([self indicatorHeight] > 1);
+        NSRect r = NSMakeRect(0, 0, 2, truncf([self indicatorHeight]));
         image = [[NSImage alloc] initWithSize:r.size];
         [image lockFocus];
         [image setBackgroundColor:[NSColor clearColor]];
@@ -90,7 +91,8 @@
 {
     static NSImage *image = nil;
     if (nil == image) {
-        NSRect r = NSMakeRect(0, 0, 2, [self indicatorHeight]);
+        OBASSERT([self indicatorHeight] > 1);
+        NSRect r = NSMakeRect(0, 0, 2, truncf([self indicatorHeight]));
         image = [[NSImage alloc] initWithSize:r.size];
         [image lockFocus];
         [image setBackgroundColor:[NSColor clearColor]];
