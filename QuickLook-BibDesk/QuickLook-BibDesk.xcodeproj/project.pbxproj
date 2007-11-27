@@ -20,6 +20,7 @@
 		F920DC430B6C705200904F15 /* SpotlightFileIconController.nib in Resources */ = {isa = PBXBuildFile; fileRef = F920DC410B6C705200904F15 /* SpotlightFileIconController.nib */; };
 		F95147490B5B4672002F5D6B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F95147480B5B4672002F5D6B /* Cocoa.framework */; };
 		F953AE340B5C9BC30053F12B /* BibDeskQuickLook.html in Resources */ = {isa = PBXBuildFile; fileRef = F953AE330B5C9BC30053F12B /* BibDeskQuickLook.html */; };
+		F95622500CFBFEA100FE3A6C /* FolderPenIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F9C2351E0B752C2E00BC5A84 /* FolderPenIcon.icns */; };
 		F9DCFC0A0CA0E30E00A07543 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9DCFC090CA0E30E00A07543 /* QuartzCore.framework */; };
 		F9F34E520B5DD04500832C0B /* BDSKSyntaxHighlighter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9F34E500B5DD04500832C0B /* BDSKSyntaxHighlighter.h */; };
 		F9F34E530B5DD04500832C0B /* BDSKSyntaxHighlighter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F34E510B5DD04500832C0B /* BDSKSyntaxHighlighter.m */; };
@@ -182,6 +183,7 @@
 				8D5B49A804867FD3000E48DA /* InfoPlist.strings in Resources */,
 				F953AE340B5C9BC30053F12B /* BibDeskQuickLook.html in Resources */,
 				F920DC430B6C705200904F15 /* SpotlightFileIconController.nib in Resources */,
+				F95622500CFBFEA100FE3A6C /* FolderPenIcon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
