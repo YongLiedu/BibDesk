@@ -231,20 +231,24 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
         NSEnumerator *enumerator = [[self items] objectEnumerator];
         AMButtonBarItem *item;
         while (item = [enumerator nextObject]) {
-            if (item == theItem && [item state] != NSOnState) {
-                [item setState:NSOnState];
-                didChangeSelection = YES;
+            if (item == theItem) {
+                // the button click already swappes the state
+                if ([item state] == NSOnState)
+                    didChangeSelection = YES;
+                else
+                    [item setState:NSOnState];
             }
             else if ([item state] == NSOnState && item != theItem) {
                 [item setState:NSOffState];
+                [self setNeedsDisplayInRect:[item frame]];
+                didChangeSelection = YES;
             }
         }
-        [self setNeedsDisplay:YES];
 	} else {
 		[theItem setState:(([theItem state] == NSOnState) ? NSOffState : NSOnState)];
-		[self setNeedsDisplayInRect:[theItem frame]];
 		didChangeSelection = YES;
 	}
+    [self setNeedsDisplayInRect:[theItem frame]];
 	NSNotification *notification = [NSNotification notificationWithName:AMButtonBarSelectionDidChangeNotification object:self userInfo:[NSDictionary dictionaryWithObject:[self selectedItemIdentifiers] forKey:@"selectedItems"]];
 	if (didChangeSelection) {
 		if ([delegate respondsToSelector:@selector(buttonBarSelectionDidChange:)]) {
