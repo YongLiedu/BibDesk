@@ -183,6 +183,8 @@ void *setupThreading(void *anObject);
 
 - (void)rebuildIndex
 {    
+#warning arm: why does this fail on G4/10.5
+    // !!! This assertion is failing on 10.5, but only on the G4; the G5 seems to work fine.  Since this method is only called from the worker thread, I'm not sure what's going on.
     NSAssert2(pthread_equal(notificationThread, pthread_self()), @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
     
     OBPRECONDITION(initialObjectsToIndex);
