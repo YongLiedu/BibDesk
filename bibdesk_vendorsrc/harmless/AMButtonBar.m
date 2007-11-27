@@ -198,19 +198,13 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 
 - (void)layoutItems
 {
-	NSPoint origin;
-	origin.y = (([self frame].size.height-1 - AM_BUTTON_HEIGHT) / 2.0);
-	if (![self isFlipped]) {
-		origin.y += 1;
-	}
-	origin.x = AM_START_GAP_WIDTH;
+	NSPoint origin = NSMakePoint(AM_START_GAP_WIDTH, floorf((NSHeight([self frame]) - AM_BUTTON_HEIGHT) / 2.0));
 	NSEnumerator *enumerator = [[self items] objectEnumerator];
 	id item;
 	while (item = [enumerator nextObject]) {
         [item sizeToFit];
 		[item setFrameOrigin:origin];
-		origin.x += [item frame].size.width;
-		origin.x += AM_BUTTON_GAP_WIDTH;
+		origin.x += [item frame].size.width + AM_BUTTON_GAP_WIDTH;
 	}
 }
 
@@ -238,8 +232,8 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 		didChangeSelection = YES;
 	}
     [self setNeedsDisplayInRect:[theItem frame]];
-	NSNotification *notification = [NSNotification notificationWithName:AMButtonBarSelectionDidChangeNotification object:self userInfo:[NSDictionary dictionaryWithObject:[self selectedItemIdentifiers] forKey:@"selectedItems"]];
 	if (didChangeSelection) {
+        NSNotification *notification = [NSNotification notificationWithName:AMButtonBarSelectionDidChangeNotification object:self userInfo:[NSDictionary dictionaryWithObject:[self selectedItemIdentifiers] forKey:@"selectedItems"]];
 		if ([delegate respondsToSelector:@selector(buttonBarSelectionDidChange:)]) {
 			[delegate buttonBarSelectionDidChange:notification];
 		}

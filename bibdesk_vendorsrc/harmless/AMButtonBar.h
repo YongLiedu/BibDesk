@@ -26,7 +26,6 @@ extern NSString *const AMButtonBarSelectionDidChangeNotification;
 	BOOL showsBaselineSeparator;
 	BOOL allowsMultipleSelection;
 	NSMutableArray *items;
-	BOOL needsLayout;
 }
 
 

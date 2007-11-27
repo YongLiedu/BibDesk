@@ -49,15 +49,8 @@ static NSParagraphStyle *paragraphStyle = nil;
 - (void)drawBezelWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
     // this is called for each mouseEntered: event, and we have to perform the bezel adjustment for those as well
-    NSRect bezelFrame = cellFrame;
-    if ([controlView isFlipped])
-        bezelFrame.origin.y += 1;
-    else
-        bezelFrame.origin.y -= 1;
-    
-    // don't draw the bezel for mouseOver on a cell that already has NSOnState set
     if (isMouseOver && [self state] != NSOnState)
-        [super drawBezelWithFrame:bezelFrame inView:controlView];
+        [super drawBezelWithFrame:cellFrame inView:controlView];
 }
 
 /*
@@ -79,12 +72,7 @@ We can remove this class when compiling for 10.5 and greater.  With the 10.4 SDK
 		
         // in this case, offset the rect and call super, so we don't offset it again in our own implementation
         if ([self state] == NSOnState) {
-            NSRect bezelFrame = cellFrame;
-            if ([controlView isFlipped])
-                bezelFrame.origin.y += 1;
-            else
-                bezelFrame.origin.y -= 1;
-            [super drawBezelWithFrame:bezelFrame inView:controlView];
+            [super drawBezelWithFrame:cellFrame inView:controlView];
         }
         else {
             // this is a mouseOver in a cell that's off
@@ -100,6 +88,7 @@ We can remove this class when compiling for 10.5 and greater.  With the 10.4 SDK
 	    
 	NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, textColor, NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, textShadow, NSShadowAttributeName, nil];
     NSAttributedString *title = [[NSAttributedString alloc] initWithString:[self title] attributes:attributes];
+    cellFrame.origin.y += [controlView isFlipped] ? -1.0 : 1.0;
     [self drawTitle:title withFrame:cellFrame inView:controlView];
     [attributes release];
     [title release];
