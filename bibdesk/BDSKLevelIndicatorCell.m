@@ -69,40 +69,47 @@
 - (float)indicatorHeight { return maxHeight; }
 
 // DigitalColor Meter indicates 0.7 and 0.5 are the approximate values for a deselected level indicator cell (relevancy mode).  This looks really bad when selected in a gradient tableview, though, particularly when the table doesn't have focus.
-- (NSImage *)deselectedRelevancyImage
+#define WIDTH 2
+#define HEIGHT 10
+
+- (CGLayerRef)deselectedRelevancyLayer
 {
-    static NSImage *image = nil;
-    if (nil == image) {
-        OBASSERT([self indicatorHeight] > 1);
-        NSRect r = NSMakeRect(0, 0, 2, truncf([self indicatorHeight]));
-        image = [[NSImage alloc] initWithSize:r.size];
-        [image lockFocus];
-        [image setBackgroundColor:[NSColor clearColor]];
+    static CGLayerRef layer = NULL;
+    if (NULL == layer) {
+        // height is irrelevant; it will be scaled when drawn
+        NSRect r = NSMakeRect(0, 0, WIDTH, HEIGHT);
+        layer = CGLayerCreateWithContext([[NSGraphicsContext currentContext] graphicsPort], CGSizeMake(WIDTH, HEIGHT), NULL);
+        [NSGraphicsContext saveGraphicsState];
+        [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(layer) flipped:NO]];
+        [[NSColor clearColor] setFill];
+        NSRectFillUsingOperation(r, NSCompositeCopy);
         [[NSColor colorWithCalibratedWhite:0.7 alpha:1.0] setFill];
-        NSRectFill(NSMakeRect(0, 0, 1, [self indicatorHeight]));
+        NSRectFill(NSMakeRect(0, 0, WIDTH/2, HEIGHT));
         [[NSColor colorWithCalibratedWhite:0.5 alpha:1.0] setFill];
-        NSRectFill(NSMakeRect(1, 0, 1, [self indicatorHeight]));
-        [image unlockFocus];
+        NSRectFill(NSMakeRect(WIDTH/2, 0, WIDTH/2, HEIGHT));
+        [NSGraphicsContext restoreGraphicsState];
     }
-    return image;
+    return layer;
 }
 
-- (NSImage *)selectedRelevancyImage
+- (CGLayerRef)selectedRelevancyLayer
 {
-    static NSImage *image = nil;
-    if (nil == image) {
-        OBASSERT([self indicatorHeight] > 1);
-        NSRect r = NSMakeRect(0, 0, 2, truncf([self indicatorHeight]));
-        image = [[NSImage alloc] initWithSize:r.size];
-        [image lockFocus];
-        [image setBackgroundColor:[NSColor clearColor]];
+    static CGLayerRef layer = NULL;
+    if (NULL == layer) {
+        // height is irrelevant; it will be scaled when drawn
+        NSRect r = NSMakeRect(0, 0, WIDTH, HEIGHT);
+        layer = CGLayerCreateWithContext([[NSGraphicsContext currentContext] graphicsPort], CGSizeMake(WIDTH, HEIGHT), NULL);
+        [NSGraphicsContext saveGraphicsState];
+        [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(layer) flipped:NO]];
+        [[NSColor clearColor] setFill];
+        NSRectFillUsingOperation(r, NSCompositeCopy);
         [[NSColor colorWithCalibratedWhite:0.7 alpha:1.0] setFill];
-        NSRectFill(NSMakeRect(0, 0, 1, [self indicatorHeight]));
+        NSRectFill(NSMakeRect(0, 0, WIDTH/2, HEIGHT));
         [[NSColor colorWithCalibratedWhite:0.9 alpha:1.0] setFill];
-        NSRectFill(NSMakeRect(1, 0, 1, [self indicatorHeight]));
-        [image unlockFocus];
+        NSRectFill(NSMakeRect(WIDTH/2, 0, WIDTH/2, HEIGHT));
+        [NSGraphicsContext restoreGraphicsState];
     }
-    return image;    
+    return layer;    
 }
 
 /*
@@ -125,13 +132,13 @@
 {
     NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
     unsigned i, iMax = floor([self doubleValue] / [self maxValue] * (NSWidth(r) / 2));
-    NSImage *toDraw;
+    CGLayerRef toDraw;
     
-    // @@ fixme; better way to do this on 10.5
+    // @@ fixme; better way to do this on 10.5; check -backgroundStyle
     if ([self isHighlighted])
-        toDraw = [self selectedRelevancyImage];
+        toDraw = [self selectedRelevancyLayer];
     else
-        toDraw = [self deselectedRelevancyImage];
+        toDraw = [self deselectedRelevancyLayer];
     
     CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
     CGContextSaveGState(ctxt);
@@ -143,9 +150,10 @@
     
     NSRect drawRect = r;
     drawRect.size.width = 2;
+    CGContextSetBlendMode(ctxt, kCGBlendModeNormal);
     for (i = 0; i < iMax; i++) {
         drawRect.origin.x += 2;
-        [toDraw drawInRect:drawRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        CGContextDrawLayerInRect(ctxt, *(CGRect *)&drawRect, toDraw);
     }
     CGContextRestoreGState(ctxt);
 }
