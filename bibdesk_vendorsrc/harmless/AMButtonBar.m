@@ -202,40 +202,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 #pragma mark 		private methods
 //====================================================================
 
-- (void)resetTrackingRects
-{
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
-        NSEnumerator *enumerator = [[self items] objectEnumerator];
-        id item;
-        while (item = [enumerator nextObject]) {
-            NSRect frame = [item frame];
-            [self removeTrackingRect:[item tag]];
-            if (nil != [self window]) {
-                NSTrackingRectTag tag = [self addTrackingRect:frame owner:self userData:item assumeInside:NO];
-                [item setTag:tag];
-            }
-        }
-    }
-}
-
-- (void)resetCursorRects
-{
-    [super resetCursorRects];
-    [self resetTrackingRects];
-}
-
-- (void)mouseEntered:(NSEvent *)event
-{
-    [[(AMButtonBarItem *)[event userData] cell] mouseEntered:event];
-    [super mouseEntered:event];
-}
-    
-- (void)mouseExited:(NSEvent *)event
-{
-    [[(AMButtonBarItem *)[event userData] cell] mouseExited:event];
-    [super mouseExited:event];
-}
-
 - (void)layoutItems
 {
 	NSPoint origin;
@@ -252,7 +218,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 		origin.x += [item frame].size.width;
 		origin.x += AM_BUTTON_GAP_WIDTH;
 	}
-    [self resetTrackingRects];
 }
 
 - (void)didClickItem:(AMButtonBarItem *)theItem
@@ -293,11 +258,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 {
     [self layoutItems];
     [super drawRect:rect];
-}
-
-- (void)viewDidMoveToWindow
-{
-    [self resetTrackingRects];
 }
 
 - (BOOL)isFlipped
