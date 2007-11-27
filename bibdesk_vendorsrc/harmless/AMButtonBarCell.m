@@ -71,8 +71,12 @@ We can remove this class when compiling for 10.5 and greater.  With the 10.4 SDK
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-	NSFont *font = [self font];
+	NSFont *font = [[NSFontManager sharedFontManager] convertFont:[self font] toHaveTrait:NSBoldFontMask];
 	NSColor *textColor;
+    NSShadow *textShadow = [[NSShadow alloc] init];
+    
+    [textShadow setShadowBlurRadius:1.0];
+    [textShadow setShadowOffset:NSMakeSize(0.0, -1.0)];
 
 	if ([self state] == NSOnState || isMouseOver) {
 		
@@ -90,16 +94,19 @@ We can remove this class when compiling for 10.5 and greater.  With the 10.4 SDK
             [self drawBezelWithFrame:cellFrame inView:controlView];
         }
 		textColor = [NSColor whiteColor];
+		[textShadow setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.6]];
 		
 	} else {
-		textColor = [NSColor blackColor];
+		textColor = [NSColor colorWithCalibratedWhite:0.2 alpha:1.0];
+		[textShadow setShadowColor:[NSColor colorWithCalibratedWhite:1.0 alpha:0.6]];
 	}
 	    
-	NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, textColor, NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, nil]; 
+	NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, textColor, NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, textShadow, NSShadowAttributeName, nil];
     NSAttributedString *title = [[NSAttributedString alloc] initWithString:[self title] attributes:attributes];
     [self drawTitle:title withFrame:cellFrame inView:controlView];
     [attributes release];
     [title release];
+    [textShadow release];
 }
 
 @end

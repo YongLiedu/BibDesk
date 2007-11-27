@@ -81,12 +81,6 @@
 	}
 }
 
-- (void)mouseDown:(NSEvent *)theEvent
-{
-    // don't call super, since the button bar handles selecting/deselecting
-    [buttonBar didClickItem:self];
-}
-
 - (void)setButtonBar:(AMButtonBar *)aBar
 {
     buttonBar = aBar;

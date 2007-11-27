@@ -147,6 +147,8 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 {
 	[items insertObject:item atIndex:idx];
     [item setButtonBar:self];
+    [item setTarget:self];
+    [item setAction:@selector(didClickItem:)];
     [self addSubview:item];
     [self setNeedsDisplay:YES];
 }
@@ -154,6 +156,7 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 - (void)removeItem:(AMButtonBarItem *)item
 {
     [item setButtonBar:nil];
+    [item setTarget:nil];
 	[items removeObject:item];
     [item removeFromSuperviewWithoutNeedingDisplay];
 	[self setNeedsDisplay:YES];
@@ -168,6 +171,7 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 {
     [items makeObjectsPerformSelector:@selector(removeFromSuperviewWithoutNeedingDisplay)];
     [items makeObjectsPerformSelector:@selector(setButtonBar:) withObject:nil];
+    [items makeObjectsPerformSelector:@selector(setTarget:) withObject:nil];
 	[items removeAllObjects];
 	[self setNeedsDisplay:YES];
 }
