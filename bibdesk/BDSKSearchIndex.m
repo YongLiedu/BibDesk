@@ -278,14 +278,14 @@ void *setupThreading(void *anObject)
     @try{
         self->notificationPort = [[NSMachPort alloc] init];
         [self->notificationPort setDelegate:self];
-        
-        [self->notificationPort scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        [[NSRunLoop currentRunLoop] addPort:self->notificationPort forMode:NSDefaultRunLoopMode];
         
         self->notificationQueue = [[BDSKThreadSafeMutableArray alloc] initWithCapacity:5];
             
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKSearchIndexInfoChangedNotification object:self->document];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKDocAddItemNotification object:self->document];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKDocDelItemNotification object:self->document];
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        [nc addObserver:self selector:@selector(processNotification:) name:BDSKSearchIndexInfoChangedNotification object:self->document];
+        [nc addObserver:self selector:@selector(processNotification:) name:BDSKDocAddItemNotification object:self->document];
+        [nc addObserver:self selector:@selector(processNotification:) name:BDSKDocDelItemNotification object:self->document];
     }
     @catch(id localException){
         // exceptions here mean something is seriously wrong, and we can't do anything about it
@@ -302,28 +302,28 @@ void *setupThreading(void *anObject)
         NSLog(@"Ignoring exception %@ raised while rebuilding index", localException);
     }
         
-    // run the current run loop until we get a cancel message, or else the current thread/run loop will just go away when this function returns
-    
+    // run the current run loop until we get a cancel message, or else the current thread/run loop will just go away when this function returns    
     @try{
         
         NSRunLoop *rl = [NSRunLoop currentRunLoop];
-        BOOL didRun;
+        BOOL keepRunning;
         
         do {
             [pool release];
             pool = [[NSAutoreleasePool alloc] init];
-            didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-        } while(self->flags.shouldKeepRunning == 1 && didRun);
+            // Running with beforeDate: distantFuture causes the runloop to block indefinitely if shouldKeepRunning was set to 0 during the initial indexing phase; invalidating and removing the port manually doesn't change this.  Hence, we need to check that flag before running the runloop, or use a short limit date.
+            keepRunning = (self->flags.shouldKeepRunning == 1) && [rl runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+        } while(keepRunning);
     }
     @catch(id localException){
         NSLog(@"Exception %@ raised in search index; exiting thread run loop.", localException);
         savedException = [localException retain];
         @throw;
     }
-
     @finally{
         [self release];
         [pool release];
+        [self->notificationPort invalidate];
         [savedException autorelease];
         return NULL;
     }
