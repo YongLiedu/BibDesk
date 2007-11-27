@@ -17,7 +17,6 @@ static float const AM_BUTTON_HEIGHT = 17.0;
 NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelectionDidChangeNotification";
 
 @interface AMButtonBar (Private)
-- (void)am_commonInit;
 - (void)setItems:(NSArray *)newItems;
 - (void)layoutItems;
 - (void)frameDidChange:(NSNotification *)aNotification;
@@ -30,25 +29,20 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 {
 	self = [super initWithFrame:frame];
 	if (self) {
-		[self am_commonInit];
+        [self setItems:[NSMutableArray array]];
+        allowsMultipleSelection = NO;
 	}
 	return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
-	self = [super initWithCoder:decoder];
-	[self am_commonInit];
-	delegate = [decoder decodeObjectForKey:@"AMBBDelegate"];
-	allowsMultipleSelection = [decoder decodeBoolForKey:@"AMBBAllowsMultipleSelection"];
-	[self setItems:[decoder decodeObjectForKey:@"AMBBItems"]];
-	return self;
-}
-
-- (void)am_commonInit
-{
-	[self setItems:[NSMutableArray array]];
-    allowsMultipleSelection = NO;
+	if (self = [super initWithCoder:decoder]) {
+        delegate = [decoder decodeObjectForKey:@"AMBBDelegate"];
+        allowsMultipleSelection = [decoder decodeBoolForKey:@"AMBBAllowsMultipleSelection"];
+        [self setItems:[decoder decodeObjectForKey:@"AMBBItems"]];
+	}
+    return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -101,9 +95,8 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 - (void)setItems:(NSArray *)newItems
 {
 	if (items != newItems) {
-		id old = items;
+		[items release];
 		items = [newItems mutableCopy];
-		[old release];
 	}
 }
 
@@ -146,7 +139,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 - (void)insertItem:(AMButtonBarItem *)item atIndex:(int)idx
 {
 	[items insertObject:item atIndex:idx];
-    [item setButtonBar:self];
     [item setTarget:self];
     [item setAction:@selector(didClickItem:)];
     [self addSubview:item];
@@ -155,7 +147,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 
 - (void)removeItem:(AMButtonBarItem *)item
 {
-    [item setButtonBar:nil];
     [item setTarget:nil];
 	[items removeObject:item];
     [item removeFromSuperviewWithoutNeedingDisplay];
@@ -170,7 +161,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 - (void)removeAllItems
 {
     [items makeObjectsPerformSelector:@selector(removeFromSuperviewWithoutNeedingDisplay)];
-    [items makeObjectsPerformSelector:@selector(setButtonBar:) withObject:nil];
     [items makeObjectsPerformSelector:@selector(setTarget:) withObject:nil];
 	[items removeAllObjects];
 	[self setNeedsDisplay:YES];
@@ -232,7 +222,7 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
         AMButtonBarItem *item;
         while (item = [enumerator nextObject]) {
             if (item == theItem) {
-                // the button click already swappes the state
+                // the button click already swaps the state
                 if ([item state] == NSOnState)
                     didChangeSelection = YES;
                 else
@@ -245,7 +235,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
             }
         }
 	} else {
-		[theItem setState:(([theItem state] == NSOnState) ? NSOffState : NSOnState)];
 		didChangeSelection = YES;
 	}
     [self setNeedsDisplayInRect:[theItem frame]];

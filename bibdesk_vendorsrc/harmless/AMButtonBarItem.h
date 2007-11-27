@@ -13,20 +13,11 @@
 
 @class AMButtonBarCell, AMButtonBar;
 
-@interface AMButtonBarItem : NSButton <NSCoding> {
-	BOOL active;
-	NSString *itemIdentifier;
-    AMButtonBar *buttonBar;
-}
+@interface AMButtonBarItem : NSButton
 
 - (id)initWithIdentifier:(NSString *)identifier;
 
-- (BOOL)isActive;
-- (void)setActive:(BOOL)value;
-
 - (NSString *)itemIdentifier;
 - (void)setItemIdentifier:(NSString *)value;
-
-- (void)setButtonBar:(AMButtonBar *)aBar;
 
 @end

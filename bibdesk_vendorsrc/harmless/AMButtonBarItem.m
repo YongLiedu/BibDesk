@@ -26,64 +26,29 @@
 
 - (id)initWithIdentifier:(NSString *)theIdentifier;
 {
-	self = [super initWithFrame:NSZeroRect];
-    [self setItemIdentifier:theIdentifier];
-    [self commonInit];
-	return self;
+	if (self = [super initWithFrame:NSZeroRect]) {
+        [self setItemIdentifier:theIdentifier];
+        [self commonInit];
+	}
+    return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
-    self = [super initWithCoder:decoder];
-    [self commonInit];
-    itemIdentifier = [[decoder decodeObjectForKey:@"AMBBIItemIdentifier"] retain];
-	active = [decoder decodeBoolForKey:@"AMBBIActive"];
-	return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder
-{
-    [super encodeWithCoder:coder];
-	[coder encodeObject:itemIdentifier forKey:@"AMBBIItemIdentifier"];
-	[coder encodeBool:active forKey:@"AMBBIActive"];
-}
-
-
-- (void)dealloc
-{
-	[itemIdentifier release];
-	[super dealloc];
-}
-
-- (BOOL)isActive
-{
-	return active;
-}
-
-- (void)setActive:(BOOL)value
-{
-	if (active != value) {
-		active = value;
+    if (self = [super initWithCoder:decoder]) {
+        [self commonInit];
 	}
+    return self;
 }
 
 - (NSString *)itemIdentifier
 {
-	return itemIdentifier;
+	return [[self cell] representedObject];
 }
 
 - (void)setItemIdentifier:(NSString *)value
 {
-	if (itemIdentifier != value) {
-		id old = itemIdentifier;
-		itemIdentifier = [value retain];
-		[old release];
-	}
-}
-
-- (void)setButtonBar:(AMButtonBar *)aBar
-{
-    buttonBar = aBar;
+	[[self cell] setRepresentedObject:value];
 }
 
 - (BOOL)isOpaque { return NO; }

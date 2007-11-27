@@ -18,22 +18,19 @@ static NSParagraphStyle *paragraphStyle = nil;
     paragraphStyle = [ps copy];
 }
 
-- (void)finishInit
-{
-    isMouseOver = NO;
-}
-
 - (id)initTextCell:(NSString *)aString
 {
-    self = [super initTextCell:aString];
-    [self finishInit];
+    if (self = [super initTextCell:aString]) {
+        isMouseOver = NO;
+    }
 	return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
-	self = [super initWithCoder:decoder];
-	[self finishInit];
+	if (self = [super initWithCoder:decoder]) {
+        isMouseOver = NO;
+    }
 	return self;
 }
 
