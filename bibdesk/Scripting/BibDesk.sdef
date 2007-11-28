@@ -619,6 +619,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="A file.">
 			<cocoa class="NSURL"/>
 			<type type="file"/>
+            <property name="URL" code="rURL" type="text" access="r"
+                description="URL for the file.">
+                <cocoa key="absoluteString"/>
+            </property>  
 		</class>
 
 		<class name="publication" plural="publications" code="bibi" inherits="item"
