@@ -56,13 +56,13 @@ typedef struct _BDSKSearchIndexFlags
     SKIndexRef index;
     id document;
     NSMutableDictionary *titles;
-    
     id delegate;
     NSArray *initialObjectsToIndex;
     
     BDSKThreadSafeMutableArray *notificationQueue;
     NSMachPort *notificationPort;
     NSThread *notificationThread;
+    NSConditionLock *setupLock;
     BDSKSearchIndexFlags flags;
     double progressValue;
 }

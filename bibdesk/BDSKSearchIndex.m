@@ -64,6 +64,9 @@ void *setupThreading(void *anObject);
 
 @implementation BDSKSearchIndex
 
+#define INDEX_STARTUP 1
+#define INDEX_STARTUP_COMPLETE 2
+
 + (void)initialize
 {
     OBINITIALIZE;
@@ -95,8 +98,18 @@ void *setupThreading(void *anObject);
         
         progressValue = 0.0;
         
+        setupLock = [[NSConditionLock alloc] initWithCondition:INDEX_STARTUP];
+        
         // this will create a retain cycle, so we'll have to tickle the thread to exit properly in -cancel
         [NSThread detachNewThreadSelector:@selector(runIndexThread) toTarget:self withObject:nil];
+        
+        // block until the NSMachPort is set up to receive messages
+        [setupLock lockWhenCondition:INDEX_STARTUP_COMPLETE];
+        [setupLock unlock];
+        
+        // done with this lock, so get rid of it now
+        [setupLock release];
+        setupLock = nil;
     }
     
     return self;
@@ -261,6 +274,8 @@ void *setupThreading(void *anObject);
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
+    [setupLock lockWhenCondition:INDEX_STARTUP];
+    
     // release at the end of this method, just before the thread exits
     notificationThread = [[NSThread currentThread] retain];
     
@@ -275,6 +290,8 @@ void *setupThreading(void *anObject);
     [nc addObserver:self selector:handler name:BDSKSearchIndexInfoChangedNotification object:document];
     [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:document];
     [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:document];
+    
+    [setupLock unlockWithCondition:INDEX_STARTUP_COMPLETE];
     
     // an exception here can probably be ignored safely
     @try{
