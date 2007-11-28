@@ -119,6 +119,8 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
             idx = [files indexOfObject:[localFiles objectAtIndex:idx - 1]];
             if (idx == NSNotFound)
                 idx = 0;
+            else
+                idx++;
         }
         [self insertObject:file inFilesAtIndex:idx];
     }

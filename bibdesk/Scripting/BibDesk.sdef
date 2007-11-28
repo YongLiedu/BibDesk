@@ -611,8 +611,8 @@ Having all three of these seems to work best for Panther. For Tiger include this
 
 		<class name="linked URL" plural="linked URLs" code="URL " inherits="item"
 			description="A URL.">
-			<cocoa class="NSURL"/>
-			<type type="URL"/>
+			<cocoa class="NSString"/>
+			<type type="text"/>
 		</class>
 
 		<class name="linked file" plural="linked files" code="File" inherits="item"
