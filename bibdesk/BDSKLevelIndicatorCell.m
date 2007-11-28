@@ -45,6 +45,15 @@
 - (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 @end
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
+typedef NSInteger NSBackgroundStyle;
+@interface NSLevelIndicatorStyle (LeopardOnly)
+- (NSBackgroundStyle)backgroundStyle;
+@end
+#else
+#warning remove this
+#endif
+
 @implementation BDSKLevelIndicatorCell
 
 - (id)initWithLevelIndicatorStyle:(NSLevelIndicatorStyle)levelIndicatorStyle;
@@ -72,7 +81,7 @@
 #define WIDTH 2
 #define HEIGHT 10
 
-- (CGLayerRef)deselectedRelevancyLayer
+- (CGLayerRef)darkRelevancyLayer
 {
     static CGLayerRef layer = NULL;
     if (NULL == layer) {
@@ -92,7 +101,7 @@
     return layer;
 }
 
-- (CGLayerRef)selectedRelevancyLayer
+- (CGLayerRef)lightRelevancyLayer
 {
     static CGLayerRef layer = NULL;
     if (NULL == layer) {
@@ -131,14 +140,28 @@
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
     NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
+    r = [controlView centerScanRect:r];
+    
     unsigned i, iMax = floor([self doubleValue] / [self maxValue] * (NSWidth(r) / 2));
     CGLayerRef toDraw;
     
-    // @@ fixme; better way to do this on 10.5; check -backgroundStyle
-    if ([self isHighlighted])
-        toDraw = [self selectedRelevancyLayer];
-    else
-        toDraw = [self deselectedRelevancyLayer];
+    if ([self respondsToSelector:@selector(backgroundStyle)]) {
+        NSBackgroundStyle style = [self backgroundStyle];
+        if (NSBackgroundStyleLight == style)
+            toDraw = [self darkRelevancyLayer];
+        else
+            toDraw = [self lightRelevancyLayer];
+    } else {            
+        if ([self isHighlighted]) {
+            // this is what NSCell does prior to 10.5, but it doesn't work with gradient tableviews
+            if ([[self highlightColorWithFrame:cellFrame inView:controlView] isEqual:[NSColor alternateSelectedControlColor]])
+                toDraw = [self lightRelevancyLayer];
+            else
+                toDraw = [self darkRelevancyLayer];
+        } else {
+            toDraw = [self darkRelevancyLayer];
+        }
+    }
     
     CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
     CGContextSaveGState(ctxt);
