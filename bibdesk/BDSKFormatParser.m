@@ -411,9 +411,8 @@
 					break;
 				case 'b':
 					// document filename
-					string = [pub documentFileName];
+					string = [pub basePath];
 					if (string != nil) {
-						string = [[string lastPathComponent] stringByDeletingPathExtension];
 						string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
 						[parsedStr appendString:string];
 					}

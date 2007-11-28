@@ -121,7 +121,7 @@
     return ([field isEqualToString:BDSKAuthorString]) ? pubAuthors : [NSArray array];
 }
 
-- (NSString *)documentFileName { return NSLocalizedString(@"Document File Name", @"Document filename for preview item in preferences"); }
+- (NSString *)basePath { return NSLocalizedString(@"/path/to/document", @"Document base path for preview item in preferences"); }
 
 - (NSString *)documentInfoForKey:(NSString *)key { return key; }
 

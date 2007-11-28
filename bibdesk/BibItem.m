@@ -1628,12 +1628,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 {
     // !!! inherit
     NSUInteger i, fileIndex = 0, urlIndex = 0, iMax = [files count];
-    NSString *key = [NSString stringWithFormat:@"Bdsk-File-%d", fileIndex];
+    NSString *key = @"Bdsk-File-0";
     
     while ([pubFields objectForKey:key])
         key = [NSString stringWithFormat:@"Bdsk-File-%d", ++fileIndex];
     
-    key = [NSString stringWithFormat:@"Bdsk-Url-%d", urlIndex];
+    key = @"Bdsk-Url-0";
     
     while ([pubFields objectForKey:key])
         key = [NSString stringWithFormat:@"Bdsk-Url-%d", ++urlIndex];
@@ -2909,10 +2909,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 	return NO;
 }
 
-- (NSString *)documentFileName {
-    return [[owner fileURL] path];
-}
-
 - (NSString *)documentInfoForKey:(NSString *)key {
     return [owner documentInfoForKey:key];
 }
@@ -3571,16 +3567,26 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 
 static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
-    BibItem *self = (BibItem *)context;
+    BibItem *self = [(id)context valueForKey:@"publication"];
+    BOOL removeField = [[(id)context valueForKey:@"removeField"] boolValue];
     NSURL *value = [self URLForField:(id)key];
-    if (value && [[self valueForKeyPath:@"files.URL"] containsObject:value] == NO) {
-        // !!! file URLs are always absolute but the init method here always returns nil, which probably means that we should do the first initialization with relative paths instead of expending them first
-        BDSKLinkedFile *aURL = [[BDSKLinkedFile alloc] initWithURL:value delegate:self];
-        if (aURL) {
-            [self->files addObject:aURL];
-            [aURL release];
+    if (value) {
+        BOOL converted = [[self valueForKeyPath:@"files.URL"] containsObject:value];
+        if (converted == NO) {
+            BDSKLinkedFile *aURL = [[BDSKLinkedFile alloc] initWithURL:value delegate:self];
+            if (aURL) {
+                [self->files addObject:aURL];
+                [aURL release];
+                converted = YES;
+            }
+            else NSLog(@"*** Unable to create file for %@", value);
         }
-        else NSLog(@"*** Unable to create file for %@", value);
+        if (removeField && converted) {
+            if ([[[BDSKTypeManager sharedManager] userDefaultFieldsForType:[self pubType]] containsObject:(id)key])
+                [self setField:(id)key toValue:@""];
+            else
+                [self removeField:(id)key];
+        }
     }
 }
 
@@ -3590,7 +3596,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         files = [NSMutableArray new];
     
     NSUInteger i = 0, count;
-    NSString *value, *key = [NSString stringWithFormat:@"Bdsk-File-%d", i];
+    NSString *value, *key = @"Bdsk-File-0";
     
     NSMutableArray *keysToRemove = [NSMutableArray array];
     NSMutableArray *unresolvedFiles = [NSMutableArray array];
@@ -3614,7 +3620,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     // reset i so we can get all of the remote URL types
     i = 0;
-    key = [NSString stringWithFormat:@"Bdsk-Url-%d", i];
+    key = @"Bdsk-Url-0";
 
     while ((value = [pubFields objectForKey:key]) != nil) {
         BDSKLinkedFile *aURL = [[BDSKLinkedFile alloc] initWithURLString:value];
@@ -3649,10 +3655,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     // @@ temporary hack to create an array of BDSKLinkedFiles from Local Files and BDSKLinkedURLs from Remote URLs
     if ([files count] == 0) {
+        void *context = (void *)[NSDictionary dictionaryWithObjectsAndKeys:self, @"publication", [NSNumber numberWithBool:NO], @"removeField", nil];
         CFArrayRef fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
-        CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, self);
+        CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, context);
         fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey];
-        CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, self);
+        CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, context);
     }
 }
 

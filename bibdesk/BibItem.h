@@ -826,7 +826,6 @@ enum {
 
 - (BOOL)isValidLocalFilePath:(NSString *)proposedPath;
 
-- (NSString *)documentFileName;
 - (NSString *)documentInfoForKey:(NSString *)key;
 
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
