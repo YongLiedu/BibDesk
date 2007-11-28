@@ -2747,14 +2747,11 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     returnURL = [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
     if (returnURL)
         [cachedURLs setObject:returnURL forKey:field];
+    
     return returnURL;
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field{
-	return [self localFileURLForField:field inherit:YES];
-}
-
-- (NSURL *)localFileURLForField:(NSString *)field inherit:(BOOL)inherit{
     
     // check the cache first
     NSURL *localURL = [cachedURLs objectForKey:field];
@@ -2762,8 +2759,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
         return localURL;
     
     NSURL *resolvedURL = nil;
-    NSString *localURLFieldValue = [self valueOfField:field inherit:inherit];
-    
+    NSString *localURLFieldValue = [self valueOfField:field inherit:NO];
     // only cache absolute URLs
     BOOL shouldCache = YES;
     
@@ -2777,8 +2773,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
         // the local-url isn't already a file URL, so we'll turn it into one
         
         // check to see if it's a relative path
-        UniChar ch = [localURLFieldValue characterAtIndex:0];
-        if(ch != '/' && ch != '~'){
+        if([localURLFieldValue isAbsolutePath] == NO){
             NSString *docPath = [[owner fileURL] path];
             NSString *basePath = [NSString isEmptyString:docPath] ? NSHomeDirectory() : [docPath stringByDeletingLastPathComponent];
 			// It's a relative path from the containing document's path
@@ -2792,14 +2787,14 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     
     // resolve aliases in the containing dir, as most NSFileManager methods do not follow them, and NSWorkspace can't open aliases
 	// we don't resolve the last path component if it's an alias, as this is used in auto file, which should move the alias rather than the target file 
-    resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent];
-    
     // if the path to the file does not exist resolvedURL is nil, so we return the unresolved path
-    NSURL *returnURL = (resolvedURL == nil) ? localURL : resolvedURL;
-    if (returnURL)
-        [cachedURLs setObject:returnURL forKey:field];
+    if (resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent])
+        localURL = resolvedURL;
     
-    return returnURL;
+    if (localURL && shouldCache)
+        [cachedURLs setObject:localURL forKey:field];
+    
+    return localURL;
 }
 
 // Legacy redirect, deprecated, but could still be called from templates

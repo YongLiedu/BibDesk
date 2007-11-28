@@ -823,7 +823,6 @@ enum {
 
 // NSURL equivalents of the localFilePath... methods
 - (NSURL *)localFileURLForField:(NSString *)field;
-- (NSURL *)localFileURLForField:(NSString *)field inherit:(BOOL)inherit;
 
 - (BOOL)isValidLocalFilePath:(NSString *)proposedPath;
 
