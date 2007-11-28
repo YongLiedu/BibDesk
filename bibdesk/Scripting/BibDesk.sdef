@@ -955,14 +955,18 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="ParseFormat" class="BDSKParseFormatCommand"/>
             <direct-parameter type="text"
                 description="The format string to parse."/>
-            <parameter name="for" code="for "
+            <parameter name="for" code="for " optional="yes"
                 description="The field or field name for which to parse the format string.">
                 <type type="field"/>
                 <type type="text"/>
                 <cocoa key="for"/>
             </parameter>
+            <parameter name="for file at index" type="integer" code="Indx" optional="yes"
+                description="The index of the linked file for which to parse the format. Defaults to 1 if there is a is a field set.">
+                <cocoa key="index"/>
+            </parameter>
             <parameter name="from" type="publication" code="from" optional="yes"
-                description="The publication for which to parse the format string. This is required if the field name was given as a string.">
+                description="The publication for which to parse the format string. This is required unless a full field reference was given.">
                 <cocoa key="from"/>
             </parameter>
             <parameter name="check" type="boolean" code="Chck" optional="yes"
@@ -978,12 +982,16 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="AutoFile" class="BDSKAutoFileCommand"/>
             <direct-parameter type="publication"
                 description="The pubication for which to auto file a linked file."/>
-            <parameter name="for" type="text" code="for " optional="yes"
-                description="The local file field name for which to auto file.">
+            <parameter name="for" type="text" code="for " optional="yes" hidden="yes"
+                description="The local file field name for which to auto file. Deprecated.">
                 <cocoa key="for"/>
             </parameter>
+            <parameter name="at index" type="integer" code="Indx" optional="yes"
+                description="The index of the linked file to auto file. Defaults to 1 if there is a is a location set, otherwise all linked files are auto filed.">
+                <cocoa key="index"/>
+            </parameter>
             <parameter name="to" type="text" code="to  " optional="yes"
-                description="The URL or path to set move the linked file to. Must be specified when the field is set and is not Local-Url">
+                description="The URL or path to move the linked file to.">
                 <cocoa key="to"/>
             </parameter>
             <parameter name="check" type="boolean" code="Chck" optional="yes"
