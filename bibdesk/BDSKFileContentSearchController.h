@@ -108,7 +108,7 @@
 
 - (void)saveSortDescriptors;
 - (void)restoreDocumentState;
-- (void)stopSearching;
+- (void)terminate;
 
 - (IBAction)search:(id)sender;
 - (IBAction)cancelCurrentSearch:(id)sender;

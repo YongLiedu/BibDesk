@@ -91,12 +91,10 @@
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // should already have been taken care of in -stopSearching
-    [searchIndex cancel];
-    [searchIndex setDelegate:nil];
+    [search release];
     [searchIndex release];
     [searchContentView release];
     [results release];
-    [search release];
     [super dealloc];
 }
 
@@ -335,14 +333,19 @@
 #pragma mark -
 #pragma mark Document interaction
 
-- (void)stopSearching
+- (void)terminate
 {
     // cancel the search
     [self cancelCurrentSearch:nil];
     
+    // the index may continue sending the search object update messages, so make sure it doesn't try to pass them on
+    [search setDelegate:nil];
+    
+    // extra safety here; make sure the index stops messaging the search object now
+    [searchIndex setDelegate:nil];
+    
     // stops the search index runloop so it will release the document
     [searchIndex cancel];
-    [searchIndex setDelegate:nil];
     [searchIndex release];
     searchIndex = nil;
 }

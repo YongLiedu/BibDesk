@@ -551,7 +551,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
     docState.isDocumentClosed = YES;
     
-    [fileSearchController stopSearching];
+    [fileSearchController terminate];
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
     [self saveSortOrder];
