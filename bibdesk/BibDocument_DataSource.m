@@ -204,10 +204,21 @@
     if (row == -1) return;
     if (tv == tableView) {
         if([aCell isKindOfClass:[NSButtonCell class]]){
-            if ([[aTableColumn identifier] isEqualToString:BDSKImportOrderString])
+            if ([[aTableColumn identifier] isEqualToString:BDSKImportOrderString]) {
                 [aCell setEnabled:[[shownPublications objectAtIndex:row] isImported] == NO];
-            else
+            } else if ([[aTableColumn identifier] isEqualToString:BDSKCrossrefString]) {
+                if ([[shownPublications objectAtIndex:row] crossrefParent]) {
+                    [aCell setEnabled:YES];
+                    [aCell setImage:[NSImage imageNamed:@"ArrowImage"]];
+                    [aCell setAlternateImage:[NSImage imageNamed:@"ArrowImage_Pressed"]];
+                } else {
+                    [aCell setEnabled:YES];
+                    [aCell setImage:nil];
+                    [aCell setAlternateImage:nil];
+                }
+            } else {
                 [aCell setEnabled:[self hasExternalGroupsSelected] == NO];
+            }
         }
     } else if (tv == groupTableView) {
         BDSKGroup *group = [groups objectAtIndex:row];
@@ -1118,6 +1129,12 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
     } else if([documentWindow firstResponder] == tableView)
         [self editPubCmd:nil];
+}
+
+- (void)tableView:(NSTableView *)tv openParentForItemAtRow:(int)row{
+    BibItem *parent = [[shownPublications objectAtIndex:row] crossrefParent];
+    if (parent)
+        [self editPub:parent];
 }
 
 #pragma mark -

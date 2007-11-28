@@ -66,6 +66,7 @@
 - (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)updateColumnsMenu;
 - (IBAction)importItem:(id)sender;
+- (IBAction)openParentItem:(id)sender;
 
 @end
 
@@ -329,6 +330,18 @@
             [levelCell setMaxHeight:(17.0 * 0.7)];
             [tc setDataCell:levelCell];
             [levelCell release];            
+        }else if ([colName isEqualToString:BDSKCrossrefString]) { 
+            NSButtonCell *crossrefButtonCell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
+            [crossrefButtonCell setButtonType:NSMomentaryChangeButton];
+            [crossrefButtonCell setBordered:NO];
+            [crossrefButtonCell setImagePosition:NSImageOnly];
+            [crossrefButtonCell setControlSize:NSSmallControlSize];
+            [crossrefButtonCell setImage:[NSImage imageNamed:@"ArrowImage"]];
+            [crossrefButtonCell setAlternateImage:[NSImage imageNamed:@"ArrowImage_Pressed"]];
+            [crossrefButtonCell setAction:@selector(openParentItem:)];
+            [crossrefButtonCell setTarget:self];
+            [tc setDataCell:crossrefButtonCell];
+            [tc setWidth:[crossrefButtonCell cellSize].width];
         }else{
             // this is our default cell; need to explicitly set if changing column type from e.g. image->text
             NSTextFieldCell *textFieldCell = [[[NSTextFieldCell alloc] initTextCell:@""] autorelease];
@@ -470,7 +483,7 @@
 	
 	if (headerImageCache == nil) {
 		NSDictionary *paths = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableHeaderImagesKey];
-		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, nil];
+		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, [NSImage imageNamed:@"ArrowImage"], BDSKCrossrefString, nil];
 		if (paths) {
 			NSEnumerator *keyEnum = [paths keyEnumerator];
 			NSString *key, *path;
@@ -522,7 +535,7 @@
 - (void)columnsMenuAddTableColumn:(id)sender{
     // first we fill the popup
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, nil]
+    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, BDSKCrossrefString, nil]
                                               excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:", @"Label for adding column")
@@ -601,6 +614,15 @@
         return;
     if([[self delegate] respondsToSelector:@selector(tableView:importItemAtRow:)])
         [[self delegate] tableView:self importItemAtRow:row];
+}
+
+- (void)openParentItem:(id)sender {
+    int row = [self clickedRow];
+    OBASSERT(row != -1);
+    if (row == -1)
+        return;
+    if([[self delegate] respondsToSelector:@selector(tableView:openParentForItemAtRow:)])
+        [[self delegate] tableView:self openParentForItemAtRow:row];
 }
 
 @end
