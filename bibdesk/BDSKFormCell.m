@@ -46,7 +46,6 @@
 #define ICON_PADDING 4.0
 
 static NSSize arrowImageSize;
-static NSSize fileIconSize;
 
 @implementation BDSKFormCell
 
@@ -55,7 +54,6 @@ static NSSize fileIconSize;
     OBINITIALIZE;
     
     arrowImageSize = [(NSImage *)[NSImage imageNamed:@"ArrowImage"] size];
-    fileIconSize = NSMakeSize(16, 16);
 }
 
 // designated initializer
@@ -82,11 +80,6 @@ static NSSize fileIconSize;
 	return [delegate formCellHasArrowButton:self];
 }
 
-- (BOOL)hasFileIcon{
-	id <BDSKFormDelegate>delegate = [[self controlView] delegate];
-    return [delegate formCellHasFileIcon:self];
-}
-
 - (BDSKForm *)controlView{
     id controlView = [super controlView];
     OBPRECONDITION(controlView == nil || [controlView isKindOfClass:[BDSKForm class]]);
@@ -97,12 +90,10 @@ static NSSize fileIconSize;
 
 - (NSRect)buttonRectForBounds:(NSRect)theRect{
 	NSRect buttonRect = NSZeroRect;
-    BOOL isArrow = [self hasArrowButton];
 	
-	if(isArrow || [self hasFileIcon]){
-		NSSize size = isArrow ? arrowImageSize : fileIconSize;
-        buttonRect = BDSKCenterRect(theRect, size, YES);
-		buttonRect.origin.x = NSMaxX(theRect) - size.width - ICON_PADDING;
+	if([self hasArrowButton]){
+        buttonRect = BDSKCenterRect(theRect, arrowImageSize, YES);
+		buttonRect.origin.x = NSMaxX(theRect) - arrowImageSize.width - ICON_PADDING;
 	}
 	return buttonRect;
 }
@@ -124,13 +115,11 @@ static NSSize fileIconSize;
 // override this to get the rect in which the text (title + value) is drawn
 - (NSRect)drawingRectForBounds:(NSRect)theRect{
 	NSRect rect = [super drawingRectForBounds:theRect];
-    BOOL isArrow = [self hasArrowButton];
     
-	if(isArrow || [self hasFileIcon]){
+	if([self hasArrowButton]){
         NSRect textRect;
         NSRect imageRect;
-        float amount = (isArrow ? arrowImageSize.width : fileIconSize.width);
-        NSDivideRect(rect, &imageRect, &textRect, amount + ICON_PADDING, NSMaxXEdge);
+        NSDivideRect(rect, &imageRect, &textRect, arrowImageSize.width + ICON_PADDING, NSMaxXEdge);
         return textRect;
 	}
 	
@@ -155,17 +144,11 @@ static NSSize fileIconSize;
             buttonImage = [NSImage imageNamed:@"ArrowImage_Pressed"];
         else
             buttonImage = [NSImage imageNamed:@"ArrowImage"];
-    } else if([self hasFileIcon]){
-        buttonImage = [[(BDSKForm *)controlView delegate] fileIconForFormCell:self];
-        if(buttonHighlighted)
-            buttonImage = [buttonImage highlightedImage];
-    } else {
-        return;
+        [controlView lockFocus];
+        [buttonImage drawFlippedInRect:buttonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [controlView unlockFocus];
     }
-    
-	[controlView lockFocus];
-    [buttonImage drawFlippedInRect:buttonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [controlView unlockFocus];
+
 }
 
 @end

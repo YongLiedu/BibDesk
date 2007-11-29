@@ -41,6 +41,7 @@
 #import "BibDocument.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKLinkedFile.h"
 
 /* ssp
 A Category on BibItem with a few additional methods to enable and enhance its scriptability beyond what comes for free with key value coding.
@@ -104,6 +105,52 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 		}
 	}
 	return nil;
+}
+
+- (NSArray *)linkedFiles {
+    return [[self localFiles] valueForKey:@"URL"];
+}
+
+- (void)insertInLinkedFiles:(NSURL *)newURL atIndex:(unsigned int)idx {
+    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
+    if (file) {
+        NSArray *localFiles = [self localFiles];
+        if (idx > 0) {
+            idx = [files indexOfObject:[localFiles objectAtIndex:idx - 1]];
+            if (idx == NSNotFound)
+                idx = 0;
+            else
+                idx++;
+        }
+        [self insertObject:file inFilesAtIndex:idx];
+    }
+}
+
+- (void)removeFromLinkedFilesAtIndex:(unsigned int)idx {
+    [[self mutableArrayValueForKey:@"files"] removeObject:[[self localFiles] objectAtIndex:idx]];
+}
+
+- (NSArray *)linkedURLs {
+    return [[self remoteURLs] valueForKeyPath:@"URL.absoluteString"];
+}
+
+- (void)insertInLinkedURLs:(NSString *)newURLString atIndex:(unsigned int)idx {
+    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURLString:newURLString] autorelease];
+    if (file) {
+        NSArray *remoteURLs = [self remoteURLs];
+        if (idx < [remoteURLs count]) {
+            idx = [files indexOfObject:[remoteURLs objectAtIndex:idx]];
+            if (idx == NSNotFound)
+                idx = [self countOfFiles];
+        } else {
+            idx = [self countOfFiles];
+        }
+        [self insertObject:file inFilesAtIndex:idx];
+    }
+}
+
+- (void)removeFromLinkedURLsAtIndex:(unsigned int)idx {
+    [[self mutableArrayValueForKey:@"files"] removeObject:[[self remoteURLs] objectAtIndex:idx]];
 }
 
 /* ssp: 2004-09-21
@@ -187,25 +234,49 @@ Extra wrapping of the created and modified date methods to
  Any policies on whether to rather return copies of the strings in question here?
 */
 - (NSString*) remoteURLString {
-	NSString *remoteURL = [[self remoteURL] absoluteString];
-	return remoteURL ? remoteURL : @"";
+    NSArray *linkedURLs = [self linkedURLs];
+    return [linkedURLs count] ? [linkedURLs objectAtIndex:0] : @"";
 }
 
-- (void) setRemoteURL:(NSString*) newURL{
-	[self setField:BDSKUrlString toValue:newURL];
+- (void) setRemoteURLString:(NSString*) newURLString{
+    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURLString:newURLString] autorelease];
+    if (file == nil)
+        return;
+    NSArray *remoteURLs = [self remoteURLs];
+    unsigned int idx = [self countOfFiles];
+    if ([remoteURLs count]) {
+        idx = [files indexOfObject:[remoteURLs objectAtIndex:0]];
+        if (idx == NSNotFound)
+            idx = [self countOfFiles];
+        else
+            [self removeObjectFromFilesAtIndex:idx];
+    }
+    [self insertObject:file inFilesAtIndex:idx];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (NSString*) localURLString {
-	NSString *localURL = [self localUrlPath];
-	return localURL ? localURL : @"";
+    NSArray *linkedFiles = [self linkedFiles];
+    return [linkedFiles count] ? [[linkedFiles objectAtIndex:0] path] : @"";
 }
 
 - (void) setLocalURLString:(NSString*) newPath {
-	if ([newPath hasPrefix:@"file://"])
-		[self setField:BDSKLocalUrlString toValue:newPath];
-	NSString *newURL = [[NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]] absoluteString];
-	[self setField:BDSKLocalUrlString toValue:newURL];
+	NSURL *newURL = [newPath hasPrefix:@"file://"] ? [NSURL URLWithString:newPath] : [NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]];
+    if (newURL == nil)
+        return;
+    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
+    if (file == nil)
+        return;
+    NSArray *localFiles = [self localFiles];
+    unsigned int idx = 0;
+    if ([localFiles count]) {
+        idx = [files indexOfObject:[localFiles objectAtIndex:0]];
+        if (idx == NSNotFound)
+            idx = 0;
+        else
+            [self removeObjectFromFilesAtIndex:idx];
+    }
+    [self insertObject:file inFilesAtIndex:idx];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 

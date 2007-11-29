@@ -65,7 +65,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKBookmarkController.h"
-#import "BDSKGroupsArray.h"
+#import "BDSKLinkedFile.h"
 
 @interface BDSKTextImportController (Private)
 
@@ -97,7 +97,7 @@
 
 - (BOOL)addCurrentSelectionToFieldAtIndex:(unsigned int)index;
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value;
-- (BOOL)autoFilePaper;
+- (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file;
 
 - (void)startTemporaryTypeSelectMode;
 - (void)endTemporaryTypeSelectModeAndSet:(BOOL)set edit:(BOOL)edit;
@@ -254,10 +254,19 @@
     
     if ([item hasEmptyOrDefaultCiteKey])
         [item setCiteKey:[item suggestedCiteKey]];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
-       [item needsToBeFiled] && [item canSetLocalUrl]){
-        [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
-        [item setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [[item filesToBeFiled] count]){
+        NSEnumerator *fileEnum = [[item filesToBeFiled] objectEnumerator];
+        BDSKLinkedFile *file;
+        NSMutableArray *files = [NSMutableArray array];
+        
+        while(file = [fileEnum nextObject]){
+            if([item canSetURLForLinkedFile:file] == NO)
+                continue;
+            [files addObject:file];
+            [item removeFileToBeFiled:file]; // unset the flag even when we fail, to avoid retrying at every edit
+        }
+        if ([files count])
+            [[BDSKFiler sharedFiler] filePapers:files fromDocument:document check:NO];
     }
     [item release];
     
@@ -419,14 +428,29 @@
 }
 
 - (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    NSArray *files = nil;
+    
     if (returnCode == NSAlertAlternateReturn){
         return;
     }else if(returnCode == NSAlertOtherReturn){
-        [item setNeedsToBeFiled:YES];
-        return;
+        NSEnumerator *fileEnum = [[item localFiles] objectEnumerator];
+        BDSKLinkedFile *file;
+        files = [NSMutableArray array];
+        
+        while(file = [fileEnum nextObject]){
+            if([item canSetURLForLinkedFile:file] == NO)
+                [item addFileToBeFiled:file];
+            else
+                [(NSMutableArray *)files addObject:file];
+        }
+    }else{
+        files = [item localFiles];
     }
     
-	[[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
+    if ([files count] == 0)
+        return;
+    
+    [[BDSKFiler sharedFiler] filePapers:files fromDocument:document check:NO];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
 }
@@ -434,8 +458,18 @@
 - (IBAction)consolidateLinkedFiles:(id)sender{
     // make the tableview stop editing:
     [self finalizeChangesPreservingSelection:YES];
-	
-	if ([item canSetLocalUrl] == NO){
+	BOOL canSet = YES;
+    NSEnumerator *fileEnum = [[item localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    
+    while(file = [fileEnum nextObject]){
+        if([item canSetURLForLinkedFile:file] == NO){
+            canSet = NO;
+            break;
+        }
+    }
+    
+	if (canSet == NO){
 		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?", @"Informative text in alert");
 		NSString *otherButton = nil;
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
@@ -459,18 +493,20 @@
 #pragma mark WebView contextual menu actions
 
 - (void)copyLocationAsRemoteUrl:(id)sender{
-	NSString *URLString = [[[[[webView mainFrame] dataSource] request] URL] absoluteString];
+	NSURL *aURL = [[[[webView mainFrame] dataSource] request] URL];
 	
-	if (URLString) {
-        [self recordChangingField:BDSKUrlString toValue:URLString];
+	if (aURL) {
+        [item addFileForURL:aURL autoFile:YES];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 	}
 }
 
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender{
-	NSString *URLString = [(NSURL *)[sender representedObject] absoluteString];
+	NSURL *aURL = (NSURL *)[sender representedObject];
 	
-	if (URLString) {
-        [self recordChangingField:BDSKUrlString toValue:URLString];
+	if (aURL) {
+        [item addFileForURL:aURL autoFile:YES];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 	}
 }
 
@@ -731,7 +767,7 @@
 	
 	// the default fields can contain fields already contained in typeInfo
     [fields addNonDuplicateObjectsFromArray:[typeMan userDefaultFieldsForType:type]];
-    [fields addNonDuplicateObjectsFromArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAbstractString, BDSKAnnoteString, nil]];
+    [fields addNonDuplicateObjectsFromArray:[NSArray arrayWithObjects:BDSKAbstractString, BDSKAnnoteString, nil]];
 }
 
 #pragma mark Sheet callbacks
@@ -743,11 +779,8 @@
     [webView setFrameLoadDelegate:nil];
     [webView setUIDelegate:nil];
 	// select the items we just added
-	if ([itemsAdded count]) {
-        [document selectPublications:itemsAdded];
-        [[document groups] setLastImportedPublications:itemsAdded];
-	}
-    [itemsAdded removeAllObjects];
+	[document selectPublications:itemsAdded];
+	[itemsAdded removeAllObjects];
     
     [super didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
 }
@@ -845,10 +878,10 @@
     
 	if (returnCode == NSOKButton) {
 		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
-			NSString *fileURLString = [[NSURL fileURLWithPath:[sheet filename]] absoluteString];
+			NSURL *fileURL = [NSURL fileURLWithPath:[sheet filename]];
 			
-            [self recordChangingField:BDSKLocalUrlString toValue:fileURLString];
-			[self autoFilePaper];
+            [item addFileForURL:fileURL autoFile:YES];
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 		} else {
 			NSLog(@"Could not write downloaded file.");
 		}
@@ -891,10 +924,10 @@
 }
 
 - (void)setLocalUrlFromDownload{
-	NSString *fileURLString = [[NSURL fileURLWithPath:downloadFileName] absoluteString];
+	NSURL *fileURL = [NSURL fileURLWithPath:downloadFileName];
 	
-    [self recordChangingField:BDSKLocalUrlString toValue:fileURLString];
-	[self autoFilePaper];
+    [item addFileForURL:fileURL autoFile:YES];
+    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
 - (void)setDownloading:(BOOL)downloading{
@@ -957,8 +990,7 @@
 		return YES;
 	} else if ([menuItem action] == @selector(consolidateLinkedFiles:)) {
 		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Menu item title")];
-		NSString *lurl = [item localUrlPath];
-		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+        return [[item localFiles] count] > 0;
 	}
 	return YES;
 }
@@ -1378,16 +1410,17 @@
 }
 
 // we don't use the one from the item befcause it doesn't know about the document yet
-- (BOOL)autoFilePaper{
+- (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file
+{
     // we can't autofile if it's disabled or there is nothing to file
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [item localUrlPath] == nil)
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [file URL] == nil)
 		return NO;
 	
-	if ([item canSetLocalUrl]) {
-		[[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO]; 
-		return YES;
+	if ([item canSetURLForLinkedFile:file]) {
+        [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:file] fromDocument:document check:NO]; 
+        return YES;
 	} else {
-		[item setNeedsToBeFiled:YES];
+		[item addFileToBeFiled:file];
 	}
 	return NO;
 }

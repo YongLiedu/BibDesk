@@ -124,7 +124,7 @@ NSString *BDSKComputerName() {
 + (void)load;
 {
     /* Ensure that computer name changes are propagated as future clients connect to a document.  Also, note that the OS will change the computer name to avoid conflicts by appending "(2)" or similar to the previous name, which is likely the most common scenario.
-     */
+    */
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     if(dynamicStore == NULL){
         CFAllocatorRef alloc = CFAllocatorGetDefault();
@@ -143,28 +143,28 @@ NSString *BDSKComputerName() {
         else {
             CFStringRef bundleID = CFBundleGetIdentifier(mainBundle);
             dynamicStore = SCDynamicStoreCreate(alloc, bundleID, &SCDynamicStoreChanged, &SCNSObjectContext);
-            CFRunLoopSourceRef rlSource = SCDynamicStoreCreateRunLoopSource(alloc, dynamicStore, 0);
-            CFRunLoopAddSource(CFRunLoopGetCurrent(), rlSource, kCFRunLoopCommonModes);
-            CFRelease(rlSource);
+        CFRunLoopSourceRef rlSource = SCDynamicStoreCreateRunLoopSource(alloc, dynamicStore, 0);
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), rlSource, kCFRunLoopCommonModes);
+        CFRelease(rlSource);
+        
+        CFMutableArrayRef keys = CFArrayCreateMutable(alloc, 0, &kCFTypeArrayCallBacks);
+        
+        // use SCDynamicStore keys as NSNotification names; don't release them
+        CFStringRef key = SCDynamicStoreKeyCreateComputerName(alloc);
+        CFArrayAppendValue(keys, key);
+        BDSKComputerNameChangedNotification = (NSString *)key;
+        
+        key = SCDynamicStoreKeyCreateHostNames(alloc);
+        CFArrayAppendValue(keys, key);
+        BDSKHostNameChangedNotification = (NSString *)key;
+        
+        OBASSERT(BDSKComputerNameChangedNotification);
+        OBASSERT(BDSKHostNameChangedNotification);
             
-            CFMutableArrayRef keys = CFArrayCreateMutable(alloc, 0, &kCFTypeArrayCallBacks);
-            
-            // use SCDynamicStore keys as NSNotification names; don't release them
-            CFStringRef key = SCDynamicStoreKeyCreateComputerName(alloc);
-            CFArrayAppendValue(keys, key);
-            BDSKComputerNameChangedNotification = (NSString *)key;
-            
-            key = SCDynamicStoreKeyCreateHostNames(alloc);
-            CFArrayAppendValue(keys, key);
-            BDSKHostNameChangedNotification = (NSString *)key;
-            
-            OBASSERT(BDSKComputerNameChangedNotification);
-            OBASSERT(BDSKHostNameChangedNotification);
-            
-            if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
-                fprintf(stderr, "unable to register for dynamic store notifications.\n");
-            CFRelease(keys);
-        }
+        if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
+            fprintf(stderr, "unable to register for dynamic store notifications.\n");
+        CFRelease(keys);
+    }
     }
     [pool release];
 }

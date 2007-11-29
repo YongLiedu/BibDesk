@@ -59,21 +59,20 @@
 + (CIColor *)startColor{
     static CIColor *startColor = nil;
     if (startColor == nil)
-        startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
+            startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
     return startColor;
 }
 
 + (CIColor *)endColor{
     static CIColor *endColor = nil;
     if (endColor == nil)
-        endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
-   return endColor;
+            endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
+    return endColor;
 }
 
 - (id)initWithFrame:(NSRect)frameRect{
     if (self = [super initWithFrame:frameRect]) {
-        drawEnd = NO;
-        dividerLayer = NULL;
+        blendStyle = 0;
     }
     return self;
 }
@@ -109,14 +108,19 @@
     }
     CGContextDrawLayerInRect(currentContext, *(CGRect *)&aRect, dividerLayer);
     
-    if (drawEnd) {
+    if (blendStyle) {
         NSRect endRect, ignored;
-        if ([self isVertical]) {
+        if (blendStyle & BDSKMinBlendStyleMask) {
+            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, [self isVertical] ? NSMinYEdge : NSMinXEdge);
+            [[NSBezierPath bezierPathWithRect:endRect] fillPathVertically:[self isVertical] withStartColor:[CIColor clearColor] endColor:[[self class] startColor]];
+        }
+        if (blendStyle & BDSKMaxBlendStyleMask) {
+            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, [self isVertical] ? NSMaxYEdge : NSMaxXEdge);
+            [[NSBezierPath bezierPathWithRect:endRect] fillPathVertically:[self isVertical] withStartColor:[[self class] endColor] endColor:[CIColor clearColor]];
+        }
+        if ([self isVertical] && (blendStyle & BDSKStatusBarBlendStyleMask)) {
             NSDivideRect(aRect, &endRect, &ignored, END_JOIN_HEIGHT, NSMaxYEdge);
             [self drawBlendedJoinEndAtBottomInRect:endRect];
-        } else {
-            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, NSMinXEdge);
-            [[NSBezierPath bezierPathWithRect:endRect] fillPathVertically:[self isVertical] withStartColor:[[self class] endColor] endColor:[CIColor clearColor]];
         }
     }
     // Draw dimple
@@ -134,12 +138,49 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:self];
 }
 
-- (BOOL)drawEnd {
-    return drawEnd;
+- (int)blendStyle {
+    return blendStyle;
 }
 
-- (void)setDrawEnd:(BOOL)flag {
-    drawEnd = flag;
+- (void)setBlendStyle:(int)mask {
+    blendStyle = mask;
 }
+
+// arm: mouseDown: swallows mouseDragged: needlessly
+- (void)mouseDown:(NSEvent *)theEvent {
+    BOOL inDivider = NO;
+    NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    NSArray *subviews = [self subviews];
+    int i, count = [subviews count];
+    id view;
+    NSRect divRect;
+    
+    for (i = 0; i < count - 1; i++) {
+        view = [subviews objectAtIndex:i];
+        divRect = [view frame];
+        if ([self isVertical]) {
+            divRect.origin.x = NSMaxX(divRect);
+            divRect.size.width = [self dividerThickness];
+        } else {
+            divRect.origin.y = NSMaxY(divRect);
+            divRect.size.height = [self dividerThickness];
+        }
+        
+        if (NSPointInRect(mouseLoc, divRect)) {
+            inDivider = YES;
+            break;
+        }
+    }
+    
+    if (inDivider) {
+        if ([theEvent clickCount] > 1 && [[self delegate] respondsToSelector:@selector(splitView:doubleClickedDividerAt:)])
+            [[self delegate] splitView:self doubleClickedDividerAt:i];
+        else
+            [super mouseDown:theEvent];
+    } else {
+        [[self nextResponder] mouseDown:theEvent];
+    }
+}
+
 
 @end

@@ -89,7 +89,7 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
                 [bookmark release];
 			}
 		}
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBookmarkChangedNotification:) name:BDSKBookmarkChangedNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBookmarkWillBeRemovedNotification:) name:BDSKBookmarkWillBeRemovedNotification object:nil];
     }
@@ -200,7 +200,7 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
     BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithUrlString:urlString name:name];
     if (bookmark) {
         [self bookmark:folder insertChildBookmark:bookmark atIndex:[[self childrenOfBookmark:folder] count]];
-        [bookmark release];
+    [bookmark release];
     }
 }
 
@@ -725,7 +725,7 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
     else if (bookmarkType == BDSKBookmarkTypeSeparator)
         return [[[self class] allocWithZone:aZone] initSeparator];
     else
-        return [[[self class] allocWithZone:aZone] initWithUrlString:urlString name:name];
+    return [[[self class] allocWithZone:aZone] initWithUrlString:urlString name:name];
 }
 
 - (void)dealloc {

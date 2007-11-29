@@ -399,7 +399,6 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         }
     } else {
         [mainBox setNeedsDisplay:YES];
-        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
     }
 }
 

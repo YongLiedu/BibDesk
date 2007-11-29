@@ -355,7 +355,7 @@
     for (i = 0; i < 2; i++) {
         frames[i] = [views[i] frame];
         frames[i].size.height = floorf(factor * NSHeight(frames[i]));
-    }
+        }
     
     // randomly divide the remaining gap over the two views; NSSplitView dumps it all over the last view, which grows that one more than the others
     gap = contentHeight - NSHeight(frames[0]) - NSHeight(frames[1]);

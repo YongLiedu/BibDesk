@@ -46,6 +46,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <OmniFoundation/NSArray-OFExtensions.h>
+#import "BDSKOwnerProtocol.h"
 
 
 @implementation BDSKPreviewItem
@@ -112,26 +113,28 @@
         return 0;
 }
 
-- (NSString *)localFilePathForField:(NSString *)field { return [pubFields objectForKey:field]; }
+- (NSURL *)localFileURLForField:(NSString *)field {
+    return [NSURL fileURLWithPath:@"Local File Name.pdf"];
+}
 
 - (NSArray *)peopleArrayForField:(NSString *)field { 
     return ([field isEqualToString:BDSKAuthorString]) ? pubAuthors : [NSArray array];
 }
 
-- (NSString *)documentFileName { return NSLocalizedString(@"Document File Name", @"Document filename for preview item in preferences"); }
+- (NSString *)basePath { return NSLocalizedString(@"/path/to/document", @"Document base path for preview item in preferences"); }
 
 - (NSString *)documentInfoForKey:(NSString *)key { return key; }
 
 - (BOOL)isValidCiteKey:(NSString *)key { return YES; }
 
-- (BOOL)isValidLocalUrlPath:(NSString *)path { return YES; }
+- (BOOL)isValidLocalFilePath:(NSString *)path { return YES; }
 
-- (NSString *)suggestedLocalUrl {
+- (NSString *)suggestedLocalFilePath {
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSString *localUrlFormat = [pw objectForKey:BDSKLocalUrlFormatKey];
+	NSString *localFileFormat = [pw objectForKey:BDSKLocalFileFormatKey];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:nil];
-	NSString *relativeFile = [BDSKFormatParser parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self];
-	if ([pw boolForKey:BDSKLocalUrlLowercaseKey])
+	NSString *relativeFile = [BDSKFormatParser parseFormat:localFileFormat forField:BDSKLocalUrlString ofItem:self];
+	if ([pw boolForKey:BDSKLocalFileLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
 	if ([pw boolForKey:BDSKAutoFileUsesRelativePathKey])
         return relativeFile;
@@ -146,6 +149,8 @@
 		ck = [ck lowercaseString];
 	return ck;
 }
+
+- (id<BDSKOwner>)owner { return  nil; }
 
 - (NSString *)displayText {
     NSMutableArray *authors = [NSMutableArray arrayWithCapacity:[pubAuthors count]];

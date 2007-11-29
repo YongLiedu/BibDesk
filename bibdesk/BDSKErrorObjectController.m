@@ -302,7 +302,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     }
     
     if ([document respondsToSelector:@selector(publications)])
-        [self removeErrorsForPublications:[document publications]];
+    [self removeErrorsForPublications:[document publications]];
 }
 
 // remove a publication

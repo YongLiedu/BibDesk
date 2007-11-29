@@ -463,44 +463,44 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             NSArray *subtemplate = nil;
             
             keyValue = [object safeValueForKeyPath:[tag keyPath]];
-            for (i = 0; i < count; i++) {
-                matchString = [matchStrings objectAtIndex:i];
+                        for (i = 0; i < count; i++) {
+                            matchString = [matchStrings objectAtIndex:i];
                 if ([matchString hasPrefix:@"$"]) {
                     matchString = [[object safeValueForKeyPath:[matchString substringFromIndex:1]] stringDescription];
                     if (matchString == nil)
                         matchString = @"";
                 }
                 switch ([tag matchType]) {
-                    case BDSKConditionTagMatchEqual:
-                        isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
-                        break;
-                    case BDSKConditionTagMatchContain:
-                        isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
-                        break;
-                    case BDSKConditionTagMatchSmaller:
-                        isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
-                        break;
-                    case BDSKConditionTagMatchSmallerOrEqual:
-                        isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
-                        break;
-                    default:
-                        isMatch = [keyValue isNotEmpty];
-                        break;
-                }
-                if (isMatch) {
+                                case BDSKConditionTagMatchEqual:
+                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
+                                    break;
+                                case BDSKConditionTagMatchContain:
+                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+                                    break;
+                                case BDSKConditionTagMatchSmaller:
+                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
+                                    break;
+                                case BDSKConditionTagMatchSmallerOrEqual:
+                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
+                                    break;
+                                default:
+                                    isMatch = [keyValue isNotEmpty];
+                                    break;
+                            }
+                            if (isMatch) {
                     subtemplate = [tag subtemplateAtIndex:i];
-                    break;
-                }
-            }
+                                break;
+                            }
+                        }
             if (subtemplate == nil && [[tag subtemplates] count] > count) {
                 subtemplate = [tag subtemplateAtIndex:count];
-            }
+                        }
             if (subtemplate != nil) {
                 keyValue = [self stringFromTemplateArray:subtemplate usingObject:object delegate:delegate];
-                [result appendString:keyValue];
-            }
-            
-        }
+                            [result appendString:keyValue];
+                        }
+                    
+                }
     } // while
     
     return [result autorelease];    
@@ -562,7 +562,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                 currentTag = [[BDSKRichValueTag alloc] initWithKeyPath:tag attributes:attr];
                 [result addObject:currentTag];
                 [currentTag release];
-               
+                
             } else if ([scanner scanString:MULTITAG_CLOSE_DELIM intoString:nil]) {
                 
                 NSString *itemTemplateString = nil;
@@ -782,48 +782,48 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             NSArray *matchStrings = [tag matchStrings];
             unsigned int i, count = [matchStrings count];
             NSArray *subtemplate = nil;
-            
+                        
             keyValue = [object safeValueForKeyPath:[tag keyPath]];
-            count = [matchStrings count];
+                        count = [matchStrings count];
             subtemplate = nil;
-            for (i = 0; i < count; i++) {
-                matchString = [matchStrings objectAtIndex:i];
+                        for (i = 0; i < count; i++) {
+                            matchString = [matchStrings objectAtIndex:i];
                 if ([matchString hasPrefix:@"$"]) {
                     matchString = [[object safeValueForKeyPath:[matchString substringFromIndex:1]] stringDescription];
                     if (matchString == nil)
                         matchString = @"";
                 }
                 switch ([tag matchType]) {
-                    case BDSKConditionTagMatchEqual:
-                        isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
-                        break;
-                    case BDSKConditionTagMatchContain:
-                        isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
-                        break;
-                    case BDSKConditionTagMatchSmaller:
-                        isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
-                        break;
-                    case BDSKConditionTagMatchSmallerOrEqual:
-                        isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
-                        break;
-                    default:
-                        isMatch = [keyValue isNotEmpty];
-                        break;
-                }
-                if (isMatch) {
+                                case BDSKConditionTagMatchEqual:
+                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
+                                    break;
+                                case BDSKConditionTagMatchContain:
+                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+                                    break;
+                                case BDSKConditionTagMatchSmaller:
+                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
+                                    break;
+                                case BDSKConditionTagMatchSmallerOrEqual:
+                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
+                                    break;
+                                default:
+                                    isMatch = [keyValue isNotEmpty];
+                                    break;
+                            }
+                            if (isMatch) {
                     subtemplate = [tag subtemplateAtIndex:i];
-                    break;
-                }
-            }
+                                break;
+                            }
+                        }
             if (subtemplate == nil && [[tag subtemplates] count] > count) {
                 subtemplate = [tag subtemplateAtIndex:count];
-            }
+                        }
             if (subtemplate != nil) {
                 tmpAttrStr = [self attributedStringFromTemplateArray:subtemplate usingObject:object delegate:delegate];
-                [result appendAttributedString:tmpAttrStr];
+                            [result appendAttributedString:tmpAttrStr];
+                        }
+                    
             }
-            
-        }
     } // while
     
     [result fixAttributesInRange:NSMakeRange(0, [result length])];

@@ -42,16 +42,9 @@
 @protocol BDSKFormDelegate <NSObject>
 - (void)arrowClickedInFormCell:(id)aCell;
 - (BOOL)formCellHasArrowButton:(id)aCell;
-- (BOOL)formCellHasFileIcon:(id)cell;
-- (NSImage *)fileIconForFormCell:(id)cell;
-- (NSImage *)dragIconForFormCell:(id)cell;
-- (void)iconClickedInFormCell:(id)cell;
 - (void)doubleClickedTitleOfFormCell:(id)cell;
-- (BOOL)writeDataToPasteboard:(NSPasteboard *)pasteboard forFormCell:(id)cell;
-- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forFormCell:(id)cell;
-- (void)cleanUpAfterDragOperation:(NSDragOperation)operation forFormCell:(id)cell;
-- (NSDragOperation)canReceiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)aCell;
-- (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)aCell;
+- (NSDragOperation)dragOperation:(id <NSDraggingInfo>)sender forFormCell:(id)cell;
+- (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)cell;
 - (BOOL)textViewShouldLinkKeys:(NSTextView *)textView forFormCell:(id)aCell;
 - (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key forFormCell:(id)aCell;
 - (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex forFormCell:(id)aCell;
@@ -97,40 +90,15 @@
 {                                                                                                    \
     return NO;                                                                                       \
 }                                                                                                    \
-- (BOOL)formCellHasFileIcon:(id)cell;                                                                \
-{                                                                                                    \
-    return NO;                                                                                       \
-}                                                                                                    \
-- (NSImage *)fileIconForFormCell:(id)cell;                                                           \
-{                                                                                                    \
-    return nil;                                                                                      \
-}                                                                                                    \
-- (void)iconClickedInFormCell:(id)cell;                                                              \
-{                                                                                                    \
-}                                                                                                    \
-- (void)doubleClickedTitleOfFormCell:(id)cell;                                                              \
+- (void)doubleClickedTitleOfFormCell:(id)cell;                                                       \
 {                                                                                                    \
 }                                                                                                    \
 - (BOOL)control:(NSControl *)control textShouldStartEditing:(NSText *)fieldEditor;                   \
 {                                                                                                    \
     return YES;                                                                                      \
 }                                                                                                    \
-- (BOOL)writeDataToPasteboard:(NSPasteboard *)pasteboard forFormCell:(id)cell;                       \
+- (NSDragOperation)dragOperation:(id <NSDraggingInfo>)sender forFormCell:(id)cell;                   \
 {                                                                                                    \
-    return NO;                                                                                       \
+    return NSDragOperationNone;                                                                      \
 }                                                                                                    \
-- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forFormCell:(id)cell; \
-{                                                                                                    \
-    return nil;                                                                                      \
-}                                                                                                    \
-- (void)cleanUpAfterDragOperation:(NSDragOperation)operation forFormCell:(id)cell;                   \
-{                                                                                                    \
-}                                                                                                    \
-- (BOOL)canReceiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)aCell;                            \
-{                                                                                                    \
-    return NO;                                                                                       \
-}                                                                                                    \
-- (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)aCell;                               \
-{                                                                                                    \
-    return NO;                                                                                       \
-}
+- (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)cell { return NO; }                  

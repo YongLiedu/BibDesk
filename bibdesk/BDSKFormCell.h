@@ -50,13 +50,6 @@
 - (BOOL)hasArrowButton;
 
 /*!
-    @method     hasFileIcon
-    @abstract   Boolean returns YES if the cell has a file icon associated with it.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (BOOL)hasFileIcon;
-/*!
     @method     buttonHighlighted
     @abstract   Boolean determines if the cell button is highlighted (pressed)
     @discussion (comprehensive description)

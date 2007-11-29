@@ -117,16 +117,16 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
         
         // arm: most of these probably don't have to be arrays, at least for ADS
         if (array = dcProperties(node, @"title"))
-            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKTitleString];
+        [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKTitleString];
         
         if (array = dcProperties(node, @"subject"))
-            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKKeywordsString];
+        [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKKeywordsString];
         
         if (array = dcProperties(node, @"publisher"))
-            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKPublisherString];
+        [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKPublisherString];
         
         if (array = dcProperties(node, @"location"))
-            [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:@"Location"];
+        [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:@"Location"];
         
         if (array = dcProperties(node, @"date"))
             [pubDict setObject:joinedArrayComponents(array, @"; ") forKey:BDSKDateString];

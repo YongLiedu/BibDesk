@@ -46,6 +46,7 @@
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAlert.h"
+#import "BDSKLinkedFile.h"
 
 static BDSKFiler *sharedFiler = nil;
 
@@ -85,23 +86,24 @@ static BDSKFiler *sharedFiler = nil;
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
 	BOOL isDir;
-	int rv;
 
 	if(![NSString isEmptyString:papersFolderPath] && !([fm fileExistsAtPath:[fm resolveAliasesInPath:papersFolderPath] isDirectory:&isDir] && isDir)){
 		// The directory isn't there or isn't a directory, so pop up an alert.
-		rv = NSRunAlertPanel(NSLocalizedString(@"Papers Folder doesn't exist", @"Message in alert dialog when unable to find Papers Folder"),
-							 NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog"),
-							 NSLocalizedString(@"OK", @"Button title"),NSLocalizedString(@"Go to Preferences", @"Button title"),nil);
-		if (rv == NSAlertAlternateReturn){
-				[[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-				[[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Papers Folder doesn't exist", @"Message in alert dialog when unable to find Papers Folder")
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Go to Preferences", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog")];
+		if ([alert runModal] == NSAlertAlternateReturn){
+            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
 		}
 		return;
 	}
 	
     int mask = BDSKInitialAutoFileOptionMask;
     if (check == YES) mask |= BDSKCheckCompleteAutoFileOptionMask;
-	[self movePapers:papers forField:BDSKLocalUrlString fromDocument:doc options:mask];
+	[self movePapers:papers forField:BDSKLocalFileString fromDocument:doc options:mask];
 }
 
 - (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(int)mask{
@@ -109,13 +111,12 @@ static BDSKFiler *sharedFiler = nil;
     int numberOfPapers = [paperInfos count];
 	NSEnumerator *paperEnum = [paperInfos objectEnumerator];
 	id paperInfo = nil;
-	BibItem *paper = nil;
+	BibItem *pub = nil;
+	BDSKLinkedFile *file = nil;
 	NSString *path = nil;
 	NSString *newPath = nil;
-	NSString *newRelativePath = nil;
 	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:numberOfPapers];
 	NSMutableDictionary *info = nil;
-	BOOL useRelativePath = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoFileUsesRelativePathKey];
     NSString *papersFolderPath = [[[NSApp delegate] folderPathForFilingPapersFromDocument:doc] stringByAppendingString:@"/"];
 	NSError *error = nil;
     
@@ -126,8 +127,8 @@ static BDSKFiler *sharedFiler = nil;
 	if (numberOfPapers == 0)
 		return;
 	
-	if (initial && [field isEqualToString:BDSKLocalUrlString] == NO)
-        [NSException raise:BDSKUnimplementedException format:@"%@ is only implemented for the Local-Url field for initial moves.",NSStringFromSelector(_cmd)];
+	if (initial && [field isEqualToString:BDSKLocalFileString] == NO)
+        [NSException raise:BDSKUnimplementedException format:@"%@ is only implemented for local files for initial moves.",NSStringFromSelector(_cmd)];
 	
 	if (numberOfPapers > 1) {
         if (progressSheet == nil)
@@ -142,128 +143,89 @@ static BDSKFiler *sharedFiler = nil;
 			  contextInfo:nil];
 	}
 	
-	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillAutoFileScriptHookName];
-	NSMutableArray *papers = nil;
-	NSMutableArray *oldValues = nil;
-	NSMutableArray *newValues = nil;
-	NSString *oldValue = nil;
-	NSString *newValue = nil;
-	
-	if(scriptHook){
-		papers = [NSMutableArray arrayWithCapacity:[paperInfos count]];
-		while (paperInfo = [paperEnum nextObject]) {
-			if(initial)
-				[papers addObject:paperInfo];
-			else
-				[papers addObject:[paperInfo objectForKey:@"paper"]];
-		}
-		// we don't set the old/new values as the newValues are not reliable
-		[scriptHook setField:field];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers document:doc];
-	}
-	
-	scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidAutoFileScriptHookName];
-	if(scriptHook){
-		papers = [NSMutableArray arrayWithCapacity:[paperInfos count]];
-		oldValues = [NSMutableArray arrayWithCapacity:[paperInfos count]];
-		newValues = [NSMutableArray arrayWithCapacity:[paperInfos count]];
-	}
-	
 	paperEnum = [paperInfos objectEnumerator];
 	while (paperInfo = [paperEnum nextObject]) {
 		
-		if(initial){
-			// autofile action: an array of BibItems
-			paper = (BibItem *)paperInfo;
-			path = [paper localUrlPathInheriting:NO];
-			newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
-            newRelativePath = newPath;
-            if ([newPath hasPrefix:papersFolderPath])
-                newRelativePath = [newPath substringFromIndex:[papersFolderPath length]];
-		}else{
+		if (initial) {
+			// autofile action: an array of BDSKLinkedFiles
+			file = (BDSKLinkedFile *)paperInfo;
+			pub = (BibItem *)[file delegate];
+			path = [[file URL] path];
+			newPath = [[pub suggestedURLForLinkedFile:file] path];
+		} else {
 			// an explicit move, possibly from undo: a list of info dictionaries
-			paper = [paperInfo objectForKey:@"paper"];
-			path = [paperInfo objectForKey:@"oldPath"];
-			newPath = [paperInfo objectForKey:@"newPath"];
+			file = [paperInfo valueForKey:@"file"];
+			pub = [paperInfo valueForKey:@"publication"];
+			path = [[file URL] path];
+			newPath = [paperInfo valueForKey:@"path"];
 		}
 		
-		if(numberOfPapers > 1){
+		if (numberOfPapers > 1) {
 			[progressIndicator incrementBy:1.0];
 			[progressIndicator displayIfNeeded];
 		}
 			
-		if([NSString isEmptyString:path] || [NSString isEmptyString:newPath]){
+		if ([NSString isEmptyString:path] || [NSString isEmptyString:newPath] || [path isEqualToString:newPath])
 			continue;
-		}else if([path isEqualToString:newPath]){
-            // we still want to change the field when we change from full URL to relative path or v.v.
-            oldValue = [paper valueOfField:field inherit:NO];
-            BOOL wasRelative = [oldValue hasPrefix:@"file://"] == NO && [oldValue isAbsolutePath] == NO;
-            if (initial == NO || useRelativePath != wasRelative || [newRelativePath isAbsolutePath] == NO)
-                continue;
-        }
         
 		info = [NSMutableDictionary dictionaryWithCapacity:6];
-		[info setObject:paper forKey:@"paper"];
+		[info setValue:file forKey:@"file"];
+		[info setValue:pub forKey:@"publication"];
         error = nil;
-        oldValue  = [[NSURL fileURLWithPath:path] absoluteString]; // we don't use the field value, as we might have already changed it in undo or find/replace
         
-        if(check && NO == [paper canSetLocalUrl]){
+        if (check && NO == [pub canSetURLForLinkedFile:file]) {
             
-            [info setObject:NSLocalizedString(@"Incomplete information to generate file name.",@"") forKey:@"status"];
-            [info setObject:[NSNumber numberWithInt:BDSKIncompleteFieldsErrorMask] forKey:@"flag"];
-            [info setObject:NSLocalizedString(@"Move anyway.",@"") forKey:@"fix"];
-            [info setObject:path forKey:@"oldPath"];
-            [info setObject:newPath forKey:@"newPath"];
+            [info setValue:NSLocalizedString(@"Incomplete information to generate file name.",@"") forKey:@"status"];
+            [info setValue:[NSNumber numberWithInt:BDSKIncompleteFieldsErrorMask] forKey:@"flag"];
+            [info setValue:NSLocalizedString(@"Move anyway.",@"") forKey:@"fix"];
+            [info setValue:newPath forKey:@"path"];
             [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
             
-        }else if(NO == [path isEqualToString:newPath] && NO == [fm movePath:path toPath:newPath force:force error:&error]){ 
+        } else {
             
-            NSDictionary *errorInfo = [error userInfo];
-            NSString *fix = [errorInfo objectForKey:NSLocalizedRecoverySuggestionErrorKey];
-            if (fix != nil)
-                [info setObject:fix forKey:@"fix"];
-            [info setObject:[errorInfo objectForKey:NSLocalizedDescriptionKey] forKey:@"status"];
-            [info setObject:[NSNumber numberWithInt:[error code]] forKey:@"flag"];
-            [info setObject:path forKey:@"oldPath"];
-            [info setObject:newPath forKey:@"newPath"];
-            [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
+            BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillAutoFileScriptHookName];
+            if (scriptHook) {
+                [scriptHook setField:field];
+                [scriptHook setOldValues:[NSArray arrayWithObject:path]];
+                [scriptHook setNewValues:[NSArray arrayWithObject:newPath]];
+                [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:doc];
+            }
             
-		}else{
-			
-			newValue  = [[NSURL fileURLWithPath:newPath] absoluteString];
-			if(initial) {// otherwise will be done by undo of setField:
-                [paper setField:field toValue:useRelativePath ? newRelativePath : newValue];
-			}else{
+            if (NO == [fm movePath:path toPath:newPath force:force error:&error]){ 
+                
+                NSDictionary *errorInfo = [error userInfo];
+                [info setValue:[errorInfo objectForKey:NSLocalizedRecoverySuggestionErrorKey] forKey:@"fix"];
+                [info setValue:[errorInfo objectForKey:NSLocalizedDescriptionKey] forKey:@"status"];
+                [info setValue:[NSNumber numberWithInt:[error code]] forKey:@"flag"];
+                [info setValue:newPath forKey:@"path"];
+                [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
+                
+            } else {
+                
+                [file update];
                 // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
-                NSString *value = [paper valueOfField:field];
-                NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", field, @"key", @"Change", @"type", doc, @"owner", value, @"oldValue", nil];
+                NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del File", @"type", [pub owner], @"owner", nil];
                 [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
-                                                                    object:paper
+                                                                    object:pub
                                                                   userInfo:notifInfo];
-            }
-            if(NO == [path isEqualToString:newPath]){
-                if(scriptHook){
-                    [papers addObject:paper];
-                    [oldValues addObject:oldValue];
-                    [newValues addObject:newValue];
-                }
-                // switch them as this is used in undo
-                [info setObject:path forKey:@"newPath"];
-                [info setObject:newPath forKey:@"oldPath"];
-                [fileInfoDicts addObject:info];
-            }
             
-		}
+                scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidAutoFileScriptHookName];
+                if (scriptHook) {
+                    [scriptHook setField:field];
+                    [scriptHook setOldValues:[NSArray arrayWithObject:path]];
+                    [scriptHook setNewValues:[NSArray arrayWithObject:newPath]];
+                    [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:doc];
+                }
+                
+                // switch them as this is used in undo
+                [info setValue:path forKey:@"path"];
+                [fileInfoDicts addObject:info];
+                
+            }
+        }
 	}
 	
-	if(scriptHook){
-		[scriptHook setField:field];
-		[scriptHook setOldValues:oldValues];
-		[scriptHook setNewValues:newValues];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers document:doc];
-	}
-	
-	if(numberOfPapers > 1){
+	if (numberOfPapers > 1) {
 		[progressSheet orderOut:nil];
 		[NSApp endSheet:progressSheet returnCode:0];
         // enable the close button in case the progress sheet was queued and is not attached at this point
@@ -274,7 +236,7 @@ static BDSKFiler *sharedFiler = nil;
 	[[undoManager prepareWithInvocationTarget:self] 
 		movePapers:fileInfoDicts forField:field fromDocument:doc options:0];
 	
-	if([self countOfErrorInfoDicts] > 0){
+	if ([self countOfErrorInfoDicts] > 0) {
         document = [doc retain];
         fieldName = [field retain];
         options = mask;
@@ -367,9 +329,9 @@ static BDSKFiler *sharedFiler = nil;
         [string appendStrings:NSLocalizedString(@"Publication key: ", @"Label for autofile dump"),
                               [[info objectForKey:@"paper"] citeKey], @"\n", 
                               NSLocalizedString(@"Original path: ", @"Label for autofile dump"),
-                              [info objectForKey:@"oldPath"], @"\n", 
+                              [[[info objectForKey:@"file"] URL] path], @"\n", 
                               NSLocalizedString(@"New path: ", @"Label for autofile dump"),
-                              [info objectForKey:@"newPath"], @"\n", 
+                              [info objectForKey:@"path"], @"\n", 
                               NSLocalizedString(@"Status: ",@"Label for autofile dump"),
                               [info objectForKey:@"status"], @"\n", 
                               NSLocalizedString(@"Fix: ", @"Label for autofile dump"),
@@ -464,13 +426,13 @@ static BDSKFiler *sharedFiler = nil;
         case 0:
             if(statusFlag & BDSKSourceFileDoesNotExistErrorMask)
                 return;
-            path = [[dict objectForKey:@"oldPath"] stringByExpandingTildeInPath];
+            path = [[[dict objectForKey:@"file"] URL] path];
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
             break;
         case 1:
             if(!(statusFlag & BDSKTargetFileExistsErrorMask))
                 return;
-            path = [[dict objectForKey:@"newPath"] stringByExpandingTildeInPath];
+            path = [dict objectForKey:@"path"];
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
             break;
         case 2:
@@ -502,23 +464,19 @@ static BDSKFiler *sharedFiler = nil;
     // filemanager needs aliases resolved for moving and existence checks
     // ...however we want to move aliases, not their targets
     // so we resolve aliases in the path to the containing folder
-    NS_DURING
-        resolvedNewPath = [[self resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
-                     stringByAppendingPathComponent:[newPath lastPathComponent]];
-    NS_HANDLER
-        NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], newPath);
+    resolvedNewPath = [[self resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
+                        stringByAppendingPathComponent:[newPath lastPathComponent]];
+    if (resolvedNewPath == nil) {
         status = NSLocalizedString(@"Unable to resolve aliases in path.", @"AutoFile error message");
         statusFlag =  BDSKCannotResolveAliasErrorMask;
-    NS_ENDHANDLER
+    }
     
-    NS_DURING
-        resolvedPath = [[self resolveAliasesInPath:[path stringByDeletingLastPathComponent]] 
-                  stringByAppendingPathComponent:[path lastPathComponent]];
-    NS_HANDLER
-        NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], path);
+    resolvedPath = [[self resolveAliasesInPath:[path stringByDeletingLastPathComponent]] 
+                    stringByAppendingPathComponent:[path lastPathComponent]];
+    if (resolvedPath == nil) {
         status = NSLocalizedString(@"Unable to resolve aliases in path.", @"AutoFile error message");
         statusFlag = BDSKCannotResolveAliasErrorMask;
-    NS_ENDHANDLER
+    }
     
     if(statusFlag == BDSKNoError){
         if([self fileExistsAtPath:resolvedNewPath]){

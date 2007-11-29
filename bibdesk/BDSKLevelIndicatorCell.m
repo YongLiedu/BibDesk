@@ -45,6 +45,21 @@
 - (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 @end
 
+#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
+enum {
+    NSBackgroundStyleLight = 0,	// The background is a light color. Dark content contrasts well with this background.
+    NSBackgroundStyleDark,	// The background is a dark color. Light content contrasts well with this background.
+    NSBackgroundStyleRaised,	// The background is intended to appear higher than the content drawn on it. Content might need to be inset.
+    NSBackgroundStyleLowered	// The background is intended to appear lower than the content drawn on it. Content might need to be embossed.
+};
+typedef NSInteger NSBackgroundStyle;
+@interface NSCell (LeopardOnly)
+- (NSBackgroundStyle)backgroundStyle;
+@end
+#else
+#warning remove this
+#endif
+
 @implementation BDSKLevelIndicatorCell
 
 - (id)initWithLevelIndicatorStyle:(NSLevelIndicatorStyle)levelIndicatorStyle;
@@ -68,21 +83,108 @@
 
 - (float)indicatorHeight { return maxHeight; }
 
-    /*
-     This method and -drawingRectForBounds: are never called as of 10.4.8 rdar://problem/4998206
-     
-     - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-     {
-         log_method();
-         NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
-         [super drawInteriorWithFrame:r inView:controlView];
-     }
-     */
+// DigitalColor Meter indicates 0.7 and 0.5 are the approximate values for a deselected level indicator cell (relevancy mode).  This looks really bad when selected in a gradient tableview, though, particularly when the table doesn't have focus.
+#define WIDTH 2
+#define HEIGHT 10
 
-- (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
+- (CGLayerRef)darkRelevancyLayer
+{
+    static CGLayerRef layer = NULL;
+    if (NULL == layer) {
+        // height is irrelevant; it will be scaled when drawn
+        NSRect r = NSMakeRect(0, 0, WIDTH, HEIGHT);
+        layer = CGLayerCreateWithContext([[NSGraphicsContext currentContext] graphicsPort], CGSizeMake(WIDTH, HEIGHT), NULL);
+        [NSGraphicsContext saveGraphicsState];
+        [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(layer) flipped:NO]];
+        [[NSColor clearColor] setFill];
+        NSRectFillUsingOperation(r, NSCompositeCopy);
+        [[NSColor colorWithCalibratedWhite:0.7 alpha:1.0] setFill];
+        NSRectFill(NSMakeRect(0, 0, WIDTH/2, HEIGHT));
+        [[NSColor colorWithCalibratedWhite:0.5 alpha:1.0] setFill];
+        NSRectFill(NSMakeRect(WIDTH/2, 0, WIDTH/2, HEIGHT));
+        [NSGraphicsContext restoreGraphicsState];
+    }
+    return layer;
+}
+
+- (CGLayerRef)lightRelevancyLayer
+{
+    static CGLayerRef layer = NULL;
+    if (NULL == layer) {
+        // height is irrelevant; it will be scaled when drawn
+        NSRect r = NSMakeRect(0, 0, WIDTH, HEIGHT);
+        layer = CGLayerCreateWithContext([[NSGraphicsContext currentContext] graphicsPort], CGSizeMake(WIDTH, HEIGHT), NULL);
+        [NSGraphicsContext saveGraphicsState];
+        [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(layer) flipped:NO]];
+        [[NSColor clearColor] setFill];
+        NSRectFillUsingOperation(r, NSCompositeCopy);
+        [[NSColor colorWithCalibratedWhite:0.7 alpha:1.0] setFill];
+        NSRectFill(NSMakeRect(0, 0, WIDTH/2, HEIGHT));
+        [[NSColor colorWithCalibratedWhite:0.9 alpha:1.0] setFill];
+        NSRectFill(NSMakeRect(WIDTH/2, 0, WIDTH/2, HEIGHT));
+        [NSGraphicsContext restoreGraphicsState];
+    }
+    return layer;    
+}
+
+/*
+ This method and -drawingRectForBounds: are never called as of 10.4.8 rdar://problem/4998206
+ 
+ - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
+ {
+     log_method();
+     NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
+     [super drawInteriorWithFrame:r inView:controlView];
+ }
+ 
+ The necessary override point is this method, with variants for other styles.
+ Since we now do all drawing manually, this is no longer necessary unless we
+ want to use other indicator styles.
+ - (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView 
+ */
+
+- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
     NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
-    [super _drawRelevancyWithFrame:r inView:controlView];
+    r = [controlView centerScanRect:r];
+    
+    unsigned i, iMax = floor([self doubleValue] / [self maxValue] * (NSWidth(r) / 2));
+    CGLayerRef toDraw;
+    
+    if ([self respondsToSelector:@selector(backgroundStyle)]) {
+        NSBackgroundStyle style = [self backgroundStyle];
+        if (NSBackgroundStyleLight == style)
+            toDraw = [self darkRelevancyLayer];
+        else
+            toDraw = [self lightRelevancyLayer];
+    } else {            
+        if ([self isHighlighted]) {
+            // this is what NSCell does prior to 10.5, but it doesn't work with gradient tableviews
+            if ([[self highlightColorWithFrame:cellFrame inView:controlView] isEqual:[NSColor alternateSelectedControlColor]])
+                toDraw = [self lightRelevancyLayer];
+            else
+                toDraw = [self darkRelevancyLayer];
+        } else {
+            toDraw = [self darkRelevancyLayer];
+        }
+    }
+    
+    CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
+    CGContextSaveGState(ctxt);
+    if ([controlView isFlipped]) {
+        CGContextTranslateCTM(ctxt, 0, NSMaxY(r));
+        CGContextScaleCTM(ctxt, 1, -1);
+        r.origin.y = 0;
+    }
+    
+    NSRect drawRect = r;
+    drawRect.size.width = 2;
+    CGContextSetBlendMode(ctxt, kCGBlendModeNormal);
+    for (i = 0; i < iMax; i++) {
+        drawRect.origin.x += 2;
+        CGContextDrawLayerInRect(ctxt, *(CGRect *)&drawRect, toDraw);
+    }
+    CGContextRestoreGState(ctxt);
 }
 
 @end

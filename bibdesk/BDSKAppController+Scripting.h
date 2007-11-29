@@ -46,7 +46,7 @@
 - (NSString *)papersFolder;
 
 - (NSString *)citeKeyFormat;
-- (NSString *)localUrlFormat;
+- (NSString *)localFileFormat;
 
 - (NSArray *)allTypes;
 

@@ -1446,7 +1446,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     unsigned int start = range.location;
     if (firstCharRange.location == NSNotFound) {
         if (requireNL == NO)
-            wsRange = range;
+        wsRange = range;
     } else {
         unichar firstChar = [self characterAtIndex:firstCharRange.location];
         unsigned int rangeEnd = NSMaxRange(firstCharRange);
@@ -1479,7 +1479,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     unsigned int end = NSMaxRange(range);
     if (lastCharRange.location == NSNotFound) {
         if (requireNL == NO)
-            wsRange = range;
+        wsRange = range;
     } else {
         unichar lastChar = [self characterAtIndex:lastCharRange.location];
         unsigned int rangeEnd = NSMaxRange(lastCharRange);

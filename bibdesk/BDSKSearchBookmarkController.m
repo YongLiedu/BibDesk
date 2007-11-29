@@ -178,7 +178,7 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
     BDSKSearchBookmark *bookmark = [[BDSKSearchBookmark alloc] initWithInfo:info label:label];
     if (bookmark) {
         [self bookmark:folder insertChildBookmark:bookmark atIndex:[[self childrenOfBookmark:folder] count]];
-        [bookmark release];
+    [bookmark release];
     }
 }
 
@@ -560,7 +560,7 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
     } else if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeSeparatorString]) {
         return [self initSeparator];
     } else {
-        NSMutableDictionary *dict = [[dictionary mutableCopy] autorelease];
+    NSMutableDictionary *dict = [[dictionary mutableCopy] autorelease];
         [dict removeObjectForKey:BOOKMARK_TYPE_KEY];
         [dict removeObjectForKey:LABEL_KEY];
         return [self initWithInfo:dict label:[dictionary objectForKey:LABEL_KEY]];
@@ -573,7 +573,7 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
     else if (bookmarkType == BDSKSearchBookmarkTypeSeparator)
         return [[[self class] allocWithZone:aZone] initSeparator];
     else
-        return [[[self class] allocWithZone:aZone] initWithInfo:info label:label];
+    return [[[self class] allocWithZone:aZone] initWithInfo:info label:label];
 }
 
 - (void)dealloc {

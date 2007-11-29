@@ -51,7 +51,7 @@
 - (id)initWithFrame:(NSRect)frame
 {
     self = [super initWithFrame:frame];
-    [self setDefaultColors];
+        [self setDefaultColors];
     layer = NULL;
     return self;
 }
@@ -92,8 +92,8 @@
         [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:layerContext flipped:NO]];
         NSRect layerRect = NSZeroRect;
         layerRect.size = layerSize;
-        
-        [[NSBezierPath bezierPathWithRect:bounds] fillPathVerticallyWithStartColor:[self lowerColor] endColor:[self upperColor]];
+                
+                [[NSBezierPath bezierPathWithRect:bounds] fillPathVerticallyWithStartColor:[self lowerColor] endColor:[self upperColor]];
         [NSGraphicsContext restoreGraphicsState];
     }
     

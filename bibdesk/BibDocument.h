@@ -47,7 +47,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BibEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
-@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
 @class BDSKItemSearchIndexes;
 
@@ -131,6 +131,13 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet BDSKGradientView *groupGradientView;
 	NSString *currentGroupField;
     
+#pragma mark File pane variables
+
+    IBOutlet FileView *fileView;
+    IBOutlet NSSlider *fileViewSlider;
+    IBOutlet BDSKCollapsibleView *fileCollapsibleView;
+    IBOutlet BDSKGradientView *fileGradientView;
+    
 #pragma mark Preview variables
 
     IBOutlet NSTextView *previewTextView;
@@ -184,7 +191,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
     IBOutlet NSWindow *searchBookmarkSheet;
     IBOutlet NSTextField *searchBookmarkField;
-    IBOutlet NSPopUpButton *searchBookmarkPopUp;
 
 #pragma mark Macros, Document Info and Front Matter variables
 
@@ -197,7 +203,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	NSMutableString *frontMatter;    // for preambles, and stuff
 	
 #pragma mark Copy & Drag related variables
-    
+
     NSString *promiseDragColumnIdentifier;
     BDSKItemPasteboardHelper *pboardHelper;
 	
@@ -210,6 +216,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     struct _docState {
         float               lastPreviewHeight;  // for the splitview double-click handling
         float               lastGroupViewWidth;
+        float               lastFileViewWidth;
         NSStringEncoding    documentStringEncoding;
         NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
         BOOL                sortDescending;
@@ -218,6 +225,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         BOOL                isDocumentClosed;
         BOOL                didImport;
     } docState;
+    
+    NSURL *saveTargetURL;
     
     BDSKItemSearchIndexes *searchIndexes;
     BDSKSearchButtonController *searchButtonController;
@@ -258,7 +267,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSData *)atomDataForPublications:(NSArray *)items;
 - (NSData *)MODSDataForPublications:(NSArray *)items;
 - (NSData *)endNoteDataForPublications:(NSArray *)items;
-- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeTo:(NSString *)basePath error:(NSError **)outError;
+- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError;
 - (NSData *)RISDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error;
 - (NSData *)LTBDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error;
 

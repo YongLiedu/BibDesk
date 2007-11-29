@@ -150,10 +150,10 @@ extern NSString *BDSKWarnOnRemovalFromGroupKey;
 extern NSString *BDSKPapersFolderPathKey;
 extern NSString *BDSKFilePapersAutomaticallyKey;
 extern NSString *BDSKAutoFileUsesRelativePathKey;
-extern NSString *BDSKLocalUrlFormatKey;
-extern NSString *BDSKLocalUrlFormatPresetKey;
-extern NSString *BDSKLocalUrlLowercaseKey;
-extern NSString *BDSKLocalUrlCleanOptionKey;
+extern NSString *BDSKLocalFileFormatKey;
+extern NSString *BDSKLocalFileFormatPresetKey;
+extern NSString *BDSKLocalFileLowercaseKey;
+extern NSString *BDSKLocalFileCleanOptionKey;
 extern NSString *BDSKWarnOnMoveFolderKey;
 
 extern NSString *BDSKLastVersionLaunchedKey;
@@ -193,9 +193,13 @@ extern NSString *BDSKSpotlightVersionInfo;
 extern NSString *BDSKShouldShowWebGroupPrefKey;
 extern NSString *BDSKDefaultArrayJoinStringKey;
 
+extern NSString *BDSKMainFileViewIconScaleKey;
+extern NSString *BDSKEditorFileViewIconScaleKey;
+
 #pragma mark Field name strings
 
 extern NSString *BDSKCiteKeyString;
+extern NSString *BDSKLocalFileString;
 extern NSString *BDSKAnnoteString;
 extern NSString *BDSKAbstractString;
 extern NSString *BDSKRssDescriptionString;
@@ -261,6 +265,7 @@ extern NSString *BDSKPhDThesisString;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKFinalizeChangesNotification;
+extern NSString *BDSKDocumentFileURLDidChangeNotification;
 extern NSString *BDSKPreviewDisplayChangedNotification;
 extern NSString *BDSKTableSelectionChangedNotification;
 extern NSString *BDSKGroupTableSelectionChangedNotification;

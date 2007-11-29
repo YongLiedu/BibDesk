@@ -39,13 +39,23 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniAppKit/OASplitView.h>
 
+enum {
+    BDSKMinBlendStyleMask = 1,
+    BDSKMaxBlendStyleMask = 2,
+    BDSKStatusBarBlendStyleMask = 4
+};
 
 @interface BDSKSplitView : OASplitView {
-    BOOL drawEnd;
+    int blendStyle;
     CGLayerRef dividerLayer;
 }
 
-- (BOOL)drawEnd;
-- (void)setDrawEnd:(BOOL)flag;
+- (int)blendStyle;
+- (void)setBlendStyle:(int)mask;
 
+@end
+
+
+@interface NSObject (BDSKSplitViewExtendedDelegate)
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset;
 @end

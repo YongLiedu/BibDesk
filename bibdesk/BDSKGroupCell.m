@@ -319,9 +319,9 @@ textRect.origin.y += floorf(vOffset); \
 	[countAttributes removeAllObjects];
     [countAttributes setObject:[NSColor alternateSelectedControlTextColor] forKey:NSForegroundColorAttributeName];
     if (countFont)
-        [countAttributes setObject:countFont forKey:NSFontAttributeName];
+    [countAttributes setObject:countFont forKey:NSFontAttributeName];
     if (font)
-        [countAttributes setObject:font forKey:@"NSOriginalFont"];
+    [countAttributes setObject:font forKey:@"NSOriginalFont"];
     [countAttributes setObject:[NSNumber numberWithFloat:-1.0] forKey:NSKernAttributeName];
     [countAttributes setObject:[NSParagraphStyle defaultClippingParagraphStyle] forKey:NSParagraphStyleAttributeName];
 

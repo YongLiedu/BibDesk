@@ -149,38 +149,13 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     if(self = [super init]){
         autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
         requiredFieldsForCiteKey = nil;
-        requiredFieldsForLocalUrl = nil;
+        requiredFieldsForLocalFile = nil;
         
         metadataCacheLock = [[NSLock alloc] init];
         metadataMessageQueue = [[OFMessageQueue alloc] init];
         [metadataMessageQueue startBackgroundProcessors:1];
         canWriteMetadata = 1;
 				
-		NSMutableArray *defaultFields = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey] mutableCopy];
-		if(![defaultFields containsObject:BDSKUrlString]){
-			[defaultFields insertObject:BDSKUrlString atIndex:0];
-			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:defaultFields forKey:BDSKDefaultFieldsKey];
-		}
-		if(![defaultFields containsObject:BDSKLocalUrlString]){
-			[defaultFields insertObject:BDSKLocalUrlString atIndex:0];
-			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:defaultFields forKey:BDSKDefaultFieldsKey];
-		}
-        [defaultFields release];
-		
-		NSMutableArray *localFileFields = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] mutableCopy];
-		if(![localFileFields containsObject:BDSKLocalUrlString]){
-			[localFileFields insertObject:BDSKLocalUrlString atIndex:0];
-			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:localFileFields forKey:BDSKLocalFileFieldsKey];
-		}
-        [localFileFields release];
-
-        NSMutableArray *remoteURLFields = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] mutableCopy];
-		if(![remoteURLFields containsObject:BDSKUrlString]){
-			[remoteURLFields insertObject:BDSKUrlString atIndex:0];
-			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:remoteURLFields forKey:BDSKRemoteURLFieldsKey];
-		}
-		[remoteURLFields release];
-        
         NSMutableArray *ratingFields = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey] mutableCopy];
 		if(![ratingFields containsObject:BDSKRatingString]){
 			[ratingFields insertObject:BDSKRatingString atIndex:0];
@@ -237,12 +212,13 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 }
 
 - (void)checkFormatStrings {
-    NSString *formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSString *formatString = [pw objectForKey:BDSKCiteKeyFormatKey];
     NSString *error = nil;
     int button = 0;
     
     if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
+        [pw setObject:formatString forKey:BDSKCiteKeyFormatKey];
         [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     }else{
         button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format"), 
@@ -251,8 +227,8 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
                                          NSLocalizedString(@"Revert to Default", @"Button title"), 
                                          nil, [error safeFormatString], nil);
         if (button == NSAlertAlternateReturn){
-            formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
-            [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
+            formatString = [[pw preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
+            [pw setObject:formatString forKey:BDSKCiteKeyFormatKey];
             [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }else{
             [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
@@ -260,22 +236,48 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         }
     }
     
-    formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    formatString = [pw objectForKey:BDSKLocalFileFormatKey];
     error = nil;
     
-    if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
-        [self setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+    if ([sud boolForKey:@"BDSKDidMigrateLocalUrlFormatDefaultsKey"] == NO) {
+        id oldFormatString = [sud objectForKey:@"Local-Url Format"];
+        if (oldFormatString) {
+            int formatPresetChoice = [sud objectForKey:@"Local-Url Format Preset"] ? [sud integerForKey:@"Local-Url Format Preset"] : 2;
+            id formatLowercase = [sud objectForKey:@"Local-Url Generate Lowercase"];
+            id formatCleanOption = [sud objectForKey:@"Local-Url Clean Braces or TeX"];
+            formatString = oldFormatString;
+            if (formatPresetChoice != 0) {
+                formatPresetChoice = MAX(1, formatPresetChoice - 1);
+                switch (formatPresetChoice) {
+                    case 1: formatString = @"%l%n0%e"; break;
+                    case 2: formatString = @"%a1/%Y%u0%e"; break;
+                    case 3: formatString = @"%a1/%T5%n0%e"; break;
+                }
+            }
+            [pw setObject:formatString forKey:BDSKLocalFileFormatKey];
+            [pw setInteger:0 forKey:BDSKLocalFileFormatPresetKey];
+            if (formatLowercase)
+                [pw setObject:formatLowercase forKey:BDSKLocalFileLowercaseKey];
+            if (formatCleanOption)
+                [pw setObject:formatCleanOption forKey:BDSKLocalFileCleanOptionKey];
+        }
+        [sud setBool:YES forKey:@"BDSKDidMigrateLocalUrlFormatDefaultsKey"];
+    }
+    
+    if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
+        [pw setObject:formatString forKey:BDSKLocalFileFormatKey];
+        [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     }else{
-        button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Local-Url is invalid.", @"Message in alert dialog when detecting invalid Local-Url format"), 
+        button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format"), 
                                          @"%@",
                                          NSLocalizedString(@"Go to Preferences", @"Button title"), 
                                          NSLocalizedString(@"Revert to Default", @"Button title"), 
                                          nil, [error safeFormatString], nil);
         if (button == NSAlertAlternateReturn){
-            formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];			
-            [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
-            [self setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+            formatString = [[pw preferenceForKey:BDSKLocalFileFormatKey] defaultObjectValue];			
+            [pw setObject:formatString forKey:BDSKLocalFileFormatKey];
+            [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }else{
             [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
             [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
@@ -642,13 +644,13 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 	requiredFieldsForCiteKey = [newFields retain];
 }
 
-- (NSArray *)requiredFieldsForLocalUrl{
-	return requiredFieldsForLocalUrl;
+- (NSArray *)requiredFieldsForLocalFile{
+	return requiredFieldsForLocalFile;
 }
 
-- (void)setRequiredFieldsForLocalUrl:(NSArray *)newFields{
-	[requiredFieldsForLocalUrl autorelease];
-	requiredFieldsForLocalUrl = [newFields retain];
+- (void)setRequiredFieldsForLocalFile:(NSArray *)newFields{
+	[requiredFieldsForLocalFile autorelease];
+	requiredFieldsForLocalFile = [newFields retain];
 }
 
 - (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner {
@@ -874,92 +876,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [theURLs addObject:[aDoc fileURL]];
     }
     return theURLs;
-}
-
-- (NSArray *)publicationsForCiteKeys:(NSArray *)citeKeys {
-    NSMutableArray *pubs = [NSMutableArray array];
-    NSArray *docs = [NSApp orderedDocuments];
-    NSEnumerator *keyEnum = [citeKeys objectEnumerator];
-    NSString *key;
-    
-    while (key = [keyEnum nextObject]) {
-        NSEnumerator *docEnum = [docs objectEnumerator];
-        BibDocument *doc;
-        BibItem *pub;
-        
-        while (doc = [docEnum nextObject]) {
-            if (pub = [[doc publications] itemForCiteKey:key]) {
-                [pubs addObject:pub];
-                break;
-            }
-        }
-    }
-    
-    return pubs;
-}
- 
-- (NSString *)citationForItems:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
-    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateName];
-    if (template) {
-        NSArray *pubs = [self publicationsForCiteKeys:citeKeys];
-        id object = [[NSApp orderedDocuments] count] == 1 ? [[NSApp orderedDocuments] lastObject] : self;
-        
-        if ([template templateFormat] & BDSKRichTextTemplateFormat) {
-            return [[BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:object publications:pubs documentAttributes:NULL] string];
-        } else {
-            return [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:object publications:pubs];
-        }
-    } else {
-        NSBeep();
-        return nil;
-    }
-}
-
-- (NSAttributedString *)attributedCitationForItems:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
-    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateName];
-    if (template) {
-        NSArray *pubs = [self publicationsForCiteKeys:citeKeys];
-        id object = [[NSApp orderedDocuments] count] == 1 ? [[NSApp orderedDocuments] lastObject] : self;
-        
-        if ([template templateFormat] & BDSKRichTextTemplateFormat) {
-            return [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:NULL];
-        } else {
-            NSString *string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:object publications:pubs];
-            return [[[NSAttributedString alloc] initWithString:string attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:0.0]] autorelease];
-        }
-    } else {
-        NSBeep();
-        return nil;
-    }
-}
-
-- (NSData *)RTFCitationForItems:(NSArray *)citeKeys usingTemplate:(NSString *)templateName {
-    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateName];
-    if (template) {
-        NSArray *pubs = [self publicationsForCiteKeys:citeKeys];
-        NSDictionary *documentAttributes = nil;
-        NSAttributedString *attrString = nil;
-        id object = [[NSApp orderedDocuments] count] == 1 ? [[NSApp orderedDocuments] lastObject] : self;
-        
-        if ([template templateFormat] & BDSKRichTextTemplateFormat) {
-            attrString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:object publications:pubs documentAttributes:&documentAttributes];
-        } else {
-            NSString *string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:object publications:pubs];
-            attrString = [[[NSAttributedString alloc] initWithString:string attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:0.0]] autorelease];
-        }
-        return [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:documentAttributes];
-    } else {
-        NSBeep();
-        return nil;
-    }
-}
-
-- (NSArray *)textTemplateNames {
-    return [BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat];
-}
-
-- (NSArray *)richTextTemplateNames {
-    return [BDSKTemplate allStyleNamesForFormat:BDSKRichTextTemplateFormat];
 }
 
 #pragma mark Version checking
@@ -1345,7 +1261,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     id doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:NULL];
     NSError *nsError = nil;
     
-    if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&nsError] == NO){
+    if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES error:&nsError] == NO){
         if(error)
             *error = [nsError localizedDescription];
         [doc presentError:nsError];
@@ -1363,7 +1279,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [self newDocumentFromSelection:pboard userData:userData error:error];
 	} else {
         NSError *addError = nil;
-        if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&addError] == NO || addError != nil)
+        if([doc addPublicationsFromPasteboard:pboard selectLibrary:YES error:&addError] == NO || addError != nil)
         if(error) *error = [addError localizedDescription];
     }
 }

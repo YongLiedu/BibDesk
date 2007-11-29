@@ -71,6 +71,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKSearchGroup.h"
+#import "BDSKLinkedFile.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -203,10 +204,21 @@
     if (row == -1) return;
     if (tv == tableView) {
         if([aCell isKindOfClass:[NSButtonCell class]]){
-            if ([[aTableColumn identifier] isEqualToString:BDSKImportOrderString])
+            if ([[aTableColumn identifier] isEqualToString:BDSKImportOrderString]) {
                 [aCell setEnabled:[[shownPublications objectAtIndex:row] isImported] == NO];
-            else
+            } else if ([[aTableColumn identifier] isEqualToString:BDSKCrossrefString]) {
+                if ([[shownPublications objectAtIndex:row] crossrefParent]) {
+                    [aCell setEnabled:YES];
+                    [aCell setImage:[NSImage imageNamed:@"ArrowImage"]];
+                    [aCell setAlternateImage:[NSImage imageNamed:@"ArrowImage_Pressed"]];
+                } else {
+                    [aCell setEnabled:YES];
+                    [aCell setImage:nil];
+                    [aCell setAlternateImage:nil];
+                }
+            } else {
                 [aCell setEnabled:[self hasExternalGroupsSelected] == NO];
+            }
         }
     } else if (tv == groupTableView) {
         BDSKGroup *group = [groups objectAtIndex:row];
@@ -304,16 +316,16 @@
 		if([tcId isURLField]){
             menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
             if([tcId isLocalFileField]){
-                item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"Menu item title") action:@selector(openLocalURL:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title") action:@selector(revealLinkedFile:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title") action:@selector(revealLocalURL:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title") action:@selector(showNotesForLinkedFile:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title") action:@selector(showNotesForLocalURL:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title") action:@selector(copyNotesForLinkedFile:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title") action:@selector(copyNotesForLocalURL:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
             }else{
@@ -489,7 +501,7 @@
 
                     while(row != NSNotFound){
                         pub = [shownPublications objectAtIndex:row];
-                        path = [pub localFilePathForField:dragColumnId];
+                        path = [[pub localFileURLForField:dragColumnId] path];
                         if(path != nil){
                             [filePaths addObject:path];
                             NSError *xerror = nil;
@@ -847,15 +859,10 @@
                 theURL = [NSURL URLFromPasteboard:pboard];
             }else return NO;
             
-            NSString *field = ([theURL isFileURL]) ? BDSKLocalUrlString : BDSKUrlString;
-            
-            if(theURL == nil || [theURL isEqual:[pub URLForField:field]])
+            if(theURL == nil)
                 return NO;
             
-            [pub setField:field toValue:[theURL absoluteString]];
-            
-            if([field isEqualToString:BDSKLocalUrlString])
-                [pub autoFilePaper];
+            [pub addFileForURL:theURL autoFile:YES];
             
             [self selectPublication:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
@@ -1004,7 +1011,7 @@
         while(rowIdx != NSNotFound){
             theBib = [shownPublications objectAtIndex:rowIdx];
             if(isLocalFile){
-                originalPath = [theBib localFilePathForField:fieldName];
+                originalPath = [[theBib localFileURLForField:fieldName] path];
                 fileName = [originalPath lastPathComponent];
                 NSParameterAssert(fileName);
                 fullPath = [basePath stringByAppendingPathComponent:fileName];
@@ -1123,6 +1130,12 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
     } else if([documentWindow firstResponder] == tableView)
         [self editPubCmd:nil];
+}
+
+- (void)tableView:(NSTableView *)tv openParentForItemAtRow:(int)row{
+    BibItem *parent = [[shownPublications objectAtIndex:row] crossrefParent];
+    if (parent)
+        [self editPub:parent];
 }
 
 #pragma mark -

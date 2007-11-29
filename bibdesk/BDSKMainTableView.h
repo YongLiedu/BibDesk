@@ -70,6 +70,7 @@
 - (void)tableView:(NSTableView *)aTableView mouseExitedTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView;
 - (void)tableView:(NSTableView *)aTableView importItemAtRow:(int)rowIndex;
+- (void)tableView:(NSTableView *)aTableView openParentForItemAtRow:(int)rowIndex;
 @end
 
 

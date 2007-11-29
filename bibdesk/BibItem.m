@@ -70,7 +70,7 @@
 #import "NSData_BDSKExtensions.h"
 #import "BDSKSkimReader.h"
 #import "BDSKCitationFormatter.h"
-
+#import "BDSKLinkedFile.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -120,6 +120,8 @@ enum {
 
 // rearranges the field dictionary, keeping old keys if they have a value
 - (void)makeType;
+
+- (void)createFilesArray;
 
 @end
 
@@ -282,8 +284,6 @@ static CFDictionaryRef selectorTable = NULL;
         [self setDate: nil];
         [self setDateAdded: nil];
         [self setDateModified: nil];
-        
-		[self setNeedsToBeFiled:NO];
 		
 		groups = [[NSMutableDictionary alloc] initWithCapacity:5];
         cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
@@ -328,6 +328,8 @@ static CFDictionaryRef selectorTable = NULL;
             [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
+            files = [[coder decodeObjectForKey:@"files"] mutableCopy];
+            [files makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
             // set by the document, which we don't archive
             owner = nil;
             fileOrder = nil;
@@ -353,6 +355,7 @@ static CFDictionaryRef selectorTable = NULL;
         [coder encodeObject:pubType forKey:@"pubType"];
         [coder encodeObject:pubFields forKey:@"pubFields"];
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
+        [coder encodeObject:files forKey:@"files"];
     } else {
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
     }        
@@ -378,6 +381,9 @@ static CFDictionaryRef selectorTable = NULL;
     [dateModified release];
     [fileOrder release];
     [identifierURL release];
+    [sortedURLs release];
+    [files release];
+    [filesToBeFiled release];
     [super dealloc];
 }
 
@@ -525,6 +531,8 @@ static CFDictionaryRef selectorTable = NULL;
 - (void)setOwner:(id<BDSKOwner>)newOwner {
     if (owner != newOwner) {
 		owner = newOwner;
+        // !!! TODO: check this
+        [self createFilesArray];
 	}
 }
 
@@ -1429,8 +1437,19 @@ static CFDictionaryRef selectorTable = NULL;
 - (float)searchScore { return searchScore; }
 
 - (NSString *)skimNotesForLocalURL{
-    NSURL *theURL = [self URLForField:BDSKLocalUrlString];
-    return theURL ? [[BDSKSkimReader sharedReader] textNotesAtURL:theURL] : nil;
+    NSMutableString *string = [NSMutableString string];
+    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    
+    while (file = [fileEnum nextObject]) {
+        NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:[file URL]];
+        if ([notes length] == 0)
+            continue;
+        if ([string length])
+            [string appendString:@"\n\n"];
+        [string appendString:notes];
+    }
+    return [string length] ? string : nil;
 }
 
 static inline 
@@ -1473,15 +1492,15 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSDictionary *)searchIndexInfo{
-    NSSet *urlFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
-    NSEnumerator *fieldEnumerator = [urlFields objectEnumerator];
-    NSString *urlFieldName = nil;
+    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    NSURL *aURL;
     
     // create an array of all local-URLs this object could have
     NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:5];
-    while(urlFieldName = [fieldEnumerator nextObject]){
-        NSURL *aURL = [self URLForField:urlFieldName];
-        if(aURL) [urls addObject:aURL];
+    while(file = [fileEnum nextObject]){
+        if (aURL = [file URL])
+            [urls addObject:aURL];
     }
     
     NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self citeKey], @"citeKey", [self displayTitle], @"title", urls, @"urls", nil];
@@ -1551,11 +1570,21 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
     // kMDItemWhereFroms is the closest we get to a URL field, so add our standard fields if available
     NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity:2];
-
-    if(value = [[self URLForField:BDSKUrlString] absoluteString]) 
-        [mutableArray addObject:value];
-    if(value = [[self localFileURLForField:BDSKLocalUrlString] absoluteString])
-        [mutableArray addObject:value];
+    NSEnumerator *fileEnum;
+    BDSKLinkedFile *file;
+    NSURL *url;
+    
+    fileEnum = [[self localFiles] objectEnumerator];
+    while (file = [fileEnum nextObject]) {
+        if (url = [file URL])
+            [mutableArray addObject:[url absoluteString]];
+    }
+    
+    fileEnum = [[self remoteURLs] objectEnumerator];
+    while (file = [fileEnum nextObject]) {
+        if (url = [file URL])
+            [mutableArray addObject:[url absoluteString]];
+    }
 
     [info setObject:mutableArray forKey:(NSString *)kMDItemWhereFroms];
     [mutableArray release];
@@ -1594,6 +1623,39 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 #pragma mark -
 #pragma mark BibTeX strings
+
+- (NSString *)filesAsBibTeXFragmentRelativeToPath:(NSString *)basePath
+{
+    // !!! inherit
+    NSUInteger i, fileIndex = 0, urlIndex = 0, iMax = [files count];
+    NSString *key = @"Bdsk-File-0";
+    
+    while ([pubFields objectForKey:key])
+        key = [NSString stringWithFormat:@"Bdsk-File-%d", ++fileIndex];
+    
+    key = @"Bdsk-Url-0";
+    
+    while ([pubFields objectForKey:key])
+        key = [NSString stringWithFormat:@"Bdsk-Url-%d", ++urlIndex];
+    
+    NSMutableString *string = nil;
+    NSString *value;
+    BDSKLinkedFile *file;
+    if (iMax > 0) {
+        string = [NSMutableString string];
+        for (i = 0; i < iMax; i++) {
+            file = [files objectAtIndex:i];
+            if ([file isFile])
+                key = [NSString stringWithFormat:@"Bdsk-File-%d", fileIndex++];
+            else
+                key = [NSString stringWithFormat:@"Bdsk-Url-%d", urlIndex++];
+            value = [file stringRelativeToPath:basePath];
+            OBPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
+            [string appendFormat:@",\n\t%@ = {%@}", key, value];
+        }
+    }
+    return string;
+}
 
 - (NSString *)bibTeXStringDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
@@ -1658,18 +1720,23 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             [s appendString:[value stringAsBibTeXString]];
         }
     }
+    
+    // make sure to add these at the end to avoid problems with BibTeX's buffers
+    if (!drop) {
+        value = [self filesAsBibTeXFragmentRelativeToPath:[self basePath]];
+        if (value) [s appendString:value];
+    }
     [knownKeys release];
     [s appendString:@"}"];
     
     return s;
 }
 
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeTo:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
+- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     BOOL shouldTeXify = [pw boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 	NSMutableSet *knownKeys = nil;
 	NSSet *urlKeys = nil;
-	NSSet *localFileKeys = nil;
 	NSString *field;
     NSString *value;
     NSMutableData *data = [NSMutableData dataWithCapacity:200];
@@ -1698,8 +1765,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	}
 	if(shouldTeXify)
         urlKeys = [[BDSKTypeManager sharedManager] allURLFieldsSet];
-	if(basePath)
-        localFileKeys = [[BDSKTypeManager sharedManager] localFileFieldsSet];
 	
 	e = [keys objectEnumerator];
 	[keys release];
@@ -1723,13 +1788,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         if (drop && ![knownKeys containsObject:field])
             continue;
         
-        if(basePath && [localFileKeys containsObject:field]){
-            value = [basePath relativePathToFilename:[self localFilePathForField:field]];
-            if (value == nil)
-                value = [pubFields objectForKey:field];
-        }else{
-            value = [pubFields objectForKey:field];
-        }
+        value = [pubFields objectForKey:field];
         
         if([personFields containsObject:field] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
             value = [self bibTeXNameStringForField:field normalized:YES inherit:NO];
@@ -1738,7 +1797,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         if(shouldTeXify && ![urlKeys containsObject:field]){
             value = [value stringByTeXifyingString];
         }                
-        
+                
         if(NO == [value isEqualToString:@""] || [fieldsToWriteIfEmpty containsObject:field]){
             
             [data appendData:lineSeparator];
@@ -1755,6 +1814,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
     }
     [knownKeys release];
+    
+    // make sure to add these at the end to avoid problems with BibTeX's buffers
+    if(isOK && !drop) {
+        value = [self filesAsBibTeXFragmentRelativeToPath:basePath];
+        // assumes encoding is ascii-compatible, but btparse does as well
+        if (value) [data appendDataFromString:value encoding:encoding error:&error];
+    }
     if(isOK)
         isOK = [data appendDataFromString:@"}" encoding:encoding error:&error];
     
@@ -1911,15 +1977,55 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
     }
     
-    NSURL *aURL = [self URLForField:BDSKLocalUrlString];
-    NSData *RTFData = nil;
-    if (aURL && (RTFData = [[BDSKSkimReader sharedReader] RTFNotesAtURL:aURL])) {
-        valueStr = [[NSAttributedString alloc] initWithRTF:RTFData documentAttributes:NULL];
+    NSArray *theFiles = [self localFiles];
+    NSEnumerator *fileEnum;
+    BDSKLinkedFile *file;
+    NSURL *aURL;
+    NSData *RTFData;
+    if ([theFiles count]) {
+        [nonReqStr appendString:NSLocalizedString(@"Local files", @"heading in preview for local files") attributes:keyAttributes];
+        [nonReqStr appendString:@"\n"];
+        fileEnum = [theFiles objectEnumerator];
+        while (file = [fileEnum nextObject]) {
+            if (aURL = [file URL]) {
+                valueStr = [[NSMutableAttributedString alloc] initWithString:[[aURL path] stringByAbbreviatingWithTildeInPath] attributes:bodyAttributes];
+                [(NSMutableAttributedString *)valueStr addAttribute:NSLinkAttributeName value:aURL range:NSMakeRange(0, [valueStr length])];
+                [nonReqStr appendAttributedString:valueStr];
+                [nonReqStr appendString:@"\n"];
+                [valueStr release];
+            }
+        }
+    }
+    
+    theFiles = [self remoteURLs];
+    if ([theFiles count]) {
+        [nonReqStr appendString:NSLocalizedString(@"Remote URLs", @"heading in preview for remote URLs") attributes:keyAttributes];
+        [nonReqStr appendString:@"\n"];
+        fileEnum = [theFiles objectEnumerator];
+        while (file = [fileEnum nextObject]) {
+            if (aURL = [file URL]) {
+                valueStr = [[NSMutableAttributedString alloc] initWithString:[aURL absoluteString] attributes:bodyAttributes];
+                [(NSMutableAttributedString *)valueStr addAttribute:NSLinkAttributeName value:aURL range:NSMakeRange(0, [valueStr length])];
+                [nonReqStr appendAttributedString:valueStr];
+                [nonReqStr appendString:@"\n"];
+                [valueStr release];
+            }
+        }
+    }
+    
+    theFiles = [self localFiles];
+    if ([theFiles count]) {
         [nonReqStr appendString:NSLocalizedString(@"Skim notes", @"heading in preview of notes from Skim") attributes:keyAttributes];
         [nonReqStr appendString:@"\n"];
-        [nonReqStr appendAttributedString:valueStr];
-        [nonReqStr appendString:@"\n"];
-        [valueStr release];
+        fileEnum = [theFiles objectEnumerator];
+        while (file = [fileEnum nextObject]) {
+            if ((aURL = [file URL]) && (RTFData = [[BDSKSkimReader sharedReader] RTFNotesAtURL:aURL])) {
+                valueStr = [[NSAttributedString alloc] initWithRTF:RTFData documentAttributes:NULL];
+                [nonReqStr appendAttributedString:valueStr];
+                [nonReqStr appendString:@"\n\n"];
+                [valueStr release];
+            }
+        }
     }
 
     // now put them together
@@ -2212,16 +2318,29 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [s appendString:@"<keywords>"];
     AddXMLField(@"keyword",BDSKKeywordsString);
     [s appendString:@"</keywords>"];
+    
+    NSEnumerator *fileE;
+    BDSKLinkedFile *file;
+    
     [s appendString:@"<urls>"];
+    
+    fileE = [[self localFiles] objectEnumerator];
     [s appendString:@"<pdf-urls>"];
-    value = [[self localURL] absoluteString];
-    if ([NSString isEmptyString:value] == NO)
-        [s appendStrings:@"<url>", value, @"</url>", nil];
+    while (file = [fileE nextObject]){
+        if (value = [[file URL] absoluteString])
+            [s appendStrings:@"<url>", value, @"</url>", nil];
+    }
     [s appendString:@"</pdf-urls>"];
+    
+    fileE = [[self remoteURLs] objectEnumerator];
     [s appendString:@"<related-urls>"];
-    AddXMLField(@"url",BDSKUrlString);
+    while (file = [fileE nextObject]){
+        if (value = [[file URL] absoluteString])
+            [s appendStrings:@"<url>", value, @"</url>", nil];
+    }
     [s appendString:@"</related-urls>"];
     [s appendString:@"</urls>"];
+    
     AddXMLField(@"abstract",BDSKAbstractString);
     AddXMLField(@"research-notes",BDSKAnnoteString);
     AddXMLField(@"notes",@"Note");
@@ -2389,18 +2508,186 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (NSCalendarDate *)currentDate{ return [NSCalendarDate date]; }
 
 - (NSString *)textSkimNotes {
-    return [[self localURL] textSkimNotes];
+    NSMutableString *string = [NSMutableString string];
+    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    NSURL *url;
+    NSString *notes;
+    
+    while (file = [fileEnum nextObject]) {
+        if (url = [file URL]) {
+            notes = [url textSkimNotes];
+            if ([notes length]) {
+                if ([string length])
+                    [string appendString:@"\n\n"];
+                [string appendString:notes];
+            }
+                
+        }
+    }
+    return string;
 }
 
 - (NSAttributedString *)richTextSkimNotes {
-    return [[self localURL] richTextSkimNotes];
+    NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:@""] autorelease];
+    NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    NSURL *url;
+    NSAttributedString *notes;
+    NSAttributedString *seperatorString = [[[NSMutableAttributedString alloc] initWithString:@"\n\n"] autorelease];
+    
+    while (file = [fileEnum nextObject]) {
+        if (url = [file URL]) {
+            notes = [url richTextSkimNotes];
+            if ([notes length]) {
+                if ([attrString length])
+                    [attrString appendAttributedString:seperatorString];
+                [attrString appendAttributedString:notes];
+            }
+        }
+    }
+    return attrString;
+}
+
+- (NSArray *)localFiles {
+    NSMutableArray *localFiles = [NSMutableArray array];
+    NSEnumerator *fileEnum = [files objectEnumerator];
+    BDSKLinkedFile *file;
+    
+    while (file = [fileEnum nextObject]) {
+        if ([file isFile])
+            [localFiles addObject:file];
+    }
+    return localFiles;
+}
+
+- (NSArray *)existingLocalFiles {
+    NSMutableArray *localFiles = [NSMutableArray array];
+    NSEnumerator *fileEnum = [files objectEnumerator];
+    BDSKLinkedFile *file;
+    
+    while (file = [fileEnum nextObject]) {
+        if ([file isFile] && [file URL])
+            [localFiles addObject:file];
+    }
+    return localFiles;
+}
+
+- (NSArray *)remoteURLs {
+    NSMutableArray *remoteURLs = [NSMutableArray array];
+    NSEnumerator *fileEnum = [files objectEnumerator];
+    BDSKLinkedFile *file;
+    
+    while (file = [fileEnum nextObject]) {
+        if ([file isFile] == NO)
+            [remoteURLs addObject:file];
+    }
+    return remoteURLs;
 }
 
 #pragma mark -
 #pragma mark URL handling
 
-- (NSURL *)remoteURL{
-	return [self remoteURLForField:BDSKUrlString];
+- (NSString *)basePath {
+    return [[[[self owner] fileURL] path] stringByDeletingLastPathComponent];
+}
+
+- (NSURL *)baseURLForLinkedFile:(BDSKLinkedFile *)file {
+    NSString *basePath = [self basePath];
+    return basePath ? [NSURL fileURLWithPath:basePath] : nil;
+}
+
+- (NSUInteger)countOfFiles { return [files count]; }
+
+- (BDSKLinkedFile *)objectInFilesAtIndex:(NSUInteger)idx
+{
+    return [files objectAtIndex:idx];
+}
+
+- (void)insertObject:(BDSKLinkedFile *)aFile inFilesAtIndex:(NSUInteger)idx
+{
+    [[[self undoManager] prepareWithInvocationTarget:self] removeObjectFromFilesAtIndex:idx];
+    [files insertObject:aFile atIndex:idx];
+    [aFile setDelegate:self];
+    if ([owner fileURL])
+        [aFile update];
+	
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del File", @"type", owner, @"owner", nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+														object:self
+													  userInfo:notifInfo];
+}
+
+- (void)removeObjectFromFilesAtIndex:(NSUInteger)idx
+{
+    BDSKLinkedFile *file = [files objectAtIndex:idx];
+    [[[self undoManager] prepareWithInvocationTarget:self] insertObject:file inFilesAtIndex:idx];
+    [file setDelegate:nil];
+    [self removeFileToBeFiled:file];
+    [files removeObjectAtIndex:idx];
+	
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del File", @"type", owner, @"owner", nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+														object:self
+													  userInfo:notifInfo];
+}
+
+- (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx
+{
+    NSArray *toMove = [[files objectsAtIndexes:aSet] copy];
+    NSMutableArray *observedFiles = [self mutableArrayValueForKey:@"files"];
+    // reduce idx by the number of smaller indexes in aSet
+    if (idx > 0) {
+        NSRange range = NSMakeRange(0, idx);
+        unsigned int buffer[idx];
+        idx -= [aSet getIndexes:buffer maxCount:idx inIndexRange:&range];
+    }
+    [observedFiles removeObjectsAtIndexes:aSet];
+    [observedFiles insertObjects:toMove atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(idx, [toMove count])]];
+    [toMove release];
+}
+
+- (void)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile {
+    BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:self] autorelease];
+    if (aFile == nil)
+        return;
+    unsigned idx = [files count];
+    if ([aFile isFile]) {
+        NSArray *localFiles = [self localFiles];
+        if ([localFiles count])
+            idx = 1 + [files indexOfObject:[localFiles lastObject]];
+    }
+    [self insertObject:aFile inFilesAtIndex:idx];
+    if (shouldAutoFile && [aFile isFile])
+        [self autoFileLinkedFile:aFile];
+}
+
+static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unused)
+{
+    BOOL firstIsFile = [first isFileURL];
+    BOOL secondIsFile = [second isFileURL];
+    
+    if (firstIsFile && secondIsFile)
+        return [[first lastPathComponent] caseInsensitiveCompare:[second lastPathComponent]];
+    else if (firstIsFile == NO && secondIsFile == NO)
+        return [[first absoluteString] caseInsensitiveCompare:[second absoluteString]];
+    else if (firstIsFile)
+        return NSOrderedAscending;
+    else return NSOrderedDescending;
+}
+
+- (NSArray *)sortedURLs
+{
+    NSMutableArray *combinedURLs = [NSMutableArray array];
+    NSEnumerator *fe = [files objectEnumerator];
+    NSURL *aURL;
+    BDSKLinkedFile *file;
+    while (file = [fe nextObject]) {
+        if (aURL = [file displayURL])
+            [combinedURLs addObject:aURL];
+    }
+    [combinedURLs sortUsingFunction:sortURLsByType context:NULL];
+    return combinedURLs;
 }
 
 - (NSImage *)imageForURLField:(NSString *)field{
@@ -2460,34 +2747,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     returnURL = [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
     if (returnURL)
         [cachedURLs setObject:returnURL forKey:field];
+    
     return returnURL;
 }
 
-- (NSURL *)localURL{
-	return [self localFileURLForField:BDSKLocalUrlString];
-}
-
-- (NSString *)localUrlPath{
-	return [self localUrlPathInheriting:YES];
-}
-
-- (NSString *)localUrlPathInheriting:(BOOL)inherit{
-	return [self localFilePathForField:BDSKLocalUrlString inherit:inherit];
-}
-
-- (NSString *)localFilePathForField:(NSString *)field{
-	return [self localFilePathForField:field inherit:YES];
-}
-
-- (NSString *)localFilePathForField:(NSString *)field inherit:(BOOL)inherit{
-    return [[self localFileURLForField:field inherit:inherit] path];
-}
-
 - (NSURL *)localFileURLForField:(NSString *)field{
-	return [self localFileURLForField:field inherit:YES];
-}
-
-- (NSURL *)localFileURLForField:(NSString *)field inherit:(BOOL)inherit{
     
     // check the cache first
     NSURL *localURL = [cachedURLs objectForKey:field];
@@ -2495,8 +2759,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         return localURL;
     
     NSURL *resolvedURL = nil;
-    NSString *localURLFieldValue = [self valueOfField:field inherit:inherit];
-    
+    NSString *localURLFieldValue = [self valueOfField:field inherit:NO];
     // only cache absolute URLs
     BOOL shouldCache = YES;
     
@@ -2510,8 +2773,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         // the local-url isn't already a file URL, so we'll turn it into one
         
         // check to see if it's a relative path
-        UniChar ch = [localURLFieldValue characterAtIndex:0];
-        if(ch != '/' && ch != '~'){
+        if([localURLFieldValue isAbsolutePath] == NO){
             NSString *docPath = [[owner fileURL] path];
             NSString *basePath = [NSString isEmptyString:docPath] ? NSHomeDirectory() : [docPath stringByDeletingLastPathComponent];
 			// It's a relative path from the containing document's path
@@ -2525,47 +2787,54 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     // resolve aliases in the containing dir, as most NSFileManager methods do not follow them, and NSWorkspace can't open aliases
 	// we don't resolve the last path component if it's an alias, as this is used in auto file, which should move the alias rather than the target file 
-    resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent];
-    
     // if the path to the file does not exist resolvedURL is nil, so we return the unresolved path
-    NSURL *returnURL = (resolvedURL == nil) ? localURL : resolvedURL;
-    if (returnURL)
-        [cachedURLs setObject:returnURL forKey:field];
+    if (resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent])
+        localURL = resolvedURL;
     
-    return returnURL;
+    if (localURL && shouldCache)
+        [cachedURLs setObject:localURL forKey:field];
+    
+    return localURL;
 }
 
-- (BOOL)isValidLocalUrlPath:(NSString *)proposedPath{
+// Legacy redirect, deprecated, but could still be called from templates
+
+- (NSURL *)remoteURL{
+    return [[[self remoteURLs] firstObject] URL];
+}
+
+- (NSURL *)localURL{
+    return [[[self localFiles] firstObject] URL];
+}
+
+- (NSString *)localUrlPath{
+	return [[self localURL] path];
+}
+
+#pragma mark AutoFile support
+
+- (BOOL)isValidLocalFilePath:(NSString *)proposedPath{
     if ([NSString isEmptyString:proposedPath])
         return NO;
     NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalFileLowercaseKey])
         proposedPath = [proposedPath lowercaseString];
     return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedPath]] == NO);
 }
 
-- (NSString *)suggestedLocalUrl{
-	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
+- (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file
+{
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
     
-    NSString *oldPath = [self localUrlPathInheriting:NO];
-    if ([oldPath hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
-        oldPath = [oldPath substringFromIndex:[papersFolderPath length] + 1];
-    else
-        oldPath = nil;
-      
-	NSString *relativeFile = [BDSKFormatParser parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self suggestion:oldPath];
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey]) {
+	NSString *relativeFile = [BDSKFormatParser parseFormatForLinkedFile:file ofItem:self];
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalFileLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
-	}
-	NSURL *url = [NSURL fileURLWithPath:[papersFolderPath stringByAppendingPathComponent:relativeFile]];
-	
-	return [url absoluteString];
+	return [NSURL fileURLWithPath:[papersFolderPath stringByAppendingPathComponent:relativeFile]];
 }
 
-- (BOOL)canSetLocalUrl
+- (BOOL)canSetURLForLinkedFile:(BDSKLinkedFile *)file
 {
-    NSArray *requiredFields = [[NSApp delegate] requiredFieldsForLocalUrl];
+    NSArray *requiredFields = [[NSApp delegate] requiredFieldsForLocalFile];
 	
 	if (nil == requiredFields || 
         ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
@@ -2578,6 +2847,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	while (fieldName = [fEnum nextObject]) {
 		if ([fieldName isEqualToString:BDSKCiteKeyString]) {
             if([self hasEmptyOrDefaultCiteKey])
+				return NO;
+		} else if ([fieldName isEqualToString:BDSKLocalFileString]) {
+			if ([file URL] == nil)
 				return NO;
 		} else if ([fieldName isEqualToString:@"Document Filename"]) {
 			if ([NSString isEmptyString:[[owner fileURL] path]])
@@ -2597,40 +2869,44 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	return YES;
 }
 
-- (BOOL)needsToBeFiled { 
-	return needsToBeFiled; 
+- (NSSet *)filesToBeFiled { 
+	return filesToBeFiled; 
 }
 
-- (void)setNeedsToBeFiled:(BOOL)flag {
-	needsToBeFiled = flag;
-	
+- (void)addFileToBeFiled:(BDSKLinkedFile *)file {
+    if (filesToBeFiled == nil)
+        filesToBeFiled = [[NSMutableSet alloc] init];
+    [filesToBeFiled addObject:file];
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKNeedsToBeFiledChangedNotification object:self];
 }
 
-- (BOOL)autoFilePaper
+- (void)removeFileToBeFiled:(BDSKLinkedFile *)file {
+    [filesToBeFiled removeObject:file];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKNeedsToBeFiledChangedNotification object:self];
+}
+
+- (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file
 {
     // we can't autofile if it's disabled or there is nothing to file
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [self localUrlPath] == nil)
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [file URL] == nil)
 		return NO;
 	
-	if ([self canSetLocalUrl]) {
+	if ([self canSetURLForLinkedFile:file]) {
         OBASSERT([owner isDocument]);
         if ([owner isDocument]) {
-            [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
+            [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:file]
                                   fromDocument:(BibDocument *)owner
                                          check:NO]; 
             return YES;
 		} else {
-            [self setNeedsToBeFiled:YES];
+            [self addFileToBeFiled:file];
         }
 	} else {
-		[self setNeedsToBeFiled:YES];
+		[self addFileToBeFiled:file];
 	}
 	return NO;
-}
-
-- (NSString *)documentFileName {
-    return [[owner fileURL] path];
 }
 
 - (NSString *)documentInfoForKey:(NSString *)key {
@@ -3121,16 +3397,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         people = nil;
     }
 	
-	if([BDSKLocalUrlString isEqualToString:key]){
-		[self setNeedsToBeFiled:NO];
-        // If the Finder comment from this file has a useful URL and our BibItem has an empty remote URL field, use the Finder comment as remote URL.  Do this before autofiling the paper, since we know the path to the file now (hidden user default).
-        if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldUseSpotlightCommentForURL"]){
-            NSString *possibleURLString = [[NSFileManager defaultManager] commentForURL:[self localURL]];
-            if(possibleURLString && [NSURL URLWithString:possibleURLString]!= nil && [self remoteURL] == nil)
-                [self setField:BDSKUrlString toValue:possibleURLString];
-        }
-    }
-	
     // see if we need to use the crossref workaround (BibTeX bug)
 	if([BDSKTitleString isEqualToString:key] &&
 	   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDuplicateBooktitleKey] &&
@@ -3147,12 +3413,17 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         
         // the URL cache is certainly invalid now
         [cachedURLs removeAllObjects];
+        [sortedURLs release];
+        sortedURLs = nil;
 	}else if(key != nil){
 		[groups removeObjectForKey:key];
 	}
     
-    if([key isURLField])
+    if([key isURLField]) {
         [cachedURLs removeObjectForKey:key];
+        [sortedURLs release];
+        sortedURLs = nil;
+    }
 	
     NSCalendarDate *theDate = nil;
     
@@ -3285,8 +3556,6 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     }
     
     // I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others as being non-nil:
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKLocalUrlString, pubFields, emptyFieldsToRemove);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKUrlString, pubFields, emptyFieldsToRemove);
     setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAnnoteString, pubFields, emptyFieldsToRemove);
     setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAbstractString, pubFields, emptyFieldsToRemove);
     setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKRssDescriptionString, pubFields, emptyFieldsToRemove);
@@ -3294,6 +3563,104 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     // now remove everything that's left in removeKeys from pubFields, since it's non-standard for this type
     CFSetApplyFunction((CFMutableSetRef)emptyFieldsToRemove, removeItemsInSetFromDictionary, pubFields);
     CFRelease(emptyFieldsToRemove);
+}
+
+static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
+{
+    BibItem *self = [(id)context valueForKey:@"publication"];
+    BOOL removeField = [[(id)context valueForKey:@"removeField"] boolValue];
+    NSURL *value = [self URLForField:(id)key];
+    if (value) {
+        BOOL converted = [[self valueForKeyPath:@"files.URL"] containsObject:value];
+        if (converted == NO) {
+            BDSKLinkedFile *aURL = [[BDSKLinkedFile alloc] initWithURL:value delegate:self];
+            if (aURL) {
+                [self->files addObject:aURL];
+                [aURL release];
+                converted = YES;
+            }
+            else NSLog(@"*** Unable to create file for %@", value);
+        }
+        if (removeField && converted) {
+            if ([[[BDSKTypeManager sharedManager] userDefaultFieldsForType:[self pubType]] containsObject:(id)key])
+                [self setField:(id)key toValue:@""];
+            else
+                [self removeField:(id)key];
+        }
+    }
+}
+
+- (void)createFilesArray
+{
+    if (files == nil)
+        files = [NSMutableArray new];
+    
+    NSUInteger i = 0, count;
+    NSString *value, *key = @"Bdsk-File-0";
+    
+    NSMutableArray *keysToRemove = [NSMutableArray array];
+    NSMutableArray *unresolvedFiles = [NSMutableArray array];
+    NSMutableArray *unresolvedURLs = [NSMutableArray array];
+
+    while ((value = [pubFields objectForKey:key]) != nil) {
+        BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithBase64String:value delegate:self];
+        if (aFile) {
+            [files addObject:aFile];
+            [aFile release];
+        }
+        else {
+            [unresolvedFiles addObject:value];
+            NSLog(@"*** error *** -[BDSKLinkedFile initWithBase64String:delegate:] failed (%@ of %@)", key, [self citeKey]);
+        }
+        [keysToRemove addObject:key];
+        
+        // next key in the sequence; increment i first, so it's guaranteed correct
+        key = [NSString stringWithFormat:@"Bdsk-File-%d", ++i];
+    }
+    
+    // reset i so we can get all of the remote URL types
+    i = 0;
+    key = @"Bdsk-Url-0";
+
+    while ((value = [pubFields objectForKey:key]) != nil) {
+        BDSKLinkedFile *aURL = [[BDSKLinkedFile alloc] initWithURLString:value];
+        if (aURL) {
+            [files addObject:aURL];
+            [aURL release];
+        }
+        else {
+            [unresolvedURLs addObject:value];
+            NSLog(@"*** error *** -[BDSKLinkedFile initWithURLString:] failed (%@)", key);
+        }
+        [keysToRemove addObject:key];
+        
+        // next key in the sequence; increment i first, so it's guaranteed correct
+        key = [NSString stringWithFormat:@"Bdsk-Url-%d", ++i];
+    }
+    
+    if ([owner fileURL])
+        [files makeObjectsPerformSelector:@selector(update)];
+    
+    // !!! get these out of pubFields for now to avoid duplication when saving
+    [pubFields removeObjectsForKeys:keysToRemove];
+    // !!! make sure the remaining keys are contiguous
+    if (count = [unresolvedFiles count]) {
+        for (i = 0; i < count; i++)
+            [pubFields setObject:[unresolvedFiles objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%d", i]];
+    }
+    if (count = [unresolvedURLs count]) {
+        for (i = 0; i < count; i++)
+            [pubFields setObject:[unresolvedURLs objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-Url-%d", i]];
+    }
+    
+    // @@ temporary hack to create an array of BDSKLinkedFiles from Local Files and BDSKLinkedURLs from Remote URLs
+    if ([files count] == 0) {
+        void *context = (void *)[NSDictionary dictionaryWithObjectsAndKeys:self, @"publication", [NSNumber numberWithBool:NO], @"removeField", nil];
+        CFArrayRef fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
+        CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, context);
+        fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey];
+        CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, context);
+    }
 }
 
 @end
@@ -3322,7 +3689,12 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
         if (type == BDSKPersonFieldCollection) {
             value = (id)[item peopleArrayForField:key];
         } else if (type == BDSKURLFieldCollection) {
-            value = (id)[item URLForField:key];
+            if ([key isEqualToString:BDSKLocalUrlString])
+                value = [[[item localFiles] firstObject] URL];
+            else if ([key isEqualToString:BDSKUrlString])
+                value = [[[item remoteURLs] firstObject] URL];
+            else
+                value = (id)[item URLForField:key];
         } else {
             value = (id)[item stringValueOfField:key];
             if ([key isURLField] == NO && [key isBooleanField] == NO && [key isTriStateField] == NO && [key isRatingField] == NO && [key isCitationField] == NO)

@@ -36,7 +36,6 @@
 
 
 #import "BibEditor.h"
-#import "BibEditor_Toolbar.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
@@ -44,7 +43,6 @@
 #import "NSImage+Toolbox.h"
 #import "BDSKComplexString.h"
 #import "BDSKScriptHookManager.h"
-#import "BDSKZoomablePDFView.h"
 #import "BDSKEdgeView.h"
 #import "KFAppleScriptHandlerAdditionsCore.h"
 #import "NSString_BDSKExtensions.h"
@@ -81,6 +79,9 @@
 #import "BDSKCitationFormatter.h"
 #import "BDSKNotesWindowController.h"
 #import "BDSKSkimReader.h"
+#import "BDSKSplitView.h"
+#import <FileView/FileView.h>
+#import "BDSKLinkedFile.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -95,25 +96,89 @@ enum{
 // offset of the form from the left window edge
 #define FORM_OFFSET 13.0
 
-@interface NSWindow (BDSKLeopardExtensions)
-- (void)setRepresentedURL:(NSURL *)aURL;
-@end
-
 @interface BibEditor (Private)
 
-- (void)setupDrawer;
 - (void)setupButtons;
 - (void)setupForm;
 - (void)setupMatrix;
 - (void)matrixFrameDidChange:(NSNotification *)notification;
 - (void)setupTypePopUp;
 - (void)registerForNotifications;
-- (void)fixURLs;
 - (void)breakTextStorageConnections;
 
 @end
 
 @implementation BibEditor
+
+- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
+
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
+{
+    return [[publication objectInFilesAtIndex:idx] displayURL];
+}
+
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
+{
+    [publication moveFilesAtIndexes:aSet toIndex:anIndex];
+    return YES;
+}
+
+- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
+{
+    BDSKLinkedFile *aFile;
+    NSEnumerator *enumerator = [newURLs objectEnumerator];
+    NSURL *aURL;
+    NSUInteger idx = [aSet firstIndex];
+    while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
+        aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
+        if (aFile) {
+            [publication removeObjectFromFilesAtIndex:idx];
+            [publication insertObject:aFile inFilesAtIndex:idx];
+            [publication autoFileLinkedFile:aFile];
+            [aFile release];
+        }
+        idx = [aSet indexGreaterThanIndex:idx];
+    }
+    return YES;
+}
+
+- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+{
+    NSUInteger idx = [indexSet lastIndex];
+    while (NSNotFound != idx) {
+        [publication removeObjectFromFilesAtIndex:idx];
+        idx = [indexSet indexLessThanIndex:idx];
+    }
+    return YES;
+}
+
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
+{
+    BDSKLinkedFile *aFile;
+    NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
+    NSURL *aURL;
+    NSUInteger idx = [aSet firstIndex], offset = 0;
+    while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
+        aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
+        if (aFile) {
+            [publication insertObject:aFile inFilesAtIndex:idx - offset];
+            [publication autoFileLinkedFile:aFile];
+            [aFile release];
+        } else {
+            // the indexes in aSet assume that we inserted the file
+            offset++;
+        }
+        idx = [aSet indexGreaterThanIndex:idx];
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (object == fileView && [keyPath isEqualToString:@"iconScale"]) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
 
 - (NSString *)windowNibName{
     return @"BibEditor";
@@ -124,13 +189,7 @@ enum{
         
         publication = [aBib retain];
         isEditable = [[publication owner] isDocument];
-        
-        // has to be before we call [self window] because that calls windowDidLoad:.
-        pdfSnoopViewLoaded = NO;
-        webSnoopViewLoaded = NO;
-        drawerState = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey] | BDSKDrawerStateRightMask;
-        drawerButtonState = BDSKDrawerUnknownState;
-        
+                
         forceEndEditing = NO;
         didSetupForm = NO;
     }
@@ -152,8 +211,8 @@ enum{
     // we should have a document at this point, as the nib is not loaded before -window is called, which shouldn't happen before the document shows us
     OBASSERT([self document]);
     
-	// The rest is called when we load the window
-	
+    [[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]];
+    
     [[bibFields prototype] setEditable:isEditable];
     [bibTypeButton setEnabled:isEditable];
     [addFieldButton setEnabled:isEditable];
@@ -180,7 +239,7 @@ enum{
 	[cell release];
     
     // Setup the toolbar
-    [self setupToolbar];
+    //[self setupToolbar];
 	
     // Setup the statusbar
 	[statusBar retain]; // we need to retain, as we might remove it from the window
@@ -190,16 +249,14 @@ enum{
 	[statusBar setDelegate:self];
     [statusBar setTextOffset:NSMaxX([actionButton frame])];
     
-    [self setWindowFrameAutosaveNameOrCascade:BDSKBibEditorFrameAutosaveName];
-    
-    // Setup the splitview autosave frame, should be done after the statusBar is setup
-    [splitView setPositionAutosaveName:@"OASplitView Position BibEditor"];
-    // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
-    if ([self windowFrameAutosaveName] == nil)
-        [splitView setPositionAutosaveName:nil];
+    // Insert the tabView in the main window
+    BDSKEdgeView *edgeView = [[mainSplitView subviews] objectAtIndex:0];
+    [[tabView superview] setFrame:[edgeView frame]];
+    [edgeView addSubview:tabView];
+	[edgeView setEdges:BDSKMaxXEdgeMask];
     
     // Setup the form and the matrix
-	BDSKEdgeView *edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:0];
+	edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:0];
 	[edgeView setEdges:BDSKMinYEdgeMask];
     NSRect ignored, frame;
     NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
@@ -208,19 +265,44 @@ enum{
     // don't know why, but this is broken
     [bibTypeButton setNextKeyView:bibFields];
     
-    edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:1];
-	[edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
+    edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:1];
+    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
     NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
     [[extraBibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[extraBibFields enclosingScrollView]];
-
+    
+    edgeView = (BDSKEdgeView *)[[[notesView enclosingScrollView] superview] superview];
+    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
+    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+    edgeView = (BDSKEdgeView *)[[[abstractView enclosingScrollView] superview] superview];
+    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
+    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+    edgeView = (BDSKEdgeView *)[[[rssDescriptionView enclosingScrollView] superview] superview];
+    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
+    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+    
+    [fileSplitView setBlendStyle:BDSKMinBlendStyleMask];
+    
+    [self setWindowFrameAutosaveNameOrCascade:BDSKBibEditorFrameAutosaveName];
+    
+    // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
+    [mainSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorMainSplitView"];
+    [fieldSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFieldSplitView"];
+    [fileSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFileSplitView"];
+    if ([self windowFrameAutosaveName] == nil) {
+        // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
+        [mainSplitView setPositionAutosaveName:nil];
+        [fieldSplitView setPositionAutosaveName:nil];
+        [fileSplitView setPositionAutosaveName:nil];
+    }
+    
     formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication owner] macroResolver]];
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
     
     [self setupForm];
     if (isEditable)
-        [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+        [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
     
     // Setup the citekey textfield
     BDSKCiteKeyFormatter *citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
@@ -268,9 +350,9 @@ enum{
 	
     [self updateCiteKeyDuplicateWarning];
     
-    [documentSnoopButton setIconImage:nil];
-    
-    [self fixURLs];
+    [fileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFileViewIconScaleKey]];
+    [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
+    [fileView setEditable:isEditable];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
@@ -278,21 +360,12 @@ enum{
 }
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    NSString *fname = [publication localUrlPath];
+    NSString *fname = [[[publication localFiles] firstObject] path];
     return fname ? fname : @"";
 }
 
 - (BibItem *)publication{
     return publication;
-}
-
-- (void)awakeFromNib{
-	
-	if (documentSnoopDrawer != nil) {
-		// we must be loading the drawer
-		[self setupDrawer];
-	}
-    
 }
 
 - (void)dealloc{
@@ -307,30 +380,16 @@ enum{
     [ratingButtonCell release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[dragFieldEditor release];
-	[viewLocalToolbarItem release];
-	[viewRemoteToolbarItem release];
-	[documentSnoopToolbarItem release];
-	[authorsToolbarItem release];
 	[statusBar release];
-	[toolbarItems release];
 	[macroTextFieldWC release];
-	[documentSnoopDrawer release];
-	[pdfSnoopContainerView release];
-	[textSnoopContainerView release];
-	[webSnoopContainerView release];
     [formCellFormatter release];
     [crossrefFormatter release];
     [citationFormatter release];
-    [downloadFileName release];
-    [downloadFieldName release];
     [super dealloc];
 }
 
 - (void)show{
     [self showWindow:self];
-    
-    // windowDidLoad is too early for setting the window URL on 10.5 (bug #1825254)
-    [self fixURLs];
 }
 
 // note that we don't want the - document accessor! It messes us up by getting called for other stuff.
@@ -380,157 +439,111 @@ enum{
 }
 
 - (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleBelowView:[tabView superview] offset:1.0];
+	[statusBar toggleBelowView:mainSplitView offset:1.0];
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowEditorStatusBarKey];
 }
 
-- (IBAction)revealLinkedFile:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-    NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-	NSString *path = [publication localFilePathForField:field];
-	[sw selectFile:path inFileViewerRootedAtPath:nil];
-}
-
 - (IBAction)openLinkedFile:(id)sender{
-    NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-	
-    BOOL err = NO;
-
-    if(![sw openLinkedFile:[publication localFilePathForField:field]]){
-            err = YES;
-    }
-    if(err)
-        NSBeginAlertSheet(NSLocalizedString(@"Can't Open Local File", @"Message in alert dialog when unable to open local file"),
-                              NSLocalizedString(@"OK", @"Button title"),
-                              nil,nil, [self window],self, NULL, NULL, NULL,
-                              NSLocalizedString(@"Sorry, the contents of the Local-Url Field are neither a valid file path nor a valid URL.",
-                                                @"Informative text in alert dialog"), nil);
-
-}
-
-- (IBAction)moveLinkedFile:(id)sender{
-    NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
+    NSEnumerator *urlEnum = nil;
+	NSURL *fileURL = [sender representedObject];
     
-    NSSavePanel *sPanel = [NSSavePanel savePanel];
-    [sPanel setPrompt:NSLocalizedString(@"Move", @"Save Panel prompt")];
-    [sPanel setNameFieldLabel:NSLocalizedString(@"Move To:", @"Move To: label")];
-    [sPanel setDirectory:[[publication localFilePathForField:field] stringByDeletingLastPathComponent]];
-	
-    [sPanel beginSheetForDirectory:nil 
-                              file:nil 
-                    modalForWindow:[self window] 
-                     modalDelegate:self 
-                    didEndSelector:@selector(moveLinkedFilePanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:[field retain]];
-}
-
-- (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSString *field = (NSString *)contextInfo;
-
-    if(returnCode == NSOKButton){
-        NSString *oldPath = [publication localFilePathForField:field];
-        NSString *newPath = [sheet filename];
-        if([NSString isEmptyString:oldPath] == NO){
-            NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:publication, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
-            
-            [publication setField:field toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
-            [[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:[self document] options:0];
-            
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-		}
-    }
-    
-    [field release];
-}
-
-- (IBAction)openRemoteURL:(id)sender{
-	NSString *field = [sender representedObject];
-	if (field == nil)
-		field = BDSKUrlString;
-    NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-    NSURL *url = [publication remoteURLForField:field];
-    if(url == nil){
-        NSString *rurl = [publication valueOfField:field];
-        
-        if([NSString isEmptyString:rurl])
-            return;
-    
-        if([rurl rangeOfString:@"://"].location == NSNotFound)
-            rurl = [@"http://" stringByAppendingString:rurl];
-
-        url = [NSURL URLWithString:rurl];
-    }
-    
-    if(url != nil)
-        [sw openURL:url];
+    if (fileURL)
+        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
     else
-        NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Message in alert dialog when an error occurs"),
-                          nil, nil, nil, [self window], nil, nil, nil, nil,
-                          NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please check the URL field and try again.",
-                                            @"Informative text in alert dialog") );
+        urlEnum = [[publication valueForKeyPath:@"localFiles.URL"] objectEnumerator];
     
+    while (fileURL = [urlEnum nextObject]) {
+        if ([fileURL isEqual:[NSNull null]] == NO) {
+            [[NSWorkspace sharedWorkspace] openLinkedFile:[fileURL path]];
+        }
+    }
+}
+
+- (IBAction)revealLinkedFile:(id)sender{
+    NSEnumerator *urlEnum = nil;
+	NSURL *fileURL = [sender representedObject];
+    
+    if (fileURL)
+        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+    else
+        urlEnum = [[publication valueForKeyPath:@"remoteURLs.URL"] objectEnumerator];
+    
+    while (fileURL = [urlEnum nextObject]) {
+        if ([fileURL isEqual:[NSNull null]] == NO) {
+            [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
+        }
+    }
+}
+
+- (IBAction)openLinkedURL:(id)sender{
+    NSEnumerator *urlEnum = nil;
+	NSURL *remoteURL = [sender representedObject];
+    
+    if (remoteURL)
+        urlEnum = [[NSArray arrayWithObject:remoteURL] objectEnumerator];
+    else
+        urlEnum = [[publication valueForKeyPath:@"remoteURLs.URL"] objectEnumerator];
+    
+    while (remoteURL = [urlEnum nextObject]) {
+        if ([remoteURL isEqual:[NSNull null]] == NO) {
+			[[NSWorkspace sharedWorkspace] openURL:remoteURL];
+        }
+    }
 }
 
 - (IBAction)showNotesForLinkedFile:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-	NSURL *fileURL = [publication localFileURLForField:field];
+    NSEnumerator *urlEnum = nil;
+	NSURL *fileURL = [sender representedObject];
     
-    if (fileURL == nil) {
-        NSBeep();
-        return;
+    if (fileURL)
+        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+    else
+        urlEnum = [[publication valueForKeyPath:@"localFiles.URL"] objectEnumerator];
+    
+    while (fileURL = [urlEnum nextObject]) {
+        if ([fileURL isEqual:[NSNull null]] == NO) {
+            BDSKNotesWindowController *notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
+        
+            [[self document] addWindowController:notesController];
+            [notesController showWindow:self];
+        }
     }
-    
-    BDSKNotesWindowController *notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
-    
-    [[self document] addWindowController:notesController];
-    [notesController showWindow:self];
 }
 
 - (IBAction)copyNotesForLinkedFile:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-	NSURL *fileURL = [publication localFileURLForField:field];
+    NSEnumerator *urlEnum = nil;
+	NSURL *fileURL = [sender representedObject];
+    NSMutableString *string = [NSMutableString string];
     
-    if (fileURL == nil) {
-        NSBeep();
-        return;
+    if (fileURL)
+        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+    else
+        urlEnum = [[publication valueForKeyPath:@"localFiles.URL"] objectEnumerator];
+    
+    while (fileURL = [urlEnum nextObject]) {
+        if ([fileURL isEqual:[NSNull null]] == NO) {
+            NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
+            
+            if ([notes length]) {
+                if ([string length])
+                    [string appendString:@"\n\n"];
+                [string appendString:notes];
+            }
+            
+        }
     }
-    
-    NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
-    
-    if ([notes isEqualToString:@""]) {
-        NSBeep();
-        return;
+    if ([string length]) {
+        NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+        [pboard setString:string forType:NSStringPboardType];
     }
-    
-    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
-    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-    [pboard setString:notes forType:NSStringPboardType];
 }
 
 #pragma mark Menus
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
     NSString *menuTitle = [menu title];
-	if (menu == [[viewLocalToolbarItem menuFormRepresentation] submenu]) {
-        [self updateMenu:menu forImagePopUpButton:viewLocalButton];
-	} else if (menu == [[viewRemoteToolbarItem menuFormRepresentation] submenu]) {
-        [self updateMenu:menu forImagePopUpButton:viewRemoteButton];
-	} else if (menu == [[documentSnoopToolbarItem menuFormRepresentation] submenu]) {
-        [self updateMenu:menu forImagePopUpButton:documentSnoopButton];
-	} else if (menu == [[authorsToolbarItem menuFormRepresentation] submenu]) {
-        [self updateAuthorsToolbarMenu:menu];
-	} else if([menuTitle isEqualToString:@"previewRecentDocumentsMenu"]){
+    if([menuTitle isEqualToString:@"previewRecentDocumentsMenu"]){
         [self updatePreviewRecentDocumentsMenu:menu];
     } else if([menuTitle isEqualToString:@"safariRecentDownloadsMenu"]){
         [self updateSafariRecentDownloadsMenu:menu];
@@ -544,72 +557,61 @@ enum{
     return NO;
 }
 
-- (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
-	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
-    [self updateMenu:menu forImagePopUpButton:view];
-    return [menu autorelease];
-}
-
-- (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view{
+- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
+    
+    NSURL *theURL = anIndex == NSNotFound ? nil : [[publication objectInFilesAtIndex:anIndex] URL];
 	NSMenu *submenu;
 	NSMenuItem *item;
-	NSURL *theURL;
+    int i;
     
-    int i = [menu numberOfItems];
-    while (i-- > 1)
-        [menu removeItemAtIndex:i];
+    if (theURL) {
+        i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
+        [menu insertItemWithTitle:[NSLocalizedString(@"Open With",@"Menu item title") stringByAppendingEllipsis]
+                andSubmenuOfApplicationsForURL:theURL atIndex:++i];
+    }
+    if ([theURL isFileURL]) {
+        i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
+        item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
+                                  action:@selector(showNotesForLinkedFile:)
+                           keyEquivalent:@""
+                                 atIndex:++i];
+        [item setRepresentedObject:theURL];
+        
+        item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
+                                  action:@selector(copyNotesForLinkedFile:)
+                           keyEquivalent:@""
+                                 atIndex:++i];
+        [item setRepresentedObject:theURL];
+        
+        if (isEditable) {
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace File",@"Menu item title: Replace File...") stringByAppendingEllipsis]
+                                      action:@selector(chooseLocalFile:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            
+            item = [menu insertItemWithTitle:NSLocalizedString(@"Move To Trash",@"Menu item title")
+                                      action:@selector(trashLocalFile:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+        }
+    } else if (theURL && isEditable) {
+        item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL",@"Menu item title: Replace File...") stringByAppendingEllipsis]
+                                  action:@selector(chooseRemoteURL:)
+                           keyEquivalent:@""
+                                 atIndex:++i];
+        [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+    }
     
-	if (view == viewLocalButton) {
-		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] objectEnumerator];
-		NSString *field = nil;
-		
-		// the first one has to be view Local-Url file, since it's also the button's action when you're clicking on the icon.
-        int idx = 0;
-		while (field = [e nextObject]) {
-            
-            if(idx++ > 0)
-                [menu addItem:[NSMenuItem separatorItem]];
-
-            item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@",@"Menu item title"), field]
-                                   action:@selector(openLinkedFile:)
-                            keyEquivalent:@""];
-            [item setTarget:self];
-            [item setRepresentedObject:field];
-            
-            theURL = [publication URLForField:field];
-            if(nil != theURL){
-                [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Menu item title"),[ field localizedFieldName]]
-                        andSubmenuOfApplicationsForURL:theURL];
-            }
-            
-			item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Reveal %@ in Finder",@"Menu item title"), [field localizedFieldName]]
-                                   action:@selector(revealLinkedFile:)
-                            keyEquivalent:@""];
-			[item setRepresentedObject:field];
-            
-			item = [menu addItemWithTitle:[[NSString stringWithFormat:NSLocalizedString(@"Move %@",@"Menu item title: Move Local-Url..."), [field localizedFieldName]] stringByAppendingEllipsis]
-                                   action:@selector(moveLinkedFile:)
-                            keyEquivalent:@""];
-			[item setRepresentedObject:field];
-            
-			item = [menu addItemWithTitle:[[NSString stringWithFormat:NSLocalizedString(@"Skim Notes For %@",@"Menu item title: Skim Notes For Local-Url..."), [field localizedFieldName]] stringByAppendingEllipsis]
-                                   action:@selector(showNotesForLinkedFile:)
-                            keyEquivalent:@""];
-			[item setRepresentedObject:field];
-            
-			item = [menu addItemWithTitle:[[NSString stringWithFormat:NSLocalizedString(@"Copy Skim Notes For %@",@"Menu item title: Copy Skim Notes For Local-Url..."), [field localizedFieldName]] stringByAppendingEllipsis]
-                                   action:@selector(copyNotesForLinkedFile:)
-                            keyEquivalent:@""];
-			[item setRepresentedObject:field];
-		}
-		
-		[menu addItem:[NSMenuItem separatorItem]];
-		
-		[menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]
-						action:@selector(chooseLocalURL:)
-				 keyEquivalent:@""];
-		
-		// get Safari recent downloads
+    if (isEditable) {
+        [menu addItem:[NSMenuItem separatorItem]];
+        
+        [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]
+                        action:@selector(chooseLocalFile:)
+                 keyEquivalent:@""];
+        
+        // get Safari recent downloads
         item = [menu addItemWithTitle:NSLocalizedString(@"Safari Recent Downloads", @"Menu item title")
                          submenuTitle:@"safariRecentDownloadsMenu"
                       submenuDelegate:self];
@@ -620,53 +622,23 @@ enum{
         if(submenu = [self recentDownloadsMenu]){
             item = [menu addItemWithTitle:NSLocalizedString(@"Link to Recent Download", @"Menu item title") submenu:submenu];
         }
-		
-		// get Preview recent documents
+        
+        // get Preview recent documents
         [menu addItemWithTitle:NSLocalizedString(@"Link to Recently Opened File", @"Menu item title")
                   submenuTitle:@"previewRecentDocumentsMenu"
                submenuDelegate:self];
-	}
-	else if (view == viewRemoteButton) {
-		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] objectEnumerator];
-		NSString *field = nil;
-		
-		// the first one has to be view Url in web brower, since it's also the button's action when you're clicking on the icon.
-		while (field = [e nextObject]) {
-			item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ in Web Browser", @"Menu item title"), [field localizedFieldName]]
-                                   action:@selector(openRemoteURL:)
-                            keyEquivalent:@""];
-			[item setRepresentedObject:field];
             
-            theURL = [publication URLForField:field];
-            if(nil != theURL){
-                [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With", @"Menu item title"), [field localizedFieldName]]
-                        andSubmenuOfApplicationsForURL:theURL];
-            }
-		}
-		
-		// get Safari recent URLs
         [menu addItem:[NSMenuItem separatorItem]];
+        
+        [menu addItemWithTitle:[NSLocalizedString(@"Choose URL", @"Menu item title") stringByAppendingEllipsis]
+                        action:@selector(chooseRemoteURL:)
+                 keyEquivalent:@""];
+        
+        // get Safari recent URLs
         [menu addItemWithTitle:NSLocalizedString(@"Link to Download URL", @"Menu item title")
                   submenuTitle:@"safariRecentURLsMenu"
                submenuDelegate:self];
-	}
-	else if (view == documentSnoopButton) {
-		
-		item = [menu addItemWithTitle:NSLocalizedString(@"View File in Drawer", @"Menu item title")
-                               action:@selector(toggleSnoopDrawer:)
-                        keyEquivalent:@""];
-		[item setTag:0];
-		
-		item = [menu addItemWithTitle:NSLocalizedString(@"View File as Text in Drawer", @"Menu item title")
-                               action:@selector(toggleSnoopDrawer:)
-                        keyEquivalent:@""];
-		[item setTag:BDSKDrawerStateTextMask];
-		
-		item = [menu addItemWithTitle:NSLocalizedString(@"View Remote URL in Drawer", @"Menu item title")
-                               action:@selector(toggleSnoopDrawer:)
-                        keyEquivalent:@""];
-		[item setTag:BDSKDrawerStateWebMask];
-	}
+    }
 }
 
 - (NSArray *)safariDownloadHistory{
@@ -725,7 +697,7 @@ enum{
             filePath = [[itemDict objectForKey:@"DownloadEntryPostPath"] stringByStandardizingPath];
 		if([fileManager fileExistsAtPath:filePath]){
 			NSMenuItem *item = [menu addItemWithTitle:[filePath lastPathComponent]
-                                               action:@selector(setLocalURLPathFromMenuItem:)
+                                               action:@selector(addLinkedFileFromMenuItem:)
                                         keyEquivalent:@""];
 			[item setRepresentedObject:filePath];
 			[item setImageAndSize:[NSImage imageForFile:filePath]];
@@ -750,7 +722,7 @@ enum{
 		NSString *URLString = [itemDict objectForKey:@"DownloadEntryURL"];
 		if (![NSString isEmptyString:URLString] && [NSURL URLWithString:URLString]) {
 			NSMenuItem *item = [menu addItemWithTitle:URLString
-                                               action:@selector(setRemoteURLFromMenuItem:)
+                                               action:@selector(addRemoteURLFromMenuItem:)
                                         keyEquivalent:@""];
 			[item setRepresentedObject:URLString];
 			[item setImageAndSize:[NSImage genericInternetLocationImage]];
@@ -814,7 +786,7 @@ enum{
         if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
             fileName = [filePath lastPathComponent];            
             item = [menu addItemWithTitle:fileName
-                                   action:@selector(setLocalURLPathFromMenuItem:)
+                                   action:@selector(addLinkedFileFromMenuItem:)
                             keyEquivalent:@""];
             [item setRepresentedObject:filePath];
             [item setImageAndSize:[NSImage imageForFile:filePath]];
@@ -832,7 +804,7 @@ enum{
         if(![previewRecentPaths containsObject:filePath] && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
             fileName = [filePath lastPathComponent];            
             item = [menu addItemWithTitle:fileName
-                                   action:@selector(setLocalURLPathFromMenuItem:)
+                                   action:@selector(addLinkedFileFromMenuItem:)
                             keyEquivalent:@""];
             [item setRepresentedObject:filePath];
             [item setImageAndSize:[NSImage imageForFile:filePath]];
@@ -879,32 +851,12 @@ enum{
         
         while(filePath = [e nextObject]){            
             item = [menu addItemWithTitle:[filePath lastPathComponent]
-                                   action:@selector(setLocalURLPathFromMenuItem:)
+                                   action:@selector(addLinkedFileFromMenuItem:)
                             keyEquivalent:@""];
             [item setRepresentedObject:filePath];
             [item setImageAndSize:[NSImage imageForFile:filePath]];
         }
     }
-}
-
-- (void)updateAuthorsToolbarMenu:(NSMenu *)menu{
-    NSArray *thePeople = [publication sortedPeople];
-    int count = [thePeople count];
-    int i = [menu numberOfItems];
-    BibAuthor *person;
-    NSMenuItem *item = nil;
-    SEL selector = @selector(showPersonDetailCmd:);
-    while (i-- > 1)
-        [menu removeItemAtIndex:i];
-    if (count == 0)
-        return;
-    for (i = 0; i < count; i++) {
-        person = [thePeople objectAtIndex:i];
-        item = [menu addItemWithTitle:[person displayName] action:selector keyEquivalent:@""];
-        [item setTag:i];
-    }
-    item = [menu addItemWithTitle:NSLocalizedString(@"Show All", @"Menu item title") action:selector keyEquivalent:@""];
-    [item setTag:count];
 }
 
 - (void)dummy:(id)obj{}
@@ -921,8 +873,7 @@ enum{
 		return isEditable;
 	}
 	else if (theAction == @selector(consolidateLinkedFiles:)) {
-		NSString *lurl = [publication localUrlPath];
-		return (isEditable && lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+		return (isEditable && [[publication localFiles] count]);
 	}
 	else if (theAction == @selector(duplicateTitleToBooktitle:)) {
 		return (isEditable && ![NSString isEmptyString:[publication valueOfField:BDSKTitleString]]);
@@ -934,74 +885,19 @@ enum{
         return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
 	}
 	else if (theAction == @selector(openLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		return (lurl == nil ? NO : YES);
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
 	else if (theAction == @selector(revealLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		return (lurl == nil ? NO : YES);
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
-	else if (theAction == @selector(moveLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		return (isEditable && lurl != nil);
+	else if (theAction == @selector(openLinkedURL:)) {
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
 	else if (theAction == @selector(showNotesForLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		return (lurl == nil ? NO : YES);
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
 	else if (theAction == @selector(copyNotesForLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		return (lurl == nil ? NO : YES);
-	}
-	else if (theAction == @selector(openRemoteURL:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKUrlString;
-		return ([publication remoteURLForField:field] != nil);
-	}
-    else if (theAction == @selector(saveFileAsLocalUrl:)) {
-		return (isEditable && [[[remoteSnoopWebView mainFrame] dataSource] isLoading] == NO);
-	}
-	else if (theAction == @selector(downloadLinkedFileAsLocalUrl:)) {
-		return (isEditable && isDownloading == NO);
-	}
-	else if (theAction == @selector(toggleSnoopDrawer:)) {
-		int requiredContent = [menuItem tag];
-		int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
-		BOOL isCloseItem = ((currentContent == requiredContent) && (drawerState & BDSKDrawerStateOpenMask));
-		if (isCloseItem) {
-			[menuItem setTitle:NSLocalizedString(@"Close Drawer", @"Menu item title")];
-		} else if (requiredContent & BDSKDrawerStateWebMask) {
-			[menuItem setTitle:NSLocalizedString(@"View Remote URL in Drawer", @"Menu item title")];
-		} else if (requiredContent & BDSKDrawerStateTextMask) {
-			[menuItem setTitle:NSLocalizedString(@"View File as Text in Drawer", @"Menu item title")];
-		} else {
-			[menuItem setTitle:NSLocalizedString(@"View File in Drawer", @"Menu item title")];
-		}
-		if (isCloseItem) {
-			// always enable the close item
-			return YES;
-		} else if (requiredContent & BDSKDrawerStateWebMask) {
-			return ([publication remoteURL] != nil);
-		} else {
-            NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
-            return (lurl == nil ? NO : YES);
-		}
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)
@@ -1021,9 +917,9 @@ enum{
     else if (theAction == @selector(raiseAddField:) || 
              theAction == @selector(raiseDelField:) || 
              theAction == @selector(raiseChangeFieldName:) || 
-             theAction == @selector(chooseLocalURL:) || 
-             theAction == @selector(setLocalURLPathFromMenuItem:) || 
-             theAction == @selector(setRemoteURLFromMenuItem:)) {
+             theAction == @selector(chooseLocalFile:) || 
+             theAction == @selector(addLinkedFileFromMenuItem:) || 
+             theAction == @selector(addRemoteURLFromMenuItem:)) {
         return isEditable;
     }
 
@@ -1131,14 +1027,29 @@ enum{
 }
 
 - (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    NSArray *files = nil;
+    
     if (returnCode == NSAlertAlternateReturn){
         return;
     }else if(returnCode == NSAlertOtherReturn){
-        [publication setNeedsToBeFiled:YES];
-        return;
+        NSEnumerator *fileEnum = [[publication localFiles] objectEnumerator];
+        BDSKLinkedFile *file;
+        files = [NSMutableArray array];
+        
+        while(file = [fileEnum nextObject]){
+            if([publication canSetURLForLinkedFile:file] == NO)
+                [publication addFileToBeFiled:file];
+            else
+                [(NSMutableArray *)files addObject:file];
+        }
+    }else{
+        files = [publication localFiles];
     }
     
-	[[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:publication] fromDocument:[self document] check:NO];
+    if ([files count] == 0)
+        return;
+    
+	[[BDSKFiler sharedFiler] filePapers:files fromDocument:[self document] check:NO];
 	
 	[tabView selectFirstTabViewItem:self];
 	
@@ -1148,7 +1059,18 @@ enum{
 - (IBAction)consolidateLinkedFiles:(id)sender{
 	[self finalizeChangesPreservingSelection:YES];
 	
-	if (![publication canSetLocalUrl]){
+	BOOL canSet = YES;
+    NSEnumerator *fileEnum = [[publication localFiles] objectEnumerator];
+    BDSKLinkedFile *file;
+    
+    while(file = [fileEnum nextObject]){
+        if([publication canSetURLForLinkedFile:file] == NO){
+            canSet = NO;
+            break;
+        }
+    }
+    
+	if (canSet == NO){
 		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?",@"");
 		NSString *otherButton = nil;
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
@@ -1236,56 +1158,118 @@ enum{
 
 #pragma mark choose local-url or url support
 
-- (IBAction)chooseLocalURL:(id)sender{
+- (IBAction)chooseLocalFile:(id)sender{
+    unsigned int anIndex = NSNotFound;
+    NSNumber *indexNumber = [sender representedObject];
+    NSString *path = nil;
+    if (indexNumber) {
+        anIndex = [indexNumber unsignedIntValue];
+        path = [[[publication objectInFilesAtIndex:anIndex] URL] path];
+    }
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
 	
-	NSArray *localFileFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
-	[fieldsPopUpButton removeAllItems];
-	[fieldsPopUpButton addItemsWithTitles:localFileFields];
-	[fieldsPopUpButton selectItemWithTitle:BDSKLocalUrlString];
-	if ([localFileFields count] > 1) 
-		[oPanel setAccessoryView:fieldsAccessoryView];
-
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
+    [oPanel beginSheetForDirectory:[path stringByDeletingLastPathComponent] 
+                              file:[path lastPathComponent] 
                     modalForWindow:[self window] 
                      modalDelegate:self 
-                    didEndSelector:@selector(chooseLocalURLPanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
+                    didEndSelector:@selector(chooseLocalFilePanelDidEnd:returnCode:contextInfo:) 
+                       contextInfo:(void *)anIndex];
   
 }
 
-- (void)chooseLocalURLPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 
     if(returnCode == NSOKButton){
-        NSString *fileURLString = [[NSURL fileURLWithPath:[[sheet filenames] objectAtIndex:0]] absoluteString];
-		NSString *field = [fieldsPopUpButton titleOfSelectedItem];
-        
-		[publication setField:field toValue:fileURLString];
-		if ([field isEqualToString:BDSKLocalUrlString])
-			[self autoFilePaper];
-		
-		[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+        unsigned int anIndex = (unsigned int)contextInfo;
+        NSURL *aURL = [[sheet URLs] objectAtIndex:0];
+        if (anIndex != NSNotFound) {
+            BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication] autorelease];
+            if (aFile == nil)
+                return;
+            [publication removeObjectFromFilesAtIndex:anIndex];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [publication autoFileLinkedFile:aFile];
+        } else {
+            [publication addFileForURL:aURL autoFile:YES];
+        }
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
 }
 
-- (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender{
+- (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
-	
-	[publication setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:path] absoluteString]];
-	[self autoFilePaper];
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+    NSURL *aURL = [NSURL fileURLWithPath:path];
+    [publication addFileForURL:aURL autoFile:YES];
+    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
-- (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender{
-	[publication setField:BDSKUrlString toValue:[sender representedObject]];
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+- (IBAction)trashLocalFile:(id)sender{
+    unsigned int anIndex = [[sender representedObject] unsignedIntValue];
+    NSString *path = [[[publication objectInFilesAtIndex:anIndex] URL] path];
+    NSString *folderPath = [path stringByDeletingLastPathComponent];
+    NSString *fileName = [path lastPathComponent];
+    int tag = 0;
+    [publication removeObjectFromFilesAtIndex:anIndex];
+    [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
+    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+}
+
+- (IBAction)chooseRemoteURL:(id)sender{
+    unsigned int anIndex = NSNotFound;
+    NSNumber *indexNumber = [sender representedObject];
+    NSString *urlString = @"http://";
+    if (indexNumber) {
+        anIndex = [indexNumber unsignedIntValue];
+        urlString = [[[publication objectInFilesAtIndex:anIndex] URL] absoluteString];
+    }
+	[chooseURLField setStringValue:urlString];
+    
+    [NSApp beginSheet:chooseURLSheet
+       modalForWindow:[self window] 
+        modalDelegate:self 
+       didEndSelector:@selector(chooseRemoteURLSheetDidEnd:returnCode:contextInfo:) 
+          contextInfo:(void *)anIndex];
+}
+
+- (void)chooseRemoteURLSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+
+    if (returnCode == NSOKButton) {
+        NSString *aURLString = [chooseURLField stringValue];
+        if ([NSString isEmptyString:aURLString])
+            return;
+        if ([aURLString rangeOfString:@"://"].location == NSNotFound)
+            aURLString = [@"http://" stringByAppendingString:aURLString];
+        NSURL *aURL = [NSURL URLWithString:aURLString];
+        if (aURL == nil)
+            return;
+        unsigned int anIndex = (unsigned int)contextInfo;
+        if (anIndex != NSNotFound) {
+            BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication] autorelease];
+            if (aFile == nil)
+                return;
+            [publication removeObjectFromFilesAtIndex:anIndex];
+            [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [publication autoFileLinkedFile:aFile];
+        } else {
+            [publication addFileForURL:aURL autoFile:NO];
+        }
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+    }        
+}
+
+- (IBAction)dismissChooseURLSheet:(id)sender{
+    [NSApp endSheet:chooseURLSheet returnCode:[sender tag]];
+    [chooseURLSheet orderOut:self];
+}
+
+- (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender{
+    NSURL *aURL = [sender representedObject];
+    [publication addFileForURL:aURL autoFile:YES];
+    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
 // ----------------------------------------------------------------------------------------
@@ -1406,7 +1390,7 @@ enum{
     NSString *currentType = [publication pubType];
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
 	NSMutableArray *removableFields = [[publication allFieldNames] mutableCopy];
-	[removableFields removeObjectsInArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil]];
+	[removableFields removeObjectsInArray:[NSArray arrayWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil]];
 	[removableFields removeObjectsInArray:[typeMan requiredFieldsForType:currentType]];
 	[removableFields removeObjectsInArray:[typeMan optionalFieldsForType:currentType]];
 	[removableFields removeObjectsInArray:[typeMan userDefaultFieldsForType:currentType]];
@@ -1451,7 +1435,7 @@ enum{
     
     NSString *currentType = [publication pubType];
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSMutableSet *nonNilFields = [NSMutableSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
+    NSMutableSet *nonNilFields = [NSMutableSet setWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
 	[nonNilFields addObjectsFromArray:[typeMan requiredFieldsForType:currentType]];
 	[nonNilFields addObjectsFromArray:[typeMan optionalFieldsForType:currentType]];
 	[nonNilFields addObjectsFromArray:[typeMan userDefaultFieldsForType:currentType]];
@@ -1802,42 +1786,12 @@ enum{
     }
 }
 
-- (void)moveFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSDictionary *info = (NSDictionary *)contextInfo;
-    if (returnCode == NSAlertDefaultReturn) {
-        NSArray *paperInfos = [NSArray arrayWithObject:info];
-        NSString *fieldName = [info objectForKey:@"fieldName"];
-        [[BDSKFiler sharedFiler] movePapers:paperInfos forField:fieldName fromDocument:[self document] options:0];
-    }
-    [info release];
-}
-
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
     NSString *oldValue = [[[publication valueOfField:fieldName] copy] autorelease];
-    BOOL isLocalFile = [fieldName isLocalFileField];
-    NSURL *oldURL = (isLocalFile) ? [[publication URLForField:fieldName] fileURLByResolvingAliases] : nil;
     
     [publication setField:fieldName toValue:value];
     
-    int autoGenerateStatus = [self userChangedField:fieldName from:oldValue to:value];
-	
-    if (isLocalFile && (autoGenerateStatus & 2) == 0) {
-        NSString *newPath = [publication localFilePathForField:fieldName];
-        if (oldURL != nil && newPath != nil && [[NSFileManager defaultManager] fileExistsAtPath:newPath] == NO) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move File?", @"Message in alert dialog when changing a local file field") 
-                                             defaultButton:NSLocalizedString(@"Yes", @"Button title") 
-                                           alternateButton:NSLocalizedString(@"No", @"Button title") 
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked file to the new location?", @"Informative text in alert dialog when changing a local file field") ];
-
-            // info is released in callback
-            NSArray *info = [[NSDictionary alloc] initWithObjectsAndKeys:publication, @"paper", [oldURL path], @"oldPath", newPath, @"newPath", fieldName, @"fieldName", nil];
-            [alert beginSheetModalForWindow:[self window]
-                              modalDelegate:self
-                             didEndSelector:@selector(moveFileAlertDidEnd:returnCode:contextInfo:)
-                                contextInfo:info];
-        }
-    }
+    [self userChangedField:fieldName from:oldValue to:value];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
@@ -1880,7 +1834,7 @@ enum{
 		requiredFields = [[NSApp delegate] requiredFieldsForCiteKey];
 		tooltip = NSLocalizedString(@"The cite key needs to be generated.", @"Tool tip message");
 	} else if ([identifier isEqualToString:@"NeedsToBeFiled"]) {
-		requiredFields = [[NSApp delegate] requiredFieldsForLocalUrl];
+		requiredFields = [[NSApp delegate] requiredFieldsForLocalFile];
 		tooltip = NSLocalizedString(@"The linked file needs to be filed.", @"Tool tip message");
 	} else {
 		return nil;
@@ -1911,7 +1865,7 @@ enum{
 }
 
 - (void)needsToBeFiledDidChange:(NSNotification *)notification{
-	if ([publication needsToBeFiled] == YES) {
+	if ([[publication filesToBeFiled] count]) {
 		[self setStatus:NSLocalizedString(@"Linked file needs to be filed.",@"Linked file needs to be filed.")];
 		if ([[statusBar iconIdentifiers] containsObject:@"NeedsToBeFiled"] == NO) {
 			NSString *tooltip = NSLocalizedString(@"The linked file needs to be filed.", @"Tool tip message");
@@ -1932,13 +1886,6 @@ enum{
 	} else {
 		[statusBar removeIconWithIdentifier:@"NeedsToGenerateCiteKey"];
 	}
-}
-
-- (BOOL)autoFilePaper{
-	BOOL didFile = [publication autoFilePaper];
-    if(didFile)
-		[self setStatus:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
-    return didFile;
 }
 
 - (void)bibDidChange:(NSNotification *)notification{
@@ -1967,6 +1914,10 @@ enum{
 			return;
 		}
 	}
+	else if([changeType isEqualToString:@"Add/Del File"]){
+        [fileView reloadIcons];
+        return;
+    }
 	
     // Rebuild the form if the crossref changed, or our parent's cite key changed.
 	if([changeKey isEqualToString:BDSKCrossrefString] || 
@@ -1977,9 +1928,6 @@ enum{
 		[self setupForm];
 		[[self window] setTitle:[publication displayTitle]];
 		[authorTableView reloadData];
-		pdfSnoopViewLoaded = NO;
-		webSnoopViewLoaded = NO;
-		[self fixURLs];
 		return;
 	}
 
@@ -2022,15 +1970,7 @@ enum{
 		}
 	}
 	
-	if([changeKey isEqualToString:BDSKLocalUrlString]){
-		pdfSnoopViewLoaded = NO;
-		[self fixURLs];
-	}
-	else if([changeKey isEqualToString:BDSKUrlString]){
-		webSnoopViewLoaded = NO;
-		[self fixURLs];
-	}
-	else if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString]){
+    if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString]){
 		[[self window] setTitle:[publication displayTitle]];
 	}
 	else if([changeKey isPersonField]){
@@ -2114,6 +2054,10 @@ enum{
 			[entry setObjectValue:value];
         }
 	}    
+}
+
+- (void)fileURLDidChange:(NSNotification *)notification{
+    [fileView reloadIcons];
 }
 
 #pragma mark annote/abstract/rss
@@ -2228,46 +2172,6 @@ enum{
     [[self document] createNewPubUsingCrossrefForItem:publication];
 }
 
-- (void)deletePubAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if (alert != nil && [alert checkValue] == YES) {
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnDeleteKey];
-	}
-    if (returnCode == NSAlertOtherReturn)
-        return;
-    
-	[[self undoManager] setActionName:NSLocalizedString(@"Delete Publication", @"Undo action name")];
-    [[self document] setStatus:NSLocalizedString(@"Deleted 1 publication",@"Status message") immediate:NO];
-	[[self document] removePublication:publication];
-}
-
-- (IBAction)deletePub:(id)sender{
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnDeleteKey]) {
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Delete Publication", @"Message in alert dialog when deleting a publication")
-											 defaultButton:NSLocalizedString(@"OK", @"Button title")
-										   alternateButton:nil
-											   otherButton:NSLocalizedString(@"Cancel", @"Button title")
-								 informativeTextWithFormat:NSLocalizedString(@"Are you sure you want to delete the current item?", @"Informative text in alert dialog")];
-		[alert setHasCheckButton:YES];
-		[alert setCheckValue:NO];
-        [alert beginSheetModalForWindow:[self window]
-                          modalDelegate:self
-                         didEndSelector:@selector(deletePubAlertDidEnd:returnCode:contextInfo:) 
-                            contextInfo:NULL];
-	} else {
-        [self deletePubAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
-    }
-}
-
-- (IBAction)editPreviousPub:(id)sender{
-    BibEditor *editor = [[self document] editPubBeforePub:publication];
-    [editor setKeyField:[self keyField]];
-}
-
-- (IBAction)editNextPub:(id)sender{
-    BibEditor *editor = [[self document] editPubAfterPub:publication];
-    [editor setKeyField:[self keyField]];
-}
-
 #pragma mark BDSKForm delegate methods
 
 - (void)doubleClickedTitleOfFormCell:(id)cell{
@@ -2279,39 +2183,9 @@ enum{
 	[self openParentItemForField:[field isEqualToString:BDSKCrossrefString] ? nil : field];
 }
 
-- (void)iconClickedInFormCell:(id)cell{
-    NSString *field = [cell representedObject];
-    if ([field isLocalFileField])
-        [[NSWorkspace sharedWorkspace] openLinkedFile:[publication localFilePathForField:field]];
-    else
-        [[NSWorkspace sharedWorkspace] openURL:[publication URLForField:field]];
-}
-
 - (BOOL)formCellHasArrowButton:(id)cell{
 	return ([[publication valueOfField:[cell representedObject]] isInherited] || 
 			([[cell representedObject] isEqualToString:BDSKCrossrefString] && [publication crossrefParent]));
-}
-
-- (BOOL)formCellHasFileIcon:(id)cell{
-    NSString *title = [cell representedObject];
-    if ([title isURLField]) {
-		// if we inherit a field, we don't show the file icon but the arrow button
-		NSString *url = [publication valueOfField:title inherit:NO];
-		// we could also check for validity here
-		if (![NSString isEmptyString:url])
-			return YES;
-	}
-	return NO;
-}
-
-- (NSImage *)fileIconForFormCell:(id)cell{
-    // we can assume that this cell should have a file icon
-    return [publication imageForURLField:[cell representedObject]];
-}
-
-- (NSImage *)dragIconForFormCell:(id)cell{
-    // we can assume that this cell should have a file icon
-    return [publication imageForURLField:[cell representedObject]];
 }
 
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
@@ -2401,42 +2275,21 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark dragging destination delegate methods
 
-- (NSDragOperation)canReceiveDrag:(id <NSDraggingInfo>)sender forField:(NSString *)field{
+- (NSDragOperation)dragOperation:(id <NSDraggingInfo>)sender forField:(NSString *)field{
 	NSPasteboard *pboard = [sender draggingPasteboard];
     id dragSource = [sender draggingSource];
     NSString *dragSourceField = nil;
 	NSString *dragType;
 	
-    if(dragSource == viewLocalButton)
-        dragSourceField = BDSKLocalUrlString;
-    else if(dragSource == viewRemoteButton)
-        dragSourceField = BDSKUrlString;
-    else if(dragSource == bibFields)
+    if(dragSource == bibFields)
         dragSourceField = [[bibFields dragSourceCell] representedObject];
     
     if ([field isEqualToString:dragSourceField])
         return NSDragOperationNone;
     
-	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
-	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, BDSKBibItemPboardType, nil]];
+	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
 	
-	if ([field isLocalFileField]) {
-		if ([dragType isEqualToString:NSFilenamesPboardType] || [dragType isEqualToString:NSURLPboardType] || [dragType isEqualToString:BDSKWeblocFilePboardType]) {
-			return NSDragOperationEvery;
-		}
-		return NSDragOperationNone;
-	} else if ([field isRemoteURLField]){
-		if ([dragType isEqualToString:BDSKWeblocFilePboardType]) {
-			return NSDragOperationEvery;
-		} else if ([dragType isEqualToString:NSURLPboardType]) {
-			// a file puts NSFilenamesPboardType and NSURLPboardType on the pasteboard
-			// we really only want to receive webloc files for remote URLs, not file URLs
-			NSURL *remoteURL = [NSURL URLFromPasteboard:pboard];
-			if(remoteURL && ![remoteURL isFileURL])
-				return NSDragOperationEvery;
-		}
-        return NSDragOperationNone;
-	} else if ([field isCitationField]){
+    if ([field isCitationField]){
 		if ([dragType isEqualToString:BDSKBibItemPboardType]) {
 			return NSDragOperationEvery;
         }
@@ -2456,84 +2309,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSPasteboard *pboard = [sender draggingPasteboard];
 	NSString *dragType;
     
-	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
-	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, BDSKBibItemPboardType, nil]];
+	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
     
-	if ([field isLocalFileField]) {
-		// a file, we link the local file field
-		NSURL *theURL = nil;
-		
-		if ([dragType isEqualToString:NSFilenamesPboardType]) {
-			NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-			if ([fileNames count])
-				theURL = [NSURL fileURLWithPath:[[fileNames objectAtIndex:0] stringByExpandingTildeInPath]];
-		} else if ([dragType isEqualToString:BDSKWeblocFilePboardType]) {
-			NSString *theURLString = [pboard stringForType:BDSKWeblocFilePboardType];
-            theURL = [NSURL URLWithString:theURLString];
-		} else if ([dragType isEqualToString:NSURLPboardType]) {
-			theURL = [NSURL URLFromPasteboard:pboard];
-		}
-        
-        if (theURL == nil || [theURL isEqual:[publication URLForField:field]]) {
-			return NO;
-        } else if (NO == [theURL isFileURL]) {
-            [self downloadURL:theURL forField:field];
-            return YES;
-        }
-        
-        NSString *oldValue = [[[publication valueOfField:field] retain] autorelease];
-        NSString *newValue = [theURL absoluteString];
-        BOOL didFile = NO;
-        
-		[publication setField:field toValue:[theURL absoluteString]];
-		
-        if ([field isEqualToString:BDSKLocalUrlString])
-            didFile = [self autoFilePaper];
-        
-        [self userChangedField:field from:oldValue to:newValue didAutoGenerate:didFile ? 2 : 0];
-        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-        
-		return YES;
-		
-	} else if ([field isRemoteURLField]){
-		// Check first for webloc files because we want to treat them differently    
-		if ([dragType isEqualToString:BDSKWeblocFilePboardType]) {
-			
-			NSString *remoteURLString = [pboard stringForType:BDSKWeblocFilePboardType];
-            NSString *oldValue = [[[publication valueOfField:field] retain] autorelease];
-			
-			if (remoteURLString == nil ||
-				[[NSURL URLWithString:remoteURLString] isEqual:[publication remoteURLForField:field]])
-				return NO;
-			
-            [publication setField:field toValue:remoteURLString];
-            
-            [self userChangedField:field from:oldValue to:remoteURLString];
-			[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-
-			return YES;
-			
-		} else if ([dragType isEqualToString:NSURLPboardType]) {
-			// a URL but not a file, we link the remote Url field
-			NSURL *remoteURL = [NSURL URLFromPasteboard:pboard];
-			
-			if (remoteURL == nil || [remoteURL isFileURL] ||
-				[remoteURL isEqual:[publication remoteURLForField:field]])
-				return NO;
-			
-            NSString *oldValue = [[[publication valueOfField:field] retain] autorelease];
-            NSString *newValue = [remoteURL absoluteString];
-			
-			[publication setField:field toValue:newValue];
-            
-            [self userChangedField:field from:oldValue to:newValue];
-			[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-			
-			return YES;
-			
-		}
-		
-	} else if ([field isCitationField]){
+    if ([field isCitationField]){
         
 		if ([dragType isEqualToString:BDSKBibItemPboardType]) {
             
@@ -2608,29 +2386,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	return NO;
 }
 
-- (NSDragOperation)imagePopUpButton:(BDSKImagePopUpButton *)view canReceiveDrag:(id <NSDraggingInfo>)sender{
-	if (view == [sender draggingSource])
-		return NSDragOperationNone;
-	NSString *field = nil;
-	if (view == viewLocalButton)
-		field = BDSKLocalUrlString;
-	else if (view == viewRemoteButton)
-		field = BDSKUrlString;
-	return [self canReceiveDrag:sender forField:field];
-}
-
-- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view receiveDrag:(id <NSDraggingInfo>)sender{
-	NSString *field = nil;
-	if (view == viewLocalButton)
-		field = BDSKLocalUrlString;
-	else if (view == viewRemoteButton)
-		field = BDSKUrlString;
-	return [self receiveDrag:sender forField:field];
-}
-
-- (NSDragOperation)canReceiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
+- (NSDragOperation)dragOperation:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
 	NSString *field = [cell representedObject];
-	return [self canReceiveDrag:sender forField:field];
+	return [self dragOperation:sender forField:field];
 }
 
 - (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
@@ -2667,7 +2425,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (BOOL)dragWindow:(BDSKDragWindow *)window receiveDrag:(id <NSDraggingInfo>)sender{
     
     NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSURLPboardType, BDSKBibItemPboardType, NSStringPboardType, nil]];
+	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
 	NSArray *draggedPubs = nil;
     BOOL hasTemporaryCiteKey = NO;
     
@@ -2675,7 +2433,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		NSString *pbString = [pboard stringForType:NSStringPboardType];
         NSError *error = nil;
         // this returns nil when there was a parser error and the user didn't decide to proceed anyway
-        draggedPubs = [[self document] newPublicationsForString:pbString type:[pbString contentStringType] verbose:YES error:&error];
+        draggedPubs = [[self document] newPublicationsForString:pbString type:[pbString contentStringType] error:&error];
         // we ignore warnings for parsing with temporary keys, but we want to ignore the cite key in that case
         if([[error userInfo] objectForKey:@"temporaryCiteKey"] != nil){
             hasTemporaryCiteKey = YES;
@@ -2784,401 +2542,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	if (dragFieldEditor == nil) {
 		dragFieldEditor = [[BDSKFieldEditor alloc] init];
         if (isEditable)
-            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, BDSKBibItemPboardType, nil]];
+            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
 	}
 	return dragFieldEditor;
-}
-
-#pragma mark dragging source delegate methods
-
-- (BOOL)writeDataToPasteboard:(NSPasteboard *)pboard forField:(NSString *)field {
-
-    NSURL *url = [publication URLForField:field];
-	
-	if (url == nil)
-		return NO;
-	
-	[self setPromisedDragURL:url];
-	
-	NSArray *types = nil;
-	NSString *pathExtension = @"";
-	
-	if([url isFileURL]){
-		NSString *path = [url path];
-		pathExtension = [path pathExtension];
-		types = [NSArray arrayWithObjects:NSURLPboardType, NSFilesPromisePboardType, nil];
-		[pboard declareTypes:types owner:nil];
-		[url writeToPasteboard:pboard];
-		[self setPromisedDragFilename:[path lastPathComponent]];
-		[pboard setPropertyList:[NSArray arrayWithObject:promisedDragFilename] forType:NSFilesPromisePboardType];
-	} else {
-		NSString *filename = [publication displayTitle];
-		if ([NSString isEmptyString:filename])
-			filename = @"Remote URL";
-		pathExtension = @"webloc";
-		types = [NSArray arrayWithObjects:NSURLPboardType, NSFilesPromisePboardType, nil];
-		[pboard declareTypes:types owner:nil];
-		[url writeToPasteboard:pboard];
-		[self setPromisedDragFilename:[filename stringByAppendingPathExtension:@"webloc"]];
-		[pboard setPropertyList:[NSArray arrayWithObject:promisedDragFilename] forType:NSFilesPromisePboardType];
-	}
-	
-	return YES;
-}
-
-- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forField:(NSString *)field {
-    NSString *dstPath = [dropDestination path];
-    
-    // queue the file creation so we don't block while waiting for this method to return
-	// console warnings can occur but are harmless
-    if([promisedDragURL isFileURL]){
-        [[OFMessageQueue mainQueue] queueSelector:@selector(copyPath:toPath:handler:) 
-                                        forObject:[NSFileManager defaultManager]
-                                       withObject:[promisedDragURL path]
-                                       withObject:[dstPath stringByAppendingPathComponent:promisedDragFilename]
-                                       withObject:nil];
-    } else {
-        [[OFMessageQueue mainQueue] queueSelector:@selector(createWeblocFileAtPath:withURL:) 
-                                        forObject:[NSFileManager defaultManager]
-                                       withObject:[dstPath stringByAppendingPathComponent:promisedDragFilename]
-                                       withObject:promisedDragURL];
-    }
-    
-    return [NSArray arrayWithObject:promisedDragFilename];
-}
-
-- (void)cleanUpAfterDragOperation:(NSDragOperation)operation forField:(NSString *)field {
-    [self setPromisedDragURL:nil];
-    [self setPromisedDragFilename:nil];
-}
-
-- (BOOL)writeDataToPasteboard:(NSPasteboard *)pasteboard forFormCell:(id)cell {
-	NSString *field = [cell representedObject];
-	return [self writeDataToPasteboard:pasteboard forField:field];
-}
-
-- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forFormCell:(id)cell {
-	NSString *field = [cell representedObject];
-	return [self namesOfPromisedFilesDroppedAtDestination:dropDestination forField:field];
-}
-
-- (void)cleanUpAfterDragOperation:(NSDragOperation)operation forFormCell:(id)cell {
-	NSString *field = [cell representedObject];
-	[self cleanUpAfterDragOperation:operation forField:field];
-}
-
-- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view writeDataToPasteboard:(NSPasteboard *)pasteboard {
-	NSString *field = nil;
-	if (view == viewLocalButton)
-		field = BDSKLocalUrlString;
-	else if (view == viewRemoteButton)
-		field = BDSKUrlString;
-	if (field != nil)
-		return [self writeDataToPasteboard:pasteboard forField:field];
-	return NO;
-}
-
-- (NSArray *)imagePopUpButton:(BDSKImagePopUpButton *)view namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination {
-	NSString *field = nil;
-	if (view == viewLocalButton)
-		field = BDSKLocalUrlString;
-	else if (view == viewRemoteButton)
-		field = BDSKUrlString;
-	if (field != nil)
-		return [self namesOfPromisedFilesDroppedAtDestination:dropDestination forField:field];
-	return nil;
-}
-
-- (void)imagePopUpButton:(BDSKImagePopUpButton *)view cleanUpAfterDragOperation:(NSDragOperation)operation {
-	NSString *field = nil;
-	if (view == viewLocalButton)
-		field = BDSKLocalUrlString;
-	else if (view == viewRemoteButton)
-		field = BDSKUrlString;
-	if (field != nil)
-		[self cleanUpAfterDragOperation:operation forField:field];
-}
-
-// used to cache the destination webloc file's URL
-- (void)setPromisedDragURL:(NSURL *)theURL{
-    [theURL retain];
-    [promisedDragURL release];
-    promisedDragURL = theURL;
-}
-
-// used to cache the filename (not the full path) of the promised file
-- (void)setPromisedDragFilename:(NSString *)theFilename{
-    if(promisedDragFilename != theFilename){
-        [promisedDragFilename release];
-        promisedDragFilename = [theFilename copy];
-    }
-}
-
-#pragma mark snoop drawer stuff
-
-// update the arrow image direction when the window changes
-- (void)windowDidMove:(NSNotification *)aNotification{
-    [self updateDocumentSnoopButton];
-}
-
-- (void)windowDidResize:(NSNotification *)notification{
-    [self updateDocumentSnoopButton];
-}
-
-// this correctly handles multiple displays and doesn't depend on the drawer being loaded
-- (NSRectEdge)preferredDrawerEdge{
-    
-    if(drawerState & BDSKDrawerStateOpenMask)
-        return [documentSnoopDrawer edge];
-        
-    NSRect screenFrame = [[[self window] screen] visibleFrame];
-    NSRect windowFrame = [[self window] frame];
-    
-    float midScreen = NSMidX(screenFrame);
-    float midWindow = NSMidX(windowFrame);
-    
-    return ( (midWindow - midScreen) < 0 ? NSMaxXEdge : NSMinXEdge);
-}
-
-- (void)updateDocumentSnoopButton
-{
-	int requiredContent = [[documentSnoopButton selectedItem] tag];
-	int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
-    NSString *lurl = [publication localUrlPath];
-    NSURL *rurl = [publication remoteURL];
-	int state = requiredContent;
-	
-	if ((requiredContent == currentContent) && (drawerState & BDSKDrawerStateOpenMask))
-		state |= BDSKDrawerStateOpenMask;
-	if ([self preferredDrawerEdge] == NSMaxXEdge)
-        state |= BDSKDrawerStateRightMask;
-	
-	if (state == drawerButtonState)
-		return; // we don't need to change the button
-	
-	drawerButtonState = state;
-	
-	if ( (state & BDSKDrawerStateOpenMask) || 
-		 ((state & BDSKDrawerStateWebMask) && rurl) ||
-		 (!(state & BDSKDrawerStateWebMask) && lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]) ) {
-		
-		NSImage *drawerImage = [NSImage imageNamed:@"drawerRight"];
-		NSImage *arrowImage = [NSImage imageNamed:@"drawerArrow"];
-		NSImage *badgeImage = nil;
-		
-		if (state & BDSKDrawerStateWebMask)
-			badgeImage = [NSImage genericInternetLocationImage];
-		else if (state & BDSKDrawerStateTextMask)
-			badgeImage = [NSImage imageForFileType:@"txt"];
-		else
-			badgeImage = [publication imageForURLField:BDSKLocalUrlString];
-		
-		NSRect iconRect = NSMakeRect(0, 0, 32, 32);
-		NSSize arrowSize = [arrowImage size];
-		NSRect arrowRect = {NSZeroPoint, arrowSize};
-		NSRect arrowDrawRect = NSMakeRect(29 - arrowSize.width, ceilf(0.5f * (32-arrowSize.height)), arrowSize.width, arrowSize.height);
-		NSRect badgeRect = {NSZeroPoint, [badgeImage size]};
-		NSRect badgeDrawRect = NSMakeRect(15, 0, 16, 16);
-		NSImage *image = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
-		
-		if (state & BDSKDrawerStateRightMask) {
-			if (state & BDSKDrawerStateOpenMask)
-				arrowImage = [arrowImage imageFlippedHorizontally];
-		} else {
-			arrowDrawRect.origin.x = 3;
-			badgeDrawRect.origin.x = 1;
-			drawerImage = [drawerImage imageFlippedHorizontally];
-			if (!(state & BDSKDrawerStateOpenMask))
-				arrowImage = [arrowImage imageFlippedHorizontally];
-		}
-		
-		[image lockFocus];
-		[drawerImage drawInRect:iconRect fromRect:iconRect  operation:NSCompositeSourceOver  fraction: 1.0];
-		[badgeImage drawInRect:badgeDrawRect fromRect:badgeRect  operation:NSCompositeSourceOver  fraction: 1.0];
-		[arrowImage drawInRect:arrowDrawRect fromRect:arrowRect  operation:NSCompositeSourceOver  fraction: 1.0];
-		[image unlockFocus];
-		
-        [documentSnoopButton fadeIconImageToImage:image];
-		
-		if (state & BDSKDrawerStateOpenMask) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close drawer", @"Tool tip message")];
-		} else if (state & BDSKDrawerStateWebMask) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View remote URL in drawer", @"Tool tip message")];
-		} else if (state & BDSKDrawerStateTextMask) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View file as text in drawer", @"Tool tip message")];
-		} else {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View file in drawer", @"Tool tip message")];
-		}
-		
-		[documentSnoopButton setIconActionEnabled:YES];
-	}
-	else {
-        [documentSnoopButton setIconImage:[NSImage imageNamed:@"drawerDisabled"]];
-		
-		if (state & BDSKDrawerStateOpenMask) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close drawer", @"Tool tip message")];
-		} else {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Choose content to view in drawer", @"Tool tip message")];
-		}
-		
-		[documentSnoopButton setIconActionEnabled:NO];
-	}
-}
-
-- (void)updateSnoopDrawerContent{
-    NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
-    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:lurl];
-
-	if ([[documentSnoopDrawer contentView] isEqual:pdfSnoopContainerView]) {
-
-		if (!lurl || pdfSnoopViewLoaded) return;
-
-        // see what type this is; we can open PDF or PS
-        // check the UTI instead of the file extension (10.4 only)
-        
-        NSError *readError = nil;
-        NSData *fileData = [NSData dataWithContentsOfURL:lurl options:NSUncachedRead error:&readError];
-        if(fileData == nil)
-            [[self window] presentError:readError];
-        
-        BOOL isPostScript = NO;
-        
-        if(theUTI == nil){
-            // some error occurred, so we'll assume it's PDF and carry on
-            NSLog(@"%@: error occurred getting UTI of %@", __FILENAMEASNSSTRING__, lurl);
-        } else if([theUTI isEqualToUTI:@"com.adobe.postscript"]){
-            isPostScript = YES;
-        } else if([theUTI isEqualToUTI:@"com.pkware.zip-archive"] || [theUTI isEqualToUTI:@"org.gnu.gnu-zip-archive"]){    
-            // OmniFoundation supports zip, gzip, and bzip2, AFAICT, but we have no UTI for bzip2
-            OBPRECONDITION([fileData mightBeCompressed]);
-            
-            // try to decompress; OmniFoundation raises a variety of exceptions if this fails, so we'll just discard all of them
-            @try {
-                fileData = [fileData decompressedData];
-            }
-            @catch( id exception ){
-                NSLog(@"discarding exception %@ raised while attempting to decompress file at %@", exception, [lurl path]);
-                fileData = nil;
-            }
-            
-            // since we don't have an actual file on disk, we can't rely on LS to return the file type, so fall back to checking the extension
-            NSString *nextToLastExtension = [[[lurl path] stringByDeletingPathExtension] pathExtension];
-            OBPRECONDITION([NSString isEmptyString:nextToLastExtension] == NO);
-            
-            theUTI = [[NSWorkspace sharedWorkspace] UTIForPathExtension:nextToLastExtension];
-            if([theUTI isEqualToUTI:@"com.adobe.postscript"])
-                isPostScript = YES;
-        }
-        
-        PDFDocument *pdfDocument = isPostScript ? [[PDFDocument alloc] initWithPostScriptData:fileData] : [[PDFDocument alloc] initWithData:fileData];
-        
-        // if unable to create a PDFDocument from the given URL, display a warning message
-        if(pdfDocument == nil){
-            NSData *pdfData = [[BDSKPreviewer sharedPreviewer] PDFDataWithString:NSLocalizedString(@"Unable to determine file type, or an error occurred reading the file.  Only PDF and PostScript files can be displayed in the drawer at present.", @"Message for Local-Url preview") color:[NSColor redColor]];
-            pdfDocument = [[PDFDocument alloc] initWithData:pdfData];
-        }
-        
-        id pdfView = [[pdfSnoopContainerView subviews] objectAtIndex:0];
-        [(BDSKZoomablePDFView *)pdfView setDocument:pdfDocument];
-        [pdfDocument release];
-        pdfSnoopViewLoaded = YES;
-	}
-	else if ([[documentSnoopDrawer contentView] isEqual:textSnoopContainerView]) {
-		NSMutableString *path = [[[lurl path] mutableCopy] autorelease];
-        
-        if([NSString isEmptyString:path] == NO && [theUTI isEqualToUTI:(NSString *)kUTTypePDF]){
-            // escape single quotes that may be in the path; other characters should be handled by quoting in the command string
-            [path replaceOccurrencesOfString:@"\'" withString:@"\\\'" options:0 range:NSMakeRange(0, [path length])];
-            
-            NSString *cmdString = [[NSBundle mainBundle] pathForResource:@"pdftotext" ofType:nil];
-            cmdString = [NSString stringWithFormat:@"%@ -f 1 -l 1 \'%@\' -", cmdString, path];
-            NSString *textSnoopString = [BDSKShellTask runShellCommand:cmdString withInputString:nil];
-            if([NSString isEmptyString:textSnoopString])
-                [documentSnoopTextView setString:NSLocalizedString(@"Unable to convert this file to text.  It may be a scanned image, or perhaps it's not a PDF file.", @"Message for Local-Url preview")];
-            else
-                [documentSnoopTextView setString:textSnoopString];
-        } else {
-            [documentSnoopTextView setString:NSLocalizedString(@"This entry does not have a Local-Url.", @"Message for Local-Url preview")];
-        }
-	}
-	else if ([[documentSnoopDrawer contentView] isEqual:webSnoopContainerView]) {
-		if (!webSnoopViewLoaded) {
-			NSURL *rurl = [publication remoteURL];
-			if (rurl == nil) return;
-			[[remoteSnoopWebView mainFrame] loadRequest:[NSURLRequest requestWithURL:rurl]];
-			webSnoopViewLoaded = YES;
-		}
-	}
-}
-
-- (void)toggleSnoopDrawer:(id)sender{
-	int requiredContent = [sender tag];
-	int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
-	
-	if (documentSnoopDrawer == nil) {
-		if ([NSBundle loadNibNamed:@"BibEditorDrawer" owner:self] == NO) {
-			[statusBar setStringValue:NSLocalizedString(@"Unable to load the drawer.", @"Message for Local-Url preview")];
-			return;
-		}
-	}
-	
-	// we force a reload, as the user might have browsed
-	if (requiredContent & BDSKDrawerStateWebMask) 
-		webSnoopViewLoaded = NO;
-	
-    // sometimes the drawer is determined to open on the side with less screen available, so we'll set the edge manually (sending -[NSDrawer setPreferredEdge:] is unreliable)
-    NSRectEdge edge = ([documentSnoopDrawer state] == NSDrawerOpenState ? [documentSnoopDrawer edge] : [self preferredDrawerEdge]);
-    
-    if (edge == NSMaxXEdge)
-		drawerState |= BDSKDrawerStateRightMask;
-    
-	drawerState = requiredContent;
-	
-	if (currentContent == requiredContent) {
-		if ([documentSnoopDrawer state] == NSDrawerClosedState || [documentSnoopDrawer state] == NSDrawerClosingState){
-			drawerState |= BDSKDrawerStateOpenMask;
-            [documentSnoopDrawer openOnEdge:edge];
-        } else {
-            [documentSnoopDrawer close:sender];
-        }
-	} else {
-		drawerState |= BDSKDrawerStateOpenMask;
-		if (requiredContent & BDSKDrawerStateTextMask) 
-			[documentSnoopDrawer setContentView:textSnoopContainerView];
-		else if (requiredContent & BDSKDrawerStateWebMask) 
-			[documentSnoopDrawer setContentView:webSnoopContainerView];
-		else
-			[documentSnoopDrawer setContentView:pdfSnoopContainerView];
-		[documentSnoopDrawer close:sender];
-		[documentSnoopDrawer openOnEdge:edge];
-	}
-	
-	// we remember the last item that was selected in the preferences, so it sticks between windows
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:[documentSnoopButton indexOfSelectedItem]
-													   forKey:BDSKSnoopDrawerContentKey];
-}
-
-- (void)drawerWillOpen:(NSNotification *)notification{
-	[self updateSnoopDrawerContent];
-	
-	if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSizeKey] != nil)
-        [documentSnoopDrawer setContentSize:NSSizeFromString([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSizeKey])];
-    [[[[documentSnoopDrawer contentView] subviews] firstObject] scrollToTop];
-    
-    [self updateDocumentSnoopButton];
-}
-
-- (void)drawerWillClose:(NSNotification *)notification{
-    id firstResponder = [[self window] firstResponder];
-    if([firstResponder respondsToSelector:@selector(window)] == NO || [firstResponder window] != [self window])
-        [[self window] makeFirstResponder:nil]; // this is necessary to avoid a crash after browsing
-	
-    [self updateDocumentSnoopButton];
-}
-
-- (NSSize)drawerWillResizeContents:(NSDrawer *)sender toSize:(NSSize)contentSize{
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:NSStringFromSize(contentSize) forKey:BDSKSnoopDrawerSavedSizeKey];
-    return contentSize;
 }
 
 - (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -3215,11 +2581,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if(![publication hasBeenEdited]){
         errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to keep it?", @"Informative text in alert dialog");
     // case 2: cite key hasn't been set, and paper needs to be filed
-    }else if([publication hasEmptyOrDefaultCiteKey] && [publication needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([publication hasEmptyOrDefaultCiteKey] && [[publication filesToBeFiled] count] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 3: only the paper needs to be filed
-    }else if([publication needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([[publication filesToBeFiled] count] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 4: only the cite key needs to be set
@@ -3245,15 +2611,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    // cancel download for local file
-    [self cancelDownload];
-    
     // @@ this finalizeChanges seems redundant now that it's in windowShouldClose:
 	[self finalizeChangesPreservingSelection:NO];
     
     // close so it's not hanging around by itself; this works if the doc window closes, also
     [macroTextFieldWC close];
-    [documentSnoopDrawer close]; 
     
 	// this can give errors when the application quits when an editor window is open
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
@@ -3263,257 +2625,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // see method for notes
     [self breakTextStorageConnections];
     
+    [fileView removeObserver:self forKeyPath:@"iconScale"];
+    
     // @@ problem here:  BibEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
     [[self retain] autorelease];
-}
-
-- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
-	NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:8];
-	NSMenuItem *item;
-	
-	NSEnumerator *iEnum = [defaultMenuItems objectEnumerator];
-	while (item = [iEnum nextObject]) { 
-		if ([item tag] == WebMenuItemTagCopy ||
-			[item tag] == WebMenuItemTagCopyImageToClipboard) {
-			
-			[menuItems addObject:item];
-		} else if ([item tag] == WebMenuItemTagCopyLinkToClipboard) {
-			NSURL *linkURL = [element objectForKey:WebElementLinkURLKey];
-			
-            [menuItems addObject:item];
-        
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Link As Local File",@"Save link as local file") stringByAppendingEllipsis]
-                                            action:@selector(downloadLinkedFileAsLocalUrl:)
-                                     keyEquivalent:@""];
-			[item setTarget:self];
-			[item setRepresentedObject:linkURL];
-			[menuItems addObject:[item autorelease]];
-        }
-	}
-	if ([menuItems count] > 0) 
-		[menuItems addObject:[NSMenuItem separatorItem]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Back", @"Menu item title")
-									  action:@selector(goBack:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Forward", @"Menu item title")
-									  action:@selector(goForward:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reload", @"Menu item title")
-									  action:@selector(reload:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Stop", @"Menu item title")
-									  action:@selector(stopLoading:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Increase Text Size", @"Menu item title")
-									  action:@selector(makeTextLarger:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size", @"Menu item title")
-									  action:@selector(makeTextSmaller:)
-							   keyEquivalent:@""];
-	[menuItems addObject:[item autorelease]];
-	
-	[menuItems addObject:[NSMenuItem separatorItem]];
-	
-	item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Save as Local File", @"Menu item title")
-									  action:@selector(saveFileAsLocalUrl:)
-							   keyEquivalent:@""];
-	[item setTarget:self];
-	[menuItems addObject:[item autorelease]];
-	
-	return menuItems;
-}
-
-- (void)savePanelDidEnd:(NSSavePanel *)savePanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        WebDataSource *dataSource = [[remoteSnoopWebView mainFrame] dataSource];
-        if (nil == dataSource || [dataSource isLoading]) 
-            return;
-		
-        if ([[dataSource data] writeToFile:[savePanel filename] atomically:YES]) {
-			NSString *fileURLString = [[savePanel URL] absoluteString];
-            NSString *oldValue = [[[publication valueOfField:BDSKLocalUrlString inherit:NO] retain] autorelease];
-			
-			[publication setField:BDSKLocalUrlString toValue:fileURLString];
-			[self autoFilePaper];
-			
-            [self userChangedField:BDSKLocalUrlString from:oldValue to:fileURLString didAutoGenerate:0];
-			[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-		} else {
-			NSLog(@"Could not write file from web.");
-		}
-    }
-}
-
-- (void)saveFileAsLocalUrl:(id)sender{
-	WebDataSource *dataSource = [[remoteSnoopWebView mainFrame] dataSource];
-	if (nil == dataSource || [dataSource isLoading]) 
-		return;
-	
-	NSString *filename = [[[dataSource request] URL] lastPathComponent];
-	NSString *extension = [filename pathExtension];
-   
-	NSSavePanel *sPanel = [NSSavePanel savePanel];
-    if (NO != [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
-	
-    [sPanel beginSheetForDirectory:nil
-                              file:filename
-                    modalForWindow:[self window]
-                     modalDelegate:self
-                    didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
-                       contextInfo:nil];
-}
-
-- (void)downloadLinkedFileAsLocalUrl:(id)sender{
-	NSURL *linkURL = (NSURL *)[sender representedObject];
-    [self downloadURL:linkURL forField:BDSKLocalUrlString];
-}
-
-#pragma mark URL downloading
-
-- (void)downloadURL:(NSURL *)linkURL forField:(NSString *)fieldName{
-    if (isDownloading)
-        return;
-	[downloadFieldName release];
-    downloadFieldName = [fieldName copy];
-    if (linkURL) {
-		download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self];
-	}
-	if (nil == download) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid or Unsupported URL", @"Message in alert dialog when unable to download file for Local-Url")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog")];
-        [alert beginSheetModalForWindow:[self window]
-                          modalDelegate:nil
-                         didEndSelector:NULL
-                            contextInfo:NULL];
-	}
-}
-
-- (void)setDownloading:(BOOL)downloading{
-    if (isDownloading != downloading) {
-        isDownloading = downloading;
-        if (isDownloading) {
-			NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Status message"), 0] stringByAppendingEllipsis];
-            [statusBar startAnimation:self];
-			[self setStatus:message];
-            [downloadFileName release];
-			downloadFileName = nil;
-        } else {
-            [statusBar stopAnimation:self];
-			[self setStatus:@""];
-            [download release];
-            download = nil;
-            receivedContentLength = 0;
-        }
-    }
-}
-
-- (void)cancelDownload{
-	[download cancel];
-	[self setDownloading:NO];
-}
-
-- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        [download setDestination:[sheet filename] allowOverwrite:YES];
-    } else {
-        [self cancelDownload];
-    }
-}
-
-#pragma mark NSURLDownloadDelegate methods
-
-- (void)downloadDidBegin:(NSURLDownload *)download{
-    [self setDownloading:YES];
-}
-
-- (NSWindow *)downloadWindowForAuthenticationSheet:(WebDownload *)download{
-    return [self window];
-}
-
-- (void)download:(NSURLDownload *)theDownload didReceiveResponse:(NSURLResponse *)response{
-    expectedContentLength = [response expectedContentLength];
-}
-
-- (void)download:(NSURLDownload *)theDownload decideDestinationWithSuggestedFilename:(NSString *)filename{
-	NSString *extension = [filename pathExtension];
-   
-	NSSavePanel *sPanel = [NSSavePanel savePanel];
-    if (NO == [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
-	
-    [sPanel beginSheetForDirectory:nil
-                              file:filename
-                    modalForWindow:[self window]
-                     modalDelegate:self
-                    didEndSelector:@selector(saveDownloadPanelDidEnd:returnCode:contextInfo:)
-                       contextInfo:nil];
-}
-
-- (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned)length{
-    if (expectedContentLength > 0) {
-        receivedContentLength += length;
-        int percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
-		NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Tool tip message"), percent] stringByAppendingEllipsis];
-		[self setStatus:message];
-    }
-}
-
-- (BOOL)download:(NSURLDownload *)download shouldDecodeSourceDataOfMIMEType:(NSString *)encodingType;{
-    return YES;
-}
-
-- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path{
-    [downloadFileName release];
-	downloadFileName = [path copy];
-}
-
-- (void)downloadDidFinish:(NSURLDownload *)theDownload{
-    [self setDownloading:NO];
-	
-	NSString *fileURLString = [[NSURL fileURLWithPath:downloadFileName] absoluteString];
-    NSString *oldValue = [[[publication valueOfField:downloadFieldName inherit:NO] retain] autorelease];
-    
-    [publication setField:downloadFieldName toValue:fileURLString];
-    if ([downloadFieldName isEqualToString:BDSKLocalUrlString])
-        [self autoFilePaper];
-    
-    [self userChangedField:downloadFieldName from:oldValue to:fileURLString didAutoGenerate:0];
-	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-}
-
-- (void)download:(NSURLDownload *)theDownload didFailWithError:(NSError *)error
-{
-    [self setDownloading:NO];
-        
-    NSString *errorDescription = [error localizedDescription];
-    if (nil == errorDescription) {
-        errorDescription = NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
-    }
-    
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:errorDescription];
-    [alert beginSheetModalForWindow:[self window]
-                      modalDelegate:nil
-                     didEndSelector:NULL
-                        contextInfo:NULL];
 }
 
 #pragma mark undo manager
@@ -3581,113 +2696,164 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark Splitview delegate methods
 
-- (void)splitView:(OASplitView *)sender multipleClick:(NSEvent *)mouseEvent{
-    NSView *form = [[splitView subviews] objectAtIndex:0]; // form
-    NSView *matrix = [[splitView subviews] objectAtIndex:1]; // matrix
-    NSRect formFrame = [form frame];
-    NSRect matrixFrame = [matrix frame];
-    
-    if(NSHeight([matrix frame]) > 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-        lastMatrixHeight = NSHeight(matrixFrame); // cache this
-        formFrame.size.height += lastMatrixHeight;
-        matrixFrame.size.height = 0;
-    } else {
-        if(lastMatrixHeight <= 0)
-            lastMatrixHeight = NSHeight([extraBibFields frame]); // a reasonable value to start
-		matrixFrame.size.height = lastMatrixHeight;
-        formFrame.size.height = NSHeight([splitView frame]) - lastMatrixHeight - [splitView dividerThickness];
-		if (NSHeight(formFrame) < 1.0) {
-			formFrame.size.height = 1.0;
-			matrixFrame.size.height = NSHeight([splitView frame]) - [splitView dividerThickness] - 1.0;
-			lastMatrixHeight = NSHeight(matrixFrame);
-		}
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
+    if ([sender isEqual:mainSplitView]) {
+        NSView *tabs = [[mainSplitView subviews] objectAtIndex:0]; // tabs
+        NSView *files = [[mainSplitView subviews] objectAtIndex:1]; // files+authors
+        NSRect tabsFrame = [tabs frame];
+        NSRect filesFrame = [files frame];
+        
+        if(NSWidth(filesFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+            lastFileViewWidth = NSWidth(filesFrame); // cache this
+            tabsFrame.size.width += lastFileViewWidth;
+            filesFrame.size.width = 0.0;
+        } else {
+            if(lastFileViewWidth <= 0.0)
+                lastFileViewWidth = 150.0; // a reasonable value to start
+            filesFrame.size.width = lastFileViewWidth;
+            tabsFrame.size.width = NSWidth([mainSplitView frame]) - lastFileViewWidth - [mainSplitView dividerThickness];
+            if (NSWidth(tabsFrame) < 390.0) {
+                tabsFrame.size.width = 390.0;
+                filesFrame.size.width = NSWidth([mainSplitView frame]) - [mainSplitView dividerThickness] - 390.0;
+                lastFileViewWidth = NSWidth(filesFrame);
+            }
+        }
+        [tabs setFrame:tabsFrame];
+        [files setFrame:filesFrame];
+        [mainSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
+    } else if ([sender isEqual:fieldSplitView]) {
+        NSView *form = [[fieldSplitView subviews] objectAtIndex:0]; // form
+        NSView *matrix = [[fieldSplitView subviews] objectAtIndex:1]; // matrix
+        NSRect formFrame = [form frame];
+        NSRect matrixFrame = [matrix frame];
+        
+            if(NSHeight(matrixFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+            lastMatrixHeight = NSHeight(matrixFrame); // cache this
+            formFrame.size.height += lastMatrixHeight;
+                matrixFrame.size.height = 0.0;
+        } else {
+                if(lastMatrixHeight <= 0.0)
+                lastMatrixHeight = NSHeight([extraBibFields frame]); // a reasonable value to start
+                matrixFrame.size.height = lastMatrixHeight;
+                formFrame.size.height = NSHeight([fieldSplitView frame]) - lastMatrixHeight - [fieldSplitView dividerThickness];
+                if (NSHeight(formFrame) < 1.0) {
+                    formFrame.size.height = 1.0;
+                    matrixFrame.size.height = NSHeight([fieldSplitView frame]) - [fieldSplitView dividerThickness] - 1.0;
+                    lastMatrixHeight = NSHeight(matrixFrame);
+                }
+        }
+        [form setFrame:formFrame];
+        [matrix setFrame:matrixFrame];
+        [fieldSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fieldSplitView];
+    } else if ([sender isEqual:fileSplitView]) {
+        NSView *files = [[fileSplitView subviews] objectAtIndex:0]; // files
+        NSView *authors = [[fileSplitView subviews] objectAtIndex:1]; // authors
+        NSRect filesFrame = [files frame];
+        NSRect authorsFrame = [authors frame];
+        
+        if(NSHeight(authorsFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+            lastAuthorsHeight = NSHeight(authorsFrame); // cache this
+            filesFrame.size.height += lastMatrixHeight;
+            authorsFrame.size.height = 0.0;
+        } else {
+            if(lastAuthorsHeight <= 0.0)
+                lastAuthorsHeight = 150.0; // a reasonable value to start
+            authorsFrame.size.height = lastAuthorsHeight;
+            filesFrame.size.height = NSHeight([fileSplitView frame]) - lastAuthorsHeight - [fileSplitView dividerThickness];
+            if (NSHeight(filesFrame) < 0.0) {
+                filesFrame.size.height = 0.0;
+                authorsFrame.size.height = NSHeight([fileSplitView frame]) - [fileSplitView dividerThickness];
+                lastAuthorsHeight = NSHeight(authorsFrame);
+            }
+        }
+        [files setFrame:filesFrame];
+        [authors setFrame:authorsFrame];
+        [fileSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fileSplitView];
     }
-    [form setFrame:formFrame];
-    [matrix setFrame:matrixFrame];
-    [splitView adjustSubviews];
-	// fix for NSSplitView bug, which doesn't send this in adjustSubviews
-	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:splitView];
 }
 
 - (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
-	// don't lose the top edge of the splitter
-	return proposedMin + 1.0;
+    if ([sender isEqual:mainSplitView]) {
+        return fmaxf(proposedMin, 390.0);
+    } else if ([sender isEqual:fieldSplitView]) {
+        // don't lose the top edge of the splitter
+        return proposedMin + 1.0;
+    }
+    return proposedMin;
 }
 
 - (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize{
+    if ([sender isEqual:mainSplitView]) {
+        NSView *tabs = [[sender subviews] objectAtIndex:0]; // tabview
+        NSView *files = [[sender subviews] objectAtIndex:1]; // files+authors
+        NSRect tabsFrame = [tabs frame];
+        NSRect filesFrame = [files frame];
+        NSSize newSize = [sender frame].size;
+        
+        tabsFrame.size.width += newSize.width - oldSize.width;
+        if (NSWidth(tabsFrame) < 390.0) {
+            tabsFrame.size.width = 390.0;
+            filesFrame.size.width = newSize.width - [mainSplitView dividerThickness] - 390.0;
+            lastFileViewWidth = NSWidth(filesFrame);
+        }
+        [tabs setFrame:tabsFrame];
+        [files setFrame:filesFrame];
+        [mainSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
+    } else if ([sender isEqual:fieldSplitView]) {
     // keeps the matrix view at the same size and resizes the form view
-	NSView *form = [[sender subviews] objectAtIndex:0]; // form
+        NSView *form = [[sender subviews] objectAtIndex:0]; // form
     NSView *matrix = [[sender subviews] objectAtIndex:1]; // matrix
     NSRect formFrame = [form frame];
     NSRect matrixFrame = [matrix frame];
-	NSSize newSize = [sender frame].size;
-	
-	formFrame.size.height += newSize.height - oldSize.height;
-	if (NSHeight(formFrame) < 1.0) {
-		formFrame.size.height = 1.0;
-		matrixFrame.size.height = newSize.height - [splitView dividerThickness] - 1.0;
-		lastMatrixHeight = NSHeight(matrixFrame);
-	}
-    formFrame.size.width = matrixFrame.size.width = NSWidth([splitView frame]);
+        NSSize newSize = [sender frame].size;
+        
+        formFrame.size.height += newSize.height - oldSize.height;
+        if (NSHeight(formFrame) < 1.0) {
+            formFrame.size.height = 1.0;
+            matrixFrame.size.height = newSize.height - [fieldSplitView dividerThickness] - 1.0;
+            lastMatrixHeight = NSHeight(matrixFrame);
+        }
     [form setFrame:formFrame];
     [matrix setFrame:matrixFrame];
-    [splitView adjustSubviews];
-	// fix for NSSplitView bug, which doesn't send this in adjustSubviews
-	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:splitView];
+        [fieldSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fieldSplitView];
+    } else if ([sender isEqual:fileSplitView]) {
+        NSView *files = [[sender subviews] objectAtIndex:0]; // files
+        NSView *authors = [[sender subviews] objectAtIndex:1]; // authors
+        NSRect filesFrame = [files frame];
+        NSRect authorsFrame = [authors frame];
+        NSSize newSize = [sender frame].size;
+        
+        filesFrame.size.height += newSize.height - oldSize.height;
+        if (NSHeight(filesFrame) < 0.0) {
+            filesFrame.size.height = 0.0;
+            authorsFrame.size.height = newSize.height - [fileSplitView dividerThickness];
+            lastAuthorsHeight = NSHeight(authorsFrame);
+        }
+        [files setFrame:filesFrame];
+        [authors setFrame:authorsFrame];
+        [fileSplitView adjustSubviews];
+        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fileSplitView];
+    } else {
+        [sender adjustSubviews];
+    }
 }
 
 @end
 
 @implementation BibEditor (Private)
 
-- (void)setupDrawer {
-    
-    [documentSnoopDrawer setParentWindow:[self window]];
-    if (drawerState & BDSKDrawerStateTextMask)
-        [documentSnoopDrawer setContentView:textSnoopContainerView];
-    else if (drawerState & BDSKDrawerStateWebMask)
-        [documentSnoopDrawer setContentView:webSnoopContainerView];
-    else
-        [documentSnoopDrawer setContentView:pdfSnoopContainerView];
-    
-    [documentSnoopPDFView setScrollerSize:NSSmallControlSize];    
-}
-
 - (void)setupButtons {
-    
-    // Set the properties of viewLocalButton that cannot be set in IB
-	[viewLocalButton setShowsMenuWhenIconClicked:NO];
-	[[viewLocalButton cell] setAltersStateOfSelectedItem:NO];
-	[[viewLocalButton cell] setAlwaysUsesFirstItemAsSelected:YES];
-	[[viewLocalButton cell] setUsesItemFromMenu:NO];
-	[viewLocalButton setRefreshesMenu:YES];
-	[viewLocalButton setDelegate:self];
-    if (isEditable)
-        [viewLocalButton registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
-    
-	[viewLocalButton setMenu:[self menuForImagePopUpButton:viewLocalButton]];
-    
-	// Set the properties of viewRemoteButton that cannot be set in IB
-	[viewRemoteButton setShowsMenuWhenIconClicked:NO];
-	[[viewRemoteButton cell] setAltersStateOfSelectedItem:NO];
-	[[viewRemoteButton cell] setAlwaysUsesFirstItemAsSelected:YES];
-	[[viewRemoteButton cell] setUsesItemFromMenu:NO];
-	[viewRemoteButton setRefreshesMenu:YES];
-	[viewRemoteButton setDelegate:self];
-    if (isEditable)
-        [viewRemoteButton registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
-    
-	[viewRemoteButton setMenu:[self menuForImagePopUpButton:viewRemoteButton]];
-    
-	// Set the properties of documentSnoopButton that cannot be set in IB
-	[documentSnoopButton setShowsMenuWhenIconClicked:NO];
-	[[documentSnoopButton cell] setAltersStateOfSelectedItem:YES];
-	[[documentSnoopButton cell] setAlwaysUsesFirstItemAsSelected:NO];
-	[[documentSnoopButton cell] setUsesItemFromMenu:NO];
-	[[documentSnoopButton cell] setRefreshesMenu:NO];
-	
-	[documentSnoopButton setMenu:[self menuForImagePopUpButton:documentSnoopButton]];
-	[documentSnoopButton selectItemAtIndex:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey]];
     
     // Set the properties of actionMenuButton that cannot be set in IB
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
@@ -3800,7 +2966,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // align the cite key field with the form cells
     if([bibFields numberOfRows] > 0){
         [bibFields drawRect:NSZeroRect];// this forces the calculation of the titleWidth
-        float offset = [[bibFields cellAtIndex:0] titleWidth] + NSMinX([splitView frame]) + FORM_OFFSET + 4.0;
+        float offset = [[bibFields cellAtIndex:0] titleWidth] + NSMinX([fieldSplitView frame]) + FORM_OFFSET + 4.0;
         NSRect frame = [citeKeyField frame];
         if(offset >= NSMaxX([citeKeyTitle frame]) + 8.0){
             frame.size.width = NSMaxX(frame) - offset;
@@ -3936,6 +3102,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 												 name:BDSKFinalizeChangesNotification
 											   object:[self document]];
 	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(fileURLDidChange:)
+												 name:BDSKDocumentFileURLDidChangeNotification
+											   object:[self document]];
+	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(typeInfoDidChange:)
 												 name:BDSKBibTypeInfoChangedNotification
 											   object:[BDSKTypeManager sharedManager]];
@@ -3953,61 +3123,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 											   object:[extraBibFields enclosingScrollView]];
 }
 
-- (void)fixURLs{
-    NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
-    NSString *rurl = [publication valueOfField:BDSKUrlString];
-    NSImage *icon;
-    BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState ||
-						  [documentSnoopDrawer state] == NSDrawerOpeningState);
-	BOOL drawerShouldReopen = NO;
-	
-	// we need to reopen with the correct content
-    if(drawerWasOpen) [documentSnoopDrawer close];
-    
-    // either missing file or the document icon
-    icon = [publication imageForURLField:BDSKLocalUrlString];
-    if(icon == nil) // nil for an empty field; we use missing file icon for a placeholder in that case
-        icon = [NSImage missingFileImage];
-    [viewLocalButton setIconImage:icon];
-    
-    if (lurl){
-		[viewLocalButton setIconActionEnabled:YES];
-		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"Open the file or option-drag to copy it", @"Tool tip message")];
-		[[self window] setRepresentedFilename:[lurl path]];
-        
-        if ([[self window] respondsToSelector:@selector(setRepresentedURL:)])
-            [[self window] setRepresentedURL:lurl];
-        
-		if([documentSnoopDrawer contentView] != webSnoopContainerView)
-			drawerShouldReopen = drawerWasOpen;
-    }else{
-		[viewLocalButton setIconActionEnabled:NO];
-        [viewLocalToolbarItem setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"Tool tip message")];
-        [[self window] setRepresentedFilename:@""];
-    }
-
-    NSURL *remoteURL = [publication remoteURL];
-    if(remoteURL != nil){
-        icon = [NSImage imageForURL:remoteURL];
-		[viewRemoteButton setIconImage:icon];
-        [viewRemoteButton setIconActionEnabled:YES];
-        [viewRemoteToolbarItem setToolTip:rurl];
-		if([[documentSnoopDrawer contentView] isEqual:webSnoopContainerView])
-			drawerShouldReopen = drawerWasOpen;
-    }else{
-        [viewRemoteButton setIconImage:[NSImage imageNamed:@"WeblocFile_Disabled"]];
-		[viewRemoteButton setIconActionEnabled:NO];
-        [viewRemoteToolbarItem setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"Tool tip message")];
-    }
-	
-    drawerButtonState = BDSKDrawerUnknownState; // this makes sure the button will be updated
-    if (drawerShouldReopen){
-		// this takes care of updating the button and the drawer content
-		[documentSnoopDrawer open];
-	}else{
-		[self updateDocumentSnoopButton];
-	}
-}
 
 - (void)breakTextStorageConnections {
     

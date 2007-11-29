@@ -89,7 +89,7 @@
         [errorItem release];
     }
     else {
-        [items addObjectsFromArray:bibtexItems];
+    [items addObjectsFromArray:bibtexItems];
     }
 
     return items;  

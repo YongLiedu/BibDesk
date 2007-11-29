@@ -64,6 +64,9 @@ void *setupThreading(void *anObject);
 
 @implementation BDSKSearchIndex
 
+#define INDEX_STARTUP 1
+#define INDEX_STARTUP_COMPLETE 2
+
 + (void)initialize
 {
     OBINITIALIZE;
@@ -90,26 +93,23 @@ void *setupThreading(void *anObject);
         flags.isIndexing = 0;
         flags.shouldKeepRunning = 1;
         
-        // repeated flushes will cause performance to suck, so don't inform the delegate of every added file
-        flags.updateGranularity = 20;
-        
-        // We need setupThreading to run in a separate thread, but +[NSThread detachNewThreadSelector...] retains self, so we end up with a retain cycle
-        pthread_attr_t attr;
-        pthread_attr_init(&attr);
-        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-        
-        int err = pthread_create(&notificationThread, &attr, &setupThreading, [[self retain] autorelease]);
-        pthread_attr_destroy(&attr);
-        
         // maintain a dictionary mapping URL -> item titles, since SKIndex properties are slow
         titles = [[NSMutableDictionary alloc] initWithCapacity:128];
         
         progressValue = 0.0;
-
-        if(err){
-            [self release];
-            self = nil;
-        }
+        
+        setupLock = [[NSConditionLock alloc] initWithCondition:INDEX_STARTUP];
+        
+        // this will create a retain cycle, so we'll have to tickle the thread to exit properly in -cancel
+        [NSThread detachNewThreadSelector:@selector(runIndexThread) toTarget:self withObject:nil];
+        
+        // block until the NSMachPort is set up to receive messages
+        [setupLock lockWhenCondition:INDEX_STARTUP_COMPLETE];
+        [setupLock unlock];
+        
+        // done with this lock, so get rid of it now
+        [setupLock release];
+        setupLock = nil;
     }
     
     return self;
@@ -133,6 +133,9 @@ void *setupThreading(void *anObject);
     // the document does cleanup that should only be performed on the main thread (this was causing an assertion failure in -[BDSKFileContentSearchController cancelCurrentSearch:])
     [document performSelectorOnMainThread:@selector(release) withObject:nil waitUntilDone:NO];
     document = nil;
+    
+    // wake the thread up so the runloop will exit
+    [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
 }
 
 - (SKIndexRef)index
@@ -152,11 +155,6 @@ void *setupThreading(void *anObject);
         NSAssert1([(id)anObject conformsToProtocol:@protocol(BDSKSearchIndexDelegate)], @"%@ does not conform to BDSKSearchIndexDelegate protocol", [anObject class]);
 
     delegate = anObject;
-}
-
-- (void)setUpdateGranularity:(unsigned int)count
-{
-    OSAtomicCompareAndSwap32Barrier(flags.updateGranularity, count, (int32_t *)&flags.updateGranularity);
 }
 
 - (NSString *)titleForURL:(NSURL *)theURL
@@ -181,32 +179,62 @@ void *setupThreading(void *anObject);
 
 @implementation BDSKSearchIndex (Private)
 
-- (void)rebuildIndex
-{    
-    NSAssert2(pthread_equal(notificationThread, pthread_self()), @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
+- (void)indexFilesForItems:(NSArray *)items
+{
+    NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
     
-    OBPRECONDITION(initialObjectsToIndex);
-    NSEnumerator *enumerator = [initialObjectsToIndex objectEnumerator];
+    NSEnumerator *enumerator = [items objectEnumerator];
     id anObject = nil;
-    double totalObjectCount = [initialObjectsToIndex count];
+    double totalObjectCount = [items count];
     double numberIndexed = 0;
-        
+    
+    // This threshold is sort of arbitrary; for small batches, frequent updates are better if the delegate has a progress indicator, but for large batches (initial indexing), it can kill performance to be continually flushing and searching while indexing.
+    const int32_t flushInterval = [items count] > 20 ? 5 : 1;
+    int32_t countSinceLastFlush = flushInterval;
+    
+    // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    
     while((anObject = [enumerator nextObject]) && flags.shouldKeepRunning == 1) {
         [self indexFilesForItem:anObject];
         numberIndexed++;
         @synchronized(self) {
             progressValue = (numberIndexed / totalObjectCount) * 100;
         }
+        
+        if (countSinceLastFlush-- == 0) {
+            [pool release];
+            pool = [NSAutoreleasePool new];
+            
+            [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+            countSinceLastFlush = flushInterval;
+        }
     }
-     
+    
+    // final update to catch any leftovers
+    
+    // it's possible that we've been told to stop, and the delegate is garbage; in that case, don't message it
+    if (flags.shouldKeepRunning == 1)
+        [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+    [pool release];
+}
+
+- (void)rebuildIndex
+{    
+    NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
+    
+    OBPRECONDITION(initialObjectsToIndex);
+    [self indexFilesForItems:initialObjectsToIndex];
+    
     // release these, since they're only used for the initial index creation
     [self setInitialObjectsToIndex:nil];
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
+    if (flags.shouldKeepRunning == 1)
+        [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
 }
 
 - (void)indexFilesForItem:(id)anItem
 {
-    OBASSERT(pthread_equal(notificationThread, pthread_self()));
+    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
     NSURL *url = nil;
     
     SKDocumentRef skDocument;
@@ -218,7 +246,6 @@ void *setupThreading(void *anObject);
     swap = OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
     OBASSERT(swap);
     
-    int32_t updateCount = flags.updateGranularity;
     
     while(url = [urlEnumerator nextObject]){
                 
@@ -236,45 +263,35 @@ void *setupThreading(void *anObject);
         OBPOSTCONDITION(success);
         
         CFRelease(skDocument);
-        
-        if (updateCount-- == 0) {
-            [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
-            updateCount = flags.updateGranularity;
-        }
     }
     swap = OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     OBASSERT(swap);
     
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+    // the caller is responsible for updating the delegate, so we can throttle initial indexing
 }
 
-void *setupThreading(void *anObject)
+- (void)runIndexThread
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    BDSKSearchIndex *self = (id)anObject;
-    [self retain]; // make sure this doesn't go away until we're done with setup
+    [setupLock lockWhenCondition:INDEX_STARTUP];
     
-    id savedException = nil;
- 
-    @try{
-        self->notificationPort = [[NSMachPort alloc] init];
-        [self->notificationPort setDelegate:self];
+    // release at the end of this method, just before the thread exits
+    notificationThread = [[NSThread currentThread] retain];
+    
+    notificationPort = [[NSMachPort alloc] init];
+    [notificationPort setDelegate:self];
+    [[NSRunLoop currentRunLoop] addPort:notificationPort forMode:NSDefaultRunLoopMode];
+    
+    notificationQueue = [[BDSKThreadSafeMutableArray alloc] initWithCapacity:5];
         
-        [self->notificationPort scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-        
-        self->notificationQueue = [[BDSKThreadSafeMutableArray alloc] initWithCapacity:5];
-            
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKSearchIndexInfoChangedNotification object:self->document];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKDocAddItemNotification object:self->document];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKDocDelItemNotification object:self->document];
-    }
-    @catch(id localException){
-        // exceptions here mean something is seriously wrong, and we can't do anything about it
-        NSLog(@"Exception %@ raised while setting up thread support in %@; exiting.", localException, self);
-        savedException = [localException retain];
-        @throw;
-    }
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    SEL handler = @selector(processNotification:);
+    [nc addObserver:self selector:handler name:BDSKSearchIndexInfoChangedNotification object:document];
+    [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:document];
+    [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:document];
+    
+    [setupLock unlockWithCondition:INDEX_STARTUP_COMPLETE];
     
     // an exception here can probably be ignored safely
     @try{
@@ -284,36 +301,36 @@ void *setupThreading(void *anObject)
         NSLog(@"Ignoring exception %@ raised while rebuilding index", localException);
     }
         
-    // run the current run loop until we get a cancel message, or else the current thread/run loop will just go away when this function returns
-    
+    // run the current run loop until we get a cancel message, or else the current thread/run loop will just go away when this function returns    
     @try{
         
         NSRunLoop *rl = [NSRunLoop currentRunLoop];
-        BOOL didRun;
+        BOOL keepRunning;
+        NSDate *distantFuture = [NSDate distantFuture];
         
         do {
             [pool release];
             pool = [[NSAutoreleasePool alloc] init];
-            didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-        } while(self->flags.shouldKeepRunning == 1 && didRun);
+            // Running with beforeDate: distantFuture causes the runloop to block indefinitely if shouldKeepRunning was set to 0 during the initial indexing phase; invalidating and removing the port manually doesn't change this.  Hence, we need to check that flag before running the runloop, or use a short limit date.
+            keepRunning = (flags.shouldKeepRunning == 1) && [rl runMode:NSDefaultRunLoopMode beforeDate:distantFuture];
+        } while(keepRunning);
     }
     @catch(id localException){
         NSLog(@"Exception %@ raised in search index; exiting thread run loop.", localException);
-        savedException = [localException retain];
         @throw;
     }
-
     @finally{
-        [self release];
-        [pool release];
-        [savedException autorelease];
-        return NULL;
+        // allow the top-level pool to catch this autorelease pool
+        
+        [notificationThread release];
+        notificationThread = nil;
+        [notificationPort invalidate];
     }
 }
 
 - (void)processNotification:(NSNotification *)note
 {    
-    if( pthread_equal(notificationThread, pthread_self()) == FALSE ){
+    if([[NSThread currentThread] isEqual:notificationThread] == NO){
         // Forward the notification to the correct thread
         [notificationQueue addObject:note];
         [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
@@ -334,19 +351,18 @@ void *setupThreading(void *anObject)
 
 - (void)handleDocAddItemNotification:(NSNotification *)note
 {
-    OBASSERT(pthread_equal(notificationThread, pthread_self()));
+    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
 	NSArray *searchIndexInfo = [[note userInfo] valueForKey:@"searchIndexInfo"];
     OBPRECONDITION(searchIndexInfo);
             
-    [self performSelector:@selector(indexFilesForItem:) withObjectsFromArray:searchIndexInfo];
-        
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+    // this will update the delegate when all is complete
+    [self indexFilesForItems:searchIndexInfo];        
 }
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
 {
-    OBASSERT(pthread_equal(notificationThread, pthread_self()));
+    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
 	NSEnumerator *itemEnumerator = [[[note userInfo] valueForKey:@"searchIndexInfo"] objectEnumerator];
     id anItem;
@@ -395,7 +411,7 @@ void *setupThreading(void *anObject)
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
 {
-    OBASSERT(pthread_equal(notificationThread, pthread_self()));
+    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
     // reindex all the files; unless you have many local files attached to the item, there won't be much savings vs. just adding the one that changed
     [self indexFilesForItem:[note userInfo]];

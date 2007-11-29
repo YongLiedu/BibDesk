@@ -75,7 +75,7 @@
 
     NSArray *BibTeXLinkNodes = [[xmlDocument rootElement] nodesForXPath:BibTexLinkNodePath
                                                     error:&error];
-    
+        
     // bail out with an XML error if the Xpath query fails
     if (nil == BibTeXLinkNodes) {
         if (outError) *outError = error;
@@ -112,7 +112,7 @@
             
             NSString *encodingName = [response textEncodingName];
             NSStringEncoding encoding = kCFStringEncodingInvalidId;
-            
+        
             if (nil != encodingName)
                 encoding = CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((CFStringRef)encodingName));
 
@@ -120,10 +120,10 @@
                 bibTeXString = [[NSString alloc] initWithData:theData encoding:encoding];
             else
                 bibTeXString = [[NSString alloc] initWithData:theData encoding:NSUTF8StringEncoding];
-            
+        
             if (nil == bibTeXString)
                 bibTeXString = [[NSString alloc] initWithData:theData encoding:NSISOLatin1StringEncoding];
-            
+        
             [bibTeXString autorelease];
         }
 
@@ -134,13 +134,13 @@
             bibtexItems = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error:&error];
         
         if ([bibtexItems count] && NO == isPartialData) {
-            BibItem *bibtexItem = [bibtexItems objectAtIndex:0]; 
-            
-            // TODO: get a useful link for the URL field. 
-            // each item's title looks like <span class="w"><a href="link">title</a></span>
-            // but it'll take some xpath hacking to make sure we match title to bibtex link correctly.
-            
-            [items addObject:bibtexItem];
+        BibItem *bibtexItem = [bibtexItems objectAtIndex:0]; 
+        
+        // TODO: get a useful link for the URL field. 
+        // each item's title looks like <span class="w"><a href="link">title</a></span>
+        // but it'll take some xpath hacking to make sure we match title to bibtex link correctly.
+        
+        [items addObject:bibtexItem];
 			
 			NSString *bracedTitle = [bibtexItem valueOfField:BDSKTitleString inherit:NO];
 			
@@ -164,7 +164,7 @@
         }
         
     }
-    
+        
     if (0 == [items count]) {
         // signal an error condition; this page had BibTeX links, but we were unable to parse anything
         // the BibTeX parser /should/ have set the NSError

@@ -49,7 +49,7 @@ enum {
     BDSKIsCrossreffedCrossrefError
 };
 
-@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver;
+@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver, BDSKLinkedFile;
 @protocol BDSKParseableItem, BDSKOwner;
 
 /*!
@@ -70,7 +70,7 @@ enum {
 	NSMutableDictionary *groups;
     NSNumber * fileOrder;
     BOOL hasBeenEdited;
-	BOOL needsToBeFiled;
+    NSMutableSet *filesToBeFiled;
 	id<BDSKOwner> owner;
     BDSKFieldCollection *templateFields;
     int currentIndex;
@@ -79,7 +79,32 @@ enum {
     BOOL isImported;
     float searchScore;
     NSURL *identifierURL;
+    NSMutableArray *files;
+    NSMutableArray *sortedURLs;
 }
+
+- (NSUInteger)countOfFiles;
+- (BDSKLinkedFile *)objectInFilesAtIndex:(NSUInteger)idx;
+- (void)insertObject:(BDSKLinkedFile *)aFile inFilesAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromFilesAtIndex:(NSUInteger)idx;
+- (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx;
+
+- (void)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile;
+
+- (NSArray *)sortedURLs;
+
+- (NSString *)basePath;
+
+- (NSArray *)localFiles;
+- (NSArray *)existingLocalFiles;
+- (NSArray *)remoteURLs;
+
+- (NSURL *)suggestedURLForLinkedFile:(BDSKLinkedFile *)file;
+- (BOOL)canSetURLForLinkedFile:(BDSKLinkedFile *)file;
+- (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file;
+- (NSSet *)filesToBeFiled;
+- (void)addFileToBeFiled:(BDSKLinkedFile *)file;
+- (void)removeFileToBeFiled:(BDSKLinkedFile *)file;
 
 /*!
      @method init
@@ -683,7 +708,7 @@ enum {
 */
 - (NSString *)bibTeXStringDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify;
 
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeTo:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError;
+- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
 /*!
     @method     RISStringValue
@@ -788,34 +813,6 @@ enum {
 - (NSString *)localUrlPath; 
 
 /*!
-    @method     localUrlPathInheriting:
-    @abstract   Calls localFilePathForField:relativeTo:inherit: with the Local-Url field and the path to the document.
-	@param      inherit Boolean, if set follows the Crossref to find inherited date.
-    @discussion -
-    @result     a complete path with no tildes, or nil if an error occurred.
-*/
-- (NSString *)localUrlPathInheriting:(BOOL)inherit;
-
-/*!
-    @method     localFilePathForField:
-    @abstract   Calls localFilePathForField:relativeTo:inherit: with the path to the document and inherit set to YES.
-    @discussion -
-    @param      field the field name linking the local file.
-    @result     a complete path with no tildes, or nil if an error occurred.
-*/
-- (NSString *)localFilePathForField:(NSString *)field; 
-
-/*!
-    @method     localFilePathForField:inherit:
-    @abstract   attempts to return a path to the local file linked through the field, relative to the base parameter
-    @discussion If the local-url field is a relative path, this will prepend base to it and return the path from building a URL with the result. If the value of local-url is a valid file url already, base is ignored. Base is also ignored if the value of local-url is an absolute path or has a tilde.
-    @param      field the field name linking the local file.
-	@param      inherit Boolean, if set follows the Crossref to find inherited date.
-    @result     a complete path with no tildes, or nil if an error occurred.
-*/
-- (NSString *)localFilePathForField:(NSString *)field inherit:(BOOL)inherit;
-
-/*!
     @method     imageForURLField:
     @abstract   Returns an icon representation of a URL field.
     @discussion (comprehensive description)
@@ -826,47 +823,9 @@ enum {
 
 // NSURL equivalents of the localFilePath... methods
 - (NSURL *)localFileURLForField:(NSString *)field;
-- (NSURL *)localFileURLForField:(NSString *)field inherit:(BOOL)inherit;
 
-/*!
-    @method suggestedLocalUrl
-    @abstract Returns a suggested local-url based on the receiver
-    @discussion Returns a suggested local-url based on the local-url format and the receivers publication  data. 
-    @result The suggested full path for the local file
-*/
-- (NSString *)suggestedLocalUrl;
+- (BOOL)isValidLocalFilePath:(NSString *)proposedPath;
 
-- (BOOL)isValidLocalUrlPath:(NSString *)proposedPath;
-
-/*!
-    @method canSetLocalUrl
-    @abstract Returns a boolean indicating whether all fields required for the generated local-url are set
-    @discussion - 
-*/
-- (BOOL)canSetLocalUrl;
-
-/*!
-    @method needsToBeFiled
-    @abstract Returns a boolean indicating whether the linked file should be automatically filed 
-    @discussion - 
-*/
-- (BOOL)needsToBeFiled;
-
-/*!
-    @method setNeedsToBeFiled:
-    @abstract Sets a boolean indicating whether the linked file should be automatically filed
-    @discussion - 
-*/
-- (void)setNeedsToBeFiled:(BOOL)flag;
-
-/*!
-    @method autoFilePaper
-    @abstract Automatically file a paper when all necessary fields are set, otherwise flags to be filed. Does nothing when the preference is set to not file automatically.  
-    @discussion - 
-*/
-- (BOOL)autoFilePaper;
-
-- (NSString *)documentFileName;
 - (NSString *)documentInfoForKey:(NSString *)key;
 
 - (void)typeInfoDidChange:(NSNotification *)aNotification;

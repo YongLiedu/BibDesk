@@ -410,7 +410,7 @@
     NSString *colID = column != -1 ? [[[tableView tableColumns] objectAtIndex:column] identifier] : nil;
     
     if([colID isLocalFileField])
-		[self openLinkedFileForField:colID];
+		[self openLocalURLForField:colID];
     else if([colID isRemoteURLField])
 		[self openRemoteURLForField:colID];
     else
@@ -431,11 +431,11 @@
 
 - (IBAction)emailPubCmd:(id)sender{
     NSMutableArray *items = [[self selectedPublications] mutableCopy];
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-    BibItem *pub = nil;
+    NSEnumerator *e = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] objectEnumerator];
+    BDSKLinkedFile *file;
+    BibItem *pub;
     
-    NSFileManager *dfm = [NSFileManager defaultManager];
-    NSString *pubPath = nil;
+    NSString *path = nil;
     NSMutableString *body = [NSMutableString string];
     NSMutableArray *files = [NSMutableArray array];
     
@@ -445,18 +445,9 @@
     if ([NSString isEmptyString:templateName] == NO)
         template = [BDSKTemplate templateForStyle:templateName];
     
-    while (pub = [e nextObject]) {
-        pubPath = [pub localUrlPath];
-        if([dfm fileExistsAtPath:pubPath])
-            [files addObject:pubPath];
-        
-        pub = [pub crossrefParent];
-        if (pub != nil && [items containsObject:pub] == NO) {
-            [items addObject:pub];
-            pubPath = [pub localUrlPath];
-            if([dfm fileExistsAtPath:pubPath])
-                [files addObject:pubPath];
-        }
+    while (file = [e nextObject]) {
+        if (path = [[file URL] path])
+            [files addObject:path];
     }
     
     if (template != nil && ([template templateFormat] & BDSKTextTemplateFormat)) {
@@ -549,14 +540,7 @@
 #endif
 }
 
-#pragma mark | URL actions
-
-- (IBAction)openLinkedFile:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-    [self openLinkedFileForField:field];
-}
+#pragma mark URL actions
 
 - (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex
 {
@@ -576,7 +560,16 @@
     return NO;
 }
 
-- (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+#pragma mark | URL Field actions
+
+- (IBAction)openLocalURL:(id)sender{
+	NSString *field = [sender representedObject];
+    if (field == nil)
+		field = BDSKLocalUrlString;
+    [self openLocalURLForField:field];
+}
+
+- (void)openLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -592,15 +585,14 @@
         
         // the user said to go ahead
         while (pub = [e nextObject]) {
-            fileURL = [pub URLForField:field];
-            if(fileURL == nil) continue;
-            [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
+            if (fileURL = [pub localFileURLForField:field])
+                [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
         }
     }
     [field release];
 }
 
-- (void)openLinkedFileForField:(NSString *)field{
+- (void)openLocalURLForField:(NSString *)field{
 	int n = [self numberOfSelectedPubs];
     
     if (n > 6) {
@@ -612,34 +604,36 @@
                              informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
-                         didEndSelector:@selector(openLinkedFileAlertDidEnd:returnCode:contextInfo:) 
+                         didEndSelector:@selector(openLocalURLAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:[field retain]];
 	} else {
-        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+        [self openLocalURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
     }
 }
 
-- (IBAction)revealLinkedFile:(id)sender{
+- (IBAction)revealLocalURL:(id)sender{
 	NSString *field = [sender representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
-    [self revealLinkedFileForField:field];
+    [self revealLocalURLForField:field];
 }
 
-- (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)revealLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
         BibItem *pub;
+        NSURL *fileURL;
         
         while (pub = [e nextObject]) {
-            [[NSWorkspace sharedWorkspace]  selectFile:[pub localFilePathForField:field] inFileViewerRootedAtPath:nil];
+            if (fileURL = [pub localFileURLForField:field])
+                [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
         }
     }
     [field release];
 }
 
-- (void)revealLinkedFileForField:(NSString *)field{
+- (void)revealLocalURLForField:(NSString *)field{
 	int n = [self numberOfSelectedPubs];
     
     if (n > 6) {
@@ -651,10 +645,10 @@
                              informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
-                         didEndSelector:@selector(revealLinkedFileAlertDidEnd:returnCode:contextInfo:) 
+                         didEndSelector:@selector(revealLocalURLAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:[field retain]];
 	} else {
-        [self revealLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+        [self revealLocalURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
     }
 }
 
@@ -697,14 +691,14 @@
     }
 }
 
-- (IBAction)showNotesForLinkedFile:(id)sender{
+- (IBAction)showNotesForLocalURL:(id)sender{
 	NSString *field = [sender representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
-    [self showNotesForLinkedFileForField:field];
+    [self showNotesForLocalURLForField:field];
 }
 
-- (void)showNotesForLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)showNotesForLocalURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -724,7 +718,7 @@
     [field release];
 }
 
-- (void)showNotesForLinkedFileForField:(NSString *)field{
+- (void)showNotesForLocalURLForField:(NSString *)field{
 	int n = [self numberOfSelectedPubs];
     
     if (n > 6) {
@@ -736,21 +730,21 @@
                              informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open windows for notes for %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
-                         didEndSelector:@selector(showNotesForLinkedFileAlertDidEnd:returnCode:contextInfo:) 
+                         didEndSelector:@selector(showNotesForLocalURLAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:[field retain]];
 	} else {
-        [self showNotesForLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+        [self showNotesForLocalURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
     }
 }
 
-- (IBAction)copyNotesForLinkedFile:(id)sender{
+- (IBAction)copyNotesForLocalURL:(id)sender{
 	NSString *field = [sender representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
-    [self copyNotesForLinkedFileForField:field];
+    [self copyNotesForLocalURLForField:field];
 }
 
-- (void)copyNotesForLinkedFileForField:(NSString *)field{
+- (void)copyNotesForLocalURLForField:(NSString *)field{
     NSEnumerator *e = [[self selectedPublications] objectEnumerator];
     BibItem *pub;
     NSURL *fileURL;
@@ -765,6 +759,216 @@
         if ([notes length])
             [notes appendString:@"\n\n"];
         [notes appendString:string];
+    }
+    
+    if ([notes isEqualToString:@""] == NO) {
+        NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+        [pboard setString:notes forType:NSStringPboardType];
+    } else {
+        NSBeep();
+    }
+}
+
+#pragma mark | Linked File actions
+
+- (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertAlternateReturn) {
+        NSEnumerator *urlEnum;
+        NSURL *fileURL = [(NSURL *)contextInfo autorelease];
+        
+        if (fileURL)
+            urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        else
+            urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
+        
+        NSString *searchString;
+        // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
+        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
+            searchString = [searchField stringValue];
+        else
+            searchString = @"";
+        
+        while (fileURL = [urlEnum nextObject]) {
+            if ([fileURL isEqual:[NSNull null]] == NO) {
+                [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
+            }
+        }
+    }
+}
+
+- (IBAction)openLinkedFile:(id)sender{
+    NSURL *fileURL = [sender representedObject];
+    if (fileURL) {
+        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
+    } else {
+        int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
+        
+        if (n > 6) {
+            // Do we really want a gazillion of files open?
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Linked Files", @"Message in alert dialog when opening a lot of linked files")
+                                             defaultButton:NSLocalizedString(@"No", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Open", @"Button title")
+                                               otherButton:nil
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+            [alert beginSheetModalForWindow:documentWindow
+                              modalDelegate:self
+                             didEndSelector:@selector(openLinkedFileAlertDidEnd:returnCode:contextInfo:) 
+                                contextInfo:NULL];
+        } else {
+            [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
+        }
+    }
+}
+
+- (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertAlternateReturn) {
+        NSEnumerator *urlEnum;
+        NSURL *fileURL = [(NSURL *)contextInfo autorelease];
+        
+        if (fileURL)
+            urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        else
+            urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
+        
+        while (fileURL = [urlEnum nextObject]) {
+            if ([fileURL isEqual:[NSNull null]] == NO) {
+                [[NSWorkspace sharedWorkspace]  selectFile:[fileURL path] inFileViewerRootedAtPath:nil];
+            }
+        }
+    }
+}
+
+- (IBAction)revealLinkedFile:(id)sender{
+    NSURL *fileURL = [sender representedObject];
+    if (fileURL) {
+        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
+    } else {
+        int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
+        
+        if (n > 6) {
+            // Do we really want a gazillion of Finder windows?
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reveal Linked Files", @"Message in alert dialog when trying to reveal a lot of linked files")
+                                             defaultButton:NSLocalizedString(@"No", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Reveal", @"Button title")
+                                               otherButton:nil
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+            [alert beginSheetModalForWindow:documentWindow
+                              modalDelegate:self
+                             didEndSelector:@selector(revealLinkedFileAlertDidEnd:returnCode:contextInfo:) 
+                                contextInfo:NULL];
+        } else {
+            [self revealLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
+        }
+    }
+}
+
+- (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if(returnCode == NSAlertAlternateReturn){
+        NSEnumerator *urlEnum;
+        NSURL *remoteURL = [(NSURL *)contextInfo autorelease];
+        
+        if (remoteURL)
+            urlEnum = [[NSArray arrayWithObject:remoteURL] objectEnumerator];
+        else
+            urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"] objectEnumerator];
+        
+        while (remoteURL = [urlEnum nextObject]) {
+            if ([remoteURL isEqual:[NSNull null]] == NO) {
+                [[NSWorkspace sharedWorkspace] openURL:remoteURL];
+            }
+		}
+	}
+}
+
+- (IBAction)openLinkedURL:(id)sender{
+    NSURL *remoteURL = [sender representedObject];
+    if (remoteURL) {
+        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[remoteURL retain]];
+    } else {
+        int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count];
+        
+        if (n > 6) {
+            // Do we really want a gazillion of browser windows?
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Remote URL", @"Message in alert dialog when trying to open a lot of remote URLs")
+                                             defaultButton:NSLocalizedString(@"No", @"Button title")
+                                          alternateButton:NSLocalizedString(@"Open", @"Button title")
+                                              otherButton:nil
+                                informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+            [alert beginSheetModalForWindow:documentWindow
+                              modalDelegate:self
+                             didEndSelector:@selector(openRemoteURLAlertDidEnd:returnCode:contextInfo:) 
+                                contextInfo:NULL];
+        } else {
+            [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
+        }
+    }
+}
+
+- (void)showNotesForLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertAlternateReturn) {
+        NSEnumerator *urlEnum;
+        NSURL *fileURL = [(NSURL *)contextInfo autorelease];
+        BDSKNotesWindowController *notesController;
+        
+        if (fileURL)
+            urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        else
+            urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
+        while (fileURL = [urlEnum nextObject]) {
+            if ([fileURL isEqual:[NSNull null]] == NO) {
+                notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
+                [self addWindowController:notesController];
+                [notesController showWindow:self];
+            }
+        }
+    }
+}
+
+- (IBAction)showNotesForLinkedFile:(id)sender{
+    NSURL *fileURL = [sender representedObject];
+    if (fileURL) {
+        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
+    } else {
+        int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
+        
+        if (n > 6) {
+            // Do we really want a gazillion of files open?
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Show Skim Notes For Linked Files", @"Message in alert dialog when showing notes for a lot of linked files")
+                                             defaultButton:NSLocalizedString(@"No", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Open", @"Button title")
+                                               otherButton:nil
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open windows for notes for %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
+            [alert beginSheetModalForWindow:documentWindow
+                              modalDelegate:self
+                             didEndSelector:@selector(showNotesForLinkedFileAlertDidEnd:returnCode:contextInfo:) 
+                                contextInfo:NULL];
+        } else {
+            [self showNotesForLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
+        }
+    }
+}
+
+- (IBAction)copyNotesForLinkedFile:(id)sender{
+    NSEnumerator *urlEnum;
+    NSURL *fileURL = [sender representedObject];
+    NSMutableString *notes = [NSMutableString string];
+    NSString *string;
+    
+    if (fileURL)
+        urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+    else
+        urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
+    
+    while (fileURL = [urlEnum nextObject]) {
+        if ([fileURL isEqual:[NSNull null]] == NO) {
+            string = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
+            if ([NSString isEmptyString:string] == NO) {
+                if ([notes length])
+                    [notes appendString:@"\n\n"];
+                [notes appendString:string];
+            }
+        }
     }
     
     if ([notes isEqualToString:@""] == NO) {
@@ -980,8 +1184,8 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
-
-    [[BDSKFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self check:check];
+    NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
+    [[BDSKFiler sharedFiler] filePapers:selectedFiles fromDocument:self check:check];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files", @"Undo action name")];
 }
@@ -1285,20 +1489,20 @@
     }
     
     if (returnCode == NSAlertDefaultReturn) {
-        NSSet *removeSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &callBacks);
-        NSZoneFree(zone, pubs);
-        
-        CFIndex idx = [pubsToRemove count];
-        
-        while(idx--){
-            if([removeSet containsObject:[pubsToRemove objectAtIndex:idx]] == NO)
-                [pubsToRemove removeObjectAtIndex:idx];
-        }
-        
-        [removeSet release];
+    NSSet *removeSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &callBacks);
+    NSZoneFree(zone, pubs);
+    
+    CFIndex idx = [pubsToRemove count];
+    
+    while(idx--){
+        if([removeSet containsObject:[pubsToRemove objectAtIndex:idx]] == NO)
+            [pubsToRemove removeObjectAtIndex:idx];
+    }
+    
+    [removeSet release];
         [self selectPublications:pubsToRemove];
     } else {
-        [pubsToRemove release];
+    [pubsToRemove release];
         pubsToRemove = [[NSMutableArray alloc] initWithObjects:pubs count:countOfItems];
         [self selectPublications:pubsToRemove];
     }

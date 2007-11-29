@@ -76,7 +76,6 @@
 	BOOL replaceAsMacro;
 	BOOL shouldSetWhenEmpty;
     int operation;
-	int shouldMove;
 	NSString *replaceLabel;
 	NSString *replaceAllTooltip;
     CFArrayRef editors;
@@ -239,7 +238,5 @@
     @result     The number of replacements made
 */
 - (unsigned int)findAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument;
-
-- (void)setField:field ofItem:bibItem toValue:newValue withInfos:(NSMutableArray *)paperInfos;
 
 @end

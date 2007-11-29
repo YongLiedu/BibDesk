@@ -46,6 +46,8 @@
 #import "NSDate_BDSKExtensions.h"
 #import "NSScanner_BDSKExtensions.h"
 #import "BDSKStringNode.h"
+#import "BDSKLinkedFile.h"
+#import "BDSKAppController.h"
 
 @implementation BDSKFormatParser
 
@@ -55,6 +57,25 @@
 }
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion
+{
+    return [self parseFormat:format forField:fieldName linkedFile:nil ofItem:pub suggestion:suggestion];
+}
+
++ (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
+{
+	NSString *localFileFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalFileFormatKey];
+	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
+    
+    NSString *oldPath = [[file URL] path];
+    if ([oldPath hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
+        oldPath = [oldPath substringFromIndex:[papersFolderPath length] + 1];
+    else
+        oldPath = nil;
+      
+    return [self parseFormat:localFileFormat forField:BDSKLocalFileString linkedFile:nil ofItem:pub suggestion:oldPath];
+}
+
++ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName linkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion
 {
 	static NSCharacterSet *nonLowercaseLetterCharSet = nil;
 	static NSCharacterSet *nonUppercaseLetterCharSet = nil;
@@ -77,10 +98,8 @@
 	NSMutableArray *arr;
 	NSScanner *wordScanner;
 	NSCharacterSet *slashCharSet = [NSCharacterSet characterSetWithCharactersInString:@"/"];
-	NSArray *localFileFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
-	BOOL isLocalFile = [localFileFields containsObject:fieldName];
-	BOOL isLast;
-    
+	BOOL isLocalFile = [fieldName isLocalFileField] || [fieldName isEqualToString:BDSKLocalFileString];
+	
 	[scanner setCharactersToBeSkipped:nil];
 	
 	while (![scanner isAtEnd]) {
@@ -101,7 +120,6 @@
 					numAuth = 0;
 					authSep = @"";
 					etal = @"";
-                    isLast = NO;
 					if (![scanner isAtEnd]) {
 						// look for [separator]
 						if ([scanner scanString:@"[" intoString:NULL]) {
@@ -115,15 +133,6 @@
 						}
 						if ([scanner peekCharacter:&nextChar]) {
 							// look for #names
-                            if (nextChar == '-') {
-								[scanner setScanLocation:[scanner scanLocation]+1];
-                                if ([scanner peekCharacter:&nextChar] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
-                                    isLast = YES;
-                                } else {
-                                    [scanner setScanLocation:[scanner scanLocation]-1];
-                                    nextChar = '-';
-                                }
-                            }
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
 								numAuth = (unsigned)(nextChar - '0');
@@ -146,7 +155,7 @@
 						if (i > 0) {
 							[parsedStr appendString:authSep];
 						}
-						string = [self stringByStrictlySanitizingString:[[authArray objectAtIndex:isLast ? [authArray count] - numAuth + i : i] lastName] forField:fieldName inFileType:[pub fileType]];
+						string = [self stringByStrictlySanitizingString:[[authArray objectAtIndex:i] lastName] forField:fieldName inFileType:[pub fileType]];
 						if (isLocalFile) {
 							string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 						}
@@ -166,7 +175,6 @@
 					authSep = @";";
 					nameSep = @".";
 					etal = @"";
-                    isLast = NO;
 					if (![scanner isAtEnd]) {
 						// look for [author separator]
 						if ([scanner scanString:@"[" intoString:NULL]) {
@@ -185,15 +193,6 @@
 						}
 						if ([scanner peekCharacter:&nextChar]) {
 							// look for #names
-                            if (nextChar == '-') {
-								[scanner setScanLocation:[scanner scanLocation]+1];
-                                if ([scanner peekCharacter:&nextChar] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
-                                    isLast = YES;
-                                } else {
-                                    [scanner setScanLocation:[scanner scanLocation]-1];
-                                    nextChar = '-';
-                                }
-                            }
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
 								numAuth = (unsigned)(nextChar - '0');
@@ -214,7 +213,7 @@
 						if (i > 0) {
 							[parsedStr appendString:authSep];
 						}
-						BibAuthor *auth = [authArray objectAtIndex:isLast ? [authArray count] - numAuth + i : i];
+						BibAuthor *auth = [authArray objectAtIndex:i];
 						NSString *firstName = [self stringByStrictlySanitizingString:[auth firstName] forField:fieldName inFileType:[pub fileType]];
 						NSString *lastName = [self stringByStrictlySanitizingString:[auth lastName] forField:fieldName inFileType:[pub fileType]];
 						if ([firstName length] > 0) {
@@ -368,10 +367,12 @@
 					break;
 				case 'l':
 					// old filename without extension
-					if ([fieldName isLocalFileField])
-						string = [pub localFilePathForField:fieldName];
+					if (file)
+						string = [[file URL] path];
+                    else if ([fieldName isLocalFileField])
+						string = [[pub localFileURLForField:fieldName] path];
 					else
-						string = [pub localFilePathForField:BDSKLocalUrlString];
+						string = [[pub localFileURLForField:BDSKLocalUrlString] path];
 					if (string != nil) {
 						string = [[string lastPathComponent] stringByDeletingPathExtension];
 						string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
@@ -380,10 +381,12 @@
 					break;
 				case 'L':
 					// old filename with extension
-					if ([fieldName isLocalFileField])
-						string = [pub localFilePathForField:fieldName];
+					if (file)
+						string = [[file URL] path];
+                    else if ([fieldName isLocalFileField])
+						string = [[pub localFileURLForField:fieldName] path];
 					else
-						string = [pub localFilePathForField:BDSKLocalUrlString];
+						string = [[pub localFileURLForField:BDSKLocalUrlString] path];
 					if (string != nil) {
 						string = [string lastPathComponent];
 						string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
@@ -392,10 +395,12 @@
 					break;
 				case 'e':
 					// old file extension
-					if ([fieldName isLocalFileField])
-						string = [pub localFilePathForField:fieldName];
+					if (file)
+						string = [[file URL] path];
+                    else if ([fieldName isLocalFileField])
+						string = [[pub localFileURLForField:fieldName] path];
 					else
-						string = [pub localFilePathForField:BDSKLocalUrlString];
+						string = [[pub localFileURLForField:BDSKLocalUrlString] path];
 					if (string != nil) {
 						string = [string pathExtension];
 						if (![string isEqualToString:@""]) {
@@ -406,9 +411,8 @@
 					break;
 				case 'b':
 					// document filename
-					string = [pub documentFileName];
+					string = [pub basePath];
 					if (string != nil) {
-						string = [[string lastPathComponent] stringByDeletingPathExtension];
 						string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
 						[parsedStr appendString:string];
 					}
@@ -555,7 +559,6 @@
 				case '%':
 				case '[':
 				case ']':
-				case '-':
 					// escaped character
 					[parsedStr appendFormat:@"%C", specifier];
 					break;
@@ -686,8 +689,8 @@
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
 		return [pub isValidCiteKey:proposedStr];
 	}
-	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]) {
-		return [pub isValidLocalUrlPath:proposedStr];
+	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
+		return [pub isValidLocalFilePath:proposedStr];
 	}
 	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
 		if ([NSString isEmptyString:proposedStr])
@@ -716,7 +719,7 @@
 		
 		return newString;
 	}
-	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]) {
+	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
 		
 		if ([NSString isEmptyString:string]) {
 			return @"";
@@ -767,8 +770,8 @@
 		
 		return newString;
 	}
-	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]) {
-		cleanOption = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKLocalUrlCleanOptionKey];
+	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
+		cleanOption = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKLocalFileCleanOptionKey];
 		
 		if (cleanOption >= 3)
 			invalidCharSet = [[BDSKTypeManager sharedManager] veryStrictInvalidCharactersForField:fieldName inFileType:type];
@@ -820,10 +823,10 @@
 	static NSCharacterSet *validSpecifierChars = nil;
 	static NSCharacterSet *validParamSpecifierChars = nil;
 	static NSCharacterSet *validUniqueSpecifierChars = nil;
+	static NSCharacterSet *validLocalFileSpecifierChars = nil;
 	static NSCharacterSet *validEscapeSpecifierChars = nil;
 	static NSCharacterSet *validArgSpecifierChars = nil;
 	static NSCharacterSet *validOptArgSpecifierChars = nil;
-	static NSCharacterSet *validAuthorSpecifierChars = nil;
 	static NSDictionary *specAttr = nil;
 	static NSDictionary *paramAttr = nil;
 	static NSDictionary *argAttr = nil;
@@ -832,12 +835,12 @@
 	
 	if (validSpecifierChars == nil) {
 		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLebkfcsirRduUn0123456789%[]"] retain];
-		validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfcirRduUn"] retain];
+		validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfciuUn"] retain];
 		validUniqueSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"uUn"] retain];
-		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]-"] retain];
+		validLocalFileSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"lLe"] retain];
+		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
 		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fcsi"] retain];
 		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfs"] retain];
-		validAuthorSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApP"] retain];
 		
 		NSFont *font = [NSFont systemFontOfSize:0];
 		NSFont *boldFont = [NSFont boldSystemFontOfSize:0];
@@ -897,6 +900,10 @@
 			}
 			foundUnique = YES;
 		}
+		else if ([validLocalFileSpecifierChars characterIsMember:specifier] && [fieldName isEqualToString:BDSKLocalFileString] == NO && [fieldName isLocalFileField] == NO) {
+			errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C is only valid in format for local file.", @"Error description"), specifier];
+			break;
+		}
 		string = [NSString stringWithFormat:@"%%%C", specifier];
 		AppendStringToFormatStrings(string, specAttr);
 		
@@ -941,19 +948,15 @@
 		
 		// check numeric optional parameters
 		if ([validParamSpecifierChars characterIsMember:specifier]) {
-            if ([validAuthorSpecifierChars characterIsMember:specifier] && [scanner scanString:@"-" intoString:NULL]) {
-                if ([scanner scanCharactersFromSet:digitCharSet intoString:&string]) {
-                    AppendStringToFormatStrings(@"-", paramAttr);
-                    AppendStringToFormatStrings(string, paramAttr);
-                } else {
-                    [scanner setScanLocation:[scanner scanLocation] - 1];
-                }
-            } else if ([scanner scanCharactersFromSet:digitCharSet intoString:&string]) {
+			if ([scanner scanCharactersFromSet:digitCharSet intoString:&string]) {
 				AppendStringToFormatStrings(string, paramAttr);
 			}
 		}
 	}
 	
+    if (foundUnique == NO && [fieldName isEqualToString:BDSKLocalFileString] && errorMsg != nil)
+        errorMsg = NSLocalizedString(@"Format for local file requires a unique specifier.", @"Error description");
+    
 	if (errorMsg == nil) {
 		// change formatString
 		*formatString = [[sanitizedFormatString copy] autorelease];
@@ -1009,7 +1012,7 @@
 			case 'l':
 			case 'L':
 			case 'e':
-				[arr addObject:BDSKLocalUrlString];
+				[arr addObject:BDSKLocalFileString];
 				break;
 			case 'b':
 				[arr addObject:@"Document Filename"];

@@ -118,6 +118,8 @@
 #import "BibItem_PubMedLookup.h"
 #import "BDSKItemSearchIndexes.h"
 #import "PDFDocument_BDSKExtensions.h"
+#import <FileView/FileView.h>
+#import "BDSKLinkedFile.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -142,6 +144,66 @@ static NSString *BDSKSelectedPublicationsKey = @"BDSKSelectedPublicationsKey";
 static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey";
 static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
 static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
+
+
+@interface BDSKFileViewObject : NSObject
+{
+    NSString *subtitle;
+    NSURL *URL;
+}
+- (id)initWithURL:(NSURL *)aURL subtitle:(NSString *)aString;
+- (NSString *)subtitle;
+- (void)setSubtitle:(NSString *)value;
+
+- (NSURL *)URL;
+- (void)setURL:(NSURL *)value;
+
+@end
+
+@implementation BDSKFileViewObject
+
+- (id)initWithURL:(NSURL *)aURL subtitle:(NSString *)aString;
+{
+    self = [super init];
+    if (self) {
+        [self setSubtitle:aString];
+        [self setURL:aURL];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [subtitle release];
+    [URL release];
+    [super dealloc];
+}
+
+- (NSString *)subtitle {
+    return subtitle;
+}
+
+- (void)setSubtitle:(NSString *)value {
+    if (subtitle != value) {
+        [subtitle release];
+        subtitle = [value copy];
+    }
+}
+
+- (NSURL *)URL {
+    return URL;
+}
+
+- (void)setURL:(NSURL *)value {
+    if (URL != value) {
+        [URL release];
+        URL = [value copy];
+    }
+}
+
+
+@end
+
 
 @interface NSFileWrapper (BDSKExtensions)
 - (NSFileWrapper *)addFileWrapperWithPath:(NSString *)path relativeTo:(NSString *)basePath recursive:(BOOL)recursive;
@@ -197,6 +259,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         toolbarItems = nil;
         docState.lastPreviewHeight = 0.0;
         docState.lastGroupViewWidth = 0.0;
+        docState.lastFileViewWidth = 0.0;
         
         // these are temporary state variables
         promiseDragColumnIdentifier = nil;
@@ -347,8 +410,8 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [documentWindow makeFirstResponder:tableView];	
     
     // SplitViews setup
-    [groupSplitView setDrawEnd:YES];
-    [splitView setDrawEnd:YES];
+    [groupSplitView setBlendStyle:BDSKStatusBarBlendStyleMask];
+    [splitView setBlendStyle:BDSKMinBlendStyleMask | BDSKMaxBlendStyleMask];
     
     // set autosave names first
 	[splitView setPositionAutosaveName:@"OASplitView Position Main Window"];
@@ -393,7 +456,18 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
     [tableView registerForDraggedTypes:dragTypes];
     [groupTableView registerForDraggedTypes:dragTypes];
-
+    
+    [fileView setBackgroundColor:[[fileView enclosingScrollView] backgroundColor]];
+    
+    [fileCollapsibleView setCollapseEdges:BDSKMinXEdgeMask];
+    [fileCollapsibleView setMinSize:NSMakeSize(100.0, 20.0)];
+    [fileGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+    [fileGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
+    
+    [fileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKMainFileViewIconScaleKey]];
+    [fileViewSlider bind:@"value" toObject:fileView withKeyPath:@"iconScale" options:nil];
+    [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
+    
 	// ImagePopUpButtons setup
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
@@ -487,7 +561,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
     docState.isDocumentClosed = YES;
     
-    [fileSearchController stopSearching];
+    [fileSearchController terminate];
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
     [self saveSortOrder];
@@ -503,6 +577,8 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 	[pboardHelper setDelegate:nil];
     [pboardHelper release];
     pboardHelper = nil;
+    
+    [fileView removeObserver:self forKeyPath:@"iconScale"];
     
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -842,12 +918,30 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
     
+#if !OMNI_FORCE_ASSERTIONS
+#warning Saving disabled
+    if (NSSaveOperation == saveOperation) {
+        if (outError) {
+            *outError = [NSError mutableLocalErrorWithCode:kBDSKFileOperationFailed localizedDescription:@"Only Save-As is supported for this build"];
+            [*outError setValue:@"In order to avoid data loss, overwriting is not allowed.  Use Save As or Export." forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
+        return NO;
+    }
+#else
+#warning Saving enabled
+#endif
+    
     // Set the string encoding according to the popup.  
     // NB: the popup has the incorrect encoding if it wasn't displayed, for example for the Save action and saving using AppleScript, so don't reset encoding unless we're actually modifying this document through a menu .
     if (NSSaveAsOperation == saveOperation && [saveTextEncodingPopupButton encoding] != 0)
         [self setDocumentStringEncoding:[saveTextEncodingPopupButton encoding]];
     
+    saveTargetURL = [absoluteURL copy];
+    
     BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
+    
+    [saveTargetURL release];
+    saveTargetURL = nil;
     
     // reset the encoding popup so we know when it wasn't shown to the user next time
     [saveTextEncodingPopupButton setEncoding:0];
@@ -974,18 +1068,17 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSFileManager *fm = [NSFileManager defaultManager];
     NSEnumerator *itemEnum = [items objectEnumerator];
     BibItem *item;
-    NSSet *localFileFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
-    NSMutableSet *localFiles = [NSMutableSet set];
     NSString *filePath;
     NSString *commonParent = nil;
     BOOL success = YES;
+    NSMutableSet *localFiles = [NSMutableSet set];
     
     if (success = [fm createDirectoryAtPath:path attributes:nil]) {
         while (item = [itemEnum nextObject]) {
-            NSEnumerator *fieldEnum = [localFileFields objectEnumerator];
-            NSString *field;
-            while (field = [fieldEnum nextObject]) {
-                if (filePath = [item localFilePathForField:field]) {
+            NSEnumerator *fileEnum = [[item localFiles] objectEnumerator];
+            BDSKLinkedFile *file;
+            while (file = [fileEnum nextObject]) {
+                if (filePath = [[file URL] path]) {
                     [localFiles addObject:filePath];
                     if (commonParent)
                         commonParent = [NSString commonRootPathOfFilename:[filePath stringByDeletingLastPathComponent] andFilename:commonParent];
@@ -996,7 +1089,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         }
         
         NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
-        NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeTo:commonParent error:outError];
+        NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:commonParent error:outError];
         NSString *bibtexPath = [[path stringByAppendingPathComponent:[path lastPathComponent]] stringByAppendingPathExtension:@"bib"];
         
         success = [bibtexData writeToFile:bibtexPath options:0 error:outError];
@@ -1011,7 +1104,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                     targetPath = [fm uniqueFilePathWithName:[targetPath stringByDeletingLastPathComponent] atPath:[targetPath lastPathComponent]];
                 success = [fm createPathToFile:targetPath attributes:nil error:NULL];
                 if (success)
-                    success = [fm copyPath:filePath toPath:targetPath handler:nil];
+                success = [fm copyPath:filePath toPath:targetPath handler:nil];
             }
         }
         
@@ -1084,11 +1177,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
-        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeTo:nil error:&error];
+        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
     }else if ([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
         data = [self RISDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKMinimalBibTeXDocumentType]){
-        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES relativeTo:nil error:&error];
+        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
     }else if ([aType isEqualToString:BDSKLTBDocumentType]){
         data = [self LTBDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKEndNoteDocumentType]){
@@ -1099,6 +1192,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         data = [self atomDataForPublications:items];
     }else{
         BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:aType];
+        NSParameterAssert(nil != selectedTemplate);
         BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
         
         if (templateFormat & BDSKRTFDTemplateFormat) {
@@ -1198,7 +1292,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return d;
 }
 
-- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeTo:(NSString *)basePath error:(NSError **)outError{
+- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath error:(NSError **)outError{
     NSParameterAssert(encoding != 0);
 
     NSEnumerator *e = [items objectEnumerator];
@@ -1266,7 +1360,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
     while(isOK && (pub = [e nextObject])){
-        pubData = [pub bibTeXDataDroppingInternal:drop relativeTo:basePath encoding:encoding error:&error];
+        pubData = [pub bibTeXDataDroppingInternal:drop relativeToPath:basePath encoding:encoding error:&error];
         if(isOK = pubData != nil){
             [outputData appendData:doubleNewlineData];
             [outputData appendData:pubData];
@@ -1759,6 +1853,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark New publications from pasteboard
 
 - (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect{
+    NSEnumerator *pubEnum;
+    BibItem *pub;
+    
     if (shouldSelect)
         [self selectLibraryGroup:nil];    
 	[self addPublications:newPubs];
@@ -1766,13 +1863,15 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self selectPublications:newPubs];
 	if (pubsToAutoFile != nil){
         // tried checking [pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]] before using delay, but pb is a CFPasteboardUnique
-        [pubsToAutoFile makeObjectsPerformSelector:@selector(autoFilePaper)];
+        pubEnum = [pubsToAutoFile objectEnumerator];
+        while (pub = [pubEnum nextObject])
+            [pub performSelector:@selector(autoFileLinkedFile:) withObjectsFromArray:[pub localFiles]];
     }
     
     BOOL autoGenerate = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey];
     NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[newPubs count]];
-    NSEnumerator *pubEnum = [newPubs objectEnumerator];
-    BibItem *pub;
+    
+    pubEnum = [newPubs objectEnumerator];
     
     while (pub = [pubEnum nextObject]) {
         if ((autoGenerate == NO && [pub hasEmptyOrDefaultCiteKey]) ||
@@ -1914,54 +2013,54 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	if(nil == newPubs || isPartialData) {
         
         if (verbose) {
-            // @@ should just be able to create an alert from the NSError, unless it's unknown type
-            NSString *message = nil;
-            NSString *defaultButton = NSLocalizedString(@"Cancel", @"");
-            NSString *alternateButton = nil;
-            NSString *otherButton = nil;
-            NSString *alertTitle = NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string");
-            int errorCode = [parseError code];
-            
-            // the partial data alert only applies to BibTeX; we could show the editor window for non-BibTeX data (I think...), but we also have to deal with alerts being shown twice if NSError is involved
-            if(type == BDSKBibTeXStringType || type == BDSKNoKeyBibTeXStringType){
-                // here we want to display an alert, but don't propagate a nil/error back up, since it's not a failure
-                if (errorCode == kBDSKParserIgnoredFrontMatter) {
-                    message = [parseError localizedRecoverySuggestion];
-                    alertTitle = [parseError localizedDescription];
-                    defaultButton = nil;
-                    // @@ fixme: NSError
-                    parseError = nil;
-                } else {
-                    // this was BibTeX, but the user may want to try going with partial data
-                    message = NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog");
-                    alternateButton = NSLocalizedString(@"Edit data", @"Button title");
-                    otherButton = NSLocalizedString(@"Keep going", @"Button title");
-                }
-                
-                // run a modal dialog asking if we want to use partial data or give up
-                NSAlert *alert = [NSAlert alertWithMessageText:alertTitle
-                                                 defaultButton:defaultButton
-                                               alternateButton:alternateButton
-                                                   otherButton:otherButton
-                                     informativeTextWithFormat:message];
-                int rv = [alert runModal];
-                
-                if(rv == NSAlertDefaultReturn && errorCode != kBDSKParserIgnoredFrontMatter){
-                    // the user said to give up
-                    newPubs = nil;
-                }else if (rv == NSAlertAlternateReturn){
-                    // they said to edit the file.
-                    [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
-                    newPubs = nil;	
-                }else if(rv == NSAlertOtherReturn){
-                    // the user said to keep going, so if they save, they might clobber data...
-                    // @@ should we ignore the error as well?
-                }
-                
+        // @@ should just be able to create an alert from the NSError, unless it's unknown type
+        NSString *message = nil;
+        NSString *defaultButton = NSLocalizedString(@"Cancel", @"");
+        NSString *alternateButton = nil;
+        NSString *otherButton = nil;
+        NSString *alertTitle = NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string");
+        int errorCode = [parseError code];
+        
+        // the partial data alert only applies to BibTeX; we could show the editor window for non-BibTeX data (I think...), but we also have to deal with alerts being shown twice if NSError is involved
+        if(type == BDSKBibTeXStringType || type == BDSKNoKeyBibTeXStringType){
+            // here we want to display an alert, but don't propagate a nil/error back up, since it's not a failure
+            if (errorCode == kBDSKParserIgnoredFrontMatter) {
+                message = [parseError localizedRecoverySuggestion];
+                alertTitle = [parseError localizedDescription];
+                defaultButton = nil;
+                // @@ fixme: NSError
+                parseError = nil;
+            } else {
+                // this was BibTeX, but the user may want to try going with partial data
+                message = NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could parse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog");
+                alternateButton = NSLocalizedString(@"Edit data", @"Button title");
+                otherButton = NSLocalizedString(@"Keep going", @"Button title");
             }
             
-            // if not BibTeX, it's an unknown type or failed due to parser error; in either case, we must have a valid NSError since the parser returned nil
-            // no partial data here since that only applies to BibTeX parsing; all we can do is just return nil and propagate the error back up, although I suppose we could display the error editor...
+            // run a modal dialog asking if we want to use partial data or give up
+            NSAlert *alert = [NSAlert alertWithMessageText:alertTitle
+                                             defaultButton:defaultButton
+                                           alternateButton:alternateButton
+                                               otherButton:otherButton
+                                 informativeTextWithFormat:message];
+            int rv = [alert runModal];
+            
+            if(rv == NSAlertDefaultReturn && errorCode != kBDSKParserIgnoredFrontMatter){
+                // the user said to give up
+                newPubs = nil;
+            }else if (rv == NSAlertAlternateReturn){
+                // they said to edit the file.
+                [[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
+                newPubs = nil;	
+            }else if(rv == NSAlertOtherReturn){
+                // the user said to keep going, so if they save, they might clobber data...
+                // @@ should we ignore the error as well?
+            }
+            
+        }
+        
+        // if not BibTeX, it's an unknown type or failed due to parser error; in either case, we must have a valid NSError since the parser returned nil
+        // no partial data here since that only applies to BibTeX parsing; all we can do is just return nil and propagate the error back up, although I suppose we could display the error editor...
 		} else {
             newPubs = nil;
         }
@@ -2079,7 +2178,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             if(newBI == nil)
                 newBI = [[[BibItem alloc] init] autorelease];
             
-            [newBI setField:BDSKLocalUrlString toValue:[url absoluteString]];
+            [newBI addFileForURL:url autoFile:NO];
 			[newPubs addObject:newBI];
 		}
 	}
@@ -2095,7 +2194,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
 	BibItem *newBI = [[[BibItem alloc] init] autorelease];
     
-    [newBI setField:BDSKUrlString toValue:[url absoluteString]];
+    [newBI addFileForURL:url autoFile:NO];
     
 	return [NSArray arrayWithObject:newBI];
 }
@@ -2601,6 +2700,14 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [self updatePreviews];
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (object == fileView && [keyPath isEqualToString:@"iconScale"]) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[fileView iconScale] forKey:BDSKMainFileViewIconScaleKey];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
 #pragma mark -
 #pragma mark Preview updating
 
@@ -2610,6 +2717,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         return;
 
     OBASSERT([NSThread inMainThread]);
+    
+    [fileView reloadIcons];
     
     //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
     [self updatePreviewPane];
@@ -2679,12 +2788,111 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [attrString release];
 }
 
+static void addValueFromArrayToBag(const void *value, void *context)
+{
+    CFBagAddValue(context, value);
+}
+
+static void addAllURLsToBag(const void *value, void *context)
+{
+    CFArrayRef fpaths = (CFArrayRef)[(BibItem *)value sortedURLs];
+    CFArrayApplyFunction(fpaths, CFRangeMake(0, CFArrayGetCount(fpaths)), addValueFromArrayToBag, context);
+}
+
+// delegate must return an NSString path or nil for each index < numberOfFiles
+- (NSUInteger)countOfFileViewURLs;
+{
+    NSArray *selPubs = [self selectedPublications];
+    if (nil == selPubs) return 0;
+    CFMutableBagRef bag = CFBagCreateMutable(NULL, 0, NULL);
+    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllURLsToBag, bag);
+    unsigned cnt = CFBagGetCount(bag);
+    CFRelease(bag);
+    return cnt;
+}
+
+typedef struct _applierContext {
+    CFMutableArrayRef array;
+    BibItem *item;
+} applierContext;
+
+static void addValueFromArrayToArray(const void *value, void *context)
+{
+    applierContext *ctxt = context;
+    // value is NSURL *
+    BDSKFileViewObject *obj = [[BDSKFileViewObject alloc] initWithURL:(id)value subtitle:[ctxt->item displayTitle]];
+    CFArrayAppendValue(ctxt->array, obj);
+    [obj release];
+}
+
+static void addAllObjectsForItemToArray(const void *value, void *context)
+{
+    CFArrayRef allURLs = (CFArrayRef)[(BibItem *)value sortedURLs];
+    applierContext ctxt;
+    ctxt.array = context;
+    ctxt.item = (id)value;
+    CFArrayApplyFunction(allURLs, CFRangeMake(0, CFArrayGetCount(allURLs)), addValueFromArrayToArray, &ctxt);
+}
+
+- (NSURL *)objectInFileViewURLsAtIndex:(NSUInteger)idx;
+{
+    NSArray *selPubs = [self selectedPublications];
+    if (nil == selPubs) return nil;
+    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, array);
+    BDSKFileViewObject *obj = (id)CFArrayGetValueAtIndex(array, idx);
+    NSURL *URL = [[obj URL] retain];
+    CFRelease(array);
+    return [URL autorelease];
+}
+
+- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
+{
+    NSArray *selPubs = [self selectedPublications];
+    if (nil == selPubs) return nil;
+    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, array);
+    BDSKFileViewObject *obj = (id)CFArrayGetValueAtIndex(array, anIndex);
+    NSString *title = [[obj subtitle] retain];
+    CFRelease(array);
+    return [title autorelease];
+}
+
+- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [self countOfFileViewURLs]; }
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex { return [self objectInFileViewURLsAtIndex:anIndex]; }
+
+- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
+    NSURL *theURL = anIndex == NSNotFound ? nil : [self objectInFileViewURLsAtIndex:anIndex];
+    int i;
+    NSMenuItem *item;
+    
+    if (theURL) {
+        i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
+        [menu insertItemWithTitle:[NSLocalizedString(@"Open With", @"Menu item title") stringByAppendingEllipsis]
+                andSubmenuOfApplicationsForURL:theURL atIndex:++i];
+    }
+    if ([theURL isFileURL]) {
+        i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
+        item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
+                                  action:@selector(showNotesForLinkedFile:)
+                           keyEquivalent:@""
+                                 atIndex:++i];
+        [item setRepresentedObject:theURL];
+        
+        item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
+                                  action:@selector(copyNotesForLinkedFile:)
+                           keyEquivalent:@""
+                                 atIndex:++i];
+        [item setRepresentedObject:theURL];
+    }
+}
+
 - (void)displayLocalURLInPreviewPane{
     NSView *view = [previewTextView enclosingScrollView];
     [[previewer progressOverlay] remove];
     [previewer updateWithBibTeXString:nil];
     
-    NSURL *url = [[[self selectedPublications] firstObject] localURL];
+    NSURL *url = [[[[self selectedPublications] firstObject] localFiles] firstObject];
     BOOL isDir;
     BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:[url path] isDirectory:&isDir];
     // checking kUTTypeText would get RTF, HTML, XML, txt, but not RTFD or web archives; consequently, we'll just try loading anything and let NSAttributedString sort it out if it's not PDF or PS
@@ -3243,40 +3451,56 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [sender adjustSubviews];
 }
 
-- (void)splitView:(OASplitView *)sender multipleClick:(NSEvent *)mouseEvent{
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
     int i = [[sender subviews] count] - 2;
     OBASSERT(i >= 0);
+	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
 	NSView *firstView = [[sender subviews] objectAtIndex:i];
 	NSView *secondView = [[sender subviews] objectAtIndex:++i];
+	NSRect zerothFrame = zerothView ? [zerothView frame] : NSZeroRect;
 	NSRect firstFrame = [firstView frame];
 	NSRect secondFrame = [secondView frame];
 	
-	if (sender == splitView) {
-		// first = table, second = preview
-		if(NSHeight([secondView frame]) > 0){ // can't use isSubviewCollapsed, because implementing splitView:canCollapseSubview: prevents uncollapsing
+	if (sender == splitView && offset == i - 1) {
+		// first = table, second = preview, zeroth = web
+		if(NSHeight(secondFrame) > 0){ // can't use isSubviewCollapsed, because implementing splitView:canCollapseSubview: prevents uncollapsing
 			docState.lastPreviewHeight = NSHeight(secondFrame); // cache this
 			firstFrame.size.height += docState.lastPreviewHeight;
 			secondFrame.size.height = 0;
 		} else {
 			if(docState.lastPreviewHeight <= 0)
-				docState.lastPreviewHeight = NSHeight([sender frame]) / 3; // a reasonable value for uncollapsing the first time
+				docState.lastPreviewHeight = floorf(NSHeight([sender frame]) / 3); // a reasonable value for uncollapsing the first time
 			firstFrame.size.height = NSHeight(firstFrame) + NSHeight(secondFrame) - docState.lastPreviewHeight;
 			secondFrame.size.height = docState.lastPreviewHeight;
 		}
-	} else {
-		// first = group, second = table+preview
-		if(NSWidth([firstView frame]) > 0){
-			docState.lastGroupViewWidth = NSWidth(firstFrame); // cache this
-			secondFrame.size.width += docState.lastGroupViewWidth;
-			firstFrame.size.width = 0;
-		} else {
-			if(docState.lastGroupViewWidth <= 0)
-				docState.lastGroupViewWidth = 120; // a reasonable value for uncollapsing the first time
-			secondFrame.size.width = NSWidth(firstFrame) + NSWidth(secondFrame) - docState.lastGroupViewWidth;
-			firstFrame.size.width = docState.lastGroupViewWidth;
-		}
-	}
+	} else if (sender == groupSplitView) {
+		// zeroth = group, first = table+preview, second = fileview
+        if (offset == 0) {
+            if(NSWidth(zerothFrame) > 0){
+                docState.lastGroupViewWidth = NSWidth(zerothFrame); // cache this
+                firstFrame.size.width += docState.lastGroupViewWidth;
+                zerothFrame.size.width = 0;
+            } else {
+                if(docState.lastGroupViewWidth <= 0)
+                    docState.lastGroupViewWidth = fminf(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
+                firstFrame.size.width -= docState.lastGroupViewWidth;
+                zerothFrame.size.width = docState.lastGroupViewWidth;
+            }
+        } else {
+            if(NSWidth(secondFrame) > 0){
+                docState.lastFileViewWidth = NSWidth(secondFrame); // cache this
+                firstFrame.size.width += docState.lastFileViewWidth;
+                secondFrame.size.width = 0;
+            } else {
+                if(docState.lastFileViewWidth <= 0)
+                    docState.lastFileViewWidth = fminf(120, NSWidth(firstFrame)); // a reasonable value for uncollapsing the first time
+                firstFrame.size.width -= docState.lastFileViewWidth;
+                secondFrame.size.width = docState.lastFileViewWidth;
+            }
+        }
+	} else return;
 	
+	[zerothView setFrame:zerothFrame];
 	[firstView setFrame:firstFrame];
 	[secondView setFrame:secondFrame];
     [sender adjustSubviews];
@@ -3290,7 +3514,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *pub;
     NSMutableArray *generateKeyPubs = [NSMutableArray arrayWithCapacity:[pubs count]];
-    NSMutableArray *autofilePubs = [NSMutableArray arrayWithCapacity:[pubs count]];
+    NSMutableArray *autofileFiles = [NSMutableArray arrayWithCapacity:[pubs count]];
     
     while(pub = [pubEnum nextObject]){
         [[self editorForPublication:pub create:NO] finalizeChanges:nil];
@@ -3300,16 +3524,21 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             [generateKeyPubs addObject:pub];
         
         // autofile paper if we have enough information
-        if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [pub needsToBeFiled] && [pub canSetLocalUrl])
-            [autofilePubs addObject:pub];
+        if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+            NSEnumerator *fileEnum = [[pub localFiles] objectEnumerator];
+            BDSKLinkedFile *file;
+            while (file = [fileEnum nextObject])
+                if ([[pub filesToBeFiled] containsObject:file] && [pub canSetURLForLinkedFile:file])
+                    [autofileFiles addObject:file];
+        }
 	}
     
     if([generateKeyPubs count]){
         [self generateCiteKeysForPublications:generateKeyPubs];
         rv |= 1;
     }
-    if([autofilePubs count]){
-        [[BDSKFiler sharedFiler] filePapers:autofilePubs fromDocument:self check:NO];
+    if([autofileFiles count]){
+        [[BDSKFiler sharedFiler] filePapers:autofileFiles fromDocument:self check:NO];
         rv |= 2;
     }
     
@@ -3351,6 +3580,11 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [self willChangeValueForKey:@"displayName"];
     [super setFileURL:absoluteURL];
     [self didChangeValueForKey:@"displayName"];
+    
+    if (absoluteURL)
+        [[publications valueForKeyPath:@"@unionOfArrays.files"]  makeObjectsPerformSelector:@selector(update)];
+    [self updatePreviews];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentFileURLDidChangeNotification object:self];
 }
 
 // just create this setter to avoid a run time warning

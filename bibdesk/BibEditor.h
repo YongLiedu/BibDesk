@@ -54,6 +54,9 @@
 @class BDSKAlert;
 @class BibAuthor;
 @class BDSKZoomablePDFView;
+@class BibEditor;
+@class FileView;
+@class BDSKSplitView;
 
 /*!
     @class BibEditor
@@ -61,10 +64,12 @@
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
 @interface BibEditor : NSWindowController <BDSKFormDelegate> {
+	IBOutlet BDSKSplitView *mainSplitView;
+	IBOutlet BDSKSplitView *fileSplitView;
+	IBOutlet BDSKSplitView *fieldSplitView;
     IBOutlet NSPopUpButton *bibTypeButton;
     IBOutlet BDSKForm *bibFields;
     IBOutlet NSMatrix *extraBibFields;
-	IBOutlet OASplitView *splitView;
     IBOutlet NSTabView *tabView;
     IBOutlet NSTextView *notesView;
     IBOutlet NSTextView *abstractView;
@@ -78,54 +83,26 @@
     BOOL ignoreFieldChange;
     // for the splitview double-click handling
     float lastMatrixHeight;
-	
+	float lastFileViewWidth;
+    float lastAuthorsHeight;
+    
 	NSButtonCell *booleanButtonCell;
 	NSButtonCell *triStateButtonCell;
 	BDSKRatingButtonCell *ratingButtonCell;
     
     IBOutlet NSTextField* citeKeyField;
     IBOutlet NSTextField* citeKeyTitle;
-	IBOutlet BDSKImagePopUpButton *viewLocalButton;
-    IBOutlet BDSKImagePopUpButton *viewRemoteButton;
-    IBOutlet BDSKImagePopUpButton *documentSnoopButton;
 	IBOutlet BDSKImagePopUpButton *actionMenuButton;
-	NSToolbarItem *viewLocalToolbarItem;
-	NSToolbarItem *viewRemoteToolbarItem;
-	NSToolbarItem *documentSnoopToolbarItem;
-	NSToolbarItem *authorsToolbarItem;
 	IBOutlet BDSKImagePopUpButton *actionButton;
     IBOutlet NSMenu *actionMenu;
 	IBOutlet NSButton *addFieldButton;
 	
+	IBOutlet NSWindow *chooseURLSheet;
+	IBOutlet NSTextField *chooseURLField;
+    
     // ----------------------------------------------------------------------------------------
     BibItem *publication;
     BOOL isEditable;
-// ----------------------------------------------------------------------------------------
-// doc preview stuff
-// ----------------------------------------------------------------------------------------
-    IBOutlet NSDrawer* documentSnoopDrawer;
-	int drawerState;
-	int drawerButtonState;
-	// doc textpreview stuff
-    IBOutlet BDSKZoomablePDFView *documentSnoopPDFView;
-    IBOutlet NSView* pdfSnoopContainerView;
-	BOOL pdfSnoopViewLoaded;
-	// doc textpreview stuff
-    IBOutlet NSTextView *documentSnoopTextView;
-    IBOutlet NSView* textSnoopContainerView;
-	// remote webpreview stuff
-    IBOutlet WebView *remoteSnoopWebView;
-    IBOutlet NSView* webSnoopContainerView;
-	BOOL webSnoopViewLoaded;
-// ----------------------------------------------------------------------------------------
-// URL downlaod stuff
-// ----------------------------------------------------------------------------------------
-	WebDownload *download;
-	BOOL isDownloading;
-	NSString *downloadFieldName;
-	NSString *downloadFileName;
-    int receivedContentLength;
-    int expectedContentLength;
 // ----------------------------------------------------------------------------------------
 // status bar stuff
 // ----------------------------------------------------------------------------------------
@@ -141,21 +118,18 @@
     
 // Author tableView
 	IBOutlet NSTableView *authorTableView;
-	IBOutlet NSScrollView *authorScrollView;
 
     // Macro editing stuff
     MacroFormWindowController *macroTextFieldWC;
 
 	// edit field stuff
 	BOOL forceEndEditing;
-    NSMutableDictionary *toolbarItems;
 
     BOOL didSetupForm;
 	
 	NSTextView *dragFieldEditor;
-	
-    NSString *promisedDragFilename;
-    NSURL *promisedDragURL;
+    
+    IBOutlet FileView *fileView;
 }
 
 /*!
@@ -175,13 +149,14 @@
 */
 - (void)show;
 
-/*!
-    @method     chooseLocalURL:
-    @abstract   Action to choose a local file using the Open dialog. 
-    @discussion (comprehensive description)
-*/
-- (IBAction)chooseLocalURL:(id)sender;
-- (void)chooseLocalURLPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (IBAction)chooseLocalFile:(id)sender;
+- (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+- (IBAction)trashLocalFile:(id)sender;
+
+- (IBAction)chooseRemoteURL:(id)sender;
+- (IBAction)dismissChooseURLSheet:(id)sender;
+- (void)chooseRemoteURLSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)toggleStatusBar:(id)sender;
 
@@ -211,8 +186,6 @@
 
 - (void)updateCiteKeyAutoGenerateStatus;
 
-- (BOOL)autoFilePaper;
-
 - (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue;
 - (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(int)mask;
 
@@ -227,34 +200,15 @@
 */
 - (void)finalizeChanges:(NSNotification *)aNotification;
 
-/*!
-    @method     openLinkedFile
-    @abstract   Action to view the local file in the default viewer.
-    @discussion (comprehensive description)
-*/
 - (IBAction)openLinkedFile:(id)sender;
 
-/*!
-    @method     revealLinkedFile
-    @abstract   Action to reveal the local file in the Finder.
-    @discussion (comprehensive description)
-*/
 - (IBAction)revealLinkedFile:(id)sender;
 
-/*!
-    @method     moveLocalURL:
-    @abstract   Action to move a local file using the Save dialog. 
-    @discussion (comprehensive description)
-*/
-- (IBAction)moveLinkedFile:(id)sender;
+- (IBAction)openLinkedURL:(id)sender;
 
 - (IBAction)showNotesForLinkedFile:(id)sender;
 
 - (IBAction)copyNotesForLinkedFile:(id)sender;
-
-- (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-
-- (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view;
 
 /*!
     @method     updateSafariRecentDownloadsMenu:
@@ -293,35 +247,19 @@
 */
 - (void)updateRecentDownloadsMenu:(NSMenu *)menu;
 
-
 /*!
-    @method     updateAuthorsToolbarMenu:
-    @abstract   Updates the menu representatino of the Authors toolbar item.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (void)updateAuthorsToolbarMenu:(NSMenu *)menu;
-
-/*!
-    @method     setLocalURLPathFromMenuItem
+    @method     addLinkedFileFromMenuItem
     @abstract   Action to select a local file path from a menu item.
     @discussion (comprehensive description)
 */
-- (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender;
+- (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender;
 
 /*!
-    @method     setRemoteURLFromMenuItem
+    @method     addRemoteURLFromMenuItem
     @abstract   Action to select a remote URL from a menu item.
     @discussion (comprehensive description)
 */
-- (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender;
-
-/*!
-    @method     openRemoteURL
-    @abstract   Action to view the remote URL in the default browser.
-    @discussion (comprehensive description)
-*/
-- (IBAction)openRemoteURL:(id)sender;
+- (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender;
 
 /*!
     @method     showCiteKeyWarning:
@@ -355,47 +293,6 @@
 - (IBAction)changeFlag:(id)sender;
 
 /*!
-    @method     updateDocumentSnoopButton
-    @abstract   Updates the icon for the document snoop button. 
-    @discussion (comprehensive description)
-*/
-- (void)updateDocumentSnoopButton;
-
-/*!
-    @method     updateSnoopDrawerContent
-    @abstract   Updates the content of the document snoop drawer. This should be called just before opening the drawer. 
-    @discussion (comprehensive description)
-*/
-- (void)updateSnoopDrawerContent;
-
-/*!
-    @method     toggleSnoopDrawer:
-    @abstract   Action to toggle the state or contents of the document snoop drawer. The content view is taken from the represented object of the sender menu item.
-    @discussion (comprehensive description)
-*/
-- (void)toggleSnoopDrawer:(id)sender;
-
-/*!
-    @method     saveFileAsLocalUrl:
-    @abstract   Action to save the current file in the web drawer and set the Local-Url to the saved location. 
-    @discussion (comprehensive description)
-*/
-- (void)saveFileAsLocalUrl:(id)sender;
-
-/*!
-    @method     downloadLinkedFileAsLocalUrl:
-    @abstract   Action to download a file linked in the web drawer and set the Local-Url to the saved location. 
-    @discussion (comprehensive description)
-*/
-- (void)downloadLinkedFileAsLocalUrl:(id)sender;
-
-- (void)downloadURL:(NSURL *)linkURL forField:(NSString *)fieldName;
-
-- (void)setDownloading:(BOOL)downloading;
-
-- (void)cancelDownload;
-
-/*!
     @method     generateCiteKey:
     @abstract   Action to generate a cite-key for the bibitem, using the cite-key format string. 
     @discussion (comprehensive description)
@@ -422,6 +319,7 @@
 - (void)bibDidChange:(NSNotification *)notification;
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
 - (void)customFieldsDidChange:(NSNotification *)aNotification;
+- (void)fileURLDidChange:(NSNotification *)notification;
 
 - (void)bibWillBeRemoved:(NSNotification *)notification;
 - (void)groupWillBeRemoved:(NSNotification *)notification;
@@ -436,11 +334,6 @@
 - (IBAction)selectCrossrefParentAction:(id)sender;
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;
 
-- (IBAction)deletePub:(id)sender;
-
-- (IBAction)editPreviousPub:(id)sender;
-- (IBAction)editNextPub:(id)sender;
-
 - (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (NSUndoManager *)undoManager;
@@ -454,11 +347,6 @@
 */
 - (IBAction)showPersonDetailCmd:(id)sender;
 - (void)showPersonDetail:(BibAuthor *)person;
-
-#pragma mark Drag and drop
-
-- (void)setPromisedDragURL:(NSURL *)theURL;
-- (void)setPromisedDragFilename:(NSString *)theFilename;
 
 #pragma mark Macro support
     

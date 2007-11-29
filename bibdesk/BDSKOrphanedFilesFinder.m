@@ -53,6 +53,7 @@
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKFileMatcher.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "BDSKLinkedFile.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
@@ -141,13 +142,12 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (NSSet *)knownFiles
 {
-    NSSet *localFileFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
     NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
     BibDocument *doc;
     NSEnumerator *pubEnum;
     BibItem *pub;
-    NSEnumerator *fieldEnum;
-    NSString *field;
+    NSEnumerator *fileEnum;
+    BDSKLinkedFile *file;
     NSURL *fileURL;
     
     NSMutableSet *knownFiles = [NSMutableSet set];
@@ -155,13 +155,12 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     while (doc = [docEnum nextObject]) {
         fileURL = [doc fileURL];
         if (fileURL)
-            [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];;
+            [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];
         pubEnum = [[doc publications] objectEnumerator];
         while (pub = [pubEnum nextObject]) {
-            fieldEnum = [localFileFields objectEnumerator];
-            while (field = [fieldEnum nextObject]) {
-                fileURL = [pub localFileURLForField:field];
-                if (fileURL)
+            fileEnum = [[pub localFiles] objectEnumerator];
+            while (file = [fileEnum nextObject]) {
+                if (fileURL = [file URL])
                     [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];
             }
         }

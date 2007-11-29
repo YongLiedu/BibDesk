@@ -511,8 +511,8 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				<cocoa key="citeKeyFormat"/>
 			</property>
 			<property name="local file format" code="LFmt" type="text" access="r"
-				description="Format for the Local-Url field as specified in the Auto File preference.">
-				<cocoa key="localUrlFormat"/>
+				description="Format for local file as specified in the Auto File preference.">
+				<cocoa key="localFileFormat"/>
 			</property>
 			<property name="all typenames" code="atyp" access="r"
 				description="All the known BibTeX publication types.">
@@ -609,6 +609,22 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</responds-to>
 		</class>
 
+		<class name="linked URL" plural="linked URLs" code="URL " inherits="item"
+			description="A URL.">
+			<cocoa class="NSString"/>
+			<type type="text"/>
+		</class>
+
+		<class name="linked file" plural="linked files" code="File" inherits="item"
+			description="A file.">
+			<cocoa class="NSURL"/>
+			<type type="file"/>
+            <property name="URL" code="rURL" type="text" access="r"
+                description="URL for the file.">
+                <cocoa key="absoluteString"/>
+            </property>  
+		</class>
+
 		<class name="publication" plural="publications" code="bibi" inherits="item"
 			description="A publication.">
             <cocoa class="BibItem"/>
@@ -617,8 +633,16 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="pubAuthors"/>
             </element>
             <element type="field"
-			description="The fields of the publication. These should be accessed by name.">
+                description="The fields of the publication. These should be accessed by name.">
                 <cocoa key="bibFields"/>
+            </element>
+            <element type="linked file"
+                description="The local files linked to the publication.">
+                <cocoa key="linkedFiles"/>
+            </element>
+            <element type="linked URL"
+                description="The remote URLs linked to the publication.">
+                <cocoa key="linkedURLs"/>
             </element>
             <property name="cite key" code="ckey" type="text"
                 description="Key for citing the publication.">
@@ -640,11 +664,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The publication's keywords.">
                 <cocoa key="keywords"/>
             </property>
-            <property name="local file" code="lURL" type="text"
+            <property name="local file" code="lURL" type="text" hidden="yes"
                 description="Location of a file containing the publication. This is a POSIX path.">
                 <cocoa key="localURLString"/>
             </property>  
-            <property name="URL" code="rURL" type="text"
+            <property name="URL" code="rURL" type="text" hidden="yes"
                 description="URL pointing to the publication.">
                 <cocoa key="remoteURLString"/>
             </property>  
@@ -935,14 +959,18 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="ParseFormat" class="BDSKParseFormatCommand"/>
             <direct-parameter type="text"
                 description="The format string to parse."/>
-            <parameter name="for" code="for "
+            <parameter name="for" code="for " optional="yes"
                 description="The field or field name for which to parse the format string.">
                 <type type="field"/>
                 <type type="text"/>
                 <cocoa key="for"/>
             </parameter>
+            <parameter name="for file at index" type="integer" code="Indx" optional="yes"
+                description="The index of the linked file for which to parse the format. Defaults to 1 if there is a is a field set.">
+                <cocoa key="index"/>
+            </parameter>
             <parameter name="from" type="publication" code="from" optional="yes"
-                description="The publication for which to parse the format string. This is required if the field name was given as a string.">
+                description="The publication for which to parse the format string. This is required unless a full field reference was given.">
                 <cocoa key="from"/>
             </parameter>
             <parameter name="check" type="boolean" code="Chck" optional="yes"
@@ -958,12 +986,16 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="AutoFile" class="BDSKAutoFileCommand"/>
             <direct-parameter type="publication"
                 description="The pubication for which to auto file a linked file."/>
-            <parameter name="for" type="text" code="for " optional="yes"
-                description="The local file field name for which to auto file.">
+            <parameter name="for" type="text" code="for " optional="yes" hidden="yes"
+                description="The local file field name for which to auto file. Deprecated.">
                 <cocoa key="for"/>
             </parameter>
+            <parameter name="at index" type="integer" code="Indx" optional="yes"
+                description="The index of the linked file to auto file. Defaults to 1 if there is a is a location set, otherwise all linked files are auto filed.">
+                <cocoa key="index"/>
+            </parameter>
             <parameter name="to" type="text" code="to  " optional="yes"
-                description="The URL or path to set move the linked file to. Must be specified when the field is set and is not Local-Url">
+                description="The URL or path to move the linked file to.">
                 <cocoa key="to"/>
             </parameter>
             <parameter name="check" type="boolean" code="Chck" optional="yes"
