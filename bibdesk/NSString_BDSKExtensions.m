@@ -224,7 +224,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     NSRange searchRange = NSMakeRange(0, [self length]);
     NSRange foundRange = [self rangeOfTeXCommandInRange:searchRange];
     
-    if (foundRange.length == 0)
+    if (foundRange.length == 0 && [rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0)
         return self;
     
     NSMutableString *mutableString = [[self mutableCopy] autorelease];
