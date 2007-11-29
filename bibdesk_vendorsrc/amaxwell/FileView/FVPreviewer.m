@@ -299,7 +299,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
         // Quick Look (qlmanage) handles more types than our setup, but you can't copy any content from PDF/text sources, which sucks; hence, we only use it as a fallback (basically a replacement for fvImageView).  There are some slight behavior mismatches, and we lose fullscreen (I think), but that's minor in comparison.
         if ([fvImageView isEqual:newView] && [absoluteURL isFileURL] && [[NSFileManager defaultManager] isExecutableFileAtPath:@"/usr/bin/qlmanage"]) {
             
-            if ([[self window] isVisible])
+            if ([[self window] isVisible] && [[self window] respondsToSelector:@selector(animator)])
                 [[[self window] animator] close];
 
             qlTask = [[NSTask alloc] init];
