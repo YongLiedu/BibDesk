@@ -71,7 +71,7 @@ static const CGFloat DEFAULT_PADDING = 32;          // 16 per side
 static CGFloat _paddingForScale(CGFloat scale)
 {
     // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
-    return DEFAULT_PADDING + DEFAULT_PADDING * scale / 7;
+    return round(DEFAULT_PADDING + DEFAULT_PADDING * scale / 7);
 }
 
 // don't bother removing icons from the cache if there are fewer than this value
