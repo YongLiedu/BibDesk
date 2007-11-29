@@ -728,9 +728,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.8] setStroke];
     CGFloat lineWidth = 2.0;
     NSBezierPath *p;
+    NSUInteger r, c;
     
-    // if the rect is larger than the padding size, it's a drop on a cell or the entire rect
-    if (NSWidth(aRect) > _padding) {
+    if (NSEqualRects(aRect, [self visibleRect]) || [self _getGridRow:&r column:&c atPoint:NSMakePoint(NSMidX(aRect), NSMidY(aRect))]) {
+        // it's either a drop on the whole table or on top of a cell
         p = [NSBezierPath bezierPathWithRoundRect:NSInsetRect(aRect, 0.5 * lineWidth, 0.5 * lineWidth) xRadius:7 yRadius:7];
     }
     else {
