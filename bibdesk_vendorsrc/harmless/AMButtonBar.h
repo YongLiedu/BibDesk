@@ -22,19 +22,14 @@ extern NSString *const AMButtonBarSelectionDidChangeNotification;
 
 @interface AMButtonBar : NSView {
 	id delegate;
-	BOOL delegateRespondsToSelectionDidChange;
 	NSColor *baselineSeparatorColor;
 	BOOL showsBaselineSeparator;
 	BOOL allowsMultipleSelection;
 	NSMutableArray *items;
-	AMButtonBarCell *buttonCell;
-	BOOL needsLayout;
 }
 
 
 - (id)initWithFrame:(NSRect)frame;
-
-- (AMButtonBarCell *)buttonCell;
 
 - (NSArray *)items;
 
@@ -42,6 +37,7 @@ extern NSString *const AMButtonBarSelectionDidChangeNotification;
 - (NSArray *)selectedItemIdentifiers;
 
 - (AMButtonBarItem *)itemAtIndex:(int)index;
+- (void)didClickItem:(AMButtonBarItem *)item;
 
 - (void)insertItem:(AMButtonBarItem *)item atIndex:(int)index;
 
@@ -57,13 +53,5 @@ extern NSString *const AMButtonBarSelectionDidChangeNotification;
 
 - (BOOL)allowsMultipleSelection;
 - (void)setAllowsMultipleSelection:(BOOL)value;
-
-- (NSColor *)baselineSeparatorColor;
-- (void)setBaselineSeparatorColor:(NSColor *)value;
-
-- (BOOL)showsBaselineSeparator;
-- (void)setShowsBaselineSeparator:(BOOL)value;
-
-
 
 @end

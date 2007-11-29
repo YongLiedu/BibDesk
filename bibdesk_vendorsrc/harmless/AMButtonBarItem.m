@@ -7,272 +7,68 @@
 //
 
 #import "AMButtonBarItem.h"
-
+#import "AMButtonBarCell.h"
+#import "AMButtonBar.h"
 
 @implementation AMButtonBarItem
 
++ (Class)cellClass { return [AMButtonBarCell class]; }
+
+- (void)commonInit
+{
+    [self setEnabled:YES];
+    [self setBezelStyle:NSRecessedBezelStyle];
+    [self setShowsBorderOnlyWhileMouseInside:YES];
+    [self setButtonType:NSPushOnPushOffButton];
+    [[self cell] setControlSize:NSSmallControlSize];
+    [self setFont:[NSFont boldSystemFontOfSize:[NSFont systemFontSizeForControlSize:[[self cell] controlSize]]]];    
+}
+
 - (id)initWithIdentifier:(NSString *)theIdentifier;
 {
-	self = [super init];
-	if (self != nil) {
-		[self setItemIdentifier:theIdentifier];
-		[self setFrame:NSZeroRect];
-		[self setEnabled:YES];
+	if (self = [super initWithFrame:NSZeroRect]) {
+        [self setItemIdentifier:theIdentifier];
+        [self commonInit];
 	}
-	return self;
+    return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
-	itemIdentifier = [[decoder decodeObjectForKey:@"AMBBIItemIdentifier"] retain];
-	toolTip = [[decoder decodeObjectForKey:@"AMBBIToolTip"] retain];
-	title = [[decoder decodeObjectForKey:@"AMBBITitle"] retain];
-	alternateTitle = [[decoder decodeObjectForKey:@"AMBBIAlternateTitle"] retain];
-	target = [decoder decodeObjectForKey:@"AMBBITarget"];
-	action = NSSelectorFromString([decoder decodeObjectForKey:@"AMBBISelector"]);
-	enabled = [decoder decodeBoolForKey:@"AMBBISelector"];
-	active = [decoder decodeBoolForKey:@"AMBBIActive"];
-	separatorItem = [decoder decodeBoolForKey:@"AMBBISeparatorItem"];
-	overflowItem = [decoder decodeBoolForKey:@"AMBBIOverflowItem"];
-	state = [decoder decodeIntForKey:@"AMBBIState"];
-	tag = [decoder decodeIntForKey:@"AMBBITag"];
-	frame = [decoder decodeRectForKey:@"AMBBIFrame"];
-	return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder
-{
-	[coder encodeObject:itemIdentifier forKey:@"AMBBIItemIdentifier"];
-	[coder encodeObject:toolTip forKey:@"AMBBIToolTip"];
-	[coder encodeObject:title forKey:@"AMBBITitle"];
-	[coder encodeObject:alternateTitle forKey:@"AMBBIAlternateTitle"];
-	[coder encodeConditionalObject:target forKey:@"AMBBITarget"];
-	[coder encodeObject:NSStringFromSelector(action) forKey:@"AMBBISelector"];
-	[coder encodeBool:enabled forKey:@"AMBBISelector"];
-	[coder encodeBool:active forKey:@"AMBBIActive"];
-	[coder encodeBool:separatorItem forKey:@"AMBBISeparatorItem"];
-	[coder encodeBool:overflowItem forKey:@"AMBBIOverflowItem"];
-	[coder encodeInt:state forKey:@"AMBBIState"];
-	[coder encodeInt:tag forKey:@"AMBBITag"];
-	[coder encodeRect:frame forKey:@"AMBBIFrame"];
-}
-
-
-- (void)dealloc
-{
-	[overflowMenu release];
-	[itemIdentifier release];
-	[toolTip release];
-	[title release];
-	[alternateTitle release];
-	[super dealloc];
-}
-
-
-- (id)target
-{
-	return target;
-}
-
-- (void)setTarget:(id)value
-{
-	if (target != value) {
-		id old = target;
-		target = [value retain];
-		[old release];
+    if (self = [super initWithCoder:decoder]) {
+        [self commonInit];
 	}
-}
-
-- (SEL)action
-{
-	return action;
-}
-
-- (void)setAction:(SEL)value
-{
-	if (action != value) {
-		action = value;
-	}
-}
-
-- (BOOL)isEnabled
-{
-	return enabled;
-}
-
-- (void)setEnabled:(BOOL)value
-{
-	if (enabled != value) {
-		enabled = value;
-	}
-}
-
-- (BOOL)isMouseOver
-{
-	return mouseOver;
-}
-
-- (void)setMouseOver:(BOOL)value
-{
-	if (mouseOver != value) {
-		mouseOver = value;
-	}
-}
-
-- (BOOL)isActive
-{
-	return active;
-}
-
-- (void)setActive:(BOOL)value
-{
-	if (active != value) {
-		active = value;
-	}
-}
-
-- (BOOL)isSeparatorItem
-{
-	return separatorItem;
-}
-
-- (void)setSeparatorItem:(BOOL)value
-{
-	if (separatorItem != value) {
-		separatorItem = value;
-	}
-}
-
-- (BOOL)isOverflowItem
-{
-	return overflowItem;
-}
-
-- (void)setOverflowItem:(BOOL)value
-{
-	if (overflowItem != value) {
-		overflowItem = value;
-	}
-}
-
-- (int)state
-{
-	return state;
-}
-
-- (void)setState:(int)value
-{
-	if (state != value) {
-		state = value;
-	}
+    return self;
 }
 
 - (NSString *)itemIdentifier
 {
-	return itemIdentifier;
+	return [[self cell] representedObject];
 }
 
 - (void)setItemIdentifier:(NSString *)value
 {
-	if (itemIdentifier != value) {
-		id old = itemIdentifier;
-		itemIdentifier = [value retain];
-		[old release];
-	}
+	[[self cell] setRepresentedObject:value];
 }
 
-- (int)tag
-{
-	return tag;
+- (BOOL)isOpaque { return NO; }
+
+- (void)viewDidMoveToWindow {
+    // fix for a Tiger bug when a button is swapped in, it does not reset the tracking rects
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && [self showsBorderOnlyWhileMouseInside]) {
+        [self setShowsBorderOnlyWhileMouseInside:NO];
+        [self setShowsBorderOnlyWhileMouseInside:YES];
+    }
+    [super viewDidMoveToWindow];
 }
 
-- (void)setTag:(int)value
-{
-	if (tag != value) {
-		tag = value;
-	}
+- (void)viewDidMoveToSuperview {
+    // fix for a Tiger bug when a button is swapped in, it does not reset the tracking rects
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && [self showsBorderOnlyWhileMouseInside]) {
+        [self setShowsBorderOnlyWhileMouseInside:NO];
+        [self setShowsBorderOnlyWhileMouseInside:YES];
+    }
+    [super viewDidMoveToSuperview];
 }
-
-- (NSString *)toolTip
-{
-	return toolTip;
-}
-
-- (void)setToolTip:(NSString *)value
-{
-	if (toolTip != value) {
-		id old = toolTip;
-		toolTip = [value retain];
-		[old release];
-	}
-}
-
-- (NSString *)title
-{
-	return title;
-}
-
-- (void)setTitle:(NSString *)value
-{
-	if (title != value) {
-		id old = title;
-		title = [value retain];
-		[old release];
-	}
-}
-
-- (NSString *)alternateTitle
-{
-	return alternateTitle;
-}
-
-- (void)setAlternateTitle:(NSString *)value
-{
-	if (alternateTitle != value) {
-		id old = alternateTitle;
-		alternateTitle = [value retain];
-		[old release];
-	}
-}
-
-- (NSMenu *)overflowMenu
-{
-	return overflowMenu;
-}
-
-- (void)setOverflowMenu:(NSMenu *)value
-{
-	if (overflowMenu != value) {
-		id old = overflowMenu;
-		overflowMenu = [value retain];
-		[old release];
-	}
-}
-
-- (NSTrackingRectTag)trackingRectTag
-{
-	return trackingRectTag;
-}
-
-- (void)setTrackingRectTag:(NSTrackingRectTag)value
-{
-	trackingRectTag = value;
-}
-
-- (NSRect)frame
-{
-	return frame;
-}
-
-- (void)setFrame:(NSRect)value
-{
-	frame = value;
-}
-
-- (void)setFrameOrigin:(NSPoint)origin
-{
-	frame.origin = origin;
-}
-
 
 @end
