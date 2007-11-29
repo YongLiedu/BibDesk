@@ -918,6 +918,7 @@ enum{
              theAction == @selector(raiseDelField:) || 
              theAction == @selector(raiseChangeFieldName:) || 
              theAction == @selector(chooseLocalFile:) || 
+             theAction == @selector(chooseRemoteURL:) || 
              theAction == @selector(addLinkedFileFromMenuItem:) || 
              theAction == @selector(addRemoteURLFromMenuItem:)) {
         return isEditable;
