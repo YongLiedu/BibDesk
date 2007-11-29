@@ -554,7 +554,7 @@
 	NSString *title = [element objectForKey:WebElementLinkLabelKey];
 	if(title == nil) title = [URLString lastPathComponent];
 	
-    [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString name:title modalForWindow:[self window]];
+    [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[self window]];
 }
 
 #pragma mark UndoManager

@@ -211,6 +211,15 @@
     [webView addBookmark:sender];
 }
 
+- (IBAction)bookmarkLink:(id)sender {
+	NSDictionary *element = (NSDictionary *)[sender representedObject];
+	NSString *URLString = [(NSURL *)[element objectForKey:WebElementLinkURLKey] absoluteString];
+	NSString *title = [element objectForKey:WebElementLinkLabelKey];
+	if(title == nil) title = [URLString lastPathComponent];
+	
+    [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[webView window]];
+}
+
 - (void)setRetrieving:(BOOL)retrieving {
     [group setRetrieving:retrieving];
     [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
@@ -347,6 +356,17 @@
 	NSMutableArray *menuItems = [NSMutableArray arrayWithArray:defaultMenuItems];
 	NSMenuItem *item;
 	
+    unsigned int i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInt:WebMenuItemTagCopyLinkToClipboard]];
+    
+    if (i != NSNotFound) {
+        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link",@"Bookmark linked page") stringByAppendingEllipsis]
+                                   action:@selector(bookmarkLink:)
+                            keyEquivalent:@""];
+        [item setTarget:self];
+        [item setRepresentedObject:element];
+        [menuItems insertObject:[item autorelease] atIndex:++i];
+    }
+    
 	if ([menuItems count] > 0) 
 		[menuItems addObject:[NSMenuItem separatorItem]];
 	

@@ -227,7 +227,7 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
     }
 }
 
-- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name modalForWindow:(NSWindow *)window {
+- (void)addBookmarkWithUrlString:(NSString *)urlString proposedName:(NSString *)name modalForWindow:(NSWindow *)window {
     [self window];
     [bookmarkField setStringValue:name];
     [folderPopUp removeAllItems];
@@ -893,7 +893,7 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
 	if(name == nil) name = [URLString lastPathComponent];
     
     if (URLString)
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString name:name modalForWindow:[self window]];
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:name modalForWindow:[self window]];
 }
 
 @end
