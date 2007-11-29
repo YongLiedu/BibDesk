@@ -800,8 +800,9 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     [path setLineDash:pattern count:2 phase:0.0];
     [[NSColor lightGrayColor] setStroke];
     [path stroke];
-    
-    NSString *message = NSLocalizedString(@"Drop Files Here", @"placeholder message for empty file view");
+
+    NSBundle *bundle = [NSBundle bundleForClass:[FileView class]];
+    NSString *message = NSLocalizedStringFromTableInBundle(@"Drop Files Here", @"FileView", bundle, @"placeholder message for empty file view");
     NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:message] autorelease];
     [attrString addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:24.0f] range:NSMakeRange(0, [attrString length])];
     [attrString addAttribute:NSForegroundColorAttributeName value:[NSColor lightGrayColor] range:NSMakeRange(0, [attrString length])];
@@ -1981,7 +1982,13 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     else if (action == @selector(revealInFinder:))
         return [aURL isFileURL] && [[NSFileManager defaultManager] fileExistsAtPath:[aURL path]];
     else if (action == @selector(openURL:) && nil != aURL) {
-        [anItem setTitle:([aURL isFileURL] ? NSLocalizedString(@"Open File", @"") : NSLocalizedString(@"Open in Browser", @""))];
+        NSBundle *bundle = [NSBundle bundleForClass:[FileView class]];
+        NSString *title;
+        if ([aURL isFileURL])
+            title = NSLocalizedStringFromTableInBundle(@"Open File", @"FileView", bundle, @"context menu title");
+        else
+            title = NSLocalizedStringFromTableInBundle(@"Open in Browser", @"FileView", bundle, @"context menu title");
+        [anItem setTitle:title];
         return YES;
     }
     else if (action == @selector(delete:) || action == @selector(copy:) || action == @selector(cut:))
@@ -2043,19 +2050,20 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         NSMenuItem *anItem;
         
         sharedMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""];
+        NSBundle *bundle = [NSBundle bundleForClass:[FileView class]];
         
-        anItem = [sharedMenu addItemWithTitle:NSLocalizedString(@"Quick Look", @"") action:@selector(previewAction:) keyEquivalent:@""];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Quick Look", @"FileView", bundle, @"context menu title") action:@selector(previewAction:) keyEquivalent:@""];
         [anItem setTag:FVQuickLookMenuItemTag];
-        anItem = [sharedMenu addItemWithTitle:NSLocalizedString(@"Open File", @"") action:@selector(openURL:) keyEquivalent:@""];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Open File", @"FileView", bundle, @"context menu title") action:@selector(openURL:) keyEquivalent:@""];
         [anItem setTag:FVOpenMenuItemTag];
-        anItem = [sharedMenu addItemWithTitle:NSLocalizedString(@"Reveal in Finder", @"") action:@selector(revealInFinder:) keyEquivalent:@""];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Reveal in Finder", @"FileView", bundle, @"context menu title") action:@selector(revealInFinder:) keyEquivalent:@""];
         [anItem setTag:FVRevealMenuItemTag];
         
         [sharedMenu addItem:[NSMenuItem separatorItem]];
         
-        anItem = [sharedMenu addItemWithTitle:NSLocalizedString(@"Zoom In", @"") action:@selector(zoomIn:) keyEquivalent:@""];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Zoom In", @"FileView", bundle, @"context menu title") action:@selector(zoomIn:) keyEquivalent:@""];
         [anItem setTag:FVZoomInMenuItemTag];
-        anItem = [sharedMenu addItemWithTitle:NSLocalizedString(@"Zoom Out", @"") action:@selector(zoomOut:) keyEquivalent:@""];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Zoom Out", @"FileView", bundle, @"context menu title") action:@selector(zoomOut:) keyEquivalent:@""];
         [anItem setTag:FVZoomOutMenuItemTag];
     }
     return sharedMenu;

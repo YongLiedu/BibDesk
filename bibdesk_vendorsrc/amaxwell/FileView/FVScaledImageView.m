@@ -78,10 +78,12 @@ static NSDictionary *__textAttributes = nil;
         CFRelease(mdItem);
     }
     
+    NSBundle *bundle = [NSBundle bundleForClass:[FVScaledImageView class]];
+    
     if (nil != mdAttributes) {
         NSMutableAttributedString *kindString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"\n\n%@", [mdAttributes objectForKey:(id)kMDItemKind]] attributes:__textAttributes];
         if ([mdAttributes objectForKey:(id)kMDItemPixelHeight] && [mdAttributes objectForKey:(id)kMDItemPixelWidth])
-            [[kindString mutableString] appendFormat:NSLocalizedString(@"\n%@ by %@ pixels", @"two string format specifiers"), [mdAttributes objectForKey:(id)kMDItemPixelWidth], [mdAttributes objectForKey:(id)kMDItemPixelHeight]];
+            [[kindString mutableString] appendFormat:NSLocalizedStringFromTableInBundle(@"\n%@ by %@ pixels", @"FileView", bundle, @"two string format specifiers"), [mdAttributes objectForKey:(id)kMDItemPixelWidth], [mdAttributes objectForKey:(id)kMDItemPixelHeight]];
         [fileDescription appendAttributedString:kindString];
         [kindString release];
     }
@@ -104,7 +106,7 @@ static NSDictionary *__textAttributes = nil;
             mbsize /= 1024.0f;
             label = @"GB";
         }
-        NSMutableAttributedString *details = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:NSLocalizedString(@"\n\nSize: %.1f %@\nCreated: %@\nModified: %@", @""), mbsize, label, [formatter stringFromDate:[fattrs objectForKey:NSFileCreationDate]], [formatter stringFromDate:[fattrs objectForKey:NSFileModificationDate]]] attributes:__textAttributes];
+        NSMutableAttributedString *details = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"\n\nSize: %.1f %@\nCreated: %@\nModified: %@", @"FileView", bundle, @"message displayed in preview"), mbsize, label, [formatter stringFromDate:[fattrs objectForKey:NSFileCreationDate]], [formatter stringFromDate:[fattrs objectForKey:NSFileModificationDate]]] attributes:__textAttributes];
         [details addAttribute:NSFontAttributeName value:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]] range:NSMakeRange(0, [details length])];
         [fileDescription appendAttributedString:details];
         [details release];

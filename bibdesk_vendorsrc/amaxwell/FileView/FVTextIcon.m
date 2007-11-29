@@ -250,7 +250,9 @@ static CGAffineTransform __paperTransform;
     }
     else {
         // avoid setting the text storage to nil, and display a mildly unhelpful error message
-        NSString *err = [NSLocalizedString(@"Unable to read text file ", @"single trailing space") stringByAppendingString:[_fileURL path]];
+        NSBundle *bundle = [NSBundle bundleForClass:[FVTextIcon class]];
+        
+        NSString *err = [NSLocalizedStringFromTableInBundle(@"Unable to read text file ", @"FileView", bundle, @"error message with single trailing space") stringByAppendingString:[_fileURL path]];
         [[textStorage mutableString] setString:err];
     }  
     [textStorage endEditing];
