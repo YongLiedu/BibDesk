@@ -253,6 +253,10 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     // the full view will likely need repainting
     [self reloadIcons];
     
+    // make sure the arrow buttons are hidden or they will be displaced
+    [_leftArrow setHidden:YES];
+    [_rightArrow setHidden:YES];
+    
     // Schedule a reload so we always have the correct quality icons, but don't do it while scaling in response to a slider.
     // This will also scroll to the first selected icon; maintaining scroll position while scaling is too jerky.
     if (NO == _isRescaling) {
