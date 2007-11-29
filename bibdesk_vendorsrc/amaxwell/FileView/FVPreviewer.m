@@ -299,8 +299,9 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
         // Quick Look (qlmanage) handles more types than our setup, but you can't copy any content from PDF/text sources, which sucks; hence, we only use it as a fallback (basically a replacement for fvImageView).  There are some slight behavior mismatches, and we lose fullscreen (I think), but that's minor in comparison.
         if ([fvImageView isEqual:newView] && [absoluteURL isFileURL] && [[NSFileManager defaultManager] isExecutableFileAtPath:@"/usr/bin/qlmanage"]) {
             
-            if ([[self window] isVisible] && [[self window] respondsToSelector:@selector(animator)])
-                [[[self window] animator] close];
+            // !!! Should animate the window fade as Quick Look does, but -animator doesn't help with that AFAICT.  Using an NSAnimation isn't quite smooth enough.  I tried using layer-backed view, but display craps out when loading a PDF because it apparently doesn't tile correctly (the entire image won't fit on the GPU).
+            if ([[self window] isVisible])
+                [[self window] close];
 
             qlTask = [[NSTask alloc] init];
             [qlTask setLaunchPath:@"/usr/bin/qlmanage"];
@@ -315,21 +316,19 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             NSArray *subviews = [[theWindow contentView] subviews];
             NSView *oldView = [subviews count] ? [subviews objectAtIndex:0] : nil;
             
-            NSView *animator = [[theWindow contentView] respondsToSelector:@selector(animator)] ? [[theWindow contentView] animator] : [theWindow contentView];
-            
+            NSView *contentView = [theWindow contentView];
             if (oldView)
-                [animator replaceSubview:oldView with:newView];
+                [contentView replaceSubview:oldView with:newView];
             else
-                [animator addSubview:newView];
+                [contentView addSubview:newView];
             
-            // Margins currently set for the HUD window on Leopard; Tiger uses NSPanel, which doesn't look as good
+            // Inset margins for the HUD window on Leopard; Tiger uses NSPanel
             NSRect frame = NSInsetRect([[theWindow contentView] frame], 1.0, 1.0);
             if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
                 frame.size.height -= 20;
                 frame.origin.y += 20;
             }
-            animator = [newView respondsToSelector:@selector(animator)] ? [newView animator] : newView;
-            [animator setFrame:frame];
+            [newView setFrame:frame];
 
             // it's annoying to recenter if this is just in response to a selection change or something
             if (NO == [theWindow isVisible])
