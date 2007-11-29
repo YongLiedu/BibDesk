@@ -1,0 +1,24 @@
+{
+    IBClasses = (
+        {
+            CLASS = Controller; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                "_fileView" = FileView; 
+                "_slider" = NSSlider; 
+                "_window" = NSWindow; 
+                arrayController = NSArrayController; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {
+            ACTIONS = {delete = id; selectNextIcon = id; selectPreviousIcon = id; }; 
+            CLASS = FileView; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {"_dataSource" = id; "_delegate" = id; }; 
+            SUPERCLASS = NSView; 
+        }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }
+    ); 
+    IBVersion = 1; 
+}
