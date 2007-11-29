@@ -2811,9 +2811,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     } else if ([sender isEqual:fieldSplitView]) {
     // keeps the matrix view at the same size and resizes the form view
         NSView *form = [[sender subviews] objectAtIndex:0]; // form
-    NSView *matrix = [[sender subviews] objectAtIndex:1]; // matrix
-    NSRect formFrame = [form frame];
-    NSRect matrixFrame = [matrix frame];
+        NSView *matrix = [[sender subviews] objectAtIndex:1]; // matrix
+        NSRect formFrame = [form frame];
+        NSRect matrixFrame = [matrix frame];
         NSSize newSize = [sender frame].size;
         
         formFrame.size.height += newSize.height - oldSize.height;
@@ -2822,8 +2822,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             matrixFrame.size.height = newSize.height - [fieldSplitView dividerThickness] - 1.0;
             lastMatrixHeight = NSHeight(matrixFrame);
         }
-    [form setFrame:formFrame];
-    [matrix setFrame:matrixFrame];
+        [form setFrame:formFrame];
+        [matrix setFrame:matrixFrame];
         [fieldSplitView adjustSubviews];
         // fix for NSSplitView bug, which doesn't send this in adjustSubviews
         [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fieldSplitView];
