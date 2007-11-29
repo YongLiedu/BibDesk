@@ -1627,13 +1627,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (NSString *)filesAsBibTeXFragmentRelativeToPath:(NSString *)basePath
 {
     // !!! inherit
-    NSUInteger i, fileIndex = 0, urlIndex = 0, iMax = [files count];
-    NSString *key = @"Bdsk-File-0";
+    NSUInteger i, fileIndex = 1, urlIndex = 1, iMax = [files count];
+    NSString *key = @"Bdsk-File-1";
     
     while ([pubFields objectForKey:key])
         key = [NSString stringWithFormat:@"Bdsk-File-%d", ++fileIndex];
     
-    key = @"Bdsk-Url-0";
+    key = @"Bdsk-Url-1";
     
     while ([pubFields objectForKey:key])
         key = [NSString stringWithFormat:@"Bdsk-Url-%d", ++urlIndex];
@@ -3595,8 +3595,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     if (files == nil)
         files = [NSMutableArray new];
     
-    NSUInteger i = 0, count;
-    NSString *value, *key = @"Bdsk-File-0";
+    NSUInteger i = 1, count;
+    NSString *value, *key = @"Bdsk-File-1";
     
     NSMutableArray *keysToRemove = [NSMutableArray array];
     NSMutableArray *unresolvedFiles = [NSMutableArray array];
@@ -3619,8 +3619,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
     
     // reset i so we can get all of the remote URL types
-    i = 0;
-    key = @"Bdsk-Url-0";
+    i = 1;
+    key = @"Bdsk-Url-1";
 
     while ((value = [pubFields objectForKey:key]) != nil) {
         BDSKLinkedFile *aURL = [[BDSKLinkedFile alloc] initWithURLString:value];
@@ -3645,11 +3645,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     [pubFields removeObjectsForKeys:keysToRemove];
     // !!! make sure the remaining keys are contiguous
     if (count = [unresolvedFiles count]) {
-        for (i = 0; i < count; i++)
+        for (i = 1; i <= count; i++)
             [pubFields setObject:[unresolvedFiles objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%d", i]];
     }
     if (count = [unresolvedURLs count]) {
-        for (i = 0; i < count; i++)
+        for (i = 1; i <= count; i++)
             [pubFields setObject:[unresolvedURLs objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-Url-%d", i]];
     }
     
