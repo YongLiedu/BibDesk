@@ -550,7 +550,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 {
     NSUInteger nr = [self numberOfRows];
     NSUInteger nc = [self numberOfColumns];
-    CGFloat w = ([self _columnWidth]) * nc + _padding / 2;
+    CGFloat w = ([self _columnWidth]) * nc;
     // add one extra padding increment because we draw in the padding, plus a bit more so we always have whitespace around the bottom row
     CGFloat h = ([self _rowHeight]) * nr + 2.5 * _padding;
     
@@ -1589,7 +1589,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             
             aRect = [self _rectOfIconInRow:r column:c];
             // rect size is 1/5 of padding, and should be centered between icons vertically
-            aRect.origin.x += _iconSize.width + _padding * 2 / 5;
+            aRect.origin.x += _iconSize.width + _padding * (c == [self numberOfColumns] - 1 ? 1 : 2) / 5;
             aRect.size.width = _padding / 5;    
             op = FVDropInsert;
             insertIndex = [self _indexForGridRow:r column:c] + 1;
@@ -1597,8 +1597,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         else if ([self _getGridRow:&r column:&c atPoint:right] && ([self _indexForGridRow:r column:c] < [self numberOfIcons])) {
             
             aRect = [self _rectOfIconInRow:r column:c];
-            aRect.origin.x -= _padding * 2 / 5;
-            aRect.size.width = _padding * 1 / 5;
+            aRect.origin.x -= _padding * (c == 0 ? 2 : 3) / 5;
+            aRect.size.width = _padding / 5;
             op = FVDropInsert;
             insertIndex = [self _indexForGridRow:r column:c];
         }
