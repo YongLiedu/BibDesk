@@ -12,8 +12,6 @@
             OUTLETS = {contentView = id; }; 
             SUPERCLASS = NSView; 
         }, 
-        {CLASS = BDSKDragOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
-        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
         {
             CLASS = BDSKEncodingPopUpButton; 
             LANGUAGE = ObjC; 
@@ -33,13 +31,7 @@
             SUPERCLASS = NSPopUpButton; 
         }, 
         {CLASS = BDSKMainTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {
-            CLASS = BDSKPopUpButtonCell; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSPopUpButtonCell; 
-        }, 
         {CLASS = BDSKPreviewTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
-        {CLASS = BDSKSearchField; LANGUAGE = ObjC; SUPERCLASS = NSSearchField; }, 
         {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
         {
             ACTIONS = {startAnimation = id; stopAnimation = id; }; 
@@ -65,8 +57,10 @@
                 changeIntersectGroupsAction = id; 
                 changeMainTableFont = id; 
                 changePreviewDisplay = id; 
+                changeSearchType = id; 
                 consolidateLinkedFiles = id; 
                 copyAsAction = id; 
+                copyNotesForLinkedFile = id; 
                 createNewPubUsingCrossrefAction = id; 
                 deleteSelectedPubs = id; 
                 deselectAllPublications = id; 
@@ -75,7 +69,9 @@
                 duplicateTitleToBooktitle = id; 
                 editAction = id; 
                 editGroupAction = id; 
+                editNewCategoryGroupWithSelection = id; 
                 editNewGroupWithSelection = id; 
+                editNewStaticGroupWithSelection = id; 
                 editPubCmd = id; 
                 editPubOrOpenURLAction = id; 
                 emailPubCmd = id; 
@@ -133,6 +129,10 @@
                 documentWindow = NSWindow; 
                 exportAccessoryView = NSView; 
                 exportSelectionCheckButton = NSButton; 
+                fileCollapsibleView = BDSKCollapsibleView; 
+                fileGradientView = BDSKGradientView; 
+                fileView = FileView; 
+                fileViewSlider = NSSlider; 
                 groupActionButton = BDSKImagePopUpButton; 
                 groupActionMenuButton = BDSKImagePopUpButton; 
                 groupAddButton = NSButton; 
@@ -146,7 +146,6 @@
                 saveAccessoryView = NSView; 
                 saveTextEncodingPopupButton = BDSKEncodingPopUpButton; 
                 searchBookmarkField = NSTextField; 
-                searchBookmarkPopUp = NSPopUpButton; 
                 searchBookmarkSheet = NSWindow; 
                 searchField = NSSearchField; 
                 splitView = BDSKSplitView; 
@@ -154,6 +153,13 @@
                 tableView = BDSKMainTableView; 
             }; 
             SUPERCLASS = NSDocument; 
+        }, 
+        {
+            ACTIONS = {delete = id; selectNextIcon = id; selectPreviousIcon = id; }; 
+            CLASS = FileView; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {dataSource = id; delegate = id; dragDataSource = id; }; 
+            SUPERCLASS = NSView; 
         }, 
         {
             ACTIONS = {
@@ -166,10 +172,21 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 
         }, 
-        {CLASS = MyTextField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
+        {CLASS = NSControl; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = NSMenu; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSMenuItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }, 
+        {CLASS = NSTableHeaderView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {
+            ACTIONS = {changeFont = id; invertSelection = id; }; 
+            CLASS = NSTableView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSControl; 
+        }, 
+        {CLASS = NSTextView; LANGUAGE = ObjC; SUPERCLASS = NSText; }, 
+        {CLASS = NSWindow; LANGUAGE = ObjC; SUPERCLASS = NSResponder; }, 
         {CLASS = OAGradientTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
-        {CLASS = OATextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }
+        {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }
     ); 
     IBVersion = 1; 
 }
