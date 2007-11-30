@@ -555,9 +555,10 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSUInteger nr = [self numberOfRows];
     NSUInteger nc = [self numberOfColumns];
     CGFloat w = ([self _columnWidth]) * nc;
-    // add one extra padding increment because we draw in the padding
-    CGFloat h = ([self _rowHeight]) * nr + _padding;
     
+    // Add one extra padding increment because we draw in the padding, plus a bit more so we always have whitespace around the bottom row.  Adding less than 1.5 * padding will clip the text in the test program.  Having a horizontal scroller may change that.
+    CGFloat h = ([self _rowHeight]) * nr + 1.5 * _padding;
+        
     NSClipView *cv = [[self enclosingScrollView] contentView];
     if (cv) {
         NSRect frame = [cv frame];
