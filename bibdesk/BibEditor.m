@@ -562,7 +562,7 @@ enum{
     NSURL *theURL = anIndex == NSNotFound ? nil : [[publication objectInFilesAtIndex:anIndex] URL];
 	NSMenu *submenu;
 	NSMenuItem *item;
-    int i;
+    int i = 0;
     
     if (theURL) {
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
