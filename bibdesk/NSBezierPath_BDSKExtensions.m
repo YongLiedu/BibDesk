@@ -70,9 +70,7 @@
         return [self bezierPathWithRect:rect];
     
     NSRect innerRect = NSInsetRect(rect, radius, radius); // Make rect with corners being centers of the corner circles.
-	static NSBezierPath *path = nil;
-    if(path == nil)
-        path = [[self bezierPath] retain];
+    NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];    
     
@@ -121,10 +119,7 @@
     OBASSERT([NSThread inMainThread]);
 
     float radius = 0.5f * rect.size.height;
-    
-	static NSBezierPath *path = nil;
-    if(path == nil)
-        path = [[self bezierPath] retain];
+    NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];
     
@@ -155,10 +150,7 @@
     float radiusX = 0.5 * NSWidth(rect);
     float radiusY = 0.5 * NSHeight(rect);
     int i = 0;
-    
-	static NSBezierPath *path = nil;
-    if(path == nil)
-        path = [[self bezierPath] retain];
+    NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];
     
@@ -176,10 +168,7 @@
     float radiusX = 0.5 * NSWidth(rect);
     float radiusY = 0.5 * NSHeight(rect);
     int i;
-    
-	static NSBezierPath *path = nil;
-    if(path == nil)
-        path = [[self bezierPath] retain];
+    NSBezierPath *path = [self bezierPath];
     
     [path removeAllPoints];
     
