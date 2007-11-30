@@ -555,8 +555,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSUInteger nr = [self numberOfRows];
     NSUInteger nc = [self numberOfColumns];
     CGFloat w = ([self _columnWidth]) * nc;
-    // add one extra padding increment because we draw in the padding, plus a bit more so we always have whitespace around the bottom row
-    CGFloat h = ([self _rowHeight]) * nr + 2.5 * _padding;
+    // add one extra padding increment because we draw in the padding
+    CGFloat h = ([self _rowHeight]) * nr + _padding;
     
     NSClipView *cv = [[self enclosingScrollView] contentView];
     if (cv) {
