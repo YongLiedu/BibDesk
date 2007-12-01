@@ -40,11 +40,6 @@
 
 static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
 
-enum {
-    FVArrowRight,
-    FVArrowLeft
-};
-
 @interface FVArrowButtonCell : NSButtonCell {
     NSUInteger arrowDirection;
 }
@@ -109,24 +104,16 @@ enum {
 
 + (Class)cellClass { return [FVArrowButtonCell class]; }
 
-- (id)initLeftArrowWithFrame:(NSRect)frameRect
+- (id)initWithFrame:(NSRect)frameRect direction:(NSUInteger)arrowDirection;
 {
     if (self = [super initWithFrame:frameRect]) {
-        [[self cell] setArrowDirection:FVArrowLeft];
-    }
-    return self;
-}
-
-- (id)initRightArrowWithFrame:(NSRect)frameRect
-{
-    if (self = [super initWithFrame:frameRect]) {
-        [[self cell] setArrowDirection:FVArrowRight];
+        [[self cell] setArrowDirection:arrowDirection];
     }
     return self;
 }
 
 - (id)initWithFrame:(NSRect)frameRect {
-    return [self initRightArrowWithFrame:frameRect];
+    return [self initWithFrame:frameRect direction:FVArrowRight];
 }
 
 // Modify mouseDown: behavior slightly.  Wince this control is superimposed on another pseudo-control (the FileView), we want to avoid passing some events to the next responder.

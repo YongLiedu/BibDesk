@@ -201,11 +201,11 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     const CFDictionaryValueCallBacks integerValueCallBacks = { 0, NULL, NULL, intDesc, intEqual };
     _trackingRectMap = CFDictionaryCreateMutable(alloc, 0, &integerKeyCallBacks, &integerValueCallBacks);
     
-    _leftArrow = [[FVArrowButton alloc] initLeftArrowWithFrame:NSMakeRect(0.0, 0.0, 16.0, 16.0)];
+    _leftArrow = [[FVArrowButton alloc] initWithFrame:NSMakeRect(0.0, 0.0, 16.0, 16.0) direction:FVArrowLeft];
     [_leftArrow setTarget:self];
     [_leftArrow setAction:@selector(leftArrowAction:)];
     
-    _rightArrow = [[FVArrowButton alloc] initRightArrowWithFrame:NSMakeRect(0.0, 0.0, 16.0, 16.0)];
+    _rightArrow = [[FVArrowButton alloc] initWithFrame:NSMakeRect(0.0, 0.0, 16.0, 16.0) direction:FVArrowRight];
     [_rightArrow setTarget:self];
     [_rightArrow setAction:@selector(rightArrowAction:)];
     

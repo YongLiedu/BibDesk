@@ -38,10 +38,10 @@
 
 #import <Cocoa/Cocoa.h>
 
+enum { FVArrowRight, FVArrowLeft };
 
 @interface FVArrowButton : NSButton
 
-- (id)initLeftArrowWithFrame:(NSRect)frameRect;
-- (id)initRightArrowWithFrame:(NSRect)frameRect;
+- (id)initWithFrame:(NSRect)frameRect direction:(NSUInteger)arrowDirection;
 
 @end
