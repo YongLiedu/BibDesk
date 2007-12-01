@@ -68,6 +68,7 @@
     self = [super init];
     if(nil == self){
         [foundFiles release];
+        foundFiles = nil;
     }
     return self;
 }
@@ -75,6 +76,7 @@
 - (void)dealloc
 {
     [foundFiles release];
+    foundFiles = nil;
     [knownFiles release];
     [baseURL release];
     [super dealloc];

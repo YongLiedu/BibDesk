@@ -531,8 +531,11 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     self = [super init];
     if(nil == self){
         [texTask release];
+        texTask = nil;
         [queueLock release];
+        queueLock = nil;
         [queue release];
+        queue = nil;
     }
     return self;
 }
@@ -540,8 +543,11 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 - (void)dealloc;
 {
     [texTask release];
+    texTask = nil;
     [queueLock release];
+    queueLock = nil;
     [queue release];
+    queue = nil;
     [super dealloc];
 }
 

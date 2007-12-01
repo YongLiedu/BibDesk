@@ -314,6 +314,7 @@ static NSImage *unlockedIcon = nil;
     if (nil == self) {
         [service setDelegate:nil];
         [service release];
+        service = nil;
     }
     return self;
 }
@@ -322,6 +323,7 @@ static NSImage *unlockedIcon = nil;
 {
     [service setDelegate:nil];
     [service release];
+    service = nil;
     [uniqueIdentifier release];
     [super dealloc];
 }

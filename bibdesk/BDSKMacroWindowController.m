@@ -637,6 +637,36 @@
     return YES;
 }
 
+- (void)replaceEveryOccurrenceOfMacroKey:(NSString *)oldKey withKey:(NSString *)newKey{
+	NSString *findStr = [NSString stringWithBibTeXString:oldKey macroResolver:macroResolver];
+	NSString *replStr = [NSString stringWithBibTeXString:newKey macroResolver:macroResolver];
+    NSArray *docs = [macroResolver isEqual:[BDSKMacroResolver defaultMacroResolver]] ? [NSApp orderedDocuments] : [NSArray arrayWithObjects:[macroResolver owner], nil]; 
+    NSEnumerator *docEnum = [docs objectEnumerator];
+    BibDocument *doc;
+    NSEnumerator *pubEnum;
+    BibItem *pub;
+    NSEnumerator *fieldEnum;
+    NSString *field;
+    unsigned numRepl;
+    NSString *oldValue;
+    NSString *newValue;
+    
+    while (doc = [docEnum nextObject]) {
+        pubEnum = [[doc publications] objectEnumerator];
+        while (pub = [pubEnum nextObject]) {
+            fieldEnum = [[pub allFieldNames] objectEnumerator];
+            while (field = [fieldEnum nextObject]) {
+                oldValue = [pub valueOfField:field inherit:NO];
+                if ([oldValue isComplex]) {
+                    newValue = [oldValue stringByReplacingOccurrencesOfString:findStr withString:replStr options:NSCaseInsensitiveSearch replacements:&numRepl];
+                    if (numRepl > 0)
+                        [pub setField:field toValue:newValue];
+                }
+            }
+        }
+    }
+}
+
 #pragma mark || Methods to support the type-ahead selector.
 
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{

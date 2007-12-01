@@ -424,6 +424,7 @@ NSString *BDSKComputerName() {
     self = [super initNonBlocking];
     if(nil == self){
         [remoteClients release];
+        remoteClients = nil;
     }
     return self;
 }
@@ -431,6 +432,7 @@ NSString *BDSKComputerName() {
 - (void)dealloc
 {
     [remoteClients release];
+    remoteClients = nil;
     [super dealloc];
 }
 

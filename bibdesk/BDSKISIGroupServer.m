@@ -112,10 +112,22 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString);
     
     self = [super init];
     if (nil == self) {
-        pthread_rwlock_destroy(&infolock);
+        if (infolock != NULL)
+            pthread_rwlock_destroy(&infolock);
+        infolock = NULL;
         [serverInfo release];
+        serverInfo = nil;
     }
     return self;
+}
+
+- (void)dealloc {
+    if (infolock != NULL)
+        pthread_rwlock_destroy(&infolock);
+    infolock = NULL;
+    [serverInfo release];
+    serverInfo = nil;
+    [super dealloc];
 }
 
 #pragma mark BDSKSearchGroupServer protocol
