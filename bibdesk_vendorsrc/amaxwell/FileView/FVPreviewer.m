@@ -275,10 +275,19 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems
 {
-    if ([webviewContextMenuDelegate respondsToSelector:_cmd])
+    if ([webviewContextMenuDelegate respondsToSelector:_cmd]) {
         return [webviewContextMenuDelegate webView:sender contextMenuItemsForElement:element defaultMenuItems:defaultMenuItems];
-    else
-        return nil;
+    } else {
+        NSMutableArray *items = [NSMutableArray array];
+        NSEnumerator *itemEnum = [defaultMenuItems objectEnumerator];
+        NSMenuItem *item;
+        while (item = [itemEnum nextObject]) {
+            int tag = [item tag];
+            if (tag == WebMenuItemTagCopyLinkToClipboard || tag == WebMenuItemTagCopyImageToClipboard || tag == WebMenuItemTagCopy || tag == WebMenuItemTagGoBack || tag == WebMenuItemTagGoForward || tag == WebMenuItemTagStop || tag == WebMenuItemTagReload || tag == WebMenuItemTagOther)
+                [items addObject:item];
+        }
+        return items;
+    }
 }
 
 - (void)previewURL:(NSURL *)absoluteURL;
