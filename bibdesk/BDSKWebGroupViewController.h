@@ -53,6 +53,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     BDSKWebGroup *group;
     BibDocument *document;
     WebFrame *loadingWebFrame;
+    NSUndoManager *undoManager;
 }
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument;

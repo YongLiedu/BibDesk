@@ -140,6 +140,7 @@
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [group release];
+    [undoManager release];
     [super dealloc];
 }
 
@@ -153,6 +154,7 @@
     [backForwardButton setFrame:frame];
     [stopOrReloadButton setImagePosition:NSImageOnly];
     [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
+    [webView seteditingDelegate:self];
 }
 
 - (NSView *)view {
@@ -410,6 +412,16 @@
     [menuItems addObject:[item autorelease]];
     
 	return menuItems;
+}
+
+#pragma mark WebEditingDelegate protocol
+
+// this is needed because WebView uses the document's undo manager by default, rather than the one from the window.
+// I consider this a bug
+- (NSUndoManager *)undoManagerForWebView:(WebView *)webView {
+    if (undoManager == nil)
+        undoManager = [[NSUndoManager alloc] init];
+    return undoManager;
 }
 
 @end
