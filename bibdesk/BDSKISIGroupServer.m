@@ -112,9 +112,7 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString);
     
     self = [super init];
     if (nil == self) {
-        if (infolock != NULL)
-            pthread_rwlock_destroy(&infolock);
-        infolock = NULL;
+        pthread_rwlock_destroy(&infolock);
         [serverInfo release];
         serverInfo = nil;
     }
@@ -122,9 +120,7 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString);
 }
 
 - (void)dealloc {
-    if (infolock != NULL)
-        pthread_rwlock_destroy(&infolock);
-    infolock = NULL;
+    pthread_rwlock_destroy(&infolock);
     [serverInfo release];
     serverInfo = nil;
     [super dealloc];

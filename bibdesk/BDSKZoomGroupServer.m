@@ -89,6 +89,7 @@ static NSString *BDSKHTTPProxySetting();
     self = [super init];
     if (nil == self) {
         [serverInfo release];
+        serverInfo = nil;
         pthread_rwlock_destroy(&infolock);
     }
     return self;
