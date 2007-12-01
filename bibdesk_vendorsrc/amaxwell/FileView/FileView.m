@@ -286,6 +286,9 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     _iconSize.height = DEFAULT_ICON_SIZE.height * scale;
     _padding = _paddingForScale(scale);
     
+    // arrows out of place now, they will be added again when required when resetting the tracking rects
+    [self _hideArrows];
+    
     // the full view will likely need repainting
     [self reloadIcons];
     
