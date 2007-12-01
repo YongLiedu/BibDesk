@@ -43,13 +43,6 @@
 #import "FVPreviewer.h"
 #import "FVArrowButton.h"
 
-@interface FileView (Private)
-// wrapper that calls bound array or datasource transparently; for internal use
-// clients should access the datasource or bound array directly
-- (NSURL *)iconURLAtIndex:(NSUInteger)anIndex;
-- (NSUInteger)numberOfIcons;
-@end
-
 // functions for dealing with multiple URLs and weblocs on the pasteboard
 static NSArray *URLSFromPasteboard(NSPasteboard *pboard);
 static BOOL writeURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard);
@@ -87,6 +80,49 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context);
 static NSDictionary *__titleAttributes = nil;
 static NSDictionary *__subtitleAttributes = nil;
 static NSShadow *__shadow = nil;
+
+#pragma mark -
+
+@interface FileView (Private)
+// wrapper that calls bound array or datasource transparently; for internal use
+// clients should access the datasource or bound array directly
+- (NSURL *)iconURLAtIndex:(NSUInteger)anIndex;
+- (NSUInteger)numberOfIcons;
+
+- (void)_commonInit;
+- (void)_registerForDraggedTypes;
+- (CGFloat)_columnWidth;
+- (CGFloat)_rowHeight;
+- (FVIcon *)_cachedIconForURL:(NSURL *)aURL;
+- (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
+- (NSArray *)_selectedURLs;
+- (void)_removeAllTrackingRects;
+- (void)_resetTrackingRectsAndToolTips;
+- (void)_discardTrackingRectsAndToolTips;
+- (void)_recalculateGridSize;
+- (NSUInteger)_indexForGridRow:(NSUInteger)rowIndex column:(NSUInteger)colIndex;
+- (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex ofIndex:(NSUInteger)anIndex;
+- (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex atPoint:(NSPoint)point;
+- (void)_drawDropHighlightInRect:(NSRect)aRect;
+- (void)_drawHighlightInRect:(NSRect)aRect;
+- (void)_drawRubberbandRect;
+- (void)_drawDropMessage;
+- (CGFloat)_scrollVelocity;
+- (void)_getRangeOfRows:(NSRange *)rowRange columns:(NSRange *)columnRange inRect:(NSRect)aRect;
+- (BOOL)_isFastScrolling;
+- (void)_scheduleIconsInRange:(NSRange)indexRange;
+- (void)_drawIconsInRange:(NSRange)indexRange rows:(NSRange)rows columns:(NSRange)columns;
+- (void)_updateButtonsForIcon:(FVIcon *)anIcon;
+- (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex;
+- (void)_hideArrows;
+- (NSURL *)_URLAtPoint:(NSPoint)point;
+- (NSIndexSet *)_allIndexesInRubberBandRect;
+- (BOOL)_isLocalDraggingInfo:(id <NSDraggingInfo>)sender;
+- (FVDropOperation)_dropOperationAtPointInView:(NSPoint)point highlightRect:(NSRect *)dropRect insertionIndex:(NSUInteger *)anIndex;
+
+@end
+
+#pragma mark -
 
 @implementation FileView
 
@@ -376,20 +412,34 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         NSUInteger r, rMin = 0, rMax = [self numberOfRows];
         NSUInteger c, cMin = 0, cMax = [self numberOfColumns];
         NSUInteger i, iMin = 0, iMax = [self numberOfIcons];
+        NSPoint mouseLoc = [self convertPoint:[[self window] mouseLocationOutsideOfEventStream] fromView:nil];
+        NSUInteger mouseIndex = NSNotFound;
         
         for (r = rMin, i = iMin; r < rMax; r++) 
         {
             for (c = cMin; c < cMax && i < iMax; c++, i++) 
             {
                 NSRect aRect = [self _rectOfIconInRow:r column:c];
+                BOOL mouseInside = NSPointInRect(mouseLoc, aRect);
+                
+                if (mouseInside)
+                    mouseIndex = i;
+                
                 // Getting the location from the mouseEntered: event isn't reliable if you move the mouse slowly, so we either need to enlarge this tracking rect, or keep a map table of tag->index.  Since we have to keep a set of tags anyway, we'll use the latter method.
-                NSTrackingRectTag tag = [self addTrackingRect:aRect owner:self userData:NULL assumeInside:NO];
+                NSTrackingRectTag tag = [self addTrackingRect:aRect owner:self userData:NULL assumeInside:mouseInside];
                 CFDictionarySetValue(_trackingRectMap, (const void *)tag, (const void *)i);
                 
                 // don't pass the URL as owner, as it's not retained; use the delegate method instead
                 [self addToolTipRect:aRect owner:self userData:NULL];
+                
             }
         }    
+        
+        FVIcon *anIcon = mouseIndex == NSNotFound ? nil : [self _cachedIconForURL:[self iconURLAtIndex:mouseIndex]];
+        if ([anIcon pageCount] > 1)
+            [self _showArrowsForIconAtIndex:mouseIndex];
+        else
+            [self _hideArrows];
     }
 }
 
@@ -1234,14 +1284,12 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     [self setNeedsDisplay:YES];
 }
 
-- (void)mouseEntered:(NSEvent *)event;
+- (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex
 {
-    NSUInteger r, c, anIndex;
-    const NSTrackingRectTag tag = [event trackingNumber];
+    NSUInteger r, c;
     
-    if (CFDictionaryGetValueIfPresent(_trackingRectMap, (const void *)tag, (const void **)&anIndex) &&
-        [self _getGridRow:&r column:&c ofIndex:anIndex]) {
-        
+    if ([self _getGridRow:&r column:&c ofIndex:anIndex]) {
+    
         FVIcon *anIcon = [self _cachedIconForURL:[self iconURLAtIndex:anIndex]];
         
         if ([anIcon pageCount] > 1) {
@@ -1277,6 +1325,21 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
             }
         }
     }
+}
+
+- (void)_hideArrows
+{
+    [_leftArrow setHidden:YES];
+    [_rightArrow setHidden:YES];
+}
+
+- (void)mouseEntered:(NSEvent *)event;
+{
+    const NSTrackingRectTag tag = [event trackingNumber];
+    NSUInteger anIndex;
+    
+    if (CFDictionaryGetValueIfPresent(_trackingRectMap, (const void *)tag, (const void **)&anIndex))
+        [self _showArrowsForIconAtIndex:anIndex];
     
     // !!! calling this before adding buttons seems to disable the tooltip on 10.4; what does it do on 10.5?
     [super mouseEntered:event];
@@ -1285,8 +1348,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 - (void)mouseExited:(NSEvent *)event;
 {
     [super mouseExited:event];
-    [_leftArrow setHidden:YES];
-    [_rightArrow setHidden:YES];
+    [self _hideArrows];
 }
 
 - (NSURL *)_URLAtPoint:(NSPoint)point;
