@@ -96,6 +96,9 @@ enum{
 // offset of the form from the left window edge
 #define FORM_OFFSET 13.0
 
+// this was copied verbatim from a Finder saved search for all items of kind document modified in the last week
+static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'public.content') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
+
 @interface BibEditor (Private)
 
 - (void)setupButtons;
@@ -110,73 +113,14 @@ enum{
 
 @implementation BibEditor
 
-- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
-
-- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
++ (void)initialize
 {
-    return [[publication objectInFilesAtIndex:idx] displayURL];
-}
-
-- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
-{
-    [publication moveFilesAtIndexes:aSet toIndex:anIndex];
-    return YES;
-}
-
-- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
-{
-    BDSKLinkedFile *aFile;
-    NSEnumerator *enumerator = [newURLs objectEnumerator];
-    NSURL *aURL;
-    NSUInteger idx = [aSet firstIndex];
-    while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
-        if (aFile) {
-            [publication removeObjectFromFilesAtIndex:idx];
-            [publication insertObject:aFile inFilesAtIndex:idx];
-            [publication autoFileLinkedFile:aFile];
-            [aFile release];
-        }
-        idx = [aSet indexGreaterThanIndex:idx];
-    }
-    return YES;
-}
-
-- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
-{
-    NSUInteger idx = [indexSet lastIndex];
-    while (NSNotFound != idx) {
-        [publication removeObjectFromFilesAtIndex:idx];
-        idx = [indexSet indexLessThanIndex:idx];
-    }
-    return YES;
-}
-
-- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
-{
-    BDSKLinkedFile *aFile;
-    NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
-    NSURL *aURL;
-    NSUInteger idx = [aSet firstIndex], offset = 0;
-    while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
-        if (aFile) {
-            [publication insertObject:aFile inFilesAtIndex:idx - offset];
-            [publication autoFileLinkedFile:aFile];
-            [aFile release];
-        } else {
-            // the indexes in aSet assume that we inserted the file
-            offset++;
-        }
-        idx = [aSet indexGreaterThanIndex:idx];
-    }
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (object == fileView && [keyPath isEqualToString:@"iconScale"]) {
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    OBINITIALIZE;
+    
+    // limit the scope to the default downloads directory (from Internet Config)        
+    NSURL *downloadURL = [[NSFileManager defaultManager] downloadFolderURL];
+    if(downloadURL){
+        [[BDSKPersistentSearch sharedSearch] addQuery:recentDownloadsQuery scopes:[NSArray arrayWithObject:downloadURL]];
     }
 }
 
@@ -822,41 +766,26 @@ enum{
 - (NSMenu *)recentDownloadsMenu{
     NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
     
-    [self updateRecentDownloadsMenu:menu]; 
+    NSArray *paths = [[BDSKPersistentSearch sharedSearch] resultsForQuery:recentDownloadsQuery attribute:(NSString *)kMDItemPath];
+    NSEnumerator *e = [paths objectEnumerator];
+    
+    NSString *filePath;
+    NSMenuItem *item;
+    
+    while(filePath = [e nextObject]){            
+        item = [menu addItemWithTitle:[filePath lastPathComponent]
+                               action:@selector(addLinkedFileFromMenuItem:)
+                        keyEquivalent:@""];
+        [item setRepresentedObject:filePath];
+        [item setImageAndSize:[NSImage imageForFile:filePath]];
+    }
     
     if ([menu numberOfItems] == 0) {
         [menu release];
-        return nil;
+        menu = nil;
     }
     
     return [menu autorelease];
-}
-
-- (void)updateRecentDownloadsMenu:(NSMenu *)menu{
-    
-    [menu removeAllItems];
-    
-    // limit the scope to the default downloads directory (from Internet Config)
-    NSURL *downloadURL = [[NSFileManager defaultManager] downloadFolderURL];
-    if(downloadURL){
-        // this was copied verbatim from a Finder saved search for all items of kind document modified in the last week
-        NSString *query = @"(kMDItemContentTypeTree = 'public.content') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
-        [[BDSKPersistentSearch sharedSearch] addQuery:query scopes:[NSArray arrayWithObject:downloadURL]];
-        
-        NSArray *paths = [[BDSKPersistentSearch sharedSearch] resultsForQuery:query attribute:(NSString *)kMDItemPath];
-        NSEnumerator *e = [paths objectEnumerator];
-        
-        NSString *filePath;
-        NSMenuItem *item;
-        
-        while(filePath = [e nextObject]){            
-            item = [menu addItemWithTitle:[filePath lastPathComponent]
-                                   action:@selector(addLinkedFileFromMenuItem:)
-                            keyEquivalent:@""];
-            [item setRepresentedObject:filePath];
-            [item setImageAndSize:[NSImage imageForFile:filePath]];
-        }
-    }
 }
 
 - (void)dummy:(id)obj{}
@@ -1155,6 +1084,78 @@ enum{
     }
     [[self undoManager] setActionName:NSLocalizedString(@"Change Flag", @"Undo action name")];
 	
+}
+
+#pragma mark FileView support
+
+- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
+
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
+{
+    return [[publication objectInFilesAtIndex:idx] displayURL];
+}
+
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
+{
+    [publication moveFilesAtIndexes:aSet toIndex:anIndex];
+    return YES;
+}
+
+- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
+{
+    BDSKLinkedFile *aFile;
+    NSEnumerator *enumerator = [newURLs objectEnumerator];
+    NSURL *aURL;
+    NSUInteger idx = [aSet firstIndex];
+    while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
+        aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
+        if (aFile) {
+            [publication removeObjectFromFilesAtIndex:idx];
+            [publication insertObject:aFile inFilesAtIndex:idx];
+            [publication autoFileLinkedFile:aFile];
+            [aFile release];
+        }
+        idx = [aSet indexGreaterThanIndex:idx];
+    }
+    return YES;
+}
+
+- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+{
+    NSUInteger idx = [indexSet lastIndex];
+    while (NSNotFound != idx) {
+        [publication removeObjectFromFilesAtIndex:idx];
+        idx = [indexSet indexLessThanIndex:idx];
+    }
+    return YES;
+}
+
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
+{
+    BDSKLinkedFile *aFile;
+    NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
+    NSURL *aURL;
+    NSUInteger idx = [aSet firstIndex], offset = 0;
+    while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
+        aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
+        if (aFile) {
+            [publication insertObject:aFile inFilesAtIndex:idx - offset];
+            [publication autoFileLinkedFile:aFile];
+            [aFile release];
+        } else {
+            // the indexes in aSet assume that we inserted the file
+            offset++;
+        }
+        idx = [aSet indexGreaterThanIndex:idx];
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (object == fileView && [keyPath isEqualToString:@"iconScale"]) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 #pragma mark choose local-url or url support
