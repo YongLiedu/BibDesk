@@ -60,12 +60,14 @@ static const CGFloat _fontSize = 20;
 // returns a string with monospaced font
 static NSAttributedString *createAttributedStringWithContentsOfURLByGuessingEncoding(NSURL *url, bool isBibTeX)
 {
-    NSString *content = [[NSString alloc] initWithContentsOfURL:url encoding:NSUTF8StringEncoding error:NULL];
-    if (nil == content)
-        content = [[NSString alloc] initWithContentsOfURL:url encoding:[NSString defaultCStringEncoding] error:NULL];
-    if (nil == content)
-        content = [[NSString alloc] initWithContentsOfURL:url encoding:NSISOLatin1StringEncoding error:NULL];
-
+    NSStringEncoding usedEncoding;
+    // this will try NSUTF8StringEncoding if the xattr fails
+    NSString *content = [[NSString alloc] initWithContentsOfURL:(NSURL *)url usedEncoding:&usedEncoding error:NULL];
+    if (nil == content && [NSString defaultCStringEncoding] != usedEncoding)
+        content = [[NSString alloc] initWithContentsOfURL:(NSURL *)url encoding:[NSString defaultCStringEncoding] error:NULL];
+    if (nil == content && NSISOLatin1StringEncoding != usedEncoding)
+        content = [[NSString alloc] initWithContentsOfURL:(NSURL *)url encoding:NSISOLatin1StringEncoding error:NULL];
+    
     NSMutableAttributedString *attrString = nil;
     
     if (content) {

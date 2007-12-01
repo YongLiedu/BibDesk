@@ -119,10 +119,11 @@ OSStatus GeneratePreviewForURL(void *thisInterface, QLPreviewRequestRef preview,
         
     } else if (UTTypeConformsTo(contentTypeUTI, kUTTypePlainText)) {
         
-        NSString *btString = [[NSString alloc] initWithContentsOfURL:(NSURL *)url encoding:NSUTF8StringEncoding error:NULL];
-        if (nil == btString)
+        NSStringEncoding usedEncoding;
+        NSString *btString = [[NSString alloc] initWithContentsOfURL:(NSURL *)url usedEncoding:&usedEncoding error:NULL];
+        if (nil == btString && [NSString defaultCStringEncoding] != usedEncoding)
             btString = [[NSString alloc] initWithContentsOfURL:(NSURL *)url encoding:[NSString defaultCStringEncoding] error:NULL];
-        if (nil == btString)
+        if (nil == btString && NSISOLatin1StringEncoding != usedEncoding)
             btString = [[NSString alloc] initWithContentsOfURL:(NSURL *)url encoding:NSISOLatin1StringEncoding error:NULL];
         
         if (btString) {
