@@ -520,15 +520,19 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (id)init;
 {
+    texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
+    delegate = nil;
+    bibString = nil;
+    queueLock = [NSRecursiveLock new];
+    queue = [NSMutableArray new];
+    isProcessing = 0;
+    notifyWhenDone = 0;
+    
     self = [super init];
-    if(self){
-        texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
-        delegate = nil;
-        bibString = nil;
-        queueLock = [NSRecursiveLock new];
-        queue = [NSMutableArray new];
-        isProcessing = 0;
-        notifyWhenDone = 0;
+    if(nil == self){
+        [texTask release];
+        [queueLock release];
+        [queue release];
     }
     return self;
 }
@@ -565,24 +569,18 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 }
 
 - (void)runTeXTaskInBackgroundWithInfo:(NSDictionary *)info{
-    // the delayed perform is because [self serverOnServerThread] returns nil the first time this is received, since the server thread hasn't had time to set up completely
-    id server = [self serverOnServerThread];
-    if (server){
-        if(info){
-            [queueLock lock];
-            [queue addObject:info];
-            [queueLock unlock];
-            // If it's still working, we don't have to do anything; sending too many of these messages just piles them up in the DO queue until the port starts dropping them.
-            if(isProcessing == 0)
-                [server processQueueUntilEmpty];
-            // start sending task finished messages to the previewer
-            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&notifyWhenDone);
-        }else{
-            // don't notify the previewer of any pending task results; it might be better if the previewer learned to ignore the messages?
-            OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&notifyWhenDone);
-        }
+    if(info){
+        [queueLock lock];
+        [queue addObject:info];
+        [queueLock unlock];
+        // If it's still working, we don't have to do anything; sending too many of these messages just piles them up in the DO queue until the port starts dropping them.
+        if(isProcessing == 0)
+            [[self serverOnServerThread] processQueueUntilEmpty];
+        // start sending task finished messages to the previewer
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&notifyWhenDone);
     }else{
-        [self performSelector:_cmd withObject:info afterDelay:0.1];
+        // don't notify the previewer of any pending task results; it might be better if the previewer learned to ignore the messages?
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&notifyWhenDone);
     }
 }
 

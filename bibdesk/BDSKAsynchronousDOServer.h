@@ -39,23 +39,37 @@
 #import <Cocoa/Cocoa.h>
 #import <libkern/OSAtomic.h>
 
-typedef struct _BDSKDOServerFlags {
-    volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
-} BDSKDOServerFlags;
-
 // protocols for the server proxies, should be included in protocols used by subclasses
 @protocol BDSKAsyncDOServerThread, BDSKAsyncDOServerMainThread;
 
 @interface BDSKAsynchronousDOServer : NSObject {
     @private
-    id serverOnMainThread;               // proxy for the main thread
-    id serverOnServerThread;             // proxy for the local server thread
-    NSConnection *mainThreadConnection;  // so the local server thread can talk to the main thread
-    NSConnection *localThreadConnection; // so the main thread can talk to the local server thread
-    NSThread *serverThread;              // mainly for debugging
-    
-    BDSKDOServerFlags serverFlags;       // state variables
+    id serverOnMainThread;                  // proxy for the main thread
+    id serverOnServerThread;                // proxy for the local server thread
+    NSConnection *mainThreadConnection;     // so the local server thread can talk to the main thread
+    NSConnection *localThreadConnection;    // so the main thread can talk to the local server thread
+    NSThread *serverThread;                 // mainly for debugging
+    struct BDSKDOServerFlags *serverFlags;  // state variables
 }
+
+/*
+ 
+ General init pattern for subclasses should be the following:
+ 
+ - initialize ivars
+ - assign self = [super init] or self = [super initNonBlocking]
+ - check if (nil == self) { // release ivars }
+ - return self
+ 
+ This should avoid handling any server messages with a partially instantiated object.  For initNonBlocking, you're less likely to have problems using the standard if (self = [super init]) { // init ivars } pattern, since the proxies likely won't be set up until your subclass init finishes.  This is not guaranteed, though.
+ 
+ */
+
+// -initNonBlocking does server setup asynchronously, so -serverOn*Thread may return nil the first
+// time you call it.  This is most convenient if you do a lot of work in serverDidSetup, or use
+// NSSocketPort for remote connections (which can be really slow to set up).
+// If you don't do anything time consuming during setup, just use -init.
+- (id)initNonBlocking;
 
 // override for custom cleanup on the main thread; call super afterwards
 - (void)stopDOServer;

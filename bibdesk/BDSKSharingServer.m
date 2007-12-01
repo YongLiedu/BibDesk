@@ -420,8 +420,10 @@ NSString *BDSKComputerName() {
 
 - (id)init
 {
-    if(self = [super init]){
-        remoteClients = [[BDSKThreadSafeMutableDictionary alloc] init];
+    remoteClients = [[BDSKThreadSafeMutableDictionary alloc] init];
+    self = [super initNonBlocking];
+    if(nil == self){
+        [remoteClients release];
     }
     return self;
 }

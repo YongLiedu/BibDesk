@@ -38,6 +38,11 @@
 
 #import "BDSKAsynchronousDOServer.h"
 
+struct BDSKDOServerFlags {
+    volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
+    volatile int32_t serverDidSetup __attribute__ ((aligned (4)));
+};
+
 // protocols for the server thread proxies, must be included in protocols used by subclasses
 @protocol BDSKAsyncDOServerThread
 // override for custom cleanup on the server thread; call super afterwards
@@ -45,7 +50,7 @@
 @end
 
 @protocol BDSKAsyncDOServerMainThread
-- (oneway void)setLocalServer:(byref id)anObject;
+- (void)setLocalServer:(byref id)anObject;
 @end
 
 
@@ -56,7 +61,7 @@
 
 @implementation BDSKAsynchronousDOServer
 
-- (id)init;
+- (id)initBlocking:(BOOL)blockDuringSetup
 {
     if (self = [super init]) {
         // set up a connection to communicate with the local background thread
@@ -72,8 +77,13 @@
         [mainThreadConnection enableMultipleThreads];
        
         // set up flags
-        memset(&serverFlags, 0, sizeof(serverFlags));
-        serverFlags.shouldKeepRunning = 1;
+        serverFlags = NSZoneCalloc(NSDefaultMallocZone(), 1, sizeof(struct BDSKDOServerFlags));
+        serverFlags->shouldKeepRunning = 1;
+        
+        if (blockDuringSetup)
+            serverFlags->serverDidSetup = 0;
+        else
+            serverFlags->serverDidSetup = 1;
         
         // these will be set when the background thread sets up
         localThreadConnection = nil;
@@ -83,8 +93,32 @@
         // run a background thread to connect to the remote server
         // this will connect back to the connection we just set up
         [NSThread detachNewThreadSelector:@selector(runDOServerForPorts:) toTarget:self withObject:[NSArray arrayWithObjects:port2, port1, nil]];
+        
+        // It would be really nice if we could just wait on a condition lock here, but
+        // then this thread's runloop can't pick up the -setLocalServer message since
+        // it's blocking (so it can't handle the ports).
+        do {
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+        } while (serverFlags->serverDidSetup == 0 && serverFlags->shouldKeepRunning == 1);
     }
     return self;
+}
+
+- (id)initNonBlocking
+{
+    return [self initBlocking:NO];
+}
+
+// default is to init blocking for simplicity
+- (id)init
+{
+    return [self initBlocking:YES];
+}
+
+- (void)dealloc
+{
+    NSZoneFree(NSDefaultMallocZone(), serverFlags);
+    [super dealloc];
 }
 
 #pragma mark Proxies
@@ -113,7 +147,7 @@
 
 #pragma mark MainThread
 
-- (oneway void)setLocalServer:(byref id)anObject;
+- (void)setLocalServer:(byref id)anObject;
 {
     [anObject setProtocolForProxy:[self protocolForServerThread]];
     serverOnServerThread = [anObject retain];
@@ -146,7 +180,7 @@
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags.shouldKeepRunning);
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->shouldKeepRunning);
     
     @try {
         
@@ -156,7 +190,7 @@
         // we'll use this to communicate between threads on the localhost
         localThreadConnection = [[NSConnection alloc] initWithReceivePort:[ports objectAtIndex:0] sendPort:[ports objectAtIndex:1]];
         if(localThreadConnection == nil)
-            @throw @"Unable to get default connection";
+            @throw @"Unable to create localThreadConnection";
         [localThreadConnection setRootObject:self];
         
         // see comments in -init
@@ -169,6 +203,7 @@
         
         // allow subclasses to do some custom setup
         [self serverDidSetup];
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->serverDidSetup);
         
         NSRunLoop *rl = [NSRunLoop currentRunLoop];
         BOOL didRun;
@@ -178,12 +213,17 @@
             [pool release];
             pool = [NSAutoreleasePool new];
             didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-        } while (serverFlags.shouldKeepRunning == 1 && didRun);
+        } while (serverFlags->shouldKeepRunning == 1 && didRun);
     }
     @catch(id exception) {
-        NSLog(@"Discarding exception \"%@\" raised in object %@", exception, self);
+        NSLog(@"Exception \"%@\" raised in object %@", exception, self);
+        
+        // arm: I'm don't recall why shouldKeepRunning is reset; the thread will exit
         // reset the flag so we can start over; shouldn't be necessary
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags.shouldKeepRunning);
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->shouldKeepRunning);
+        
+        // allow the main thread to continue, anyway
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->serverDidSetup);
     }
     
     @finally {
@@ -201,7 +241,7 @@
     // this cleans up the connections, ports and proxies on both sides
     [serverOnServerThread cleanup];
     // we're in the main thread, so set the stop flag
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags.shouldKeepRunning);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags->shouldKeepRunning);
     
     // clean up the connection in the main thread; don't invalidate the ports, since they're still in use
     [mainThreadConnection setRootObject:nil];
@@ -215,6 +255,6 @@
 
 #pragma mark Thread Safe
 
-- (BOOL)shouldKeepRunning { return serverFlags.shouldKeepRunning == 1; }
+- (BOOL)shouldKeepRunning { return serverFlags->shouldKeepRunning == 1; }
 
 @end

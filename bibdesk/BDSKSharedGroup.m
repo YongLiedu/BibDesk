@@ -291,25 +291,29 @@ static NSImage *unlockedIcon = nil;
 
 - (id)initWithGroup:(BDSKSharedGroup *)aGroup andService:(NSNetService *)aService;
 {
-    if (self = [super init]) {
-        group = aGroup; // don't retain since it retains us
-        
-        service = [aService retain];
-        
-        // monitor changes to the TXT data
-        [service setDelegate:self];
-        [service startMonitoring];
-        
-        // set up flags
-        memset(&flags, 0, sizeof(flags));
-        
-        // set up the authentication flag
-        NSData *TXTData = [service TXTRecordData];
-        if(TXTData)
-            [self netService:service didUpdateTXTRecordData:TXTData];
-        
-        // test this to see if we've registered with the remote host
-        uniqueIdentifier = nil;
+    group = aGroup; // don't retain since it retains us
+    
+    service = [aService retain];
+    
+    // monitor changes to the TXT data
+    [service setDelegate:self];
+    [service startMonitoring];
+    
+    // set up flags
+    memset(&flags, 0, sizeof(flags));
+    
+    // set up the authentication flag
+    NSData *TXTData = [service TXTRecordData];
+    if(TXTData)
+        [self netService:service didUpdateTXTRecordData:TXTData];
+    
+    // test this to see if we've registered with the remote host
+    uniqueIdentifier = nil;
+    
+    self = [super initNonBlocking];
+    if (nil == self) {
+        [service setDelegate:nil];
+        [service release];
     }
     return self;
 }
@@ -391,7 +395,9 @@ static NSImage *unlockedIcon = nil;
         
         if(uniqueIdentifier == nil){
             // use uniqueIdentifier as the notification identifier for this host on the other end
-            uniqueIdentifier = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
+            CFUUIDRef uuid = CFUUIDCreate(NULL);
+            uniqueIdentifier = (id)CFUUIDCreateString(NULL, uuid);
+            CFRelease(uuid);
             @try {
                 NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKClientProtocol)];
                 [proxy registerClient:checker forIdentifier:uniqueIdentifier version:[BDSKSharedGroupServer supportedProtocolVersion]];

@@ -330,12 +330,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
             [server setDelegate:self];
         }
         
-        id proxy = [server serverOnServerThread];
-        if(nil == proxy){
-            [self performSelector:_cmd withObject:nil afterDelay:0.1];
-        } else {
-            [proxy checkForOrphansWithKnownFiles:[self knownFiles] baseURL:baseURL];
-        }
+        [[server serverOnServerThread] checkForOrphansWithKnownFiles:[self knownFiles] baseURL:baseURL];
         
     } else {
         NSBeep();

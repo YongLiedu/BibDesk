@@ -77,16 +77,19 @@ static NSString *BDSKHTTPProxySetting();
 
 - (id)initWithGroup:(BDSKSearchGroup *)aGroup serverInfo:(BDSKServerInfo *)info;
 {    
+    group = aGroup;
+    serverInfo = [info copy];
+    flags.failedDownload = 0;
+    flags.isRetrieving = 0;
+    flags.needsReset = 1;
+    availableResults = 0;
+    fetchedResults = 0;
+    pthread_rwlock_init(&infolock, NULL);
+    
     self = [super init];
     if (self) {
-        group = aGroup;
-        serverInfo = [info copy];
-        flags.failedDownload = 0;
-        flags.isRetrieving = 0;
-        flags.needsReset = 1;
-        availableResults = 0;
-        fetchedResults = 0;
-        pthread_rwlock_init(&infolock, NULL);
+        [serverInfo release];
+        pthread_rwlock_destroy(&infolock);
     }
     return self;
 }
@@ -124,11 +127,7 @@ static NSString *BDSKHTTPProxySetting();
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
     
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
-    id server = [self serverOnServerThread];
-    if (server)
-        [server downloadWithSearchTerm:[group searchTerm]];
-    else
-        [self performSelector:_cmd withObject:nil afterDelay:0.1];
+    [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
 }
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
