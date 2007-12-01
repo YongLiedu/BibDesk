@@ -931,6 +931,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
     
+    // set com.apple.TextEncoding for other apps
+    NSString *UTI = [[NSWorkspace sharedWorkspace] UTIForURL:absoluteURL];
+    if (success && UTI && UTTypeConformsTo((CFStringRef)UTI, kUTTypePlainText)) 
+        [[NSFileManager defaultManager] setAppleStringEncoding:[self documentStringEncoding] atPath:[absoluteURL path] error:NULL];
+    
     [saveTargetURL release];
     saveTargetURL = nil;
     

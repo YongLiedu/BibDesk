@@ -50,6 +50,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKStringEncodingManager.h"
 #import "BDSKTypeManager.h"
+#import "NSFileManager_ExtendedAttributes.h"
 
 static NSString *yesString = nil;
 static NSString *noString = nil;
@@ -178,8 +179,16 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         NSData *data = [[NSData alloc] initWithContentsOfFile:path options:NSMappedRead error:NULL];
 
         NSString *string = nil;
+        // zero encoding is never valid
         if(encoding > 0)
             string = [[NSString alloc] initWithData:data encoding:encoding];
+        // read com.apple.TextEncoding on Leopard, or when reading a Tiger file saved on Leopard
+        if(nil == string) {
+            encoding = [[NSFileManager defaultManager] appleStringEncodingAtPath:path error:NULL];
+            if (encoding > 0)
+                string = [[NSString alloc] initWithData:data encoding:encoding];
+        }
+        // if the string is nil at this point, the passed in encoding was not valid/correct and com.apple.TextEncoding wasn't present
         if(nil == string && try && dataHasUnicodeByteOrderMark(data) && encoding != NSUnicodeStringEncoding)
             string = [[NSString alloc] initWithData:data encoding:NSUnicodeStringEncoding];
         if(nil == string && try && encoding != NSUTF8StringEncoding)
