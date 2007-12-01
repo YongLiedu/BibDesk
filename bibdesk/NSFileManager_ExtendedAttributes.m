@@ -29,12 +29,61 @@
  */
 
 #import "NSFileManager_ExtendedAttributes.h"
+#import "NSError_BDSKExtensions.h"
 #include <sys/xattr.h>
 
 // private function to print error messages
 static NSString *xattrError(int err, const char *path);
 
 @implementation NSFileManager (ExtendedAttributes)
+
+- (BOOL)setAppleStringEncoding:(NSStringEncoding)nsEncoding atPath:(NSString *)path error:(NSError **)error;
+{
+    NSParameterAssert(0 != nsEncoding);
+    CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(nsEncoding);
+    CFStringRef name = CFStringConvertEncodingToIANACharSetName(cfEncoding);
+    NSString *encodingString = [NSString stringWithFormat:@"%@;%d", name, cfEncoding];
+    return [self setExtendedAttributeNamed:@"com.apple.TextEncoding" toValue:[encodingString dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:error];
+}
+
+- (NSStringEncoding)appleStringEncodingAtPath:(NSString *)path error:(NSError **)error;
+{
+    NSData *eaData = [self extendedAttributeNamed:@"com.apple.TextEncoding" atPath:path traverseLink:YES error:error];
+    NSString *encodingString = nil;
+    
+    // IANA charset names should be ASCII, but utf-8 is compatible
+    /*
+     MACINTOSH;0
+     UTF-8;134217984
+     UTF-8;
+     ;3071
+     */
+    
+    if (nil != eaData)
+        encodingString = [[NSString alloc] initWithData:eaData encoding:NSUTF8StringEncoding];
+    
+    // this is not a valid NSStringEncoding
+    NSStringEncoding nsEncoding = 0;
+    NSArray *array = nil;
+    if (encodingString)
+        array = [encodingString componentsSeparatedByString:@";"];
+    
+    // currently only two elements, but may become arbitrarily long in future
+    if ([array count] >= 2) {
+        CFStringEncoding cfEncoding = [[array objectAtIndex:1] unsignedIntValue];
+        nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
+    }
+    else if ([array count] > 0) {
+        CFStringRef name = (CFStringRef)[array objectAtIndex:0];
+        CFStringEncoding cfEncoding = CFStringConvertIANACharSetNameToEncoding(name);
+        nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
+    }
+    else if (NULL != error && nil != encodingString /* we read something from EA, but couldn't understand it */) {
+        *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Unable to interpret com.apple.TextEncoding", @"")];
+    }
+    
+    return nsEncoding;
+}
 
 - (NSArray *)extendedAttributeNamesAtPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
 {

@@ -198,4 +198,10 @@
 */
 - (BOOL)removeAllExtendedAttributesAtPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
 
+// methods to get/set com.apple.TextEncoding attribute for 10.5 compatibility
+// apparently only used by NSString methods with the usedEncoding: parameter
+- (NSStringEncoding)appleStringEncodingAtPath:(NSString *)path error:(NSError **)error;
+- (BOOL)setAppleStringEncoding:(NSStringEncoding)nsEncoding atPath:(NSString *)path error:(NSError **)error;
+
+
 @end
