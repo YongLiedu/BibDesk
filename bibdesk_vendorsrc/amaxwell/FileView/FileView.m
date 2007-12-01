@@ -405,6 +405,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 {    
     // no guarantee that we have a window, in which case these will all be wrong
     if (nil != [self window]) {
+        NSRect visibleRect = [self visibleRect];
         NSUInteger r, rMin = 0, rMax = [self numberOfRows];
         NSUInteger c, cMin = 0, cMax = [self numberOfColumns];
         NSUInteger i, iMin = 0, iMax = [self numberOfIcons];
@@ -415,19 +416,20 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         {
             for (c = cMin; c < cMax && i < iMax; c++, i++) 
             {
-                NSRect aRect = [self _rectOfIconInRow:r column:c];
-                BOOL mouseInside = NSPointInRect(mouseLoc, aRect);
-                
-                if (mouseInside)
-                    mouseIndex = i;
-                
-                // Getting the location from the mouseEntered: event isn't reliable if you move the mouse slowly, so we either need to enlarge this tracking rect, or keep a map table of tag->index.  Since we have to keep a set of tags anyway, we'll use the latter method.
-                NSTrackingRectTag tag = [self addTrackingRect:aRect owner:self userData:NULL assumeInside:mouseInside];
-                CFDictionarySetValue(_trackingRectMap, (const void *)tag, (const void *)i);
-                
-                // don't pass the URL as owner, as it's not retained; use the delegate method instead
-                [self addToolTipRect:aRect owner:self userData:NULL];
-                
+                NSRect aRect = NSIntersectionRect(visibleRect, [self _rectOfIconInRow:r column:c]);
+                if (NSIsEmptyRect(aRect) == NO) {
+                    BOOL mouseInside = NSPointInRect(mouseLoc, aRect);
+                    
+                    if (mouseInside)
+                        mouseIndex = i;
+                    
+                    // Getting the location from the mouseEntered: event isn't reliable if you move the mouse slowly, so we either need to enlarge this tracking rect, or keep a map table of tag->index.  Since we have to keep a set of tags anyway, we'll use the latter method.
+                    NSTrackingRectTag tag = [self addTrackingRect:aRect owner:self userData:NULL assumeInside:mouseInside];
+                    CFDictionarySetValue(_trackingRectMap, (const void *)tag, (const void *)i);
+                    
+                    // don't pass the URL as owner, as it's not retained; use the delegate method instead
+                    [self addToolTipRect:aRect owner:self userData:NULL];
+                }
             }
         }    
         
