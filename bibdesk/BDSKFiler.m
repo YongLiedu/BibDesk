@@ -117,7 +117,6 @@ static BDSKFiler *sharedFiler = nil;
 	NSString *newPath = nil;
 	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:numberOfPapers];
 	NSMutableDictionary *info = nil;
-    NSString *papersFolderPath = [[[NSApp delegate] folderPathForFilingPapersFromDocument:doc] stringByAppendingString:@"/"];
 	NSError *error = nil;
     
     BOOL initial = (mask & BDSKInitialAutoFileOptionMask);
