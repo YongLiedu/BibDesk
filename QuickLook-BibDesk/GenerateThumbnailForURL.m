@@ -63,9 +63,9 @@ static NSAttributedString *createAttributedStringWithContentsOfURLByGuessingEnco
     NSStringEncoding usedEncoding;
     // this will try NSUTF8StringEncoding if the xattr fails
     NSString *content = [[NSString alloc] initWithContentsOfURL:(NSURL *)url usedEncoding:&usedEncoding error:NULL];
-    if (nil == content && [NSString defaultCStringEncoding] != usedEncoding)
+    if (nil == content)
         content = [[NSString alloc] initWithContentsOfURL:(NSURL *)url encoding:[NSString defaultCStringEncoding] error:NULL];
-    if (nil == content && NSISOLatin1StringEncoding != usedEncoding)
+    if (nil == content)
         content = [[NSString alloc] initWithContentsOfURL:(NSURL *)url encoding:NSISOLatin1StringEncoding error:NULL];
     
     NSMutableAttributedString *attrString = nil;
