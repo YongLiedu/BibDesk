@@ -398,8 +398,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 {
     [self _removeAllTrackingRects];
     [self removeAllToolTips];   
-    [_leftArrow setHidden:YES]; 
-    [_rightArrow setHidden:YES]; 
 }
 
 /*  
