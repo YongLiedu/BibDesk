@@ -154,7 +154,7 @@
     [backForwardButton setFrame:frame];
     [stopOrReloadButton setImagePosition:NSImageOnly];
     [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
-    [webView seteditingDelegate:self];
+    [webView setEditingDelegate:self];
 }
 
 - (NSView *)view {
