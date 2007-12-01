@@ -48,7 +48,7 @@
 
 - (void)rebuildIndex;
 - (void)indexFilesForItem:(id)anItem;
-void *setupThreading(void *anObject);
+- (void)runIndexThread;
 - (void)processNotification:(NSNotification *)note;
 - (void)handleDocAddItemNotification:(NSNotification *)note;
 - (void)handleDocDelItemNotification:(NSNotification *)note;
