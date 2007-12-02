@@ -147,6 +147,7 @@ struct BDSKDOServerFlags {
 
 - (void)setLocalServer:(byref id)anObject;
 {
+    OBASSERT([NSThread inMainThread]);
     [anObject setProtocolForProxy:[self protocolForServerThread]];
     serverOnServerThread = [anObject retain];
 }
@@ -155,6 +156,7 @@ struct BDSKDOServerFlags {
 
 - (oneway void)cleanup;
 {   
+    OBASSERT([[NSThread currentThread] isEqual:serverThread]);
     // clean up the connection in the server thread
     [localThreadConnection setRootObject:nil];
     
