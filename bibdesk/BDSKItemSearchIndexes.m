@@ -41,6 +41,7 @@
 #import "BibItem.h"
 
 static CFTypeRef searchIndexDictionaryRetain(CFAllocatorRef alloc, const void *value) { return CFRetain(value); }
+// Note: SKIndexClose() is supposed to dispose of indexes.  However, it leaks on both Tiger and Leopard unless you're using GC on Leopard.  For non-GC apps, we need to use CFRelease() on Leopard, according to the response to my bug report on the leaks.  This is still not documented, though.
 static void searchIndexDictionaryRelease(CFAllocatorRef alloc, const void *value) { CFRelease((SKIndexRef)value); }
 static CFStringRef searchIndexDictionaryCopyDescription(const void *value)
 {
@@ -181,13 +182,17 @@ static void removeFromIndex(const void *key, const void *value, void *context)
     SKIndexRef skIndex;
     NSEnumerator *fieldEnum = [[[self class] indexedFields] objectEnumerator];
     NSString *fieldName;
+    
+    // Search Kit defaults to indexing the first 2000 terms.  This is almost never what we want for BibItem searching, so set it to be unlimited (zero, of course).
+    NSDictionary *options = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:0], (id)kSKMaximumTerms, nil];
     while (fieldName = [fieldEnum nextObject]) {
         indexData = CFDataCreateMutable(NULL, 0);
-        skIndex = SKIndexCreateWithMutableData(indexData, (CFStringRef)fieldName, kSKIndexInverted, NULL);
+        skIndex = SKIndexCreateWithMutableData(indexData, (CFStringRef)fieldName, kSKIndexInverted, (CFDictionaryRef)options);
         CFDictionaryAddValue(searchIndexes, (CFStringRef)fieldName, skIndex);
         CFRelease(indexData);
         CFRelease(skIndex);
     }
+    [options release];
     
     // this will handle the index flush after adding all the pubs
     [self addPublications:pubs];
