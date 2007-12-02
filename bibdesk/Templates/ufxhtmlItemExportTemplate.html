@@ -10,7 +10,12 @@
 
     (<abbr class="date-published" title="<$date.description/>"><$fields.month/> <$fields.year/></abbr>)
 
-    <span class="uri uid"><a href="<$fields.Url/>"><$fields.Url/></a></span>
+<$localFiles>
+	<span class="uri uid"><a href="<$URL.absoluteString/>"><$URL.path/></a></span><br />
+</$localFiles>
+<remoteURLs>
+	<span class="uri uid"><a href="<$URL.absoluteString/>"><$URL.absoluteString/></a></span><br />
+</remoteURLs>
     <div class="description"><$fields.Abstract/></div>
     <span class="type"><$pubType/></span> - 
    <!-- <span class="id"><$citeKey/></span> 

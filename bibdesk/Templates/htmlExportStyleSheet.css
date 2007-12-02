@@ -45,6 +45,6 @@
 
 .FieldValue { color: black; }
 
-.Url { font-size: 0.8em; color: #c95e62; }
+.URL, .File { font-size: 0.8em; color: #c95e62; }
 
 .Citations { font-size: 0.8em; color: #3d433b; }

@@ -13,7 +13,7 @@
 		<pubDate><$pubDate.rssDescription/></pubDate>
 		<title><$fields.Title.xmlString/></title>
 		<description><$fields.Rss-Description.xmlString/></description>
-		<link><$remoteURL/></link>
+		<link><$remoteURLs.URL.@firstObject/></link>
 	</item>
 	</$publications>
 </channel>
