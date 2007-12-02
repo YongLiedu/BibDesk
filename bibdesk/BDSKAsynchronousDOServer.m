@@ -71,9 +71,7 @@ struct BDSKDOServerFlags {
         mainThreadConnection = [[NSConnection alloc] initWithReceivePort:port1 sendPort:port2];
         [mainThreadConnection setRootObject:self];
         
-        /* See http://mjtsai.com/blog/2003/08/23/nsobjectinaccessibleexcep/ and this caveat in the docs:
-           If an NSConnection object exists that uses the same ports, but switched in role, then the new NSConnection object communicates with it. Messages sent to a proxy held by either connection are forwarded through the other NSConnection object. This rule applies both within and across address spaces.
-            */
+        // enable explicitly; we don't need this, but it's set by default on 10.5 and we need to be uniform for debugging
         [mainThreadConnection enableMultipleThreads];
        
         // set up flags
@@ -193,7 +191,7 @@ struct BDSKDOServerFlags {
             @throw @"Unable to create localThreadConnection";
         [localThreadConnection setRootObject:self];
         
-        // see comments in -init
+        // enable explicitly; we don't need this, but it's set by default on 10.5 and we need to be uniform for debugging
         [localThreadConnection enableMultipleThreads];
         
         serverOnMainThread = [[localThreadConnection rootProxy] retain];
@@ -238,6 +236,7 @@ struct BDSKDOServerFlags {
 
 - (void)stopDOServer;
 {
+    OBASSERT([NSThread inMainThread]);
     // this cleans up the connections, ports and proxies on both sides
     [serverOnServerThread cleanup];
     // we're in the main thread, so set the stop flag

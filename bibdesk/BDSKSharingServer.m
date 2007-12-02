@@ -467,7 +467,11 @@ NSString *BDSKComputerName() {
                     
     }
     @catch(id exception) {
-        [self stopDOServer];
+        NSLog(@"%@", exception);
+        // Use performSelectorOnMainThread: in case we don't have a main thread proxy.
+        // Pass NO for waitUntilDone: since this thread will get a callback from stopDOServer
+        // so we can't block the runloop.
+        [self performSelectorOnMainThread:@selector(stopDOServer) withObject:nil waitUntilDone:NO];
     }
 }
 
