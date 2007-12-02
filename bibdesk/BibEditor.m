@@ -2118,6 +2118,22 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 // sent by the notesView and the abstractView
 - (void)textDidEndEditing:(NSNotification *)aNotification{
+    NSString *field = nil;
+    if(currentEditedView == notesView)
+        field = BDSKAnnoteString;
+    else if(currentEditedView == abstractView)
+        field = BDSKAbstractString;
+    else if(currentEditedView == rssDescriptionView)
+        field = BDSKRssDescriptionString;
+    if (field) {
+        // this is needed to update the search index and tex preview
+        NSString *value = [publication valueOfField:field];
+        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", field, @"key", @"Change", @"type", value, @"oldValue", [publication owner], @"owner", nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+                                                            object:publication
+                                                          userInfo:notifInfo];
+    }
+    
 	currentEditedView = nil;
     
     if ([[[aNotification object] string] isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO) {
