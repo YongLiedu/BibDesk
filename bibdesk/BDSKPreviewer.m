@@ -529,14 +529,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     notifyWhenDone = 0;
     
     self = [super init];
-    if(nil == self){
-        [texTask release];
-        texTask = nil;
-        [queueLock release];
-        queueLock = nil;
-        [queue release];
-        queue = nil;
-    }
     return self;
 }
 

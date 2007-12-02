@@ -111,11 +111,6 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString);
     pthread_rwlock_init(&infolock, NULL);
     
     self = [super init];
-    if (nil == self) {
-        pthread_rwlock_destroy(&infolock);
-        [serverInfo release];
-        serverInfo = nil;
-    }
     return self;
 }
 

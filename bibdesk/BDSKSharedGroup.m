@@ -311,11 +311,6 @@ static NSImage *unlockedIcon = nil;
     uniqueIdentifier = nil;
     
     self = [super initNonBlocking];
-    if (nil == self) {
-        [service setDelegate:nil];
-        [service release];
-        service = nil;
-    }
     return self;
 }
 

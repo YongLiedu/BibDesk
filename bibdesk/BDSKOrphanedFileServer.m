@@ -66,10 +66,6 @@
     delegate = nil;
     
     self = [super init];
-    if(nil == self){
-        [foundFiles release];
-        foundFiles = nil;
-    }
     return self;
 }
 
