@@ -149,14 +149,15 @@ static unsigned long scriptHookID = 0;
     
     [self setDocument:aDocument];
 	
-	NS_DURING
+	@try {
 		[script executeHandler:kBDSKPerformBibdeskAction 
 					 fromSuite:kBDSKBibdeskSuite 
 	   withLabelsAndParameters:keyDirectObject, items, kBDSKPrepositionForScriptHook, self, nil];
-	NS_HANDLER
-		NSLog(@"Error executing script hook \"%@\": %@", name, [localException reason]);
+	}
+    @catch(id exception) {
+		NSLog(@"Error executing script hook \"%@\": %@", name, [exception respondsToSelector:@selector(reason)] ? [exception reason] : exception);
 		rv = NO;
-	NS_ENDHANDLER
+	}
 	
 	return rv;
 }
