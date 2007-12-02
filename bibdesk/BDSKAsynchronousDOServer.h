@@ -58,10 +58,11 @@
  
  - initialize ivars
  - assign self = [super init] or self = [super initNonBlocking]
- - check if (nil == self) { // release ivars }
  - return self
  
- This should avoid handling any server messages with a partially instantiated object.  For initNonBlocking, you're less likely to have problems using the standard if (self = [super init]) { // init ivars } pattern, since the proxies likely won't be set up until your subclass init finishes.  This is not guaranteed, though.
+ This should avoid handling any server messages with a partially instantiated object.  For initNonBlocking, you're less likely to have problems using the standard if (self = [super init]) { // init ivars } pattern, since the proxies likely will be set up by the time your subclass init finishes on the main thread.  This is not reliable, though.
+ 
+ This -init pattern isn't generally correct, since if self = [super init] returns a new object and releases the old self, your initialized ivars will be dealloced and bad things will happen.  We can guarantee that BDSKAsynchronousDOServer always returns self from -init, so this should work even if NSObject does something weird with -init in future.
  
  */
 
