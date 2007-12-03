@@ -90,7 +90,7 @@
 
 - (void)setDelegate:(id)newDelegate { delegate = newDelegate; }
 
-- (BOOL)allFilesEnumerated { return (BOOL)(1 == allFilesEnumerated); }
+- (BOOL)allFilesEnumerated { OSMemoryBarrier(); return (BOOL)(1 == allFilesEnumerated); }
 
 - (void)stopEnumerating { OSAtomicCompareAndSwap32Barrier(1, 0, &keepEnumerating); }
 
@@ -127,6 +127,7 @@
     [self flushFoundFiles];
     
     // keepEnumerating is 0 when enumeration was stopped
+    OSMemoryBarrier();
     if (keepEnumerating == 1)
         OSAtomicCompareAndSwap32Barrier(0, 1, &allFilesEnumerated);
     
@@ -167,6 +168,7 @@
     
     BOOL isDir, isHidden;
     BDSKFile *aFile;
+    OSMemoryBarrier();
     
     while ( (1 == keepEnumerating) && (aFile = [enumerator nextObjectFile]) ){
         
@@ -197,7 +199,7 @@
             [foundFiles addObject:[aFile fileURL]];
             
         }
-        
+        OSMemoryBarrier();
     }
     
 }

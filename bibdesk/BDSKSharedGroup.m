@@ -334,11 +334,20 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)isAlive{ return YES; }
 
-- (BOOL)isRetrieving { return flags.isRetrieving == 1; }
+- (BOOL)isRetrieving { 
+    OSMemoryBarrier();
+    return flags.isRetrieving == 1; 
+}
 
-- (BOOL)needsAuthentication { return flags.needsAuthentication == 1; }
+- (BOOL)needsAuthentication { 
+    OSMemoryBarrier();
+    return flags.needsAuthentication == 1; 
+}
 
-- (BOOL)failedDownload { return flags.failedDownload == 1; }
+- (BOOL)failedDownload { 
+    OSMemoryBarrier();
+    return flags.failedDownload == 1; 
+}
 
 #pragma mark Proxies
 
@@ -374,6 +383,7 @@ static NSImage *unlockedIcon = nil;
         if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:NSFailedAuthenticationException]){
             
             // if the user didn't cancel, set an auth failure flag and show an alert
+            OSMemoryBarrier();
             if(flags.canceledAuthentication == 0){
                 OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
                 // don't show the alert when we couldn't authenticate when cleaning up
@@ -433,6 +443,7 @@ static NSImage *unlockedIcon = nil;
 // this can be called from any thread
 - (NSData *)authenticationDataForComponents:(NSArray *)components;
 {
+    OSMemoryBarrier();
     if(flags.needsAuthentication == 0)
         return [[NSData data] sha1Signature];
     
@@ -440,6 +451,7 @@ static NSImage *unlockedIcon = nil;
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.canceledAuthentication);
     
     int rv = 1;
+    OSMemoryBarrier();
     if(flags.authenticationFailed == 0)
         password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]]];
     
@@ -470,6 +482,7 @@ static NSImage *unlockedIcon = nil;
     if(data){
         NSDictionary *dict = [NSNetService dictionaryFromTXTRecordData:data];
         int32_t val = [[NSString stringWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] intValue];
+        OSMemoryBarrier();
         int32_t oldVal = flags.needsAuthentication;
         OSAtomicCompareAndSwap32Barrier(oldVal, val, (int32_t *)&flags.needsAuthentication);
     }

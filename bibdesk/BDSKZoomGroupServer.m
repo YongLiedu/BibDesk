@@ -165,9 +165,9 @@ static NSString *BDSKHTTPProxySetting();
     return [[self serverOnServerThread] fetchedResults];
 }
 
-- (BOOL)failedDownload { return 1 == flags.failedDownload; }
+- (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }
 
-- (BOOL)isRetrieving { return 1 == flags.isRetrieving; }
+- (BOOL)isRetrieving { OSMemoryBarrier(); return 1 == flags.isRetrieving; }
 
 - (NSFormatter *)searchStringFormatter { return [[[ZOOMCCLQueryFormatter alloc] initWithConfigString:[[[self serverInfo] options] objectForKey:@"queryConfig"]] autorelease]; }
 
@@ -255,6 +255,7 @@ static NSString *BDSKHTTPProxySetting();
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
 {
     // only reset the connection when we're actually going to use it, since a mixed host/database/port won't work
+    OSMemoryBarrier();
     if (flags.needsReset)
         [self resetConnection];
     

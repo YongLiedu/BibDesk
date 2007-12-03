@@ -414,18 +414,22 @@ static double runLoopTimeout = 30;
 }
 
 - (BOOL)hasLTB{
+    OSMemoryBarrier();
     return 1 == flags.hasLTB;
 }
 
 - (BOOL)hasLaTeX{
+    OSMemoryBarrier();
     return 1 == flags.hasLaTeX;
 }
 
 - (BOOL)hasPDFData{
+    OSMemoryBarrier();
     return 1 == flags.hasPDFData;
 }
 
 - (BOOL)hasRTFData{
+    OSMemoryBarrier();
     return 1 == flags.hasRTFData;
 }
 

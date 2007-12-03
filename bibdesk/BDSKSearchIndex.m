@@ -145,8 +145,8 @@
 
 - (BOOL)isIndexing
 {
-    uint32_t isIndexing = flags.isIndexing;
-    return isIndexing == 1;
+    OSMemoryBarrier();
+    return flags.isIndexing == 1;
 }
 
 - (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject
@@ -195,7 +195,8 @@
     // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
-    while((anObject = [enumerator nextObject]) && flags.shouldKeepRunning == 1) {
+    OSMemoryBarrier();
+    while(flags.shouldKeepRunning == 1 && (anObject = [enumerator nextObject])) {
         [self indexFilesForItem:anObject];
         numberIndexed++;
         @synchronized(self) {
@@ -209,11 +210,13 @@
             [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
             countSinceLastFlush = flushInterval;
         }
+        OSMemoryBarrier();
     }
     
     // final update to catch any leftovers
     
     // it's possible that we've been told to stop, and the delegate is garbage; in that case, don't message it
+    OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
         [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
     [pool release];
@@ -228,6 +231,7 @@
     
     // release these, since they're only used for the initial index creation
     [self setInitialObjectsToIndex:nil];
+    OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
         [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
 }
@@ -312,6 +316,7 @@
             [pool release];
             pool = [[NSAutoreleasePool alloc] init];
             // Running with beforeDate: distantFuture causes the runloop to block indefinitely if shouldKeepRunning was set to 0 during the initial indexing phase; invalidating and removing the port manually doesn't change this.  Hence, we need to check that flag before running the runloop, or use a short limit date.
+            OSMemoryBarrier();
             keepRunning = (flags.shouldKeepRunning == 1) && [rl runMode:NSDefaultRunLoopMode beforeDate:distantFuture];
         } while(keepRunning);
     }

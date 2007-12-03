@@ -572,6 +572,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
         [queue addObject:info];
         [queueLock unlock];
         // If it's still working, we don't have to do anything; sending too many of these messages just piles them up in the DO queue until the port starts dropping them.
+        OSMemoryBarrier();
         if(isProcessing == 0)
             [[self serverOnServerThread] processQueueUntilEmpty];
         // start sending task finished messages to the previewer
@@ -626,14 +627,15 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
         [queueLock lock];
         
         // Don't notify the main thread until we've processed all of the entries in the queue
-        if ([queue count] == 0 && 1 == notifyWhenDone) {
+        OSMemoryBarrier();
+        if (1 == notifyWhenDone && [queue count] == 0) {
             // If the main thread is blocked on the queueLock, we're hosed because it can't service the DO port!
             [queueLock unlock];
             [[self serverOnMainThread] serverFinishedWithResult:success];
             [queueLock lock];
         }
-        
-    } while ([queue count] && 1 == notifyWhenDone);
+        OSMemoryBarrier();
+    } while (1 == notifyWhenDone && [queue count]);
 
     // swap, then unlock, so if a potential caller is blocking on the lock, they know to call processQueueUntilEmpty
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&isProcessing);

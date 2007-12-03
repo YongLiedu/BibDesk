@@ -97,6 +97,7 @@ struct BDSKDOServerFlags {
         // it's blocking (so it can't handle the ports).
         do {
             [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+            OSMemoryBarrier();
         } while (serverFlags->serverDidSetup == 0 && serverFlags->shouldKeepRunning == 1);
     }
     return self;
@@ -206,14 +207,18 @@ struct BDSKDOServerFlags {
         OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->serverDidSetup);
         
         NSRunLoop *rl = [NSRunLoop currentRunLoop];
+        NSDate *distantFuture = [[NSDate distantFuture] retain];
         BOOL didRun;
         
         // see http://lists.apple.com/archives/cocoa-dev/2006/Jun/msg01054.html for a helpful explanation of NSRunLoop
         do {
             [pool release];
             pool = [NSAutoreleasePool new];
-            didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+            didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:distantFuture];
+            OSMemoryBarrier();
         } while (serverFlags->shouldKeepRunning == 1 && didRun);
+        
+        [distantFuture release];
     }
     @catch(id exception) {
         NSLog(@"Exception \"%@\" raised in object %@", exception, self);
@@ -256,6 +261,9 @@ struct BDSKDOServerFlags {
 
 #pragma mark Thread Safe
 
-- (BOOL)shouldKeepRunning { return serverFlags->shouldKeepRunning == 1; }
+- (BOOL)shouldKeepRunning { 
+    OSMemoryBarrier();
+    return serverFlags->shouldKeepRunning == 1; 
+}
 
 @end

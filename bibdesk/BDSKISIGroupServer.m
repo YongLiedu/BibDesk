@@ -105,7 +105,6 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString);
     serverInfo = [info copy];
     flags.failedDownload = 0;
     flags.isRetrieving = 0;
-    flags.needsReset = 1;
     availableResults = 0;
     fetchedResults = 0;
     pthread_rwlock_init(&infolock, NULL);
@@ -159,7 +158,6 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString);
         serverInfo = [info copy];
     }
     pthread_rwlock_unlock(&infolock);
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.needsReset);
 }
 
 - (BDSKServerInfo *)serverInfo;
@@ -190,9 +188,9 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString);
     return [[self serverOnServerThread] fetchedResults];
 }
 
-- (BOOL)failedDownload { return 1 == flags.failedDownload; }
+- (BOOL)failedDownload { OSMemoryBarrier(); return 1 == flags.failedDownload; }
 
-- (BOOL)isRetrieving { return 1 == flags.isRetrieving; }
+- (BOOL)isRetrieving { OSMemoryBarrier(); return 1 == flags.isRetrieving; }
 - (NSFormatter *)searchStringFormatter { return nil; }
 
 #pragma mark Main thread

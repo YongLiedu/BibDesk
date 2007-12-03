@@ -1298,6 +1298,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
     
     // we could unlock after checking the flag, but we don't want multiple threads writing to the cache directory at the same time, in case files have identical items
     [metadataCacheLock lock];
+    OSMemoryBarrier();
     if(canWriteMetadata == 0){
         NSLog(@"Application will quit without writing metadata cache.");
         [metadataCacheLock unlock];
@@ -1351,7 +1352,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         NSMutableDictionary *metadata = [NSMutableDictionary dictionaryWithCapacity:10];    
         
         while(anItem = [entryEnum nextObject]){
-            
+            OSMemoryBarrier();
             if(canWriteMetadata == 0){
                 NSLog(@"Application will quit without finishing writing metadata cache.");
                 break;
