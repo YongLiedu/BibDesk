@@ -275,6 +275,7 @@ static CFDictionaryRef selectorTable = NULL;
         people = nil;
         
         owner = nil;
+        files = [NSMutableArray new];
         
         fileOrder = nil;
         identifierURL = createUniqueURL();
@@ -3591,10 +3592,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (void)createFilesArray
-{
-    if (files == nil)
-        files = [NSMutableArray new];
-    
+{    
     NSUInteger i = 1, count;
     NSString *value, *key = @"Bdsk-File-1";
     
