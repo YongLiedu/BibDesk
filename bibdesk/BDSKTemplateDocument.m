@@ -770,6 +770,18 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [menuToken setValue:newValue forKey:@"dateFormatKey"];
 }
 
+- (IBAction)changeCounterStyle:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"counterStyleKey"];
+}
+
+- (IBAction)changeCounterCasing:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"counterCasingKey"];
+}
+
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     SEL action = [menuItem action];
     NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
@@ -793,6 +805,12 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         return YES;
     } else if (action == @selector(changeDateFormat:)) {
         [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"dateFormatKey"]] isEqualToString:[menuItem representedObject]]];
+        return YES;
+    } else if (action == @selector(changeCounterStyle:)) {
+        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"counterStyleKey"]] isEqualToString:[menuItem representedObject]]];
+        return YES;
+    } else if (action == @selector(changeCounterCasing:)) {
+        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"counterCasingKey"]] isEqualToString:[menuItem representedObject]]];
         return YES;
     } else if ([[BDSKTemplateDocument superclass] instancesRespondToSelector:_cmd]) {
         return [super validateMenuItem:menuItem];
@@ -824,18 +842,20 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     SETUP_SUBMENU(fieldOptionsMenu, 1, @"cleaning", @selector(changeCleaning:));
     SETUP_SUBMENU(fieldOptionsMenu, 2, @"appending", @selector(changeAppending:));
     SETUP_SUBMENU(urlOptionsMenu, 0, @"urlFormat", @selector(changeUrlFormat:));
-    SETUP_SUBMENU(urlOptionsMenu, 1, @"cleaning", @selector(changeCleaning:));
-    SETUP_SUBMENU(urlOptionsMenu, 2, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(urlOptionsMenu, 1, @"casing", @selector(changeCasing:));
+    SETUP_SUBMENU(urlOptionsMenu, 2, @"cleaning", @selector(changeCleaning:));
     SETUP_SUBMENU(urlOptionsMenu, 3, @"appending", @selector(changeAppending:));
     SETUP_SUBMENU(personOptionsMenu, 0, @"nameStyle", @selector(changeNameStyle:));
     SETUP_SUBMENU(personOptionsMenu, 1, @"joinStyle", @selector(changeJoinStyle:));
-    SETUP_SUBMENU(personOptionsMenu, 2, @"cleaning", @selector(changeCleaning:));
-    SETUP_SUBMENU(personOptionsMenu, 3, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(personOptionsMenu, 2, @"casing", @selector(changeCasing:));
+    SETUP_SUBMENU(personOptionsMenu, 3, @"cleaning", @selector(changeCleaning:));
     SETUP_SUBMENU(personOptionsMenu, 4, @"appending", @selector(changeAppending:));
     SETUP_SUBMENU(dateOptionsMenu, 0, @"dateFormat", @selector(changeDateFormat:));
-    SETUP_SUBMENU(dateOptionsMenu, 1, @"cleaning", @selector(changeCleaning:));
-    SETUP_SUBMENU(dateOptionsMenu, 2, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(dateOptionsMenu, 1, @"casing", @selector(changeCasing:));
+    SETUP_SUBMENU(dateOptionsMenu, 2, @"cleaning", @selector(changeCleaning:));
     SETUP_SUBMENU(dateOptionsMenu, 3, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(numberOptionsMenu, 0, @"counterStyle", @selector(changeCounterStyle:));
+    SETUP_SUBMENU(numberOptionsMenu, 1, @"counterCasing", @selector(changeCounterCasing:));
 }
 
 - (void)updateTextViews {
@@ -905,6 +925,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                 break;
             case BDSKDateTokenType:
                 optionViews = [NSMutableArray arrayWithObjects:dateOptionsView, fieldOptionsView, nil];
+                break;
+            case BDSKNumberTokenType:
+                optionViews = [NSMutableArray arrayWithObjects:numberOptionsView, nil];
                 break;
             case BDSKTextTokenType:
                 optionViews = [NSMutableArray arrayWithObjects:textOptionsView, nil];
@@ -1062,6 +1085,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
             case BDSKURLTokenType: menu = urlOptionsMenu; break;
             case BDSKPersonTokenType: menu = personOptionsMenu; break;
             case BDSKDateTokenType: menu = dateOptionsMenu; break;
+            case BDSKNumberTokenType: menu = numberOptionsMenu; break;
             default: menu = nil; break;
         }
     }
@@ -1443,6 +1467,16 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                 return @"cleaningKey";
             if ([[templateOptions valueForKeyPath:@"appending.key"] containsObject:key])
                 return @"appendingKey";
+            return nil;
+        case BDSKDateTokenType:
+            if ([[templateOptions valueForKeyPath:@"dateFormat.key"] containsObject:key])
+                return @"dateFormatKey";
+            return nil;
+        case BDSKNumberTokenType:
+            if ([[templateOptions valueForKeyPath:@"counterStyle.key"] containsObject:key])
+                return @"counterStyleKey";
+            if ([[templateOptions valueForKeyPath:@"counterCasing.key"] containsObject:key])
+                return @"counterCasingKey";
             return nil;
         default:
             return nil;

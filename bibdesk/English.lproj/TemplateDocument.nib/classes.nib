@@ -19,6 +19,8 @@
                 boldCheckButton = NSButton; 
                 capitalizationPopUp = NSPopUpButton; 
                 cleaningPopUp = NSPopUpButton; 
+                counterCapitalizationPopUp = NSPopUpButton; 
+                counterStylePopUp = NSPopUpButton; 
                 dateOptionsMenu = NSMenu; 
                 dateOptionsView = NSView; 
                 datePopUp = NSPopUpButton; 
@@ -38,6 +40,8 @@
                 itemTemplateTokenField = NSTokenField; 
                 joinStylePopUp = NSPopUpButton; 
                 nameStylePopUp = NSPopUpButton; 
+                numberOptionsMenu = NSMenu; 
+                numberOptionsView = NSView; 
                 optionalTokenField = NSTokenField; 
                 ownerController = NSObjectController; 
                 personOptionsMenu = NSMenu; 

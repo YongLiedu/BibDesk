@@ -819,8 +819,105 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 
 @implementation BDSKNumberTagToken
 
+- (id)initWithTitle:(NSString *)aTitle {
+    if (self = [super initWithTitle:aTitle]) {
+        counterStyleKey = nil;
+        counterCasingKey = nil;
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        if ([decoder allowsKeyedCoding]) {
+            counterStyleKey = [[decoder decodeObjectForKey:@"counterStyleKey"] retain];
+            counterCasingKey = [[decoder decodeObjectForKey:@"counterCasingKey"] retain];
+        } else {
+            counterStyleKey = [[decoder decodeObject] retain];
+            counterCasingKey = [[decoder decodeObject] retain];
+        }
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+    [super encodeWithCoder:encoder];
+    if ([encoder allowsKeyedCoding]) {
+        [encoder encodeObject:counterStyleKey forKey:@"counterStyleKey"];
+        [encoder encodeObject:counterCasingKey forKey:@"counterCasingKey"];
+    } else {
+        [encoder encodeObject:counterStyleKey];
+        [encoder encodeObject:counterCasingKey];
+    }
+}
+
+- (id)copyWithZone:(NSZone *)aZone {
+    BDSKNumberTagToken *copy = [super copyWithZone:aZone];
+    copy->counterStyleKey = [counterStyleKey retain];
+    copy->counterCasingKey = [counterCasingKey retain];
+    return copy;
+}
+
+- (void)dealloc {
+    [counterStyleKey release];
+    [counterCasingKey release];
+    [super dealloc];
+}
+/*
+- (BOOL)isEqual:(id)other {
+    return [super isEqual:other] &&
+           EQUAL_OR_NIL_STRINGS(counterStyleKey, [other counterStyleKey]) &&
+           EQUAL_OR_NIL_STRINGS(counterCasingKey, [other counterCasingKey]);
+}
+*/
 - (int)type {
     return BDSKNumberTokenType;
+}
+
+- (NSString *)counterStyleKey {
+    return counterStyleKey;
+}
+
+- (void)setCounterStyleKey:(NSString *)newCounterStyleKey {
+    if (counterStyleKey != newCounterStyleKey) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setCasingKey:counterStyleKey];
+        [counterStyleKey release];
+        counterStyleKey = [newCounterStyleKey retain];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
+    }
+}
+
+- (NSString *)counterCasingKey {
+    return counterCasingKey;
+}
+
+- (void)setCounterCasingKey:(NSString *)newCounterCasingKey {
+    if (counterCasingKey != newCounterCasingKey) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setCasingKey:counterCasingKey];
+        [counterCasingKey release];
+        counterCasingKey = [newCounterCasingKey retain];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
+    }
+}
+
+- (NSArray *)keys {
+    NSMutableArray *keys = [NSMutableArray array];
+    
+    if (key) {
+        [keys addObject:key];
+    } else {
+        [keys addObject:@"fields"];
+        [keys addObject:title];
+    }
+    if ([counterStyleKey length])
+        [keys addObject:counterStyleKey];
+    if ([counterCasingKey length])
+        [keys addObject:counterCasingKey];
+    return keys;
+}
+
+- (NSString *)string {
+    return [NSString stringWithFormat:@"<$%@/>", [[self keys] componentsJoinedByString:@"."]];
 }
 
 @end

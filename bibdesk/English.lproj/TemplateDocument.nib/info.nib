@@ -7,7 +7,7 @@
 	<key>IBEditorPositions</key>
 	<dict>
 		<key>1305</key>
-		<string>31 365 138 87 0 0 1440 938 </string>
+		<string>31 364 138 87 0 0 1440 938 </string>
 		<key>1311</key>
 		<string>37 406 138 106 0 0 1440 938 </string>
 		<key>1314</key>
@@ -18,6 +18,10 @@
 		<string>552 605 335 72 0 0 1440 938 </string>
 		<key>144</key>
 		<string>399 605 642 72 0 0 1440 938 </string>
+		<key>1719</key>
+		<string>399 605 642 72 0 0 1440 938 </string>
+		<key>1728</key>
+		<string>113 376 110 68 0 0 1440 938 </string>
 		<key>358</key>
 		<string>552 605 335 72 0 0 1440 938 </string>
 		<key>589</key>
@@ -28,7 +32,7 @@
 		<string>399 590 642 102 0 0 1440 938 </string>
 	</dict>
 	<key>IBFramework Version</key>
-	<string>446.1</string>
+	<string>489.0</string>
 	<key>IBLockedTabItems</key>
 	<array>
 		<integer>885</integer>
@@ -36,18 +40,20 @@
 	<key>IBOpenObjects</key>
 	<array>
 		<integer>1311</integer>
-		<integer>1419</integer>
-		<integer>358</integer>
-		<integer>88</integer>
-		<integer>1305</integer>
-		<integer>144</integer>
+		<integer>1728</integer>
 		<integer>1425</integer>
-		<integer>589</integer>
-		<integer>1314</integer>
+		<integer>1719</integer>
+		<integer>88</integer>
+		<integer>1419</integer>
+		<integer>1305</integer>
 		<integer>5</integer>
+		<integer>1314</integer>
 		<integer>804</integer>
+		<integer>358</integer>
+		<integer>144</integer>
+		<integer>589</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>8R218</string>
+	<string>8S165</string>
 </dict>
 </plist>

@@ -170,7 +170,16 @@ extern NSString *BDSKTokenDidChangeNotification;
 #pragma mark -
 
 @interface BDSKNumberTagToken : BDSKTagToken {
+    NSString *counterStyleKey;
+    NSString *counterCasingKey;
 }
+
+- (NSString *)counterStyleKey;
+- (void)setCounterStyleKey:(NSString *)newCounterStyleKey;
+
+- (NSString *)counterCasingKey;
+- (void)setCounterCasingKey:(NSString *)newCounterCasingKey;
+
 @end
 
 #pragma mark -

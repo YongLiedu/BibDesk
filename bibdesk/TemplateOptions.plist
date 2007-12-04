@@ -281,4 +281,32 @@
             key = "rssDescription";
         }
     );
+    counterStyle = (
+        {
+            displayName = "Number";
+            key = "<None>";
+        },
+        {
+            displayName = "Roman";
+            key = "romanNumeralValue";
+        },
+        {
+            displayName = "Alpha";
+            key = "alphaCounterValue";
+        },
+        {
+            displayName = "Greek";
+            key = "greekCounterValue";
+        }
+    );
+    counterCasing = (
+        {
+            displayName = "Lowercase";
+            key = "<None>";
+        },
+        {
+            displayName = "Uppercase";
+            key = uppercaseString;
+        }
+    );
 }
