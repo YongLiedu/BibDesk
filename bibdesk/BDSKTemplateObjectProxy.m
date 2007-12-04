@@ -144,7 +144,7 @@
             }
             [pub setItemIndex:++currentIndex];
             [pub prepareForTemplateParsing];
-            [returnString appendString:[BDSKTemplateParser stringFromTemplateArray:parsedTemplate usingObject:pub]];
+            [returnString appendString:[BDSKTemplateParser stringFromTemplateArray:parsedTemplate usingObject:pub atIndex:currentIndex]];
             [pub cleanupAfterTemplateParsing];
             [pool release];
         }
@@ -169,7 +169,7 @@
             }
             [pub setItemIndex:++currentIndex];
             [pub prepareForTemplateParsing];
-            [returnString appendAttributedString:[BDSKTemplateParser attributedStringFromTemplateArray:parsedTemplate usingObject:pub]];
+            [returnString appendAttributedString:[BDSKTemplateParser attributedStringFromTemplateArray:parsedTemplate usingObject:pub atIndex:currentIndex]];
             [pub cleanupAfterTemplateParsing];
             [pool release];
         }

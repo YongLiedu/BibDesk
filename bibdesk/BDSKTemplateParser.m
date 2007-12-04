@@ -219,7 +219,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 }
 
 + (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
-    return [self stringFromTemplateArray:[self arrayByParsingTemplateString:template] usingObject:object delegate:delegate];
+    return [self stringFromTemplateArray:[self arrayByParsingTemplateString:template] usingObject:object atIndex:1 delegate:delegate];
 }
 
 + (NSArray *)arrayByParsingTemplateString:(NSString *)template {
@@ -412,95 +412,108 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
     return [result autorelease];    
 }
 
-+ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object {
-    return [self stringFromTemplateArray:template usingObject:object delegate:nil];
++ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex {
+    return [self stringFromTemplateArray:template usingObject:object atIndex:anIndex delegate:nil];
 }
 
-+ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
++ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate {
     NSEnumerator *tagEnum = [template objectEnumerator];
     id tag;
     NSMutableString *result = [[NSMutableString alloc] init];
     
     while (tag = [tagEnum nextObject]) {
         int type = [(BDSKTag *)tag type];
-        id keyValue = nil;
         
         if (type == BDSKTextTagType) {
             
             [result appendString:[tag text]];
             
-        } else if (type == BDSKValueTagType) {
-            
-            if (keyValue = [object safeValueForKeyPath:[tag keyPath]])
-                [result appendString:[keyValue stringDescription]];
-            
-        } else if (type == BDSKCollectionTagType) {
-            
-            keyValue = [object safeValueForKeyPath:[tag keyPath]];
-            if ([keyValue respondsToSelector:@selector(objectEnumerator)]) {
-                NSEnumerator *itemE = [keyValue objectEnumerator];
-                id nextItem, item = [itemE nextObject];
-                NSArray *itemTemplate = [[tag itemTemplate] arrayByAddingObjectsFromArray:[tag separatorTemplate]];
-                while (item) {
-                    nextItem = [itemE nextObject];
-                    if (nextItem == nil)
-                        itemTemplate = [tag itemTemplate];
-                    [delegate templateParserWillParseTemplate:itemTemplate usingObject:item isAttributed:NO];
-                    keyValue = [self stringFromTemplateArray:itemTemplate usingObject:item delegate:delegate];
-                    [delegate templateParserDidParseTemplate:itemTemplate usingObject:item isAttributed:NO];
-                    if (keyValue != nil)
-                        [result appendString:keyValue];
-                    item = nextItem;
-                }
-            }
-            
         } else {
             
-            NSString *matchString = nil;
-            BOOL isMatch;
-            NSArray *matchStrings = [tag matchStrings];
-            unsigned int i, count = [matchStrings count];
-            NSArray *subtemplate = nil;
+            NSString *keyPath = [tag keyPath];
+            id keyValue = nil;
             
-            keyValue = [object safeValueForKeyPath:[tag keyPath]];
-                        for (i = 0; i < count; i++) {
-                            matchString = [matchStrings objectAtIndex:i];
-                if ([matchString hasPrefix:@"$"]) {
-                    matchString = [[object safeValueForKeyPath:[matchString substringFromIndex:1]] stringDescription];
-                    if (matchString == nil)
-                        matchString = @"";
-                }
-                switch ([tag matchType]) {
-                                case BDSKConditionTagMatchEqual:
-                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
-                                    break;
-                                case BDSKConditionTagMatchContain:
-                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
-                                    break;
-                                case BDSKConditionTagMatchSmaller:
-                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
-                                    break;
-                                case BDSKConditionTagMatchSmallerOrEqual:
-                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
-                                    break;
-                                default:
-                                    isMatch = [keyValue isNotEmpty];
-                                    break;
-                            }
-                            if (isMatch) {
-                    subtemplate = [tag subtemplateAtIndex:i];
-                                break;
-                            }
-                        }
-            if (subtemplate == nil && [[tag subtemplates] count] > count) {
-                subtemplate = [tag subtemplateAtIndex:count];
-                        }
-            if (subtemplate != nil) {
-                keyValue = [self stringFromTemplateArray:subtemplate usingObject:object delegate:delegate];
+            if ([keyPath hasPrefix:@"#"]) {
+                keyValue = [NSNumber numberWithInt:anIndex];
+                if ([keyPath hasPrefix:@"#."] && [keyPath length] > 2)
+                    keyValue = [keyValue safeValueForKeyPath:[keyPath substringFromIndex:2]];
+            } else {
+                keyValue = [object safeValueForKeyPath:keyPath];
+            }
+            
+            if (type == BDSKValueTagType) {
+                
+                if (keyValue)
+                    [result appendString:[keyValue stringDescription]];
+                
+            } else if (type == BDSKCollectionTagType) {
+                
+                if ([keyValue respondsToSelector:@selector(objectEnumerator)]) {
+                    NSEnumerator *itemE = [keyValue objectEnumerator];
+                    id nextItem, item = [itemE nextObject];
+                    NSArray *itemTemplate = [[tag itemTemplate] arrayByAddingObjectsFromArray:[tag separatorTemplate]];
+                    int idx = 0;
+                    while (item) {
+                        nextItem = [itemE nextObject];
+                        if (nextItem == nil)
+                            itemTemplate = [tag itemTemplate];
+                        [delegate templateParserWillParseTemplate:itemTemplate usingObject:item isAttributed:NO];
+                        keyValue = [self stringFromTemplateArray:itemTemplate usingObject:item atIndex:++idx delegate:delegate];
+                        [delegate templateParserDidParseTemplate:itemTemplate usingObject:item isAttributed:NO];
+                        if (keyValue != nil)
                             [result appendString:keyValue];
-                        }
-                    
+                        item = nextItem;
+                    }
                 }
+                
+            } else {
+                
+                NSString *matchString = nil;
+                BOOL isMatch;
+                NSArray *matchStrings = [tag matchStrings];
+                unsigned int i, count = [matchStrings count];
+                NSArray *subtemplate = nil;
+                
+                for (i = 0; i < count; i++) {
+                    matchString = [matchStrings objectAtIndex:i];
+                    if ([matchString hasPrefix:@"$"]) {
+                        matchString = [[object safeValueForKeyPath:[matchString substringFromIndex:1]] stringDescription];
+                        if (matchString == nil)
+                            matchString = @"";
+                    }
+                    switch ([tag matchType]) {
+                        case BDSKConditionTagMatchEqual:
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
+                            break;
+                        case BDSKConditionTagMatchContain:
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+                            break;
+                        case BDSKConditionTagMatchSmaller:
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
+                            break;
+                        case BDSKConditionTagMatchSmallerOrEqual:
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
+                            break;
+                        default:
+                            isMatch = [keyValue isNotEmpty];
+                            break;
+                    }
+                    if (isMatch) {
+                        subtemplate = [tag subtemplateAtIndex:i];
+                        break;
+                    }
+                }
+                if (subtemplate == nil && [[tag subtemplates] count] > count) {
+                    subtemplate = [tag subtemplateAtIndex:count];
+                }
+                if (subtemplate != nil) {
+                    keyValue = [self stringFromTemplateArray:subtemplate usingObject:object atIndex:anIndex delegate:delegate];
+                    [result appendString:keyValue];
+                }
+                
+            }
+                    
+        }
     } // while
     
     return [result autorelease];    
@@ -513,7 +526,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 }
 
 + (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
-    return [self attributedStringFromTemplateArray:[self arrayByParsingTemplateAttributedString:template] usingObject:object delegate:delegate];
+    return [self attributedStringFromTemplateArray:[self arrayByParsingTemplateAttributedString:template] usingObject:object atIndex:1 delegate:delegate];
 }
 
 + (NSArray *)arrayByParsingTemplateAttributedString:(NSAttributedString *)template {
@@ -725,105 +738,119 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
     return [result autorelease];    
 }
 
-+ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object {
-    return [self attributedStringFromTemplateArray:template usingObject:object delegate:nil];
++ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex {
+    return [self attributedStringFromTemplateArray:template usingObject:object atIndex:anIndex delegate:nil];
 }
 
-+ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
++ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate {
     NSEnumerator *tagEnum = [template objectEnumerator];
     id tag;
     NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
     
     while (tag = [tagEnum nextObject]) {
         int type = [(BDSKTag *)tag type];
-        id keyValue = nil;
         NSAttributedString *tmpAttrStr = nil;
         
         if (type == BDSKTextTagType) {
             
             [result appendAttributedString:[tag attributedText]];
             
-        } else if (type == BDSKValueTagType) {
-            
-            if (keyValue = [object safeValueForKeyPath:[tag keyPath]]) {
-                if ([keyValue isKindOfClass:[NSAttributedString class]]) {
-                    tmpAttrStr = [[NSAttributedString alloc] initWithAttributedString:keyValue attributes:[(BDSKRichValueTag *)tag attributes]];
-                } else {
-                    tmpAttrStr = [[NSAttributedString alloc] initWithString:[keyValue stringDescription] attributes:[(BDSKRichValueTag *)tag attributes]];
-                }
-                [result appendAttributedString:tmpAttrStr];
-                [tmpAttrStr release];
-            }
-            
-        } else if (type == BDSKCollectionTagType) {
-            
-            keyValue = [object safeValueForKeyPath:[tag keyPath]];
-            if ([keyValue respondsToSelector:@selector(objectEnumerator)]) {
-                NSEnumerator *itemE = [keyValue objectEnumerator];
-                id nextItem, item = [itemE nextObject];
-                NSArray *itemTemplate = [[tag itemTemplate] arrayByAddingObjectsFromArray:[tag separatorTemplate]];
-                while (item) {
-                    nextItem = [itemE nextObject];
-                    if (nextItem == nil)
-                        itemTemplate = [tag itemTemplate];
-                    [delegate templateParserWillParseTemplate:itemTemplate usingObject:item isAttributed:YES];
-                    tmpAttrStr = [self attributedStringFromTemplateArray:itemTemplate usingObject:item delegate:delegate];
-                    [delegate templateParserDidParseTemplate:itemTemplate usingObject:item isAttributed:YES];
-                    if (tmpAttrStr != nil)
-                        [result appendAttributedString:tmpAttrStr];
-                    item = nextItem;
-                }
-            }
-            
         } else {
             
-            NSString *matchString = nil;
-            BOOL isMatch;
-            NSArray *matchStrings = [tag matchStrings];
-            unsigned int i, count = [matchStrings count];
-            NSArray *subtemplate = nil;
-                        
-            keyValue = [object safeValueForKeyPath:[tag keyPath]];
-                        count = [matchStrings count];
-            subtemplate = nil;
-                        for (i = 0; i < count; i++) {
-                            matchString = [matchStrings objectAtIndex:i];
-                if ([matchString hasPrefix:@"$"]) {
-                    matchString = [[object safeValueForKeyPath:[matchString substringFromIndex:1]] stringDescription];
-                    if (matchString == nil)
-                        matchString = @"";
-                }
-                switch ([tag matchType]) {
-                                case BDSKConditionTagMatchEqual:
-                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
-                                    break;
-                                case BDSKConditionTagMatchContain:
-                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
-                                    break;
-                                case BDSKConditionTagMatchSmaller:
-                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
-                                    break;
-                                case BDSKConditionTagMatchSmallerOrEqual:
-                                    isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
-                                    break;
-                                default:
-                                    isMatch = [keyValue isNotEmpty];
-                                    break;
-                            }
-                            if (isMatch) {
-                    subtemplate = [tag subtemplateAtIndex:i];
-                                break;
-                            }
-                        }
-            if (subtemplate == nil && [[tag subtemplates] count] > count) {
-                subtemplate = [tag subtemplateAtIndex:count];
-                        }
-            if (subtemplate != nil) {
-                tmpAttrStr = [self attributedStringFromTemplateArray:subtemplate usingObject:object delegate:delegate];
-                            [result appendAttributedString:tmpAttrStr];
-                        }
-                    
+            NSString *keyPath = [tag keyPath];
+            id keyValue = nil;
+            
+            if ([keyPath hasPrefix:@"#"]) {
+                keyValue = [NSNumber numberWithInt:anIndex];
+                if ([keyPath hasPrefix:@"#."] && [keyPath length] > 2)
+                    keyValue = [keyValue safeValueForKeyPath:[keyPath substringFromIndex:2]];
+            } else {
+                keyValue = [object safeValueForKeyPath:keyPath];
             }
+            
+            if (type == BDSKValueTagType) {
+                
+                if (keyValue) {
+                    if ([keyValue isKindOfClass:[NSAttributedString class]]) {
+                        tmpAttrStr = [[NSAttributedString alloc] initWithAttributedString:keyValue attributes:[(BDSKRichValueTag *)tag attributes]];
+                    } else {
+                        tmpAttrStr = [[NSAttributedString alloc] initWithString:[keyValue stringDescription] attributes:[(BDSKRichValueTag *)tag attributes]];
+                    }
+                    [result appendAttributedString:tmpAttrStr];
+                    [tmpAttrStr release];
+                }
+                
+            } else if (type == BDSKCollectionTagType) {
+                
+                keyValue = [object safeValueForKeyPath:[tag keyPath]];
+                if ([keyValue respondsToSelector:@selector(objectEnumerator)]) {
+                    NSEnumerator *itemE = [keyValue objectEnumerator];
+                    id nextItem, item = [itemE nextObject];
+                    NSArray *itemTemplate = [[tag itemTemplate] arrayByAddingObjectsFromArray:[tag separatorTemplate]];
+                    int idx = 0;
+                    while (item) {
+                        nextItem = [itemE nextObject];
+                        if (nextItem == nil)
+                            itemTemplate = [tag itemTemplate];
+                        [delegate templateParserWillParseTemplate:itemTemplate usingObject:item isAttributed:YES];
+                        tmpAttrStr = [self attributedStringFromTemplateArray:itemTemplate usingObject:item atIndex:++idx delegate:delegate];
+                        [delegate templateParserDidParseTemplate:itemTemplate usingObject:item isAttributed:YES];
+                        if (tmpAttrStr != nil)
+                            [result appendAttributedString:tmpAttrStr];
+                        item = nextItem;
+                    }
+                }
+                
+            } else {
+                
+                NSString *matchString = nil;
+                BOOL isMatch;
+                NSArray *matchStrings = [tag matchStrings];
+                unsigned int i, count = [matchStrings count];
+                NSArray *subtemplate = nil;
+                            
+                count = [matchStrings count];
+                subtemplate = nil;
+                for (i = 0; i < count; i++) {
+                    matchString = [matchStrings objectAtIndex:i];
+                    if ([matchString hasPrefix:@"$"]) {
+                        matchString = [[object safeValueForKeyPath:[matchString substringFromIndex:1]] stringDescription];
+                        if (matchString == nil)
+                            matchString = @"";
+                    }
+                    switch ([tag matchType]) {
+                        case BDSKConditionTagMatchEqual:
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
+                            break;
+                        case BDSKConditionTagMatchContain:
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+                            break;
+                        case BDSKConditionTagMatchSmaller:
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
+                            break;
+                        case BDSKConditionTagMatchSmallerOrEqual:
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
+                            break;
+                        default:
+                            isMatch = [keyValue isNotEmpty];
+                            break;
+                    }
+                    if (isMatch) {
+                        subtemplate = [tag subtemplateAtIndex:i];
+                        break;
+                    }
+                }
+                if (subtemplate == nil && [[tag subtemplates] count] > count) {
+                    subtemplate = [tag subtemplateAtIndex:count];
+                }
+                if (subtemplate != nil) {
+                    tmpAttrStr = [self attributedStringFromTemplateArray:subtemplate usingObject:object atIndex:anIndex delegate:delegate];
+                    [result appendAttributedString:tmpAttrStr];
+                }
+                
+            }
+            
+        }
     } // while
     
     [result fixAttributesInRange:NSMakeRange(0, [result length])];
@@ -974,6 +1001,62 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 - (BOOL)isNotEmpty
 {
     return [self isEqualToNumber:[NSNumber numberWithBool:NO]] == NO;
+}
+
+inline static NSString *romanNumeralForDigit(unsigned digit, NSString *i, NSString *v, NSString *x){
+    switch (digit) {
+        case 1: return i;
+        case 2: return [NSString stringWithFormat:@"%@%@", i, i];
+        case 3: return [NSString stringWithFormat:@"%@%@%@", i, i, i];
+        case 4: return [NSString stringWithFormat:@"%@%@", i, v];
+        case 5: return v;
+        case 6: return [NSString stringWithFormat:@"%@%@", v, i];
+        case 7: return [NSString stringWithFormat:@"%@%@%@", v, i, i];
+        case 8: return [NSString stringWithFormat:@"%@%@%@%@", v, i, i, i];
+        case 9: return [NSString stringWithFormat:@"%@%@", i, x];
+        default: return @"";
+    }
+}
+
+- (NSString *)romanNumeralValue{
+    static NSString *symbols[9] = {@"i", @"v", @"x", @"l", @"c", @"d", @"m", @"mmm", @""};
+    
+    NSMutableString *string = [NSMutableString string];
+    unsigned digit, offset, number = [self unsignedIntValue];
+    
+    if (number >= 5000)
+        [NSException raise:@"Roman Numeral Exception" format:@"The number %i is too big to represent as a roman numeral.", number];
+    
+    for (offset = 0; number > 0 && offset < 7; offset += 2) {
+        digit = number % 10;
+        number /= 10;
+        [string insertString:romanNumeralForDigit(digit, symbols[offset], symbols[offset + 1], symbols[offset + 2]) atIndex:0];
+    }
+    return string;
+}
+
+- (NSString *)alphaCounterValue{
+    NSMutableString *string = [NSMutableString string];
+    unsigned letter, number = [self unsignedIntValue];
+    
+    while (number > 0) {
+        letter = number % 26;
+        number /= 26;
+        [string insertString:[NSString stringWithFormat:@"%C", 'a' + letter - 1] atIndex:0];
+    }
+    return string;
+}
+
+- (NSString *)greekCounterValue{
+    NSMutableString *string = [NSMutableString string];
+    unsigned letter, number = [self unsignedIntValue];
+    
+    while (number > 0) {
+        letter = number % 24;
+        number /= 24;
+        [string insertString:[NSString stringWithFormat:@"%C", 0x03b1 + letter - 1] atIndex:0];
+    }
+    return string;
 }
 
 @end
