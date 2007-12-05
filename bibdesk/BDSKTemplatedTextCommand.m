@@ -120,7 +120,7 @@
 @end
 
 
-@implementation BibDeskTemplatedRichTextCommand
+@implementation BDSKTemplatedRichTextCommand
 
 - (id)performDefaultImplementation {
 
