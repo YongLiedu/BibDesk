@@ -980,6 +980,12 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         return;
     
 	[[BDSKFiler sharedFiler] filePapers:files fromDocument:[self document] check:NO];
+    
+    // this will trigger our status updates
+    NSEnumerator *fileEnum = [files objectEnumerator];
+    BDSKLinkedFile *file;
+    while (file = [fileEnum nextObject])
+        [publication removeFileToBeFiled:file];
 	
 	[tabView selectFirstTabViewItem:self];
 	
