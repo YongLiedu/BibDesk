@@ -82,6 +82,7 @@
 #import "BDSKSplitView.h"
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
+#import "NSObject_BDSKExtensions.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -483,6 +484,18 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
 }
 
+- (IBAction)autoFileLinkedFile:(id)sender{
+    unsigned int anIndex = [[sender representedObject] unsignedIntValue];
+    BDSKLinkedFile *file = [publication objectInFilesAtIndex:anIndex];
+    
+    // @@ should we check first if we have enough information to file?
+    
+	[[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObjects:file, nil] fromDocument:[self document] check:NO];
+    
+    // this will trigger our status updates
+    [publication removeFileToBeFiled:file];
+}
+
 #pragma mark Menus
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
@@ -536,6 +549,12 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             
             item = [menu insertItemWithTitle:NSLocalizedString(@"Move To Trash",@"Menu item title")
                                       action:@selector(trashLocalFile:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            
+            item = [menu insertItemWithTitle:NSLocalizedString(@"Auto File",@"Menu item title")
+                                      action:@selector(autoFileLinkedFile:)
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
@@ -982,10 +1001,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	[[BDSKFiler sharedFiler] filePapers:files fromDocument:[self document] check:NO];
     
     // this will trigger our status updates
-    NSEnumerator *fileEnum = [files objectEnumerator];
-    BDSKLinkedFile *file;
-    while (file = [fileEnum nextObject])
-        [publication removeFileToBeFiled:file];
+    [publication performSelector:@selector(removeFileToBeFiled:) withObjectsFromArray:files];
 	
 	[tabView selectFirstTabViewItem:self];
 	

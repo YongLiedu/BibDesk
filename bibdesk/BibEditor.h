@@ -210,6 +210,8 @@
 
 - (IBAction)copyNotesForLinkedFile:(id)sender;
 
+- (IBAction)autoFileLinkedFile:(id)sender;
+
 /*!
     @method     updateSafariRecentDownloadsMenu:
     @abstract   Updates the menu of items for local paths of recent downloads from Safari.
