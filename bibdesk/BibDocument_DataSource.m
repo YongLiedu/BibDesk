@@ -846,23 +846,29 @@
             return NO;
 		if(row != -1){
             BibItem *pub = [shownPublications objectAtIndex:row];
+            NSMutableArray *urlsToAdd = [NSMutableArray array];
             NSURL *theURL = nil;
             
             if([type isEqualToString:NSFilenamesPboardType]){
                 NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
                 if ([fileNames count] == 0)
                     return NO;
-                theURL = [NSURL fileURLWithPath:[[fileNames objectAtIndex:0] stringByExpandingTildeInPath]];
+                NSEnumerator *fileEnum = [fileNames objectEnumerator];
+                NSString *aPath;
+                while (aPath = [fileEnum nextObject])
+                    [urlsToAdd addObject:[NSURL fileURLWithPath:[aPath stringByExpandingTildeInPath]]];
             }else if([type isEqualToString:BDSKWeblocFilePboardType]){
-                theURL = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]];
+                [urlsToAdd addObject:[NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]];
             }else if([type isEqualToString:NSURLPboardType]){
-                theURL = [NSURL URLFromPasteboard:pboard];
+                [urlsToAdd addObject:[NSURL URLFromPasteboard:pboard]];
             }else return NO;
             
-            if(theURL == nil)
+            if([urlsToAdd count] == 0)
                 return NO;
             
-            [pub addFileForURL:theURL autoFile:YES];
+            NSEnumerator *urlEnum = [urlsToAdd objectEnumerator];
+            while (theURL = [urlEnum nextObject])
+                [pub addFileForURL:theURL autoFile:YES];
             
             [self selectPublication:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
