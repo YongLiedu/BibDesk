@@ -1763,6 +1763,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	[bibString appendString:frontMatter];
 	[bibString appendString:@"\n"];
 	
+    [bibString appendString:[[BDSKMacroResolver defaultMacroResolver] bibTeXString]];
     [bibString appendString:[[self macroResolver] bibTeXString]];
 	
 	NSEnumerator *e = [items objectEnumerator];
