@@ -173,18 +173,17 @@
 
 - (BOOL)connectAndCheckTypeOfFile:(NSURL *)fileURL;
 {
-    NSParameterAssert([fileURL isFileURL]);
+    OBASSERT([fileURL isFileURL]);
     if (nil == connection)
         [self establishConnection];
     
-    BOOL isDir;
-    if ([[NSFileManager defaultManager] fileExistsAtPath:[fileURL path] isDirectory:&isDir] == NO || isDir)
-        return NO;
-    
-    // make sure it's a PDF file before hitting the agent...
-    if (UTTypeConformsTo((CFStringRef)[[NSWorkspace sharedWorkspace] UTIForURL:fileURL], kUTTypePDF) == FALSE)
-        return NO;
-    return YES;
+    // these checks are client side to avoid connecting to the server unless it's really necessary
+    CFStringRef type = (CFStringRef)[[NSWorkspace sharedWorkspace] UTIForURL:fileURL];
+    if (UTTypeConformsTo(type, kUTTypePDF) || UTTypeConformsTo(type, CFSTR("com.adobe.postscript")) ||
+        UTTypeConformsTo(type, CFSTR("net.sourceforge.skim-app.pdfd")) || UTTypeConformsTo(type, CFSTR("net.sourceforge.skim-app.skimnotes")))
+        return YES;
+
+    return NO;
 }
 
 - (NSData *)SkimNotesAtURL:(NSURL *)fileURL;
