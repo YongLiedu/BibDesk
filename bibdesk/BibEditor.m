@@ -484,18 +484,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
 }
 
-- (IBAction)autoFileLinkedFile:(id)sender{
-    unsigned int anIndex = [[sender representedObject] unsignedIntValue];
-    BDSKLinkedFile *file = [publication objectInFilesAtIndex:anIndex];
-    
-    // @@ should we check first if we have enough information to file?
-    
-	[[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObjects:file, nil] fromDocument:[self document] check:NO];
-    
-    // this will trigger our status updates
-    [publication removeFileToBeFiled:file];
-}
-
 #pragma mark Menus
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
@@ -554,7 +542,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
             
             item = [menu insertItemWithTitle:NSLocalizedString(@"Auto File",@"Menu item title")
-                                      action:@selector(autoFileLinkedFile:)
+                                      action:@selector(consolidateLinkedFiles:)
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
@@ -977,22 +965,27 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSArray *files = nil;
+    unsigned int anIndex = (unsigned int)contextInfo;
+    
+    if (anIndex == NSNotFound)
+        files = [publication localFiles];
+    else
+        files = [NSArray arrayWithObject:[publication objectInFilesAtIndex:anIndex]];
     
     if (returnCode == NSAlertAlternateReturn){
         return;
     }else if(returnCode == NSAlertOtherReturn){
-        NSEnumerator *fileEnum = [[publication localFiles] objectEnumerator];
+        NSEnumerator *fileEnum = [files objectEnumerator];
         BDSKLinkedFile *file;
-        files = [NSMutableArray array];
+        NSMutableArray *tmpFiles = [NSMutableArray array];
         
         while(file = [fileEnum nextObject]){
-            if([publication canSetURLForLinkedFile:file] == NO)
+            if([publication canSetURLForLinkedFile:file])
+                [tmpFiles addObject:file];
+            else if([file URL])
                 [publication addFileToBeFiled:file];
-            else
-                [(NSMutableArray *)files addObject:file];
         }
-    }else{
-        files = [publication localFiles];
+        files = tmpFiles;
     }
     
     if ([files count] == 0)
@@ -1000,9 +993,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
 	[[BDSKFiler sharedFiler] filePapers:files fromDocument:[self document] check:NO];
     
-    // this will trigger our status updates
-    [publication performSelector:@selector(removeFileToBeFiled:) withObjectsFromArray:files];
-	
 	[tabView selectFirstTabViewItem:self];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
@@ -1011,14 +1001,21 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (IBAction)consolidateLinkedFiles:(id)sender{
 	[self finalizeChangesPreservingSelection:YES];
 	
+    unsigned int anIndex = NSNotFound;
 	BOOL canSet = YES;
-    NSEnumerator *fileEnum = [[publication localFiles] objectEnumerator];
-    BDSKLinkedFile *file;
     
-    while(file = [fileEnum nextObject]){
-        if([publication canSetURLForLinkedFile:file] == NO){
-            canSet = NO;
-            break;
+    if ([sender representedObject]) {
+        BDSKLinkedFile *file = [publication objectInFilesAtIndex:[[sender representedObject] unsignedIntValue]];
+        canSet = [publication canSetURLForLinkedFile:file];
+    } else {
+        NSEnumerator *fileEnum = [[publication localFiles] objectEnumerator];
+        BDSKLinkedFile *file;
+        
+        while(file = [fileEnum nextObject]){
+            if([publication canSetURLForLinkedFile:file] == NO){
+                canSet = NO;
+                break;
+            }
         }
     }
     
@@ -1037,9 +1034,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:) 
-                            contextInfo:NULL];
+                            contextInfo:(void *)anIndex];
 	} else {
-        [self consolidateAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
+        [self consolidateAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:(void *)anIndex];
     }
 }
 

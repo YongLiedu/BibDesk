@@ -263,7 +263,6 @@
             if([item canSetURLForLinkedFile:file] == NO)
                 continue;
             [files addObject:file];
-            [item removeFileToBeFiled:file]; // unset the flag even when we fail, to avoid retrying at every edit
         }
         if ([files count])
             [[BDSKFiler sharedFiler] filePapers:files fromDocument:document check:NO];

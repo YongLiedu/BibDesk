@@ -2900,7 +2900,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
             [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:file]
                                   fromDocument:(BibDocument *)owner
                                          check:NO]; 
-            [self removeFileToBeFiled:file];
             return YES;
 		} else {
             [self addFileToBeFiled:file];

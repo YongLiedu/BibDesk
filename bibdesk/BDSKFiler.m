@@ -164,8 +164,10 @@ static BDSKFiler *sharedFiler = nil;
 			[progressIndicator displayIfNeeded];
 		}
 			
-		if ([NSString isEmptyString:path] || [NSString isEmptyString:newPath] || [path isEqualToString:newPath])
+		if ([NSString isEmptyString:path] || [NSString isEmptyString:newPath] || [path isEqualToString:newPath]) {
+            [pub removeFileToBeFiled:file];
 			continue;
+        }
         
 		info = [NSMutableDictionary dictionaryWithCapacity:6];
 		[info setValue:file forKey:@"file"];
@@ -221,6 +223,10 @@ static BDSKFiler *sharedFiler = nil;
                 [fileInfoDicts addObject:info];
                 
             }
+            
+            // we always do this even when it failed, to avoid retrying at every edit
+            [pub removeFileToBeFiled:file];
+            
         }
 	}
 	
