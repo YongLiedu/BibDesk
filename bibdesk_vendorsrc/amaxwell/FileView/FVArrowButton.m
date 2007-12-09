@@ -78,11 +78,11 @@ static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
         bgColor = [NSColor colorWithCalibratedWhite:0.0 alpha:0.5];
         arrowColor = [NSColor colorWithCalibratedWhite:0.7 alpha:0.8];
     } else if ([self isEnabled]) {
-        bgColor = [NSColor colorWithCalibratedWhite:0.0 alpha:0.3];
-        arrowColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.7];
+        bgColor = [NSColor colorWithCalibratedWhite:0.0 alpha:0.7];
+        arrowColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
     } else {
-        bgColor = [NSColor colorWithCalibratedWhite:0.3 alpha:0.2];
-        arrowColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.5];
+        bgColor = [NSColor colorWithCalibratedWhite:0.3 alpha:0.5];
+        arrowColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
     }
     
     [bgColor setFill];
