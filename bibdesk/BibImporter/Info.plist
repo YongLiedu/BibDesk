@@ -11,7 +11,7 @@
 			<string>MDImporter</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>net.sourceforge.bibdesk.bib</string>
+				<string>org.tug.tex.bibtex</string>
                 <string>net.sourceforge.bibdesk.bdskcache</string>
                 <string>net.sourceforge.bibdesk.ris</string>
                 <string>net.sourceforge.bibdesk.bdsksearch</string>

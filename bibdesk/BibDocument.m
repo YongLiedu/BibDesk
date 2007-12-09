@@ -2106,7 +2106,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             contentString = [[NSString alloc] initWithContentsOfFile:fileName encoding:[self documentStringEncoding] guessEncoding:YES];
             
             if(contentString != nil){
-                if([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bib"])
+                if([theUTI isEqualToUTI:@"org.tug.tex.bibtex"])
                     type = BDSKBibTeXStringType;
                 else if([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.ris"])
                     type = BDSKRISStringType;

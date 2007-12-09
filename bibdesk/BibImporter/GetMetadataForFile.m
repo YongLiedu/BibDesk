@@ -47,7 +47,7 @@ Boolean GetMetadataForFile(void* thisInterface,
     Boolean success = FALSE;
     
     CFStringRef cacheUTI = CFSTR("net.sourceforge.bibdesk.bdskcache");
-    CFStringRef bibtexUTI = CFSTR("net.sourceforge.bibdesk.bib");
+    CFStringRef bibtexUTI = CFSTR("org.tug.tex.bibtex");
     CFStringRef risUTI = CFSTR("net.sourceforge.bibdesk.ris");
     CFStringRef searchUTI = CFSTR("net.sourceforge.bibdesk.bdsksearch");
     

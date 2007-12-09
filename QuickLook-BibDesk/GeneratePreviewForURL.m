@@ -127,7 +127,7 @@ OSStatus GeneratePreviewForURL(void *thisInterface, QLPreviewRequestRef preview,
             btString = [[NSString alloc] initWithContentsOfURL:(NSURL *)url encoding:NSISOLatin1StringEncoding error:NULL];
         
         if (btString) {
-            if (UTTypeEqual(CFSTR("net.sourceforge.bibdesk.bib"), contentTypeUTI)) {
+            if (UTTypeEqual(CFSTR("org.tug.tex.bibtex"), contentTypeUTI)) {
                 CFDataRef data = (CFDataRef)[BDSKSyntaxHighlighter RTFDataWithBibTeXString:btString];
                 if (data) {
                     QLPreviewRequestSetDataRepresentation(preview, data, kUTTypeRTF, NULL);

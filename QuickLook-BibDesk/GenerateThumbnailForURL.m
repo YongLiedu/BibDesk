@@ -253,7 +253,7 @@ OSStatus GenerateThumbnailForURL(void *thisInterface, QLThumbnailRequestRef thum
             
     if (UTTypeEqual(contentTypeUTI, CFSTR("net.sourceforge.bibdesk.bdskcache"))) {
         didGenerate = generateThumbnailForCacheFile(thumbnail, url, maxSize);
-    } else if (UTTypeEqual(contentTypeUTI, CFSTR("net.sourceforge.bibdesk.bib"))) {
+    } else if (UTTypeEqual(contentTypeUTI, CFSTR("org.tug.tex.bibtex"))) {
         didGenerate = generateThumbnailForTextFile(thumbnail, url, true);
     } else if (UTTypeConformsTo(contentTypeUTI, kUTTypeText)) {
         // this handles RIS and other plain text types that we support, sans highlighting
