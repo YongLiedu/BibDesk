@@ -3291,10 +3291,14 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSRect buttonRect = [self buttonRectForBounds:cellFrame];
     NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
     if (NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped])) {
+        // @@ button isn't highlighted on 10.5; sending displayIfNeeded breaks the button action if called before hadButton is set, and it doesn't help anyway
 		[self setButtonHighlighted:YES];
 		BOOL keepOn = YES;
 		BOOL isInside = YES;
+        // @@ workaround for 10.5
+        BOOL hadButton = hasButton;
 		while (keepOn) {
+            // @@ on 10.5 hasButton ivar is NO after this call
 			theEvent = [[controlView window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
 			mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
 			isInside = NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]);
@@ -3303,7 +3307,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 					[self setButtonHighlighted:isInside];
 					break;
 				case NSLeftMouseUp:
-					if (isInside && hasButton)
+					if (isInside && hadButton)
                         [(NSControl *)controlView sendAction:buttonAction to:buttonTarget];
 					[self setButtonHighlighted:NO];
 					keepOn = NO;
