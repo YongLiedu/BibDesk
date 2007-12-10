@@ -47,7 +47,7 @@
 @class BDSKComplexStringFormatter;
 @class BDSKCrossrefFormatter;
 @class BDSKCitationFormatter;
-@class MacroFormWindowController;
+@class BDSKMacroTableViewWindowController;
 @class BDSKImagePopUpButton;
 @class BibItem;
 @class BDSKStatusBar;
@@ -57,18 +57,19 @@
 @class BibEditor;
 @class FileView;
 @class BDSKSplitView;
+@class BDSKEditorTableView;
 
 /*!
     @class BibEditor
     @abstract WindowController for the edit window
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
-@interface BibEditor : NSWindowController <BDSKFormDelegate> {
+@interface BibEditor : NSWindowController {
 	IBOutlet BDSKSplitView *mainSplitView;
 	IBOutlet BDSKSplitView *fileSplitView;
 	IBOutlet BDSKSplitView *fieldSplitView;
     IBOutlet NSPopUpButton *bibTypeButton;
-    IBOutlet BDSKForm *bibFields;
+    IBOutlet BDSKEditorTableView *tableView;
     IBOutlet NSMatrix *extraBibFields;
     IBOutlet NSTabView *tabView;
     IBOutlet NSTextView *notesView;
@@ -103,6 +104,8 @@
     // ----------------------------------------------------------------------------------------
     BibItem *publication;
     BOOL isEditable;
+    
+    NSMutableArray *fields;
 // ----------------------------------------------------------------------------------------
 // status bar stuff
 // ----------------------------------------------------------------------------------------
@@ -112,7 +115,7 @@
 	IBOutlet NSButton *citeKeyWarningButton;
 	
 // form cell formatter
-    BDSKComplexStringFormatter *formCellFormatter;
+    BDSKComplexStringFormatter *tableCellFormatter;
     BDSKCrossrefFormatter *crossrefFormatter;
 	BDSKCitationFormatter *citationFormatter;
     
@@ -120,7 +123,7 @@
 	IBOutlet NSTableView *authorTableView;
 
     // Macro editing stuff
-    MacroFormWindowController *macroTextFieldWC;
+    BDSKMacroTableViewWindowController *macroTextFieldWC;
 
 	// edit field stuff
 	BOOL forceEndEditing;
@@ -323,6 +326,8 @@
 */
 - (void)openParentItemForField:(NSString *)field;
 
+- (IBAction)openParentItemAction:(id)sender;
+
 - (IBAction)selectCrossrefParentAction:(id)sender;
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;
 
@@ -342,12 +347,7 @@
 
 #pragma mark Macro support
     
-/*!
-    @method     editSelectedFormCellAsMacro
-    @abstract   pops up a window above the form cell with extra info about a macro.
-    @discussion (description)
-*/
-- (BOOL)editSelectedFormCellAsMacro;
+- (BOOL)editSelectedCellAsMacro;
 - (void)macrosDidChange:(NSNotification *)aNotification;
 
 @end
@@ -356,3 +356,37 @@
 @interface BDSKTabView : NSTabView {}
 @end
 
+
+@interface BDSKEditorTableView : NSTableView {
+    int clickedColumn;
+    int clickedRow;
+}
+@end
+
+
+@interface BDSKEditorTextFieldCell : NSTextFieldCell {
+    BOOL buttonHighlighted;
+    BOOL hasButton;
+    id buttonTarget;
+    SEL buttonAction;
+}
+
+- (BOOL)buttonHighlighted;
+- (void)setButtonHighlighted:(BOOL)highlighted;
+
+- (BOOL)hasButton;
+- (void)setHasButton:(BOOL)flag;
+
+- (id)buttonTarget;
+- (void)setButtonTarget:(id)target;
+
+- (SEL)buttonAction;
+- (void)setButtonAction:(SEL)selector;
+
+- (NSRect)buttonRectForBounds:(NSRect)theRect;
+
+@end
+
+
+@interface BDSKLabelTextFieldCell : NSTextFieldCell
+@end

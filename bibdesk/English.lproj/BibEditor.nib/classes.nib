@@ -8,20 +8,25 @@
         }, 
         {CLASS = BDSKDragWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
         {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
-        {CLASS = BDSKEditorTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
+        {CLASS = BDSKEditorTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {
-            CLASS = BDSKForm; 
+            CLASS = BDSKEditorTextFieldCell; 
             LANGUAGE = ObjC; 
-            OUTLETS = {dragSourceCell = id; }; 
-            SUPERCLASS = NSForm; 
+            OUTLETS = {buttonTarget = id; }; 
+            SUPERCLASS = NSTextFieldCell; 
         }, 
-        {CLASS = BDSKFormCell; LANGUAGE = ObjC; SUPERCLASS = NSFormCell; }, 
+        {CLASS = BDSKEditorTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {
             CLASS = BDSKImagePopUpButton; 
             LANGUAGE = ObjC; 
             OUTLETS = {delegate = id; }; 
             SUPERCLASS = NSPopUpButton; 
+        }, 
+        {
+            CLASS = BDSKLabelTextFieldCell; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSTextFieldCell; 
         }, 
         {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
         {
@@ -48,15 +53,19 @@
                 duplicateTitleToBooktitle = id; 
                 editSelectedFieldAsRawBibTeX = id; 
                 generateCiteKey = id; 
-                moveLinkedFile = id; 
+                openLinkedFile = id; 
+                openLinkedURL = id; 
+                openParentItemAction = id; 
                 raiseAddField = id; 
                 raiseChangeFieldName = id; 
                 raiseDelField = id; 
+                revealLinkedFile = id; 
                 selectCrossrefParentAction = id; 
                 showCiteKeyWarning = id; 
                 showNotesForLinkedFile = id; 
                 showPersonDetailCmd = id; 
                 toggleStatusBar = id; 
+                trashLocalFile = id; 
             }; 
             CLASS = BibEditor; 
             LANGUAGE = ObjC; 
@@ -67,7 +76,6 @@
                 actionMenuButton = BDSKImagePopUpButton; 
                 addFieldButton = NSButton; 
                 authorTableView = NSTableView; 
-                bibFields = BDSKForm; 
                 bibTypeButton = NSPopUpButton; 
                 chooseURLField = NSTextField; 
                 chooseURLSheet = NSWindow; 
@@ -85,6 +93,7 @@
                 rssDescriptionView = NSTextView; 
                 statusBar = BDSKStatusBar; 
                 tabView = NSTabView; 
+                tableView = BDSKEditorTableView; 
             }; 
             SUPERCLASS = NSWindowController; 
         }, 

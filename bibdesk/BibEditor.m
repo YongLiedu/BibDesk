@@ -103,7 +103,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 @interface BibEditor (Private)
 
 - (void)setupButtons;
-- (void)setupForm;
+- (void)setupFields;
 - (void)setupMatrix;
 - (void)matrixFrameDidChange:(NSNotification *)notification;
 - (void)setupTypePopUp;
@@ -133,6 +133,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if (self = [super initWithWindowNibName:@"BibEditor"]) {
         
         publication = [aBib retain];
+        fields = [[NSMutableArray alloc] init];
         isEditable = [[publication owner] isDocument];
                 
         forceEndEditing = NO;
@@ -156,9 +157,19 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     // we should have a document at this point, as the nib is not loaded before -window is called, which shouldn't happen before the document shows us
     OBASSERT([self document]);
     
-    [[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]];
+    [[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.935 alpha:1.0]];
     
-    [[bibFields prototype] setEditable:isEditable];
+    // Unfortunately Tiger does not support transparent tables
+    // We could also use a tabless tabview with a separate tab control
+    [tableView setBackgroundColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+    
+    BDSKEditorTextFieldCell *dataCell = [[tableView tableColumnWithIdentifier:@"value"] dataCell];
+    [dataCell setButtonAction:@selector(openParentItemAction:)];
+    [dataCell setButtonTarget:self];
+    
+    if (isEditable)
+        [tableView setDoubleAction:@selector(raiseChangeFieldName:)];
+    
     [bibTypeButton setEnabled:isEditable];
     [addFieldButton setEnabled:isEditable];
     
@@ -183,9 +194,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	[extraBibFields setPrototype:cell];
 	[cell release];
     
-    // Setup the toolbar
-    //[self setupToolbar];
-	
     // Setup the statusbar
 	[statusBar retain]; // we need to retain, as we might remove it from the window
 	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowEditorStatusBarKey]) {
@@ -205,10 +213,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	[edgeView setEdges:BDSKMinYEdgeMask];
     NSRect ignored, frame;
     NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
-    [[bibFields enclosingScrollView] setFrame:frame];
-	[edgeView addSubview:[bibFields enclosingScrollView]];
+    [[tableView enclosingScrollView] setFrame:frame];
+	[edgeView addSubview:[tableView enclosingScrollView]];
     // don't know why, but this is broken
-    [bibTypeButton setNextKeyView:bibFields];
+    [bibTypeButton setNextKeyView:tableView];
     
     edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:1];
     [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
@@ -241,13 +249,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         [fileSplitView setPositionAutosaveName:nil];
     }
     
-    formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication owner] macroResolver]];
+    tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication owner] macroResolver]];
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
     
-    [self setupForm];
+    [self setupFields];
     if (isEditable)
-        [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
+        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
     
     // Setup the citekey textfield
     BDSKCiteKeyFormatter *citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
@@ -287,8 +295,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     [self registerForNotifications];
     
-    [bibFields setDelegate:self];
-    
     [[self window] setDelegate:self];
     if (isEditable)
         [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
@@ -315,6 +321,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)dealloc{
     [publication release];
+    [fields release];
 	[authorTableView setDelegate:nil];
     [authorTableView setDataSource:nil];
     [notesViewUndoManager release];
@@ -327,7 +334,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	[dragFieldEditor release];
 	[statusBar release];
 	[macroTextFieldWC release];
-    [formCellFormatter release];
+    [tableCellFormatter release];
     [crossrefFormatter release];
     [citationFormatter release];
     [super dealloc];
@@ -348,7 +355,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		NSText *textView = (NSText *)firstResponder;
 		NSRange selection = [textView selectedRange];
 		id textDelegate = [textView delegate];
-        if(textDelegate == bibFields || textDelegate == citeKeyField)
+        if(textDelegate == tableView || textDelegate == citeKeyField)
             firstResponder = textDelegate; // the text field or the form (textView is the field editor)
 
 		forceEndEditing = YES; // make sure the validation will always allow the end of the edit
@@ -370,7 +377,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         // for inherited fields, we should do something here to make sure the user doesn't have to go through the warning sheet
 		
 		if([[self window] makeFirstResponder:firstResponder] &&
-		   !(firstResponder == bibFields && didSetupForm)){
+		   !(firstResponder == tableView && didSetupForm)){
             if([[textView string] length] < NSMaxRange(selection)) // check range for safety
                 selection = NSMakeRange([[textView string] length],0);
             [textView setSelectedRange:selection];
@@ -838,9 +845,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)
             return NO;
-        id cell = [bibFields selectedCell];
-		return (cell != nil && [bibFields currentEditor] != nil && [macroTextFieldWC isEditing] == NO && 
-                [[cell representedObject] isEqualToString:BDSKCrossrefString] == NO && [[cell representedObject] isCitationField] == NO);
+        int row = [tableView editedRow];
+		return (row != -1 && [macroTextFieldWC isEditing] == NO && 
+                [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
     }
     else if (theAction == @selector(toggleStatusBar:)) {
 		if ([statusBar isVisible]) {
@@ -1309,7 +1316,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		[tabView selectFirstTabViewItem:nil];
         [publication addField:newField];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add Field", @"Undo action name")];
-		[self setupForm];
+		[self setupFields];
 		[self setKeyField:newField];
     }
 }
@@ -1338,8 +1345,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         id firstResponder = [[self window] firstResponder];
         if ([firstResponder isKindOfClass:[NSText class]] && [firstResponder isFieldEditor])
             firstResponder = [firstResponder delegate];
-        if(firstResponder == bibFields)
-            keyField = [[bibFields selectedCell] representedObject];
+        if(firstResponder == tableView)
+            keyField = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
         else if(firstResponder == extraBibFields)
             keyField = [[extraBibFields keyCell] representedObject];
         else if(firstResponder == citeKeyField)
@@ -1376,13 +1383,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             }
         }
     }else{
-        int i, numRows = [bibFields numberOfRows];
-
-        for (i = 0; i < numRows; i++) {
-            if ([[[bibFields cellAtIndex:i] representedObject] isEqualToString:fieldName]) {
-                [bibFields selectTextAtIndex:i];
-                return;
-            }
+        unsigned int row = [fields indexOfObject:fieldName];
+        if (row != NSNotFound) {
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [tableView editColumn:1 row:row withEvent:nil select:YES];
         }
     }
 }
@@ -1402,7 +1406,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [publication removeField:oldField];
     [self userChangedField:oldField from:oldValue to:@""];
     [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
-    [self setupForm];
+    [self setupFields];
 }
 
 // raises the del field sheet
@@ -1425,10 +1429,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
                                                                                                        fieldsArray:removableFields];
-    
-    NSString *selectedCellTitle = [[bibFields selectedCell] representedObject];
-    if([removableFields containsObject:selectedCellTitle]){
-        [removeFieldController setField:selectedCellTitle];
+    int selectedRow = [tableView selectedRow];
+    NSString *selectedField = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
+    if([removableFields containsObject:selectedField]){
+        [removeFieldController setField:selectedField];
         // if we don't deselect this cell, we can't remove it from the form
         [self finalizeChangesPreservingSelection:NO];
     }
@@ -1471,11 +1475,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
     [self userChangedField:newField from:@"" to:oldValue didAutoGenerate:autoGenerateStatus];
     [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
-    [self setupForm];
+    [self setupFields];
     [self setKeyField:newField];
 }
 
-- (IBAction)raiseChangeFieldName:(id)sender{
+- (void)raiseChangeFieldSheetForField:(NSString *)field{
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSArray *currentFields = [publication allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
@@ -1492,13 +1496,18 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                                                                                        fieldsArray:removableFields
                                                                                                          newPrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
                                                                                                     newFieldsArray:fieldNames];
+    if (field == nil) {
+        int selectedRow = [tableView selectedRow];
+        field = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
+        if([removableFields containsObject:field] == NO)
+            field = nil;
+    }
     
-    NSString *selectedCellTitle = [[bibFields selectedCell] representedObject];
-    if([removableFields containsObject:selectedCellTitle]){
-        [changeFieldController setField:selectedCellTitle];
+    if([removableFields containsObject:field]){
+        [changeFieldController setField:field];
         // if we don't deselect this cell, we can't remove it from the form
         [self finalizeChangesPreservingSelection:NO];
-    }else if(sender == self){
+    }else if(field){
         // double clicked title of a field we cannot change
         [changeFieldController release];
         [removableFields release];
@@ -1514,38 +1523,50 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	[changeFieldController release];
 }
 
+- (IBAction)raiseChangeFieldName:(id)sender{
+    NSString *field = nil;
+    if (sender == tableView)
+        field = [fields objectAtIndex:[tableView clickedRow]];
+    [self raiseChangeFieldSheetForField:field];
+}
+
 #pragma mark Text Change handling
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
-	if ([self editSelectedFormCellAsMacro])
-		[[bibFields currentEditor] selectAll:sender];
+	int row = [tableView selectedRow];
+	if (row == -1) 
+		return;
+    [self editSelectedCellAsMacro];
+	if([tableView editedRow] != row)
+		[tableView editColumn:1 row:row withEvent:nil select:YES];
 }
 
-- (BOOL)editSelectedFormCellAsMacro{
-	NSCell *cell = [bibFields selectedCell];
-	if ([macroTextFieldWC isEditing] || cell == nil || [[cell representedObject] isEqualToString:BDSKCrossrefString] || [[cell representedObject] isCitationField]) 
+- (BOOL)editSelectedCellAsMacro{
+	int row = [tableView selectedRow];
+	if ([macroTextFieldWC isEditing] || row == -1) 
 		return NO;
-	NSString *value = [publication valueOfField:[cell representedObject]];
-	
-	[formCellFormatter setEditAsComplexString:YES];
-	[cell setObjectValue:value];
-    
-    if (macroTextFieldWC == nil)
-        macroTextFieldWC = [[MacroFormWindowController alloc] init];
-	
-    return [macroTextFieldWC attachToView:bibFields atRow:[bibFields selectedRow] column:0 withValue:value];
+	if (macroTextFieldWC == nil)
+    	macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
+	NSString *value = [publication valueOfField:[fields objectAtIndex:row]];
+	NSText *fieldEditor = [tableView currentEditor];
+	[tableCellFormatter setEditAsComplexString:YES];
+	if (fieldEditor) {
+		[fieldEditor setString:[tableCellFormatter editingStringForObjectValue:value]];
+		[[[tableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
+		[fieldEditor selectAll:self];
+	}
+	return [macroTextFieldWC attachToView:tableView atRow:row column:1 withValue:value];
 }
 
 - (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
-	[self editSelectedFormCellAsMacro];
-	return YES;
+	return [self editSelectedCellAsMacro];
 }
 
 // this is called when the user actually starts editing
 - (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor{
-    if (control != bibFields) return YES;
+    if (control != tableView) return YES;
     
-    NSString *field = [[bibFields selectedCell] representedObject];
+    NSString *field = [fields objectAtIndex:[tableView editedRow]];
 	NSString *value = [publication valueOfField:field];
     
 	if([value isInherited] &&
@@ -1593,9 +1614,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 // send by the formatter when formatting in getObjectValue... failed
 // alert sheets must be app modal because this method returns a value and the editor window ccan close when this method returns
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)aString errorDescription:(NSString *)error{
-	if (control == bibFields) {
-        NSCell *cell = [bibFields cellAtIndex:[bibFields indexOfSelectedItem]];
-        NSString *fieldName = [cell representedObject];
+	if (control == tableView) {
+        NSString *fieldName = [fields objectAtIndex:[tableView editedRow]];
 		if ([fieldName isEqualToString:BDSKCrossrefString]) {
             // this may occur if the cite key formatter fails to format
             if(error != nil){
@@ -1606,8 +1626,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                          informativeTextWithFormat:@"%@", error];
                 
                 [alert runSheetModalForWindow:[self window]];
-                if(forceEndEditing)
-                    [cell setStringValue:[publication valueOfField:fieldName]];
+                // @@ Fix me!!
+                //if(forceEndEditing)
+                //    [cell setStringValue:[publication valueOfField:fieldName]];
             }else{
                 NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
             }
@@ -1622,16 +1643,18 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                          informativeTextWithFormat:@"%@", error];
                 
                 [alert runSheetModalForWindow:[self window]];
-                if(forceEndEditing)
-                    [cell setStringValue:[publication valueOfField:fieldName]];
+                // @@ Fix me!!
+                //if(forceEndEditing)
+                //    [cell setStringValue:[publication valueOfField:fieldName]];
             }else{
                 NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
             }
             return forceEndEditing;
-        } else if ([formCellFormatter editAsComplexString]) {
+        } else if ([tableCellFormatter editAsComplexString]) {
 			if (forceEndEditing) {
 				// reset the cell's value to the last saved value and proceed
-				[cell setStringValue:[publication valueOfField:fieldName]];
+                // @@ Fix me!!
+				//[cell setStringValue:[publication valueOfField:fieldName]];
 				return YES;
 			}
 			// don't set the value
@@ -1657,7 +1680,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             int rv = [alert runSheetModalForWindow:[self window]];
 			
 			if (forceEndEditing || rv == NSAlertAlternateReturn) {
-				[cell setStringValue:[publication valueOfField:fieldName]];
+                // @@ Fix me!!
+				//[cell setStringValue:[publication valueOfField:fieldName]];
 				return YES;
 			} else {
 				return NO;
@@ -1673,8 +1697,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                      informativeTextWithFormat:@"%@", error];
             
             [alert runSheetModalForWindow:[self window]];
-            if(forceEndEditing)
-                [control setStringValue:[publication citeKey]];
+            // @@ Fix me!!
+            //if(forceEndEditing)
+            //    [control setStringValue:[publication citeKey]];
 		}else{
             NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
 		}
@@ -1689,36 +1714,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 // send when the user wants to end editing
 // alert sheets must be app modal because this method returns a value and the editor window ccan close when this method returns
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor{
-	if (control == bibFields) {
-		
-		NSCell *cell = [bibFields cellAtIndex:[bibFields indexOfSelectedItem]];
-		NSString *message = nil;
-		
-		if ([[cell representedObject] isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:[cell stringValue]] == NO) {
-			
-            // check whether we won't get a crossref chain
-            int errorCode = [publication canSetCrossref:[cell stringValue] andCiteKey:[publication citeKey]];
-            if (errorCode == BDSKSelfCrossrefError)
-                message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
-            else if (errorCode == BDSKChainCrossrefError)
-                message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"Informative text in alert dialog");
-            else if (errorCode == BDSKIsCrossreffedCrossrefError)
-                message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
-			
-			if (message) {
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
-                                                     defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                                   alternateButton:nil
-                                                       otherButton:nil
-                                         informativeTextWithFormat:message];
-                
-                [alert runSheetModalForWindow:[self window]];
-				[cell setStringValue:@""];
-				return forceEndEditing;
-			}
-		}
-        		
-	} else if (control == citeKeyField) {
+    if (control == citeKeyField) {
 		
         NSString *message = nil;
         NSString *cancelButton = nil;
@@ -1767,27 +1763,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
 	id control = [aNotification object];
 	
-    if (control == bibFields) {
+    if (control == tableView) {
         
-        int idx = [control indexOfSelectedItem];
-        if (idx == -1)
-            return;
-        
-        NSCell *cell = [control cellAtIndex:idx];
-        NSString *title = [cell representedObject];
-        NSString *value = [cell stringValue];
-        NSString *prevValue = [publication valueOfField:title];
-
-        if ([prevValue isInherited] &&
-            ([value isEqualAsComplexString:prevValue] || [value isEqualAsComplexString:@""]) ) {
-            // make sure we keep the original inherited string value
-            [cell setObjectValue:prevValue];
-        } else if (isEditable && prevValue != nil && [value isEqualAsComplexString:prevValue] == NO) {
-            // if prevValue == nil, the field was removed and we're finalizing an edit for a field we should ignore
-            [self recordChangingField:title toValue:value];
-        }
-        // do this here, the order is important!
-        [formCellFormatter setEditAsComplexString:NO];
+        [tableCellFormatter setEditAsComplexString:NO];
         
 	} else if (control == citeKeyField) {
 
@@ -1931,7 +1909,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		   ![[pw stringArrayForKey:BDSKBooleanFieldsKey] containsObject:changeKey] &&
 		   ![[pw stringArrayForKey:BDSKTriStateFieldsKey] containsObject:changeKey]){
 			// no need to rebuild the form when we have a field in the matrix
-			[self setupForm];
+			[self setupFields];
 			return;
 		}
 	}
@@ -1943,17 +1921,19 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     // Rebuild the form if the crossref changed, or our parent's cite key changed.
 	if([changeKey isEqualToString:BDSKCrossrefString] || 
 	   (parentDidChange && [changeKey isEqualToString:BDSKCiteKeyString])){
-        // if we are editing a crossref field, we should first set the new value, because setupForm will set the edited value. This happens when it is set through drag/drop
-        if ([[[bibFields selectedCell] representedObject] isEqualToString:changeKey])
-            [[bibFields selectedCell] setObjectValue:[publication valueOfField:changeKey]];
-		[self setupForm];
+        // if we are editing a crossref field, we should first set the new value, because setupFields will set the edited value. This happens when it is set through drag/drop
+        // @@ fixme: is this correct, i.e. what happens with complex or inherited strings?
+		int editedRow = [tableView editedRow];
+        if (editedRow != -1 && [[fields objectAtIndex:editedRow] isEqualToString:changeKey])
+            [[tableView currentEditor] setString:[publication valueOfField:changeKey]];
+        [self setupFields];
 		[[self window] setTitle:[publication displayTitle]];
 		[authorTableView reloadData];
 		return;
 	}
 
 	if([changeKey isEqualToString:BDSKPubTypeString]){
-		[self setupForm];
+		[self setupFields];
 		[self updateTypePopup];
 		return;
 	}
@@ -1979,16 +1959,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		[self updateCiteKeyAutoGenerateStatus];
         [self updateCiteKeyDuplicateWarning];
 	}else{
-		// essentially a cellWithTitle: for NSForm
-		NSEnumerator *cellE = [[bibFields cells] objectEnumerator];
-		NSFormCell *entry = nil;
-		while(entry = [cellE nextObject]){
-			if([[entry representedObject] isEqualToString:changeKey]){
-				[entry setObjectValue:[publication valueOfField:changeKey]];
-				[bibFields setNeedsDisplay:YES];
-				break;
-			}
-		}
+		[tableView reloadData];
 	}
 	
     if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString]){
@@ -2038,7 +2009,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	while (pub = [pubEnum nextObject]) {
 		if ([crossref caseInsensitiveCompare:[pub valueForKey:@"citeKey"]] != NSOrderedSame) 
 			continue;
-		[self setupForm];
+		[self setupFields];
 		return;
 	}
 }
@@ -2047,13 +2018,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     // ensure that the pub updates first, since it observes this notification also
     [publication typeInfoDidChange:aNotification];
 	[self setupTypePopUp];
-	[self setupForm];
+	[self setupFields];
 }
  
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
     // ensure that the pub updates first, since it observes this notification also
     [publication customFieldsDidChange:aNotification];
-	[self setupForm];
+	[self setupFields];
     [authorTableView reloadData];
 }
 
@@ -2062,19 +2033,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	if(changedOwner && changedOwner != [publication owner])
 		return; // only macro changes for our own document or the global macros
 	
-	NSArray *cells = [bibFields cells];
-	NSEnumerator *cellE = [cells objectEnumerator];
-	NSFormCell *entry = nil;
-	NSString *value;
-	
-	while(entry = [cellE nextObject]){
-		value = [publication valueOfField:[entry representedObject]];
-		if([value isComplex]){
-            // ARM: the cell must check pointer equality in the setter, or something; since it's the same object, setting the value again is a noop unless we set to nil first.  Fixes bug #1284205.
-            [entry setObjectValue:nil];
-			[entry setObjectValue:value];
-        }
-	}    
+	[tableView reloadData];   
 }
 
 - (void)fileURLDidChange:(NSNotification *)notification{
@@ -2132,7 +2091,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem{
     // fix a weird keyview loop bug
     if([[tabViewItem identifier] isEqualToString:BDSKBibtexString])
-        [bibTypeButton setNextKeyView:bibFields];
+        [bibTypeButton setNextKeyView:tableView];
 }
 
 // sent by the notesView and the abstractView
@@ -2201,6 +2160,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
 }
 
+- (IBAction)openParentItemAction:(id)sender{
+    NSString *field = [fields objectAtIndex:[tableView clickedRow]];
+	[self openParentItemForField:[field isEqualToString:BDSKCrossrefString] ? nil : field];
+}
+
 - (IBAction)selectCrossrefParentAction:(id)sender{
     [[self document] selectCrossrefParentForItem:publication];
 }
@@ -2209,30 +2173,16 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [[self document] createNewPubUsingCrossrefForItem:publication];
 }
 
-#pragma mark BDSKForm delegate methods
-
-- (void)doubleClickedTitleOfFormCell:(id)cell{
-    [self raiseChangeFieldName:self];
-}
-
-- (void)arrowClickedInFormCell:(id)cell{
-    NSString *field = [cell representedObject];
-	[self openParentItemForField:[field isEqualToString:BDSKCrossrefString] ? nil : field];
-}
-
-- (BOOL)formCellHasArrowButton:(id)cell{
-	return ([[publication valueOfField:[cell representedObject]] isInherited] || 
-			([[cell representedObject] isEqualToString:BDSKCrossrefString] && [publication crossrefParent]));
-}
+#pragma mark control text delegate methods
 
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
-    if (control != bibFields) {
+    if (control != tableView) {
 		return charRange;
 	} else if ([macroTextFieldWC isEditing]) {
 		return [[NSApp delegate] rangeForUserCompletion:charRange 
 								  forBibTeXString:[textView string]];
 	} else {
-		return [[NSApp delegate] entry:[[bibFields selectedCell] representedObject] 
+		return [[NSApp delegate] entry:[fields objectAtIndex:[tableView editedRow]] 
 				rangeForUserCompletion:charRange 
 							  ofString:[textView string]];
 
@@ -2240,13 +2190,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textview {
-    if (control == bibFields)
+    if (control == tableView)
 		return [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorFormShouldAutoCompleteKey];
 	return NO;
 }
 
 - (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)idx{
-    if (control != bibFields) {
+    if (control != tableView) {
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
 		return [[NSApp delegate] possibleMatches:[[[publication owner] macroResolver] allMacroDefinitions] 
@@ -2254,7 +2204,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 								partialWordRange:charRange 
 								indexOfBestMatch:idx];
 	} else {
-		return [[NSApp delegate] entry:[[bibFields selectedCell] representedObject] 
+		return [[NSApp delegate] entry:[fields objectAtIndex:[tableView editedRow]] 
 						   completions:words 
 				   forPartialWordRange:charRange 
 							  ofString:[textView string] 
@@ -2311,127 +2261,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 #pragma mark dragging destination delegate methods
-
-- (NSDragOperation)dragOperation:(id <NSDraggingInfo>)sender forField:(NSString *)field{
-	NSPasteboard *pboard = [sender draggingPasteboard];
-    id dragSource = [sender draggingSource];
-    NSString *dragSourceField = nil;
-	NSString *dragType;
-	
-    if(dragSource == bibFields)
-        dragSourceField = [[bibFields dragSourceCell] representedObject];
-    
-    if ([field isEqualToString:dragSourceField])
-        return NSDragOperationNone;
-    
-	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
-	
-    if ([field isCitationField]){
-		if ([dragType isEqualToString:BDSKBibItemPboardType]) {
-			return NSDragOperationEvery;
-        }
-        return NSDragOperationNone;
-	} else if ([field isEqualToString:BDSKCrossrefString]){
-		if ([dragType isEqualToString:BDSKBibItemPboardType]) {
-			return NSDragOperationEvery;
-        }
-        return NSDragOperationNone;
-	} else {
-		// we don't support dropping on a textual field. This is handled by the window
-	}
-	return NSDragOperationNone;
-}
-
-- (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forField:(NSString *)field{
-	NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *dragType;
-    
-	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
-    
-    if ([field isCitationField]){
-        
-		if ([dragType isEqualToString:BDSKBibItemPboardType]) {
-            
-            NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
-            NSArray *draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
-            NSString *citeKeys = [[draggedPubs valueForKey:@"citeKey"] componentsJoinedByString:@","];
-            NSString *oldValue = [[[publication valueOfField:field inherit:NO] retain] autorelease];
-            NSString *newValue;
-            
-            if ([draggedPubs count]) {
-                if ([NSString isEmptyString:oldValue])   
-                    newValue = citeKeys;
-                else
-                    newValue = [NSString stringWithFormat:@"%@,%@", oldValue, citeKeys];
-                
-                [publication setField:field toValue:newValue];
-                
-                [self userChangedField:field from:oldValue to:newValue];
-                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-                
-                return YES;
-            }
-            
-        }
-        
-	} else if ([field isEqualToString:BDSKCrossrefString]){
-        
-		if ([dragType isEqualToString:BDSKBibItemPboardType]) {
-            
-            NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
-            NSArray *draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
-            NSString *crossref = [[draggedPubs firstObject] citeKey];
-            NSString *oldValue;
-            
-            if ([NSString isEmptyString:crossref])
-                return NO;
-            
-            // first check if we don't create a Crossref chain
-            int errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
-            NSString *message = nil;
-            if (errorCode == BDSKSelfCrossrefError)
-                message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
-            else if (errorCode == BDSKChainCrossrefError)
-                message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"Informative text in alert dialog");
-            else if (errorCode == BDSKIsCrossreffedCrossrefError)
-                message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
-            
-            if (message) {
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
-                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                      informativeTextWithFormat:message];
-                [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-                return NO;
-            }
-            
-            oldValue = [[[publication valueOfField:BDSKCrossrefString] retain] autorelease];
-            
-            [publication setField:BDSKCrossrefString toValue:crossref];
-            
-            [self userChangedField:BDSKCrossrefString from:oldValue to:crossref];
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-            
-            return YES;
-            
-        }
-        
-	} else {
-		// we don't at the moment support dropping on a textual field
-	}
-	return NO;
-}
-
-- (NSDragOperation)dragOperation:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
-	NSString *field = [cell representedObject];
-	return [self dragOperation:sender forField:field];
-}
-
-- (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
-	NSString *field = [cell representedObject];
-	return [self receiveDrag:sender forField:field];
-}
 
 - (NSDragOperation)dragWindow:(BDSKDragWindow *)window canReceiveDrag:(id <NSDraggingInfo>)sender{
     NSPasteboard *pboard = [sender draggingPasteboard];
@@ -2574,7 +2403,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
-	if (anObject != bibFields)
+	if (anObject != tableView)
 		return nil;
 	if (dragFieldEditor == nil) {
 		dragFieldEditor = [[BDSKFieldEditor alloc] init];
@@ -2628,23 +2457,22 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // case 4: only the cite key needs to be set
     }else if([publication hasEmptyOrDefaultCiteKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to cancel and edit the cite key, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
-	// case 5: good to go
-    }else{
-        return YES;
     }
 	
-    NSBeginAlertSheet(NSLocalizedString(@"Warning!", @"Message in alert dialog"),
-                      NSLocalizedString(@"Keep", @"Button title"),   //default button NSAlertDefaultReturn
-                      discardMsg,                        //far left button NSAlertAlternateReturn
-                      NSLocalizedString(@"Cancel", @"Button title"), //middle button NSAlertOtherReturn
-                      [self window],
-                      self, // modal delegate
-                      @selector(shouldCloseSheetDidEnd:returnCode:contextInfo:), 
-                      NULL, // did dismiss sel
-                      NULL,
-                      errMsg);
-    return NO; // this method returns before the callback
-
+    if (errMsg) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning!", @"Message in alert dialog")
+                                         defaultButton:NSLocalizedString(@"Keep", @"Button title")
+                                       alternateButton:discardMsg
+                                           otherButton:NSLocalizedString(@"Cancel", @"Button title")
+                              informativeTextWithFormat:errMsg];
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:self 
+                         didEndSelector:@selector(shouldCloseSheetDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+        return NO; // this method returns before the callback
+    } else {
+        return YES;
+    }
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
@@ -2697,15 +2525,193 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	}else return [self undoManager];
 }
 
-#pragma mark author table view datasource methods
+#pragma mark TableView datasource methods
 
-- (int)numberOfRowsInTableView:(NSTableView *)tableView{
-	return [publication numberOfPeople];
+- (int)numberOfRowsInTableView:(NSTableView *)tv{
+	if ([tv isEqual:tableView]) {
+        return [fields count];
+	} else if ([tv isEqual:authorTableView]) {
+        return [publication numberOfPeople];
+    }
+    return 0;
 }
 
-- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    return [[[publication sortedPeople] objectAtIndex:row] displayName];
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+	if ([tv isEqual:tableView]) {
+        NSString *tcID = [tableColumn identifier];
+        NSString *field = [fields objectAtIndex:row];
+        if ([tcID isEqualToString:@"field"]) {
+            return [field localizedFieldName];
+        } else {
+            id value = [publication valueOfField:field];
+            return value ? value : @"";
+        }
+	} else if ([tv isEqual:authorTableView]) {
+        return [[[publication sortedPeople] objectAtIndex:row] displayName];
+    }
+    return nil;
 }
+
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+	if ([tv isEqual:tableView]) {
+        NSString *tcID = [tableColumn identifier];
+        if ([tcID isEqualToString:@"value"]) {
+            NSString *field = [fields objectAtIndex:row];
+            
+            if ([field isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:object] == NO) {
+                NSString *message = nil;
+                
+                // check whether we won't get a crossref chain
+                int errorCode = [publication canSetCrossref:object andCiteKey:[publication citeKey]];
+                if (errorCode == BDSKSelfCrossrefError)
+                    message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
+                else if (errorCode == BDSKChainCrossrefError)
+                    message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"Informative text in alert dialog");
+                else if (errorCode == BDSKIsCrossreffedCrossrefError)
+                    message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
+                
+                if (message) {
+                    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
+                                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                                       alternateButton:nil
+                                                           otherButton:nil
+                                             informativeTextWithFormat:message];
+                    
+                    [alert runSheetModalForWindow:[self window]];
+                    [tableView reloadData];
+                    return;
+                }
+            }
+            
+            if (NO == [object isEqualAsComplexString:[publication valueOfField:field]])
+                [self recordChangingField:field toValue:object];
+        }
+    }
+}
+
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+    if ([tv isEqual:tableView]) {
+        NSPasteboard *pboard = [info draggingPasteboard];
+        NSString *field;
+        
+        if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]]) {
+            if (row == -1)
+                row = [tableView numberOfRows] - 1;
+            else if (op ==  NSTableViewDropAbove)
+                row = fminf(row, [tableView numberOfRows] - 1);
+            [tableView setDropRow:row dropOperation:NSTableViewDropOn];
+            field = [fields objectAtIndex:row];
+            if ([field isCitationField] || [field isEqualToString:BDSKCrossrefString])
+                return NSDragOperationEvery;
+        }
+    }
+    return NSDragOperationNone;
+}
+
+- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+    if ([tv isEqual:tableView]) {
+        NSPasteboard *pboard = [info draggingPasteboard];
+        
+        if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, nil]]){
+            NSString *field = [fields objectAtIndex:row];
+            
+            if ([field isCitationField]){
+                
+                NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
+                NSArray *draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
+                NSString *citeKeys = [[draggedPubs valueForKey:@"citeKey"] componentsJoinedByString:@","];
+                NSString *oldValue = [[[publication valueOfField:field inherit:NO] retain] autorelease];
+                NSString *newValue;
+                
+                if ([draggedPubs count]) {
+                    if ([NSString isEmptyString:oldValue])   
+                        newValue = citeKeys;
+                    else
+                        newValue = [NSString stringWithFormat:@"%@,%@", oldValue, citeKeys];
+                    
+                    [publication setField:field toValue:newValue];
+                    
+                    [self userChangedField:field from:oldValue to:newValue];
+                    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+                    
+                    return YES;
+                }
+                
+            } else if ([field isEqualToString:BDSKCrossrefString]){
+                
+                NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
+                NSArray *draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
+                NSString *crossref = [[draggedPubs firstObject] citeKey];
+                NSString *oldValue;
+                
+                if ([NSString isEmptyString:crossref])
+                    return NO;
+                
+                // first check if we don't create a Crossref chain
+                int errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
+                NSString *message = nil;
+                if (errorCode == BDSKSelfCrossrefError)
+                    message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
+                else if (errorCode == BDSKChainCrossrefError)
+                    message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"Informative text in alert dialog");
+                else if (errorCode == BDSKIsCrossreffedCrossrefError)
+                    message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
+                
+                if (message) {
+                    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
+                                                     defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                                   alternateButton:nil
+                                                       otherButton:nil
+                                          informativeTextWithFormat:message];
+                    [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+                    return NO;
+                }
+                
+                oldValue = [[[publication valueOfField:BDSKCrossrefString] retain] autorelease];
+                
+                [publication setField:BDSKCrossrefString toValue:crossref];
+                
+                [self userChangedField:BDSKCrossrefString from:oldValue to:crossref];
+                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+                
+                return YES;
+                    
+            }
+        }
+    }
+    return NO;
+}
+
+#pragma mark TableView delegate methods
+
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+	if ([tv isEqual:tableView]) {
+        if ([[tableColumn identifier] isEqualToString:@"value"])
+            return isEditable;
+    }
+    return NO;
+}
+
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+	if ([tv isEqual:tableView]) {
+        NSString *field = [fields objectAtIndex:row];
+        if([[tableColumn identifier] isEqualToString:@"field"]){
+            BOOL isDefault = [[[BDSKTypeManager sharedManager] requiredFieldsForType:[publication pubType]] containsObject:field];
+            [cell setFont:isDefault ? [NSFont boldSystemFontOfSize:13.0] : [NSFont systemFontOfSize:13.0]];
+        } else {
+            NSFormatter *formatter = tableCellFormatter;
+            if ([field isEqualToString:BDSKCrossrefString])
+                formatter = crossrefFormatter;
+            else if ([field isCitationField])
+                formatter = citationFormatter;
+            [cell setFormatter:formatter];
+            [cell setButtonHighlighted:NO];
+            [cell setHasButton:[[publication valueOfField:field] isInherited]];
+        }
+    }
+}
+
+#pragma mark Author table view action
 
 - (IBAction)showPersonDetailCmd:(id)sender{
     NSArray *thePeople = [publication sortedPeople];
@@ -2909,41 +2915,22 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	
 }    
 
-#define AddFormEntries(fields, attrs) \
-    e = [fields objectEnumerator]; \
+#define AddFields(newFields) \
+    e = [newFields objectEnumerator]; \
     while(tmp = [e nextObject]){ \
         if ([ignoredKeys containsObject:tmp]) continue; \
 		[ignoredKeys addObject:tmp]; \
-		entry = [bibFields insertEntry:[tmp localizedFieldName] usingTitleFont:requiredFont attributesForTitle:attrs indexAndTag:i objectValue:[publication valueOfField:tmp]]; \
-		[entry setRepresentedObject:tmp]; \
-        if ([tmp isEqualToString:BDSKCrossrefString]) \
-			[entry setFormatter:crossrefFormatter]; \
-        else if ([tmp isCitationField]) \
-			[entry setFormatter:citationFormatter]; \
-		else \
-			[entry setFormatter:formCellFormatter]; \
-		if([editedTitle isEqualToString:tmp]) editedRow = i; \
-		i++; \
+        [fields addObject:tmp]; \
     }
 
-- (void)setupForm{
-    static NSFont *requiredFont = nil;
-    if(!requiredFont){
-        requiredFont = [NSFont systemFontOfSize:13.0];
-        [[NSFontManager sharedFontManager] convertFont:requiredFont
-                                           toHaveTrait:NSBoldFontMask];
-    }
-    
+- (void)setupFields{
 	// if we were editing in the form, we will restore the selected cell and the selection
 	NSResponder *firstResponder = [[self window] firstResponder];
-	NSText *fieldEditor = nil;
 	NSString *editedTitle = nil;
-	int editedRow = -1;
 	NSRange selection = NSMakeRange(0, 0);
-	if([firstResponder isKindOfClass:[NSText class]] && [[(NSText *)firstResponder delegate] isEqual:bibFields]){
-		fieldEditor = (NSText *)firstResponder;
-		selection = [fieldEditor selectedRange];
-		editedTitle = [(NSFormCell *)[bibFields selectedCell] representedObject];
+	if([firstResponder isKindOfClass:[NSText class]] && [[(NSText *)firstResponder delegate] isEqual:tableView]){
+		selection = [(NSText *)firstResponder selectedRange];
+		editedTitle = [fields objectAtIndex:[tableView editedRow]];
 		forceEndEditing = YES;
 		if (![[self window] makeFirstResponder:[self window]])
 			[[self window] endEditingFor:nil];
@@ -2951,11 +2938,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	}
 	
     NSString *tmp;
-    NSFormCell *entry;
-    NSArray *sKeys;
-    int i=0;
-    NSRect rect = [bibFields frame];
-    NSPoint origin = rect.origin;
 	NSEnumerator *e;
 	
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
@@ -2967,43 +2949,48 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [ignoredKeys addObjectsFromArray:ratingFields];
     [ignoredKeys addObjectsFromArray:booleanFields];
     [ignoredKeys addObjectsFromArray:triStateFields];
-
-    NSDictionary *reqAtt = [[NSDictionary alloc] initWithObjects:[NSArray arrayWithObjects:[NSColor redColor],nil]
-                                                         forKeys:[NSArray arrayWithObjects:NSForegroundColorAttributeName,nil]];
+    
+    NSArray *allFields = [[publication allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
 	
-	// set up for adding all items 
-    // remove all items in the NSForm
-    [bibFields removeAllEntries];
-
-    // make two passes to get the required entries at top.
-    i=0;
-    sKeys = [[publication allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    [fields removeAllObjects];
 	
 	// now add the entries to the form
-	AddFormEntries([[BDSKTypeManager sharedManager] requiredFieldsForType:[publication pubType]], reqAtt);
-	AddFormEntries([[BDSKTypeManager sharedManager] optionalFieldsForType:[publication pubType]], nil);
-	AddFormEntries(sKeys, nil);
+	AddFields([[BDSKTypeManager sharedManager] requiredFieldsForType:[publication pubType]]);
+	AddFields([[BDSKTypeManager sharedManager] optionalFieldsForType:[publication pubType]]);
+	AddFields([[BDSKTypeManager sharedManager] userDefaultFieldsForType:[publication pubType]]);
+	AddFields(allFields);
     
     [ignoredKeys release];
-    [reqAtt release];
     
-    [bibFields sizeToFit];
-    
-    [bibFields setFrameOrigin:origin];
-    [bibFields setNeedsDisplay:YES];
+    [tableView reloadData];
     
 	// restore the edited cell and its selection
-	if(editedRow != -1){
-        OBASSERT(fieldEditor);
-        [[self window] makeFirstResponder:bibFields];
-        [bibFields selectTextAtRow:editedRow column:0];
-        [fieldEditor setSelectedRange:selection];
+	if(editedTitle){
+        int editedRow = [fields indexOfObject:editedTitle];
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:editedRow] byExtendingSelection:NO];
+		[tableView editColumn:1 row:editedRow withEvent:nil select:YES];
+        [[tableView currentEditor] setSelectedRange:selection];
 	}
     
     // align the cite key field with the form cells
-    if([bibFields numberOfRows] > 0){
-        [bibFields drawRect:NSZeroRect];// this forces the calculation of the titleWidth
-        float offset = [[bibFields cellAtIndex:0] titleWidth] + NSMinX([fieldSplitView frame]) + FORM_OFFSET + 4.0;
+    if([fields count] > 0){
+        NSTableColumn *tableColumn = [tableView tableColumnWithIdentifier:@"field"];
+        id cell;
+        int numberOfRows = [fields count];
+        int row;
+        float maxWidth = 0.0;
+        
+        for (row = 0; row < numberOfRows; row++) {
+            cell = [tableColumn dataCellForRow:row];
+            [self tableView:tableView willDisplayCell:cell forTableColumn:tableColumn row:row];
+            [cell setObjectValue:[fields objectAtIndex:row]];
+            maxWidth = fmaxf(maxWidth, [cell cellSize].width);
+        }
+        [tableColumn setMinWidth:maxWidth];
+        [tableColumn setMaxWidth:maxWidth];
+        [tableView sizeToFit];
+        [tableView reloadData];
+        float offset = maxWidth + NSMinX([fieldSplitView frame]) + FORM_OFFSET + 4.0;
         NSRect frame = [citeKeyField frame];
         if(offset >= NSMaxX([citeKeyTitle frame]) + 8.0){
             frame.size.width = NSMaxX(frame) - offset;
@@ -3206,6 +3193,233 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         return YES;
     }
     return [super performKeyEquivalent:theEvent];
+}
+
+@end
+
+
+@implementation BDSKEditorTableView
+
+- (id)initWithFrame:(NSRect)frameRect {
+    if (self = [super initWithFrame:frameRect]) {
+        clickedColumn = -1;
+        clickedRow = -1;
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        clickedColumn = -1;
+        clickedRow = -1;
+    }
+    return self;
+}
+
+- (void)mouseDown:(NSEvent *)theEvent {
+    NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    clickedColumn = [self columnAtPoint:location];
+	clickedRow = [self rowAtPoint:location];
+	NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:clickedColumn];
+    
+	if (clickedRow != -1 && clickedColumn != -1) {
+        id cell = [tableColumn dataCellForRow:clickedRow];
+        NSRect cellFrame = [self frameOfCellAtColumn:clickedColumn row:clickedRow];
+        if ([cell isKindOfClass:[BDSKEditorTextFieldCell class]] &&
+            NSMouseInRect(location, [cell buttonRectForBounds:cellFrame], [self isFlipped])) {
+            if ([theEvent clickCount] > 1)
+                theEvent = [NSEvent mouseEventWithType:[theEvent type] location:[theEvent locationInWindow] modifierFlags:[theEvent modifierFlags] timestamp:[theEvent timestamp] windowNumber:[theEvent windowNumber] context:[theEvent context] eventNumber:[theEvent eventNumber] clickCount:1 pressure:[theEvent pressure]];
+            if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 &&
+                [cell trackMouse:theEvent inRect:cellFrame ofView:self untilMouseUp:YES])
+                return;
+        } else if ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
+			[[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow]) {
+			[self selectRow:clickedRow byExtendingSelection:NO];
+			if ([cell isKindOfClass:[NSTextFieldCell class]]) {
+				[self editColumn:clickedColumn row:clickedRow withEvent:theEvent select:NO];
+				return;
+			}
+		}
+	}
+	
+	[super mouseDown:theEvent];
+}
+
+- (id)_highlightColorForCell:(NSCell *)cell {
+    return nil;
+}
+
+- (int)clickedColumn {
+    return clickedColumn;
+}
+
+- (int)clickedRow {
+    return clickedRow;
+}
+
+@end
+
+
+@implementation BDSKEditorTextFieldCell
+
+- (id)initTextCell:(NSString *)aString {
+    if (self = [super initTextCell:aString]) {
+        buttonHighlighted = NO;
+        hasButton = NO;
+        buttonTarget = nil;
+        buttonAction = NULL;
+        [self setBezeled:YES];
+        [self setDrawsBackground:YES];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        buttonHighlighted = NO;
+        hasButton = NO;
+        buttonTarget = nil;
+        buttonAction = NULL;
+        [self setBezeled:YES];
+        [self setDrawsBackground:YES];
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+    BDSKEditorTextFieldCell *copy = [super copyWithZone:zone];
+    copy->buttonHighlighted = buttonHighlighted;
+    copy->hasButton = hasButton;
+    copy->buttonTarget = buttonTarget;
+    copy->buttonAction = buttonAction;
+    return copy;
+}
+
+- (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)untilMouseUp {
+    NSRect buttonRect = [self buttonRectForBounds:cellFrame];
+    NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
+    if (NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped])) {
+		[self setButtonHighlighted:YES];
+		BOOL keepOn = YES;
+		BOOL isInside = YES;
+		while (keepOn) {
+			theEvent = [[controlView window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
+			mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
+			isInside = NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]);
+			switch ([theEvent type]) {
+				case NSLeftMouseDragged:
+					[self setButtonHighlighted:isInside];
+					break;
+				case NSLeftMouseUp:
+					if (isInside && hasButton)
+                        [(NSControl *)controlView sendAction:buttonAction to:buttonTarget];
+					[self setButtonHighlighted:NO];
+					keepOn = NO;
+					break;
+				default:
+					// Ignore any other kind of event.
+					break;
+			}
+		}
+        return YES;
+    } else 
+        return [super trackMouse:theEvent inRect:cellFrame ofView:controlView untilMouseUp:untilMouseUp];
+}
+
+- (BOOL)buttonHighlighted {
+    return buttonHighlighted;
+}
+
+- (void)setButtonHighlighted:(BOOL)highlighted {
+    if (buttonHighlighted != highlighted) {
+        buttonHighlighted = highlighted;
+		[[self controlView] setNeedsDisplay:YES];
+    }
+}
+
+- (BOOL)hasButton {
+    return hasButton;
+}
+
+- (void)setHasButton:(BOOL)flag {
+    if (hasButton != flag) {
+        hasButton = flag;
+    }
+}
+
+- (id)buttonTarget {
+    return buttonTarget;
+}
+
+- (void)setButtonTarget:(id)target {
+    buttonTarget = target;
+}
+
+- (SEL)buttonAction {
+    return buttonAction;
+}
+
+- (void)setButtonAction:(SEL)selector {
+    buttonAction = selector;
+}
+
+- (NSRect)buttonRectForBounds:(NSRect)theRect {
+	NSRect buttonRect = NSZeroRect;
+    
+	if (hasButton) {
+        NSSize size = NSMakeSize(15.0, 15.0);
+        buttonRect.origin.x = NSMaxX(theRect) - size.width - 2.0;
+        buttonRect.origin.y = ceilf(NSMidY(theRect) - 0.5 * size.height);
+        buttonRect.size = size;
+	}
+    return buttonRect;
+}
+
+- (NSRect)drawingRectForBounds:(NSRect)theRect {
+	if (hasButton) {
+        NSRect ignored;
+        NSSize size = NSMakeSize(15.0, 15.0);
+        NSDivideRect(theRect, &ignored, &theRect, size.width + 2.0, NSMaxXEdge);
+    }
+    return [super drawingRectForBounds:theRect];
+}
+
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    [super drawInteriorWithFrame:cellFrame inView:controlView];
+	
+    if (hasButton) {
+        NSImage *buttonImage = [NSImage imageNamed:buttonHighlighted ? @"ArrowImage_Pressed" : @"ArrowImage"];
+        NSRect buttonRect = [self buttonRectForBounds:cellFrame];
+        [buttonImage drawFlippedInRect:buttonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    }
+}
+
+- (NSText *)setUpFieldEditorAttributes:(NSText *)textObj {
+    textObj = [super setUpFieldEditorAttributes:textObj];
+    if ([self drawsBackground])
+        [textObj setBackgroundColor:[NSColor textBackgroundColor]];
+    return textObj;
+}
+
+@end
+
+#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
+typedef NSInteger NSBackgroundStyle;
+#else
+#warning remove this
+#endif
+
+@implementation BDSKLabelTextFieldCell
+
+- (NSBackgroundStyle)backgroundStyle { return 0 /* NSBackgroundStyleLight */; }
+
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    if (NSHeight(cellFrame) > 20) {
+        if ([controlView isFlipped])
+            cellFrame.origin.y += NSHeight(cellFrame) - 20;
+        cellFrame.size.height = 20;
+    }
+    [super drawInteriorWithFrame:cellFrame inView:controlView];
 }
 
 @end
