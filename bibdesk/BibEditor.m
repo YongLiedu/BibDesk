@@ -2706,7 +2706,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 formatter = citationFormatter;
             [cell setFormatter:formatter];
             [cell setButtonHighlighted:NO];
-            [cell setHasButton:[[publication valueOfField:field] isInherited]];
+            [cell setHasButton:[[publication valueOfField:field] isInherited] || [field isEqualToString:BDSKCrossrefString]];
         }
     }
 }
@@ -3223,8 +3223,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:clickedColumn];
     
 	if (clickedRow != -1 && clickedColumn != -1) {
-        id cell = [tableColumn dataCellForRow:clickedRow];
         NSRect cellFrame = [self frameOfCellAtColumn:clickedColumn row:clickedRow];
+        id cell = [tableColumn dataCellForRow:clickedRow];
+        if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
+            [[self delegate] tableView:self willDisplayCell:cell forTableColumn:tableColumn row:clickedRow];
         if ([cell isKindOfClass:[BDSKEditorTextFieldCell class]] &&
             NSMouseInRect(location, [cell buttonRectForBounds:cellFrame], [self isFlipped])) {
             if ([theEvent clickCount] > 1)
@@ -3232,8 +3234,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 &&
                 [cell trackMouse:theEvent inRect:cellFrame ofView:self untilMouseUp:YES])
                 return;
-        } else if ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
-			[[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow]) {
+        } else if ([cell isEditable] && ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
+                                         [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow])) {
 			[self selectRow:clickedRow byExtendingSelection:NO];
 			if ([cell isKindOfClass:[NSTextFieldCell class]]) {
 				[self editColumn:clickedColumn row:clickedRow withEvent:theEvent select:NO];
