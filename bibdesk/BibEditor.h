@@ -73,9 +73,7 @@
     IBOutlet NSTabView *tabView;
     IBOutlet NSTextView *notesView;
     IBOutlet NSTextView *abstractView;
-    IBOutlet NSTextView* rssDescriptionView;
-    IBOutlet NSView* fieldsAccessoryView;
-    IBOutlet NSPopUpButton* fieldsPopUpButton;
+    IBOutlet NSTextView *rssDescriptionView;
 	NSTextView *currentEditedView;
     NSUndoManager *notesViewUndoManager;
     NSUndoManager *abstractViewUndoManager;
@@ -90,9 +88,8 @@
 	NSButtonCell *triStateButtonCell;
 	BDSKRatingButtonCell *ratingButtonCell;
     
-    IBOutlet NSTextField* citeKeyField;
-    IBOutlet NSTextField* citeKeyTitle;
-	IBOutlet BDSKImagePopUpButton *actionMenuButton;
+    IBOutlet NSTextField *citeKeyField;
+    IBOutlet NSTextField *citeKeyTitle;
 	IBOutlet BDSKImagePopUpButton *actionButton;
     IBOutlet NSMenu *actionMenu;
 	IBOutlet NSButton *addFieldButton;

@@ -2897,13 +2897,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)setupButtons {
     
-    // Set the properties of actionMenuButton that cannot be set in IB
-	[actionMenuButton setShowsMenuWhenIconClicked:YES];
-	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
-	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
-	[[actionMenuButton cell] setUsesItemFromMenu:NO];
-	[[actionMenuButton cell] setRefreshesMenu:NO];
-    
 	[actionButton setAlternateImage:[NSImage imageNamed:@"GroupAction_Pressed"]];
 	[actionButton setArrowImage:nil];
 	[actionButton setShowsMenuWhenIconClicked:YES];
@@ -2977,7 +2970,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         id cell;
         int numberOfRows = [fields count];
         int row;
-        float maxWidth = 0.0;
+        float maxWidth = NSWidth([citeKeyTitle frame]) + 4.0;
         
         for (row = 0; row < numberOfRows; row++) {
             cell = [tableColumn dataCellForRow:row];
@@ -2989,14 +2982,12 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [tableColumn setMaxWidth:maxWidth];
         [tableView sizeToFit];
         [tableView reloadData];
-        float offset = maxWidth + NSMinX([fieldSplitView frame]) + FORM_OFFSET + 4.0;
         NSRect frame = [citeKeyField frame];
-        if(offset >= NSMaxX([citeKeyTitle frame]) + 8.0){
-            frame.size.width = NSMaxX(frame) - offset;
-            frame.origin.x = offset;
-            [citeKeyField setFrame:frame];
-            [[citeKeyField superview] setNeedsDisplay:YES];
-        }
+        float offset = fminf(NSMaxX(frame) - 20.0, maxWidth + NSMinX([citeKeyTitle frame]) + 4.0);
+        frame.size.width = NSMaxX(frame) - offset;
+        frame.origin.x = offset;
+        [citeKeyField setFrame:frame];
+        [[citeKeyField superview] setNeedsDisplay:YES];
     }
     
 	didSetupForm = YES;

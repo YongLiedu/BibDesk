@@ -73,7 +73,6 @@
                 abstractView = NSTextView; 
                 actionButton = BDSKImagePopUpButton; 
                 actionMenu = NSMenu; 
-                actionMenuButton = BDSKImagePopUpButton; 
                 addFieldButton = NSButton; 
                 authorTableView = NSTableView; 
                 bibTypeButton = NSPopUpButton; 
@@ -84,8 +83,6 @@
                 citeKeyWarningButton = NSButton; 
                 extraBibFields = NSMatrix; 
                 fieldSplitView = BDSKSplitView; 
-                fieldsAccessoryView = NSView; 
-                fieldsPopUpButton = NSPopUpButton; 
                 fileSplitView = BDSKSplitView; 
                 fileView = FileView; 
                 mainSplitView = BDSKSplitView; 
