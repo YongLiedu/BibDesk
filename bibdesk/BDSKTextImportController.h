@@ -40,7 +40,7 @@
 #import "BDSKSheetController.h"
 #import "BDSKOwnerProtocol.h"
 
-@class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKImagePopUpButton, MacroTableViewWindowController;
+@class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKImagePopUpButton, BDSKMacroEditor;
 @class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter, BDSKTypeSelectHelper;
 
 @interface BDSKTextImportController : BDSKSheetController <BDSKOwner> {
@@ -90,7 +90,7 @@
     int receivedContentLength;
     int expectedContentLength;
 	
-	MacroTableViewWindowController *macroTextFieldWC;
+	BDSKMacroEditor *macroEditor;
     
     BOOL temporaryTypeSelectMode;
     NSResponder *savedFirstResponder;

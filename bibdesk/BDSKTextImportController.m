@@ -40,7 +40,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BibItem.h"
 #import "BDSKTypeManager.h"
-#import "BDSKMacroTextFieldWindowController.h"
+#import "BDSKMacroEditor.h"
 #import "BDSKImagePopUpButton.h"
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "BDSKTypeSelectHelper.h"
@@ -125,7 +125,7 @@
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
 		crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
 		citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
-		macroTextFieldWC = nil;
+		macroEditor = nil;
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleFlagsChangedNotification:)
@@ -152,7 +152,7 @@
     [citationFormatter release];
     [sourceBox release];
     [webViewView release];
-	[macroTextFieldWC release];
+	[macroEditor release];
 	[webSelection release];
     [tableFieldEditor release];
     [downloadFileName release];
@@ -982,7 +982,7 @@
 		return YES;
 	} else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
 		int row = [itemTableView selectedRow];
-		return (row != -1 && [macroTextFieldWC isEditing] == NO && [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
+		return (row != -1 && [macroEditor isEditing] == NO && [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
 	} else if ([menuItem action] == @selector(generateCiteKey:)) {
 		// need to set the title, as the document can change it in the main menu
 		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Menu item title")];
@@ -1292,7 +1292,7 @@
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
     if (control != itemTableView) {
 		return charRange;
-	} else if ([macroTextFieldWC isEditing]) {
+	} else if ([macroEditor isEditing]) {
 		return [[NSApp delegate] rangeForUserCompletion:charRange 
 								  forBibTeXString:[textView string]];
 	} else {
@@ -1306,7 +1306,7 @@
 - (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)idx{
     if (control != itemTableView) {
 		return words;
-	} else if ([macroTextFieldWC isEditing]) {
+	} else if ([macroEditor isEditing]) {
 		return [[NSApp delegate] possibleMatches:[[document macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
@@ -1339,10 +1339,10 @@
 
 - (BOOL)editSelectedCellAsMacro{
 	int row = [itemTableView selectedRow];
-	if ([macroTextFieldWC isEditing] || row == -1 || [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] || [[fields objectAtIndex:row] isCitationField]) 
+	if ([macroEditor isEditing] || row == -1 || [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] || [[fields objectAtIndex:row] isCitationField]) 
 		return NO;
-	if (macroTextFieldWC == nil)
-    	macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
+	if (macroEditor == nil)
+    	macroEditor = [[BDSKMacroEditor alloc] init];
 	NSString *value = [item valueOfField:[fields objectAtIndex:row]];
 	NSText *fieldEditor = [itemTableView currentEditor];
 	[tableCellFormatter setEditAsComplexString:YES];
@@ -1351,7 +1351,7 @@
 		[[[itemTableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	return [macroTextFieldWC attachToView:itemTableView atRow:row column:2 withValue:value];
+	return [macroEditor attachToTableView:itemTableView atRow:row column:2 withValue:value];
 }
 
 #pragma mark BDSKMacroFormatter delegate

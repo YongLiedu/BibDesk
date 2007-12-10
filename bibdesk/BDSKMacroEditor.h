@@ -1,4 +1,4 @@
-// BDSKMacroTextFieldWindowController.h
+// BDSKMacroEditor.h
 // Created by Michael McCracken, January 2005
 
 // Inspired by and somewhat copied from Calendar, whose author I've
@@ -41,20 +41,15 @@
 
 @class BDSKBackgroundView;
 
-@interface BDSKMacroTextFieldWindowController : NSWindowController {
+@interface BDSKMacroEditor : NSWindowController {
     IBOutlet NSTextField *expandedValueTextField;
     IBOutlet BDSKBackgroundView *backgroundView;
-	NSControl *control;
+	NSTableView *tableView;
 	int row;
 	int column;
 }
 
-- (BOOL)attachToView:(NSControl *)aControl atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString;
+- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString;
 - (BOOL)isEditing;
 
 @end
-
-@interface MacroTableViewWindowController : BDSKMacroTextFieldWindowController @end
-@interface MacroFormWindowController : BDSKMacroTextFieldWindowController @end
-@interface MacroMatrixWindowController : BDSKMacroTextFieldWindowController @end
-

@@ -37,7 +37,7 @@
  */
 #import <Cocoa/Cocoa.h>
 
-@class BDSKMacroResolver, BDSKComplexStringFormatter, MacroTableViewWindowController;
+@class BDSKMacroResolver, BDSKComplexStringFormatter, BDSKMacroEditor;
 
 @interface BDSKMacroWindowController : NSWindowController {
     IBOutlet NSArrayController *arrayController;
@@ -48,7 +48,7 @@
     BDSKMacroResolver *macroResolver;
     NSMutableArray *macros;
 	BDSKComplexStringFormatter *tableCellFormatter;
-	MacroTableViewWindowController *macroTextFieldWC;
+	BDSKMacroEditor *macroEditor;
     BOOL isEditable;
     BOOL showAll;
 }

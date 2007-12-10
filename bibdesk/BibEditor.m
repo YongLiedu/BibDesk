@@ -57,8 +57,7 @@
 #import "BDSKAppController.h"
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
-#import "BDSKMacroTextFieldWindowController.h"
-#import "BDSKForm.h"
+#import "BDSKMacroEditor.h"
 #import "BDSKStatusBar.h"
 #import "BibAuthor.h"
 #import "NSFileManager_BDSKExtensions.h"
@@ -333,7 +332,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[dragFieldEditor release];
 	[statusBar release];
-	[macroTextFieldWC release];
+	[macroEditor release];
     [tableCellFormatter release];
     [crossrefFormatter release];
     [citationFormatter release];
@@ -846,7 +845,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         if (isEditable == NO)
             return NO;
         int row = [tableView editedRow];
-		return (row != -1 && [macroTextFieldWC isEditing] == NO && 
+		return (row != -1 && [macroEditor isEditing] == NO && 
                 [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString] == NO && [[fields objectAtIndex:row] isCitationField] == NO);
     }
     else if (theAction == @selector(toggleStatusBar:)) {
@@ -1543,10 +1542,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)editSelectedCellAsMacro{
 	int row = [tableView selectedRow];
-	if ([macroTextFieldWC isEditing] || row == -1) 
+	if ([macroEditor isEditing] || row == -1) 
 		return NO;
-	if (macroTextFieldWC == nil)
-    	macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
+	if (macroEditor == nil)
+    	macroEditor = [[BDSKMacroEditor alloc] init];
 	NSString *value = [publication valueOfField:[fields objectAtIndex:row]];
 	NSText *fieldEditor = [tableView currentEditor];
 	[tableCellFormatter setEditAsComplexString:YES];
@@ -1555,7 +1554,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		[[[tableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	return [macroTextFieldWC attachToView:tableView atRow:row column:1 withValue:value];
+	return [macroEditor attachToTableView:tableView atRow:row column:1 withValue:value];
 }
 
 - (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
@@ -2178,7 +2177,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
     if (control != tableView) {
 		return charRange;
-	} else if ([macroTextFieldWC isEditing]) {
+	} else if ([macroEditor isEditing]) {
 		return [[NSApp delegate] rangeForUserCompletion:charRange 
 								  forBibTeXString:[textView string]];
 	} else {
@@ -2198,7 +2197,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)idx{
     if (control != tableView) {
 		return words;
-	} else if ([macroTextFieldWC isEditing]) {
+	} else if ([macroEditor isEditing]) {
 		return [[NSApp delegate] possibleMatches:[[[publication owner] macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
@@ -2480,7 +2479,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[self finalizeChangesPreservingSelection:NO];
     
     // close so it's not hanging around by itself; this works if the doc window closes, also
-    [macroTextFieldWC close];
+    [macroEditor close];
     
 	// this can give errors when the application quits when an editor window is open
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 

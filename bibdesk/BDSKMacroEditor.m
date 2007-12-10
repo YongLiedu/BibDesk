@@ -1,4 +1,4 @@
-// BDSKMacroTextFieldWindowController.m
+// BDSKMacroEditor.m
 // Created by Michael McCracken, January 2005
 
 /*
@@ -34,16 +34,14 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKMacroTextFieldWindowController.h"
+#import "BDSKMacroEditor.h"
 #import "BDSKComplexString.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKBackgroundView.h"
 #import <OmniBase/assertions.h>
 #import "NSWindowController_BDSKExtensions.h"
 
-@interface BDSKMacroTextFieldWindowController (Private)
-
-+ (Class)controlClass;
+@interface BDSKMacroEditor (Private)
 
 - (void)endEditingAndOrderOut;
 
@@ -65,11 +63,11 @@
 
 @end
 
-@implementation BDSKMacroTextFieldWindowController
+@implementation BDSKMacroEditor
 
 - (id)init {
 	if (self = [super initWithWindowNibName:[self windowNibName]]) {
-		control = nil;
+		tableView = nil;
 		row = -1;
 		column = -1;
 	}
@@ -84,58 +82,52 @@
     return @"MacroTextFieldWindow";
 }
 
-- (BOOL)attachToView:(NSControl *)aControl atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString {
+- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString {
 	if ([self isEditing]) 
 		return NO; // we are already busy editing
-	
-	OBASSERT([aControl isKindOfClass:[[self class] controlClass]]);
-	
-	control = [aControl retain];
+    
+	tableView = [aTableView retain];
 	row = aRow;
 	column = aColumn;
 	
 	[self window]; // make sure we loaded the nib
 	
-	[control scrollRectToVisible:[self currentCellFrame]];
+	[tableView scrollRectToVisible:[self currentCellFrame]];
 	[self setExpandedValue:aString];
 	[self cellWindowDidBecomeKey:nil]; //draw the focus ring we are covering
 	[self cellFrameDidChange:nil]; // reset the frame and show the window
-    // track changes in the text, the frame and the window's key status of the control
+    // track changes in the text, the frame and the window's key status of the tableView
     [self registerForNotifications];
 	
 	return YES;
 }
 
 - (BOOL)isEditing {
-	return (control != nil);
+	return (tableView != nil);
 }
 
 @end
 
-@implementation BDSKMacroTextFieldWindowController (Private)
-
-+ (Class)controlClass {
-    return [NSTextField class];
-}
+@implementation BDSKMacroEditor (Private)
 
 - (void)registerForNotifications {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-	NSWindow *controlWindow = [control window];
-	NSView *contentView = [[control enclosingScrollView] contentView];
+	NSWindow *tableViewWindow = [tableView window];
+	NSView *contentView = [[tableView enclosingScrollView] contentView];
 	if (contentView == nil)
-		contentView = control;
+		contentView = tableView;
 	
     [nc addObserver:self
 		   selector:@selector(controlTextDidChange:)
 			   name:NSControlTextDidChangeNotification
-			 object:control];
+			 object:tableView];
 	[nc addObserver:self
 		   selector:@selector(controlTextDidEndEditing:)
 			   name:NSControlTextDidEndEditingNotification
-			 object:control];
+			 object:tableView];
 
 	// observe future changes in the frame and the key status of the window
-	// if the target control has a scrollview, we should observe its content view, or we won't notice scrolling
+	// if the target tableView has a scrollview, we should observe its content view, or we won't notice scrolling
 	[nc addObserver:self
 		   selector:@selector(cellFrameDidChange:)
 			   name:NSViewFrameDidChangeNotification
@@ -147,26 +139,36 @@
 	[nc addObserver:self
 		   selector:@selector(cellWindowDidBecomeKey:)
 			   name:NSWindowDidBecomeKeyNotification
-			 object:controlWindow];
+			 object:tableViewWindow];
 	[nc addObserver:self
 		   selector:@selector(cellWindowDidResignKey:)
 			   name:NSWindowDidResignKeyNotification
-			 object:controlWindow];
+			 object:tableViewWindow];
+    [nc addObserver:self
+           selector:@selector(tableViewColumnDidResize:)
+               name:NSTableViewColumnDidResizeNotification
+             object:tableView];
+    [nc addObserver:self
+           selector:@selector(tableViewColumnDidMove:)
+               name:NSTableViewColumnDidMoveNotification
+             object:tableView];
 }
 
 - (void)unregisterForNotifications {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-	NSWindow *controlWindow = [control window];
-	NSView *contentView = [[control enclosingScrollView] contentView];
+	NSWindow *tableViewWindow = [tableView window];
+	NSView *contentView = [[tableView enclosingScrollView] contentView];
 	if (contentView == nil)
-		contentView = control;
+		contentView = tableView;
 	
-	[nc removeObserver:self name:NSControlTextDidChangeNotification object:control];
-	[nc removeObserver:self name:NSControlTextDidEndEditingNotification object:control];
+	[nc removeObserver:self name:NSControlTextDidChangeNotification object:tableView];
+	[nc removeObserver:self name:NSControlTextDidEndEditingNotification object:tableView];
 	[nc removeObserver:self name:NSViewFrameDidChangeNotification object:contentView];
 	[nc removeObserver:self name:NSViewBoundsDidChangeNotification object:contentView];
-	[nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:controlWindow];
-	[nc removeObserver:self name:NSWindowDidResignKeyNotification object:controlWindow];
+	[nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:tableViewWindow];
+	[nc removeObserver:self name:NSWindowDidResignKeyNotification object:tableViewWindow];
+    [nc removeObserver:self name:NSTableViewColumnDidResizeNotification object:tableView];
+    [nc removeObserver:self name:NSTableViewColumnDidMoveNotification object:tableView];
 }
 
 - (void)endEditingAndOrderOut {
@@ -175,34 +177,34 @@
     [self hideWindow];
 	
 	// release the temporary objects
-	[control release];
-	control = nil; // we should set this to nil, as we use this as a flag that we are editing
+	[tableView release];
+	tableView = nil; // we should set this to nil, as we use this as a flag that we are editing
 	row = -1;
 	column = -1;
 }
 
 - (void)attachWindow {
-	[[control window] addChildWindow:[self window] ordered:NSWindowAbove];
+	[[tableView window] addChildWindow:[self window] ordered:NSWindowAbove];
     [[self window] orderFront:self];
 }
 
 - (void)hideWindow {
-    [[control window] removeChildWindow:[self window]];
+    [[tableView window] removeChildWindow:[self window]];
     [[self window] orderOut:self];
 }
 
 - (id)currentCell {
-	return [(NSTextField *)control cell];
+    return [[[tableView tableColumns] objectAtIndex:column] dataCellForRow:row];
 }
 
 - (NSRect)currentCellFrame {
-	return [(NSTextField*)control bounds];
+	return [tableView frameOfCellAtColumn:column row:row];
 }
 
 - (void)setExpandedValue:(NSString *)expandedValue {
 	NSColor *color = [NSColor blueColor];
 	if ([expandedValue isInherited]) 
-		color = [color blendedColorWithFraction:0.4 ofColor:[NSColor controlBackgroundColor]];
+		color = [color blendedColorWithFraction:0.4 ofColor:[NSColor textBackgroundColor]];
 	[expandedValueTextField setTextColor:color];
 	[expandedValueTextField setStringValue:expandedValue];
 	[expandedValueTextField setToolTip:NSLocalizedString(@"This field contains macros and is being edited as it would appear in a BibTeX file. This is the expanded value.", @"Tool tip message")];
@@ -217,14 +219,14 @@
 #pragma mark Frame change and keywindow notification handlers
 
 - (void)cellFrameDidChange:(NSNotification *)notification {
-	NSRectEdge lowerEdge = [control isFlipped] ? NSMaxYEdge : NSMinYEdge;
+	NSRectEdge lowerEdge = [tableView isFlipped] ? NSMaxYEdge : NSMinYEdge;
 	NSRect lowerEdgeRect, ignored;
 	NSRect winFrame = [[self window] frame];
 	float margin = 4.0; // for the shadow and focus ring
 	float minWidth = 16.0; // minimal width of the window without margins, so subviews won't get shifted
-	NSView *contentView = [[control enclosingScrollView] contentView];
+	NSView *contentView = [[tableView enclosingScrollView] contentView];
 	if (contentView == nil)
-		contentView = control;
+		contentView = tableView;
 	
 	NSDivideRect([self currentCellFrame], &lowerEdgeRect, &ignored, 1.0, lowerEdge);
 	lowerEdgeRect = NSIntersectionRect(lowerEdgeRect, [contentView visibleRect]);
@@ -235,8 +237,8 @@
 		return;
 	}
 	
-	lowerEdgeRect = [control convertRect:lowerEdgeRect toView:nil]; // takes into account isFlipped
-    winFrame.origin = [[control window] convertBaseToScreen:lowerEdgeRect.origin];
+	lowerEdgeRect = [tableView convertRect:lowerEdgeRect toView:nil]; // takes into account isFlipped
+    winFrame.origin = [[tableView window] convertBaseToScreen:lowerEdgeRect.origin];
 	winFrame.origin.y -= NSHeight(winFrame);
 	winFrame.size.width = fmaxf(NSWidth(lowerEdgeRect), minWidth);
 	winFrame = NSInsetRect(winFrame, -margin, 0.0);
@@ -280,37 +282,6 @@
 		[self setExpandedValue:[formatter parsedString]];
 }
 
-@end
-
-#pragma mark -
-#pragma mark Subclass for NSTableView
-
-@implementation MacroTableViewWindowController
-
-+ (Class)controlClass {
-    return [NSTableView class];
-}
-
-- (void)registerForNotifications {
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [super registerForNotifications];
-    [nc addObserver:self
-           selector:@selector(tableViewColumnDidResize:)
-               name:NSTableViewColumnDidResizeNotification
-             object:control];
-    [nc addObserver:self
-           selector:@selector(tableViewColumnDidMove:)
-               name:NSTableViewColumnDidMoveNotification
-             object:control];
-}
-
-- (void)unregisterForNotifications {
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [super unregisterForNotifications];
-    [nc removeObserver:self name:NSTableViewColumnDidResizeNotification object:control];
-    [nc removeObserver:self name:NSTableViewColumnDidMoveNotification object:control];
-}
-
 #pragma mark NSTableView notification handlers
 
 - (void)tableViewColumnDidResize:(NSNotification *)notification {
@@ -333,59 +304,4 @@
 	[self cellFrameDidChange:nil];
 }
 
-- (id)currentCell {
-    return [[[(NSTableView*)control tableColumns] objectAtIndex:column] dataCellForRow:row];
-}
-
-- (NSRect)currentCellFrame {
-	return [(NSTableView*)control frameOfCellAtColumn:column row:row];
-}
-
 @end
-
-#pragma mark -
-#pragma mark Subclass for NSForm
-
-@implementation MacroFormWindowController
-
-+ (Class)controlClass {
-    return [NSForm class];
-}
-
-- (id)currentCell {
-	return [(NSForm *)control cellAtIndex:row];
-}
-
-- (NSRect)currentCellFrame {
-	NSRect cellFrame = NSZeroRect;
-    float offset = [[(NSForm*)control cellAtRow:row column:column] titleWidth] + 4.0;
-    NSRect ignored;
-    cellFrame = [(NSForm*)control cellFrameAtRow:row column:column];
-    NSDivideRect(cellFrame, &ignored, &cellFrame, offset, NSMinXEdge);
-
-	return cellFrame;
-}
-
-@end
-
-#pragma mark -
-#pragma mark Subclass for NSMatrix
-
-@implementation MacroMatrixWindowController
-
-+ (Class)controlClass {
-    return [NSMatrix class];
-}
-
-- (id)currentCell {
-	return [(NSMatrix *)control cellAtRow:row column:column];
-}
-
-- (NSRect)currentCellFrame {
-	return [(NSMatrix*)control cellFrameAtRow:row column:column];
-}
-
-
-@end
-
-

@@ -40,14 +40,13 @@
 
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
-#import "BDSKForm.h"
 
 @class BDSKRatingButton;
 @class BDSKRatingButtonCell;
 @class BDSKComplexStringFormatter;
 @class BDSKCrossrefFormatter;
 @class BDSKCitationFormatter;
-@class BDSKMacroTableViewWindowController;
+@class BDSKMacroEditor;
 @class BDSKImagePopUpButton;
 @class BibItem;
 @class BDSKStatusBar;
@@ -123,7 +122,7 @@
 	IBOutlet NSTableView *authorTableView;
 
     // Macro editing stuff
-    BDSKMacroTableViewWindowController *macroTextFieldWC;
+    BDSKMacroEditor *macroEditor;
 
 	// edit field stuff
 	BOOL forceEndEditing;

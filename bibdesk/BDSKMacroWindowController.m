@@ -43,7 +43,7 @@
 #import <OmniFoundation/NSUndoManager-OFExtensions.h> // for isUndoingOrRedoing
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "OmniFoundation/NSData-OFExtensions.h"
-#import "BDSKMacroTextFieldWindowController.h"
+#import "BDSKMacroEditor.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKComplexStringFormatter.h"
@@ -71,7 +71,7 @@
         macros = [[NSMutableArray alloc] initWithCapacity:5];
                 
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:aMacroResolver];
-		macroTextFieldWC = nil;
+		macroEditor = nil;
         
         isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isDocument]);
         
@@ -105,7 +105,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [macros release];
     [tableCellFormatter release];
-	[macroTextFieldWC release];
+	[macroEditor release];
 	[macroResolver release];
     [super dealloc];
 }
@@ -341,10 +341,10 @@
 
 - (BOOL)editSelectedCellAsMacro{
     int row = [tableView selectedRow];
-	if ([macroTextFieldWC isEditing] || row == -1) 
+	if ([macroEditor isEditing] || row == -1) 
 		return NO;
-	if(macroTextFieldWC == nil)
-        macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
+	if(macroEditor == nil)
+        macroEditor = [[BDSKMacroEditor alloc] init];
     BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
 	NSString *value = [macro value];
 	NSText *fieldEditor = [tableView currentEditor];
@@ -354,7 +354,7 @@
 		[[[tableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	return [macroTextFieldWC attachToView:tableView atRow:row column:1 withValue:value];
+	return [macroEditor attachToTableView:tableView atRow:row column:1 withValue:value];
 }
 
 #pragma mark BDSKMacroFormatter delegate
