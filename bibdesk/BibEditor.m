@@ -3221,6 +3221,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             NSMouseInRect(location, [cell buttonRectForBounds:cellFrame], [self isFlipped])) {
             if ([theEvent clickCount] > 1)
                 theEvent = [NSEvent mouseEventWithType:[theEvent type] location:[theEvent locationInWindow] modifierFlags:[theEvent modifierFlags] timestamp:[theEvent timestamp] windowNumber:[theEvent windowNumber] context:[theEvent context] eventNumber:[theEvent eventNumber] clickCount:1 pressure:[theEvent pressure]];
+            // @@ on Leopard the default mouseDown does not work for the button. Calling trackMouse ourselves is wrong as the cell may be reset up for drawing, but we don't have an alternative (yet)
             if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 &&
                 [cell trackMouse:theEvent inRect:cellFrame ofView:self untilMouseUp:YES])
                 return;
@@ -3292,13 +3293,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
     if (NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped])) {
         // @@ button isn't highlighted on 10.5; sending displayIfNeeded breaks the button action if called before hadButton is set, and it doesn't help anyway
-		[self setButtonHighlighted:YES];
+		// @@ circumventing the tableView's mouseDown is actually wrong, because it does not keep the cell exclusively for the mouse tracking, which can change its properties
+        [self setButtonHighlighted:YES];
 		BOOL keepOn = YES;
 		BOOL isInside = YES;
-        // @@ workaround for 10.5
-        BOOL hadButton = hasButton;
 		while (keepOn) {
-            // @@ on 10.5 hasButton ivar is NO after this call
 			theEvent = [[controlView window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
 			mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
 			isInside = NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]);
@@ -3307,7 +3306,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 					[self setButtonHighlighted:isInside];
 					break;
 				case NSLeftMouseUp:
-					if (isInside && hadButton)
+					if (isInside)
                         [(NSControl *)controlView sendAction:buttonAction to:buttonTarget];
 					[self setButtonHighlighted:NO];
 					keepOn = NO;
