@@ -217,6 +217,7 @@
 
 // make sure it uses black text on Leopard when the row is selected
 - (NSBackgroundStyle)backgroundStyle { return NSBackgroundStyleLight; }
+- (NSBackgroundStyle)interiorBackgroundStyle { return NSBackgroundStyleLight; }
 
 // NSTextFieldCell seems to align the text at the top in flipped views such as NSTableView, which is weird
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {

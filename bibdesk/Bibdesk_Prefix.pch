@@ -67,6 +67,7 @@ typedef NSInteger NSBackgroundStyle;
 
 @interface NSCell (BDSKLeopard)
 - (NSBackgroundStyle)backgroundStyle;
+- (NSBackgroundStyle)interiorBackgroundStyle;
 - (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView;
 @end
 
