@@ -193,6 +193,8 @@
 		CE3B682B09D1B0190017D339 /* BDSKImagePopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */; };
 		CE3B682D09D1B0190017D339 /* BDSKImagePopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */; };
 		CE416B760CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE416B740CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m */; };
+		CE4241360D0EAE0B00F824E7 /* BDSKEditorTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4241340D0EAE0B00F824E7 /* BDSKEditorTableView.m */; };
+		CE4241450D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4241430D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m */; };
 		CE42A26A0A99BE2400C62D85 /* BDSKErrorEditWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE42A2680A99BE2400C62D85 /* BDSKErrorEditWindow.nib */; };
 		CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */; };
 		CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE43865C0BB8274600A56987 /* SearchBookmarksWindow.nib */; };
@@ -1066,6 +1068,10 @@
 		CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButtonCell.m; sourceTree = "<group>"; };
 		CE416B730CE5E25B00AAB04C /* BDSKBookmarkOutlineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBookmarkOutlineView.h; sourceTree = "<group>"; };
 		CE416B740CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBookmarkOutlineView.m; sourceTree = "<group>"; };
+		CE4241330D0EAE0B00F824E7 /* BDSKEditorTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKEditorTableView.h; sourceTree = "<group>"; };
+		CE4241340D0EAE0B00F824E7 /* BDSKEditorTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKEditorTableView.m; sourceTree = "<group>"; };
+		CE4241420D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKEditorTextFieldCell.h; sourceTree = "<group>"; };
+		CE4241430D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKEditorTextFieldCell.m; sourceTree = "<group>"; };
 		CE42A2690A99BE2400C62D85 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKErrorEditWindow.nib; sourceTree = "<group>"; };
 		CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchBookmarkController.h; sourceTree = "<group>"; };
 		CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchBookmarkController.m; sourceTree = "<group>"; };
@@ -1992,6 +1998,8 @@
 				F9022C410758027800C3F701 /* BDSKMainTableView.m */,
 				F9022C430758027800C3F701 /* BDSKDragWindow.m */,
 				CE2837400917D31D006B4C63 /* BDSKEdgeView.m */,
+				CE4241340D0EAE0B00F824E7 /* BDSKEditorTableView.m */,
+				CE4241430D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m */,
 				F941135309B549BF00EE8463 /* BDSKEditorTextView.m */,
 				CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */,
 				CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */,
@@ -2432,6 +2440,8 @@
 				F9022C400758027800C3F701 /* BDSKMainTableView.h */,
 				F9022C420758027800C3F701 /* BDSKDragWindow.h */,
 				CE28373F0917D31D006B4C63 /* BDSKEdgeView.h */,
+				CE4241330D0EAE0B00F824E7 /* BDSKEditorTableView.h */,
+				CE4241420D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.h */,
 				F941135209B549BF00EE8463 /* BDSKEditorTextView.h */,
 				CE129A150B44088900416D19 /* BDSKEntrezGroupServer.h */,
 				CE35DCE70A99B1A700029B66 /* BDSKErrorEditor.h */,
@@ -3740,6 +3750,8 @@
 				CE6C962C0CD9014A0022D69F /* NSScrollView_BDSKExtensions.m in Sources */,
 				CE416B760CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m in Sources */,
 				F911D7120CFE90050009C77B /* BDSKLinkedFile.m in Sources */,
+				CE4241360D0EAE0B00F824E7 /* BDSKEditorTableView.m in Sources */,
+				CE4241450D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

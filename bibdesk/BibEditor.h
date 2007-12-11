@@ -349,40 +349,5 @@
 @end
 
 
-@interface BDSKTabView : NSTabView {}
-@end
-
-
-@interface BDSKEditorTableView : NSTableView {
-    int clickedColumn;
-    int clickedRow;
-}
-@end
-
-
-@interface BDSKEditorTextFieldCell : NSTextFieldCell {
-    BOOL buttonHighlighted;
-    BOOL hasButton;
-    id buttonTarget;
-    SEL buttonAction;
-}
-
-- (BOOL)buttonHighlighted;
-- (void)setButtonHighlighted:(BOOL)highlighted;
-
-- (BOOL)hasButton;
-- (void)setHasButton:(BOOL)flag;
-
-- (id)buttonTarget;
-- (void)setButtonTarget:(id)target;
-
-- (SEL)buttonAction;
-- (void)setButtonAction:(SEL)selector;
-
-- (NSRect)buttonRectForBounds:(NSRect)theRect;
-
-@end
-
-
-@interface BDSKLabelTextFieldCell : NSTextFieldCell
+@interface BDSKTabView : NSTabView
 @end
