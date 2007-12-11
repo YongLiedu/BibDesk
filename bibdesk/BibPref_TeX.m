@@ -233,7 +233,7 @@ static NSSet *standardStyles = nil;
 }
 
 - (IBAction)changeDefaultTeXEncoding:(id)sender{
-    [defaults setInteger:[sender encoding] forKey:BDSKTeXPreviewFileEncodingKey];        
+    [defaults setInteger:[(BDSKEncodingPopUpButton *)sender encoding] forKey:BDSKTeXPreviewFileEncodingKey];        
     [defaults autoSynchronize];
 }
 

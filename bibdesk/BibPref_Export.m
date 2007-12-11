@@ -497,7 +497,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
                 return NO;
             if (sourceIndex < idx)
                 --idx;
-            [item removeChild:dropItem];
+            [(BDSKTreeNode *)item removeChild:dropItem];
             [item insertChild:dropItem atIndex:idx];
         } else {
             int sourceIndex = [itemNodes indexOfObject:dropItem];

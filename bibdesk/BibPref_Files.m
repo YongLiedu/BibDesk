@@ -69,7 +69,7 @@
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
-    [defaults setInteger:[sender encoding] forKey:BDSKDefaultStringEncodingKey];
+    [defaults setInteger:[(BDSKEncodingPopUpButton *)sender encoding] forKey:BDSKDefaultStringEncodingKey];
     [defaults autoSynchronize];
 }
 
