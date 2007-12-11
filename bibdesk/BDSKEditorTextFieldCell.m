@@ -205,6 +205,10 @@
     return textObj;
 }
 
+- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    return nil;
+}
+
 @end
 
 #define LABEL_EFFECTIVE_HEIGHT 20.0
@@ -222,6 +226,10 @@
         cellFrame.size.height = LABEL_EFFECTIVE_HEIGHT;
     }
     [super drawInteriorWithFrame:cellFrame inView:controlView];
+}
+
+- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    return nil;
 }
 
 @end

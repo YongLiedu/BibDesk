@@ -51,26 +51,29 @@
 	if (clickedRow != -1 && clickedColumn != -1) {
         NSRect cellFrame = [self frameOfCellAtColumn:clickedColumn row:clickedRow];
         id cell = [tableColumn dataCellForRow:clickedRow];
+        BOOL isEditable = [tableColumn isEditable] && 
+                ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
+                 [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow]);
         if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
             [[self delegate] tableView:self willDisplayCell:cell forTableColumn:tableColumn row:clickedRow];
         if ([cell respondsToSelector:@selector(buttonRectForBounds:)] &&
             NSMouseInRect(location, [cell buttonRectForBounds:cellFrame], [self isFlipped])) {
             if ([theEvent clickCount] > 1)
                 theEvent = [NSEvent mouseEventWithType:[theEvent type] location:[theEvent locationInWindow] modifierFlags:[theEvent modifierFlags] timestamp:[theEvent timestamp] windowNumber:[theEvent windowNumber] context:[theEvent context] eventNumber:[theEvent eventNumber] clickCount:1 pressure:[theEvent pressure]];
-        } else if ([cell isKindOfClass:[NSTextFieldCell class]] && [tableColumn isEditable] && 
-                   ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
-                    [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow])) {
+        } else if ([cell isKindOfClass:[NSTextFieldCell class]] && isEditable) {
 			[self selectRow:clickedRow byExtendingSelection:NO];
             [self editColumn:clickedColumn row:clickedRow withEvent:theEvent select:NO];
             return;
-		}
+		} else if (isEditable == NO && ([theEvent clickCount] != 2 || [self doubleAction] == NULL)) {
+            return;
+        }
 	}
 	
 	[super mouseDown:theEvent];
 }
 
-- (id)_highlightColorForCell:(NSCell *)cell {
-    return nil;
-}
+- (BOOL)acceptsFirstResponder { return NO; }
+
+- (void)highlightSelectionInClipRect:(NSRect)clipRect {}
 
 @end
