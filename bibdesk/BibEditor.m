@@ -2924,6 +2924,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             [cell setObjectValue:[fields objectAtIndex:row]];
             maxWidth = fmaxf(maxWidth, [cell cellSize].width);
         }
+        maxWidth = ceilf(maxWidth);
         [tableColumn setMinWidth:maxWidth];
         [tableColumn setMaxWidth:maxWidth];
         [tableView sizeToFit];
