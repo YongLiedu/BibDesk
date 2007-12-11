@@ -44,6 +44,41 @@ BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList);
 #define NSAppKitVersionNumber10_4 824
 #endif
 
+
+#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
+
+enum {
+    // An empty area, or did not hit in the cell
+    NSCellHitNone = 0,
+    // A content area in the cell
+    NSCellHitContentArea = 1 << 0,
+    // An editable text area of the cell
+    NSCellHitEditableTextArea = 1 << 1,
+    // A trackable area in the cell
+    NSCellHitTrackableArea = 1 << 2,
+};
+
+enum {
+    NSBackgroundStyleLight = 0,	// The background is a light color. Dark content contrasts well with this background.
+    NSBackgroundStyleDark,	// The background is a dark color. Light content contrasts well with this background.
+    NSBackgroundStyleRaised,	// The background is intended to appear higher than the content drawn on it. Content might need to be inset.
+    NSBackgroundStyleLowered	// The background is intended to appear lower than the content drawn on it. Content might need to be embossed.
+};
+typedef NSInteger NSBackgroundStyle;
+
+enum {
+    WebCacheModelDocumentViewer = 0,
+    WebCacheModelDocumentBrowser = 1,
+    WebCacheModelPrimaryWebBrowser = 2
+};
+@interface WebPreferences (BDSKLeopardOnly)
+- (void)setCacheModel:(int)cacheModel;
+@end
+
+#else
+#warning 10.5: remove this
+#endif
+
 #define NSLog BDSKLog
 #define NSLogv BDSKLogv
 
