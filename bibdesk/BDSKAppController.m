@@ -81,15 +81,6 @@
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKBookmarkController.h"
 
-
-#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
-@interface WebPreferences (BDSKLeopardOnly)
-- (void)setCacheModel:(int)cacheModel;
-@end
-#else
-#warning remove this
-#endif
-
 @implementation BDSKAppController
 
 // remove legacy comparisons of added/created/modified strings in table column code from prefs
@@ -343,13 +334,10 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     
     [self doSpotlightImportIfNeeded];
     
-#if defined(MAC_OS_X_VERSION_10_5) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
-#warning use named constant
-#endif
     // Improve web group perf on 10.5: http://lists.apple.com/archives/cocoa-dev/2007/Dec/msg00261.html
     // header does't say this is 10.5 only, but it doesn't show up in the 10.4u header
     if ([WebPreferences instancesRespondToSelector:@selector(setCacheModel:)])
-        [[WebPreferences standardPreferences] setCacheModel:1]; // WebCacheModelDocumentBrowser
+        [[WebPreferences standardPreferences] setCacheModel:WebCacheModelDocumentBrowser];
     
 }
 

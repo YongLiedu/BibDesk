@@ -179,7 +179,7 @@
         // unquoted string, just scan up to the next character in the stopset
         NSString *s = nil;
         if ([self scanUpToCharactersFromSet:stopSet intoString:&s])
-            tmpObject = [s stringByRemovingSurroundingWhitespace];
+            tmpObject = [s stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     }
     [self scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
     if (object != NULL)

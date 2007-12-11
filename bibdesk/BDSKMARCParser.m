@@ -317,7 +317,7 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict,
             break;
         
         if([scanner scanUpToString:subFieldIndicator intoString:&subValue]){
-            subValue = [subValue stringByRemovingSurroundingWhitespace];
+            subValue = [subValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             addSubstringToDictionary(subValue, pubDict, tag, subTag);
         }
     }
@@ -338,7 +338,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     if(key == nil)
         return;
     
-    subValue = [subValue stringByRemovingSurroundingWhitespace];
+    subValue = [subValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     tmpValue = [pubDict objectForKey:key];
     
     if([tag isEqualToString:titleTag]){

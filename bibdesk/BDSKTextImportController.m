@@ -678,7 +678,7 @@
             pbData = [pb dataForType:pbType];
             pbString = [[[NSAttributedString alloc] initWithRTF:pbData
                                              documentAttributes:NULL] autorelease];
-            pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
+            pbString = [[(NSAttributedString *)pbString string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
             if([pbString rangeOfString:@"http://"].location == 0){
                 [self showWebViewWithURLString:pbString];
@@ -691,7 +691,7 @@
             pbData = [pb dataForType:pbType];
             pbString = [[[NSAttributedString alloc] initWithRTFD:pbData
                                               documentAttributes:NULL] autorelease];
-            pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
+            pbString = [[(NSAttributedString *)pbString string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             
             if([pbString rangeOfString:@"http://"].location == 0){
                 [self showWebViewWithURLString:pbString];
@@ -703,7 +703,7 @@
 		}else if([pbType isEqualToString:NSStringPboardType]){
             pbData = [pb dataForType:pbType];
             pbString = [pb stringForType:pbType];
-            pbString = [pbString stringByRemovingSurroundingWhitespace];
+            pbString = [pbString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 			if([pbString rangeOfString:@"http://"].location == 0){
                 [self showWebViewWithURLString:pbString];
             }else{
@@ -720,7 +720,7 @@
 
 - (void)showWebViewWithURLString:(NSString *)urlString{
     [self setShowingWebView:YES];
-    NSURL *url = [NSURL URLWithString:[urlString stringByRemovingSurroundingWhitespace]];
+    NSURL *url = [NSURL URLWithString:[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
     NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
     
     [[webView mainFrame] loadRequest:urlreq];

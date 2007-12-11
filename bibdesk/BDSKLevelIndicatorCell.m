@@ -45,21 +45,6 @@
 - (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 @end
 
-#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
-enum {
-    NSBackgroundStyleLight = 0,	// The background is a light color. Dark content contrasts well with this background.
-    NSBackgroundStyleDark,	// The background is a dark color. Light content contrasts well with this background.
-    NSBackgroundStyleRaised,	// The background is intended to appear higher than the content drawn on it. Content might need to be inset.
-    NSBackgroundStyleLowered	// The background is intended to appear lower than the content drawn on it. Content might need to be embossed.
-};
-typedef NSInteger NSBackgroundStyle;
-@interface NSCell (LeopardOnly)
-- (NSBackgroundStyle)backgroundStyle;
-@end
-#else
-#warning remove this
-#endif
-
 @implementation BDSKLevelIndicatorCell
 
 - (id)initWithLevelIndicatorStyle:(NSLevelIndicatorStyle)levelIndicatorStyle;

@@ -422,7 +422,7 @@ error:(NSError **)outError{
             
             [value removeSurroundingWhitespace];
             
-            key = [key stringByRemovingSurroundingWhitespace];
+            key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             @try{
                 value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
                 [macros setObject:value forKey:key];
@@ -517,7 +517,7 @@ error:(NSError **)outError{
         
         [value removeSurroundingWhitespace];
         
-        key = [key stringByRemovingSurroundingWhitespace];
+        key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         @try{
             value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
             [macros setObject:value forKey:key];
