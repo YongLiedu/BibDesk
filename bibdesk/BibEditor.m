@@ -87,16 +87,8 @@
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
-enum{
-	BDSKDrawerUnknownState = -1,
-	BDSKDrawerStateTextMask = 1,
-	BDSKDrawerStateWebMask = 2,
-	BDSKDrawerStateOpenMask = 4,
-	BDSKDrawerStateRightMask = 8,
-};
-
-// offset of the form from the left window edge
-#define FORM_OFFSET 13.0
+// offset of the table from the left window edge
+#define TABLE_OFFSET 13.0
 
 // this was copied verbatim from a Finder saved search for all items of kind document modified in the last week
 static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'public.content') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
@@ -213,7 +205,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:0];
 	[edgeView setEdges:BDSKMinYEdgeMask];
     NSRect ignored, frame;
-    NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
+    NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, TABLE_OFFSET, NSMinXEdge);
     [[tableView enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[tableView enclosingScrollView]];
     // don't know why, but this is broken
@@ -221,7 +213,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:1];
     [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-    NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
+    NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, TABLE_OFFSET, NSMinXEdge);
     [[extraBibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[extraBibFields enclosingScrollView]];
     

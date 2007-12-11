@@ -38,42 +38,45 @@
 
 #import "BDSKEditorTextFieldCell.h"
 
-#define BUTTON_SIZE     NSMakeSize(15.0, 15.0)
-#define BUTTON_MARGIN   2.0
+#define BUTTON_MARGIN 2.0
 
 @implementation BDSKEditorTextFieldCell
 
+- (void)commonInit {
+    [self setBezeled:YES];
+    [self setDrawsBackground:YES];
+    [self setHasButton:NO];
+    buttonCell = [[NSButtonCell alloc] initImageCell:[NSImage imageNamed:@"ArrowImage"]];
+    [buttonCell setAlternateImage:[NSImage imageNamed:@"ArrowImage_Pressed"]];
+    [buttonCell setButtonType:NSMomentaryChangeButton];
+    [buttonCell setBordered:NO];
+    [buttonCell setImagePosition:NSImageOnly];
+}
+
 - (id)initTextCell:(NSString *)aString {
     if (self = [super initTextCell:aString]) {
-        buttonHighlighted = NO;
-        hasButton = NO;
-        buttonTarget = nil;
-        buttonAction = NULL;
-        [self setBezeled:YES];
-        [self setDrawsBackground:YES];
+        [self commonInit];
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
-        buttonHighlighted = NO;
-        hasButton = NO;
-        buttonTarget = nil;
-        buttonAction = NULL;
-        [self setBezeled:YES];
-        [self setDrawsBackground:YES];
+        [self commonInit];
     }
     return self;
 }
 
 - (id)copyWithZone:(NSZone *)zone {
     BDSKEditorTextFieldCell *copy = [super copyWithZone:zone];
-    copy->buttonHighlighted = buttonHighlighted;
+    copy->buttonCell = [buttonCell copyWithZone:zone];
     copy->hasButton = hasButton;
-    copy->buttonTarget = buttonTarget;
-    copy->buttonAction = buttonAction;
     return copy;
+}
+
+- (void)dealloc {
+    [buttonCell release];
+    [super dealloc];
 }
 
 - (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView
@@ -90,8 +93,9 @@
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)untilMouseUp {
     NSRect buttonRect = [self buttonRectForBounds:cellFrame];
     NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
-    if (hasButton && NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped])) {
-        [self setButtonHighlighted:YES];
+    if (NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped])) {
+        // letting the buttonCell do the tracking does not work, it does not highlight and ignores whether the mouse is inside or outside
+        [buttonCell setHighlighted:YES];
         [controlView setNeedsDisplayInRect:buttonRect];
 		BOOL keepOn = YES;
 		BOOL isInside = YES;
@@ -101,15 +105,15 @@
 			isInside = NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]);
 			switch ([theEvent type]) {
 				case NSLeftMouseDragged:
-					if (isInside != buttonHighlighted) {
-                        [self setButtonHighlighted:isInside];
+					if (isInside != [buttonCell isHighlighted]) {
+                        [buttonCell setHighlighted:isInside];
                         [controlView setNeedsDisplayInRect:buttonRect];
 					}
                     break;
 				case NSLeftMouseUp:
 					if (isInside) {
-                        [(NSControl *)controlView sendAction:buttonAction to:buttonTarget];
-                        [self setButtonHighlighted:NO];
+                        [(NSControl *)controlView sendAction:[buttonCell action] to:[buttonCell target]];
+                        [buttonCell setHighlighted:NO];
                         [controlView setNeedsDisplayInRect:buttonRect];
                     }
 					keepOn = NO;
@@ -124,16 +128,6 @@
         return [super trackMouse:theEvent inRect:cellFrame ofView:controlView untilMouseUp:untilMouseUp];
 }
 
-- (BOOL)isButtonHighlighted {
-    return buttonHighlighted;
-}
-
-- (void)setButtonHighlighted:(BOOL)highlighted {
-    if (buttonHighlighted != highlighted) {
-        buttonHighlighted = highlighted;
-    }
-}
-
 - (BOOL)hasButton {
     return hasButton;
 }
@@ -144,27 +138,35 @@
     }
 }
 
+- (BOOL)isButtonHighlighted {
+    return [buttonCell isHighlighted];
+}
+
+- (void)setButtonHighlighted:(BOOL)highlighted {
+    [buttonCell setHighlighted:highlighted];
+}
+
 - (id)buttonTarget {
-    return buttonTarget;
+    return [buttonCell target];
 }
 
 - (void)setButtonTarget:(id)target {
-    buttonTarget = target;
+    [buttonCell setTarget:target];
 }
 
 - (SEL)buttonAction {
-    return buttonAction;
+    return [buttonCell action];
 }
 
 - (void)setButtonAction:(SEL)selector {
-    buttonAction = selector;
+    [buttonCell setAction:selector];
 }
 
 - (NSRect)buttonRectForBounds:(NSRect)theRect {
 	NSRect buttonRect = NSZeroRect;
     
-	if (hasButton) {
-        NSSize size = BUTTON_SIZE;
+	if ([self hasButton]) {
+        NSSize size = [buttonCell cellSize];
         buttonRect.origin.x = NSMaxX(theRect) - size.width - BUTTON_MARGIN;
         buttonRect.origin.y = ceilf(NSMidY(theRect) - 0.5 * size.height);
         buttonRect.size = size;
@@ -173,9 +175,9 @@
 }
 
 - (NSRect)drawingRectForBounds:(NSRect)theRect {
-	if (hasButton) {
+	if ([self hasButton]) {
         NSRect ignored;
-        NSSize size = BUTTON_SIZE;
+        NSSize size = [buttonCell cellSize];
         NSDivideRect(theRect, &ignored, &theRect, size.width + BUTTON_MARGIN, NSMaxXEdge);
     }
     return [super drawingRectForBounds:theRect];
@@ -184,11 +186,8 @@
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     [super drawInteriorWithFrame:cellFrame inView:controlView];
 	
-    if (hasButton) {
-        NSImage *buttonImage = [NSImage imageNamed:buttonHighlighted ? @"ArrowImage_Pressed" : @"ArrowImage"];
-        NSRect buttonRect = [self buttonRectForBounds:cellFrame];
-        [buttonImage drawFlippedInRect:buttonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    }
+	if ([self hasButton])
+        [buttonCell drawWithFrame:[self buttonRectForBounds:cellFrame] inView:controlView];
 }
 
 - (NSText *)setUpFieldEditorAttributes:(NSText *)textObj {

@@ -40,10 +40,8 @@
 
 
 @interface BDSKEditorTextFieldCell : NSTextFieldCell {
-    BOOL buttonHighlighted;
+    NSButtonCell *buttonCell;
     BOOL hasButton;
-    id buttonTarget;
-    SEL buttonAction;
 }
 
 - (BOOL)isButtonHighlighted;
