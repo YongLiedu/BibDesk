@@ -34,8 +34,10 @@
 #define __FILENAMEASNSSTRING__ \
 [[NSString stringWithFileSystemRepresentation:__FILE__] lastPathComponent]
 
-BDSK_PRIVATE_EXTERN void BDSKLog(NSString *format, ...);
-BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList);
+//
+// everything inside this #define should be removed when we start using the 10.5 SDK
+//
+#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
 
 #ifndef NSAppKitVersionNumber10_4
 #define NSUInteger unsigned
@@ -43,9 +45,6 @@ BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList);
 #define CGFloat float
 #define NSAppKitVersionNumber10_4 824
 #endif
-
-
-#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
 
 enum {
     // An empty area, or did not hit in the cell
@@ -81,12 +80,22 @@ enum {
 - (void)setCacheModel:(int)cacheModel;
 @end
 
+#define NSImageNameFollowLinkFreestandingTemplate @"NSFollowLinkFreestandingTemplate"
+
 #else
 #warning 10.5: remove this
-#endif
+#endif // end of 10.4 transition defines
 
+#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning 10.5: remove ASL hacks
+#else
+BDSK_PRIVATE_EXTERN void BDSKLog(NSString *format, ...);
+BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList);
+
+// these are only needed on Tiger; Leopard logs to asl by default
 #define NSLog BDSKLog
 #define NSLogv BDSKLogv
+#endif
 
 #if defined (OMNI_ASSERTIONS_ON)
 
