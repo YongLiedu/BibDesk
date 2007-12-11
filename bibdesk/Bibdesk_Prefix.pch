@@ -81,6 +81,10 @@ enum {
 - (void)setCacheModel:(int)cacheModel;
 @end
 
+@interface NSTextView (BDSKLeopardOnly)
+- (void)setAutomaticLinkDetectionEnabled:(BOOL)flag;
+@end
+
 #define NSImageNameFollowLinkFreestandingTemplate @"NSFollowLinkFreestandingTemplate"
 
 #else

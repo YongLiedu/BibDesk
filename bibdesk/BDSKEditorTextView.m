@@ -250,10 +250,10 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
 #warning 10.5: remove URL detection
 #endif
     // use Apple's link detection on 10.5 and later
-    if (floor(NSAppKitVersionNumber <= NSAppKitVersionNumber10_4))
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
         [[self textStorage] setDelegate:self];
     else
-        [self toggleAutomaticLinkDetection:nil];
+        [self setAutomaticLinkDetectionEnabled:YES];
     [self updateFontFromPreferences];
     [OFPreference addObserver:self selector:@selector(handleFontChangedNotification:) forPreference:[OFPreference preferenceForKey:BDSKEditorFontNameKey]];
 }    
