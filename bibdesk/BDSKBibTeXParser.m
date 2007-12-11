@@ -420,7 +420,7 @@ error:(NSError **)outError{
             if(endOfValue == NO)
                 break;
             
-            [value removeSurroundingWhitespace];
+            CFStringTrimWhitespace((CFMutableStringRef)value);
             
             key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             @try{
@@ -515,7 +515,7 @@ error:(NSError **)outError{
         if(nesting > 0)
             continue;
         
-        [value removeSurroundingWhitespace];
+        CFStringTrimWhitespace((CFMutableStringRef)value);
         
         key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         @try{

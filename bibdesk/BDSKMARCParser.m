@@ -435,7 +435,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
         if(range.location != NSNotFound){
             NSMutableString *mutString = [string mutableCopy];
             [mutString deleteCharactersInRange:NSMakeRange(start, NSMaxRange(range) - start)];
-            [mutString removeSurroundingWhitespace];
+            CFStringTrimWhitespace((CFMutableStringRef)mutString);
             string = [mutString autorelease];
             length = [string length];
         }

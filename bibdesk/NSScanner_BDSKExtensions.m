@@ -118,7 +118,7 @@
                 else // or should we raise an exception?
                     [tmpString appendFormat:@"%C", ch];
             } else if (ch == '"') {
-                [tmpString removeSurroundingWhitespace];
+                CFStringTrimWhitespace((CFMutableStringRef)tmpString);
                 tmpObject = tmpString;
                 break;
             }
