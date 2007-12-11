@@ -3221,10 +3221,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             NSMouseInRect(location, [cell buttonRectForBounds:cellFrame], [self isFlipped])) {
             if ([theEvent clickCount] > 1)
                 theEvent = [NSEvent mouseEventWithType:[theEvent type] location:[theEvent locationInWindow] modifierFlags:[theEvent modifierFlags] timestamp:[theEvent timestamp] windowNumber:[theEvent windowNumber] context:[theEvent context] eventNumber:[theEvent eventNumber] clickCount:1 pressure:[theEvent pressure]];
-            // @@ on Leopard the default mouseDown does not work for the button. Calling trackMouse ourselves is wrong as the cell may be reset up for drawing, but we don't have an alternative (yet)
-            if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 &&
-                [cell trackMouse:theEvent inRect:cellFrame ofView:self untilMouseUp:YES])
-                return;
         } else if ([cell isEditable] && ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
                                          [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow])) {
 			[self selectRow:clickedRow byExtendingSelection:NO];
@@ -3288,12 +3284,21 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return copy;
 }
 
+- (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView
+{
+    NSUInteger hit = [super hitTestForEvent:event inRect:cellFrame ofView:controlView];
+    // super returns 0 for button clicks, so -[NSTableView mouseDown:] doesn't track the cell
+    NSRect buttonRect = [self buttonRectForBounds:cellFrame];
+    NSPoint mouseLoc = [controlView convertPoint:[event locationInWindow] fromView:nil];
+    if (NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]))
+        hit = NSCellHitContentArea | NSCellHitTrackableArea;
+    return hit;
+}
+
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)untilMouseUp {
     NSRect buttonRect = [self buttonRectForBounds:cellFrame];
     NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
     if (NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped])) {
-        // @@ button isn't highlighted on 10.5; sending displayIfNeeded breaks the button action if called before hadButton is set, and it doesn't help anyway
-		// @@ circumventing the tableView's mouseDown is actually wrong, because it does not keep the cell exclusively for the mouse tracking, which can change its properties
         [self setButtonHighlighted:YES];
 		BOOL keepOn = YES;
 		BOOL isInside = YES;
@@ -3398,15 +3403,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 @end
 
-#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
-typedef NSInteger NSBackgroundStyle;
-#else
-#warning remove this
-#endif
-
 @implementation BDSKLabelTextFieldCell
 
-- (NSBackgroundStyle)backgroundStyle { return 0 /* NSBackgroundStyleLight */; }
+- (NSBackgroundStyle)backgroundStyle { return NSBackgroundStyleLight; }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     if (NSHeight(cellFrame) > 20) {
