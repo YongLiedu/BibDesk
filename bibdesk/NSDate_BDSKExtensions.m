@@ -110,199 +110,6 @@ static CFDateFormatterRef numericDateFormatter = NULL;
     return [[NSDate dateWithNaturalLanguageString:dateString locale:locale] retain];
 }
 
-/* Colloquial date handling
-
-The parsing logic requires the date to contain three tokens (all strings are compared case-insensitively):
-
-1.  Integer specifier.  May be "a", "an", a sequence of digits, or localized strings "one"..."ten"
-2.  A time interval.  May be "day" "week" "month" "year" or "fortnight", or the plural form of any of these (plural forms are not recognized as such).  This will be multiplied by the integer specifier from the first step.
-3.  A direction for the interval, either positive or negative time.  The term "from" is taken to imply a positive interval as in "10 days from today."  The term "ago" is taken to imply a negative interval, as in "10 days ago."
-4.  A time base.  May be "today" "now" "yesterday" or "tomorrow."  The interval will be adjusted accordingly from this base date.
-
-Date format strings are not recognized anywhere in the string.  If the parsing fails at any step, nil will be returned, except if the integer specifier is zero (this will result in a return value of +[NSDate date].
-
-*/
-
-+ (id)dateWithColloquialString:(NSString *)string;
-{
-    if([NSString isEmptyString:string])
-        return nil;
-    NSDate *today = [[self class] date];
-    NSScanner *scanner = [[NSScanner alloc] initWithString:string];
-    NSCharacterSet *whitespaceSet = [NSCharacterSet whitespaceCharacterSet];
-    [scanner setCharactersToBeSkipped:nil];
-    [scanner scanCharactersFromSet:whitespaceSet intoString:NULL];
-    
-    // this is a fairly generic exception that we throw when a parse failure occurs
-    NSException *parseException = [NSException exceptionWithName:@"BDSKColloquialDateException" reason:@"Parse failure" userInfo:nil];
-    NSTimeInterval interval = 0;
-    volatile BOOL failed = NO;
-    
-    static CFMutableDictionaryRef numbers = NULL;
-    if(numbers == NULL){
-        int idx = 1;
-        numbers = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 10, &OFCaseInsensitiveStringKeyDictionaryCallbacks, &OFIntegerDictionaryValueCallbacks);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"one",@"Number for parsing colloquial date"), (const void *)idx++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"two",@"Number for parsing colloquial date"), (const void *)idx++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"three",@"Number for parsing colloquial date"), (const void *)idx++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"four",@"Number for parsing colloquial date"), (const void *)idx++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"five",@"Number for parsing colloquial date"), (const void *)idx++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"six",@"Number for parsing colloquial date"), (const void *)idx++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"seven",@"Number for parsing colloquial date"), (const void *)idx++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"eight",@"Number for parsing colloquial date"), (const void *)idx++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"nine",@"Number for parsing colloquial date"), (const void *)idx++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"ten",@"Number for parsing colloquial date"), (const void *)idx++);
-    }
-    
-    @try{
-        NSString *countStr = nil;
-        int cnt;
-        [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&countStr];
-        
-        // we could add an NSString method to look up numbers from a dictionary, say 
-        if(CFStringCompare((CFStringRef)countStr, (CFStringRef)NSLocalizedString(@"a", @"Word for parsing colloquial date"), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
-            cnt = 1;
-        else if(CFStringCompare((CFStringRef)countStr, (CFStringRef)NSLocalizedString(@"an", @"Word for parsing colloquial date"), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
-            cnt = 1;
-        else if(countStr != nil)
-            if(CFDictionaryGetValueIfPresent(numbers, countStr, (const void **)&cnt) == FALSE)
-                cnt = [countStr intValue];
-
-        // this occurs if the first token was unrecognizable
-        if(cnt == 0 || ABS(cnt) >= HUGE_VAL)
-            @throw parseException;
-        
-        [scanner scanCharactersFromSet:whitespaceSet intoString:NULL];
-
-        NSString *intervalStr = nil;
-        [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&intervalStr];
-        
-        if(intervalStr == nil)
-            @throw parseException;
-
-        // these are arranged in what I consider the maximum likelihood of occurrence
-        // @@ there is probably a standard somewhere that tells how to compute month/year intervals (or likely in the CFDate source), but we don't really care about leap year or 30 vs. 31 days per month for present purposes
-        
-        NSArray *yearMonthWeek = [[NSUserDefaults standardUserDefaults] objectForKey:NSYearMonthWeekDesignations];
-        OBASSERT([yearMonthWeek count] == 3);
-        
-        NSString *year = [yearMonthWeek count] ? [yearMonthWeek objectAtIndex:0] : NSLocalizedString(@"year", @"Word for parsing colloquial date");
-        NSString *month = [yearMonthWeek count] > 1 ? [yearMonthWeek objectAtIndex:1] : NSLocalizedString(@"month", @"Word for parsing colloquial date");
-        NSString *week = [yearMonthWeek count] > 2 ? [yearMonthWeek objectAtIndex:2] : NSLocalizedString(@"week", @"Word for parsing colloquial date");
-        
-        if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"day", @"Word for parsing colloquial date")])
-            interval = 24 * 3600;
-        else if([intervalStr hasCaseInsensitivePrefix:week])
-            interval = 7 * 24 * 3600;
-        else if([intervalStr hasCaseInsensitivePrefix:month])
-            interval = 30.5 * 24 * 3600;
-        else if([intervalStr hasCaseInsensitivePrefix:year])
-            interval = 12 * 30.5 * 24 * 3600;
-        else if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"fortnight", @"Word for parsing colloquial date")])
-            interval = 2 * 7 * 24 * 3600;
-        else if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"hour", @"Word for parsing colloquial date")])
-            interval = 3600;
-        else if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"minute", @"Word for parsing colloquial date")])
-            interval = 3600;
-        else
-            @throw parseException;
-        
-        // we need to apply this number of intervals
-        interval *= cnt;
-        
-        // NSTimeInterval is supposed to give submillisecond precision over a range of 10,000 years.  It's unlikely that we work with publications over that range.
-        NSAssert(ABS(interval) < DBL_MAX, @"Time interval overflow.");
-                
-        [scanner scanCharactersFromSet:whitespaceSet intoString:NULL];
-        
-        // now see what direction we're going in time
-        NSString *signStr = nil;
-        [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&signStr];
-        
-        NSAssert(interval > 0, @"Interval must be greater than zero.");
-        BOOL getBase = NO;
-        
-        // -[self note] passing nil or NULL to a CFString function results in a crash
-        // @@ Use a case-insensitive dictionary here also, with NSEarlierTimeDesignations; NSLaterTimeDesignations doesn't make sense in our context of relative dates (and the OS handles those fairly well anyway)
-        if(signStr != nil){
-            if(CFStringCompare((CFStringRef)signStr, (CFStringRef)NSLocalizedString(@"from", @"Word for parsing colloquial date"), kCFCompareCaseInsensitive) == kCFCompareEqualTo){
-                interval *= 1;
-                getBase = YES;
-            } else if(CFStringCompare((CFStringRef)signStr, (CFStringRef)NSLocalizedString(@"ago", @"Word for parsing colloquial date"), kCFCompareCaseInsensitive) == kCFCompareEqualTo){
-                interval *= -1; 
-                getBase = NO;
-            } else
-                @throw parseException;
-        }
-        
-        // get the base date if necessary
-        if(getBase == YES){
-            
-            [scanner scanCharactersFromSet:whitespaceSet intoString:NULL];
-            
-            NSString *baseStr = nil;
-            [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&baseStr];
-            
-            static CFMutableDictionaryRef days = NULL;
-            int deltat; // an NSTimeInterval, but we can't store a double in a dictionary, and we don't need the extra precision
-            
-            if(days == NULL){
-                deltat = 0;
-                days = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &OFCaseInsensitiveStringKeyDictionaryCallbacks, &OFIntegerDictionaryValueCallbacks);
-                
-                // strings equivalent to "today"
-                NSArray *array = [[NSUserDefaults standardUserDefaults] objectForKey:NSThisDayDesignations];
-                cnt = [array count];
-                if(cnt < 2)
-                    array = [NSArray arrayWithObjects:NSLocalizedString(@"today", @"Word for parsing colloquial date"), NSLocalizedString(@"now", @"Word for parsing colloquial date"), nil];
-                while(cnt--)
-                    CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, cnt), (const void *)deltat);
-                
-                // strings equivalent to "tomorrow"
-                array = [[NSUserDefaults standardUserDefaults] objectForKey:NSNextDayDesignations];
-                cnt = [array count];
-                deltat = 1 * 24 * 3600;
-                if(cnt == 0)
-                    array = [NSArray arrayWithObject:NSLocalizedString(@"tomorrow", @"Word for parsing colloquial date")];
-                while(cnt--)
-                    CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, cnt), (const void *)deltat);
-
-                // strings equivalent to "yesterday"
-                array = [[NSUserDefaults standardUserDefaults] objectForKey:NSPriorDayDesignations];
-                cnt = [array count];
-                deltat = -1 * 24 * 3600;
-                if(cnt == 0)
-                    array = [NSArray arrayWithObject:NSLocalizedString(@"yesterday", @"Word for parsing colloquial date")];
-                while(cnt--)
-                    CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, cnt), (const void *)deltat);
-            }
-                
-            deltat = 0;
-            if(baseStr != nil && CFDictionaryGetValueIfPresent(days, (CFStringRef)baseStr, (const void **)&deltat) == FALSE)
-                @throw parseException;
-            
-            today = [today addTimeInterval:deltat];
-        }
-        
-        // not really necessary; we just ignore stuff after this
-        OBASSERT([scanner isAtEnd]);
-    }
-    @catch(NSException *exception){
-        failed = YES;
-        if([[exception name] isEqual:@"BDSKColloquialDateException"] == NO)
-            @throw;
-    }
-    @catch(id exception){
-        failed = YES;
-        @throw;
-    }
-    @finally{
-        [scanner release];
-    }
-    
-    return (failed == YES ? nil : [today addTimeInterval:interval]);
-}
-
 @end
 
 @implementation NSCalendarDate (BDSKExtensions)
@@ -327,11 +134,21 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
 }
 
 - (NSString *)dateDescription{
-    return [self descriptionWithCalendarFormat:[[NSUserDefaults standardUserDefaults] stringForKey:NSDateFormatString]];
+    // Saturday, March 24, 2001 (NSDateFormatString)
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [formatter setDateStyle:NSDateFormatterFullStyle];
+    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    return [formatter stringFromDate:self];
 }
 
 - (NSString *)shortDateDescription{
-    return [self descriptionWithCalendarFormat:[[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString]];
+    // 31/10/01 (NSShortDateFormatString)
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [formatter setDateStyle:NSDateFormatterShortStyle];
+    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    return [formatter stringFromDate:self];
 }
 
 - (NSString *)rssDescription{
