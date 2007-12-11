@@ -95,7 +95,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 @interface BibEditor (Private)
 
-- (void)setupButtons;
+- (void)setupActionButton;
+- (void)setupButtonCells;
 - (void)setupFields;
 - (void)setupMatrix;
 - (void)matrixFrameDidChange:(NSNotification *)notification;
@@ -168,26 +169,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [bibTypeButton setEnabled:isEditable];
     [addFieldButton setEnabled:isEditable];
     
-    // Setup the default cells for the extraBibFields matrix
-	booleanButtonCell = [[NSButtonCell alloc] initTextCell:@""];
-	[booleanButtonCell setButtonType:NSSwitchButton];
-	[booleanButtonCell setTarget:self];
-	[booleanButtonCell setAction:@selector(changeFlag:)];
-    [booleanButtonCell setEnabled:isEditable];
-	
-	triStateButtonCell = [booleanButtonCell copy];
-	[triStateButtonCell setAllowsMixedState:YES];
-	
-	ratingButtonCell = [[BDSKRatingButtonCell alloc] initWithMaxRating:5];
-	[ratingButtonCell setImagePosition:NSImageLeft];
-	[ratingButtonCell setAlignment:NSLeftTextAlignment];
-	[ratingButtonCell setTarget:self];
-	[ratingButtonCell setAction:@selector(changeRating:)];
-    [ratingButtonCell setEnabled:isEditable];
-	
-	NSCell *cell = [[NSCell alloc] initTextCell:@""];
-	[extraBibFields setPrototype:cell];
-	[cell release];
+    [self setupButtonCells];
     
     // Setup the statusbar
 	[statusBar retain]; // we need to retain, as we might remove it from the window
@@ -262,9 +244,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     // Setup the type popup
     [self setupTypePopUp];
     
-	// Setup the toolbar buttons.
-    // The popupbutton needs to be set before fixURLs is called, and -windowDidLoad gets sent after awakeFromNib.
-    [self setupButtons];
+	// Setup the action button
+    [self setupActionButton];
 
     [authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
     
@@ -801,17 +782,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return [menu autorelease];
 }
 
-- (void)dummy:(id)obj{}
-
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
     
     SEL theAction = [menuItem action];
     
-	if (theAction == nil ||
-		theAction == @selector(dummy:)){ // Unused selector for disabled items. Needed to avoid the popupbutton to insert its own
-		return NO;
-	}
-	else if (theAction == @selector(generateCiteKey:)) {
+	if (theAction == @selector(generateCiteKey:)) {
 		return isEditable;
 	}
 	else if (theAction == @selector(consolidateLinkedFiles:)) {
@@ -872,10 +847,27 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 #pragma mark Cite Key handling methods
 
 - (IBAction)showCiteKeyWarning:(id)sender{
-    if ([publication hasEmptyOrDefaultCiteKey])
-        NSBeginAlertSheet(NSLocalizedString(@"Cite Key Not Set", @"Message in alert dialog when duplicate citye key was found"),nil,nil,nil,[self window],nil,NULL,NULL,NULL,NSLocalizedString(@"The cite key has not been set. Please provide one.", @"Informative text in alert dialog"));
-    else if ([publication isValidCiteKey:[publication citeKey]] == NO)
-        NSBeginAlertSheet(NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found"),nil,nil,nil,[self window],nil,NULL,NULL,NULL,NSLocalizedString(@"The cite key you entered is either already used in this document. Please provide a unique one.", @"Informative text in alert dialog"));
+    if ([publication hasEmptyOrDefaultCiteKey]) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cite Key Not Set", @"Message in alert dialog when duplicate citye key was found") 
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The cite key has not been set. Please provide one.", @"Informative text in alert dialog")];
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:nil
+                         didEndSelector:NULL
+                            contextInfo:NULL];
+    } else if ([publication isValidCiteKey:[publication citeKey]] == NO) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found") 
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The cite key you entered is either already used in this document. Please provide a unique one.", @"Informative text in alert dialog")];
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:nil
+                         didEndSelector:NULL
+                            contextInfo:NULL];
+    }
 }
 
 - (void)updateCiteKeyDuplicateWarning{
@@ -2455,9 +2447,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    // @@ this finalizeChanges seems redundant now that it's in windowShouldClose:
-	[self finalizeChangesPreservingSelection:NO];
-    
     // close so it's not hanging around by itself; this works if the doc window closes, also
     [macroEditor close];
     
@@ -2874,18 +2863,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 @implementation BibEditor (Private)
 
-- (void)setupButtons {
-    
-	[actionButton setAlternateImage:[NSImage imageNamed:@"GroupAction_Pressed"]];
-	[actionButton setArrowImage:nil];
-	[actionButton setShowsMenuWhenIconClicked:YES];
-	[[actionButton cell] setAltersStateOfSelectedItem:NO];
-	[[actionButton cell] setAlwaysUsesFirstItemAsSelected:NO];
-	[[actionButton cell] setUsesItemFromMenu:NO];
-	[[actionButton cell] setRefreshesMenu:NO];
-	
-}    
-
 #define AddFields(newFields) \
     e = [newFields objectEnumerator]; \
     while(tmp = [e nextObject]){ \
@@ -3047,6 +3024,29 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	}
 }
 
+- (void)setupButtonCells {
+    // Setup the default cells for the extraBibFields matrix
+	booleanButtonCell = [[NSButtonCell alloc] initTextCell:@""];
+	[booleanButtonCell setButtonType:NSSwitchButton];
+	[booleanButtonCell setTarget:self];
+	[booleanButtonCell setAction:@selector(changeFlag:)];
+    [booleanButtonCell setEnabled:isEditable];
+	
+	triStateButtonCell = [booleanButtonCell copy];
+	[triStateButtonCell setAllowsMixedState:YES];
+	
+	ratingButtonCell = [[BDSKRatingButtonCell alloc] initWithMaxRating:5];
+	[ratingButtonCell setImagePosition:NSImageLeft];
+	[ratingButtonCell setAlignment:NSLeftTextAlignment];
+	[ratingButtonCell setTarget:self];
+	[ratingButtonCell setAction:@selector(changeRating:)];
+    [ratingButtonCell setEnabled:isEditable];
+	
+	NSCell *cell = [[NSCell alloc] initTextCell:@""];
+	[extraBibFields setPrototype:cell];
+	[cell release];
+}
+
 - (void)matrixFrameDidChange:(NSNotification *)notification {
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     int numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
@@ -3058,6 +3058,16 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if (numCols != [extraBibFields numberOfColumns])
         [self setupMatrix];
 }
+
+- (void)setupActionButton {
+	[actionButton setAlternateImage:[NSImage imageNamed:@"GroupAction_Pressed"]];
+	[actionButton setArrowImage:nil];
+	[actionButton setShowsMenuWhenIconClicked:YES];
+	[[actionButton cell] setAltersStateOfSelectedItem:NO];
+	[[actionButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+	[[actionButton cell] setUsesItemFromMenu:NO];
+	[[actionButton cell] setRefreshesMenu:NO];
+}    
 
 - (void)setupTypePopUp{
     [bibTypeButton removeAllItems];
