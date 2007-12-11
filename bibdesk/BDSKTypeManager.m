@@ -62,12 +62,17 @@ static BDSKTypeManager *sharedInstance = nil;
 	
 	[self reloadTypeInfo];
 	
-    // this set is used for warning the user on manual entry of a citekey; allows non-ASCII characters and some math symbols
-    invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~%"] retain];
+    NSMutableCharacterSet *tmpSet;
+    // this set is used for warning the user on manual entry of a citekey; allows ASCII characters and some math symbols
+    // arm: up through 1.3.12 we allowed non-ASCII characters in here, but btparse chokes on them and so does BibTeX.  TLC 2nd ed. says that cite keys are TeX commands, and subject to the same restrictions as such [a-zA-Z0-9], but this is generally relaxed in the case of BibTeX to include some punctuation.
+    tmpSet = [NSMutableCharacterSet characterSetWithRange:NSMakeRange(21, 126 - 21)];
+    [tmpSet removeCharactersInString:@" '\"@,\\#}{~%"];
+    [tmpSet invert];
+    invalidCiteKeyCharSet = [tmpSet copy];
     
-	fragileCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@"&$^"] retain];
+	fragileCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@"&$^"] copy];
     
-    NSMutableCharacterSet *tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (unsigned int)'a', 26)] mutableCopy];
+    tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (unsigned int)'a', 26)] mutableCopy];
     [tmpSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
     [tmpSet addCharactersInRange:NSMakeRange( (unsigned int)'-', 15)];  //  -./0123456789:;
     
@@ -76,7 +81,7 @@ static BDSKTypeManager *sharedInstance = nil;
     [tmpSet release];
 
 	// this set is used for warning the user on manual entry of a local-url; allows non-ASCII characters and some math symbols
-    invalidLocalUrlCharSet = [[NSCharacterSet characterSetWithCharactersInString:@":"] retain];
+    invalidLocalUrlCharSet = [[NSCharacterSet characterSetWithCharactersInString:@":"] copy];
     
 	// this is used for generated local urls
 	strictInvalidLocalUrlCharSet = [invalidLocalUrlCharSet copy];  // don't release this
@@ -105,7 +110,7 @@ static BDSKTypeManager *sharedInstance = nil;
 	
 	strictInvalidGeneralCharSet = [[NSCharacterSet alloc] init];
     
-    separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] retain];
+    separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] copy];
     separatorOFCharSet = [[OFCharacterSet alloc] initWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]];
     
     localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
