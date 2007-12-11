@@ -195,6 +195,7 @@
 		CE416B760CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE416B740CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m */; };
 		CE4241360D0EAE0B00F824E7 /* BDSKEditorTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4241340D0EAE0B00F824E7 /* BDSKEditorTableView.m */; };
 		CE4241450D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4241430D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m */; };
+		CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3A0BD50B1634D500233208 /* BDSKCompletionServerProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CE42A26A0A99BE2400C62D85 /* BDSKErrorEditWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE42A2680A99BE2400C62D85 /* BDSKErrorEditWindow.nib */; };
 		CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */; };
 		CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE43865C0BB8274600A56987 /* SearchBookmarksWindow.nib */; };
@@ -524,7 +525,6 @@
 		F9EA8FCB0ADE01F9005EFBE4 /* BDSKUpdateChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EA8FC90ADE01F9005EFBE4 /* BDSKUpdateChecker.m */; };
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B908B1572600AAC9A9 /* BDSKScrollableTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */; };
-		F9F0C3130CDEA7570018E9D9 /* BDSKCompletionServerProtocol.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE3A0BD50B1634D500233208 /* BDSKCompletionServerProtocol.h */; };
 		F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */; };
 		F9F5ECD20AE5E7C8007EBB31 /* BDSKURLGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5ECD00AE5E7C8007EBB31 /* BDSKURLGroup.m */; };
 		F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */; };
@@ -874,16 +874,6 @@
 			dstSubfolderSpec = 16;
 			files = (
 				F9CA0C870CDF94280059D36D /* BibDesk.qlgenerator in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F9F0C31E0CDEA97C0018E9D9 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = Contents/Headers;
-			dstSubfolderSpec = 1;
-			files = (
-				F9F0C3130CDEA7570018E9D9 /* BDSKCompletionServerProtocol.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2823,6 +2813,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CE424A430D0F121400F824E7 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -2877,11 +2875,11 @@
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				F9022E8B07580A7C00C3F701 /* CopyFiles */,
 				F920DB22075C2D40000C5FCA /* Rez */,
+				CE424A430D0F121400F824E7 /* Headers */,
 				F91B5C4E076412A10011ED22 /* CopyFiles */,
 				F95CC0ED087F542F002C5694 /* CopyFiles */,
 				F9FF213B09E83BAB00BB1706 /* ShellScript */,
 				F91E54660853576600208CDF /* ShellScript */,
-				F9F0C31E0CDEA97C0018E9D9 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -3457,7 +3455,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\necho \"*** stripping header files from frameworks ***\"\nfind \"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\" -type file -name \"*.h\" -delete\n\n#echo \"*** stripping .DS_STORE files ***\"\nfind \"${BUILT_PRODUCTS_DIR}\" -type file -name \".DS_STORE\" -delete\n\n#echo \"*** stripping IB files from NIBs ***\"\n#find \"${BUILT_PRODUCTS_DIR}\" -type file \\( -name \"classes.nib\" -or -name \"info.nib\" -or -name \"data.dependency\" \\) -delete\n\nexit 0";
+			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\necho \"*** stripping header files from frameworks ***\"\nfind \"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\" -type file -name \"*.h\" -delete\n\n#echo \"*** stripping .DS_STORE files ***\"\nfind \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}\" -type file -name \".DS_STORE\" -delete\n\n#echo \"*** stripping IB files from NIBs ***\"\n#find \"${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}\" -type file \\( -name \"classes.nib\" -or -name \"info.nib\" -or -name \"data.dependency\" \\) -delete\n\nexit 0";
 		};
 /* End PBXShellScriptBuildPhase section */
 
