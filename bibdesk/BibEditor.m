@@ -130,7 +130,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         isEditable = [[publication owner] isDocument];
                 
         forceEndEditing = NO;
-        didSetupForm = NO;
+        didSetupFields = NO;
     }
     return self;
 }
@@ -347,17 +347,21 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
 	// need to finalize text field cells being edited or the abstract/annote text views, since the text views bypass the normal undo mechanism for speed, and won't cause the doc to be marked dirty on subsequent edits
 	if([firstResponder isKindOfClass:[NSText class]]){
-		NSText *textView = (NSText *)firstResponder;
+        
+        NSTextView *textView = (NSTextView *)firstResponder;
+		int editedRow = -1;
 		NSRange selection = [textView selectedRange];
-		id textDelegate = [textView delegate];
-        if(textDelegate == tableView || textDelegate == citeKeyField)
-            firstResponder = textDelegate; // the text field or the form (textView is the field editor)
-
+        if (shouldPreserveSelection && [textView isFieldEditor]) {
+            firstResponder = [textView delegate];
+            if (firstResponder == tableView)
+                editedRow = [tableView editedRow];
+        }
+        
 		forceEndEditing = YES; // make sure the validation will always allow the end of the edit
-		didSetupForm = NO; // if we we rebuild the form, the selection will become meaningless
+		didSetupFields = NO; // if we we rebuild the fields, the selection will become meaningless
         
 		// now make sure we submit the edit
-		if (![[self window] makeFirstResponder:[self window]]){
+		if ([[self window] makeFirstResponder:[self window]] == NO) {
             // this will remove the field editor from the view, set its delegate to nil, and empty it of text
 			[[self window] endEditingFor:nil];
             forceEndEditing = NO;
@@ -371,11 +375,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         
         // for inherited fields, we should do something here to make sure the user doesn't have to go through the warning sheet
 		
-		if([[self window] makeFirstResponder:firstResponder] &&
-		   !(firstResponder == tableView && didSetupForm)){
-            if([[textView string] length] < NSMaxRange(selection)) // check range for safety
-                selection = NSMakeRange([[textView string] length],0);
-            [textView setSelectedRange:selection];
+		if (shouldPreserveSelection && [[self window] makeFirstResponder:firstResponder] && didSetupFields == NO) {
+            if (firstResponder == tableView && editedRow != -1)
+                [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
+            if ([[textView string] length] >= NSMaxRange(selection)) // check range for safety
+                [textView setSelectedRange:selection];
         }
             
 	}
@@ -1051,9 +1055,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (IBAction)bibTypeDidChange:(id)sender{
-    if (![[self window] makeFirstResponder:[self window]]){
-        [[self window] endEditingFor:nil];
-    }
+    [self finalizeChangesPreservingSelection:YES];
     NSString *newType = [bibTypeButton titleOfSelectedItem];
     if(![[publication pubType] isEqualToString:newType]){
         [publication setPubType:newType];
@@ -2931,16 +2933,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     [ignoredKeys release];
     
-    [tableView reloadData];
-    
-	// restore the edited cell and its selection
-	if(editedTitle){
-        int editedRow = [fields indexOfObject:editedTitle];
-        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:editedRow] byExtendingSelection:NO];
-		[tableView editColumn:1 row:editedRow withEvent:nil select:YES];
-        [[tableView currentEditor] setSelectedRange:selection];
-	}
-    
     // align the cite key field with the form cells
     if([fields count] > 0){
         NSTableColumn *tableColumn = [tableView tableColumnWithIdentifier:@"field"];
@@ -2958,7 +2950,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [tableColumn setMinWidth:maxWidth];
         [tableColumn setMaxWidth:maxWidth];
         [tableView sizeToFit];
-        [tableView reloadData];
         NSRect frame = [citeKeyField frame];
         float offset = fminf(NSMaxX(frame) - 20.0, maxWidth + NSMinX([citeKeyTitle frame]) + 4.0);
         frame.size.width = NSMaxX(frame) - offset;
@@ -2967,7 +2958,20 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [[citeKeyField superview] setNeedsDisplay:YES];
     }
     
-	didSetupForm = YES;
+    [tableView reloadData];
+    
+	// restore the edited cell and its selection
+	if(editedTitle){
+        unsigned int editedRow = [fields indexOfObject:editedTitle];
+        if (editedRow != NSNotFound) {
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:editedRow] byExtendingSelection:NO];
+            [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
+            if ([[[tableView currentEditor] string] length] >= NSMaxRange(selection))
+                [[tableView currentEditor] setSelectedRange:selection];
+        }
+	}
+    
+	didSetupFields = YES;
     
 	[self setupMatrix];
 }

@@ -125,7 +125,7 @@
 	BOOL forceEndEditing;
 	BOOL ignoreEdit;
 
-    BOOL didSetupForm;
+    BOOL didSetupFields;
 	
 	NSTextView *dragFieldEditor;
     
