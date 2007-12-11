@@ -56,7 +56,7 @@
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    id obj = [super copyWithZone:aZone];
+    BDSKLevelIndicatorCell *obj = [super copyWithZone:aZone];
     [obj setMaxHeight:maxHeight];
     return obj;
 }

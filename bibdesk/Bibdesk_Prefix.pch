@@ -66,6 +66,12 @@ enum {
 };
 typedef NSInteger NSBackgroundStyle;
 
+@interface NSCell (BDSKLeopard)
+- (NSBackgroundStyle)backgroundStyle;
+- (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView;
+@end
+
+#import <WebKit/WebKit.h>
 enum {
     WebCacheModelDocumentViewer = 0,
     WebCacheModelDocumentBrowser = 1,
