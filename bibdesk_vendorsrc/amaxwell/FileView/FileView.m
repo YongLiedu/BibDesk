@@ -1945,17 +1945,19 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (IBAction)selectPreviousIcon:(id)sender;
 {
     NSUInteger curIdx = [_selectedIndexes firstIndex];
-    NSUInteger previous;
+    NSUInteger previous = NSNotFound;
     
     if (NSNotFound == curIdx)
         previous = 0;
     else if (0 == curIdx && [self numberOfIcons] > 0) 
         previous = ([self numberOfIcons] - 1);
-    else
+    else if ([self numberOfIcons] > 0)
         previous = curIdx - 1;
     
-    [self scrollItemAtIndexToVisible:previous];
-    [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:previous]];
+    if (NSNotFound != previous) {
+        [self scrollItemAtIndexToVisible:previous];
+        [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:previous]];
+    }
 }
 
 - (IBAction)selectNextIcon:(id)sender;
