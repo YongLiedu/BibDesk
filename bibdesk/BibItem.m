@@ -3105,6 +3105,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 	// otherwise we have a multivalued string, we should parse to get the order and delimiters right
     OFCharacterSet *delimiterCharSet = [[BDSKTypeManager sharedManager] separatorOFCharacterSetForField:field];
     OFCharacterSet *whitespaceCharSet = [OFCharacterSet whitespaceCharacterSet];
+    NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
 	
 	BOOL useDelimiters = NO;
 	if([oldString containsCharacterInOFCharacterSet:delimiterCharSet])
@@ -3126,7 +3127,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 		else
 			token = [scanner readFullTokenUpToString:@" and "];
 		if(token){
-			token = [token stringByRemovingSurroundingWhitespace];
+			token = [token stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
 			if(![NSString isEmptyString:token] && [token caseInsensitiveCompare:groupName] != NSOrderedSame){
 				[string appendString:lastDelimiter];
 				[string appendString:token];
@@ -3226,7 +3227,8 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 	// otherwise we have a multivalued string, we should parse to get the order and delimiters right
     OFCharacterSet *delimiterCharSet = [[BDSKTypeManager sharedManager] separatorOFCharacterSetForField:field];
     OFCharacterSet *whitespaceCharSet = [OFCharacterSet whitespaceCharacterSet];
-	
+    NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+
 	BOOL useDelimiters = NO;
 	if([oldString containsCharacterInOFCharacterSet:delimiterCharSet])
 		useDelimiters = YES;
@@ -3247,7 +3249,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 		else
 			token = [scanner readFullTokenUpToString:@" and "];
 		if(token){
-			token = [token stringByRemovingSurroundingWhitespace];
+			token = [token stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
 			if(![NSString isEmptyString:token]){
 				[string appendString:lastDelimiter];
 				if([token caseInsensitiveCompare:groupName] == NSOrderedSame)
