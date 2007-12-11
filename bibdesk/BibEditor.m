@@ -159,6 +159,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     BDSKEditorTextFieldCell *dataCell = [[tableView tableColumnWithIdentifier:@"value"] dataCell];
     [dataCell setButtonAction:@selector(openParentItemAction:)];
     [dataCell setButtonTarget:self];
+    [dataCell setEditable:isEditable];
+    [dataCell setSelectable:YES]; // the previous call may reset this
     
     if (isEditable)
         [tableView setDoubleAction:@selector(raiseChangeFieldName:)];
@@ -1557,6 +1559,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 // this is called when the user actually starts editing
 - (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor{
+    if (isEditable == NO) return NO;
     if (control != tableView) return YES;
     
     NSString *field = [fields objectAtIndex:[tableView editedRow]];
@@ -2679,8 +2682,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	if ([tv isEqual:tableView]) {
+        // we always want to "edit" even when we are not editable, so we can always select, and the cell will prevent editing when isEditable == NO
         if ([[tableColumn identifier] isEqualToString:@"value"])
-            return isEditable;
+            return YES;
     }
     return NO;
 }

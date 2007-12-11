@@ -57,7 +57,7 @@
             NSMouseInRect(location, [cell buttonRectForBounds:cellFrame], [self isFlipped])) {
             if ([theEvent clickCount] > 1)
                 theEvent = [NSEvent mouseEventWithType:[theEvent type] location:[theEvent locationInWindow] modifierFlags:[theEvent modifierFlags] timestamp:[theEvent timestamp] windowNumber:[theEvent windowNumber] context:[theEvent context] eventNumber:[theEvent eventNumber] clickCount:1 pressure:[theEvent pressure]];
-        } else if ([cell isKindOfClass:[NSTextFieldCell class]] && [cell isEditable] && 
+        } else if ([cell isKindOfClass:[NSTextFieldCell class]] && [tableColumn isEditable] && 
                    ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
                     [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow])) {
 			[self selectRow:clickedRow byExtendingSelection:NO];
