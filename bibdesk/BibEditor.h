@@ -123,6 +123,7 @@
 
 	// edit field stuff
 	BOOL forceEndEditing;
+	BOOL ignoreEdit;
 
     BOOL didSetupForm;
 	

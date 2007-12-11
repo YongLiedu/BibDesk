@@ -1559,34 +1559,36 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 // this is called when the user actually starts editing
 - (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor{
-    if (isEditable == NO) return NO;
-    if (control != tableView) return YES;
+    BOOL canEdit = isEditable;
     
-    NSString *field = [fields objectAtIndex:[tableView editedRow]];
-	NSString *value = [publication valueOfField:field];
-    
-	if([value isInherited] &&
-	   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnEditInheritedKey]){
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
-											 defaultButton:NSLocalizedString(@"OK", @"Button title")
-										   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-											   otherButton:NSLocalizedString(@"Edit Parent", @"Button title")
-								 informativeTextWithFormat:NSLocalizedString(@"The value was inherited from the item linked to by the Crossref field. Do you want to overwrite the inherited value?", @"Informative text in alert dialog")];
-		[alert setHasCheckButton:YES];
-		[alert setCheckValue:NO];
-		int rv = [alert runSheetModalForWindow:[self window]
-								 modalDelegate:self 
-								didEndSelector:@selector(editInheritedAlertDidEnd:returnCode:contextInfo:)  
-							didDismissSelector:NULL 
-								   contextInfo:NULL];
-		if (rv == NSAlertAlternateReturn) {
-			return NO;
-		} else if (rv == NSAlertOtherReturn) {
-			[self openParentItemForField:field];
-			return NO;
-		}
+    if (canEdit && control == tableView) {
+        // check if we're editing an inherited field
+        NSString *field = [fields objectAtIndex:[tableView editedRow]];
+        NSString *value = [publication valueOfField:field];
+        
+        if([value isInherited] &&
+           [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnEditInheritedKey]){
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+                                                 defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                               alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                                   otherButton:NSLocalizedString(@"Edit Parent", @"Button title")
+                                     informativeTextWithFormat:NSLocalizedString(@"The value was inherited from the item linked to by the Crossref field. Do you want to overwrite the inherited value?", @"Informative text in alert dialog")];
+            [alert setHasCheckButton:YES];
+            [alert setCheckValue:NO];
+            int rv = [alert runSheetModalForWindow:[self window]
+                                     modalDelegate:self 
+                                    didEndSelector:@selector(editInheritedAlertDidEnd:returnCode:contextInfo:)  
+                                didDismissSelector:NULL 
+                                       contextInfo:NULL];
+            if (rv == NSAlertAlternateReturn) {
+                canEdit = NO;
+            } else if (rv == NSAlertOtherReturn) {
+                [self openParentItemForField:field];
+                canEdit = NO;
+            }
+        }
 	}
-	return YES;
+    return canEdit;
 }
 
 - (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -1608,9 +1610,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 // send by the formatter when formatting in getObjectValue... failed
-// alert sheets must be app modal because this method returns a value and the editor window ccan close when this method returns
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)aString errorDescription:(NSString *)error{
-	if (control == tableView) {
+	BOOL accept = forceEndEditing;
+    
+    if (control == tableView) {
         NSString *fieldName = [fields objectAtIndex:[tableView editedRow]];
 		if ([fieldName isEqualToString:BDSKCrossrefString]) {
             // this may occur if the cite key formatter fails to format
@@ -1622,13 +1625,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                          informativeTextWithFormat:@"%@", error];
                 
                 [alert runSheetModalForWindow:[self window]];
-                // @@ Fix me!!
-                //if(forceEndEditing)
-                //    [cell setStringValue:[publication valueOfField:fieldName]];
             }else{
                 NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
             }
-            return forceEndEditing;
 		} else if ([fieldName isCitationField]) {
             // this may occur if the citation formatter fails to format
             if(error != nil){
@@ -1639,23 +1638,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                          informativeTextWithFormat:@"%@", error];
                 
                 [alert runSheetModalForWindow:[self window]];
-                // @@ Fix me!!
-                //if(forceEndEditing)
-                //    [cell setStringValue:[publication valueOfField:fieldName]];
             }else{
                 NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
             }
-            return forceEndEditing;
-        } else if ([tableCellFormatter editAsComplexString]) {
-			if (forceEndEditing) {
-				// reset the cell's value to the last saved value and proceed
-                // @@ Fix me!!
-				//[cell setStringValue:[publication valueOfField:fieldName]];
-				return YES;
-			}
-			// don't set the value
-			return NO;
-		} else {
+        } else if (NO == [tableCellFormatter editAsComplexString]) {
 			// this is a simple string, an error means that there are unbalanced braces
 			NSString *message = nil;
 			NSString *cancelButton = nil;
@@ -1675,14 +1661,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             
             int rv = [alert runSheetModalForWindow:[self window]];
 			
-			if (forceEndEditing || rv == NSAlertAlternateReturn) {
-                // @@ Fix me!!
-				//[cell setStringValue:[publication valueOfField:fieldName]];
-				return YES;
-			} else {
-				return NO;
-			}
+			accept = (forceEndEditing || rv == NSAlertAlternateReturn);
 		}
+        if(accept)
+            ignoreEdit = YES;
 	} else if (control == citeKeyField) {
         // this may occur if the cite key formatter fails to format
         if(error != nil){
@@ -1693,23 +1675,22 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                      informativeTextWithFormat:@"%@", error];
             
             [alert runSheetModalForWindow:[self window]];
-            // @@ Fix me!!
-            //if(forceEndEditing)
-            //    [control setStringValue:[publication citeKey]];
 		}else{
             NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
 		}
-        return forceEndEditing;
+        if (accept)
+            [citeKeyField setStringValue:[publication citeKey]];
     } else {
         // shouldn't get here
         NSLog(@"%@:%d formatter failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__);
-        return forceEndEditing;
     }
+    return accept;
 }
 
 // send when the user wants to end editing
-// alert sheets must be app modal because this method returns a value and the editor window ccan close when this method returns
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor{
+    BOOL endEdit = YES;
+    
     if (control == citeKeyField) {
 		
         NSString *message = nil;
@@ -1745,15 +1726,15 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             int rv = [alert runSheetModalForWindow:[self window]];
             
             if (forceEndEditing || rv == NSAlertAlternateReturn) {
-                return YES;
+                [citeKeyField setStringValue:[publication citeKey]];
              } else {
                 [control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];
-                return NO;
+                endEdit = NO;
             }
 		}
 	}
 	
-	return YES;
+	return endEdit;
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
@@ -2549,39 +2530,36 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
-	if ([tv isEqual:tableView]) {
-        NSString *tcID = [tableColumn identifier];
-        if ([tcID isEqualToString:@"value"]) {
-            NSString *field = [fields objectAtIndex:row];
+	if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"] && ignoreEdit == NO) {
+        NSString *field = [fields objectAtIndex:row];
+        
+        if ([field isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:object] == NO) {
+            NSString *message = nil;
             
-            if ([field isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:object] == NO) {
-                NSString *message = nil;
+            // check whether we won't get a crossref chain
+            int errorCode = [publication canSetCrossref:object andCiteKey:[publication citeKey]];
+            if (errorCode == BDSKSelfCrossrefError)
+                message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
+            else if (errorCode == BDSKChainCrossrefError)
+                message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"Informative text in alert dialog");
+            else if (errorCode == BDSKIsCrossreffedCrossrefError)
+                message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
+            
+            if (message) {
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
+                                                     defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                                   alternateButton:nil
+                                                       otherButton:nil
+                                         informativeTextWithFormat:message];
                 
-                // check whether we won't get a crossref chain
-                int errorCode = [publication canSetCrossref:object andCiteKey:[publication citeKey]];
-                if (errorCode == BDSKSelfCrossrefError)
-                    message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
-                else if (errorCode == BDSKChainCrossrefError)
-                    message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"Informative text in alert dialog");
-                else if (errorCode == BDSKIsCrossreffedCrossrefError)
-                    message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
-                
-                if (message) {
-                    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
-                                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                                       alternateButton:nil
-                                                           otherButton:nil
-                                             informativeTextWithFormat:message];
-                    
-                    [alert runSheetModalForWindow:[self window]];
-                    [tableView reloadData];
-                    return;
-                }
+                [alert runSheetModalForWindow:[self window]];
+                [tableView reloadData];
+                return;
             }
-            
-            if (NO == [object isEqualAsComplexString:[publication valueOfField:field]])
-                [self recordChangingField:field toValue:object];
         }
+        
+        if (NO == [object isEqualAsComplexString:[publication valueOfField:field]])
+            [self recordChangingField:field toValue:object];
     }
 }
 
@@ -2682,6 +2660,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	if ([tv isEqual:tableView]) {
+        ignoreEdit = NO;
         // we always want to "edit" even when we are not editable, so we can always select, and the cell will prevent editing when isEditable == NO
         if ([[tableColumn identifier] isEqualToString:@"value"])
             return YES;
