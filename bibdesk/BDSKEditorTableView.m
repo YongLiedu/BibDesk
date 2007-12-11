@@ -43,33 +43,74 @@
 @implementation BDSKEditorTableView
 
 - (void)mouseDown:(NSEvent *)theEvent {
-    NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    int clickedColumn = [self columnAtPoint:location];
-	int clickedRow = [self rowAtPoint:location];
-	NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:clickedColumn];
     
-	if (clickedRow != -1 && clickedColumn != -1) {
-        NSRect cellFrame = [self frameOfCellAtColumn:clickedColumn row:clickedRow];
-        id cell = [tableColumn dataCellForRow:clickedRow];
-        BOOL isEditable = [tableColumn isEditable] && 
-                ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
-                 [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow]);
-        if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
-            [[self delegate] tableView:self willDisplayCell:cell forTableColumn:tableColumn row:clickedRow];
-        if ([cell respondsToSelector:@selector(buttonRectForBounds:)] &&
-            NSMouseInRect(location, [cell buttonRectForBounds:cellFrame], [self isFlipped])) {
-            if ([theEvent clickCount] > 1)
-                theEvent = [NSEvent mouseEventWithType:[theEvent type] location:[theEvent locationInWindow] modifierFlags:[theEvent modifierFlags] timestamp:[theEvent timestamp] windowNumber:[theEvent windowNumber] context:[theEvent context] eventNumber:[theEvent eventNumber] clickCount:1 pressure:[theEvent pressure]];
-        } else if ([cell isKindOfClass:[NSTextFieldCell class]] && isEditable) {
-			[self selectRow:clickedRow byExtendingSelection:NO];
-            [self editColumn:clickedColumn row:clickedRow withEvent:theEvent select:NO];
-            return;
-		} else if (isEditable == NO && ([theEvent clickCount] != 2 || [self doubleAction] == NULL)) {
-            return;
+    // 10.5 has single-click editing by default, and uses slightly different behavior; we should do the same for consistency across apps.  Field name editing, formatters, and button clicks seem to work with no issues if we just use super on 10.5.
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
+        NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+        int clickedColumn = [self columnAtPoint:location];
+        int clickedRow = [self rowAtPoint:location];
+        NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:clickedColumn];
+        
+        if (clickedRow != -1 && clickedColumn != -1) {
+            NSRect cellFrame = [self frameOfCellAtColumn:clickedColumn row:clickedRow];
+            id cell = [tableColumn dataCellForRow:clickedRow];
+            BOOL isEditable = [tableColumn isEditable] && 
+                    ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
+                     [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:clickedRow]);
+            if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
+                [[self delegate] tableView:self willDisplayCell:cell forTableColumn:tableColumn row:clickedRow];
+            if ([cell respondsToSelector:@selector(buttonRectForBounds:)] &&
+                NSMouseInRect(location, [cell buttonRectForBounds:cellFrame], [self isFlipped])) {
+                if ([theEvent clickCount] > 1)
+                    theEvent = [NSEvent mouseEventWithType:[theEvent type] location:[theEvent locationInWindow] modifierFlags:[theEvent modifierFlags] timestamp:[theEvent timestamp] windowNumber:[theEvent windowNumber] context:[theEvent context] eventNumber:[theEvent eventNumber] clickCount:1 pressure:[theEvent pressure]];
+            } else if ([cell isKindOfClass:[NSTextFieldCell class]] && isEditable) {
+                [self selectRowIndexes:[NSIndexSet indexSetWithIndex:clickedRow] byExtendingSelection:NO];
+                [self editColumn:clickedColumn row:clickedRow withEvent:theEvent select:NO];
+                return;
+            } else if (isEditable == NO && ([theEvent clickCount] != 2 || [self doubleAction] == NULL)) {
+                return;
+            }
         }
-	}
-	
+    }
 	[super mouseDown:theEvent];
+}
+
+- (void)textDidEndEditing:(NSNotification *)aNotification {
+    int editedRow = [self editedRow];
+    int editedColumn = [self editedColumn];
+    
+    [super textDidEndEditing:aNotification];
+    
+    // on Leopard, we have to manually handle tab/return movements to avoid losing focus
+    // http://www.cocoabuilder.com/archive/message/cocoa/2007/10/31/191866
+    
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        int movement = [[[aNotification userInfo] objectForKey:@"NSTextMovement"] intValue];
+        if ((editedRow != -1 && editedColumn != -1) && 
+            (NSTabTextMovement == movement || NSBacktabTextMovement == movement || NSReturnTextMovement == movement)) {
+            
+            // assume NSReturnTextMovement
+            int nextRow = editedRow;
+            if (NSBacktabTextMovement == movement)
+                nextRow = editedRow - 1;
+            else if (NSTabTextMovement == movement)
+                nextRow = editedRow + 1;
+            
+            if (nextRow < [self numberOfRows] && nextRow >= 0) {
+            
+                NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:editedColumn];
+                BOOL isEditable = [tableColumn isEditable] && 
+                ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
+                 [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:nextRow]);
+                
+                if (isEditable) {
+                    [self selectRowIndexes:[NSIndexSet indexSetWithIndex:nextRow] byExtendingSelection:NO];
+                    [self editColumn:editedColumn row:nextRow withEvent:nil select:NO];
+                    [[aNotification object] selectAll:self];
+                }
+            }
+        }
+    }
 }
 
 - (BOOL)acceptsFirstResponder { return NO; }
