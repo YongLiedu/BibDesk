@@ -1983,18 +1983,20 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 	
 - (void)bibWasAddedOrRemoved:(NSNotification *)notification{
-	NSEnumerator *pubEnum = [[[notification userInfo] objectForKey:@"pubs"] objectEnumerator];
-	id pub;
 	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
 	
-	if ([NSString isEmptyString:crossref])
-		return;
-	while (pub = [pubEnum nextObject]) {
-		if ([crossref caseInsensitiveCompare:[pub valueForKey:@"citeKey"]] != NSOrderedSame) 
-			continue;
-		[self setupFields];
-		return;
-	}
+	if ([NSString isEmptyString:crossref] == NO) {
+        NSEnumerator *pubEnum = [[[notification userInfo] objectForKey:@"pubs"] objectEnumerator];
+        id pub;
+        
+        while (pub = [pubEnum nextObject]) {
+            if ([crossref caseInsensitiveCompare:[pub valueForKey:@"citeKey"]] == NSOrderedSame) {
+                // changes in the parent cannot change the field names, as custom fields are never inherited
+                [tableView reloadData];
+                break;
+            }
+        }
+    }
 }
  
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
