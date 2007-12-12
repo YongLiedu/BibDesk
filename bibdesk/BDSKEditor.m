@@ -1075,7 +1075,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	int newRating = [cell rating];
 		
 	if(newRating != oldRating) {
-		[publication setField:field toRatingValue:newRating];
+		[self recordChangingField:setField:field toRatingValue:newRating];
         [self userChangedField:field from:[NSString stringWithFormat:@"%i", oldRating] to:[NSString stringWithFormat:@"%i", newRating]];
 		[[self undoManager] setActionName:NSLocalizedString(@"Change Rating", @"Undo action name")];
 	}
@@ -1692,7 +1692,36 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor{
     BOOL endEdit = YES;
     
-    if (control == citeKeyField) {
+    if (control == tableView) {
+        
+        NSString *field = [fields objectAtIndex:[tableView editedRow]];
+        NSString *value = [fieldEditor string];
+        
+        if ([field isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:value] == NO) {
+            NSString *message = nil;
+            
+            // check whether we won't get a crossref chain
+            int errorCode = [publication canSetCrossref:value andCiteKey:[publication citeKey]];
+            if (errorCode == BDSKSelfCrossrefError)
+                message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
+            else if (errorCode == BDSKChainCrossrefError)
+                message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"Informative text in alert dialog");
+            else if (errorCode == BDSKIsCrossreffedCrossrefError)
+                message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
+            
+            if (message) {
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
+                                                     defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                                   alternateButton:nil
+                                                       otherButton:nil
+                                         informativeTextWithFormat:message];
+                
+                [alert runSheetModalForWindow:[self window]];
+                ignoreEdit = YES;
+            }
+        }
+        
+    } else if (control == citeKeyField) {
 		
         NSString *message = nil;
         NSString *cancelButton = nil;
@@ -2332,10 +2361,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		}
 		
         // add the crossref field if it doesn't exist, then set it to the citekey of the drag source's bibitem
-		[publication setField:BDSKCrossrefString toValue:crossref];
-        
-        [self userChangedField:BDSKCrossrefString from:oldValue to:crossref];
-		[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+		[self recordChangingField:BDSKCrossrefString toValue:crossref];
 		
         return YES;
         
@@ -2535,32 +2561,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
 	if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"] && ignoreEdit == NO) {
         NSString *field = [fields objectAtIndex:row];
-        
-        if ([field isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:object] == NO) {
-            NSString *message = nil;
-            
-            // check whether we won't get a crossref chain
-            int errorCode = [publication canSetCrossref:object andCiteKey:[publication citeKey]];
-            if (errorCode == BDSKSelfCrossrefError)
-                message = NSLocalizedString(@"An item cannot cross reference to itself.", @"Informative text in alert dialog");
-            else if (errorCode == BDSKChainCrossrefError)
-                message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"Informative text in alert dialog");
-            else if (errorCode == BDSKIsCrossreffedCrossrefError)
-                message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"Informative text in alert dialog");
-            
-            if (message) {
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Message in alert dialog when entering an invalid Crossref key") 
-                                                     defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                                   alternateButton:nil
-                                                       otherButton:nil
-                                         informativeTextWithFormat:message];
-                
-                [alert runSheetModalForWindow:[self window]];
-                [tableView reloadData];
-                return;
-            }
-        }
-        
         NSString *oldValue = [publication valueOfField:field];
         if (oldValue == nil)
             oldValue = @"";
@@ -2602,20 +2602,14 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 
                 NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
                 NSArray *draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
-                NSString *citeKeys = [[draggedPubs valueForKey:@"citeKey"] componentsJoinedByString:@","];
-                NSString *oldValue = [[[publication valueOfField:field inherit:NO] retain] autorelease];
-                NSString *newValue;
                 
                 if ([draggedPubs count]) {
-                    if ([NSString isEmptyString:oldValue])   
-                        newValue = citeKeys;
-                    else
-                        newValue = [NSString stringWithFormat:@"%@,%@", oldValue, citeKeys];
                     
-                    [publication setField:field toValue:newValue];
+                    NSString *citeKeys = [[draggedPubs valueForKey:@"citeKey"] componentsJoinedByString:@","];
+                    NSString *oldValue = [[[publication valueOfField:field inherit:NO] retain] autorelease];
+                    NSString *newValue = [NSString isEmptyString:oldValue] ? citeKeys : [NSString stringWithFormat:@"%@,%@", oldValue, citeKeys];
                     
-                    [self userChangedField:field from:oldValue to:newValue];
-                    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+                    [self recordChangingField:field toValue:newValue];
                     
                     return YES;
                 }
@@ -2625,7 +2619,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
                 NSArray *draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
                 NSString *crossref = [[draggedPubs firstObject] citeKey];
-                NSString *oldValue;
                 
                 if ([NSString isEmptyString:crossref])
                     return NO;
@@ -2650,12 +2643,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                     return NO;
                 }
                 
-                oldValue = [[[publication valueOfField:BDSKCrossrefString] retain] autorelease];
-                
-                [publication setField:BDSKCrossrefString toValue:crossref];
-                
-                [self userChangedField:BDSKCrossrefString from:oldValue to:crossref];
-                [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+                [self recordChangingField:BDSKCrossrefString toValue:crossref];
                 
                 return YES;
                     
