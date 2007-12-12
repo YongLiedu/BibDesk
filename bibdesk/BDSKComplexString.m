@@ -688,6 +688,10 @@ static IMP originalStringByAppendingString;
     return nodes;
 }
 
++ (BOOL)isEmptyAsComplexString:(NSString *)aString{
+    return aString == nil || [aString isEqualAsComplexString:@""];
+}
+
 - (BOOL)isEqualAsComplexString:(NSString *)other{
 	// we can assume that we are not complex, as BDSKComplexString overrides this
 	if ([other isComplex])

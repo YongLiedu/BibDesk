@@ -1184,11 +1184,11 @@ static CFDictionaryRef selectorTable = NULL;
 - (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit{
     NSString* value = [pubFields objectForKey:key];
 	
-	if (inherit && BDIsEmptyString((CFStringRef)value) && [fieldsToWriteIfEmpty containsObject:key] == NO) {
+	if (inherit && [NSString isEmptyAsComplexString:value] && [fieldsToWriteIfEmpty containsObject:key] == NO) {
 		BibItem *parent = [self crossrefParent];
 		if (parent) {
 			NSString *parentValue = [parent valueOfField:key inherit:NO];
-			if (BDIsEmptyString((CFStringRef)parentValue) == FALSE)
+			if ([NSString isEmptyAsComplexString:parentValue] == NO)
 				return [NSString stringWithInheritedValue:parentValue];
 		}
 	}

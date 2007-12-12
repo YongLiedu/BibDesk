@@ -78,6 +78,8 @@
 
 @interface NSString (BDSKComplexStringExtensions)
 
++ (BOOL)isEmptyAsComplexString:(NSString *)aString;
+
 /*!
     @method     stringWithNodes:macroResolver:
     @abstract   Returns a newly allocated and initialized complex string build with an array of BDSKStringNodes as its nodes.
