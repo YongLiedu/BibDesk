@@ -1874,7 +1874,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	NSString *changeType = [userInfo objectForKey:@"type"];
 	NSString *changeKey = [userInfo objectForKey:@"key"];
 	NSString *newValue = [userInfo objectForKey:@"value"];
-	NSString *oldValue = [userInfo objectForKey:@"oldValue"];
 	BibItem *sender = (BibItem *)[notification object];
 	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
@@ -1883,41 +1882,23 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 							 [crossref caseInsensitiveCompare:[userInfo objectForKey:@"oldCiteKey"]] == NSOrderedSame));
 	
     // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
-	if (sender != publication && !parentDidChange)
+	if (sender != publication && NO == parentDidChange)
 		return;
 	
-    // these should always be updated
-    if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString]){
-		[[self window] setTitle:[publication displayTitle]];
-	}
-	else if([changeKey isPersonField]){
-		[authorTableView reloadData];
-	}
-
-	if ([changeType isEqualToString:@"Change Field"]) {
-        if ((([NSString isEmptyAsComplexString:newValue] && [fields containsObject:changeKey]) || 
-             ([NSString isEmptyAsComplexString:oldValue] && [fields containsObject:changeKey] == NO)) &&
-            [changeKey isRatingField] == NO && [changeKey isBooleanField] == NO && [changeKey isTriStateField] == NO && [changeKey isNoteField] == NO) {
-			[self setupFields];
-			return;
-		}
-	}
-	else if([changeType isEqualToString:@"Add/Del File"]){
+	if([changeType isEqualToString:@"Add/Del File"]){
         [fileView reloadIcons];
-        return;
     }
-	
-    // Rebuild the form if the crossref changed, or our parent's cite key changed.
-	if([changeKey isEqualToString:BDSKCrossrefString] || 
+	else if([changeKey isEqualToString:BDSKCrossrefString] || 
 	   (parentDidChange && [changeKey isEqualToString:BDSKCiteKeyString])){
-        // if we are editing a crossref field, we should first set the new value, because setupFields will set the edited value. This happens when it is set through drag/drop
-        // @@ fixme: is this correct, i.e. what happens with complex or inherited strings?
+        // Reset if the crossref changed, or our parent's cite key changed.
+        // If we are editing a crossref field, we should first set the new value, because setupFields will set the edited value. This happens when it is set through drag/drop
 		int editedRow = [tableView editedRow];
         if (editedRow != -1 && [[fields objectAtIndex:editedRow] isEqualToString:changeKey])
             [[tableView currentEditor] setString:[publication valueOfField:changeKey]];
-        [self setupFields];
-		[[self window] setTitle:[publication displayTitle]];
+        // every field value could change, but not the displayed field names
+        [tableView reloadData];
 		[authorTableView reloadData];
+		[[self window] setTitle:[publication displayTitle]];
 	}
 	else if([changeKey isEqualToString:BDSKPubTypeString]){
 		[self setupFields];
@@ -1928,33 +1909,32 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		[self updateCiteKeyAutoGenerateStatus];
         [self updateCiteKeyDuplicateWarning];
 	}
-    else if([changeKey isEqualToString:BDSKAnnoteString]){
-        if(ignoreFieldChange) return;
-        // make a copy of the current value, so we don't overwrite it when we set the field value to the text storage
-        NSString *tmpValue = [[publication valueOfField:BDSKAnnoteString inherit:NO] copy];
-        [notesView setString:(tmpValue == nil ? @"" : tmpValue)];
-        [tmpValue release];
-        if(currentEditedView == notesView)
-            [[self window] makeFirstResponder:[self window]];
-        [notesViewUndoManager removeAllActions];
-    }
-    else if([changeKey isEqualToString:BDSKAbstractString]){
-        if(ignoreFieldChange) return;
-        NSString *tmpValue = [[publication valueOfField:BDSKAbstractString inherit:NO] copy];
-        [abstractView setString:(tmpValue == nil ? @"" : tmpValue)];
-        [tmpValue release];
-        if(currentEditedView == abstractView)
-            [[self window] makeFirstResponder:[self window]];
-        [abstractViewUndoManager removeAllActions];
-    }
-    else if([changeKey isEqualToString:BDSKRssDescriptionString]){
-        if(ignoreFieldChange) return;
-        NSString *tmpValue = [[publication valueOfField:BDSKRssDescriptionString inherit:NO] copy];
-        [rssDescriptionView setString:(tmpValue == nil ? @"" : tmpValue)];
-        [tmpValue release];
-        if(currentEditedView == rssDescriptionView)
-            [[self window] makeFirstResponder:[self window]];
-        [rssDescriptionViewUndoManager removeAllActions];
+    else if([changeKey isNoteField]){
+        if(ignoreFieldChange == NO) {
+            if([changeKey isEqualToString:BDSKAnnoteString]){
+               // make a copy of the current value, so we don't overwrite it when we set the field value to the text storage
+                NSString *tmpValue = [[publication valueOfField:BDSKAnnoteString inherit:NO] copy];
+                [notesView setString:(tmpValue == nil ? @"" : tmpValue)];
+                [tmpValue release];
+                if(currentEditedView == notesView)
+                    [[self window] makeFirstResponder:[self window]];
+                [notesViewUndoManager removeAllActions];
+            } else if([changeKey isEqualToString:BDSKAbstractString]){
+                NSString *tmpValue = [[publication valueOfField:BDSKAbstractString inherit:NO] copy];
+                [abstractView setString:(tmpValue == nil ? @"" : tmpValue)];
+                [tmpValue release];
+                if(currentEditedView == abstractView)
+                    [[self window] makeFirstResponder:[self window]];
+                [abstractViewUndoManager removeAllActions];
+            } else if([changeKey isEqualToString:BDSKRssDescriptionString]){
+                NSString *tmpValue = [[publication valueOfField:BDSKRssDescriptionString inherit:NO] copy];
+                [rssDescriptionView setString:(tmpValue == nil ? @"" : tmpValue)];
+                [tmpValue release];
+                if(currentEditedView == rssDescriptionView)
+                    [[self window] makeFirstResponder:[self window]];
+                [rssDescriptionViewUndoManager removeAllActions];
+            }
+        }
     }
 	else if([changeKey isRatingField] || [changeKey isBooleanField] || [changeKey isTriStateField]){
 		
@@ -1969,7 +1949,21 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		}
 	}
     else{
-		[tableView reloadData];
+        // this is a normal field displayed in the tableView
+        
+        if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString])
+            [[self window] setTitle:[publication displayTitle]];
+        else if([changeKey isPersonField])
+            [authorTableView reloadData];
+        
+        if (([NSString isEmptyAsComplexString:newValue] && [fields containsObject:changeKey]) || 
+            ([NSString isEmptyAsComplexString:newValue] == NO && [fields containsObject:changeKey] == NO)) {
+			// a field was added or removed
+            [self setupFields];
+		} else {
+            // a field value changed
+            [tableView reloadData];
+        }
 	}
     
 }
