@@ -630,14 +630,7 @@ enum {
 - (void)setField: (NSString *)key toValue: (NSString *)value;
 - (void)setField: (NSString *)key toValue: (NSString *)value withModDate:(NSCalendarDate *)date;
 
-/*!
-    @method     setField:toValueWithoutUndo:
-    @abstract   Bypasses the undo and change notification mechanisms.  Only for use by BDSKEditor.
-    @discussion (comprehensive description)
-    @param      key (description)
-    @param      value (description)
-*/
-- (void)setField:(NSString *)key toValueWithoutUndo:(NSString *)value;
+- (void)replaceValueOfFieldByCopy:(NSString *)key;
 
 /*!
     @method valueOfField:
@@ -657,12 +650,6 @@ enum {
     
 */
 - (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit;
-
-- (void)removeField: (NSString *)key;
-- (void)removeField: (NSString *)key withModDate:(NSCalendarDate *)date;
-
-- (void)addField:(NSString *)key;
-- (void)addField:(NSString *)key withModDate:(NSCalendarDate *)date;
 
 - (NSDictionary *)pubFields;
 - (NSArray *)allFieldNames;

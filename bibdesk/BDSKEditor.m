@@ -1295,25 +1295,19 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
-// ----------------------------------------------------------------------------------------
-#pragma mark add-Field-Sheet Support
-// Add field sheet support
-// ----------------------------------------------------------------------------------------
-
-#warning Empty fields: this assumes the displayed fields are all non-nil fields, which may not be true
+#pragma mark Add field
 
 - (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSArray *currentFields = [(NSArray *)contextInfo autorelease];
 	NSString *newField = [addFieldController field];
     if(returnCode == NSCancelButton || newField == nil)
         return;
     
-    NSArray *currentFields = [publication allFieldNames];
     newField = [newField fieldName];
     if([currentFields containsObject:newField] == NO){
 		[tabView selectFirstTabViewItem:nil];
-        [publication addField:newField];
+        [publication setField:newField toValue:[NSString stringWithFormat:@"%@ %@",NSLocalizedString(@"Add data for field:", @"Default value for new field"), newField]];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add Field", @"Undo action name")];
-		[self setupFields];
 		[self setKeyField:newField];
     }
 }
@@ -1321,45 +1315,46 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 // raises the add field sheet
 - (IBAction)raiseAddField:(id)sender{
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSArray *currentFields = [publication allFieldNames];
-    NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
+    NSArray *fieldNames;
+    NSMutableArray *currentFields = [fields mutableCopy];
+    
+    [currentFields addObjectsFromArray:[[typeMan ratingFieldsSet] allObjects]];
+    [currentFields addObjectsFromArray:[[typeMan booleanFieldsSet] allObjects]];
+    [currentFields addObjectsFromArray:[[typeMan triStateFieldsSet] allObjects]];
+    [currentFields addObjectsFromArray:[[typeMan noteFieldsSet] allObjects]];
+    
+    fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:", @"Label for adding field")
                                                                                               fieldsArray:fieldNames];
 	[addFieldController beginSheetModalForWindow:[self window]
                                    modalDelegate:self
                                   didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
+                                     contextInfo:currentFields];
     [addFieldController release];
 }
 
-// ----------------------------------------------------------------------------------------
-#pragma mark ||  delete-Field-Sheet Support
-// ----------------------------------------------------------------------------------------
-
-#warning Empty fields: this assumes the displayed fields are all non-nil fields, which may not be true
+#pragma mark Delete field
 
 - (void)removeFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [removeFieldController field];
     NSString *oldValue = [[[publication valueOfField:oldField] retain] autorelease];
     NSArray *removableFields = [removeFieldController fieldsArray];
-    if(returnCode == NSCancelButton || oldField == nil || [removableFields count] == 0)
-        return;
-	
-    [tabView selectFirstTabViewItem:nil];
-    [publication removeField:oldField];
-    [self userChangedField:oldField from:oldValue to:@""];
-    [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
-    [self setupFields];
+    
+    if (returnCode == NSOKButton && oldField != nil && [removableFields count]) {
+        [tabView selectFirstTabViewItem:nil];
+        [publication setField:oldField toValue:nil];
+        [self userChangedField:oldField from:oldValue to:@""];
+        [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
+        [self setupFields];
+    }
 }
 
-// raises the del field sheet
 - (IBAction)raiseDelField:(id)sender{
     // populate the popupbutton
     NSString *currentType = [publication pubType];
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-	NSMutableArray *removableFields = [[publication allFieldNames] mutableCopy];
-	[removableFields removeObjectsInArray:[NSArray arrayWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil]];
+	NSMutableArray *removableFields = [fields mutableCopy];
 	[removableFields removeObjectsInArray:[typeMan requiredFieldsForType:currentType]];
 	[removableFields removeObjectsInArray:[typeMan optionalFieldsForType:currentType]];
 	[removableFields removeObjectsInArray:[typeMan userDefaultFieldsForType:currentType]];
@@ -1392,81 +1387,62 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 #pragma mark Change field name
 
-#warning Empty fields: this assumes the displayed fields are all non-nil fields, which may not be true
-
 - (void)changeFieldSheetDidEnd:(BDSKChangeFieldSheetController *)changeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [changeFieldController field];
     NSString *newField = [changeFieldController newField];
     NSString *oldValue = [[[publication valueOfField:oldField] retain] autorelease];
     int autoGenerateStatus = 0;
     
-    if(returnCode == NSCancelButton || [NSString isEmptyString:newField] || 
-       [newField isEqualToString:oldField] || [[publication allFieldNames] containsObject:newField])
-        return;
-    
-    NSString *currentType = [publication pubType];
-    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSMutableSet *nonNilFields = [NSMutableSet setWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
-	[nonNilFields addObjectsFromArray:[typeMan requiredFieldsForType:currentType]];
-	[nonNilFields addObjectsFromArray:[typeMan optionalFieldsForType:currentType]];
-	[nonNilFields addObjectsFromArray:[typeMan userDefaultFieldsForType:currentType]];
-    
-    [tabView selectFirstTabViewItem:nil];
-    [publication addField:newField];
-    [publication setField:newField toValue:[publication valueOfField:oldField]];
-    if([nonNilFields containsObject:oldField])
-        [publication setField:oldField toValue:@""];
-    else
-        [publication removeField:oldField];
-    autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
-    [self userChangedField:newField from:@"" to:oldValue didAutoGenerate:autoGenerateStatus];
-    [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
-    [self setupFields];
-    [self setKeyField:newField];
+    if (returnCode == NSOKButton && [NSString isEmptyString:newField] == NO  && 
+        [newField isEqualToString:oldField] == NO && [fields containsObject:newField] == NO) {
+        
+        [tabView selectFirstTabViewItem:nil];
+        [publication setField:newField toValue:[publication valueOfField:oldField inherit:NO]];
+        autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
+        [self userChangedField:newField from:@"" to:oldValue didAutoGenerate:autoGenerateStatus];
+        [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
+        [self setKeyField:newField];
+    }
 }
 
 - (void)raiseChangeFieldSheetForField:(NSString *)field{
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSArray *currentFields = [publication allFieldNames];
-    NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
-	NSMutableArray *removableFields = [[publication allFieldNames] mutableCopy];
-    [removableFields removeObjectsInArray:[[typeMan noteFieldsSet] allObjects]];
+    NSArray *fieldNames;
+    NSMutableArray *currentFields = [fields mutableCopy];
     
-    if([removableFields count] == 0){
+    [currentFields addObjectsFromArray:[[typeMan ratingFieldsSet] allObjects]];
+    [currentFields addObjectsFromArray:[[typeMan booleanFieldsSet] allObjects]];
+    [currentFields addObjectsFromArray:[[typeMan triStateFieldsSet] allObjects]];
+    [currentFields addObjectsFromArray:[[typeMan noteFieldsSet] allObjects]];
+    
+    fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
+    
+    if([fields count] == 0){
+        [currentFields release];
         NSBeep();
-        [removableFields release];
         return;
     }
     
     BDSKChangeFieldSheetController *changeFieldController = [[BDSKChangeFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to change:", @"Label for changing field name")
-                                                                                                       fieldsArray:removableFields
+                                                                                                       fieldsArray:fields
                                                                                                          newPrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
                                                                                                     newFieldsArray:fieldNames];
-    if (field == nil) {
-        int selectedRow = [tableView selectedRow];
-        field = selectedRow == -1 ? nil : [fields objectAtIndex:selectedRow];
-        if([removableFields containsObject:field] == NO)
-            field = nil;
-    }
+    if (field == nil)
+        field = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
     
-    if([removableFields containsObject:field]){
-        [changeFieldController setField:field];
-        // if we don't deselect this cell, we can't remove it from the form
-        [self finalizeChangesPreservingSelection:NO];
-    }else if(field){
-        // double clicked title of a field we cannot change
-        [changeFieldController release];
-        [removableFields release];
-        return;
-    }
+    OBASSERT(field == nil || [fields containsObject:field]);
     
-	[removableFields release];
+    // if we don't deselect this cell, we can't remove it from the form
+    [self finalizeChangesPreservingSelection:NO];
+    
+    [changeFieldController setField:field];
     
 	[changeFieldController beginSheetModalForWindow:[self window]
                                       modalDelegate:self
                                      didEndSelector:@selector(changeFieldSheetDidEnd:returnCode:contextInfo:)
                                         contextInfo:NULL];
 	[changeFieldController release];
+    [currentFields release];
 }
 
 - (IBAction)raiseChangeFieldName:(id)sender{
@@ -1902,11 +1878,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (void)bibDidChange:(NSNotification *)notification{
-// unused	BibItem *notifBib = [notification object];
 	NSDictionary *userInfo = [notification userInfo];
 	NSString *changeType = [userInfo objectForKey:@"type"];
 	NSString *changeKey = [userInfo objectForKey:@"key"];
 	NSString *newValue = [userInfo objectForKey:@"value"];
+	NSString *oldValue = [userInfo objectForKey:@"oldValue"];
 	BibItem *sender = (BibItem *)[notification object];
 	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
@@ -1917,12 +1893,19 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
 	if (sender != publication && !parentDidChange)
 		return;
+	
+    // these should always be updated
+    if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString]){
+		[[self window] setTitle:[publication displayTitle]];
+	}
+	else if([changeKey isPersonField]){
+		[authorTableView reloadData];
+	}
 
-	if([changeType isEqualToString:@"Add/Del Field"]){
-		if(![[pw stringArrayForKey:BDSKRatingFieldsKey] containsObject:changeKey] &&
-		   ![[pw stringArrayForKey:BDSKBooleanFieldsKey] containsObject:changeKey] &&
-		   ![[pw stringArrayForKey:BDSKTriStateFieldsKey] containsObject:changeKey]){
-			// no need to rebuild the form when we have a field in the matrix
+	if ([changeType isEqualToString:@"Change Field"]) {
+        if ((([NSString isEmptyAsComplexString:newValue] && [fields containsObject:changeKey]) || 
+             ([NSString isEmptyAsComplexString:oldValue] && [fields containsObject:changeKey] == NO)) &&
+            [changeKey isRatingField] == NO && [changeKey isBooleanField] == NO && [changeKey isTriStateField] == NO && [changeKey isNoteField] == NO) {
 			[self setupFields];
 			return;
 		}
@@ -1943,44 +1926,15 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         [self setupFields];
 		[[self window] setTitle:[publication displayTitle]];
 		[authorTableView reloadData];
-		return;
 	}
-
-	if([changeKey isEqualToString:BDSKPubTypeString]){
+	else if([changeKey isEqualToString:BDSKPubTypeString]){
 		[self setupFields];
 		[self updateTypePopup];
-		return;
 	}
-	
-	if([[pw stringArrayForKey:BDSKRatingFieldsKey] containsObject:changeKey] || 
-	   [[pw stringArrayForKey:BDSKBooleanFieldsKey] containsObject:changeKey] || 
-	   [[pw stringArrayForKey:BDSKTriStateFieldsKey] containsObject:changeKey]){
-		
-		NSEnumerator *cellE = [[extraBibFields cells] objectEnumerator];
-		NSButtonCell *entry = nil;
-		while(entry = [cellE nextObject]){
-			if([[entry representedObject] isEqualToString:changeKey]){
-				[entry setIntValue:[publication intValueOfField:changeKey]];
-				[extraBibFields setNeedsDisplay:YES];
-				break;
-			}
-		}
-		return;
-	}
-	
-	if([changeKey isEqualToString:BDSKCiteKeyString]){
+	else if([changeKey isEqualToString:BDSKCiteKeyString]){
 		[citeKeyField setStringValue:newValue];
 		[self updateCiteKeyAutoGenerateStatus];
         [self updateCiteKeyDuplicateWarning];
-	}else{
-		[tableView reloadData];
-	}
-	
-    if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString]){
-		[[self window] setTitle:[publication displayTitle]];
-	}
-	else if([changeKey isPersonField]){
-		[authorTableView reloadData];
 	}
     else if([changeKey isEqualToString:BDSKAnnoteString]){
         if(ignoreFieldChange) return;
@@ -2010,7 +1964,22 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [[self window] makeFirstResponder:[self window]];
         [rssDescriptionViewUndoManager removeAllActions];
     }
-            
+	else if([changeKey isRatingField] || [changeKey isBooleanField] || [changeKey isTriStateField]){
+		
+		NSEnumerator *cellE = [[extraBibFields cells] objectEnumerator];
+		NSButtonCell *entry = nil;
+		while(entry = [cellE nextObject]){
+			if([[entry representedObject] isEqualToString:changeKey]){
+				[entry setIntValue:[publication intValueOfField:changeKey]];
+				[extraBibFields setNeedsDisplay:YES];
+				break;
+			}
+		}
+	}
+    else{
+		[tableView reloadData];
+	}
+    
 }
 	
 - (void)bibWasAddedOrRemoved:(NSNotification *)notification{
@@ -2879,7 +2848,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     e = [newFields objectEnumerator]; \
     while(tmp = [e nextObject]){ \
         if ([ignoredKeys containsObject:tmp]) continue; \
-        if (checkEmpty && [[publication valueOfField:tmp inherit:NO] isEqualToString:@""]) continue; \
+        if (checkEmpty && [[publication valueOfField:tmp inherit:NO] isEqualAsComplexString:@""]) continue; \
         [ignoredKeys addObject:tmp]; \
         [fields addObject:tmp]; \
     }
@@ -3150,15 +3119,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     // This is a fix for bug #1483613 (and others).  We set some of the BibItem's fields to -[[NSTextView textStorage] mutableString] for efficiency in tracking changes for live editing updates in the main window preview.  However, this causes a retain cycle, as the text storage retains its text view; any font changes to the editor text view will cause the retained textview to message its delegate (BDSKEditor) which is garbage in -[NSTextView _addToTypingAttributes].
     NSEnumerator *fieldE = [[[BDSKTypeManager sharedManager] noteFieldsSet] objectEnumerator];
-    NSString *currentValue = nil;
-    NSString *fieldName = nil;
-    while(fieldName = [fieldE nextObject]){
-        currentValue = [[publication valueOfField:fieldName inherit:NO] copy];
-        // set without undo, or we dirty the document every time the editor is closed
-        if(nil != currentValue)
-            [publication setField:fieldName toValueWithoutUndo:currentValue];
-        [currentValue release];
-    }
+    NSString *field = nil;
+    while(field = [fieldE nextObject])
+        [publication replaceValueOfFieldByCopy:field];
 }
 
 @end

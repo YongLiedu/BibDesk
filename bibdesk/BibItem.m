@@ -1135,7 +1135,13 @@ static CFDictionaryRef selectorTable = NULL;
     OBPRECONDITION(key != nil);
     // use a copy of the old value, since this may be a mutable value
     NSString *oldValue = [[pubFields objectForKey:key] copy];
-	if ([self undoManager]) {
+    if ([oldValue isEqualAsComplexString:@""]) {
+        [oldValue release];
+        oldValue = nil;
+    }
+    if ([value isEqualAsComplexString:@""] && [key isNoteField] == NO)
+        value = nil;
+    if ([self undoManager]) {
 		NSCalendarDate *oldModDate = [self dateModified];
 		
 		[[[self undoManager] prepareWithInvocationTarget:self] setField:key 
@@ -1143,25 +1149,16 @@ static CFDictionaryRef selectorTable = NULL;
 													 withModDate:oldModDate];
 	}
     	
-    if(value != nil){
-		[pubFields setObject:value forKey:key];
-		// to allow autocomplete:
+    [pubFields setValue:value forKey:key];
+    // to allow autocomplete:
+    if (value)
 		[[NSApp delegate] addString:value forCompletionEntry:key];
-	}else{
-		[pubFields removeObjectForKey:key];
-	}
-	if (date != nil) {
-		[pubFields setObject:[date description] forKey:BDSKDateModifiedString];
-	} else {
-		[pubFields removeObjectForKey:BDSKDateModifiedString];
-	}
+    [pubFields setValue:[date description] forKey:BDSKDateModifiedString];
 	[self updateMetadataForKey:key];
 	
-	NSDictionary *notifInfo;
-	if(oldValue != nil && value != nil)
-		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type", oldValue, @"oldValue", owner, @"owner", nil];
-	else
-		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", owner, @"owner", nil];
+	NSMutableDictionary *notifInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Change Field", @"type", owner, @"owner", nil];
+    [notifInfo setValue:value forKey:@"value"];
+    [notifInfo setValue:oldValue forKey:@"oldValue"];
     [oldValue release];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -1169,12 +1166,13 @@ static CFDictionaryRef selectorTable = NULL;
 													  userInfo:notifInfo];
 }
 
-- (void)setField:(NSString *)key toValueWithoutUndo:(NSString *)value{
+- (void)replaceValueOfFieldByCopy:(NSString *)key{
     NSParameterAssert(nil != key);
-    NSParameterAssert(nil != value);
     // this method is intended as a workaround for a BDSKEditor issue with using -[NSTextStorage mutableString] to track changes
-    OBPRECONDITION([value isEqualToString:[pubFields objectForKey:key]]);
-    [pubFields setObject:value forKey:key];
+    NSString *value = [[pubFields objectForKey:key] copy];
+    if (value)
+        [pubFields setObject:value forKey:key];
+    [value release];
 }
 
 - (NSString *)valueOfField: (NSString *)key{
@@ -1182,83 +1180,20 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit{
-    NSString* value = [pubFields objectForKey:key];
+    NSString *value = [pubFields objectForKey:key];
 	
 	if (inherit && [NSString isEmptyAsComplexString:value] && [fieldsToWriteIfEmpty containsObject:key] == NO) {
 		BibItem *parent = [self crossrefParent];
-		if (parent) {
+		value = nil;
+        if (parent) {
 			NSString *parentValue = [parent valueOfField:key inherit:NO];
 			if ([NSString isEmptyAsComplexString:parentValue] == NO)
-				return [NSString stringWithInheritedValue:parentValue];
+				value = [NSString stringWithInheritedValue:parentValue];
 		}
 	}
 	
-	return value;
-}
-
-- (void)addField:(NSString *)key{
-	[self addField:key withModDate:[NSCalendarDate date]];
-}
-
-- (void)addField:(NSString *)key withModDate:(NSCalendarDate *)date{
-	if ([self undoManager]) {
-		[[[self undoManager] prepareWithInvocationTarget:self] removeField:key
-														withModDate:[self dateModified]];
-	}
-	
-	NSString *defaultValue = nil;
-	if ([key isBooleanField] || [key isTriStateField] || [key isRatingField]) {
-        defaultValue = @"";
-    } else {
-        defaultValue = [NSString stringWithFormat:@"%@ %@",NSLocalizedString(@"Add data for field:", @"Default value for new field"), key];
-    }
-    [self setField:key toValue:defaultValue];
-	
-	if (date != nil) {
-		[pubFields setObject:[date description] forKey:BDSKDateModifiedString];
-	} else {
-		[pubFields removeObjectForKey:BDSKDateModifiedString];
-	}
-	[self updateMetadataForKey:key];
-	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", owner, @"owner", nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
-														object:self
-													  userInfo:notifInfo];
-
-}
-
-- (void)removeField: (NSString *)key{
-	[self removeField:key withModDate:[NSCalendarDate date]];
-}
-
-- (void)removeField: (NSString *)key withModDate:(NSCalendarDate *)date{
-	
-    OBPRECONDITION(key != nil);
-    
-	if ([self undoManager]) {
-        if(![NSString isEmptyString:[pubFields objectForKey:key]])
-            // this will ensure that the current value can be restored when the user deletes a non-empty field
-            [self setField:key toValue:@""];
-        
-		[[[self undoManager] prepareWithInvocationTarget:self] addField:key
-                                                            withModDate:[self dateModified]];
-	}
-	
-    [pubFields removeObjectForKey:key];
-	
-	if (date != nil) {
-		[pubFields setObject:[date description] forKey:BDSKDateModifiedString];
-	} else {
-		[pubFields removeObjectForKey:BDSKDateModifiedString];
-	}
-	[self updateMetadataForKey:key];
-
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type", owner, @"owner", nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
-														object:self
-													  userInfo:notifInfo];
-	
+    // @@ empty fields: or should we return nil for empty fields?
+	return [NSString isEmptyAsComplexString:value] ? @"" : value;
 }
 
 #pragma mark Derived field values
@@ -1349,8 +1284,6 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setField:(NSString *)field toTriStateValue:(NSCellStateValue)triStateValue{
-	if(![[self allFieldNames] containsObject:field])
-		[self addField:field];
 	[self setField:field toValue:[NSString stringWithTriStateValue:triStateValue]];
 }
 
@@ -3493,12 +3426,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
             }
             else NSLog(@"*** Unable to create file for %@", value);
         }
-        if (removeField && converted) {
-            if ([[[BDSKTypeManager sharedManager] userDefaultFieldsForType:[self pubType]] containsObject:(id)key])
-                [self setField:(id)key toValue:@""];
-            else
-                [self removeField:(id)key];
-        }
+        if (removeField && converted)
+            [self setField:(id)key toValue:nil];
     }
 }
 
