@@ -1181,19 +1181,21 @@ static CFDictionaryRef selectorTable = NULL;
 
 - (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit{
     NSString *value = [pubFields objectForKey:key];
+    BOOL isEmpty = [NSString isEmptyAsComplexString:value];
 	
-	if (inherit && [NSString isEmptyAsComplexString:value] && [fieldsToWriteIfEmpty containsObject:key] == NO) {
+	if (inherit && isEmpty && [fieldsToWriteIfEmpty containsObject:key] == NO) {
 		BibItem *parent = [self crossrefParent];
 		value = nil;
         if (parent) {
 			NSString *parentValue = [parent valueOfField:key inherit:NO];
-			if ([NSString isEmptyAsComplexString:parentValue] == NO)
+            isEmpty = [NSString isEmptyAsComplexString:parentValue];
+			if (isEmpty == NO)
 				value = [NSString stringWithInheritedValue:parentValue];
 		}
 	}
 	
     // @@ empty fields: or should we return nil for empty fields?
-	return [NSString isEmptyAsComplexString:value] ? @"" : value;
+	return isEmpty ? @"" : value;
 }
 
 #pragma mark Derived field values
