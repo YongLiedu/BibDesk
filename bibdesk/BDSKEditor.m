@@ -1075,7 +1075,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	int newRating = [cell rating];
 		
 	if(newRating != oldRating) {
-		[self recordChangingField:setField:field toRatingValue:newRating];
+		[publication setField:field toRatingValue:newRating];
         [self userChangedField:field from:[NSString stringWithFormat:@"%i", oldRating] to:[NSString stringWithFormat:@"%i", newRating]];
 		[[self undoManager] setActionName:NSLocalizedString(@"Change Rating", @"Undo action name")];
 	}
