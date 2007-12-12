@@ -497,12 +497,15 @@ static CFDictionaryRef selectorTable = NULL;
 	return YES;
 }
 
+#ifdef __ppc__
 - (unsigned int)hash{
-    // optimized hash from http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html
+    // Optimized hash from http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html (for ppc).  Use super's hash implementation on other architectures.
+
     // note that BibItems are used in hashing collections and so -hash must not depend on mutable state
     return( ((unsigned int) self >> 4) | 
             (unsigned int) self << (32 - 4));
 }
+#endif
 
 #pragma mark -
 
