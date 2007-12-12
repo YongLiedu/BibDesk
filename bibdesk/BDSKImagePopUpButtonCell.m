@@ -318,7 +318,7 @@
 					}
 					
 				} else if([nextEvent type] == NSLeftMouseDragged) {
-                    // test option key to see if we should drag-copy or show the menu, since the drag-to-copy behavior is inconsistent, particularly in BibEditor (see bug #1519481)
+                    // test option key to see if we should drag-copy or show the menu, since the drag-to-copy behavior is inconsistent, particularly in BDSKEditor (see bug #1519481)
 					shouldSendAction = NO;
 					if (([nextEvent modifierFlags] & NSAlternateKeyMask) > 0 &&
                         [controlView respondsToSelector:@selector(startDraggingWithEvent:)]){ 

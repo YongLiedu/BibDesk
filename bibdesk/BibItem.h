@@ -632,7 +632,7 @@ enum {
 
 /*!
     @method     setField:toValueWithoutUndo:
-    @abstract   Bypasses the undo and change notification mechanisms.  Only for use by BibEditor.
+    @abstract   Bypasses the undo and change notification mechanisms.  Only for use by BDSKEditor.
     @discussion (comprehensive description)
     @param      key (description)
     @param      value (description)

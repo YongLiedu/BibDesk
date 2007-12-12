@@ -65,7 +65,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKURLGroupSheetController.h"
 #import "BDSKScriptGroupSheetController.h"
-#import "BibEditor.h"
+#import "BDSKEditor.h"
 #import "BDSKPersonController.h"
 #import "BDSKColoredBox.h"
 #import "BDSKCollapsibleView.h"

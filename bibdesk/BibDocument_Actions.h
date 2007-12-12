@@ -100,7 +100,7 @@
 
 - (IBAction)duplicate:(id)sender;
 
-- (BibEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew;
+- (BDSKEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew;
 
 /*!
     @method editPubCmd
@@ -118,10 +118,10 @@
     @discussion Creates a bibeditor if one doesn't exist, and tells it to show itself. 
     @param pub The BibItem that should be edited.
 */
-- (BibEditor *)editPub:(BibItem *)pub;
+- (BDSKEditor *)editPub:(BibItem *)pub;
 
-- (BibEditor *)editPubBeforePub:(BibItem *)pub;
-- (BibEditor *)editPubAfterPub:(BibItem *)pub;
+- (BDSKEditor *)editPubBeforePub:(BibItem *)pub;
+- (BDSKEditor *)editPubAfterPub:(BibItem *)pub;
 
 /*!
     @method editAction:

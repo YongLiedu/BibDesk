@@ -39,7 +39,7 @@
 #import "NSWindow+Scripting.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
-#import "BibEditor.h"
+#import "BDSKEditor.h"
 #import "BDSKPersonController.h"
 #import "BDSKOwnerProtocol.h"
 

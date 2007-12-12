@@ -170,7 +170,7 @@ NSString *BDSKWarnOnEditInheritedKey = @"Warn on Editing Inherited Fields";
 NSString *BDSKAutoSortForCrossrefsKey = @"Automatically Sort for Crossrefs";
 
 NSString *BDSKLastVersionLaunchedKey = @"Last launched version number";
-NSString *BDSKSnoopDrawerSavedSizeKey = @"Saved size of BibEditor document snoop drawer";
+NSString *BDSKSnoopDrawerSavedSizeKey = @"Saved size of BDSKEditor document snoop drawer";
 NSString *BDSKShouldSaveNormalizedAuthorNamesKey = @"Save normalized names in BibTeX files";
 NSString *BDSKSaveAnnoteAndAbstractAtEndOfItemKey = @"Save Annote and Abstract at End of Item";
 NSString *BDSKBibStyleMacroDefinitionsKey = @"Macro definitions from bib style file";

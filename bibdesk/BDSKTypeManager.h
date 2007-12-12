@@ -233,7 +233,7 @@
 /*!
     @method     invalidCharactersForField:inFieldType:
     @abstract   Characters that must not be used in a given key and reference type, currently only for Cite Key in BibTeX.  This is a fairly liberal definition, since it allows
-                non-ascii and some math characters.  Used by the formatter subclass for field entry in BibEditor.
+                non-ascii and some math characters.  Used by the formatter subclass for field entry in BDSKEditor.
     @discussion (comprehensive description)
     @param      fieldName The name of the field (e.g. "Author")
     @param      type The reference type (e.g. BibTeX, RIS)

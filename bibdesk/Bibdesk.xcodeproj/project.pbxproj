@@ -196,6 +196,7 @@
 		CE4241360D0EAE0B00F824E7 /* BDSKEditorTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4241340D0EAE0B00F824E7 /* BDSKEditorTableView.m */; };
 		CE4241450D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4241430D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m */; };
 		CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3A0BD50B1634D500233208 /* BDSKCompletionServerProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CE424B120D0F5C6800F824E7 /* BDSKEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE424B0C0D0F5C6800F824E7 /* BDSKEditor.nib */; };
 		CE42A26A0A99BE2400C62D85 /* BDSKErrorEditWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE42A2680A99BE2400C62D85 /* BDSKErrorEditWindow.nib */; };
 		CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */; };
 		CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE43865C0BB8274600A56987 /* SearchBookmarksWindow.nib */; };
@@ -327,7 +328,7 @@
 		F9022C7E075802E300C3F701 /* BDSKOpenCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C62075802E300C3F701 /* BDSKOpenCommand.m */; };
 		F9022C7F075802E300C3F701 /* BibDocument_DataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C64075802E300C3F701 /* BibDocument_DataSource.m */; };
 		F9022C80075802E300C3F701 /* BibDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C66075802E300C3F701 /* BibDocument.m */; };
-		F9022C81075802E300C3F701 /* BibEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C68075802E300C3F701 /* BibEditor.m */; };
+		F9022C81075802E300C3F701 /* BDSKEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C68075802E300C3F701 /* BDSKEditor.m */; };
 		F9022C82075802E300C3F701 /* BDSKFiler.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C6A075802E300C3F701 /* BDSKFiler.m */; };
 		F9022C84075802E300C3F701 /* BibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C6E075802E300C3F701 /* BibItem.m */; };
 		F9022C86075802E300C3F701 /* BDSKPersonController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C72075802E300C3F701 /* BDSKPersonController.m */; };
@@ -350,7 +351,6 @@
 		F9022CBC075803AC00C3F701 /* BibPref_TeX.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022CB9075803AC00C3F701 /* BibPref_TeX.m */; };
 		F9022CBF0758049200C3F701 /* ReadMe.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9022CBD0758049200C3F701 /* ReadMe.nib */; };
 		F9022CC6075804A600C3F701 /* AutoFile.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9022CC0075804A600C3F701 /* AutoFile.nib */; };
-		F9022CC8075804A600C3F701 /* BibEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9022CC4075804A600C3F701 /* BibEditor.nib */; };
 		F9022CD7075804E400C3F701 /* BibPref_AutoFile.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9022CCD075804E400C3F701 /* BibPref_AutoFile.nib */; };
 		F9022CD8075804E400C3F701 /* BibPref_Cite.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9022CCF075804E400C3F701 /* BibPref_Cite.nib */; };
 		F9022CD9075804E400C3F701 /* BibPref_CiteKey.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9022CD1075804E400C3F701 /* BibPref_CiteKey.nib */; };
@@ -1062,6 +1062,8 @@
 		CE4241340D0EAE0B00F824E7 /* BDSKEditorTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKEditorTableView.m; sourceTree = "<group>"; };
 		CE4241420D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKEditorTextFieldCell.h; sourceTree = "<group>"; };
 		CE4241430D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKEditorTextFieldCell.m; sourceTree = "<group>"; };
+		CE424B0D0D0F5C6800F824E7 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKEditor.nib; sourceTree = "<group>"; };
+		CE424B130D0F5C9C00F824E7 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKEditor.nib; sourceTree = "<group>"; };
 		CE42A2690A99BE2400C62D85 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKErrorEditWindow.nib; sourceTree = "<group>"; };
 		CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchBookmarkController.h; sourceTree = "<group>"; };
 		CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchBookmarkController.m; sourceTree = "<group>"; };
@@ -1275,8 +1277,8 @@
 		F9022C64075802E300C3F701 /* BibDocument_DataSource.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibDocument_DataSource.m; sourceTree = "<group>"; };
 		F9022C65075802E300C3F701 /* BibDocument.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibDocument.h; sourceTree = "<group>"; };
 		F9022C66075802E300C3F701 /* BibDocument.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibDocument.m; sourceTree = "<group>"; };
-		F9022C67075802E300C3F701 /* BibEditor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibEditor.h; sourceTree = "<group>"; };
-		F9022C68075802E300C3F701 /* BibEditor.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibEditor.m; sourceTree = "<group>"; };
+		F9022C67075802E300C3F701 /* BDSKEditor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKEditor.h; sourceTree = "<group>"; };
+		F9022C68075802E300C3F701 /* BDSKEditor.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKEditor.m; sourceTree = "<group>"; };
 		F9022C69075802E300C3F701 /* BDSKFiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKFiler.h; sourceTree = "<group>"; };
 		F9022C6A075802E300C3F701 /* BDSKFiler.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKFiler.m; sourceTree = "<group>"; };
 		F9022C6D075802E300C3F701 /* BibItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibItem.h; sourceTree = "<group>"; };
@@ -1321,7 +1323,6 @@
 		F9022CBE0758049200C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ReadMe.nib; sourceTree = SOURCE_ROOT; };
 		F9022CC1075804A600C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/AutoFile.nib; sourceTree = SOURCE_ROOT; };
 		F9022CC3075804A600C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibDocument.nib; sourceTree = "<group>"; };
-		F9022CC5075804A600C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibEditor.nib; sourceTree = SOURCE_ROOT; };
 		F9022CCE075804E400C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibPref_AutoFile.nib; sourceTree = SOURCE_ROOT; };
 		F9022CD0075804E400C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibPref_Cite.nib; sourceTree = SOURCE_ROOT; };
 		F9022CD2075804E400C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibPref_CiteKey.nib; sourceTree = SOURCE_ROOT; };
@@ -1579,7 +1580,6 @@
 		F9C7D3D70BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKTypeInfoEditor.nib; sourceTree = "<group>"; };
 		F9C7D3D80BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKURLGroupSheet.nib; sourceTree = "<group>"; };
 		F9C7D3D90BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
-		F9C7D3DB0BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibEditor.nib; sourceTree = SOURCE_ROOT; };
 		F9C7D3DE0BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_AutoFile.nib; sourceTree = SOURCE_ROOT; };
 		F9C7D3DF0BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_Cite.nib; sourceTree = SOURCE_ROOT; };
 		F9C7D3E00BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_CiteKey.nib; sourceTree = SOURCE_ROOT; };
@@ -1858,7 +1858,7 @@
 				457538400B701ECD00C0E49B /* BDSKWebGroupView.nib */,
 				CE7F64C20B41694A00A919D0 /* BDSKSearchGroupView.nib */,
 				CE4B5F0F0BF3DB0200A73E42 /* BibDocument.nib */,
-				F9022CC4075804A600C3F701 /* BibEditor.nib */,
+				CE424B0C0D0F5C6800F824E7 /* BDSKEditor.nib */,
 				F9022CCD075804E400C3F701 /* BibPref_AutoFile.nib */,
 				F9022CCF075804E400C3F701 /* BibPref_Cite.nib */,
 				F9022CD1075804E400C3F701 /* BibPref_CiteKey.nib */,
@@ -2116,7 +2116,7 @@
 				CE518F2609E526E000E97C3A /* BDSKTextViewFindController.m */,
 				3D86633E0802C25800FF1724 /* BDSKTypeInfoEditor.m */,
 				CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */,
-				F9022C68075802E300C3F701 /* BibEditor.m */,
+				F9022C68075802E300C3F701 /* BDSKEditor.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -2579,7 +2579,7 @@
 				F9E07C8209202309007BCDD4 /* BibDocument_Groups.h */,
 				F9E07C8D09202345007BCDD4 /* BibDocument_Search.h */,
 				F9022C8B0758034000C3F701 /* BibDocumentView_Toolbar.h */,
-				F9022C67075802E300C3F701 /* BibEditor.h */,
+				F9022C67075802E300C3F701 /* BDSKEditor.h */,
 				F920DAFE075C2B69000C5FCA /* BibItem+Scripting.h */,
 				F9022C6D075802E300C3F701 /* BibItem.h */,
 				F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */,
@@ -3168,7 +3168,6 @@
 				F9022CBF0758049200C3F701 /* ReadMe.nib in Resources */,
 				F9022CC6075804A600C3F701 /* AutoFile.nib in Resources */,
 				CE4B5F100BF3DB0200A73E42 /* BibDocument.nib in Resources */,
-				F9022CC8075804A600C3F701 /* BibEditor.nib in Resources */,
 				F9022CD7075804E400C3F701 /* BibPref_AutoFile.nib in Resources */,
 				F9022CD8075804E400C3F701 /* BibPref_Cite.nib in Resources */,
 				F9022CD9075804E400C3F701 /* BibPref_CiteKey.nib in Resources */,
@@ -3310,6 +3309,7 @@
 				CE2A1B6A0CE4D13600A0499B /* NewBookmark.tiff in Resources */,
 				CE2A1B6B0CE4D13700A0499B /* SmallBookmark.tiff in Resources */,
 				CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */,
+				CE424B120D0F5C6800F824E7 /* BDSKEditor.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3508,7 +3508,7 @@
 				F9022C7E075802E300C3F701 /* BDSKOpenCommand.m in Sources */,
 				F9022C7F075802E300C3F701 /* BibDocument_DataSource.m in Sources */,
 				F9022C80075802E300C3F701 /* BibDocument.m in Sources */,
-				F9022C81075802E300C3F701 /* BibEditor.m in Sources */,
+				F9022C81075802E300C3F701 /* BDSKEditor.m in Sources */,
 				F9022C82075802E300C3F701 /* BDSKFiler.m in Sources */,
 				F9022C84075802E300C3F701 /* BibItem.m in Sources */,
 				F9022C86075802E300C3F701 /* BDSKPersonController.m in Sources */,
@@ -4005,6 +4005,15 @@
 			name = SelectEncodingsPanel.nib;
 			sourceTree = "<group>";
 		};
+		CE424B0C0D0F5C6800F824E7 /* BDSKEditor.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CE424B0D0D0F5C6800F824E7 /* English */,
+				CE424B130D0F5C9C00F824E7 /* French */,
+			);
+			name = BDSKEditor.nib;
+			sourceTree = "<group>";
+		};
 		CE42A2680A99BE2400C62D85 /* BDSKErrorEditWindow.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -4192,15 +4201,6 @@
 				F9C7D3C60BE927DF00D65C7F /* French */,
 			);
 			name = AutoFile.nib;
-			sourceTree = "<group>";
-		};
-		F9022CC4075804A600C3F701 /* BibEditor.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F9022CC5075804A600C3F701 /* English */,
-				F9C7D3DB0BE927E100D65C7F /* French */,
-			);
-			name = BibEditor.nib;
 			sourceTree = "<group>";
 		};
 		F9022CCD075804E400C3F701 /* BibPref_AutoFile.nib */ = {

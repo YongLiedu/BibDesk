@@ -48,7 +48,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKGroupsArray.h"
 
-#import "BibEditor.h"
+#import "BDSKEditor.h"
 #import "BDSKPersonController.h"
 #import "BDSKDocumentInfoWindowController.h"
 #import "BDSKMacroWindowController.h"
@@ -319,32 +319,32 @@
     }
 }
 
-- (BibEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew{
-    BibEditor *editor = nil;
+- (BDSKEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew{
+    BDSKEditor *editor = nil;
 	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
 	NSWindowController *wc;
 	
 	while(wc = [wcEnum nextObject]){
-		if([wc isKindOfClass:[BibEditor class]] && [[(BibEditor*)wc publication] isEqual:pub]){
-			editor = (BibEditor*)wc;
+		if([wc isKindOfClass:[BDSKEditor class]] && [[(BDSKEditor*)wc publication] isEqual:pub]){
+			editor = (BDSKEditor*)wc;
 			break;
 		}
 	}
     if(editor == nil && createNew){
-        editor = [[BibEditor alloc] initWithPublication:pub];
+        editor = [[BDSKEditor alloc] initWithPublication:pub];
         [self addWindowController:editor];
         [editor release];
     }
     return editor;
 }
 
-- (BibEditor *)editPub:(BibItem *)pub{
-    BibEditor *editor = [self editorForPublication:pub create:YES];
+- (BDSKEditor *)editPub:(BibItem *)pub{
+    BDSKEditor *editor = [self editorForPublication:pub create:YES];
     [editor show];
     return editor;
 }
 
-- (BibEditor *)editPubBeforePub:(BibItem *)pub{
+- (BDSKEditor *)editPubBeforePub:(BibItem *)pub{
     unsigned int idx = [shownPublications indexOfObject:pub];
     if(idx == NSNotFound){
         NSBeep();
@@ -355,7 +355,7 @@
     return [self editPub:[shownPublications objectAtIndex:idx]];
 }
 
-- (BibEditor *)editPubAfterPub:(BibItem *)pub{
+- (BDSKEditor *)editPubAfterPub:(BibItem *)pub{
     unsigned int idx = [shownPublications indexOfObject:pub];
     if(idx == NSNotFound){
         NSBeep();

@@ -43,7 +43,7 @@
 
 /* Implements the script command 'open'.
 It can be used with 
-. publications to open their BibEditor and
+. publications to open their BDSKEditor and
 . authors to open their author window
 */
 

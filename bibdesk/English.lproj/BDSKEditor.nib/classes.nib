@@ -8,35 +8,6 @@
         }, 
         {CLASS = BDSKDragWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
         {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
-        {CLASS = BDSKEditorTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {
-            CLASS = BDSKEditorTextFieldCell; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {buttonTarget = id; }; 
-            SUPERCLASS = NSTextFieldCell; 
-        }, 
-        {CLASS = BDSKEditorTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
-        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {
-            CLASS = BDSKImagePopUpButton; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {delegate = id; }; 
-            SUPERCLASS = NSPopUpButton; 
-        }, 
-        {
-            CLASS = BDSKLabelTextFieldCell; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSTextFieldCell; 
-        }, 
-        {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
-        {
-            ACTIONS = {startAnimation = id; stopAnimation = id; }; 
-            CLASS = BDSKStatusBar; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {delegate = id; textCell = id; }; 
-            SUPERCLASS = BDSKGradientView; 
-        }, 
-        {CLASS = BDSKTabView; LANGUAGE = ObjC; SUPERCLASS = NSTabView; }, 
         {
             ACTIONS = {
                 addLinkedFileFromMenuItem = id; 
@@ -67,7 +38,7 @@
                 toggleStatusBar = id; 
                 trashLocalFile = id; 
             }; 
-            CLASS = BibEditor; 
+            CLASS = BDSKEditor; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 abstractView = NSTextView; 
@@ -94,6 +65,35 @@
             }; 
             SUPERCLASS = NSWindowController; 
         }, 
+        {CLASS = BDSKEditorTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
+        {
+            CLASS = BDSKEditorTextFieldCell; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {buttonTarget = id; }; 
+            SUPERCLASS = NSTextFieldCell; 
+        }, 
+        {CLASS = BDSKEditorTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
+        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {
+            CLASS = BDSKImagePopUpButton; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {delegate = id; }; 
+            SUPERCLASS = NSPopUpButton; 
+        }, 
+        {
+            CLASS = BDSKLabelTextFieldCell; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSTextFieldCell; 
+        }, 
+        {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
+        {
+            ACTIONS = {startAnimation = id; stopAnimation = id; }; 
+            CLASS = BDSKStatusBar; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {delegate = id; textCell = id; }; 
+            SUPERCLASS = BDSKGradientView; 
+        }, 
+        {CLASS = BDSKTabView; LANGUAGE = ObjC; SUPERCLASS = NSTabView; }, 
         {
             ACTIONS = {delete = id; selectNextIcon = id; selectPreviousIcon = id; }; 
             CLASS = FileView; 

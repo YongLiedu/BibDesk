@@ -1,4 +1,4 @@
-//  BibEditor.m
+//  BDSKEditor.m
 
 //  Created by Michael McCracken on Mon Dec 24 2001.
 /*
@@ -35,7 +35,7 @@
  */
 
 
-#import "BibEditor.h"
+#import "BDSKEditor.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
@@ -85,7 +85,7 @@
 #import "BDSKEditorTableView.h"
 #import "BDSKEditorTextFieldCell.h"
 
-static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
+static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
 
 // offset of the table from the left window edge
 #define TABLE_OFFSET 13.0
@@ -93,7 +93,7 @@ static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave na
 // this was copied verbatim from a Finder saved search for all items of kind document modified in the last week
 static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'public.content') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
 
-@interface BibEditor (Private)
+@interface BDSKEditor (Private)
 
 - (void)setupActionButton;
 - (void)setupButtonCells;
@@ -106,7 +106,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 @end
 
-@implementation BibEditor
+@implementation BDSKEditor
 
 + (void)initialize
 {
@@ -120,11 +120,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (NSString *)windowNibName{
-    return @"BibEditor";
+    return @"BDSKEditor";
 }
 
 - (id)initWithPublication:(BibItem *)aBib{
-    if (self = [super initWithWindowNibName:@"BibEditor"]) {
+    if (self = [super initWithWindowNibName:@"BDSKEditor"]) {
         
         publication = [aBib retain];
         fields = [[NSMutableArray alloc] init];
@@ -213,12 +213,12 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     [fileSplitView setBlendStyle:BDSKMinBlendStyleMask];
     
-    [self setWindowFrameAutosaveNameOrCascade:BDSKBibEditorFrameAutosaveName];
+    [self setWindowFrameAutosaveNameOrCascade:BDSKEditorFrameAutosaveName];
     
     // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
-    [mainSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorMainSplitView"];
-    [fieldSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFieldSplitView"];
-    [fileSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFileSplitView"];
+    [mainSplitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKEditorMainSplitView"];
+    [fieldSplitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKEditorFieldSplitView"];
+    [fileSplitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKEditorFileSplitView"];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [mainSplitView setPositionAutosaveName:nil];
@@ -2125,7 +2125,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)openParentItemForField:(NSString *)field{
     BibItem *parent = [publication crossrefParent];
     if(parent){
-        BibEditor *editor = [[self document] editPub:parent];
+        BDSKEditor *editor = [[self document] editPub:parent];
         if(editor && field)
             [editor setKeyField:field];
     }
@@ -2460,7 +2460,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     [fileView removeObserver:self forKeyPath:@"iconScale"];
     
-    // @@ problem here:  BibEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
+    // @@ problem here:  BDSKEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
     [[self retain] autorelease];
 }
 
@@ -2861,7 +2861,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 @end
 
-@implementation BibEditor (Private)
+@implementation BDSKEditor (Private)
 
 #define AddFields(newFields) \
     e = [newFields objectEnumerator]; \
@@ -3132,7 +3132,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)breakTextStorageConnections {
     
-    // This is a fix for bug #1483613 (and others).  We set some of the BibItem's fields to -[[NSTextView textStorage] mutableString] for efficiency in tracking changes for live editing updates in the main window preview.  However, this causes a retain cycle, as the text storage retains its text view; any font changes to the editor text view will cause the retained textview to message its delegate (BibEditor) which is garbage in -[NSTextView _addToTypingAttributes].
+    // This is a fix for bug #1483613 (and others).  We set some of the BibItem's fields to -[[NSTextView textStorage] mutableString] for efficiency in tracking changes for live editing updates in the main window preview.  However, this causes a retain cycle, as the text storage retains its text view; any font changes to the editor text view will cause the retained textview to message its delegate (BDSKEditor) which is garbage in -[NSTextView _addToTypingAttributes].
     NSEnumerator *fieldE = [[[BDSKTypeManager sharedManager] noteFieldsSet] objectEnumerator];
     NSString *currentValue = nil;
     NSString *fieldName = nil;

@@ -40,7 +40,7 @@
 #import "BDSKCountedSet.h"
 #import "BDSKGroup.h"
 #import "BDSKCategoryGroup.h"
-#import "BibEditor.h"
+#import "BDSKEditor.h"
 #import "BDSKTypeManager.h"
 #import "BibAuthor.h"
 #import "BDSKStringConstants.h"
@@ -1178,7 +1178,7 @@ static CFDictionaryRef selectorTable = NULL;
 - (void)setField:(NSString *)key toValueWithoutUndo:(NSString *)value{
     NSParameterAssert(nil != key);
     NSParameterAssert(nil != value);
-    // this method is intended as a workaround for a BibEditor issue with using -[NSTextStorage mutableString] to track changes
+    // this method is intended as a workaround for a BDSKEditor issue with using -[NSTextStorage mutableString] to track changes
     OBPRECONDITION([value isEqualToString:[pubFields objectForKey:key]]);
     [pubFields setObject:value forKey:key];
 }
@@ -3547,7 +3547,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     context.dict = pubFields;
     context.removalSet = emptyFieldsToRemove;
     
-    // @@ BibEditor handles empty fields specially; fields set to @"" are shown, but nil fields are not.  This code also handles type conversions without loss of information.  It would be nice to move more of this functionality into the controller layer, instead of the model.  We could have a convertToType: method that handles the conversion, and the editor could handle the optional/required/user fields by displaying the appropriate UI.
+    // @@ BDSKEditor handles empty fields specially; fields set to @"" are shown, but nil fields are not.  This code also handles type conversions without loss of information.  It would be nice to move more of this functionality into the controller layer, instead of the model.  We could have a convertToType: method that handles the conversion, and the editor could handle the optional/required/user fields by displaying the appropriate UI.
     
     // see if we have a nil value for any required field; if so, give it an empty value and don't remove it at the end
     CFArrayApplyFunction(requiredFields, CFRangeMake(0, CFArrayGetCount(requiredFields)), setEmptyStringIfObjectIsNilAndExcludeFromRemoval, &context);

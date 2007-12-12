@@ -3,27 +3,6 @@
         {CLASS = BDSKContainerView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKDragWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
         {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
-        {CLASS = BDSKEditorTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
-        {CLASS = BDSKForm; LANGUAGE = ObjC; SUPERCLASS = NSForm; }, 
-        {CLASS = BDSKFormCell; LANGUAGE = ObjC; SUPERCLASS = NSFormCell; }, 
-        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
-        {
-            CLASS = BDSKImagePopUpButtonCell; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSPopUpButtonCell; 
-        }, 
-        {
-            CLASS = BDSKPreviewer; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {imagePreviewView = NSImageView; }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {CLASS = BDSKRatingButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
-        {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
-        {CLASS = BDSKStatusBar; LANGUAGE = ObjC; SUPERCLASS = BDSKGradientView; }, 
-        {CLASS = BDSKTabView; LANGUAGE = ObjC; SUPERCLASS = NSTabView; }, 
-        {CLASS = BDSKUndoTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {
             ACTIONS = {
                 bibTypeDidChange = id; 
@@ -55,7 +34,7 @@
                 toggleSnoopDrawer = id; 
                 toggleStatusBar = id; 
             }; 
-            CLASS = BibEditor; 
+            CLASS = BDSKEditor; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 abstractView = NSTextView; 
@@ -95,6 +74,27 @@
             }; 
             SUPERCLASS = NSWindowController; 
         }, 
+        {CLASS = BDSKEditorTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
+        {CLASS = BDSKForm; LANGUAGE = ObjC; SUPERCLASS = NSForm; }, 
+        {CLASS = BDSKFormCell; LANGUAGE = ObjC; SUPERCLASS = NSFormCell; }, 
+        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
+        {
+            CLASS = BDSKImagePopUpButtonCell; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSPopUpButtonCell; 
+        }, 
+        {
+            CLASS = BDSKPreviewer; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {imagePreviewView = NSImageView; }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {CLASS = BDSKRatingButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
+        {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
+        {CLASS = BDSKStatusBar; LANGUAGE = ObjC; SUPERCLASS = BDSKGradientView; }, 
+        {CLASS = BDSKTabView; LANGUAGE = ObjC; SUPERCLASS = NSTabView; }, 
+        {CLASS = BDSKUndoTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = NSObject; LANGUAGE = ObjC; }, 
         {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 

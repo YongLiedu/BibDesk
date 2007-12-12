@@ -1,4 +1,4 @@
-//  BibEditor.h
+//  BDSKEditor.h
 
 //  Created by Michael McCracken on Mon Dec 24 2001.
 /*
@@ -34,7 +34,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*! @header BibEditor.h
+/*! @header BDSKEditor.h
     @discussion The class for editing BibItems. Handles the UI for the fields and notes.
 */ 
 
@@ -53,17 +53,17 @@
 @class BDSKAlert;
 @class BibAuthor;
 @class BDSKZoomablePDFView;
-@class BibEditor;
+@class BDSKEditor;
 @class FileView;
 @class BDSKSplitView;
 @class BDSKEditorTableView;
 
 /*!
-    @class BibEditor
+    @class BDSKEditor
     @abstract WindowController for the edit window
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
-@interface BibEditor : NSWindowController {
+@interface BDSKEditor : NSWindowController {
 	IBOutlet BDSKSplitView *mainSplitView;
 	IBOutlet BDSKSplitView *fileSplitView;
 	IBOutlet BDSKSplitView *fieldSplitView;
