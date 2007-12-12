@@ -1682,6 +1682,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 // send when the user wants to end editing
+// @@ why is this delegate method used instead of an action?  is this layer of validation called after the formatter succeeds?
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor{
     BOOL endEdit = YES;
     
@@ -1710,6 +1711,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                 message = NSLocalizedString(@"Cannot set this cite key as this would lead to a crossreff chain.", @"Informative text in alert dialog");
         }
         
+        // @@ fixme: button titles don't correspond to message options
         if (message) {
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Message in alert dialog when entering an invalid value") 
                                                  defaultButton:NSLocalizedString(@"OK", @"Button title")
