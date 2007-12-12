@@ -97,10 +97,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)setupActionButton;
 - (void)setupButtonCells;
-- (void)setupFields;
 - (void)setupMatrix;
 - (void)matrixFrameDidChange:(NSNotification *)notification;
 - (void)setupTypePopUp;
+- (void)resetFields;
+- (void)reloadTable;
 - (void)registerForNotifications;
 - (void)breakTextStorageConnections;
 
@@ -230,7 +231,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
     
-    [self setupFields];
+    [self resetFields];
+    [self setupMatrix];
     if (isEditable)
         [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
     
@@ -1346,7 +1348,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         [publication setField:oldField toValue:nil];
         [self userChangedField:oldField from:oldValue to:@""];
         [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
-        [self setupFields];
+        [self resetFields];
     }
 }
 
@@ -1891,17 +1893,17 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	else if([changeKey isEqualToString:BDSKCrossrefString] || 
 	   (parentDidChange && [changeKey isEqualToString:BDSKCiteKeyString])){
         // Reset if the crossref changed, or our parent's cite key changed.
-        // If we are editing a crossref field, we should first set the new value, because setupFields will set the edited value. This happens when it is set through drag/drop
+        // If we are editing a crossref field, we should first set the new value, because resetFields will set the edited value. This happens when it is set through drag/drop
 		int editedRow = [tableView editedRow];
         if (editedRow != -1 && [[fields objectAtIndex:editedRow] isEqualToString:changeKey])
             [[tableView currentEditor] setString:[publication valueOfField:changeKey]];
         // every field value could change, but not the displayed field names
-        [tableView reloadData];
+        [self reloadTable];
 		[authorTableView reloadData];
 		[[self window] setTitle:[publication displayTitle]];
 	}
 	else if([changeKey isEqualToString:BDSKPubTypeString]){
-		[self setupFields];
+		[self resetFields];
 		[self updateTypePopup];
 	}
 	else if([changeKey isEqualToString:BDSKCiteKeyString]){
@@ -1959,10 +1961,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         if (([NSString isEmptyAsComplexString:newValue] && [fields containsObject:changeKey]) || 
             ([NSString isEmptyAsComplexString:newValue] == NO && [fields containsObject:changeKey] == NO)) {
 			// a field was added or removed
-            [self setupFields];
+            [self resetFields];
 		} else {
             // a field value changed
-            [tableView reloadData];
+            [self reloadTable];
         }
 	}
     
@@ -1978,7 +1980,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         while (pub = [pubEnum nextObject]) {
             if ([crossref caseInsensitiveCompare:[pub valueForKey:@"citeKey"]] == NSOrderedSame) {
                 // changes in the parent cannot change the field names, as custom fields are never inherited
-                [tableView reloadData];
+                [self reloadTable];
                 break;
             }
         }
@@ -1987,22 +1989,29 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
  
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
 	[self setupTypePopUp];
-	[self setupFields];
+	[self resetFields];
 }
  
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
     // ensure that the pub updates first, since it observes this notification also
     [publication customFieldsDidChange:aNotification];
-	[self setupFields];
+	[self resetFields];
+    [self setupMatrix];
     [authorTableView reloadData];
 }
 
 - (void)macrosDidChange:(NSNotification *)notification{
 	id changedOwner = [[notification object] owner];
-	if(changedOwner && changedOwner != [publication owner])
-		return; // only macro changes for our own document or the global macros
-	
-	[tableView reloadData];   
+	if(changedOwner == nil || changedOwner == [publication owner]) {
+        NSEnumerator *fieldEnum = [fields objectEnumerator];
+        NSString *field;
+        while (field = [fieldEnum nextObject]) {
+            if ([[publication valueOfField:field] isComplex]) {
+                [self reloadTable];
+                break;
+            }
+        }
+    }
 }
 
 - (void)fileURLDidChange:(NSNotification *)notification{
@@ -2832,6 +2841,34 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 @implementation BDSKEditor (Private)
 
+- (void)reloadTable{
+	// if we were editing in the form, we will restore the selected cell and the selection
+	NSResponder *firstResponder = [[self window] firstResponder];
+	NSString *editedTitle = nil;
+	NSRange selection = NSMakeRange(0, 0);
+	if([firstResponder isKindOfClass:[NSText class]] && [[(NSText *)firstResponder delegate] isEqual:tableView]){
+		selection = [(NSText *)firstResponder selectedRange];
+		editedTitle = [fields objectAtIndex:[tableView editedRow]];
+		forceEndEditing = YES;
+		if (![[self window] makeFirstResponder:[self window]])
+			[[self window] endEditingFor:nil];
+		forceEndEditing = NO;
+	}
+	
+    [tableView reloadData];
+    
+	// restore the edited cell and its selection
+	if(editedTitle){
+        unsigned int editedRow = [fields indexOfObject:editedTitle];
+        if (editedRow != NSNotFound) {
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:editedRow] byExtendingSelection:NO];
+            [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
+            if ([[[tableView currentEditor] string] length] >= NSMaxRange(selection))
+                [[tableView currentEditor] setSelectedRange:selection];
+        }
+	}
+}
+
 #define AddFields(newFields, checkEmpty) \
     e = [newFields objectEnumerator]; \
     while(tmp = [e nextObject]){ \
@@ -2841,7 +2878,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [fields addObject:tmp]; \
     }
 
-- (void)setupFields{
+- (void)resetFields{
 	// if we were editing in the form, we will restore the selected cell and the selection
 	NSResponder *firstResponder = [[self window] firstResponder];
 	NSString *editedTitle = nil;
@@ -2923,8 +2960,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	}
     
 	didSetupFields = YES;
-    
-	[self setupMatrix];
 }
 
 #define AddMatrixEntries(fields, cell) \
