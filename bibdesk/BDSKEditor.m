@@ -1878,7 +1878,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	NSString *newValue = [userInfo objectForKey:@"value"];
 	BibItem *sender = (BibItem *)[notification object];
 	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	BOOL parentDidChange = (crossref != nil && 
 							([crossref caseInsensitiveCompare:[sender citeKey]] == NSOrderedSame || 
 							 [crossref caseInsensitiveCompare:[userInfo objectForKey:@"oldCiteKey"]] == NSOrderedSame));
@@ -2303,7 +2302,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 	// Test a keyboard mask so that we can override all fields when dragging into the editor window (option)
 	// create a crossref (cmd-option), or fill empty fields (no modifiers)
-	unsigned modifierFlags = [NSApp currentModifierFlags]; // use the Carbon function since [NSApp currentModifierFlags] won't work if we're not the front app
+    
+    // uses the Carbon function since [NSApp modifierFlags] won't work if we're not the front app
+	unsigned modifierFlags = [NSApp currentModifierFlags];
 	
 	// we always have sourceDragMask & NSDragOperationLink here for some reason, so test the mask manually
 	if((modifierFlags & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask)){
@@ -2311,7 +2312,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		// linking, try to set the crossref field
         NSString *crossref = [tempBI citeKey];
 		NSString *message = nil;
-        NSString *oldValue = [[[publication valueOfField:BDSKCrossrefString] retain] autorelease];
 		
 		// first check if we don't create a Crossref chain
         int errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
