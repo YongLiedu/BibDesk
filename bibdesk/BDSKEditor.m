@@ -2190,9 +2190,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	}
 }
 
-#warning how does this work?
-- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView forFormCell:(id)aCell {
-    return [[aCell representedObject] isCitationField];
+- (BOOL)tableView:(NSTableView *)tv textViewShouldLinkKeys:(NSTextView *)textView forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+    return [tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"] && [[fields objectAtIndex:row] isCitationField];
 }
 
 static NSString *queryStringWithCiteKey(NSString *citekey)
@@ -2200,8 +2199,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return [NSString stringWithFormat:@"(net_sourceforge_bibdesk_citekey = '%@'cd) && ((kMDItemContentType != *) || (kMDItemContentType != com.apple.mail.emlx))", citekey];
 }
 
-- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key forFormCell:(id)aCell {
-    if ([[[publication owner] publications] itemForCiteKey:key] == nil) {
+- (BOOL)tableView:(NSTableView *)tv textView:(NSTextView *)textView isValidKey:(NSString *)key forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+    if ([tv isEqual:tableView] == NO || [[tableColumn identifier] isEqualToString:@"value"] == NO) {
+        return NO;
+    } else if ([[[publication owner] publications] itemForCiteKey:key] == nil) {
         // don't add a search with the query here, since it gets called on every keystroke; the formatter method gets called at the end, or when scrolling
         NSString *queryString = queryStringWithCiteKey(key);
         return [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryString attribute:(id)kMDItemPath] count] > 0;
@@ -2209,19 +2210,23 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return YES;
 }
 
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex forFormCell:(id)aCell {
-    BibItem *pub = [[[publication owner] publications] itemForCiteKey:aLink];
-    if (nil == pub) {
-        NSString *path = [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryStringWithCiteKey(aLink) attribute:(id)kMDItemPath] firstObject];
-        // if it was a valid key/link, we should definitely have a path, but better make sure
-        if (path)
-            [[NSWorkspace sharedWorkspace] openLinkedFile:path];
-        else
-            NSBeep();
+- (BOOL)tableView:(NSTableView *)tv textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+    if ([tv isEqual:tableView] == NO || [[tableColumn identifier] isEqualToString:@"value"] == NO) {
+        return NO;
     } else {
-        [[self document] editPub:[[[publication owner] publications] itemForCiteKey:aLink]];
+        BibItem *pub = [[[publication owner] publications] itemForCiteKey:aLink];
+        if (nil == pub) {
+            NSString *path = [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryStringWithCiteKey(aLink) attribute:(id)kMDItemPath] firstObject];
+            // if it was a valid key/link, we should definitely have a path, but better make sure
+            if (path)
+                [[NSWorkspace sharedWorkspace] openLinkedFile:path];
+            else
+                NSBeep();
+        } else {
+            [[self document] editPub:[[[publication owner] publications] itemForCiteKey:aLink]];
+        }
+        return YES;
     }
-    return YES;
 }
 
 - (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key {
@@ -2556,7 +2561,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             }
         }
         
-        if (NO == [object isEqualAsComplexString:[publication valueOfField:field]])
+        NSString *oldValue = [publication valueOfField:field];
+        if (oldValue == nil)
+            oldValue = @"";
+        if (object == nil)
+            object = @"";
+        
+        if (NO == [object isEqualAsComplexString:oldValue])
             [self recordChangingField:field toValue:object];
     }
 }
@@ -2870,11 +2881,12 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 @implementation BDSKEditor (Private)
 
-#define AddFields(newFields) \
+#define AddFields(newFields, checkEmpty) \
     e = [newFields objectEnumerator]; \
     while(tmp = [e nextObject]){ \
         if ([ignoredKeys containsObject:tmp]) continue; \
-		[ignoredKeys addObject:tmp]; \
+        if (checkEmpty && [[publication valueOfField:tmp inherit:NO] isEqualToString:@""]) continue; \
+        [ignoredKeys addObject:tmp]; \
         [fields addObject:tmp]; \
     }
 
@@ -2909,11 +2921,14 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	
     [fields removeAllObjects];
 	
+    BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
+    NSString *type = [publication pubType];
+    
 	// now add the entries to the form
-	AddFields([[BDSKTypeManager sharedManager] requiredFieldsForType:[publication pubType]]);
-	AddFields([[BDSKTypeManager sharedManager] optionalFieldsForType:[publication pubType]]);
-	AddFields([[BDSKTypeManager sharedManager] userDefaultFieldsForType:[publication pubType]]);
-	AddFields(allFields);
+	AddFields([tm requiredFieldsForType:type], NO);
+	AddFields([tm optionalFieldsForType:type], NO);
+	AddFields([tm userDefaultFieldsForType:type], NO);
+	AddFields(allFields, YES);
     
     [ignoredKeys release];
     
@@ -2985,7 +3000,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSString *editedTitle = nil;
 	int editedIndex = -1;
     if([[self window] firstResponder] == extraBibFields)
-        editedTitle = [(NSFormCell *)[extraBibFields selectedCell] representedObject];
+        editedTitle = [(NSCell *)[extraBibFields selectedCell] representedObject];
 	
 	NSEnumerator *e;
     NSString *tmp;

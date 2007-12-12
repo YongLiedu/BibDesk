@@ -38,6 +38,7 @@
 
 #import "BDSKEditorTableView.h"
 #import "BDSKEditorTextFieldCell.h"
+#import "BDSKFieldEditor.h"
 
 
 @implementation BDSKEditorTableView
@@ -116,5 +117,28 @@
 - (BOOL)acceptsFirstResponder { return NO; }
 
 - (void)highlightSelectionInClipRect:(NSRect)clipRect {}
+
+#pragma mark BDSKFieldEditorDelegate protocol
+
+- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView {
+    int row = [self editedRow], column = [self editedColumn];
+    NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
+    return [[self delegate] respondsToSelector:@selector(tableView:textViewShouldLinkKeys:forTableColumn:row:)] &&
+           [[self delegate] tableView:self textViewShouldLinkKeys:textView forTableColumn:tableColumn row:row];
+}
+
+- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key{
+    int row = [self editedRow], column = [self editedColumn];
+    NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
+    return [[self delegate] respondsToSelector:@selector(tableView:textView:isValidKey:forTableColumn:row:)] &&
+           [[self delegate] tableView:self textView:textView isValidKey:key forTableColumn:tableColumn row:row];
+}
+
+- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex{
+    int row = [self editedRow], column = [self editedColumn];
+    NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
+    return [[self delegate] respondsToSelector:@selector(tableView:textView:clickedOnLink:atIndex:forTableColumn:row:)] &&
+           [[self delegate] tableView:self textView:textView clickedOnLink:aLink atIndex:charIndex forTableColumn:tableColumn row:row];
+}
 
 @end
