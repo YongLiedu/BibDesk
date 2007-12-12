@@ -1300,6 +1300,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 // Add field sheet support
 // ----------------------------------------------------------------------------------------
 
+#warning Empty fields: this assumes the displayed fields are all non-nil fields, which may not be true
+
 - (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *newField = [addFieldController field];
     if(returnCode == NSCancelButton || newField == nil)
@@ -1331,64 +1333,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [addFieldController release];
 }
 
-#pragma mark Key field
-
-- (NSString *)keyField{
-    NSString *keyField = nil;
-    NSString *tabId = [[tabView selectedTabViewItem] identifier];
-    if([tabId isEqualToString:BDSKBibtexString]){
-        id firstResponder = [[self window] firstResponder];
-        if ([firstResponder isKindOfClass:[NSText class]] && [firstResponder isFieldEditor])
-            firstResponder = [firstResponder delegate];
-        if(firstResponder == tableView)
-            keyField = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
-        else if(firstResponder == extraBibFields)
-            keyField = [[extraBibFields keyCell] representedObject];
-        else if(firstResponder == citeKeyField)
-            keyField = BDSKCiteKeyString;
-        else if(firstResponder == bibTypeButton)
-            keyField = BDSKPubTypeString;
-    }else{
-        keyField = tabId;
-    }
-    return keyField;
-}
-
-- (void)setKeyField:(NSString *)fieldName{
-    if([NSString isEmptyString:fieldName]){
-        return;
-    }else if([fieldName isNoteField]){
-        [tabView selectTabViewItemWithIdentifier:fieldName];
-    }else if([fieldName isEqualToString:BDSKPubTypeString]){
-        [[self window] makeFirstResponder:bibTypeButton];
-    }else if([fieldName isEqualToString:BDSKCiteKeyString]){
-        [citeKeyField selectText:nil];
-    }else if([fieldName isBooleanField] || [fieldName isTriStateField] || [fieldName isRatingField]){
-        int i, j, numRows = [extraBibFields numberOfRows], numCols = [extraBibFields numberOfColumns];
-        id cell;
-        
-        for (i = 0; i < numRows; i++) {
-            for (j = 0; j < numCols; j++) {
-                cell = [extraBibFields cellAtRow:i column:j];
-                if ([[cell representedObject] isEqualToString:fieldName]) {
-                    [[self window] makeFirstResponder:extraBibFields];
-                    [extraBibFields setKeyCell:cell];
-                    return;
-                }
-            }
-        }
-    }else{
-        unsigned int row = [fields indexOfObject:fieldName];
-        if (row != NSNotFound) {
-            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-            [tableView editColumn:1 row:row withEvent:nil select:YES];
-        }
-    }
-}
-
 // ----------------------------------------------------------------------------------------
 #pragma mark ||  delete-Field-Sheet Support
 // ----------------------------------------------------------------------------------------
+
+#warning Empty fields: this assumes the displayed fields are all non-nil fields, which may not be true
 
 - (void)removeFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [removeFieldController field];
@@ -1442,6 +1391,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 #pragma mark Change field name
+
+#warning Empty fields: this assumes the displayed fields are all non-nil fields, which may not be true
 
 - (void)changeFieldSheetDidEnd:(BDSKChangeFieldSheetController *)changeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [changeFieldController field];
@@ -1523,6 +1474,61 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if (sender == tableView)
         field = [fields objectAtIndex:[tableView clickedRow]];
     [self raiseChangeFieldSheetForField:field];
+}
+
+#pragma mark Key field
+
+- (NSString *)keyField{
+    NSString *keyField = nil;
+    NSString *tabId = [[tabView selectedTabViewItem] identifier];
+    if([tabId isEqualToString:BDSKBibtexString]){
+        id firstResponder = [[self window] firstResponder];
+        if ([firstResponder isKindOfClass:[NSText class]] && [firstResponder isFieldEditor])
+            firstResponder = [firstResponder delegate];
+        if(firstResponder == tableView)
+            keyField = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
+        else if(firstResponder == extraBibFields)
+            keyField = [[extraBibFields keyCell] representedObject];
+        else if(firstResponder == citeKeyField)
+            keyField = BDSKCiteKeyString;
+        else if(firstResponder == bibTypeButton)
+            keyField = BDSKPubTypeString;
+    }else{
+        keyField = tabId;
+    }
+    return keyField;
+}
+
+- (void)setKeyField:(NSString *)fieldName{
+    if([NSString isEmptyString:fieldName]){
+        return;
+    }else if([fieldName isNoteField]){
+        [tabView selectTabViewItemWithIdentifier:fieldName];
+    }else if([fieldName isEqualToString:BDSKPubTypeString]){
+        [[self window] makeFirstResponder:bibTypeButton];
+    }else if([fieldName isEqualToString:BDSKCiteKeyString]){
+        [citeKeyField selectText:nil];
+    }else if([fieldName isBooleanField] || [fieldName isTriStateField] || [fieldName isRatingField]){
+        int i, j, numRows = [extraBibFields numberOfRows], numCols = [extraBibFields numberOfColumns];
+        id cell;
+        
+        for (i = 0; i < numRows; i++) {
+            for (j = 0; j < numCols; j++) {
+                cell = [extraBibFields cellAtRow:i column:j];
+                if ([[cell representedObject] isEqualToString:fieldName]) {
+                    [[self window] makeFirstResponder:extraBibFields];
+                    [extraBibFields setKeyCell:cell];
+                    return;
+                }
+            }
+        }
+    }else{
+        unsigned int row = [fields indexOfObject:fieldName];
+        if (row != NSNotFound) {
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [tableView editColumn:1 row:row withEvent:nil select:YES];
+        }
+    }
 }
 
 #pragma mark Text Change handling
