@@ -2184,6 +2184,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	}
 }
 
+#warning how does this work?
 - (BOOL)textViewShouldLinkKeys:(NSTextView *)textView forFormCell:(id)aCell {
     return [[aCell representedObject] isCitationField];
 }
