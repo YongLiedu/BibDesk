@@ -118,9 +118,6 @@ enum {
 // updates derived info from the dictionary
 - (void)updateMetadataForKey:(NSString *)key;
 
-// rearranges the field dictionary, keeping old keys if they have a value
-- (void)makeType;
-
 - (void)createFilesArray;
 
 @end
@@ -319,7 +316,6 @@ static CFDictionaryRef selectorTable = NULL;
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         if(self = [super init]){
-            // we need to set the pubFields first because makeType might have to change it
             pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
             [self setFileType:[coder decodeObjectForKey:@"fileType"]];
             [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
@@ -510,12 +506,7 @@ static CFDictionaryRef selectorTable = NULL;
 
 #pragma mark -
 
-- (void)typeInfoDidChange:(NSNotification *)aNotification{
-	[self makeType];
-}
-
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
-	[self makeType];
 	[groups removeAllObjects];
     // these fields may change type, so our cached values should be discarded
     [people release];
@@ -3382,8 +3373,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 	if(![[self pubType] isEqualToString:newType]){
 		[pubType release];
 		pubType = [newType copy];
-		
-		[self makeType];
 	}
 }
 
@@ -3410,9 +3399,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 	// invalidate the cached groups; they are rebuilt when needed
 	if(allFieldsChanged){
 		[groups removeAllObjects];
-        // re-call make type to make sure we still have all the appropriate bibtex defined fields...
-        // but only if we have set the full pubFields array, as we should not be able to remove necessary fields.
-        [self makeType];
         
         // the URL cache is certainly invalid now
         [cachedURLs removeAllObjects];
@@ -3486,87 +3472,7 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     }
 }
 
-#pragma mark Type info
-
-typedef struct _EmptyFieldApplierContext {
-    NSMutableDictionary *dict;
-    NSMutableSet *removalSet;
-} EmptyFieldApplierContext;
-
-// used to be a #define; changed to function for clarity in debugging
-static inline void setEmptyStringIfObjectIsNilAndExcludeFromRemoval(const void *value, void *ctxt)
-{
-    NSString *key = (NSString *)value;
-    EmptyFieldApplierContext *context = (EmptyFieldApplierContext *)ctxt;
-    if([context->dict objectForKey:key] == nil)
-        [context->dict setObject:@"" forKey:key];
-    [context->removalSet removeObject:key];
-}
-
-// CFSetApplierFunction callback
-static void removeItemsInSetFromDictionary(const void *value, void *context)
-{
-    CFDictionaryRemoveValue((CFMutableDictionaryRef)context, value);
-}
-
-// CFSet string equality callback
-static Boolean stringIsEqualToString(const void *value1, const void *value2) { return [(id)value1 isEqualToString:(id)value2]; }
-
-- (void)makeType{
-    NSString *theType = [self pubType];
-    
-    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
-    
-    // enumerating small arrays by index is generally faster than NSEnumerator, and -makeType is called many times at load
-    CFArrayRef requiredFields = (CFArrayRef)[typeManager requiredFieldsForType:theType];
-    CFArrayRef optionalFields = (CFArrayRef)[typeManager optionalFieldsForType:theType];
-    CFArrayRef userFields = (CFArrayRef)[typeManager userDefaultFieldsForType:theType];
-    
-    // current state of this item's pubFields
-    CFArrayRef allFields = (CFArrayRef)[self allFieldNames];
-    
-    CFIndex allFieldsCount = CFArrayGetCount(allFields);
-    
-    // have to retain keys removed from the dictionary, but we know they're strings
-    CFSetCallBacks callBacks = { 0, OFCFTypeRetain, OFCFTypeRelease, CFCopyDescription, stringIsEqualToString, CFHash };
-    
-    // fixed-size mutable set; this needn't be larger than allFieldsCount
-    NSMutableSet *emptyFieldsToRemove = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), allFieldsCount, &callBacks);
-    NSString *key;
-    
-    CFIndex idx;
-    
-    // for each field currently in this publication, check if it's value is an empty string; if so, add to the set of fields to be removed
-    for (idx = 0; idx < allFieldsCount; idx++) {
-        key = (id)CFArrayGetValueAtIndex(allFields, idx);
-        if ([[pubFields objectForKey:key] isEqualAsComplexString:@""])
-            [emptyFieldsToRemove addObject:key];
-    }   
-    
-    EmptyFieldApplierContext context;
-    context.dict = pubFields;
-    context.removalSet = emptyFieldsToRemove;
-    
-    // @@ BDSKEditor handles empty fields specially; fields set to @"" are shown, but nil fields are not.  This code also handles type conversions without loss of information.  It would be nice to move more of this functionality into the controller layer, instead of the model.  We could have a convertToType: method that handles the conversion, and the editor could handle the optional/required/user fields by displaying the appropriate UI.
-    
-    // see if we have a nil value for any required field; if so, give it an empty value and don't remove it at the end
-    CFArrayApplyFunction(requiredFields, CFRangeMake(0, CFArrayGetCount(requiredFields)), setEmptyStringIfObjectIsNilAndExcludeFromRemoval, &context);
-    
-    // now check the BibTeX-defined optional fields
-    CFArrayApplyFunction(optionalFields, CFRangeMake(0, CFArrayGetCount(optionalFields)), setEmptyStringIfObjectIsNilAndExcludeFromRemoval, &context);
-    
-    // now check all user-defined default fields
-    CFArrayApplyFunction(userFields, CFRangeMake(0, CFArrayGetCount(userFields)), setEmptyStringIfObjectIsNilAndExcludeFromRemoval, &context);
-    
-    // I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others as being non-nil:
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAnnoteString, &context);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAbstractString, &context);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKRssDescriptionString, &context);
-    
-    // now remove everything that's left in removeKeys from pubFields, since it's non-standard for this type
-    CFSetApplyFunction((CFMutableSetRef)emptyFieldsToRemove, removeItemsInSetFromDictionary, pubFields);
-    CFRelease(emptyFieldsToRemove);
-}
+#pragma mark File conversion
 
 static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {

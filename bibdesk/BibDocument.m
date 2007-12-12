@@ -2464,11 +2464,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                selector:@selector(handleApplicationWillTerminateNotification:)
                    name:NSApplicationWillTerminateNotification
                  object:nil];
-        // observe these two on behalf of our BibItems, or else all BibItems register for these notifications and -[BibItem dealloc] gets expensive when unregistering; this means that (shared) items without a document won't get these notifications
-        [nc addObserver:self
-               selector:@selector(handleTypeInfoDidChangeNotification:)
-                   name:BDSKBibTypeInfoChangedNotification
-                 object:[BDSKTypeManager sharedManager]];
+        // observe this on behalf of our BibItems, or else all BibItems register for these notifications and -[BibItem dealloc] gets expensive when unregistering; this means that (shared) items without a document won't get these notifications
         [nc addObserver:self
                selector:@selector(handleCustomFieldsDidChangeNotification:)
                    name:BDSKCustomFieldsChangedNotification
@@ -2682,10 +2678,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification{
     [self saveSortOrder];
-}
-
-- (void)handleTypeInfoDidChangeNotification:(NSNotification *)notification{
-    [publications makeObjectsPerformSelector:@selector(typeInfoDidChange:) withObject:notification];
 }
 
 - (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification{

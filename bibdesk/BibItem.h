@@ -828,7 +828,6 @@ enum {
 
 - (NSString *)documentInfoForKey:(NSString *)key;
 
-- (void)typeInfoDidChange:(NSNotification *)aNotification;
 - (void)customFieldsDidChange:(NSNotification *)aNotification;
 
 - (void)duplicateTitleToBooktitleOverwriting:(BOOL)overwrite;

@@ -250,11 +250,17 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
     
     // Setup the textviews
-    [notesView setString:[publication valueOfField:BDSKAnnoteString inherit:NO]];
+    NSString *currentValue = [publication valueOfField:BDSKAnnoteString inherit:NO];
+    if (currentValue)
+        [notesView setString:currentValue];
     [notesView setEditable:isEditable];
-    [abstractView setString:[publication valueOfField:BDSKAbstractString inherit:NO]];
+    currentValue = [publication valueOfField:BDSKAbstractString inherit:NO];
+    if (currentValue)
+        [abstractView setString:currentValue];
     [abstractView setEditable:isEditable];
-    [rssDescriptionView setString:[publication valueOfField:BDSKRssDescriptionString inherit:NO]];
+    currentValue = [publication valueOfField:BDSKRssDescriptionString inherit:NO];
+    if (currentValue)
+        [rssDescriptionView setString:currentValue];
     [rssDescriptionView setEditable:isEditable];
 	currentEditedView = nil;
     
@@ -1988,8 +1994,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
  
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
-    // ensure that the pub updates first, since it observes this notification also
-    [publication typeInfoDidChange:aNotification];
 	[self setupTypePopUp];
 	[self setupFields];
 }

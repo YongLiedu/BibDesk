@@ -431,7 +431,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)handleTableSelectionChangedNotification:(NSNotification *)notification;
 
 // notifications observed on behalf of owned BibItems for efficiency
-- (void)handleTypeInfoDidChangeNotification:(NSNotification *)notification;
 - (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification;
     
 /*!
