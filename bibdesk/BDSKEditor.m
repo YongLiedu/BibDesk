@@ -2190,8 +2190,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	}
 }
 
-- (BOOL)tableView:(NSTableView *)tv textViewShouldLinkKeys:(NSTextView *)textView forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
-    return [tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"] && [[fields objectAtIndex:row] isCitationField];
+- (BOOL)control:(NSControl *)control textViewShouldLinkKeys:(NSTextView *)textView {
+    return [control isEqual:tableView] && [[fields objectAtIndex:[tableView editedRow]] isCitationField];
 }
 
 static NSString *queryStringWithCiteKey(NSString *citekey)
@@ -2199,21 +2199,20 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return [NSString stringWithFormat:@"(net_sourceforge_bibdesk_citekey = '%@'cd) && ((kMDItemContentType != *) || (kMDItemContentType != com.apple.mail.emlx))", citekey];
 }
 
-- (BOOL)tableView:(NSTableView *)tv textView:(NSTextView *)textView isValidKey:(NSString *)key forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
-    if ([tv isEqual:tableView] == NO || [[tableColumn identifier] isEqualToString:@"value"] == NO) {
-        return NO;
-    } else if ([[[publication owner] publications] itemForCiteKey:key] == nil) {
-        // don't add a search with the query here, since it gets called on every keystroke; the formatter method gets called at the end, or when scrolling
-        NSString *queryString = queryStringWithCiteKey(key);
-        return [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryString attribute:(id)kMDItemPath] count] > 0;
+- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView isValidKey:(NSString *)key {
+    if ([control isEqual:tableView]) {
+        if ([[[publication owner] publications] itemForCiteKey:key] == nil) {
+            // don't add a search with the query here, since it gets called on every keystroke; the formatter method gets called at the end, or when scrolling
+            NSString *queryString = queryStringWithCiteKey(key);
+            return [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryString attribute:(id)kMDItemPath] count] > 0;
+        }
+        return YES;
     }
-    return YES;
+    return NO;
 }
 
-- (BOOL)tableView:(NSTableView *)tv textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
-    if ([tv isEqual:tableView] == NO || [[tableColumn identifier] isEqualToString:@"value"] == NO) {
-        return NO;
-    } else {
+- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex {
+    if ([control isEqual:tableView]) {
         BibItem *pub = [[[publication owner] publications] itemForCiteKey:aLink];
         if (nil == pub) {
             NSString *path = [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryStringWithCiteKey(aLink) attribute:(id)kMDItemPath] firstObject];
@@ -2227,6 +2226,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         }
         return YES;
     }
+    return NO;
 }
 
 - (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key {
