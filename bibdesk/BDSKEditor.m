@@ -196,8 +196,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, TABLE_OFFSET, NSMinXEdge);
     [[tableView enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[tableView enclosingScrollView]];
-    // don't know why, but this is broken
-    [bibTypeButton setNextKeyView:tableView];
     
     edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:1];
     [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
@@ -2068,9 +2066,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem{
-    // fix a weird keyview loop bug
-    if([[tabViewItem identifier] isEqualToString:BDSKBibtexString])
-        [bibTypeButton setNextKeyView:tableView];
 }
 
 // sent by the notesView and the abstractView
