@@ -105,3 +105,107 @@
 }
 
 @end
+
+#if defined(MAC_OS_X_VERSION_10_5) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+
+#import <objc/runtime.h>
+
+@interface NSSplitView (FileViewFixes)
+- (void)_fv_replacementMouseDown:(NSEvent *)theEvent;
+@end
+
+@implementation NSSplitView (FileViewFixes)
+
+static IMP originalMouseDown = NULL;
+
++ (void)load
+{
+    Method m = class_getInstanceMethod(self, @selector(mouseDown:));
+    IMP replacementMouseDown = class_getMethodImplementation(self, @selector(_fv_replacementMouseDown:));
+    originalMouseDown = method_setImplementation(m, replacementMouseDown);
+}
+
+- (void)_fv_replacementMouseDown:(NSEvent *)theEvent;
+{
+    BOOL inDivider = NO;
+    NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    NSArray *subviews = [self subviews];
+    int i, count = [subviews count];
+    id view;
+    NSRect divRect;
+    
+    for (i = 0; i < count - 1; i++) {
+        view = [subviews objectAtIndex:i];
+        divRect = [view frame];
+        if ([self isVertical]) {
+            divRect.origin.x = NSMaxX(divRect);
+            divRect.size.width = [self dividerThickness];
+        } else {
+            divRect.origin.y = NSMaxY(divRect);
+            divRect.size.height = [self dividerThickness];
+        }
+        
+        if (NSPointInRect(mouseLoc, divRect)) {
+            inDivider = YES;
+            break;
+        }
+    }
+    
+    if (inDivider) {
+        originalMouseDown(self, _cmd, theEvent);
+    } else {
+        [[self nextResponder] mouseDown:theEvent];
+    }
+}
+
+@end
+
+#else
+
+@interface PosingSplitView : NSSplitView
+@end
+
+@implementation PosingSplitView
+
++ (void)load
+{
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    [self poseAsClass:NSClassFromString(@"NSSplitView")];
+    [pool release];
+}
+
+- (void)mouseDown:(NSEvent *)theEvent {
+    BOOL inDivider = NO;
+    NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    NSArray *subviews = [self subviews];
+    int i, count = [subviews count];
+    id view;
+    NSRect divRect;
+    
+    for (i = 0; i < count - 1; i++) {
+        view = [subviews objectAtIndex:i];
+        divRect = [view frame];
+        if ([self isVertical]) {
+            divRect.origin.x = NSMaxX(divRect);
+            divRect.size.width = [self dividerThickness];
+        } else {
+            divRect.origin.y = NSMaxY(divRect);
+            divRect.size.height = [self dividerThickness];
+        }
+        
+        if (NSPointInRect(mouseLoc, divRect)) {
+            inDivider = YES;
+            break;
+        }
+    }
+    
+    if (inDivider) {
+        [super mouseDown:theEvent];
+    } else {
+        [[self nextResponder] mouseDown:theEvent];
+    }
+}
+
+@end
+
+#endif
