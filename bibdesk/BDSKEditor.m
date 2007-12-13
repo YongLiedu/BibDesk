@@ -1007,6 +1007,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (IBAction)consolidateLinkedFiles:(id)sender{
 	[self finalizeChangesPreservingSelection:YES];
 	
+    // @@ not clear what's going on here
+#warning this is always NSNotFound
     unsigned int anIndex = NSNotFound;
 	BOOL canSet = YES;
     
