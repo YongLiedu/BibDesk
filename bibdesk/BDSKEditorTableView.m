@@ -63,8 +63,10 @@
             if ([theEvent clickCount] > 1)
                 theEvent = [NSEvent mouseEventWithType:[theEvent type] location:[theEvent locationInWindow] modifierFlags:[theEvent modifierFlags] timestamp:[theEvent timestamp] windowNumber:[theEvent windowNumber] context:[theEvent context] eventNumber:[theEvent eventNumber] clickCount:1 pressure:[theEvent pressure]];
         } else if ([cell isKindOfClass:[NSTextFieldCell class]] && isEditable) {
-            [self selectRowIndexes:[NSIndexSet indexSetWithIndex:clickedRow] byExtendingSelection:NO];
-            [self editColumn:clickedColumn row:clickedRow withEvent:theEvent select:NO];
+            if ([[self window] makeFirstResponder:nil]) {
+                [self selectRowIndexes:[NSIndexSet indexSetWithIndex:clickedRow] byExtendingSelection:NO];
+                [self editColumn:clickedColumn row:clickedRow withEvent:theEvent select:NO];
+            }
             return;
         } else if (isEditable == NO && ([theEvent clickCount] != 2 || [self doubleAction] == NULL)) {
             return;
