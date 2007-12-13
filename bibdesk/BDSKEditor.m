@@ -2043,7 +2043,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)textDidBeginEditing:(NSNotification *)aNotification{
     // Add the mutableString of the text storage to the item's pubFields, so changes
     // are automatically tracked.  We still have to update the UI manually.
-    // The contents of the text views are initialized with the current contents of the BibItem in windowWillLoad:
+    // The contents of the text views are initialized with the current contents of the BibItem in windowDidLoad:
 	currentEditedView = [aNotification object];
     ignoreFieldChange = YES;
     // we need to preserve selection manually; otherwise you end up editing at the end of the string after the call to setField: below
@@ -2086,10 +2086,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return YES;
 }
 
-- (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem{
-}
-
-// sent by the notesView and the abstractView
+// sent by the textViews
 - (void)textDidEndEditing:(NSNotification *)aNotification{
     NSString *field = nil;
     if(currentEditedView == notesView)
