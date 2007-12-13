@@ -2199,14 +2199,23 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return [NSString stringWithFormat:@"(net_sourceforge_bibdesk_citekey = '%@'cd) && ((kMDItemContentType != *) || (kMDItemContentType != com.apple.mail.emlx))", citekey];
 }
 
+- (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key {
+    BOOL isValid;
+    if ([[[publication owner] publications] itemForCiteKey:key] == nil) {
+        NSString *queryString = queryStringWithCiteKey(key);
+        if ([[BDSKPersistentSearch sharedSearch] hasQuery:queryString] == NO) {
+            [[BDSKPersistentSearch sharedSearch] addQuery:queryString scopes:[NSArray arrayWithObject:[[NSFileManager defaultManager] spotlightCacheFolderPathByCreating:NULL]]];
+        }
+        isValid = ([[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryString attribute:(id)kMDItemPath] count] > 0);
+    } else {
+        isValid = YES;
+    }
+    return isValid;
+}
+
 - (BOOL)control:(NSControl *)control textView:(NSTextView *)textView isValidKey:(NSString *)key {
     if ([control isEqual:tableView]) {
-        if ([[[publication owner] publications] itemForCiteKey:key] == nil) {
-            // don't add a search with the query here, since it gets called on every keystroke; the formatter method gets called at the end, or when scrolling
-            NSString *queryString = queryStringWithCiteKey(key);
-            return [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryString attribute:(id)kMDItemPath] count] > 0;
-        }
-        return YES;
+        return [self citationFormatter:citationFormatter isValidKey:key];
     }
     return NO;
 }
@@ -2227,20 +2236,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         return YES;
     }
     return NO;
-}
-
-- (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key {
-    BOOL isValid;
-    if ([[[publication owner] publications] itemForCiteKey:key] == nil) {
-        NSString *queryString = queryStringWithCiteKey(key);
-        if ([[BDSKPersistentSearch sharedSearch] hasQuery:queryString] == NO) {
-            [[BDSKPersistentSearch sharedSearch] addQuery:queryString scopes:[NSArray arrayWithObject:[[NSFileManager defaultManager] spotlightCacheFolderPathByCreating:NULL]]];
-        }
-        isValid = ([[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryString attribute:(id)kMDItemPath] count] > 0);
-    } else {
-        isValid = YES;
-    }
-    return isValid;
 }
 
 #pragma mark dragging destination delegate methods
