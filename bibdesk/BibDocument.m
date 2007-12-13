@@ -120,6 +120,7 @@
 #import "PDFDocument_BDSKExtensions.h"
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
+#import "NSDate_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -1922,13 +1923,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		if([pbURL isFileURL])
             newPubs = newFilePubs = [self newPublicationsForFiles:[NSArray arrayWithObject:[pbURL path]] error:&error];
         else
-            newPubs = [self newPublicationForURL:pbURL error:&error];
+            newPubs = [self newPublicationForURLFromPasteboard:pb error:&error];
     }else if([type isEqualToString:NSURLPboardType]){
         NSURL *pbURL = [NSURL URLFromPasteboard:pb]; 	
 		if([pbURL isFileURL])
             newPubs = newFilePubs = [self newPublicationsForFiles:[NSArray arrayWithObject:[pbURL path]] error:&error];
         else
-            newPubs = [self newPublicationForURL:pbURL error:&error];
+            newPubs = [self newPublicationForURLFromPasteboard:pb error:&error];
 	}else{
         // errors are key, value
         OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description"), nil);
@@ -2170,17 +2171,26 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	return newPubs;
 }
 
-- (NSArray *)newPublicationForURL:(NSURL *)url error:(NSError **)error {
-    if(url == nil){
+- (NSArray *)newPublicationForURLFromPasteboard:(NSPasteboard *)pboard error:(NSError **)error {
+    
+    NSMutableArray *pubs = nil;
+    
+    NSURL *theURL = [WebView URLFromPasteboard:pboard];
+    if (theURL) {
+        BibItem *newBI = [[[BibItem alloc] init] autorelease];
+        pubs = [NSMutableArray array];
+        [newBI addFileForURL:theURL autoFile:NO];
+        [newBI setPubType:@"webpage"];
+        [newBI setField:@"Lastchecked" toValue:[[NSCalendarDate date] dateDescription]];
+        NSString *title = [WebView URLTitleFromPasteboard:pboard];
+        if (title)
+            [newBI setField:BDSKTitleString toValue:title];
+        [pubs addObject:newBI];
+    } else {
         OFErrorWithInfo(error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find expected URL on the pasteboard", @"Error description"), nil);
-        return nil;
     }
     
-	BibItem *newBI = [[[BibItem alloc] init] autorelease];
-    
-    [newBI addFileForURL:url autoFile:NO];
-    
-	return [NSArray arrayWithObject:newBI];
+	return pubs;
 }
 
 #pragma mark -
