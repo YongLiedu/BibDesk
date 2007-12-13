@@ -2389,7 +2389,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	return dragFieldEditor;
 }
 
-- (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)shouldCloseAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     switch (returnCode){
         case NSAlertOtherReturn:
             break; // do nothing
@@ -2397,7 +2397,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             [[publication retain] autorelease]; // make sure it stays around till we're closed
             [[self document] removePublication:publication]; // now fall through to default
         default:
-            [sheet orderOut:nil];
+            [[alert window] orderOut:nil];
             [self close];
     }
 }
@@ -2443,7 +2443,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                               informativeTextWithFormat:errMsg];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self 
-                         didEndSelector:@selector(shouldCloseSheetDidEnd:returnCode:contextInfo:) 
+                         didEndSelector:@selector(shouldCloseAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:NULL];
         return NO; // this method returns before the callback
     } else {
