@@ -1007,14 +1007,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (IBAction)consolidateLinkedFiles:(id)sender{
 	[self finalizeChangesPreservingSelection:YES];
 	
-    // @@ not clear what's going on here
-#warning this is always NSNotFound
+    NSNumber *indexNumber = [sender representedObject];
     unsigned int anIndex = NSNotFound;
 	BOOL canSet = YES;
     
-    if ([sender representedObject]) {
-        BDSKLinkedFile *file = [publication objectInFilesAtIndex:[[sender representedObject] unsignedIntValue]];
-        canSet = [publication canSetURLForLinkedFile:file];
+    if (indexNumber) {
+        anIndex = [indexNumber unsignedIntValue];
+        canSet = [publication canSetURLForLinkedFile:[publication objectInFilesAtIndex:anIndex]];
     } else {
         NSEnumerator *fileEnum = [[publication localFiles] objectEnumerator];
         BDSKLinkedFile *file;
