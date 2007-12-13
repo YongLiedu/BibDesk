@@ -2581,20 +2581,20 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
 
 	NSDictionary *userInfo = [notification userInfo];
+    BibItem *pub = [notification object];
     
     // see if it's ours
-	if([userInfo objectForKey:@"owner"] != self)
+	if([pub owner] != self)
         return;
 
 	NSString *changedKey = [userInfo objectForKey:@"key"];
-    BibItem *pub = [notification object];
     NSString *key = [pub citeKey];
     NSString *oldKey = nil;
     NSEnumerator *pubEnum = [publications objectEnumerator];
     
     // need to handle cite keys and crossrefs if a cite key changed
     if([changedKey isEqualToString:BDSKCiteKeyString]){
-        oldKey = [userInfo objectForKey:@"oldCiteKey"];
+        oldKey = [userInfo objectForKey:@"oldValue"];
         [publications changeCiteKey:oldKey toCiteKey:key forItem:pub];
         if([NSString isEmptyString:oldKey])
             oldKey = nil;

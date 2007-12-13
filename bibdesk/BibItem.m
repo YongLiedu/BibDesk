@@ -950,7 +950,7 @@ static CFDictionaryRef selectorTable = NULL;
 	}
 	[self updateMetadataForKey:BDSKPubTypeString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newType, @"value", BDSKPubTypeString, @"key", @"Change", @"type", owner, @"owner", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKPubTypeString, @"key", newType, @"newValue", oldType, @"oldValue", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -996,7 +996,7 @@ static CFDictionaryRef selectorTable = NULL;
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", oldCiteKey, @"oldCiteKey", owner, @"owner", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKCiteKeyString, @"key", newCiteKey, @"newValue", oldCiteKey, @"oldValue", nil];
 
     [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
     [oldCiteKey release];
@@ -1120,7 +1120,7 @@ static CFDictionaryRef selectorTable = NULL;
 		
 		[self setPubFields:newFields];
 		
-		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Fields", @"type", owner, @"owner", nil]; // cmh: maybe not the best info, but handled correctly
+		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:nil]; // cmh: maybe not the best info, but handled correctly
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 															object:self
 														  userInfo:notifInfo];
@@ -1156,8 +1156,8 @@ static CFDictionaryRef selectorTable = NULL;
     [pubFields setValue:[date description] forKey:BDSKDateModifiedString];
 	[self updateMetadataForKey:key];
 	
-	NSMutableDictionary *notifInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Change Field", @"type", owner, @"owner", nil];
-    [notifInfo setValue:value forKey:@"value"];
+	NSMutableDictionary *notifInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:key, @"key", nil];
+    [notifInfo setValue:value forKey:@"newValue"];
     [notifInfo setValue:oldValue forKey:@"oldValue"];
     [oldValue release];
     
@@ -2542,7 +2542,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     if ([owner fileURL])
         [aFile update];
 	
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del File", @"type", owner, @"owner", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -2556,7 +2556,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [self removeFileToBeFiled:file];
     [files removeObjectAtIndex:idx];
 	
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del File", @"type", owner, @"owner", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];

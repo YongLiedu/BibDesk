@@ -205,7 +205,7 @@ static BDSKFiler *sharedFiler = nil;
                 
                 [file update];
                 // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
-                NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del File", @"type", [pub owner], @"owner", nil];
+                NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
                 [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
                                                                     object:pub
                                                                   userInfo:notifInfo];

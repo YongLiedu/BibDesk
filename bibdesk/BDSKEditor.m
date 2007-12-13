@@ -1874,22 +1874,30 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)bibDidChange:(NSNotification *)notification{
 	NSDictionary *userInfo = [notification userInfo];
-	NSString *changeType = [userInfo objectForKey:@"type"];
 	NSString *changeKey = [userInfo objectForKey:@"key"];
-	NSString *newValue = [userInfo objectForKey:@"value"];
+	NSString *newValue = [userInfo objectForKey:@"newValue"];
 	BibItem *sender = (BibItem *)[notification object];
 	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
 	BOOL parentDidChange = (crossref != nil && 
 							([crossref caseInsensitiveCompare:[sender citeKey]] == NSOrderedSame || 
-							 [crossref caseInsensitiveCompare:[userInfo objectForKey:@"oldCiteKey"]] == NSOrderedSame));
+							 [crossref caseInsensitiveCompare:[userInfo objectForKey:@"oldValue"]] == NSOrderedSame));
 	
     // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
 	if (sender != publication && NO == parentDidChange)
 		return;
 	
-	if([changeType isEqualToString:@"Add/Del File"]){
+	if([changeKey isEqualToString:BDSKLocalFileString]){
         [fileView reloadIcons];
     }
+	else if([changeKey isEqualToString:BDSKPubTypeString]){
+		[self resetFieldsIfNeeded];
+		[self updateTypePopup];
+	}
+	else if([changeKey isEqualToString:BDSKCiteKeyString]){
+		[citeKeyField setStringValue:newValue];
+		[self updateCiteKeyAutoGenerateStatus];
+        [self updateCiteKeyDuplicateWarning];
+	}
 	else if([changeKey isEqualToString:BDSKCrossrefString] || 
 	   (parentDidChange && [changeKey isEqualToString:BDSKCiteKeyString])){
         // Reset if the crossref changed, or our parent's cite key changed.
@@ -1901,15 +1909,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         [self reloadTable];
 		[authorTableView reloadData];
 		[[self window] setTitle:[publication displayTitle]];
-	}
-	else if([changeKey isEqualToString:BDSKPubTypeString]){
-		[self resetFieldsIfNeeded];
-		[self updateTypePopup];
-	}
-	else if([changeKey isEqualToString:BDSKCiteKeyString]){
-		[citeKeyField setStringValue:newValue];
-		[self updateCiteKeyAutoGenerateStatus];
-        [self updateCiteKeyDuplicateWarning];
 	}
     else if([changeKey isNoteField]){
         if(ignoreFieldChange == NO) {
@@ -1950,7 +1949,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 			}
 		}
 	}
-    else{
+    else if (changeKey){
         // this is a normal field displayed in the tableView
         
         if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString])
@@ -1964,6 +1963,28 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		} else {
             // a field value changed
             [self reloadTable];
+        }
+    }
+	else{
+        // changeKey == nil, all fields are set
+		[self resetFields];
+        [self setupMatrix];
+        if(ignoreFieldChange == NO) {
+           // make a copy of the current value, so we don't overwrite it when we set the field value to the text storage
+            NSString *tmpValue = [[publication valueOfField:BDSKAnnoteString inherit:NO] copy];
+            [notesView setString:(tmpValue == nil ? @"" : tmpValue)];
+            [tmpValue release];
+            tmpValue = [[publication valueOfField:BDSKAbstractString inherit:NO] copy];
+            [abstractView setString:(tmpValue == nil ? @"" : tmpValue)];
+            [tmpValue release];
+            tmpValue = [[publication valueOfField:BDSKRssDescriptionString inherit:NO] copy];
+            [rssDescriptionView setString:(tmpValue == nil ? @"" : tmpValue)];
+            [tmpValue release];
+            if(currentEditedView)
+                [[self window] makeFirstResponder:[self window]];
+            [notesViewUndoManager removeAllActions];
+            [abstractViewUndoManager removeAllActions];
+            [rssDescriptionViewUndoManager removeAllActions];
         }
 	}
     
@@ -2080,7 +2101,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if (field) {
         // this is needed to update the search index and tex preview
         NSString *value = [publication valueOfField:field];
-        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", field, @"key", @"Change", @"type", value, @"oldValue", [publication owner], @"owner", nil];
+        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:field, @"key", value, @"newValue", value, @"oldValue", nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
                                                             object:publication
                                                           userInfo:notifInfo];
