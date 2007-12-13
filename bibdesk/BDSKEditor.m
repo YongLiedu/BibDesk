@@ -2117,12 +2117,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
 }
 
-// sent by the notesView and the abstractView; this ensures that the annote/abstract preview gets updated
+// sent by the textviews; this ensures that the document's annote/abstract preview gets updated
+// post with document as object; if you have multiple docs, others can ignore these notifications
 - (void)textDidChange:(NSNotification *)aNotification{
-    NSNotification *notif = [NSNotification notificationWithName:BDSKPreviewDisplayChangedNotification object:nil];
+    NSNotification *notif = [NSNotification notificationWithName:BDSKPreviewDisplayChangedNotification object:[self document]];
     [[NSNotificationQueue defaultQueue] enqueueNotification:notif 
                                                postingStyle:NSPostWhenIdle 
-                                               coalesceMask:NSNotificationCoalescingOnName 
+                                               coalesceMask:NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender
                                                    forModes:nil];
 }
 
@@ -2531,8 +2532,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if ([tcID isEqualToString:@"field"]) {
             return [field localizedFieldName];
         } else {
-            id value = [publication valueOfField:field];
-            return value ? value : @"";
+            return [publication valueOfField:field];
         }
 	} else if ([tv isEqual:authorTableView]) {
         return [[[publication sortedPeople] objectAtIndex:row] displayName];

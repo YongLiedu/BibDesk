@@ -909,19 +909,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
     
-#if !OMNI_FORCE_ASSERTIONS
-#warning Saving disabled
-    if (NSSaveOperation == saveOperation) {
-        if (outError) {
-            *outError = [NSError mutableLocalErrorWithCode:kBDSKFileOperationFailed localizedDescription:@"Only Save-As is supported for this build"];
-            [*outError setValue:@"In order to avoid data loss, overwriting is not allowed.  Use Save As or Export." forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
-        return NO;
-    }
-#else
-#warning Saving enabled
-#endif
-    
     // Set the string encoding according to the popup.  
     // NB: the popup has the incorrect encoding if it wasn't displayed, for example for the Save action and saving using AppleScript, so don't reset encoding unless we're actually modifying this document through a menu .
     if (NSSaveAsOperation == saveOperation && [saveTextEncodingPopupButton encoding] != 0)
@@ -2482,7 +2469,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
     // note: this is only supposed to handle the pretty-printed preview, /not/ the TeX preview
-    [self updatePreviewPane];
+    // don't update if the note was posted by editors that don't belong to us
+    if ([notification object] == self || [notification object] == nil)
+        [self updatePreviewPane];
 }
 
 - (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification{
