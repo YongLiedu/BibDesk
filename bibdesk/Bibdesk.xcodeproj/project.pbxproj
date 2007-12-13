@@ -1472,6 +1472,9 @@
 		F94DB0F70B3E2FA1006F37A2 /* BDSKSearchGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroup.m; sourceTree = "<group>"; };
 		F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPersistentSearch.h; sourceTree = "<group>"; };
 		F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPersistentSearch.m; sourceTree = "<group>"; };
+		F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Release.xcconfig"; sourceTree = "<group>"; };
+		F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Debug.xcconfig"; sourceTree = "<group>"; };
+		F95C5E990D10E89500C81970 /* BibDesk-Common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Common.xcconfig"; sourceTree = "<group>"; };
 		F95CC0C0087F5378002C5694 /* NSFileManager_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSFileManager_BDSKExtensions.h; sourceTree = "<group>"; };
 		F95CC0C1087F5378002C5694 /* NSFileManager_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSFileManager_BDSKExtensions.m; sourceTree = "<group>"; };
 		F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibImporter.xcodeproj; path = BibImporter/BibImporter.xcodeproj; sourceTree = "<group>"; };
@@ -1818,6 +1821,7 @@
 				F98F307A088E0F2800C1427D /* Subprojects */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				F95C5EDE0D10F5F100C81970 /* Configurations */,
 			);
 			name = BibDesk;
 			sourceTree = "<group>";
@@ -2659,6 +2663,16 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		F95C5EDE0D10F5F100C81970 /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */,
+				F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */,
+				F95C5E990D10E89500C81970 /* BibDesk-Common.xcconfig */,
+			);
+			name = Configurations;
+			sourceTree = "<group>";
+		};
 		F95CC10F087F54BF002C5694 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -2880,6 +2894,7 @@
 				F95CC0ED087F542F002C5694 /* CopyFiles */,
 				F9FF213B09E83BAB00BB1706 /* ShellScript */,
 				F91E54660853576600208CDF /* ShellScript */,
+				F95C5E850D10E52400C81970 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -3404,6 +3419,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ -d \"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app\" ]; then\nif [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\necho \"*** Indexing Tiger Help ***\"\nfor LOC_DIR in \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"/*.lproj; do \\\n\"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app/Contents/MacOS/Help Indexer\" \\\n\"${LOC_DIR}/BibDesk Help\" \\\n-Tokenizer 1 \\\n-ShowProgress NO \\\n-LogStyle 2 \\\n-IndexAnchors YES \\\n-TigerIndexing YES \\\n-GenerateSummaries YES \\\n-Stopwords en \\\n-MinTermLength 3;\\\ndone\nfi\nexit 0";
+		};
+		F95C5E850D10E52400C81970 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -f /usr/bin/codesign ]; then\n/usr/bin/codesign -f -s \"BibDesk Signing Certificate\" -v ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\nfi";
 		};
 		F98870CD07580E5F001D4D49 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4406,23 +4434,13 @@
 /* Begin XCBuildConfiguration section */
 		F993F1BD08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 964;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				FRAMEWORK_SEARCH_PATHS = "";
-				GCC_DEBUGGING_SYMBOLS = default;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_SYMBOL_SEPARATION = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G4;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Bibdesk_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = OMNI_FORCE_ASSERTIONS;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = YES;
@@ -4430,13 +4448,16 @@
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
-				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREPROCESS = YES;
-				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "";
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-sectcreate",
+					__TEXT,
+					__info_plist,
+					"$(SRCROOT)/$(INFOPLIST_FILE)",
+				);
 				PREBINDING = NO;
 				PRODUCT_NAME = BibDesk;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -4448,6 +4469,7 @@
 		};
 		F993F1BE08553A61007A7657 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
 				ARCHS = (
 					ppc,
@@ -4488,7 +4510,12 @@
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "";
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-sectcreate",
+					__TEXT,
+					__info_plist,
+					"$(SRCROOT)/$(INFOPLIST_FILE)",
+				);
 				PREBINDING = NO;
 				PRODUCT_NAME = BibDesk;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -4528,7 +4555,12 @@
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "";
-				OTHER_LDFLAGS = "-lSystem";
+				OTHER_LDFLAGS = (
+					"-sectcreate",
+					__TEXT,
+					__info_plist,
+					"$(SRCROOT)/$(INFOPLIST_FILE)",
+				);
 				PRODUCT_NAME = BibDesk;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -4872,8 +4904,12 @@
 		};
 		F993F20408553A61007A7657 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
-				ARCHS = ppc;
+				ARCHS = (
+					i386,
+					ppc,
+				);
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_OPTIMIZATION_LEVEL = s;
