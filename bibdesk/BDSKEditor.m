@@ -100,8 +100,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)setupMatrix;
 - (void)matrixFrameDidChange:(NSNotification *)notification;
 - (void)setupTypePopUp;
+- (NSArray *)currentFields;
 - (void)resetFields;
+- (void)resetFieldsIfNeeded;
 - (void)reloadTable;
+- (void)reloadTableWithFields:(NSArray *)newFields;
 - (void)registerForNotifications;
 - (void)breakTextStorageConnections;
 
@@ -1349,7 +1352,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         [publication setField:oldField toValue:nil];
         [self userChangedField:oldField from:oldValue to:@""];
         [[self undoManager] setActionName:NSLocalizedString(@"Remove Field", @"Undo action name")];
-        [self resetFields];
     }
 }
 
@@ -1903,7 +1905,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		[[self window] setTitle:[publication displayTitle]];
 	}
 	else if([changeKey isEqualToString:BDSKPubTypeString]){
-		[self resetFields];
+		[self resetFieldsIfNeeded];
 		[self updateTypePopup];
 	}
 	else if([changeKey isEqualToString:BDSKCiteKeyString]){
@@ -1958,8 +1960,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         else if([changeKey isPersonField])
             [authorTableView reloadData];
         
-        if (([NSString isEmptyAsComplexString:newValue] && [fields containsObject:changeKey]) || 
-            ([NSString isEmptyAsComplexString:newValue] == NO && [fields containsObject:changeKey] == NO)) {
+        if ([NSString isEmptyAsComplexString:newValue] == [fields containsObject:changeKey]) {
 			// a field was added or removed
             [self resetFields];
 		} else {
@@ -1989,13 +1990,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
  
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
 	[self setupTypePopUp];
-	[self resetFields];
+	[self resetFieldsIfNeeded];
 }
  
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
     // ensure that the pub updates first, since it observes this notification also
     [publication customFieldsDidChange:aNotification];
-	[self resetFields];
+	[self resetFieldsIfNeeded];
     [self setupMatrix];
     [authorTableView reloadData];
 }
@@ -2837,78 +2838,30 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 @implementation BDSKEditor (Private)
 
-- (void)reloadTable{
-	// if we were editing in the form, we will restore the selected cell and the selection
-	NSResponder *firstResponder = [[self window] firstResponder];
-	NSString *editedTitle = nil;
-	NSRange selection = NSMakeRange(0, 0);
-	if([firstResponder isKindOfClass:[NSText class]] && [[(NSText *)firstResponder delegate] isEqual:tableView]){
-		selection = [(NSText *)firstResponder selectedRange];
-		editedTitle = [fields objectAtIndex:[tableView editedRow]];
-		forceEndEditing = YES;
-		if (![[self window] makeFirstResponder:[self window]])
-			[[self window] endEditingFor:nil];
-		forceEndEditing = NO;
-	}
-	
-    [tableView reloadData];
-    
-	// restore the edited cell and its selection
-	if(editedTitle){
-        unsigned int editedRow = [fields indexOfObject:editedTitle];
-        if (editedRow != NSNotFound) {
-            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:editedRow] byExtendingSelection:NO];
-            [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
-            if ([[[tableView currentEditor] string] length] >= NSMaxRange(selection))
-                [[tableView currentEditor] setSelectedRange:selection];
-        }
-	}
-}
-
-#define AddFields(newFields, checkEmpty) \
-    e = [newFields objectEnumerator]; \
-    while(tmp = [e nextObject]){ \
-        if ([ignoredKeys containsObject:tmp]) continue; \
-        if (checkEmpty && [[publication valueOfField:tmp inherit:NO] isEqualAsComplexString:@""]) continue; \
-        [ignoredKeys addObject:tmp]; \
-        [fields addObject:tmp]; \
+#define AddFields(addedFields, checkEmpty) \
+    e = [addedFields objectEnumerator]; \
+    while(field = [e nextObject]){ \
+        if ([ignoredKeys containsObject:field]) continue; \
+        if (checkEmpty && [[publication valueOfField:field inherit:NO] isEqualAsComplexString:@""]) continue; \
+        [ignoredKeys addObject:field]; \
+        [currentFields addObject:field]; \
     }
 
-- (void)resetFields{
-	// if we were editing in the form, we will restore the selected cell and the selection
-	NSResponder *firstResponder = [[self window] firstResponder];
-	NSString *editedTitle = nil;
-	NSRange selection = NSMakeRange(0, 0);
-	if([firstResponder isKindOfClass:[NSText class]] && [[(NSText *)firstResponder delegate] isEqual:tableView]){
-		selection = [(NSText *)firstResponder selectedRange];
-		editedTitle = [fields objectAtIndex:[tableView editedRow]];
-		forceEndEditing = YES;
-		if (![[self window] makeFirstResponder:[self window]])
-			[[self window] endEditingFor:nil];
-		forceEndEditing = NO;
-	}
-	
-    NSString *tmp;
-	NSEnumerator *e;
-	
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSArray *ratingFields = [pw stringArrayForKey:BDSKRatingFieldsKey];
-	NSArray *booleanFields = [pw stringArrayForKey:BDSKBooleanFieldsKey];
-	NSArray *triStateFields = [pw stringArrayForKey:BDSKTriStateFieldsKey];
-
-	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects: BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, BDSKDateAddedString, BDSKDateModifiedString, nil];
-    [ignoredKeys addObjectsFromArray:ratingFields];
-    [ignoredKeys addObjectsFromArray:booleanFields];
-    [ignoredKeys addObjectsFromArray:triStateFields];
-    
+- (NSArray *)currentFields {
+    // build the new set of fields
+    NSMutableArray *currentFields = [NSMutableArray array];
     NSArray *allFields = [[publication allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
-	
-    [fields removeAllObjects];
-	
+	NSEnumerator *e;
+    NSString *field;
     BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
     NSString *type = [publication pubType];
+	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects:BDSKDateAddedString, BDSKDateModifiedString, nil];
     
-	// now add the entries to the form
+    [ignoredKeys unionSet:[tm noteFieldsSet]];
+    [ignoredKeys unionSet:[tm ratingFieldsSet]];
+    [ignoredKeys unionSet:[tm booleanFieldsSet]];
+    [ignoredKeys unionSet:[tm triStateFieldsSet]];
+	
 	AddFields([tm requiredFieldsForType:type], NO);
 	AddFields([tm optionalFieldsForType:type], NO);
 	AddFields([tm userDefaultFieldsForType:type], NO);
@@ -2916,30 +2869,53 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     [ignoredKeys release];
     
-    // align the cite key field with the form cells
-    if([fields count] > 0){
-        NSTableColumn *tableColumn = [tableView tableColumnWithIdentifier:@"field"];
-        id cell;
-        int numberOfRows = [fields count];
-        int row;
-        float maxWidth = NSWidth([citeKeyTitle frame]) + 4.0;
+    return currentFields;
+}
+
+- (void)reloadTableWithFields:(NSArray *)newFields{
+	// if we were editing in the tableView, we will restore the selected cell and the selection
+	NSText *fieldEditor = [tableView currentEditor];
+	NSString *editedTitle = nil;
+	NSRange selection = NSMakeRange(0, 0);
+	if(fieldEditor){
+		selection = [fieldEditor selectedRange];
+		editedTitle = [fields objectAtIndex:[tableView editedRow]];
+		forceEndEditing = YES;
+		if ([[self window] makeFirstResponder:[self window]] == NO)
+			[[self window] endEditingFor:nil];
+		forceEndEditing = NO;
+	}
+	
+    if (newFields && [fields isEqualToArray:newFields] == NO) {
         
-        for (row = 0; row < numberOfRows; row++) {
-            cell = [tableColumn dataCellForRow:row];
-            [self tableView:tableView willDisplayCell:cell forTableColumn:tableColumn row:row];
-            [cell setObjectValue:[fields objectAtIndex:row]];
-            maxWidth = fmaxf(maxWidth, [cell cellSize].width);
+        [fields setArray:newFields];
+        
+        // align the cite key field with the form cells
+        if([fields count] > 0){
+            NSTableColumn *tableColumn = [tableView tableColumnWithIdentifier:@"field"];
+            id cell;
+            int numberOfRows = [fields count];
+            int row;
+            float maxWidth = NSWidth([citeKeyTitle frame]) + 4.0;
+            
+            for (row = 0; row < numberOfRows; row++) {
+                cell = [tableColumn dataCellForRow:row];
+                [self tableView:tableView willDisplayCell:cell forTableColumn:tableColumn row:row];
+                [cell setObjectValue:[fields objectAtIndex:row]];
+                maxWidth = fmaxf(maxWidth, [cell cellSize].width);
+            }
+            maxWidth = ceilf(maxWidth);
+            [tableColumn setMinWidth:maxWidth];
+            [tableColumn setMaxWidth:maxWidth];
+            [tableView sizeToFit];
+            NSRect frame = [citeKeyField frame];
+            NSRect oldFrame = frame;
+            float offset = fminf(NSMaxX(frame) - 20.0, maxWidth + NSMinX([citeKeyTitle frame]) + 4.0);
+            frame.size.width = NSMaxX(frame) - offset;
+            frame.origin.x = offset;
+            [citeKeyField setFrame:frame];
+            [[citeKeyField superview] setNeedsDisplayInRect:NSUnionRect(oldFrame, frame)];
         }
-        maxWidth = ceilf(maxWidth);
-        [tableColumn setMinWidth:maxWidth];
-        [tableColumn setMaxWidth:maxWidth];
-        [tableView sizeToFit];
-        NSRect frame = [citeKeyField frame];
-        float offset = fminf(NSMaxX(frame) - 20.0, maxWidth + NSMinX([citeKeyTitle frame]) + 4.0);
-        frame.size.width = NSMaxX(frame) - offset;
-        frame.origin.x = offset;
-        [citeKeyField setFrame:frame];
-        [[citeKeyField superview] setNeedsDisplay:YES];
     }
     
     [tableView reloadData];
@@ -2950,25 +2926,43 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         if (editedRow != NSNotFound) {
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:editedRow] byExtendingSelection:NO];
             [tableView editColumn:1 row:editedRow withEvent:nil select:NO];
-            if ([[[tableView currentEditor] string] length] >= NSMaxRange(selection))
-                [[tableView currentEditor] setSelectedRange:selection];
+            fieldEditor = [tableView currentEditor];
+            if ([[fieldEditor string] length] >= NSMaxRange(selection))
+                [fieldEditor setSelectedRange:selection];
         }
 	}
+}
+
+- (void)reloadTable {
+    [self reloadTableWithFields:nil];
+}
+
+- (void)resetFields{
+    [self reloadTableWithFields:[self currentFields]];
+    
+	didSetupFields = YES;
+}
+
+- (void)resetFieldsIfNeeded{
+    NSArray *currentFields = [self currentFields];
+    
+    if ([fields isEqualToArray:currentFields] == NO)
+        [self reloadTableWithFields:currentFields];
     
 	didSetupFields = YES;
 }
 
 #define AddMatrixEntries(fields, cell) \
     e = [fields objectEnumerator]; \
-    while(tmp = [e nextObject]){ \
+    while(field = [e nextObject]){ \
 		NSButtonCell *buttonCell = [cell copy]; \
-		[buttonCell setTitle:[tmp localizedFieldName]]; \
-		[buttonCell setRepresentedObject:tmp]; \
-		[buttonCell setIntValue:[publication intValueOfField:tmp]]; \
+		[buttonCell setTitle:[field localizedFieldName]]; \
+		[buttonCell setRepresentedObject:field]; \
+		[buttonCell setIntValue:[publication intValueOfField:field]]; \
         cellWidth = fmaxf(cellWidth, [buttonCell cellSize].width); \
         [cells addObject:buttonCell]; \
 		[buttonCell release]; \
-		if([editedTitle isEqualToString:tmp]) \
+		if([editedTitle isEqualToString:field]) \
 			editedIndex = [cells count] - 1; \
     }
 
@@ -2985,7 +2979,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         editedTitle = [(NSCell *)[extraBibFields selectedCell] representedObject];
 	
 	NSEnumerator *e;
-    NSString *tmp;
+    NSString *field;
     NSMutableArray *cells = [NSMutableArray arrayWithCapacity:numEntries];
     float cellWidth = 0.0;
 	
