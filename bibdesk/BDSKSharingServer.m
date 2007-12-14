@@ -207,7 +207,7 @@ NSString *BDSKComputerName() {
 - (void)queueDataChangedNotification:(NSNotification *)note;
 {
     SEL theSEL = @selector(handleQueuedDataChanged);
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:theSEL object:nil];
+    [[self class] cancelPreviousPerformRequestsWithTarget:self selector:theSEL object:nil];
     [self performSelector:theSEL withObject:nil afterDelay:5.0];
 }
 
