@@ -2965,9 +2965,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSRect matrixFrame = [[matrix enclosingScrollView] frame];
     NSDivideRect(NSUnionRect(tableFrame, matrixFrame), &matrixFrame, &tableFrame, fminf(NSHeight([matrix frame]), 198.0), NSMinYEdge);
     [[tableView enclosingScrollView] setFrame:tableFrame];
-    [[matrix enclosingScrollView] setPostsFrameChangedNotifications:NO];
     [[matrix enclosingScrollView] setFrame:matrixFrame];
-    [[matrix enclosingScrollView] setPostsFrameChangedNotifications:YES];
     
 	// restore the edited cell
 	if(editedIndex != -1){
@@ -3024,55 +3022,61 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)registerForNotifications {
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(bibDidChange:)
-												 name:BDSKBibItemChangedNotification
-											   object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(needsToBeFiledDidChange:)
-												 name:BDSKNeedsToBeFiledChangedNotification
-											   object:publication];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(bibWasAddedOrRemoved:)
-												 name:BDSKDocAddItemNotification
-											   object:[self document]];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(bibWasAddedOrRemoved:)
-												 name:BDSKDocDelItemNotification
-											   object:[self document]];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(bibWillBeRemoved:)
-												 name:BDSKDocWillRemoveItemNotification
-											   object:[self document]];
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self
+           selector:@selector(bibDidChange:)
+               name:BDSKBibItemChangedNotification
+             object:nil];
+    [nc addObserver:self
+           selector:@selector(needsToBeFiledDidChange:)
+               name:BDSKNeedsToBeFiledChangedNotification
+             object:publication];
+    [nc addObserver:self
+           selector:@selector(bibWasAddedOrRemoved:)
+               name:BDSKDocAddItemNotification
+             object:[self document]];
+    [nc addObserver:self
+           selector:@selector(bibWasAddedOrRemoved:)
+               name:BDSKDocDelItemNotification
+             object:[self document]];
+    [nc addObserver:self
+           selector:@selector(bibWillBeRemoved:)
+               name:BDSKDocWillRemoveItemNotification
+             object:[self document]];
     if(isEditable == NO)
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(groupWillBeRemoved:)
-                                                     name:BDSKDidAddRemoveGroupNotification
-                                                   object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(finalizeChanges:)
-												 name:BDSKFinalizeChangesNotification
-											   object:[self document]];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(fileURLDidChange:)
-												 name:BDSKDocumentFileURLDidChangeNotification
-											   object:[self document]];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(typeInfoDidChange:)
-												 name:BDSKBibTypeInfoChangedNotification
-											   object:[BDSKTypeManager sharedManager]];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(customFieldsDidChange:)
-												 name:BDSKCustomFieldsChangedNotification
-											   object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(macrosDidChange:)
-												 name:BDSKMacroDefinitionChangedNotification
-											   object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(matrixFrameDidChange:)
-												 name:NSViewFrameDidChangeNotification
-											   object:[matrix enclosingScrollView]];
+        [nc addObserver:self
+                   selector:@selector(groupWillBeRemoved:)
+                       name:BDSKDidAddRemoveGroupNotification
+                     object:nil];
+    [nc addObserver:self
+           selector:@selector(finalizeChanges:)
+               name:BDSKFinalizeChangesNotification
+             object:[self document]];
+    [nc addObserver:self
+           selector:@selector(fileURLDidChange:)
+               name:BDSKDocumentFileURLDidChangeNotification
+             object:[self document]];
+    [nc addObserver:self
+           selector:@selector(typeInfoDidChange:)
+               name:BDSKBibTypeInfoChangedNotification
+             object:[BDSKTypeManager sharedManager]];
+    [nc addObserver:self
+           selector:@selector(customFieldsDidChange:)
+               name:BDSKCustomFieldsChangedNotification
+             object:nil];
+    [nc addObserver:self
+           selector:@selector(macrosDidChange:)
+               name:BDSKMacroDefinitionChangedNotification
+             object:nil];
+    NSView *view = [[matrix enclosingScrollView] superview];
+    [nc addObserver:self
+           selector:@selector(matrixFrameDidChange:)
+               name:NSViewFrameDidChangeNotification
+             object:view];
+    [nc addObserver:self
+           selector:@selector(matrixFrameDidChange:)
+               name:NSViewBoundsDidChangeNotification
+             object:view];
 }
 
 
