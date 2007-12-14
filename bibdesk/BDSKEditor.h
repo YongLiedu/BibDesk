@@ -53,7 +53,6 @@
 @class BDSKAlert;
 @class BibAuthor;
 @class BDSKZoomablePDFView;
-@class BDSKEditor;
 @class FileView;
 @class BDSKSplitView;
 @class BDSKEditorTableView;
