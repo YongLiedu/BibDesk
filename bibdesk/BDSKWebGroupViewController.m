@@ -288,7 +288,6 @@
                 newPubs = [document newPublicationsForString:string type:type verbose:NO error:&error];
         }
         if (nil == newPubs) {
-#warning remove for release
             // !!! logs are here to help diagnose problems that users are reporting
             NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
             NSLog(@"loaded MIME type %@", [[dataSource mainResource] MIMEType]);
@@ -307,15 +306,11 @@
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-#warning FIXME: is this really a failure?
-    // arm: I'm not sure what the provisional load failure implies; from the docs it sounds like things will continue loading, so do we really want to kill things here?  If anyone knows or has a test case for this, please comment.
     if (frame == loadingWebFrame) {
         [self setRetrieving:NO];
         [group addPublications:nil];
         loadingWebFrame = nil;
     }
-    // !!! logs are here to help diagnose problems that users are reporting
-    NSLog(@"-[%@ %@] %@", [self class], NSStringFromSelector(_cmd), error);
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
