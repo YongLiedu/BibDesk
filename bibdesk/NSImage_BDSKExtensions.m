@@ -1,5 +1,5 @@
 //
-//  NSImage+Toolbox.m
+//  NSImage_BDSKExtensions.m
 //  BibDesk
 //
 //  Created by Sven-S. Porst on Thu Jul 29 2004.
@@ -36,12 +36,12 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "NSBezierPath_BDSKExtensions.h"
 #import <OmniAppKit/IconFamily.h>
 
-@implementation NSImage (Toolbox)
+@implementation NSImage (BDSKExtensions)
 
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code {
 	int width = iconSize.width;

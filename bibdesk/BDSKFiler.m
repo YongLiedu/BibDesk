@@ -37,7 +37,7 @@
  */
 
 #import "BDSKFiler.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKPathColorTransformer.h"
 #import <OmniAppKit/NSTableView-OAExtensions.h>

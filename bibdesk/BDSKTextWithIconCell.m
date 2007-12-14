@@ -38,7 +38,7 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 #import "NSLayoutManager_BDSKExtensions.h"
 

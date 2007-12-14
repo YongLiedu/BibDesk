@@ -59,7 +59,7 @@
 #import "BDSKFieldEditor.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKMacroResolver.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKFiler.h"
 #import "BDSKStringParser.h"
 #import "NSArray_BDSKExtensions.h"

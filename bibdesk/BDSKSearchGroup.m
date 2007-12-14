@@ -40,7 +40,7 @@
 #import "BDSKEntrezGroupServer.h"
 #import "BDSKZoomGroupServer.h"
 #import "BDSKMacroResolver.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKServerInfo.h"
 #import <OmniFoundation/NSArray-OFExtensions.h>

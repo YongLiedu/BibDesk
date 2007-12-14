@@ -39,7 +39,7 @@
 #import "BDSKBookmarkController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKBookmarkOutlineView.h"
 
 static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";

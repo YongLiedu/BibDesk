@@ -37,7 +37,7 @@
  */
 
 #import "BDSKCategoryGroup.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BDSKTypeManager.h"

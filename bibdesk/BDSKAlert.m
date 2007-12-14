@@ -37,7 +37,7 @@
  */
 
 #import "BDSKAlert.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 
 

@@ -37,7 +37,7 @@
  */
 
 #import "BDSKPathIconTransformer.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import <OmniAppKit/FrameworkDefines.h>
 #import <OmniAppKit/OATextWithIconCell.h>
 #import "NSFileManager_BDSKExtensions.h"

@@ -40,7 +40,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument_Actions.h"
 #import "BDSKGroupCell.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKFilterController.h"
 #import "BDSKGroupTableView.h"
 #import "BDSKHeaderPopUpButtonCell.h"

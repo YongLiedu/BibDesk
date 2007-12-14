@@ -41,7 +41,7 @@
 #import <OmniBase/rcsid.h>
 #import "NSBezierPath_BDSKExtensions.h"
 #import <OmniBase/OBUtilities.h>
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 

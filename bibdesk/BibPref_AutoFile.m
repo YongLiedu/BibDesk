@@ -37,7 +37,7 @@
  */
 
 #import "BibPref_AutoFile.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKAlert.h"
 #import "BDSKFormatParser.h"
 #import "BDSKAppController.h"

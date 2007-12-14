@@ -38,7 +38,7 @@
 
 #import "NSURL_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKSkimReader.h"
 
 @implementation NSURL (BDSKExtensions)

@@ -40,7 +40,7 @@
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BDAlias.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKComplexString.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKEdgeView.h"

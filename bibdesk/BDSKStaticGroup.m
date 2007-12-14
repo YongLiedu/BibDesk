@@ -37,7 +37,7 @@
  */
 
 #import "BDSKStaticGroup.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BibItem.h"
 #import <OmniBase/OBUtilities.h>
 

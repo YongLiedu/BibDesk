@@ -40,7 +40,7 @@
 #import "BDSKStringConstants.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKItemSearchIndexes.h"
 
 @implementation BDSKWebGroup

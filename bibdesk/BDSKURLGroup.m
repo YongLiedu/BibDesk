@@ -46,7 +46,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKStringParser.h"
 #import "NSError_BDSKExtensions.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKItemSearchIndexes.h"

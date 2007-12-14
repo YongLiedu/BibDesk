@@ -41,7 +41,7 @@
 #import "BDSKSharingServer.h"
 #import "BDSKPasswordController.h"
 #import "NSArray_BDSKExtensions.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import <BDSKAsynchronousDOServer.h>
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"

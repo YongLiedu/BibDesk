@@ -43,7 +43,7 @@
 #import "BDSKDocumentController.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BibDocument_Actions.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BibAuthor.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKFileMatchConfigController.h"

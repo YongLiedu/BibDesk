@@ -1,5 +1,5 @@
 //
-//  NSImage+Toolbox.h
+//  NSImage_BDSKExtensions.h
 //  BibDesk
 //
 //  Created by Sven-S. Porst on Thu Jul 29 2004.
@@ -40,7 +40,7 @@
 #import <ApplicationServices/ApplicationServices.h>
 #import <OmniAppKit/NSImage-OAExtensions.h>
 
-@interface NSImage (Toolbox)
+@interface NSImage (BDSKExtensions)
 
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code;
 + (NSImage *)imageWithLargeIconForToolboxCode:(OSType) code;

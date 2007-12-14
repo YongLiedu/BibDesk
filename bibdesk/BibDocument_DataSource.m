@@ -39,7 +39,7 @@
 #import "BibDocument_Actions.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKGroupCell.h"
 #import "BDSKGroup.h"
 #import "BDSKStaticGroup.h"

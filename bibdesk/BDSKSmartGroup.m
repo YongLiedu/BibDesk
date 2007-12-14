@@ -38,7 +38,7 @@
 
 #import "BDSKSmartGroup.h"
 #import "BDSKFilter.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BibItem.h"
 
 

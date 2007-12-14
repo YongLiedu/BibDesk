@@ -44,7 +44,7 @@
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BDSKOrphanedFileServer.h"
 #import "NSTableView_BDSKExtensions.h"

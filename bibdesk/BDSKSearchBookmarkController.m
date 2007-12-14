@@ -38,7 +38,7 @@
 
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKStringConstants.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKBookmarkOutlineView.h"
 
 static NSString *BDSKSearchBookmarkRowsPboardType = @"BDSKSearchBookmarkRowsPboardType";

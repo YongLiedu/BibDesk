@@ -59,7 +59,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKStringNode.h"
 #import "OFCharacterSet_BDSKExtensions.h"
 #import "PDFMetadata.h"

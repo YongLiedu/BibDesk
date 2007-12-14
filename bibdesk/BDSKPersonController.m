@@ -48,7 +48,7 @@
 #import "BDSKDragImageView.h"
 #import "BDSKPublicationsArray.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import <AddressBook/AddressBook.h>
 
 @implementation BDSKPersonController

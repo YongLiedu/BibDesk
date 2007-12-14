@@ -40,7 +40,7 @@
 
 #import "BibPref_InputManager.h"
 #import "BDSKTypeManager.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKTextWithIconCell.h"
 #import "NSSet_BDSKExtensions.h"
 #import "BDSKAppController.h"

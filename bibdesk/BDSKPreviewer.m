@@ -51,7 +51,7 @@
 #import "BDSKCollapsibleView.h"
 #import "BDSKAsynchronousDOServer.h"
 #import "BDSKDocumentController.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 
 static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 

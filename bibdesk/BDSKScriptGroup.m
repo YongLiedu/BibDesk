@@ -44,7 +44,7 @@
 #import "BDSKBibTeXParser.h"
 #import "BDSKStringParser.h"
 #import "NSString_BDSKExtensions.h"
-#import "NSImage+Toolbox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKAppController.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
