@@ -65,10 +65,9 @@
 @interface BDSKEditor : NSWindowController {
 	IBOutlet BDSKSplitView *mainSplitView;
 	IBOutlet BDSKSplitView *fileSplitView;
-	IBOutlet BDSKSplitView *fieldSplitView;
     IBOutlet NSPopUpButton *bibTypeButton;
     IBOutlet BDSKEditorTableView *tableView;
-    IBOutlet NSMatrix *extraBibFields;
+    IBOutlet NSMatrix *matrix;
     IBOutlet NSTabView *tabView;
     IBOutlet NSTextView *notesView;
     IBOutlet NSTextView *abstractView;
@@ -79,7 +78,6 @@
     NSUndoManager *rssDescriptionViewUndoManager;
     BOOL ignoreFieldChange;
     // for the splitview double-click handling
-    float lastMatrixHeight;
 	float lastFileViewWidth;
     float lastAuthorsHeight;
     

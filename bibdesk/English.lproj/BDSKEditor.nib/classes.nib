@@ -10,8 +10,8 @@
         {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
         {
             ACTIONS = {
-                addLinkedFileFromMenuItem = NSMenuItem; 
-                addRemoteURLFromMenuItem = NSMenuItem; 
+                addLinkedFileFromMenuItem = id; 
+                addRemoteURLFromMenuItem = id; 
                 bibTypeDidChange = id; 
                 changeFlag = id; 
                 changeRating = id; 
@@ -52,11 +52,10 @@
                 citeKeyField = NSTextField; 
                 citeKeyTitle = NSTextField; 
                 citeKeyWarningButton = NSButton; 
-                extraBibFields = NSMatrix; 
-                fieldSplitView = BDSKSplitView; 
                 fileSplitView = BDSKSplitView; 
                 fileView = FileView; 
                 mainSplitView = BDSKSplitView; 
+                matrix = NSMatrix; 
                 notesView = NSTextView; 
                 rssDescriptionView = NSTextView; 
                 statusBar = BDSKStatusBar; 

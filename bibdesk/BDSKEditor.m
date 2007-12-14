@@ -182,33 +182,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     // Insert the tabView in the main window
     BDSKEdgeView *edgeView = [[mainSplitView subviews] objectAtIndex:0];
-    [[tabView superview] setFrame:[edgeView frame]];
+	[edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxXEdgeMask];
+    [[tabView superview] setFrame:[[edgeView contentView] bounds]];
     [edgeView addSubview:tabView];
-	[edgeView setEdges:BDSKMaxXEdgeMask];
-    
-    // Setup the form and the matrix
-	edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:0];
-	[edgeView setEdges:BDSKMinYEdgeMask];
-    NSRect ignored, frame;
-    NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, TABLE_OFFSET, NSMinXEdge);
-    [[tableView enclosingScrollView] setFrame:frame];
-	[edgeView addSubview:[tableView enclosingScrollView]];
-    
-    edgeView = (BDSKEdgeView *)[[fieldSplitView subviews] objectAtIndex:1];
-    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-    NSDivideRect([[edgeView contentView] bounds], &ignored, &frame, TABLE_OFFSET, NSMinXEdge);
-    [[extraBibFields enclosingScrollView] setFrame:frame];
-	[edgeView addSubview:[extraBibFields enclosingScrollView]];
-    
-    edgeView = (BDSKEdgeView *)[[[notesView enclosingScrollView] superview] superview];
-    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
-    edgeView = (BDSKEdgeView *)[[[abstractView enclosingScrollView] superview] superview];
-    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
-    edgeView = (BDSKEdgeView *)[[[rssDescriptionView enclosingScrollView] superview] superview];
-    [edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-    [edgeView setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
     
     [fileSplitView setBlendStyle:BDSKMinBlendStyleMask];
     
@@ -216,12 +192,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
     [mainSplitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKEditorMainSplitView"];
-    [fieldSplitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKEditorFieldSplitView"];
     [fileSplitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKEditorFileSplitView"];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [mainSplitView setPositionAutosaveName:nil];
-        [fieldSplitView setPositionAutosaveName:nil];
         [fileSplitView setPositionAutosaveName:nil];
     }
     
@@ -1463,8 +1437,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             firstResponder = [firstResponder delegate];
         if(firstResponder == tableView)
             keyField = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
-        else if(firstResponder == extraBibFields)
-            keyField = [[extraBibFields keyCell] representedObject];
+        else if(firstResponder == matrix)
+            keyField = [[matrix keyCell] representedObject];
         else if(firstResponder == citeKeyField)
             keyField = BDSKCiteKeyString;
         else if(firstResponder == bibTypeButton)
@@ -1485,15 +1459,15 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }else if([fieldName isEqualToString:BDSKCiteKeyString]){
         [citeKeyField selectText:nil];
     }else if([fieldName isBooleanField] || [fieldName isTriStateField] || [fieldName isRatingField]){
-        int i, j, numRows = [extraBibFields numberOfRows], numCols = [extraBibFields numberOfColumns];
+        int i, j, numRows = [matrix numberOfRows], numCols = [matrix numberOfColumns];
         id cell;
         
         for (i = 0; i < numRows; i++) {
             for (j = 0; j < numCols; j++) {
-                cell = [extraBibFields cellAtRow:i column:j];
+                cell = [matrix cellAtRow:i column:j];
                 if ([[cell representedObject] isEqualToString:fieldName]) {
-                    [[self window] makeFirstResponder:extraBibFields];
-                    [extraBibFields setKeyCell:cell];
+                    [[self window] makeFirstResponder:matrix];
+                    [matrix setKeyCell:cell];
                     return;
                 }
             }
@@ -1936,12 +1910,12 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
 	else if([changeKey isRatingField] || [changeKey isBooleanField] || [changeKey isTriStateField]){
 		
-		NSEnumerator *cellE = [[extraBibFields cells] objectEnumerator];
+		NSEnumerator *cellE = [[matrix cells] objectEnumerator];
 		NSButtonCell *entry = nil;
 		while(entry = [cellE nextObject]){
 			if([[entry representedObject] isEqualToString:changeKey]){
 				[entry setIntValue:[publication intValueOfField:changeKey]];
-				[extraBibFields setNeedsDisplay:YES];
+				[matrix setNeedsDisplay:YES];
 				break;
 			}
 		}
@@ -2718,32 +2692,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [mainSplitView adjustSubviews];
         // fix for NSSplitView bug, which doesn't send this in adjustSubviews
         [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
-    } else if ([sender isEqual:fieldSplitView]) {
-        NSView *form = [[fieldSplitView subviews] objectAtIndex:0]; // form
-        NSView *matrix = [[fieldSplitView subviews] objectAtIndex:1]; // matrix
-        NSRect formFrame = [form frame];
-        NSRect matrixFrame = [matrix frame];
-        
-            if(NSHeight(matrixFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-            lastMatrixHeight = NSHeight(matrixFrame); // cache this
-            formFrame.size.height += lastMatrixHeight;
-                matrixFrame.size.height = 0.0;
-        } else {
-                if(lastMatrixHeight <= 0.0)
-                lastMatrixHeight = NSHeight([extraBibFields frame]); // a reasonable value to start
-                matrixFrame.size.height = lastMatrixHeight;
-                formFrame.size.height = NSHeight([fieldSplitView frame]) - lastMatrixHeight - [fieldSplitView dividerThickness];
-                if (NSHeight(formFrame) < 1.0) {
-                    formFrame.size.height = 1.0;
-                    matrixFrame.size.height = NSHeight([fieldSplitView frame]) - [fieldSplitView dividerThickness] - 1.0;
-                    lastMatrixHeight = NSHeight(matrixFrame);
-                }
-        }
-        [form setFrame:formFrame];
-        [matrix setFrame:matrixFrame];
-        [fieldSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fieldSplitView];
     } else if ([sender isEqual:fileSplitView]) {
         NSView *files = [[fileSplitView subviews] objectAtIndex:0]; // files
         NSView *authors = [[fileSplitView subviews] objectAtIndex:1]; // authors
@@ -2752,7 +2700,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         
         if(NSHeight(authorsFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
             lastAuthorsHeight = NSHeight(authorsFrame); // cache this
-            filesFrame.size.height += lastMatrixHeight;
+            filesFrame.size.height += lastAuthorsHeight;
             authorsFrame.size.height = 0.0;
         } else {
             if(lastAuthorsHeight <= 0.0)
@@ -2776,9 +2724,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
     if ([sender isEqual:mainSplitView]) {
         return fmaxf(proposedMin, 390.0);
-    } else if ([sender isEqual:fieldSplitView]) {
-        // don't lose the top edge of the splitter
-        return proposedMin + 1.0;
     }
     return proposedMin;
 }
@@ -2802,25 +2747,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [mainSplitView adjustSubviews];
         // fix for NSSplitView bug, which doesn't send this in adjustSubviews
         [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
-    } else if ([sender isEqual:fieldSplitView]) {
-    // keeps the matrix view at the same size and resizes the form view
-        NSView *form = [[sender subviews] objectAtIndex:0]; // form
-        NSView *matrix = [[sender subviews] objectAtIndex:1]; // matrix
-        NSRect formFrame = [form frame];
-        NSRect matrixFrame = [matrix frame];
-        NSSize newSize = [sender frame].size;
-        
-        formFrame.size.height += newSize.height - oldSize.height;
-        if (NSHeight(formFrame) < 1.0) {
-            formFrame.size.height = 1.0;
-            matrixFrame.size.height = newSize.height - [fieldSplitView dividerThickness] - 1.0;
-            lastMatrixHeight = NSHeight(matrixFrame);
-        }
-        [form setFrame:formFrame];
-        [matrix setFrame:matrixFrame];
-        [fieldSplitView adjustSubviews];
-        // fix for NSSplitView bug, which doesn't send this in adjustSubviews
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fieldSplitView];
     } else if ([sender isEqual:fileSplitView]) {
         NSView *files = [[sender subviews] objectAtIndex:0]; // files
         NSView *authors = [[sender subviews] objectAtIndex:1]; // authors
@@ -2962,6 +2888,20 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	didSetupFields = YES;
 }
 
+- (void)getNumberOfMatrixRows:(int *)rows columns:(int *)columns {
+    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
+    int numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
+    float width = NSWidth([[matrix enclosingScrollView] frame]) - [NSScroller scrollerWidth];
+    float spacing = [matrix intercellSpacing].width;
+    float cellWidth = [matrix cellSize].width;
+    int numCols = MIN(floor((width + spacing) / (cellWidth + spacing)), numEntries);
+    numCols = MAX(numCols, 1);
+    if (columns)
+        *columns = numCols;
+    if (rows)
+        *rows = (numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+}
+
 #define AddMatrixEntries(fields, cell) \
     e = [fields objectEnumerator]; \
     while(field = [e nextObject]){ \
@@ -2981,12 +2921,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSArray *ratingFields = [pw stringArrayForKey:BDSKRatingFieldsKey];
 	NSArray *booleanFields = [pw stringArrayForKey:BDSKBooleanFieldsKey];
 	NSArray *triStateFields = [pw stringArrayForKey:BDSKTriStateFieldsKey];
-    int numEntries = [ratingFields count] + [booleanFields count] + [triStateFields count];
+    int numRows, numCols, numEntries = [ratingFields count] + [booleanFields count] + [triStateFields count];
+    NSPoint origin = [matrix frame].origin;
     
 	NSString *editedTitle = nil;
 	int editedIndex = -1;
-    if([[self window] firstResponder] == extraBibFields)
-        editedTitle = [(NSCell *)[extraBibFields selectedCell] representedObject];
+    if([[self window] firstResponder] == matrix)
+        editedTitle = [(NSCell *)[matrix selectedCell] representedObject];
 	
 	NSEnumerator *e;
     NSString *field;
@@ -2997,17 +2938,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	AddMatrixEntries(booleanFields, booleanButtonCell);
 	AddMatrixEntries(triStateFields, triStateButtonCell);
 	
-    NSPoint origin = [extraBibFields frame].origin;
-    float width = NSWidth([[extraBibFields enclosingScrollView] frame]) - [NSScroller scrollerWidth];
-    float spacing = [extraBibFields intercellSpacing].width;
-    int numCols = MIN(floor((width + spacing) / (cellWidth + spacing)), numEntries);
-    numCols = MAX(numCols, 1);
-    int numRows = (numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
-    
-    while ([extraBibFields numberOfRows])
-		[extraBibFields removeRow:0];
+    while ([matrix numberOfRows])
+		[matrix removeRow:0];
 	
-    [extraBibFields renewRows:numRows columns:numCols];
+    [self getNumberOfMatrixRows:&numRows columns:&numCols];
+    [matrix renewRows:numRows columns:numCols];
     
     e = [cells objectEnumerator];
     NSCell *cell;
@@ -3018,23 +2953,31 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 			column = 0;
 			row++;
 		}
-		[extraBibFields putCell:cell atRow:row column:column];
+		[matrix putCell:cell atRow:row column:column];
     }
     
-	[extraBibFields sizeToFit];
+	[matrix sizeToFit];
     
-    [extraBibFields setFrameOrigin:origin];
-    [extraBibFields setNeedsDisplay:YES];
+    [matrix setFrameOrigin:origin];
+    [matrix setNeedsDisplay:YES];
 	
+    NSRect tableFrame = [[tableView enclosingScrollView] frame];
+    NSRect matrixFrame = [[matrix enclosingScrollView] frame];
+    NSDivideRect(NSUnionRect(tableFrame, matrixFrame), &matrixFrame, &tableFrame, fminf(NSHeight([matrix frame]), 198.0), NSMinYEdge);
+    [[tableView enclosingScrollView] setFrame:tableFrame];
+    [[matrix enclosingScrollView] setPostsFrameChangedNotifications:NO];
+    [[matrix enclosingScrollView] setFrame:matrixFrame];
+    [[matrix enclosingScrollView] setPostsFrameChangedNotifications:YES];
+    
 	// restore the edited cell
 	if(editedIndex != -1){
-        [[self window] makeFirstResponder:extraBibFields];
-        [extraBibFields selectCellAtRow:editedIndex / numCols column:editedIndex % numCols];
+        [[self window] makeFirstResponder:matrix];
+        [matrix selectCellAtRow:editedIndex / numCols column:editedIndex % numCols];
 	}
 }
 
 - (void)setupButtonCells {
-    // Setup the default cells for the extraBibFields matrix
+    // Setup the default cells for the matrix matrix
 	booleanButtonCell = [[NSButtonCell alloc] initTextCell:@""];
 	[booleanButtonCell setButtonType:NSSwitchButton];
 	[booleanButtonCell setTarget:self];
@@ -3052,19 +2995,14 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [ratingButtonCell setEnabled:isEditable];
 	
 	NSCell *cell = [[NSCell alloc] initTextCell:@""];
-	[extraBibFields setPrototype:cell];
+	[matrix setPrototype:cell];
 	[cell release];
 }
 
 - (void)matrixFrameDidChange:(NSNotification *)notification {
-    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    int numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
-    float width = NSWidth([[extraBibFields enclosingScrollView] frame]) - [NSScroller scrollerWidth];
-    float spacing = [extraBibFields intercellSpacing].width;
-    float cellWidth = [extraBibFields cellSize].width;
-    int numCols = MIN(floor((width + spacing) / (cellWidth + spacing)), numEntries);
-    numCols = MAX(numCols, 1);
-    if (numCols != [extraBibFields numberOfColumns])
+    int numberOfColumns;
+    [self getNumberOfMatrixRows:NULL columns:&numberOfColumns];
+    if (numberOfColumns != [matrix numberOfColumns])
         [self setupMatrix];
 }
 
@@ -3134,7 +3072,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(matrixFrameDidChange:)
 												 name:NSViewFrameDidChangeNotification
-											   object:[extraBibFields enclosingScrollView]];
+											   object:[matrix enclosingScrollView]];
 }
 
 
