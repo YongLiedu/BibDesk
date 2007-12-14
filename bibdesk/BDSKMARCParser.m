@@ -395,9 +395,12 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 - (BOOL)isMARCString{
     unsigned fieldTerminator = 0x1E;
     NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[a-z]{3}[ a][ a0-9]22[0-9]{5}[ 1-8uz][ a-z][ r]45[ 0A-Z]0([0-9]{12})+%C", fieldTerminator];
-    AGRegex *regex = [AGRegex regexWithPattern:pattern];
+    AGRegex *MARCRegex = [AGRegex regexWithPattern:pattern];
+    // German libraries are converting from MAB to MARC, but they sometimes just leave the leader from the MAB2 format, so we'll accept that too
+    pattern = [NSString stringWithFormat:@"^[0-9]{5}[a-z][a-zA-Z0-9 \\-\\.]{4}[0-9]{7}[a-zA-Z0-9 \\-\\.]{6}[a-z]([0-9]{12})+%C", fieldTerminator];
+    AGRegex *MABRegex = [AGRegex regexWithPattern:pattern];
     
-    return nil != [regex findInString:self];
+    return nil != [MARCRegex findInString:self] || nil != [MABRegex findInString:self];
 }
 
 - (BOOL)isFormattedMARCString{
