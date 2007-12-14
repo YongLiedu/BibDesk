@@ -16,6 +16,23 @@
 		F99F53D80B40A618006E9E44 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = F99F53D60B40A618006E9E44 /* Controller.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		F9A46E310D12FF02001ED26C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9A46E2C0D12FF02001ED26C /* yaz.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216 /* yaz.framework */;
+			remoteInfo = yaz;
+		};
+		F9A46E330D12FF10001ED26C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9A46E2C0D12FF02001ED26C /* yaz.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* yaz */;
+			remoteInfo = yaz;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		F99F53D10B40A602006E9E44 /* Copy Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -39,10 +56,11 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* z3950Test_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = z3950Test_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* z3950Test.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = z3950Test.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* z3950Test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = z3950Test.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F99F53CD0B40A5BF006E9E44 /* yaz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = yaz.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F99F53D50B40A618006E9E44 /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
 		F99F53D60B40A618006E9E44 /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
+		F9A46E2C0D12FF02001ED26C /* yaz.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = yaz.xcodeproj; path = ../yaz.xcodeproj; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +113,7 @@
 		29B97314FDCFA39411CA2CEA /* z3950Test */ = {
 			isa = PBXGroup;
 			children = (
+				F9A46E2C0D12FF02001ED26C /* yaz.xcodeproj */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -133,6 +152,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		F9A46E2D0D12FF02001ED26C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F9A46E320D12FF02001ED26C /* yaz.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -148,6 +175,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				F9A46E340D12FF10001ED26C /* PBXTargetDependency */,
 			);
 			name = z3950Test;
 			productInstallPath = "$(HOME)/Applications";
@@ -161,15 +189,32 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "z3950Test" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* z3950Test */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = F9A46E2D0D12FF02001ED26C /* Products */;
+					ProjectRef = F9A46E2C0D12FF02001ED26C /* yaz.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* z3950Test */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		F9A46E320D12FF02001ED26C /* yaz.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = yaz.framework;
+			remoteRef = F9A46E310D12FF02001ED26C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8D1107290486CEB800E47090 /* Resources */ = {
@@ -194,6 +239,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F9A46E340D12FF10001ED26C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = yaz;
+			targetProxy = F9A46E330D12FF10001ED26C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
@@ -265,7 +318,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Debug;
 		};
@@ -275,7 +328,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Release;
 		};
