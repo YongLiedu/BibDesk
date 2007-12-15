@@ -396,8 +396,6 @@ static NSSet *alwaysDisabledFields = nil;
 
 - (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if (tableView == defaultFieldsTableView) {
-        NSString *colID = [tableColumn identifier];
-        NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
         
         return YES;
     } else if (tableView == globalMacroFilesTableView) {
@@ -408,7 +406,6 @@ static NSSet *alwaysDisabledFields = nil;
 
 - (void)tableView:(NSTableView *)tableView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if (tableView == defaultFieldsTableView) {
-        NSString *colID = [tableColumn identifier];
         NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
         
         if([alwaysDisabledFields containsObject:field])
