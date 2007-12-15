@@ -186,6 +186,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [[tabView superview] setFrame:[[edgeView contentView] bounds]];
     [edgeView addSubview:tabView];
     
+    edgeView = (BDSKEdgeView *)[[[matrix enclosingScrollView] superview] superview];
+	[edgeView setEdges:BDSKMaxYEdgeMask];
+    
     [fileSplitView setBlendStyle:BDSKMinBlendStyleMask];
     
     [self setWindowFrameAutosaveNameOrCascade:BDSKEditorFrameAutosaveName];
@@ -2966,11 +2969,18 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [matrix setFrameOrigin:origin];
     [matrix setNeedsDisplay:YES];
 	
-    NSRect tableFrame = [[tableView enclosingScrollView] frame];
-    NSRect matrixFrame = [[matrix enclosingScrollView] frame];
-    NSDivideRect(NSUnionRect(tableFrame, matrixFrame), &matrixFrame, &tableFrame, fminf(NSHeight([matrix frame]), 190.0), NSMinYEdge);
-    [[tableView enclosingScrollView] setFrame:tableFrame];
-    [[matrix enclosingScrollView] setFrame:matrixFrame];
+    NSView *matrixEdgeView = [[[matrix enclosingScrollView] superview] superview];
+    NSView *tableScrollView = [tableView enclosingScrollView];
+    NSRect tableFrame = [tableScrollView frame];
+    NSRect matrixFrame = [matrixEdgeView frame];
+    float dh = fminf(NSHeight([matrix frame]), 190.0) + 1.0 - NSHeight(matrixFrame);
+    if (fabsf(dh) > 0.1) {
+        tableFrame.size.height -= dh;
+        tableFrame.origin.y += dh;
+        matrixFrame.size.height += dh;
+        [tableScrollView setFrame:tableFrame];
+        [matrixEdgeView setFrame:matrixFrame];
+    }
     
 	// restore the edited cell
 	if(editedIndex != -1){
