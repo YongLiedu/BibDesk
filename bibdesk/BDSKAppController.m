@@ -84,32 +84,30 @@
 @implementation BDSKAppController
 
 // remove legacy comparisons of added/created/modified strings in table column code from prefs
-// maybe we can support transforming these in the add field sheets, if we want to allow some 
-// sort of fuzzy matching?
-static BOOL fixLegacyTableColumnIdentifiers(NSArray **tableColumnIdentifiers){
-    NSMutableArray *fixedTableColumnIdentifiers = nil;
+static void fixLegacyTableColumnIdentifiers()
+{
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSMutableArray *fixedTableColumnIdentifiers = [[[pw arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
+
     unsigned idx;
-    BOOL fixed = NO;
-    NSDictionary *legacyKeys = [NSDictionary dictionaryWithObjectsAndKeys:@"Added", BDSKDateAddedString, @"Created", BDSKDateAddedString, @"Modified", BDSKDateModifiedString, @"Authors Or Editors", BDSKAuthorEditorString, @"Authors", BDSKAuthorString, nil];
+    BOOL didFixIdentifier = NO;
+    NSDictionary *legacyKeys = [NSDictionary dictionaryWithObjectsAndKeys:BDSKDateAddedString, @"Added", BDSKDateAddedString, @"Created", BDSKDateModifiedString, @"Modified", BDSKAuthorEditorString, @"Authors Or Editors", BDSKAuthorString, @"Authors", nil];
     NSEnumerator *keyEnum = [legacyKeys keyEnumerator];
     NSString *key;
     
     while (key = [keyEnum nextObject]) {
-        if ((idx = [*tableColumnIdentifiers indexOfObject:key]) != NSNotFound) {
-            if (fixedTableColumnIdentifiers == nil)
-                fixedTableColumnIdentifiers = [*tableColumnIdentifiers mutableCopy];
+        if ((idx = [fixedTableColumnIdentifiers indexOfObject:key]) != NSNotFound) {
+            didFixIdentifier = YES;
             [fixedTableColumnIdentifiers replaceObjectAtIndex:idx withObject:[legacyKeys objectForKey:key]];
         }
     }
-    
-    if (fixedTableColumnIdentifiers)
-        *tableColumnIdentifiers = [fixedTableColumnIdentifiers autorelease];
-    return fixed;
+    if (didFixIdentifier)
+        [pw setObject:fixedTableColumnIdentifiers forKey:BDSKShownColsNamesKey];
 }
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    //OBINITIALIZE;
         
     // make sure we use Spotlight's plugins on 10.4 and later
     SKLoadDefaultExtractorPlugIns();
@@ -119,9 +117,7 @@ static BOOL fixLegacyTableColumnIdentifiers(NSArray **tableColumnIdentifiers){
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     
     // eliminate support for some legacy keys
-    NSArray *prefsShownColNamesArray = [pw arrayForKey:BDSKShownColsNamesKey];
-    if(fixLegacyTableColumnIdentifiers(&prefsShownColNamesArray))
-        [pw setObject:prefsShownColNamesArray forKey:BDSKShownColsNamesKey];
+    fixLegacyTableColumnIdentifiers();
     
     // legacy pref key removed prior to release of 1.3.1 (stored path instead of alias)
     NSString *filePath = [pw objectForKey:@"Default Bib File"];
