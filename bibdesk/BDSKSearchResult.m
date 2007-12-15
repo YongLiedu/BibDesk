@@ -38,8 +38,8 @@
 
 #import "BDSKSearchResult.h"
 #import "NSAttributedString_BDSKExtensions.h"
-#import "NSImage+ToolBox.h"
 #import "BDSKSearchIndex.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKFile.h"
 
 @implementation BDSKSearchResult

@@ -37,7 +37,7 @@
  */
 
 #import "BDSKSearch.h"
-#import "NSImage+ToolBox.h"
+#import "NSImage_BDSKExtensions.h"
 #import "BDSKSearchResult.h"
 #import "BDSKSearchIndex.h"
 
