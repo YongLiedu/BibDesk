@@ -961,11 +961,16 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (unsigned int)rating{
-	return [self ratingValueOfField:BDSKRatingString];
+    NSArray *ratingFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey];
+    NSString *field = [ratingFields containsObject:BDSKRatingString] ? BDSKRatingString : [ratingFields firstObject];
+	return field ? [self ratingValueOfField:field] : 0;
 }
 
 - (void)setRating:(unsigned int)rating{
-    [self setField:BDSKRatingString toRatingValue:rating];
+    NSArray *ratingFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey];
+    NSString *field = [ratingFields containsObject:BDSKRatingString] ? BDSKRatingString : [ratingFields firstObject];
+    if (field)
+        [self setField:field toRatingValue:rating];
 }
 
 - (void)setHasBeenEdited:(BOOL)flag{
@@ -1869,9 +1874,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                     citationFormatter = [[[BDSKCitationFormatter alloc] initWithDelegate:self] autorelease];
                 valueStr = [[citationFormatter attributedStringForObjectValue:stringValue withDefaultAttributes:bodyAttributes] retain];
   
-			}else if([key isEqualToString:BDSKRatingString]){
-				int rating = [self ratingValueOfField:BDSKRatingString];
-				valueStr = [[NSAttributedString alloc] initWithString:[NSString ratingStringWithInteger:rating]
+			}else if([key isRatingField]){
+				valueStr = [[NSAttributedString alloc] initWithString:[NSString ratingStringWithInteger:[self ratingValueOfField:key]]
 														   attributes:bodyAttributes];                
 			}else if([key isEqualToString:BDSKPagesString]){
                 valueStr = [[NSAttributedString alloc] initWithString:[stringValue stringByConvertingDoubleHyphenToEndash]

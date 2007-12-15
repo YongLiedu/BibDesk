@@ -2974,12 +2974,15 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSRect tableFrame = [tableScrollView frame];
     NSRect matrixFrame = [matrixEdgeView frame];
     float dh = fminf(NSHeight([matrix frame]), 190.0) + 1.0 - NSHeight(matrixFrame);
+    if ([cells count] == 0)
+        dh -= 1.0;
     if (fabsf(dh) > 0.1) {
         tableFrame.size.height -= dh;
         tableFrame.origin.y += dh;
         matrixFrame.size.height += dh;
         [tableScrollView setFrame:tableFrame];
         [matrixEdgeView setFrame:matrixFrame];
+        [[tableScrollView superview] setNeedsDisplay:YES];
     }
     
 	// restore the edited cell

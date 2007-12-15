@@ -155,13 +155,6 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         metadataMessageQueue = [[OFMessageQueue alloc] init];
         [metadataMessageQueue startBackgroundProcessors:1];
         canWriteMetadata = 1;
-				
-        NSMutableArray *ratingFields = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey] mutableCopy];
-		if(![ratingFields containsObject:BDSKRatingString]){
-			[ratingFields insertObject:BDSKRatingString atIndex:0];
-			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:ratingFields forKey:BDSKRatingFieldsKey];
-		}
-		[ratingFields release];
     }
     return self;
 }

@@ -275,7 +275,7 @@ static NSSet *alwaysDisabledFields = nil;
 		return;
 	}
 	NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
-	if([alwaysDisabledFields containsObject:field] || [field isEqualToString:BDSKRatingString])
+	if([alwaysDisabledFields containsObject:field])
 		[delSelectedDefaultFieldButton setEnabled:NO];
 	else
 		[delSelectedDefaultFieldButton setEnabled:YES];
@@ -399,8 +399,6 @@ static NSSet *alwaysDisabledFields = nil;
         NSString *colID = [tableColumn identifier];
         NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
         
-        if([field isEqualToString:BDSKRatingString] && ([colID isEqualToString:@"field"] || [colID isEqualToString:@"type"]))
-            return NO;
         return YES;
     } else if (tableView == globalMacroFilesTableView) {
         return YES;
@@ -415,9 +413,6 @@ static NSSet *alwaysDisabledFields = nil;
         
         if([alwaysDisabledFields containsObject:field])
             [cell setEnabled:NO];
-        else if([field isEqualToString:BDSKRatingString] &&
-                ([colID isEqualToString:@"field"] || [colID isEqualToString:@"type"]))
-            [cell setEnabled:NO];
         else
             [cell setEnabled:YES];
     }
@@ -431,7 +426,7 @@ static NSSet *alwaysDisabledFields = nil;
             return;
         }
         NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
-        if([alwaysDisabledFields containsObject:field] || [field isEqualToString:BDSKRatingString])
+        if([alwaysDisabledFields containsObject:field])
             [delSelectedDefaultFieldButton setEnabled:NO];
         else
             [delSelectedDefaultFieldButton setEnabled:YES];
