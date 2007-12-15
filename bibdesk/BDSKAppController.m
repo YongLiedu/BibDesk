@@ -91,7 +91,7 @@ static void fixLegacyTableColumnIdentifiers()
 
     unsigned idx;
     BOOL didFixIdentifier = NO;
-    NSDictionary *legacyKeys = [NSDictionary dictionaryWithObjectsAndKeys:BDSKDateAddedString, @"Added", BDSKDateAddedString, @"Created", BDSKDateModifiedString, @"Modified", BDSKAuthorEditorString, @"Authors Or Editors", BDSKAuthorString, @"Authors", nil];
+    NSDictionary *legacyKeys = [NSDictionary dictionaryWithObjectsAndKeys:@"Added", BDSKDateAddedString, @"Created", BDSKDateAddedString, @"Modified", BDSKDateModifiedString, @"Authors Or Editors", BDSKAuthorEditorString, @"Authors", BDSKAuthorString, nil];
     NSEnumerator *keyEnum = [legacyKeys keyEnumerator];
     NSString *key;
     
