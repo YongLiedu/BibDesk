@@ -1424,8 +1424,12 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (IBAction)raiseChangeFieldName:(id)sender{
     NSString *field = nil;
-    if (sender == tableView)
-        field = [fields objectAtIndex:[tableView clickedRow]];
+    if (sender == tableView) {
+        int clickedRow = [tableView clickedRow];
+        if (clickedRow == -1)
+            return;
+        field = [fields objectAtIndex:clickedRow];
+    }
     [self raiseChangeFieldSheetForField:field];
 }
 
