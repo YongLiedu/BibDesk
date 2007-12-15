@@ -2888,18 +2888,22 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	didSetupFields = YES;
 }
 
-- (void)getNumberOfMatrixRows:(int *)rows columns:(int *)columns {
+- (void)getNumberOfRows:(int *)rows columns:(int *)columns forMatrixCellSize:(NSSize)cellSize {
     BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     int numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
-    float width = NSWidth([[matrix enclosingScrollView] frame]) - [NSScroller scrollerWidth];
-    float spacing = [matrix intercellSpacing].width;
-    float cellWidth = [matrix cellSize].width;
-    int numCols = MIN(floor((width + spacing) / (cellWidth + spacing)), numEntries);
+    NSSize size = [[matrix enclosingScrollView] frame].size;
+    NSSize spacing = [matrix intercellSpacing];
+    int numRows, numCols = MIN(floor((size.width + spacing.width) / (cellSize.width + spacing.width)), numEntries);
     numCols = MAX(numCols, 1);
+    numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+    if (numRows * (cellSize.height + spacing.height) > 190.0 + spacing.height) {
+        numCols = MIN(floor((size.width - [NSScroller scrollerWidth] + spacing.width) / (cellSize.width + spacing.width)), numEntries);
+        numRows = ceil(numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+    }
     if (columns)
         *columns = numCols;
     if (rows)
-        *rows = (numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
+        *rows = numRows;
 }
 
 #define AddMatrixEntries(fields, cell) \
@@ -2909,7 +2913,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		[buttonCell setTitle:[field localizedFieldName]]; \
 		[buttonCell setRepresentedObject:field]; \
 		[buttonCell setIntValue:[publication intValueOfField:field]]; \
-        cellWidth = fmaxf(cellWidth, [buttonCell cellSize].width); \
+        size = [buttonCell cellSize]; \
+        cellSize = NSMakeSize(fmaxf(cellSize.width, size.width), fmaxf(cellSize.height, size.height)); \
         [cells addObject:buttonCell]; \
 		[buttonCell release]; \
 		if([editedTitle isEqualToString:field]) \
@@ -2932,7 +2937,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSEnumerator *e;
     NSString *field;
     NSMutableArray *cells = [NSMutableArray arrayWithCapacity:numEntries];
-    float cellWidth = 0.0;
+    NSSize size, cellSize = NSZeroSize;
 	
 	AddMatrixEntries(ratingFields, ratingButtonCell);
 	AddMatrixEntries(booleanFields, booleanButtonCell);
@@ -2940,8 +2945,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	
     while ([matrix numberOfRows])
 		[matrix removeRow:0];
-	
-    [self getNumberOfMatrixRows:&numRows columns:&numCols];
+    
+    [self getNumberOfRows:&numRows columns:&numCols forMatrixCellSize:cellSize];
     [matrix renewRows:numRows columns:numCols];
     
     e = [cells objectEnumerator];
@@ -2963,7 +2968,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	
     NSRect tableFrame = [[tableView enclosingScrollView] frame];
     NSRect matrixFrame = [[matrix enclosingScrollView] frame];
-    NSDivideRect(NSUnionRect(tableFrame, matrixFrame), &matrixFrame, &tableFrame, fminf(NSHeight([matrix frame]), 198.0), NSMinYEdge);
+    NSDivideRect(NSUnionRect(tableFrame, matrixFrame), &matrixFrame, &tableFrame, fminf(NSHeight([matrix frame]), 190.0), NSMinYEdge);
     [[tableView enclosingScrollView] setFrame:tableFrame];
     [[matrix enclosingScrollView] setFrame:matrixFrame];
     
@@ -2999,7 +3004,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)matrixFrameDidChange:(NSNotification *)notification {
     int numberOfColumns;
-    [self getNumberOfMatrixRows:NULL columns:&numberOfColumns];
+    [self getNumberOfRows:NULL columns:&numberOfColumns forMatrixCellSize:[matrix cellSize]];
     if (numberOfColumns != [matrix numberOfColumns])
         [self setupMatrix];
 }
