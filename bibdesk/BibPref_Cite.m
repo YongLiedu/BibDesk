@@ -56,15 +56,21 @@
                 forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
 }
 
-- (void)updateUI{
+- (void)updateDragCopyUI{
+    NSArray *dragCopyTypes = [defaults arrayForKey:BDSKDragCopyTypesKey];
+    [defaultDragCopyPopup selectItemWithTag:[[dragCopyTypes objectAtIndex:0] intValue]];
+    [alternateDragCopyPopup selectItemWithTag:[[dragCopyTypes objectAtIndex:1] intValue]];
+    [defaultDragCopyTemplatePopup setEnabled:[[dragCopyTypes objectAtIndex:0] intValue] == BDSKTemplateDragCopyType];
+    [alternateDragCopyTemplatePopup setEnabled:[[dragCopyTypes objectAtIndex:1] intValue] == BDSKTemplateDragCopyType];
+}
+
+- (void)updateCiteCommandUI{
     NSString *citeString = [defaults stringForKey:BDSKCiteStringKey];
 	NSString *startCiteBracket = [defaults stringForKey:BDSKCiteStartBracketKey]; 
 	NSString *endCiteBracket = [defaults stringForKey:BDSKCiteEndBracketKey]; 
 	BOOL prependTilde = [defaults boolForKey:BDSKCitePrependTildeKey];
 	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, startCiteBracket];
 	
-    [defaultDragCopyPopup selectItemWithTag:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:0] intValue]];
-    [alternateDragCopyPopup selectItemWithTag:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:1] intValue]];
     [separateCiteCheckButton setState:[defaults boolForKey:BDSKSeparateCiteKey] ? NSOnState : NSOffState];
     [prependTildeCheckButton setState:[defaults boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
     [citeBracketRadio selectCellWithTag:[[defaults objectForKey:BDSKCiteStartBracketKey] isEqualToString:@"{"] ? 1 : 2];
@@ -81,9 +87,11 @@
 		[citeBehaviorLine setFrame:frame];
 	}
 	[controlBox setNeedsDisplay:YES];
-    
-    [defaultDragCopyTemplatePopup setEnabled:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:0] intValue] == BDSKTemplateDragCopyType];
-    [alternateDragCopyTemplatePopup setEnabled:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:1] intValue] == BDSKTemplateDragCopyType];
+}
+
+- (void)updateUI{
+    [self updateDragCopyUI];
+    [self updateCiteCommandUI];
 }
 
 - (void)handleTemplatePrefsChangedNotification:(NSNotification *)notification{
@@ -121,7 +129,8 @@
     [dragCopyTypes replaceObjectAtIndex:0 withObject:number];
     [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
     [dragCopyTypes release];
-    [self valuesHaveChanged];
+    [self updateDragCopyUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeDefaultDragCopyTemplate:(id)sender{
@@ -141,7 +150,8 @@
     [dragCopyTypes replaceObjectAtIndex:1 withObject:number];
     [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
     [dragCopyTypes release];
-    [self valuesHaveChanged];
+    [self updateDragCopyUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeAlternateDragCopyTemplate:(id)sender{
@@ -157,18 +167,20 @@
 
 - (IBAction)changeSeparateCite:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKSeparateCiteKey];
-	[self valuesHaveChanged];
+	[self updateCiteCommandUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changePrependTilde:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKCitePrependTildeKey];
-	[self valuesHaveChanged];
+	[self updateCiteCommandUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)citeStringFieldChanged:(id)sender{
     [defaults setObject:[[sender stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\\"]]
                  forKey:BDSKCiteStringKey];
-    [self changeSeparateCite:separateCiteCheckButton];
+	[self updateCiteCommandUI];
     [defaults autoSynchronize];
 }
 
@@ -182,7 +194,8 @@
 		[defaults setObject:@"[" forKey:BDSKCiteStartBracketKey];
 		[defaults setObject:@"]" forKey:BDSKCiteEndBracketKey];
 	}
-	[self valuesHaveChanged];
+	[self updateCiteCommandUI];
+    [defaults autoSynchronize];
 }
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error{

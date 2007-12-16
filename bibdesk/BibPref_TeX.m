@@ -67,35 +67,45 @@ static NSSet *standardStyles = nil;
     [formatter release];
 }
 
-- (void)updateUI{
-    [usesTeXButton setState:[defaults boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
-  
-    [texBinaryPathField setStringValue:[defaults objectForKey:BDSKTeXBinPathKey]];
-    [bibtexBinaryPathField setStringValue:[defaults objectForKey:BDSKBibTeXBinPathKey]];
-    [bibTeXStyleField setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
-    [encodingPopUpButton setEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncodingKey]];
-    [bibTeXStyleField setEnabled:[defaults boolForKey:BDSKUsesTeXKey]];
-    
-    if ([BDSKShellCommandFormatter isValidExecutableCommand:[defaults objectForKey:BDSKTeXBinPathKey]])
+- (void)updateTeXPathUI{
+    NSString *teXPath = [defaults objectForKey:BDSKTeXBinPathKey];
+    [texBinaryPathField setStringValue:teXPath];
+    if ([BDSKShellCommandFormatter isValidExecutableCommand:teXPath])
         [texBinaryPathField setTextColor:[NSColor blackColor]];
     else
         [texBinaryPathField setTextColor:[NSColor redColor]];
-    
-    if ([BDSKShellCommandFormatter isValidExecutableCommand:[defaults objectForKey:BDSKBibTeXBinPathKey]])
+}
+
+- (void)updateBibTeXPathUI{
+    NSString *bibTeXPath = [defaults objectForKey:BDSKBibTeXBinPathKey];
+    [bibtexBinaryPathField setStringValue:bibTeXPath];
+    if ([BDSKShellCommandFormatter isValidExecutableCommand:bibTeXPath])
         [bibtexBinaryPathField setTextColor:[NSColor blackColor]];
     else
         [bibtexBinaryPathField setTextColor:[NSColor redColor]];
+}
+
+- (void)updateUI{
+    [self updateTeXPathUI];
+    [self updateBibTeXPathUI];
     
+    [usesTeXButton setState:[defaults boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
+  
+    [bibTeXStyleField setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
+    [bibTeXStyleField setEnabled:[defaults boolForKey:BDSKUsesTeXKey]];
+    [encodingPopUpButton setEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncodingKey]];
 }
 
 -(IBAction)changeTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKTeXBinPathKey];
-    [self valuesHaveChanged];
+    [self updateTeXPathUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeBibTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
-    [self valuesHaveChanged];
+    [self updateBibTeXPathUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeUsesTeX:(id)sender{

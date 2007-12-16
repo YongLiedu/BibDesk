@@ -59,16 +59,24 @@
     [super dealloc];
 }
 
-- (void)updateUI{
-	BOOL duplicate = [defaults boolForKey:BDSKDuplicateBooktitleKey];
-	[tableView reloadData];
+- (void)updateDuplicateTypes {
     [defaults setObject:typesArray forKey:BDSKTypesForDuplicateBooktitleKey];
+	[tableView reloadData];
+}
+
+- (void)updateDuplicateBooktitleUI{
+	BOOL duplicate = [defaults boolForKey:BDSKDuplicateBooktitleKey];
     [duplicateBooktitleCheckButton setState:duplicate ? NSOnState : NSOffState];
     [forceDuplicateBooktitleCheckButton setState:[defaults boolForKey:BDSKForceDuplicateBooktitleKey] ? NSOnState : NSOffState];
     [forceDuplicateBooktitleCheckButton setEnabled:duplicate];
 	[tableView setEnabled:duplicate];
 	[addTypeButton setEnabled:duplicate];
 	[deleteTypeButton setEnabled:duplicate];
+}
+
+- (void)updateUI{
+    [self updateDuplicateBooktitleUI];
+    [self updateDuplicateTypes];
     [warnOnEditInheritedCheckButton setState:[defaults boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
     [autoSortCheckButton setState:[defaults boolForKey:BDSKAutoSortForCrossrefsKey] ? NSOnState : NSOffState];
 }
@@ -79,28 +87,33 @@
 
 - (IBAction)changeAutoSort:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKAutoSortForCrossrefsKey];
-	[self valuesHaveChanged];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnEditInherited:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnEditInheritedKey];
-	[self valuesHaveChanged];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeDuplicateBooktitle:(id)sender{
-    [defaults setBool:([sender state] == NSOnState) forKey:BDSKDuplicateBooktitleKey];
-	[self valuesHaveChanged];
+    BOOL duplicate = [sender state] == NSOnState;
+    [defaults setBool:duplicate forKey:BDSKDuplicateBooktitleKey];
+    [self updateDuplicateBooktitleUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeForceDuplicateBooktitle:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKForceDuplicateBooktitleKey];
-	[self valuesHaveChanged];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)deleteType:(id)sender{
-    if([tableView selectedRow] != -1){
-        [typesArray removeObjectAtIndex:[tableView selectedRow]];
-        [self valuesHaveChanged];
+    int row = [tableView selectedRow];
+    if(row != -1){
+        if ([tableView editedRow] != -1)
+            [[controlBox window] makeFirstResponder:tableView];
+        [typesArray removeObjectAtIndex:row];
+        [self updateDuplicateTypes];
     }
 }
 
@@ -128,7 +141,7 @@
         [typesArray removeObjectAtIndex:row];
     else
         [typesArray replaceObjectAtIndex:row withObject:[(NSString *)object entryType]];
-    [self updateUI];
+    [self updateDuplicateTypes];
 }
 
 - (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{

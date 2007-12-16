@@ -73,7 +73,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)updateUI{
-    NSString *citeKeyFormat = [defaults stringForKey:BDSKCiteKeyFormatKey];
+    NSString *citeKeyFormat = [formatSheetField currentEditor] ? [formatSheetField stringValue] : [defaults stringForKey:BDSKCiteKeyFormatKey];
 	NSAttributedString *attrFormat = nil;
     int citeKeyPresetChoice = [defaults integerForKey:BDSKCiteKeyFormatPresetKey];
 	BOOL custom = (citeKeyPresetChoice == 0);

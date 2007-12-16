@@ -79,7 +79,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)updateUI{
-    NSString *formatString = [defaults stringForKey:BDSKLocalFileFormatKey];
+    NSString *formatString = [formatSheetField currentEditor] ? [formatSheetField stringValue] : [defaults stringForKey:BDSKLocalFileFormatKey];
 	NSAttributedString *attrFormat = nil;
     int formatPresetChoice = [defaults integerForKey:BDSKLocalFileFormatPresetKey];
 	BOOL custom = (formatPresetChoice == 0);

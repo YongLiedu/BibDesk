@@ -40,8 +40,6 @@
 
 @interface BibPref_General : OAPreferenceClient {
     IBOutlet NSMatrix *startupBehaviorRadio;
-    int prevStartupBehaviorTag;
-	
     IBOutlet NSPopUpButton *emailTemplatePopup;
 	IBOutlet NSButton* editOnPasteButton;
     IBOutlet NSPopUpButton *checkForUpdatesButton;

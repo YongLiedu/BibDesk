@@ -75,7 +75,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     } else {
         [self setItemNodes:[BDSKTemplate defaultServiceTemplates]];
     }
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 - (void)awakeFromNib
@@ -88,9 +88,6 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [outlineView setAutoresizesOutlineColumn:NO];
     
     [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
-    
-    // this will synchronize prefs, as well
-    [self valuesHaveChanged];
 }
 
 - (void)dealloc
@@ -137,7 +134,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     else if (BDSKServiceTemplateList == templatePrefList)
         [self setItemNodes:[BDSKTemplate defaultServiceTemplates]];
     else [NSException raise:NSInternalInconsistencyException format:@"Unrecognized templatePrefList parameter"];
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{

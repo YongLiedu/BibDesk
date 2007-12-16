@@ -51,37 +51,36 @@
     [self handleTemplatePrefsChanged:nil];
 }
 
-- (void)updateUI{
-    [startupBehaviorRadio selectCellWithTag:[[defaults objectForKey:BDSKStartupBehaviorKey] intValue]];
-    if([[defaults objectForKey:BDSKStartupBehaviorKey] intValue] != 3){
-        [defaultBibFileTextField setEnabled:NO];
-        [defaultBibFileButton setEnabled:NO];
-    }else{
-        [defaultBibFileTextField setEnabled:YES];
-        [defaultBibFileButton setEnabled:YES];
-	}
-    
+- (void)updateStartupBehaviorUI {
+    int startupBehavior = [[defaults objectForKey:BDSKStartupBehaviorKey] intValue];
+    [startupBehaviorRadio selectCellWithTag:startupBehavior];
+    [defaultBibFileTextField setEnabled:startupBehavior == 3];
+    [defaultBibFileButton setEnabled:startupBehavior == 3];
+}
+
+- (void)udateDefaultBibFileUI {
     NSData *aliasData = [defaults objectForKey:BDSKDefaultBibFileAliasKey];
     BDAlias *alias;
     if([aliasData length] && (alias = [BDAlias aliasWithData:aliasData]))
         [defaultBibFileTextField setStringValue:[[alias fullPath] stringByAbbreviatingWithTildeInPath]];
     else
         [defaultBibFileTextField setStringValue:@""];
-	
-    prevStartupBehaviorTag = [[defaults objectForKey:BDSKStartupBehaviorKey] intValue];
+}
+
+- (void)udateWarningsUI {
+    [warnOnDeleteButton setState:[defaults boolForKey:BDSKWarnOnDeleteKey] ? NSOnState : NSOffState];
+    [warnOnRemovalFromGroupButton setState:[defaults boolForKey:BDSKWarnOnRemovalFromGroupKey] ? NSOnState : NSOffState];
+    [warnOnRenameGroupButton setState:[defaults boolForKey:BDSKWarnOnRenameGroupKey] ? NSOnState : NSOffState];
+    [warnOnGenerateCiteKeysButton setState:[defaults boolForKey:BDSKWarnOnCiteKeyChangeKey] ? NSOnState : NSOffState];
+}
+
+- (void)updateUI{
+    [self updateStartupBehaviorUI];
+    [self udateDefaultBibFileUI];
+	[self udateWarningsUI];
     
     [editOnPasteButton setState:[defaults boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
-    
     [checkForUpdatesButton selectItemWithTag:[defaults integerForKey:BDSKUpdateCheckIntervalKey]];
-
-    [warnOnDeleteButton setState:([defaults boolForKey:BDSKWarnOnDeleteKey] == YES) ? NSOnState : NSOffState];
-
-    [warnOnRemovalFromGroupButton setState:([defaults boolForKey:BDSKWarnOnRemovalFromGroupKey] == YES) ? NSOnState : NSOffState];
-
-    [warnOnRenameGroupButton setState:([defaults boolForKey:BDSKWarnOnRenameGroupKey] == YES) ? NSOnState : NSOffState];
-    
-    [warnOnGenerateCiteKeysButton setState:([defaults boolForKey:BDSKWarnOnCiteKeyChangeKey] == YES) ? NSOnState : NSOffState];
-    
 }
 
 // tags correspond to BDSKUpdateCheckInterval enum
@@ -103,13 +102,15 @@
     BDAlias *alias = [BDAlias aliasWithPath:[[sender stringValue] stringByStandardizingPath]];
     if(alias)
         [defaults setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+    [self udateDefaultBibFileUI];
     [defaults autoSynchronize];
 }
 
 - (IBAction)changeStartupBehavior:(id)sender{
     int n = [[sender selectedCell] tag];
     [defaults setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
-    [self valuesHaveChanged];
+    [self updateStartupBehaviorUI];
+    [defaults autoSynchronize];
     if(n == 3 && [[defaultBibFileTextField stringValue] isEqualToString:@""])
         [self chooseAutoOpenFile:nil];
 }
@@ -133,11 +134,12 @@
         return;
     
     BDAlias *alias = [BDAlias aliasWithURL:[sheet URL]];
-    [defaultBibFileTextField setStringValue:[[[sheet URL] path] stringByAbbreviatingWithTildeInPath]];    
     
     [defaults setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
     [defaults setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
-    [self valuesHaveChanged];
+    [self udateDefaultBibFileUI];
+    [self updateStartupBehaviorUI];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeEmailTemplate:(id)sender{
@@ -156,17 +158,17 @@
 
 - (IBAction)changeWarnOnDelete:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnDeleteKey];
-	[self valuesHaveChanged];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnRemovalFromGroup:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRemovalFromGroupKey];
-	[self valuesHaveChanged];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnRenameGroup:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRenameGroupKey];
-	[self valuesHaveChanged];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnGenerateCiteKeys:(id)sender{
@@ -181,7 +183,7 @@
 }
 
 - (void)handleWarningPrefChanged:(NSNotification *)notification {
-    [self valuesHaveChanged];
+    [self udateWarningsUI];
 }
 
 - (void)handleTemplatePrefsChanged:(NSNotification *)notification {

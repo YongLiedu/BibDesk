@@ -57,10 +57,9 @@
     [self handleTemplatePrefsChangedNotification:nil];
     
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
-    [self updateUI];
 }
 
-- (void)updateUI{
+- (void)updatePreviewDisplayUI{
     [displayPrefRadioMatrix selectCellWithTag:[defaults integerForKey:BDSKPreviewDisplayKey]];
 	
     int maxNumber = [defaults integerForKey:BDSKPreviewMaxNumberKey];
@@ -70,6 +69,10 @@
 		[previewMaxNumberComboBox setIntValue:maxNumber];
     
     [previewTemplatePopup setEnabled:[defaults integerForKey:BDSKPreviewDisplayKey] == 3];
+}
+
+- (void)updateUI{
+    [self updatePreviewDisplayUI];
     
     int tag, tagMax = 2;
     int mask = [defaults integerForKey:BDSKAuthorNameDisplayKey];
@@ -104,7 +107,7 @@
 }
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
-    [self updateUI];
+    [self updatePreviewDisplayUI];
 }
 
 - (IBAction)changePreviewDisplay:(id)sender{
@@ -122,8 +125,7 @@
 		[defaults setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
         [defaults autoSynchronize];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-	} else 
-        [self updateUI];
+	}
 }
 
 - (IBAction)changePreviewTemplate:(id)sender{
@@ -206,7 +208,7 @@
     else
         prefMask &= ~cellMask;
     [defaults setInteger:prefMask forKey:BDSKAuthorNameDisplayKey];
-    [self valuesHaveChanged];
+    [defaults autoSynchronize];
 }
 
 
