@@ -117,7 +117,7 @@ static NSString *xattrError(int err, const char *path);
     
     // see comment in extendedAttributeNamed:... 
     if (NULL == namebuf) {
-        NSLog(@"-[%@ %@]: failed to malloc %d bytes", [self class], NSStringFromSelector(_cmd), bufSize);
+        NSLog(@"-[%@ %@]: failed to malloc %ld bytes", [self class], NSStringFromSelector(_cmd), bufSize);
         errMsg = NSLocalizedString(@"Unable to allocate memory for extended attribute names", @"");
         if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         return nil;
@@ -235,13 +235,12 @@ static NSString *xattrError(int err, const char *path);
     char *namebuf = (char *)NSZoneMalloc(NSDefaultMallocZone(), sizeof(char) * bufSize);
     // One error report showed this method trying to malloc 3909287936 bytes, which failed.  Since we had an NSAssert here, it failed as well.  Since it's apparently possible for getxattr to return an insane length but no error, we'll fail more gracefully here.
     if (NULL == namebuf) {
-        NSLog(@"-[%@ %@]: failed to malloc %d bytes", [self class], NSStringFromSelector(_cmd), bufSize);
+        NSLog(@"-[%@ %@]: failed to malloc %ld bytes", [self class], NSStringFromSelector(_cmd), bufSize);
         errMsg = NSLocalizedString(@"Unable to allocate memory for extended attribute names", @"");
         if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         return nil;
     }
     
-    NSAssert(namebuf != NULL, @"unable to allocate memory");
     status = getxattr(fsPath, attrName, namebuf, bufSize, 0, xopts);
     
     if(status == -1){
