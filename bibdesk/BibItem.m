@@ -273,6 +273,7 @@ static CFDictionaryRef selectorTable = NULL;
         
         owner = nil;
         files = [NSMutableArray new];
+        sortedURLs = nil;
         
         fileOrder = nil;
         identifierURL = createUniqueURL();
@@ -284,7 +285,6 @@ static CFDictionaryRef selectorTable = NULL;
         [self setDateModified: nil];
 		
 		groups = [[NSMutableDictionary alloc] initWithCapacity:5];
-        cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
 		
         templateFields = nil;
         // updateMetadataForKey with a nil argument will set the dates properly if we read them from a file
@@ -324,12 +324,12 @@ static CFDictionaryRef selectorTable = NULL;
             [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
             [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
-            cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
             files = [[coder decodeObjectForKey:@"files"] mutableCopy];
             [files makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
             // set by the document, which we don't archive
             owner = nil;
             fileOrder = nil;
+            sortedURLs = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
             // we don't bother encoding this
             spotlightMetadataChanged = YES;
@@ -368,7 +368,7 @@ static CFDictionaryRef selectorTable = NULL;
     [pubFields release];
     [people release];
 	[groups release];
-    [cachedURLs release];
+    [sortedURLs release];
 
     [pubType release];
     [fileType release];
@@ -378,7 +378,6 @@ static CFDictionaryRef selectorTable = NULL;
     [dateModified release];
     [fileOrder release];
     [identifierURL release];
-    [sortedURLs release];
     [files release];
     [filesToBeFiled release];
     [super dealloc];
@@ -514,7 +513,6 @@ static CFDictionaryRef selectorTable = NULL;
     // these fields may change type, so our cached values should be discarded
     [people release];
     people = nil;
-    [cachedURLs removeAllObjects];
 }
 
 #pragma mark Document
@@ -2545,7 +2543,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [aFile setDelegate:self];
     if ([owner fileURL])
         [aFile update];
-	
+    
+	[sortedURLs release];
+    sortedURLs = nil;
+    
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
@@ -2559,6 +2560,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [file setDelegate:nil];
     [self removeFileToBeFiled:file];
     [files removeObjectAtIndex:idx];
+    
+    [sortedURLs release];
+    sortedURLs = nil;
 	
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -2610,18 +2614,21 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     else return NSOrderedDescending;
 }
 
+// This only depends on the files array, so it only needs to be reset when that array is mutated.  It's cached because the document calls this each time one of the fileview datasource methods is called.  I'm not sure how to avoid that without using FSEvents to watch for file moves (not available on 10.4) or building the collection each time it's requested (slow).  Maintaining the collection in the document would be cleaner in some respects, but then it would have to observe changes to files in all of its items (and still be subject to stale URLs after a move).
 - (NSArray *)sortedURLs
 {
-    NSMutableArray *combinedURLs = [NSMutableArray array];
-    NSEnumerator *fe = [files objectEnumerator];
-    NSURL *aURL;
-    BDSKLinkedFile *file;
-    while (file = [fe nextObject]) {
-        if (aURL = [file displayURL])
-            [combinedURLs addObject:aURL];
+    if (nil == sortedURLs) {
+        sortedURLs = [NSMutableArray new];
+        NSEnumerator *fe = [files objectEnumerator];
+        NSURL *aURL;
+        BDSKLinkedFile *file;
+        while (file = [fe nextObject]) {
+            if (aURL = [file displayURL])
+                [sortedURLs addObject:aURL];
+        }
+        [sortedURLs sortUsingFunction:sortURLsByType context:NULL];
     }
-    [combinedURLs sortUsingFunction:sortURLsByType context:NULL];
-    return combinedURLs;
+    return sortedURLs;
 }
 
 - (NSImage *)imageForURLField:(NSString *)field{
@@ -2642,14 +2649,9 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 
 - (NSURL *)remoteURLForField:(NSString *)field{
     
-    // check the cache first
-    NSURL *returnURL = [cachedURLs objectForKey:field];
-    if (returnURL)
-        return returnURL;
-    
     NSString *value = [self valueOfField:field inherit:NO];
     
-    // early return to avoid using a struct from nil
+    // early return to avoid using an NSRange struct from nil
     if(nil == value)
         return nil;
     
@@ -2678,24 +2680,13 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
             value = [value substringWithRange:NSMakeRange(6, loc - 6)];
     }
 
-    returnURL = [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
-    if (returnURL)
-        [cachedURLs setObject:returnURL forKey:field];
-    
-    return returnURL;
+    return [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field{
     
-    // check the cache first
-    NSURL *localURL = [cachedURLs objectForKey:field];
-    if (nil != localURL)
-        return localURL;
-    
-    NSURL *resolvedURL = nil;
+    NSURL *localURL = nil, *resolvedURL = nil;
     NSString *localURLFieldValue = [self valueOfField:field inherit:NO];
-    // only cache absolute URLs
-    BOOL shouldCache = YES;
     
     if ([NSString isEmptyString:localURLFieldValue]) return nil;
     
@@ -2712,7 +2703,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
             NSString *basePath = [NSString isEmptyString:docPath] ? NSHomeDirectory() : [docPath stringByDeletingLastPathComponent];
 			// It's a relative path from the containing document's path
             localURLFieldValue = [basePath stringByAppendingPathComponent:localURLFieldValue];
-            shouldCache = NO;
         }
 
         localURL = [NSURL fileURLWithPath:[localURLFieldValue stringByStandardizingPath]];
@@ -2724,9 +2714,6 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     // if the path to the file does not exist resolvedURL is nil, so we return the unresolved path
     if (resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent])
         localURL = resolvedURL;
-    
-    if (localURL && shouldCache)
-        [cachedURLs setObject:localURL forKey:field];
     
     return localURL;
 }
@@ -3341,20 +3328,9 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
 	// invalidate the cached groups; they are rebuilt when needed
 	if(allFieldsChanged){
 		[groups removeAllObjects];
-        
-        // the URL cache is certainly invalid now
-        [cachedURLs removeAllObjects];
-        [sortedURLs release];
-        sortedURLs = nil;
 	}else if(key != nil){
 		[groups removeObjectForKey:key];
 	}
-    
-    if([key isURLField]) {
-        [cachedURLs removeObjectForKey:key];
-        [sortedURLs release];
-        sortedURLs = nil;
-    }
 	
     NSCalendarDate *theDate = nil;
     

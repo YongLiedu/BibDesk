@@ -75,12 +75,11 @@ enum {
     BDSKFieldCollection *templateFields;
     int currentIndex;
     BOOL spotlightMetadataChanged;
-    NSMutableDictionary *cachedURLs;
     BOOL isImported;
     float searchScore;
     NSURL *identifierURL;
-    NSMutableArray *files;
     NSMutableArray *sortedURLs;
+    NSMutableArray *files;
 }
 
 - (NSUInteger)countOfFiles;
