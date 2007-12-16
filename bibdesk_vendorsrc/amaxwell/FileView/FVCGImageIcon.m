@@ -67,7 +67,7 @@ static const NSUInteger MAX_PIXEL_DIMENSION = 1024; /* maximum height or width a
         _thumbnailRef = NULL;
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
         _inDiskCache = NO;
-        int rc = pthread_mutex_init(&_mutex, NULL);
+        NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
             perror("pthread_mutex_init");        
     }

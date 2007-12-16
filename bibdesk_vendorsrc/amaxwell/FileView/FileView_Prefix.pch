@@ -6,11 +6,12 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-// 10.4 compatibility
+// 10.4 SDK compatibility
 #ifndef NSINTEGER_DEFINED
 #define NSUInteger unsigned
 #define NSInteger int
 #define CGFloat float
+#define NSIntegerMax INT_MAX
 // avoid redefinition in FileView.h
 #define NSINTEGER_DEFINED 1
 #endif

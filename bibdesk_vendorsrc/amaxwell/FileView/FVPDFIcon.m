@@ -115,7 +115,7 @@ static CGPDFDocumentRef createCGPDFDocumentWithPostScriptURL(NSURL *fileURL)
         // initialize to zero so we know whether to load the PDF document
         _pageCount = 0;
         
-        int rc = pthread_mutex_init(&_mutex, NULL);
+        NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
             perror("pthread_mutex_init");
     }

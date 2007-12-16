@@ -43,6 +43,7 @@
 #define NSUInteger unsigned
 #define NSInteger int
 #define CGFloat float
+#define NSIntegerMax INT_MAX
 #endif
 
 #ifndef NSAppKitVersionNumber10_4

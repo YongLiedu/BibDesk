@@ -258,8 +258,9 @@ static NSURL *missingFileURL = nil;
 
 static char * FVCreateCStringWithInode(ino_t n)
 {
+    // LONG_MAX on x86_64 is 9223372036854775807, so 40 chars should be sufficient
     char temp[40];
-    sprintf(temp,"%d",n);
+    sprintf(temp,"%ld", (long)n);
     return strdup(temp);   
 }
 

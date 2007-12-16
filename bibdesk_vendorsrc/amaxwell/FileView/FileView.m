@@ -168,7 +168,7 @@ static NSShadow *__shadow = nil;
 - (CGFloat)_rowHeight { return _iconSize.height + _padding; }
 
 static Boolean intEqual(const void *v1, const void *v2) { return v1 == v2; }
-static CFStringRef intDesc(const void *value) { return (CFStringRef)[[NSString alloc] initWithFormat:@"%d", value]; }
+static CFStringRef intDesc(const void *value) { return (CFStringRef)[[NSString alloc] initWithFormat:@"%ld", (long)value]; }
 static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 
 - (void)_commonInit {
@@ -1300,7 +1300,12 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
             NSRect leftRect = NSZeroRect, rightRect = NSZeroRect;
             
             // determine a min/max size for the arrow buttons
-            CGFloat side = roundf(NSHeight(iconRect) / 5);
+            CGFloat side;
+#if __LP64__
+            side = round(NSHeight(iconRect) / 5);
+#else
+            side = roundf(NSHeight(iconRect) / 5);
+#endif
             side = MIN(side, 32);
             side = MAX(side, 10);
             leftRect.size = NSMakeSize(side, side);
@@ -1498,10 +1503,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
 static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSRect rect;
-    rect.origin.x = fminf(aPoint.x, bPoint.x);
-    rect.origin.y = fminf(aPoint.y, bPoint.y);
-    rect.size.width = fmaxf(3.0, fmaxf(aPoint.x, bPoint.x) - NSMinX(rect));
-    rect.size.height = fmaxf(3.0, fmaxf(aPoint.y, bPoint.y) - NSMinY(rect));
+    rect.origin.x = MIN(aPoint.x, bPoint.x);
+    rect.origin.y = MIN(aPoint.y, bPoint.y);
+    rect.size.width = MAX(3.0, fmaxf(aPoint.x, bPoint.x) - NSMinX(rect));
+    rect.size.height = MAX(3.0, fmaxf(aPoint.y, bPoint.y) - NSMinY(rect));
     return rect;
 }
 
@@ -1747,7 +1752,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
                                          timestamp:[currentEvent timestamp]
                                       windowNumber:[currentEvent windowNumber]
                                            context:[currentEvent context]
-                                       eventNumber:INT_MAX
+                                       eventNumber:NSIntegerMax
                                         clickCount:1
                                           pressure:0];            
         }
@@ -2144,11 +2149,11 @@ void CLogv(NSString *format, va_list argList)
 {
     NSString *logString = [[NSString alloc] initWithFormat:format arguments:argList];
     
-    char *buf;
+    char *buf = NULL;
     char stackBuf[1024];
     
     // add 1 for the NULL terminator (length arg to getCString:maxLength:encoding: needs to include space for this)
-    unsigned requiredLength = ([logString maximumLengthOfBytesUsingEncoding:NSUTF8StringEncoding] + 1);
+    NSUInteger requiredLength = ([logString maximumLengthOfBytesUsingEncoding:NSUTF8StringEncoding] + 1);
     
     if (requiredLength <= sizeof(stackBuf) && [logString getCString:stackBuf maxLength:sizeof(stackBuf) encoding:NSUTF8StringEncoding]) {
         buf = stackBuf;
@@ -2156,7 +2161,6 @@ void CLogv(NSString *format, va_list argList)
         [logString getCString:buf maxLength:requiredLength encoding:NSUTF8StringEncoding];
     } else {
         fprintf(stderr, "unable to allocate log buffer\n");
-        abort();
     }
     [logString release];
     

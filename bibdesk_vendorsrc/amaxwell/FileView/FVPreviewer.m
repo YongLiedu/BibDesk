@@ -282,7 +282,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
         NSEnumerator *itemEnum = [defaultMenuItems objectEnumerator];
         NSMenuItem *item;
         while (item = [itemEnum nextObject]) {
-            int tag = [item tag];
+            NSInteger tag = [item tag];
             if (tag == WebMenuItemTagCopyLinkToClipboard || tag == WebMenuItemTagCopyImageToClipboard || tag == WebMenuItemTagCopy || tag == WebMenuItemTagGoBack || tag == WebMenuItemTagGoForward || tag == WebMenuItemTagStop || tag == WebMenuItemTagReload || tag == WebMenuItemTagOther)
                 [items addObject:item];
         }

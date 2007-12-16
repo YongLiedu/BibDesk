@@ -110,7 +110,7 @@ static CGAffineTransform __paperTransform;
         _inDiskCache = NO;
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
         
-        int rc = pthread_mutex_init(&_mutex, NULL);
+        NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
             perror("pthread_mutex_init");
     }
