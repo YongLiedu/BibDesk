@@ -90,15 +90,42 @@
 
 @end
 
+// modify the TeX template in application support
+static void upgradeTemplate()
+{
+    NSString *texTemplatePath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"previewtemplate.tex"];
+    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey];
+    
+    NSMutableString *texFile = [[NSMutableString alloc] initWithContentsOfFile:texTemplatePath encoding:encoding error:NULL];
+    
+    // This is a change required for latex2rtf compatibility.  Old versions used a peculiar "%latex2rtf:" comment at the beginning of a line to indicate a command or section that was needed for latex2rtf.  The latest version (in our vendorsrc tree as of 15 Dec 2007) uses a more typical \if\else\fi construct.
+    NSString *oldString = @"%% The following command is provided for LaTeX2RTF compatibility\n"
+    @"%% with amslatex.  DO NOT UNCOMMENT THE NEXT LINE!\n"
+    @"%latex2rtf:\\providecommand{\\bysame}{\\_\\_\\_\\_\\_}";
+    NSString *newString = @"% The following command is provided for LaTeX2RTF compatibility with amslatex.\n"
+    @"\\newif\\iflatextortf\n"
+    @"\\iflatextortf\n"
+    @"\\providecommand{\\bysame}{\\_\\_\\_\\_\\_}\n"
+    @"\\fi";
+    if ([texFile replaceOccurrencesOfString:oldString withString:newString options:0 range:NSMakeRange(0, [texFile length])])
+        [texFile writeToFile:texTemplatePath atomically:YES encoding:encoding error:NULL];
+    [texFile release];
+}
+
 static double runLoopTimeout = 30;
 
 @implementation BDSKTeXTask
 
 + (void)initialize
 {
+    OBINITIALIZE;
+    
     // returns 0 if the key doesn't exist
     if ([[NSUserDefaults standardUserDefaults] floatForKey:@"BDSKTeXTaskRunLoopTimeout"] > 1)
         runLoopTimeout = [[NSUserDefaults standardUserDefaults] floatForKey:@"BDSKTeXTaskRunLoopTimeout"];
+        
+    upgradeTemplate();
+    
 }
 
 - (id)init{
@@ -122,7 +149,7 @@ static double runLoopTimeout = 30;
 			[fm createDirectoryAtPathWithNoAttributes:dirPath];
 		
 		texTemplatePath = [[[fm currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"previewtemplate.tex"] copy];
-				
+        				
 		NSString *filePath = [dirPath stringByAppendingPathComponent:newFileName];
         texPath = [[BDSKTeXPath alloc] initWithBasePath:filePath];
         
@@ -131,7 +158,7 @@ static double runLoopTimeout = 30;
         // some users set BIBINPUTS in environment.plist, which will break our preview unless they added "." to the path (bug #1471984)
         const char *bibInputs = getenv("BIBINPUTS");
         if(bibInputs != NULL){
-            NSString *value = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:bibInputs length:strlen(bibInputs)];
+            NSString *value = [NSString stringWithFileSystemRepresentation:bibInputs];
             if([value rangeOfString:[texPath workingDirectory]].length == 0){
                 value = [NSString stringWithFormat:@"%@:%@", value, [texPath workingDirectory]];
                 setenv("BIBINPUTS", [value fileSystemRepresentation], 1);
@@ -146,7 +173,6 @@ static double runLoopTimeout = 30;
 
         OFSimpleLockInit(&processingLock);
         pthread_rwlock_init(&dataFileLock, NULL);
-        
 	}
 	return self;
 }
@@ -260,7 +286,7 @@ static double runLoopTimeout = 30;
             [binDirPath release];
             binDirPath = [pdfTeXBinPathDir retain];
             const char *path_cstring = getenv("PATH");
-            NSString *original_path = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:path_cstring  length:strlen(path_cstring)];
+            NSString *original_path = [NSString stringWithFileSystemRepresentation:path_cstring];
             NSString *new_path = [NSString stringWithFormat: @"%@:%@", original_path, binDirPath];
             setenv("PATH", [new_path fileSystemRepresentation], 1);
         }

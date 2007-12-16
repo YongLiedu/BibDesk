@@ -4,9 +4,12 @@
 \voffset = -105pt
 \hoffset = -120pt
 \renewcommand{\refname}{}
-%% The following command is provided for LaTeX2RTF compatibility
-%% with amslatex.  DO NOT UNCOMMENT THE NEXT LINE!
-%latex2rtf:\providecommand{\bysame}{\_\_\_\_\_}
+
+% The following command is provided for LaTeX2RTF compatibility with amslatex.
+\newif\iflatextortf
+\iflatextortf
+\providecommand{\bysame}{\_\_\_\_\_}
+\fi
 
 \begin{document}
 \nocite{<<CiteKeys>>}   
