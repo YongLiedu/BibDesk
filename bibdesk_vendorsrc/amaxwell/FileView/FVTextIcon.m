@@ -316,7 +316,7 @@ static CGAffineTransform __paperTransform;
     // repeat for the thumbnail image as needed, but this time just draw our bitmap again
     if (NULL == _thumbnailRef) {
         
-        ctxt = [FVBitmapContextCache new8BitGrayBitmapContextOfWidth:_thumbnailSize.width height:_thumbnailSize.height];
+        ctxt = [FVBitmapContextCache newBitmapContextOfWidth:_thumbnailSize.width height:_thumbnailSize.height];
         CGContextSaveGState(ctxt);
         
         // take a small hit here for good interpolation so we can draw smaller icons at larger sizes
@@ -333,7 +333,7 @@ static CGAffineTransform __paperTransform;
         pthread_mutex_unlock(&_mutex);
         
         CGContextRestoreGState(ctxt);
-        [FVBitmapContextCache disposeOf8BitGrayBitmapContext:ctxt];
+        [FVBitmapContextCache disposeOfBitmapContext:ctxt];
     }
     
     

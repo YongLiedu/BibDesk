@@ -248,15 +248,9 @@ void FVCGImageHeader::pinfo(void) const
 #undef USE_IMAGEIO
 #endif
 
-#if 0 // MAC_OS_X_VERSION_10_5
-#define USE_IMAGEIO 1
-#warning FVIconCache is using ImageIO
-#else
-#warning FVIconCache is using raw bitmap data
 #define USE_IMAGEIO 0
 #ifndef MAC_OS_X_VERSION_10_5
 #warning Using private CG API
-#endif
 #endif
 
 // PNG and JPEG2000 are too slow when drawing, and TIFF is too big (although we could compress it)
