@@ -281,6 +281,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)dealloc{
     [publication release];
     [fields release];
+    [addedFields release];
 	[authorTableView setDelegate:nil];
     [authorTableView setDataSource:nil];
     [notesViewUndoManager release];
@@ -1283,6 +1284,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     newField = [newField fieldName];
     if([currentFields containsObject:newField] == NO){
+        if (addedFields == nil)
+            addedFields = [[NSMutableSet alloc] init];
+        [addedFields addObject:newField];
 		[tabView selectFirstTabViewItem:nil];
         [publication setField:newField toValue:[NSString stringWithFormat:@"%@ %@",NSLocalizedString(@"Add data for field:", @"Default value for new field"), newField]];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add Field", @"Undo action name")];
@@ -1320,6 +1324,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSArray *removableFields = [removeFieldController fieldsArray];
     
     if (returnCode == NSOKButton && oldField != nil && [removableFields count]) {
+        [addedFields removeObject:oldField];
         [tabView selectFirstTabViewItem:nil];
         [publication setField:oldField toValue:nil];
         [self userChangedField:oldField from:oldValue to:@""];
@@ -1373,6 +1378,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if (returnCode == NSOKButton && [NSString isEmptyString:newField] == NO  && 
         [newField isEqualToString:oldField] == NO && [fields containsObject:newField] == NO) {
         
+        [addedFields removeObject:oldField];
+        [addedFields addObject:newField];
         [tabView selectFirstTabViewItem:nil];
         [publication setField:newField toValue:[publication valueOfField:oldField inherit:NO]];
         autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
@@ -1882,7 +1889,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         // If we are editing a crossref field, we should first set the new value, because resetFields will set the edited value. This happens when it is set through drag/drop
 		int editedRow = [tableView editedRow];
         if (editedRow != -1 && [[fields objectAtIndex:editedRow] isEqualToString:changeKey])
-            [[tableView currentEditor] setString:[publication valueOfField:changeKey]];
+            [[tableView currentEditor] setString:newValue ? newValue : @""];
         // every field value could change, but not the displayed field names
         [self reloadTable];
 		[authorTableView reloadData];
@@ -1935,6 +1942,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         else if([changeKey isPersonField])
             [authorTableView reloadData];
         
+        if ([tableView editedRow] != -1 && [[fields objectAtIndex:[tableView editedRow]] isEqualToString:changeKey]) {
+            NSString *tmpValue = newValue ? newValue : @"";
+            if ([changeKey isCitationField] == NO && [tableCellFormatter editAsComplexString])
+                tmpValue = [tmpValue stringAsBibTeXString];
+            [[tableView currentEditor] setString:tmpValue];
+        }
+        
         if ([NSString isEmptyAsComplexString:newValue] == [fields containsObject:changeKey]) {
 			// a field was added or removed
             [self resetFields];
@@ -1945,6 +1959,16 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
 	else{
         // changeKey == nil, all fields are set
+        if ([tableView editedRow] != -1) {
+            NSString *key = [fields objectAtIndex:[tableView editedRow]];
+            NSString *value = [publication valueOfField:key];
+            NSString *tmpValue = [publication valueOfField:key];
+            if (tmpValue == nil)
+                tmpValue = @"";
+            if ([changeKey isCitationField] == NO && [tableCellFormatter editAsComplexString])
+                tmpValue = [tmpValue stringAsBibTeXString];
+            [[tableView currentEditor] setString:tmpValue];
+        }
 		[self resetFields];
         [self setupMatrix];
         if(ignoreFieldChange == NO) {
@@ -2781,11 +2805,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 @implementation BDSKEditor (Private)
 
-#define AddFields(addedFields, checkEmpty) \
-    e = [addedFields objectEnumerator]; \
+#define AddFields(newFields, checkEmpty) \
+    e = [newFields objectEnumerator]; \
     while(field = [e nextObject]){ \
         if ([ignoredKeys containsObject:field]) continue; \
-        if (checkEmpty && [[publication valueOfField:field inherit:NO] isEqualAsComplexString:@""]) continue; \
+        if (checkEmpty && [addedFields containsObject:field] == NO && [[publication valueOfField:field inherit:NO] isEqualAsComplexString:@""]) continue; \
         [ignoredKeys addObject:field]; \
         [currentFields addObject:field]; \
     }
@@ -2793,12 +2817,15 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (NSArray *)currentFields {
     // build the new set of fields
     NSMutableArray *currentFields = [NSMutableArray array];
-    NSArray *allFields = [[publication allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    NSMutableArray *allFields = [[publication allFieldNames] mutableCopy];
 	NSEnumerator *e;
     NSString *field;
     BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
     NSString *type = [publication pubType];
 	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects:BDSKDateAddedString, BDSKDateModifiedString, nil];
+    
+    [allFields addObjectsFromArray:[addedFields allObjects]];
+    [allFields sortUsingSelector:@selector(caseInsensitiveCompare:)];
     
     [ignoredKeys unionSet:[tm noteFieldsSet]];
     [ignoredKeys unionSet:[tm ratingFieldsSet]];
@@ -2810,6 +2837,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	AddFields([tm userDefaultFieldsForType:type], NO);
 	AddFields(allFields, YES);
     
+    [allFields release];
     [ignoredKeys release];
     
     return currentFields;
