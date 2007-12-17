@@ -984,7 +984,6 @@
 - (IBAction)migrateFiles:(id)sender {
     if (nil == migrationController)
         migrationController = [[BDSKFileMigrationController alloc] init];
-    [migrationController setDocument:self];
     [self addWindowController:migrationController];
     [migrationController showWindow:self];
 }
