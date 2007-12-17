@@ -38,6 +38,7 @@
 
 #import "BDSKField.h"
 #import "BDSKOwnerProtocol.h"
+#import "BDSKTypeManager.h"
 
 /* cmh
 A wrapper object around the fields to access them in AppleScript. 
