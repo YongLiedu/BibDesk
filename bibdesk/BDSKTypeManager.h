@@ -288,6 +288,7 @@
 - (BOOL)isBooleanField;
 - (BOOL)isTriStateField;
 - (BOOL)isRatingField;
+- (BOOL)isIntegerField;
 - (BOOL)isLocalFileField;
 - (BOOL)isRemoteURLField;
 - (BOOL)isPersonField;

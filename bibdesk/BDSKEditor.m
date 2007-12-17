@@ -1472,7 +1472,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         [[self window] makeFirstResponder:bibTypeButton];
     }else if([fieldName isEqualToString:BDSKCiteKeyString]){
         [citeKeyField selectText:nil];
-    }else if([fieldName isBooleanField] || [fieldName isTriStateField] || [fieldName isRatingField]){
+    }else if([fieldName isIntegerField]){
         int i, j, numRows = [matrix numberOfRows], numCols = [matrix numberOfColumns];
         id cell;
         
@@ -1922,7 +1922,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             }
         }
     }
-	else if([changeKey isRatingField] || [changeKey isBooleanField] || [changeKey isTriStateField]){
+	else if([changeKey isIntegerField]){
 		
 		NSEnumerator *cellE = [[matrix cells] objectEnumerator];
 		NSButtonCell *entry = nil;

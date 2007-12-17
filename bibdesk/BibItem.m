@@ -1832,11 +1832,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     BDSKCitationFormatter *citationFormatter = nil;
     NSCalendarDate *date = nil;
     NSString *stringValue = nil;
-    BOOL notNote = NO;
+    BOOL isNotNoteOrInt = NO;
     
     while(key = [e nextObject]){
-		notNote = ![key isNoteField];
-        stringValue = [self valueOfField:key inherit:notNote];
+		isNotNoteOrInt = [key isNoteField] == NO && [key isIntegerField];
+        stringValue = [self valueOfField:key inherit:isNotNoteOrInt];
         
         if(![stringValue isEqualToString:@""] &&
            ![key isEqualToString:BDSKTitleString]){
@@ -1881,7 +1881,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             }else{
                 valueStr = [[NSAttributedString alloc] initWithTeXString:stringValue
                                                               attributes:bodyAttributes
-                                                      collapseWhitespace:notNote];
+                                                      collapseWhitespace:isNotNoteOrInt];
 			}
 			
                        
