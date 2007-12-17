@@ -1961,7 +1961,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         // changeKey == nil, all fields are set
         if ([tableView editedRow] != -1) {
             NSString *key = [fields objectAtIndex:[tableView editedRow]];
-            NSString *value = [publication valueOfField:key];
             NSString *tmpValue = [publication valueOfField:key];
             if (tmpValue == nil)
                 tmpValue = @"";

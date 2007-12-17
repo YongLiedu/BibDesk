@@ -3454,7 +3454,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (void)createFilesArray
 {        
-    NSUInteger i = 1, count;
+    NSUInteger i = 1;
     NSString *value, *key = @"Bdsk-File-1";
     
     NSMutableArray *keysToRemove = [NSMutableArray array];
