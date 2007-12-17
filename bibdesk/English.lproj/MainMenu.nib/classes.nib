@@ -1,198 +1,310 @@
-{
-    IBClasses = (
-        {
-            ACTIONS = {
-                checkForUpdates = id; 
-                editSearchBookmarks = id; 
-                reportBug = id; 
-                requestFeature = id; 
-                showBookmarks = id; 
-                showPreferencePanel = id; 
-                showReadMeFile = id; 
-                showRelNotes = id; 
-                toggleShowingErrorPanel = id; 
-                toggleShowingOrphanedFilesPanel = id; 
-                toggleShowingPreviewPanel = id; 
-                visitWebSite = id; 
-                visitWiki = id; 
-            }; 
-            CLASS = BDSKAppController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                bookmarksMenu = NSMenu; 
-                columnsMenu = NSMenu; 
-                copyAsTemplateMenu = NSMenu; 
-                groupSortMenu = NSMenu; 
-                searchBookmarksMenu = NSMenu; 
-            }; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {
-            ACTIONS = {openDocumentUsingFilter = id; openDocumentUsingPhonyCiteKeys = id; }; 
-            CLASS = BDSKDocumentController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                openTextEncodingAccessoryView = NSView; 
-                openTextEncodingPopupButton = BDSKEncodingPopUpButton; 
-                openUsingFilterAccessoryView = NSView; 
-                openUsingFilterComboBox = NSComboBox; 
-            }; 
-            SUPERCLASS = NSDocumentController; 
-        }, 
-        {
-            CLASS = BDSKEncodingPopUpButton; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSPopUpButton; 
-        }, 
-        {
-            ACTIONS = {
-                clearQuickSearch = id; 
-                contextualMenuAddTableColumn = id; 
-                contextualMenuSelectTableColumn = id; 
-                copyAsBibTex = id; 
-                copyAsPDF = id; 
-                copyAsRTF = id; 
-                copyAsTex = id; 
-                delPub = id; 
-                didChangeQuickSearchKey = id; 
-                didChangeSortKey = id; 
-                dismissAddFieldSheet = id; 
-                editPubCmd = id; 
-                emailPubCmd = id; 
-                exportAsHTML = id; 
-                exportAsRSS = id; 
-                newPub = id; 
-                openCustomCitePrefPane = id; 
-                quickSearchAddField = id; 
-                searchFieldAction = id; 
-                searchFieldChangeKey = id; 
-                splitViewDoubleClick = id; 
-                toggleShowingCustomCiteDrawer = id; 
-            }; 
-            CLASS = BibDocument; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                addFieldPrompt = NSTextField; 
-                addFieldSheet = NSWindow; 
-                addFieldTextField = NSTextField; 
-                bibListViews = NSWindow; 
-                ccTableView = BDSKCustomCiteTableView; 
-                contextualMenu = NSMenu; 
-                ctxCopyBibTex = NSMenuItem; 
-                ctxCopyPDF = NSMenuItem; 
-                ctxCopyTex = NSMenuItem; 
-                customCiteDrawer = NSDrawer; 
-                documentWindow = NSWindow; 
-                dummyView = NSBox; 
-                infoLine = NSTextField; 
-                openCustomCitePrefsButton = NSButton; 
-                outlineBox = NSView; 
-                outlineView = NSOutlineView; 
-                previewField = NSTextView; 
-                quickSearchBox = NSBox; 
-                quickSearchButton = NSPopUpButton; 
-                quickSearchClearButton = NSButton; 
-                quickSearchTextField = NSTextField; 
-                rssExportAccessoryView = NSView; 
-                rssExportForm = NSForm; 
-                rssExportTextField = NSTextField; 
-                searchField = id; 
-                searchFieldBox = NSBox; 
-                searchFieldTextField = NSTextField; 
-                sortKeyButton = NSPopUpButton; 
-                sortKeyView = NSView; 
-                splitView = OASplitView; 
-                tableBox = NSView; 
-                tableView = BDSKDragTableView; 
-            }; 
-            SUPERCLASS = NSDocument; 
-        }, 
-        {
-            ACTIONS = {
-                addBookmark = id; 
-                addScriptGroupAction = id; 
-                addSearchBookmark = id; 
-                addSearchGroupAction = id; 
-                addSmartGroupAction = id; 
-                addStaticGroupAction = id; 
-                addURLGroupAction = id; 
-                alternateCut = id; 
-                alternateDelete = id; 
-                changePreviewDisplay = id; 
-                columnsMenuAddTableColumn = id; 
-                consolidateLinkedFiles = id; 
-                copyAsAction = id; 
-                createNewPubUsingCrossrefAction = id; 
-                deleteSelectedPubs = id; 
-                deselectAll = id; 
-                deselectAllPublications = id; 
-                duplicate = id; 
-                duplicateTitleToBooktitle = id; 
-                editAction = id; 
-                editIgnoredSortPrefixes = id; 
-                editNewCategoryGroupWithSelection = id; 
-                editNewStaticGroupWithSelection = id; 
-                editPubCmd = id; 
-                editSelectedFieldAsRawBibTeX = id; 
-                emailPubCmd = id; 
-                find = id; 
-                generateCiteKey = id; 
-                importFromFileAction = id; 
-                importFromPasteboardAction = id; 
-                importFromWebAction = id; 
-                invertSelection = id; 
-                makeNewEmptyCollection = id; 
-                makeNewExternalSource = id; 
-                makeNewNotepad = id; 
-                makeSearchFieldKey = id; 
-                matchFiles = id; 
-                mergeInExternalPublications = id; 
-                newBDSKLibrary = id; 
-                newPub = id; 
-                newTemplateDocument = id; 
-                openDocumentUsingFilter = id; 
-                openDocumentUsingPhonyCiteKeys = id; 
-                openLinkedFile = id; 
-                openRemoteURL = id; 
-                openTemplateDocument = id; 
-                refreshAllExternalGroups = id; 
-                refreshScriptGroups = id; 
-                refreshSharedBrowsing = id; 
-                refreshURLGroups = id; 
-                removeSelectedPubs = id; 
-                reportBug = id; 
-                requestFeature = id; 
-                revealLinkedFile = id; 
-                saveAsBDSKDocument = id; 
-                searchByContent = id; 
-                selectAllPublications = id; 
-                selectCrossrefParentAction = id; 
-                selectDuplicates = id; 
-                selectIncompletePublications = id; 
-                selectLibraryGroup = id; 
-                selectPossibleDuplicates = id; 
-                sendToLyX = id; 
-                showDocumentInfoWindow = id; 
-                showFindPanel = id; 
-                showMacrosWindow = id; 
-                showNotesForLinkedFile = id; 
-                showReadMe = id; 
-                showRelNotes = id; 
-                sortForCrossrefs = id; 
-                sortGroupsByCount = id; 
-                sortGroupsByGroup = id; 
-                toggle = id; 
-                toggleShowingCustomCiteDrawer = id; 
-                toggleShowingErrorPanel = id; 
-                toggleShowingOrphanedFilesPanel = id; 
-                toggleShowingPreviewPanel = id; 
-                toggleSnoopDrawer = id; 
-                toggleStatusBar = id; 
-            }; 
-            CLASS = FirstResponder; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSObject; 
-        }
-    ); 
-    IBVersion = 1; 
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKEncodingPopUpButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPopUpButton</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSFontManager</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenuItem</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>newTemplateDocument</key>
+				<string>id</string>
+				<key>openDocumentUsingFilter</key>
+				<string>id</string>
+				<key>openDocumentUsingPhonyCiteKeys</key>
+				<string>id</string>
+				<key>openTemplateDocument</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKDocumentController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>mainDocument</key>
+				<string>id</string>
+				<key>openTextEncodingAccessoryView</key>
+				<string>NSView</string>
+				<key>openTextEncodingPopupButton</key>
+				<string>BDSKEncodingPopUpButton</string>
+				<key>openUsingFilterAccessoryView</key>
+				<string>NSView</string>
+				<key>openUsingFilterComboBox</key>
+				<string>NSComboBox</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSDocumentController</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>addBookmark</key>
+				<string>id</string>
+				<key>addScriptGroupAction</key>
+				<string>id</string>
+				<key>addSearchBookmark</key>
+				<string>id</string>
+				<key>addSearchGroupAction</key>
+				<string>id</string>
+				<key>addSmartGroupAction</key>
+				<string>id</string>
+				<key>addStaticGroupAction</key>
+				<string>id</string>
+				<key>addURLGroupAction</key>
+				<string>id</string>
+				<key>alternateCut</key>
+				<string>id</string>
+				<key>alternateDelete</key>
+				<string>id</string>
+				<key>changePreviewDisplay</key>
+				<string>id</string>
+				<key>columnsMenuAddTableColumn</key>
+				<string>id</string>
+				<key>consolidateLinkedFiles</key>
+				<string>id</string>
+				<key>copyAsAction</key>
+				<string>id</string>
+				<key>createNewPubUsingCrossrefAction</key>
+				<string>id</string>
+				<key>deleteSelectedPubs</key>
+				<string>id</string>
+				<key>deselectAll</key>
+				<string>id</string>
+				<key>deselectAllPublications</key>
+				<string>id</string>
+				<key>duplicate</key>
+				<string>id</string>
+				<key>duplicateTitleToBooktitle</key>
+				<string>id</string>
+				<key>editAction</key>
+				<string>id</string>
+				<key>editIgnoredSortPrefixes</key>
+				<string>id</string>
+				<key>editNewCategoryGroupWithSelection</key>
+				<string>id</string>
+				<key>editNewStaticGroupWithSelection</key>
+				<string>id</string>
+				<key>editPubCmd</key>
+				<string>id</string>
+				<key>editSelectedFieldAsRawBibTeX</key>
+				<string>id</string>
+				<key>emailPubCmd</key>
+				<string>id</string>
+				<key>find</key>
+				<string>id</string>
+				<key>generateCiteKey</key>
+				<string>id</string>
+				<key>importFromFileAction</key>
+				<string>id</string>
+				<key>importFromPasteboardAction</key>
+				<string>id</string>
+				<key>importFromWebAction</key>
+				<string>id</string>
+				<key>invertSelection</key>
+				<string>id</string>
+				<key>makeNewEmptyCollection</key>
+				<string>id</string>
+				<key>makeNewExternalSource</key>
+				<string>id</string>
+				<key>makeNewNotepad</key>
+				<string>id</string>
+				<key>makeSearchFieldKey</key>
+				<string>id</string>
+				<key>matchFiles</key>
+				<string>id</string>
+				<key>mergeInExternalPublications</key>
+				<string>id</string>
+				<key>migrateFiles</key>
+				<string>id</string>
+				<key>newBDSKLibrary</key>
+				<string>id</string>
+				<key>newPub</key>
+				<string>id</string>
+				<key>newTemplateDocument</key>
+				<string>id</string>
+				<key>openDocumentUsingFilter</key>
+				<string>id</string>
+				<key>openDocumentUsingPhonyCiteKeys</key>
+				<string>id</string>
+				<key>openLinkedFile</key>
+				<string>id</string>
+				<key>openRemoteURL</key>
+				<string>id</string>
+				<key>openTemplateDocument</key>
+				<string>id</string>
+				<key>refreshAllExternalGroups</key>
+				<string>id</string>
+				<key>refreshScriptGroups</key>
+				<string>id</string>
+				<key>refreshSharedBrowsing</key>
+				<string>id</string>
+				<key>refreshURLGroups</key>
+				<string>id</string>
+				<key>removeSelectedPubs</key>
+				<string>id</string>
+				<key>reportBug</key>
+				<string>id</string>
+				<key>requestFeature</key>
+				<string>id</string>
+				<key>revealLinkedFile</key>
+				<string>id</string>
+				<key>saveAsBDSKDocument</key>
+				<string>id</string>
+				<key>searchByContent</key>
+				<string>id</string>
+				<key>selectAllPublications</key>
+				<string>id</string>
+				<key>selectCrossrefParentAction</key>
+				<string>id</string>
+				<key>selectDuplicates</key>
+				<string>id</string>
+				<key>selectIncompletePublications</key>
+				<string>id</string>
+				<key>selectLibraryGroup</key>
+				<string>id</string>
+				<key>selectPossibleDuplicates</key>
+				<string>id</string>
+				<key>sendToLyX</key>
+				<string>id</string>
+				<key>showDocumentInfoWindow</key>
+				<string>id</string>
+				<key>showFindPanel</key>
+				<string>id</string>
+				<key>showMacrosWindow</key>
+				<string>id</string>
+				<key>showNotesForLinkedFile</key>
+				<string>id</string>
+				<key>showReadMe</key>
+				<string>id</string>
+				<key>showRelNotes</key>
+				<string>id</string>
+				<key>sortForCrossrefs</key>
+				<string>id</string>
+				<key>sortGroupsByCount</key>
+				<string>id</string>
+				<key>sortGroupsByGroup</key>
+				<string>id</string>
+				<key>toggle</key>
+				<string>id</string>
+				<key>toggleShowingCustomCiteDrawer</key>
+				<string>id</string>
+				<key>toggleShowingErrorPanel</key>
+				<string>id</string>
+				<key>toggleShowingOrphanedFilesPanel</key>
+				<string>id</string>
+				<key>toggleShowingPreviewPanel</key>
+				<string>id</string>
+				<key>toggleSnoopDrawer</key>
+				<string>id</string>
+				<key>toggleStatusBar</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>checkForUpdates</key>
+				<string>id</string>
+				<key>editSearchBookmarks</key>
+				<string>id</string>
+				<key>reportBug</key>
+				<string>id</string>
+				<key>requestFeature</key>
+				<string>id</string>
+				<key>showBookmarks</key>
+				<string>id</string>
+				<key>showPreferencePanel</key>
+				<string>id</string>
+				<key>showReadMeFile</key>
+				<string>id</string>
+				<key>showRelNotes</key>
+				<string>id</string>
+				<key>toggleShowingErrorPanel</key>
+				<string>id</string>
+				<key>toggleShowingOrphanedFilesPanel</key>
+				<string>id</string>
+				<key>toggleShowingPreviewPanel</key>
+				<string>id</string>
+				<key>visitWebSite</key>
+				<string>id</string>
+				<key>visitWiki</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKAppController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>bookmarksMenu</key>
+				<string>NSMenu</string>
+				<key>columnsMenu</key>
+				<string>NSMenu</string>
+				<key>copyAsTemplateMenu</key>
+				<string>NSMenu</string>
+				<key>groupSortMenu</key>
+				<string>NSMenu</string>
+				<key>searchBookmarksMenu</key>
+				<string>NSMenu</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>

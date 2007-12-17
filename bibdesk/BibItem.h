@@ -91,6 +91,7 @@ enum {
 - (void)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile;
 
 - (NSArray *)sortedURLs;
+- (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove error:(NSError **)outError;
 
 - (NSString *)basePath;
 

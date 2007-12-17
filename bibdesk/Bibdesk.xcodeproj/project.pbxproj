@@ -525,6 +525,9 @@
 		F9EA8FCB0ADE01F9005EFBE4 /* BDSKUpdateChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EA8FC90ADE01F9005EFBE4 /* BDSKUpdateChecker.m */; };
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B908B1572600AAC9A9 /* BDSKScrollableTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */; };
+		F9EF94E50D15FE7400314058 /* BDSKFileMigrationController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9EF94E30D15FE7400314058 /* BDSKFileMigrationController.h */; };
+		F9EF94E60D15FE7400314058 /* BDSKFileMigrationController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF94E40D15FE7400314058 /* BDSKFileMigrationController.m */; };
+		F9EF94EB0D16014000314058 /* BDSKFileMigration.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9EF94E90D16014000314058 /* BDSKFileMigration.nib */; };
 		F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */; };
 		F9F5ECD20AE5E7C8007EBB31 /* BDSKURLGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5ECD00AE5E7C8007EBB31 /* BDSKURLGroup.m */; };
 		F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */; };
@@ -1656,6 +1659,9 @@
 		F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextField.m; sourceTree = "<group>"; };
 		F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextFieldCell.h; sourceTree = "<group>"; };
 		F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextFieldCell.m; sourceTree = "<group>"; };
+		F9EF94E30D15FE7400314058 /* BDSKFileMigrationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileMigrationController.h; sourceTree = "<group>"; };
+		F9EF94E40D15FE7400314058 /* BDSKFileMigrationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileMigrationController.m; sourceTree = "<group>"; };
+		F9EF94EA0D16014000314058 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKFileMigration.nib; sourceTree = "<group>"; };
 		F9F0856808247BC800812F2A /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDesk Help/postprocess-nontitle.py"; sourceTree = "<group>"; };
 		F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibDeskInputManager.xcodeproj; path = inputmanager/BibDeskInputManager.xcodeproj; sourceTree = "<group>"; };
 		F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSError_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -1838,6 +1844,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F9EF94E90D16014000314058 /* BDSKFileMigration.nib */,
 				F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */,
 				F9022DDA0758089500C3F701 /* Images */,
 				3D8A54F6082D1F86008E818C /* BibDesk Help */,
@@ -2121,6 +2128,8 @@
 				3D86633E0802C25800FF1724 /* BDSKTypeInfoEditor.m */,
 				CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */,
 				F9022C68075802E300C3F701 /* BDSKEditor.m */,
+				F9EF94E30D15FE7400314058 /* BDSKFileMigrationController.h */,
+				F9EF94E40D15FE7400314058 /* BDSKFileMigrationController.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -2832,6 +2841,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
+				F9EF94E50D15FE7400314058 /* BDSKFileMigrationController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3325,6 +3335,7 @@
 				CE2A1B6B0CE4D13700A0499B /* SmallBookmark.tiff in Resources */,
 				CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */,
 				CE424B120D0F5C6800F824E7 /* BDSKEditor.nib in Resources */,
+				F9EF94EB0D16014000314058 /* BDSKFileMigration.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3778,6 +3789,7 @@
 				F911D7120CFE90050009C77B /* BDSKLinkedFile.m in Sources */,
 				CE4241360D0EAE0B00F824E7 /* BDSKEditorTableView.m in Sources */,
 				CE4241450D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m in Sources */,
+				F9EF94E60D15FE7400314058 /* BDSKFileMigrationController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4427,6 +4439,14 @@
 				F9C7D3CD0BE927DF00D65C7F /* French */,
 			);
 			name = BDSKErrorPanel.nib;
+			sourceTree = "<group>";
+		};
+		F9EF94E90D16014000314058 /* BDSKFileMigration.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F9EF94EA0D16014000314058 /* English */,
+			);
+			name = BDSKFileMigration.nib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

@@ -121,6 +121,7 @@
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
 #import "NSDate_BDSKExtensions.h"
+#import "BDSKFileMigrationController.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -320,6 +321,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [webGroupViewController release];
     [searchIndexes release];
     [searchButtonController release];
+    [migrationController release];
     [super dealloc];
 }
 

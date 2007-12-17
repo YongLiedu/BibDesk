@@ -82,6 +82,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPreviewer.h"
 #import "BDSKSkimReader.h"
+#import "BDSKFileMigrationController.h"
 
 @implementation BibDocument (Actions)
 
@@ -978,6 +979,14 @@
     } else {
         NSBeep();
     }
+}
+
+- (IBAction)migrateFiles:(id)sender {
+    if (nil == migrationController)
+        migrationController = [[BDSKFileMigrationController alloc] init];
+    [migrationController setDocument:self];
+    [self addWindowController:migrationController];
+    [migrationController showWindow:self];
 }
 
 #pragma mark View Actions

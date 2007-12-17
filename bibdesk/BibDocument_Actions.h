@@ -211,6 +211,8 @@
 
 - (IBAction)copyNotesForLinkedFile:(id)sender;
 
+- (IBAction)migrateFiles:(id)sender;
+
 #pragma mark View Actions
 
 /*!

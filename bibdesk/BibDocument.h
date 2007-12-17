@@ -49,7 +49,7 @@
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
 @class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
-@class BDSKItemSearchIndexes;
+@class BDSKItemSearchIndexes, BDSKFileMigrationController;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -137,6 +137,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSSlider *fileViewSlider;
     IBOutlet BDSKCollapsibleView *fileCollapsibleView;
     IBOutlet BDSKGradientView *fileGradientView;
+    
+    BDSKFileMigrationController *migrationController;
     
 #pragma mark Preview variables
 
