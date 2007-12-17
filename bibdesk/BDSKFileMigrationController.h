@@ -17,5 +17,6 @@
 
 - (IBAction)migrate:(id)sender;
 - (IBAction)openParentDirectory:(id)sender;
+- (IBAction)editPublication:(id)sender;
 
 @end
