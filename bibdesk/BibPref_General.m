@@ -58,7 +58,7 @@
     [defaultBibFileButton setEnabled:startupBehavior == 3];
 }
 
-- (void)udateDefaultBibFileUI {
+- (void)updateDefaultBibFileUI {
     NSData *aliasData = [defaults objectForKey:BDSKDefaultBibFileAliasKey];
     BDAlias *alias;
     if([aliasData length] && (alias = [BDAlias aliasWithData:aliasData]))
@@ -67,7 +67,7 @@
         [defaultBibFileTextField setStringValue:@""];
 }
 
-- (void)udateWarningsUI {
+- (void)updateWarningsUI {
     [warnOnDeleteButton setState:[defaults boolForKey:BDSKWarnOnDeleteKey] ? NSOnState : NSOffState];
     [warnOnRemovalFromGroupButton setState:[defaults boolForKey:BDSKWarnOnRemovalFromGroupKey] ? NSOnState : NSOffState];
     [warnOnRenameGroupButton setState:[defaults boolForKey:BDSKWarnOnRenameGroupKey] ? NSOnState : NSOffState];
@@ -76,8 +76,8 @@
 
 - (void)updateUI{
     [self updateStartupBehaviorUI];
-    [self udateDefaultBibFileUI];
-	[self udateWarningsUI];
+    [self updateDefaultBibFileUI];
+	[self updateWarningsUI];
     
     [editOnPasteButton setState:[defaults boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
     [checkForUpdatesButton selectItemWithTag:[defaults integerForKey:BDSKUpdateCheckIntervalKey]];
@@ -102,7 +102,7 @@
     BDAlias *alias = [BDAlias aliasWithPath:[[sender stringValue] stringByStandardizingPath]];
     if(alias)
         [defaults setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
-    [self udateDefaultBibFileUI];
+    [self updateDefaultBibFileUI];
     [defaults autoSynchronize];
 }
 
@@ -137,7 +137,7 @@
     
     [defaults setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
     [defaults setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
-    [self udateDefaultBibFileUI];
+    [self updateDefaultBibFileUI];
     [self updateStartupBehaviorUI];
     [defaults autoSynchronize];
 }
@@ -183,7 +183,7 @@
 }
 
 - (void)handleWarningPrefChanged:(NSNotification *)notification {
-    [self udateWarningsUI];
+    [self updateWarningsUI];
 }
 
 - (void)handleTemplatePrefsChanged:(NSNotification *)notification {
