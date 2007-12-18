@@ -2530,6 +2530,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (docState.isDocumentClosed)
         return;
     
+    // -[BDSKItemSearchIndexes addPublications:] will overwrite previous values for this pub
+    [searchIndexes addPublications:[NSArray arrayWithObject:pub]];
+    
     BOOL isCurrentGroupField = [[self currentGroupField] isEqualToString:changedKey];
     
 	[self updateSmartGroupsCountAndContent:isCurrentGroupField == NO];
@@ -2601,10 +2604,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         if([NSString isEmptyString:oldKey])
             oldKey = nil;
     }
-    
-    // -[BDSKItemSearchIndexes addPublications:] will overwrite previous values for this pub
-    if (nil == changedKey && [[BDSKItemSearchIndexes indexedFields] containsObject:changedKey])
-        [searchIndexes addPublications:[NSArray arrayWithObject:pub]];
     
     // access type manager outside the enumerator, since it's @synchronized...
     BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
