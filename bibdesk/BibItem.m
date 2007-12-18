@@ -3445,6 +3445,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         [self setDateModified:nil];
     }
     
+#warning needs to be updated for file handling
+    // Updates the document's file content search index
     if([owner isDocument] && ([key isURLField] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchIndexInfoChangedNotification
                                                             object:(BibDocument *)owner
