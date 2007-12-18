@@ -2791,7 +2791,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove error:(NSError **)outError
 {
-    int initialCount = [files count];
+    unsigned int initialCount = [files count];
     NSMutableArray *messages = [NSMutableArray new];
     conversionContext context;
     context.publication = self;
