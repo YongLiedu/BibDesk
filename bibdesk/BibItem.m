@@ -2568,6 +2568,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	[sortedURLs release];
     sortedURLs = nil;
     
+    [self updateMetadataForKey:BDSKLocalFileString];
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
@@ -2585,6 +2586,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [sortedURLs release];
     sortedURLs = nil;
 	
+    [self updateMetadataForKey:BDSKLocalFileString];
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
@@ -2789,6 +2791,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove error:(NSError **)outError
 {
+    // UI should warn about this; if you add files via the new interface and migrate later, we'll nuke your changes
     [files removeAllObjects];
     
     NSMutableArray *messages = [NSMutableArray new];
@@ -2811,7 +2814,10 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
     
     [messages release];
-
+    
+    // cause the search index to update (if any), since we bypass the normal insert mechanism
+    [self updateMetadataForKey:BDSKLocalFileString];
+    
     return 0 == failureCount;
 }
 
@@ -3466,9 +3472,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         [self setDateModified:nil];
     }
     
-#warning needs to be updated for file handling
-    // Updates the document's file content search index
-    if([owner isDocument] && ([key isURLField] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
+    // Updates the document's file content search index, which depends on the title
+    if([owner isDocument] && ([key isEqualToString:BDSKLocalFileString] || [key isEqualToString:BDSKTitleString] || allFieldsChanged)){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchIndexInfoChangedNotification
                                                             object:(BibDocument *)owner
                                                           userInfo:[self searchIndexInfo]];
