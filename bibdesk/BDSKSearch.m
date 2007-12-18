@@ -177,7 +177,12 @@
     // max number of documents we expect
     CFIndex maxCount = SKIndexGetDocumentCount(skIndex);
     
-    NSAssert1([data changeIndexSize:maxCount], @"Unable to allocate memory for index of size %d", maxCount);
+    BOOL changeSize = [data changeIndexSize:maxCount];
+    NSAssert1(changeSize, @"Unable to allocate memory for index of size %d", maxCount);
+    if (NO == changeSize) {
+        NSLog(@"*** ERROR: unable to allocate memory for index of size %d", maxCount);
+        return;
+    }
 
     CFIndex actualCount;
     
@@ -190,7 +195,12 @@
     
     if (actualCount > 0) {
         
-        NSAssert1([data changeResultSize:actualCount], @"Unable to allocate memory for %d results", actualCount);
+        changeSize = [data changeIndexSize:actualCount];
+        NSAssert1(changeSize, @"Unable to allocate memory for index of size %d", actualCount);
+        if (NO == changeSize) {
+            NSLog(@"*** ERROR: unable to allocate memory for index of size %d", actualCount);
+            return;
+        }
         
         SKDocumentRef *skDocuments = [data documentRefBuffer];
         SKIndexCopyDocumentRefsForDocumentIDs(skIndex, actualCount, documentIDs, skDocuments);
