@@ -13,8 +13,18 @@
 			<string>NSTextFieldCell</string>
 		</dict>
 		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
 			<key>ACTIONS</key>
 			<dict>
+				<key>editPublication</key>
+				<string>id</string>
 				<key>migrate</key>
 				<string>id</string>
 				<key>openParentDirectory</key>
@@ -28,19 +38,13 @@
 			<dict>
 				<key>migrateButton</key>
 				<string>NSButton</string>
+				<key>progressBar</key>
+				<string>NSProgressIndicator</string>
 				<key>tableView</key>
 				<string>NSTableView</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSWindowController</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSControl</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

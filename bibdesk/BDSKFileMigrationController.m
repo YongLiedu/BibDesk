@@ -19,6 +19,7 @@
 @end
 
 // Presently we have an array of dictionaries with 3 keys: @"URL" (NSURL *), @"error" (NSString *), and @"publication" (BibItem *).  These are returned in the NSError from the BibItem, and we just display the values as-is.  Displaying icons doesn't make sense since the files don't exist.  There's no helpful functionality here for resolving problems yet, and the error message is lame.
+// Table column identifiers are "File", "Publication", "Error"
 
 @implementation BDSKFileMigrationController
 
@@ -50,6 +51,7 @@
     [tableView setDoubleAction:@selector(editPublication:)];
     [tableView setTarget:self];
     [tableView setDataSource:self];
+    [progressBar setUsesThreadedAnimation:NO];
 }
 
 - (NSString *)windowNibName { return @"BDSKFileMigration"; }
@@ -75,9 +77,18 @@
 
 - (IBAction)migrate:(id)sender;
 {
+    // get rid of leftovers from a previous run
+    [[self mutableArrayValueForKey:@"results"] removeAllObjects];
+    
     BDSKPublicationsArray *pubs = [[self document] publications];
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *aPub;
+    
+    [progressBar setDoubleValue:0.0];
+    [progressBar setHidden:NO];
+    
+    double current = 0, final = [pubs count];
+    unsigned update = 0;
     
     while (aPub = [pubEnum nextObject]) {
         NSError *error;
@@ -92,7 +103,17 @@
                 [displayDict release];
             }
         }
+        [progressBar setDoubleValue:(++current / final) * 100];
+        
+        if ((update++ % 5) == 0) {
+            // tickling the runloop rather than using -displayIfNeeded keeps spindump from running on Leopard and slowing things down even more
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
+        }
     }
+    
+    [progressBar setDoubleValue:100.0];
+    [progressBar setHidden:YES];
+
     [[self document] updatePreviews];
 }
 
@@ -111,10 +132,9 @@
         NSBeep();
 }
 
-// find the deepest directory that actually exists
+// find the deepest directory that actually exists; returns nil for non-file URLs
 - (NSString *)deepestDirectoryPathForURL:(NSURL *)theURL
 {
-    // assumes a file URL
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *path = nil;
     if ([theURL isFileURL]) {
@@ -139,6 +159,16 @@
     if (path)
         [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:@""];
     else NSBeep();
+}
+
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tc row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation
+{
+    NSString *tooltip = nil;
+    if ([[tc identifier] isEqualToString:@"File"]) {
+        NSURL *theURL = [[[self mutableArrayValueForKey:@"results"] objectAtIndex:row] objectForKey:@"URL"];
+        tooltip = [theURL isFileURL] ? [theURL path] : [theURL absoluteString]; 
+    }
+    return tooltip;
 }
 
 @end
@@ -170,7 +200,7 @@
 }
 
 - (id)transformedValue:(id)aURL {
-    return [aURL isFileURL] ? [[aURL path] stringByAbbreviatingWithTildeInPath] : [aURL absoluteString];
+    return [aURL isFileURL] ? [[NSFileManager defaultManager] displayNameAtPath:[aURL path]] : [aURL absoluteString];
 }
 
 @end

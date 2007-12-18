@@ -13,6 +13,7 @@
     IBOutlet NSButton *migrateButton;
     BOOL keepOriginalValues;
     NSMutableArray *results;
+    IBOutlet NSProgressIndicator *progressBar;
 }
 
 - (IBAction)migrate:(id)sender;
