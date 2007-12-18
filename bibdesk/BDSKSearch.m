@@ -195,10 +195,10 @@
     
     if (actualCount > 0) {
         
-        changeSize = [data changeIndexSize:actualCount];
-        NSAssert1(changeSize, @"Unable to allocate memory for index of size %d", actualCount);
+        changeSize = [data changeResultSize:actualCount];
+        NSAssert1(changeSize, @"Unable to allocate memory for results of size %d", actualCount);
         if (NO == changeSize) {
-            NSLog(@"*** ERROR: unable to allocate memory for index of size %d", actualCount);
+            NSLog(@"*** ERROR: unable to allocate memory for results of size %d", actualCount);
             return;
         }
         
