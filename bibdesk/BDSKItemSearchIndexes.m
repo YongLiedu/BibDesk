@@ -94,6 +94,18 @@ static void flushAllIndexes(const void *key, const void *value, void *context)
     SKIndexFlush((SKIndexRef)value);
 }
 
+- (void)flushIndexesImmediately
+{
+    CFDictionaryApplyFunction(searchIndexes, flushAllIndexes, NULL);    
+}
+
+// Index flushing is fairly expensive, especially with thousands of pubs added; queuing it should keep pub changes that happen in a tight loop from being as memory intensive.
+- (void)scheduleIndexFlush
+{
+    [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(flushIndexesImmediately) object:nil];
+    [self performSelector:@selector(flushIndexesImmediately) withObject:nil afterDelay:0.0];
+}
+
 static void appendNormalizedNames(const void *value, void *context)
 {
     BibAuthor *person = (BibAuthor *)value;
@@ -150,7 +162,7 @@ static void appendNormalizedNames(const void *value, void *context)
     }
     
     [names release];
-    CFDictionaryApplyFunction(searchIndexes, flushAllIndexes, NULL);
+    [self scheduleIndexFlush];
 }
 
 static void removeFromIndex(const void *key, const void *value, void *context)
@@ -170,7 +182,7 @@ static void removeFromIndex(const void *key, const void *value, void *context)
             CFRelease(doc);
         }
     }
-    CFDictionaryApplyFunction(searchIndexes, flushAllIndexes, NULL);
+    [self scheduleIndexFlush];
 }
 
 - (void)resetWithPublications:(NSArray *)pubs;
