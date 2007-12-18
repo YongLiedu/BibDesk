@@ -2338,8 +2338,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)allFieldsString{
-    NSDictionary *thePubFields = [self pubFields];
-    NSMutableString *result = [[[NSMutableString alloc] initWithCapacity:([thePubFields count] * 10)] autorelease];
+    NSMutableString *result = [NSMutableString string];
     
     [result appendString:[self citeKey]];
     [result appendString:@"|"];
@@ -2349,21 +2348,42 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     // if it has a parent, find all the available keys, and use valueOfField: to get either the
     // child object or parent object value. Inherit only the fields of the parent relevant for the item.
     if(parent){
-        NSEnumerator *keyEnum = [thePubFields keyEnumerator];
-        NSString *key = nil;
+        BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
+        NSMutableArray *allFields = [NSMutableArray array];
+        NSString *type = [self pubType];
+        [allFields addObjectsFromArray:[tm requiredFieldsForType:type]];
+        [allFields addObjectsFromArray:[tm optionalFieldsForType:type]];
+        [allFields addNonDuplicateObjectsFromArray:[tm userDefaultFieldsForType:type]];
+        [allFields addNonDuplicateObjectsFromArray:[self allFieldNames]];
+        
+        NSEnumerator *keyEnum = [allFields objectEnumerator];
+        NSString *key;
+        NSString *value;
         
         while(key = [keyEnum nextObject]){
-            [result appendString:[self valueOfField:key inherit:YES]];
-            [result appendString:@"|"];
+            if ([key isIntegerField] == NO && [key isURLField] == NO) {
+                value = [self valueOfField:key inherit:[key isNoteField] == NO];
+                if ([NSString isEmptyString:value] == NO) {
+                    [result appendString:value];
+                    [result appendString:@"|"];
+                }
+            }
         }
                 
     } else {
-        NSEnumerator *pubFieldsE = [thePubFields objectEnumerator];
-        NSString *value = nil;
+        NSDictionary *thePubFields = [self pubFields];
+        NSEnumerator *keyEnum = [thePubFields keyEnumerator];
+        NSString *key;
+        NSString *value;
         
-        while(value = [pubFieldsE nextObject]){
-            [result appendString:value];
-            [result appendString:@"|"];
+        while(key = [pubFieldsE nextObject]){
+            if ([key isIntegerField] == NO && [key isURLField] == NO) {
+                value = [thePubFields objectForKey:key];
+                if ([NSString isEmptyString:value] == NO) {
+                    [result appendString:value];
+                    [result appendString:@"|"];
+                }
+            }
         }
     }       
     

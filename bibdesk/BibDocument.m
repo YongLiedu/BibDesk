@@ -2603,7 +2603,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     }
     
     // -[BDSKItemSearchIndexes addPublications:] will overwrite previous values for this pub
-    [searchIndexes addPublications:[NSArray arrayWithObject:pub]];
+    if ([changedKey isIntegerField] == NO && [changedKey isURLField] == NO)
+        [searchIndexes addPublications:[NSArray arrayWithObject:pub]];
     
     // access type manager outside the enumerator, since it's @synchronized...
     BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
