@@ -13,6 +13,9 @@ GCC_NO_COMMON_BLOCKS = NO
 GCC_OPTIMIZATION_LEVEL = s
 GCC_UNROLL_LOOPS = NO
 
+// block NSAssert and assert in release builds
+GCC_PREPROCESSOR_DEFINITIONS = NS_BLOCK_ASSERTIONS NDEBUG
+
 GCC_C_LANGUAGE_STANDARD = compiler-default
 
 // I think this is set to avoid a compiler warning on BibDesk_vers.c
