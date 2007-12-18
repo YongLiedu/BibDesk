@@ -2581,6 +2581,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
 
+    // note: userInfo is nil if -[BibItem setFields:] is called
 	NSDictionary *userInfo = [notification userInfo];
     BibItem *pub = [notification object];
     
@@ -2601,8 +2602,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             oldKey = nil;
     }
     
-    // will overwrite previous values
-    [searchIndexes addPublications:[NSArray arrayWithObject:pub]];
+    // -[BDSKItemSearchIndexes addPublications:] will overwrite previous values for this pub
+    if (nil == changedKey && [[BDSKItemSearchIndexes indexedFields] containsObject:changedKey])
+        [searchIndexes addPublications:[NSArray arrayWithObject:pub]];
     
     // access type manager outside the enumerator, since it's @synchronized...
     BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
