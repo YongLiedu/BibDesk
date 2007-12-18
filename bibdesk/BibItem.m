@@ -2791,9 +2791,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove error:(NSError **)outError
 {
-    // UI should warn about this; if you add files via the new interface and migrate later, we'll nuke your changes
-    [files removeAllObjects];
-    
+    int initialCount = [files count];
     NSMutableArray *messages = [NSMutableArray new];
     conversionContext context;
     context.publication = self;
@@ -2816,7 +2814,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     [messages release];
     
     // cause the search index to update (if any), since we bypass the normal insert mechanism
-    [self updateMetadataForKey:BDSKLocalFileString];
+   if (initalCount != [files count])
+        [self updateMetadataForKey:BDSKLocalFileString];
     
     return 0 == failureCount;
 }
