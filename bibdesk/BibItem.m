@@ -2767,8 +2767,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
     conversionContext *ctxt = (conversionContext *)context;
     BibItem *self = ctxt->publication;
+    
+    // this function is called for all local & remote URL fields, whether or not they have a value
     NSURL *value = [self URLForField:(id)key];
     if (value) {
+        // see if this file was converted previously to avoid duplication
         BOOL converted = [[self valueForKeyPath:@"files.URL"] containsObject:value];
         if (converted == NO) {
             BDSKLinkedFile *file = [[BDSKLinkedFile alloc] initWithURL:value delegate:self];
@@ -2778,15 +2781,18 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
                 converted = YES;
             }
             else {
+                // @@ this error message is lame
                 NSDictionary *message = [[NSDictionary alloc] initWithObjectsAndKeys:value, @"URL", NSLocalizedString(@"File or directory not found", @""), @"error", nil];
                 [ctxt->messages addObject:message];
                 [message release];
             }
         }
+        
+        // clear the old URL field if the file was converted (now or previously)
         if (ctxt->removeField && converted)
             [self setField:(id)key toValue:nil];
     }
-    // TODO: handle case of nil URL as well
+    // TODO: handle case of nil URL with non-empty field
 }
 
 - (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove error:(NSError **)outError
@@ -2813,8 +2819,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     [messages release];
     
-    // cause the search index to update (if any), since we bypass the normal insert mechanism
-   if (initialCount != [files count])
+    // Cause the file content search index to update (if any), since we bypassed the normal insert mechanism.  The date-modified will only be set if shouldRemove == YES and the conversion succeeded, since it goes through setField:toValue:.  Calling migrateFilesAndRemove:error: from -createFiles won't cause date-modified to be set, since it passes NO for shouldRemove.
+    if (initialCount != [files count])
         [self updateMetadataForKey:BDSKLocalFileString];
     
     return 0 == failureCount;
@@ -3484,9 +3490,9 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSUInteger i = 1;
     NSString *value, *key = @"Bdsk-File-1";
     
-    NSMutableArray *keysToRemove = [NSMutableArray array];
-    NSMutableArray *unresolvedFiles = [NSMutableArray array];
-    NSMutableArray *unresolvedURLs = [NSMutableArray array];
+    NSMutableArray *keysToRemove = [NSMutableArray new];
+    NSMutableArray *unresolvedFiles = [NSMutableArray new];
+    NSMutableArray *unresolvedURLs = [NSMutableArray new];
     
     while ((value = [pubFields objectForKey:key]) != nil) {
         BDSKLinkedFile *aFile = [[BDSKLinkedFile alloc] initWithBase64String:value delegate:self];
@@ -3529,9 +3535,10 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     unsigned unresolvedFileCount = [unresolvedFiles count], unresolvedURLCount = [unresolvedURLs count];
     
-    // !!! get these out of pubFields for now to avoid duplication when saving
+    // remove from pubFields to avoid duplication when saving
     [pubFields removeObjectsForKeys:keysToRemove];
-    // !!! make sure the remaining keys are contiguous
+    
+    // add unresolved URLs back in, and make sure the remaining keys are contiguous
     if (unresolvedFileCount) {
         for (i = 1; i <= unresolvedFileCount; i++)
             [pubFields setObject:[unresolvedFiles objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%d", i]];
@@ -3543,6 +3550,10 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     if (0 == [files count])
         [self migrateFilesAndRemove:NO error:NULL];
+    
+    [keysToRemove release];
+    [unresolvedFiles release];
+    [unresolvedURLs release];
 }
 
 @end
