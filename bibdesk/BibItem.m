@@ -2337,6 +2337,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return string;
 }
 
+// at present, this is only used for searching (Search Kit or substring search from Services)
 - (NSString *)allFieldsString{
     NSMutableString *result = [NSMutableString string];
     
@@ -2362,7 +2363,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         
         while(key = [keyEnum nextObject]){
             if ([key isIntegerField] == NO && [key isURLField] == NO) {
-                value = [self valueOfField:key inherit:[key isNoteField] == NO];
+                value = [self valueOfField:key inherit:([key isNoteField] == NO)];
                 if ([NSString isEmptyString:value] == NO) {
                     [result appendString:value];
                     [result appendString:@"|"];
@@ -2376,7 +2377,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         NSString *key;
         NSString *value;
         
-        while(key = [pubFieldsE nextObject]){
+        while(key = [keyEnum nextObject]){
             if ([key isIntegerField] == NO && [key isURLField] == NO) {
                 value = [thePubFields objectForKey:key];
                 if ([NSString isEmptyString:value] == NO) {
