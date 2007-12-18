@@ -1219,7 +1219,7 @@ static CFDictionaryRef selectorTable = NULL;
 		return [NSString stringWithBool:[self boolValueOfField:field]];
     }else if([field isTriStateField]){
 		return [NSString stringWithTriStateValue:[self triStateValueOfField:field]];
-    }else if([field isCitationField]){
+    }else if([field isNoteField] || [field isCitationField] || [field isEqualToString:BDSKCrossrefString]){
 		return [self valueOfField:field inherit:NO];
 	}else if([field isEqualToString:BDSKPubTypeString]){
 		return [self pubType];
