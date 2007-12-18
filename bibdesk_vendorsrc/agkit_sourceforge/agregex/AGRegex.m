@@ -157,7 +157,8 @@ static AGRegex *backrefPattern;
 	if (range.location + range.length < length)
 		options |= PCRE_NOTEOL;
 	// allocate match vector
-	NSAssert1(matchv = malloc(sizeof(int) * groupCount * 3), @"couldn't allocate match vector for %d items", groupCount * 3);
+    matchv = malloc(sizeof(int) * groupCount * 3);
+	NSAssert1(matchv, @"couldn't allocate match vector for %d items", groupCount * 3);
     
     // ARM:  Here's another performance hit with the UTF8 conversion
 	// convert character range to byte range
