@@ -2814,7 +2814,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     [messages release];
     
     // cause the search index to update (if any), since we bypass the normal insert mechanism
-   if (initalCount != [files count])
+   if (initialCount != [files count])
         [self updateMetadataForKey:BDSKLocalFileString];
     
     return 0 == failureCount;
