@@ -93,6 +93,13 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
 
 - (NSString *)windowNibName { return @"BDSKFileMigration"; }
 
+- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
+    NSString *title = NSLocalizedString(@"Migrate Files", @"title for file migration window");
+    if ([NSString isEmptyString:displayName] == NO)
+        title = [NSString stringWithFormat:@"%@ %@ %@", title, [NSString emdashString], displayName];
+    return title;
+}
+
 - (int)numberOfRowsInTableView:(NSTableView *)tableView { return 0; }
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row { return nil; }
 - (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column;
