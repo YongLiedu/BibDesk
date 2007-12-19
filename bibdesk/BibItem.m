@@ -2833,7 +2833,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     [messages release];
     
-    // Cause the file content search index to update (if any), since we bypassed the normal insert mechanism.  The date-modified will only be set if shouldRemove == YES and the conversion succeeded, since it goes through setField:toValue:.  Calling migrateFilesAndRemove:numberOfAddedFiles:numberOfRemovedFields:error: from -createFiles won't cause date-modified to be set, since it passes NO for shouldRemove.
+    // Cause the file content search index (if any) to update, since we bypassed the normal insert mechanism where this is typically handled.  The date-modified will only be set if shouldRemove == YES and the conversion succeeded, since the applier function calls setField:toValue:.  
+    // @@ Calling migrateFilesAndRemove:numberOfAddedFiles:numberOfRemovedFields:error: from -createFiles will also cause date-modified to be set.
     if (initialCount != [files count])
         [self updateMetadataForKey:BDSKLocalFileString];
     
