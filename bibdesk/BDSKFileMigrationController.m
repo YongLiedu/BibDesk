@@ -137,8 +137,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
         // workaround for an AppKit bug in Tiger, the progress bar does not work after the first time it is used, so we replace it by a copy
         NSProgressIndicator *newProgressBar = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:progressBar]];
-        [[progressBar superview] addSubview:newProgressBar];
-        [progressBar removeFromSuperview];
+        [[progressBar superview] replaceSubview:progressBar with:newProgressBar];
         progressBar = newProgressBar;
     }
     [progressBar setDoubleValue:0.0];
