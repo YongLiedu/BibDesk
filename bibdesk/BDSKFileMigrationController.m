@@ -128,7 +128,6 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
         pubs = [[self document] selectedPublications];
     
     [progressBar setDoubleValue:0.0];
-    [progressBar startAnimation:self];
     [progressBar setHidden:NO];
     [migrateButton setEnabled:NO];
     
@@ -161,7 +160,6 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
         [progressBar setDoubleValue:(double)(++current) / final];
     }
     
-    [progressBar stopAnimation:self];
     [progressBar setHidden:YES];
     [migrateButton setEnabled:YES];
     
@@ -172,7 +170,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
         messageFormat = NSLocalizedString(@"Migrated %i files or URLs, removed %i fields.", @"Status message");
     [statusField setStringValue:[NSString stringWithFormat:messageFormat, numberOfAddedFiles, numberOfRemovedFields]];
     
-    // @@ is this necessary?
+    // BibItem change notifications are only posted if the old fields are removed, so this ensures that the file view is updated
     [[self document] updatePreviews];
 }
 
