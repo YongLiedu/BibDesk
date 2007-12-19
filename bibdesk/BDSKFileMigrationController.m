@@ -88,7 +88,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     [tableView setDoubleAction:@selector(editPublication:)];
     [tableView setTarget:self];
     [tableView setDataSource:self];
-    [progressBar setUsesThreadedAnimation:NO];
+    [progressBar setUsesThreadedAnimation:YES];
 }
 
 - (NSString *)windowNibName { return @"BDSKFileMigration"; }
@@ -128,18 +128,18 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
         pubs = [[self document] selectedPublications];
     
     [progressBar setDoubleValue:0.0];
+    [progressBar setMaxValue:[pubs count]];
     [progressBar setHidden:NO];
-    [progressBar startAnimation:self];
     [migrateButton setEnabled:NO];
     
-    int current = 0, final = [pubs count];
+    int current = 0;
     int numberOfAddedFiles = 0, numberOfRemovedFields = 0, addedFiles, removedFields;
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *aPub;
     
     while (aPub = [pubEnum nextObject]) {
         
-        if ((current % 10) == 0) {
+        if ((current++ % 10) == 0) {
             // tickling the runloop rather than using -displayIfNeeded keeps spindump from running on Leopard and slowing things down even more
             [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
         }
@@ -158,11 +158,10 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
         }
         numberOfAddedFiles += addedFiles;
         numberOfRemovedFields += removedFields;
-        [progressBar setDoubleValue:(double)(++current) / final];
+        [progressBar incrementBy:1.0];
     }
     
     [progressBar setHidden:YES];
-    [progressBar stopAnimation:self];
     [migrateButton setEnabled:YES];
     
     NSString *messageFormat = nil;
