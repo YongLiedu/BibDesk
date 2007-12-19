@@ -2761,6 +2761,8 @@ typedef struct _conversionContext {
     BibItem *publication;
     BOOL removeField;
     NSMutableArray *messages;
+    int numberOfAddedFiles;
+    int numberOfRemovedFields;
 } conversionContext;
 
 static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
@@ -2769,33 +2771,43 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     BibItem *self = ctxt->publication;
     
     // this function is called for all local & remote URL fields, whether or not they have a value
-    NSURL *value = [self URLForField:(id)key];
-    if (value) {
+    NSURL *urlValue = [self URLForField:(id)key];
+    if (urlValue) {
         // see if this file was converted previously to avoid duplication
-        BOOL converted = [[self valueForKeyPath:@"files.URL"] containsObject:value];
+        BOOL converted = [[self valueForKeyPath:@"files.URL"] containsObject:urlValue];
         if (converted == NO) {
-            BDSKLinkedFile *file = [[BDSKLinkedFile alloc] initWithURL:value delegate:self];
+            BDSKLinkedFile *file = [[BDSKLinkedFile alloc] initWithURL:urlValue delegate:self];
             if (file) {
                 [self->files addObject:file];
                 [file release];
                 converted = YES;
+                (ctxt->numberOfAddedFiles)++;
             }
             else {
                 // @@ this error message is lame
-                NSDictionary *message = [[NSDictionary alloc] initWithObjectsAndKeys:value, @"URL", NSLocalizedString(@"File or directory not found", @""), @"error", nil];
+                NSDictionary *message = [[NSDictionary alloc] initWithObjectsAndKeys:urlValue, @"URL", NSLocalizedString(@"File or URL not found", @""), @"error", nil];
                 [ctxt->messages addObject:message];
                 [message release];
             }
         }
         
         // clear the old URL field if the file was converted (now or previously)
-        if (ctxt->removeField && converted)
+        if (ctxt->removeField && converted) {
             [self setField:(id)key toValue:nil];
+            (ctxt->numberOfRemovedFields)++;
+        }
+    } else {
+        NSString *stringValue = [self valueOfField:(id)key inherit:NO];
+        if (NO == [NSString isEmptyString:stringValue]) {
+            // @@ this error message is lame
+            NSDictionary *message = [[NSDictionary alloc] initWithObjectsAndKeys:stringValue, @"URL", NSLocalizedString(@"File or URL invalid", @""), @"error", nil];
+            [ctxt->messages addObject:message];
+            [message release];
+        }
     }
-    // TODO: handle case of nil URL with non-empty field
 }
 
-- (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove error:(NSError **)outError
+- (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError
 {
     unsigned int initialCount = [files count];
     NSMutableArray *messages = [NSMutableArray new];
@@ -2803,6 +2815,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     context.publication = self;
     context.removeField = shouldRemove;
     context.messages = messages;
+    context.numberOfAddedFiles = 0;
+    context.numberOfRemovedFields = 0;
     
     CFArrayRef fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
     CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, &context);
@@ -2819,9 +2833,14 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     [messages release];
     
-    // Cause the file content search index to update (if any), since we bypassed the normal insert mechanism.  The date-modified will only be set if shouldRemove == YES and the conversion succeeded, since it goes through setField:toValue:.  Calling migrateFilesAndRemove:error: from -createFiles won't cause date-modified to be set, since it passes NO for shouldRemove.
+    // Cause the file content search index to update (if any), since we bypassed the normal insert mechanism.  The date-modified will only be set if shouldRemove == YES and the conversion succeeded, since it goes through setField:toValue:.  Calling migrateFilesAndRemove:numberOfAddedFiles:numberOfRemovedFields:error: from -createFiles won't cause date-modified to be set, since it passes NO for shouldRemove.
     if (initialCount != [files count])
         [self updateMetadataForKey:BDSKLocalFileString];
+    
+    if (numberOfAddedFiles)
+        *numberOfAddedFiles = context.numberOfAddedFiles;
+    if (numberOfRemovedFields)
+        *numberOfRemovedFields = context.numberOfRemovedFields;
     
     return 0 == failureCount;
 }
@@ -3549,7 +3568,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
     
     if (0 == [files count])
-        [self migrateFilesAndRemove:NO error:NULL];
+        [self migrateFilesAndRemove:NO numberOfAddedFiles:NULL numberOfRemovedFields:NULL error:NULL];
     
     [keysToRemove release];
     [unresolvedFiles release];

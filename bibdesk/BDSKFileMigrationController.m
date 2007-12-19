@@ -114,8 +114,12 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
 
 - (IBAction)migrate:(id)sender;
 {
+    NSMutableArray *observedResults = [self mutableArrayValueForKey:@"results"];
+    
     // get rid of leftovers from a previous run
-    [[self mutableArrayValueForKey:@"results"] removeAllObjects];
+    [observedResults removeAllObjects];
+    
+    [statusField setStringValue:@""];
     
     NSArray *pubs = nil;
     if (useSelection == NO)
@@ -124,37 +128,51 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
         pubs = [[self document] selectedPublications];
     
     [progressBar setDoubleValue:0.0];
+    [progressBar startAnimation:self];
     [progressBar setHidden:NO];
+    [migrateButton setEnabled:NO];
     
-    double current = 0, final = [pubs count];
-    unsigned update = 0;
+    int current = 0, final = [pubs count];
+    int numberOfAddedFiles = 0, numberOfRemovedFields = 0, addedFiles, removedFields;
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *aPub;
     
     while (aPub = [pubEnum nextObject]) {
+        
+        if ((current % 10) == 0) {
+            // tickling the runloop rather than using -displayIfNeeded keeps spindump from running on Leopard and slowing things down even more
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
+        }
+        
         NSError *error;
-        if (NO == [aPub migrateFilesAndRemove:(NO == keepOriginalValues) error:&error]) {
+        if (NO == [aPub migrateFilesAndRemove:(NO == keepOriginalValues) numberOfAddedFiles:&addedFiles numberOfRemovedFields:&removedFields error:&error]) {
             NSArray *messages = [error valueForKey:@"messages"];
             NSEnumerator *msgEnum = [messages objectEnumerator];
             NSDictionary *dict;
             while (dict = [msgEnum nextObject]) {
                 NSMutableDictionary *displayDict = [dict mutableCopy];
                 [displayDict setObject:aPub forKey:@"publication"];
-                [[self mutableArrayValueForKey:@"results"] addObject:displayDict];
+                [observedResults addObject:displayDict];
                 [displayDict release];
             }
         }
-        [progressBar setDoubleValue:(++current / final) * 100];
-        
-        if ((update++ % 5) == 0) {
-            // tickling the runloop rather than using -displayIfNeeded keeps spindump from running on Leopard and slowing things down even more
-            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
-        }
+        numberOfAddedFiles += addedFiles;
+        numberOfRemovedFields += removedFields;
+        [progressBar setDoubleValue:(double)(++current) / final];
     }
     
-    [progressBar setDoubleValue:100.0];
+    [progressBar stopAnimation:self];
     [progressBar setHidden:YES];
-
+    [migrateButton setEnabled:YES];
+    
+    NSString *messageFormat = nil;
+    if (keepOriginalValues)
+        messageFormat = NSLocalizedString(@"Migrated %i files or URLs.", @"Status message");
+    else
+        messageFormat = NSLocalizedString(@"Migrated %i files or URLs, removed %i fields.", @"Status message");
+    [statusField setStringValue:[NSString stringWithFormat:messageFormat, numberOfAddedFiles, numberOfRemovedFields]];
+    
+    // @@ is this necessary?
     [[self document] updatePreviews];
 }
 

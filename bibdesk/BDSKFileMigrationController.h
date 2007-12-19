@@ -41,10 +41,11 @@
 @interface BDSKFileMigrationController : NSWindowController {
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *migrateButton;
+    IBOutlet NSProgressIndicator *progressBar;
+    IBOutlet NSTextField *statusField;
     BOOL keepOriginalValues;
     BOOL useSelection;
     NSMutableArray *results;
-    IBOutlet NSProgressIndicator *progressBar;
 }
 
 - (IBAction)migrate:(id)sender;
