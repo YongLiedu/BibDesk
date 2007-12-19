@@ -129,6 +129,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     
     [progressBar setDoubleValue:0.0];
     [progressBar setHidden:NO];
+    [progressBar startAnimation:self];
     [migrateButton setEnabled:NO];
     
     int current = 0, final = [pubs count];
@@ -161,6 +162,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     }
     
     [progressBar setHidden:YES];
+    [progressBar stopAnimation:self];
     [migrateButton setEnabled:YES];
     
     NSString *messageFormat = nil;
