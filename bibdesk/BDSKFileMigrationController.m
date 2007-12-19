@@ -173,7 +173,8 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     [statusField setStringValue:[NSString stringWithFormat:messageFormat, numberOfAddedFiles, numberOfRemovedFields]];
     
     // BibItem change notifications are only posted if the old fields are removed, so this ensures that the file view is updated
-    [[self document] updatePreviews];
+    if (addedFiles > 0)
+        [[self document] updatePreviews];
 }
 
 - (IBAction)editPublication:(id)sender;
