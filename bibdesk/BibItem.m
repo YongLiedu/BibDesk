@@ -1617,6 +1617,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSAssert1(type != nil, @"Tried to use a nil pubtype in %@.", [self citeKey]);
     
     NSMutableArray *keys = [[self allFieldNames] mutableCopy];
+    
+    // add fields to be written regardless; this is a seldom-used hack for some BibTeX style problems
+    if ([fieldsToWriteIfEmpty count]) {
+        NSEnumerator *emptyE = [fieldsToWriteIfEmpty objectEnumerator];
+        while (field = [emptyE nextObject]) {
+            if ([keys containsObject:field] == NO)
+                [keys addObject:field];
+        }
+    }
+    
 	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	if ([pw boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey]) {
 		NSMutableArray *noteKeys = [[[btm noteFieldsSet] allObjects] mutableCopy];
@@ -1631,7 +1641,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		[knownKeys addObjectsFromArray:[btm requiredFieldsForType:type]];
 		[knownKeys addObjectsFromArray:[btm optionalFieldsForType:type]];
 		[knownKeys addObject:BDSKCrossrefString];
-	}
+	}        
     
     // Sets are used directly instead of the NSString category methods because +[BDSKTypeManager sharedManager] uses @synchronized, which kills performance in a loop.
 	if(shouldTeXify)
@@ -1667,7 +1677,15 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             if(shouldTeXify && NO == [urlKeys containsObject:field])
                 value = [value stringByTeXifyingString];
                         
-            if(NO == [value isEqualToString:@""] || [fieldsToWriteIfEmpty containsObject:field]){
+            // We used to keep empty strings in fields as markers for the editor; now they're generally nil
+            BOOL isEmpty = [NSString isEmptyString:value];
+            BOOL shouldWriteField = (NO == isEmpty || [fieldsToWriteIfEmpty containsObject:field]);
+            
+            // If this is an empty field and we'll save it, our NSData method will crash on a nil value so use @"".
+            if (isEmpty && shouldWriteField)
+                value = @"";
+            
+            if(shouldWriteField) {
                     
                 [data appendData:lineSeparator];
                 isOK = [data appendDataFromString:field encoding:encoding error:&error];
