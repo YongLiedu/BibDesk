@@ -1591,26 +1591,17 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return string;
 }
 
-- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
-    NSData *data = [self bibTeXDataDroppingInternal:drop relativeToPath:[self basePath] encoding:NSUTF8StringEncoding error:NULL];
-    NSString *btString = nil;
-    if (nil != data)
-        btString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
-    return btString;
-}
-
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
+- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    BOOL shouldTeXify = [pw boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
     BOOL shouldNormalizeAuthors = [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey];
-
+    
 	NSMutableSet *knownKeys = nil;
 	NSSet *urlKeys = nil;
 	NSString *field;
     NSString *value;
     NSMutableData *data = [NSMutableData dataWithCapacity:200];
 	NSEnumerator *e;
-    NSError *error= nil;
+    NSError *error = nil;
     BOOL isOK = YES;
     
     BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
@@ -1630,6 +1621,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
     
 	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    
 	if ([pw boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey]) {
 		NSMutableArray *noteKeys = [[[btm noteFieldsSet] allObjects] mutableCopy];
         [noteKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
@@ -1638,6 +1630,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		[keys addObjectsFromArray:noteKeys];
         [noteKeys release];
 	}
+    
 	if (drop) {
         knownKeys = [[NSMutableSet alloc] initWithCapacity:14];
 		[knownKeys addObjectsFromArray:[btm requiredFieldsForType:type]];
@@ -1649,10 +1642,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	if(shouldTeXify)
         urlKeys = [btm allURLFieldsSet];
     NSSet *personFields = [btm personFieldsSet];
-
+    
 	e = [keys objectEnumerator];
 	[keys release];
-
+    
     // citekey is the only thing that could fail here, and that's not likely if we read it in originally
     NSString *typeAndCiteKey = [NSString stringWithFormat:@"@%@{%@", type, [self citeKey]]; 
     isOK = [data appendDataFromString:typeAndCiteKey encoding:encoding error:&error];
@@ -1664,38 +1657,37 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     NSData *lineSeparator = [@",\n\t" dataUsingEncoding:encoding];
     NSData *fieldValueSeparator = [@" = " dataUsingEncoding:encoding];
-        
+    
     while (isOK && (field = [e nextObject])) {
         
         if (NO == drop || [knownKeys containsObject:field]) {
-        
+            
             value = [pubFields objectForKey:field];
-          
+            
             // only use the normalized author name if it's not complex
             if([personFields containsObject:field] && shouldNormalizeAuthors && NO == [value isComplex])
                 value = [self bibTeXNameStringForField:field normalized:YES inherit:NO];
-                
+            
             // TeXifying URLs leads to serious problems
             if(shouldTeXify && NO == [urlKeys containsObject:field])
                 value = [value stringByTeXifyingString];
-                        
+            
             // We used to keep empty strings in fields as markers for the editor; now they're generally nil
-            BOOL isEmpty = [NSString isEmptyString:value];
-            BOOL shouldWriteField = (NO == isEmpty || [fieldsToWriteIfEmpty containsObject:field]);
+            BOOL isEmpty = [NSString isEmptyAsComplexString:value];
             
-            // If this is an empty field and we'll save it, our NSData method will crash on a nil value so use @"".
-            if (isEmpty && shouldWriteField)
-                value = @"";
-            
-            if(shouldWriteField) {
-                    
+            if(NO == isEmpty || [fieldsToWriteIfEmpty containsObject:field]) {
+                
+                // If this is an empty field and we'll save it, our NSData method will crash on a nil value so use @"".
+                if (isEmpty)
+                    value = @"";
+                
                 [data appendData:lineSeparator];
                 isOK = [data appendDataFromString:field encoding:encoding error:&error];
                 [data appendData:fieldValueSeparator];
-                    
+                
                 if(isOK)
                     isOK = [data appendDataFromString:[value stringAsBibTeXString] encoding:encoding error:&error];
-                    
+                
                 if(isOK == NO) {
                     error = [[error mutableCopy] autorelease];
                     [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert field \"%@\" of item with cite key \"%@\".", @"string encoding error context"), [field localizedFieldName], [self citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -1718,6 +1710,19 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         *outError = error;
     
     return isOK ? data : nil;
+}
+
+- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
+    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
+    return [self bibTeXDataDroppingInternal:drop texify:shouldTeXify relativeToPath:basePath encoding:encoding error:outError];
+}
+
+- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
+    NSData *data = [self bibTeXDataDroppingInternal:drop texify:shouldTeXify relativeToPath:[self basePath] encoding:NSUTF8StringEncoding error:NULL];
+    NSString *btString = nil;
+    if (nil != data)
+        btString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    return btString;
 }
 
 - (NSString *)bibTeXStringDroppingInternal:(BOOL)drop{
