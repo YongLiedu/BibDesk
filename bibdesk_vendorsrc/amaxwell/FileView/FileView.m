@@ -1365,6 +1365,13 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     return NSNotFound == anIndex ? nil : [self iconURLAtIndex:anIndex];
 }
 
+- (void)_openURLIfDelegateApproves:(NSURL *)aURL
+{
+    if ([[self delegate] respondsToSelector:@selector(fileView:shouldOpenURL:)] == NO ||
+        [[self delegate] fileView:self shouldOpenURL:aURL])
+        [[NSWorkspace sharedWorkspace] openURL:aURL];
+}
+
 - (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)userData
 {
     NSURL *theURL = [self _URLAtPoint:point];
@@ -1487,7 +1494,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                 [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
                 [FVPreviewer previewURL:[self _URLAtPoint:p]];
             } else {
-                [[NSWorkspace sharedWorkspace] openURL:[self _URLAtPoint:p]];
+                [self _openURLIfDelegateApproves:[self _URLAtPoint:p]];
             }
         }
         
@@ -1983,7 +1990,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)openURL:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] openURL:[self URLForLastMouseDown]];
+    [self _openURLIfDelegateApproves:[self URLForLastMouseDown]];
 }
 
 - (IBAction)zoomIn:(id)sender;
@@ -2103,7 +2110,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     if ([[menu itemAtIndex:0] isSeparatorItem])
         [menu removeItemAtIndex:0];
         
-    [[self delegate] fileView:self willPopUpMenu:menu onIconAtIndex:idx];
+    if ([[self delegate] respondsToSelector:@selector(fileView:willPopUpMenu:onIconAtIndex:)])
+        [[self delegate] fileView:self willPopUpMenu:menu onIconAtIndex:idx];
     
     if ([menu numberOfItems] == 0)
         menu = nil;

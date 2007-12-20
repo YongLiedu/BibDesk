@@ -151,12 +151,14 @@ enum {
 
 @end
 
-// delegate must conform to this
 @interface NSObject (FileViewDelegate)
 
 // Called immediately before display.   The anIndex parameter will be NSNotFound if there is not a URL at the mouse event location.  If you remove all items, the menu will not be shown.
 - (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)aMenu onIconAtIndex:(NSUInteger)anIndex;
 
 // In addition, it can be sent the WebUIDelegate method webView:contextMenuItemsForElement:defaultMenuItems:
+
+// implement this to return NO if you open the URL yourself
+- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL;
 
 @end
