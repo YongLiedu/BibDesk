@@ -603,24 +603,15 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 // this method is called from -drawRect:, so it /must not/ mark rects as needing display
 - (void)_recalculateGridSize
 {
+    NSClipView *cv = [[self enclosingScrollView] contentView];
+    NSRect frame = cv ? [cv frame] : NSZeroRect;
     NSUInteger nr = [self numberOfRows];
     NSUInteger nc = [self numberOfColumns];
-    CGFloat w = ([self _columnWidth]) * nc;
-    
+    CGFloat w = MAX([self _columnWidth] * nc, NSWidth(frame));
     // Add one extra padding increment because we draw in the padding, plus a bit more so we always have whitespace around the bottom row.  Adding less than 1.5 * padding will clip the text in the test program.  Having a horizontal scroller may change that.
-    CGFloat h = ([self _rowHeight]) * nr + 1.5 * _padding.height;
-        
-    NSClipView *cv = [[self enclosingScrollView] contentView];
-    if (cv) {
-        NSRect frame = [cv frame];
-        if (h < NSHeight(frame))
-            h = NSHeight(frame);
-        
-        if (w < NSWidth(frame))
-            w = NSWidth(frame);
-    }
-    [self setFrameSize:NSMakeSize(w, h)];
-    [self setFrameOrigin:NSZeroPoint];
+    CGFloat h = MAX([self _rowHeight] * nr + 1.5 * _padding.height, NSHeight(frame));
+    
+    [self setFrame:NSMakeRect(0.0, 0.0, w, h)];
 }    
 
 - (NSUInteger)_indexForGridRow:(NSUInteger)rowIndex column:(NSUInteger)colIndex;
@@ -668,7 +659,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex atPoint:(NSPoint)point;
 {
     // check for this immediately
-    if (point.x <= _padding.width / 2 || point.y <= _padding.width / 2)
+    if (point.x <= _padding.width / 2 || point.y <= _padding.height / 2)
         return NO;
     
     // column width is padding + icon width
