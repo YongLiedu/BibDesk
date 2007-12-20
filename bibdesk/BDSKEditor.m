@@ -487,46 +487,52 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
         [menu insertItemWithTitle:[NSLocalizedString(@"Open With",@"Menu item title") stringByAppendingEllipsis]
                 andSubmenuOfApplicationsForURL:theURL atIndex:++i];
-    }
-    if ([theURL isFileURL]) {
-        i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
-        item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
-                                  action:@selector(showNotesForLinkedFile:)
-                           keyEquivalent:@""
-                                 atIndex:++i];
-        [item setRepresentedObject:theURL];
         
-        item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
-                                  action:@selector(copyNotesForLinkedFile:)
-                           keyEquivalent:@""
-                                 atIndex:++i];
-        [item setRepresentedObject:theURL];
-        
-        if (isEditable) {
-            item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace File",@"Menu item title: Replace File...") stringByAppendingEllipsis]
-                                      action:@selector(chooseLocalFile:)
+        if ([theURL isFileURL]) {
+            item = [menu itemAtIndex:--i];
+            [item setAction:@selector(openLinkedFile:)];
+            [item setTarget:self];
+            [item setRepresentedObject:theURL];
+            
+            i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
+                                      action:@selector(showNotesForLinkedFile:)
                                keyEquivalent:@""
                                      atIndex:++i];
-            [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            [item setRepresentedObject:theURL];
             
-            item = [menu insertItemWithTitle:NSLocalizedString(@"Move To Trash",@"Menu item title")
-                                      action:@selector(trashLocalFile:)
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
+                                      action:@selector(copyNotesForLinkedFile:)
                                keyEquivalent:@""
                                      atIndex:++i];
-            [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            [item setRepresentedObject:theURL];
             
-            item = [menu insertItemWithTitle:NSLocalizedString(@"Auto File",@"Menu item title")
-                                      action:@selector(consolidateLinkedFiles:)
+            if (isEditable) {
+                item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace File",@"Menu item title: Replace File...") stringByAppendingEllipsis]
+                                          action:@selector(chooseLocalFile:)
+                                   keyEquivalent:@""
+                                         atIndex:++i];
+                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+                
+                item = [menu insertItemWithTitle:NSLocalizedString(@"Move To Trash",@"Menu item title")
+                                          action:@selector(trashLocalFile:)
+                                   keyEquivalent:@""
+                                         atIndex:++i];
+                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+                
+                item = [menu insertItemWithTitle:NSLocalizedString(@"Auto File",@"Menu item title")
+                                          action:@selector(consolidateLinkedFiles:)
+                                   keyEquivalent:@""
+                                         atIndex:++i];
+                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            }
+        } else if (isEditable) {
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL",@"Menu item title: Replace File...") stringByAppendingEllipsis]
+                                      action:@selector(chooseRemoteURL:)
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
         }
-    } else if (theURL && isEditable) {
-        item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL",@"Menu item title: Replace File...") stringByAppendingEllipsis]
-                                  action:@selector(chooseRemoteURL:)
-                           keyEquivalent:@""
-                                 atIndex:++i];
-        [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
     }
     
     if (isEditable) {

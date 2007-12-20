@@ -2862,20 +2862,26 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
         [menu insertItemWithTitle:[NSLocalizedString(@"Open With", @"Menu item title") stringByAppendingEllipsis]
                 andSubmenuOfApplicationsForURL:theURL atIndex:++i];
-    }
-    if ([theURL isFileURL]) {
-        i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
-        item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
-                                  action:@selector(showNotesForLinkedFile:)
-                           keyEquivalent:@""
-                                 atIndex:++i];
-        [item setRepresentedObject:theURL];
         
-        item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
-                                  action:@selector(copyNotesForLinkedFile:)
-                           keyEquivalent:@""
-                                 atIndex:++i];
-        [item setRepresentedObject:theURL];
+        if ([theURL isFileURL]) {
+            item = [menu itemAtIndex:--i];
+            [item setAction:@selector(openLinkedFile:)];
+            [item setTarget:self];
+            [item setRepresentedObject:theURL];
+            
+            i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
+                                      action:@selector(showNotesForLinkedFile:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:theURL];
+            
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
+                                      action:@selector(copyNotesForLinkedFile:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:theURL];
+        }
     }
 }
 
