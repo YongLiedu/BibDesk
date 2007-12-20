@@ -240,14 +240,14 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
             else
                 [NSException raise:NSInternalInconsistencyException format:@"Unexpected short line"];
 			            
-            if([tag isEqualToString:@"AU"])
+            if([tag isEqualToString:@"AU"] || [tag isEqualToString:@"ED"])
                 value = fixedAuthorName(value);
             
 			[mutableValue setString:value];                
 			
 		} else {
         
-            if([tag isEqualToString:@"AU"]){
+            if([tag isEqualToString:@"AU"] || [tag isEqualToString:@"ED"]){
                 [mutableValue appendString:@" and "];
                 [mutableValue appendString:fixedAuthorName([sourceLine stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet])];
             } else if([tag isEqualToString:@"CR"]){

@@ -82,6 +82,7 @@
         AB = Abstract; 
         AR = Pages; 
         AU = Author; 
+        ED = Editor; 
         ID = Keywords; 
         IS = Number; 
         J9 = Source; 
@@ -256,6 +257,7 @@
         CR = "Cited references"; 
         DE = "Author keywords"; 
         DT = "Document type"; 
+        ED = "Editors"; 
         EF = "End of file"; 
         EM = "E-mail address"; 
         EP = "Ending page"; 
