@@ -198,6 +198,12 @@
         [buttonCell drawWithFrame:[self buttonRectForBounds:cellFrame] inView:controlView];
 }
 
+// @@ Sometime we might want to figure out why this doesn't work correctly; text baseline seems to be messed up.
+- (NSRect)expansionFrameWithFrame:(NSRect)cellFrame inView:(NSView *)view;
+{
+    return NSZeroRect;
+}
+
 - (NSText *)setUpFieldEditorAttributes:(NSText *)textObj {
     textObj = [super setUpFieldEditorAttributes:textObj];
     if ([self drawsBackground])
