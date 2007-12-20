@@ -234,7 +234,8 @@ static CFDictionaryRef selectorTable = NULL;
     selectorTable = CFDictionaryCreateCopy(CFAllocatorGetDefault(), table);
     CFRelease(table);
     
-    // hidden pref as support for RFE #1690155 (partially implemented; view will represent this as inherited unless it goes through -[BibItem valueOfField:inherit:], which fields like "Key" certainly will)
+    // hidden pref as support for RFE #1690155 https://sourceforge.net/tracker/index.php?func=detail&aid=1690155&group_id=61487&atid=497426
+    // partially implemented; view will represent this as inherited unless it goes through -[BibItem valueOfField:inherit:], which fields like "Key" certainly will
     NSArray *emptyFields = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKFieldsToWriteIfEmpty"];
     if ([emptyFields count])
         fieldsToWriteIfEmpty = [[NSSet alloc] initWithArray:emptyFields];
@@ -1618,7 +1619,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     NSMutableArray *keys = [[self allFieldNames] mutableCopy];
     
-    // add fields to be written regardless; this is a seldom-used hack for some BibTeX style problems
+    // add fields to be written regardless; this is a seldom-used hack for some crossref problems
+    // @@ added here for sorting; the original code required the user to also add this in the default fields list, but I'm not sure if that's a distinction worth preserving since it's only a hidden pref
     if ([fieldsToWriteIfEmpty count]) {
         NSEnumerator *emptyE = [fieldsToWriteIfEmpty objectEnumerator];
         while (field = [emptyE nextObject]) {
