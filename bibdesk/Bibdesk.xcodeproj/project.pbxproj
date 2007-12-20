@@ -1617,7 +1617,7 @@
 		F9C7D3FE0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F9C7D3FF0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F9C7D4000BE9280F00D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Preferences.strings; sourceTree = "<group>"; };
-		F9C7D4040BE9282000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = French; path = French.lproj/PreferenceSearchTerms.plist; sourceTree = "<group>"; };
+		F9C7D4040BE9282000D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = French; path = French.lproj/PreferenceSearchTerms.plist; sourceTree = "<group>"; };
 		F9C7D4090BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/Credits.rtf; sourceTree = SOURCE_ROOT; };
 		F9C7D40A0BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/ReadMe.rtf; sourceTree = "<group>"; };
 		F9C7D4310BE93D7D00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = folder; name = French; path = "French.lproj/BibDesk Help"; sourceTree = "<group>"; };
