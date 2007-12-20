@@ -1365,10 +1365,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     return NSNotFound == anIndex ? nil : [self iconURLAtIndex:anIndex];
 }
 
-- (void)_openURLIfDelegateApproves:(NSURL *)aURL
+- (void)_openURL:(NSURL *)aURL
 {
-    if ([[self delegate] respondsToSelector:@selector(fileView:shouldOpenURL:)] == NO ||
-        [[self delegate] fileView:self shouldOpenURL:aURL])
+    if ([[self delegate] respondsToSelector:@selector(fileView:openURL:)] == NO ||
+        [[self delegate] fileView:self openURL:aURL] == NO)
         [[NSWorkspace sharedWorkspace] openURL:aURL];
 }
 
@@ -1494,7 +1494,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                 [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
                 [FVPreviewer previewURL:[self _URLAtPoint:p]];
             } else {
-                [self _openURLIfDelegateApproves:[self _URLAtPoint:p]];
+                [self _openURL:[self _URLAtPoint:p]];
             }
         }
         
@@ -1990,7 +1990,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)openURL:(id)sender
 {
-    [self _openURLIfDelegateApproves:[self URLForLastMouseDown]];
+    [self _openURL:[self URLForLastMouseDown]];
 }
 
 - (IBAction)zoomIn:(id)sender;

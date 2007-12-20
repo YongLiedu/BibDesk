@@ -158,7 +158,7 @@ enum {
 
 // In addition, it can be sent the WebUIDelegate method webView:contextMenuItemsForElement:defaultMenuItems:
 
-// implement this to return NO if you open the URL yourself
-- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL;
+// implement this to return YES if you open the URL yourself
+- (BOOL)fileView:(FileView *)aFileView openURL:(NSURL *)aURL;
 
 @end
