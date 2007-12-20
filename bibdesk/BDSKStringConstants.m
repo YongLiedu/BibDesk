@@ -156,7 +156,6 @@ NSString *BDSKWarnOnRemovalFromGroupKey = @"BDSKWarnOnRemovalFromGroupKey";
 
 NSString *BDSKPapersFolderPathKey = @"Path to the papers folder";
 NSString *BDSKFilePapersAutomaticallyKey = @"File papers into the papers folder automatically";
-NSString *BDSKAutoFileUsesRelativePathKey = @"AutoFile uses relative path";
 NSString *BDSKLocalFileFormatKey = @"BDSKLocalFileFormatKey";
 NSString *BDSKLocalFileFormatPresetKey = @"BDSKLocalFileFormatPresetKey";
 NSString *BDSKLocalFileLowercaseKey = @"BDSKLocalFileLowercaseKey";

@@ -136,8 +136,6 @@
 	NSString *relativeFile = [BDSKFormatParser parseFormat:localFileFormat forField:BDSKLocalUrlString ofItem:self];
 	if ([pw boolForKey:BDSKLocalFileLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
-	if ([pw boolForKey:BDSKAutoFileUsesRelativePathKey])
-        return relativeFile;
     return [[papersFolderPath stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
 }
 

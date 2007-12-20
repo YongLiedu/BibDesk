@@ -149,7 +149,6 @@ extern NSString *BDSKWarnOnRemovalFromGroupKey;
 
 extern NSString *BDSKPapersFolderPathKey;
 extern NSString *BDSKFilePapersAutomaticallyKey;
-extern NSString *BDSKAutoFileUsesRelativePathKey;
 extern NSString *BDSKLocalFileFormatKey;
 extern NSString *BDSKLocalFileFormatPresetKey;
 extern NSString *BDSKLocalFileLowercaseKey;

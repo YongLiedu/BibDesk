@@ -47,7 +47,6 @@
 	IBOutlet NSTextField* papersFolderLocationTextField;
 	IBOutlet NSButton* choosePapersFolderLocationButton;
 	IBOutlet NSMatrix *papersFolderLocationRadio;
-	IBOutlet NSButton* useRelativePathCheckButton;
 	IBOutlet NSButton* filePapersAutomaticallyCheckButton;
 	IBOutlet NSButton* warnOnMoveFolderCheckButton;
     IBOutlet NSTextField *formatField;
@@ -70,7 +69,6 @@
 - (IBAction)setPapersFolderPathFromTextField:(id)sender;
 - (IBAction)choosePapersFolderLocationAction:(id)sender;
 - (IBAction)papersFolderLocationAction:(id)sender;
-- (IBAction)toggleUseRelativePathAction:(id)sender;
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender;
 - (IBAction)toggleWarnOnMoveFolderAction:(id)sender;
 - (IBAction)localUrlFormatChanged:(id)sender;

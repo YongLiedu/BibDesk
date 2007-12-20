@@ -88,7 +88,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	NSRect frame;
 	
     [filePapersAutomaticallyCheckButton setState:[defaults boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
-    [useRelativePathCheckButton setState:[defaults boolForKey:BDSKAutoFileUsesRelativePathKey] ? NSOnState : NSOffState];
     [warnOnMoveFolderCheckButton setState:[defaults boolForKey:BDSKWarnOnMoveFolderKey] ? NSOnState : NSOffState];
 
     if ([NSString isEmptyString:papersFolder]) {
@@ -96,14 +95,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[papersFolderLocationTextField setEnabled:NO];
 		[choosePapersFolderLocationButton setEnabled:NO];
 		[papersFolderLocationRadio selectCellWithTag:1];
-		[useRelativePathCheckButton setEnabled:YES];
 	} else {
 		[papersFolderLocationTextField setStringValue:papersFolder];
 		[papersFolderLocationTextField setEnabled:YES];
 		[choosePapersFolderLocationButton setEnabled:YES];
 		[papersFolderLocationRadio selectCellWithTag:0];
-		[useRelativePathCheckButton setState:NSOffState];
-		[useRelativePathCheckButton setEnabled:NO];
 	}
 
     [formatLowercaseCheckButton setState:[defaults boolForKey:BDSKLocalFileLowercaseKey] ? NSOnState : NSOffState];
@@ -172,7 +168,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 
 - (IBAction)papersFolderLocationAction:(id)sender{
 	if ([[sender selectedCell] tag] == 0) {
-        [defaults setBool:NO forKey:BDSKAutoFileUsesRelativePathKey];
         if ([NSString isEmptyString:lastPapersFolderPath]) {
             [self choosePapersFolderLocationAction:sender];
             [defaults autoSynchronize];
@@ -186,12 +181,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[defaults setObject:@"" forKey:BDSKPapersFolderPathKey];
 		[self valuesHaveChanged];
 	}
-}
-
-- (IBAction)toggleUseRelativePathAction:(id)sender{
-	[defaults setBool:([useRelativePathCheckButton state] == NSOnState)
-			   forKey:BDSKAutoFileUsesRelativePathKey];
-	[self valuesHaveChanged];
 }
 
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender{
