@@ -70,7 +70,7 @@ enum {
     NSUInteger              _lastClickedIndex;
     NSRect                  _rubberBandRect;
     NSRect                  _dropRectForHighlight;
-    CGFloat                 _padding;
+    NSSize                  _padding;
     NSSize                  _iconSize;
     NSPoint                 _lastMouseDownLocInView;
     BOOL                    _isEditable;

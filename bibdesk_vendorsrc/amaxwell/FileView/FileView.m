@@ -61,10 +61,10 @@ static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20"
 static const NSSize DEFAULT_ICON_SIZE = { 64, 64 };
 static const CGFloat DEFAULT_PADDING = 32;          // 16 per side
 
-static CGFloat _paddingForScale(CGFloat scale)
+static NSSize _paddingForScale(CGFloat scale)
 {
     // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
-    return round(DEFAULT_PADDING + DEFAULT_PADDING * scale / 7);
+    return NSMakeSize(5.0 * round(2.0 + scale), round(DEFAULT_PADDING * (1.0 + scale / 8.0)));
 }
 
 // don't bother removing icons from the cache if there are fewer than this value
@@ -164,8 +164,8 @@ static NSShadow *__shadow = nil;
 + (BOOL)accessInstanceVariablesDirectly { return NO; }
 
 // not part of the API because padding is private, and that's a can of worms
-- (CGFloat)_columnWidth { return _iconSize.width + _padding; }
-- (CGFloat)_rowHeight { return _iconSize.height + _padding; }
+- (CGFloat)_columnWidth { return _iconSize.width + _padding.width; }
+- (CGFloat)_rowHeight { return _iconSize.height + _padding.height; }
 
 static Boolean intEqual(const void *v1, const void *v2) { return v1 == v2; }
 static CFStringRef intDesc(const void *value) { return (CFStringRef)[[NSString alloc] initWithFormat:@"%ld", (long)value]; }
@@ -377,7 +377,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     NSView *view = [self enclosingScrollView];
     if (nil == view)
         view = self;
-    return MAX(1, trunc((NSWidth([view frame]) - _padding / 2) / [self _columnWidth]));
+    return MAX(1, trunc((NSWidth([view frame]) - _padding.width / 2) / [self _columnWidth]));
 }
 
 // This is the square rect the icon is drawn in.  It doesn't include padding, so rects aren't contiguous.
@@ -385,8 +385,8 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 - (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
 {
     NSPoint origin = [self frame].origin;
-    CGFloat leftEdge = origin.x + _padding / 2 + ([self _columnWidth]) * column;
-    CGFloat bottomEdge = origin.y + _padding / 2 + ([self _rowHeight]) * row;
+    CGFloat leftEdge = origin.x + _padding.width / 2 + ([self _columnWidth]) * column;
+    CGFloat bottomEdge = origin.y + _padding.height / 2 + ([self _rowHeight]) * row;
     return NSMakeRect(leftEdge, bottomEdge, _iconSize.width, _iconSize.height);
 }
 
@@ -608,7 +608,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     CGFloat w = ([self _columnWidth]) * nc;
     
     // Add one extra padding increment because we draw in the padding, plus a bit more so we always have whitespace around the bottom row.  Adding less than 1.5 * padding will clip the text in the test program.  Having a horizontal scroller may change that.
-    CGFloat h = ([self _rowHeight]) * nr + 1.5 * _padding;
+    CGFloat h = ([self _rowHeight]) * nr + 1.5 * _padding.height;
         
     NSClipView *cv = [[self enclosingScrollView] contentView];
     if (cv) {
@@ -668,7 +668,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex atPoint:(NSPoint)point;
 {
     // check for this immediately
-    if (point.x <= _padding / 2 || point.y <= _padding / 2)
+    if (point.x <= _padding.width / 2 || point.y <= _padding.width / 2)
         return NO;
     
     // column width is padding + icon width
@@ -680,7 +680,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     while (idx < nc) {
         
-        start = _padding / 2 + (_iconSize.width + _padding) * idx;
+        start = _padding.width / 2 + (_iconSize.width + _padding.width) * idx;
         if (start < point.x && point.x < (start + _iconSize.width))
             break;
         idx++;
@@ -696,7 +696,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     while (idx < nr) {
         
-        start = _padding / 2 + (_iconSize.height + _padding) * idx;
+        start = _padding.height / 2 + (_iconSize.height + _padding.height) * idx;
         if (start < point.y && point.y < (start + _iconSize.height))
             break;
         idx++;
@@ -897,8 +897,8 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSRect bounds = [self bounds];
     
     // account for padding around edges of the view
-    bounds.origin.x += _padding / 2;
-    bounds.origin.y += _padding / 2;
+    bounds.origin.x += _padding.width / 2;
+    bounds.origin.y += _padding.height / 2;
     
     rmin = (NSMinY(aRect) - NSMinY(bounds)) / [self _rowHeight];
     rmax = (NSMinY(aRect) - NSMinY(bounds)) / [self _rowHeight] + NSHeight(aRect) / [self _rowHeight];
@@ -1054,9 +1054,9 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
             
             NSRect textRect = fileRect;
             textRect.origin.y += NSHeight(iconRect);
-            textRect.size.height = _padding;
+            textRect.size.height = _padding.height;
             // allow the text rect to extend outside the grid cell
-            textRect = NSInsetRect(textRect, -_padding / 3, 2.0);
+            textRect = NSInsetRect(textRect, -_padding.width / 3, 2.0);
             
             BOOL willDrawText = [self needsToDrawRect:textRect];
             
@@ -1671,16 +1671,16 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             
             aRect = [self _rectOfIconInRow:r column:c];
             // rect size is 1/5 of padding, and should be centered between icons vertically
-            aRect.origin.x += _iconSize.width + _padding * (c == [self numberOfColumns] - 1 ? 1 : 2) / 5;
-            aRect.size.width = _padding / 5;    
+            aRect.origin.x += _iconSize.width + _padding.width * (c == [self numberOfColumns] - 1 ? 1 : 2) / 5;
+            aRect.size.width = _padding.width / 5;    
             op = FVDropInsert;
             insertIndex = [self _indexForGridRow:r column:c] + 1;
         }
         else if ([self _getGridRow:&r column:&c atPoint:right] && ([self _indexForGridRow:r column:c] < [self numberOfIcons])) {
             
             aRect = [self _rectOfIconInRow:r column:c];
-            aRect.origin.x -= _padding * (c == 0 ? 2 : 3) / 5;
-            aRect.size.width = _padding / 5;
+            aRect.origin.x -= _padding.width * (c == 0 ? 2 : 3) / 5;
+            aRect.size.width = _padding.width / 5;
             op = FVDropInsert;
             insertIndex = [self _indexForGridRow:r column:c];
         }
@@ -1766,7 +1766,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         else {
             // local drag: work around the problem with autoscrolling at the bottom by using an offset
             newEvent = [NSEvent mouseEventWithType:[currentEvent type]
-                                          location:NSMakePoint(curPt.x, curPt.y - _padding)
+                                          location:NSMakePoint(curPt.x, curPt.y - _padding.height)
                                      modifierFlags:[currentEvent modifierFlags]
                                          timestamp:[currentEvent timestamp]
                                       windowNumber:[currentEvent windowNumber]
