@@ -489,11 +489,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                 andSubmenuOfApplicationsForURL:theURL atIndex:++i];
         
         if ([theURL isFileURL]) {
-            item = [menu itemAtIndex:--i];
-            [item setAction:@selector(openLinkedFile:)];
-            [item setTarget:self];
-            [item setRepresentedObject:theURL];
-            
             i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
             item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
                                       action:@selector(showNotesForLinkedFile:)
@@ -1157,6 +1152,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         }
         idx = [aSet indexGreaterThanIndex:idx];
     }
+}
+
+- (BOOL)fileView:(FileView *)aFileView openURL:(NSURL *)aURL {
+    if ([aURL isFileURL])
+        return [[NSWorkspace sharedWorkspace] openLinkedFile:[aURL path]];
+    else
+        return NO;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
