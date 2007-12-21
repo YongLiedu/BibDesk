@@ -2782,37 +2782,46 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 @implementation BDSKEditor (Private)
 
-#define AddFields(newFields, checkEmpty) \
-    e = [newFields objectEnumerator]; \
-    while(field = [e nextObject]){ \
-        if ([ignoredKeys containsObject:field]) continue; \
-        if (checkEmpty && [addedFields containsObject:field] == NO && [[publication valueOfField:field inherit:NO] isEqualAsComplexString:@""]) continue; \
-        [ignoredKeys addObject:field]; \
-        [currentFields addObject:field]; \
-    }
-
 - (NSArray *)currentFields {
     // build the new set of fields
     NSMutableArray *currentFields = [NSMutableArray array];
-    NSMutableArray *allFields = [[publication allFieldNames] mutableCopy];
+    NSMutableArray *allFields = [[NSMutableArray alloc] init];
 	NSEnumerator *e;
     NSString *field;
     BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
     NSString *type = [publication pubType];
 	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects:BDSKDateAddedString, BDSKDateModifiedString, nil];
     
-    [allFields addObjectsFromArray:[addedFields allObjects]];
-    [allFields sortUsingSelector:@selector(caseInsensitiveCompare:)];
-    
     [ignoredKeys unionSet:[tm noteFieldsSet]];
     [ignoredKeys unionSet:[tm ratingFieldsSet]];
     [ignoredKeys unionSet:[tm booleanFieldsSet]];
     [ignoredKeys unionSet:[tm triStateFieldsSet]];
+    
+    [allFields addObjectsFromArray:[tm requiredFieldsForType:type]];
+    [allFields addObjectsFromArray:[tm optionalFieldsForType:type]];
+    [allFields addObjectsFromArray:[tm userDefaultFieldsForType:type]];
 	
-	AddFields([tm requiredFieldsForType:type], NO);
-	AddFields([tm optionalFieldsForType:type], NO);
-	AddFields([tm userDefaultFieldsForType:type], NO);
-	AddFields(allFields, YES);
+    e = [allFields objectEnumerator];
+    while (field = [e nextObject]) {
+        if ([ignoredKeys containsObject:field] == NO) {
+            [ignoredKeys addObject:field];
+            [currentFields addObject:field];
+        }
+    }
+	
+    [allFields release];
+    allFields = [[publication allFieldNames] mutableCopy];
+    [allFields addObjectsFromArray:[addedFields allObjects]];
+    [allFields sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    
+    e = [allFields objectEnumerator];
+    while (field = [e nextObject]) {
+        if ([ignoredKeys containsObject:field] == NO) {
+            [ignoredKeys addObject:field];
+            if ([addedFields containsObject:field] || NO == [[publication valueOfField:field inherit:NO] isEqualAsComplexString:@""])
+                [currentFields addObject:field];
+        }
+    }
     
     [allFields release];
     [ignoredKeys release];
@@ -2918,42 +2927,51 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         *rows = numRows;
 }
 
-#define AddMatrixEntries(fields, cell) \
-    e = [fields objectEnumerator]; \
-    while(field = [e nextObject]){ \
-		NSButtonCell *buttonCell = [cell copy]; \
-		[buttonCell setTitle:[field localizedFieldName]]; \
-		[buttonCell setRepresentedObject:field]; \
-		[buttonCell setIntValue:[publication intValueOfField:field]]; \
-        size = [buttonCell cellSize]; \
-        cellSize = NSMakeSize(fmaxf(cellSize.width, size.width), fmaxf(cellSize.height, size.height)); \
-        [cells addObject:buttonCell]; \
-		[buttonCell release]; \
-		if([editedTitle isEqualToString:field]) \
-			editedIndex = [cells count] - 1; \
-    }
+- (NSSize)addMatrixButtonCell:(NSButtonCell *)templateCell toArray:(NSMutableArray *)cells forField:(NSString *)field {
+    NSSize size;
+    NSButtonCell *buttonCell = [templateCell copy];
+    [buttonCell setTitle:[field localizedFieldName]];
+    [buttonCell setRepresentedObject:field];
+    [buttonCell setIntValue:[publication intValueOfField:field]];
+    [cells addObject:buttonCell];
+    size = [buttonCell cellSize];
+    [buttonCell release];
+    return size;
+}
 
 - (void)setupMatrix{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSArray *ratingFields = [pw stringArrayForKey:BDSKRatingFieldsKey];
-	NSArray *booleanFields = [pw stringArrayForKey:BDSKBooleanFieldsKey];
-	NSArray *triStateFields = [pw stringArrayForKey:BDSKTriStateFieldsKey];
-    int numRows, numCols, numEntries = [ratingFields count] + [booleanFields count] + [triStateFields count];
+    NSArray *ratingFields = [pw stringArrayForKey:BDSKRatingFieldsKey];
+    NSArray *booleanFields = [pw stringArrayForKey:BDSKBooleanFieldsKey];
+    NSArray *triStateFields = [pw stringArrayForKey:BDSKTriStateFieldsKey];
+    int numRows, numCols, numEntries = [ratingFields count] + [booleanFields count] + [triStateFields count], i;
     NSPoint origin = [matrix frame].origin;
-    
-	NSString *editedTitle = nil;
-	int editedIndex = -1;
-    if([[self window] firstResponder] == matrix)
-        editedTitle = [(NSCell *)[matrix selectedCell] representedObject];
-	
 	NSEnumerator *e;
     NSString *field;
     NSMutableArray *cells = [NSMutableArray arrayWithCapacity:numEntries];
     NSSize size, cellSize = NSZeroSize;
+	NSString *editedTitle = nil;
 	
-	AddMatrixEntries(ratingFields, ratingButtonCell);
-	AddMatrixEntries(booleanFields, booleanButtonCell);
-	AddMatrixEntries(triStateFields, triStateButtonCell);
+    e = [ratingFields objectEnumerator];
+    while (field = [e nextObject]) {
+		size = [self addMatrixButtonCell:ratingButtonCell toArray:cells forField:field];
+        cellSize = NSMakeSize(fmaxf(size.width, cellSize.width), fmaxf(size.height, cellSize.height));
+    }
+	
+    e = [booleanFields objectEnumerator];
+    while (field = [e nextObject]) {
+		size = [self addMatrixButtonCell:booleanButtonCell toArray:cells forField:field];
+        cellSize = NSMakeSize(fmaxf(size.width, cellSize.width), fmaxf(size.height, cellSize.height));
+    }
+	
+    e = [triStateFields objectEnumerator];
+    while (field = [e nextObject]) {
+		size = [self addMatrixButtonCell:triStateButtonCell toArray:cells forField:field];
+        cellSize = NSMakeSize(fmaxf(size.width, cellSize.width), fmaxf(size.height, cellSize.height));
+    }
+    
+    if ([[self window] firstResponder] == matrix)
+        editedTitle = [(NSCell *)[matrix selectedCell] representedObject];
 	
     while ([matrix numberOfRows])
 		[matrix removeRow:0];
@@ -2961,22 +2979,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [self getNumberOfRows:&numRows columns:&numCols forMatrixCellSize:cellSize];
     [matrix renewRows:numRows columns:numCols];
     
-    e = [cells objectEnumerator];
-    NSCell *cell;
-    int column = numCols;
-    int row = -1;
-    while(cell = [e nextObject]){
-		if (++column >= numCols) {
-			column = 0;
-			row++;
-		}
-		[matrix putCell:cell atRow:row column:column];
-    }
+    for (i = 0; i < numEntries; i++)
+		[matrix putCell:[cells objectAtIndex:i] atRow:i / numCols column:i % numCols];
     
 	[matrix sizeToFit];
-    
     [matrix setFrameOrigin:origin];
-    [matrix setNeedsDisplay:YES];
 	
     NSView *matrixEdgeView = [[[matrix enclosingScrollView] superview] superview];
     NSView *tableScrollView = [tableView enclosingScrollView];
@@ -2992,17 +2999,22 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [tableScrollView setFrame:tableFrame];
         [matrixEdgeView setFrame:matrixFrame];
         [[tableScrollView superview] setNeedsDisplay:YES];
+    } else {
+        [matrix setNeedsDisplay:YES];
     }
     
 	// restore the edited cell
-	if(editedIndex != -1){
-        [[self window] makeFirstResponder:matrix];
-        [matrix selectCellAtRow:editedIndex / numCols column:editedIndex % numCols];
-	}
+    if (editedTitle) {
+        unsigned int editedIndex = [[cells valueForKey:@"representedObject"] indexOfObject:editedTitle];
+        if (editedIndex != NSNotFound) {
+            [[self window] makeFirstResponder:matrix];
+            [matrix selectCellAtRow:editedIndex / numCols column:editedIndex % numCols];
+        }
+    }
 }
 
 - (void)setupButtonCells {
-    // Setup the default cells for the matrix matrix
+    // Setup the default cells for the matrix
 	booleanButtonCell = [[NSButtonCell alloc] initTextCell:@""];
 	[booleanButtonCell setButtonType:NSSwitchButton];
 	[booleanButtonCell setTarget:self];
