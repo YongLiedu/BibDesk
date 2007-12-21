@@ -113,7 +113,7 @@ static BDSKFiler *sharedFiler = nil;
 	id paperInfo = nil;
 	BibItem *pub = nil;
 	BDSKLinkedFile *file = nil;
-	NSString *path = nil;
+	NSString *oldPath = nil;
 	NSString *newPath = nil;
 	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:numberOfPapers];
 	NSMutableDictionary *info = nil;
@@ -149,13 +149,13 @@ static BDSKFiler *sharedFiler = nil;
 			// autofile action: an array of BDSKLinkedFiles
 			file = (BDSKLinkedFile *)paperInfo;
 			pub = (BibItem *)[file delegate];
-			path = [[file URL] path];
+			oldPath = [[file URL] path];
 			newPath = [[pub suggestedURLForLinkedFile:file] path];
 		} else {
 			// an explicit move, possibly from undo: a list of info dictionaries
 			file = [paperInfo valueForKey:@"file"];
 			pub = [paperInfo valueForKey:@"publication"];
-			path = [[file URL] path];
+			oldPath = [[file URL] path];
 			newPath = [paperInfo valueForKey:@"path"];
 		}
 		
@@ -164,13 +164,14 @@ static BDSKFiler *sharedFiler = nil;
 			[progressIndicator displayIfNeeded];
 		}
 			
-		if ([NSString isEmptyString:path] || [NSString isEmptyString:newPath] || [path isEqualToString:newPath]) {
+		if ([NSString isEmptyString:oldPath] || [NSString isEmptyString:newPath] || [oldPath isEqualToString:newPath]) {
             [pub removeFileToBeFiled:file];
 			continue;
         }
         
 		info = [NSMutableDictionary dictionaryWithCapacity:6];
 		[info setValue:file forKey:@"file"];
+		[info setValue:oldPath forKey:@"oldPath"];
 		[info setValue:pub forKey:@"publication"];
         error = nil;
         
@@ -187,12 +188,12 @@ static BDSKFiler *sharedFiler = nil;
             BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillAutoFileScriptHookName];
             if (scriptHook) {
                 [scriptHook setField:field];
-                [scriptHook setOldValues:[NSArray arrayWithObject:path]];
+                [scriptHook setOldValues:[NSArray arrayWithObject:oldPath]];
                 [scriptHook setNewValues:[NSArray arrayWithObject:newPath]];
                 [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:doc];
             }
             
-            if (NO == [fm movePath:path toPath:newPath force:force error:&error]){ 
+            if (NO == [fm movePath:oldPath toPath:newPath force:force error:&error]){ 
                 
                 NSDictionary *errorInfo = [error userInfo];
                 [info setValue:[errorInfo objectForKey:NSLocalizedRecoverySuggestionErrorKey] forKey:@"fix"];
@@ -213,13 +214,13 @@ static BDSKFiler *sharedFiler = nil;
                 scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidAutoFileScriptHookName];
                 if (scriptHook) {
                     [scriptHook setField:field];
-                    [scriptHook setOldValues:[NSArray arrayWithObject:path]];
+                    [scriptHook setOldValues:[NSArray arrayWithObject:oldPath]];
                     [scriptHook setNewValues:[NSArray arrayWithObject:newPath]];
                     [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:doc];
                 }
                 
                 // switch them as this is used in undo
-                [info setValue:path forKey:@"path"];
+                [info setValue:oldPath forKey:@"path"];
                 [fileInfoDicts addObject:info];
                 
             }
