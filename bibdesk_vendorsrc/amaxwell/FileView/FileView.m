@@ -2002,7 +2002,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)delete:(id)sender;
 {
-    if (NO == [[self dataSource] fileView:self deleteURLsAtIndexes:_selectedIndexes])
+    if (NO == [self isEditable] || NO == [[self dataSource] fileView:self deleteURLsAtIndexes:_selectedIndexes])
         NSBeep();
     else
         [self reloadIcons];
