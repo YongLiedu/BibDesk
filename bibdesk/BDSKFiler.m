@@ -299,7 +299,7 @@
     
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
-        if ([[info objectForKey:] boolValue] == YES) {
+        if ([[info objectForKey:SELECT_KEY] boolValue] == YES) {
             if (options & BDSKInitialAutoFileOptionMask) {
                 [fileInfoDicts addObject:[info objectForKey:PUBLICATION_KEY]];
             } else {
