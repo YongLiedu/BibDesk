@@ -48,7 +48,15 @@
 #import "BDSKAlert.h"
 #import "BDSKLinkedFile.h"
 
-static BDSKFiler *sharedFiler = nil;
+// these keys should correspond to the table column identifiers
+#define FILE_KEY           @"file"
+#define PUBLICATION_KEY    @"publication"
+#define OLD_PATH_KEY       @"oldPath"
+#define NEW_PATH_KEY       @"path"
+#define STATUS_KEY         @"status"
+#define FLAG_KEY           @"flag"
+#define FIX_KEY            @"fix"
+#define SELECT_KEY         @"select"
 
 @implementation BDSKFiler
 
@@ -61,6 +69,7 @@ static BDSKFiler *sharedFiler = nil;
 }
 
 + (BDSKFiler *)sharedFiler{
+    static BDSKFiler *sharedFiler = nil;
 	if(!sharedFiler){
 		sharedFiler = [[BDSKFiler alloc] init];
 	}
@@ -153,10 +162,10 @@ static BDSKFiler *sharedFiler = nil;
 			newPath = [[pub suggestedURLForLinkedFile:file] path];
 		} else {
 			// an explicit move, possibly from undo: a list of info dictionaries
-			file = [paperInfo valueForKey:@"file"];
-			pub = [paperInfo valueForKey:@"publication"];
+			file = [paperInfo valueForKey:FILE_KEY];
+			pub = [paperInfo valueForKey:PUBLICATION_KEY];
 			oldPath = [[file URL] path];
-			newPath = [paperInfo valueForKey:@"path"];
+			newPath = [paperInfo valueForKey:NEW_PATH_KEY];
 		}
 		
 		if (numberOfPapers > 1) {
@@ -170,17 +179,17 @@ static BDSKFiler *sharedFiler = nil;
         }
         
 		info = [NSMutableDictionary dictionaryWithCapacity:6];
-		[info setValue:file forKey:@"file"];
-		[info setValue:oldPath forKey:@"oldPath"];
-		[info setValue:pub forKey:@"publication"];
+		[info setValue:file forKey:FILE_KEY];
+		[info setValue:oldPath forKey:OLD_PATH_KEY];
+		[info setValue:pub forKey:PUBLICATION_KEY];
         error = nil;
         
         if (check && NO == [pub canSetURLForLinkedFile:file]) {
             
-            [info setValue:NSLocalizedString(@"Incomplete information to generate file name.",@"") forKey:@"status"];
-            [info setValue:[NSNumber numberWithInt:BDSKIncompleteFieldsErrorMask] forKey:@"flag"];
-            [info setValue:NSLocalizedString(@"Move anyway.",@"") forKey:@"fix"];
-            [info setValue:newPath forKey:@"path"];
+            [info setValue:NSLocalizedString(@"Incomplete information to generate file name.",@"") forKey:STATUS_KEY];
+            [info setValue:[NSNumber numberWithInt:BDSKIncompleteFieldsErrorMask] forKey:FLAG_KEY];
+            [info setValue:NSLocalizedString(@"Move anyway.",@"") forKey:FIX_KEY];
+            [info setValue:newPath forKey:NEW_PATH_KEY];
             [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
             
         } else {
@@ -196,10 +205,10 @@ static BDSKFiler *sharedFiler = nil;
             if (NO == [fm movePath:oldPath toPath:newPath force:force error:&error]){ 
                 
                 NSDictionary *errorInfo = [error userInfo];
-                [info setValue:[errorInfo objectForKey:NSLocalizedRecoverySuggestionErrorKey] forKey:@"fix"];
-                [info setValue:[errorInfo objectForKey:NSLocalizedDescriptionKey] forKey:@"status"];
-                [info setValue:[NSNumber numberWithInt:[error code]] forKey:@"flag"];
-                [info setValue:newPath forKey:@"path"];
+                [info setValue:[errorInfo objectForKey:NSLocalizedRecoverySuggestionErrorKey] forKey:FIX_KEY];
+                [info setValue:[errorInfo objectForKey:NSLocalizedDescriptionKey] forKey:STATUS_KEY];
+                [info setValue:[NSNumber numberWithInt:[error code]] forKey:FLAG_KEY];
+                [info setValue:newPath forKey:NEW_PATH_KEY];
                 [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
                 
             } else {
@@ -217,7 +226,7 @@ static BDSKFiler *sharedFiler = nil;
                 }
                 
                 // switch them as this is used in undo
-                [info setValue:oldPath forKey:@"path"];
+                [info setValue:oldPath forKey:NEW_PATH_KEY];
                 [fileInfoDicts addObject:info];
                 
             }
@@ -290,9 +299,9 @@ static BDSKFiler *sharedFiler = nil;
     
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
-        if ([[info objectForKey:@"select"] boolValue] == YES) {
+        if ([[info objectForKey:] boolValue] == YES) {
             if (options & BDSKInitialAutoFileOptionMask) {
-                [fileInfoDicts addObject:[info objectForKey:@"publication"]];
+                [fileInfoDicts addObject:[info objectForKey:PUBLICATION_KEY]];
             } else {
                 [fileInfoDicts addObject:info];
             }
@@ -330,15 +339,15 @@ static BDSKFiler *sharedFiler = nil;
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
         [string appendStrings:NSLocalizedString(@"Publication key: ", @"Label for autofile dump"),
-                              [[info objectForKey:@"publication"] citeKey], @"\n", 
+                              [[info objectForKey:PUBLICATION_KEY] citeKey], @"\n", 
                               NSLocalizedString(@"Original path: ", @"Label for autofile dump"),
-                              [[[info objectForKey:@"file"] URL] path], @"\n", 
+                              [[[info objectForKey:FILE_KEY] URL] path], @"\n", 
                               NSLocalizedString(@"New path: ", @"Label for autofile dump"),
-                              [info objectForKey:@"path"], @"\n", 
+                              [info objectForKey:NEW_PATH_KEY], @"\n", 
                               NSLocalizedString(@"Status: ",@"Label for autofile dump"),
-                              [info objectForKey:@"status"], @"\n", 
+                              [info objectForKey:STATUS_KEY], @"\n", 
                               NSLocalizedString(@"Fix: ", @"Label for autofile dump"),
-                              (([info objectForKey:@"fix"] == nil) ? NSLocalizedString(@"Cannot fix.", @"Cannot fix AutoFile error") : [info objectForKey:@"fix"]),
+                              (([info objectForKey:FIX_KEY] == nil) ? NSLocalizedString(@"Cannot fix.", @"Cannot fix AutoFile error") : [info objectForKey:FIX_KEY]),
                               @"\n\n", nil];
     }
     
@@ -392,7 +401,7 @@ static BDSKFiler *sharedFiler = nil;
 
 - (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
 	NSString *tcid = [tableColumn identifier];
-    if ([tcid isEqualToString:@"select"]) {
+    if ([tcid isEqualToString:SELECT_KEY]) {
         return NSLocalizedString(@"Select items to Try Again or to Force.", @"Tool tip message");
     }
     return [[self objectInErrorInfoDictsAtIndex:row] objectForKey:tcid];
@@ -403,7 +412,7 @@ static BDSKFiler *sharedFiler = nil;
     if (row == -1)
         return;
     NSDictionary *dict = [self objectInErrorInfoDictsAtIndex:row];
-    int statusFlag = [[dict objectForKey:@"flag"] intValue];
+    int statusFlag = [[dict objectForKey:FLAG_KEY] intValue];
     NSString *tcid = nil;
     NSString *path = nil;
     BibItem *pub = nil;
@@ -414,11 +423,11 @@ static BDSKFiler *sharedFiler = nil;
         if(column == -1)
             return;
         tcid = [[[tv tableColumns] objectAtIndex:column] identifier];
-        if([tcid isEqualToString:@"oldPath"] || [tcid isEqualToString:@"icon"]){
+        if([tcid isEqualToString:OLD_PATH_KEY] || [tcid isEqualToString:@"icon"]){
             type = 0;
         }else if([tcid isEqualToString:@"newPath"]){
             type = 1;
-        }else if([tcid isEqualToString:@"status"] || [tcid isEqualToString:@"fix"]){
+        }else if([tcid isEqualToString:STATUS_KEY] || [tcid isEqualToString:FIX_KEY]){
             type = 2;
         }
     }else if([sender isKindOfClass:[NSMenuItem class]]){
@@ -429,17 +438,17 @@ static BDSKFiler *sharedFiler = nil;
         case 0:
             if(statusFlag & BDSKSourceFileDoesNotExistErrorMask)
                 return;
-            path = [[[dict objectForKey:@"file"] URL] path];
+            path = [[[dict objectForKey:FILE_KEY] URL] path];
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
             break;
         case 1:
             if(!(statusFlag & BDSKTargetFileExistsErrorMask))
                 return;
-            path = [dict objectForKey:@"path"];
+            path = [dict objectForKey:NEW_PATH_KEY];
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
             break;
         case 2:
-            pub = [dict objectForKey:@"publication"];
+            pub = [dict objectForKey:PUBLICATION_KEY];
             // at this moment we have the document set
             [document editPub:pub];
             break;
