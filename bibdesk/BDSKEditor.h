@@ -260,13 +260,6 @@
 - (IBAction)showCiteKeyWarning:(id)sender;
 
 /*!
-    @method     updateCiteKeyDuplicateWarning
-    @abstract   Method to (un)set a warning to the user that the cite-key is a duplicate in te document. 
-    @discussion (comprehensive description)
-*/
-- (void)updateCiteKeyDuplicateWarning;
-
-/*!
     @method     bibTypeDidChange:
     @abstract   Action of a form field to set a new value for a bibliography field.
     @discussion (comprehensive description)
@@ -315,11 +308,6 @@
 - (void)bibWillBeRemoved:(NSNotification *)notification;
 - (void)groupWillBeRemoved:(NSNotification *)notification;
 
-/*!
-	@method     openParentItemForField:
-	@abstract   opens an editor for the crossref parent item.
-	@discussion (description)
-*/
 - (void)openParentItemForField:(NSString *)field;
 
 - (IBAction)openParentItemAction:(id)sender;
@@ -333,13 +321,7 @@
 
 #pragma mark Person controller
 
-/*!
-    @method     showPersonDetail:
-	 @abstract   opens a BDSKPersonController to show details of a pub
-	 @discussion (description)
-*/
-- (IBAction)showPersonDetailCmd:(id)sender;
-- (void)showPersonDetail:(BibAuthor *)person;
+- (IBAction)showPersonDetail:(id)sender;
 
 #pragma mark Macro support
     
