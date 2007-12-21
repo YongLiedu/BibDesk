@@ -292,7 +292,7 @@ static BDSKFiler *sharedFiler = nil;
         info = [self objectInErrorInfoDictsAtIndex:i];
         if ([[info objectForKey:@"select"] boolValue] == YES) {
             if (options & BDSKInitialAutoFileOptionMask) {
-                [fileInfoDicts addObject:[info objectForKey:@"paper"]];
+                [fileInfoDicts addObject:[info objectForKey:@"publication"]];
             } else {
                 [fileInfoDicts addObject:info];
             }
@@ -330,7 +330,7 @@ static BDSKFiler *sharedFiler = nil;
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
         [string appendStrings:NSLocalizedString(@"Publication key: ", @"Label for autofile dump"),
-                              [[info objectForKey:@"paper"] citeKey], @"\n", 
+                              [[info objectForKey:@"publication"] citeKey], @"\n", 
                               NSLocalizedString(@"Original path: ", @"Label for autofile dump"),
                               [[[info objectForKey:@"file"] URL] path], @"\n", 
                               NSLocalizedString(@"New path: ", @"Label for autofile dump"),
@@ -439,7 +439,7 @@ static BDSKFiler *sharedFiler = nil;
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
             break;
         case 2:
-            pub = [dict objectForKey:@"paper"];
+            pub = [dict objectForKey:@"publication"];
             // at this moment we have the document set
             [document editPub:pub];
             break;
