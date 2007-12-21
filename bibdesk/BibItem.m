@@ -2527,14 +2527,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     if ([owner fileURL])
         [aFile update];
     
-	[sortedURLs release];
-    sortedURLs = nil;
-    
-    [self updateMetadataForKey:BDSKLocalFileString];
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
-														object:self
-													  userInfo:notifInfo];
+    [self noteFilesChanged];
 }
 
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx
@@ -2545,14 +2538,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [self removeFileToBeFiled:file];
     [files removeObjectAtIndex:idx];
     
-    [sortedURLs release];
-    sortedURLs = nil;
-	
-    [self updateMetadataForKey:BDSKLocalFileString];
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
-														object:self
-													  userInfo:notifInfo];
+    [self noteFilesChanged];
 }
 
 - (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx
@@ -2583,6 +2569,20 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [self insertObject:aFile inFilesAtIndex:idx];
     if (shouldAutoFile && [aFile isFile])
         [self autoFileLinkedFile:aFile];
+}
+
+- (void)noteFilesChanged {
+    // this is called after filing a linked file
+    // these are now stale, so rebuild
+    [sortedURLs release];
+    sortedURLs = nil;
+    // this updates the search index
+    [self updateMetadataForKey:BDSKLocalFileString];
+    // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+                                                        object:self
+                                                      userInfo:notifInfo];
 }
 
 static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unused)

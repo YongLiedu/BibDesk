@@ -90,6 +90,8 @@ enum {
 
 - (void)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile;
 
+- (void)noteFilesChanged;
+
 - (NSArray *)sortedURLs;
 - (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError;
 

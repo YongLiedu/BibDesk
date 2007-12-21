@@ -205,12 +205,9 @@ static BDSKFiler *sharedFiler = nil;
             } else {
                 
                 [file update];
-                // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
-                NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
-                [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
-                                                                    object:pub
-                                                                  userInfo:notifInfo];
-            
+                // make sure the UI is updated
+                [pub noteFilesChanged];
+                
                 scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidAutoFileScriptHookName];
                 if (scriptHook) {
                     [scriptHook setField:field];
