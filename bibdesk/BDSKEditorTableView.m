@@ -113,8 +113,39 @@
     }
 }
 
-- (BOOL)acceptsFirstResponder { return NO; }
-
 - (void)highlightSelectionInClipRect:(NSRect)clipRect {}
+
+- (BOOL)becomeFirstResponder {
+    if ([super becomeFirstResponder]) {
+        if ([self editedRow] == -1) {
+            int row = -1, column, numRows = [self numberOfRows], numCols = [self numberOfColumns];
+            switch ([[self window] keyViewSelectionDirection]) {
+                case NSSelectingNext:
+                    row = 0;
+                    break;
+                case NSSelectingPrevious:
+                    row = numRows - 1;
+                    break;
+                default:
+                    break;
+            }
+            if (row != -1 && row < numRows) {
+                for (column = 0; column < numCols; column++) {
+                    NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
+                    if ([tableColumn isEditable] && 
+                        ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
+                         [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:row])) {
+                        [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+                        [self editColumn:column row:row withEvent:nil select:YES];
+                        break;
+                    }
+                }
+            }
+        }
+        return YES;
+    } else {
+        return NO;
+    }
+}
 
 @end
