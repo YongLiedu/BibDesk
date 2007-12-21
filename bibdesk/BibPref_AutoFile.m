@@ -119,7 +119,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	} else {
 		[self setLocalUrlFormatInvalidWarning:YES message:error];
 		[previewTextField setStringValue:NSLocalizedString(@"Invalid Format", @"Preview for invalid autogeneration format")];
-		if (![formatSheet isVisible])
+		if (NO == [formatSheet isVisible])
 			[self showFormatSheet:self];
 	}
 	[formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:formatPresetChoice]];
@@ -304,12 +304,19 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 #pragma mark Format sheet stuff
 
 - (IBAction)showFormatSheet:(id)sender{
-	
-    [NSApp beginSheet:formatSheet
-       modalForWindow:[[self controlBox] window]
-        modalDelegate:self
-       didEndSelector:NULL
-          contextInfo:nil];
+	if ([[self controlBox] window]) {
+        [NSApp beginSheet:formatSheet
+           modalForWindow:[[self controlBox] window]
+            modalDelegate:self
+           didEndSelector:NULL
+              contextInfo:nil];
+    }
+}
+
+- (void)didBecomeCurrentPreferenceClient {
+    [super didBecomeCurrentPreferenceClient];
+    if ([formatWarningButton isHidden] == NO && [formatSheet isVisible] == NO)
+        [self showFormatSheet:self];
 }
 
 - (BOOL)canCloseFormatSheet{

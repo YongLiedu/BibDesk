@@ -954,7 +954,7 @@
 		}
 	}
 	
-    if (foundUnique == NO && [fieldName isEqualToString:BDSKLocalFileString] && errorMsg != nil)
+    if (foundUnique == NO && [fieldName isEqualToString:BDSKLocalFileString] && errorMsg == nil)
         errorMsg = NSLocalizedString(@"Format for local file requires a unique specifier.", @"Error description");
     
 	if (errorMsg == nil) {
