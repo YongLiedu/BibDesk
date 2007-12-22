@@ -145,7 +145,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     [progressBar setHidden:NO];
     [migrateButton setEnabled:NO];
     
-    int current = 0;
+    int current = 0, final = [pubs count];
     int numberOfAddedFiles = 0, numberOfRemovedFields = 0, addedFiles, removedFields;
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *aPub;
@@ -172,6 +172,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
         numberOfAddedFiles += addedFiles;
         numberOfRemovedFields += removedFields;
         [progressBar incrementBy:1.0];
+        [statusField setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%i of %i", @"Status message"), current, final]];
     }
     
     [progressBar setHidden:YES];
