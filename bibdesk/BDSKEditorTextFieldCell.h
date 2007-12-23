@@ -44,9 +44,6 @@
     BOOL hasButton;
 }
 
-- (BOOL)isButtonHighlighted;
-- (void)setButtonHighlighted:(BOOL)highlighted;
-
 - (BOOL)hasButton;
 - (void)setHasButton:(BOOL)flag;
 

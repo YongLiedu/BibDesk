@@ -137,14 +137,6 @@
     }
 }
 
-- (BOOL)isButtonHighlighted {
-    return [buttonCell isHighlighted];
-}
-
-- (void)setButtonHighlighted:(BOOL)highlighted {
-    [buttonCell setHighlighted:highlighted];
-}
-
 - (id)buttonTarget {
     return [buttonCell target];
 }

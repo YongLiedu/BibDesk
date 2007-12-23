@@ -2665,7 +2665,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             else if ([field isCitationField])
                 formatter = citationFormatter;
             [cell setFormatter:formatter];
-            [cell setButtonHighlighted:NO];
             [cell setHasButton:[[publication valueOfField:field] isInherited] || [field isEqualToString:BDSKCrossrefString]];
         }
     }
