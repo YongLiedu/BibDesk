@@ -42,6 +42,8 @@
 
 @implementation BDSKEditorTextFieldCell
 
++ (BOOL)prefersTrackingUntilMouseUp { return YES; }
+
 - (void)commonInit {
     [self setBezeled:YES];
     [self setDrawsBackground:YES];
@@ -101,35 +103,24 @@
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)untilMouseUp {
     NSRect buttonRect = [self buttonRectForBounds:cellFrame];
     NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
-    if (NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped])) {
-        // letting the buttonCell do the tracking does not work, it does not highlight and ignores whether the mouse is inside or outside
-        [buttonCell setHighlighted:YES];
-        [controlView setNeedsDisplayInRect:buttonRect];
+    BOOL insideButton = NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]);
+    if (insideButton) {
 		BOOL keepOn = YES;
-		BOOL isInside = YES;
 		while (keepOn) {
-			theEvent = [[controlView window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
-			mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
-			isInside = NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]);
-			switch ([theEvent type]) {
-				case NSLeftMouseDragged:
-					if (isInside != [buttonCell isHighlighted]) {
-                        [buttonCell setHighlighted:isInside];
-                        [controlView setNeedsDisplayInRect:buttonRect];
-					}
-                    break;
-				case NSLeftMouseUp:
-					if (isInside) {
-                        [(NSControl *)controlView sendAction:[buttonCell action] to:[buttonCell target]];
-                        [buttonCell setHighlighted:NO];
-                        [controlView setNeedsDisplayInRect:buttonRect];
-                    }
-					keepOn = NO;
-					break;
-				default:
-					// Ignore any other kind of event.
-					break;
-			}
+            if (insideButton) {
+                // NSButtonCell does not highlight itself, it tracks until a click or the mouse exits
+                [buttonCell highlight:YES withFrame:buttonRect inView:controlView];
+                if ([buttonCell trackMouse:theEvent inRect:buttonRect ofView:controlView untilMouseUp:NO])
+                    keepOn = NO;
+                [buttonCell highlight:NO withFrame:buttonRect inView:controlView];
+            }
+            if (keepOn) {
+                // we're dragging outside the button, wait for a mouseup or move back inside
+                theEvent = [[controlView window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
+                mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
+                insideButton = NSMouseInRect(mouseLoc, buttonRect, [controlView isFlipped]);
+                keepOn = ([theEvent type] == NSLeftMouseDragged);
+            }
 		}
         return YES;
     } else 
