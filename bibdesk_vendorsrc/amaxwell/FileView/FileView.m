@@ -143,7 +143,7 @@ static NSShadow *__shadow = nil;
     __subtitleAttributes = [ta copy];
     
     __shadow = [[NSShadow alloc] init];
-    [__shadow setShadowOffset:NSMakeSize(2.0,-3.0)];
+    [__shadow setShadowOffset:NSMakeSize(0.0, -3.0)];
     [__shadow setShadowBlurRadius:5.0];
     
     // QTMovie raises if +initialize isn't sent on the AppKit thread

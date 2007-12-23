@@ -249,6 +249,8 @@ static NSURL *missingFileURL = nil;
     [NSGraphicsContext restoreGraphicsState];
 }
 
+- (BOOL)needsShadow { return YES; }
+
 - (NSUInteger)pageCount { return 1; }
 - (NSUInteger)currentPageIndex { return 1; }
 - (void)showNextPage { /* do nothing */ }

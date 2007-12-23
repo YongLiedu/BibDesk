@@ -154,4 +154,6 @@ static IconRef __genericURLIcon;
     }
 }
 
+- (BOOL)needsShadow { return NO; }
+
 @end
