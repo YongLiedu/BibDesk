@@ -1098,7 +1098,8 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                 [name drawInRect:textRect withAttributes:__titleAttributes];  
                 if (useSubtitle) {
                     CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
-                    textRect.origin.y += titleHeight;
+                    if ([ctxt isFlipped])
+                        textRect.origin.y += titleHeight;
                     textRect.size.height -= titleHeight;
                     [[_dataSource fileView:self subtitleAtIndex:i] drawInRect:textRect withAttributes:__subtitleAttributes];
                 }
