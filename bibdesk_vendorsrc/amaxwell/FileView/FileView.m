@@ -1159,7 +1159,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
         [self _drawDropMessage];
     }
     
-    if ([self _hasArrows]) {
+    if ([self _hasArrows] && _isDrawingDragImage == NO) {
         if (NSIntersectsRect(rect, _leftArrowFrame))
             [_leftArrow drawWithFrame:_leftArrowFrame inView:self];
         if (NSIntersectsRect(rect, _rightArrowFrame))
