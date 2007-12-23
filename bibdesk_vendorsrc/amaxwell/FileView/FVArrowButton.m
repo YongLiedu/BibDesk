@@ -40,21 +40,19 @@
 
 static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
 
-@interface FVArrowButtonCell : NSButtonCell {
-    NSUInteger arrowDirection;
-}
-- (NSUInteger)arrowDirection;
-- (void)setArrowDirection:(NSUInteger)newArrowDirection;
-@end
-
 @implementation FVArrowButtonCell
 
 - (id)initTextCell:(NSString *)aString {
+    return [self initWithArrowDirection:FVArrowRight];
+}
+
+- (id)initWithArrowDirection:(NSUInteger)anArrowDirection {
     if (self = [super initTextCell:@""]) {
         [self setHighlightsBy:NSNoCellMask];
         [self setImagePosition:NSImageOnly];
         [self setBezelStyle:NSRegularSquareBezelStyle];
         [self setBordered:NO];
+        arrowDirection = anArrowDirection;
     }
     return self;
 }
@@ -74,14 +72,14 @@ static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
     // NSCell's highlight drawing does not look correct against a dark background, so override it completely
     NSColor *bgColor = nil;
     NSColor *arrowColor = nil;
-    if ([self isHighlighted]) {
-        bgColor = [NSColor colorWithCalibratedWhite:0.0 alpha:0.5];
-        arrowColor = [NSColor colorWithCalibratedWhite:0.7 alpha:0.8];
-    } else if ([self isEnabled]) {
-        bgColor = [NSColor colorWithCalibratedWhite:0.0 alpha:0.7];
-        arrowColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
-    } else {
+    if ([self isEnabled] == NO) {
         bgColor = [NSColor colorWithCalibratedWhite:0.3 alpha:0.5];
+        arrowColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
+    } else if ([self isHighlighted]) {
+        bgColor = [NSColor colorWithCalibratedWhite:0.0 alpha:0.8];
+        arrowColor = [NSColor colorWithCalibratedWhite:0.5 alpha:0.9];
+    } else {
+        bgColor = [NSColor colorWithCalibratedWhite:0.0 alpha:0.7];
         arrowColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
     }
     
@@ -89,6 +87,7 @@ static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
     [[NSBezierPath bezierPathWithOvalInRect:frame] fill];
     
     CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
+    CGContextSaveGState(ctxt);
     CGContextTranslateCTM(ctxt, NSMinX(frame), NSMinY(frame));
     if (FVArrowLeft == arrowDirection) {
         CGContextTranslateCTM(ctxt, NSWidth(frame), 0);
@@ -96,6 +95,7 @@ static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
     }
     [arrowColor setFill];
     [rightArrowBezierPathWithSize(frame.size) fill];
+    CGContextRestoreGState(ctxt);
 }
 
 @end

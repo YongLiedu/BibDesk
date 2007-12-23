@@ -79,8 +79,11 @@ enum {
     CFAbsoluteTime          _timeOfLastOrigin;
     NSPoint                 _lastOrigin;
     CFMutableDictionaryRef  _trackingRectMap;
-    NSButton               *_leftArrow;
-    NSButton               *_rightArrow;
+    NSButtonCell           *_leftArrow;
+    NSButtonCell           *_rightArrow;
+    NSButtonCell           *_trackedArrow;
+    NSRect                  _leftArrowFrame;
+    NSRect                  _rightArrowFrame;
     
     NSArray                *_iconURLs;
 }

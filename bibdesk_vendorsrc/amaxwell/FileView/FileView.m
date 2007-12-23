@@ -116,6 +116,7 @@ static NSShadow *__shadow = nil;
 - (void)_updateButtonsForIcon:(FVIcon *)anIcon;
 - (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex;
 - (void)_hideArrows;
+- (BOOL)_hasArrows;
 - (NSURL *)_URLAtPoint:(NSPoint)point;
 - (NSIndexSet *)_allIndexesInRubberBandRect;
 - (BOOL)_isLocalDraggingInfo:(id <NSDraggingInfo>)sender;
@@ -203,23 +204,13 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     const CFDictionaryValueCallBacks integerValueCallBacks = { 0, NULL, NULL, intDesc, intEqual };
     _trackingRectMap = CFDictionaryCreateMutable(alloc, 0, &integerKeyCallBacks, &integerValueCallBacks);
     
-    _leftArrow = [[FVArrowButton alloc] initWithFrame:NSMakeRect(0.0, 0.0, 16.0, 16.0) direction:FVArrowLeft];
+    _leftArrow = [[FVArrowButtonCell alloc] initWithArrowDirection:FVArrowLeft];
     [_leftArrow setTarget:self];
     [_leftArrow setAction:@selector(leftArrowAction:)];
     
-    _rightArrow = [[FVArrowButton alloc] initWithFrame:NSMakeRect(0.0, 0.0, 16.0, 16.0) direction:FVArrowRight];
+    _rightArrow = [[FVArrowButtonCell alloc] initWithArrowDirection:FVArrowRight];
     [_rightArrow setTarget:self];
     [_rightArrow setAction:@selector(rightArrowAction:)];
-    
-    /*
-     Add as subviews and setHidden.  
-     
-     If I use addSubview: when the mouse enters, it kills the tooltip on 10.5.  In the long run, it may be better to accept that limitation.  On 10.4, tooltips seem to interfere with the buttons in either case, causing the buttons to flicker when moving the mouse around; for now, I've decided to ignore that since it's evidently a bug.
-     */
-    [_leftArrow setHidden:YES];
-    [self addSubview:_leftArrow];
-    [_rightArrow setHidden:YES];
-    [self addSubview:_rightArrow];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -1168,6 +1159,13 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
         [self _drawDropMessage];
     }
     
+    if ([self _hasArrows]) {
+        if (NSIntersectsRect(rect, _leftArrowFrame))
+            [_leftArrow drawWithFrame:_leftArrowFrame inView:self];
+        if (NSIntersectsRect(rect, _rightArrowFrame))
+            [_rightArrow drawWithFrame:_rightArrowFrame inView:self];
+    }
+    
     // drop highlight and rubber band are mutually exclusive
     if (NSIsEmptyRect(_dropRectForHighlight) == NO) {
         [self _drawDropHighlightInRect:[self centerScanRect:_dropRectForHighlight]];
@@ -1257,23 +1255,13 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 - (void)_updateButtonsForIcon:(FVIcon *)anIcon;
 {
     NSUInteger curPage = [anIcon currentPageIndex];
-    if (curPage == [anIcon pageCount]) {
-        [_leftArrow setEnabled:YES];
-        [_rightArrow setEnabled:NO];
-    }
-    else if (curPage == 1) {
-        [_leftArrow setEnabled:NO];
-        [_rightArrow setEnabled:YES];
-    }
-    else {
-        [_leftArrow setEnabled:YES];
-        [_rightArrow setEnabled:YES];
-    }    
+    [_leftArrow setEnabled:curPage != 1];
+    [_rightArrow setEnabled:curPage != [anIcon pageCount]];
 }
 
 - (void)leftArrowAction:(id)sender
 {
-    FVIcon *anIcon = [[sender cell] representedObject];
+    FVIcon *anIcon = [_leftArrow representedObject];
     [anIcon showPreviousPage];
     [self _updateButtonsForIcon:anIcon];
     [self setNeedsDisplay:YES];
@@ -1281,10 +1269,14 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
 - (void)rightArrowAction:(id)sender
 {
-    FVIcon *anIcon = [[sender cell] representedObject];
+    FVIcon *anIcon = [_rightArrow representedObject];
     [anIcon showNextPage];
     [self _updateButtonsForIcon:anIcon];
     [self setNeedsDisplay:YES];
+}
+
+- (BOOL)_hasArrows {
+    return [_leftArrow representedObject] != nil;
 }
 
 - (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex
@@ -1299,8 +1291,6 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
         
             NSRect iconRect = [self _rectOfIconInRow:r column:c];
             
-            NSRect leftRect = NSZeroRect, rightRect = NSZeroRect;
-            
             // determine a min/max size for the arrow buttons
             CGFloat side;
 #if __LP64__
@@ -1310,35 +1300,28 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 #endif
             side = MIN(side, 32);
             side = MAX(side, 10);
-            leftRect.size = NSMakeSize(side, side);
-            rightRect.size = NSMakeSize(side, side);
-            
             // 2 pixels between arrows horizontally, and 4 pixels between bottom of arrow and bottom of iconRect
-            leftRect.origin = NSMakePoint(NSMidX(iconRect) - 2 - NSWidth(leftRect), NSMaxY(iconRect) - NSHeight(leftRect) - 4);
-            rightRect.origin = NSMakePoint(NSMidX(iconRect) + 2, NSMaxY(iconRect) - NSHeight(rightRect) - 4);
+            _leftArrowFrame = _rightArrowFrame = NSMakeRect(NSMidX(iconRect) + 2, NSMaxY(iconRect) - side - 4, side, side);
+            _leftArrowFrame.origin.x -= side + 4;
             
-            // Could check to see if the icon is fully visible; NSSplitView is a bit weird about this, since we end up getting mouseEntered: for icons that are scrolled out of sight.  Full visibility isn't required to change pages, though.
-            if (NSContainsRect([self visibleRect], rightRect) && NSContainsRect([self visibleRect], leftRect)) {
-                
-                [_leftArrow setFrame:leftRect];
-                [[_leftArrow cell] setRepresentedObject:anIcon];
-                [_rightArrow setFrame:rightRect];
-                [[_rightArrow cell] setRepresentedObject:anIcon];
-                
-                // set enabled states
-                [self _updateButtonsForIcon:anIcon];
-                [_leftArrow setHidden:NO];
-                [_rightArrow setHidden:NO];
-                // adding buttons as subviews here seems to kill the tooltips; maybe that's good, though...they can easily hide the arrow buttons, depending on where the mouse enters
-            }
+            [_leftArrow setRepresentedObject:anIcon];
+            [_rightArrow setRepresentedObject:anIcon];
+            
+            // set enabled states
+            [self _updateButtonsForIcon:anIcon];
+            
+            [self setNeedsDisplayInRect:NSUnionRect(_leftArrowFrame, _rightArrowFrame)];
         }
     }
 }
 
 - (void)_hideArrows
 {
-    [_leftArrow setHidden:YES];
-    [_rightArrow setHidden:YES];
+    if ([self _hasArrows]) {
+        [_leftArrow setRepresentedObject:nil];
+        [_rightArrow setRepresentedObject:nil];
+        [self setNeedsDisplayInRect:NSUnionRect(_leftArrowFrame, _rightArrowFrame)];
+    }
 }
 
 - (void)mouseEntered:(NSEvent *)event;
@@ -1424,6 +1407,27 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSUInteger flags = [event modifierFlags];
     
     NSUInteger r, c, i;
+    
+    if ([self _hasArrows]) {
+        if (NSMouseInRect(p, _leftArrowFrame, [self isFlipped])) {
+            _trackedArrow = _leftArrow;
+            // NSButtonCell does not do the highlighting itself
+            [_leftArrow highlight:YES withFrame:_leftArrowFrame inView:self];
+            // this returns YES when the mouse is up or NO when the mouse moves out of the rect
+            if ([_leftArrow trackMouse:event inRect:_leftArrowFrame ofView:self untilMouseUp:NO])
+                _trackedArrow = nil;
+            [_leftArrow highlight:NO withFrame:_leftArrowFrame inView:self];
+            return;
+        }
+        else if (NSMouseInRect(p, _rightArrowFrame, [self isFlipped])) {
+            _trackedArrow = _rightArrow;
+            [_rightArrow highlight:YES withFrame:_rightArrowFrame inView:self];
+            if ([_rightArrow trackMouse:event inRect:_rightArrowFrame ofView:self untilMouseUp:NO])
+                _trackedArrow = nil;
+            [_rightArrow highlight:NO withFrame:_rightArrowFrame inView:self];
+            return;
+        }
+    }
     
     // mark this icon for highlight if necessary
     if ([self _getGridRow:&r column:&c atPoint:p]) {
@@ -1565,18 +1569,44 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (void)mouseUp:(NSEvent *)event
 {
-    if (NO == NSIsEmptyRect(_rubberBandRect)) {
+    if (_trackedArrow) {
+        // the mouse went up while tracking outside ann arrow button, it was already unhighlighted
+        _trackedArrow = nil;
+    }
+    else if (NO == NSIsEmptyRect(_rubberBandRect)) {
+        [self setNeedsDisplayInRect:_rubberBandRect];
         _rubberBandRect = NSZeroRect;
-        [self setNeedsDisplay:YES];
     }
 }
 
 - (void)mouseDragged:(NSEvent *)event
 {
-    // in mouseDragged:, we're either drawing a rubber band selection or initiating a drag
+    // in mouseDragged:, we're either tracking an arrow button, drawing a rubber band selection, or initiating a drag
+    
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    
+    if (_trackedArrow == _leftArrow) {
+        // the mouse was dragged out of the left arrow button
+        if (NSMouseInRect(p, _leftArrowFrame, [self isFlipped])) {
+            // it's dragged back into the button, highlight and track it until the mouse moved up or outside the button
+            [_leftArrow highlight:YES withFrame:_leftArrowFrame inView:self];
+            if ([_leftArrow trackMouse:event inRect:_leftArrowFrame ofView:self untilMouseUp:NO])
+                _trackedArrow = nil;
+            [_leftArrow highlight:NO withFrame:_leftArrowFrame inView:self];
+        }
+        return;
+    }
+    else if (_trackedArrow == _rightArrow) {
+        if (NSMouseInRect(p, _rightArrowFrame, [self isFlipped])) {
+            [_rightArrow highlight:YES withFrame:_rightArrowFrame inView:self];
+            if ([_rightArrow trackMouse:event inRect:_rightArrowFrame ofView:self untilMouseUp:NO])
+                _trackedArrow = nil;
+            [_rightArrow highlight:NO withFrame:_rightArrowFrame inView:self];
+        }
+        return;
+    }
     
     NSArray *selectedURLs = nil;
-    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
     NSURL *pointURL = [self _URLAtPoint:p];
 
     // No previous rubber band selection, so check to see if we're dragging an icon at this point.

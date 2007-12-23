@@ -45,3 +45,11 @@ enum { FVArrowRight, FVArrowLeft };
 - (id)initWithFrame:(NSRect)frameRect direction:(NSUInteger)arrowDirection;
 
 @end
+
+@interface FVArrowButtonCell : NSButtonCell {
+    NSUInteger arrowDirection;
+}
+- (id)initWithArrowDirection:(NSUInteger)anArrowDirection;
+- (NSUInteger)arrowDirection;
+- (void)setArrowDirection:(NSUInteger)newArrowDirection;
+@end
