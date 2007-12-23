@@ -139,6 +139,7 @@ static NSShadow *__shadow = nil;
     __titleAttributes = [ta copy];
     
     [ta setObject:[NSFont systemFontOfSize:10.0] forKey:NSFontAttributeName];
+    [ta setObject:[NSColor grayColor] forKey:NSForegroundColorAttributeName];
     __subtitleAttributes = [ta copy];
     
     __shadow = [[NSShadow alloc] init];
@@ -1038,21 +1039,19 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
             
             // allow some extra for the shadow
             BOOL willDrawIcon = [self needsToDrawRect:NSInsetRect(fileRect, -5, -5)];
-            FVIcon *image = [self _cachedIconForURL:aURL];
-            
-            // note that iconRect will be transformed for a flipped context
-            NSRect iconRect = fileRect;
-            
-            NSRect textRect = fileRect;
-            textRect.origin.y += NSHeight(iconRect);
-            textRect.size.height = _padding.height;
+            NSRect textRect = NSMakeRect(NSMinX(fileRect), NSMaxY(fileRect), NSWidth(fileRect), _padding.height);
             // allow the text rect to extend outside the grid cell
-            textRect = NSInsetRect(textRect, -_padding.width / 3, 2.0);
+            textRect = NSInsetRect(textRect, -_padding.width / 3.0, 2.0);
             
             BOOL willDrawText = [self needsToDrawRect:textRect];
             
             // avoid redraw all of the icons           
             if (willDrawIcon) {
+                
+                FVIcon *image = [self _cachedIconForURL:aURL];
+                
+                // note that iconRect will be transformed for a flipped context
+                NSRect iconRect = fileRect;
                 
                 // draw highlight, then draw icon over it, as Finder does
                 if ([_selectedIndexes containsIndex:i])
