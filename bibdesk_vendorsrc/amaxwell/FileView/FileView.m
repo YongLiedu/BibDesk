@@ -95,6 +95,7 @@ static NSShadow *__shadow = nil;
 - (CGFloat)_rowHeight;
 - (FVIcon *)_cachedIconForURL:(NSURL *)aURL;
 - (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
+- (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
 - (NSArray *)_selectedURLs;
 - (void)_removeAllTrackingRects;
 - (void)_resetTrackingRectsAndToolTips;
@@ -391,6 +392,13 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     return NSMakeRect(leftEdge, bottomEdge, _iconSize.width, _iconSize.height);
 }
 
+- (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
+{
+    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect), NSWidth(iconRect), _padding.height);
+    // allow the text rect to extend outside the grid cell
+    return NSInsetRect(textRect, -_padding.width / 3.0, 2.0);
+}
+
 static void _removeTrackingRectTagFromView(const void *key, const void *value, void *context)
 {
     [(NSView *)context removeTrackingRect:(NSTrackingRectTag)key];
@@ -420,19 +428,25 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         {
             for (c = cMin; c < cMax && i < iMax; c++, i++) 
             {
-                NSRect aRect = NSIntersectionRect(visibleRect, [self _rectOfIconInRow:r column:c]);
-                if (NSIsEmptyRect(aRect) == NO) {
-                    BOOL mouseInside = NSPointInRect(mouseLoc, aRect);
+                NSRect iconRect = [self _rectOfIconInRow:r column:c];
+                NSRect imageRect = NSIntersectionRect(visibleRect, iconRect);
+                NSRect textRect = NSIntersectionRect(visibleRect, [self _rectOfTextForIconRect:iconRect]);
+                
+                if (NSIsEmptyRect(imageRect) == NO) {
+                    BOOL mouseInside = NSPointInRect(mouseLoc, imageRect);
                     
                     if (mouseInside)
                         mouseIndex = i;
                     
                     // Getting the location from the mouseEntered: event isn't reliable if you move the mouse slowly, so we either need to enlarge this tracking rect, or keep a map table of tag->index.  Since we have to keep a set of tags anyway, we'll use the latter method.
-                    NSTrackingRectTag tag = [self addTrackingRect:aRect owner:self userData:NULL assumeInside:mouseInside];
+                    NSTrackingRectTag tag = [self addTrackingRect:imageRect owner:self userData:NULL assumeInside:mouseInside];
                     CFDictionarySetValue(_trackingRectMap, (const void *)tag, (const void *)i);
                     
                     // don't pass the URL as owner, as it's not retained; use the delegate method instead
-                    [self addToolTipRect:aRect owner:self userData:NULL];
+                    [self addToolTipRect:imageRect owner:self userData:(void *)i];
+                }
+                if (NSIsEmptyRect(textRect) == NO) {
+                    [self addToolTipRect:textRect owner:self userData:(void *)i];
                 }
             }
         }    
@@ -1039,10 +1053,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
             
             // allow some extra for the shadow
             BOOL willDrawIcon = [self needsToDrawRect:NSInsetRect(fileRect, -5, -5)];
-            NSRect textRect = NSMakeRect(NSMinX(fileRect), NSMaxY(fileRect), NSWidth(fileRect), _padding.height);
-            // allow the text rect to extend outside the grid cell
-            textRect = NSInsetRect(textRect, -_padding.width / 3.0, 2.0);
-            
+            NSRect textRect = [self _rectOfTextForIconRect:fileRect];
             BOOL willDrawText = [self needsToDrawRect:textRect];
             
             // avoid redraw all of the icons           
@@ -1365,7 +1376,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
 - (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)userData
 {
-    NSURL *theURL = [self _URLAtPoint:point];
+    NSURL *theURL = [self iconURLAtIndex:(NSUInteger)userData];
     return [theURL isFileURL] ? [[theURL path] stringByAbbreviatingWithTildeInPath] : [theURL absoluteString];
 }
 
