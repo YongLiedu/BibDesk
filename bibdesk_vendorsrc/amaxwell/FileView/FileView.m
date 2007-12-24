@@ -1559,7 +1559,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (void)mouseUp:(NSEvent *)event
 {
     if (NO == NSIsEmptyRect(_rubberBandRect)) {
-        [self setNeedsDisplayInRect:_rubberBandRect];
+        [self setNeedsDisplay:YES];
         _rubberBandRect = NSZeroRect;
     }
 }
