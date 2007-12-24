@@ -118,7 +118,7 @@
             if (isInside) {
                 // NSButtonCell does not highlight itself, it tracks until a click or the mouse exits
                 [self highlight:YES withFrame:cellFrame inView:controlView];
-                isInside = [self trackMouse:theEvent inRect:cellFrame ofView:controlView untilMouseUp:NO];
+                isInside = [super trackMouse:theEvent inRect:cellFrame ofView:controlView untilMouseUp:NO];
                 [self highlight:NO withFrame:cellFrame inView:controlView];
                 keepOn = isInside ? NO : untilMouseUp;
             }
