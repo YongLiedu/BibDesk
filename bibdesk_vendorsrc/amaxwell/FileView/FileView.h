@@ -81,7 +81,6 @@ enum {
     CFMutableDictionaryRef  _trackingRectMap;
     NSButtonCell           *_leftArrow;
     NSButtonCell           *_rightArrow;
-    NSButtonCell           *_trackedArrow;
     NSRect                  _leftArrowFrame;
     NSRect                  _rightArrowFrame;
     

@@ -212,7 +212,6 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     [_rightArrow setTarget:self];
     [_rightArrow setAction:@selector(rightArrowAction:)];
     
-    _trackedArrow = nil;
     _leftArrowFrame = NSZeroRect;
     _rightArrowFrame = NSZeroRect;
 }
@@ -1262,6 +1261,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSUInteger curPage = [anIcon currentPageIndex];
     [_leftArrow setEnabled:curPage != 1];
     [_rightArrow setEnabled:curPage != [anIcon pageCount]];
+    [self setNeedsDisplayInRect:NSUnionRect(_leftArrowFrame, _rightArrowFrame)];
 }
 
 - (void)leftArrowAction:(id)sender
@@ -1410,29 +1410,13 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     _lastMouseDownLocInView = p;
 
     NSUInteger flags = [event modifierFlags];
-    
     NSUInteger r, c, i;
-    NSRect arrowFrame = NSZeroRect;
     
-    if ([self _hasArrows]) {
-        if (NSMouseInRect(p, _leftArrowFrame, [self isFlipped])) {
-            _trackedArrow = _leftArrow;
-            arrowFrame = _leftArrowFrame;
-        } else if (NSMouseInRect(p, _rightArrowFrame, [self isFlipped])) {
-            _trackedArrow = _rightArrow;
-            arrowFrame = _rightArrowFrame;
-        }
+    if ([self _hasArrows] && NSMouseInRect(p, _leftArrowFrame, [self isFlipped])) {
+        [_leftArrow trackMouse:event inRect:_leftArrowFrame ofView:self untilMouseUp:YES];
     }
-    
-    if (_trackedArrow) {
-        BOOL didClick = NO;
-        // NSButtonCell does not do the highlighting itself
-        [_trackedArrow highlight:YES withFrame:arrowFrame inView:self];
-        // this returns YES when the mouse is up or NO when the mouse moves out of the rect
-        didClick = [_trackedArrow trackMouse:event inRect:arrowFrame ofView:self untilMouseUp:NO];
-        [_trackedArrow highlight:NO withFrame:arrowFrame inView:self];
-        if (didClick)
-            _trackedArrow = nil;
+    else if ([self _hasArrows] && NSMouseInRect(p, _rightArrowFrame, [self isFlipped])) {
+        [_rightArrow trackMouse:event inRect:_rightArrowFrame ofView:self untilMouseUp:YES];
     }
     // mark this icon for highlight if necessary
     else if ([self _getGridRow:&r column:&c atPoint:p]) {
@@ -1574,11 +1558,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (void)mouseUp:(NSEvent *)event
 {
-    if (_trackedArrow) {
-        // the mouse went up while tracking outside ann arrow button, it was already unhighlighted
-        _trackedArrow = nil;
-    }
-    else if (NO == NSIsEmptyRect(_rubberBandRect)) {
+    if (NO == NSIsEmptyRect(_rubberBandRect)) {
         [self setNeedsDisplayInRect:_rubberBandRect];
         _rubberBandRect = NSZeroRect;
     }
@@ -1591,28 +1571,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
     NSURL *pointURL = [self _URLAtPoint:p];
     
-    if (_trackedArrow) {
-        // the mouse was dragged out of an arrow arrow button
-        NSRect arrowFrame = NSZeroRect;
-        BOOL isInside = NO;
-        
-        if ([_trackedArrow isEqual:_leftArrow] && NSMouseInRect(p, _leftArrowFrame, [self isFlipped])) {
-            isInside = YES;
-            arrowFrame = _leftArrowFrame;
-        } else if ([_trackedArrow isEqual:_rightArrow] && NSMouseInRect(p, _rightArrowFrame, [self isFlipped])) {
-            isInside = YES;
-            arrowFrame = _rightArrowFrame;
-        }
-        if (isInside) {
-            // it's dragged back into the button, highlight and track it until the mouse moved up or outside the button
-            [_trackedArrow highlight:YES withFrame:arrowFrame inView:self];
-            isInside = [_trackedArrow trackMouse:event inRect:arrowFrame ofView:self untilMouseUp:NO];
-            [_trackedArrow highlight:NO withFrame:arrowFrame inView:self];
-            if (isInside)
-                _trackedArrow = nil;
-        }
-    }
-    else if (NSEqualRects(_rubberBandRect, NSZeroRect) && nil != pointURL) {
+    if (NSEqualRects(_rubberBandRect, NSZeroRect) && nil != pointURL) {
         // No previous rubber band selection, so check to see if we're dragging an icon at this point.
         // The condition is also false when we're getting a repeated call to mouseDragged: for rubber band drawing.
         

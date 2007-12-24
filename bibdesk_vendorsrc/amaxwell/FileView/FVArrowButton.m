@@ -42,6 +42,8 @@ static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
 
 @implementation FVArrowButtonCell
 
++ (BOOL)prefersTrackingUntilMouseUp { return YES; }
+
 - (id)initTextCell:(NSString *)aString {
     return [self initWithArrowDirection:FVArrowRight];
 }
@@ -55,16 +57,6 @@ static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
         arrowDirection = anArrowDirection;
     }
     return self;
-}
-
-- (NSUInteger)arrowDirection;
-{
-    return arrowDirection;
-}
-
-- (void)setArrowDirection:(NSUInteger)newArrowDirection;
-{
-    arrowDirection = newArrowDirection;
 }
 
 - (void)drawWithFrame:(NSRect)frame inView:(NSView *)controlView;
@@ -98,45 +90,30 @@ static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
     CGContextRestoreGState(ctxt);
 }
 
-@end
-
-@implementation FVArrowButton
-
-+ (Class)cellClass { return [FVArrowButtonCell class]; }
-
-- (id)initWithFrame:(NSRect)frameRect direction:(NSUInteger)arrowDirection;
-{
-    if (self = [super initWithFrame:frameRect]) {
-        [[self cell] setArrowDirection:arrowDirection];
-    }
-    return self;
-}
-
-- (id)initWithFrame:(NSRect)frameRect {
-    return [self initWithFrame:frameRect direction:FVArrowRight];
-}
-
-// Modify mouseDown: behavior slightly.  Wince this control is superimposed on another pseudo-control (the FileView), we want to avoid passing some events to the next responder.
-- (void)mouseDown:(NSEvent *)event
-{
-    // convert double-clicks to a single-click event, so you can click the button rapidly without passing a double-click to the FileView
-    if ([event clickCount] > 1) {
-        NSEvent *newEvent;
-        newEvent = [NSEvent mouseEventWithType:[event type]
-                                      location:[event locationInWindow]
-                                 modifierFlags:[event modifierFlags]
-                                     timestamp:[event timestamp]
-                                  windowNumber:[event windowNumber]
-                                       context:[event context]
-                                   eventNumber:([event eventNumber] + 1)
-                                    clickCount:1
-                                      pressure:[event pressure]]; 
-        event = newEvent;
-    }
-    
-    // swallow clicks when disabled to avoid changing FileView selection
-    if ([self isEnabled])
-        [super mouseDown:event];
+- (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)untilMouseUp {
+    NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
+    BOOL isInside = NSMouseInRect(mouseLoc, cellFrame, [controlView isFlipped]);
+    if (isInside) {
+		BOOL keepOn = YES;
+		while (keepOn) {
+            if (isInside) {
+                // NSButtonCell does not highlight itself, it tracks until a click or the mouse exits
+                [self highlight:YES withFrame:cellFrame inView:controlView];
+                isInside = [self trackMouse:theEvent inRect:cellFrame ofView:controlView untilMouseUp:NO];
+                [self highlight:NO withFrame:cellFrame inView:controlView];
+                keepOn = isInside ? NO : untilMouseUp;
+            }
+            if (keepOn) {
+                // we're dragging outside the button, wait for a mouseup or move back inside
+                theEvent = [[controlView window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
+                mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
+                isInside = NSMouseInRect(mouseLoc, cellFrame, [controlView isFlipped]);
+                keepOn = ([theEvent type] == NSLeftMouseDragged);
+            }
+		}
+        return isInside;
+    } else 
+        return NO;
 }
 
 @end
