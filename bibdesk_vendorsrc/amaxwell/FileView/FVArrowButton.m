@@ -38,7 +38,6 @@
 
 #import "FVArrowButton.h"
 
-static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
 
 @implementation FVArrowButtonCell
 
@@ -57,6 +56,30 @@ static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
         arrowDirection = anArrowDirection;
     }
     return self;
+}
+
+- (NSBezierPath *)arrowBezierPathWithSize:(NSSize)size;
+{
+    CGFloat w = size.width / 16.0, h = size.height / 16.0;
+    CGFloat tip = arrowDirection == FVArrowRight ? 14.0*w : 2.0*w;
+    CGFloat base = arrowDirection == FVArrowRight ? 3.0*w : 13.0*w;
+    NSBezierPath *arrow = [NSBezierPath bezierPath];
+    
+    [arrow moveToPoint:NSMakePoint(base, 6.0*h)];
+    [arrow lineToPoint:NSMakePoint(base, 10.0*h)];
+    [arrow lineToPoint:NSMakePoint(8.0*w, 10.0*h)];
+    
+    // top point of triangle
+    [arrow lineToPoint:NSMakePoint(8.0*w, 13.0*h)];
+    // right point of triangle
+    [arrow lineToPoint:NSMakePoint(tip, 8.0*h)];
+    // bottom point of triangle
+    [arrow lineToPoint:NSMakePoint(8.0*w, 3.0*h)];
+    
+    [arrow lineToPoint:NSMakePoint(8.0*w, 6.0*h)];
+    [arrow closePath];
+    
+    return arrow;
 }
 
 - (void)drawWithFrame:(NSRect)frame inView:(NSView *)controlView;
@@ -81,12 +104,8 @@ static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
     CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
     CGContextSaveGState(ctxt);
     CGContextTranslateCTM(ctxt, NSMinX(frame), NSMinY(frame));
-    if (FVArrowLeft == arrowDirection) {
-        CGContextTranslateCTM(ctxt, NSWidth(frame), 0);
-        CGContextScaleCTM(ctxt, -1, 1);
-    }
     [arrowColor setFill];
-    [rightArrowBezierPathWithSize(frame.size) fill];
+    [[self arrowBezierPathWithSize:frame.size] fill];
     CGContextRestoreGState(ctxt);
 }
 
@@ -117,23 +136,3 @@ static NSBezierPath *rightArrowBezierPathWithSize(NSSize size);
 }
 
 @end
-
-static NSBezierPath *rightArrowBezierPathWithSize(NSSize size)
-{
-    CGFloat w = size.width, h = size.height;
-    NSBezierPath *arrow = [NSBezierPath bezierPath];
-    [arrow moveToPoint:NSMakePoint(3.0/16.0*w, 6.0/16.0*h)];
-    [arrow lineToPoint:NSMakePoint(3.0/16.0*w, 10.0/16.0*h)];
-    [arrow lineToPoint:NSMakePoint(8.0/16.0*w, 10.0/16.0*h)];
-    
-    // top point of triangle
-    [arrow lineToPoint:NSMakePoint(8.0/16.0*w, 13.0/16.0*h)];
-    // right point of triangle
-    [arrow lineToPoint:NSMakePoint(14.0/16.0*w, 8.0/16.0*h)];
-    // bottom point of triangle
-    [arrow lineToPoint:NSMakePoint(8.0/16.0*w, 3.0/16.0*h)];
-    
-    [arrow lineToPoint:NSMakePoint(8.0/16.0*w, 6.0/16.0*h)];
-    [arrow closePath];
-    return arrow;
-}
