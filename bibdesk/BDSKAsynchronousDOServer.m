@@ -41,6 +41,7 @@
 struct BDSKDOServerFlags {
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
     volatile int32_t serverDidSetup __attribute__ ((aligned (4)));
+    volatile int32_t serverDidStart __attribute__ ((aligned (4)));
 };
 
 // protocols for the server thread proxies, must be included in protocols used by subclasses
@@ -61,57 +62,32 @@ struct BDSKDOServerFlags {
 
 @implementation BDSKAsynchronousDOServer
 
-- (id)initBlocking:(BOOL)blockDuringSetup
+- (void)checkStartup:(NSTimer *)ignored
 {
-    if (self = [super init]) {
-        // set up a connection to communicate with the local background thread
-        NSPort *port1 = [NSPort port];
-        NSPort *port2 = [NSPort port];
-        
-        mainThreadConnection = [[NSConnection alloc] initWithReceivePort:port1 sendPort:port2];
-        [mainThreadConnection setRootObject:self];
-        
-        // enable explicitly; we don't need this, but it's set by default on 10.5 and we need to be uniform for debugging
-        [mainThreadConnection enableMultipleThreads];
-       
+    if (0 == serverFlags->serverDidStart)
+        NSLog(@"*** Warning *** %@ has not been started after 1 second", self);
+}
+
+- (id)init
+{
+    if (self = [super init]) {       
         // set up flags
         serverFlags = NSZoneCalloc(NSDefaultMallocZone(), 1, sizeof(struct BDSKDOServerFlags));
         serverFlags->shouldKeepRunning = 1;
-        
-        if (blockDuringSetup)
-            serverFlags->serverDidSetup = 0;
-        else
-            serverFlags->serverDidSetup = 1;
+        serverFlags->serverDidSetup = 0;
+        serverFlags->serverDidStart = 0;
+
+#if OMNI_FORCE_ASSERTIONS
+        // check for absentminded developers; there's no actual requirement that startDOServer be called immediately
+        [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(checkStartup:) userInfo:nil repeats:NO];
+#endif    
         
         // these will be set when the background thread sets up
         localThreadConnection = nil;
         serverOnMainThread = nil;
         serverOnServerThread = nil;
-        
-        // run a background thread to connect to the remote server
-        // this will connect back to the connection we just set up
-        [NSThread detachNewThreadSelector:@selector(runDOServerForPorts:) toTarget:self withObject:[NSArray arrayWithObjects:port2, port1, nil]];
-        
-        // It would be really nice if we could just wait on a condition lock here, but
-        // then this thread's runloop can't pick up the -setLocalServer message since
-        // it's blocking (so it can't handle the ports).
-        do {
-            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-            OSMemoryBarrier();
-        } while (serverFlags->serverDidSetup == 0 && serverFlags->shouldKeepRunning == 1);
     }
     return self;
-}
-
-- (id)initNonBlocking
-{
-    return [self initBlocking:NO];
-}
-
-// default is to init blocking for simplicity
-- (id)init
-{
-    return [self initBlocking:YES];
 }
 
 - (void)dealloc
@@ -144,7 +120,7 @@ struct BDSKDOServerFlags {
     return serverOnServerThread; 
 }
 
-#pragma mark MainThread
+#pragma mark Main Thread
 
 - (void)setLocalServer:(byref id)anObject;
 {
@@ -153,7 +129,32 @@ struct BDSKDOServerFlags {
     serverOnServerThread = [anObject retain];
 }
 
-#pragma mark ServerThread
+- (void)startDOServer;
+{
+    // set up a connection to communicate with the local background thread
+    NSPort *port1 = [NSPort port];
+    NSPort *port2 = [NSPort port];
+    
+    mainThreadConnection = [[NSConnection alloc] initWithReceivePort:port1 sendPort:port2];
+    [mainThreadConnection setRootObject:self];
+    
+    // enable explicitly; we don't want this, but it's set by default on 10.5 and we need to be uniform for debugging
+    [mainThreadConnection enableMultipleThreads];
+    
+    // run a background thread to connect to the remote server
+    // this will connect back to the connection we just set up
+    [NSThread detachNewThreadSelector:@selector(runDOServerForPorts:) toTarget:self withObject:[NSArray arrayWithObjects:port2, port1, nil]];
+    
+    // It would be really nice if we could just wait on a condition lock here, but
+    // then this thread's runloop can't pick up the -setLocalServer message since
+    // it's blocking (the runloop can't service the ports).
+    do {
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+        OSMemoryBarrier();
+    } while (serverFlags->serverDidSetup == 0 && serverFlags->shouldKeepRunning == 1);    
+}
+
+#pragma mark Server Thread
 
 - (oneway void)cleanup;
 {   
@@ -240,6 +241,25 @@ struct BDSKDOServerFlags {
 
 #pragma mark API
 #pragma mark Main Thread
+
+- (void)startDOServerSync;
+{
+    OBASSERT([NSThread inMainThread]);   
+    // no need for memory barrier functions here since there's no thread yet
+    serverFlags->serverDidSetup = 0;
+    serverFlags->serverDidStart = 1;
+    [self startDOServer];
+}
+
+- (void)startDOServerAsync;
+{
+    OBASSERT([NSThread inMainThread]); 
+    // no need for memory barrier functions here since there's no thread yet
+    // set serverDidSetup to 1 so we don't wait in startDOServer
+    serverFlags->serverDidSetup = 1;
+    serverFlags->serverDidStart = 1;
+    [self startDOServer];
+}
 
 - (void)stopDOServer;
 {

@@ -291,26 +291,29 @@ static NSImage *unlockedIcon = nil;
 
 - (id)initWithGroup:(BDSKSharedGroup *)aGroup andService:(NSNetService *)aService;
 {
-    group = aGroup; // don't retain since it retains us
-    
-    service = [aService retain];
-    
-    // monitor changes to the TXT data
-    [service setDelegate:self];
-    [service startMonitoring];
-    
-    // set up flags
-    memset(&flags, 0, sizeof(flags));
-    
-    // set up the authentication flag
-    NSData *TXTData = [service TXTRecordData];
-    if(TXTData)
-        [self netService:service didUpdateTXTRecordData:TXTData];
-    
-    // test this to see if we've registered with the remote host
-    uniqueIdentifier = nil;
-    
-    self = [super initNonBlocking];
+    self = [super init];
+    if (self) {
+        group = aGroup; // don't retain since it retains us
+        
+        service = [aService retain];
+        
+        // monitor changes to the TXT data
+        [service setDelegate:self];
+        [service startMonitoring];
+        
+        // set up flags
+        memset(&flags, 0, sizeof(flags));
+        
+        // set up the authentication flag
+        NSData *TXTData = [service TXTRecordData];
+        if(TXTData)
+            [self netService:service didUpdateTXTRecordData:TXTData];
+        
+        // test this to see if we've registered with the remote host
+        uniqueIdentifier = nil;
+        
+        [self startDOServerAsync];
+    }
     return self;
 }
 

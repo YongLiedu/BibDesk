@@ -52,25 +52,15 @@
     struct BDSKDOServerFlags *serverFlags;  // state variables
 }
 
-/*
- 
- General init pattern for subclasses should be the following:
- 
- - initialize ivars
- - assign self = [super init] or self = [super initNonBlocking]
- - return self
- 
- This should avoid handling any server messages with a partially instantiated object.  For initNonBlocking, you're less likely to have problems using the standard if (self = [super init]) { // init ivars } pattern, since the proxies likely will be set up by the time your subclass init finishes on the main thread.  This is not reliable, though.
- 
- This -init pattern isn't generally correct, since if self = [super init] returns a new object and releases the old self, your initialized ivars will be dealloced and bad things will happen.  We can guarantee that BDSKAsynchronousDOServer always returns self from -init, so this should work even if NSObject does something weird with -init in future.
- 
+/* 
+ If you override -init (designated initializer), call -startDOServerSync or -startDOServerAsync as the last step of initialization or after all necessary ivars are set.  If -init isn't overriden, call one of the start methods after initializing the object.
  */
 
-// -initNonBlocking does server setup asynchronously, so -serverOn*Thread may return nil the first
-// time you call it.  This is most convenient if you do a lot of work in serverDidSetup, or use
-// NSSocketPort for remote connections (which can be really slow to set up).
-// If you don't do anything time consuming during setup, just use -init.
-- (id)initNonBlocking;
+// detaches the server thread and returns when proxies are set up
+- (void)startDOServerSync;
+
+// detaches the server thread and returns immediately; proxies may not be usable on return
+- (void)startDOServerAsync;
 
 // override for custom cleanup on the main thread; call super afterwards
 - (void)stopDOServer;

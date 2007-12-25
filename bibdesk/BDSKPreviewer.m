@@ -520,15 +520,17 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (id)init;
 {
-    texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
-    delegate = nil;
-    bibString = nil;
-    queueLock = [NSRecursiveLock new];
-    queue = [NSMutableArray new];
-    isProcessing = 0;
-    notifyWhenDone = 0;
-    
     self = [super init];
+    if (self) {
+        texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
+        delegate = nil;
+        bibString = nil;
+        queueLock = [NSRecursiveLock new];
+        queue = [NSMutableArray new];
+        isProcessing = 0;
+        notifyWhenDone = 0;
+        [self startDOServerSync];
+    }
     return self;
 }
 

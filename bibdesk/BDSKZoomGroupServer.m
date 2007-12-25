@@ -77,16 +77,18 @@ static NSString *BDSKHTTPProxySetting();
 
 - (id)initWithGroup:(BDSKSearchGroup *)aGroup serverInfo:(BDSKServerInfo *)info;
 {    
-    group = aGroup;
-    serverInfo = [info copy];
-    flags.failedDownload = 0;
-    flags.isRetrieving = 0;
-    flags.needsReset = 1;
-    availableResults = 0;
-    fetchedResults = 0;
-    pthread_rwlock_init(&infolock, NULL);
-    
     self = [super init];
+    if (self) {
+        group = aGroup;
+        serverInfo = [info copy];
+        flags.failedDownload = 0;
+        flags.isRetrieving = 0;
+        flags.needsReset = 1;
+        availableResults = 0;
+        fetchedResults = 0;
+        pthread_rwlock_init(&infolock, NULL);
+        [self startDOServerSync];
+    }
     return self;
 }
 

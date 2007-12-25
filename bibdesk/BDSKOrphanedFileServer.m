@@ -58,14 +58,16 @@
 
 - (id)init;
 {
-    foundFiles = [[NSMutableArray alloc] initWithCapacity:32];
-    knownFiles = nil;
-    baseURL = nil;
-    keepEnumerating = 0;
-    allFilesEnumerated = 0;
-    delegate = nil;
-    
     self = [super init];
+    if (self) {
+        foundFiles = [[NSMutableArray alloc] initWithCapacity:32];
+        knownFiles = nil;
+        baseURL = nil;
+        keepEnumerating = 0;
+        allFilesEnumerated = 0;
+        delegate = nil;
+        [self startDOServerSync];
+    }
     return self;
 }
 
