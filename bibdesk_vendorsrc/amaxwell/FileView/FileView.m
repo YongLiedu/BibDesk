@@ -1000,7 +1000,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
     NSUInteger r, rMin = rows.location, rMax = NSMaxRange(rows);
     NSUInteger c, cMin = columns.location, cMax = NSMaxRange(columns);
-    NSUInteger i, iMin = indexRange.location, iMax = NSMaxRange(indexRange);
+    NSUInteger i;
         
     NSGraphicsContext *ctxt = [NSGraphicsContext currentContext];
     CGContextRef cgContext = [ctxt graphicsPort];
@@ -1024,13 +1024,13 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     
     BOOL useFastDrawingPath = (isResizing || _isRescaling || ([self _isFastScrolling] && _iconSize.height <= 256));
     BOOL useSubtitle = [_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
     
     // iterate each row/column to see if it's in the dirty rect, and evaluate the current cache state
-    for (r = rMin, i = iMin; r < rMax; r++) 
+    for (r = rMin; r < rMax; r++) 
     {
-        for (c = cMin; c < cMax && i < iMax; c++) 
+        for (c = cMin; c < cMax; c++) 
         {
-            // can't just increment i, since we no longer iterate all columns and rows
             i = [self _indexForGridRow:r column:c];
 
             // if we're creating a drag image, only draw selected icons
@@ -1091,7 +1091,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                     textRect = [self centerScanRect:textRect];
                     
                     // draw text over the icon/shadow
-                    NSString *name = [aURL isFileURL] ? [[aURL path] lastPathComponent] : [aURL absoluteString];
+                    NSString *name = [aURL isFileURL] ? [fileManager displayNameAtPath:[aURL path]] : [aURL absoluteString];
                     [name drawInRect:textRect withAttributes:__titleAttributes];  
                     if (useSubtitle) {
                         CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
@@ -1108,6 +1108,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     
     // avoid hitting the cache thread while a live resize is in progress, but allow cache updates while scrolling
     // use the same range criteria that we used in iterating icons
+    NSUInteger iMin = indexRange.location, iMax = NSMaxRange(indexRange);
     if (NO == isResizing && NO == _isRescaling)
         [self _scheduleIconsInRange:NSMakeRange(iMin, iMax - iMin)];
 }
