@@ -46,7 +46,7 @@
 
 @interface BDSKSearchIndex (Private)
 
-- (void)rebuildIndex;
+- (void)buildIndex;
 - (void)indexFilesForItem:(id)anItem;
 - (void)runIndexThread;
 - (void)processNotification:(NSNotification *)note;
@@ -60,19 +60,10 @@
 
 @end
 
-/* Access to the SKIndexRef is no longer locked, since all access to it takes place on the worker pthread.  We could possibly switch to NSThread for running the worker thread now that the retain issue has been addressed, but the pthread solution works  well and has been debugged.  Setting flags.isIndexing should always succeed, since it's only changed from the worker thread; we're using the OSAtomic functions just in case (and because they're interesting). */
-
 @implementation BDSKSearchIndex
 
 #define INDEX_STARTUP 1
 #define INDEX_STARTUP_COMPLETE 2
-
-+ (void)initialize
-{
-    OBINITIALIZE;
-    // ensure that the AppKit knows we're multithreaded, since we're using pthreads
-    [NSThread detachNewThreadSelector:NULL toTarget:nil withObject:nil];
-}
 
 - (id)initWithDocument:(id)aDocument
 {
@@ -86,9 +77,14 @@
         index = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, NULL);
         CFRelease(indexData); // @@ doc bug: is this owned by the index now?  seems to be...
             
-        document = [aDocument retain];
         delegate = nil;
         [self setInitialObjectsToIndex:[[aDocument publications] arrayByPerformingSelector:@selector(searchIndexInfo)]];
+        
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        SEL handler = @selector(processNotification:);
+        [nc addObserver:self selector:handler name:BDSKSearchIndexInfoChangedNotification object:aDocument];
+        [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:aDocument];
+        [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:aDocument];
         
         flags.isIndexing = 0;
         flags.shouldKeepRunning = 1;
@@ -117,7 +113,6 @@
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [notificationPort release];
     [notificationQueue release];
     [titles release];
@@ -128,11 +123,8 @@
 // cancel is usually sent from the main thread
 - (void)cancel
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     OSAtomicCompareAndSwap32(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
-    
-    // the document does cleanup that should only be performed on the main thread (this was causing an assertion failure in -[BDSKFileContentSearchController cancelCurrentSearch:])
-    [document performSelectorOnMainThread:@selector(release) withObject:nil waitUntilDone:NO];
-    document = nil;
     
     // wake the thread up so the runloop will exit
     [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
@@ -222,7 +214,7 @@
     [pool release];
 }
 
-- (void)rebuildIndex
+- (void)buildIndex
 {    
     NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
     
@@ -288,18 +280,11 @@
     [[NSRunLoop currentRunLoop] addPort:notificationPort forMode:NSDefaultRunLoopMode];
     
     notificationQueue = [[BDSKThreadSafeMutableArray alloc] initWithCapacity:5];
-        
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    SEL handler = @selector(processNotification:);
-    [nc addObserver:self selector:handler name:BDSKSearchIndexInfoChangedNotification object:document];
-    [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:document];
-    [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:document];
-    
     [setupLock unlockWithCondition:INDEX_STARTUP_COMPLETE];
     
     // an exception here can probably be ignored safely
     @try{
-        [self rebuildIndex];
+        [self buildIndex];
     }
     @catch(id localException){
         NSLog(@"Ignoring exception %@ raised while rebuilding index", localException);

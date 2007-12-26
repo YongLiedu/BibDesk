@@ -41,11 +41,14 @@
 @class BDSKSearchIndex, BDSKThreadSafeMutableArray;
 
 @protocol BDSKSearchIndexDelegate <NSObject>
+
+// Sent on the main thread at periodic intervals to inform the delegate that new files have been added to the index, and that any searches in progress need to be updated.
 - (void)searchIndexDidUpdate:(BDSKSearchIndex *)index;
+
+// Sent on the main thread after the initial indexing phase has finished.  This allows the delegate to update its search for the last time.
 - (void)searchIndexDidFinishInitialIndexing:(BDSKSearchIndex *)index;
 @end
 
-// I think a union guarantees correct alignment; is that true for a struct as well?
 typedef struct _BDSKSearchIndexFlags
 {
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
@@ -54,7 +57,6 @@ typedef struct _BDSKSearchIndexFlags
 
 @interface BDSKSearchIndex : NSObject {
     SKIndexRef index;
-    id document;
     NSMutableDictionary *titles;
     id delegate;
     NSArray *initialObjectsToIndex;
@@ -67,14 +69,19 @@ typedef struct _BDSKSearchIndexFlags
     double progressValue;
 }
 
+// aDocument must respond to -publications; this should generally be called on the main thread
 - (id)initWithDocument:(id)aDocument;
 
 // Warning:  it is /not/ safe to write to this SKIndexRef directly; use it only for reading.
 - (SKIndexRef)index;
+
+// Required before disposing of the index.  After calling cancel, the index is no longer viable.
 - (void)cancel;
 - (BOOL)isIndexing;
 - (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject;
 - (NSString *)titleForURL:(NSURL *)theURL;
+
+// Poll this for progress bar updates during indexing
 - (double)progressValue;
 
 @end
