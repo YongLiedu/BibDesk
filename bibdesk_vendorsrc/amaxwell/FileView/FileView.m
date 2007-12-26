@@ -1028,92 +1028,86 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     // we should use the fast path when scrolling at small sizes; PDF sucks in that case...
     
     BOOL useFastDrawingPath = (isResizing || _isRescaling || ([self _isFastScrolling] && _iconSize.height <= 256));
-    
     BOOL useSubtitle = [_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)];
     
     // iterate each row/column to see if it's in the dirty rect, and evaluate the current cache state
     for (r = rMin, i = iMin; r < rMax; r++) 
     {
-        for (c = cMin; c < cMax && i < iMax; c++, i++) 
+        for (c = cMin; c < cMax && i < iMax; c++) 
         {
-            // @@ i hate continue...
-            // don't draw icons that aren't selected if we're creating a drag image
-            if (_isDrawingDragImage && [_selectedIndexes containsIndex:i] == NO)
-                continue;
-            
-            NSRect fileRect = [self _rectOfIconInRow:r column:c];
-            
-            NSURL *aURL = [self iconURLAtIndex:i];
-            
-            // allow some extra for the shadow
-            BOOL willDrawIcon = [self needsToDrawRect:NSInsetRect(fileRect, -5, -5)];
-            NSRect textRect = [self _rectOfTextForIconRect:fileRect];
-            BOOL willDrawText = [self needsToDrawRect:textRect];
-            
-            // avoid redraw all of the icons           
-            if (willDrawIcon) {
-                
-                FVIcon *image = [self _cachedIconForURL:aURL];
-                
-                // note that iconRect will be transformed for a flipped context
-                NSRect iconRect = fileRect;
-                
-                // draw highlight, then draw icon over it, as Finder does
-                if ([_selectedIndexes containsIndex:i])
-                    [self _drawHighlightInRect:NSInsetRect(fileRect, -4, -4)];
-                
-                CGContextSaveGState(cgContext);
-                
-                // draw a shadow behind the image/page
-                if ([image needsShadow])
-                    [__shadow set];
-                
-                // possibly better performance by caching all bitmaps in a flipped state, but bookkeeping is a pain
-                CGContextTranslateCTM(cgContext, 0, NSMaxY(iconRect));
-                CGContextScaleCTM(cgContext, 1, -1);
-                iconRect.origin.y = 0;
-                
-                // Note: don't use integral rects here to avoid res independence issues (on Tiger, centerScanRect: just makes in integral rect).  The icons may create an integral bitmap context, but it'll still be drawn into this rect with correct scaling.
-                iconRect = [self centerScanRect:iconRect];
-                                
-                if (useFastDrawingPath)
-                    [image fastDrawInRect:iconRect inCGContext:cgContext];
-                else
-                    [image drawInRect:iconRect inCGContext:cgContext];
+            // can't just increment i, since we no longer iterate all columns and rows
+            i = [self _indexForGridRow:r column:c];
 
-                CGContextRestoreGState(cgContext);
-            }
+            // if we're creating a drag image, only draw selected icons
+            if (NSNotFound != i && (NO == _isDrawingDragImage || [_selectedIndexes containsIndex:i])) {
             
-            if (willDrawText) {
-                CGContextSaveGState(cgContext);
+                NSRect fileRect = [self _rectOfIconInRow:r column:c];
                 
-                // @@ this is a hack for drawing into the drag image context
-                if (NO == [ctxt isFlipped]) {
-                    CGContextTranslateCTM(cgContext, 0, NSMaxY(textRect));
+                NSURL *aURL = [self iconURLAtIndex:i];
+                
+                // we may only be drawing icon and/or text
+                // allow some extra for the shadow (-5)
+                BOOL willDrawIcon = [self needsToDrawRect:NSInsetRect(fileRect, -5, -5)];
+                NSRect textRect = [self _rectOfTextForIconRect:fileRect];
+                BOOL willDrawText = [self needsToDrawRect:textRect];
+                                
+                if (willDrawIcon) {
+
+                    FVIcon *image = [self _cachedIconForURL:aURL];
+                    
+                    // note that iconRect will be transformed for a flipped context
+                    NSRect iconRect = fileRect;
+                    
+                    // draw highlight, then draw icon over it, as Finder does
+                    if ([_selectedIndexes containsIndex:i])
+                        [self _drawHighlightInRect:NSInsetRect(fileRect, -4, -4)];
+                    
+                    CGContextSaveGState(cgContext);
+                    
+                    // draw a shadow behind the image/page
+                    if ([image needsShadow])
+                        [__shadow set];
+                    
+                    // possibly better performance by caching all bitmaps in a flipped state, but bookkeeping is a pain
+                    CGContextTranslateCTM(cgContext, 0, NSMaxY(iconRect));
                     CGContextScaleCTM(cgContext, 1, -1);
-                    textRect.origin.y = 0;
+                    iconRect.origin.y = 0;
+                    
+                    // Note: don't use integral rects here to avoid res independence issues (on Tiger, centerScanRect: just makes an integral rect).  The icons may create an integral bitmap context, but it'll still be drawn into this rect with correct scaling.
+                    iconRect = [self centerScanRect:iconRect];
+                                    
+                    if (useFastDrawingPath)
+                        [image fastDrawInRect:iconRect inCGContext:cgContext];
+                    else
+                        [image drawInRect:iconRect inCGContext:cgContext];
+
+                    CGContextRestoreGState(cgContext);
                 }
-                textRect = [self centerScanRect:textRect];
                 
-                // draw text over the icon/shadow
-                NSString *name = [aURL isFileURL] ? [[aURL path] lastPathComponent] : [aURL absoluteString];
-#if 1
-                [name drawInRect:textRect withAttributes:__titleAttributes];  
-                if (useSubtitle) {
-                    CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
-                    if ([ctxt isFlipped])
-                        textRect.origin.y += titleHeight;
-                    textRect.size.height -= titleHeight;
-                    [[_dataSource fileView:self subtitleAtIndex:i] drawInRect:textRect withAttributes:__subtitleAttributes];
-                }
-#else
-                NSRect tr = textRect;
-                textRect.origin.y += NSHeight(textRect);
-                NSStringDrawingOptions opts = NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine;
-                [name drawWithRect:tr options:opts attributes:__titleAttributes];
-#endif
-                CGContextRestoreGState(cgContext);
-            }            
+                if (willDrawText) {
+                    CGContextSaveGState(cgContext);
+                    
+                    // @@ this is a hack for drawing into the drag image context
+                    if (NO == [ctxt isFlipped]) {
+                        CGContextTranslateCTM(cgContext, 0, NSMaxY(textRect));
+                        CGContextScaleCTM(cgContext, 1, -1);
+                        textRect.origin.y = 0;
+                    }
+                    textRect = [self centerScanRect:textRect];
+                    
+                    // draw text over the icon/shadow
+                    NSString *name = [aURL isFileURL] ? [[aURL path] lastPathComponent] : [aURL absoluteString];
+                    [name drawInRect:textRect withAttributes:__titleAttributes];  
+                    if (useSubtitle) {
+                        CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
+                        if ([ctxt isFlipped])
+                            textRect.origin.y += titleHeight;
+                        textRect.size.height -= titleHeight;
+                        [[_dataSource fileView:self subtitleAtIndex:i] drawInRect:textRect withAttributes:__subtitleAttributes];
+                    }
+                    CGContextRestoreGState(cgContext);
+                } 
+            }
         }
     }
     
@@ -1559,7 +1553,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (void)mouseUp:(NSEvent *)event
 {
     if (NO == NSIsEmptyRect(_rubberBandRect)) {
-        [self setNeedsDisplay:YES];
+        [self setNeedsDisplayInRect:_rubberBandRect];
         _rubberBandRect = NSZeroRect;
     }
 }
@@ -1616,7 +1610,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         // no icons to drag, so we must draw the rubber band rectangle
         _rubberBandRect = _rectWithCorners(_lastMouseDownLocInView, p);
         [self setSelectionIndexes:[self _allIndexesInRubberBandRect]];
-        [self setNeedsDisplay:YES];
+        [self setNeedsDisplayInRect:_rubberBandRect];
         [self autoscroll:event];
         [super mouseDragged:event];
     }
