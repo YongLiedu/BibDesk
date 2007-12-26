@@ -422,25 +422,20 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         {
             for (c = cMin; c < cMax && i < iMax; c++, i++) 
             {
-                NSRect iconRect = [self _rectOfIconInRow:r column:c];
-                NSRect imageRect = NSIntersectionRect(visibleRect, iconRect);
-                NSRect textRect = NSIntersectionRect(visibleRect, [self _rectOfTextForIconRect:iconRect]);
+                NSRect iconRect = NSIntersectionRect(visibleRect, [self _rectOfIconInRow:r column:c]);
                 
-                if (NSIsEmptyRect(imageRect) == NO) {
-                    BOOL mouseInside = NSPointInRect(mouseLoc, imageRect);
+                if (NSIsEmptyRect(iconRect) == NO) {
+                    BOOL mouseInside = NSPointInRect(mouseLoc, iconRect);
                     
                     if (mouseInside)
                         mouseIndex = i;
                     
                     // Getting the location from the mouseEntered: event isn't reliable if you move the mouse slowly, so we either need to enlarge this tracking rect, or keep a map table of tag->index.  Since we have to keep a set of tags anyway, we'll use the latter method.
-                    NSTrackingRectTag tag = [self addTrackingRect:imageRect owner:self userData:NULL assumeInside:mouseInside];
+                    NSTrackingRectTag tag = [self addTrackingRect:iconRect owner:self userData:NULL assumeInside:mouseInside];
                     CFDictionarySetValue(_trackingRectMap, (const void *)tag, (const void *)i);
                     
                     // don't pass the URL as owner, as it's not retained; use the delegate method instead
-                    [self addToolTipRect:imageRect owner:self userData:(void *)i];
-                }
-                if (NSIsEmptyRect(textRect) == NO) {
-                    [self addToolTipRect:textRect owner:self userData:(void *)i];
+                    [self addToolTipRect:iconRect owner:self userData:NULL];
                 }
             }
         }    
@@ -1364,8 +1359,8 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
 - (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)userData
 {
-    NSURL *theURL = [self iconURLAtIndex:(NSUInteger)userData];
-    return [theURL isFileURL] ? [[theURL path] stringByAbbreviatingWithTildeInPath] : [theURL absoluteString];
+    NSURL *theURL = [self _URLAtPoint:point];
+    return [theURL isFileURL] ? [[NSFileManager defaultManager] displayNameAtPath:[theURL path]] : [theURL absoluteString];
 }
 
 // this method and shouldDelayWindowOrderingForEvent: are overriden to allow dragging from the view without making our window key
