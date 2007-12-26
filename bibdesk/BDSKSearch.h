@@ -42,7 +42,11 @@
 @class BDSKSearchIndex, BDSKSearch, BDSKSearchPrivateIvars;
 
 @protocol BDSKSearchDelegate <NSObject>
+
+// sent as the search is in progress (not all matches returned); anArray includes all results
 - (void)search:(BDSKSearch *)aSearch didUpdateWithResults:(NSArray *)anArray;
+
+// sent when the search is complete (all matches returned); anArray includes all results
 - (void)search:(BDSKSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
 @end
 
@@ -60,11 +64,58 @@
     id delegate;
 }
 
+/* 
+ * File content search classes:
+ *
+ * BDSKFileContentSearchController: owned by document, creates index/search and displays results
+ * BDSKSearchIndex: wrapper around SKIndexRef and worker thread
+ * BDSKSearch: wrapper around SKSearchRef
+ * BDSKSearchResult: returned by BDSKSearch to the BDSKFileContentSearchController 
+ *
+ */
+
+/*
+  
+ Search Kit is easy to use if you fully create the index, then search it (as we do with BibItem indexes).  Unfortunately, that's really slow for files, so we want to display results while indexing.  Search Kit gets in our way at a few points:  
+ 
+    - SKSearchRef is a one-shot object, and basically works with a snapshot of the index.  
+      Therefore, it needs to be recreated each time the index is updated, even if the 
+      search string doesn't change, or you don't get new results.
+ 
+    - SKSearchRef searches asynchronously, so SKSearchFindMatches needs to be called 
+      in a loop until all matches are found.
+ 
+    - There's no way to search incrementally, so each time you call SKSearchFindMatches 
+      you get all results found previously.
+ 
+    - Search scores need to be renormalized every time you call SKSearchFindMatches.
+  
+ BDSKFileContentSearchController creates/owns the BDSKSearchIndex, since the index needs a pointer to the document (initially) for notification registration and indexing.  BDSKFileContentSearchController creates/owns a single BDSKSearch and implements the BDSKSearchDelegate protocol to get updates from the BDSKSearch (what new items were found).  BDSKSearch creates and returns BDSKSearchResult objects to the controller for display.
+ 
+ BDSKSearchIndex is a wrapper around an SKIndexRef that handles document/pub changes on a worker thread.  BDSKSearch conforms to the BDSKSearchIndexDelegate protocol, which allows the BDSKSearch to keep updating as new files are indexed, until the search is canceled or the index is done updating.  
+ 
+  BDSKSearchResult is a simple container that wraps a search result (URL, title, icon, score) for display.  It implements -hash and -isEqual: so can be used in an NSSet; this was the primary reason it was written, since an NSSet was used to only add new results to the BDSKFileContentSearchController's NSArrayController in order to preserve selection.  At present, it's a simple container with accessors for type checking (vs. an NSMutableDictionary).
+ 
+ So this is how we get incremental updates during indexing: 
+ 
+  1) The BDSKSearchIndex informs BDSKSearch (its delegate) that new files have been added.  
+  2) BDSKSearch cancels its current SKSearchRef and creates a new one.  
+  3) BDSKSearch flushes the index and finds matches for the new SKSearchRef.
+  4) All results of the new search are then accumulated and sent to the controller (delegate).
+  5) Repeat 1--4 until indexing is complete
+ 
+ 
+ */
+
 - (id)initWithIndex:(BDSKSearchIndex *)anIndex delegate:(id <BDSKSearchDelegate>)aDelegate;
+
+// primary entry point for searching; starts the search, which will send delegate messages
 - (void)searchForString:(NSString *)aString withOptions:(SKSearchOptions)opts;
 
 - (void)setDelegate:(id <BDSKSearchDelegate>)aDelegate;
 - (id)delegate;
+
+// cancels the current search; shouldn't be any further update messages until another search is performed
 - (void)cancel;
 
 @end

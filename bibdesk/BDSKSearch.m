@@ -41,15 +41,20 @@
 #import "BDSKSearchResult.h"
 #import "BDSKSearchIndex.h"
 
+// Wrapper around a buffers to clean up the interface and avoid malloc/free every time
+// a search is performed.
+
+// We don't realloc buffers to a smaller size (which might happens as fewer results are returned).
+
 @interface BDSKSearchPrivateIvars : NSObject
 {
  @private
-    SKDocumentID *__ids;
-    float *__scores;
-    size_t __indexSize;
+    SKDocumentID *ids;
+    float *scores;
+    size_t indexSize;
     
-    SKDocumentRef *__docs;
-    size_t __resultSize;
+    SKDocumentRef *docs;
+    size_t resultSize;
 }
 
 - (SKDocumentID *)documentIDBuffer;
@@ -260,8 +265,6 @@
 
 @end
 
-// wrapper around a few pointers to clean up the interface
-// we don't realloc buffers to a smaller size (which might happens as fewer results are returned)
 
 @implementation BDSKSearchPrivateIvars
 
@@ -269,45 +272,45 @@
 {
     self = [super init];
     
-    __indexSize = 0;
-    __ids = NULL;
-    __scores = NULL;
+    indexSize = 0;
+    ids = NULL;
+    scores = NULL;
     
-    __resultSize = 0;
-    __docs = NULL;
+    resultSize = 0;
+    docs = NULL;
     
     return self;
 }
 
 - (void)dealloc
 {
-    if (__ids) NSZoneFree(NSZoneFromPointer(__ids), __ids);
-    if (__docs) NSZoneFree(NSZoneFromPointer(__docs), __docs);
-    if (__scores) NSZoneFree(NSZoneFromPointer(__scores), __scores);
+    if (ids) NSZoneFree(NSZoneFromPointer(ids), ids);
+    if (docs) NSZoneFree(NSZoneFromPointer(docs), docs);
+    if (scores) NSZoneFree(NSZoneFromPointer(scores), scores);
     [super dealloc];
 }
 
 - (BOOL)changeIndexSize:(size_t)size;
 {
-    if ((!__ids && !__scores) || __indexSize < size) {
-        __ids = (SKDocumentID *)NSZoneRealloc([self zone], __ids, size * sizeof(SKDocumentID));
-        __scores = (float *)NSZoneRealloc([self zone], __scores, size * sizeof(float));
-        __indexSize = size;
+    if ((!ids && !scores) || indexSize < size) {
+        ids = (SKDocumentID *)NSZoneRealloc([self zone], ids, size * sizeof(SKDocumentID));
+        scores = (float *)NSZoneRealloc([self zone], scores, size * sizeof(float));
+        indexSize = size;
     } 
-    return NULL != __scores && NULL != __ids;
+    return NULL != scores && NULL != ids;
 }
 
 - (BOOL)changeResultSize:(size_t)size;
 {
-    if (!__docs || __resultSize < size) {
-        __docs = (SKDocumentRef *)NSZoneRealloc([self zone], __docs, size * sizeof(SKDocumentRef));
-        __resultSize = size;
+    if (!docs || resultSize < size) {
+        docs = (SKDocumentRef *)NSZoneRealloc([self zone], docs, size * sizeof(SKDocumentRef));
+        resultSize = size;
     }
-    return NULL != __docs;
+    return NULL != docs;
 }
 
-- (SKDocumentID *)documentIDBuffer { return __ids; }
-- (float *)scoreBuffer { return __scores; }
-- (SKDocumentRef *)documentRefBuffer { return __docs; }
+- (SKDocumentID *)documentIDBuffer { return ids; }
+- (float *)scoreBuffer { return scores; }
+- (SKDocumentRef *)documentRefBuffer { return docs; }
 
 @end
