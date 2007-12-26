@@ -1263,7 +1263,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     FVIcon *anIcon = [_leftArrow representedObject];
     [anIcon showPreviousPage];
     [self _updateButtonsForIcon:anIcon];
-    [self setNeedsDisplay:YES];
+    NSUInteger r, c;
+    // should always succeed
+    if ([self _getGridRow:&r column:&c atPoint:_leftArrowFrame.origin])
+        [self setNeedsDisplayInRect:[self _rectOfIconInRow:r column:c]];
 }
 
 - (void)rightArrowAction:(id)sender
@@ -1271,7 +1274,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     FVIcon *anIcon = [_rightArrow representedObject];
     [anIcon showNextPage];
     [self _updateButtonsForIcon:anIcon];
-    [self setNeedsDisplay:YES];
+    NSUInteger r, c;
+    // should always succeed
+    if ([self _getGridRow:&r column:&c atPoint:_rightArrowFrame.origin])
+        [self setNeedsDisplayInRect:[self _rectOfIconInRow:r column:c]];
 }
 
 - (BOOL)_hasArrows {
