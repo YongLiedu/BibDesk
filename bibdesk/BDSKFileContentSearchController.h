@@ -77,7 +77,7 @@
 {
     NSMutableArray *results;
     NSMutableArray *filteredResults;
-    NSMutableArray *filterURLs;
+    NSMutableSet *filterURLs;
     BDSKSearch *search;
     BDSKSearchIndex *searchIndex;
         
@@ -107,8 +107,8 @@
 - (void)setResults:(NSArray *)newResults;
 - (NSArray *)filteredResults;
 - (void)setFilteredResults:(NSArray *)newFilteredResults;
-- (NSArray *)filterURLs;
-- (void)setFilterURLs:(NSArray *)newFilterURLs;
+
+- (void)filterUsingURLs:(NSArray *)newFilterURLs;
 
 - (NSData *)sortDescriptorData;
 - (void)setSortDescriptorData:(NSData *)data;

@@ -315,18 +315,11 @@
     return filteredResults;
 }
 
-- (void)setFilterURLs:(NSArray *)newFilterURLs;
+- (void)filterUsingURLs:(NSArray *)newFilterURLs;
 {
-    if(newFilterURLs != filterURLs){
-        [filterURLs release];
-        filterURLs = [newFilterURLs mutableCopy];
-        [self updateFilteredResults];
-    }
-}
-
-- (NSArray *)filterURLs
-{
-    return filterURLs;
+    [filterURLs release];
+    filterURLs = newFilterURLs == nil ? nil : [[NSSet alloc] initWithArray:newFilterURLs];
+    [self updateFilteredResults];
 }
 
 - (NSData *)sortDescriptorData
