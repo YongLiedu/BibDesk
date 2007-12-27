@@ -73,6 +73,9 @@
 
 @class BDSKSearch;
 
+@interface BDSKSelectionPreservingArrayController : NSArrayController
+@end
+
 @interface BDSKFileContentSearchController : NSWindowController <BDSKSearchDelegate>
 {
     NSMutableArray *results;
@@ -81,7 +84,7 @@
     BDSKSearch *search;
     BDSKSearchIndex *searchIndex;
         
-    IBOutlet NSArrayController *resultsArrayController;
+    IBOutlet BDSKSelectionPreservingArrayController *resultsArrayController;
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *stopButton;
     IBOutlet NSView *progressView;

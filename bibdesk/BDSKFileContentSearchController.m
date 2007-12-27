@@ -429,3 +429,30 @@
 }
 
 @end
+
+// The array controller is set to preserve selection, but it seems to work based on pointer equality or else isn't implemented for setContent:.  Consequently, each time setContent: is called (via setResults:), the selection changes randomly.  Here we explicitly preserve selection based on isEqual:, which is implemented correctly for the BDSKSearchResults.  This is generally pretty fast, since the number of selected objects is typically small.
+
+@implementation BDSKSelectionPreservingArrayController
+
+- (void)setContent:(id)object
+{
+    NSArray *previouslySelectedObjects = [[NSArray alloc] initWithArray:[self selectedObjects] copyItems:NO];
+    [super setContent:object];
+    
+    unsigned cnt = [previouslySelectedObjects count];
+    NSArray *arrangedObjects = [self arrangedObjects];
+    NSMutableIndexSet *indexesToSelect = [NSMutableIndexSet indexSet];
+    while (cnt--) {
+        id oldObject = [previouslySelectedObjects objectAtIndex:cnt];
+        unsigned i = [arrangedObjects indexOfObject:oldObject];
+        if (NSNotFound != i)
+            [indexesToSelect addIndex:i];
+    }
+    if ([indexesToSelect count])
+        [self setSelectionIndexes:indexesToSelect];
+    [previouslySelectedObjects release];
+}
+
+@end
+
+
