@@ -61,9 +61,10 @@
         
         if (nil == theTitle)
             theTitle = [theURL path];
-        [theURL release];
 
         string = [theTitle copy];
+        [theURL release];
+
         attributedString = [[NSAttributedString alloc] initWithTeXString:string attributes:nil collapseWhitespace:NO];
         
         identifierURL = [[theItem valueForKey:@"identifierURL"] copy];
