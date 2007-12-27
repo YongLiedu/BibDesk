@@ -76,6 +76,8 @@
 @interface BDSKFileContentSearchController : NSWindowController <BDSKSearchDelegate>
 {
     NSMutableArray *results;
+    NSMutableArray *filteredResults;
+    NSMutableArray *filterURLs;
     BDSKSearch *search;
     BDSKSearchIndex *searchIndex;
         
@@ -101,7 +103,12 @@
 // Use this to connect a search field and initiate a search
 - (void)setSearchField:(NSSearchField *)aSearchField;
 
+- (NSArray *)results;
 - (void)setResults:(NSArray *)newResults;
+- (NSArray *)filteredResults;
+- (void)setFilteredResults:(NSArray *)newFilteredResults;
+- (NSArray *)filterURLs;
+- (void)setFilterURLs:(NSArray *)newFilterURLs;
 
 - (NSData *)sortDescriptorData;
 - (void)setSortDescriptorData:(NSData *)data;

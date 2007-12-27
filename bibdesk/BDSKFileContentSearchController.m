@@ -45,6 +45,7 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "BDSKSearch.h"
+#import "BDSKSearchResult.h"
 #import "BDSKLevelIndicatorCell.h"
 #import "BibDocument_Search.h"
 
@@ -70,7 +71,9 @@
     self = [super init];
     if(!self) return nil;
     
-    results = [[NSMutableArray alloc] initWithCapacity:10];
+    results = nil;
+    filteredResults = nil;
+    filterURLs = nil;
     
     canceledSearch = NO;
         
@@ -95,6 +98,8 @@
     [searchIndex release];
     [searchContentView release];
     [results release];
+    [filteredResults release];
+    [filterURLs release];
     [super dealloc];
 }
 
@@ -267,17 +272,57 @@
 #pragma mark -
 #pragma mark Accessors
 
+- (void)updateFilteredResults
+{
+    NSMutableArray *newFilteredResults = [NSMutableArray arrayWithCapacity:[results count]];
+    NSEnumerator *resultEnum = [results objectEnumerator];
+    BDSKSearchResult *result;
+    
+    while (result = [resultEnum nextObject])
+        if ([filterURLs containsObject:[result identifierURL]])
+            [newFilteredResults addObject:result];
+    [self setFilteredResults:newFilteredResults];
+}
+
 - (void)setResults:(NSArray *)newResults
 {
     if(newResults != results){
         [results release];
         results = [newResults mutableCopy];
+        [self updateFilteredResults];
     }
 }
 
-- (NSMutableArray *)results
+- (NSArray *)results
 {
     return results;
+}
+
+- (void)setFilteredResults:(NSArray *)newFilteredResults
+{
+    if(newFilteredResults != filteredResults){
+        [filteredResults release];
+        filteredResults = [newFilteredResults mutableCopy];
+    }
+}
+
+- (NSArray *)filteredResults
+{
+    return filteredResults;
+}
+
+- (void)setFilterURLs:(NSArray *)newFilterURLs;
+{
+    if(newFilterURLs != filterURLs){
+        [filterURLs release];
+        filterURLs = [newFilterURLs mutableCopy];
+        [self updateFilteredResults];
+    }
+}
+
+- (NSArray *)filterURLs
+{
+    return filterURLs;
 }
 
 - (NSData *)sortDescriptorData
