@@ -274,14 +274,18 @@
 
 - (void)updateFilteredResults
 {
-    NSMutableArray *newFilteredResults = [NSMutableArray arrayWithCapacity:[results count]];
-    NSEnumerator *resultEnum = [results objectEnumerator];
-    BDSKSearchResult *result;
-    
-    while (result = [resultEnum nextObject])
-        if ([filterURLs containsObject:[result identifierURL]])
-            [newFilteredResults addObject:result];
-    [self setFilteredResults:newFilteredResults];
+    if (filterURLs == nil) {
+        [self setFilteredResults:results];
+    } else {
+        NSMutableArray *newFilteredResults = [NSMutableArray arrayWithCapacity:[results count]];
+        NSEnumerator *resultEnum = [results objectEnumerator];
+        BDSKSearchResult *result;
+        
+        while (result = [resultEnum nextObject])
+            if ([filterURLs containsObject:[result identifierURL]])
+                [newFilteredResults addObject:result];
+        [self setFilteredResults:newFilteredResults];
+    }
 }
 
 - (void)setResults:(NSArray *)newResults
