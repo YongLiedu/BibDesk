@@ -62,6 +62,7 @@ typedef struct _BDSKSearchIndexFlags
     
     BDSKThreadSafeMutableArray *notificationQueue;
     NSMachPort *notificationPort;
+    NSThread *notificationThread;
     NSConditionLock *setupLock;
     BDSKSearchIndexFlags flags;
     double progressValue;

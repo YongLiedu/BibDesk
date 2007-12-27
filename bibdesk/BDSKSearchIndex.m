@@ -170,7 +170,7 @@
 
 - (void)indexFilesForItems:(NSArray *)items
 {
-    NSAssert2([NSThread inMainThread] == NO, @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
+    NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
     
     NSEnumerator *enumerator = [items objectEnumerator];
     id anObject = nil;
@@ -213,7 +213,7 @@
 
 - (void)buildIndexForItems:(NSArray *)items
 {    
-    NSAssert2([NSThread inMainThread] == NO, @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
+    NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
     
     OBPRECONDITION(items);
     [items retain];
@@ -227,7 +227,7 @@
 
 - (void)indexFilesForItem:(id)anItem
 {
-    OBASSERT([NSThread inMainThread] == NO);
+    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
     NSURL *url = nil;
     
     SKDocumentRef skDocument;
@@ -269,6 +269,9 @@
     
     [setupLock lockWhenCondition:INDEX_STARTUP];
     
+    // release at the end of this method, just before the thread exits
+    notificationThread = [[NSThread currentThread] retain];
+    
     notificationPort = [[NSMachPort alloc] init];
     [notificationPort setDelegate:self];
     [[NSRunLoop currentRunLoop] addPort:notificationPort forMode:NSDefaultRunLoopMode];
@@ -306,6 +309,8 @@
     @finally{
         // allow the top-level pool to catch this autorelease pool
         
+        [notificationThread release];
+        notificationThread = nil;
         [notificationPort invalidate];
     }
 }
@@ -320,7 +325,7 @@
 
 - (void)handleDocAddItemNotification:(NSNotification *)note
 {
-    OBASSERT([NSThread inMainThread] == NO);
+    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
 	NSArray *searchIndexInfo = [[note userInfo] valueForKey:@"searchIndexInfo"];
     OBPRECONDITION(searchIndexInfo);
@@ -331,7 +336,7 @@
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
 {
-    OBASSERT([NSThread inMainThread] == NO);
+    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
 	NSEnumerator *itemEnumerator = [[[note userInfo] valueForKey:@"searchIndexInfo"] objectEnumerator];
     id anItem;
@@ -380,7 +385,7 @@
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
 {
-    OBASSERT([NSThread inMainThread] == NO);
+    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
     // Reindex all the files; unless you have many (say a dozen or more) local files attached to the item, there won't be much savings vs. just adding the one that changed.
     [self indexFilesForItem:[note userInfo]];
