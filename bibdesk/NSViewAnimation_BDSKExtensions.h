@@ -38,6 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+extern NSTimeInterval BDSKDefaultAnimationTimeInterval;
 
 @interface NSViewAnimation (BDSKExtensions)
 + (void)animateWithViewAnimations:(NSArray *)viewAnimations;

@@ -55,6 +55,7 @@
 #import "BDSKCenterScaledImageCell.h"
 #import "BDSKLevelIndicatorCell.h"
 #import "BDSKImageFadeAnimation.h"
+#import "NSViewAnimation_BDSKExtensions.h"
 #import <QuartzCore/QuartzCore.h>
 
 @interface BDSKMainTableView (Private)

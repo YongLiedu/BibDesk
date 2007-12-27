@@ -50,8 +50,6 @@ while ( object = mjtNextObjectIMP ## object(mjtForeachEnumerator ## object, mjtN
 @interface NSString (BDSKStringConstants)
 @end
 
-extern NSTimeInterval BDSKDefaultAnimationTimeInterval;
-
 extern NSString *BDSKTeXBinPathKey;
 extern NSString *BDSKBibTeXBinPathKey;
 extern NSString *BDSKBTStyleKey;

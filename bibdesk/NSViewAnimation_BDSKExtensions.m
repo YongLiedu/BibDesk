@@ -38,8 +38,16 @@
 
 #import "NSViewAnimation_BDSKExtensions.h"
 
+NSTimeInterval BDSKDefaultAnimationTimeInterval = 0.15;
 
 @implementation NSViewAnimation (BDSKExtensions)
+
++ (void)didLoad
+{    
+    NSNumber *n = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKDefaultAnimationTimeInterval"];
+    if (nil != n)
+        BDSKDefaultAnimationTimeInterval = [n floatValue];
+}
 
 + (void)animateWithViewAnimations:(NSArray *)viewAnimations {
     NSViewAnimation *animation = [[NSViewAnimation alloc] initWithViewAnimations:viewAnimations];
