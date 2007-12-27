@@ -61,6 +61,7 @@
 #import "BDSKGroup.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKOwnerProtocol.h"
+#import "NSViewAnimation_BDSKExtensions.h"
 
 @implementation BibDocument (Search)
 
@@ -317,18 +318,11 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [mainBox addSubview:contentView];
     
     if (BDSKDefaultAnimationTimeInterval > 0.0) {
-        NSViewAnimation *animation;
         NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
         NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:contentView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
-
-        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
+        [NSViewAnimation animateWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]];
         [fadeOutDict release];
         [fadeInDict release];
-        
-        [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:BDSKDefaultAnimationTimeInterval];
-        [animation setAnimationCurve:NSAnimationEaseIn];
-        [animation startAnimation];
     }
     
     [[previewer progressOverlay] remove];
@@ -350,19 +344,11 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         [[previewer progressOverlay] overlayView:currentPreviewView];
     
     if (BDSKDefaultAnimationTimeInterval > 0.0) {
-        NSViewAnimation *animation;
         NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:view, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
         NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
-        
-        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
+        [NSViewAnimation animateWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]];
         [fadeOutDict release];
         [fadeInDict release];
-        
-        [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:BDSKDefaultAnimationTimeInterval];
-        [animation setAnimationCurve:NSAnimationEaseIn];
-        [animation setDelegate:self];
-        [animation startAnimation];
     }
     
     [[fileSearchController searchContentView] removeFromSuperview];

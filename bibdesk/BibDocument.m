@@ -122,6 +122,7 @@
 #import "BDSKLinkedFile.h"
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKFileMigrationController.h"
+#import "NSViewAnimation_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -3239,12 +3240,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     
     if (BDSKDefaultAnimationTimeInterval > 0.0) {
         NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
-        NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
-        
-        [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:BDSKDefaultAnimationTimeInterval];
-        [animation setAnimationCurve:NSAnimationEaseInOut];
-        [animation startAnimation];
+        [NSViewAnimation animateWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]];
     } else {
         [resizeView setFrame:endRect];
     }
@@ -3301,12 +3297,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     
     if (BDSKDefaultAnimationTimeInterval > 0.0) {
         NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
-        NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
-        
-        [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:BDSKDefaultAnimationTimeInterval];
-        [animation setAnimationCurve:NSAnimationEaseInOut];
-        [animation startAnimation];
+        [NSViewAnimation animateWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]];
     } else {
         [resizeView setFrame:endRect];
     }

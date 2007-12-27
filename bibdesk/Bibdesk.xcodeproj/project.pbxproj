@@ -198,6 +198,7 @@
 		CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3A0BD50B1634D500233208 /* BDSKCompletionServerProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CE424B120D0F5C6800F824E7 /* BDSKEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE424B0C0D0F5C6800F824E7 /* BDSKEditor.nib */; };
 		CE42A26A0A99BE2400C62D85 /* BDSKErrorEditWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE42A2680A99BE2400C62D85 /* BDSKErrorEditWindow.nib */; };
+		CE4376F70D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4376F50D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m */; };
 		CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */; };
 		CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE43865C0BB8274600A56987 /* SearchBookmarksWindow.nib */; };
 		CE4A7EFA0BAED4EC004AD07D /* BDSKBibliographyCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE9DBEDE093CF2640008648B /* BDSKBibliographyCommand.m */; };
@@ -1068,6 +1069,8 @@
 		CE424B0D0D0F5C6800F824E7 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKEditor.nib; sourceTree = "<group>"; };
 		CE424B130D0F5C9C00F824E7 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKEditor.nib; sourceTree = "<group>"; };
 		CE42A2690A99BE2400C62D85 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKErrorEditWindow.nib; sourceTree = "<group>"; };
+		CE4376F40D24341E00C993CF /* NSViewAnimation_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSViewAnimation_BDSKExtensions.h; sourceTree = "<group>"; };
+		CE4376F50D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSViewAnimation_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchBookmarkController.h; sourceTree = "<group>"; };
 		CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchBookmarkController.m; sourceTree = "<group>"; };
 		CE43865D0BB8274600A56987 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SearchBookmarksWindow.nib; sourceTree = "<group>"; };
@@ -2045,6 +2048,7 @@
 				CE969E320931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m */,
 				CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */,
 				F9022CA10758038000C3F701 /* NSTextView_BDSKExtensions.m */,
+				CE4376F50D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m */,
 				CE7EA95B0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.m */,
 				F97073AE0911592000526FC8 /* NSWorkspace_BDSKExtensions.m */,
 				CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */,
@@ -2639,6 +2643,7 @@
 				CE77A7FB0923BEBA0019D901 /* NSTableView_BDSKExtensions.h */,
 				F9022CA00758038000C3F701 /* NSTextView_BDSKExtensions.h */,
 				F97AF8ED09575E8B00D1F1B0 /* NSURL_BDSKExtensions.h */,
+				CE4376F40D24341E00C993CF /* NSViewAnimation_BDSKExtensions.h */,
 				CEFD45860BFFC1F80027B933 /* NSWindow+Scripting.h */,
 				CE7EA95A0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.h */,
 				F97073AD0911592000526FC8 /* NSWorkspace_BDSKExtensions.h */,
@@ -3790,6 +3795,7 @@
 				CE4241360D0EAE0B00F824E7 /* BDSKEditorTableView.m in Sources */,
 				CE4241450D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m in Sources */,
 				F9EF94E60D15FE7400314058 /* BDSKFileMigrationController.m in Sources */,
+				CE4376F70D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
