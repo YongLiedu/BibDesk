@@ -239,6 +239,11 @@ The groupedPublications array is a subset of the publications array, developed b
     
     if ([self hasExternalGroupsSelected]) {
         if ([self isDisplayingSearchButtons]) {
+            
+            // file content and skim notes search are not compatible with external groups
+            if ([BDSKFileContentSearchString isEqualToString:[searchButtonController selectedItemIdentifier]])
+                [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+            
             [searchButtonController removeSkimNotesItem];
             [searchButtonController removeFileContentItem];
         }
