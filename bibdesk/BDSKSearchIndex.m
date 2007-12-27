@@ -403,10 +403,10 @@
 {
     OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
-    // reindex all the files; unless you have many local files attached to the item, there won't be much savings vs. just adding the one that changed
+    // Reindex all the files; unless you have many (say a dozen or more) local files attached to the item, there won't be much savings vs. just adding the one that changed.
     [self indexFilesForItem:[note userInfo]];
     
-    // we used to remove the old object from the array, but it's a) not thread safe and b) having an extra document in the index isn't that bad
+    // @@ files are only added, not removed (unless the BibItem itself is deleted), so we can end up with some stale files in the index
     [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
 }    
 
