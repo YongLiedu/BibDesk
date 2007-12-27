@@ -48,6 +48,7 @@
     NSAttributedString *attributedString;
     NSImage *image;
     NSNumber *score;
+    NSURL *identifierURL;
 }
 
 // This class is designed to be used in a hashing container (NSSet, NSDictionary) when you want the isEqual: and hash to be based on file comparison
@@ -58,6 +59,7 @@
 - (NSString *)string;
 - (NSAttributedString *)attributedString;
 - (NSNumber *)score;
+- (NSURL *)identifierURL;
 - (NSURL *)URL;
 
 @end

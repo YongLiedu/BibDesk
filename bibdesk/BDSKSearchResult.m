@@ -56,7 +56,8 @@
         file = [[BDSKFile alloc] initWithURL:theURL];
 
         image = [[NSImage imageForURL:theURL] retain];
-        NSString *theTitle = [anIndex titleForURL:theURL];
+        NSDictionary *theItem = [anIndex itemInfoForURL:theURL];
+        NSString *theTitle = [theItem valueForKey:@"title"];
         
         if (nil == theTitle)
             theTitle = [theURL path];
@@ -64,6 +65,8 @@
 
         string = [theTitle copy];
         attributedString = [[NSAttributedString alloc] initWithTeXString:string attributes:nil collapseWhitespace:NO];
+        
+        identifierURL = [[theItem valueForKey:@"identifierURL"] copy];
         
         score = [[NSNumber alloc] initWithFloat:theScore];
     }
@@ -76,6 +79,7 @@
     [file release];
     [attributedString release];
     [string release];
+    [identifierURL release];
     [image release];
     [score release];
     [super dealloc];
@@ -87,6 +91,7 @@
     copy->file = [file copy];
     copy->string = [string copy];
     copy->attributedString = [attributedString copy];
+    copy->identifierURL = [identifierURL copy];
     copy->image = [image retain];
     copy->score = [score retain];
     return copy;
@@ -110,6 +115,7 @@
 - (NSImage *)image { return image; }
 - (NSString *)string { return string; }
 - (NSAttributedString *)attributedString { return attributedString; }
+- (NSURL *)identifierURL { return identifierURL; }
 - (NSNumber *)score { return score; }
 - (NSURL *)URL { return [file fileURL]; }
 

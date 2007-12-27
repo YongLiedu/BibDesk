@@ -152,9 +152,9 @@
     return searchContentView;
 }
 
-- (NSArray *)titlesOfSelectedItems
+- (NSArray *)identifierURLsOfSelectedItems
 {
-    return [[resultsArrayController selectedObjects] valueForKey:@"string"];
+    return [[resultsArrayController selectedObjects] valueForKey:@"identifierURL"];
 }
 
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note

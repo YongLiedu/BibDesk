@@ -86,8 +86,8 @@
         flags.isIndexing = 0;
         flags.shouldKeepRunning = 1;
         
-        // maintain a dictionary mapping URL -> item titles, since SKIndex properties are slow
-        titles = [[NSMutableDictionary alloc] initWithCapacity:128];
+        // maintain dictionaries mapping URL -> itemInfos, since SKIndex properties are slow
+        itemInfos = [[NSMutableDictionary alloc] initWithCapacity:128];
         
         progressValue = 0.0;
         
@@ -112,7 +112,7 @@
 {
     [notificationPort release];
     [notificationQueue release];
-    [titles release];
+    [itemInfos release];
     if(index) CFRelease(index);
     [super dealloc];
 }
@@ -146,13 +146,13 @@
     delegate = anObject;
 }
 
-- (NSString *)titleForURL:(NSURL *)theURL
+- (NSDictionary *)itemInfoForURL:(NSURL *)theURL
 {
-    NSString *theTitle = nil;
-    @synchronized(titles) {
-        theTitle = [[titles objectForKey:theURL] retain];
+    NSDictionary *itemInfo = nil;
+    @synchronized(itemInfos) {
+        itemInfo = [[itemInfos objectForKey:theURL] retain];
     }
-    return [theTitle autorelease];
+    return [itemInfo autorelease];
 }
 
 - (double)progressValue
@@ -248,8 +248,8 @@
         
         // SKIndexSetProperties is more generally useful, but is really slow when creating the index
         // SKIndexRenameDocument changes the URL, so it's not useful
-        @synchronized(titles) {
-            [titles setObject:[anItem valueForKey:@"title"] forKey:url];
+        @synchronized(itemInfos) {
+            [itemInfos setObject:anItem forKey:url];
         }
         
         success = SKIndexAddDocument(index, skDocument, NULL, TRUE);
@@ -358,8 +358,8 @@
 			
 			url = [urls objectAtIndex:idx];
             
-            @synchronized(titles) {
-                [titles removeObjectForKey:url];
+            @synchronized(itemInfos) {
+                [itemInfos removeObjectForKey:url];
             }
 			
 			skDocument = SKDocumentCreateWithURL((CFURLRef)url);

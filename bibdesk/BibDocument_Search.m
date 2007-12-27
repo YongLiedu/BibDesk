@@ -376,20 +376,21 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         [self hideSearchButtonView];
         
         // have to hide the search view before trying to select anything
-        NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
-
-        if([titlesToSelect count]){
+        NSArray *itemsToSelect = [fileSearchController identifierURLsOfSelectedItems];
+        
+        if([itemsToSelect count]){
             
             // clear current selection (just in case)
             [tableView deselectAll:nil];
             
             // we match based on title, since that's all the index knows about the BibItem at present
             NSMutableArray *pubsToSelect = [NSMutableArray array];
-            NSEnumerator *pubEnum = [shownPublications objectEnumerator];
-            BibItem *item;
-            while(item = [pubEnum nextObject])
-                if([titlesToSelect containsObject:[item displayTitle]]) 
-                    [pubsToSelect addObject:item];
+            NSEnumerator *itemEnum = [itemsToSelect objectEnumerator];
+            NSURL *aURL;
+            BibItem *pub;
+            while(aURL = [itemEnum nextObject])
+                if (pub = [publications itemForIdentifierURL:aURL])
+                    [pubsToSelect addObject:pub];
             [self selectPublications:pubsToSelect];
             [tableView scrollRowToCenter:[tableView selectedRow]];
             

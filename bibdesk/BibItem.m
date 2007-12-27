@@ -1437,7 +1437,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             [urls addObject:aURL];
     }
     
-    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self citeKey], @"citeKey", [self displayTitle], @"title", urls, @"urls", nil];
+    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self citeKey], @"citeKey", [self displayTitle], @"title", [self identifierURL], @"identifierURL", urls, @"urls", nil];
     [urls release];
     return info;
 }
