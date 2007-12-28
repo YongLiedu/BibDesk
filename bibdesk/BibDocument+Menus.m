@@ -437,7 +437,7 @@
         return NO;
 	}
     id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView) {
+	if (firstResponder == tableView || firstResponder == [fileSearchController tableView]) {
 		return [self validateEditSelectionMenuItem:menuItem];
 	} else if (firstResponder == groupTableView) {
 		return [self validateEditGroupMenuItem:menuItem];

@@ -101,6 +101,7 @@
 - (id)initForDocument:(id)aDocument;
 // This returns the search content view, suitable for placement inside a document window
 - (NSView *)searchContentView;
+- (NSTableView *)tableView;
 // Use this to connect a search field and initiate a search
 - (void)setSearchField:(NSSearchField *)aSearchField;
 

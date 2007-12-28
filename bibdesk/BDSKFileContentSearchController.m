@@ -158,6 +158,13 @@
     return searchContentView;
 }
 
+- (NSTableView *)tableView
+{
+    if(tableView == nil)
+        [self window]; // this forces a load of the nib
+    return tableView;
+}
+
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note
 {
     // work around for bug where corner view doesn't get redrawn after scrollers hide
