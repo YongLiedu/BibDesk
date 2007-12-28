@@ -44,6 +44,12 @@
 
 @implementation BDSKSearchResult
 
++ (void)initialize
+{
+    OBINITIALIZE;
+    [self setKeys:[NSArray arrayWithObject:@"primitiveScore"] triggerChangeNotificationsForDependentKey:@"score"];
+}
+
 - (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)theScore;
 {
     
@@ -69,7 +75,7 @@
         
         identifierURL = [[theItem valueForKey:@"identifierURL"] copy];
         
-        score = [[NSNumber alloc] initWithFloat:theScore];
+        score = theScore;
     }
     
     return self;
@@ -82,7 +88,6 @@
     [string release];
     [identifierURL release];
     [image release];
-    [score release];
     [super dealloc];
 }
 
@@ -94,7 +99,7 @@
     copy->attributedString = [attributedString copy];
     copy->identifierURL = [identifierURL copy];
     copy->image = [image retain];
-    copy->score = [score retain];
+    copy->score = score;
     return copy;
 }
 
@@ -108,17 +113,22 @@
     return [file hash];
 }
 
-- (BOOL)isEqual:(BDSKSearchResult *)anObject
+- (BOOL)isEqual:(id)anObject
 {
-    return [anObject isKindOfClass:isa] ? [anObject->file isEqual:file] : NO;
+    return [anObject isKindOfClass:[self class]] ? [((BDSKSearchResult *)anObject)->file isEqual:file] : NO;
 }
 
 - (NSImage *)image { return image; }
 - (NSString *)string { return string; }
 - (NSAttributedString *)attributedString { return attributedString; }
 - (NSURL *)identifierURL { return identifierURL; }
-- (NSNumber *)score { return score; }
+- (NSNumber *)score { return [NSNumber numberWithDouble:score]; }
+- (void)setScore:(NSNumber *)value { [self setPrimitiveScore:[value doubleValue]]; }
 - (NSURL *)URL { return [file fileURL]; }
+
+// used in computations; NSNumber is returned for display
+- (void)setPrimitiveScore:(double)newScore { score = newScore; }
+- (double)primitiveScore { return score; }
 
 @end
 

@@ -242,11 +242,9 @@
     BDSKSearchResult *result;
     
     while (result = [resultEnumerator nextObject]) {
-        double score = [[result valueForKey:@"score"] doubleValue];
-        score = score / maxValue * 5;
-        NSNumber *normalizedScore = [[NSNumber alloc] initWithDouble:score];
-        [result setValue:normalizedScore forKey:@"score"];
-        [normalizedScore release];
+        double score = [result primitiveScore];
+        double normalizedScore = score / maxValue * 5;
+        [result setPrimitiveScore:normalizedScore];
     }
 }
 

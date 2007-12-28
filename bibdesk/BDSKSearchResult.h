@@ -47,7 +47,7 @@
     NSString *string;
     NSAttributedString *attributedString;
     NSImage *image;
-    NSNumber *score;
+    double score;
     NSURL *identifierURL;
 }
 
@@ -58,6 +58,8 @@
 - (NSImage *)image;
 - (NSString *)string;
 - (NSAttributedString *)attributedString;
+- (void)setPrimitiveScore:(double)newScore;
+- (double)primitiveScore;
 - (NSNumber *)score;
 - (NSURL *)identifierURL;
 - (NSURL *)URL;
