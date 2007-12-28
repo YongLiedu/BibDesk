@@ -413,7 +413,7 @@
 
 - (void)editAction:(id)sender {
 	id firstResponder = [documentWindow firstResponder];
-    if (firstResponder == tableView || firstResponder == [fileSearchController tableView]) {
+    if (firstResponder == tableView || firstResponder == [fileSearchController tableView])
 		[self editPubCmd:sender];
 	else if (firstResponder == groupTableView)
 		[self editGroupAction:sender];
