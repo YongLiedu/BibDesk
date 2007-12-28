@@ -37,7 +37,6 @@
  */
 
 #import "BDSKSearchResult.h"
-#import "NSAttributedString_BDSKExtensions.h"
 #import "BDSKSearchIndex.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKFile.h"
@@ -64,8 +63,6 @@
 
         string = [theTitle copy];
         [theURL release];
-
-        attributedString = [[NSAttributedString alloc] initWithTeXString:string attributes:nil collapseWhitespace:NO];
         
         identifierURL = [[theItem valueForKey:@"identifierURL"] copy];
         
@@ -78,7 +75,6 @@
 - (void)dealloc
 {
     [file release];
-    [attributedString release];
     [string release];
     [identifierURL release];
     [image release];
@@ -90,7 +86,6 @@
     BDSKSearchResult *copy = [[[self class] allocWithZone:zone] init];
     copy->file = [file copy];
     copy->string = [string copy];
-    copy->attributedString = [attributedString copy];
     copy->identifierURL = [identifierURL copy];
     copy->image = [image retain];
     copy->score = score;
@@ -114,7 +109,6 @@
 
 - (NSImage *)image { return image; }
 - (NSString *)string { return string; }
-- (NSAttributedString *)attributedString { return attributedString; }
 - (NSURL *)identifierURL { return identifierURL; }
 - (NSURL *)URL { return [file fileURL]; }
 - (void)setScore:(double)newScore { score = newScore; }

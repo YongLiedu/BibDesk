@@ -50,20 +50,6 @@
 #import "BibDocument_Search.h"
 #import "NSArray_BDSKExtensions.h"
 
-// Overrides attributedStringValue since we return an attributed string; normally, the cell uses the font of the attributed string, rather than the table's font, so font changes are ignored.  This means that italics and bold in titles will be lost until the search string changes again, but that's not a great loss.
-@interface BDSKFileContentTextWithIconCell : BDSKTextWithIconCell
-@end
-
-@implementation BDSKFileContentTextWithIconCell
-
-- (NSAttributedString *)attributedStringValue
-{
-    NSMutableAttributedString *value = [[super attributedStringValue] mutableCopy];
-    [value addAttribute:NSFontAttributeName value:[self font] range:NSMakeRange(0, [value length])];
-    return [value autorelease];
-}
-
-@end
 
 @implementation BDSKFileContentSearchController
 
@@ -109,19 +95,12 @@
     [tableView setTarget:self];
     [tableView setDoubleAction:@selector(tableAction:)];
     
-    BDSKLevelIndicatorCell *cell = [[BDSKLevelIndicatorCell alloc] initWithLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle];
+    BDSKLevelIndicatorCell *cell = [[tableView tableColumnWithIdentifier:@"score"] dataCell];
     [cell setEnabled:NO]; // this is required to make it non-editable
     [cell setMaxHeight:17.0 * 0.7];
-    [cell setMaxValue:5.0];
-    [[tableView tableColumnWithIdentifier:@"score"] setDataCell:cell];
-    [cell release];
     
     // set up the image/text cell combination
-    BDSKTextWithIconCell *textCell = [[BDSKFileContentTextWithIconCell alloc] init];
-    [textCell setControlSize:[cell controlSize]];
-    [textCell setDrawsHighlight:NO];
-    [[tableView tableColumnWithIdentifier:@"name"] setDataCell:textCell];
-    [textCell release];
+    [(BDSKTextWithIconCell *)[[tableView tableColumnWithIdentifier:@"title"] dataCell] setDrawsHighlight:NO];
     
     OBPRECONDITION([[tableView enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -441,6 +420,10 @@
 - (void)tableViewSelectionDidChange:(NSNotification *)notification {
     if ([[self document] respondsToSelector:_cmd])
         [[self document] tableViewSelectionDidChange:notification];
+}
+
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation {
+    return [[NSFileManager defaultManager] displayNameAtPath:[[[[resultsArrayController arrangedObjects] objectAtIndex:row] URL] path]];
 }
 
 - (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {

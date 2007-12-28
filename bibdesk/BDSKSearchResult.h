@@ -45,7 +45,6 @@
     BDSKFile *file;
     // title of the search result (shown in table)
     NSString *string;
-    NSAttributedString *attributedString;
     NSImage *image;
     double score;
     NSURL *identifierURL;
@@ -57,7 +56,6 @@
 // used by the table cell
 - (NSImage *)image;
 - (NSString *)string;
-- (NSAttributedString *)attributedString;
 - (void)setScore:(double)newScore;
 - (double)score;
 - (NSURL *)identifierURL;
