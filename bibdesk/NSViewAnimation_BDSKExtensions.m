@@ -59,4 +59,23 @@ NSTimeInterval BDSKDefaultAnimationTimeInterval = 0.15;
     [animation release];
 }
 
++ (void)animateResizeView:(NSView *)aView toRect:(NSRect)aRect {
+    if (BDSKDefaultAnimationTimeInterval > 0.0) {
+        NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:aView, NSViewAnimationTargetKey, [NSValue valueWithRect:aRect], NSViewAnimationEndFrameKey, nil];
+        [self animateWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]];
+    } else {
+        [aView setFrame:aRect];
+    }
+}
+
++ (void)animateFadeOutView:(NSView *)fadeOutView fadeInView:(NSView *)fadeInView {
+    if (BDSKDefaultAnimationTimeInterval > 0.0) {
+        NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:fadeOutView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
+        NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:fadeInView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
+        [self animateWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]];
+        [fadeOutDict release];
+        [fadeInDict release];
+    }
+}
+
 @end

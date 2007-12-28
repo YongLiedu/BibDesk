@@ -317,13 +317,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [contentView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [mainBox addSubview:contentView];
     
-    if (BDSKDefaultAnimationTimeInterval > 0.0) {
-        NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
-        NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:contentView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
-        [NSViewAnimation animateWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]];
-        [fadeOutDict release];
-        [fadeInDict release];
-    }
+    [NSViewAnimation animateFadeOutView:splitView fadeInView:contentView];
     
     [[previewer progressOverlay] remove];
     
@@ -343,13 +337,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     if([currentPreviewView isEqual:previewerBox] || [currentPreviewView isEqual:[[previewer textView] enclosingScrollView]])
         [[previewer progressOverlay] overlayView:currentPreviewView];
     
-    if (BDSKDefaultAnimationTimeInterval > 0.0) {
-        NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:view, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
-        NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
-        [NSViewAnimation animateWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]];
-        [fadeOutDict release];
-        [fadeInDict release];
-    }
+    [NSViewAnimation animateFadeOutView:view fadeInView:splitView];
     
     [[fileSearchController searchContentView] removeFromSuperview];
     

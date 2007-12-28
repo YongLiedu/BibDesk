@@ -3238,12 +3238,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     [resizeView addSubview:controlView];
     [views release];
     
-    if (BDSKDefaultAnimationTimeInterval > 0.0) {
-        NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
-        [NSViewAnimation animateWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]];
-    } else {
-        [resizeView setFrame:endRect];
-    }
+    [NSViewAnimation animateResizeView:resizeView toRect:endRect];
     
     views = [[resizeView subviews] copy];
     viewEnum = [views objectEnumerator];
@@ -3295,12 +3290,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     [resizeView addSubview:controlView];
     [views release];
     
-    if (BDSKDefaultAnimationTimeInterval > 0.0) {
-        NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
-        [NSViewAnimation animateWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]];
-    } else {
-        [resizeView setFrame:endRect];
-    }
+    [NSViewAnimation animateResizeView:resizeView toRect:endRect];
     
     [controlView removeFromSuperview];
     views = [[resizeView subviews] copy];

@@ -42,4 +42,6 @@ extern NSTimeInterval BDSKDefaultAnimationTimeInterval;
 
 @interface NSViewAnimation (BDSKExtensions)
 + (void)animateWithViewAnimations:(NSArray *)viewAnimations;
++ (void)animateResizeView:(NSView *)aView toRect:(NSRect)aRect;
++ (void)animateFadeOutView:(NSView *)fadeOutView fadeInView:(NSView *)fadeInView;
 @end
