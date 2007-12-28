@@ -103,6 +103,18 @@
 - (NSColor *)textColor;
 {
     NSColor *color = nil;
+    
+    // this allows the expansion tooltips on 10.5 to draw with the correct color
+#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+    // on 10.5, we can just check background style instead of messing around with flags and checking the highlight color, which accounts for much of the code in this class
+#warning 10.5 fixme
+#endif
+    if ([self respondsToSelector:@selector(backgroundStyle)]) {
+        NSBackgroundStyle style = [self backgroundStyle];
+        if (NSBackgroundStyleLight == style)
+            return (!_oaFlags.drawsHighlight && _cFlags.highlighted) ? [NSColor textBackgroundColor] : [NSColor blackColor];
+    }
+        
     if (_oaFlags.settingUpFieldEditor)
         color = [NSColor blackColor];
     else if (!_oaFlags.drawsHighlight && _cFlags.highlighted)
@@ -193,6 +205,24 @@ textRect.origin.y += vOffset; \
     else
         [[self icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 	[NSGraphicsContext restoreGraphicsState];
+}
+
+// default rect on 10.5 is very wide, and it shows the expansion tooltip even for cells that aren't truncated
+- (NSRect)expansionFrameWithFrame:(NSRect)aRect inView:(NSView *)controlView
+{
+    _calculateDrawingRectsAndSizes;
+    
+    NSDivideRect(textRect, &ignored, &textRect, SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
+    textRect = NSInsetRect(textRect, 1.0f, 0.0);
+    
+    NSAttributedString *label = [self attributedStringValue];
+    NSRect expansionRect = [super expansionFrameWithFrame:aRect inView:controlView];
+    // if it all fits in the textRect, we don't need the expansion tooltip
+    if ([label size].width <= NSWidth(textRect))
+        expansionRect = NSZeroRect;
+    else
+        expansionRect.size.width = [label size].width;
+    return expansionRect;
 }
 
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)flag;

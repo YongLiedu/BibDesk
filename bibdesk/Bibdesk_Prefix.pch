@@ -69,6 +69,7 @@ typedef NSInteger NSBackgroundStyle;
 - (NSBackgroundStyle)backgroundStyle;
 - (NSBackgroundStyle)interiorBackgroundStyle;
 - (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView;
+- (NSRect)expansionFrameWithFrame:(NSRect)aRect inView:(NSView *)controlView;
 @end
 
 #import <WebKit/WebKit.h>
