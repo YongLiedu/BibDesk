@@ -101,10 +101,11 @@
 - (id)initForDocument:(id)aDocument;
 // This returns the search content view, suitable for placement inside a document window
 - (NSView *)searchContentView;
-// This method returns the titles of all selected items (the text content of the rows)
-- (NSArray *)identifierURLsOfSelectedItems;
 // Use this to connect a search field and initiate a search
 - (void)setSearchField:(NSSearchField *)aSearchField;
+
+- (NSArray *)identifierURLsOfSelectedItems;
+- (NSArray *)URLsOfSelectedItems;
 
 - (NSArray *)results;
 - (void)setResults:(NSArray *)newResults;

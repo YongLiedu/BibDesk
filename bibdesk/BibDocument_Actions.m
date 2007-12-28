@@ -394,7 +394,21 @@
 }
 
 - (IBAction)editPubCmd:(id)sender{
-    [self editPublications:[self selectedPublications]];
+    NSArray *pubs = nil;
+    if ([self isDisplayingFileContentSearch]) {
+        NSMutableArray *tmpArray = [NSMutableArray array];
+        NSEnumerator *itemEnum = [[fileSearchController identifierURLsOfSelectedItems] objectEnumerator];
+        NSURL *idURL;
+        BibItem *pub;
+        while (idURL = [itemEnum nextObject]) {
+            if (pub = [publications itemForIdentifierURL:idURL])
+                [tmpArray addObject:pub];
+        }
+        pubs = tmpArray;
+    } else {
+        pubs = [self selectedPublications];
+    }
+    [self editPublications:pubs];
 }
 
 - (void)editAction:(id)sender {
@@ -780,6 +794,8 @@
         
         if (fileURL)
             urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        else if ([self isDisplayingFileContentSearch])
+            urlEnum = [[fileSearchController URLsOfSelectedItems] objectEnumerator];
         else
             urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
         
@@ -803,7 +819,11 @@
     if (fileURL) {
         [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
     } else {
-        int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
+        int n = 0;
+        if ([self isDisplayingFileContentSearch])
+            n = [[fileSearchController URLsOfSelectedItems] count];
+        else
+            n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
         
         if (n > 6) {
             // Do we really want a gazillion of files open?
@@ -829,6 +849,8 @@
         
         if (fileURL)
             urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        else if ([self isDisplayingFileContentSearch])
+            urlEnum = [[fileSearchController URLsOfSelectedItems] objectEnumerator];
         else
             urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
         
@@ -845,7 +867,11 @@
     if (fileURL) {
         [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
     } else {
-        int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
+        int n = 0;
+        if ([self isDisplayingFileContentSearch])
+            n = [[fileSearchController URLsOfSelectedItems] count];
+        else
+            n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
         
         if (n > 6) {
             // Do we really want a gazillion of Finder windows?
@@ -914,8 +940,11 @@
         
         if (fileURL)
             urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        else if ([self isDisplayingFileContentSearch])
+            urlEnum = [[fileSearchController URLsOfSelectedItems] objectEnumerator];
         else
             urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
+        
         while (fileURL = [urlEnum nextObject]) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
                 notesController = [[[BDSKNotesWindowController alloc] initWithURL:fileURL] autorelease];
@@ -931,7 +960,11 @@
     if (fileURL) {
         [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
     } else {
-        int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
+        int n = 0;
+        if ([self isDisplayingFileContentSearch])
+            n = [[fileSearchController URLsOfSelectedItems] count];
+        else
+            n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
         
         if (n > 6) {
             // Do we really want a gazillion of files open?
@@ -958,6 +991,8 @@
     
     if (fileURL)
         urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+    else if ([self isDisplayingFileContentSearch])
+        urlEnum = [[fileSearchController URLsOfSelectedItems] objectEnumerator];
     else
         urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
     

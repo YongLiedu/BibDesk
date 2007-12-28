@@ -48,6 +48,7 @@
 #import "BDSKSearchResult.h"
 #import "BDSKLevelIndicatorCell.h"
 #import "BibDocument_Search.h"
+#import "NSArray_BDSKExtensions.h"
 
 // Overrides attributedStringValue since we return an attributed string; normally, the cell uses the font of the attributed string, rather than the table's font, so font changes are ignored.  This means that italics and bold in titles will be lost until the search string changes again, but that's not a great loss.
 @interface BDSKFileContentTextWithIconCell : BDSKTextWithIconCell
@@ -155,11 +156,6 @@
     if(searchContentView == nil)
         [self window]; // this forces a load of the nib
     return searchContentView;
-}
-
-- (NSArray *)identifierURLsOfSelectedItems
-{
-    return [[resultsArrayController selectedObjects] valueForKey:@"identifierURL"];
 }
 
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note
@@ -343,6 +339,17 @@
             [sortDescriptors removeObjectAtIndex:i];
     }
     [resultsArrayController setSortDescriptors:sortDescriptors];
+}
+
+- (NSArray *)identifierURLsOfSelectedItems
+{
+    NSMutableArray *array = [NSMutableArray array];
+    [array addNonDuplicateObjectsFromArray:[[resultsArrayController selectedObjects] valueForKey:@"identifierURL"]];
+    return array;
+}
+
+- (NSArray *)URLsOfSelectedItems {
+    return [[resultsArrayController selectedObjects] valueForKey:@"URL"];
 }
 
 #pragma mark -

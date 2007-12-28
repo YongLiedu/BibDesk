@@ -123,7 +123,10 @@
 }
 
 - (BOOL) validateEditSelectionMenuItem:(NSMenuItem*) menuItem {
-    return [self numberOfSelectedPubs] > 0;
+    if ([self isDisplayingFileContentSearch])
+        return [[fileSearchController identifierURLsOfSelectedItems] count] > 0;
+    else
+        return [self numberOfSelectedPubs] > 0;
 }
 
 - (BOOL) validateDeleteSelectionMenuItem:(NSMenuItem*) menuItem {
@@ -235,11 +238,21 @@
 }	
 
 - (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    return [menuItem representedObject] != nil || [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
+    if ([menuItem representedObject])
+        return YES;
+    else if ([self isDisplayingFileContentSearch])
+        return [[fileSearchController URLsOfSelectedItems] count] > 0;
+    else
+        return [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
 }	
 
 - (BOOL) validateRevealLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    return [menuItem representedObject] != nil || [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
+    if ([menuItem representedObject])
+        return YES;
+    else if ([self isDisplayingFileContentSearch])
+        return [[fileSearchController URLsOfSelectedItems] count] > 0;
+    else
+        return [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
 }	
 
 - (BOOL) validateOpenLinkedURLMenuItem:(NSMenuItem*) menuItem {
@@ -247,11 +260,21 @@
 }	
 
 - (BOOL) validateShowNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    return [menuItem representedObject] != nil || [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
+    if ([menuItem representedObject])
+        return YES;
+    else if ([self isDisplayingFileContentSearch])
+        return [[fileSearchController URLsOfSelectedItems] count] > 0;
+    else
+        return [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
 }	
 
 - (BOOL) validateCopyNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    return [menuItem representedObject] != nil || [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
+    if ([menuItem representedObject])
+        return YES;
+    else if ([self isDisplayingFileContentSearch])
+        return [[fileSearchController URLsOfSelectedItems] count] > 0;
+    else
+        return [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
 }	
 
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
