@@ -242,9 +242,9 @@
     BDSKSearchResult *result;
     
     while (result = [resultEnumerator nextObject]) {
-        double score = [result primitiveScore];
+        double score = [result score];
         double normalizedScore = score / maxValue * 5;
-        [result setPrimitiveScore:normalizedScore];
+        [result setScore:normalizedScore];
     }
 }
 

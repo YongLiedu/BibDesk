@@ -58,9 +58,8 @@
 - (NSImage *)image;
 - (NSString *)string;
 - (NSAttributedString *)attributedString;
-- (void)setPrimitiveScore:(double)newScore;
-- (double)primitiveScore;
-- (NSNumber *)score;
+- (void)setScore:(double)newScore;
+- (double)score;
 - (NSURL *)identifierURL;
 - (NSURL *)URL;
 

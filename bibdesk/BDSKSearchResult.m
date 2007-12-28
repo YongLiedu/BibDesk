@@ -44,12 +44,6 @@
 
 @implementation BDSKSearchResult
 
-+ (void)initialize
-{
-    OBINITIALIZE;
-    [self setKeys:[NSArray arrayWithObject:@"primitiveScore"] triggerChangeNotificationsForDependentKey:@"score"];
-}
-
 - (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)theScore;
 {
     
@@ -122,13 +116,9 @@
 - (NSString *)string { return string; }
 - (NSAttributedString *)attributedString { return attributedString; }
 - (NSURL *)identifierURL { return identifierURL; }
-- (NSNumber *)score { return [NSNumber numberWithDouble:score]; }
-- (void)setScore:(NSNumber *)value { [self setPrimitiveScore:[value doubleValue]]; }
 - (NSURL *)URL { return [file fileURL]; }
-
-// used in computations; NSNumber is returned for display
-- (void)setPrimitiveScore:(double)newScore { score = newScore; }
-- (double)primitiveScore { return score; }
+- (void)setScore:(double)newScore { score = newScore; }
+- (double)score { return score; }
 
 @end
 
