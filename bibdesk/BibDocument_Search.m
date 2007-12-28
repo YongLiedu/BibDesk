@@ -293,7 +293,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     // @@ File content search isn't really compatible with the group concept yet; this allows us to select publications when the content search is done, and also provides some feedback to the user that all pubs will be searched.  This is ridiculously complicated since we need to avoid calling searchByContent: in a loop.
     [tableView deselectAll:nil];
     [groupTableView updateHighlights];
-    
+    /*
     // here we avoid the table selection change notification that will result in an endless loop
     id tableDelegate = [groupTableView delegate];
     [groupTableView setDelegate:nil];
@@ -303,13 +303,15 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     // this is what displaySelectedGroup normally ends up doing
     [self handleGroupTableSelectionChangedNotification:nil];
     [self sortPubsByKey:nil];
-    
+    */
     if(fileSearchController == nil){
         fileSearchController = [[BDSKFileContentSearchController alloc] initForDocument:self];
         NSData *sortDescriptorData = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKFileContentSearchSortDescriptorKey defaultObject:[[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey]];
         if(sortDescriptorData)
             [fileSearchController setSortDescriptorData:sortDescriptorData];
     }
+    
+    [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
     
     NSView *contentView = [fileSearchController searchContentView];
     NSRect frame = [splitView frame];
