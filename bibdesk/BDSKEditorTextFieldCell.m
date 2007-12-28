@@ -181,10 +181,21 @@
         [buttonCell drawWithFrame:[self buttonRectForBounds:cellFrame] inView:controlView];
 }
 
-// @@ Sometime we might want to figure out why this doesn't work correctly; text baseline seems to be messed up.
+// NSTextFieldCell draws this with the wrong baseline, or possibly it wraps lines even though the cell is set to clip
+- (void)drawWithExpansionFrame:(NSRect)cellFrame inView:(NSView *)view
+{
+    [[self attributedStringValue] drawInRect:cellFrame];
+}
+
 - (NSRect)expansionFrameWithFrame:(NSRect)cellFrame inView:(NSView *)view;
 {
-    return NSZeroRect;
+    NSRect expansionRect = [super expansionFrameWithFrame:cellFrame inView:view];
+    NSAttributedString *attrString = [self attributedStringValue];
+    if ([attrString size].width <= cellFrame.size.width)
+        expansionRect = NSZeroRect;
+    else
+        expansionRect.size = [attrString size];
+    return expansionRect;
 }
 
 - (NSText *)setUpFieldEditorAttributes:(NSText *)textObj {
