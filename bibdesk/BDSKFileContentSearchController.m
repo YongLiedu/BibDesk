@@ -359,6 +359,10 @@
     return [[resultsArrayController selectedObjects] valueForKey:@"URL"];
 }
 
+- (NSArray *)titlesOfSelectedItems {
+    return [[resultsArrayController selectedObjects] valueForKey:@"string"];
+}
+
 #pragma mark -
 #pragma mark SearchKit methods
 
@@ -433,6 +437,11 @@
 }
 
 #pragma mark TableView delegate
+
+- (void)tableViewSelectionDidChange:(NSNotification *)notification {
+    if ([[self document] respondsToSelector:_cmd])
+        [[self document] tableViewSelectionDidChange:notification];
+}
 
 - (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
     return BDSKFileContentSearchTableViewFontNameKey;

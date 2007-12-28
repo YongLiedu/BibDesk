@@ -2795,13 +2795,17 @@ static void addAllURLsToBag(const void *value, void *context)
 // delegate must return an NSString path or nil for each index < numberOfFiles
 - (NSUInteger)countOfFileViewURLs;
 {
-    NSArray *selPubs = [self selectedPublications];
-    if (nil == selPubs) return 0;
-    CFMutableBagRef bag = CFBagCreateMutable(NULL, 0, NULL);
-    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllURLsToBag, bag);
-    unsigned cnt = CFBagGetCount(bag);
-    CFRelease(bag);
-    return cnt;
+    if ([self isDisplayingFileContentSearch]) {
+        return [[fileSearchController URLsOfSelectedItems] count];
+    } else {
+        NSArray *selPubs = [self selectedPublications];
+        if (nil == selPubs) return 0;
+        CFMutableBagRef bag = CFBagCreateMutable(NULL, 0, NULL);
+        CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllURLsToBag, bag);
+        unsigned cnt = CFBagGetCount(bag);
+        CFRelease(bag);
+        return cnt;
+    }
 }
 
 typedef struct _applierContext {
@@ -2829,26 +2833,38 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 
 - (NSURL *)objectInFileViewURLsAtIndex:(NSUInteger)idx;
 {
-    NSArray *selPubs = [self selectedPublications];
-    if (nil == selPubs) return nil;
-    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
-    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, array);
-    BDSKFileViewObject *obj = (id)CFArrayGetValueAtIndex(array, idx);
-    NSURL *URL = [[obj URL] retain];
-    CFRelease(array);
-    return [URL autorelease];
+    if ([self isDisplayingFileContentSearch]) {
+        return [[fileSearchController URLsOfSelectedItems] objectAtIndex:idx];
+    } else {
+        NSArray *selPubs = [self selectedPublications];
+        if (selPubs) {
+            CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+            CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, array);
+            BDSKFileViewObject *obj = (id)CFArrayGetValueAtIndex(array, idx);
+            NSURL *URL = [[obj URL] retain];
+            CFRelease(array);
+            return [URL autorelease];
+        } else
+            return nil;
+    }
 }
 
 - (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
-    NSArray *selPubs = [self selectedPublications];
-    if (nil == selPubs) return nil;
-    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
-    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, array);
-    BDSKFileViewObject *obj = (id)CFArrayGetValueAtIndex(array, anIndex);
-    NSString *title = [[obj subtitle] retain];
-    CFRelease(array);
-    return [title autorelease];
+    if ([self isDisplayingFileContentSearch]) {
+        return [[fileSearchController titlesOfSelectedItems] objectAtIndex:anIndex];
+    } else {
+        NSArray *selPubs = [self selectedPublications];
+        if (selPubs) {
+            CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+            CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, array);
+            BDSKFileViewObject *obj = (id)CFArrayGetValueAtIndex(array, anIndex);
+            NSString *title = [[obj subtitle] retain];
+            CFRelease(array);
+            return [title autorelease];
+        } else 
+            return nil;
+    }
 }
 
 - (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [self countOfFileViewURLs]; }

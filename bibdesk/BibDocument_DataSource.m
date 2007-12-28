@@ -241,7 +241,7 @@
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
 	NSTableView *tv = [aNotification object];
-    if(tv == tableView){
+    if(tv == tableView || ([self isDisplayingFileContentSearch] && tv == [fileSearchController tableView])){
         NSNotification *note = [NSNotification notificationWithName:BDSKTableSelectionChangedNotification object:self];
         [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
 	}else if(tv == groupTableView){
