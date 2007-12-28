@@ -249,7 +249,6 @@ textRect.origin.y += vOffset; \
 - (void)setObjectValue:(id <NSCopying>)obj;
 {
     [self setIcon:[(NSObject *)obj valueForKey:OATextWithIconCellImageKey]];
-    // using -[self/super setAttributedStringValue:] causes an endless loop and blows the stack
     [super setObjectValue:[(NSObject *)obj valueForKey:OATextWithIconCellStringKey]];
 }
 
