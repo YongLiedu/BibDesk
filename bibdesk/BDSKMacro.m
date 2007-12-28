@@ -92,7 +92,7 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@: {%@ = %@}",[self class], [self name], [self value]];
+    return [NSString stringWithFormat:@"%@: {%@ = %@}, resolver = %@",[super description], [self name], [self value], [self macroResolver]];
 }
 
 - (NSString *)name {
