@@ -2697,11 +2697,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [self updatePreviews];
 }
 
-- (void)migrationAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
-{
-    
-}
-
 - (void)handleTemporaryFileMigrationNotification:(NSNotification *)notification{
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableMigrationWarning"] == NO) {
         
