@@ -446,8 +446,10 @@
 
         // Rearranging objects will likely move the row we just edited (bug #1859542), so find this macro and edit its value instead of some random macro's value.  Using [[arrayController arrangedObjects] indexOfObject:macro] won't work because the notification handler just replaced it with another object (so that's probably a garbage pointer now, as well).
         unsigned newRow = [[[arrayController arrangedObjects] valueForKeyPath:@"name.lowercaseString"] indexOfObject:[object lowercaseString]];
-        if (NSNotFound != newRow)
+        if (NSNotFound != newRow) {
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:newRow] byExtendingSelection:YES];
             [tableView editColumn:1 row:newRow withEvent:nil select:YES];
+        }
         
 		[undoMan setActionName:NSLocalizedString(@"Change Macro Key", @"Undo action name")];
 
