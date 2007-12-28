@@ -250,10 +250,7 @@ textRect.origin.y += vOffset; \
 {
     [self setIcon:[(NSObject *)obj valueForKey:OATextWithIconCellImageKey]];
     // using -[self/super setAttributedStringValue:] causes an endless loop and blows the stack
-    id objectValue = [(NSObject *)obj valueForKey:@"attributedString"];
-    if (nil == objectValue)
-        objectValue = [(NSObject *)obj valueForKey:OATextWithIconCellStringKey];
-    [super setObjectValue:objectValue];
+    [super setObjectValue:[(NSObject *)obj valueForKey:OATextWithIconCellStringKey]];
 }
 
 // API
