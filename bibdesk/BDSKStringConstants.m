@@ -309,6 +309,7 @@ NSString *BDSKDocumentControllerRemoveDocumentNotification = @"BDSKDocumentContr
 NSString *BDSKDocumentControllerDidChangeMainDocumentNotification = @"BDSKDocumentControllerDidChangeMainDocumentNotification";
 NSString *BDSKSearchIndexInfoChangedNotification = @"BDSKSearchIndexInfoChangedNotification";
 NSString *BDSKEncodingsListChangedNotification = @"BDSKEncodingsListChangedNotification";
+NSString *BDSKTemporaryFileMigrationNotification = @"BDSKTemporaryFileMigrationNotification";
 
 #pragma mark Exception name strings
 

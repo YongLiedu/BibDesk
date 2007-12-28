@@ -298,6 +298,7 @@ extern NSString *BDSKDocumentControllerRemoveDocumentNotification;
 extern NSString *BDSKDocumentControllerDidChangeMainDocumentNotification;
 extern NSString *BDSKSearchIndexInfoChangedNotification;
 extern NSString *BDSKEncodingsListChangedNotification;
+extern NSString *BDSKTemporaryFileMigrationNotification;
 
 #pragma mark Exception name strings
 extern NSString *BDSKComplexStringException;
