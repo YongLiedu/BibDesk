@@ -294,22 +294,14 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [tableView deselectAll:nil];
     [groupTableView updateHighlights];
     
-    // here we avoid the table selection change notification that will result in an endless loop
-    id tableDelegate = [groupTableView delegate];
-    [groupTableView setDelegate:nil];
-    [groupTableView deselectAll:nil];
-    [groupTableView setDelegate:tableDelegate];
-    
-    // this is what displaySelectedGroup normally ends up doing
-    [self handleGroupTableSelectionChangedNotification:nil];
-    [self sortPubsByKey:nil];
-    
     if(fileSearchController == nil){
         fileSearchController = [[BDSKFileContentSearchController alloc] initForDocument:self];
         NSData *sortDescriptorData = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKFileContentSearchSortDescriptorKey defaultObject:[[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey]];
         if(sortDescriptorData)
             [fileSearchController setSortDescriptorData:sortDescriptorData];
     }
+    
+    [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
     
     NSView *contentView = [fileSearchController searchContentView];
     NSRect frame = [splitView frame];

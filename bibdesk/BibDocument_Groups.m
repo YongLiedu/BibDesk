@@ -610,7 +610,10 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [groupedPublications setArray:array];
     
-    [self search:searchField]; // redo the search to update the table
+    if ([self isDisplayingFileContentSearch])
+        [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
+    
+    [searchField sendAction:[searchField action] to:[searchField target]]; // redo the search to update the table
 }
 
 - (BOOL)selectGroups:(NSArray *)theGroups{
