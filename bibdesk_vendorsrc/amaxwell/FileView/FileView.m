@@ -1353,8 +1353,8 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
 - (void)_openURL:(NSURL *)aURL
 {
-    if ([[self delegate] respondsToSelector:@selector(fileView:openURL:)] == NO ||
-        [[self delegate] fileView:self openURL:aURL] == NO)
+    if ([[self delegate] respondsToSelector:@selector(fileView:shouldOpenURL:)] == NO ||
+        [[self delegate] fileView:self shouldOpenURL:aURL] == YES)
         [[NSWorkspace sharedWorkspace] openURL:aURL];
 }
 

@@ -2870,15 +2870,15 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 - (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [self countOfFileViewURLs]; }
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex { return [self objectInFileViewURLsAtIndex:anIndex]; }
 
-- (BOOL)fileView:(FileView *)aFileView openURL:(NSURL *)aURL {
+- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL {
     if ([aURL isFileURL]) {
         NSString *searchString = @"";
         // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
         if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
             searchString = [searchField stringValue];
-        return [[NSWorkspace sharedWorkspace] openURL:aURL withSearchString:searchString];
+        return [[NSWorkspace sharedWorkspace] openURL:aURL withSearchString:searchString] == NO;
     } else {
-        return NO;
+        return YES;
     }
 }
 

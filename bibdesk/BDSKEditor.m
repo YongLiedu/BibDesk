@@ -1448,11 +1448,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
 }
 
-- (BOOL)fileView:(FileView *)aFileView openURL:(NSURL *)aURL {
+- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL {
     if ([aURL isFileURL])
-        return [[NSWorkspace sharedWorkspace] openLinkedFile:[aURL path]];
+        return [[NSWorkspace sharedWorkspace] openLinkedFile:[aURL path]] == NO;
     else
-        return NO;
+        return YES;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
