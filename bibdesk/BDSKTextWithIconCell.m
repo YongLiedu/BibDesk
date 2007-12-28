@@ -384,21 +384,14 @@ We should probably change the definition of OATextWithIconCell*Key to have a pre
 /*
 @interface NSObject (BDSKTextWithIconCell) @end
 @implementation NSObject (BDSKTextWithIconCell)
-- (id)attributedString { return nil; }
 - (id)string { return nil; }
 - (id)image { return nil; }
 @end
 */
 
 // special cases for strings
-@interface NSAttributedString (BDSKTextWithIconCell) @end
-@implementation NSAttributedString (BDSKTextWithIconCell)
-- (id)attributedString { return self; }
-- (id)image { return nil; }
-@end
 @interface NSString (BDSKTextWithIconCell) @end
 @implementation NSString (BDSKTextWithIconCell)
-- (id)attributedString { return nil; }
 - (NSString *)string { return self; }
 - (id)image { return nil; }
 @end
