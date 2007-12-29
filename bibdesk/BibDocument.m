@@ -148,6 +148,14 @@ static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey
 static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
 static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
+enum {
+    BDSKItemChangedFieldMask = 1,
+    BDSKItemChangedTitleMask = 2,
+    BDSKItemChangedPersonFieldMask = 4,
+    BDSKItemChangedGroupFieldMask = 8,
+    BDSKItemChangedLocalFileMask = 16,
+    BDSKItemChangedSortKeyMask = 32
+};
 
 @interface BDSKFileViewObject : NSObject
 {
@@ -252,6 +260,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         docState.sortDescending = NO;
         docState.sortGroupsDescending = NO;
         docState.didImport = NO;
+        docState.itemChangeMask = 0;
         
         // these are created lazily when needed
         fileSearchController = nil;
@@ -2562,16 +2571,17 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return [sortKey isEqualToString:key];
 }
 
-- (void)handlePrivateBibItemChanged:(NSString *)changedKey{
+- (void)handlePrivateBibItemChanged{
     // we can be called from a queue after the document was closed
     if (docState.isDocumentClosed)
         return;
     
-    BOOL isCurrentGroupField = [[self currentGroupField] isEqualToString:changedKey];
+    // flush the indexes before refiltering, as flushing is usually delayed to the end of the run loop
+    [searchIndexes flushIndexesIfNeeded];
     
-	[self updateSmartGroupsCountAndContent:isCurrentGroupField == NO];
+	[self updateSmartGroupsCountAndContent:(docState.itemChangeMask & BDSKItemChangedGroupFieldMask) == 0];
     
-    if(isCurrentGroupField){
+    if((docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0){
         // this handles all UI updates if we call it, so don't bother with any others
         [self updateCategoryGroupsPreservingSelection:YES];
     } else {
@@ -2580,24 +2590,26 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if ([[searchField stringValue] isEqualToString:@""] == NO) {
             NSString *searchKey = [searchButtonController selectedItemIdentifier];
             if ([searchKey isEqualToString:BDSKSkimNotesString] || [searchKey isEqualToString:BDSKFileContentSearchString])
-                shouldRedoSearch = [changedKey isEqualToString:BDSKLocalFileString];
+                shouldRedoSearch = (docState.itemChangeMask & BDSKItemChangedLocalFileMask) != 0;
             else
-                shouldRedoSearch = [searchKey isEqualToString:BDSKAllFieldsString] || changedKey == nil ||
-                                   ([searchKey isEqualToString:BDSKPersonString] && [changedKey isPersonField]) ||
-                                   [searchKey isEqualToString:changedKey];
+                shouldRedoSearch = ([searchKey isEqualToString:BDSKAllFieldsString] && (docState.itemChangeMask & BDSKItemChangedFieldMask) != 0) ||
+                                   ([searchKey isEqualToString:BDSKPersonString] && (docState.itemChangeMask & BDSKItemChangedPersonFieldMask) != 0) ||
+                                   [searchKey isEqualToString:BDSKTitleString] && (docState.itemChangeMask & BDSKItemChangedTitleMask) != 0;
         }
         if (shouldRedoSearch) {
             [searchField sendAction:[searchField action] to:[searchField target]];
-        } else { 
+        } else if([self isDisplayingFileContentSearch] == NO && (docState.itemChangeMask & BDSKItemChangedFieldMask) != 0) { 
             // groups and quicksearch won't update for us
-            if([self sortKeyDependsOnKey:changedKey])
-                [self sortPubsByKey:nil]; // resort if the changed value was in the currently sorted column
+            if ((docState.itemChangeMask & BDSKItemChangedSortKeyMask) != 0)
+                [self sortPubsByKey:nil];
             else
                 [tableView reloadData];
             [self updateStatus];
             [self updatePreviews];
         }
     }
+    
+    docState.itemChangeMask = 0;
 }
 
 // this structure is only used in the following CFSetApplierFunction
@@ -2684,8 +2696,23 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         }
     }
     
+    
+    if (changedKey == nil) {
+        docState.itemChangeMask |= BDSKItemChangedFieldMask | BDSKItemChangedTitleMask | BDSKItemChangedGroupFieldMask | BDSKItemChangedSortKeyMask;
+    } else if ([changedKey isEqualToString:BDSKLocalFileString]) {
+        docState.itemChangeMask |= BDSKItemChangedLocalFileMask;
+    } else {
+        docState.itemChangeMask |= BDSKItemChangedFieldMask;
+        if ([changedKey isEqualToString:BDSKTitleString])
+            docState.itemChangeMask |= BDSKItemChangedTitleMask;
+        if ([changedKey isEqualToString:[self currentGroupField]])
+            docState.itemChangeMask |= BDSKItemChangedGroupFieldMask;
+        if ([self sortKeyDependsOnKey:changedKey])
+            docState.itemChangeMask |= BDSKItemChangedSortKeyMask;
+    }
+    
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
-    [self queueSelectorOnce:@selector(handlePrivateBibItemChanged:) withObject:changedKey];
+    [self queueSelectorOnce:@selector(handlePrivateBibItemChanged)];
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{

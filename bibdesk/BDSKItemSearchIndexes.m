@@ -76,6 +76,7 @@ const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
     self = [super init];
     if (self) {
         searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &BDSKSearchIndexDictionaryValueCallBacks);
+        needsFlushing = NO;
         
         // ensure that we never hand out a NULL search index unless someone asks for a field that isn't indexed
         [self resetWithPublications:nil];
@@ -97,12 +98,26 @@ static void flushAllIndexes(const void *key, const void *value, void *context)
 - (void)flushIndexesImmediately
 {
     CFDictionaryApplyFunction(searchIndexes, flushAllIndexes, NULL);    
+    needsFlushing = NO;
+}
+
+- (void)flushIndexesIfNeeded {
+    if (needsFlushing) {
+        [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(flushIndexesImmediately) object:nil];
+        [self performSelector:@selector(flushIndexesImmediately) withObject:nil afterDelay:0.0];
+    }
+}
+
+- (void)flushIndexes {
+    [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(flushIndexesImmediately) object:nil];
+    [self performSelector:@selector(flushIndexesImmediately) withObject:nil afterDelay:0.0];
 }
 
 // Index flushing is fairly expensive, especially with thousands of pubs added; queuing it should keep pub changes that happen in a tight loop from being as memory intensive.
 - (void)scheduleIndexFlush
 {
     [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(flushIndexesImmediately) object:nil];
+    needsFlushing = YES;
     [self performSelector:@selector(flushIndexesImmediately) withObject:nil afterDelay:0.0];
 }
 

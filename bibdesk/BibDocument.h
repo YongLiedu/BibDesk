@@ -223,6 +223,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         BOOL                dragFromExternalGroups;
         BOOL                isDocumentClosed;
         BOOL                didImport;
+        int                 itemChangeMask;
     } docState;
     
     NSURL *saveTargetURL;

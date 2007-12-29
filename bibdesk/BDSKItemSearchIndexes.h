@@ -40,7 +40,7 @@
 
 @interface BDSKItemSearchIndexes : NSObject {
     CFMutableDictionaryRef searchIndexes;
-
+    BOOL needsFlushing;
 }
 
 + (NSSet *)indexedFields;
@@ -49,5 +49,8 @@
 - (void)addPublications:(NSArray *)pubs;
 - (void)resetWithPublications:(NSArray *)pubs;
 - (SKIndexRef)indexForField:(NSString *)field;
+
+- (void)flushIndexes;
+- (void)flushIndexesIfNeeded;
 
 @end
