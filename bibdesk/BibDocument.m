@@ -2366,6 +2366,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     }
 }
 
+- (NSArray *)selectedFileURLs {
+    if ([self isDisplayingFileContentSearch])
+        return [fileSearchController URLsOfSelectedItems];
+    else
+        return [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"];
+}
+
 #pragma mark -
 #pragma mark Notification handlers
 

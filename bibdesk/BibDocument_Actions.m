@@ -793,10 +793,8 @@
         
         if (fileURL)
             urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
-        else if ([self isDisplayingFileContentSearch])
-            urlEnum = [[fileSearchController URLsOfSelectedItems] objectEnumerator];
         else
-            urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
+            urlEnum = [[self selectedFileURLs] objectEnumerator];
         
         NSString *searchString;
         // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
@@ -818,11 +816,7 @@
     if (fileURL) {
         [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
     } else {
-        int n = 0;
-        if ([self isDisplayingFileContentSearch])
-            n = [[fileSearchController URLsOfSelectedItems] count];
-        else
-            n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
+        int n = [[self selectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of files open?
@@ -848,10 +842,8 @@
         
         if (fileURL)
             urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
-        else if ([self isDisplayingFileContentSearch])
-            urlEnum = [[fileSearchController URLsOfSelectedItems] objectEnumerator];
         else
-            urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
+            urlEnum = [[self selectedFileURLs] objectEnumerator];
         
         while (fileURL = [urlEnum nextObject]) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
@@ -864,13 +856,9 @@
 - (IBAction)revealLinkedFile:(id)sender{
     NSURL *fileURL = [sender representedObject];
     if (fileURL) {
-        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
+        [self revealLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
     } else {
-        int n = 0;
-        if ([self isDisplayingFileContentSearch])
-            n = [[fileSearchController URLsOfSelectedItems] count];
-        else
-            n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
+        int n = [[self selectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of Finder windows?
@@ -910,7 +898,7 @@
 - (IBAction)openLinkedURL:(id)sender{
     NSURL *remoteURL = [sender representedObject];
     if (remoteURL) {
-        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[remoteURL retain]];
+        [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[remoteURL retain]];
     } else {
         int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count];
         
@@ -939,10 +927,8 @@
         
         if (fileURL)
             urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
-        else if ([self isDisplayingFileContentSearch])
-            urlEnum = [[fileSearchController URLsOfSelectedItems] objectEnumerator];
         else
-            urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
+            urlEnum = [[self selectedFileURLs] objectEnumerator];
         
         while (fileURL = [urlEnum nextObject]) {
             if ([fileURL isEqual:[NSNull null]] == NO) {
@@ -957,13 +943,9 @@
 - (IBAction)showNotesForLinkedFile:(id)sender{
     NSURL *fileURL = [sender representedObject];
     if (fileURL) {
-        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
+        [self showNotesForLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
     } else {
-        int n = 0;
-        if ([self isDisplayingFileContentSearch])
-            n = [[fileSearchController URLsOfSelectedItems] count];
-        else
-            n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count];
+        int n = [[self selectedFileURLs] count];
         
         if (n > 6) {
             // Do we really want a gazillion of files open?
@@ -990,10 +972,8 @@
     
     if (fileURL)
         urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
-    else if ([self isDisplayingFileContentSearch])
-        urlEnum = [[fileSearchController URLsOfSelectedItems] objectEnumerator];
     else
-        urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"] objectEnumerator];
+        urlEnum = [[self selectedFileURLs] objectEnumerator];
     
     while (fileURL = [urlEnum nextObject]) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
