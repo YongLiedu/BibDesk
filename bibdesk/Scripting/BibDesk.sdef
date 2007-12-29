@@ -609,14 +609,14 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</responds-to>
 		</class>
 
-		<class name="linked URL" plural="linked URLs" code="URL " inherits="item"
-			description="A URL.">
+		<class name="linked URL" plural="linked URLs" code="URL " inherits="string"
+			description="A linked URL. This is a string.">
 			<cocoa class="NSString"/>
 			<type type="text"/>
 		</class>
 
 		<class name="linked file" plural="linked files" code="File" inherits="item"
-			description="A file.">
+			description="A linked file. This is a file or alias.">
 			<cocoa class="NSURL"/>
 			<type type="file"/>
             <property name="URL" code="rURL" type="text" access="r"
