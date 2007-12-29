@@ -434,7 +434,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 // notifications observed on behalf of owned BibItems for efficiency
 - (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification;
-    
+
+- (void)handleTemporaryFileMigrationNotification:(NSNotification *)notification;
+
 /*!
     @method     handleBibItemAddDelNotification:
     @abstract   this method gets called for setPublications: also
