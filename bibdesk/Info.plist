@@ -992,7 +992,6 @@
 					<false/>
 					<key>Shown Column Names</key>
 					<array>
-						<string>Local-Url</string>
 						<string>Keywords</string>
 						<string>BibTeX Type</string>
 						<string>Cite Key</string>
