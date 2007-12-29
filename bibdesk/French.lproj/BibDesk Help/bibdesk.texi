@@ -1025,6 +1025,8 @@ you change it to phdthesis, it will still have that booktitle.
 
 @subheading Viewing a linked file
 
+@c FIXME -- this is obsolete
+
 You can view a linked file in its appropriate application by clicking
 on the @buttontitle{View File} button, which has the file's icon as its
 image. If no file is linked, the button displays a question mark.
@@ -1906,6 +1908,7 @@ Papers Folder as described in the
 * Automatically Move Files::    How BibDesk can keep new papers organized automatically once you've consolidated them.
 * Consolidate Linked Files::    A command to move all linked files to your Papers Folder.
 * Customizing the Format for the Local-Url::  How to customize the generated location of used for AutoFile. 
+* Migrate Files::  How to convert from Local-Url to aliases
 @end menu
 
 @c --------------------------------------------------------------------------------------
@@ -1991,6 +1994,38 @@ For setting the format used to generate the new location for AutoFile,
 see the @ref{AutoFile Preferences} preference help topic.
 The syntax of the format is described in more detail in 
 @ref{Autogeneration Format Syntax}. 
+
+@node Migrate Files
+@c DO NOT LOCALIZE THE NEXT LINE
+@anchor{FileMigration}
+@section Migrate Files
+@abstract{Converting files from paths to aliases}
+
+@cindex migrate files, alias
+@cindex linked file, URL
+
+@c maybe this should be a separate technical note or something?
+
+Versions of BibDesk prior to 1.3.13 stored links to files as paths or a file: URL.  
+File links are now stored as a relative path (relative to the .bib file),
+and as a Mac OS alias.  Each file is stored in a BibTeX field named @code{Bdsk-File-N}, where N is
+a positive nonzero integer.  The content is Base-64 encoded ASCII, which is not human readable,
+but compatible with BibTeX storage requirements.
+
+When you open a file that has Local-Url (and/or other Local-File fields), they are automatically
+converted to aliases (or paths, if the file can't be found).  When you save the file, the
+Bdsk-File fields will be saved as well, and will be used exclusively next time that file is
+opened.
+
+The @menutitle{Migrate Files} item of the @menutitle{Database} menu allows you to
+see which files could not be found, and to clear out the old local file fields
+such as Local-Url.  Changes are undoable, but you may wish to make a backup of your file
+before proceeding.  
+
+@menutitle{Migrate Files} mimics the automatic migration performed when first opening a file
+that does not use the new Bdsk-File scheme.  The primary difference is that the manual migration 
+is more flexible and it displays warnings.  It can be run at any time, even after a previous
+manual migration.
 
 @c ======================================================================================
 
