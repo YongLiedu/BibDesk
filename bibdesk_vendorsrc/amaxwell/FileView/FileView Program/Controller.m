@@ -54,6 +54,7 @@
     
     // for optional datasource method
     [_fileView setDataSource:self];
+    [_fileView setEditable:YES];
 }
 
 - (void)dealloc
