@@ -336,7 +336,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
 	}
 	
-	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format", @"Message in alert dialog when entering invalid Local-Url format") 
+	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Local File Format", @"Message in alert dialog when entering invalid Local File format") 
 										 defaultButton:NSLocalizedString(@"Keep Editing", @"Button title") 
 									   alternateButton:NSLocalizedString(@"Revert to Default", @"Button title") 
 										   otherButton:otherButton
@@ -371,7 +371,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.", @"Informative text in alert dialog");
 	}
 	
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format", @"Message in alert dialog when entering invalid Local-Url format") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Local File Format", @"Message in alert dialog when entering invalid Local File format") 
 									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
 								   alternateButton:nil 
 									   otherButton:nil 
