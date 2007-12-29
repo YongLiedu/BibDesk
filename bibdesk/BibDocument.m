@@ -2574,18 +2574,29 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(isCurrentGroupField){
         // this handles all UI updates if we call it, so don't bother with any others
         [self updateCategoryGroupsPreservingSelection:YES];
-    } else if(![[searchField stringValue] isEqualToString:@""] && 
-       ([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString] || [[searchButtonController selectedItemIdentifier] isEqualToString:changedKey]) ){
+    } else {
+        BOOL shouldRedoSearch = NO;
         // don't perform a search if the search field is empty
-		[self search:searchField];
-	} else { 
-        // groups and quicksearch won't update for us
-        if([self sortKeyDependsOnKey:changedKey])
-            [self sortPubsByKey:nil]; // resort if the changed value was in the currently sorted column
-        else
-            [tableView reloadData];
-        [self updateStatus];
-        [self updatePreviews];
+        if ([[searchField stringValue] isEqualToString:@""] == NO) {
+            NSString *searchKey = [searchButtonController selectedItemIdentifier];
+            if ([searchKey isEqualToString:BDSKSkimNotesString] || [searchKey isEqualToString:BDSKFileContentSearchString])
+                shouldRedoSearch = [changedKey isEqualToString:BDSKLocalFileString];
+            else
+                shouldRedoSearch = [searchKey isEqualToString:BDSKAllFieldsString] || changedKey == nil ||
+                                   ([searchKey isEqualToString:BDSKPersonString] && [changedKey isPersonField]) ||
+                                   [searchKey isEqualToString:changedKey];
+        }
+        if (shouldRedoSearch) {
+            [searchField sendAction:[searchField action] to:[searchField target]];
+        } else { 
+            // groups and quicksearch won't update for us
+            if([self sortKeyDependsOnKey:changedKey])
+                [self sortPubsByKey:nil]; // resort if the changed value was in the currently sorted column
+            else
+                [tableView reloadData];
+            [self updateStatus];
+            [self updatePreviews];
+        }
     }
 }
 
