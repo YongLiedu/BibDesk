@@ -643,9 +643,9 @@ The query operators that SKSearchCreate recognizes for non-similarity searching 
 
 The operators AND, OR, and NOT are case sensitive.
 
-Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `à', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
+Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `√†', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
 
-Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `à', `A', and `À'.
+Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `√†', `A', and `√Ä'.
 
 @node Find and Replace
 @c DO NOT LOCALIZE THE NEXT LINE
@@ -1023,52 +1023,21 @@ you change it to phdthesis, it will still have that booktitle.
 @cindex viewing PDF as text
 @cindex drag and drop, files
 
-@subheading Viewing a linked file
+@subheading Linked files
 
-@c FIXME -- this is obsolete
+You can view a linked file in its appropriate application by double-clicking
+its icon.  Alternately, you can preview the file by control-clicking on the
+icon and choosing @menutitle{Quick Look}.
 
-You can view a linked file in its appropriate application by clicking
-on the @buttontitle{View File} button, which has the file's icon as its
-image. If no file is linked, the button displays a question mark.
+Control-clicking in the file icon pane (region marked ``Drop Files Here'')
+will give more options for adding and viewing files or URLs.
 
-In either case, you can click and hold on the button or click the 
-little arrow to get a menuwhich gives you options to choose a file to link. 
-Another way of setting the Local-Url link is by dragging a file onto 
-the @buttontitle{View File} button or the Local-Url text field.
-
-If you enter a local file field by hand, it is important to know that 
-it accepts either a full file URL, or an absolute or relative file path. 
-Note that for URLs special characters like spaces should be escaped 
-(the escape for a space character is %20). Relative paths are interpreted 
-relative to the containing .bib documents folder. 
-
-If your your linked file is a PDF, you can use the @buttontitle{View in Drawer}
-button to view it without leaving BibDesk. Pressing and holding that
-button gives you the option of viewing it as a PDF or viewing just
-the text of the PDF, so you can select the text to copy and paste
-into the data fields.
-
-You can also view the web page specified in the ``URL'' field using
-the @buttontitle{View in Drawer} button to view it in the drawer in BibDesk or
-by clicking the @buttontitle{View Remote} button to open it in your preferred
-web browser.
-
-If you like to keep the URL set to the download location of the
-paper, clicking and holding the @buttontitle{View Remote} button will show a
-menu that lets you choose from the URLs of recently downloaded files
-in Safari.
-
-You can also set the URL field by dragging a web location file on the 
-@buttontitle{View Remote} button or the Url text field. 
+You can also add any file or URL field by dragging a web it to the 
+file icon pane. 
  
 The @buttontitle{Annote} and @buttontitle{Abstract} tabs provide access to larger text areas
 for these types of information. Rss-Description is covered in
 @ref{Default Fields Preferences}.
-
-Below the table view is the Notes pane, which shows the contents of
-the highlighted reference. It can also be set (in the 
-@ref{General Preferences} Preferences) to show the entire selected entry as nicely formatted
-text.
 
 @subheading Other editing topics
 
@@ -1907,7 +1876,7 @@ Papers Folder as described in the
 @menu
 * Automatically Move Files::    How BibDesk can keep new papers organized automatically once you've consolidated them.
 * Consolidate Linked Files::    A command to move all linked files to your Papers Folder.
-* Customizing the Format for the Local-Url::  How to customize the generated location of used for AutoFile. 
+* Customizing the Local File Format::  How to customize the generated location of used for AutoFile. 
 * Migrate Files::  How to convert from Local-Url to aliases
 @end menu
 
@@ -1928,7 +1897,7 @@ described in the @ref{AutoFile Preferences} preference help topic.
 Note however that the actual move can be delayed if not all the fields 
 that are necessary to generate the new location are set. 
 Which fields are necessary to generate the location depends on the format 
-that is used for the Local-Url. This format can be set in the 
+that is used for the file name (Local File format). This format can be set in the 
 @ref{AutoFile Preferences,AutoFile Preferences}.
 
 Of course the file will never be automatically moved if you do not choose the 
@@ -1955,9 +1924,9 @@ will be moved to the generated location, even if not all the fields necessary
 for the location are set. 
 
 If you choose @buttontitle{Move Complete Only}, only the files for which 
-all the fields necessary for generating the Local-Url are set will be moved. 
-Which fields are necessary to generate the location depends on the format 
-that is used for the Local-Url.
+all the fields necessary for generating the file name are set will be moved. 
+Which fields are necessary to generate the location depends on the Local File format 
+that is used.
 
 @image{gfx/consolidateLinkedFilesDialog}
 
@@ -1986,9 +1955,9 @@ of the Editor.
 
 @c --------------------------------------------------------------------------------------
 
-@node Customizing the Format for the Local-Url
-@section Customizing the Format for the Local-Url
-@abstract{Customizing the format for the Local-Url}
+@node Customizing the Local File Format
+@section Customizing the Local File Format
+@abstract{Customizing the Local File Format}
 
 For setting the format used to generate the new location for AutoFile, 
 see the @ref{AutoFile Preferences} preference help topic.
@@ -3061,19 +3030,19 @@ automatically move files.
 
 @image{gfx/autoFilePrefs}
 
-The upper series of checkboxes defines the base path to which the Local-Url format will
+The upper series of checkboxes defines the base path to which the Local File format will
 be applied.  This may be an absolute (fixed) or relative path.  Relative paths are
 specified as a POSIX path relative to the document's path.
 
-@prefitem{Papers folder location} Papers that are automatically filed by BibDesk will 
+@prefitem{File papers in fixed location} Papers that are automatically filed by BibDesk will 
 be moved to this folder or a subfolder. The format string used to generate the location of the 
 moved papers is relative to this folder. When the papers folder is empty, the folder 
 containing the document to which the items belong will be used. To get this behavior, deselect 
 the checkbox.
 
-@prefitem{Use relative path for Local-Url} When this option is selected, the Local-Url 
+@prefitem{File papers relative to each document} When this option is selected, the Local File format 
 format will be appended to the BibTeX document's folder path; to modify this, insert a
-relative path as the first part of your Local-Url format.
+relative path as the first part of your format.
 This option is only available when the papers folder is empty. When you choose this option, 
 make sure that any document is saved before activating AutoFile. 
 
@@ -3082,7 +3051,7 @@ move files into the papers folder hierarchy for new items. The new location will
 using a format string, which you can supply using the other controls. 
 See @ref{AutoFile} for more information about the Auto File feature. 
 
-@prefitem{Local-Url Format} You can choose from several default cite key
+@prefitem{Local File Format} You can choose from several default cite key
 formats. Choosing @menutitle{Custom} allows you to set the cite key
 format string to any valid format.
 
@@ -3095,7 +3064,7 @@ the following additional items.
 @prefitem{Preset Format} This is a copy of the popup button in the main pane.
 
 @prefitem{Format String} This text field shows the format string that is used to 
-automatically generate new locations for auto filed papers. The Local-Url 
+automatically generate new locations for auto filed papers. The Local File 
 format string can contain several special format specifiers, which are
 a %-character followed by a specifier character and optionally zero to
 two numbers. See @ref{Autogeneration Format Syntax} for a
@@ -3240,8 +3209,8 @@ select the menu item with the Option key pressed.
 Sometimes you want to perform a particular AppleScript every time a certain action occurs. 
 For example, you might want to have field that depends in a definite way on some other fields, 
 so it can be handy if Bibdesk would auto generate this field for you. This is already built in 
-for the Local-Url field and the Cite Key, but what about other fields?  As another example, 
-you might want to commit a file linked by the Local-Url field to cvs or subversion 
+for the Local File fields and the Cite Key, but what about other fields?  As another example, 
+you might want to commit a linked file to cvs or subversion 
 whenever the file is moved by Auto File. 
 
 For such times, BibDesk allows you to add custom AppleScripts that are automatically run 
@@ -3577,12 +3546,12 @@ Note: for BibTeX, it is also necessary to enclose the accent sequence in braces
 @c DO NOT LOCALIZE THE NEXT LINE
 @anchor{AutogenerationFormatSyntax}
 @appendix Autogeneration Format Syntax
-@abstract{The syntax of the format used for Cite Key and Local-Url AutoGeneration.}
+@abstract{The syntax of the format used for Cite Key and Local File AutoGeneration.}
 
 @heading Syntax of the format
 
 The format is used for autogeneration of certain values, such as the cite key 
-and the local-url. The format is a string containing special format specifiers, 
+and the local file. The format is a string containing special format specifiers, 
 which are replaced by strings determined by the bibliography data. 
 Most format specifiers have the form of a %-character followed by a single character. 
 It can be followed by optional digits, which serve as parameters for the format specifier. 
@@ -3746,10 +3715,10 @@ The optional parameter delimited by square brackets after a title specifier @spe
 denotes the maximum length of words to be dropped. If this arguments is missing, 
 words with length up to 3 are not counted, but they are included. 
 
-In the local url format the slash-character (/) has a special meaning, as it is used 
+In the local file format the slash-character (/) has a special meaning, as it is used 
 to build the (UNIX style) folder hierarchy. This is usually not what you want generated 
 parts of the format to do. Therefore in the @samp{author} and @samp{title} slashes 
-are always replaced by dashes (-) for the local-url format. The same replacement is also 
+are always replaced by dashes (-) for the local file format. The same replacement is also 
 performed by default for the @samp{keyword} or @samp{field} specifiers. 
 These latter two however can have an optional parameters delimited by square brackets, 
 which can be used to set the replacement string to another value. In particular, setting 
@@ -3768,7 +3737,7 @@ For example, accents are removed and spaces will be converted to dashes.
 Keywords are, by default, separated by one of ;:, (semicolon, colon, or comma.) 
 The precise way keywords are separated and how to change these defaults is described in @ref{Field Groups}. 
 
-The format for the local-url can contain any character apart from colons (:). 
+The format for the local file can contain any character apart from colons (:). 
 To use an explicit percent character, use the escape specifier @spec{%%} 
 (except inside an optional argument delimited by square brackets). Also note the special 
 treatment of the slash (/) noted above. 
