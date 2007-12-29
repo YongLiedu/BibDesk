@@ -2712,7 +2712,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [alert setCheckValue:NO];
         
         // tried running as a sheet, but the document window may not be on screen yet
-        [[alert window] center];
         int rv = [alert runModal];
         
         if ([alert checkValue] == YES)

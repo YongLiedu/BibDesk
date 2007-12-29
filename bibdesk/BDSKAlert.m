@@ -277,6 +277,8 @@
 	}
 	
 	[imageView setImage:image];
+    
+    [[self window] center];
 }
 
 @end
