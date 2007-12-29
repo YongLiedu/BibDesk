@@ -58,8 +58,18 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    *obj = string; // ? retain?
-    return YES;
+    if ([string hasPrefix:@"Bdsk-File"]) {
+        if (error) *error = NSLocalizedString(@"\"Bdsk-File\" fields are reserved for BibDesk's internal usage", @"field name warning");
+        return NO;
+    }
+    else if ([string hasPrefix:@"Bdsk-Url"]) {
+        if (error) *error = NSLocalizedString(@"\"Bdsk-Url\" fields are reserved for BibDesk's internal usage", @"field name warning");
+        return NO;
+    }
+    else {
+        *obj = string;
+        return YES;
+    }
 }
 
 // This is currently the same deal as what we check for in cite-keys, but in a different class
@@ -70,12 +80,15 @@
             errorDescription:(NSString **)error{
     NSRange r = [partialString rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
     if ( r.location != NSNotFound || 
-        ([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) )
+        ([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) ) {
+        if (error) *error = NSLocalizedString(@"The first character must not be a digit", @"field name warning");
 		return NO; // BibTeX chokes if the first character of a field name is a digit
+    }
 	NSString *capitalizedString = [partialString fieldName];
     if (![capitalizedString isEqualToString:partialString]) {
 		// This is a BibDesk requirement, since we expect field names to be capitalized; BibTeX is case-insensitive of itself.  This will convert "FieldName" to "Fieldname" and "Field-name" to "Field-Name".
 		*newString = capitalizedString;
+        if (error) *error = NSLocalizedString(@"Field names must be capitalized in BibDesk", @"field name warning");
 		return NO;
 	} else return YES;
 }
