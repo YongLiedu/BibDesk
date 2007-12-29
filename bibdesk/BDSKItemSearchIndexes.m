@@ -76,7 +76,9 @@ const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
     self = [super init];
     if (self) {
         searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &BDSKSearchIndexDictionaryValueCallBacks);
-        needsFlushing = NO;
+        
+        // pointer equality, nonretained; indexes are retained by the dictionary
+        indexesToFlush = CFSetCreateMutable(NULL, 0, NULL);
         
         // ensure that we never hand out a NULL search index unless someone asks for a field that isn't indexed
         [self resetWithPublications:nil];
@@ -87,38 +89,19 @@ const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
 - (void)dealloc
 {
     CFRelease(searchIndexes);
+    CFRelease(indexesToFlush);
     [super dealloc];
 }
 
-static void flushAllIndexes(const void *key, const void *value, void *context)
+static void addIndexToSet(const void *key, const void *value, void *context)
 {
-    SKIndexFlush((SKIndexRef)value);
+    CFSetAddValue((CFMutableSetRef)context, (SKIndexRef)value);
 }
 
-- (void)flushIndexesImmediately
-{
-    CFDictionaryApplyFunction(searchIndexes, flushAllIndexes, NULL);    
-    needsFlushing = NO;
-}
-
-- (void)flushIndexesIfNeeded {
-    if (needsFlushing) {
-        [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(flushIndexesImmediately) object:nil];
-        [self performSelector:@selector(flushIndexesImmediately) withObject:nil afterDelay:0.0];
-    }
-}
-
-- (void)flushIndexes {
-    [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(flushIndexesImmediately) object:nil];
-    [self performSelector:@selector(flushIndexesImmediately) withObject:nil afterDelay:0.0];
-}
-
-// Index flushing is fairly expensive, especially with thousands of pubs added; queuing it should keep pub changes that happen in a tight loop from being as memory intensive.
+// Index flushing is fairly expensive, especially with thousands of pubs added; here we just mark all indexes as dirty (which is negligible) and flush each index when requested.
 - (void)scheduleIndexFlush
 {
-    [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(flushIndexesImmediately) object:nil];
-    needsFlushing = YES;
-    [self performSelector:@selector(flushIndexesImmediately) withObject:nil afterDelay:0.0];
+    CFDictionaryApplyFunction(searchIndexes, addIndexToSet, indexesToFlush);    
 }
 
 static void appendNormalizedNames(const void *value, void *context)
@@ -228,7 +211,12 @@ static void removeFromIndex(const void *key, const void *value, void *context)
 - (SKIndexRef)indexForField:(NSString *)field;
 {
     NSParameterAssert(nil != field);
-    return (SKIndexRef)CFDictionaryGetValue(searchIndexes, (CFStringRef)field);
+    SKIndexRef anIndex = (SKIndexRef)CFDictionaryGetValue(searchIndexes, (CFStringRef)field);
+    if (CFSetContainsValue(indexesToFlush, anIndex)) {
+        SKIndexFlush(anIndex);
+        CFSetRemoveValue(indexesToFlush, anIndex);
+    }
+    return anIndex;
 }
 
 @end

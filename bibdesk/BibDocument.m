@@ -2576,9 +2576,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (docState.isDocumentClosed)
         return;
     
-    // flush the indexes before refiltering, as flushing is usually delayed to the end of the run loop
-    [searchIndexes flushIndexesIfNeeded];
-    
 	[self updateSmartGroupsCountAndContent:(docState.itemChangeMask & BDSKItemChangedGroupFieldMask) == 0];
     
     if((docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0){
