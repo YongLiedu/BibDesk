@@ -2307,10 +2307,35 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark Selection
 
 - (int)numberOfSelectedPubs{
+#if 0
+    if ([self isDisplayingFileContentSearch])
+        return [[fileSearchController identifierURLsOfSelectedItems] count];
+    else
+        return [tableView numberOfSelectedRows];
+#endif
     return [tableView numberOfSelectedRows];
 }
 
 - (NSArray *)selectedPublications{
+#if 0
+    NSArray *selPubs = nil;
+    if ([self isDisplayingFileContentSearch]) {
+        if ([[fileSearchController tableView] numberOfSelectedRows]) {
+            NSMutableArray *tmpArray = [NSMutableArray array];
+            NSEnumerator *itemEnum = [[fileSearchController identifierURLsOfSelectedItems] objectEnumerator];
+            NSURL *idURL;
+            BibItem *pub;
+            while (idURL = [itemEnum nextObject]) {
+                if (pub = [publications itemForIdentifierURL:idURL])
+                    [tmpArray addObject:pub];
+            }
+            selPubs = tmpArray;
+        }
+    } else if ([tableView numberOfSelectedRows]) {
+        selPubs = [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
+    }
+    return selPubs;
+#endif
 
     if(nil == tableView || [tableView selectedRow] == -1)
         return nil;
