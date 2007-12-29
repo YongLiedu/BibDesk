@@ -78,7 +78,7 @@ enum {
     BDSKTemplatePreviewDisplay = 3,
     BDSKPDFPreviewDisplay = 4,
     BDSKRTFPreviewDisplay = 5,
-    BDSKLocalUrlPreviewDisplay = 6
+    BDSKLinkedFilePreviewDisplay = 6
 };
 
 // our main document types

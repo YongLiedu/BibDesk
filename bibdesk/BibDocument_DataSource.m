@@ -1216,17 +1216,10 @@
 
 // Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
 - (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
-    if(typeSelectHelper == [tableView typeSelectHelper]){    
-        if ([self numberOfSelectedPubs] == 1){
-            return [tableView selectedRow];
-        }else{
-            return NSNotFound;
-        }
+    if(typeSelectHelper == [tableView typeSelectHelper]){   
+        return [[tableView selectedRowIndexes] lastIndex];
     } else if(typeSelectHelper == [groupTableView typeSelectHelper]){
-        if([groupTableView numberOfSelectedRows] != 1)
-            return NSNotFound;
-        else
-            return [[groupTableView selectedRowIndexes] firstIndex];
+        return [[groupTableView selectedRowIndexes] lastIndex];
     } else return NSNotFound;
 }
 

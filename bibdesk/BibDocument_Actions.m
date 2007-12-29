@@ -205,7 +205,7 @@
                                                  defaultButton:NSLocalizedString(@"Yes", @"Button title")
                                                alternateButton:nil
                                                    otherButton:NSLocalizedString(@"No", @"Button title")
-                                     informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @"Informative text in alert dialog: You are about to remove [number] item(s) from [group \"Name\"]."), [tableView numberOfSelectedRows], ([tableView numberOfSelectedRows] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item", @"")), groupName];
+                                     informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @"Informative text in alert dialog: You are about to remove [number] item(s) from [group \"Name\"]."), [self numberOfSelectedPubs], ([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item", @"")), groupName];
             [alert setHasCheckButton:YES];
             [alert setCheckValue:NO];
             [alert beginSheetModalForWindow:documentWindow
@@ -226,16 +226,17 @@
         return;
     
     // deletion changes the scroll position
-    NSPoint scrollLocation = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-    int lastIndex = [[tableView selectedRowIndexes] lastIndex];
+    NSTableView *tv = [self isDisplayingFileContentSearch] ? [fileSearchController tableView] : tableView;
+    NSPoint scrollLocation = [[tv enclosingScrollView] scrollPositionAsPercentage];
+    int lastIndex = [[tv selectedRowIndexes] lastIndex];
 	[self removePublications:[self selectedPublications]];
-    [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollLocation];
+    [[tv enclosingScrollView] setScrollPositionAsPercentage:scrollLocation];
     
     // should select the publication following the last deleted publication (if any)
-	if(lastIndex >= [tableView numberOfRows])
-        lastIndex = [tableView numberOfRows] - 1;
+	if(lastIndex >= [tv numberOfRows])
+        lastIndex = [tv numberOfRows] - 1;
     if(lastIndex != -1)
-        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:lastIndex] byExtendingSelection:NO];
+        [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:lastIndex] byExtendingSelection:NO];
     
 	int numSelectedPubs = [self numberOfSelectedPubs];
 	NSString * pubSingularPlural;
@@ -1395,6 +1396,7 @@
 }
 
 - (IBAction)selectCrossrefParentAction:(id)sender{
+    OBASSERT([self isDisplayingFileContentSearch] == NO);
     BibItem *selectedBI = [[self selectedPublications] lastObject];
     [self selectCrossrefParentForItem:selectedBI];
 }

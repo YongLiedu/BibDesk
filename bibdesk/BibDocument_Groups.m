@@ -634,7 +634,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
    
-    if([tableView numberOfSelectedRows] == 0 || 
+    if([self numberOfSelectedPubs] == 0 || 
        [self hasExternalGroupsSelected] == YES)
         return [NSIndexSet indexSet];
     
@@ -669,10 +669,11 @@ The groupedPublications array is a subset of the publications array, developed b
     NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
     
     // Unfortunately, we have to check all of the items in the main table, since hidden items may have a visible group
-    NSIndexSet *rowIndexes = [tableView selectedRowIndexes];
-    unsigned int rowIndex = [rowIndexes firstIndex];
+    NSArray *selectedPubs = [self selectedPublications];
+    NSEnumerator *pubEnum = [selectedPubs objectEnumerator];
+    BibItem *pub;
     CFSetRef possibleGroups;
-        
+    
     id *groupNamePtr;
     
     // use a static pointer to a buffer, with initial size of 10
@@ -683,14 +684,14 @@ The groupedPublications array is a subset of the publications array, developed b
     int groupCount = 0;
     
     // we could iterate the dictionary in the outer loop and publications in the inner loop, but there are generally more publications than groups (and we only check visible groups), so this should be more efficient
-    while(rowIndex != NSNotFound){ 
+    while(pub = [pubEnum nextObject]){ 
         
         // here are all the groups that this item can be a part of
-        possibleGroups = (CFSetRef)[[shownPublications objectAtIndex:rowIndex] groupsForField:groupField];
+        possibleGroups = (CFSetRef)[pub groupsForField:groupField];
         
         groupCount = CFSetGetCount(possibleGroups);
         if(groupCount > groupValueMaxSize){
-            NSAssert1(groupCount < 1024, @"insane number of groups for %@", [[shownPublications objectAtIndex:rowIndex] citeKey]);
+            NSAssert1(groupCount < 1024, @"insane number of groups for %@", [pub citeKey]);
             groupValues = NSZoneRealloc(NSDefaultMallocZone(), groupValues, sizeof(id) * groupCount);
             groupValueMaxSize = groupCount;
         }
@@ -708,8 +709,6 @@ The groupedPublications array is a subset of the publications array, developed b
                     [indexSet addIndex:cnt];
             }
         }
-        
-        rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
     }
     
     CFRelease(rowDict);
@@ -726,15 +725,14 @@ The groupedPublications array is a subset of the publications array, developed b
             if([visibleIndexes containsIndex:groupIndex]){
                 
                 aGroup = [groups objectAtIndex:groupIndex];
-                rowIndex = [rowIndexes firstIndex];
+                pubEnum = [selectedPubs objectEnumerator];
                 
-                while(rowIndex != NSNotFound){
+                while(pub = [pubEnum nextObject]){
                 
-                    if([aGroup containsItem:[shownPublications objectAtIndex:rowIndex]]){
+                    if([(BDSKGroup *)aGroup containsItem:pub]){
                         [indexSet addIndex:groupIndex];
                         break;
                     }
-                    rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
                 }
             }
             groupIndex = [staticAndSmartIndexes indexGreaterThanIndex:groupIndex];

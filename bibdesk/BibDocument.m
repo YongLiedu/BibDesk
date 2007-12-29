@@ -575,7 +575,7 @@ enum {
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
        [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
        [self isMainDocument] &&
-       [tableView selectedRow] != -1 )
+       [self numberOfSelectedPubs] != 0)
         [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];    
 	
 	[pboardHelper setDelegate:nil];
@@ -2232,7 +2232,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // cache the selection; this works for multiple publications
     NSArray *pubsToSelect = nil;
     if([tableView numberOfSelectedRows])
-        pubsToSelect = [self selectedPublications];
+        pubsToSelect = [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
     
     // a nil argument means resort the current column in the same order
     if(key == nil){
@@ -3005,12 +3005,12 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     }
 }
 
-- (void)displayLocalURLInPreviewPane{
+- (void)displayLinkedFileInPreviewPane{
     NSView *view = [previewTextView enclosingScrollView];
     [[previewer progressOverlay] remove];
     [previewer updateWithBibTeXString:nil];
     
-    NSURL *url = [[[[[self selectedPublications] firstObject] localFiles] firstObject] URL];
+    NSURL *url = [[self selectedFileURLs] firstObject];
     BOOL isDir;
     BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:[url path] isDirectory:&isDir];
     // checking kUTTypeText would get RTF, HTML, XML, txt, but not RTFD or web archives; consequently, we'll just try loading anything and let NSAttributedString sort it out if it's not PDF or PS
@@ -3242,8 +3242,8 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     
     if(displayType == BDSKPDFPreviewDisplay || displayType == BDSKRTFPreviewDisplay){
         [self displayTeXPreviewInPreviewPane];
-    }else if(displayType == BDSKLocalUrlPreviewDisplay){
-        [self displayLocalURLInPreviewPane];
+    }else if(displayType == BDSKLinkedFilePreviewDisplay){
+        [self displayLinkedFileInPreviewPane];
     }else{
         [self displayAttributedTextPreviewInPreviewPane];
     }
@@ -3459,7 +3459,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 
 - (NSView *)printableView{
     int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
-    if(displayType == BDSKPDFPreviewDisplay || displayType == BDSKLocalUrlPreviewDisplay){
+    if(displayType == BDSKPDFPreviewDisplay || displayType == BDSKLinkedFilePreviewDisplay){
         // we don't reach this, we let the pdfView do the printing
         return currentPreviewView; 
     }else if(displayType == BDSKRTFPreviewDisplay){
