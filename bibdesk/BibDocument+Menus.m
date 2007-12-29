@@ -238,21 +238,11 @@
 }	
 
 - (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    if ([menuItem representedObject])
-        return YES;
-    else if ([self isDisplayingFileContentSearch])
-        return [[fileSearchController URLsOfSelectedItems] count] > 0;
-    else
-        return [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
+    return ([menuItem representedObject] != nil || [[self selectedFileURLs] count] > 0);
 }	
 
 - (BOOL) validateRevealLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    if ([menuItem representedObject])
-        return YES;
-    else if ([self isDisplayingFileContentSearch])
-        return [[fileSearchController URLsOfSelectedItems] count] > 0;
-    else
-        return [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
+    return ([menuItem representedObject] != nil || [[self selectedFileURLs] count] > 0);
 }	
 
 - (BOOL) validateOpenLinkedURLMenuItem:(NSMenuItem*) menuItem {
@@ -260,21 +250,11 @@
 }	
 
 - (BOOL) validateShowNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    if ([menuItem representedObject])
-        return YES;
-    else if ([self isDisplayingFileContentSearch])
-        return [[fileSearchController URLsOfSelectedItems] count] > 0;
-    else
-        return [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
+    return ([menuItem representedObject] != nil || [[self selectedFileURLs] count] > 0);
 }	
 
 - (BOOL) validateCopyNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    if ([menuItem representedObject])
-        return YES;
-    else if ([self isDisplayingFileContentSearch])
-        return [[fileSearchController URLsOfSelectedItems] count] > 0;
-    else
-        return [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] count] > 0;
+    return ([menuItem representedObject] != nil || [[self selectedFileURLs] count] > 0);
 }	
 
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
