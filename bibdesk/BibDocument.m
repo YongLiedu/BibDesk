@@ -2595,7 +2595,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         }
         if (shouldRedoSearch) {
             [searchField sendAction:[searchField action] to:[searchField target]];
-        } else if([self isDisplayingFileContentSearch] == NO && (docState.itemChangeMask & BDSKItemChangedFieldMask) != 0) { 
+        } else if((docState.itemChangeMask & BDSKItemChangedFieldMask) != 0) { 
             // groups and quicksearch won't update for us
             if ((docState.itemChangeMask & BDSKItemChangedSortKeyMask) != 0)
                 [self sortPubsByKey:nil];
