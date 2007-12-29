@@ -244,6 +244,12 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     return tooltip;
 }
 
+- (void)showHelp:(id)sender
+{
+    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"FileMigration" inBook:helpBookName];
+}
+
 @end
 
 @implementation BDSKBibItemTransformer
