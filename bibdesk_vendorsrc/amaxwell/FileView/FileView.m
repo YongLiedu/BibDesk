@@ -1350,11 +1350,15 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     return NSNotFound == anIndex ? nil : [self iconURLAtIndex:anIndex];
 }
 
-- (void)_openURL:(NSURL *)aURL
+- (void)_openURLs:(NSArray *)URLs
 {
-    if ([[self delegate] respondsToSelector:@selector(fileView:shouldOpenURL:)] == NO ||
-        [[self delegate] fileView:self shouldOpenURL:aURL] == YES)
-        [[NSWorkspace sharedWorkspace] openURL:aURL];
+    NSEnumerator *e = [URLs objectEnumerator];
+    NSURL *aURL;
+    while (aURL = [e nextObject]) {
+        if ([[self delegate] respondsToSelector:@selector(fileView:shouldOpenURL:)] == NO ||
+            [[self delegate] fileView:self shouldOpenURL:aURL] == YES)
+            [[NSWorkspace sharedWorkspace] openURL:aURL];
+    }
 }
 
 - (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)userData
@@ -1484,7 +1488,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                 [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
                 [FVPreviewer previewURL:[self _URLAtPoint:p]];
             } else {
-                [self _openURL:[self _URLAtPoint:p]];
+                [self _openURLs:[self _selectedURLs]];
             }
         }
         
@@ -1615,11 +1619,6 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [self autoscroll:event];
         [super mouseDragged:event];
     }
-}
-
-- (NSURL *)URLForLastMouseDown
-{
-    return [self _URLAtPoint:_lastMouseDownLocInView];
 }
 
 #pragma mark Drop target
@@ -1987,12 +1986,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)revealInFinder:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] selectFile:[[self URLForLastMouseDown] path] inFileViewerRootedAtPath:nil];
+    [[NSWorkspace sharedWorkspace] selectFile:[[[self _selectedURLs] lastObject] path] inFileViewerRootedAtPath:nil];
 }
 
 - (IBAction)openURL:(id)sender
 {
-    [self _openURL:[self URLForLastMouseDown]];
+    [self _openURLs:[self _selectedURLs]];
 }
 
 - (IBAction)zoomIn:(id)sender;
@@ -2008,7 +2007,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (IBAction)previewAction:(id)sender;
 {
     [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
-    [FVPreviewer previewURL:[self URLForLastMouseDown]];
+    [FVPreviewer previewURL:[[self _selectedURLs] lastObject]];
 }
 
 - (IBAction)delete:(id)sender;
@@ -2055,12 +2054,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (BOOL)validateMenuItem:(NSMenuItem *)anItem
 {
-    NSURL *aURL = [self URLForLastMouseDown];  
+    NSURL *aURL = [[self _selectedURLs] lastObject];  
     SEL action = [anItem action];
     if (action == @selector(zoomOut:) || action == @selector(zoomIn:))
         return YES;
     else if (action == @selector(revealInFinder:))
-        return [aURL isFileURL] && [[NSFileManager defaultManager] fileExistsAtPath:[aURL path]];
+        return [aURL isFileURL] && [_selectedIndexes count] == 1;
     else if (action == @selector(openURL:) && nil != aURL) {
         NSBundle *bundle = [NSBundle bundleForClass:[FileView class]];
         NSString *title;
@@ -2075,8 +2074,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         return [self isEditable] && [_selectedIndexes count] > 0;
     else if (action == @selector(selectAll:))
         return ([self numberOfIcons] > 0);
-    else if (action == @selector(openURL:) || action == @selector(previewAction:))
-        return (nil != aURL);
+    else if (action == @selector(previewAction:))
+        return (nil != aURL) && [_selectedIndexes count] == 1;
     else if (action == @selector(paste:))
         return [self isEditable];
     // need to handle print: and other actions
@@ -2092,6 +2091,10 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     if ([self _getGridRow:&r column:&c atPoint:_lastMouseDownLocInView])
         idx = [self _indexForGridRow:r column:c];
     
+    // Finder changes selection only if the clicked item isn't in the current selection
+    if (menu && NO == [_selectedIndexes containsIndex:idx])
+        [self setSelectionIndexes:idx == NSNotFound ? [NSIndexSet indexSet] : [NSIndexSet indexSetWithIndex:idx]];
+
     // remove disabled items and double separators
     i = [menu numberOfItems];
     BOOL wasSeparator = YES;
@@ -2117,11 +2120,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     
     if ([menu numberOfItems] == 0)
         menu = nil;
-    
-    NSIndexSet *newSelectionIndexes = idx == NSNotFound ? [NSIndexSet indexSet] : [NSIndexSet indexSetWithIndex:idx];
-    if ([newSelectionIndexes isEqual:_selectedIndexes] == NO)
-        [self setSelectionIndexes:newSelectionIndexes];
-    
+
     return menu;
 }
 
