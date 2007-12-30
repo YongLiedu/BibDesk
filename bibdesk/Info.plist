@@ -949,8 +949,10 @@
 						<real>50</real>
 						<key>Local-Url</key>
 						<real>18</real>
+                        <key>Local File</key>
+                        <real>50</real>
 						<key>Publication Date</key>
-						<real>50</real>
+						<real>40</real>
 						<key>Rating</key>
 						<real>70</real>
 						<key>Read</key>
@@ -978,8 +980,6 @@
 					<real>1</real>
 					<key>Preview RTF Scale Factor</key>
 					<real>1</real>
-					<key>Saved size of BibEditor document snoop drawer</key>
-					<string></string>
 					<key>Show Editor Status Bar</key>
 					<true/>
 					<key>Show Find Status Bar</key>
@@ -1000,6 +1000,7 @@
 						<string>1st Author</string>
 						<string>2nd Author</string>
 						<string>3rd Author</string>
+                        <string>Local File</string>
 					</array>
 					<key>Snoop Drawer Content</key>
 					<integer>0</integer>
