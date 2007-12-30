@@ -1392,14 +1392,17 @@ static CFDictionaryRef selectorTable = NULL;
     NSMutableString *string = [NSMutableString string];
     NSEnumerator *fileEnum = [[self localFiles] objectEnumerator];
     BDSKLinkedFile *file;
+    NSURL *fileURL;
     
     while (file = [fileEnum nextObject]) {
-        NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:[file URL]];
-        if ([notes length] == 0)
-            continue;
-        if ([string length])
-            [string appendString:@"\n\n"];
-        [string appendString:notes];
+        if (fileURL = [file URL]) {
+            NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
+            if ([notes length] == 0)
+                continue;
+            if ([string length])
+                [string appendString:@"\n\n"];
+            [string appendString:notes];
+        }
     }
     return [string length] ? string : nil;
 }
