@@ -2118,8 +2118,9 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     if ([menu numberOfItems] == 0)
         menu = nil;
     
-    if (menu && NO == [_selectedIndexes containsIndex:idx])
-        [self setSelectionIndexes:idx == NSNotFound ? [NSIndexSet indexSet] : [NSIndexSet indexSetWithIndex:idx]];
+    NSIndexSet *newSelectionIndexes = idx == NSNotFound ? [NSIndexSet indexSet] : [NSIndexSet indexSetWithIndex:idx];
+    if ([newSelectionIndexes isEqual:_selectedIndexes] == NO)
+        [self setSelectionIndexes:newSelectionIndexes];
     
     return menu;
 }
