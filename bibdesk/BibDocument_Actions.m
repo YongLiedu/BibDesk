@@ -801,6 +801,7 @@
 - (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
+        NSURL *fileURL;
         NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
         
         if (fileURLs)
@@ -850,6 +851,7 @@
 - (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
+        NSURL *fileURL;
         NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
         
         if (fileURLs)
@@ -892,6 +894,7 @@
 - (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if(returnCode == NSAlertAlternateReturn){
         NSEnumerator *urlEnum;
+        NSURL *remoteURL;
         NSArray *remoteURLs = [(NSArray *)contextInfo autorelease];
         
         if (remoteURLs)
@@ -934,6 +937,7 @@
 - (void)showNotesForLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
+        NSURL *fileURL;
         NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
         BDSKNotesWindowController *notesController;
         
