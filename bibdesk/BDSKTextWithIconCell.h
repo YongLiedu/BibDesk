@@ -44,6 +44,7 @@
 @interface BDSKTextWithIconCell : NSTextFieldCell
 {
     NSImage *icon;
+    NSParagraphStyle *paragraphStyle;
     struct {
         unsigned int drawsHighlight:1;
         unsigned int imagePosition:3;
@@ -60,6 +61,8 @@
 
 - (BOOL)drawsHighlight;
 - (void)setDrawsHighlight:(BOOL)flag;
+
+- (void)setParagraphStyle:(NSParagraphStyle *)style;
 
 @end
 

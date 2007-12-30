@@ -76,7 +76,7 @@
 - (void)dealloc;
 {
     [icon release];
-    
+    [paragraphStyle release];
     [super dealloc];
 }
 
@@ -88,8 +88,22 @@
     
     copy->icon = [icon retain];
     copy->_oaFlags.drawsHighlight = _oaFlags.drawsHighlight;
+    copy->paragraphStyle = [paragraphStyle retain];
     
     return copy;
+}
+
+- (NSParagraphStyle *)paragraphStyle;
+{
+    return (nil == paragraphStyle) ? [[self class] paragraphStyle] : paragraphStyle;
+}
+
+- (void)setParagraphStyle:(NSParagraphStyle *)style;
+{
+    if (paragraphStyle != style) {
+        [paragraphStyle release];
+        paragraphStyle = [style copy];
+    }
 }
 
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
@@ -261,7 +275,7 @@ textRect.origin.y += vOffset; \
         [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
     }
     
-    [label addAttribute:NSParagraphStyleAttributeName value:[[self class] paragraphStyle] range:labelRange];
+    [label addAttribute:NSParagraphStyleAttributeName value:[self paragraphStyle] range:labelRange];
     [label drawInRect:textRect];
     [label release];
     
