@@ -64,6 +64,7 @@
 - (id)delegate;
 
 - (void)update;
+- (void)updateWithPath:(NSString *)aPath;
 
 @end
 

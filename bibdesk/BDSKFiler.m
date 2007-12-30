@@ -213,7 +213,7 @@
                 
             } else {
                 
-                [file update];
+                [file updateWithPath:newPath];
                 // make sure the UI is updated
                 [pub noteFilesChanged:YES];
                 

@@ -162,7 +162,8 @@ static Class BDSKLinkedObjectClass = Nil;
 
 - (BOOL)isFile { return NO; }
 
-- (void)update {}
+- (void)update { [self updateWithPath:nil]; }
+- (void)updateWithPath:(NSString *)aPath {}
 
 - (NSString *)relativePath { return nil; }
 
@@ -455,7 +456,7 @@ static Class BDSKLinkedObjectClass = Nil;
 }
 
 // this could be called when the document fileURL changes
-- (void)update {
+- (void)updateWithPath:(NSString *)aPath {
     NSURL *baseURL = [delegate baseURLForLinkedFile:self];
     FSRef baseRef;
     
@@ -468,6 +469,26 @@ static Class BDSKLinkedObjectClass = Nil;
             // the fileRef was invalid, reset it and update
             [self setFileRef:NULL];
             [self fileRef];
+            if (fileRef == NULL) {
+                // this can happen after an auto file to a volume, as the file is actually not moved but copied
+                BDAlias *anAlias;
+                if (baseURL)
+                    anAlias = [[BDAlias alloc] initWithPath:[basePath relativePathToFilename:aPath] relativeToPath:[baseURL path]];
+                else
+                    anAlias = [[BDAlias alloc] initWithPath:aPath];
+                if (anAlias) {
+                    BDAlias *saveAlias = alias;
+                    alias = [anAlias retain];
+                    [self fileRef];
+                    if (fileRef == NULL) {
+                        [alias release];
+                        alias = saveAlias;
+                        [self fileRef];
+                    } else {
+                        [saveAlias release];
+                    }
+                }
+            }
         } else {
             CFRelease(aURL);
             if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef)) {
