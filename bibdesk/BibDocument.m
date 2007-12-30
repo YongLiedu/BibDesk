@@ -2554,7 +2554,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (BOOL)sortKeyDependsOnKey:(NSString *)key{
-    if([sortKey isEqualToString:BDSKTitleString])
+    if (key == nil)
+        return YES;
+    else if([sortKey isEqualToString:BDSKTitleString])
         return [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKChapterString] || [key isEqualToString:BDSKPagesString] || [key isEqualToString:BDSKPubTypeString];
     else if([sortKey isEqualToString:BDSKContainerString])
         return [key isEqualToString:BDSKContainerString] || [key isEqualToString:BDSKJournalString] || [key isEqualToString:BDSKBooktitleString] || [key isEqualToString:BDSKVolumeString] || [key isEqualToString:BDSKSeriesString] || [key isEqualToString:BDSKPubTypeString];
@@ -2566,6 +2568,20 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return [key isEqualToString:BDSKAuthorString] || [key isEqualToString:BDSKEditorString];
     else
         return [sortKey isEqualToString:key];
+}
+
+- (BOOL)searchKeyDependsOnKey:(NSString *)key{
+    NSString *searchKey = [[searchField stringValue] isEqualToString:@""] ? nil : [searchButtonController selectedItemIdentifier];
+    if ([searchKey isEqualToString:BDSKSkimNotesString] || [searchKey isEqualToString:BDSKFileContentSearchString])
+        return [key isEqualToString:BDSKLocalFileString];
+    else if (key == nil)
+        return YES;
+    else if ([searchKey isEqualToString:BDSKAllFieldsString])
+        return [key isEqualToString:BDSKLocalFileString] == NO && [key isEqualToString:BDSKRemoteURLString] == NO;
+    else if ([searchKey isEqualToString:BDSKPersonString])
+        return [key isPersonField];
+    else
+        return [key isEqualToString:searchKey];
 }
 
 - (void)handlePrivateBibItemChanged{
@@ -2679,21 +2695,12 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         }
     }
     
-    NSString *searchKey = [[searchField stringValue] isEqualToString:@""] ? nil : [searchButtonController selectedItemIdentifier];
-    
-    if ([changedKey isEqualToString:BDSKLocalFileString]) {
-        if ([searchKey isEqualToString:BDSKSkimNotesString] || [searchKey isEqualToString:BDSKFileContentSearchString])
-            docState.itemChangeMask |= BDSKItemChangedSearchKeyMask;
-    } else if ([changedKey isEqualToString:BDSKRemoteURLString] == NO) {
-        if ([changedKey isEqualToString:[self currentGroupField]] || changedKey == nil)
-            docState.itemChangeMask |= BDSKItemChangedGroupFieldMask;
-        if ([searchKey isEqualToString:BDSKAllFieldsString] ||
-            ([searchKey isEqualToString:BDSKPersonString] && ([changedKey isPersonField] || changedKey == nil)) ||
-            ([searchKey isEqualToString:BDSKTitleString] && ([changedKey isEqualToString:BDSKTitleString] || changedKey == nil)))
-            docState.itemChangeMask |= BDSKItemChangedSearchKeyMask;
-    }
-    if ([self sortKeyDependsOnKey:changedKey] || changedKey == nil)
+    if ([changedKey isEqualToString:[self currentGroupField]] || changedKey == nil)
+        docState.itemChangeMask |= BDSKItemChangedGroupFieldMask;
+    if ([self sortKeyDependsOnKey:changedKey])
         docState.itemChangeMask |= BDSKItemChangedSortKeyMask;
+    if ([self searchKeyDependsOnKey:changedKey])
+        docState.itemChangeMask |= BDSKItemChangedSearchKeyMask;
     
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
     [self queueSelectorOnce:@selector(handlePrivateBibItemChanged)];
