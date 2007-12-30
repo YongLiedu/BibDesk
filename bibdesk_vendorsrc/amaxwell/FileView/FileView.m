@@ -1488,7 +1488,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                 [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
                 [FVPreviewer previewURL:[self _URLAtPoint:p]];
             } else {
-                [self _openURLs:[self _selectedURLs]];
+                [self openSelectedURLs:self];
             }
         }
         
@@ -1989,7 +1989,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     [[NSWorkspace sharedWorkspace] selectFile:[[[self _selectedURLs] lastObject] path] inFileViewerRootedAtPath:nil];
 }
 
-- (IBAction)openURL:(id)sender
+- (IBAction)openSelectedURLs:(id)sender
 {
     [self _openURLs:[self _selectedURLs]];
 }
@@ -2060,16 +2060,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         return YES;
     else if (action == @selector(revealInFinder:))
         return [aURL isFileURL] && [_selectedIndexes count] == 1;
-    else if (action == @selector(openURL:) && nil != aURL) {
-        NSBundle *bundle = [NSBundle bundleForClass:[FileView class]];
-        NSString *title;
-        if ([aURL isFileURL])
-            title = NSLocalizedStringFromTableInBundle(@"Open File", @"FileView", bundle, @"context menu title");
-        else
-            title = NSLocalizedStringFromTableInBundle(@"Open in Browser", @"FileView", bundle, @"context menu title");
-        [anItem setTitle:title];
+    else if (action == @selector(openSelectedURLs:) && nil != aURL)
         return YES;
-    }
     else if (action == @selector(delete:) || action == @selector(copy:) || action == @selector(cut:))
         return [self isEditable] && [_selectedIndexes count] > 0;
     else if (action == @selector(selectAll:))
@@ -2135,7 +2127,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Quick Look", @"FileView", bundle, @"context menu title") action:@selector(previewAction:) keyEquivalent:@""];
         [anItem setTag:FVQuickLookMenuItemTag];
-        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Open File", @"FileView", bundle, @"context menu title") action:@selector(openURL:) keyEquivalent:@""];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Open", @"FileView", bundle, @"context menu title") action:@selector(openSelectedURLs:) keyEquivalent:@""];
         [anItem setTag:FVOpenMenuItemTag];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Reveal in Finder", @"FileView", bundle, @"context menu title") action:@selector(revealInFinder:) keyEquivalent:@""];
         [anItem setTag:FVRevealMenuItemTag];
