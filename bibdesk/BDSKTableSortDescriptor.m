@@ -192,6 +192,10 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
         else
             sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(UTICompare:)];
         
+    }else if([tcID isEqualToString:BDSKLocalFileString]){
+        
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"countOfLocalFilesAsNumber" ascending:ascend selector:@selector(compare:)];
+        
     }else {
         
         // this assumes that all other columns must be NSString objects

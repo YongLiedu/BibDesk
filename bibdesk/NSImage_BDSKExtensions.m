@@ -186,6 +186,49 @@
     return image != [NSNull null] ? image : nil;
 }
 
++ (NSImage *)paperclipImage;
+{
+    NSRect r = NSMakeRect(0, 0, 32, 32);
+    NSImage *image = [[NSImage alloc] initWithSize:r.size];
+    [image setBackgroundColor:[NSColor clearColor]];
+    
+    NSBezierPath *path = [NSBezierPath bezierPath];    
+    [image lockFocus];
+    
+    // I started out with the idea of making this resolution-independent and scaling to an arbitrary size, but transforming the points was too annoying.  I started out with a 1x1" grid subdivided into 0.125" ticks in OmniGraffle and drew a paperclip using lines and semicircles.  The path coordinates were taken directly from that graffle diagram, and the transform and line width were adjusted by trial and error.
+    NSAffineTransform *t = [NSAffineTransform transform];
+    [t rotateByDegrees:-35];
+    [t translateXBy:0 yBy:10];
+    [t scaleXBy:2 yBy:2];
+    [t concat];
+    [path setLineWidth:0.5];
+    
+    // start at the outside (right) and work inward
+    [path moveToPoint:NSMakePoint(4, 8)];
+    [path lineToPoint:NSMakePoint(4, 2)];
+    
+    NSPoint center = NSMakePoint(2, 2);
+    CGFloat radius = [path currentPoint].x - center.x;
+    [path appendBezierPathWithArcWithCenter:center radius:radius startAngle:0 endAngle:180 clockwise:YES];
+    [path lineToPoint:NSMakePoint(0, 10)];
+    
+    center = NSMakePoint(1.5, 10);
+    radius = center.x - [path currentPoint].x;
+    [path appendBezierPathWithArcWithCenter:center radius:radius startAngle:180 endAngle:0 clockwise:YES];
+    [path lineToPoint:NSMakePoint(3, 4)];
+    
+    center = NSMakePoint(2, 4);
+    radius = [path currentPoint].x - center.x;
+    [path appendBezierPathWithArcWithCenter:center radius:radius startAngle:0 endAngle:180 clockwise:YES];
+    [path lineToPoint:NSMakePoint(1, 8)];
+    
+    [[NSColor blackColor] setStroke];
+    [path stroke];
+    
+    [image unlockFocus];
+    return [image autorelease];
+}
+
 - (NSImage *)imageFlippedHorizontally;
 {
 	NSImage *flippedImage;

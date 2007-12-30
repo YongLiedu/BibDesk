@@ -48,6 +48,8 @@
 
 + (NSImage *)imageForURL:(NSURL *)aURL;
 + (NSImage *)imageForFile:(NSString *)path;
++ (NSImage *)paperclipImage;
+
 - (NSImage *)imageFlippedHorizontally;
 - (NSImage *)highlightedImage;
 - (NSImage *)dragImageWithCount:(int)count;

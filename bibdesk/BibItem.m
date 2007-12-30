@@ -1360,14 +1360,16 @@ static CFDictionaryRef selectorTable = NULL;
     }else if([field isEqualToString:BDSKRelevanceString]){
         return [NSNumber numberWithFloat:[self searchScore]];
     }else if([field isEqualToString:BDSKLocalFileString]){
-        BDSKLinkedFile *file = [[self localFiles] firstObject];
-        NSURL *fileURL = [file URL];
-        if (file == nil)
-            return nil;
-        else if (fileURL == nil)
-            return [NSImage missingFileImage];
-        else
-            return [NSImage imageForURL:fileURL];
+        unsigned count = [[self localFiles] count];
+        NSDictionary *cellDictionary = nil;
+        if (count > 0) {
+            NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
+            static NSImage *image = nil;
+            if (nil == image)
+                image = [[NSImage paperclipImage] copy];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:image, OATextWithIconCellImageKey, label, OATextWithIconCellStringKey, nil];
+        }
+        return cellDictionary;
     }else if([field isEqualToString:BDSKRemoteURLString]){
         BDSKLinkedFile *file = [[self localFiles] firstObject];
         NSURL *theURL = [file URL];
@@ -2527,6 +2529,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *basePath = [self basePath];
     return basePath ? [NSURL fileURLWithPath:basePath] : nil;
 }
+
+// for main tableview sort descriptor
+- (NSNumber *)countOfLocalFilesAsNumber { return [NSNumber numberWithInt:[[self localFiles] count]]; }
 
 - (NSUInteger)countOfFiles { return [files count]; }
 

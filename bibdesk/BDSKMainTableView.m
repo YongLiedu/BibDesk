@@ -57,6 +57,8 @@
 #import "BDSKImageFadeAnimation.h"
 #import "NSViewAnimation_BDSKExtensions.h"
 #import <QuartzCore/QuartzCore.h>
+#import "BDSKTextWithIconCell.h"
+#import "NSImage_BDSKExtensions.h"
 
 @interface BDSKMainTableView (Private)
 
@@ -295,8 +297,16 @@
         NSImage *image;
         NSString *title;
 
-        if([colName isURLField] || [colName isEqualToString:BDSKLocalFileString] || [colName isEqualToString:BDSKRemoteURLString]){
+        if([colName isURLField] || [colName isEqualToString:BDSKRemoteURLString]){
             [tc setDataCell:imageCell];
+        }else if([colName isEqualToString:BDSKLocalFileString]){
+            BDSKTextWithIconCell *textIconCell = [[[BDSKTextWithIconCell alloc] init] autorelease];
+            NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+            // Mail.app word wraps its paperclip cell, and BDSKTextWithIconCell ignores setLineBreakMode:
+            [style setLineBreakMode:NSLineBreakByWordWrapping];
+            [textIconCell setParagraphStyle:style];
+            [style release];
+            [tc setDataCell:textIconCell];
         }else if([colName isRatingField]){
             BDSKRatingButtonCell *ratingCell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];
             [ratingCell setBordered:NO];
@@ -484,7 +494,10 @@
 	
 	if (headerImageCache == nil) {
 		NSDictionary *paths = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableHeaderImagesKey];
-		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, [NSImage imageNamed:@"TinyFile"], BDSKLocalFileString, [NSImage imageNamed:@"ArrowImage"], BDSKCrossrefString, nil];
+        NSImage *paperclip = [NSImage paperclipImage];
+        [paperclip setScalesWhenResized:YES];
+        [paperclip setSize:NSMakeSize(16, 16)];
+		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, [NSImage imageNamed:@"ArrowImage"], BDSKCrossrefString, nil];
 		if (paths) {
 			NSEnumerator *keyEnum = [paths keyEnumerator];
 			NSString *key, *path;
