@@ -196,6 +196,10 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
         
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"countOfLocalFilesAsNumber" ascending:ascend selector:@selector(compare:)];
         
+    }else if([tcID isEqualToString:BDSKRemoteURLString]){
+        
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"countOfRemoteURLsAsNumber" ascending:ascend selector:@selector(compare:)];
+        
     }else {
         
         // this assumes that all other columns must be NSString objects

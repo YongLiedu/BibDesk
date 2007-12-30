@@ -297,9 +297,9 @@
         NSImage *image;
         NSString *title;
 
-        if([colName isURLField] || [colName isEqualToString:BDSKRemoteURLString]){
+        if([colName isURLField]){
             [tc setDataCell:imageCell];
-        }else if([colName isEqualToString:BDSKLocalFileString]){
+        }else if([colName isEqualToString:BDSKLocalFileString] || [colName isEqualToString:BDSKRemoteURLString]){
             BDSKTextWithIconCell *textIconCell = [[[BDSKTextWithIconCell alloc] init] autorelease];
             NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
             // Mail.app word wraps its paperclip cell, and BDSKTextWithIconCell ignores setLineBreakMode:

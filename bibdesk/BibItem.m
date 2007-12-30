@@ -1371,12 +1371,13 @@ static CFDictionaryRef selectorTable = NULL;
         }
         return cellDictionary;
     }else if([field isEqualToString:BDSKRemoteURLString]){
-        BDSKLinkedFile *file = [[self localFiles] firstObject];
-        NSURL *theURL = [file URL];
-        if (theURL == nil)
-            return nil;
-        else
-            return [NSImage imageForURL:theURL];
+        unsigned count = [[self remoteURLs] count];
+        NSDictionary *cellDictionary = nil;
+        if (count > 0) {
+            NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSImage genericInternetLocationImage], OATextWithIconCellImageKey, label, OATextWithIconCellStringKey, nil];
+        }
+        return cellDictionary;
     }else{
         // the tableColumn isn't something we handle in a custom way.
         return [self valueOfField:field];

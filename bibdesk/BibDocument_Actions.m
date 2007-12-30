@@ -430,14 +430,14 @@
 		[self openRemoteURLForField:colID];
     } else if([colID isEqualToString:BDSKLocalFileString]) {
         BibItem *pub = [[self selectedPublications] lastObject];
-        NSURL *fileURL = [[[pub localFiles] firstObject] URL];
-        if (fileURL)
-            [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
+        NSArray *fileURLs = [[pub localFiles] valueForKey:@"URL"];
+        if ([fileURLs count])
+            [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURLs retain]];
     } else if([colID isEqualToString:BDSKRemoteURLString]) {
         BibItem *pub = [[self selectedPublications] lastObject];
-        NSURL *theURL = [[[pub remoteURLs] firstObject] URL];
-        if (theURL)
-            [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[theURL retain]];
+        NSArray *theURLs = [[pub remoteURLs] valueForKey:@"URL"];
+        if ([theURLs count])
+            [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[theURLs retain]];
     } else {
         [self editPubCmd:sender];
     }
@@ -801,10 +801,10 @@
 - (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
-        NSURL *fileURL = [(NSURL *)contextInfo autorelease];
+        NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
         
-        if (fileURL)
-            urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        if (fileURLs)
+            urlEnum = [fileURLs objectEnumerator];
         else
             urlEnum = [[self selectedFileURLs] objectEnumerator];
         
@@ -826,7 +826,7 @@
 - (IBAction)openLinkedFile:(id)sender{
     NSURL *fileURL = [sender representedObject];
     if (fileURL) {
-        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
+        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
         int n = [[self selectedFileURLs] count];
         
@@ -850,10 +850,10 @@
 - (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
-        NSURL *fileURL = [(NSURL *)contextInfo autorelease];
+        NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
         
-        if (fileURL)
-            urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        if (fileURLs)
+            urlEnum = [fileURLs objectEnumerator];
         else
             urlEnum = [[self selectedFileURLs] objectEnumerator];
         
@@ -868,7 +868,7 @@
 - (IBAction)revealLinkedFile:(id)sender{
     NSURL *fileURL = [sender representedObject];
     if (fileURL) {
-        [self revealLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
+        [self revealLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
         int n = [[self selectedFileURLs] count];
         
@@ -892,10 +892,10 @@
 - (void)openLinkedURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if(returnCode == NSAlertAlternateReturn){
         NSEnumerator *urlEnum;
-        NSURL *remoteURL = [(NSURL *)contextInfo autorelease];
+        NSArray *remoteURLs = [(NSArray *)contextInfo autorelease];
         
-        if (remoteURL)
-            urlEnum = [[NSArray arrayWithObject:remoteURL] objectEnumerator];
+        if (remoteURLs)
+            urlEnum = [remoteURLs objectEnumerator];
         else
             urlEnum = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"] objectEnumerator];
         
@@ -910,7 +910,7 @@
 - (IBAction)openLinkedURL:(id)sender{
     NSURL *remoteURL = [sender representedObject];
     if (remoteURL) {
-        [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[remoteURL retain]];
+        [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:remoteURL, nil]];
     } else {
         int n = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count];
         
@@ -934,11 +934,11 @@
 - (void)showNotesForLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum;
-        NSURL *fileURL = [(NSURL *)contextInfo autorelease];
+        NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
         BDSKNotesWindowController *notesController;
         
-        if (fileURL)
-            urlEnum = [[NSArray arrayWithObject:fileURL] objectEnumerator];
+        if (fileURLs)
+            urlEnum = [fileURLs objectEnumerator];
         else
             urlEnum = [[self selectedFileURLs] objectEnumerator];
         
@@ -955,7 +955,7 @@
 - (IBAction)showNotesForLinkedFile:(id)sender{
     NSURL *fileURL = [sender representedObject];
     if (fileURL) {
-        [self showNotesForLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
+        [self showNotesForLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[[NSArray alloc] initWithObjects:fileURL, nil]];
     } else {
         int n = [[self selectedFileURLs] count];
         
