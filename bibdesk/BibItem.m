@@ -2548,18 +2548,19 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     if ([owner fileURL])
         [aFile update];
     
-    [self noteFilesChanged];
+    [self noteFilesChanged:[aFile isFile]];
 }
 
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx
 {
     BDSKLinkedFile *file = [files objectAtIndex:idx];
+    BOOL isFile = [file isFile];
     [[[self undoManager] prepareWithInvocationTarget:self] insertObject:file inFilesAtIndex:idx];
     [file setDelegate:nil];
     [self removeFileToBeFiled:file];
     [files removeObjectAtIndex:idx];
     
-    [self noteFilesChanged];
+    [self noteFilesChanged:isFile];
 }
 
 - (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx
@@ -2594,15 +2595,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [self autoFileLinkedFile:aFile];
 }
 
-- (void)noteFilesChanged {
+- (void)noteFilesChanged:(BOOL)isFile {
     // this is called after filing a linked file
     // these are now stale, so rebuild
+    NSString *key = isFile ? BDSKLocalFileString : BDSKRemoteURLString;
     [sortedURLs release];
     sortedURLs = nil;
     // this updates the search index
-    [self updateMetadataForKey:BDSKLocalFileString];
+    [self updateMetadataForKey:key];
     // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
                                                         object:self
                                                       userInfo:notifInfo];

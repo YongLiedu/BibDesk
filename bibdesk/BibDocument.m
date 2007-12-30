@@ -149,12 +149,9 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
 enum {
-    BDSKItemChangedFieldMask = 1,
-    BDSKItemChangedTitleMask = 2,
-    BDSKItemChangedPersonFieldMask = 4,
-    BDSKItemChangedGroupFieldMask = 8,
-    BDSKItemChangedLocalFileMask = 16,
-    BDSKItemChangedSortKeyMask = 32
+    BDSKItemChangedGroupFieldMask = 1,
+    BDSKItemChangedSearchKeyMask = 2,
+    BDSKItemChangedSortKeyMask = 4
 };
 
 @interface BDSKFileViewObject : NSObject
@@ -2576,34 +2573,23 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (docState.isDocumentClosed)
         return;
     
-	[self updateSmartGroupsCountAndContent:(docState.itemChangeMask & BDSKItemChangedGroupFieldMask) == 0];
+    BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
+	[self updateSmartGroupsCountAndContent:shouldUpdateGroups];
     
-    if((docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0){
+    if(shouldUpdateGroups){
         // this handles all UI updates if we call it, so don't bother with any others
         [self updateCategoryGroupsPreservingSelection:YES];
+    } else if ((docState.itemChangeMask & BDSKItemChangedSearchKeyMask) != 0) {
+        // this handles all UI updates if we call it, so don't bother with any others
+        [searchField sendAction:[searchField action] to:[searchField target]];
     } else {
-        BOOL shouldRedoSearch = NO;
-        // don't perform a search if the search field is empty
-        if ([[searchField stringValue] isEqualToString:@""] == NO) {
-            NSString *searchKey = [searchButtonController selectedItemIdentifier];
-            if ([searchKey isEqualToString:BDSKSkimNotesString] || [searchKey isEqualToString:BDSKFileContentSearchString])
-                shouldRedoSearch = (docState.itemChangeMask & BDSKItemChangedLocalFileMask) != 0;
-            else
-                shouldRedoSearch = ([searchKey isEqualToString:BDSKAllFieldsString] && (docState.itemChangeMask & BDSKItemChangedFieldMask) != 0) ||
-                                   ([searchKey isEqualToString:BDSKPersonString] && (docState.itemChangeMask & BDSKItemChangedPersonFieldMask) != 0) ||
-                                   [searchKey isEqualToString:BDSKTitleString] && (docState.itemChangeMask & BDSKItemChangedTitleMask) != 0;
-        }
-        if (shouldRedoSearch) {
-            [searchField sendAction:[searchField action] to:[searchField target]];
-        } else if((docState.itemChangeMask & BDSKItemChangedFieldMask) != 0) { 
-            // groups and quicksearch won't update for us
-            if ((docState.itemChangeMask & BDSKItemChangedSortKeyMask) != 0)
-                [self sortPubsByKey:nil];
-            else
-                [tableView reloadData];
-            [self updateStatus];
-            [self updatePreviews];
-        }
+        // groups and quicksearch won't update for us
+        if ((docState.itemChangeMask & BDSKItemChangedSortKeyMask) != 0)
+            [self sortPubsByKey:nil];
+        else
+            [tableView reloadData];
+        [self updateStatus];
+        [self updatePreviews];
     }
     
     docState.itemChangeMask = 0;
@@ -2693,20 +2679,21 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         }
     }
     
+    NSString *searchKey = [[searchField stringValue] isEqualToString:@""] ? nil : [searchButtonController selectedItemIdentifier];
     
-    if (changedKey == nil) {
-        docState.itemChangeMask |= BDSKItemChangedFieldMask | BDSKItemChangedTitleMask | BDSKItemChangedGroupFieldMask | BDSKItemChangedSortKeyMask;
-    } else if ([changedKey isEqualToString:BDSKLocalFileString]) {
-        docState.itemChangeMask |= BDSKItemChangedLocalFileMask;
-    } else {
-        docState.itemChangeMask |= BDSKItemChangedFieldMask;
-        if ([changedKey isEqualToString:BDSKTitleString])
-            docState.itemChangeMask |= BDSKItemChangedTitleMask;
-        if ([changedKey isEqualToString:[self currentGroupField]])
+    if ([changedKey isEqualToString:BDSKLocalFileString]) {
+        if ([searchKey isEqualToString:BDSKSkimNotesString] || [searchKey isEqualToString:BDSKFileContentSearchString])
+            docState.itemChangeMask |= BDSKItemChangedSearchKeyMask;
+    } else if ([changedKey isEqualToString:BDSKRemoteURLString] == NO) {
+        if ([changedKey isEqualToString:[self currentGroupField]] || changedKey == nil)
             docState.itemChangeMask |= BDSKItemChangedGroupFieldMask;
-        if ([self sortKeyDependsOnKey:changedKey])
-            docState.itemChangeMask |= BDSKItemChangedSortKeyMask;
+        if ([searchKey isEqualToString:BDSKAllFieldsString] ||
+            ([searchKey isEqualToString:BDSKPersonString] && ([changedKey isPersonField] || changedKey == nil)) ||
+            ([searchKey isEqualToString:BDSKTitleString] && ([changedKey isEqualToString:BDSKTitleString] || changedKey == nil)))
+            docState.itemChangeMask |= BDSKItemChangedSearchKeyMask;
     }
+    if ([self sortKeyDependsOnKey:changedKey] || changedKey == nil)
+        docState.itemChangeMask |= BDSKItemChangedSortKeyMask;
     
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
     [self queueSelectorOnce:@selector(handlePrivateBibItemChanged)];

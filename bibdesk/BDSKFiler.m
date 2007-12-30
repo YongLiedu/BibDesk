@@ -215,7 +215,7 @@
                 
                 [file update];
                 // make sure the UI is updated
-                [pub noteFilesChanged];
+                [pub noteFilesChanged:YES];
                 
                 scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidAutoFileScriptHookName];
                 if (scriptHook) {

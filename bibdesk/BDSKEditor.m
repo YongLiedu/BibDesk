@@ -1938,7 +1938,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	if (sender != publication && NO == parentDidChange)
 		return;
 	
-	if([changeKey isEqualToString:BDSKLocalFileString]){
+	if([changeKey isEqualToString:BDSKLocalFileString] || [changeKey isEqualToString:BDSKRemoteURLString]){
         [fileView reloadIcons];
     }
 	else if([changeKey isEqualToString:BDSKPubTypeString]){
