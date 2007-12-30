@@ -2983,7 +2983,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     int i;
     NSMenuItem *item;
     
-    if (theURL) {
+    if (theURL && [[aFileView selectionIndexes] count] <= 1) {
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
         [menu insertItemWithTitle:[NSLocalizedString(@"Open With", @"Menu item title") stringByAppendingEllipsis]
                 andSubmenuOfApplicationsForURL:theURL atIndex:++i];

@@ -1035,7 +1035,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	NSMenuItem *item;
     int i = 0;
     
-    if (theURL) {
+    if (theURL && [[aFileView selectionIndexes] count] <= 1) {
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
         [menu insertItemWithTitle:[NSLocalizedString(@"Open With",@"Menu item title") stringByAppendingEllipsis]
                 andSubmenuOfApplicationsForURL:theURL atIndex:++i];
