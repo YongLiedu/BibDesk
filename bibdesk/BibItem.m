@@ -1366,10 +1366,7 @@ static CFDictionaryRef selectorTable = NULL;
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
-            static NSImage *image = nil;
-            if (nil == image)
-                image = [[NSImage paperclipImage] copy];
-            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:image, OATextWithIconCellImageKey, label, OATextWithIconCellStringKey, nil];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSImage paperclipImage], OATextWithIconCellImageKey, label, OATextWithIconCellStringKey, nil];
         }
         return cellDictionary;
     }else if([field isEqualToString:BDSKRemoteURLString]){
