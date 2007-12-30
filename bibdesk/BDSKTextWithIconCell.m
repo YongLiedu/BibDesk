@@ -142,13 +142,11 @@
 #define BORDER_BETWEEN_IMAGE_AND_TEXT (3.0)
 #define SIZE_OF_TEXT_FIELD_BORDER (1.0)
 
-#define CELL_SIZE_FUDGE_FACTOR 10.0
-
 - (NSSize)cellSize;
 {
     NSSize cellSize = [super cellSize];
-    // TODO: WJS 1/31/04 -- I REALLY don't think this next line is accurate. It appears to not be used much, anyways, but still...
-    cellSize.width += [icon size].width + (BORDER_BETWEEN_EDGE_AND_IMAGE * 2.0) + (BORDER_BETWEEN_IMAGE_AND_TEXT * 2.0) + (SIZE_OF_TEXT_FIELD_BORDER * 2.0) + CELL_SIZE_FUDGE_FACTOR;
+    NSSize iconSize = [icon size];
+    cellSize.width += iconSize.width * cellSize.height / iconSize.height + BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT;
     return cellSize;
 }
 
