@@ -517,11 +517,16 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication] autorelease];
             if (aFile == nil)
                 return;
+            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
             [publication removeObjectFromFilesAtIndex:anIndex];
+            if (oldURL)
+                [[self document] userRemovedURL:oldURL forPublication:publication];
+            [oldURL release];
             [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [[self document] userAddedURL:aURL forPublication:publication];
             [publication autoFileLinkedFile:aFile];
         } else {
-            [publication addFileForURL:aURL autoFile:YES];
+            [publication addFileForURL:aURL autoFile:YES runScriptHook:YES];
         }
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
@@ -530,7 +535,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)addLinkedFileFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
     NSURL *aURL = [NSURL fileURLWithPath:path];
-    [publication addFileForURL:aURL autoFile:YES];
+    [publication addFileForURL:aURL autoFile:YES runScriptHook:YES];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
@@ -540,7 +545,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSString *folderPath = [path stringByDeletingLastPathComponent];
     NSString *fileName = [path lastPathComponent];
     int tag = 0;
+    NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
     [publication removeObjectFromFilesAtIndex:anIndex];
+    if (oldURL)
+        [[self document] userRemovedURL:oldURL forPublication:publication];
+    [oldURL release];
     [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
@@ -578,11 +587,16 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication] autorelease];
             if (aFile == nil)
                 return;
+            NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
             [publication removeObjectFromFilesAtIndex:anIndex];
+            if (oldURL)
+                [[self document] userRemovedURL:oldURL forPublication:publication];
+            [oldURL release];
             [publication insertObject:aFile inFilesAtIndex:anIndex];
+            [[self document] userAddedURL:aURL forPublication:publication];
             [publication autoFileLinkedFile:aFile];
         } else {
-            [publication addFileForURL:aURL autoFile:NO];
+            [publication addFileForURL:aURL autoFile:NO runScriptHook:YES];
         }
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
@@ -595,7 +609,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender{
     NSURL *aURL = [sender representedObject];
-    [publication addFileForURL:aURL autoFile:YES];
+    [publication addFileForURL:aURL autoFile:YES runScriptHook:YES];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
@@ -1408,8 +1422,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
         aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
         if (aFile) {
+            NSURL *oldURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
             [publication removeObjectFromFilesAtIndex:idx];
+            if (oldURL)
+                [[self document] userRemovedURL:oldURL forPublication:publication];
+            [oldURL release];
             [publication insertObject:aFile inFilesAtIndex:idx];
+            [[self document] userAddedURL:aURL forPublication:publication];
             [publication autoFileLinkedFile:aFile];
             [aFile release];
         }
@@ -1422,7 +1441,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 {
     NSUInteger idx = [indexSet lastIndex];
     while (NSNotFound != idx) {
+        NSURL *aURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
         [publication removeObjectFromFilesAtIndex:idx];
+        if (aURL)
+            [[self document] userRemovedURL:aURL forPublication:publication];
+        [aURL release];
         idx = [indexSet indexLessThanIndex:idx];
     }
     return YES;
@@ -1438,6 +1461,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
         if (aFile) {
             [publication insertObject:aFile inFilesAtIndex:idx - offset];
+            [[self document] userAddedURL:aURL forPublication:publication];
             [publication autoFileLinkedFile:aFile];
             [aFile release];
         } else {

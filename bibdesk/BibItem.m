@@ -71,6 +71,8 @@
 #import "BDSKSkimReader.h"
 #import "BDSKCitationFormatter.h"
 #import "BDSKLinkedFile.h"
+#import "BDSKScriptHook.h"
+#import "BDSKScriptHookManager.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -2578,7 +2580,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [toMove release];
 }
 
-- (void)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile {
+- (void)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile runScriptHook:(BOOL)runScriptHook {
     BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:self] autorelease];
     if (aFile == nil)
         return;
@@ -2589,6 +2591,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             idx = 1 + [files indexOfObject:[localFiles lastObject]];
     }
     [self insertObject:aFile inFilesAtIndex:idx];
+    if (runScriptHook && [[self owner] isDocument])
+        [(BibDocument *)[self owner] userAddedURL:aURL forPublication:self];
     if (shouldAutoFile && [aFile isFile])
         [self autoFileLinkedFile:aFile];
 }

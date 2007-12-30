@@ -495,7 +495,7 @@
 	NSURL *aURL = [[[[webView mainFrame] dataSource] request] URL];
 	
 	if (aURL) {
-        [item addFileForURL:aURL autoFile:YES];
+        [item addFileForURL:aURL autoFile:YES runScriptHook:NO];
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 	}
 }
@@ -504,7 +504,7 @@
 	NSURL *aURL = (NSURL *)[sender representedObject];
 	
 	if (aURL) {
-        [item addFileForURL:aURL autoFile:YES];
+        [item addFileForURL:aURL autoFile:YES runScriptHook:NO];
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 	}
 }
@@ -879,7 +879,7 @@
 		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
 			NSURL *fileURL = [NSURL fileURLWithPath:[sheet filename]];
 			
-            [item addFileForURL:fileURL autoFile:YES];
+            [item addFileForURL:fileURL autoFile:YES runScriptHook:NO];
             [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 		} else {
 			NSLog(@"Could not write downloaded file.");
@@ -925,7 +925,7 @@
 - (void)setLocalUrlFromDownload{
 	NSURL *fileURL = [NSURL fileURLWithPath:downloadFileName];
 	
-    [item addFileForURL:fileURL autoFile:YES];
+    [item addFileForURL:fileURL autoFile:YES runScriptHook:NO];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 

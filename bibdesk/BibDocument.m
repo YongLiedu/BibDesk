@@ -2175,7 +2175,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             if(newBI == nil)
                 newBI = [[[BibItem alloc] init] autorelease];
             
-            [newBI addFileForURL:url autoFile:NO];
+            [newBI addFileForURL:url autoFile:NO runScriptHook:NO];
 			[newPubs addObject:newBI];
 		}
 	}
@@ -2191,7 +2191,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (theURL) {
         BibItem *newBI = [[[BibItem alloc] init] autorelease];
         pubs = [NSMutableArray array];
-        [newBI addFileForURL:theURL autoFile:NO];
+        [newBI addFileForURL:theURL autoFile:NO runScriptHook:YES];
         [newBI setPubType:@"webpage"];
         [newBI setField:@"Lastchecked" toValue:[[NSCalendarDate date] dateDescription]];
         NSString *title = [WebView URLTitleFromPasteboard:pboard];
@@ -3639,6 +3639,26 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 	}
     
     return rv;
+}
+
+- (void)userAddedURL:(NSURL *)aURL forPublication:(BibItem *)pub {
+	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKAddFileScriptHookName];
+	if (scriptHook) {
+		[scriptHook setField:[aURL isFileURL] ? BDSKLocalFileString : BDSKRemoteURLString];
+		[scriptHook setOldValues:[NSArray array]];
+		[scriptHook setNewValues:[NSArray arrayWithObjects:[aURL isFileURL] ? [aURL path] : [aURL absoluteString], nil]];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObjects:pub, nil] document:self];
+	}
+}
+
+- (void)userRemovedURL:(NSURL *)aURL forPublication:(BibItem *)pub {
+	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKRemoveFileScriptHookName];
+	if (scriptHook) {
+		[scriptHook setField:[aURL isFileURL] ? BDSKLocalFileString : BDSKRemoteURLString];
+		[scriptHook setOldValues:[NSArray arrayWithObjects:[aURL isFileURL] ? [aURL path] : [aURL absoluteString], nil]];
+		[scriptHook setNewValues:[NSArray array]];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObjects:pub, nil] document:self];
+	}
 }
 
 #pragma mark -

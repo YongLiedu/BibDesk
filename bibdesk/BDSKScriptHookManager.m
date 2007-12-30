@@ -45,6 +45,8 @@
 
 NSString *BDSKChangeFieldScriptHookName = @"Change Field";
 NSString *BDSKCloseEditorWindowScriptHookName = @"Close Editor Window";
+NSString *BDSKAddFileScriptHookName = @"Add File or URL";
+NSString *BDSKRemoveFileScriptHookName = @"Remove File or URL";
 NSString *BDSKWillAutoFileScriptHookName = @"Will Auto File";
 NSString *BDSKDidAutoFileScriptHookName = @"Did Auto File";
 NSString *BDSKWillGenerateCiteKeyScriptHookName = @"Will Generate Cite Key";
@@ -67,6 +69,8 @@ static NSArray *scriptHookNames = nil;
     if (scriptHookNames == nil) {
 		scriptHookNames = [[NSArray alloc] initWithObjects:BDSKChangeFieldScriptHookName, 
 														   BDSKCloseEditorWindowScriptHookName, 
+														   BDSKAddFileScriptHookName, 
+														   BDSKRemoveFileScriptHookName, 
 														   BDSKWillAutoFileScriptHookName, 
 														   BDSKDidAutoFileScriptHookName, 
 														   BDSKWillGenerateCiteKeyScriptHookName, 

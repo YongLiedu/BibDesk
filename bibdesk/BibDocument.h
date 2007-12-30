@@ -509,4 +509,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (int)userChangedField:(NSString *)fieldName ofPublications:(NSArray *)pubs from:(NSArray *)oldValues to:(NSArray *)newValues;
 
+- (void)userAddedURL:(NSURL *)aURL forPublication:(BibItem *)pub;
+- (void)userRemovedURL:(NSURL *)aURL forPublication:(BibItem *)pub;
+
 @end

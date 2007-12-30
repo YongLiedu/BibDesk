@@ -41,6 +41,8 @@
 
 extern NSString *BDSKCloseEditorWindowScriptHookName;
 extern NSString *BDSKChangeFieldScriptHookName;
+extern NSString *BDSKAddFileScriptHookName;
+extern NSString *BDSKRemoveFileScriptHookName;
 extern NSString *BDSKWillAutoFileScriptHookName;
 extern NSString *BDSKDidAutoFileScriptHookName;
 extern NSString *BDSKWillGenerateCiteKeyScriptHookName;

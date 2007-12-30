@@ -868,7 +868,7 @@
             
             NSEnumerator *urlEnum = [urlsToAdd objectEnumerator];
             while (theURL = [urlEnum nextObject])
-                [pub addFileForURL:theURL autoFile:YES];
+                [pub addFileForURL:theURL autoFile:YES runScriptHook:YES];
             
             [self selectPublication:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
