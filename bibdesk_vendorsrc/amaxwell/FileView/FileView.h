@@ -111,6 +111,8 @@ enum {
 - (IBAction)selectNextIcon:(id)sender;
 - (IBAction)delete:(id)sender;
 
+- (IBAction)openSelectedURLs:(id)sender;
+
 - (BOOL)isEditable;
 - (void)setEditable:(BOOL)flag;
 
