@@ -473,7 +473,7 @@ static Class BDSKLinkedObjectClass = Nil;
                 // this can happen after an auto file to a volume, as the file is actually not moved but copied
                 BDAlias *anAlias;
                 NSString *basePath = [baseURL path];
-                if (baseURL)
+                if (basePath)
                     anAlias = [[BDAlias alloc] initWithPath:[basePath relativePathToFilename:aPath] relativeToPath:basePath];
                 else
                     anAlias = [[BDAlias alloc] initWithPath:aPath];
