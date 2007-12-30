@@ -42,6 +42,7 @@
 #import "FVPDFIcon.h"
 #import "FVTextIcon.h"
 #import "FVQLIcon.h"
+#import "FVWebViewIcon.h"
 #import <sys/stat.h>
 
 #pragma mark -
@@ -118,7 +119,11 @@ static NSURL *missingFileURL = nil;
         return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil] autorelease];
     }
     else if (NO == [representedURL isFileURL]) {
-        return [[[FVFinderIcon allocWithZone:[self zone]] initWithURLScheme:[representedURL scheme]] autorelease];
+        NSString *scheme = [representedURL scheme];
+        if ([scheme isEqualToString:@"http"])
+            return [[[FVWebViewIcon allocWithZone:[self zone]] initWithURL:representedURL] autorelease];
+        else
+            return [[[FVFinderIcon allocWithZone:[self zone]] initWithURLScheme:scheme] autorelease];
     }
     
     OSStatus err = noErr;

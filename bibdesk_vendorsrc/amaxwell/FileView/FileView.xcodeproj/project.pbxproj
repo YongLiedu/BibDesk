@@ -26,6 +26,10 @@
 /* Begin PBXBuildFile section */
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
+		F92C7BC70D280D0E004409D8 /* FVWebViewIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */; };
+		F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */; };
+		F92C7C4F0D282503004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
+		F92C7C500D28250F004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
 		F94692020CA56EC500AC2772 /* FileView.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F70CA56EC500AC2772 /* FileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F94692030CA56EC500AC2772 /* FileView.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691F80CA56EC500AC2772 /* FileView.m */; };
 		F94692040CA56EC500AC2772 /* FVArrowButton.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F90CA56EC500AC2772 /* FVArrowButton.h */; };
@@ -169,6 +173,9 @@
 		32DBCF5E0370ADEE00C91783 /* FileView_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView_Prefix.pch; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Info.plist; sourceTree = "<group>"; };
 		8DC2EF5B0486A6940098B216 /* FileView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FileView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVWebViewIcon.h; sourceTree = "<group>"; };
+		F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVWebViewIcon.m; sourceTree = "<group>"; };
+		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
 		F94691F70CA56EC500AC2772 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
 		F94691F80CA56EC500AC2772 /* FileView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileView.m; sourceTree = "<group>"; };
 		F94691F90CA56EC500AC2772 /* FVArrowButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVArrowButton.h; sourceTree = "<group>"; };
@@ -187,7 +194,7 @@
 		F946922E0CA5710500AC2772 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
 		F946922F0CA5710500AC2772 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = /System/Library/Frameworks/QuickLook.framework; sourceTree = "<absolute>"; };
 		F94692300CA5710500AC2772 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
-		F94692510CA575F000AC2772 /* FileView Program.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "FileView Program.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F94692510CA575F000AC2772 /* FileView Program.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FileView Program.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F946927C0CA5777300AC2772 /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
 		F946927D0CA5777300AC2772 /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
 		F946927F0CA5777300AC2772 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -255,6 +262,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F92C7C500D28250F004409D8 /* SystemConfiguration.framework in Frameworks */,
 				F9A2D3B30CCBB7A7002F517B /* libbz2.dylib in Frameworks */,
 				8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */,
 				F94692310CA5710500AC2772 /* QTKit.framework in Frameworks */,
@@ -279,6 +287,7 @@
 			files = (
 				F946926E0CA5769100AC2772 /* Cocoa.framework in Frameworks */,
 				F946926A0CA5767700AC2772 /* FileView.framework in Frameworks */,
+				F92C7C4F0D282503004409D8 /* SystemConfiguration.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -315,6 +324,7 @@
 		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */,
 				F980F0920CCC3C2E0067C1DF /* libz.dylib */,
 				F9A2D3B20CCBB7A7002F517B /* libbz2.dylib */,
 				F946922D0CA5710500AC2772 /* QTKit.framework */,
@@ -346,6 +356,8 @@
 				F946944F0CA59AF100AC2772 /* FVScaledImageView.m */,
 				F946921C0CA5700800AC2772 /* FVQLIcon.m */,
 				F9A2D4270CCBE6BA002F517B /* FVQLIcon.h */,
+				F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */,
+				F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */,
 				F94691F70CA56EC500AC2772 /* FileView.h */,
 				F94691F80CA56EC500AC2772 /* FileView.m */,
 				F94691F90CA56EC500AC2772 /* FVArrowButton.h */,
@@ -498,6 +510,7 @@
 				F9A2D3F40CCBE15C002F517B /* FVTextIcon.h in Headers */,
 				F9A2D3FF0CCBE321002F517B /* FVIcon_Private.h in Headers */,
 				F9A2D4280CCBE6BA002F517B /* FVQLIcon.h in Headers */,
+				F92C7BC70D280D0E004409D8 /* FVWebViewIcon.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -660,6 +673,7 @@
 				F9A2D3ED0CCBE13F002F517B /* FVFinderIcon.m in Sources */,
 				F9A2D3F10CCBE14E002F517B /* FVPDFIcon.m in Sources */,
 				F9A2D3F50CCBE15C002F517B /* FVTextIcon.m in Sources */,
+				F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -820,8 +834,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
-					ppc,
 					i386,
+					ppc,
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
