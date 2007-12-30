@@ -145,8 +145,7 @@
 - (NSSize)cellSize;
 {
     NSSize cellSize = [super cellSize];
-    NSSize iconSize = [icon size];
-    cellSize.width += iconSize.width * cellSize.height / iconSize.height + BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT;
+    cellSize.width += cellSize.height + BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT;
     return cellSize;
 }
 
