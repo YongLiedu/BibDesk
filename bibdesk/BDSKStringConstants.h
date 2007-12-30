@@ -197,6 +197,7 @@ extern NSString *BDSKEditorFileViewIconScaleKey;
 
 extern NSString *BDSKCiteKeyString;
 extern NSString *BDSKLocalFileString;
+extern NSString *BDSKRemoteURLString;
 extern NSString *BDSKAnnoteString;
 extern NSString *BDSKAbstractString;
 extern NSString *BDSKRssDescriptionString;

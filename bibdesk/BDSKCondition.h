@@ -56,6 +56,14 @@ typedef enum {
 
 // this should correspond to the tags of the items in the popup
 typedef enum {
+	BDSKCountEqual = 0,
+	BDSKCountNotEqual,
+	BDSKCountLarger,
+	BDSKCountSmaller
+} BDSKCountComparison;
+
+// this should correspond to the tags of the items in the popup
+typedef enum {
     BDSKToday = 0, 
     BDSKYesterday, 
     BDSKThisWeek, 
@@ -75,14 +83,17 @@ enum {
     BDSKBooleanField,
     BDSKTriStateField,
     BDSKRatingField,
+    BDSKLinkedField,
     BDSKStringField
 };
 
 @interface BDSKCondition : NSObject <NSCopying, NSCoding> {
 	NSString *key;
 	BDSKStringComparison stringComparison;
+	BDSKCountComparison countComparison;
 	BDSKDateComparison dateComparison;
 	NSString *stringValue;
+    int countValue;
     int numberValue;
     int andNumberValue;
     int periodValue;
@@ -118,6 +129,12 @@ enum {
 - (NSString *)stringValue;
 - (void)setStringValue:(NSString *)newValue;
 
+// Count accessors
+- (BDSKCountComparison)countComparison;
+- (void)setCountComparison:(BDSKCountComparison)newComparison;
+- (int)countValue;
+- (void)setCountValue:(int)newValue;
+
 // Date accessors
 - (BDSKDateComparison)dateComparison;
 - (void)setDateComparison:(BDSKDateComparison)newComparison;
@@ -135,6 +152,7 @@ enum {
 - (void)setDefaultValue;
 
 - (BOOL)isDateCondition;
+- (BOOL)isCountCondition;
 
 @end
 

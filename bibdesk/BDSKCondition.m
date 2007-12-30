@@ -73,6 +73,8 @@
         key = [@"" retain];
         stringValue = [@"" retain];
         stringComparison = BDSKContain;
+        countComparison = BDSKCountNotEqual;
+        countValue = 0;
         dateComparison = BDSKToday;
         numberValue = 0;
         andNumberValue = 0;
@@ -194,6 +196,25 @@
         return ((cachedStartDate == nil || [date compare:cachedStartDate] == NSOrderedDescending) &&
                 (cachedEndDate == nil || [date compare:cachedEndDate] == NSOrderedAscending));
         
+    } else if ([self isCountCondition]) {
+        
+        int count = 0;
+        if ([key isEqualToString:BDSKLocalFileString])
+            count = [[item localFiles] count];
+        else if ([key isEqualToString:BDSKRemoteURLString])
+            count = [[item remoteURLs] count];
+        
+        switch (countComparison) {
+            case BDSKCountEqual:
+                return count == countValue;
+            case BDSKCountNotEqual:
+                return count != countValue;
+            case BDSKCountLarger:
+                return count > countValue;
+            case BDSKCountSmaller:
+                return count < countValue;
+        }
+        
     } else {
         
         OBASSERT(stringValue != nil);
@@ -266,12 +287,14 @@
 }
 
 - (int)comparison {
-    return ([self isDateCondition]) ? dateComparison : stringComparison;
+    return [self isDateCondition] ? dateComparison : [self isCountCondition] ? countComparison : stringComparison;
 }
 
 - (void)setComparison:(int)newComparison {
     if ([self isDateCondition])
         [self setDateComparison:(BDSKDateComparison)newComparison];
+    if ([self isCountCondition])
+        [self setCountComparison:(BDSKCountComparison)newComparison];
     else
         [self setStringComparison:(BDSKStringComparison)newComparison];
 }
@@ -294,6 +317,8 @@
             default:
                 return @"";
         }
+    } else if ([self isCountCondition]) {
+        return [NSString stringWithFormat:@"%i", countValue];
     } else {
         return [self stringValue];
     }
@@ -334,6 +359,8 @@
             default:
                 break;
         }
+    } else if ([self isCountCondition]) {
+        [self setCountValue:[newValue intValue]];
     } else {
         [self setStringValue:newValue];
     }
@@ -360,6 +387,24 @@
         [stringValue release];
         stringValue = [newValue retain];
     }
+}
+
+#pragma mark | count (linked files/URLs)
+
+- (BDSKCountComparison)countComparison {
+    return countComparison;
+}
+
+- (void)setCountComparison:(BDSKCountComparison)newComparison {
+    countComparison = newComparison;
+}
+
+- (int)countValue {
+    return countValue;
+}
+
+- (void)setCountValue:(int)newValue {
+    countValue = newValue;
 }
 
 #pragma mark | dates
@@ -424,6 +469,10 @@
     return [key fieldType] == BDSKDateField;
 }
 
+- (BOOL)isCountCondition {
+    return [key fieldType] == BDSKLinkedField;
+}
+
 - (void)setDefaultValue {
     // set some default values
     if ([self isDateCondition]) {
@@ -439,6 +488,8 @@
         [self setStringValue:[NSString stringWithTriStateValue:NSOffState]];
     } else if ([key isRatingField]) {
         [self setStringValue:@"0"];
+    } else if ([self isCountCondition]) {
+        [self setCountValue:0];
     } else {
         [self setStringValue:@""];
     }
@@ -598,6 +649,9 @@
             if (newFieldType == BDSKDateField) {
                 [self setDateComparison:BDSKToday];
                 [self setDefaultValue];
+            } else if (newFieldType == BDSKLinkedField) {
+                [self setCountComparison:BDSKCountNotEqual];
+                [self setDefaultValue];
             } else {
                 [self updateCachedDates]; // remove the cached date and stop the timer
                 [self setStringComparison:newFieldType == BDSKStringField ? BDSKContain : BDSKEqual];
@@ -625,6 +679,8 @@
         return BDSKTriStateField;
     else if ([self isRatingField])
         return BDSKRatingField;
+    else if ([self isEqualToString:BDSKLocalFileString] || [self isEqualToString:BDSKRemoteURLString])
+        return BDSKLinkedField;
     else
         return BDSKStringField;
 }

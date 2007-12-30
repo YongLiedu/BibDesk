@@ -45,8 +45,10 @@
 @interface BDSKConditionController : NSWindowController {
 	IBOutlet NSComboBox *keyComboBox;
 	IBOutlet NSPopUpButton *comparisonPopUp;
+	IBOutlet NSPopUpButton *countComparisonPopUp;
     IBOutlet NSPopUpButton *dateComparisonPopUp;
 	IBOutlet NSTextField *valueTextField;
+	IBOutlet NSTextField *countTextField;
     IBOutlet NSTextField *numberTextField;
     IBOutlet NSTextField *andNumberTextField;
     IBOutlet NSTextField *dateTextField;

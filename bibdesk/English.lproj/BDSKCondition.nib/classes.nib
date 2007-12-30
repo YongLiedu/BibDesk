@@ -11,12 +11,14 @@
                 booleanButton = NSButton; 
                 comparisonBox = NSBox; 
                 comparisonPopUp = NSPopUpButton; 
+                countComparisonPopUp = NSPopUpButton; 
+                countTextField = NSTextField; 
                 dateComparisonPopUp = NSPopUpButton; 
                 dateTextField = NSTextField; 
                 keyComboBox = NSComboBox; 
                 numberTextField = NSTextField; 
                 periodPopUp = NSPopUpButton; 
-                ratingButton = NSButton; 
+                ratingButton = BDSKRatingButton; 
                 removeButton = NSButton; 
                 toDateTextField = NSTextField; 
                 triStateButton = NSButton; 

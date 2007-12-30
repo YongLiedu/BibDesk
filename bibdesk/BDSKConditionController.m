@@ -68,7 +68,7 @@
 		canRemove = [filterController canRemoveCondition];
 		
         BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-        keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateAddedString, BDSKDateModifiedString, BDSKAllFieldsString, BDSKPubTypeString, BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, nil]
+        keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateAddedString, BDSKDateModifiedString, BDSKAllFieldsString, BDSKPubTypeString, BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, BDSKLocalFileString, BDSKRemoteURLString, nil]
                                       excluding:nil] mutableCopy];
     }
     return self;
@@ -79,8 +79,10 @@
 	//NSLog(@"dealloc conditionController");
     [condition removeObserver:self forKeyPath:@"key"];
     [condition removeObserver:self forKeyPath:@"dateComparison"];
+    [condition removeObserver:self forKeyPath:@"countComparison"];
     [condition removeObserver:self forKeyPath:@"stringComparison"];
     [condition removeObserver:self forKeyPath:@"stringValue"];
+    [condition removeObserver:self forKeyPath:@"countValue"];
     [condition removeObserver:self forKeyPath:@"numberValue"];
     [condition removeObserver:self forKeyPath:@"andNumberValue"];
     [condition removeObserver:self forKeyPath:@"periodValue"];
@@ -94,8 +96,10 @@
     [view release];
     view  = nil;
     [[dateComparisonPopUp superview] release];
+    [[countComparisonPopUp superview] release];
     [[comparisonPopUp superview] release];
     [[valueTextField superview] release];
+    [[countTextField superview] release];
     [[numberTextField superview] release];
     [[andNumberTextField superview] release];
     [[periodPopUp superview] release];
@@ -116,8 +120,10 @@
     // we add/remove these controls, so we need to retain them
     [view retain];
     [[dateComparisonPopUp superview] retain];
+    [[countComparisonPopUp superview] retain];
     [[comparisonPopUp superview] retain];
     [[valueTextField superview] retain];
+    [[countTextField superview] retain];
     [[numberTextField superview] retain];
     [[andNumberTextField superview] retain];
     [[periodPopUp superview] retain];
@@ -143,8 +149,10 @@
     
     [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"dateComparison" options: NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"countComparison" options:NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"stringComparison" options:NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"stringValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"countValue" options:NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"numberValue" options:NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"andNumberValue" options:NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"periodValue" options:NSKeyValueObservingOptionOld  context:NULL];
@@ -232,6 +240,9 @@
         case BDSKRatingField:
             controls = [NSArray arrayWithObjects:ratingButton, nil];
         break;
+        case BDSKLinkedField:
+            controls = [NSArray arrayWithObjects:countTextField, nil];
+        break;
         default:
             controls = [NSArray arrayWithObjects:valueTextField, nil];
     }
@@ -257,10 +268,12 @@
     if ([condition isDateCondition]) {
         [[dateComparisonPopUp superview] setFrameOrigin:NSZeroPoint];
         [comparisonBox addSubview:[dateComparisonPopUp superview]];
+    } else if ([condition isCountCondition]) {
+        [[countComparisonPopUp superview] setFrameOrigin:NSZeroPoint];
+        [comparisonBox addSubview:[countComparisonPopUp superview]];
     } else {
         [[comparisonPopUp superview] setFrameOrigin:NSZeroPoint];
         [comparisonBox addSubview:[comparisonPopUp superview]];
-        [self layoutValueControls];
     }
 }
 
@@ -284,20 +297,27 @@
             NSString *newValue = [change objectForKey:NSKeyValueChangeNewKey];
             int oldFieldType = [oldValue fieldType];
             int newFieldType = [newValue fieldType];
-            if((oldFieldType == BDSKDateField) != (newFieldType == BDSKDateField)){
+            int oldComparisonType = oldFieldType == BDSKDateField ? 0 : oldFieldType == BDSKLinkedField ? 1 : 2;
+            int newComparisonType = newFieldType == BDSKDateField ? 0 : newFieldType == BDSKLinkedField ? 1 : 2;
+            if(oldComparisonType != newComparisonType){
                 [self layoutComparisonControls];
-            }else if(oldFieldType != newFieldType){
+            }
+            if(oldFieldType != newFieldType){
                 [self layoutValueControls];
             }
             [[undoManager prepareWithInvocationTarget:condition] setKey:oldValue];
         } else if ([keyPath isEqualToString:@"dateComparison"]) {
             [self layoutValueControls];
             [[undoManager prepareWithInvocationTarget:condition] setDateComparison:[oldValue intValue]];
+        } else if ([keyPath isEqualToString:@"countComparison"]) {
+            [[undoManager prepareWithInvocationTarget:condition] setCountComparison:[oldValue intValue]];
         } else if ([keyPath isEqualToString:@"stringComparison"]) {
             [[undoManager prepareWithInvocationTarget:condition] setStringComparison:[oldValue intValue]];
         } else if ([keyPath isEqualToString:@"stringValue"]) {
             [[undoManager prepareWithInvocationTarget:condition] setStringValue:oldValue];
             [ratingButton setRating:[[condition stringValue] unsignedIntValue]];
+        } else if ([keyPath isEqualToString:@"countValue"]) {
+            [[undoManager prepareWithInvocationTarget:condition] setCountValue:[oldValue intValue]];
         } else if ([keyPath isEqualToString:@"numberValue"]) {
             [[undoManager prepareWithInvocationTarget:condition] setNumberValue:[oldValue intValue]];
         } else if ([keyPath isEqualToString:@"andNumberValue"]) {

@@ -208,6 +208,7 @@ NSString *BDSKShouldShowWebGroupPrefKey = @"BDSKShouldShowWebGroup";
 
 NSString *BDSKCiteKeyString = @"Cite Key";
 NSString *BDSKLocalFileString = @"Local File";
+NSString *BDSKRemoteURLString = @"Remote URL";
 NSString *BDSKAnnoteString = @"Annote";
 NSString *BDSKAbstractString = @"Abstract";
 NSString *BDSKRssDescriptionString = @"Rss-Description";
