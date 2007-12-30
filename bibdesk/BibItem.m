@@ -1359,6 +1359,22 @@ static CFDictionaryRef selectorTable = NULL;
         return nil;
     }else if([field isEqualToString:BDSKRelevanceString]){
         return [NSNumber numberWithFloat:[self searchScore]];
+    }else if([field isEqualToString:BDSKLocalFileString]){
+        BDSKLinkedFile *file = [[self localFiles] firstObject];
+        NSURL *fileURL = [file URL];
+        if (file == nil)
+            return nil;
+        else if (fileURL == nil)
+            return [NSImage missingFileImage];
+        else
+            return [NSImage imageForURL:fileURL];
+    }else if([field isEqualToString:BDSKRemoteURLString]){
+        BDSKLinkedFile *file = [[self localFiles] firstObject];
+        NSURL *theURL = [file URL];
+        if (theURL == nil)
+            return nil;
+        else
+            return [NSImage imageForURL:theURL];
     }else{
         // the tableColumn isn't something we handle in a custom way.
         return [self valueOfField:field];

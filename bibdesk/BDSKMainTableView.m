@@ -295,7 +295,7 @@
         NSImage *image;
         NSString *title;
 
-        if([colName isURLField]){
+        if([colName isURLField] || [colName isEqualToString:BDSKLocalFileString] || [colName isEqualToString:BDSKRemoteURLString]){
             [tc setDataCell:imageCell];
         }else if([colName isRatingField]){
             BDSKRatingButtonCell *ratingCell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];
@@ -484,7 +484,7 @@
 	
 	if (headerImageCache == nil) {
 		NSDictionary *paths = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableHeaderImagesKey];
-		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, [NSImage imageNamed:@"ArrowImage"], BDSKCrossrefString, nil];
+		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, [NSImage imageNamed:@"TinyFile"], BDSKLocalFileString, [NSImage imageNamed:@"ArrowImage"], BDSKCrossrefString, nil];
 		if (paths) {
 			NSEnumerator *keyEnum = [paths keyEnumerator];
 			NSString *key, *path;
@@ -510,7 +510,7 @@
 	static NSDictionary *headerTitleCache = nil;
 	
 	if (headerTitleCache == nil) {
-        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"@", BDSKUrlString, @"#", BDSKItemNumberString, @"#", BDSKImportOrderString, nil];
+        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"@", BDSKUrlString, @"@", BDSKRemoteURLString, @"#", BDSKItemNumberString, @"#", BDSKImportOrderString, nil];
 		[tmpDict addEntriesFromDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableHeaderTitlesKey]];
         headerTitleCache = [tmpDict copy];
         [tmpDict release];
@@ -536,7 +536,7 @@
 - (void)columnsMenuAddTableColumn:(id)sender{
     // first we fill the popup
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, BDSKCrossrefString, nil]
+    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, BDSKCrossrefString, BDSKLocalFileString, BDSKRemoteURLString, nil]
                                               excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:", @"Label for adding column")

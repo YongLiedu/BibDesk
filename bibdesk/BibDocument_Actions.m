@@ -424,12 +424,23 @@
     int column = [tableView clickedColumn];
     NSString *colID = column != -1 ? [[[tableView tableColumns] objectAtIndex:column] identifier] : nil;
     
-    if([colID isLocalFileField])
+    if([colID isLocalFileField]) {
 		[self openLocalURLForField:colID];
-    else if([colID isRemoteURLField])
+    } else if([colID isRemoteURLField]) {
 		[self openRemoteURLForField:colID];
-    else
+    } else if([colID isEqualToString:BDSKLocalFileString]) {
+        BibItem *pub = [[self selectedPublications] lastObject];
+        NSURL *fileURL = [[[pub localFiles] firstObject] URL];
+        if (fileURL)
+            [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[fileURL retain]];
+    } else if([colID isEqualToString:BDSKRemoteURLString]) {
+        BibItem *pub = [[self selectedPublications] lastObject];
+        NSURL *theURL = [[[pub remoteURLs] firstObject] URL];
+        if (theURL)
+            [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[theURL retain]];
+    } else {
         [self editPubCmd:sender];
+    }
 }
 
 - (void)showPerson:(BibAuthor *)person{
