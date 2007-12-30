@@ -494,7 +494,7 @@
 	
 	if (headerImageCache == nil) {
 		NSDictionary *paths = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableHeaderImagesKey];
-        NSImage *paperclip = [NSImage paperclipImage];
+        NSImage *paperclip = [[[NSImage paperclipImage] copy] autorelease];
         [paperclip setScalesWhenResized:YES];
         [paperclip setSize:NSMakeSize(16, 16)];
 		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, [NSImage imageNamed:@"ArrowImage"], BDSKCrossrefString, nil];
