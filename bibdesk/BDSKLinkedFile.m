@@ -333,7 +333,7 @@ static Class BDSKLinkedObjectClass = Nil;
         fileRef = NULL;
     }
     FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
-    if (newRef) {
+    if (newRef && newFileRef) {
         bcopy(newFileRef, newRef, sizeof(FSRef));
         fileRef = newRef;
     }
