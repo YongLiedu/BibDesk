@@ -162,7 +162,10 @@ static BOOL FVWebIconDisabled = NO;
         
     // these will always be the same size, so use the context cache
     CGContextRef ctxt = [FVBitmapContextCache newBitmapContextOfWidth:width height:height];
+    CGContextSaveGState(ctxt);
+    CGContextSetInterpolationQuality(ctxt, kCGInterpolationHigh);
     CGContextDrawImage(ctxt, CGRectMake(0, 0, CGBitmapContextGetWidth(ctxt), CGBitmapContextGetHeight(ctxt)), _fullImageRef);
+    CGContextRestoreGState(ctxt);
     
     CGImageRef smallImage = CGBitmapContextCreateImage(ctxt);
     [FVBitmapContextCache disposeOfBitmapContext:ctxt];
