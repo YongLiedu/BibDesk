@@ -42,7 +42,7 @@
 
 @implementation BDSKSortCommand
 
-static normalizedKey(NSString *key) {
+static NSString *normalizedKey(NSString *key) {
     static NSArray *specialKeys = nil;
     if (specialKeys == nil) {
         specialKeys = [[NSMutableArray alloc] initWithObjects:
