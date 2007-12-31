@@ -135,4 +135,6 @@
     if (didLock) pthread_mutex_unlock(&_mutex);
 }
 
+- (BOOL)needsShadow { return (NULL != _imageRef || [_fallbackIcon needsShadow]); }
+
 @end

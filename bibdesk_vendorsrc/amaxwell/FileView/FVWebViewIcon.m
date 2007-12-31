@@ -201,7 +201,24 @@ static BOOL FVWebIconDisabled = NO;
         NSSize size = [self size];
         CGContextRef context = [FVBitmapContextCache newBitmapContextOfWidth:size.width height:size.height];
         NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:[view isFlipped]];
+        
+        [NSGraphicsContext saveGraphicsState]; // save previous context
+        
+        [NSGraphicsContext setCurrentContext:nsContext];
+        [nsContext saveGraphicsState];
+        [[NSColor whiteColor] setFill];
+        NSRect rect = NSMakeRect(0, 0, size.width, size.height);
+        [[NSBezierPath bezierPathWithRoundRect:rect xRadius:5 yRadius:5] fill];
+        [nsContext restoreGraphicsState];
+
+        [_webView setFrame:NSInsetRect(rect, 10, 10)];
+        
+        CGContextSaveGState(context);
+        CGContextTranslateCTM(context, 10, 10);
         [view displayRectIgnoringOpacity:[view bounds] inContext:nsContext];
+        CGContextRestoreGState(context);
+        
+        [NSGraphicsContext restoreGraphicsState]; // restore previous context
         
         pthread_mutex_lock(&_mutex);
         
@@ -382,5 +399,7 @@ static BOOL FVWebIconDisabled = NO;
         [self _drawPlaceholderInRect:dstRect inCGContext:context];
     }
 }
+
+- (BOOL)needsShadow { return nil == _fallbackIcon || [_fallbackIcon needsShadow]; }
 
 @end
