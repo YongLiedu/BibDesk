@@ -41,6 +41,7 @@
 #import "FVIcon_Private.h"
 
 @class FVFinderIcon;
+@class WebView;
 
 @interface FVWebViewIcon : FVIcon
 {
@@ -51,6 +52,8 @@
     BOOL             _webviewFailed;
     NSSize           _desiredSize;
     char            *_diskCacheName;
+    WebView         *_webView;
+    BOOL             _triedWebView;
     pthread_mutex_t  _mutex;
 }
 

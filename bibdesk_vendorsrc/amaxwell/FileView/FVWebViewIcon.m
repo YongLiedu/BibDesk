@@ -65,7 +65,12 @@ static BOOL FVWebIconDisabled = NO;
         _fullImageRef = NULL;
         _thumbnailRef = NULL;
         _fallbackIcon = nil;
+        
+        // track failure messages via the delegate
         _webviewFailed = NO;
+        
+        // main thread only; keeps track of whether a webview has been created
+        _triedWebView = NO;
         
         const char *name = [[aURL absoluteString] UTF8String];
         _diskCacheName = NSZoneMalloc([self zone], sizeof(char) * (strlen(name) + 1));
@@ -78,8 +83,20 @@ static BOOL FVWebIconDisabled = NO;
     return self;
 }
 
+- (void)_releaseWebView
+{
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    [_webView stopLoading:nil];
+    [_webView setFrameLoadDelegate:nil];
+    [_webView release];
+    _webView = nil;
+}
+
 - (void)dealloc
 {
+    // it's very unlikely that we'll reach this on a non-main thread or with a non-nil webview, but just in case...
+    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES];
+    
     pthread_mutex_destroy(&_mutex);
     CGImageRelease(_fullImageRef);
     CGImageRelease(_thumbnailRef);
@@ -136,31 +153,6 @@ static BOOL FVWebIconDisabled = NO;
     return reachable;
 }
 
-static BOOL isLoading(WebView *aView)
-{
-    // -[WebView isLoading] is only available on 10.5 (same signature as -[WebDataSource isLoading])
-    if ([aView respondsToSelector:@selector(isLoading)])
-        return [(WebDataSource *)aView isLoading];
-    
-    // see http://trac.webkit.org/projects/webkit/browser/trunk/WebKit/mac/WebView/WebView.mm
-    WebFrame *mainFrame = [aView mainFrame];
-    return ([[mainFrame dataSource] isLoading] || [[mainFrame provisionalDataSource] isLoading]);
-}
-
-- (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame;
-{
-    pthread_mutex_lock(&_mutex);
-    _webviewFailed = YES;
-    pthread_mutex_unlock(&_mutex);
-}
-
-- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame;
-{
-    pthread_mutex_lock(&_mutex);
-    _webviewFailed = YES;
-    pthread_mutex_unlock(&_mutex);
-}
-
 // returns a 1/5 scale image; change this if -size changes (small image should be <= 200 pixels)
 - (CGImageRef)_createResampledImage;
 {
@@ -177,34 +169,39 @@ static BOOL isLoading(WebView *aView)
     return smallImage;
 }
 
-- (void)renderOffscreenOnMainThread 
-{ 
-    NSSize size = [self size];
-    
-    // always use the WebKit cache, and use a short timeout (default is 60 seconds)
-    NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:1.0];
-    
-    // concept from http://lists.apple.com/archives/quicklook-dev/2007/Nov/msg00047.html
-    WebView *webView = [[WebView alloc] initWithFrame:NSMakeRect(0, 0, size.width, size.height)];
-    [webView setFrameLoadDelegate:self];
-    [[webView mainFrame] loadRequest:request];
-        
-    // run the runloop in default mode until the webview finishes loading
-    while (isLoading(webView))
-        CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, TRUE);
-    
-    // the delegate methods will tell us if the load failed; I see no other way to ask for status
+- (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame;
+{
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    pthread_mutex_lock(&_mutex);
+    _webviewFailed = YES;
+    pthread_mutex_unlock(&_mutex);
+}
+
+- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame;
+{
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    pthread_mutex_lock(&_mutex);
+    _webviewFailed = YES;
+    pthread_mutex_unlock(&_mutex);
+}
+
+- (void)_mainFrameDidFinishLoading
+{
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+
+    // the delegate methods will tell us if the load failed; I see no other way to ask for status    
     if (NO == _webviewFailed) {
-
+        
         // display the main frame's view directly to avoid showing the scrollers
-
-        WebFrameView *view = [[webView mainFrame] frameView];
+        
+        WebFrameView *view = [[_webView mainFrame] frameView];
         [view setAllowsScrolling:NO];
-
+        
+        NSSize size = [self size];
         CGContextRef context = [FVBitmapContextCache newBitmapContextOfWidth:size.width height:size.height];
         NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:[view isFlipped]];
         [view displayRectIgnoringOpacity:[view bounds] inContext:nsContext];
-
+        
         pthread_mutex_lock(&_mutex);
         
         // full image is large, so cache it to disk in case we get a -releaseResources or another view needs it
@@ -228,8 +225,40 @@ static BOOL isLoading(WebView *aView)
         pthread_mutex_unlock(&_mutex);
     }
     
-    [webView setFrameLoadDelegate:nil];
-    [webView release];
+    // clear out the webview, since we won't need it again
+    [self _releaseWebView];
+}
+
+- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
+{
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    // wait for the main frame
+    if ([frame isEqual:[_webView mainFrame]])
+        [self _mainFrameDidFinishLoading];
+}
+
+- (void)renderOffscreenOnMainThread 
+{ 
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+
+    // Originally just checked nil here, but logging showed that a webview was instantiated twice and the page loaded both times.  A nil webview is not a sufficient condition, since there's a delay between needsRenderForSize: and renderOffscreen; remember that the webview isn't rendering synchronously as in the other subclasses, so it may finish in between those calls.
+    if (nil == _webView && NO == _triedWebView) {
+        
+        _triedWebView = YES;
+        
+        NSSize size = [self size];
+        
+        // always use the WebKit cache, and use a short timeout (default is 60 seconds)
+        NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:1.0];
+        
+        // See also http://lists.apple.com/archives/quicklook-dev/2007/Nov/msg00047.html
+        // Note: changed from blocking to non-blocking; we now just keep state and rely on the
+        // delegate methods.
+        
+        _webView = [[WebView alloc] initWithFrame:NSMakeRect(0, 0, size.width, size.height)];
+        [_webView setFrameLoadDelegate:self];
+        [[_webView mainFrame] loadRequest:request];
+    }
 }
 
 - (void)renderOffscreen
