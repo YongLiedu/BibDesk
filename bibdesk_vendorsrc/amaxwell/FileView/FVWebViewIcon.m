@@ -87,6 +87,7 @@ static BOOL FVWebIconDisabled = NO;
 {
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     [_webView stopLoading:nil];
+    [_webView setPolicyDelegate:nil];
     [_webView setFrameLoadDelegate:nil];
     [_webView release];
     _webView = nil;
@@ -132,7 +133,7 @@ static BOOL FVWebIconDisabled = NO;
          */
         
         if (YES == _webviewFailed)
-            needsRender = [_fallbackIcon needsRenderForSize:size];
+            needsRender = (nil == _fallbackIcon || [_fallbackIcon needsRenderForSize:size]);
         else if (size.height > 1.2 * [self size].height)
             needsRender = (NULL == _fullImageRef);
         else
@@ -217,13 +218,6 @@ static BOOL FVWebIconDisabled = NO;
         
         [FVBitmapContextCache disposeOfBitmapContext:context];
     }
-    else {
-        // some web resource failed to load
-        pthread_mutex_lock(&_mutex);
-        if (nil == _fallbackIcon)
-            _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
-        pthread_mutex_unlock(&_mutex);
-    }
     
     // clear out the webview, since we won't need it again
     [self _releaseWebView];
@@ -235,6 +229,23 @@ static BOOL FVWebIconDisabled = NO;
     // wait for the main frame
     if ([frame isEqual:[_webView mainFrame]])
         [self _mainFrameDidFinishLoading];
+}
+
+- (void)webView:(WebView *)sender decidePolicyForMIMEType:(NSString *)type request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id < WebPolicyDecisionListener >)listener
+{
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+
+    // !!! Better to just load text/html and ignore everything else?  PDF doesn't show up in the window, so there's no point in loading it.
+    if ([type isEqualToString:@"application/pdf"]) {
+        
+        // next renderOffscreen will create a fallback icon
+        pthread_mutex_lock(&_mutex);        
+        _webviewFailed = YES;        
+        pthread_mutex_unlock(&_mutex);  
+        
+        [listener ignore];
+        [self _releaseWebView];
+    }
 }
 
 - (void)renderOffscreenOnMainThread 
@@ -269,6 +280,7 @@ static BOOL FVWebIconDisabled = NO;
         [prefs setAllowsAnimatedImages:NO];
         
         [_webView setFrameLoadDelegate:self];
+        [_webView setPolicyDelegate:self];
         [[_webView mainFrame] loadRequest:request];
     }
 }
@@ -289,14 +301,18 @@ static BOOL FVWebIconDisabled = NO;
         pthread_mutex_unlock(&_mutex);
         return;
     }
+    
+    // may have failed in one of the delegate methods, so we'll continue on and load the fallback icon here
+    BOOL alreadyFailed = _webviewFailed;
+    
     pthread_mutex_unlock(&_mutex);
     
     // if we can't even reach the network, don't bother blocking the main thread for a failed load
-    if ([self _canReachURL]) {
+    if ([self _canReachURL] && NO == alreadyFailed) {
         [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:YES];
     }
     else {
-        // load a Finder icon and set the webview failure bit; we won't try again
+        // Unreachable or failed to load.  Load a Finder icon and set the webview failure bit; we won't try again.
         pthread_mutex_lock(&_mutex);
         _webviewFailed = YES;
         if (nil == _fallbackIcon)
