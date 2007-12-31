@@ -243,6 +243,8 @@
 		CE7F5E480B3F5F1800A919D0 /* searchFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7F5E470B3F5F1800A919D0 /* searchFolderIcon.tiff */; };
 		CE7F64C40B41694A00A919D0 /* BDSKSearchGroupView.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE7F64C20B41694A00A919D0 /* BDSKSearchGroupView.nib */; };
 		CE820EC90C8AE2F60020E6B0 /* BDSKPersonWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE820EC20C8AE2F60020E6B0 /* BDSKPersonWindow.nib */; };
+		CE83E3A50D294EE300BB7AD8 /* BDSKSortCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = CE83E3A30D294EE300BB7AD8 /* BDSKSortCommand.h */; };
+		CE83E3A60D294EE300BB7AD8 /* BDSKSortCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE83E3A40D294EE300BB7AD8 /* BDSKSortCommand.m */; };
 		CE89618A0CBEB59800EA2D98 /* BDSKToken.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961860CBEB59800EA2D98 /* BDSKToken.m */; };
 		CE89618C0CBEB59800EA2D98 /* BDSKTypeTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961880CBEB59800EA2D98 /* BDSKTypeTemplate.m */; };
 		CE8961BD0CBEB5AC00EA2D98 /* BDSKTemplateDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961BB0CBEB5AC00EA2D98 /* BDSKTemplateDocument.m */; };
@@ -1141,6 +1143,8 @@
 		CE7F64C30B41694A00A919D0 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKSearchGroupView.nib; sourceTree = "<group>"; };
 		CE820EC30C8AE2F60020E6B0 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPersonWindow.nib; sourceTree = "<group>"; };
 		CE820ECC0C8AE30F0020E6B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKPersonWindow.nib; sourceTree = "<group>"; };
+		CE83E3A30D294EE300BB7AD8 /* BDSKSortCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSortCommand.h; sourceTree = "<group>"; };
+		CE83E3A40D294EE300BB7AD8 /* BDSKSortCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSortCommand.m; sourceTree = "<group>"; };
 		CE8961850CBEB59800EA2D98 /* BDSKToken.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKToken.h; sourceTree = "<group>"; };
 		CE8961860CBEB59800EA2D98 /* BDSKToken.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKToken.m; sourceTree = "<group>"; };
 		CE8961870CBEB59800EA2D98 /* BDSKTypeTemplate.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTypeTemplate.h; sourceTree = "<group>"; };
@@ -1956,6 +1960,7 @@
 				F9022C62075802E300C3F701 /* BDSKOpenCommand.m */,
 				CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */,
 				F9022FC107580B9400C3F701 /* BDSKSearchForCommand.m */,
+				CE83E3A40D294EE300BB7AD8 /* BDSKSortCommand.m */,
 				CEAC484F0A96589A00B8DF43 /* BDSKTemplatedTextCommand.m */,
 				F9022FBC07580B9400C3F701 /* BDSKAppController+Scripting.m */,
 				3DD300F5075C054D003FD2D7 /* BDSKField.m */,
@@ -2545,6 +2550,7 @@
 				F9022C59075802E300C3F701 /* BDSKShellTask.h */,
 				F92BACCC0BCBFEE0008D5BC3 /* BDSKSkimReader.h */,
 				CEFDBDBB0AEA86BA009EE99D /* BDSKSmartGroup.h */,
+				CE83E3A30D294EE300BB7AD8 /* BDSKSortCommand.h */,
 				CEF7AC040915929E00BE9E02 /* BDSKSplitView.h */,
 				F9A411EF0A0B1FEF008493C0 /* BDSKSpotlightView.h */,
 				CEFDBDC30AEA86F0009EE99D /* BDSKStaticGroup.h */,
@@ -2845,6 +2851,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
+				CE83E3A50D294EE300BB7AD8 /* BDSKSortCommand.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3794,6 +3801,7 @@
 				CE4241450D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m in Sources */,
 				F9EF94E60D15FE7400314058 /* BDSKFileMigrationController.m in Sources */,
 				CE4376F70D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m in Sources */,
+				CE83E3A60D294EE300BB7AD8 /* BDSKSortCommand.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
