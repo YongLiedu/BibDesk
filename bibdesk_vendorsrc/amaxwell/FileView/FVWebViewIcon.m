@@ -256,6 +256,18 @@ static BOOL FVWebIconDisabled = NO;
         // delegate methods.
         
         _webView = [[WebView alloc] initWithFrame:NSMakeRect(0, 0, size.width, size.height)];
+        
+        Class cls = [self class];
+        NSString *prefIdentifier = [NSString stringWithFormat:@"%@.%@", [[NSBundle bundleForClass:cls] bundleIdentifier], cls];
+        [_webView setPreferencesIdentifier:prefIdentifier];
+        
+        WebPreferences *prefs = [_webView preferences];
+        [prefs setPlugInsEnabled:NO];
+        [prefs setJavaEnabled:NO];
+        [prefs setJavaScriptCanOpenWindowsAutomatically:NO];
+        [prefs setJavaScriptEnabled:NO];
+        [prefs setAllowsAnimatedImages:NO];
+        
         [_webView setFrameLoadDelegate:self];
         [[_webView mainFrame] loadRequest:request];
     }
