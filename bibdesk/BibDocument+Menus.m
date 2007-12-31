@@ -259,7 +259,8 @@
 
 - (BOOL) validatePreviewMenuItem:(NSMenuItem*) menuItem {
     return ([menuItem representedObject] != nil || 
-            [[self selectedFileURLs] count] + [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count]);
+            [[self selectedFileURLs] count] ||
+            [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count]);
 }	
 
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {

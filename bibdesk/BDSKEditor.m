@@ -1387,7 +1387,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
 	}
 	else if (theAction == @selector(previewAction:)) {
-		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] + [[publication valueForKey:@"linkedURLs"] count] == 1;
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] || [[publication valueForKey:@"linkedURLs"] count];
 	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)
