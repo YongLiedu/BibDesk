@@ -17,13 +17,16 @@
 #if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
 
 // New types for Leopard; don't explode if they leak into the frameworks early
+// From NSObjCRuntime.h
 #ifndef NSINTEGER_DEFINED
 typedef int NSInteger;
 typedef unsigned int NSUInteger;
-#define NSIntegerMax INT_MAX
-#define NSUIntegerMax UINT_MAX
+#define NSIntegerMax    LONG_MAX
+#define NSIntegerMin    LONG_MIN
+#define NSUIntegerMax   ULONG_MAX
 #define NSINTEGER_DEFINED 1
-#endif
+#endif /* NSINTEGER_DEFINED */
+
 
 #import <OmniBase/assertions.h>
 #import <stdlib.h>

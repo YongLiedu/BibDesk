@@ -8,7 +8,16 @@
 // $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2007-10-25/OmniGroup/Frameworks/OmniAppKit/OAUtilities.h 91281 2007-09-14 19:08:31Z bungi $
 
 #if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+
+// From CGBase.h
+#ifndef	CGFLOAT_DEFINED
 typedef float CGFloat;
+#define CGFLOAT_MIN FLT_MIN
+#define CGFLOAT_MAX FLT_MAX
+#define CGFLOAT_IS_DOUBLE 0
+#define CGFLOAT_DEFINED 1
+#endif /* CGFLOAT_DEFINED */
+
 #define cgFloatValue floatValue
 #else
 #define cgFloatValue doubleValue
