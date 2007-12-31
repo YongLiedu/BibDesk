@@ -1081,7 +1081,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                          atIndex:++i];
                 [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
                 
-                item = [menu insertItemWithTitle:NSLocalizedString(@"Auto File",@"Menu item title")
+                item = [menu insertItemWithTitle:NSLocalizedString(@"Consolidate",@"Menu item title")
                                           action:@selector(consolidateLinkedFiles:)
                                    keyEquivalent:@""
                                          atIndex:++i];
