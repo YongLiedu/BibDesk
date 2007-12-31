@@ -134,12 +134,14 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     else if ([[self document] hasExternalGroupsSelected] == NO)
         pubs = [[self document] selectedPublications];
     
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
-        // workaround for an AppKit bug in Tiger, the progress bar does not work after the first time it is used, so we replace it by a copy
-        NSProgressIndicator *newProgressBar = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:progressBar]];
-        [[progressBar superview] replaceSubview:progressBar with:newProgressBar];
-        progressBar = newProgressBar;
-    }
+#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+    // Workaround for an AppKit bug in Tiger, the progress bar does not work after the first time it is used, so we replace it by a copy.  Apparently also in Leopard when linking against 10.4 SDK.
+    NSProgressIndicator *newProgressBar = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:progressBar]];
+    [[progressBar superview] replaceSubview:progressBar with:newProgressBar];
+    progressBar = newProgressBar;
+#else
+#warning 10.5 remove this
+#endif
     [progressBar setDoubleValue:0.0];
     [progressBar setMaxValue:[pubs count]];
     [progressBar setHidden:NO];
@@ -152,8 +154,8 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     
     while (aPub = [pubEnum nextObject]) {
         
-        if ((current++ % 10) == 0) {
-            // tickling the runloop rather than using -displayIfNeeded keeps spindump from running on Leopard and slowing things down even more
+        if ((current++ % 5) == 0) {
+            // Causes the progress bar and other UI to update; tickling the runloop rather than using -displayIfNeeded keeps spindump from running on Leopard and slowing things down even more.
             [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
         }
         
