@@ -1365,11 +1365,14 @@ static CFDictionaryRef selectorTable = NULL;
     }else if([field isEqualToString:BDSKRelevanceString]){
         return [NSNumber numberWithFloat:[self searchScore]];
     }else if([field isEqualToString:BDSKLocalFileString]){
-        unsigned count = [[self localFiles] count];
+        NSArray *localFiles = [self localFiles];
+        unsigned count = [localFiles count];
+        BOOL hasMissingFile = count && [[localFiles valueForKey:@"URL"] containsObject:[NSNull null]];
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
-            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSImage paperclipImage], OATextWithIconCellImageKey, label, OATextWithIconCellStringKey, nil];
+            NSImage *image = hasMissingFile ? [NSImage redPaperclipImage] : [NSImage paperclipImage];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:image, OATextWithIconCellImageKey, label, OATextWithIconCellStringKey, nil];
         }
         return cellDictionary;
     }else if([field isEqualToString:BDSKRemoteURLString]){
