@@ -80,11 +80,11 @@ typedef enum {
 
 enum {
     BDSKDateField,
+    BDSKLinkedField,
+    BDSKStringField,
     BDSKBooleanField,
     BDSKTriStateField,
-    BDSKRatingField,
-    BDSKLinkedField,
-    BDSKStringField
+    BDSKRatingField
 };
 
 @interface BDSKCondition : NSObject <NSCopying, NSCoding> {

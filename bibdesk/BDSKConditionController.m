@@ -297,14 +297,10 @@
             NSString *newValue = [change objectForKey:NSKeyValueChangeNewKey];
             int oldFieldType = [oldValue fieldType];
             int newFieldType = [newValue fieldType];
-            int oldComparisonType = oldFieldType == BDSKDateField ? 0 : oldFieldType == BDSKLinkedField ? 1 : 2;
-            int newComparisonType = newFieldType == BDSKDateField ? 0 : newFieldType == BDSKLinkedField ? 1 : 2;
-            if(oldComparisonType != newComparisonType){
+            if(MIN(oldFieldType, BDSKStringField) != MIN(newFieldType, BDSKStringField))
                 [self layoutComparisonControls];
-            }
-            if(oldFieldType != newFieldType){
+            if(oldFieldType != newFieldType)
                 [self layoutValueControls];
-            }
             [[undoManager prepareWithInvocationTarget:condition] setKey:oldValue];
         } else if ([keyPath isEqualToString:@"dateComparison"]) {
             [self layoutValueControls];
