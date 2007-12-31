@@ -942,6 +942,7 @@ static CFDictionaryRef selectorTable = NULL;
 															  withModDate:[self dateModified]];
     }
 	
+    [oldType retain];
 	[self setPubTypeWithoutUndo:newType];
 	
 	if (date != nil) {
@@ -952,6 +953,8 @@ static CFDictionaryRef selectorTable = NULL;
 	[self updateMetadataForKey:BDSKPubTypeString];
 		
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKPubTypeString, @"key", newType, @"newValue", oldType, @"oldValue", nil];
+    [oldType release];
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
