@@ -37,6 +37,7 @@
  */
 
 #import "NSArray_BDSKExtensions.h"
+#import "BDSKTableSortDescriptor.h"
 
 
 @implementation NSArray (BDSKExtensions)
@@ -124,6 +125,11 @@
 - (NSArray *)arrayDroppingLastObject;
 {
     return [self count] ? [self subarrayWithRange:NSMakeRange(0, [self count] - 1)] : self;
+}
+
+- (NSArray *)arraySortedByAuthor;
+{
+    return [self sortedArrayUsingDescriptors:[NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKAuthorString ascending:YES], nil]];
 }
 
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;

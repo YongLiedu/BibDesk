@@ -58,6 +58,7 @@
 - (NSArray *)firstSixObjects;
 - (NSArray *)arrayDroppingFirstObject;
 - (NSArray *)arrayDroppingLastObject;
+- (NSArray *)arraySortedByAuthor;
 - (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
