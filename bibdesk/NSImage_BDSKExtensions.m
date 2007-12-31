@@ -186,8 +186,8 @@
     return image != [NSNull null] ? image : nil;
 }
 
-static inline NSImage *createPaperclipImageWithColor(NSColor *color) {
-    NSSize size = NSMakeSize(32, 32);
+static NSImage *createPaperclipImageWithColor(NSColor *color) {
+    NSSize size = NSMakeSize(32.0, 32.0);
     NSImage *image = [[NSImage alloc] initWithSize:size];
     [image setBackgroundColor:[NSColor clearColor]];
     
@@ -196,36 +196,23 @@ static inline NSImage *createPaperclipImageWithColor(NSColor *color) {
     
     // I started out with the idea of making this resolution-independent and scaling to an arbitrary size, but transforming the points was too annoying.  I started out with a 1x1" grid subdivided into 0.125" ticks in OmniGraffle and drew a paperclip using lines and semicircles.  The path coordinates were taken directly from that graffle diagram, and the transform and line width were adjusted by trial and error.
     NSAffineTransform *t = [NSAffineTransform transform];
-    [t rotateByDegrees:-35];
-    [t translateXBy:0 yBy:10];
-    [t scaleXBy:2 yBy:2];
+    [t rotateByDegrees:-35.0];
+    [t translateXBy:0.0 yBy:10.0];
     [t concat];
-    [path setLineWidth:0.5];
     
     // start at the outside (right) and work inward
-    [path moveToPoint:NSMakePoint(4, 8)];
-    [path lineToPoint:NSMakePoint(4, 2)];
-    
-    NSPoint center = NSMakePoint(2, 2);
-    CGFloat radius = [path currentPoint].x - center.x;
-    [path appendBezierPathWithArcWithCenter:center radius:radius startAngle:0 endAngle:180 clockwise:YES];
-    [path lineToPoint:NSMakePoint(0, 10)];
-    
-    center = NSMakePoint(1.5, 10);
-    radius = center.x - [path currentPoint].x;
-    [path appendBezierPathWithArcWithCenter:center radius:radius startAngle:180 endAngle:0 clockwise:YES];
-    [path lineToPoint:NSMakePoint(3, 4)];
-    
-    center = NSMakePoint(2, 4);
-    radius = [path currentPoint].x - center.x;
-    [path appendBezierPathWithArcWithCenter:center radius:radius startAngle:0 endAngle:180 clockwise:YES];
-    [path lineToPoint:NSMakePoint(1, 8)];
+    [path moveToPoint:NSMakePoint(8.0, 16.0)];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(4.0, 4.0) radius:4.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(3.0, 20.0) radius:3.0 startAngle:180.0 endAngle:0.0 clockwise:YES];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(4.0, 8.0) radius:2.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
+    [path lineToPoint:NSMakePoint(2.0, 16.0)];
     
     [color setStroke];
+    [path setLineWidth:1.0];
     [path stroke];
     
     [image unlockFocus];
-    
+    [[image TIFFRepresentation] writeToFile:@"/Users/hofman/Desktop/paperclip1.tiff" atomically:YES];
     return image;
 }
 
