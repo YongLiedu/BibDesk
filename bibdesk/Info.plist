@@ -950,13 +950,15 @@
 						<key>Local-Url</key>
 						<real>18</real>
                         <key>Local File</key>
-                        <real>50</real>
+                        <real>70</real>
 						<key>Publication Date</key>
 						<real>40</real>
 						<key>Rating</key>
 						<real>70</real>
 						<key>Read</key>
 						<real>30</real>
+                        <key>Remote URL</key>
+                        <real>70</real>
 						<key>Title</key>
 						<real>300</real>
 						<key>Url</key>
