@@ -40,10 +40,11 @@
 
 // define here, since this is the only public header for the project
 #ifndef NSINTEGER_DEFINED
-#define NSUInteger unsigned
-#define NSInteger int
-#define CGFloat float
+typedef int NSInteger;
+typedef unsigned int NSUInteger;
+typedef float CGFloat;
 #define NSIntegerMax INT_MAX
+#define NSINTEGER_DEFINED 1
 #endif
 
 #ifndef NSAppKitVersionNumber10_4
