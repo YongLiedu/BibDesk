@@ -38,7 +38,10 @@
 
 #import "BDSKSortCommand.h"
 #import "BDSKTableSortDescriptor.h"
-
+#import "NSString_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
+#import "BibDocument.h"
+#import "BibItem.h"
 
 @implementation BDSKSortCommand
 
@@ -46,12 +49,10 @@ static NSString *normalizedKey(NSString *key) {
     static NSArray *specialKeys = nil;
     if (specialKeys == nil) {
         specialKeys = [[NSMutableArray alloc] initWithObjects:
-            BDSKCiteKeyString, BDSKPubDateString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, 
-            BDSKAuthorEditorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKLastAuthorEditorString, 
-            BDSKPubTypeString, BDSKItemNumberString, BDSKLocalFileString, BDSKRemoteURLString, nil];
+            BDSKAuthorEditorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKLastAuthorEditorString, nil];
     }
 
-    NSString *capKey = [key capitalizedString];
+    NSString *capKey = [key fieldName];
     if ([key isEqualToString:capKey] == NO) {
         NSEnumerator *specialKeyEnum = [specialKeys objectEnumerator];
         NSString *specialKey;
@@ -70,11 +71,19 @@ static NSString *normalizedKey(NSString *key) {
 }
 
 - (id)performDefaultImplementation {
-    
     id dP = [self directParameter];
-    id dPO = nil;
     if ([dP isKindOfClass:[NSArray class]] == NO)
-        dPO = [dP objectsByEvaluatingSpecifier];
+        dP = [dP objectsByEvaluatingSpecifier];
+    if ([dP isKindOfClass:[NSArray class]] == NO)
+        return nil;
+    else if ([dP count] == 0)
+        return dP;
+    
+	NSIndexSpecifier *indexSpec = [dP objectAtIndex:0];
+    if ([indexSpec isKindOfClass:[NSScriptObjectSpecifier class]]) {
+        BibDocument *doc = [[indexSpec containerSpecifier] objectsByEvaluatingSpecifier];
+        dP = [[dP lastObject] isKindOfClass:[BibItem class]] ? dP : [[doc publications] objectsAtIndexSpecifiers:(NSArray *)dP];
+    }
     
     NSDictionary *args = [self evaluatedArguments];
     NSString *key = [args objectForKey:@"by"];
@@ -87,7 +96,7 @@ static NSString *normalizedKey(NSString *key) {
     if (subKey)
         [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:normalizedKey(subKey) ascending:isAscending];
     
-    return [dPO sortedArrayUsingDescriptors:[NSArray arrayWithObjects:sortDescriptor, subSortDescriptor, nil]];
+    return [dP sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObjects:sortDescriptor, subSortDescriptor, nil]];
 }
 
 @end

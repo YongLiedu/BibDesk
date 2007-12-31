@@ -129,7 +129,7 @@
 
 - (NSArray *)arraySortedByAuthor;
 {
-    return [self sortedArrayUsingDescriptors:[NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKAuthorString ascending:YES], nil]];
+    return [self sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKAuthorString ascending:YES], nil]];
 }
 
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;

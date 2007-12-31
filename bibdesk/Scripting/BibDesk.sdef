@@ -958,14 +958,14 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="Returns a list of publications sorted by a field.">
             <cocoa name="Sort" class="BDSKSortCommand"/>
             <direct-parameter
-                description="The publications to sort."/>
+                description="The publications to sort.">
                 <type type="publication" list="yes"/>
             </direct-parameter>
             <parameter name="by" code="by  " type="text"
                 description="The field to sort by.">
                 <cocoa key="by"/>
             </parameter>
-            <parameter name="subsort" code="SubS" type="text" optional="yes"
+            <parameter name="subsort by" code="SubS" type="text" optional="yes"
                 description="The secondary field to subsort by.">
                 <cocoa key="subsort"/>
             </parameter>
@@ -973,6 +973,9 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Is the sort ascending?">
                 <cocoa key="ascending"/>
             </parameter>
+            <result description="sorted list of publications">
+                <type type="publication" list="yes"/>
+            </result>
         </command>
         
         <command name="parse format" code="BDSKpfmt"
