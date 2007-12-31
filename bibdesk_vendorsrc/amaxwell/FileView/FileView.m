@@ -1261,7 +1261,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSUInteger r, c;
     // should always succeed
     if ([self _getGridRow:&r column:&c atPoint:_leftArrowFrame.origin])
-        [self setNeedsDisplayInRect:[self _rectOfIconInRow:r column:c]];
+        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -8.0, -8.0)];
 }
 
 - (void)rightArrowAction:(id)sender
@@ -1272,7 +1272,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSUInteger r, c;
     // should always succeed
     if ([self _getGridRow:&r column:&c atPoint:_rightArrowFrame.origin])
-        [self setNeedsDisplayInRect:[self _rectOfIconInRow:r column:c]];
+        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -8.0, -8.0)];
 }
 
 - (BOOL)_hasArrows {
