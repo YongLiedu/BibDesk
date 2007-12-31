@@ -37,11 +37,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <Quartz/Quartz.h>
-#import <QTKit/QTKit.h>
-#import <WebKit/WebKit.h>
 
-@class FVScaledImageView;
+@class FVScaledImageView, QTMovieView, PDFView, WebView;
 
 @interface FVPreviewer : NSWindowController {
     IBOutlet QTMovieView       *movieView;

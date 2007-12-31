@@ -38,6 +38,9 @@
 
 #import "FVPreviewer.h"
 #import "FVScaledImageView.h"
+#import <Quartz/Quartz.h>
+#import <QTKit/QTKit.h>
+#import <WebKit/WebKit.h>
 
 @implementation FVPreviewer
 
