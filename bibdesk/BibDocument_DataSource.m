@@ -311,6 +311,7 @@
 	if(tv == tableView){
 		
 		NSString *tcId = [[[tableView tableColumns] objectAtIndex:column] identifier];
+        NSArray *linkedURLs;
         NSURL *theURL;
         
 		if([tcId isURLField]){
@@ -339,10 +340,67 @@
                                     andSubmenuOfApplicationsForURL:theURL atIndex:1];
             }
             [menu addItem:[NSMenuItem separatorItem]];
-            item = [menu addItemWithTitle:NSLocalizedString(@"Edit", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Get Info", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
             [item setTarget:self];
-            item = [menu addItemWithTitle:[NSLocalizedString(@"Delete", @"Menu item title") stringByAppendingEllipsis] action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Remove", @"Menu item title") action:@selector(removeSelectedPubs:) keyEquivalent:@""];
             [item setTarget:self];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Delete", @"Menu item title") action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
+            [item setAlternate:YES];
+		}else if([tcId isEqualToString:BDSKLocalFileString]){
+            linkedURLs = [self selectedFileURLs];
+            
+            if([linkedURLs count]){
+                menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked Files", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:tcId];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked Files in Finder", @"Menu item title") action:@selector(revealLinkedFile:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:tcId];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked Files", @"Menu item title") action:@selector(showNotesForLinkedFile:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:tcId];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked Files", @"Menu item title") action:@selector(copyNotesForLinkedFile:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:tcId];
+                if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
+                    item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
+                                        andSubmenuOfApplicationsForURL:theURL atIndex:1];
+                }
+                [menu addItem:[NSMenuItem separatorItem]];
+            }
+            item = [menu addItemWithTitle:NSLocalizedString(@"Get Info", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
+            [item setTarget:self];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Remove", @"Menu item title") action:@selector(removeSelectedPubs:) keyEquivalent:@""];
+            [item setTarget:self];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Delete", @"Menu item title") action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
+            [item setAlternate:YES];
+		}else if([tcId isEqualToString:BDSKRemoteURLString]){
+            linkedURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
+            
+            if([linkedURLs count]){
+                menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Open URLs in Browser", @"Menu item title") action:@selector(openLinkedURL:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:tcId];
+                if([linkedURLs count] == 1 && (theURL = [linkedURLs lastObject]) && [theURL isEqual:[NSNull null]] == NO){
+                    item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
+                                        andSubmenuOfApplicationsForURL:theURL atIndex:1];
+                }
+                [menu addItem:[NSMenuItem separatorItem]];
+            }
+            item = [menu addItemWithTitle:NSLocalizedString(@"Get Info", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
+            [item setTarget:self];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Remove", @"Menu item title") action:@selector(removeSelectedPubs:) keyEquivalent:@""];
+            [item setTarget:self];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Delete", @"Menu item title") action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
+            [item setAlternate:YES];
 		}else{
 			menu = [actionMenu copyWithZone:[NSMenu menuZone]];
             
