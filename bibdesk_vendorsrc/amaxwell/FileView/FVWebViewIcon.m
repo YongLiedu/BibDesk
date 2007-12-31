@@ -235,8 +235,24 @@ static BOOL FVWebIconDisabled = NO;
 {
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
 
-    // !!! Better to just load text/html and ignore everything else?  PDF doesn't show up in the window, so there's no point in loading it.
-    if ([type isEqualToString:@"application/pdf"]) {
+    // !!! Better to just load text/html and ignore everything else?  The point of implementing this method is to ignore PDF.  It doesn't show up in the thumbnail and it's slow to load, so there's no point in loading it.
+    
+    // Documentation says the default implementation checks "If request is not a directory", which is...odd.
+    // See http://trac.webkit.org/projects/webkit/browser/trunk/WebKit/mac/DefaultDelegates/WebDefaultPolicyDelegate.m
+    
+    // This class should never get a file URL, but we'll implement it in the standard way for consistency.
+    if ([[request URL] isFileURL]) {
+        BOOL isDirectory = NO;
+        [[NSFileManager defaultManager] fileExistsAtPath:[[request URL] path] isDirectory:&isDirectory];
+        if (isDirectory) {
+            [listener ignore];
+        } else if ([[sender class] canShowMIMEType:type]) {
+            [listener use];
+        } else {
+            [listener ignore];
+        }
+    }
+    else if ([type isEqualToString:@"application/pdf"]) {
         
         // next renderOffscreen will create a fallback icon
         pthread_mutex_lock(&_mutex);        
@@ -245,6 +261,12 @@ static BOOL FVWebIconDisabled = NO;
         
         [listener ignore];
         [self _releaseWebView];
+    }
+    else if ([[sender class] canShowMIMEType:type]) {
+        [listener use];
+    }
+    else {
+        [listener ignore];
     }
 }
 
