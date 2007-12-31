@@ -84,6 +84,8 @@
 #import "BDSKSkimReader.h"
 #import "BDSKFileMigrationController.h"
 
+#import <FileView/FVPreviewer.h>
+
 @implementation BibDocument (Actions)
 
 #pragma mark -
@@ -1008,6 +1010,21 @@
         [pboard setString:notes forType:NSStringPboardType];
     } else {
         NSBeep();
+    }
+}
+
+- (IBAction)previewAction:(id)sender {
+    NSURL *theURL = [sender representedObject];
+    if (theURL == nil) {
+        NSArray *selectedURLs = [self selectedFileURLs];
+        if ([selectedURLs count])
+            theURL = [selectedURLs firstObject];
+        else
+            theURL = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"] firstObject];
+    }
+    if (theURL && [theURL isEqual:[NSNull null]] == NO) {
+        [FVPreviewer setWebViewContextMenuDelegate:self];
+        [FVPreviewer previewURL:theURL];
     }
 }
 

@@ -99,6 +99,7 @@
                 openLinkedFile = id; 
                 openRemoteURL = id; 
                 openTemplateDocument = id; 
+                previewAction = id; 
                 refreshAllExternalGroups = id; 
                 refreshScriptGroups = id; 
                 refreshSharedBrowsing = id; 

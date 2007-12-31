@@ -257,6 +257,11 @@
     return ([menuItem representedObject] != nil || [[self selectedFileURLs] count] > 0);
 }	
 
+- (BOOL) validatePreviewMenuItem:(NSMenuItem*) menuItem {
+    return ([menuItem representedObject] != nil || 
+            [[self selectedFileURLs] count] + [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs"] count]);
+}	
+
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
 	return ([self numberOfSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
 }
@@ -699,6 +704,9 @@
 	}
 	else if(act == @selector(copyNotesForLinkedFile:)) {
 		return [self validateCopyNotesForLinkedFileMenuItem:menuItem];
+	}
+	else if(act == @selector(previewAction:)) {
+		return [self validatePreviewMenuItem:menuItem];
 	}
 	else if(act == @selector(toggleShowingCustomCiteDrawer:)) {
 		return [self validateToggleToggleCustomCiteDrawerMenuItem:menuItem];

@@ -81,6 +81,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKEditorTableView.h"
 #import "BDSKEditorTextFieldCell.h"
+#import <FileView/FVPreviewer.h>
 
 static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
 
@@ -458,6 +459,21 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         NSPasteboard *pboard = [NSPasteboard generalPasteboard];
         [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
         [pboard setString:string forType:NSStringPboardType];
+    }
+}
+
+- (IBAction)previewAction:(id)sender {
+    NSURL *theURL = [sender representedObject];
+    if (theURL == nil) {
+        NSArray *theURLs = [publication valueForKeyPath:@"localFiles.URL"];
+        if ([theURLs count])
+            theURL = [theURLs firstObject];
+        else
+            theURL = [[publication valueForKeyPath:@"remoteURLs.URL"] firstObject];
+    }
+    if (theURL && [theURL isEqual:[NSNull null]] == NO) {
+        [FVPreviewer setWebViewContextMenuDelegate:self];
+        [FVPreviewer previewURL:theURL];
     }
 }
 
@@ -1369,6 +1385,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	}
 	else if (theAction == @selector(copyNotesForLinkedFile:)) {
 		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] > 0;
+	}
+	else if (theAction == @selector(previewAction:)) {
+		return [menuItem representedObject] != nil || [[publication valueForKey:@"linkedFiles"] count] + [[publication valueForKey:@"linkedURLs"] count] == 1;
 	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)
