@@ -115,15 +115,14 @@ static NSURL *missingFileURL = nil;
     // CFURLGetFSRef won't like a nil URL
     NSParameterAssert(nil != representedURL);
     
-    if ([representedURL isEqual:missingFileURL]) {
+    NSString *scheme = [representedURL scheme];
+    
+    // initWithURLScheme requires a scheme, so there's not much we can do without it
+    if ([representedURL isEqual:missingFileURL] || nil == scheme) {
         return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil] autorelease];
     }
     else if (NO == [representedURL isFileURL]) {
-        NSString *scheme = [representedURL scheme];
-        if ([scheme isEqualToString:@"http"])
-            return [[[FVWebViewIcon allocWithZone:[self zone]] initWithURL:representedURL] autorelease];
-        else
-            return [[[FVFinderIcon allocWithZone:[self zone]] initWithURLScheme:scheme] autorelease];
+        return [[[FVWebViewIcon allocWithZone:[self zone]] initWithURL:representedURL] autorelease];
     }
     
     OSStatus err = noErr;

@@ -51,11 +51,11 @@ static BOOL FVWebIconDisabled = NO;
 }
 
 - (id)initWithURL:(NSURL *)aURL;
-{
-    NSParameterAssert([[aURL scheme] isEqualToString:@"http"]);
+{    
+    NSParameterAssert(nil != [aURL scheme] && NO == [aURL isFileURL]);
     
-    // if this is disabled, return a finder icon instead
-    if (FVWebIconDisabled) {
+    // if this is disabled or not an http URL, return a finder icon instead
+    if (FVWebIconDisabled || NO == [[aURL scheme] isEqualToString:@"http"]) {
         NSZone *zone = [self zone];
         [self release];
         self = [[FVFinderIcon allocWithZone:zone] initWithURLScheme:[aURL scheme]];
