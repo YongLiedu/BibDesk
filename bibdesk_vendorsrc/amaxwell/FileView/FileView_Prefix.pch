@@ -6,15 +6,24 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-// 10.4 SDK compatibility
+// From NSObjCRuntime.h
 #ifndef NSINTEGER_DEFINED
-#define NSUInteger unsigned
-#define NSInteger int
-#define CGFloat float
-#define NSIntegerMax INT_MAX
-// avoid redefinition in FileView.h
+typedef int NSInteger;
+typedef unsigned int NSUInteger;
+#define NSIntegerMax    LONG_MAX
+#define NSIntegerMin    LONG_MIN
+#define NSUIntegerMax   ULONG_MAX
 #define NSINTEGER_DEFINED 1
-#endif
+#endif /* NSINTEGER_DEFINED */
+
+// From CGBase.h
+#ifndef	CGFLOAT_DEFINED
+typedef float CGFloat;
+#define CGFLOAT_MIN FLT_MIN
+#define CGFLOAT_MAX FLT_MAX
+#define CGFLOAT_IS_DOUBLE 0
+#define CGFLOAT_DEFINED 1
+#endif /* CGFLOAT_DEFINED */
 
 // from 10.5 header
 #ifndef NSAppKitVersionNumber10_4
