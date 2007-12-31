@@ -144,7 +144,10 @@ static NSShadow *__shadow = nil;
     __subtitleAttributes = [ta copy];
     
     __shadow = [[NSShadow alloc] init];
-    [__shadow setShadowOffset:NSMakeSize(0.0, -3.0)];
+    // IconServices shadows look darker than the normal NSShadow (especially Leopard folder shadows) so try to match
+    [__shadow setShadowColor:[NSColor colorWithCalibratedWhite:0 alpha:0.4]];
+    [__shadow setShadowOffset:NSMakeSize(0.0, -2.0)];
+    // this will have to be scaled when drawing, since it's in a global coordinate space
     [__shadow setShadowBlurRadius:5.0];
     
     // QTMovie raises if +initialize isn't sent on the AppKit thread
@@ -1024,6 +1027,9 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     BOOL useFastDrawingPath = (isResizing || _isRescaling || ([self _isFastScrolling] && _iconSize.height <= 256));
     BOOL useSubtitle = [_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)];
     NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    // shadow needs to be scaled as the icon scale changes to approximate the IconServices shadow
+    [__shadow setShadowBlurRadius:2.0 * [self iconScale]];
     
     // iterate each row/column to see if it's in the dirty rect, and evaluate the current cache state
     for (r = rMin; r < rMax; r++) 
