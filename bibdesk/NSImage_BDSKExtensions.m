@@ -194,7 +194,6 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     NSBezierPath *path = [NSBezierPath bezierPath];    
     [image lockFocus];
     
-    // I started out with the idea of making this resolution-independent and scaling to an arbitrary size, but transforming the points was too annoying.  I started out with a 1x1" grid subdivided into 0.125" ticks in OmniGraffle and drew a paperclip using lines and semicircles.  The path coordinates were taken directly from that graffle diagram, and the transform and line width were adjusted by trial and error.
     NSAffineTransform *t = [NSAffineTransform transform];
     [t rotateByDegrees:-35.0];
     [t translateXBy:0.0 yBy:10.0];
@@ -212,7 +211,6 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     [path stroke];
     
     [image unlockFocus];
-    [[image TIFFRepresentation] writeToFile:@"/Users/hofman/Desktop/paperclip1.tiff" atomically:YES];
     return image;
 }
 
