@@ -526,7 +526,6 @@
 		F9EA8FCB0ADE01F9005EFBE4 /* BDSKUpdateChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EA8FC90ADE01F9005EFBE4 /* BDSKUpdateChecker.m */; };
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B908B1572600AAC9A9 /* BDSKScrollableTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */; };
-		F9EF94E50D15FE7400314058 /* BDSKFileMigrationController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9EF94E30D15FE7400314058 /* BDSKFileMigrationController.h */; };
 		F9EF94E60D15FE7400314058 /* BDSKFileMigrationController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF94E40D15FE7400314058 /* BDSKFileMigrationController.m */; };
 		F9EF94EB0D16014000314058 /* BDSKFileMigration.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9EF94E90D16014000314058 /* BDSKFileMigration.nib */; };
 		F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */; };
@@ -2107,6 +2106,7 @@
 				F9252E2108F60D170045D563 /* BDSKFileContentSearchController.m */,
 				F9B88D970B7D14B700D5D42C /* BDSKFileMatcher.m */,
 				F9BE68360B80F94000B2597C /* BDSKFileMatchConfigController.m */,
+				F9EF94E40D15FE7400314058 /* BDSKFileMigrationController.m */,
 				F9022C6A075802E300C3F701 /* BDSKFiler.m */,
 				CE38FB8D091D94A100BCB69D /* BDSKFilterController.m */,
 				F97965F0086909EA00050427 /* BDSKFindController.m */,
@@ -2132,8 +2132,6 @@
 				3D86633E0802C25800FF1724 /* BDSKTypeInfoEditor.m */,
 				CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */,
 				F9022C68075802E300C3F701 /* BDSKEditor.m */,
-				F9EF94E30D15FE7400314058 /* BDSKFileMigrationController.h */,
-				F9EF94E40D15FE7400314058 /* BDSKFileMigrationController.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -2463,6 +2461,7 @@
 				F9252E2008F60D170045D563 /* BDSKFileContentSearchController.h */,
 				F9B88D960B7D14B700D5D42C /* BDSKFileMatcher.h */,
 				F9BE68370B80F94000B2597C /* BDSKFileMatchConfigController.h */,
+				F9EF94E30D15FE7400314058 /* BDSKFileMigrationController.h */,
 				F9022C69075802E300C3F701 /* BDSKFiler.h */,
 				CE38FB8A091D94A100BCB69D /* BDSKFilter.h */,
 				CE38FB8C091D94A100BCB69D /* BDSKFilterController.h */,
@@ -2846,7 +2845,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				F9EF94E50D15FE7400314058 /* BDSKFileMigrationController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4463,10 +4461,10 @@
 			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 982;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_MODEL_TUNING = G4;
 				GCC_PREPROCESSOR_DEFINITIONS = OMNI_FORCE_ASSERTIONS;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = YES;
@@ -4503,17 +4501,13 @@
 				);
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 982;
-				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = "";
-				GCC_AUTO_VECTORIZATION = NO;
-				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_FAST_OBJC_DISPATCH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INPUT_FILETYPE = sourcecode.c.objc;
-				GCC_MODEL_TUNING = G4;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bibdesk_Prefix.pch;
 				GCC_UNROLL_LOOPS = NO;
