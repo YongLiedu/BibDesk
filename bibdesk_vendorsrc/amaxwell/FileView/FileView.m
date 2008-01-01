@@ -382,7 +382,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 // Caller is responsible for any centering before drawing.
 - (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
 {
-    NSPoint origin = [self frame].origin;
+    NSPoint origin = [self bounds].origin;
     CGFloat leftEdge = origin.x + _padding.width / 2 + ([self _columnWidth]) * column;
     CGFloat bottomEdge = origin.y + _padding.height / 2 + ([self _rowHeight]) * row;
     return NSMakeRect(leftEdge, bottomEdge, _iconSize.width, _iconSize.height);
@@ -1030,6 +1030,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     
     // shadow needs to be scaled as the icon scale changes to approximate the IconServices shadow
     [__shadow setShadowBlurRadius:2.0 * [self iconScale]];
+    [__shadow setShadowOffset:NSMakeSize(0.0, -[self iconScale])];
     
     // iterate each row/column to see if it's in the dirty rect, and evaluate the current cache state
     for (r = rMin; r < rMax; r++) 
@@ -1267,7 +1268,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSUInteger r, c;
     // should always succeed
     if ([self _getGridRow:&r column:&c atPoint:_leftArrowFrame.origin])
-        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -8.0, -8.0)];
+        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
 }
 
 - (void)rightArrowAction:(id)sender
@@ -1278,7 +1279,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSUInteger r, c;
     // should always succeed
     if ([self _getGridRow:&r column:&c atPoint:_rightArrowFrame.origin])
-        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -8.0, -8.0)];
+        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
 }
 
 - (BOOL)_hasArrows {
