@@ -49,6 +49,8 @@
     [arrayController addObject:[NSNull null]];
     [arrayController addObject:[NSURL URLWithString:@"http://www.macintouch.com/"]];
     [arrayController addObject:[NSURL URLWithString:@"http://bibdesk.sf.net/"]];
+    [arrayController addObject:[NSURL URLWithString:@"http://www-chaos.engr.utk.edu/pap/crg-aiche2000daw-paper.pdf"]];
+    [arrayController addObject:[NSURL URLWithString:@"http://dx.doi.org/10.1023/A:1018361121952"]];
     
     // nonexistent domain
     [arrayController addObject:[NSURL URLWithString:@"http://bibdesk.sourceforge.tld/"]];

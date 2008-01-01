@@ -90,16 +90,23 @@ static IconRef __genericURLIcon;
             _iconRef = __genericURLIcon;
         // increment retain count of the shared instance
         if (_iconRef) AcquireIconRef(_iconRef);
+        
+        _drawsLinkBadge = NO;
     }
     return self;
 }
 
+// nil URL will draw the missing file
 - (id)initWithFinderIconOfURL:(NSURL *)theURL;
 {
     self = [super init];
     if (self) {
         _iconType = FVFinderIconType;
         _iconRef = NULL;
+        
+        _drawsLinkBadge = theURL ? [[self class] _shouldDrawBadgeForURL:theURL] : NO;
+        if (_drawsLinkBadge)
+            theURL = [[self class] _resolvedURLWithURL:theURL];
         
         if (theURL) {
             OSStatus err;
@@ -108,7 +115,7 @@ static IconRef __genericURLIcon;
                 err = fnfErr;
             else
                 err = noErr;
-            err = GetIconRefFromFileInfo(&fileRef, 0, NULL, kFSCatInfoNone, NULL, kIconServicesNormalUsageFlag, &_iconRef, NULL);
+            err = GetIconRefFromFileInfo(&fileRef, 0, NULL, kFSCatInfoNone, NULL, kIconServicesNoBadgeFlag, &_iconRef, NULL);
             if (noErr != err) {
                 // this will indicate that we should plot the question mark icon
                 _iconRef = NULL;
@@ -144,14 +151,17 @@ static IconRef __genericURLIcon;
     if (NULL == _iconRef) {
         
         if (__genericDocIcon)
-            PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kPlotIconRefNormalFlags, __genericDocIcon);
+            PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, __genericDocIcon);
         rect = CGRectInset(rect, rect.size.width/4, rect.size.height/4);
         if (__questionIcon)
-            PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kPlotIconRefNormalFlags, __questionIcon);          
+            PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kIconServicesNoBadgeFlag, __questionIcon);          
     }
     else {
-        PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kPlotIconRefNormalFlags, _iconRef);
+        PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, _iconRef);
     }
+    // We could use Icon Services to draw the badge, but it draws pure alpha with a centered badge at large sizes.  It also results in an offset image relative to the grid.
+    if (_drawsLinkBadge)
+        [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:rect];
 }
 
 - (BOOL)needsShadow { return NO; }

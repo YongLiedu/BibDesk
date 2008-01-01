@@ -95,6 +95,10 @@ static CGPDFDocumentRef createCGPDFDocumentWithPostScriptURL(NSURL *fileURL)
     self = [super init];
     if (self) {
         
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
+        if (_drawsLinkBadge)
+            aURL = [[self class] _resolvedURLWithURL:aURL];
+
         // PDF sucks because we have to read the file and parse it to find out the page size, even if we're not going to draw it.  Since that's not very efficient, don't even open the file until we have to draw it.
         
         // Set default sizes so we can draw a blank page on the first pass; this will use a common aspect ratio.
@@ -336,6 +340,8 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
     else if (_thumbnailRef) {
         CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnailRef);
         pthread_mutex_unlock(&_mutex);
+        if (_drawsLinkBadge)
+            [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:[self _drawingRectWithRect:dstRect]];
     }
     else {
         pthread_mutex_unlock(&_mutex);
@@ -356,8 +362,11 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
         // draw the thumbnail if the rect is small or we have no PDF document (yet)...if we have neither, draw a blank page
         if (CGRectGetHeight(drawRect) <= _thumbnailSize.height * 1.2 || NULL == _pdfDoc) {
             
-            if (NULL != _thumbnailRef) 
+            if (NULL != _thumbnailRef) {
                 CGContextDrawImage(context, drawRect, _thumbnailRef);
+                if (_drawsLinkBadge)
+                    [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
+            }
             else {
                 // draw a blank page as a placeholder, and the real icon will get picked up next time around
                 // this path is hit fairly often, but is seldom actually drawn because of the callback rate
@@ -404,6 +413,10 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
                 CGContextDrawPDFPage(context, _pdfPage);
             }
             CGContextRestoreGState(context);
+            
+            if (_drawsLinkBadge)
+                [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
+
         }
         pthread_mutex_unlock(&_mutex);
     }

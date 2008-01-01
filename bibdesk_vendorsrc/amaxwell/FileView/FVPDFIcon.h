@@ -56,6 +56,7 @@
     pthread_mutex_t   _mutex;
     NSUInteger        _currentPage;
     NSUInteger        _pageCount;
+    BOOL              _drawsLinkBadge;
 }
 - (id)initWithPDFAtURL:(NSURL *)aURL;
 - (id)initWithPostscriptAtURL:(NSURL *)aURL;

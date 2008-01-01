@@ -51,6 +51,7 @@
     FVIconType      _iconType;
     BOOL            _inDiskCache;
     char           *_diskCacheName;
+    BOOL            _drawsLinkBadge;
     pthread_mutex_t _mutex;
 }
 - (id)initWithImageAtURL:(NSURL *)aURL;

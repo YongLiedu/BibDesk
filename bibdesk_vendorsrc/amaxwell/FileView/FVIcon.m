@@ -110,6 +110,40 @@ static NSURL *missingFileURL = nil;
     return [self iconWithURL:representedURL size:iconSize];
 }
 
++ (BOOL)_shouldDrawBadgeForURL:(NSURL *)aURL
+{
+    NSParameterAssert([aURL isFileURL]);
+    
+    const UInt8 *fsPath = (void *)[[aURL path] UTF8String];
+    OSStatus err;
+    FSRef fileRef;
+    err = FSPathMakeRefWithOptions(fsPath, kFSPathMakeRefDoNotFollowLeafSymlink, &fileRef, NULL);   
+    
+    // kLSItemContentType returns a CFStringRef, according to the header
+    CFStringRef theUTI = NULL;
+    if (noErr == err)
+        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
+    
+    BOOL drawBadge = (NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeResolvable));
+    
+    if (theUTI) CFRelease(theUTI);
+    return drawBadge;
+}
+
++ (NSURL *)_resolvedURLWithURL:(NSURL *)aURL
+{
+    const UInt8 *fsPath = (void *)[[aURL path] UTF8String];
+    OSStatus err;
+    FSRef fileRef;
+    err = FSPathMakeRefWithOptions(fsPath, kFSPathMakeRefDefaultOptions, &fileRef, NULL); 
+    
+    Boolean isFolder, wasAliased;
+    err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
+    if (noErr == err)
+        aURL = [(id)CFURLCreateFromFSRef(NULL, &fileRef) autorelease];
+    return aURL;
+}
+    
 + (id)iconWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
 {
     // CFURLGetFSRef won't like a nil URL
@@ -129,21 +163,28 @@ static NSURL *missingFileURL = nil;
     
     FSRef fileRef;
     
-    // return missing file icon if we can't resolve the path
-    if (FALSE == CFURLGetFSRef((CFURLRef)representedURL, &fileRef))
-        return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil] autorelease];
+    // convert to an FSRef without resolving symlinks, to get the UTI of the actual URL
+    const UInt8 *fsPath = (void *)[[representedURL path] UTF8String];
+    err = FSPathMakeRefWithOptions(fsPath, kFSPathMakeRefDoNotFollowLeafSymlink, &fileRef, NULL);
+    
+    // return missing file icon if we can't convert the path to an FSRef
+    if (noErr != err)
+        return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil] autorelease];    
     
     // kLSItemContentType returns a CFStringRef, according to the header
     CFStringRef theUTI = NULL;
     if (noErr == err)
         err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
+            
+    // For a link/alias, get the target's UTI in order to determine which concrete subclass to create.  Subclasses that are file-based need to check the URL to see if it should be badged using _shouldDrawBadgeForURL, and then call _resolvedURLWithURL in order to actually load the file's content.
     
-    if (UTTypeConformsTo(theUTI, kUTTypeResolvable)) {
-        // resolve alias, should we add a link badge?
+    // aliases and symlinks are kUTTypeResolvable, so the alias manager should handle either of them
+    // this doesn't handle alias->symlink->file, but I don't think that's worth it
+    if (NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeResolvable)) {
         Boolean isFolder, wasAliased;
         err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
-        if (err == noErr) {
-            representedURL = [(NSURL *)CFURLCreateFromFSRef(NULL, &fileRef) autorelease];
+        // don't change the UTI if it couldn't be resolved; in that case, we should just show a finder icon
+        if (noErr == err) {
             CFRelease(theUTI);
             err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
         }
@@ -176,7 +217,7 @@ static NSURL *missingFileURL = nil;
     
     if (nil == anIcon)
         anIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:representedURL];
-    
+        
     [(id)theUTI release];
     
     return [anIcon autorelease];    
@@ -216,6 +257,22 @@ static NSURL *missingFileURL = nil;
 
 // this method is optional; some subclasses may not have a fast path
 - (void)fastDrawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context { [self drawInRect:dstRect inCGContext:context]; }
+
+- (void)_drawBadgeInContext:(CGContextRef)context forIconInRect:(NSRect)dstRect withDrawingRect:(CGRect)drawingRect
+{
+    IconRef linkBadge;
+    OSStatus err;
+    err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kAliasBadgeIcon, &linkBadge);
+    
+    // rect needs to be a square, or else the aspect ratio of the arrow is wrong
+    // rect needs to be the same size as the full icon, or the scale of the arrow is wrong
+    
+    // We don't know the size of the actual link arrow (and it changes with the size of dstRect), so fine-tuning the drawing isn't really possible as far as I can see.
+    if (noErr == err) {
+        PlotIconRefInContext(context, (CGRect *)&dstRect, kAlignBottomLeft, kTransformNone, NULL, kPlotIconRefNormalFlags, linkBadge);
+        ReleaseIconRef(linkBadge);
+    }
+}
 
 // handles centering and aspect ratio, since most of our icons have weird sizes, but they'll be drawn in a square box
 - (CGRect)_drawingRectWithRect:(NSRect)iconRect;

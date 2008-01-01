@@ -154,6 +154,10 @@ static CGAffineTransform __paperTransform;
         _inDiskCache = NO;
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
         
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
+        if (_drawsLinkBadge)
+            aURL = [[self class] _resolvedURLWithURL:aURL];
+        
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
             perror("pthread_mutex_init");
@@ -193,6 +197,8 @@ static CGAffineTransform __paperTransform;
     if (_thumbnailRef) {
         CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnailRef);
         pthread_mutex_unlock(&_mutex);
+        if (_drawsLinkBadge)
+            [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:[self _drawingRectWithRect:dstRect]];
     }
     else {
         pthread_mutex_unlock(&_mutex);
@@ -212,6 +218,8 @@ static CGAffineTransform __paperTransform;
     if (toDraw) {
         CGContextDrawImage(context, drawRect, toDraw);
         pthread_mutex_unlock(&_mutex);
+        if (_drawsLinkBadge)
+            [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
     }
     else {
         pthread_mutex_unlock(&_mutex);

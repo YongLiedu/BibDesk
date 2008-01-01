@@ -49,6 +49,7 @@
     NSSize          _desiredSize;
     FVIcon         *_fallbackIcon;
     BOOL            _quickLookFailed;
+    BOOL            _drawsLinkBadge;
     pthread_mutex_t _mutex;
 }
 - (id)initWithURL:(NSURL *)theURL;

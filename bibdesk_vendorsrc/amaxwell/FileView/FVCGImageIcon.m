@@ -68,6 +68,11 @@ static const NSUInteger MAX_PIXEL_DIMENSION = 1024; /* maximum height or width a
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
         _inDiskCache = NO;
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
+        
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
+        if (_drawsLinkBadge)
+            aURL = [[self class] _resolvedURLWithURL:aURL];
+        
         if (rc)
             perror("pthread_mutex_init");        
     }
@@ -213,6 +218,8 @@ static inline BOOL isBigImage(CGImageRef image)
         if (_thumbnailRef) {
             CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnailRef);
             pthread_mutex_unlock(&_mutex);
+            if (_drawsLinkBadge)
+                [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:[self _drawingRectWithRect:dstRect]];
         }
         else {
             pthread_mutex_unlock(&_mutex);
@@ -230,13 +237,19 @@ static inline BOOL isBigImage(CGImageRef image)
         if (CGRectGetHeight(drawRect) > _thumbnailSize.height) {
             // prefer the full image if we're drawing in a large rect and it's available
             CGImageRef image = (_fullImageRef ? _fullImageRef : _thumbnailRef);
-            if (image)
+            if (image) {
                 CGContextDrawImage(context, drawRect, image);
-            else
+                if (_drawsLinkBadge)
+                    [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
+            }
+            else {
                 [self _drawPlaceholderInRect:dstRect inCGContext:context];
+            }
         }
         else if (_thumbnailRef) {
             CGContextDrawImage(context, drawRect, _thumbnailRef);
+            if (_drawsLinkBadge)
+                [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
         }
         else {
             [self _drawPlaceholderInRect:dstRect inCGContext:context];
