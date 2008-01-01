@@ -2765,26 +2765,31 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
     conversionContext *ctxt = (conversionContext *)context;
     BibItem *self = ctxt->publication;
+    NSArray *currentURLs = [self valueForKeyPath:@"files.URL"];
     
     // this function is called for all local & remote URL fields, whether or not they have a value
     NSURL *urlValue = [self URLForField:(id)key];
     if (urlValue) {
         // see if this file was converted previously to avoid duplication
-        BOOL converted = [[self valueForKeyPath:@"files.URL"] containsObject:urlValue];
+        BOOL converted = [currentURLs containsObject:urlValue];
         if (converted == NO) {
             BDSKLinkedFile *file = [[BDSKLinkedFile alloc] initWithURL:urlValue delegate:self];
-            if (file) {
-                [self->files addObject:file];
-                [file release];
-                converted = YES;
-                (ctxt->numberOfAddedFiles)++;
+            // check again, because the URL may be given in a diffreent form, e.g. with an extra slash at the end for a folder
+            converted = [currentURLs containsObject:[file URL]];
+            if (converted == NO) {
+                if (file) {
+                    [self->files addObject:file];
+                    converted = YES;
+                    (ctxt->numberOfAddedFiles)++;
+                }
+                else {
+                    // @@ this error message is lame
+                    NSDictionary *message = [[NSDictionary alloc] initWithObjectsAndKeys:urlValue, @"URL", NSLocalizedString(@"File or URL not found", @""), @"error", nil];
+                    [ctxt->messages addObject:message];
+                    [message release];
+                }
             }
-            else {
-                // @@ this error message is lame
-                NSDictionary *message = [[NSDictionary alloc] initWithObjectsAndKeys:urlValue, @"URL", NSLocalizedString(@"File or URL not found", @""), @"error", nil];
-                [ctxt->messages addObject:message];
-                [message release];
-            }
+            [file release];
         }
         
         // clear the old URL field if the file was converted (now or previously)
@@ -2805,7 +2810,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError
 {
-    unsigned int initialCount = [files count];
+    int addedLocalFiles = 0;
     NSMutableArray *messages = [NSMutableArray new];
     conversionContext context;
     context.publication = self;
@@ -2816,6 +2821,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     CFArrayRef fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
     CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, &context);
+    addedLocalFiles = context.numberOfAddedFiles;
     
     fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey];
     CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, &context);
@@ -2831,8 +2837,10 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     // Cause the file content search index (if any) to update, since we bypassed the normal insert mechanism where this is typically handled.  The date-modified will only be set if shouldRemove == YES and the conversion succeeded, since the applier function calls setField:toValue:.  
     // @@ Calling migrateFilesAndRemove:numberOfAddedFiles:numberOfRemovedFields:error: from -createFiles will also cause date-modified to be set.
-    if (initialCount != [files count])
-        [self updateMetadataForKey:BDSKLocalFileString];
+    if (addedLocalFiles > 0)
+        [self noteFilesChanged:YES];
+    if (context.numberOfAddedFiles > addedLocalFiles)
+        [self noteFilesChanged:NO];
     
     if (numberOfAddedFiles)
         *numberOfAddedFiles = context.numberOfAddedFiles;
