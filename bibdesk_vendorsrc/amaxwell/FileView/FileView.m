@@ -1636,8 +1636,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     return [[sender draggingSource] isEqual:self];
 }
 
-// get lots of updates for autoscrolling
-- (BOOL)wantsPeriodicDraggingUpdates { return YES; }
+- (BOOL)wantsPeriodicDraggingUpdates { return NO; }
 
 - (FVDropOperation)_dropOperationAtPointInView:(NSPoint)point highlightRect:(NSRect *)dropRect insertionIndex:(NSUInteger *)anIndex
 {
@@ -1752,40 +1751,6 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         }
     }
     
-    NSPoint curPt = [[self window] mouseLocationOutsideOfEventStream];
-    // autoscrolling at the top of the scroll view seems to work fine, so don't screw with it
-    // tried using a timer, but drags into the view from outside were too problematic for starting/stopping
-    if (ABS([self convertPoint:curPt fromView:nil].y - NSMaxY([self visibleRect])) <= 10) {
-        
-        NSEvent *currentEvent = [[self window] currentEvent];
-        NSEvent *newEvent;
-        
-        // Current event may be (at least) a ProcessNotification or MouseExited event when the drag source is external, so create an event from scratch to avoid assertion failures when sending -eventNumber, -clickCount, and -pressure.
-        if ([currentEvent type] > NSRightMouseDragged) {
-            newEvent = [NSEvent mouseEventWithType:NSLeftMouseDragged
-                                          location:curPt
-                                     modifierFlags:[currentEvent modifierFlags]
-                                         timestamp:[currentEvent timestamp]
-                                      windowNumber:[currentEvent windowNumber]
-                                           context:[currentEvent context]
-                                       eventNumber:NSIntegerMax
-                                        clickCount:1
-                                          pressure:0];            
-        }
-        else {
-            // local drag: work around the problem with autoscrolling at the bottom by using an offset
-            newEvent = [NSEvent mouseEventWithType:[currentEvent type]
-                                          location:NSMakePoint(curPt.x, curPt.y - _padding.height)
-                                     modifierFlags:[currentEvent modifierFlags]
-                                         timestamp:[currentEvent timestamp]
-                                      windowNumber:[currentEvent windowNumber]
-                                           context:[currentEvent context]
-                                       eventNumber:[currentEvent eventNumber]
-                                        clickCount:[currentEvent clickCount]
-                                          pressure:[currentEvent pressure]];          
-        }
-        [self autoscroll:newEvent];
-    }
     [self setNeedsDisplay:YES];
     return dragOp;
 }
