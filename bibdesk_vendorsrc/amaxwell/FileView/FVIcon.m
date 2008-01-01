@@ -188,6 +188,7 @@ static NSURL *missingFileURL = nil;
         // don't change the UTI if it couldn't be resolved; in that case, we should just show a finder icon
         if (noErr == err) {
             CFRelease(theUTI);
+            theUTI = NULL;
             err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
         }
     }
