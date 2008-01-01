@@ -3649,7 +3649,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKRemoveFileScriptHookName];
 	if (scriptHook) {
 		[scriptHook setField:([aURL isEqual:[NSNull null]] || [aURL isFileURL]) ? BDSKLocalFileString : BDSKRemoteURLString];
-		[scriptHook setOldValues:[NSArray arrayWithObjects:[aURL isEqual:[NSNull null]] ? aURL : [aURL isFileURL] ? [aURL path] : [aURL absoluteString], nil]];
+		[scriptHook setOldValues:[NSArray arrayWithObjects:[aURL isEqual:[NSNull null]] ? (id)aURL : [aURL isFileURL] ? [aURL path] : [aURL absoluteString], nil]];
 		[scriptHook setNewValues:[NSArray array]];
 		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObjects:pub, nil] document:self];
 	}
