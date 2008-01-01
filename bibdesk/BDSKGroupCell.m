@@ -217,6 +217,26 @@ textRect.origin.y -= floorf(vOffset); \
 else \
 textRect.origin.y += floorf(vOffset); \
 
+- (NSSize)cellSize;
+{
+    NSSize cellSize = [super cellSize];
+    NSSize countSize = NSZeroSize;
+    float countSep = 0.0;
+    if ([[self objectValue] isRetrieving] || [[self objectValue] failedDownload]) {
+        countSize = NSMakeSize(16, 16);
+        countSep = 1.0;
+    }
+    else if ([[self objectValue] count] > 0) {
+        countSize = [countString size];
+        countSep = 0.5 * countSize.height - 0.5;
+    }
+    float countWidth = countSize.width + 2 * countSep + 2 * BORDER_BETWEEN_EDGE_AND_COUNT;
+    // cellSize.height approximates the icon size
+    cellSize.width += cellSize.height + countWidth;
+    cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT + BORDER_BETWEEN_COUNT_AND_TEXT;
+    return cellSize;
+}
+
 - (NSRect)textRectForBounds:(NSRect)aRect {
     NSView *controlView = [self controlView];
     _calculateDrawingRectsAndSizes;
