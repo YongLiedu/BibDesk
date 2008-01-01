@@ -281,24 +281,6 @@ textRect.origin.y += vOffset; \
     [self drawIconWithFrame:imageRect inView:controlView];
 }
 
-// default rect on 10.5 is very wide, and it shows the expansion tooltip even for cells that aren't truncated
-- (NSRect)expansionFrameWithFrame:(NSRect)aRect inView:(NSView *)controlView
-{
-    _calculateDrawingRectsAndSizes;
-    
-    NSDivideRect(textRect, &ignored, &textRect, SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
-    textRect = NSInsetRect(textRect, 1.0f, 0.0);
-    
-    NSAttributedString *label = [self attributedStringValue];
-    NSRect expansionRect = [super expansionFrameWithFrame:aRect inView:controlView];
-    // if it all fits in the textRect, we don't need the expansion tooltip
-    if ([label size].width <= NSWidth(textRect))
-        expansionRect = NSZeroRect;
-    else
-        expansionRect.size.width = [label size].width;
-    return expansionRect;
-}
-
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)flag;
 {
     return [super trackMouse:theEvent inRect:cellFrame ofView:controlView untilMouseUp:flag];
