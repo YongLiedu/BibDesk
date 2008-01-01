@@ -610,14 +610,14 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (void)_recalculateGridSize
 {
     NSClipView *cv = [[self enclosingScrollView] contentView];
-    NSRect frame = cv ? [cv frame] : NSZeroRect;
-    NSUInteger nr = [self numberOfRows];
-    NSUInteger nc = [self numberOfColumns];
-    CGFloat w = MAX([self _columnWidth] * nc, NSWidth(frame));
-    // Add one extra padding increment because we draw in the padding, plus a bit more so we always have whitespace around the bottom row.  Adding less than 1.5 * padding will clip the text in the test program.  Having a horizontal scroller may change that.
-    CGFloat h = MAX([self _rowHeight] * nr + 1.5 * _padding.height, NSHeight(frame));
+    NSRect minFrame = cv ? [cv frame] : NSZeroRect;
+    NSRect frame = NSZeroRect;
+    frame.size.width = MAX([self _columnWidth] * [self numberOfColumns], NSWidth(minFrame));
+    // Add half an extra padding for the top margin
+    frame.size.height = MAX([self _rowHeight] * [self numberOfRows] + 0.5 * _padding.height, NSHeight(minFrame));
     
-    [self setFrame:NSMakeRect(0.0, 0.0, w, h)];
+    if (NSEqualRect(frame, [self frame]) == NO)
+        [self setFrame:frame];
 }    
 
 - (NSUInteger)_indexForGridRow:(NSUInteger)rowIndex column:(NSUInteger)colIndex;
