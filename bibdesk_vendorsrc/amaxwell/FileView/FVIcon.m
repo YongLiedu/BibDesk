@@ -138,6 +138,18 @@ static NSURL *missingFileURL = nil;
     if (noErr == err)
         err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
     
+    if (UTTypeConformsTo(theUTI, kUTTypeResolvable)) {
+        // resolve alias, should we add a link badge?
+        Boolean isFolder, wasAliased;
+        err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
+        if (err == noErr) {
+            CFRelease(representedURL);
+            representedURL = (NSURL *)CFURLCreateFromFSRef(NULL, &fileRef);
+            CFRelease(theUTI);
+            err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
+        }
+    }
+    
     FVIcon *anIcon = nil;
         
     // Problems here.  TextMate claims a lot of plain text types but doesn't declare a UTI for any of them, so I end up with a dynamic UTI, and Spotlight ignores the files.  That's broken behavior on TextMate's part, and it sucks for my purposes.
