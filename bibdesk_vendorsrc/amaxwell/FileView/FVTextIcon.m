@@ -90,6 +90,50 @@ static CGAffineTransform __paperTransform;
 }
 
 // allows a crude sniffing, so initWithTextAtURL: doesn't have to immediately instantiate an attributed string ivar and return nil if that fails
+
++ (NSArray *)_supportedUTIs
+{
+    // new in 10.5
+    if ([NSAttributedString respondsToSelector:@selector(textUnfilteredTypes)])
+        return [NSAttributedString performSelector:@selector(textUnfilteredTypes)];
+    
+    NSMutableSet *UTIs = [NSMutableSet set];
+    NSEnumerator *typeEnum = [[NSAttributedString textUnfilteredFileTypes] objectEnumerator];
+    NSString *aType;
+    CFStringRef aUTI;
+    
+    // checking OSType and extension gives lots of duplicates, but the set filters them out
+    while (aType = [typeEnum nextObject]) {
+        OSType osType = NSHFSTypeCodeFromFileType(aType);
+        if (0 != osType) {
+            aUTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassOSType, (CFStringRef)aType, NULL);
+        }
+        else {
+            aUTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)aType, NULL);
+        }
+        if (NULL != aUTI) {
+            [UTIs addObject:(id)aUTI];
+            CFRelease(aUTI);
+        }
+    }
+    return [UTIs allObjects];
+}
+
+// This should be very reliable, but in practice it's only as reliable as the UTI declaration.  For instance, OmniGraffle declares .graffle files as public.composite-content and public.xml in its Info.plist.  Since we see that it's public.xml (which is in this list), we open it as text, and it will actually open with NSAttributedString...and display as binary garbage.
++ (BOOL)canInitWithUTI:(NSString *)aUTI
+{
+    static NSArray *types = nil;
+    if (nil == types)
+        types = [[self _supportedUTIs] copyWithZone:[self zone]];
+
+    NSUInteger cnt = [types count];
+    while (cnt--)
+        if (UTTypeConformsTo((CFStringRef)aUTI, (CFStringRef)[types objectAtIndex:cnt]))
+            return YES;
+    return NO;
+}
+
+// This is mainly useful to prove that the file cannot be opened; as in the case of OmniGraffle files (see comment above), it returns YES.
 + (BOOL)canInitWithURL:(NSURL *)aURL;
 {
     NSAttributedString *attributedString = [[NSAttributedString alloc] initWithURL:aURL documentAttributes:NULL];

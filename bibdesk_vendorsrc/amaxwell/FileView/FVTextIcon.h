@@ -52,6 +52,7 @@
     char           *_diskCacheName;
     pthread_mutex_t _mutex;
 }
++ (BOOL)canInitWithUTI:(NSString *)aUTI;
 + (BOOL)canInitWithURL:(NSURL *)aURL;
 - (id)initWithTextAtURL:(NSURL *)aURL;
 @end

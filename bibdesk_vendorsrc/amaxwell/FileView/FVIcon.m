@@ -156,11 +156,7 @@ static NSURL *missingFileURL = nil;
     else if (UTTypeConformsTo(theUTI, kUTTypeMovie)) {
         anIcon = [[FVCGImageIcon allocWithZone:[self zone]] initWithQTMovieAtURL:representedURL];
     }
-    else if (UTTypeConformsTo(theUTI, kUTTypeText)) {
-        anIcon = [[FVTextIcon allocWithZone:[self zone]] initWithTextAtURL:representedURL];
-    }
-    else if (UTTypeConformsTo(theUTI, CFSTR("public.composite-content")) && [FVTextIcon canInitWithURL:representedURL]) {
-        // note that public.composite-content has to come after kUTTypePDF, which also conforms to it
+    else if ([FVTextIcon canInitWithUTI:(NSString *)theUTI]) {
         anIcon = [[FVTextIcon allocWithZone:[self zone]] initWithTextAtURL:representedURL];
     }
     else if (Nil != FVQLIconClass) {
