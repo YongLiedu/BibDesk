@@ -3648,8 +3648,8 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 - (void)userRemovedURL:(NSURL *)aURL forPublication:(BibItem *)pub {
 	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKRemoveFileScriptHookName];
 	if (scriptHook) {
-		[scriptHook setField:[aURL isFileURL] ? BDSKLocalFileString : BDSKRemoteURLString];
-		[scriptHook setOldValues:[NSArray arrayWithObjects:[aURL isFileURL] ? [aURL path] : [aURL absoluteString], nil]];
+		[scriptHook setField:([aURL isEqual:[NSNull null]] || [aURL isFileURL]) ? BDSKLocalFileString : BDSKRemoteURLString];
+		[scriptHook setOldValues:[NSArray arrayWithObjects:[aURL isEqual:[NSNull null]] ? aURL : [aURL isFileURL] ? [aURL path] : [aURL absoluteString], nil]];
 		[scriptHook setNewValues:[NSArray array]];
 		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObjects:pub, nil] document:self];
 	}
