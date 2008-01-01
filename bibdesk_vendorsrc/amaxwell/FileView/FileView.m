@@ -1899,6 +1899,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     [self selectPreviousIcon:self];
 }
 
+- (void)insertNewline:(id)sender;
+{
+    if ([_selectedIndexes count])
+        [self openSelectedURLs:sender];
+}
+
 - (void)deleteForward:(id)sender;
 {
     [self delete:self];
