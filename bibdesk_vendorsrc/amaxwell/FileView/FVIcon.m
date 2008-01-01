@@ -143,8 +143,7 @@ static NSURL *missingFileURL = nil;
         Boolean isFolder, wasAliased;
         err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
         if (err == noErr) {
-            CFRelease(representedURL);
-            representedURL = (NSURL *)CFURLCreateFromFSRef(NULL, &fileRef);
+            representedURL = [(NSURL *)CFURLCreateFromFSRef(NULL, &fileRef) autorelease];
             CFRelease(theUTI);
             err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
         }
