@@ -616,7 +616,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // Add half an extra padding for the top margin
     frame.size.height = MAX([self _rowHeight] * [self numberOfRows] + 0.5 * _padding.height, NSHeight(minFrame));
     
-    if (NSEqualRect(frame, [self frame]) == NO)
+    if (NSEqualRects(frame, [self frame]) == NO)
         [self setFrame:frame];
 }    
 
