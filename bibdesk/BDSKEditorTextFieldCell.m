@@ -187,15 +187,12 @@
     [[self attributedStringValue] drawInRect:cellFrame];
 }
 
-- (NSRect)expansionFrameWithFrame:(NSRect)cellFrame inView:(NSView *)view;
+- (NSSize)cellSize
 {
-    NSRect expansionRect = [super expansionFrameWithFrame:cellFrame inView:view];
-    NSAttributedString *attrString = [self attributedStringValue];
-    if ([attrString size].width <= cellFrame.size.width)
-        expansionRect = NSZeroRect;
-    else
-        expansionRect.size = [attrString size];
-    return expansionRect;
+    NSSize cellSize = [super cellSize];
+    if ([self hasButton])
+        cellSize.width += [buttonCell cellSize].width + BUTTON_MARGIN;
+    return cellSize;
 }
 
 - (NSText *)setUpFieldEditorAttributes:(NSText *)textObj {
