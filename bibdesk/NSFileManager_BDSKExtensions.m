@@ -486,25 +486,7 @@ static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDescPtr, NSString *path, BOOL
 
     bzero(&fileRef, sizeof(fileRef));
     
-    if (isSymLink) {
-        // FSPathMakeRef follows symlinks, so we need to do a bit more here to get the descriptor for the symlink itself
-        const UInt8 *parentPath;
-        FSRef parentRef;
-        HFSUniStr255 fileName;
-        
-        parentPath = (UInt8 *)[[path stringByDeletingLastPathComponent] fileSystemRepresentation];
-        err = FSPathMakeRef(parentPath, &parentRef, NULL);
-        if(err == noErr){
-            [[path lastPathComponent] getCharacters:fileName.unicode];
-            fileName.length = [[path lastPathComponent] length];
-            if (fileName.length == 0)
-                err = fnfErr;
-            else 
-                err = FSMakeFSRefUnicode(&parentRef, fileName.length, fileName.unicode, kTextEncodingFullName, &fileRef);
-        }
-    } else {
-        err = FSPathMakeRef((UInt8 *)[path fileSystemRepresentation], &fileRef, NULL);
-    }
+    err = FSPathMakeRefWithOptions((UInt8 *)[path fileSystemRepresentation], &fileRef, kFSPathMakeRefDoNotFollowLeafSymlink, NULL);
     
     if (err != noErr) 
         return err;
