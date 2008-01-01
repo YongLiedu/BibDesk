@@ -146,6 +146,11 @@ static CGAffineTransform __paperTransform;
 {
     self = [super init];
     if (self) {
+        
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
+        if (_drawsLinkBadge)
+            aURL = [[self class] _resolvedURLWithURL:aURL];
+        
         _fileURL = [aURL copy];
         _fullSize = __paperSize;
         _thumbnailSize = NSMakeSize(_fullSize.width / 2, _fullSize.height / 2);
@@ -153,10 +158,6 @@ static CGAffineTransform __paperTransform;
         _thumbnailRef = NULL;
         _inDiskCache = NO;
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
-        
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
-        if (_drawsLinkBadge)
-            aURL = [[self class] _resolvedURLWithURL:aURL];
         
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
