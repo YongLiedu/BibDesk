@@ -1097,10 +1097,14 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                     
                     // draw text over the icon/shadow
                     NSString *name;
-                    if ([aURL isFileURL] && noErr == LSCopyDisplayNameForURL((CFURLRef)aURL, (CFStringRef *)&name))
-                        name = [name autorelease];
-                    else
+                    if ([aURL isFileURL]) {
+                        if (noErr == LSCopyDisplayNameForURL((CFURLRef)aURL, (CFStringRef *)&name))
+                            name = [name autorelease];
+                        else
+                            name = [[aURL path] lastPathComponent];
+                    } else {
                         name = [aURL absoluteString];
+                    }
                     [name drawInRect:textRect withAttributes:__titleAttributes];  
                     if (useSubtitle) {
                         CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
