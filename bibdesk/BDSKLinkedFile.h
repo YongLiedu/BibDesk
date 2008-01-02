@@ -52,6 +52,7 @@
 
 - (NSURL *)URL;
 - (NSURL *)displayURL;
+- (NSString *)path;
 
 // string value to be saved as a field value, base64 encoded data for a local file or an absolute URL string for a remote URL
 - (NSString *)stringRelativeToPath:(NSString *)newBasePath;
@@ -70,5 +71,5 @@
 
 
 @interface NSObject (BDSKLinkedFileDelegate)
-- (NSURL *)baseURLForLinkedFile:(BDSKLinkedFile *)file;
+- (NSString *)basePathForLinkedFile:(BDSKLinkedFile *)file;
 @end

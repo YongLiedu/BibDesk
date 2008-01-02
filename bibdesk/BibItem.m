@@ -2534,9 +2534,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return [[[[self owner] fileURL] path] stringByDeletingLastPathComponent];
 }
 
-- (NSURL *)baseURLForLinkedFile:(BDSKLinkedFile *)file {
-    NSString *basePath = [self basePath];
-    return basePath ? [NSURL fileURLWithPath:basePath] : nil;
+- (NSString *)basePathForLinkedFile:(BDSKLinkedFile *)file {
+    return [self basePath];
 }
 
 // for main tableview sort descriptor

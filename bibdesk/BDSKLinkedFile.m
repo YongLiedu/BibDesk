@@ -40,11 +40,115 @@
 #import "BDAlias.h"
 #import <OmniFoundation/NSData-OFExtensions.h>
 
+static AliasHandle BDSKDataToAliasHandle(CFDataRef inData)
+{
+    CFIndex len;
+    Handle handle = NULL;
+    
+    if (inData != NULL) {
+        len = CFDataGetLength(inData);
+        handle = NewHandle(len);
+        
+        if ((handle != NULL) && (len > 0)) {
+            HLock(handle);
+            BlockMoveData(CFDataGetBytePtr(inData), *handle, len);
+            HUnlock(handle);
+        }
+    }
+    return (AliasHandle)handle;
+}
+
+static CFDataRef BDSKAliasHandleToData(AliasHandle inAlias)
+{
+    Handle inHandle = (Handle)inAlias;
+    CFDataRef data = NULL;
+    CFIndex len;
+    SInt8 handleState;
+    
+    if (inHandle != NULL) {
+        len = GetHandleSize(inHandle);
+        handleState = HGetState(inHandle);
+        
+        HLock(inHandle);
+        
+        data = CFDataCreate(kCFAllocatorDefault, (const UInt8 *) *inHandle, len);
+        
+        HSetState(inHandle, handleState);
+    }
+    return data;
+}
+
+static OSStatus BDSKPathToFSRef(CFStringRef inPath, FSRef *outRef)
+{
+    OSStatus err = noErr;
+    
+    if (inPath == NULL)
+        err = fnfErr;
+    else
+        err = FSPathMakeRefWithOptions((UInt8 *)[(NSString *)inPath fileSystemRepresentation], kFSPathMakeRefDoNotFollowLeafSymlink, outRef, NULL); 
+    
+    return err;
+}
+
+static CFStringRef BDSKFSRefToPathCopy(const FSRef *inRef)
+{
+    CFURLRef tmpURL = NULL;
+    CFStringRef	result = NULL;
+    
+    if (inRef != NULL) {
+        tmpURL = CFURLCreateFromFSRef(kCFAllocatorDefault, inRef);
+        
+        if (tmpURL != NULL) {
+            result = CFURLCopyFileSystemPath(tmpURL, kCFURLPOSIXPathStyle);
+            CFRelease(tmpURL);
+        }
+    }
+    
+    return result;
+}
+
+static AliasHandle BDSKFSRefToAliasHandle(const FSRef *inRef, const FSRef *inBaseRef)
+{
+    OSStatus err = noErr;
+    AliasHandle	alias = NULL;
+    
+    err = FSNewAlias(inBaseRef, inRef, &alias);
+    
+    if (err != noErr && alias != NULL) {
+        DisposeHandle((Handle)alias);
+        alias = NULL;
+    }
+    
+    return alias;
+}
+
+static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBasePath)
+{
+    OSStatus err = noErr;
+    FSRef ref, baseRef;
+    AliasHandle alias = NULL;
+    
+    err = BDSKPathToFSRef(inPath, &ref);
+    
+    if (err == noErr) {
+        if (inBasePath != NULL) {
+            err = BDSKPathToFSRef(inBasePath, &baseRef);
+            
+            if (err != noErr)
+                alias = BDSKFSRefToAliasHandle(&ref, &baseRef);
+        } else {
+            alias = BDSKFSRefToAliasHandle(&ref, NULL);
+        }
+    }
+    
+    return alias;
+}
+
 // Private concrete subclasses
 
 @interface BDSKLinkedAliasFile : BDSKLinkedFile
 {
-    BDAlias *alias;
+    AliasHandle alias;
     const FSRef *fileRef;
     NSString *relativePath;
     id delegate;
@@ -53,9 +157,9 @@
 - (id)initWithPath:(NSString *)aPath delegate:(id)aDelegate;
 
 - (void)setRelativePath:(NSString *)newRelativePath;
+- (void)updateRelativePathWithBasePath:(NSString *)basePath;
 
 - (const FSRef *)fileRef;
-- (NSString *)path;
 
 - (NSData *)aliasDataRelativeToPath:(NSString *)newBasePath;
 
@@ -154,6 +258,11 @@ static Class BDSKLinkedObjectClass = Nil;
     return [self URL];
 }
 
+- (NSString *)path;
+{
+    return [[self URL] path];
+}
+
 - (NSString *)stringRelativeToPath:(NSString *)newBasePath;
 {
     OBRequestConcreteImplementation(self, _cmd);
@@ -184,13 +293,13 @@ static Class BDSKLinkedObjectClass = Nil;
 @implementation BDSKLinkedAliasFile
 
 // guaranteed to be called with a non-nil alias
-- (id)initWithAlias:(BDAlias *)anAlias relativePath:(NSString *)relPath delegate:(id)aDelegate;
+- (id)initWithAlias:(AliasHandle)anAlias relativePath:(NSString *)relPath delegate:(id)aDelegate;
 {
-    NSParameterAssert(nil == aDelegate || [aDelegate respondsToSelector:@selector(baseURLForLinkedFile:)]);
-    NSParameterAssert(nil != anAlias);
+    NSParameterAssert(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
+    NSParameterAssert(NULL != anAlias);
     if (self = [super init]) {
         fileRef = NULL; // this is updated lazily, as we don't know the base path at this point
-        alias = [anAlias retain];
+        alias = anAlias;
         relativePath = [relPath copy];
         delegate = aDelegate;
     }
@@ -200,9 +309,15 @@ static Class BDSKLinkedObjectClass = Nil;
 - (id)initWithAliasData:(NSData *)data relativePath:(NSString *)relPath delegate:(id)aDelegate;
 {
     NSParameterAssert(nil != data);
-    BDAlias *anAlias = [[BDAlias alloc] initWithData:data];
-    self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate];
-    [anAlias release];
+    AliasHandle anAlias = BDSKDataToAliasHandle((CFDataRef)data);
+    if (anAlias == NULL) {
+        [[super init] release];
+        self = nil;
+    } else {
+        self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate];
+        if (self == nil)
+            DisposeHandle((Handle)anAlias);
+    }
     return self;
 }
 
@@ -218,25 +333,18 @@ static Class BDSKLinkedObjectClass = Nil;
 - (id)initWithPath:(NSString *)aPath delegate:(id)aDelegate;
 {
     NSParameterAssert(nil != aPath);
-    NSParameterAssert(nil == aDelegate || [aDelegate respondsToSelector:@selector(baseURLForLinkedFile:)]);
-    BDAlias *anAlias = nil;
-    NSURL *baseURL = [aDelegate baseURLForLinkedFile:self];
-    NSString *basePath = [baseURL path];
-    NSString *relPath = nil;
-    // BDAlias has a different interpretation of aPath, which is inconsistent with the way it handles FSRef
-    if (basePath) {
-        relPath = [basePath relativePathToFilename:aPath];
-        anAlias = [[BDAlias alloc] initWithPath:relPath relativeToPath:basePath];
-    } else {
-        anAlias = [[BDAlias alloc] initWithPath:aPath];
-    }
-    if (anAlias) {
+    NSParameterAssert(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
+    NSString *basePath = [aDelegate basePathForLinkedFile:self];
+    NSString *relPath = [basePath relativePathToFilename:aPath];
+    AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
+    
+    if (anAlias != NULL) {
         if ((self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate])) {
-            if (baseURL)
+            if (basePath)
                 // this initalizes the FSRef and update the alias
                 [self fileRef];
-        }
-        [anAlias release];
+        } else
+            DisposeHandle((Handle)anAlias);
     } else {
         [[super init] release];
         self = nil;
@@ -246,6 +354,7 @@ static Class BDSKLinkedObjectClass = Nil;
 
 - (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
 {
+    OBASSERT([aURL isFileURL]);
     return [self initWithPath:[aURL path] delegate:aDelegate];
 }
 
@@ -257,7 +366,6 @@ static Class BDSKLinkedObjectClass = Nil;
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    OBASSERT_NOT_REACHED("BDSKLinkedAliasFile needs a base path for encoding");
     NSData *data = nil;
     NSString *relPath = nil;
     if ([coder allowsKeyedCoding]) {
@@ -272,12 +380,11 @@ static Class BDSKLinkedObjectClass = Nil;
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    OBASSERT_NOT_REACHED("BDSKLinkedAliasFile needs a base path for encoding");
     if ([coder allowsKeyedCoding]) {
-        [coder encodeObject:[self aliasDataRelativeToPath:[[delegate baseURLForLinkedFile:self] path]] forKey:@"aliasData"];
+        [coder encodeObject:[self aliasDataRelativeToPath:[delegate basePathForLinkedFile:self]] forKey:@"aliasData"];
         [coder encodeObject:relativePath forKey:@"relativePath"];
     } else {
-        [coder encodeObject:[self aliasDataRelativeToPath:[[delegate baseURLForLinkedFile:self] path]]];
+        [coder encodeObject:[self aliasDataRelativeToPath:[delegate basePathForLinkedFile:self]]];
         [coder encodeObject:relativePath];
     }
 }
@@ -285,7 +392,8 @@ static Class BDSKLinkedObjectClass = Nil;
 - (void)dealloc
 {
     NSZoneFree([self zone], (void *)fileRef);
-    [alias release];
+    if (alias != NULL)
+        DisposeHandle((Handle)alias);
     [relativePath release];
     [super dealloc];
 }
@@ -312,7 +420,7 @@ static Class BDSKLinkedObjectClass = Nil;
 }
 
 - (void)setDelegate:(id)newDelegate {
-    NSParameterAssert(nil == newDelegate || [newDelegate respondsToSelector:@selector(baseURLForLinkedFile:)]);
+    NSParameterAssert(nil == newDelegate || [newDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     delegate = newDelegate;
 }
 
@@ -344,9 +452,9 @@ static Class BDSKLinkedObjectClass = Nil;
 
 - (const FSRef *)fileRef;
 {
-    NSURL *baseURL = [delegate baseURLForLinkedFile:self];
+    NSString *basePath = [delegate basePathForLinkedFile:self];
     FSRef baseRef;
-    Boolean hasBaseRef = baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef);
+    Boolean hasBaseRef = basePath && noErr == BDSKPathToFSRef((CFStringRef)basePath, &baseRef);
     Boolean shouldUpdate = false;
     
     if (fileRef == NULL) {
@@ -354,21 +462,15 @@ static Class BDSKLinkedObjectClass = Nil;
         short aliasCount = 1;
         Boolean hasRef = false;
         
-        if (baseURL && relativePath) {
-            NSString *path = [[baseURL path] stringByAppendingPathComponent:relativePath];
-            NSURL *tmpURL = [NSURL fileURLWithPath:path];
+        if (basePath && relativePath) {
+            NSString *path = [basePath stringByAppendingPathComponent:relativePath];
             
-            shouldUpdate = hasRef = hasBaseRef && tmpURL && CFURLGetFSRef((CFURLRef)tmpURL, &aRef);
+            shouldUpdate = hasRef = (hasBaseRef && noErr == BDSKPathToFSRef((CFStringRef)path, &aRef));
         }
         
-        if (hasRef == false && alias) {
-            if (hasBaseRef) {
-                hasRef = noErr == FSMatchAliasNoUI(&baseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
-                shouldUpdate = shouldUpdate && hasRef;
-            } else {
-                hasRef = noErr == FSMatchAliasNoUI(NULL, kARMNoUI | kARMSearch | kARMSearchRelFirst, [alias alias], &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
-                shouldUpdate = false;
-            }
+        if (hasRef == false && alias != NULL) {
+            hasRef = noErr == FSMatchAliasNoUI(hasBaseRef ? &baseRef : NULL, kARMNoUI | kARMSearch | kARMSearchRelFirst, alias, &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
+            shouldUpdate = shouldUpdate && hasBaseRef && hasRef;
         }
         
         if (hasRef)
@@ -378,17 +480,11 @@ static Class BDSKLinkedObjectClass = Nil;
     }
     
     if (shouldUpdate) {
-        if (alias)
-            FSUpdateAlias(&baseRef, fileRef, [alias alias], &shouldUpdate);
+        if (alias != NULL)
+            FSUpdateAlias(&baseRef, fileRef, alias, &shouldUpdate);
         else
-            alias = [[BDAlias alloc] initWithFSRef:(FSRef *)fileRef relativeToFSRef:&baseRef];
-        if (baseURL) {
-            CFURLRef tmpURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), fileRef);
-            if (tmpURL) {
-                [self setRelativePath:[[baseURL path] relativePathToFilename:[(NSURL *)tmpURL path]]];
-                CFRelease(tmpURL);
-            }
-        }
+            alias = BDSKFSRefToAliasHandle(fileRef, &baseRef);
+        [self updateRelativePathWithBasePath:basePath];
     }
     
     return fileRef;
@@ -396,16 +492,8 @@ static Class BDSKLinkedObjectClass = Nil;
 
 - (NSURL *)URL;
 {
-    BOOL hadFileRef = fileRef != NULL;
-    const FSRef *aRef = [self fileRef];
-    NSURL *aURL = aRef == NULL ? nil : [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), aRef) autorelease];
-    if (aURL == nil && hadFileRef) {
-        // apparently fileRef is invalid, try to update it
-        [self setFileRef:NULL];
-        if (aRef = [self fileRef])
-            aURL = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), aRef) autorelease];
-    }
-    return aURL;
+    NSString *path = [self path];
+    return path ? [NSURL fileURLWithPath:path] : nil;
 }
 
 - (NSURL *)displayURL;
@@ -418,32 +506,44 @@ static Class BDSKLinkedObjectClass = Nil;
 
 - (NSString *)path;
 {
-    return [[self URL] path];
+    BOOL hadFileRef = fileRef != NULL;
+    const FSRef *ref = [self fileRef];
+    NSString *path = ref == NULL ? nil : (NSString *)BDSKFSRefToPathCopy(ref);
+    
+    if (path == nil && hadFileRef) {
+        // apparently fileRef is invalid, try to update it
+        [self setFileRef:NULL];
+        if (ref = [self fileRef])
+            path = (NSString *)BDSKFSRefToPathCopy(ref);
+    }
+    return [path autorelease];
 }
 
 - (NSData *)aliasDataRelativeToPath:(NSString *)newBasePath;
 {
     // make sure the fileRef is valid
-    [self URL];
+    [self path];
     
     FSRef *fsRef = (FSRef *)[self fileRef];
     FSRef baseRef;
-    NSURL *baseURL;
-    BDAlias *anAlias = nil;
+    NSString *basePath;
+    AliasHandle anAlias = NULL;
+    CFDataRef data = NULL;
     
     if (fsRef) {
-        baseURL = newBasePath ? [NSURL fileURLWithPath:newBasePath] : nil;
-        if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef))
-            anAlias = [[[BDAlias alloc] initWithFSRef:fsRef relativeToFSRef:&baseRef] autorelease];
-        else
-            anAlias = [[[BDAlias alloc] initWithFSRef:fsRef] autorelease];
+        BOOL hasBaseRef = (newBasePath && noErr == BDSKPathToFSRef((CFStringRef)newBasePath, &baseRef));
+        anAlias = BDSKFSRefToAliasHandle(fsRef, hasBaseRef ? &baseRef : NULL);
     } else if (relativePath && newBasePath) {
-        anAlias = [[[BDAlias alloc] initWithPath:relativePath relativeToPath:newBasePath] autorelease];
+        anAlias = BDSKPathToAliasHandle((CFStringRef)[basePath stringByAppendingPathComponent:relativePath], (CFStringRef)newBasePath);
     }
-    if (anAlias == nil)
-        anAlias = alias;
+    if (anAlias != NULL) {
+        data = BDSKAliasHandleToData(anAlias);
+        DisposeHandle((Handle)anAlias);
+    } else if (alias != NULL) {
+        data = BDSKAliasHandleToData(alias);
+    }
     
-    return [anAlias aliasData];
+    return (NSData *)data;
 }
 
 - (NSString *)stringRelativeToPath:(NSString *)newBasePath;
@@ -457,55 +557,53 @@ static Class BDSKLinkedObjectClass = Nil;
 
 // this could be called when the document fileURL changes
 - (void)updateWithPath:(NSString *)aPath {
-    NSURL *baseURL = [delegate baseURLForLinkedFile:self];
+    NSString *basePath = [delegate basePathForLinkedFile:self];
     FSRef baseRef;
     
     if (fileRef == NULL) {
         // this does the updating if possible
         [self fileRef];
     } else {
-        CFURLRef aURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), fileRef);
-        if (aURL == NULL) {
+        CFStringRef path = BDSKFSRefToPathCopy(fileRef);
+        if (path == NULL) {
             // the fileRef was invalid, reset it and update
             [self setFileRef:NULL];
             [self fileRef];
             if (fileRef == NULL) {
                 // this can happen after an auto file to a volume, as the file is actually not moved but copied
-                BDAlias *anAlias;
-                NSString *basePath = [baseURL path];
-                if (basePath)
-                    anAlias = [[BDAlias alloc] initWithPath:[basePath relativePathToFilename:aPath] relativeToPath:basePath];
-                else
-                    anAlias = [[BDAlias alloc] initWithPath:aPath];
-                if (anAlias) {
-                    BDAlias *saveAlias = alias;
-                    alias = [anAlias retain];
+                AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
+                if (anAlias != NULL) {
+                    AliasHandle saveAlias = alias;
+                    alias = anAlias;
                     [self fileRef];
                     if (fileRef == NULL) {
-                        [alias release];
                         alias = saveAlias;
                         [self fileRef];
-                    } else {
-                        [saveAlias release];
+                    } else if (saveAlias != NULL) {
+                        DisposeHandle((Handle)saveAlias);
                     }
                 }
             }
         } else {
-            CFRelease(aURL);
-            if (baseURL && CFURLGetFSRef((CFURLRef)baseURL, &baseRef)) {
+            CFRelease(path);
+            if (basePath && noErr == BDSKPathToFSRef((CFStringRef)basePath, &baseRef)) {
                 Boolean didUpdate;
-                if (alias)
-                    FSUpdateAlias(&baseRef, fileRef, [alias alias], &didUpdate);
+                if (alias != NULL)
+                    FSUpdateAlias(&baseRef, fileRef, alias, &didUpdate);
                 else
-                    alias = [[BDAlias alloc] initWithFSRef:(FSRef *)fileRef relativeToFSRef:&baseRef];
-                if (baseURL) {
-                    CFURLRef tmpURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), fileRef);
-                    if (tmpURL) {
-                        [self setRelativePath:[[baseURL path] relativePathToFilename:[(NSURL *)tmpURL path]]];
-                        CFRelease(tmpURL);
-                    }
-                }
+                    alias = BDSKFSRefToAliasHandle(fileRef, &baseRef);
+                [self updateRelativePathWithBasePath:basePath];
             }
+        }
+    }
+}
+
+- (void)updateRelativePathWithBasePath:(NSString *)basePath {
+    if (basePath && fileRef != NULL) {
+        CFStringRef path = BDSKFSRefToPathCopy(fileRef);
+        if (path) {
+            [self setRelativePath:[basePath relativePathToFilename:(NSString *)path]];
+            CFRelease(path);
         }
     }
 }
