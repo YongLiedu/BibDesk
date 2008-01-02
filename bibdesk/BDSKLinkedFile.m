@@ -37,7 +37,7 @@
  */
 
 #import "BDSKLinkedFile.h"
-#import "BDAlias.h"
+#import <CoreServices/CoreServices.h>
 #import <OmniFoundation/NSData-OFExtensions.h>
 
 static AliasHandle BDSKDataToAliasHandle(CFDataRef inData)
