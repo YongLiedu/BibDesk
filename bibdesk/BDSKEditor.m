@@ -587,7 +587,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
           contextInfo:(void *)anIndex];
 }
 
-- (void)chooseRemoteURLSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 
     if (returnCode == NSOKButton) {
         NSString *aURLString = [chooseURLField stringValue];
