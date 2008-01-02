@@ -86,9 +86,9 @@ static BOOL FVWebIconDisabled = NO;
 - (void)_releaseWebView
 {
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
-    [_webView stopLoading:nil];
     [_webView setPolicyDelegate:nil];
     [_webView setFrameLoadDelegate:nil];
+    [_webView stopLoading:nil];
     [_webView release];
     _webView = nil;
 }
@@ -107,10 +107,22 @@ static BOOL FVWebIconDisabled = NO;
     [super dealloc];
 }
 
+- (void)_releaseWebViewAndRetryIfNeeded
+{
+    if (nil != _webView) {
+        _triedWebView = NO;
+        [self _releaseWebView];
+    }
+}
+
 - (void)releaseResources
 { 
     // the thumbnail is small enough to always keep around
     pthread_mutex_lock(&_mutex);
+    
+    // Cancel any pending loads; set _triedWebView to NO if there was a non-nil webview (i.e. it was loading), or else -renderOffscreenOnMainThread will never complete if it gets called again.
+    [self performSelectorOnMainThread:@selector(_releaseWebViewAndRetryIfNeeded) withObject:nil waitUntilDone:YES];
+    
     CGImageRelease(_fullImageRef);
     _fullImageRef = NULL;
     
@@ -119,7 +131,14 @@ static BOOL FVWebIconDisabled = NO;
     pthread_mutex_unlock(&_mutex);    
 }
 
-- (NSSize)size { return (NSSize){ 1000, 900 }; }
+// size of the _fullImageRef
+- (NSSize)size { return (NSSize){ 500, 450 }; }
+
+// actual size of the webview; large enough to fit a reasonably sized page
+- (NSSize)_webviewSize { return (NSSize){ 1000, 900 }; }
+
+// size of the _thumbnailRef (1/5 of webview size)
+- (NSSize)_thumbnailSize { return (NSSize){ 200, 180 }; }
 
 - (BOOL)needsRenderForSize:(NSSize)size
 {
@@ -134,7 +153,7 @@ static BOOL FVWebIconDisabled = NO;
         
         if (YES == _webviewFailed)
             needsRender = (nil == _fallbackIcon || [_fallbackIcon needsRenderForSize:size]);
-        else if (size.height > 1.2 * [self size].height)
+        else if (size.height > 1.2 * [self _thumbnailSize].height)
             needsRender = (NULL == _fullImageRef);
         else
             needsRender = (NULL == _thumbnailRef);
@@ -154,17 +173,16 @@ static BOOL FVWebIconDisabled = NO;
     return reachable;
 }
 
-// returns a 1/5 scale image; change this if -size changes (small image should be <= 200 pixels)
-- (CGImageRef)_createResampledImage;
+- (CGImageRef)_createResampledImageOfSize:(NSSize)size fromCGImage:(CGImageRef)largeImage;
 {
-    CGFloat width = [self size].width / 5;
-    CGFloat height = [self size].height / 5;
+    CGFloat width = size.width;
+    CGFloat height = size.height;
         
     // these will always be the same size, so use the context cache
     CGContextRef ctxt = [FVBitmapContextCache newBitmapContextOfWidth:width height:height];
     CGContextSaveGState(ctxt);
     CGContextSetInterpolationQuality(ctxt, kCGInterpolationHigh);
-    CGContextDrawImage(ctxt, CGRectMake(0, 0, CGBitmapContextGetWidth(ctxt), CGBitmapContextGetHeight(ctxt)), _fullImageRef);
+    CGContextDrawImage(ctxt, CGRectMake(0, 0, CGBitmapContextGetWidth(ctxt), CGBitmapContextGetHeight(ctxt)), largeImage);
     CGContextRestoreGState(ctxt);
     
     CGImageRef smallImage = CGBitmapContextCreateImage(ctxt);
@@ -201,7 +219,7 @@ static BOOL FVWebIconDisabled = NO;
         WebFrameView *view = [[_webView mainFrame] frameView];
         [view setAllowsScrolling:NO];
         
-        NSSize size = [self size];
+        NSSize size = [self _webviewSize];
         CGContextRef context = [FVBitmapContextCache newBitmapContextOfWidth:size.width height:size.height];
         NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:[view isFlipped]];
         
@@ -223,19 +241,23 @@ static BOOL FVWebIconDisabled = NO;
         
         [NSGraphicsContext restoreGraphicsState]; // restore previous context
         
+        // temporary CGImage from the full webview
+        CGImageRef largeImage = CGBitmapContextCreateImage(context);
+                
         pthread_mutex_lock(&_mutex);
         
         // full image is large, so cache it to disk in case we get a -releaseResources or another view needs it
         CGImageRelease(_fullImageRef);
-        _fullImageRef = CGBitmapContextCreateImage(context);
+        _fullImageRef = [self _createResampledImageOfSize:[self size] fromCGImage:largeImage];
         [FVIconCache cacheCGImage:_fullImageRef withName:_diskCacheName];
         
         // resample to a thumbnail size that will draw quickly
         CGImageRelease(_thumbnailRef);
-        _thumbnailRef = [self _createResampledImage];
+        _thumbnailRef = [self _createResampledImageOfSize:[self _thumbnailSize] fromCGImage:largeImage];
         
         pthread_mutex_unlock(&_mutex);
         
+        CGImageRelease(largeImage);
         [FVBitmapContextCache disposeOfBitmapContext:context];
     }
     
@@ -299,10 +321,10 @@ static BOOL FVWebIconDisabled = NO;
         
         _triedWebView = YES;
         
-        NSSize size = [self size];
+        NSSize size = [self _webviewSize];
         
         // always use the WebKit cache, and use a short timeout (default is 60 seconds)
-        NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:1.0];
+        NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:10.0];
         
         // See also http://lists.apple.com/archives/quicklook-dev/2007/Nov/msg00047.html
         // Note: changed from blocking to non-blocking; we now just keep state and rely on the
@@ -338,7 +360,7 @@ static BOOL FVWebIconDisabled = NO;
         
         // this may have been added to the disk cache by another instance; in that case, we need to create a new thumbnail
         if (NULL == _thumbnailRef)
-            _thumbnailRef = [self _createResampledImage];
+            _thumbnailRef = [self _createResampledImageOfSize:[self _thumbnailSize] fromCGImage:_fullImageRef];
         
         pthread_mutex_unlock(&_mutex);
         return;
@@ -387,7 +409,8 @@ static BOOL FVWebIconDisabled = NO;
     if (pthread_mutex_trylock(&_mutex) == 0) {
         
         CGRect drawRect = [self _drawingRectWithRect:dstRect];
-        if (_fullImageRef && (NULL == _thumbnailRef || CGRectGetHeight(drawRect) > 1.2 * CGImageGetHeight(_thumbnailRef)))
+        // if we have _fullImageRef, we're guaranteed to have _thumbnailRef
+        if (_fullImageRef && CGRectGetHeight(drawRect) > 1.2 * [self _thumbnailSize].height)
             CGContextDrawImage(context, drawRect, _fullImageRef);
         else if (_thumbnailRef)
             CGContextDrawImage(context, drawRect, _thumbnailRef);
