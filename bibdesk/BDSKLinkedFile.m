@@ -534,6 +534,7 @@ static Class BDSKLinkedObjectClass = Nil;
         BOOL hasBaseRef = (newBasePath && noErr == BDSKPathToFSRef((CFStringRef)newBasePath, &baseRef));
         anAlias = BDSKFSRefToAliasHandle(fsRef, hasBaseRef ? &baseRef : NULL);
     } else if (relativePath && newBasePath) {
+#warning uninitialized variable
         anAlias = BDSKPathToAliasHandle((CFStringRef)[basePath stringByAppendingPathComponent:relativePath], (CFStringRef)newBasePath);
     }
     if (anAlias != NULL) {
