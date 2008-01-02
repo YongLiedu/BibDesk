@@ -469,7 +469,8 @@ static Class BDSKLinkedObjectClass = Nil;
         }
         
         if (hasRef == false && alias != NULL) {
-            hasRef = noErr == FSMatchAliasNoUI(hasBaseRef ? &baseRef : NULL, kARMNoUI | kARMSearch | kARMSearchRelFirst, alias, &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
+            // it would be preferable to search the (relative) path before the fileID, but than links to symlinks will always be resolved to the target
+            hasRef = noErr == FSMatchAliasNoUI(hasBaseRef ? &baseRef : NULL, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, alias, &aliasCount, &aRef, &shouldUpdate, NULL, NULL);
             shouldUpdate = shouldUpdate && hasBaseRef && hasRef;
         }
         
@@ -519,23 +520,21 @@ static Class BDSKLinkedObjectClass = Nil;
     return [path autorelease];
 }
 
-- (NSData *)aliasDataRelativeToPath:(NSString *)newBasePath;
+- (NSData *)aliasDataRelativeToPath:(NSString *)basePath;
 {
     // make sure the fileRef is valid
     [self path];
     
     FSRef *fsRef = (FSRef *)[self fileRef];
     FSRef baseRef;
-    NSString *basePath;
     AliasHandle anAlias = NULL;
     CFDataRef data = NULL;
     
     if (fsRef) {
-        BOOL hasBaseRef = (newBasePath && noErr == BDSKPathToFSRef((CFStringRef)newBasePath, &baseRef));
+        BOOL hasBaseRef = (basePath && noErr == BDSKPathToFSRef((CFStringRef)basePath, &baseRef));
         anAlias = BDSKFSRefToAliasHandle(fsRef, hasBaseRef ? &baseRef : NULL);
-    } else if (relativePath && newBasePath) {
-#warning uninitialized variable
-        anAlias = BDSKPathToAliasHandle((CFStringRef)[basePath stringByAppendingPathComponent:relativePath], (CFStringRef)newBasePath);
+    } else if (relativePath && basePath) {
+        anAlias = BDSKPathToAliasHandle((CFStringRef)[basePath stringByAppendingPathComponent:relativePath], (CFStringRef)basePath);
     }
     if (anAlias != NULL) {
         data = BDSKAliasHandleToData(anAlias);
