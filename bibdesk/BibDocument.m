@@ -258,6 +258,7 @@ enum {
         docState.sortGroupsDescending = NO;
         docState.didImport = NO;
         docState.itemChangeMask = 0;
+        docState.displayMigrationAlert = NO;
         
         // these are created lazily when needed
         fileSearchController = nil;
@@ -336,6 +337,15 @@ enum {
         return @"BibDocument";
 }
 
+- (void)migrationAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)unused {
+    
+    if ([alert checkValue] == YES)
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"BDSKDisableMigrationWarning"];
+    
+    if (NSAlertDefaultReturn == returnCode)
+        [self migrateFiles:self];
+}
+
 - (void)showWindows{
     [super showWindows];
     
@@ -367,6 +377,23 @@ enum {
             [self selectLibraryGroup:nil];
             [self setSearchString:searchString];
         }
+    }
+    
+    
+    if (docState.displayMigrationAlert) {
+        
+        docState.displayMigrationAlert = NO;
+        // If a single file was migrated, this alert will be shown even if all other BibItems already use BDSKLinkedFile.  However, I think that's an edge case, since the user had to manually add that pub in a text editor or by setting the local-url field.  Items imported or added in BD will already use BDSKLinkedFile, so this notification won't be posted.
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Automatically migrated files", @"warning in document")
+                                             defaultButton:NSLocalizedString(@"Migrate", @"") 
+                                           alternateButton:NSLocalizedString(@"Later", @"") 
+                                               otherButton:nil 
+                                 informativeTextWithFormat:NSLocalizedString(@"Local File and URL fields have been converted to use a more flexible storage format.  Choose \"Migrate\" to display the migration interface, which can show problems and convert permanently to the new format.", @"")];
+        
+        // @@ Should we show a check button? If the user saves the doc as-is, it'll have local-url and bdsk-file fields in it, and there will be no warning the next time it's opened.  Someone who uses a script hook to convert bdsk-file back to local-url won't want to see it, though.
+        [alert setHasCheckButton:YES];
+        [alert setCheckValue:NO];
+        [alert beginSheetModalForWindow:[self windowForSheet] modalDelegate:self didEndSelector:@selector(migrationAlertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
     }
 }
 
@@ -528,6 +555,7 @@ enum {
     [self updateCategoryGroupsPreservingSelection:NO];
     
     [saveTextEncodingPopupButton setEncoding:0];
+
 }
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
@@ -2759,28 +2787,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)handleTemporaryFileMigrationNotification:(NSNotification *)notification{
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableMigrationWarning"] == NO) {
-        
-        // If a single file was migrated, this alert will be shown even if all other BibItems already use BDSKLinkedFile.  However, I think that's an edge case, since the user had to manually add that pub in a text editor or by setting the local-url field.  Items imported or added in BD will already use BDSKLinkedFile, so this notification won't be posted.
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Automatically migrated files", @"warning in document")
-                                             defaultButton:NSLocalizedString(@"Migrate", @"") 
-                                           alternateButton:NSLocalizedString(@"Later", @"") 
-                                               otherButton:nil 
-                                 informativeTextWithFormat:NSLocalizedString(@"Local File and URL fields have been converted to use a more flexible storage format.  Choose \"Migrate\" to display the migration interface, which can show problems and convert permanently to the new format.", @"")];
-        
-        // @@ Should we show a check button? If the user saves the doc as-is, it'll have local-url and bdsk-file fields in it, and there will be no warning the next time it's opened.  Someone who uses a script hook to convert bdsk-file back to local-url won't want to see it, though.
-        [alert setHasCheckButton:YES];
-        [alert setCheckValue:NO];
-        
-        // tried running as a sheet, but the document window may not be on screen yet
-        int rv = [alert runModal];
-        
-        if ([alert checkValue] == YES)
-            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"BDSKDisableMigrationWarning"];
-
-        if (NSAlertDefaultReturn == rv)
-            [self migrateFiles:self];
-    }
+    // display after the window loads so we can use a sheet, and the migration controller window is in front
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableMigrationWarning"] == NO)
+        docState.displayMigrationAlert = YES;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
