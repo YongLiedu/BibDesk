@@ -155,7 +155,7 @@
 
 - (IBAction)chooseRemoteURL:(id)sender;
 - (IBAction)dismissChooseURLSheet:(id)sender;
-- (void)chooseRemoteURLSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)toggleStatusBar:(id)sender;
 
