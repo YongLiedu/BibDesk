@@ -44,14 +44,17 @@
 
 static BDSKTypeManager *sharedInstance = nil;
 
-// note: if calling this in a loop, @synchronized() can be very expensive, so call it before entering the loop
 @implementation BDSKTypeManager
 + (BDSKTypeManager *)sharedManager{
-    @synchronized(sharedInstance){
-        if(sharedInstance == nil) 
-            sharedInstance = [[BDSKTypeManager alloc] init];
-    }
     return sharedInstance;
+}
+
++ (void)initialize
+{
+    OBINITIALIZE;
+    // Create the singleton here since +initialize is thread safe; @synchronized in +sharedManager was killing performance, especially with the NSString category methods.
+    if(sharedInstance == nil) 
+        sharedInstance = [[self alloc] init];
 }
 
 - (id)init{
