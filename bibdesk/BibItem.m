@@ -2799,8 +2799,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     } else {
         NSString *stringValue = [self valueOfField:(id)key inherit:NO];
         if (NO == [NSString isEmptyString:stringValue]) {
-            // @@ this error message is lame
-            NSDictionary *message = [[NSDictionary alloc] initWithObjectsAndKeys:stringValue, @"URL", NSLocalizedString(@"File or URL invalid", @""), @"error", nil];
+            NSDictionary *message = [[NSDictionary alloc] initWithObjectsAndKeys:[NSString stringWithFormat:NSLocalizedString(@"URL \"%@\" is invalid", @""), stringValue], @"error", nil];
             [ctxt->messages addObject:message];
             [message release];
         }
