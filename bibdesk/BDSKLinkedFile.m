@@ -134,7 +134,7 @@ static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBaseP
         if (inBasePath != NULL) {
             err = BDSKPathToFSRef(inBasePath, &baseRef);
             
-            if (err != noErr)
+            if (err == noErr)
                 alias = BDSKFSRefToAliasHandle(&ref, &baseRef);
         } else {
             alias = BDSKFSRefToAliasHandle(&ref, NULL);
