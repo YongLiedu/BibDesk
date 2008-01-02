@@ -485,8 +485,8 @@ static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDescPtr, NSString *path, BOOL
     OSErr err;
 
     bzero(&fileRef, sizeof(fileRef));
-    
-    err = FSPathMakeRefWithOptions((UInt8 *)[path fileSystemRepresentation], &fileRef, kFSPathMakeRefDoNotFollowLeafSymlink, NULL);
+
+    err = FSPathMakeRefWithOptions((UInt8 *)[path fileSystemRepresentation], kFSPathMakeRefDoNotFollowLeafSymlink, &fileRef, NULL);
     
     if (err != noErr) 
         return err;
