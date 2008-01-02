@@ -1026,7 +1026,6 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     
     BOOL useFastDrawingPath = (isResizing || _isRescaling || ([self _isFastScrolling] && _iconSize.height <= 256));
     BOOL useSubtitle = [_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
     
     // shadow needs to be scaled as the icon scale changes to approximate the IconServices shadow
     [__shadow setShadowBlurRadius:2.0 * [self iconScale]];
@@ -1097,7 +1096,11 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                     textRect = [self centerScanRect:textRect];
                     
                     // draw text over the icon/shadow
-                    NSString *name = [aURL isFileURL] ? [fileManager displayNameAtPath:[aURL path]] : [aURL absoluteString];
+                    NSString *name;
+                    if ([aURL isFileURL] && noErr == LSCopyDisplayNameForURL((CFURLRef)aURL, (CFStringRef *)&name))
+                        name = [name autorelease];
+                    else
+                        name = [aURL absoluteString];
                     [name drawInRect:textRect withAttributes:__titleAttributes];  
                     if (useSubtitle) {
                         CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
@@ -1372,7 +1375,12 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 - (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)userData
 {
     NSURL *theURL = [self _URLAtPoint:point];
-    return [theURL isFileURL] ? [[NSFileManager defaultManager] displayNameAtPath:[theURL path]] : [theURL absoluteString];
+    NSString *name;
+    if ([theURL isFileURL] && noErr == LSCopyDisplayNameForURL((CFURLRef)theURL, (CFStringRef *)&name))
+        name = [name autorelease];
+    else
+        name = [theURL absoluteString];
+    return name;
 }
 
 // this method and shouldDelayWindowOrderingForEvent: are overriden to allow dragging from the view without making our window key
