@@ -134,14 +134,11 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     else if ([[self document] hasExternalGroupsSelected] == NO)
         pubs = [[self document] selectedPublications];
     
-#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-    // Workaround for an AppKit bug in Tiger, the progress bar does not work after the first time it is used, so we replace it by a copy.  Apparently also in Leopard when linking against 10.4 SDK.
+    // Workaround for an AppKit bug in Tiger, the progress bar does not work after the first time it is used, so we replace it by a copy.  Apparently also in Leopard under some conditions
     NSProgressIndicator *newProgressBar = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:progressBar]];
     [[progressBar superview] replaceSubview:progressBar with:newProgressBar];
     progressBar = newProgressBar;
-#else
-#warning 10.5 remove this
-#endif
+
     [progressBar setDoubleValue:0.0];
     [progressBar setMaxValue:[pubs count]];
     [progressBar setHidden:NO];
