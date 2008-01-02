@@ -42,6 +42,7 @@
 #import "BDSKBibTeXParser.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKLinkedFile.h"
+#import "NSURL_BDSKExtensions.h"
 
 /* ssp
 A Category on BibItem with a few additional methods to enable and enhance its scriptability beyond what comes for free with key value coding.
@@ -135,7 +136,8 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)insertInLinkedURLs:(NSString *)newURLString atIndex:(unsigned int)idx {
-    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURLString:newURLString] autorelease];
+    NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:newURLString];
+    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL] autorelease];
     if (file) {
         NSArray *remoteURLs = [self remoteURLs];
         if (idx < [remoteURLs count]) {
