@@ -181,7 +181,6 @@ static NSURL *missingFileURL = nil;
     // For a link/alias, get the target's UTI in order to determine which concrete subclass to create.  Subclasses that are file-based need to check the URL to see if it should be badged using _shouldDrawBadgeForURL, and then call _resolvedURLWithURL in order to actually load the file's content.
     
     // aliases and symlinks are kUTTypeResolvable, so the alias manager should handle either of them
-    // this doesn't handle alias->symlink->file, but I don't think that's worth it
     if (NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeResolvable)) {
         Boolean isFolder, wasAliased;
         err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
