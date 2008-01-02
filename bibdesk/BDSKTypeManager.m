@@ -52,7 +52,6 @@ static BDSKTypeManager *sharedInstance = nil;
 + (void)initialize
 {
     OBINITIALIZE;
-    // Create the singleton here since +initialize is thread safe; @synchronized in +sharedManager was killing performance, especially with the NSString category methods.
     if(sharedInstance == nil) 
         sharedInstance = [[self alloc] init];
 }
@@ -184,42 +183,40 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 - (void)reloadTypeInfo{
-	@synchronized(self){
-        // Load the TypeInfo plists
-        NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
+    // Load the TypeInfo plists
+    NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
 
-        NSFileManager *fm = [NSFileManager defaultManager];
-        NSString *userTypeInfoPath = [[fm currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
-        NSDictionary *userTypeInfoDict;
-        
-        if ([fm fileExistsAtPath:userTypeInfoPath]) {
-            userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
-            // set all the lists we support in the user file
-            [self setFieldsForTypesDict:[userTypeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
-            [self setTypesForFileTypeDict:[NSDictionary dictionaryWithObjectsAndKeys: 
-                [[userTypeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString], BDSKBibtexString, 
-                [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:@"PubMed"], @"PubMed", nil]];
-        } else {
-            [self setFieldsForTypesDict:[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
-            [self setTypesForFileTypeDict:[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY]];
-        }
-
-        [self setFileTypesDict:[typeInfoDict objectForKey:FILE_TYPES_KEY]];
-        [self setFieldNameForPubMedTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY]];
-        [self setBibtexTypeForPubMedTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY]];
-        [self setFieldNamesForMARCTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_MARC_TAGS_KEY]];
-        [self setMODSGenresForBibTeXTypeDict:[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY]];
-        [self setFieldNameForJSTORTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_JSTOR_TAGS_KEY]];
-        [self setFieldDescriptionForJSTORTagDict:[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_JSTOR_TAGS_KEY]];
-        [self setFieldNameForWebOfScienceTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_WOS_TAGS_KEY]];
-        [self setFieldDescriptionForWebOfScienceTagDict:[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_WOS_TAGS_KEY]];
-        [self setBibtexTypeForWebOfScienceTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_WOS_TYPES_KEY]];
-        [self setBibtexTypeForDublinCoreTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_DC_TYPES_KEY]];        
-        [self setFieldNameForDublinCoreTermDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_DC_TERMS_KEY]];
-        [self setFieldNameForReferTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_REFER_TAGS_KEY]];
-        [self setBibtexTypeForReferTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_REFER_TYPES_KEY]];
-        [self setBibtexTypeForHCiteTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_HCITE_TYPES_KEY]];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *userTypeInfoPath = [[fm currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
+    NSDictionary *userTypeInfoDict;
+    
+    if ([fm fileExistsAtPath:userTypeInfoPath]) {
+        userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
+        // set all the lists we support in the user file
+        [self setFieldsForTypesDict:[userTypeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
+        [self setTypesForFileTypeDict:[NSDictionary dictionaryWithObjectsAndKeys: 
+            [[userTypeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString], BDSKBibtexString, 
+            [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:@"PubMed"], @"PubMed", nil]];
+    } else {
+        [self setFieldsForTypesDict:[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
+        [self setTypesForFileTypeDict:[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY]];
     }
+
+    [self setFileTypesDict:[typeInfoDict objectForKey:FILE_TYPES_KEY]];
+    [self setFieldNameForPubMedTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY]];
+    [self setBibtexTypeForPubMedTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY]];
+    [self setFieldNamesForMARCTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_MARC_TAGS_KEY]];
+    [self setMODSGenresForBibTeXTypeDict:[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY]];
+    [self setFieldNameForJSTORTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_JSTOR_TAGS_KEY]];
+    [self setFieldDescriptionForJSTORTagDict:[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_JSTOR_TAGS_KEY]];
+    [self setFieldNameForWebOfScienceTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_WOS_TAGS_KEY]];
+    [self setFieldDescriptionForWebOfScienceTagDict:[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_WOS_TAGS_KEY]];
+    [self setBibtexTypeForWebOfScienceTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_WOS_TYPES_KEY]];
+    [self setBibtexTypeForDublinCoreTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_DC_TYPES_KEY]];        
+    [self setFieldNameForDublinCoreTermDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_DC_TERMS_KEY]];
+    [self setFieldNameForReferTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_REFER_TAGS_KEY]];
+    [self setBibtexTypeForReferTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_REFER_TYPES_KEY]];
+    [self setBibtexTypeForHCiteTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_HCITE_TYPES_KEY]];
 	
 	[self reloadAllFieldNames];
 	
@@ -229,57 +226,51 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 - (void)reloadAllFieldNames {
-    @synchronized(self){
-        NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
-        NSEnumerator *typeEnum = [[self bibTypesForFileType:BDSKBibtexString] objectEnumerator];
-        NSString *type;
-        
-        while (type = [typeEnum nextObject]) {
-            [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
-            [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
-        }
-        OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-        [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKDefaultFieldsKey]];
-        [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKLocalFileFieldsKey]];
-        [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKRemoteURLFieldsKey]];
-        [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKBooleanFieldsKey]];
-        [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKRatingFieldsKey]];
-        [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKTriStateFieldsKey]];
-        [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKCitationFieldsKey]];
-        [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKPersonFieldsKey]];
-        
-        [self setAllFieldNames:allFields];
-    }
+    NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
+    NSEnumerator *typeEnum = [[self bibTypesForFileType:BDSKBibtexString] objectEnumerator];
+    NSString *type;
     
+    while (type = [typeEnum nextObject]) {
+        [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
+        [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
+    }
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKDefaultFieldsKey]];
+    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKLocalFileFieldsKey]];
+    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKRemoteURLFieldsKey]];
+    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKBooleanFieldsKey]];
+    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKRatingFieldsKey]];
+    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKTriStateFieldsKey]];
+    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKCitationFieldsKey]];
+    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKPersonFieldsKey]];
+    
+    [self setAllFieldNames:allFields];
+
 }
 
 - (void)reloadURLFields {
-    @synchronized(self){
-        [localFileFieldsSet removeAllObjects];
-        [remoteURLFieldsSet removeAllObjects];
-        [allURLFieldsSet removeAllObjects];
-        
-        [localFileFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey]];
-        [remoteURLFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey]];
-        [allURLFieldsSet unionSet:remoteURLFieldsSet];
-        [allURLFieldsSet unionSet:localFileFieldsSet];
-    }
+    [localFileFieldsSet removeAllObjects];
+    [remoteURLFieldsSet removeAllObjects];
+    [allURLFieldsSet removeAllObjects];
+    
+    [localFileFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey]];
+    [remoteURLFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey]];
+    [allURLFieldsSet unionSet:remoteURLFieldsSet];
+    [allURLFieldsSet unionSet:localFileFieldsSet];
 }
 
 - (void)reloadSpecialFields{
-    @synchronized(self){
-        [ratingFieldsSet removeAllObjects];
-        [triStateFieldsSet removeAllObjects];
-        [booleanFieldsSet removeAllObjects];
-        [citationFieldsSet removeAllObjects];
-        [personFieldsSet removeAllObjects];
-        
-        [ratingFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey]];
-        [triStateFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey]];
-        [booleanFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey]];    
-        [citationFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKCitationFieldsKey]];   
-        [personFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKPersonFieldsKey]];
-    }
+    [ratingFieldsSet removeAllObjects];
+    [triStateFieldsSet removeAllObjects];
+    [booleanFieldsSet removeAllObjects];
+    [citationFieldsSet removeAllObjects];
+    [personFieldsSet removeAllObjects];
+    
+    [ratingFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey]];
+    [triStateFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey]];
+    [booleanFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey]];    
+    [citationFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKCitationFieldsKey]];   
+    [personFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKPersonFieldsKey]];
 }
 
 - (void)reloadGroupFields{
@@ -630,13 +621,8 @@ static BDSKTypeManager *sharedInstance = nil;
     return allURLFieldsSet;
 }
 
-// this one needs to be thread safe
 - (NSSet *)localFileFieldsSet{
-    NSSet *set;
-    @synchronized(self){
-        set = [[localFileFieldsSet copy] autorelease];
-    }
-    return set;
+    return localFileFieldsSet;
 }
 
 - (NSSet *)remoteURLFieldsSet{
