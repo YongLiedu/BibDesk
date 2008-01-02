@@ -107,7 +107,7 @@ static void fixLegacyTableColumnIdentifiers()
 
 + (void)initialize
 {
-    //OBINITIALIZE;
+    OBINITIALIZE;
         
     // make sure we use Spotlight's plugins on 10.4 and later
     SKLoadDefaultExtractorPlugIns();
