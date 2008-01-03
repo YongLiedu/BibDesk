@@ -151,17 +151,18 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 enum {
     BDSKItemChangedGroupFieldMask = 1,
     BDSKItemChangedSearchKeyMask = 2,
-    BDSKItemChangedSortKeyMask = 4
+    BDSKItemChangedSortKeyMask = 4,
+    BDSKItemChangedFilesMask = 8
 };
 
 @interface BDSKFileViewObject : NSObject
 {
-    NSString *subtitle;
+    NSString *string;
     NSURL *URL;
 }
-- (id)initWithURL:(NSURL *)aURL subtitle:(NSString *)aString;
-- (NSString *)subtitle;
-- (void)setSubtitle:(NSString *)value;
+- (id)initWithURL:(NSURL *)aURL string:(NSString *)aString;
+- (NSString *)string;
+- (void)setString:(NSString *)value;
 
 - (NSURL *)URL;
 - (void)setURL:(NSURL *)value;
@@ -170,11 +171,11 @@ enum {
 
 @implementation BDSKFileViewObject
 
-- (id)initWithURL:(NSURL *)aURL subtitle:(NSString *)aString;
+- (id)initWithURL:(NSURL *)aURL string:(NSString *)aString;
 {
     self = [super init];
     if (self) {
-        [self setSubtitle:aString];
+        [self setString:aString];
         [self setURL:aURL];
     }
     return self;
@@ -182,19 +183,19 @@ enum {
 
 - (void)dealloc
 {
-    [subtitle release];
+    [string release];
     [URL release];
     [super dealloc];
 }
 
-- (NSString *)subtitle {
-    return subtitle;
+- (NSString *)string {
+    return string;
 }
 
-- (void)setSubtitle:(NSString *)value {
-    if (subtitle != value) {
-        [subtitle release];
-        subtitle = [value copy];
+- (void)setString:(NSString *)value {
+    if (string != value) {
+        [string release];
+        string = [value copy];
     }
 }
 
@@ -309,6 +310,7 @@ enum {
     [shownPublications release];
     [groupedPublications release];
     [groups release];
+    [shownFiles release];
     [frontMatter release];
     [documentInfo release];
     [drawerController release];
@@ -2617,6 +2619,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (docState.isDocumentClosed)
         return;
     
+    if ((docState.itemChangeMask & BDSKItemChangedFilesMask) != 0)
+        [self invalidateShownFiles];
+
     BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
 	[self updateSmartGroupsCountAndContent:shouldUpdateGroups];
     
@@ -2729,6 +2734,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         docState.itemChangeMask |= BDSKItemChangedSortKeyMask;
     if ([self searchKeyDependsOnKey:changedKey])
         docState.itemChangeMask |= BDSKItemChangedSearchKeyMask;
+    if ([changedKey isEqualToString:BDSKLocalFileString] || [changedKey isEqualToString:BDSKRemoteURLString])
+        docState.itemChangeMask |= BDSKItemChangedFilesMask;
+    
     
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
     [self queueSelectorOnce:@selector(handlePrivateBibItemChanged)];
@@ -2744,6 +2752,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)handleTableSelectionChangedNotification:(NSNotification *)notification{
+    [self invalidateShownFiles];
     [self updatePreviews];
     [groupTableView updateHighlights];
 }
@@ -2880,43 +2889,16 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [attrString release];
 }
 
-static void addValueFromArrayToBag(const void *value, void *context)
-{
-    CFBagAddValue(context, value);
-}
-
-static void addAllURLsToBag(const void *value, void *context)
-{
-    CFArrayRef fpaths = (CFArrayRef)[(BibItem *)value sortedURLs];
-    CFArrayApplyFunction(fpaths, CFRangeMake(0, CFArrayGetCount(fpaths)), addValueFromArrayToBag, context);
-}
-
-// delegate must return an NSString path or nil for each index < numberOfFiles
-- (NSUInteger)countOfFileViewURLs;
-{
-    if ([self isDisplayingFileContentSearch]) {
-        return [[fileSearchController URLsOfSelectedItems] count];
-    } else {
-        NSArray *selPubs = [self selectedPublications];
-        if (nil == selPubs) return 0;
-        CFMutableBagRef bag = CFBagCreateMutable(NULL, 0, NULL);
-        CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllURLsToBag, bag);
-        unsigned cnt = CFBagGetCount(bag);
-        CFRelease(bag);
-        return cnt;
-    }
-}
-
 typedef struct _applierContext {
     CFMutableArrayRef array;
-    BibItem *item;
+    NSString *title;
 } applierContext;
 
 static void addValueFromArrayToArray(const void *value, void *context)
 {
     applierContext *ctxt = context;
     // value is NSURL *
-    BDSKFileViewObject *obj = [[BDSKFileViewObject alloc] initWithURL:(id)value subtitle:[ctxt->item displayTitle]];
+    BDSKFileViewObject *obj = [[BDSKFileViewObject alloc] initWithURL:(id)value string:ctxt->title];
     CFArrayAppendValue(ctxt->array, obj);
     [obj release];
 }
@@ -2926,48 +2908,42 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     CFArrayRef allURLs = (CFArrayRef)[(BibItem *)value sortedURLs];
     applierContext ctxt;
     ctxt.array = context;
-    ctxt.item = (id)value;
+    ctxt.title = [(BibItem *)value displayTitle];
     CFArrayApplyFunction(allURLs, CFRangeMake(0, CFArrayGetCount(allURLs)), addValueFromArrayToArray, &ctxt);
 }
 
-- (NSURL *)objectInFileViewURLsAtIndex:(NSUInteger)idx;
-{
-    if ([self isDisplayingFileContentSearch]) {
-        return [[fileSearchController URLsOfSelectedItems] objectAtIndex:idx];
-    } else {
-        NSArray *selPubs = [self selectedPublications];
-        if (selPubs) {
-            CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
-            CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, array);
-            BDSKFileViewObject *obj = (id)CFArrayGetValueAtIndex(array, idx);
-            NSURL *URL = [[obj URL] retain];
-            CFRelease(array);
-            return [URL autorelease];
-        } else
-            return nil;
+- (NSArray *)shownFiles {
+    if (shownFiles == nil) {
+        if ([self isDisplayingFileContentSearch]) {
+            shownFiles = [[fileSearchController selectedResults] mutableCopy];
+        } else {
+            NSArray *selPubs = [self selectedPublications];
+            if (selPubs) {
+                shownFiles = [[NSMutableArray alloc] initWithCapacity:[selPubs count]];
+                CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, shownFiles);
+            }
+        }
     }
+    return shownFiles;
+}
+
+- (void)invalidateShownFiles {
+    [shownFiles release];
+    shownFiles = nil;
 }
 
 - (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
 {
-    if ([self isDisplayingFileContentSearch]) {
-        return [[fileSearchController titlesOfSelectedItems] objectAtIndex:anIndex];
-    } else {
-        NSArray *selPubs = [self selectedPublications];
-        if (selPubs) {
-            CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
-            CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, array);
-            BDSKFileViewObject *obj = (id)CFArrayGetValueAtIndex(array, anIndex);
-            NSString *title = [[obj subtitle] retain];
-            CFRelease(array);
-            return [title autorelease];
-        } else 
-            return nil;
-    }
+    return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"string"];
 }
 
-- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [self countOfFileViewURLs]; }
-- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex { return [self objectInFileViewURLsAtIndex:anIndex]; }
+- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView {
+    return [[self shownFiles] count];
+}
+
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex {
+    return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
+}
 
 - (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL {
     if ([aURL isFileURL]) {
@@ -2982,7 +2958,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 }
 
 - (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
-    NSURL *theURL = anIndex == NSNotFound ? nil : [self objectInFileViewURLsAtIndex:anIndex];
+    NSURL *theURL = anIndex == NSNotFound ? nil : [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
     int i;
     NSMenuItem *item;
     

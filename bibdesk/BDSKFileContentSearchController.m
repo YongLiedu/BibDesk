@@ -342,6 +342,10 @@
     return [[resultsArrayController selectedObjects] valueForKey:@"string"];
 }
 
+- (NSArray *)selectedResults {
+    return [resultsArrayController selectedObjects];
+}
+
 #pragma mark -
 #pragma mark SearchKit methods
 

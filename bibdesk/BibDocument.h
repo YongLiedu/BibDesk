@@ -188,6 +188,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     // All display related operations should use shownPublications
    
     BDSKGroupsArray *groups;
+    
+    NSMutableArray *shownFiles;
 	
 #pragma mark Search group bookmarks
 
@@ -480,6 +482,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)selectPublications:(NSArray *)bibArray;
 
 - (NSArray *)selectedFileURLs;
+
+- (NSArray *)shownFiles;
+- (void)invalidateShownFiles;
 
 - (void)setStatus:(NSString *)status;
 - (void)setStatus:(NSString *)status immediate:(BOOL)now;

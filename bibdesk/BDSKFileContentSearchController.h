@@ -108,6 +108,7 @@
 - (NSArray *)identifierURLsOfSelectedItems;
 - (NSArray *)URLsOfSelectedItems;
 - (NSArray *)titlesOfSelectedItems;
+- (NSArray *)selectedResults;
 
 - (NSArray *)results;
 - (void)setResults:(NSArray *)newResults;
