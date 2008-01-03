@@ -1015,9 +1015,10 @@
 }
 
 - (IBAction)migrateFiles:(id)sender {
-    if (nil == migrationController)
+    if (nil == migrationController) {
         migrationController = [[BDSKFileMigrationController alloc] init];
-    [self addWindowController:migrationController];
+        [self addWindowController:migrationController];
+    }
     [migrationController showWindow:self];
 }
 
