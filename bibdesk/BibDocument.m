@@ -289,7 +289,7 @@ enum {
     [drawerController release];
     [toolbarItems release];
 	[statusBar release];
-    [[tableView enclosingScrollView] retain];
+    [[tableView enclosingScrollView] release];
     [[previewTextView enclosingScrollView] release];
     [previewer release];
     [previewerBox release];

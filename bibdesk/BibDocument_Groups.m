@@ -195,7 +195,7 @@ The groupedPublications array is a subset of the publications array, developed b
         webFrame.origin.y = NSMaxY(tableFrame) + [splitView dividerThickness];
         
         [webView setFrame:webFrame];
-        [splitView addSubview:webView positioned:NSWindowBelow relativeTo:[tableView enclosingScrollView]];
+        [splitView addSubview:webView positioned:NSWindowBelow relativeTo:mainView];
         [webView setFrame:webFrame];
         [view1 setFrame:tableFrame];
         [view2 setFrame:previewFrame];
