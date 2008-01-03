@@ -155,61 +155,34 @@ enum {
     BDSKItemChangedFilesMask = 8
 };
 
-@interface BDSKFileViewObject : NSObject
-{
-    NSString *string;
+@interface BDSKFileViewObject : NSObject {
     NSURL *URL;
+    NSString *string;
 }
 - (id)initWithURL:(NSURL *)aURL string:(NSString *)aString;
-- (NSString *)string;
-- (void)setString:(NSString *)value;
-
 - (NSURL *)URL;
-- (void)setURL:(NSURL *)value;
-
+- (NSString *)string;
 @end
 
 @implementation BDSKFileViewObject
 
-- (id)initWithURL:(NSURL *)aURL string:(NSString *)aString;
-{
-    self = [super init];
-    if (self) {
-        [self setString:aString];
-        [self setURL:aURL];
+- (id)initWithURL:(NSURL *)aURL string:(NSString *)aString {
+    if (self = [super init]) {
+        URL = [aURL copy];
+        string = [aString copy];
     }
     return self;
 }
 
-- (void)dealloc
-{
-    [string release];
+- (void)dealloc {
     [URL release];
+    [string release];
     [super dealloc];
 }
 
-- (NSString *)string {
-    return string;
-}
+- (NSURL *)URL { return URL; }
 
-- (void)setString:(NSString *)value {
-    if (string != value) {
-        [string release];
-        string = [value copy];
-    }
-}
-
-- (NSURL *)URL {
-    return URL;
-}
-
-- (void)setURL:(NSURL *)value {
-    if (URL != value) {
-        [URL release];
-        URL = [value copy];
-    }
-}
-
+- (NSString *)string { return string; }
 
 @end
 
@@ -2887,27 +2860,29 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [attrString release];
 }
 
-typedef struct _applierContext {
+typedef struct _fileViewObjectContext {
     CFMutableArrayRef array;
     NSString *title;
-} applierContext;
+} fileViewObjectContext;
 
-static void addValueFromArrayToArray(const void *value, void *context)
+static void addFileViewObjectForURLToArray(const void *value, void *context)
 {
-    applierContext *ctxt = context;
+    fileViewObjectContext *ctxt = context;
     // value is NSURL *
     BDSKFileViewObject *obj = [[BDSKFileViewObject alloc] initWithURL:(id)value string:ctxt->title];
     CFArrayAppendValue(ctxt->array, obj);
     [obj release];
 }
 
-static void addAllObjectsForItemToArray(const void *value, void *context)
+static void addAllFileViewObjectsForItemToArray(const void *value, void *context)
 {
     CFArrayRef allURLs = (CFArrayRef)[(BibItem *)value sortedURLs];
-    applierContext ctxt;
-    ctxt.array = context;
-    ctxt.title = [(BibItem *)value displayTitle];
-    CFArrayApplyFunction(allURLs, CFRangeMake(0, CFArrayGetCount(allURLs)), addValueFromArrayToArray, &ctxt);
+    if (CFArrayGetCount(allURLs)) {
+        fileViewObjectContext ctxt;
+        ctxt.array = context;
+        ctxt.title = [(BibItem *)value displayTitle];
+        CFArrayApplyFunction(allURLs, CFRangeMake(0, CFArrayGetCount(allURLs)), addFileViewObjectForURLToArray, &ctxt);
+    }
 }
 
 - (NSArray *)shownFiles {
@@ -2918,7 +2893,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
             NSArray *selPubs = [self selectedPublications];
             if (selPubs) {
                 shownFiles = [[NSMutableArray alloc] initWithCapacity:[selPubs count]];
-                CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllObjectsForItemToArray, shownFiles);
+                CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllFileViewObjectsForItemToArray, shownFiles);
             }
         }
     }
