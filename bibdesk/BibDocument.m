@@ -573,6 +573,7 @@ enum {
 
     docState.isDocumentClosed = YES;
     
+    [fileMigrationController stop:self];
     [fileSearchController terminate];
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];

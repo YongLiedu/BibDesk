@@ -72,6 +72,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
         results = [NSMutableArray new];
         keepOriginalValues = YES;
         useSelection = NO;
+        stopped = NO;
     }
     return self;
 }
@@ -151,7 +152,9 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *aPub;
     
-    while (aPub = [pubEnum nextObject]) {
+    stopped = NO;
+    
+    while (stopped == NO && (aPub = [pubEnum nextObject])) {
         
         if ((current++ % 5) == 0) {
             // Causes the progress bar and other UI to update; tickling the runloop rather than using -displayIfNeeded keeps spindump from running on Leopard and slowing things down even more.
@@ -191,6 +194,11 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
         [document updatePreviews];
     
     [document release];
+}
+
+- (IBAction)stop:(id)sender;
+{
+    stopped = YES;
 }
 
 - (IBAction)editPublication:(id)sender;
