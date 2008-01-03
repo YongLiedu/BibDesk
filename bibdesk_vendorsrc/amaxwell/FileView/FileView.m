@@ -1305,7 +1305,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSUInteger curPage = [anIcon currentPageIndex];
     [_leftArrow setEnabled:curPage != 1];
     [_rightArrow setEnabled:curPage != [anIcon pageCount]];
-    [self setNeedsDisplayInRect:NSUnionRect(_leftArrowFrame, _rightArrowFrame)];
+    NSUInteger r, c;
+    // _getGridRow should always succeed.  Drawing entire icon since a mouseover can occur between the time the icon is loaded and drawn, so only the part of the icon below the buttons is drawn (at least, I think that's what happens...)
+    if ([self _getGridRow:&r column:&c atPoint:_leftArrowFrame.origin])
+        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
 }
 
 - (void)leftArrowAction:(id)sender
@@ -1314,7 +1317,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     [anIcon showPreviousPage];
     [self _updateButtonsForIcon:anIcon];
     NSUInteger r, c;
-    // should always succeed
+    // _getGridRow should always succeed
     if ([self _getGridRow:&r column:&c atPoint:_leftArrowFrame.origin])
         [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
 }
@@ -1325,7 +1328,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     [anIcon showNextPage];
     [self _updateButtonsForIcon:anIcon];
     NSUInteger r, c;
-    // should always succeed
+    // _getGridRow should always succeed
     if ([self _getGridRow:&r column:&c atPoint:_rightArrowFrame.origin])
         [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
 }
