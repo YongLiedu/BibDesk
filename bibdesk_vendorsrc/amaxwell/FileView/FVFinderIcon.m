@@ -194,19 +194,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-#if DEBUG
-    NSLog(@"*** memory error *** dealloc of %@", [self class]);
-#endif
-    // stop compiler warning about missing [super dealloc]
-    if (0) [super dealloc];
-}
-
-- (id)retain { return self; }
-- (oneway void)release { }
-- (NSUInteger)retainCount { return NSUIntegerMax; }
-
 - (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 {
     CGRect rect = [self _drawingRectWithRect:dstRect];            
@@ -245,19 +232,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-#if DEBUG
-    NSLog(@"*** memory error *** dealloc of %@", [self class]);
-#endif
-    // stop compiler warning about missing [super dealloc]
-    if (0) [super dealloc];
-}
-
-- (id)retain { return self; }
-- (oneway void)release { }
-- (NSUInteger)retainCount { return NSUIntegerMax; }
-
 @end
 
 #pragma mark Generic URL icon
@@ -285,19 +259,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-#if DEBUG
-    NSLog(@"*** memory error *** dealloc of %@", [self class]);
-#endif
-    // stop compiler warning about missing [super dealloc]
-    if (0) [super dealloc];
-}
-
-- (id)retain { return self; }
-- (oneway void)release { }
-- (NSUInteger)retainCount { return NSUIntegerMax; }
-
 @end
 
 #pragma mark FTP URL icon
@@ -324,18 +285,5 @@
     }
     return self;
 }
-
-- (void)dealloc
-{
-#if DEBUG
-    NSLog(@"*** memory error *** dealloc of %@", [self class]);
-#endif
-    // stop compiler warning about missing [super dealloc]
-    if (0) [super dealloc];
-}
-
-- (id)retain { return self; }
-- (oneway void)release { }
-- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 @end
