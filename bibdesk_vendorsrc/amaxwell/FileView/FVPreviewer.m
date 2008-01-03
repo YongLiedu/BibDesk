@@ -364,4 +364,8 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
     }
 }
 
+- (IBAction)previewAction:(id)sender {
+	[[self window] close];
+}
+
 @end
