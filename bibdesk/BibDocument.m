@@ -2819,8 +2819,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
     OBASSERT([NSThread inMainThread]);
     
-    [fileView reloadIcons];
-    
     //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
     [self updatePreviewPane];
     
@@ -2930,6 +2928,8 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
 - (void)invalidateShownFiles {
     [shownFiles release];
     shownFiles = nil;
+    
+    [fileView reloadIcons];
 }
 
 - (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
