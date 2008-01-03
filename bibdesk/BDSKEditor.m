@@ -595,7 +595,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             return;
         if ([aURLString rangeOfString:@"://"].location == NSNotFound)
             aURLString = [@"http://" stringByAppendingString:aURLString];
-        NSURL *aURL = [NSURL URLWithString:aURLString];
+        NSURL *aURL = [NSURL URLWithStringByNormalizingPercentEscapes:aURLString];
         if (aURL == nil)
             return;
         unsigned int anIndex = (unsigned int)contextInfo;
