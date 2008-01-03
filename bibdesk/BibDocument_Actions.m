@@ -279,10 +279,8 @@
 
 - (IBAction)alternateDelete:(id)sender {
 	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView) {
+	if (firstResponder == tableView || firstResponder == [fileSearchController tableView]) {
 		[self deleteSelectedPubs:sender];
-	} else if (firstResponder == groupTableView) {
-		[self removeSelectedGroups:sender];
 	}
 }
 
@@ -290,7 +288,8 @@
 // Note: cut: calls delete:
 
 - (IBAction)alternateCut:(id)sender {
-	if ([documentWindow firstResponder] == tableView) {
+	id firstResponder = [documentWindow firstResponder];
+	if (firstResponder == tableView || firstResponder == [fileSearchController tableView]) {
 		[tableView copy:sender];
 		[self alternateDelete:sender];
 	}
@@ -397,20 +396,7 @@
 }
 
 - (IBAction)editPubCmd:(id)sender{
-    NSArray *pubs = nil;
-    if ([self isDisplayingFileContentSearch]) {
-        NSMutableArray *tmpArray = [NSMutableArray array];
-        NSEnumerator *itemEnum = [[fileSearchController identifierURLsOfSelectedItems] objectEnumerator];
-        NSURL *idURL;
-        BibItem *pub;
-        while (idURL = [itemEnum nextObject]) {
-            if (pub = [publications itemForIdentifierURL:idURL])
-                [tmpArray addObject:pub];
-        }
-        pubs = tmpArray;
-    } else {
-        pubs = [self selectedPublications];
-    }
+    NSArray *pubs = [self selectedPublications];
     [self editPublications:pubs];
 }
 
@@ -1038,7 +1024,10 @@
 #pragma mark View Actions
 
 - (IBAction)selectAllPublications:(id)sender {
-	[tableView selectAll:sender];
+    if ([self isDisplayingFileContentSearch])
+        [[fileSearchController tableView] selectAll:sender];
+    else
+        [tableView selectAll:sender];
 }
 
 - (IBAction)deselectAllPublications:(id)sender {

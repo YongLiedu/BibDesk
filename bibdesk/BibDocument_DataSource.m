@@ -1140,7 +1140,7 @@
 // the next 3 are called from tableview actions defined in NSTableView_OAExtensions
 
 - (void)tableView:(NSTableView *)tv insertNewline:(id)sender{
-	if (tv == tableView) {
+	if (tv == tableView || tv == [fileSearchController tableView]) {
 		[self editPubCmd:sender];
 	} else if (tv == groupTableView) {
 		[self renameGroupAction:sender];
@@ -1149,7 +1149,7 @@
 
 - (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
 	// the rows are always the selected rows
-	if (tv == tableView) {
+	if (tv == tableView || tv == [fileSearchController tableView]) {
 		[self removeSelectedPubs:nil];
 	} else if (tv == groupTableView) {
 		[self removeSelectedGroups:nil];

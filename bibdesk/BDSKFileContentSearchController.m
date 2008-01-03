@@ -438,6 +438,16 @@
     return BDSKFileContentSearchTableViewFontSizeKey;
 }
 
+- (void)tableView:(NSTableView *)tv insertNewline:(id)sender{
+    if ([[self document] respondsToSelector:_cmd])
+        [[self document] tableView:tv insertNewline:sender];
+}
+
+- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
+    if ([[self document] respondsToSelector:_cmd])
+        [[self document] tableView:tv deleteRows:rows];
+}
+
 @end
 
 // The array controller is set to preserve selection, but it seems to work based on pointer equality or else isn't implemented for setContent:.  Consequently, each time setContent: is called (via setResults:), the selection changes randomly.  Here we explicitly preserve selection based on isEqual:, which is implemented correctly for the BDSKSearchResults.  This is generally pretty fast, since the number of selected objects is typically small.

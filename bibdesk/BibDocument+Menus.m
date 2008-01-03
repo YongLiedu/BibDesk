@@ -57,7 +57,8 @@
 - (BOOL) validateCutMenuItem:(NSMenuItem*) menuItem {
     if ([documentWindow isKeyWindow] == NO)
         return NO;
-	if ([documentWindow firstResponder] != tableView ||
+	id firstResponder = [documentWindow firstResponder];
+	if ((firstResponder != tableView && firstResponder != [fileSearchController tableView]) ||
 		[self numberOfSelectedPubs] == 0 ||
         [self hasExternalGroupsSelected] == YES) {
 		// no selection or selection includes shared groups
@@ -72,7 +73,8 @@
 - (BOOL) validateAlternateCutMenuItem:(NSMenuItem*) menuItem {
     if ([documentWindow isKeyWindow] == NO)
         return NO;
-	if ([documentWindow firstResponder] != tableView ||
+	id firstResponder = [documentWindow firstResponder];
+	if ((firstResponder != tableView && firstResponder != [fileSearchController tableView]) ||
 		[self numberOfSelectedPubs] == 0 ||
         [self hasExternalGroupsSelected] == YES) {
 		// no selection
@@ -87,7 +89,8 @@
 - (BOOL) validateCopyMenuItem:(NSMenuItem*) menuItem {
     if ([documentWindow isKeyWindow] == NO)
         return NO;
-	if ([documentWindow firstResponder] != tableView ||
+	id firstResponder = [documentWindow firstResponder];
+	if ((firstResponder != tableView && firstResponder != [fileSearchController tableView]) ||
 		[self numberOfSelectedPubs] == 0) {
 		// no selection
 		return NO;
@@ -123,10 +126,7 @@
 }
 
 - (BOOL) validateEditSelectionMenuItem:(NSMenuItem*) menuItem {
-    if ([self isDisplayingFileContentSearch])
-        return [[fileSearchController identifierURLsOfSelectedItems] count] > 0;
-    else
-        return [self numberOfSelectedPubs] > 0;
+    return [self numberOfSelectedPubs] > 0;
 }
 
 - (BOOL) validateDeleteSelectionMenuItem:(NSMenuItem*) menuItem {
@@ -436,7 +436,7 @@
     if ([documentWindow isKeyWindow] == NO)
         return NO;
     id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView) {
+	if (firstResponder == tableView || tableView == [fileSearchController tableView]) {
 		return [self validateRemoveSelectionMenuItem:menuItem];
 	} else if (firstResponder == groupTableView) {
 		return [self validateRemoveSelectedGroupsMenuItem:menuItem];
@@ -449,10 +449,8 @@
     if ([documentWindow isKeyWindow] == NO)
         return NO;
 	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView) {
+	if (firstResponder == tableView || tableView == [fileSearchController tableView]) {
 		return [self validateDeleteSelectionMenuItem:menuItem];
-	} else if (firstResponder == groupTableView) {
-		return [self validateRemoveSelectedGroupsMenuItem:menuItem];
 	} else {
 		return NO;
 	}
