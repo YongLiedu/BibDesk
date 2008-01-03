@@ -66,3 +66,5 @@ typedef NSUInteger FVIconType;
 @end
 
 FV_PRIVATE_EXTERN char * FVCreateDiskCacheNameWithURL(NSURL *fileURL);
+FV_PRIVATE_EXTERN NSString * const FVWebIconUpdatedNotificationName;
+

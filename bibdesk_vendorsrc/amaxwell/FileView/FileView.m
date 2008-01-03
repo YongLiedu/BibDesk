@@ -39,6 +39,7 @@
 #import "FileView.h"
 #import <QTKit/QTKit.h>
 #import "FVIcon.h"
+#import "FVIcon_Private.h"
 #import "FVIconQueue.h"
 #import "FVPreviewer.h"
 #import "FVArrowButton.h"
@@ -216,6 +217,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     
     _leftArrowFrame = NSZeroRect;
     _rightArrowFrame = NSZeroRect;
+    
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -483,6 +485,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (void)reloadIcons;
 {
     // grid may have changed, so do a full redisplay
+    [self _recalculateGridSize];
     [self setNeedsDisplay:YES];
     // any time the grid or scale changes, cursor rects are garbage
     [[self window] invalidateCursorRectsForView:self];
@@ -503,9 +506,15 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // mmalc's example unbinds here for a nil superview, but that causes problems if you remove the view and add it back in later (and also can cause crashes as a side effect, if we're not careful with the datasource)
     if (nil == newSuperview) {
         [self removeObserver:self forKeyPath:@"selectionIndexes"];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconUpdatedNotificationName object:nil];
     }
     else {
         [self addObserver:self forKeyPath:@"selectionIndexes" options:0 context:NULL];
+        
+        // special case; see FVWebViewIcon for posting and comments
+        [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                 selector:@selector(_handleWebIconNotification:) 
+                                                     name:FVWebIconUpdatedNotificationName object:nil];        
     }
 }
 
@@ -709,6 +718,11 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 }
 
 #pragma mark Cache thread
+
+- (void)_handleWebIconNotification:(NSNotification *)aNote
+{
+    [self iconQueueUpdated:[NSArray arrayWithObject:[aNote object]]];
+}
 
 - (void)_rescaleComplete;
 {    
@@ -1170,7 +1184,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
     [[self backgroundColor] setFill];
     NSRectFillUsingOperation(rect, NSCompositeCopy);
-    
+        
     // Only iterate icons in the visible range, since we know the overall geometry
     NSRange rowRange, columnRange;
     [self _getRangeOfRows:&rowRange columns:&columnRange inRect:rect];
