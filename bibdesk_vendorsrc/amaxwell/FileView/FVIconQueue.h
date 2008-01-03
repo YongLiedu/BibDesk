@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface NSObject (FVIconQueueCallBack)
-- (void)iconQueueUpdated;
+- (void)iconQueueUpdated:(NSArray *)updatedIcons;
 @end
 
 @interface FVIconQueue : NSObject
