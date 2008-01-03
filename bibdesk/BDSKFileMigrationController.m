@@ -122,6 +122,8 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
 - (IBAction)migrate:(id)sender;
 {
     NSMutableArray *observedResults = [self mutableArrayValueForKey:@"results"];
+    // keep a reference to the document, because it may go away when the window closes while we're busy
+    BibDocument *document = (BibDocument *)[[self document] retain];
     
     // get rid of leftovers from a previous run
     [observedResults removeAllObjects];
@@ -130,9 +132,9 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     
     NSArray *pubs = nil;
     if (useSelection == NO)
-        pubs = [[self document] publications];
+        pubs = [document publications];
     else if ([[self document] hasExternalGroupsSelected] == NO)
-        pubs = [[self document] selectedPublications];
+        pubs = [document selectedPublications];
     
     // Workaround for an AppKit bug in Tiger, the progress bar does not work after the first time it is used, so we replace it by a copy.  Apparently also in Leopard under some conditions
     NSProgressIndicator *newProgressBar = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:progressBar]];
@@ -186,7 +188,9 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     
     // BibItem change notifications are only posted if the old fields are removed, so this ensures that the file view is updated
     if (numberOfAddedFiles > 0)
-        [[self document] updatePreviews];
+        [document updatePreviews];
+    
+    [document release];
 }
 
 - (IBAction)editPublication:(id)sender;

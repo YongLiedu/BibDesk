@@ -1017,6 +1017,8 @@
 - (IBAction)migrateFiles:(id)sender {
     if (nil == migrationController) {
         migrationController = [[BDSKFileMigrationController alloc] init];
+    }
+    if ([[self windowControllers] containsObject:migrationController] == NO) {
         [self addWindowController:migrationController];
     }
     [migrationController showWindow:self];
