@@ -3671,6 +3671,7 @@ static void addAllObjectsForItemToArray(const void *value, void *context)
     if (absoluteURL)
         [[publications valueForKeyPath:@"@unionOfArrays.files"]  makeObjectsPerformSelector:@selector(update)];
     [self updatePreviews];
+    [self invalidateShownFiles];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentFileURLDidChangeNotification object:self];
 }
 
