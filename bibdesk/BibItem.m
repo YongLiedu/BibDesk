@@ -3575,7 +3575,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         // Don't post this unless the owner is a document.  At present, if we open a URL group using a local file on disk that has valid URLs, this method will be called and it will end up with BDSKLinkedFile instances.  If we then click the "Import" button in the document, no warning is displayed because we don't call migrateFilesAndRemove:... again.
         if (added > 0 && [[self owner] isDocument]) {
             NSNotification *note = [NSNotification notificationWithName:BDSKTemporaryFileMigrationNotification object:[self owner]];
-            [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
+            [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostNow coalesceMask:NSNotificationCoalescingOnName forModes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
         }
     }
     
