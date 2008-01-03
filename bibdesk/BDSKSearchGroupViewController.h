@@ -41,8 +41,8 @@
 @class BDSKCollapsibleView, BDSKEdgeView, BDSKSearchGroup;
 
 @interface BDSKSearchGroupViewController : NSWindowController {
-    IBOutlet BDSKCollapsibleView *view;
-    IBOutlet BDSKEdgeView *edgeView;
+    IBOutlet BDSKEdgeView *view;
+    IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet NSSearchField *searchField;
     IBOutlet NSButton *searchButton;
     

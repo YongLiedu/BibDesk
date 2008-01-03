@@ -289,7 +289,7 @@ enum {
     [drawerController release];
     [toolbarItems release];
 	[statusBar release];
-	[splitView release];
+    [[tableView enclosingScrollView] retain];
     [[previewTextView enclosingScrollView] release];
     [previewer release];
     [previewerBox release];
@@ -442,9 +442,11 @@ enum {
     if (fract >= 0)
         [splitView setFraction:fract];
     
-    // it might be replaced by the file content search view
-    [splitView retain];
     [mainBox setBackgroundColor:[NSColor controlBackgroundColor]];
+    
+    // this might be replaced by the file content tableView
+    [[tableView enclosingScrollView] retain];
+    [[tableView enclosingScrollView] setFrame:[mainView bounds]];
     
     [[previewTextView enclosingScrollView] retain];
     
@@ -3263,7 +3265,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 #pragma mark Control view animation
 
 - (BOOL)isDisplayingSearchButtons { return [documentWindow isEqual:[[searchButtonController view] window]]; }
-- (BOOL)isDisplayingFileContentSearch { return [documentWindow isEqual:[[fileSearchController searchContentView] window]]; }
+- (BOOL)isDisplayingFileContentSearch { return [documentWindow isEqual:[[fileSearchController tableView] window]]; }
 - (BOOL)isDisplayingSearchGroupView { return [documentWindow isEqual:[[searchGroupViewController view] window]]; }
 - (BOOL)isDisplayingWebGroupView { return [documentWindow isEqual:[[webGroupViewController view] window]]; }
 
@@ -3619,8 +3621,8 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 #pragma mark Protocols forwarding
 
 // Declaring protocol conformance in the category headers shuts the compiler up, but causes a hang in -[NSObject conformsToProtocol:], which sucks.  Therefore, we use wrapper methods here to call the real (category) implementations.
-- (void)restoreDocumentStateByRemovingSearchView:(NSView *)view{ 
-    [self _restoreDocumentStateByRemovingSearchView:view]; 
+- (void)removeFileContentSearch:(BDSKFileContentSearchController *)controller{ 
+    [self privateRemoveFileContentSearch:controller]; 
 }
 
 - (NSIndexSet *)indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{

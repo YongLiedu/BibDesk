@@ -36,10 +36,10 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 backForwardButton = NSSegmentedControl; 
-                edgeView = BDSKEdgeView; 
+                collapsibleView = BDSKCollapsibleView; 
                 stopOrReloadButton = NSButton; 
                 urlField = NSTextField; 
-                view = BDSKCollapsibleView; 
+                view = BDSKEdgeView; 
                 webEdgeView = BDSKEdgeView; 
                 webView = WebView; 
             }; 

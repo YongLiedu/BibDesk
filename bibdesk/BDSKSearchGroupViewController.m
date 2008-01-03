@@ -53,9 +53,10 @@
 }
 
 - (void)awakeFromNib {
-    [view setMinSize:[view frame].size];
-    [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
-    [edgeView setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
+    [collapsibleView setMinSize:[collapsibleView frame].size];
+    [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    [view setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    [view setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
 }
 
 - (void)updateSearchView {

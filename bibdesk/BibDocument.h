@@ -106,10 +106,11 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 {
 #pragma mark Main tableview pane variables
 
-    IBOutlet NSWindow* documentWindow;
+    IBOutlet NSWindow *documentWindow;
     IBOutlet BDSKMainTableView *tableView;
-    IBOutlet BDSKSplitView* splitView;
-    IBOutlet BDSKColoredBox* mainBox;
+    IBOutlet BDSKSplitView *splitView;
+    IBOutlet BDSKColoredBox *mainBox;
+    IBOutlet NSView *mainView;
     
     IBOutlet BDSKStatusBar *statusBar;
     

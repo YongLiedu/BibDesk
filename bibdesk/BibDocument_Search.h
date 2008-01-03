@@ -40,6 +40,8 @@
 
 extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
+@class BDSKFileContentSearchController;
+
 @protocol OAFindControllerTarget;
 
 @interface BibDocument (Search)
@@ -63,7 +65,7 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
 - (IBAction)searchByContent:(id)sender;
 
-- (void)_restoreDocumentStateByRemovingSearchView:(NSView *)view;
+- (void)privateRemoveFileContentSearch:(BDSKFileContentSearchController *)controller;
 
 #pragma mark Find panel
 

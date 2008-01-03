@@ -18,10 +18,10 @@
             CLASS = BDSKSearchGroupViewController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                edgeView = BDSKEdgeView; 
+                collapsibleView = BDSKCollapsibleView; 
                 searchButton = NSButton; 
                 searchField = NSSearchField; 
-                view = BDSKCollapsibleView; 
+                view = BDSKEdgeView; 
             }; 
             SUPERCLASS = NSWindowController; 
         }

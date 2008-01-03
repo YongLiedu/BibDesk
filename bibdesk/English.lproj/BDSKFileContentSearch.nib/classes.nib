@@ -1,6 +1,11 @@
 {
     IBClasses = (
         {
+            CLASS = BDSKCollapsibleView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = BDSKContainerView; 
+        }, 
+        {
             CLASS = BDSKContainerView; 
             LANGUAGE = ObjC; 
             OUTLETS = {contentView = id; }; 
@@ -12,12 +17,13 @@
             CLASS = BDSKFileContentSearchController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                collapsibleView = BDSKCollapsibleView; 
+                controlView = BDSKEdgeView; 
                 indexProgressBar = NSProgressIndicator; 
                 progressView = NSView; 
-                resultsArrayController = NSArrayController; 
+                resultsArrayController = BDSKSelectionPreservingArrayController; 
                 stopButton = NSButton; 
                 tableView = NSTableView; 
-                topBarView = BDSKEdgeView; 
             }; 
             SUPERCLASS = NSWindowController; 
         }, 

@@ -105,7 +105,7 @@
     if([field isEqualToString:BDSKFileContentSearchString]) {
         [self searchByContent:nil];
     } else {
-        if ([[[fileSearchController searchContentView] window] isEqual:documentWindow])
+        if ([self isDisplayingFileContentSearch])
             [fileSearchController restoreDocumentState];
         
         NSArray *pubsToSelect = [self selectedPublications];
@@ -303,41 +303,44 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     
     [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
     
-    NSView *contentView = [fileSearchController searchContentView];
-    NSRect frame = [splitView frame];
-    [contentView setFrame:frame];
-    [contentView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-    [mainBox addSubview:contentView];
+    [self insertControlView:[fileSearchController controlView] atTop:NO];
     
-    [NSViewAnimation animateFadeOutView:splitView fadeInView:contentView];
+    NSView *oldView = [tableView enclosingScrollView];
+    NSView *newView = [[fileSearchController tableView] enclosingScrollView];
+    
+    [newView setFrame:[oldView frame]];
+    [mainView addSubview:newView];
+    [NSViewAnimation animateFadeOutView:oldView fadeInView:newView];
+    [oldView removeFromSuperview];
     
     [[previewer progressOverlay] remove];
     
-    [splitView removeFromSuperview];
     // connect the searchfield to the controller and start the search
     [fileSearchController setSearchField:searchField];
 }
 
 // Method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
-- (void)_restoreDocumentStateByRemovingSearchView:(NSView *)view
+- (void)privateRemoveFileContentSearch:(BDSKFileContentSearchController *)controller
 {
-    
-    NSRect frame = [view frame];
-    [splitView setFrame:frame];
-    [mainBox addSubview:splitView];
     
     if([currentPreviewView isEqual:previewerBox] || [currentPreviewView isEqual:[[previewer textView] enclosingScrollView]])
         [[previewer progressOverlay] overlayView:currentPreviewView];
     
-    [NSViewAnimation animateFadeOutView:view fadeInView:splitView];
+    NSView *oldView = [[fileSearchController tableView] enclosingScrollView];
+    NSView *newView = [tableView enclosingScrollView];
     
-    [[fileSearchController searchContentView] removeFromSuperview];
+    [newView setFrame:[oldView frame]];
+    [mainView addSubview:newView];
+    [NSViewAnimation animateFadeOutView:oldView fadeInView:newView];
+    [oldView removeFromSuperview];
+    
+    [self removeControlView:[fileSearchController controlView]];
     
     // reconnect the searchfield
     [searchField setTarget:self];
     [searchField setDelegate:self];
     
-    // _restoreDocumentStateByRemovingSearchView may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list.  Otherwise, select the pubs corresponding to the file content selection.
+    // privateRemoveFileContentSearch may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list.  Otherwise, select the pubs corresponding to the file content selection.
     if ([[searchField stringValue] isEqualToString:@""]) {
         [self hideSearchButtonView];
         
@@ -365,7 +368,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
                 [documentWindow makeFirstResponder:(NSResponder *)tableView];
         }
     } else {
-        [mainBox setNeedsDisplay:YES];
+        [mainView setNeedsDisplay:YES];
     }
 }
 

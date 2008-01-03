@@ -37,6 +37,10 @@
  */
 
 #import "BDSKFileContentSearchController.h"
+#import "BDSKSearchIndex.h"
+#import "BDSKEdgeView.h"
+#import "BDSKCollapsibleView.h"
+#import "BDSKStatusBar.h"
 #import "BibItem.h"
 #import "BDSKStringConstants.h"
 #import "NSImage_BDSKExtensions.h"
@@ -83,7 +87,7 @@
     // should already have been taken care of in -stopSearching
     [search release];
     [searchIndex release];
-    [searchContentView release];
+    [[tableView enclosingScrollView] release];
     [results release];
     [filteredResults release];
     [filterURLs release];
@@ -109,12 +113,16 @@
                                                object:[[tableView enclosingScrollView] contentView]];    
 
     // Do custom view setup 
-    [topBarView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
-    [topBarView setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
+    NSRect frame = [collapsibleView frame];
+    frame.size.width = 400.0;
+    [collapsibleView setMinSize:frame.size];
+    [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMinYEdgeMask];
+    [controlView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    [controlView setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
 
     // we might remove this, so keep a retained reference
-    searchContentView = [[[self window] contentView] retain];
-
+    [[tableView enclosingScrollView] retain];
+    
     // @@ workaround: the font from prefs seems to be overridden by the nib; maybe bindings issue?
     [tableView changeFont:nil];
     
@@ -130,11 +138,11 @@
     return @"BDSKFileContentSearch";
 }
 
-- (NSView *)searchContentView
+- (NSView *)controlView
 {
-    if(searchContentView == nil)
+    if(controlView == nil)
         [self window]; // this forces a load of the nib
-    return searchContentView;
+    return controlView;
 }
 
 - (NSTableView *)tableView
@@ -214,7 +222,7 @@
 
         // we get a search: action after the cancel/controlTextDidEndEditing: combination, so see if this was a cancel action
         if (searchFieldDidEndEditing)
-            [[searchContentView window] makeFirstResponder:nil];
+            [[tableView window] makeFirstResponder:nil];
 
         [self restoreDocumentState];
     } else {
@@ -248,7 +256,7 @@
     // hide this so it doesn't flash during the transition
     [progressView setHidden:YES];
     
-    [[self document] restoreDocumentStateByRemovingSearchView:[self searchContentView]];
+    [[self document] removeFileContentSearch:self];
 }
 
 #pragma mark -
