@@ -593,8 +593,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         NSString *aURLString = [chooseURLField stringValue];
         if ([NSString isEmptyString:aURLString])
             return;
-        if ([aURLString rangeOfString:@"://"].location == NSNotFound)
-            aURLString = [@"http://" stringByAppendingString:aURLString];
         NSURL *aURL = [NSURL URLWithStringByNormalizingPercentEscapes:aURLString];
         if (aURL == nil)
             return;

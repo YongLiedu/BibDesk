@@ -857,9 +857,6 @@
         
         NSString *urlString = [urlTextField stringValue];
         
-        if([urlString rangeOfString:@"://"].location == NSNotFound)
-            urlString = [@"http://" stringByAppendingString:urlString];
-        
         NSURL *url = [NSURL URLWithString:urlString];
         
         if(url == nil){
