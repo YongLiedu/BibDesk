@@ -729,9 +729,36 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         [[FVIconQueue sharedQueue] enqueueRenderIcons:icons forObject:self];
 }
 
-- (void)iconQueueUpdated;
+- (void)iconQueueUpdated:(NSArray *)updatedIcons;
 {
-    [self setNeedsDisplay:YES];
+    // Only iterate icons in the visible range, since we know the overall geometry
+    NSRange rowRange, columnRange;
+    [self _getRangeOfRows:&rowRange columns:&columnRange inRect:[self visibleRect]];
+    
+    NSUInteger iMin, iMax = [self numberOfIcons];
+    
+    // _indexForGridRow:column: returns NSNotFound if we're in a short row (empty column)
+    iMin = [self _indexForGridRow:rowRange.location column:columnRange.location];
+    if (NSNotFound == iMin)
+        iMin = [self numberOfIcons];
+    else
+        iMax = MIN([self numberOfIcons], iMin + rowRange.length * [self numberOfColumns]);
+    
+    NSArray *visibleIcons = [self iconsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(iMin, iMax - iMin)]];
+    NSUInteger i;
+    NSSet *updatedIconSet = [[NSSet alloc] initWithArray:updatedIcons];
+    CGFloat padding = 3.0 * [self iconScale];
+    
+    // If an icon isn't visible, there's no need to redisplay anything.  Similarly, if 20 icons are displayed and only 5 updated, there's no need to redraw all 20.  Geometry calculations are much faster than redrawing, in general.
+    for (i = iMin; i < iMax; i++) {
+        
+        if ([updatedIconSet containsObject:[visibleIcons objectAtIndex:(i - iMin)]]) {
+            NSUInteger r, c;
+            if ([self _getGridRow:&r column:&c ofIndex:i])
+                [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -padding, -padding)];
+        }
+    }
+    [updatedIconSet release];
 }
 
 // drawRect: uses -releaseResources on icons that aren't visible but present in the datasource, so we just need a way to cull icons that are cached but not currently in the datasource

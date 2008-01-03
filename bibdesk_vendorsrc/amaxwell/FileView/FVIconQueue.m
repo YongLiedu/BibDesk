@@ -137,10 +137,11 @@ static id sharedInstance = nil;
         NSUInteger i = 0, iMax = [taskQueue count], length = MIN((iMax - i), (NSUInteger)5);
         while (length) {
             NSRange r = NSMakeRange(i, length);
-            [[taskQueue subarrayWithRange:r] makeObjectsPerformSelector:@selector(renderOffscreen)];
+            NSArray *toRender = [taskQueue subarrayWithRange:r];
+            [toRender makeObjectsPerformSelector:@selector(renderOffscreen)];
             
             // using waitUntilDone:YES keeps the app much more responsive; otherwise we end up with too many drawing updates and repetitive rendering requests
-            [target performSelectorOnMainThread:@selector(iconQueueUpdated) withObject:nil waitUntilDone:YES modes:modes];
+            [target performSelectorOnMainThread:@selector(iconQueueUpdated:) withObject:toRender waitUntilDone:YES modes:modes];
             i = NSMaxRange(r);
             length = MIN((iMax - i), (NSUInteger)5);
         }
