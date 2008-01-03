@@ -306,7 +306,8 @@ static NSURL *missingFileURL = nil;
     NSShadow *aShadow = [[NSShadow alloc] init];
     [aShadow set];
     
-    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRect:dstRect xRadius:10 yRadius:10];
+    CGFloat radius = MIN(NSWidth(dstRect) / 4.0, 10.0);
+    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRect:dstRect xRadius:radius yRadius:radius];
     [path setLineWidth:2.0];
     CGFloat pattern[2] = { 12.0, 6.0 };
     
