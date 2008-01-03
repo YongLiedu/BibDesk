@@ -2491,39 +2491,38 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return attrString;
 }
 
+typedef struct _fileContext {
+    CFMutableArrayRef array;
+    BOOL isFile;
+    BOOL includeAll;
+} fileContext;
+
+static void addFilesToArray(const void *value, void *context)
+{
+    fileContext *ctxt = context;
+    BDSKLinkedFile *file = (BDSKLinkedFile *)value;
+    if ([file isFile] == ctxt->isFile && (ctxt->includeAll || [file URL] != nil))
+        CFArrayAppendValue(ctxt->array, value);
+}
+
 - (NSArray *)localFiles {
     NSMutableArray *localFiles = [NSMutableArray array];
-    NSEnumerator *fileEnum = [files objectEnumerator];
-    BDSKLinkedFile *file;
-    
-    while (file = [fileEnum nextObject]) {
-        if ([file isFile])
-            [localFiles addObject:file];
-    }
+    fileContext ctxt = {(CFMutableArrayRef)localFiles, YES, YES};
+    CFArrayApplyFunction((CFArrayRef)files, CFRangeMake(0, [files count]), addFilesToArray, &ctxt);
     return localFiles;
 }
 
 - (NSArray *)existingLocalFiles {
     NSMutableArray *localFiles = [NSMutableArray array];
-    NSEnumerator *fileEnum = [files objectEnumerator];
-    BDSKLinkedFile *file;
-    
-    while (file = [fileEnum nextObject]) {
-        if ([file isFile] && [file URL])
-            [localFiles addObject:file];
-    }
+    fileContext ctxt = {(CFMutableArrayRef)localFiles, YES, NO};
+    CFArrayApplyFunction((CFArrayRef)files, CFRangeMake(0, [files count]), addFilesToArray, &ctxt);
     return localFiles;
 }
 
 - (NSArray *)remoteURLs {
     NSMutableArray *remoteURLs = [NSMutableArray array];
-    NSEnumerator *fileEnum = [files objectEnumerator];
-    BDSKLinkedFile *file;
-    
-    while (file = [fileEnum nextObject]) {
-        if ([file isFile] == NO)
-            [remoteURLs addObject:file];
-    }
+    fileContext ctxt = {(CFMutableArrayRef)remoteURLs, NO, YES};
+    CFArrayApplyFunction((CFArrayRef)files, CFRangeMake(0, [files count]), addFilesToArray, &ctxt);
     return remoteURLs;
 }
 
