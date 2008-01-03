@@ -290,10 +290,6 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 
 - (IBAction)searchByContent:(id)sender
 {
-    // @@ File content search isn't really compatible with the group concept yet; this allows us to select publications when the content search is done, and also provides some feedback to the user that all pubs will be searched.  This is ridiculously complicated since we need to avoid calling searchByContent: in a loop.
-    [tableView deselectAll:nil];
-    [groupTableView updateHighlights];
-    
     if(fileSearchController == nil){
         fileSearchController = [[BDSKFileContentSearchController alloc] initForDocument:self];
         NSData *sortDescriptorData = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKFileContentSearchSortDescriptorKey defaultObject:[[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey]];
@@ -313,19 +309,16 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [NSViewAnimation animateFadeOutView:oldView fadeInView:newView];
     [oldView removeFromSuperview];
     
-    [[previewer progressOverlay] remove];
-    
     // connect the searchfield to the controller and start the search
     [fileSearchController setSearchField:searchField];
+    
+    // make sure the previews and fileview are updated
+    [self handleTableSelectionChangedNotification:nil];
 }
 
 // Method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
 - (void)privateRemoveFileContentSearch:(BDSKFileContentSearchController *)controller
 {
-    
-    if([currentPreviewView isEqual:previewerBox] || [currentPreviewView isEqual:[[previewer textView] enclosingScrollView]])
-        [[previewer progressOverlay] overlayView:currentPreviewView];
-    
     NSView *oldView = [[fileSearchController tableView] enclosingScrollView];
     NSView *newView = [tableView enclosingScrollView];
     
@@ -366,9 +359,14 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
             // if searchfield doesn't have focus (user clicked cancel button), switch to the tableview
             if ([[documentWindow firstResponder] isEqual:[searchField currentEditor]] == NO)
                 [documentWindow makeFirstResponder:(NSResponder *)tableView];
+        } else {
+            // make sure the previews and fileview are updated
+            [self handleTableSelectionChangedNotification:nil];
         }
     } else {
         [mainView setNeedsDisplay:YES];
+        // make sure the previews and fileview are updated
+        [self handleTableSelectionChangedNotification:nil];
     }
 }
 

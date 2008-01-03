@@ -2324,17 +2324,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark Selection
 
 - (int)numberOfSelectedPubs{
-#if 0
     if ([self isDisplayingFileContentSearch])
         return [[fileSearchController identifierURLsOfSelectedItems] count];
     else
         return [tableView numberOfSelectedRows];
-#endif
-    return [tableView numberOfSelectedRows];
 }
 
 - (NSArray *)selectedPublications{
-#if 0
     NSArray *selPubs = nil;
     if ([self isDisplayingFileContentSearch]) {
         if ([[fileSearchController tableView] numberOfSelectedRows]) {
@@ -2352,12 +2348,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         selPubs = [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
     }
     return selPubs;
-#endif
-
-    if(nil == tableView || [tableView selectedRow] == -1)
-        return nil;
-    
-    return [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
 }
 
 - (BOOL)selectItemsForCiteKeys:(NSArray *)citeKeys selectLibrary:(BOOL)flag {
@@ -2601,7 +2591,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return;
     
     if ((docState.itemChangeMask & BDSKItemChangedFilesMask) != 0)
-        [self invalidateShownFiles];
+        [self updateFileView];
 
     BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
 	[self updateSmartGroupsCountAndContent:shouldUpdateGroups];
@@ -2733,7 +2723,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)handleTableSelectionChangedNotification:(NSNotification *)notification{
-    [self invalidateShownFiles];
+    [self updateFileView];
     [self updatePreviews];
     [groupTableView updateHighlights];
 }
@@ -2908,7 +2898,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     return shownFiles;
 }
 
-- (void)invalidateShownFiles {
+- (void)updateFileView {
     [shownFiles release];
     shownFiles = nil;
     
@@ -3654,7 +3644,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     if (absoluteURL)
         [[publications valueForKeyPath:@"@unionOfArrays.files"]  makeObjectsPerformSelector:@selector(update)];
     [self updatePreviews];
-    [self invalidateShownFiles];
+    [self updateFileView];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentFileURLDidChangeNotification object:self];
 }
 

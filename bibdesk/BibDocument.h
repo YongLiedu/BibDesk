@@ -485,7 +485,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSArray *)selectedFileURLs;
 
 - (NSArray *)shownFiles;
-- (void)invalidateShownFiles;
+- (void)updateFileView;
 
 - (void)setStatus:(NSString *)status;
 - (void)setStatus:(NSString *)status immediate:(BOOL)now;
