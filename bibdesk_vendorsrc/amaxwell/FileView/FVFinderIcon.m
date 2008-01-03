@@ -38,32 +38,22 @@
 
 #import "FVFinderIcon.h"
 
-@implementation FVFinderIcon
-
-static IconRef __genericDocIcon;
-static IconRef __questionIcon;
-static IconRef __httpIcon;
-static IconRef __ftpIcon;
-static IconRef __genericURLIcon;
-
-+ (void)initialize
+@interface FVSingletonFinderIcon : FVFinderIcon
++ (id)sharedIcon;
+@end
+@interface FVMissingFinderIcon : FVSingletonFinderIcon
 {
-    static BOOL didInit = NO;
-    if (NO == didInit) {
-        OSStatus err;
-        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericDocumentIcon, &__genericDocIcon);
-        if (err) __genericDocIcon = NULL;
-        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kQuestionMarkIcon, &__questionIcon);
-        if (err) __questionIcon = NULL;
-        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationHTTPIcon, &__httpIcon);
-        if (err) __httpIcon = NULL;
-        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationFTPIcon, &__ftpIcon);
-        if (err) __ftpIcon = NULL;
-        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericURLIcon, &__genericURLIcon);
-        if (err) __genericURLIcon = NULL;
-        didInit = YES;
-    }
+    IconRef _questionIcon;
 }
+@end
+@interface FVHTTPURLIcon : FVSingletonFinderIcon
+@end
+@interface FVGenericURLIcon : FVSingletonFinderIcon
+@end
+@interface FVFTPURLIcon : FVSingletonFinderIcon
+@end
+
+@implementation FVFinderIcon
 
 - (BOOL)needsRenderForSize:(NSSize)size
 {
@@ -78,21 +68,14 @@ static IconRef __genericURLIcon;
 - (id)initWithURLScheme:(NSString *)scheme;
 {
     NSParameterAssert(nil != scheme);
-    self = [super init];
-    if (self) {
-        _iconType = FVFinderIconType;
+    [self release];
         
-        if ([scheme isEqualToString:@"http"])
-            _iconRef = __httpIcon;
-        else if ([scheme isEqualToString:@"ftp"])
-            _iconRef = __ftpIcon;
-        else
-            _iconRef = __genericURLIcon;
-        // increment retain count of the shared instance
-        if (_iconRef) AcquireIconRef(_iconRef);
-        
-        _drawsLinkBadge = NO;
-    }
+    if ([scheme isEqualToString:@"http"])
+        self = [FVHTTPURLIcon sharedIcon];
+    else if ([scheme isEqualToString:@"ftp"])
+        self = [FVFTPURLIcon sharedIcon];
+    else
+        self = [FVGenericURLIcon sharedIcon];
     return self;
 }
 
@@ -149,12 +132,7 @@ static IconRef __genericURLIcon;
     CGRect rect = [self _drawingRectWithRect:dstRect];
     
     if (NULL == _iconRef) {
-        
-        if (__genericDocIcon)
-            PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, __genericDocIcon);
-        rect = CGRectInset(rect, rect.size.width/4, rect.size.height/4);
-        if (__questionIcon)
-            PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kIconServicesNoBadgeFlag, __questionIcon);          
+        [[FVMissingFinderIcon sharedIcon] drawInRect:dstRect inCGContext:context];       
     }
     else {
         PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, _iconRef);
@@ -165,5 +143,199 @@ static IconRef __genericURLIcon;
 }
 
 - (BOOL)needsShadow { return NO; }
+
+@end
+
+#pragma mark Base singleton
+
+@implementation FVSingletonFinderIcon
+
++ (id)sharedIcon {  NSAssert(0, @"subclasses must implement +sharedIcon and provide static storage"); return nil; }
+
+- (void)dealloc
+{
+#if DEBUG
+    NSLog(@"*** memory error *** dealloc of %@", [self class]);
+#endif
+    // stop compiler warning about missing [super dealloc]
+    if (0) [super dealloc];
+}
+
+- (id)retain { return self; }
+- (oneway void)release { }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
+
+@end
+
+#pragma mark Missing file icon
+
+@implementation FVMissingFinderIcon
+
++ (id)sharedIcon
+{
+    static id sharedInstance = nil;
+    if (nil == sharedInstance)
+        sharedInstance = [[self allocWithZone:[self zone]] init];
+    return sharedInstance;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _iconType = FVFinderIconType;
+        _drawsLinkBadge = NO;
+        OSStatus err;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kQuestionMarkIcon, &_questionIcon);
+        if (err) _questionIcon = NULL;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericDocumentIcon, &_iconRef);
+        if (err) _iconRef = NULL;
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+#if DEBUG
+    NSLog(@"*** memory error *** dealloc of %@", [self class]);
+#endif
+    // stop compiler warning about missing [super dealloc]
+    if (0) [super dealloc];
+}
+
+- (id)retain { return self; }
+- (oneway void)release { }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
+
+- (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
+{
+    CGRect rect = [self _drawingRectWithRect:dstRect];            
+    if (_iconRef)
+        PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, _iconRef);
+    rect = CGRectInset(rect, rect.size.width/4, rect.size.height/4);
+    if (_questionIcon)
+        PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kIconServicesNoBadgeFlag, _questionIcon);          
+}
+
+
+@end
+
+#pragma mark HTTP URL icon
+
+@implementation FVHTTPURLIcon
+
++ (id)sharedIcon
+{
+    static id sharedInstance = nil;
+    if (nil == sharedInstance)
+        sharedInstance = [[self allocWithZone:[self zone]] init];
+    return sharedInstance;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _iconType = FVFinderIconType;
+        _drawsLinkBadge = NO;
+        OSStatus err;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationHTTPIcon, &_iconRef);
+        if (err) _iconRef = NULL;
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+#if DEBUG
+    NSLog(@"*** memory error *** dealloc of %@", [self class]);
+#endif
+    // stop compiler warning about missing [super dealloc]
+    if (0) [super dealloc];
+}
+
+- (id)retain { return self; }
+- (oneway void)release { }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
+
+@end
+
+#pragma mark Generic URL icon
+
+@implementation FVGenericURLIcon
+
++ (id)sharedIcon
+{
+    static id sharedInstance = nil;
+    if (nil == sharedInstance)
+        sharedInstance = [[self allocWithZone:[self zone]] init];
+    return sharedInstance;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _iconType = FVFinderIconType;
+        _drawsLinkBadge = NO;
+        OSStatus err;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericURLIcon, &_iconRef);
+        if (err) _iconRef = NULL;
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+#if DEBUG
+    NSLog(@"*** memory error *** dealloc of %@", [self class]);
+#endif
+    // stop compiler warning about missing [super dealloc]
+    if (0) [super dealloc];
+}
+
+- (id)retain { return self; }
+- (oneway void)release { }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
+
+@end
+
+#pragma mark FTP URL icon
+
+@implementation FVFTPURLIcon 
+
++ (id)sharedIcon
+{
+    static id sharedInstance = nil;
+    if (nil == sharedInstance)
+        sharedInstance = [[self allocWithZone:[self zone]] init];
+    return sharedInstance;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _iconType = FVFinderIconType;
+        _drawsLinkBadge = NO;
+        OSStatus err;
+        err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationFTPIcon, &_iconRef);
+        if (err) _iconRef = NULL;
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+#if DEBUG
+    NSLog(@"*** memory error *** dealloc of %@", [self class]);
+#endif
+    // stop compiler warning about missing [super dealloc]
+    if (0) [super dealloc];
+}
+
+- (id)retain { return self; }
+- (oneway void)release { }
+- (NSUInteger)retainCount { return NSUIntegerMax; }
 
 @end

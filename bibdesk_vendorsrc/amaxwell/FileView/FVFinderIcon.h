@@ -42,7 +42,7 @@
 
 @interface FVFinderIcon : FVIcon
 {
-@private
+@protected
     IconRef         _iconRef;
     FVIconType      _iconType;
     BOOL            _drawsLinkBadge;
