@@ -633,6 +633,14 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     if (NSEqualRects(frame, [self frame]) == NO)
         [self setFrame:frame];
+    
+    NSUInteger numIcons = [self numberOfIcons];
+    NSUInteger lastSelIndex = [_selectedIndexes lastIndex];
+    if (lastSelIndex != NSNotFound && lastSelIndex >= numIcons) {
+        NSMutableIndexSet *tmpIndexes = [_selectedIndexes mutableCopy];
+        [tmpIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
+        [self setSelectionIndexes:tmpIndexes];
+    }
 }    
 
 - (NSUInteger)_indexForGridRow:(NSUInteger)rowIndex column:(NSUInteger)colIndex;
