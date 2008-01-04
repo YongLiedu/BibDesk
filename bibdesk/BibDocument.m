@@ -319,13 +319,6 @@ enum {
     
     if (NSAlertDefaultReturn == returnCode)
         [self migrateFiles:self];
-    else if (NSAlertAlternateReturn == returnCode) {
-        if (nil == migrationController) {
-            migrationController = [[BDSKFileMigrationController alloc] init];
-            [self addWindowController:migrationController];
-        }
-        [migrationController showHelp:nil];
-    }
 }
 
 - (void)showWindows{
@@ -367,13 +360,15 @@ enum {
         NSString *verify = NSLocalizedString(@"Verify", @"button title for migration alert");
         BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Local File and URL fields have been automatically converted", @"warning in document")
                                              defaultButton:verify 
-                                           alternateButton:NSLocalizedString(@"More Info", @"help button title in alert") 
-                                               otherButton:NSLocalizedString(@"Later", @"")
+                                           alternateButton:NSLocalizedString(@"Later", @"") 
+                                               otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"BibDesk now uses a more flexible storage format for these fields.  Choose \"%@\" to manually verify the conversion and optionally remove the old fields.  Conversion can be done at any time from the \"%@\" menu.", @"alert text"), verify, NSLocalizedString(@"Database", @"Database main menu title")];
         
         // @@ Should we show a check button? If the user saves the doc as-is, it'll have local-url and bdsk-file fields in it, and there will be no warning the next time it's opened.  Someone who uses a script hook to convert bdsk-file back to local-url won't want to see it, though.
         [alert setHasCheckButton:YES];
         [alert setCheckValue:NO];
+        [alert setShowsHelp:YES];
+        [alert setHelpAnchor:@"FileMigration"];
         [alert beginSheetModalForWindow:[self windowForSheet] modalDelegate:self didEndSelector:@selector(migrationAlertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
     }
 }
