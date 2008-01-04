@@ -3630,9 +3630,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (BOOL)isUsedField:(NSString *)name{
-    BOOL isUsed = [usedFields containsObject:[name fieldName]];
-    [usedFields addObject:name];
-    return isUsed;
+    return [usedFields containsObject:[name fieldName]];
 }
 
 - (BOOL)isEmptyField:(NSString *)name{
@@ -3640,6 +3638,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (id)fieldForName:(NSString *)name{
+    name = [name fieldName];
+    [usedFields addObject:name];
     return [[[BDSKField alloc] initWithName:name bibItem:item] autorelease];
 }
 
