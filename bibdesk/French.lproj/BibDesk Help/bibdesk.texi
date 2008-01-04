@@ -643,9 +643,9 @@ The query operators that SKSearchCreate recognizes for non-similarity searching 
 
 The operators AND, OR, and NOT are case sensitive.
 
-Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `√†', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
+Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `à', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
 
-Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `√†', `A', and `√Ä'.
+Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `à', `A', and `À'.
 
 @node Find and Replace
 @c DO NOT LOCALIZE THE NEXT LINE
@@ -1271,34 +1271,32 @@ on the type of the item.
 If you use a special type that has a container concept write to bibdesk-develop@@lists.sourceforge.net
 and it can be added. 
 
-@subheading Local-Url
-@cindex Local-Url
+@subheading Local File
+@cindex Local File
 @cindex drag and drop, files
 
-The Local-Url column is the column with the column with a little icon depicting a file in the header. 
+The Local File column is the column with the column with a paperclip icon in the header. 
 
-The Local-Url column displays a little icon for a file that is linked through 
-the Local-Url field, of course only if the Local-Url field is set. 
-If the Local-Url field for an item is set, but the file could not be found 
-on the system, the cell in the Local-Url column displays a file icon with a question mark. 
+The Local File column displays a paperclip icon and the number of attached files when files are attached.
+If one of the linked files could not be found, the paperclip will be displayed in red.
 This way you can easily track missing linked files. 
 
-When a cell in the Local-Url column is double-clicked, the linked file will be opened 
+When a cell in the Local File column is double-clicked, the linked files will be opened 
 using the default application for the corresponding file type. 
-The icon can also be dragged from the table to the Finder in order to copy it to another location, 
+The linked files can also be dragged from the table to the Finder in order to copy it to another location, 
 or it can be dragged into a specific application in the Dock to open the file in a specific application 
 or perhaps mail it as an attachment.
 
-@cindex Url
-@cindex drag and drop, URLs
-@subheading Url
+@cindex Remote URL
+@cindex drag and drop, Remote URL
+@subheading Remote URL
 
-The Url column is the column with the column with an @@-sign in the header. 
+The Remote URL column is the column with the column with an @@-sign in the header. 
 
-Similarly, the Url column displays a little webloc icon (a file icon with an @@-sign) 
-when the Url field of the item is set. 
+Similarly, the Remote URL column displays a little webloc icon (a file icon with an @@-sign) 
+when the one or more URLs are attached to the pubblication. The column then also displays the number of linked URLs. 
 
-Double-clicking a cell in the Url column will open the linked remote URL 
+Double-clicking a cell in the Remote URL column will open the first linked remote URL 
 in your default browser application.   
 
 @subheading Date
@@ -1877,7 +1875,7 @@ Papers Folder as described in the
 * Automatically Move Files::    How BibDesk can keep new papers organized automatically once you've consolidated them.
 * Consolidate Linked Files::    A command to move all linked files to your Papers Folder.
 * Customizing the Local File Format::  How to customize the generated location of used for AutoFile. 
-* Migrate Files::  How to convert from Local-Url to aliases
+* Convert Files::  How to convert from Local-Url to aliases
 @end menu
 
 @c --------------------------------------------------------------------------------------
@@ -1964,37 +1962,42 @@ see the @ref{AutoFile Preferences} preference help topic.
 The syntax of the format is described in more detail in 
 @ref{Autogeneration Format Syntax}. 
 
-@node Migrate Files
+@node Convert Files
 @c DO NOT LOCALIZE THE NEXT LINE
 @anchor{FileMigration}
-@section Migrate Files
+@section Convert Files
 @abstract{Converting files from paths to aliases}
 
 @cindex migrate files, alias
+@cindex convert files
 @cindex linked file, URL
 
 @c maybe this should be a separate technical note or something?
 
 Versions of BibDesk prior to 1.3.13 stored links to files as paths or a file: URL.  
 File links are now stored as a relative path (relative to the .bib file),
-and as a Mac OS alias.  Each file is stored in a BibTeX field named @code{Bdsk-File-N}, where N is
-a positive nonzero integer.  The content is Base-64 encoded ASCII, which is not human readable,
-but compatible with BibTeX storage requirements.
+and as a Mac OS alias.  This allows AutoFile to operate on an arbitrary number of files,
+and allows you to move your files in the Finder without breaking the links in your database.
 
-When you open a file that has Local-Url (and/or other Local-File fields), they are automatically
-converted to aliases (or paths, if the file can't be found).  When you save the file, the
-Bdsk-File fields will be saved as well, and will be used exclusively next time that file is
-opened.
+When you open a file that has URL fields (Local File and Remote URL fields), 
+they are automatically converted to aliases (or paths, if the file can't be found).  
+When you save the file, the new information will be saved and will be used exclusively 
+the next time that file is opened.  
 
-The @menutitle{Migrate Files} item of the @menutitle{Database} menu allows you to
-see which files could not be found, and to clear out the old local file fields
-such as Local-Url.  Changes are undoable, but you may wish to make a backup of your file
+The new file fields will appear as @samp{Bdsk-File-N} in a
+text editor, where N is a positive nonzero integer.  They are not human readable, but can
+be accessed via AppleScript and Script Hooks.  The new URL fields will appear as @samp{Bdsk-Url-N}
+in a text editor, and are human-readable.
+
+The @menutitle{Convert File and URL Fields} item of the @menutitle{Database} menu allows you to
+see which files could not be found, and to clear out the old file and URL fields
+such as Local-Url and Url.  Changes are undoable, but you may wish to make a backup of your file
 before proceeding.  
 
-@menutitle{Migrate Files} mimics the automatic migration performed when first opening a file
-that does not use the new Bdsk-File scheme.  The primary difference is that the manual migration 
-is more flexible and it displays warnings.  It can be run at any time, even after a previous
-manual migration.
+@menutitle{Convert File and URL Fields} mimics the automatic conversion performed when first opening a file
+that does not use the new Bdsk-File scheme.  The primary difference is that the manual process 
+is more flexible and displays warnings.  It can be run at any time, even after a previous
+manual conversion.
 
 @c ======================================================================================
 

@@ -1271,34 +1271,32 @@ on the type of the item.
 If you use a special type that has a container concept write to bibdesk-develop@@lists.sourceforge.net
 and it can be added. 
 
-@subheading Local-Url
-@cindex Local-Url
+@subheading Local File
+@cindex Local File
 @cindex drag and drop, files
 
-The Local-Url column is the column with the column with a little icon depicting a file in the header. 
+The Local File column is the column with the column with a paperclip icon in the header. 
 
-The Local-Url column displays a little icon for a file that is linked through 
-the Local-Url field, of course only if the Local-Url field is set. 
-If the Local-Url field for an item is set, but the file could not be found 
-on the system, the cell in the Local-Url column displays a file icon with a question mark. 
+The Local File column displays a paperclip icon and the number of attached files when files are attached.
+If one of the linked files could not be found, the paperclip will be displayed in red.
 This way you can easily track missing linked files. 
 
-When a cell in the Local-Url column is double-clicked, the linked file will be opened 
+When a cell in the Local File column is double-clicked, the linked files will be opened 
 using the default application for the corresponding file type. 
-The icon can also be dragged from the table to the Finder in order to copy it to another location, 
+The linked files can also be dragged from the table to the Finder in order to copy it to another location, 
 or it can be dragged into a specific application in the Dock to open the file in a specific application 
 or perhaps mail it as an attachment.
 
-@cindex Url
-@cindex drag and drop, URLs
-@subheading Url
+@cindex Remote URL
+@cindex drag and drop, Remote URL
+@subheading Remote URL
 
-The Url column is the column with the column with an @@-sign in the header. 
+The Remote URL column is the column with the column with an @@-sign in the header. 
 
-Similarly, the Url column displays a little webloc icon (a file icon with an @@-sign) 
-when the Url field of the item is set. 
+Similarly, the Remote URL column displays a little webloc icon (a file icon with an @@-sign) 
+when the one or more URLs are attached to the pubblication. The column then also displays the number of linked URLs. 
 
-Double-clicking a cell in the Url column will open the linked remote URL 
+Double-clicking a cell in the Remote URL column will open the first linked remote URL 
 in your default browser application.   
 
 @subheading Date
