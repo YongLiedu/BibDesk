@@ -179,6 +179,8 @@
 				<string>id</string>
 				<key>openTemplateDocument</key>
 				<string>id</string>
+				<key>previewAction</key>
+				<string>id</string>
 				<key>refreshAllExternalGroups</key>
 				<string>id</string>
 				<key>refreshScriptGroups</key>
