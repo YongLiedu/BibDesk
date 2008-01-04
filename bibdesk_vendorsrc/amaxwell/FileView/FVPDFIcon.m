@@ -218,6 +218,15 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
     pthread_mutex_unlock(&_mutex);
 }
 
+// used to constrain thumbnail size for huge pages
+static inline void limitSize(NSSize *size)
+{
+    while (MIN(size->width, size->height) > 200) {
+        size->width *= 0.9;
+        size->height *= 0.9;
+    }
+}
+
 - (void)renderOffscreen
 {  
     // hold the lock while initializing these variables, so we don't waste time trying to render again, since we may be returning YES from needsRender
@@ -268,6 +277,9 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
             _fullSize = NSMakeSize(pageRect.size.height, pageRect.size.width);
         _thumbnailSize.width = _fullSize.width / 2;
         _thumbnailSize.height = _fullSize.height / 2;
+        
+        // really huge PDFs (e.g. maps) will create really huge bitmaps and run us out of memory
+        limitSize(&_thumbnailSize);
     }
                 
     // Bitmap contexts for PDF files tend to be in the 2-5 MB range, and even a one point size difference in height or width (typical, even for the same page size) results in us creating a new context for each one if we use the context cache.  That sucks, so we'll just create and destroy them as needed, since drawing into a large cached context and then cropping doesn't work.
