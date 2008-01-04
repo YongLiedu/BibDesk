@@ -136,6 +136,7 @@ static id sharedInstance = nil;
         // batch these in intervals of 5, so the display updates incrementally instead of waiting for all the renders to finish
         NSUInteger i = 0, iMax = [taskQueue count], length = MIN((iMax - i), (NSUInteger)5);
         while (length) {
+            NSAutoreleasePool *pool = [NSAutoreleasePool new];
             NSRange r = NSMakeRange(i, length);
             NSArray *toRender = [taskQueue subarrayWithRange:r];
             [toRender makeObjectsPerformSelector:@selector(renderOffscreen)];
@@ -144,6 +145,7 @@ static id sharedInstance = nil;
             [target performSelectorOnMainThread:@selector(iconQueueUpdated:) withObject:toRender waitUntilDone:YES modes:modes];
             i = NSMaxRange(r);
             length = MIN((iMax - i), (NSUInteger)5);
+            [pool release];
         }
     }
     CFRelease(taskCopy);
