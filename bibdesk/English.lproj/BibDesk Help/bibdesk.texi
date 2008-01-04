@@ -1877,7 +1877,7 @@ Papers Folder as described in the
 * Automatically Move Files::    How BibDesk can keep new papers organized automatically once you've consolidated them.
 * Consolidate Linked Files::    A command to move all linked files to your Papers Folder.
 * Customizing the Local File Format::  How to customize the generated location of used for AutoFile. 
-* Migrate Files::  How to convert from Local-Url to aliases
+* Convert Files::  How to convert from Local-Url to aliases
 @end menu
 
 @c --------------------------------------------------------------------------------------
@@ -1964,37 +1964,42 @@ see the @ref{AutoFile Preferences} preference help topic.
 The syntax of the format is described in more detail in 
 @ref{Autogeneration Format Syntax}. 
 
-@node Migrate Files
+@node Convert Files
 @c DO NOT LOCALIZE THE NEXT LINE
 @anchor{FileMigration}
-@section Migrate Files
+@section Convert Files
 @abstract{Converting files from paths to aliases}
 
 @cindex migrate files, alias
+@cindex convert files
 @cindex linked file, URL
 
 @c maybe this should be a separate technical note or something?
 
 Versions of BibDesk prior to 1.3.13 stored links to files as paths or a file: URL.  
 File links are now stored as a relative path (relative to the .bib file),
-and as a Mac OS alias.  Each file is stored in a BibTeX field named @code{Bdsk-File-N}, where N is
-a positive nonzero integer.  The content is Base-64 encoded ASCII, which is not human readable,
-but compatible with BibTeX storage requirements.
+and as a Mac OS alias.  This allows AutoFile to operate on an arbitrary number of files,
+and allows you to move your files in the Finder without breaking the links in your database.
 
-When you open a file that has Local-Url (and/or other Local-File fields), they are automatically
-converted to aliases (or paths, if the file can't be found).  When you save the file, the
-Bdsk-File fields will be saved as well, and will be used exclusively next time that file is
-opened.
+When you open a file that has URL fields (Local File and Remote URL fields), 
+they are automatically converted to aliases (or paths, if the file can't be found).  
+When you save the file, the new information will be saved and will be used exclusively 
+the next time that file is opened.  
 
-The @menutitle{Migrate Files} item of the @menutitle{Database} menu allows you to
-see which files could not be found, and to clear out the old local file fields
-such as Local-Url.  Changes are undoable, but you may wish to make a backup of your file
+The new file fields will appear as @samp{Bdsk-File-N} in a
+text editor, where N is a positive nonzero integer.  They are not human readable, but can
+be accessed via AppleScript and Script Hooks.  The new URL fields will appear as @samp{Bdsk-Url-N}
+in a text editor, and are human-readable.
+
+The @menutitle{Convert File and URL Fields} item of the @menutitle{Database} menu allows you to
+see which files could not be found, and to clear out the old file and URL fields
+such as Local-Url and Url.  Changes are undoable, but you may wish to make a backup of your file
 before proceeding.  
 
-@menutitle{Migrate Files} mimics the automatic migration performed when first opening a file
-that does not use the new Bdsk-File scheme.  The primary difference is that the manual migration 
-is more flexible and it displays warnings.  It can be run at any time, even after a previous
-manual migration.
+@menutitle{Convert File and URL Fields} mimics the automatic conversion performed when first opening a file
+that does not use the new Bdsk-File scheme.  The primary difference is that the manual process 
+is more flexible and displays warnings.  It can be run at any time, even after a previous
+manual conversion.
 
 @c ======================================================================================
 
