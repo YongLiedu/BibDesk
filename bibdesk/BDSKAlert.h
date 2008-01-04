@@ -45,6 +45,8 @@
 	IBOutlet NSTextField *messageField;
 	IBOutlet NSButton *checkButton;
 	IBOutlet NSImageView *imageView;
+    IBOutlet NSButton *helpButton;
+    NSString *helpAnchor;
     NSMutableArray *buttons;
     NSImage *unbadgedImage;
     int alertStyle;
@@ -72,6 +74,12 @@
 - (NSButton *)addButtonWithTitle:(NSString *)aTitle;
 - (NSArray *)buttons;
 - (NSButton *)checkButton;
+
+- (IBAction)helpAction:(id)sender;
+- (void)setHelpAnchor:(NSString *)anchor;
+- (NSString *)helpAnchor;
+- (void)setShowsHelp:(BOOL)flag;
+- (BOOL)showsHelp;
 
 - (void)setAlertStyle:(NSAlertStyle)style;
 - (NSAlertStyle)alertStyle;

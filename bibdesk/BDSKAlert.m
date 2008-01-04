@@ -72,12 +72,14 @@
 		hasCheckButton = NO;
 		minButtonSize = NSMakeSize(90.0, 32.0);
         buttons = [[NSMutableArray alloc] initWithCapacity:3];
+        helpAnchor = nil;
         unbadgedImage = [[NSImage imageNamed:@"NSApplicationIcon"] retain];
     }
     return self;
 }
 
 - (void)dealloc {
+    [helpAnchor release];
     [buttons release];
     [unbadgedImage release];
     [super dealloc];
@@ -142,6 +144,33 @@
 - (BOOL)checkValue {
     [self window]; // force the nib to be loaded
 	return ([checkButton state] == NSOnState);
+}
+
+- (void)setShowsHelp:(BOOL)flag {
+    [self window]; // force the nib to be loaded
+    [helpButton setHidden:(NO == flag)];
+}
+
+- (BOOL)showsHelp {
+    return [helpButton isHidden] == NO;
+}
+
+- (NSString *)helpAnchor {
+    return helpAnchor;
+}
+
+- (void)setHelpAnchor:(NSString *)anchor {
+    [helpAnchor autorelease];
+    helpAnchor = [anchor copy];
+}
+
+- (IBAction)helpAction:(id)sender {
+    // standard NSAlert sends alertShowHelp: to the delegate, but we don't have a delegate
+    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
+    NSString *anchor = [self helpAnchor];
+    if (nil == anchor)
+        [NSException raise:NSInvalidArgumentException format:@"No help anchor set for %@", self];
+    [[NSHelpManager sharedHelpManager] openHelpAnchor:anchor inBook:helpBookName];
 }
 
 - (NSImage *)icon {
