@@ -70,7 +70,8 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     self = [self initWithWindowNibName:[self windowNibName]];
     if (self) {
         results = [NSMutableArray new];
-        keepOriginalValues = YES;
+        keepLocalFileFields = YES;
+        keepRemoteURLFields = YES;
         useSelection = NO;
     }
     return self;
@@ -148,6 +149,11 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     int numberOfAddedFiles = 0, numberOfRemovedFields = 0, addedFiles, removedFields;
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *aPub;
+    int mask = BDSKRemoveNoFields;
+    if (keepLocalFileFields == NO)
+        mask |= BDSKRemoveLocalFileFieldsMask;
+    if (keepRemoteURLFields == NO)
+        mask |= BDSKRemoveRemoteURLFieldsMask;
         
     while ((aPub = [pubEnum nextObject])) {
         
@@ -156,7 +162,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
             [[self window] displayIfNeeded];
         
         NSError *error;
-        if (NO == [aPub migrateFilesAndRemove:(NO == keepOriginalValues) numberOfAddedFiles:&addedFiles numberOfRemovedFields:&removedFields error:&error]) {
+        if (NO == [aPub migrateFilesWithRemoveOptions:mask numberOfAddedFiles:&addedFiles numberOfRemovedFields:&removedFields error:&error]) {
             NSArray *messages = [error valueForKey:@"messages"];
             NSEnumerator *msgEnum = [messages objectEnumerator];
             NSDictionary *dict;
@@ -177,7 +183,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     [migrateButton setEnabled:YES];
     
     NSString *messageFormat = nil;
-    if (keepOriginalValues)
+    if (mask == BDSKRemoveNoFields)
         messageFormat = NSLocalizedString(@"Converted %i files or URLs.", @"Status message");
     else
         messageFormat = NSLocalizedString(@"Converted %i files or URLs, removed %i fields.", @"Status message");

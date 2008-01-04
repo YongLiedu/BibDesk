@@ -43,7 +43,8 @@
     IBOutlet NSButton *migrateButton;
     IBOutlet NSProgressIndicator *progressBar;
     IBOutlet NSTextField *statusField;
-    BOOL keepOriginalValues;
+    BOOL keepLocalFileFields;
+    BOOL keepRemoteURLFields;
     BOOL useSelection;
     NSMutableArray *results;
 }

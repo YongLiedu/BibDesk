@@ -49,6 +49,12 @@ enum {
     BDSKIsCrossreffedCrossrefError
 };
 
+enum {
+    BDSKRemoveNoFields = 0,
+    BDSKRemoveLocalFileFieldsMask = 1,
+    BDSKRemoveRemoteURLFieldsMask = 1 << 1,
+};
+
 @class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver, BDSKLinkedFile;
 @protocol BDSKParseableItem, BDSKOwner;
 
@@ -93,7 +99,7 @@ enum {
 - (void)noteFilesChanged:(BOOL)isFile;
 
 - (NSArray *)sortedURLs;
-- (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError;
+- (BOOL)migrateFilesWithRemoveOptions:(int)removeMask numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError;
 
 - (NSString *)basePath;
 

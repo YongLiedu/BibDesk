@@ -2805,21 +2805,22 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
 }
 
-- (BOOL)migrateFilesAndRemove:(BOOL)shouldRemove numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError
+- (BOOL)migrateFilesWithRemoveOptions:(int)removeMask numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError
 {
     int addedLocalFiles = 0;
     NSMutableArray *messages = [NSMutableArray new];
     conversionContext context;
     context.publication = self;
-    context.removeField = shouldRemove;
     context.messages = messages;
     context.numberOfAddedFiles = 0;
     context.numberOfRemovedFields = 0;
     
+    context.removeField = (removeMask & BDSKRemoveLocalFileFieldsMask) != 0;
     CFArrayRef fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
     CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, &context);
     addedLocalFiles = context.numberOfAddedFiles;
     
+    context.removeField = (removeMask & BDSKRemoveRemoteURLFieldsMask) != 0;
     fieldsArray = (CFArrayRef)[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey];
     CFArrayApplyFunction(fieldsArray, CFRangeMake(0, CFArrayGetCount(fieldsArray)), addURLForFieldToArrayIfNotNil, &context);
     
@@ -2832,8 +2833,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     [messages release];
     
-    // Cause the file content search index (if any) to update, since we bypassed the normal insert mechanism where this is typically handled.  The date-modified will only be set if shouldRemove == YES and the conversion succeeded, since the applier function calls setField:toValue:.  
-    // @@ Calling migrateFilesAndRemove:numberOfAddedFiles:numberOfRemovedFields:error: from -createFiles will also cause date-modified to be set.
+    // Cause the file content search index (if any) to update, since we bypassed the normal insert mechanism where this is typically handled.  The date-modified will only be set if fields are removed, since the applier function calls setField:toValue:.  
+    // @@ Calling migrateFilesWithRemoveOptions:numberOfAddedFiles:numberOfRemovedFields:error: from -createFiles will also cause date-modified to be set.
     if (addedLocalFiles > 0)
         [self noteFilesChanged:YES];
     if (context.numberOfAddedFiles > addedLocalFiles)
@@ -3571,7 +3572,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     if (0 == [files count]) {
         int added;
-        [self migrateFilesAndRemove:NO numberOfAddedFiles:&added numberOfRemovedFields:NULL error:NULL];
+        [self migrateFilesWithRemoveOptions:BDSKRemoveNoFields numberOfAddedFiles:&added numberOfRemovedFields:NULL error:NULL];
         // Don't post this unless the owner is a document.  At present, if we open a URL group using a local file on disk that has valid URLs, this method will be called and it will end up with BDSKLinkedFile instances.  If we then click the "Import" button in the document, no warning is displayed because we don't call migrateFilesAndRemove:... again.
         if (added > 0 && [[self owner] isDocument]) {
             NSNotification *note = [NSNotification notificationWithName:BDSKTemporaryFileMigrationNotification object:[self owner]];
