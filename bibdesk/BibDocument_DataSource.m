@@ -72,6 +72,7 @@
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKLinkedFile.h"
+#import "NSArray_BDSKExtensions.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -579,6 +580,57 @@
                         [url writeToPasteboard:pboard];
 						return success;
 					}
+				
+                }else if([dragColumnId isEqualToString:BDSKLocalFileString]){
+
+                    // if we have more than one files, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
+                    unsigned row = [rowIndexes firstIndex];
+                    BibItem *pub = nil;
+                    NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                    NSEnumerator *fileEnum;
+                    BDSKLinkedFile *file;
+                    NSString *path;
+                    
+                    while(row != NSNotFound){
+                        pub = [shownPublications objectAtIndex:row];
+                        fileEnum = [[pub localFiles] objectEnumerator];
+                        
+                        while(file = [fileEnum nextObject]){
+                            path = [file path];
+                            if(path != nil){
+                                [filePaths addObject:path];
+                                NSError *xerror = nil;
+                                // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
+                                if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
+                                    NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
+                            }
+                        }
+                        row = [rowIndexes indexGreaterThanIndex:row];
+                    }
+                    
+                    if([filePaths count]){
+                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
+                        return [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
+                    }
+                    
+				}else if([dragColumnId isEqualToString:BDSKRemoteURLString]){
+					// cache this so we know which column (field) was dragged
+					[self setPromiseDragColumnIdentifier:dragColumnId];
+					
+					BibItem *pub;
+                    NSURL *url;
+                    unsigned row = [rowIndexes firstIndex];
+                    while(row != NSNotFound){
+                        pub = [shownPublications objectAtIndex:row];
+                        if(url = [[pub remoteURLs] firstObject]){
+                            // put the URL and a webloc file promise on the pasteboard
+                            [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
+                            success = [pboard setPropertyList:[NSArray arrayWithObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]] forType:NSFilesPromisePboardType];
+                            [url writeToPasteboard:pboard];
+                            return success;
+                        }
+                        row = [rowIndexes indexGreaterThanIndex:row];
+                    }
 				}
 			}
 		}
