@@ -223,6 +223,13 @@
     [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[webView window]];
 }
 
+- (IBAction)openInDefaultBrowser:(id)sender {
+    NSDictionary *element = (NSDictionary *)[sender representedObject];
+	NSURL *theURL = [element objectForKey:WebElementLinkURLKey];
+    if (theURL)
+        [[NSWorkspace sharedWorkspace] openURL:theURL];
+}
+
 - (void)setRetrieving:(BOOL)retrieving {
     [group setRetrieving:retrieving];
     [backForwardButton setEnabled:[webView canGoBack] forSegment:0];
@@ -369,6 +376,14 @@
     unsigned int i = [[menuItems valueForKey:@"tag"] indexOfObject:[NSNumber numberWithInt:WebMenuItemTagCopyLinkToClipboard]];
     
     if (i != NSNotFound) {
+        
+        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open in Default Browser",@"Open web page")
+                                                                    action:@selector(openInDefaultBrowser:)
+                                                             keyEquivalent:@""];
+        [item setTarget:self];
+        [item setRepresentedObject:element];
+        [menuItems insertObject:[item autorelease] atIndex:(i > 0 ? i - 1 : 0)];
+        
         item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link",@"Bookmark linked page") stringByAppendingEllipsis]
                                    action:@selector(bookmarkLink:)
                             keyEquivalent:@""];
