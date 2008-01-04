@@ -227,9 +227,29 @@
 	
     // see if we should resize the message text
     NSRect frame = [[self window] frame];
+    NSRect messageFieldRect = [messageField frame];
+    NSRect textRect = [[messageField attributedStringValue] boundingRectForDrawingInViewWithSize:NSMakeSize(NSWidth(messageFieldRect), 200.0)];
+    float extraHeight = NSHeight(textRect) - NSHeight(messageFieldRect);
+    
+    if (extraHeight > 0) {
+        frame.size.height += extraHeight;
+        messageFieldRect.size.height += extraHeight;
+        messageFieldRect.origin.y -= extraHeight;
+        [messageField setFrame:messageFieldRect];
+        
+        // shift info field downward as well
+        NSRect infoRect = [informationField frame];
+        infoRect.origin.y -= extraHeight;
+        [informationField setFrame:infoRect];
+
+		[[self window] setFrame:frame display:NO];
+    }
+
+    // see if we should resize the informative text
+    frame = [[self window] frame];
     NSRect infoRect = [informationField frame];
-    NSRect textRect = [[informationField attributedStringValue] boundingRectForDrawingInViewWithSize:NSMakeSize(NSWidth(infoRect), 200.0)];
-    float extraHeight = NSHeight(textRect) - NSHeight(infoRect);
+    textRect = [[informationField attributedStringValue] boundingRectForDrawingInViewWithSize:NSMakeSize(NSWidth(infoRect), 200.0)];
+    extraHeight = NSHeight(textRect) - NSHeight(infoRect);
 
     if (extraHeight > 0) {
         frame.size.height += extraHeight;
