@@ -632,7 +632,7 @@ static Class BDSKLinkedObjectClass = Nil;
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    return [[[self class] alloc] initWithURL:URL];
+    return [[[self class] alloc] initWithURL:URL delegate:nil];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
