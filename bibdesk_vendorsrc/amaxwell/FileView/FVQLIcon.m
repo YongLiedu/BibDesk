@@ -88,18 +88,28 @@
 
 - (NSSize)size { return _fullSize; }
 
+// allow 20% difference in either dimension
+static inline bool checkSizes(NSSize currentSize, NSSize size)
+{
+    if (size.height > 1.2*currentSize.height && size.width > 1.2*currentSize.width)
+        return true;
+    else if (size.height < 0.8*currentSize.height && size.width < 0.8*currentSize.width)
+        return true;
+    return false;
+}
+
 - (BOOL)needsRenderForSize:(NSSize)size
 {
     BOOL needsRender = NO;
     pthread_mutex_lock(&_mutex);
-    _desiredSize = size;
     if (NO == _quickLookFailed) {
-        // Leave size out of the criteria.  It's not clear what sizes QL will return, and we don't want to go into a loop asking for a size it can't produce.
-        needsRender = (NULL == _imageRef);
+        // The _fullSize is zero or whatever quicklook returned last time, which may be something odd like 78x46.  Since we ask QL for a size but it constrains the size it actually returns based on the icon's aspect ratio, we have to check height and width.  Just checking height in this was causing an endless loop asking for a size it won't return.
+        needsRender = (NULL == _imageRef || checkSizes(_fullSize, size));
     }
     else {
         needsRender = [_fallbackIcon needsRenderForSize:size];
     }
+    _desiredSize = size;
     pthread_mutex_unlock(&_mutex);
     return needsRender;
 }
@@ -109,7 +119,7 @@
     pthread_mutex_lock(&_mutex);
     CGImageRelease(_imageRef);
     _imageRef = NULL;
-    
+
     if (NO == _quickLookFailed)
         _imageRef = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, *(CGSize *)&_desiredSize, NULL);
 
