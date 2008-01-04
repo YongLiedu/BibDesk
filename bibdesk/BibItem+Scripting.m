@@ -137,7 +137,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (void)insertInLinkedURLs:(NSString *)newURLString atIndex:(unsigned int)idx {
     NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:newURLString];
-    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL] autorelease];
+    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
     if (file) {
         NSArray *remoteURLs = [self remoteURLs];
         if (idx < [remoteURLs count]) {
