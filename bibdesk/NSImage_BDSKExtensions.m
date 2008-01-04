@@ -195,16 +195,16 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     [image lockFocus];
     
     NSAffineTransform *t = [NSAffineTransform transform];
-    [t rotateByDegrees:-35.0];
-    [t translateXBy:0.0 yBy:10.0];
+    [t rotateByDegrees:-45.0];
+    [t translateXBy:-4.0 yBy:10.0];
     [t concat];
     
     // start at the outside (right) and work inward
-    [path moveToPoint:NSMakePoint(8.0, 16.0)];
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(4.0, 4.0) radius:4.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(3.0, 20.0) radius:3.0 startAngle:180.0 endAngle:0.0 clockwise:YES];
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(4.0, 8.0) radius:2.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
-    [path lineToPoint:NSMakePoint(2.0, 16.0)];
+    [path moveToPoint:NSMakePoint(10.0, 18.0)];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(5.0, 4.0) radius:5.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(3.0, 22.0) radius:3.5 startAngle:180.0 endAngle:0.0 clockwise:YES];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(5.0, 8.0) radius:2.0 startAngle:0.0 endAngle:180.0 clockwise:YES];
+    [path lineToPoint:NSMakePoint(3.0, 18.0)];
     
     [color setStroke];
     [path setLineWidth:1.0];
