@@ -2055,8 +2055,14 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)previewAction:(id)sender;
 {
-    [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
-    [FVPreviewer previewURL:[[self _selectedURLs] lastObject]];
+    if ([_selectedIndexes count] == 1) {
+        [FVPreviewer setWebViewContextMenuDelegate:[self delegate]];
+        [FVPreviewer previewURL:[[self _selectedURLs] lastObject]];
+    }
+    else {
+        [FVPreviewer setWebViewContextMenuDelegate:nil];
+        [FVPreviewer previewFileURLs:[self _selectedURLs]];
+    }
 }
 
 - (IBAction)delete:(id)sender;
@@ -2116,7 +2122,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     else if (action == @selector(selectAll:))
         return ([self numberOfIcons] > 0);
     else if (action == @selector(previewAction:))
-        return (nil != aURL) && [_selectedIndexes count] == 1;
+        return (nil != aURL) && [_selectedIndexes count] >= 1;
     else if (action == @selector(paste:))
         return [self isEditable];
     // need to handle print: and other actions

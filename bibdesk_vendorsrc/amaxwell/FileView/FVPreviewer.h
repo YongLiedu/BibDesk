@@ -52,7 +52,15 @@
     
     NSTask                     *qlTask;
 }
+
+// this uses Quick Look as a fallback on 10.5, and uses our pseudo-Quick Look the rest of the time (which allows copy-paste)
 + (void)previewURL:(NSURL *)absoluteURL;
+
+// on 10.5, this uses Quick Look unconditionally to preview all items, so you get the cool slideshow features (but no copy-paste)
+// on 10.4, it just previews the first URL in the list
+// non file: URLs are ignored in either case
++ (void)previewFileURLs:(NSArray *)absoluteURLs;
+
 + (BOOL)isPreviewing;
 + (void)setWebViewContextMenuDelegate:(id)anObject;
 @end

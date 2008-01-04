@@ -57,6 +57,11 @@
     [[self sharedInstance] previewURL:absoluteURL];
 }
 
++ (void)previewFileURLs:(NSArray *)absoluteURLs;
+{
+    [[self sharedInstance] previewFileURLs:absoluteURLs];
+}
+
 + (BOOL)isPreviewing;
 {
     return [[self sharedInstance] isPreviewing];
@@ -290,6 +295,42 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
                 [items addObject:item];
         }
         return items;
+    }
+}
+
+- (void)previewFileURLs:(NSArray *)absoluteURLs;
+{
+    if ([qlTask isRunning]) {
+        [qlTask terminate];
+        [qlTask release];
+        
+        // set to nil, since we may alternate between QL and our own previewing
+        qlTask = nil;
+    }
+    
+    NSMutableArray *paths = [NSMutableArray array];
+    NSUInteger cnt = [absoluteURLs count];
+    
+    // ignore non-file URLs; this isn't technically necessary for our pseudo-Quick Look, but it's consistent
+    while (cnt--)
+        if ([[absoluteURLs objectAtIndex:cnt] isFileURL])
+            [paths insertObject:[[absoluteURLs objectAtIndex:cnt] path] atIndex:0];
+    
+    if ([paths count] && [[NSFileManager defaultManager] isExecutableFileAtPath:@"/usr/bin/qlmanage"]) {
+        
+        NSMutableArray *args = paths;
+        [args insertObject:@"-p" atIndex:0];
+        
+        qlTask = [[NSTask alloc] init];
+        [qlTask setLaunchPath:@"/usr/bin/qlmanage"];
+        [qlTask setArguments:args];
+        // qlmanage is really verbose, so don't fill the log with its spew
+        [qlTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
+        [qlTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
+        [qlTask launch];
+    }
+    else if([paths count]) {
+        [[self class] previewURL:[NSURL fileURLWithPath:[paths objectAtIndex:0]]];
     }
 }
 
