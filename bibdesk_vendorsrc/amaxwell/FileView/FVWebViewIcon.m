@@ -41,6 +41,17 @@
 #import <WebKit/WebKit.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 
+#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
+enum {
+    WebCacheModelDocumentViewer = 0,
+    WebCacheModelDocumentBrowser = 1,
+    WebCacheModelPrimaryWebBrowser = 2
+};
+@interface WebPreferences (FVWebViewIcon)
+- (void)setCacheModel:(NSUInteger)cacheModel;
+@end
+#endif
+
 @implementation FVWebViewIcon
 
 static BOOL FVWebIconDisabled = NO;
@@ -368,6 +379,10 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         [prefs setJavaScriptCanOpenWindowsAutomatically:NO];
         [prefs setJavaScriptEnabled:NO];
         [prefs setAllowsAnimatedImages:NO];
+        
+        // most memory-efficient setting; remote resources are still cached to disk
+        if ([prefs respondsToSelector:@selector(setCacheModel:)])
+            [prefs setCacheModel:WebCacheModelDocumentViewer];
         
         [_webView setFrameLoadDelegate:self];
         [_webView setPolicyDelegate:self];
