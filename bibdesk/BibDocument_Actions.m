@@ -919,7 +919,7 @@
                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self
-                             didEndSelector:@selector(openRemoteURLAlertDidEnd:returnCode:contextInfo:) 
+                             didEndSelector:@selector(openLinkedURLAlertDidEnd:returnCode:contextInfo:) 
                                 contextInfo:NULL];
         } else {
             [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
