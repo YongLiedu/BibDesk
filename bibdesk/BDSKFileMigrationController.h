@@ -45,12 +45,10 @@
     IBOutlet NSTextField *statusField;
     BOOL keepOriginalValues;
     BOOL useSelection;
-    BOOL stopped;
     NSMutableArray *results;
 }
 
 - (IBAction)migrate:(id)sender;
-- (IBAction)stop:(id)sender;
 - (IBAction)openParentDirectory:(id)sender;
 - (IBAction)editPublication:(id)sender;
 - (IBAction)showHelp:(id)sender;

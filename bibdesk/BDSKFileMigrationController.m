@@ -72,7 +72,6 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
         results = [NSMutableArray new];
         keepOriginalValues = YES;
         useSelection = NO;
-        stopped = NO;
     }
     return self;
 }
@@ -95,7 +94,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
 - (NSString *)windowNibName { return @"BDSKFileMigration"; }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
-    NSString *title = NSLocalizedString(@"Migrate Files", @"title for file migration window");
+    NSString *title = NSLocalizedString(@"Convert Files and URLs", @"title for file migration window");
     if ([NSString isEmptyString:displayName] == NO)
         title = [NSString stringWithFormat:@"%@ %@ %@", title, [NSString emdashString], displayName];
     return title;
@@ -123,8 +122,6 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
 - (IBAction)migrate:(id)sender;
 {
     NSMutableArray *observedResults = [self mutableArrayValueForKey:@"results"];
-    // keep a reference to the document, because it may go away when the window closes while we're busy
-    BibDocument *document = (BibDocument *)[[self document] retain];
     
     // get rid of leftovers from a previous run
     [observedResults removeAllObjects];
@@ -133,9 +130,9 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     
     NSArray *pubs = nil;
     if (useSelection == NO)
-        pubs = [document publications];
+        pubs = [[self document] publications];
     else if ([[self document] hasExternalGroupsSelected] == NO)
-        pubs = [document selectedPublications];
+        pubs = [[self document] selectedPublications];
     
     // Workaround for an AppKit bug in Tiger, the progress bar does not work after the first time it is used, so we replace it by a copy.  Apparently also in Leopard under some conditions
     NSProgressIndicator *newProgressBar = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:progressBar]];
@@ -151,15 +148,12 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     int numberOfAddedFiles = 0, numberOfRemovedFields = 0, addedFiles, removedFields;
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *aPub;
-    
-    stopped = NO;
-    
-    while (stopped == NO && (aPub = [pubEnum nextObject])) {
         
-        if ((current++ % 5) == 0) {
-            // Causes the progress bar and other UI to update; tickling the runloop rather than using -displayIfNeeded keeps spindump from running on Leopard and slowing things down even more.
-            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
-        }
+    while ((aPub = [pubEnum nextObject])) {
+        
+        // Causes the progress bar and other UI to update
+        if ((current++ % 5) == 0)
+            [[self window] displayIfNeeded];
         
         NSError *error;
         if (NO == [aPub migrateFilesAndRemove:(NO == keepOriginalValues) numberOfAddedFiles:&addedFiles numberOfRemovedFields:&removedFields error:&error]) {
@@ -184,21 +178,14 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     
     NSString *messageFormat = nil;
     if (keepOriginalValues)
-        messageFormat = NSLocalizedString(@"Migrated %i files or URLs.", @"Status message");
+        messageFormat = NSLocalizedString(@"Converted %i files or URLs.", @"Status message");
     else
-        messageFormat = NSLocalizedString(@"Migrated %i files or URLs, removed %i fields.", @"Status message");
+        messageFormat = NSLocalizedString(@"Converted %i files or URLs, removed %i fields.", @"Status message");
     [statusField setStringValue:[NSString stringWithFormat:messageFormat, numberOfAddedFiles, numberOfRemovedFields]];
     
     // BibItem change notifications are only posted if the old fields are removed, so this ensures that the file view is updated
     if (numberOfAddedFiles > 0)
-        [document updatePreviews];
-    
-    [document release];
-}
-
-- (IBAction)stop:(id)sender;
-{
-    stopped = YES;
+        [[self document] updatePreviews];
 }
 
 - (IBAction)editPublication:(id)sender;

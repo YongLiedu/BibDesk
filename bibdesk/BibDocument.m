@@ -566,14 +566,15 @@ enum {
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    
+        
     // see comment in invalidateSearchFieldCellTimer
-    [documentWindow endEditingFor:nil];
-    [self invalidateSearchFieldCellTimer];
+    if (floor(NSAppKitVersionNumber <= NSAppKitVersionNumber10_4)) {
+        [documentWindow endEditingFor:nil];
+        [self invalidateSearchFieldCellTimer];
+    }
 
     docState.isDocumentClosed = YES;
-    
-    [migrationController stop:self];
+
     [fileSearchController terminate];
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
