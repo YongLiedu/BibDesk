@@ -44,10 +44,21 @@
 
 @implementation FVQLIcon
 
+static BOOL FVQLIconDisabled = NO;
+
++ (void)initialize
+{
+    FVQLIconDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"FVQLIconDisabled"];
+}
+
 - (id)initWithURL:(NSURL *)theURL;
 {
-    self = [super init];
-    if (self) {
+    if (FVQLIconDisabled) {
+        NSZone *zone = [self zone];
+        [self release];
+        self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:theURL];
+    }
+    else if ((self = [super init])) {
         _fileURL = [theURL copy];
         _imageRef = NULL;
         _fullSize = NSZeroSize;
