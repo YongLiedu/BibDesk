@@ -261,11 +261,16 @@
     }
 	
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnDeleteKey]) {
+        NSString *info;
+        if (numSelectedPubs > 1)
+            info = [NSString stringWithFormat:NSLocalizedString(@"You are about to delete %i publications. Do you want to proceed?", @"Informative text in alert dialog"), numSelectedPubs];
+        else
+            info = NSLocalizedString(@"You are about to delete a publication. Do you want to proceed?", @"Informative text in alert dialog");
 		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
 											 defaultButton:NSLocalizedString(@"OK", @"Button title")
 										   alternateButton:nil
 											   otherButton:NSLocalizedString(@"Cancel", @"Button title")
-								 informativeTextWithFormat:NSLocalizedString(@"You are about to delete %i items. Do you want to proceed?", @"Informative text in alert dialog"), numSelectedPubs];
+								 informativeTextWithFormat:info];
 		[alert setHasCheckButton:YES];
 		[alert setCheckValue:NO];
         [alert beginSheetModalForWindow:documentWindow
