@@ -190,26 +190,10 @@
 	return macros;
 }
 
-- (unsigned int)countOfAuthors {
+- (NSArray *)authors {
 	NSMutableSet *auths = [NSMutableSet set];
-	
     [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
-	
-	return [auths count];
-}
-
-- (BibAuthor *)objectInAuthorsAtIndex:(unsigned int)idx {
-	NSMutableSet *auths = [NSMutableSet set];
-	
-    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
-	
-	if (idx < [auths count]) 
-		return [[auths allObjects] objectAtIndex:idx];
-	return nil;
-}
-
-- (BibAuthor *)valueInAuthorsAtIndex:(unsigned int)idx {
-    return [self objectInAuthorsAtIndex:idx];
+	return [auths allObjects];
 }
 
 - (BibAuthor *)valueInAuthorsWithName:(NSString*) name {
@@ -236,26 +220,10 @@
 	return author;
 }
 
-- (unsigned int)countOfEditors {
+- (NSArray *)editors {
 	NSMutableSet *auths = [NSMutableSet set];
-	
     [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubEditors)];
-	
-	return [auths count];
-}
-
-- (BibAuthor *)objectInEditorsAtIndex:(unsigned int)idx {
-	NSMutableSet *auths = [NSMutableSet set];
-	
-    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubEditors)];
-	
-	if (idx < [auths count]) 
-		return [[auths allObjects] objectAtIndex:idx];
-	return nil;
-}
-
-- (BibAuthor *)valueInEditorsAtIndex:(unsigned int)idx {
-    return [self objectInEditorsAtIndex:idx];
+	return [auths allObjects];
 }
 
 - (BibAuthor *)valueInEditorsWithName:(NSString*) name {
