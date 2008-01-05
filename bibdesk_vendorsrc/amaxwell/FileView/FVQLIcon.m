@@ -112,15 +112,16 @@ static inline bool checkSizes(NSSize currentSize, NSSize size)
 - (BOOL)needsRenderForSize:(NSSize)size
 {
     BOOL needsRender = NO;
-    pthread_mutex_lock(&_mutex);
-    if (NO == _quickLookFailed) {
-        // The _fullSize is zero or whatever quicklook returned last time, which may be something odd like 78x46.  Since we ask QL for a size but it constrains the size it actually returns based on the icon's aspect ratio, we have to check height and width.  Just checking height in this was causing an endless loop asking for a size it won't return.
-        needsRender = (NULL == _imageRef || checkSizes(_fullSize, size));
+    if (pthread_mutex_trylock(&_mutex) == 0) {
+        if (NO == _quickLookFailed) {
+            // The _fullSize is zero or whatever quicklook returned last time, which may be something odd like 78x46.  Since we ask QL for a size but it constrains the size it actually returns based on the icon's aspect ratio, we have to check height and width.  Just checking height in this was causing an endless loop asking for a size it won't return.
+            needsRender = (NULL == _imageRef || checkSizes(_fullSize, size));
+        }
+        else {
+            needsRender = [_fallbackIcon needsRenderForSize:size];
+        }
+        _desiredSize = size;
     }
-    else {
-        needsRender = [_fallbackIcon needsRenderForSize:size];
-    }
-    _desiredSize = size;
     pthread_mutex_unlock(&_mutex);
     return needsRender;
 }
