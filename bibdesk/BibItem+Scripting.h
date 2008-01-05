@@ -46,7 +46,15 @@
 - (BDSKField *)valueInBibFieldsWithName:(NSString *)name;
 - (NSArray *)bibFields;
 
-- (BibAuthor*)valueInAuthorsWithName:(NSString*)name;
+- (unsigned int)countOfAsAuthors;
+- (BibAuthor *)objectInAsAuthorsAtIndex:(unsigned int)idx;
+- (BibAuthor *)valueInAsAuthorsAtIndex:(unsigned int)idx;
+- (BibAuthor*)valueInAsAuthorsWithName:(NSString*)name;
+
+- (unsigned int)countOfAsEditors;
+- (BibAuthor *)objectInAsEditorsAtIndex:(unsigned int)idx;
+- (BibAuthor *)valueInAsEditorsAtIndex:(unsigned int)idx;
+- (BibAuthor *)valueInAsEditorsWithName:(NSString *)name;
 
 - (void)setBibTeXString:(NSString*) btString;
 

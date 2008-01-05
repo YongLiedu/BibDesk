@@ -50,8 +50,15 @@
 - (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
 - (NSArray *)macros;
 
-- (BibAuthor *)valueInAuthorsWithName:(NSString *)name;
+- (unsigned int)countOfAuthors;
+- (BibAuthor *)objectInAuthorsAtIndex:(unsigned int)index;
 - (BibAuthor *)valueInAuthorsAtIndex:(unsigned int)index;
+- (BibAuthor *)valueInAuthorsWithName:(NSString *)name;
+
+- (unsigned int)countOfEditors;
+- (BibAuthor *)objectInEditorsAtIndex:(unsigned int)index;
+- (BibAuthor *)valueInEditorsAtIndex:(unsigned int)index;
+- (BibAuthor *)valueInEditorsWithName:(NSString *)name;
 
 - (NSArray*) selection;
 - (void) setSelection: (NSArray*) newSelection;

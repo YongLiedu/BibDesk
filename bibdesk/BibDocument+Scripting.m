@@ -190,7 +190,29 @@
 	return macros;
 }
 
-- (BibAuthor*) valueInAuthorsWithName:(NSString*) name {
+- (unsigned int)countOfAuthors {
+	NSMutableSet *auths = [NSMutableSet set];
+	
+    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
+	
+	return [auths count];
+}
+
+- (BibAuthor *)objectInAuthorsAtIndex:(unsigned int)idx {
+	NSMutableSet *auths = [NSMutableSet set];
+	
+    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
+	
+	if (idx < [auths count]) 
+		return [[auths allObjects] objectAtIndex:idx];
+	return nil;
+}
+
+- (BibAuthor *)valueInAuthorsAtIndex:(unsigned int)idx {
+    return [self objectInAuthorsAtIndex:idx];
+}
+
+- (BibAuthor *)valueInAuthorsWithName:(NSString*) name {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
@@ -199,37 +221,74 @@
 	NSEnumerator *authEnum;
 	BibItem *pub;
 	BibAuthor *auth;
+	BibAuthor *author;
+    BibAuthor *editor = nil;
 
     pubEnum = [publications objectEnumerator];
-	while (pub = [pubEnum nextObject]) {
+	while (author == nil && (pub = [pubEnum nextObject])) {
 		authEnum = [[pub pubAuthors] objectEnumerator];
 		while (auth = [authEnum nextObject]) {
 			if ([auth isEqual:newAuth]) {
-				return auth;
-			}
+				author = auth;
+                break;
+            }
 		}
+        if (editor == nil) {
+            authEnum = [[pub pubEditors] objectEnumerator];
+            while (auth = [authEnum nextObject]) {
+                if ([auth isEqual:newAuth])
+                    editor = auth;
+            }
+        }
 	}
     
+	return author ? author : editor;
+}
+
+- (unsigned int)countOfEditors {
+	NSMutableSet *auths = [NSMutableSet set];
+	
+    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubEditors)];
+	
+	return [auths count];
+}
+
+- (BibAuthor *)objectInEditorsAtIndex:(unsigned int)idx {
+	NSMutableSet *auths = [NSMutableSet set];
+	
+    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubEditors)];
+	
+	if (idx < [auths count]) 
+		return [[auths allObjects] objectAtIndex:idx];
+	return nil;
+}
+
+- (BibAuthor *)valueInEditorsAtIndex:(unsigned int)idx {
+    return [self objectInEditorsAtIndex:idx];
+}
+
+- (BibAuthor *)valueInEditorsWithName:(NSString*) name {
+    // create a new author so we can use BibAuthor's isEqual: method for comparison
+    // instead of trying to do string comparisons
+    BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
+    
+	NSEnumerator *pubEnum;
+	NSEnumerator *authEnum;
+	BibItem *pub;
+	BibAuthor *auth;
+    BibAuthor *editor = nil;
+
     pubEnum = [publications objectEnumerator];
 	while (pub = [pubEnum nextObject]) {
 		authEnum = [[pub pubEditors] objectEnumerator];
 		while (auth = [authEnum nextObject]) {
 			if ([auth isEqual:newAuth]) {
-				return auth;
-			}
+				editor = auth;
+                break;
+            }
 		}
 	}
     
-	return nil;
-}
-
-- (BibAuthor*) valueInAuthorsAtIndex:(unsigned int)idx {
-	NSMutableSet *auths = [NSMutableSet set];
-	
-    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
-	
-	if (idx < [auths count]) 
-		return [[auths allObjects] objectAtIndex:idx];
 	return nil;
 }
 

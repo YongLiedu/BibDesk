@@ -93,11 +93,50 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	return bibFields;
 }
 
-- (BibAuthor *)valueInAuthorsWithName:(NSString *)name {
+- (unsigned int)countOfAsAuthors {
+	return [[self pubAuthors] count];
+}
+
+- (BibAuthor *)objectInAsAuthorsAtIndex:(unsigned int)idx {
+	return [[self pubAuthors] objectAtIndex:idx];
+}
+
+- (BibAuthor *)valueInAsAuthorsAtIndex:(unsigned int)idx {
+    return [self objectInAsAuthorsAtIndex:idx];
+}
+
+- (BibAuthor *)valueInAsAuthorsWithName:(NSString *)name {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
 	NSEnumerator *authEnum = [[self pubAuthors] objectEnumerator];
+	BibAuthor *auth;
+	
+	while (auth = [authEnum nextObject]) {
+		if ([auth isEqual:newAuth]) {
+			return auth;
+		}
+	}
+	return nil;
+}
+
+- (unsigned int)countOfAsEditors {
+	return [[self pubEditors] count];
+}
+
+- (BibAuthor *)objectInAsEditorsAtIndex:(unsigned int)idx {
+	return [[self pubEditors] objectAtIndex:idx];
+}
+
+- (BibAuthor *)valueInAsEditorsAtIndex:(unsigned int)idx {
+    return [self objectInAsEditorsAtIndex:idx];
+}
+
+- (BibAuthor *)valueInAsEditorsWithName:(NSString *)name {
+    // create a new author so we can use BibAuthor's isEqual: method for comparison
+    // instead of trying to do string comparisons
+    BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
+	NSEnumerator *authEnum = [[self pubEditors] objectEnumerator];
 	BibAuthor *auth;
 	
 	while (auth = [authEnum nextObject]) {
