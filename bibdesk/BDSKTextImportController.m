@@ -126,18 +126,6 @@
 		crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
 		citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
 		macroEditor = nil;
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleFlagsChangedNotification:)
-                                                     name:OAFlagsChangedNotification
-                                                   object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleBibItemChangedNotification:)
-                                                     name:BDSKBibItemChangedNotification
-                                                   object:nil];
-        // make sure the window is loaded immediately
-        [self window];
-        OBPOSTCONDITION([self window]);
     }
     return self;
 }
@@ -165,21 +153,30 @@
 
 - (NSString *)windowNibName { return @"TextImport"; }
 
-- (void)awakeFromNib{
-	[itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
+- (void)windowDidLoad{
     [citeKeyField setFormatter:[[[BDSKCiteKeyFormatter alloc] init] autorelease]];
     [citeKeyField setStringValue:[item citeKey]];
+    
     [statusLine setStringValue:@""];
-	[webViewBox setEdges:BDSKEveryEdgeMask];
+	
+    [webViewBox setEdges:BDSKEveryEdgeMask];
 	[webViewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
 	[webViewBox setContentView:webView];
+    
     [self setupTypeUI];
+    
+    // these can be swapped in/out
     [sourceBox retain];
     [webViewView retain];
-	[webView setEditingDelegate:self];
+	
+    [webView setEditingDelegate:self];
+	
+    [itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
+    
     [self setWindowFrameAutosaveName:@"BDSKTextImportController Frame Autosave Name"];
-	// Set the properties of actionMenuButton that cannot be set in IB
+	
+    // Set the properties of actionMenuButton that cannot be set in IB
 	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
 	[actionMenuButton setArrowImage:nil];
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
@@ -187,6 +184,15 @@
 	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
 	[[actionMenuButton cell] setRefreshesMenu:NO];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleFlagsChangedNotification:)
+                                                 name:OAFlagsChangedNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleBibItemChangedNotification:)
+                                                 name:BDSKBibItemChangedNotification
+                                               object:nil];
 }
 
 #pragma mark Calling the main sheet
@@ -194,7 +200,7 @@
 - (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with the pasteboard data, so we can directly show the main sheet 
     // make sure we loaded the nib
-	NSParameterAssert(nil != [self window]); 
+    [self window];
 	[self loadPasteboardData];
 	
     [super beginSheetModalForWindow:docWindow modalDelegate:modalDelegate didEndSelector:didEndSelector contextInfo:contextInfo];
@@ -203,7 +209,7 @@
 - (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with a webview, so we first ask for the URL to load
     // make sure we loaded the nib;
-	NSParameterAssert(nil != [self window]); 
+    [self window];
 	[self setShowingWebView:YES];
 	
 	// remember the arguments to pass in the callback later
@@ -224,7 +230,7 @@
 - (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with a file, so we first ask for the file to load
     // make sure we loaded the nib
-	NSParameterAssert(nil != [self window]); 
+    [self window];
 	
 	// remember the arguments to pass in the callback later
 	theModalDelegate = modalDelegate;
