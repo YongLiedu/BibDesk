@@ -135,6 +135,9 @@
                                                  selector:@selector(handleBibItemChangedNotification:)
                                                      name:BDSKBibItemChangedNotification
                                                    object:nil];
+        // make sure the window is loaded immediately
+        [self window];
+        OBPOSTCONDITION([self window]);
     }
     return self;
 }
@@ -190,7 +193,8 @@
 
 - (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with the pasteboard data, so we can directly show the main sheet 
-	NSParameterAssert([self window]); // make sure we loaded the nib
+    // make sure we loaded the nib
+	NSParameterAssert(nil != [self window]); 
 	[self loadPasteboardData];
 	
     [super beginSheetModalForWindow:docWindow modalDelegate:modalDelegate didEndSelector:didEndSelector contextInfo:contextInfo];
@@ -198,7 +202,8 @@
 
 - (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with a webview, so we first ask for the URL to load
-	NSParameterAssert([self window]); // make sure we loaded the nib
+    // make sure we loaded the nib;
+	NSParameterAssert(nil != [self window]); 
 	[self setShowingWebView:YES];
 	
 	// remember the arguments to pass in the callback later
@@ -218,7 +223,8 @@
 		
 - (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with a file, so we first ask for the file to load
-	NSParameterAssert([self window]); // make sure we loaded the nib
+    // make sure we loaded the nib
+	NSParameterAssert(nil != [self window]); 
 	
 	// remember the arguments to pass in the callback later
 	theModalDelegate = modalDelegate;
