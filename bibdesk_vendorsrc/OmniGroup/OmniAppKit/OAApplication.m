@@ -133,7 +133,7 @@ static unsigned int launchModifierFlags;
         // This window already has a sheet, we need to wait for it to finish
         [sheetQueue addObject:[OASheetRequest sheetRequestWithSheet:sheet modalForWindow:docWindow modalDelegate:modalDelegate didEndSelector:didEndSelector contextInfo:contextInfo]];
     } else {
-        if (docWindow != nil)
+        if (docWindow != nil && nil != sheet)
             [windowsForSheets setObject:docWindow forKey:sheet];
         [super beginSheet:sheet modalForWindow:docWindow modalDelegate:modalDelegate didEndSelector:didEndSelector contextInfo:contextInfo];
     }
