@@ -53,7 +53,7 @@
     NSSize           _desiredSize;
     char            *_diskCacheName;
     WebView         *_webView;
-    BOOL             _triedWebView;
+    BOOL             _isRendering;
     pthread_mutex_t  _mutex;
 }
 

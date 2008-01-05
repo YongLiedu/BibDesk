@@ -82,8 +82,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         // track failure messages via the delegate
         _webviewFailed = NO;
         
-        // main thread only; keeps track of whether a webview has been created
-        _triedWebView = NO;
+        // keeps track of whether a webview has been created
+        _isRendering = NO;
         
         const char *name = [[aURL absoluteString] UTF8String];
         _diskCacheName = NSZoneMalloc([self zone], sizeof(char) * (strlen(name) + 1));
@@ -124,7 +124,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 {
     NSAssert(pthread_mutex_trylock(&_mutex) != 0, @"changing _webView without aquiring lock!");
     if (nil != _webView) {
-        _triedWebView = NO;
+        _isRendering = NO;
         [self _releaseWebView];
     }
 }
@@ -134,7 +134,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     // the thumbnail is small enough to always keep around
     pthread_mutex_lock(&_mutex);
     
-    // Cancel any pending loads; set _triedWebView to NO if there was a non-nil webview (i.e. it was loading), or else -renderOffscreenOnMainThread will never complete if it gets called again.
+    // Cancel any pending loads; set _isRendering to NO if there was a non-nil webview (i.e. it was loading), or else -renderOffscreenOnMainThread will never complete if it gets called again.
     [self performSelectorOnMainThread:@selector(_releaseWebViewAndRetryIfNeeded) withObject:nil waitUntilDone:YES];
     
     CGImageRelease(_fullImageRef);
@@ -167,10 +167,10 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         
         if (YES == _webviewFailed)
             needsRender = (nil == _fallbackIcon || [_fallbackIcon needsRenderForSize:size]);
-        else if (size.height > 1.2 * [self _thumbnailSize].height && NO == _triedWebView)
+        else if (size.height > 1.2 * [self _thumbnailSize].height && NO == _isRendering)
             needsRender = (NULL == _fullImageRef);
         else
-            needsRender = (NULL == _thumbnailRef && NO == _triedWebView);
+            needsRender = (NULL == _thumbnailRef && NO == _isRendering);
         pthread_mutex_unlock(&_mutex);
     }
     return needsRender;
@@ -348,46 +348,39 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
 
     // Originally just checked nil here, but logging showed that a webview was instantiated twice and the page loaded both times.  A nil webview is not a sufficient condition, since there's a delay between needsRenderForSize: and renderOffscreen; remember that the webview isn't rendering synchronously as in the other subclasses, so it may finish in between those calls.
-    pthread_mutex_lock(&_mutex);
-    BOOL triedWebview = _triedWebView;
-    pthread_mutex_unlock(&_mutex);
     
-    if (nil == _webView && NO == triedWebview) {
-        
-        pthread_mutex_lock(&_mutex);
-        _triedWebView = YES;
-        pthread_mutex_unlock(&_mutex);
+    NSAssert(nil == _webView, @"*** Render error *** renderOffscreenOnMainThread called when _webView already exists");
 
-        NSSize size = [self _webviewSize];
-        
-        // always use the WebKit cache, and use a short timeout (default is 60 seconds)
-        NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:10.0];
-        
-        // See also http://lists.apple.com/archives/quicklook-dev/2007/Nov/msg00047.html
-        // Note: changed from blocking to non-blocking; we now just keep state and rely on the
-        // delegate methods.
-        
-        _webView = [[WebView alloc] initWithFrame:NSMakeRect(0, 0, size.width, size.height)];
-        
-        Class cls = [self class];
-        NSString *prefIdentifier = [NSString stringWithFormat:@"%@.%@", [[NSBundle bundleForClass:cls] bundleIdentifier], cls];
-        [_webView setPreferencesIdentifier:prefIdentifier];
-        
-        WebPreferences *prefs = [_webView preferences];
-        [prefs setPlugInsEnabled:NO];
-        [prefs setJavaEnabled:NO];
-        [prefs setJavaScriptCanOpenWindowsAutomatically:NO];
-        [prefs setJavaScriptEnabled:NO];
-        [prefs setAllowsAnimatedImages:NO];
-        
-        // most memory-efficient setting; remote resources are still cached to disk
-        if ([prefs respondsToSelector:@selector(setCacheModel:)])
-            [prefs setCacheModel:WebCacheModelDocumentViewer];
-        
-        [_webView setFrameLoadDelegate:self];
-        [_webView setPolicyDelegate:self];
-        [[_webView mainFrame] loadRequest:request];
-    }
+    NSSize size = [self _webviewSize];
+    
+    // always use the WebKit cache, and use a short timeout (default is 60 seconds)
+    NSURLRequest *request = [NSURLRequest requestWithURL:_httpURL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:10.0];
+    
+    // See also http://lists.apple.com/archives/quicklook-dev/2007/Nov/msg00047.html
+    // Note: changed from blocking to non-blocking; we now just keep state and rely on the
+    // delegate methods.
+    
+    _webView = [[WebView alloc] initWithFrame:NSMakeRect(0, 0, size.width, size.height)];
+    
+    Class cls = [self class];
+    NSString *prefIdentifier = [NSString stringWithFormat:@"%@.%@", [[NSBundle bundleForClass:cls] bundleIdentifier], cls];
+    [_webView setPreferencesIdentifier:prefIdentifier];
+    
+    WebPreferences *prefs = [_webView preferences];
+    [prefs setPlugInsEnabled:NO];
+    [prefs setJavaEnabled:NO];
+    [prefs setJavaScriptCanOpenWindowsAutomatically:NO];
+    [prefs setJavaScriptEnabled:NO];
+    [prefs setAllowsAnimatedImages:NO];
+    
+    // most memory-efficient setting; remote resources are still cached to disk
+    if ([prefs respondsToSelector:@selector(setCacheModel:)])
+        [prefs setCacheModel:WebCacheModelDocumentViewer];
+    
+    [_webView setFrameLoadDelegate:self];
+    [_webView setPolicyDelegate:self];
+    [[_webView mainFrame] loadRequest:request];
+
 }
 
 - (void)renderOffscreen
@@ -395,7 +388,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     // !!! early return here after a cache check
     pthread_mutex_lock(&_mutex);
     
-    CGImageRelease(_fullImageRef);
+    NSParameterAssert(NULL == _fullImageRef);
     _fullImageRef = [FVIconCache newImageNamed:_diskCacheName];
     if (_fullImageRef) {
         
@@ -406,25 +399,24 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         pthread_mutex_unlock(&_mutex);
         return;
     }
-    
+        
+    // if we can't even reach the network, don't bother using the webview
     // may have failed in one of the delegate methods, so we'll continue on and load the fallback icon here
-    BOOL alreadyFailed = _webviewFailed;
-    
-    pthread_mutex_unlock(&_mutex);
-    
-    // if we can't even reach the network, don't bother blocking the main thread for a failed load
-    if ([self _canReachURL] && NO == alreadyFailed) {
-        [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:YES];
+
+    if ([self _canReachURL] && NO == _webviewFailed && NO == _isRendering) {
+        // make sure needsRenderForSize: knows that we're actively rendering, so renderOffscreen doesn't get called again
+        _isRendering = YES;
+        [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:NO];
     }
     else {
         // Unreachable or failed to load.  Load a Finder icon and set the webview failure bit; we won't try again.
-        pthread_mutex_lock(&_mutex);
         _webviewFailed = YES;
+        _isRendering = NO;
         if (nil == _fallbackIcon)
             _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
         [_fallbackIcon renderOffscreen];
-        pthread_mutex_unlock(&_mutex);
     }
+    pthread_mutex_unlock(&_mutex);
 }
 
 - (void)fastDrawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
