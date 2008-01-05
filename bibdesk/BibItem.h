@@ -297,6 +297,8 @@ enum {
 */
 - (NSString *)bibTeXNameStringForField:(NSString *)field normalized:(BOOL)normalized inherit:(BOOL)inherit;
 
+- (NSArray *)pubEditors;
+
 /*!
     @method numberOfAuthorsOrEditors
     @abstract Calls numberOfAuthorsOrEditorsInheriting: with inherit set to YES. 
