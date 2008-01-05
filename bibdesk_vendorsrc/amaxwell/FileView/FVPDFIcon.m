@@ -288,7 +288,6 @@ static inline void limitSize(NSSize *size)
 
     if (NULL == _thumbnailRef) {
         
-        pthread_mutex_unlock(&_mutex);
         CGContextRef ctxt = FVIconBitmapContextCreateWithSize(_thumbnailSize.width, _thumbnailSize.height);
         
         // set a white page background
@@ -297,8 +296,6 @@ static inline void limitSize(NSSize *size)
         CGContextClipToRect(ctxt, pageRect);
         CGContextFillRect(ctxt, pageRect);
         
-        // now hold the lock until we finish
-        pthread_mutex_lock(&_mutex);
         if (_pdfPage) {
             // always downscaling, so CGPDFPageGetDrawingTransform is okay to use here
             CGAffineTransform t = CGPDFPageGetDrawingTransform(_pdfPage, kCGPDFCropBox, pageRect, 0, true);

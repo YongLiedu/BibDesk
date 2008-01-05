@@ -67,6 +67,8 @@ static const NSUInteger MAX_PIXEL_DIMENSION = 1024; /* maximum height or width a
         _thumbnailRef = NULL;
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
         _inDiskCache = NO;
+        _isRendering = NO;
+        
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         
         _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
@@ -123,9 +125,9 @@ static const NSUInteger MAX_PIXEL_DIMENSION = 1024; /* maximum height or width a
     BOOL needsRender = NO;
     if (pthread_mutex_trylock(&_mutex) == 0) {
         if (size.height > _thumbnailSize.height)
-            needsRender = (NULL == _fullImageRef);
+            needsRender = (NULL == _fullImageRef && NO == _isRendering);
         else
-            needsRender = (NULL == _thumbnailRef);
+            needsRender = (NULL == _thumbnailRef && NO == _isRendering);
         pthread_mutex_unlock(&_mutex);
     }
     return needsRender;
@@ -173,6 +175,8 @@ static inline BOOL isBigImage(CGImageRef image)
             return;
         }
     }
+    
+    _isRendering = YES;
     pthread_mutex_unlock(&_mutex);
     
     CGImageSourceRef src;
@@ -189,8 +193,9 @@ static inline BOOL isBigImage(CGImageRef image)
         src = CGImageSourceCreateWithURL((CFURLRef)_fileURL, __imsrcOptions);
     }
     
+    pthread_mutex_lock(&_mutex);
+
     if (src) {
-        pthread_mutex_lock(&_mutex);
         CGImageRelease(_thumbnailRef);
         CGImageRelease(_fullImageRef);
         CGImageRef bigImage = CGImageSourceCreateImageAtIndex(src, 0, __imsrcOptions);
@@ -207,9 +212,11 @@ static inline BOOL isBigImage(CGImageRef image)
         _thumbnailRef = CGImageSourceCreateThumbnailAtIndex(src, 0, __imsrcOptions);
         _thumbnailSize = _thumbnailRef ? NSMakeSize(CGImageGetWidth(_thumbnailRef), CGImageGetHeight(_thumbnailRef)) : NSZeroSize;
         _fullSize = _fullImageRef ? NSMakeSize(CGImageGetWidth(_fullImageRef), CGImageGetHeight(_fullImageRef)) : NSZeroSize;
-        pthread_mutex_unlock(&_mutex);
         CFRelease(src);
     } 
+    
+    _isRendering = NO;
+    pthread_mutex_unlock(&_mutex);
 }    
 
 - (void)fastDrawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;

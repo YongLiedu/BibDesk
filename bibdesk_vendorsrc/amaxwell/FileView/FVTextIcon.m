@@ -158,6 +158,7 @@ static CGAffineTransform __paperTransform;
         _thumbnailRef = NULL;
         _inDiskCache = NO;
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
+        _isRendering = NO;
         
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
@@ -183,9 +184,9 @@ static CGAffineTransform __paperTransform;
     // if we can't lock we're already rendering, which will give us both icons (so no render required)
     if (pthread_mutex_trylock(&_mutex) == 0) {
         if (size.height < _thumbnailSize.height * 1.2)
-            needsRender = (NULL == _thumbnailRef);
+            needsRender = (NULL == _thumbnailRef && NO == _isRendering);
         else 
-            needsRender = (NULL == _fullImageRef);
+            needsRender = (NULL == _fullImageRef && NO == _isRendering);
         pthread_mutex_unlock(&_mutex);
     }
     return needsRender;
@@ -249,6 +250,9 @@ static CGAffineTransform __paperTransform;
             return;
         }
     }
+    
+    // set a flag instead of holding the lock the entire time, since we don't use mutable ivars until later
+    _isRendering = YES;
     pthread_mutex_unlock(&_mutex);
     
     // definitely use the context cache for this, since these bitmaps are pretty huge
@@ -359,9 +363,7 @@ static CGAffineTransform __paperTransform;
     // reset size while we have the lock, since it may be different now that we've read the string
     _fullSize = paperSize;
     _thumbnailSize = NSMakeSize(_fullSize.width / 2, _fullSize.height / 2);
-    
-    pthread_mutex_unlock(&_mutex);
-    
+        
     // now restore our cached bitmap context and push it back into the cache
     CGContextRestoreGState(ctxt);
     [FVBitmapContextCache disposeOfBitmapContext:ctxt];
@@ -377,19 +379,17 @@ static CGAffineTransform __paperTransform;
         stringRect.origin = NSZeroPoint;
         stringRect.size = _thumbnailSize;
         
-        pthread_mutex_lock(&_mutex);
         if (_fullImageRef) {
             CGContextDrawImage(ctxt, *(CGRect *)&stringRect, _fullImageRef);
             CGImageRelease(_thumbnailRef);
             _thumbnailRef = CGBitmapContextCreateImage(ctxt);
         }
-        pthread_mutex_unlock(&_mutex);
         
         CGContextRestoreGState(ctxt);
         [FVBitmapContextCache disposeOfBitmapContext:ctxt];
     }
-    
-    
+    _isRendering = NO;
+    pthread_mutex_unlock(&_mutex);
 }    
 
 @end
