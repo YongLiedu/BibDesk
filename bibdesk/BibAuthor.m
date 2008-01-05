@@ -66,7 +66,7 @@ static BibAuthor *emptyAuthorInstance = nil;
 + (void)initialize{
     
     OBINITIALIZE;
-    emptyAuthorInstance = [[BibAuthor alloc] initWithName:@"" andPub:nil];
+    emptyAuthorInstance = [[BibAuthor alloc] initWithName:@"" andPub:nil forField:BDSKAuthorString];
 }
     
 
@@ -75,7 +75,7 @@ static BibAuthor *emptyAuthorInstance = nil;
 }
 
 + (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{	
-    return [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
+    return [[[BibAuthor alloc] initWithName:newName andPub:aPub forField:BDSKAuthorString] autorelease];
 }
 
 + (BibAuthor *)authorWithVCardRepresentation:(NSData *)vCard andPub:aPub{
@@ -104,13 +104,15 @@ static BibAuthor *emptyAuthorInstance = nil;
     return emptyAuthorInstance;
 }
 
-- (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub{
+- (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub forField:(NSString *)aField{
 	if (self = [super init]) {
         // zero the flags
         memset(&flags, (BOOL)0, sizeof(BibAuthorFlags));
 
 		// set this first so we have the document for parser errors
         publication = aPub; // don't retain this, since it retains us
+        
+        field = aField ? [aField retain] : [BDSKAuthorString retain];
         
         originalName = [aName copy];
         // this does all the name parsing
@@ -135,6 +137,7 @@ static BibAuthor *emptyAuthorInstance = nil;
     [unpunctuatedAbbreviatedNormalizedName release];
     [firstNames release];
     [fuzzyName release];
+    [field release];
     [super dealloc];
 }
 
@@ -381,6 +384,10 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     if(publication != nil)
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Attempt to modify non-nil attribute of immutable object %@", self] userInfo:nil];
     publication = newPub;
+}
+
+- (NSString *)field{
+    return field;
 }
 
 // Accessors for personController - we don't retain it to avoid cycles.

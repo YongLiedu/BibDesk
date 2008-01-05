@@ -596,7 +596,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
     return mutableArray;
 }
 
-+ (NSArray *)authorsFromBibtexString:(NSString *)aString withPublication:(BibItem *)pub{
++ (NSArray *)authorsFromBibtexString:(NSString *)aString withPublication:(BibItem *)pub forField:(NSString *)field{
     
 	NSMutableArray *authors = [NSMutableArray arrayWithCapacity:2];
     
@@ -625,7 +625,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
     BibAuthor *anAuthor;
     
     for(i = 0; i < iMax; i++){
-        anAuthor = [[BibAuthor alloc] initWithName:(id)CFArrayGetValueAtIndex(names, i) andPub:pub];
+        anAuthor = [[BibAuthor alloc] initWithName:(id)CFArrayGetValueAtIndex(names, i) andPub:pub forField:(NSString *)field];
         [authors addObject:anAuthor];
         [anAuthor release];
     }

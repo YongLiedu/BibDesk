@@ -199,12 +199,12 @@
 }
 
 - (BibAuthor *)objectInAuthorsAtIndex:(unsigned int)idx {
-	NSMutableSet *auths = [NSMutableSet set];
+	NSMutableArray *auths = [NSMutableArray array];
 	
     [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
 	
 	if (idx < [auths count]) 
-		return [[auths allObjects] objectAtIndex:idx];
+		return [auths objectAtIndex:idx];
 	return nil;
 }
 
@@ -217,14 +217,12 @@
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
     
-	NSEnumerator *pubEnum;
+	NSEnumerator *pubEnum = [publications objectEnumerator];
 	NSEnumerator *authEnum;
 	BibItem *pub;
 	BibAuthor *auth;
-	BibAuthor *author;
-    BibAuthor *editor = nil;
+	BibAuthor *author = nil;
 
-    pubEnum = [publications objectEnumerator];
 	while (author == nil && (pub = [pubEnum nextObject])) {
 		authEnum = [[pub pubAuthors] objectEnumerator];
 		while (auth = [authEnum nextObject]) {
@@ -233,16 +231,9 @@
                 break;
             }
 		}
-        if (editor == nil) {
-            authEnum = [[pub pubEditors] objectEnumerator];
-            while (auth = [authEnum nextObject]) {
-                if ([auth isEqual:newAuth])
-                    editor = auth;
-            }
-        }
 	}
     
-	return author ? author : editor;
+	return author;
 }
 
 - (unsigned int)countOfEditors {
@@ -254,12 +245,12 @@
 }
 
 - (BibAuthor *)objectInEditorsAtIndex:(unsigned int)idx {
-	NSMutableSet *auths = [NSMutableSet set];
+	NSMutableArray *auths = [NSMutableArray array];
 	
     [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubEditors)];
 	
 	if (idx < [auths count]) 
-		return [[auths allObjects] objectAtIndex:idx];
+		return [auths objectAtIndex:idx];
 	return nil;
 }
 
@@ -272,14 +263,13 @@
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
     
-	NSEnumerator *pubEnum;
+	NSEnumerator *pubEnum = [publications objectEnumerator];
 	NSEnumerator *authEnum;
 	BibItem *pub;
 	BibAuthor *auth;
     BibAuthor *editor = nil;
 
-    pubEnum = [publications objectEnumerator];
-	while (pub = [pubEnum nextObject]) {
+	while (editor == nil && (pub = [pubEnum nextObject])) {
 		authEnum = [[pub pubEditors] objectEnumerator];
 		while (auth = [authEnum nextObject]) {
 			if ([auth isEqual:newAuth]) {
@@ -289,7 +279,7 @@
 		}
 	}
     
-	return nil;
+	return editor;
 }
 
 - (NSArray*) selection { 

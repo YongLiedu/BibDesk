@@ -54,5 +54,6 @@
 - (BOOL)citeKeyIsCrossreffed:(NSString *)key;
 - (id)itemForIdentifierURL:(NSURL *)aURL;
 - (NSArray *)itemsForAuthor:(BibAuthor *)anAuthor;
+- (NSArray *)itemsForEditor:(BibAuthor *)anEditor;
 
 @end

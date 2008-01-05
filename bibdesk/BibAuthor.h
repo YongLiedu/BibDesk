@@ -78,6 +78,7 @@ enum {
     NSString *unpunctuatedAbbreviatedNormalizedName;
     BDSKPersonController *personController; // unretained
     BibItem *publication;
+    NSString *field;
     unsigned hash;
    
 @private
@@ -91,7 +92,7 @@ enum {
 + (BibAuthor *)authorWithVCardRepresentation:(NSData *)vCard andPub:aPub;
 
 // maybe this should be 'and pubs'
-- (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub;
+- (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub forField:(NSString *)aField;
 - (void)dealloc;
 
 - (NSComparisonResult)compare:(BibAuthor *)otherAuth;
@@ -132,6 +133,8 @@ enum {
 
 - (BibItem *)publication;
 - (void)setPublication:(BibItem *)newPub;
+
+- (NSString *)field;
 
 - (BDSKPersonController *)personController;
 - (void)setPersonController:(BDSKPersonController *)newPersonController;

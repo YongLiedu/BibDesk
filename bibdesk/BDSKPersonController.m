@@ -236,7 +236,7 @@
             fieldName = [fieldNames objectAtIndex:fieldIndex];
             
             // create a new array of BibAuthor objects from a person field (which may be nil or empty)
-            peopleFromString = [BDSKBibTeXParser authorsFromBibtexString:[pub valueOfField:fieldName] withPublication:pub];
+            peopleFromString = [BDSKBibTeXParser authorsFromBibtexString:[pub valueOfField:fieldName] withPublication:pub forField:fieldName];
                     
             if([peopleFromString count]){
                 

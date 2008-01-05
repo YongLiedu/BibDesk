@@ -102,12 +102,12 @@ error:(NSError **)outError;
 + (NSDictionary *)macrosFromBibTeXStyle:(NSString *)styleContents document:(BibDocument *)aDocument;
     
 /*!
-    @method     authorsFromBibtexString:document:
+    @method     authorsFromBibtexString:withPublication:forField
     @abstract   Parses a BibTeX author string (separates components joined by the string "and")
     @discussion (comprehensive description)
     @param      aString The author string
     @result     An array of BibAuthor objects.
 */
-+ (NSArray *)authorsFromBibtexString:(NSString *)aString withPublication:(BibItem *)pub;
++ (NSArray *)authorsFromBibtexString:(NSString *)aString withPublication:(BibItem *)pub forField:(NSString *)field;
 
 @end

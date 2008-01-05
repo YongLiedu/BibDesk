@@ -282,6 +282,24 @@
     return anAuthorPubs;
 }
 
+- (NSArray *)itemsForEditor:(BibAuthor *)anEditor;
+{
+    NSMutableSet *auths = BDSKCreateFuzzyAuthorCompareMutableSet();
+    NSEnumerator *pubEnum = [publications objectEnumerator];
+    BibItem *bi;
+    NSMutableArray *anEditorPubs = [NSMutableArray array];
+    
+    while(bi = [pubEnum nextObject]){
+        [auths addObjectsFromArray:[bi pubEditors]];
+        if([auths containsObject:anEditor]){
+            [anEditorPubs addObject:bi];
+        }
+        [auths removeAllObjects];
+    }
+    [auths release];
+    return anEditorPubs;
+}
+
 @end
 
 

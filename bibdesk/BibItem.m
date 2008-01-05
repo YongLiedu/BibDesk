@@ -582,7 +582,7 @@ static CFDictionaryRef selectorTable = NULL;
             personStr = [pubFields objectForKey:personType];
             
             // parse into an array of BibAuthor objects
-            NSArray *tmpPeople = [BDSKBibTeXParser authorsFromBibtexString:personStr withPublication:self];
+            NSArray *tmpPeople = [BDSKBibTeXParser authorsFromBibtexString:personStr withPublication:self forField:personStr];
             if([tmpPeople count])
                 [people setObject:tmpPeople forKey:personType];
         }

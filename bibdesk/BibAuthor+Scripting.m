@@ -51,24 +51,21 @@ ssp 2004-07-10
     // only publications belonging to a BibDocument are scriptable
 	BibDocument * myDoc = (BibDocument *)[[self publication] owner];
 	NSScriptObjectSpecifier *containerRef = [myDoc objectSpecifier];
+    NSString *key = [field isEqualToString:BDSKEditorString] ? @"editors" : @"authors";
 		
-	return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"authors" name:[self normalizedName]] autorelease];
-/*	unsigned index = [ar indexOfObjectIdenticalTo:self];
-    if (index != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [[self document] objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"publications" index:index] autorelease];
-    } else {
-        return nil;
-    }
-*/	
+	return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:key name:[self normalizedName]] autorelease];
 }
 
 - (NSArray *)publications {
     // only publications belonging to a BibDocument are scriptable
 	BibDocument * myDoc = (BibDocument *)[[self publication] owner];
-	if (myDoc)
-		return [[myDoc publications] itemsForAuthor:self];
-	return [NSArray array];
+	if (myDoc) {
+        if ([field isEqualToString:BDSKEditorString])
+            return [[myDoc publications] itemsForEditor:self];
+        else
+            return [[myDoc publications] itemsForAuthor:self];
+	}
+    return [NSArray array];
 }
 
 @end
