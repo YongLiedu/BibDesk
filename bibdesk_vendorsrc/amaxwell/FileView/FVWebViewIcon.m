@@ -176,17 +176,6 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     return needsRender;
 }
 
-// this is intended to be a fast check to see if should try to use WebView
-- (BOOL)_canReachURL
-{
-    BOOL reachable = NO;
-    SCNetworkConnectionFlags flags;
-    
-    if (SCNetworkCheckReachabilityByName([[_httpURL host] UTF8String], &flags))
-        reachable = !(flags & kSCNetworkFlagsConnectionRequired) && (flags & kSCNetworkFlagsReachable);
-    return reachable;
-}
-
 - (CGImageRef)_createResampledImageOfSize:(NSSize)size fromCGImage:(CGImageRef)largeImage;
 {
     CGFloat width = size.width;
@@ -400,10 +389,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         return;
     }
         
-    // if we can't even reach the network, don't bother using the webview
     // may have failed in one of the delegate methods, so we'll continue on and load the fallback icon here
-
-    if ([self _canReachURL] && NO == _webviewFailed && NO == _isRendering) {
+    if (NO == _webviewFailed && NO == _isRendering) {
         // make sure needsRenderForSize: knows that we're actively rendering, so renderOffscreen doesn't get called again
         _isRendering = YES;
         [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:NO];
