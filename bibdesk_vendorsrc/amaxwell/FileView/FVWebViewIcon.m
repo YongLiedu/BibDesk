@@ -127,7 +127,6 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         const char *name = [[aURL absoluteString] UTF8String];
         _diskCacheName = NSZoneMalloc([self zone], sizeof(char) * (strlen(name) + 1));
         strcpy(_diskCacheName, name);
-        _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
 
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
@@ -143,6 +142,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         [_webView setPolicyDelegate:nil];
         [_webView setFrameLoadDelegate:nil];
         [_webView stopLoading:nil];
+        _isRendering = NO;
         [[self class] pushWebView:_webView];
         _webView = nil;
     }
@@ -162,22 +162,13 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     [super dealloc];
 }
 
-- (void)_releaseWebViewAndRetryIfNeeded
-{
-    NSAssert(pthread_mutex_trylock(&_mutex) != 0, @"changing _webView without aquiring lock!");
-    if (nil != _webView) {
-        _isRendering = NO;
-        [self _releaseWebView];
-    }
-}
-
 - (void)releaseResources
 { 
     // the thumbnail is small enough to always keep around
     pthread_mutex_lock(&_mutex);
     
     // Cancel any pending loads; set _isRendering to NO if there was a non-nil webview (i.e. it was loading), or else -renderOffscreenOnMainThread will never complete if it gets called again.
-    [self performSelectorOnMainThread:@selector(_releaseWebViewAndRetryIfNeeded) withObject:nil waitUntilDone:YES];
+    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES];
     
     CGImageRelease(_fullImageRef);
     _fullImageRef = NULL;
@@ -435,8 +426,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     NSParameterAssert(NULL == _fullImageRef);
     _fullImageRef = [FVIconCache newImageNamed:_diskCacheName];
     if (_fullImageRef) {
-        
-        // this may have been added to the disk cache by another instance; in that case, we need to create a new thumbnail
+
+        // image may have been added to the disk cache by another instance; in that case, we need to create a new thumbnail
         if (NULL == _thumbnailRef)
             _thumbnailRef = [self _createResampledImageOfSize:[self _thumbnailSize] fromCGImage:_fullImageRef];
         
@@ -454,6 +445,10 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         // Unreachable or failed to load.  Set the webview failure bit; we won't try again.
         _webviewFailed = YES;
         _isRendering = NO;
+        
+        // nil fallback icon used to signal shadow
+        if (nil == _fallbackIcon)
+            _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
         [_fallbackIcon renderOffscreen];
     }
     pthread_mutex_unlock(&_mutex);
