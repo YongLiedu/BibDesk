@@ -55,6 +55,7 @@ static id sharedInstance = nil;
 
 #define QUEUE_STARTUP 1
 #define QUEUE_STARTUP_COMPLETE 2
+#define TASK_BATCH_SIZE 5
 
 // I was creating the sharedInstance in +initialize in order to avoid @synchronized and thread safety issues.  However, that led to problems when the _runCacheThread triggered a second main thread message to +initialize, but the main thread was already blocked on _setupLock waiting for _runCacheThread to unlock.  Since +sharedQueue is only used from the main thread, I'll ignore singleton threading issues for now.
 + (FVIconQueue *)sharedQueue;
@@ -133,16 +134,22 @@ static id sharedInstance = nil;
         [_iconsToRelease minusSet:[NSSet setWithArray:taskQueue]];
         [_taskLock unlock];
         
-        // batch these in intervals of 5, so the display updates incrementally instead of waiting for all the renders to finish
-        NSUInteger i = 0, iMax = [taskQueue count], length = MIN((iMax - i), (NSUInteger)5);
+        // batch these in intervals of TASK_BATCH_SIZE, so the display updates incrementally instead of waiting for all the renders to finish
+        NSUInteger i = 0, iMax = [taskQueue count], length = MIN((iMax - i), (NSUInteger)TASK_BATCH_SIZE);
         while (length) {
             NSAutoreleasePool *pool = [NSAutoreleasePool new];
             NSRange r = NSMakeRange(i, length);
-            NSArray *toRender = [taskQueue subarrayWithRange:r];
+            
+            id taskBatch[TASK_BATCH_SIZE];
+            [taskQueue getObjects:taskBatch range:r];
+            
+            NSArray *toRender = [[NSArray alloc] initWithObjects:taskBatch count:length];
             [toRender makeObjectsPerformSelector:@selector(renderOffscreen)];
             [target performSelectorOnMainThread:@selector(iconQueueUpdated:) withObject:toRender waitUntilDone:NO modes:modes];
+            [toRender release];
+            
             i = NSMaxRange(r);
-            length = MIN((iMax - i), (NSUInteger)5);
+            length = MIN((iMax - i), (NSUInteger)TASK_BATCH_SIZE);
             [pool release];
         }
     }
