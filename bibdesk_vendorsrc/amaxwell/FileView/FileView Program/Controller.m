@@ -46,14 +46,16 @@
         path = [files objectAtIndex:i];
         [arrayController addObject:[NSURL fileURLWithPath:[base stringByAppendingPathComponent:path]]];
     }
-    [arrayController addObject:[NSNull null]];
-    [arrayController addObject:[NSURL URLWithString:@"http://www.macintouch.com/"]];
-    [arrayController addObject:[NSURL URLWithString:@"http://bibdesk.sf.net/"]];
-    [arrayController addObject:[NSURL URLWithString:@"http://www-chaos.engr.utk.edu/pap/crg-aiche2000daw-paper.pdf"]];
-    [arrayController addObject:[NSURL URLWithString:@"http://dx.doi.org/10.1023/A:1018361121952"]];
+    
+    NSUInteger insertIndex = floor(iMax / 2);
+    [arrayController insertObject:[NSNull null] atArrangedObjectIndex:insertIndex++];
+    [arrayController insertObject:[NSURL URLWithString:@"http://www.macintouch.com/"] atArrangedObjectIndex:insertIndex++];
+    [arrayController insertObject:[NSURL URLWithString:@"http://bibdesk.sf.net/"] atArrangedObjectIndex:insertIndex++];
+    [arrayController insertObject:[NSURL URLWithString:@"http://www-chaos.engr.utk.edu/pap/crg-aiche2000daw-paper.pdf"] atArrangedObjectIndex:insertIndex++];
+    [arrayController insertObject:[NSURL URLWithString:@"http://dx.doi.org/10.1023/A:1018361121952"] atArrangedObjectIndex:insertIndex++];
     
     // nonexistent domain
-    [arrayController addObject:[NSURL URLWithString:@"http://bibdesk.sourceforge.tld/"]];
+    [arrayController insertObject:[NSURL URLWithString:@"http://bibdesk.sourceforge.tld/"] atArrangedObjectIndex:insertIndex++];
     
     [_fileView bind:@"iconURLs" toObject:arrayController withKeyPath:@"arrangedObjects" options:nil];
     [_fileView bind:@"selectionIndexes" toObject:arrayController withKeyPath:@"selectionIndexes" options:nil];
