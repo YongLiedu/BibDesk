@@ -199,12 +199,12 @@
 }
 
 - (BibAuthor *)objectInAuthorsAtIndex:(unsigned int)idx {
-	NSMutableArray *auths = [NSMutableArray array];
+	NSMutableSet *auths = [NSMutableSet set];
 	
     [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
 	
 	if (idx < [auths count]) 
-		return [auths objectAtIndex:idx];
+		return [[auths allObjects] objectAtIndex:idx];
 	return nil;
 }
 
@@ -245,12 +245,12 @@
 }
 
 - (BibAuthor *)objectInEditorsAtIndex:(unsigned int)idx {
-	NSMutableArray *auths = [NSMutableArray array];
+	NSMutableSet *auths = [NSMutableSet set];
 	
     [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubEditors)];
 	
 	if (idx < [auths count]) 
-		return [auths objectAtIndex:idx];
+		return [[auths allObjects] objectAtIndex:idx];
 	return nil;
 }
 
