@@ -4449,6 +4449,10 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @item @@arraySortedByAuthor
 @tab 
+@item @@arraySortedByAuthorOrEditor
+@tab 
+@item @@arraySortedByTitle
+@tab 
 @end multitable
 
 

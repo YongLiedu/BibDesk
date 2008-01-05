@@ -132,6 +132,16 @@
     return [self sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKAuthorString ascending:YES], nil]];
 }
 
+- (NSArray *)arraySortedByAuthorOrEditor;
+{
+    return [self sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKAuthorEditorString ascending:YES], nil]];
+}
+
+- (NSArray *)arraySortedByTitle;
+{
+    return [self sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKTitleString ascending:YES], nil]];
+}
+
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
 {
     NSMutableArray *array = [NSMutableArray array];

@@ -59,6 +59,8 @@
 - (NSArray *)arrayDroppingFirstObject;
 - (NSArray *)arrayDroppingLastObject;
 - (NSArray *)arraySortedByAuthor;
+- (NSArray *)arraySortedByAuthorOrEditor;
+- (NSArray *)arraySortedByTitle;
 - (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
