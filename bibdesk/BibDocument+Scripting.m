@@ -195,11 +195,12 @@
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
     
-	NSEnumerator *pubEnum = [publications objectEnumerator];
+	NSEnumerator *pubEnum;
 	NSEnumerator *authEnum;
 	BibItem *pub;
 	BibAuthor *auth;
 
+    pubEnum = [publications objectEnumerator];
 	while (pub = [pubEnum nextObject]) {
 		authEnum = [[pub pubAuthors] objectEnumerator];
 		while (auth = [authEnum nextObject]) {
@@ -208,6 +209,17 @@
 			}
 		}
 	}
+    
+    pubEnum = [publications objectEnumerator];
+	while (pub = [pubEnum nextObject]) {
+		authEnum = [[pub pubEditors] objectEnumerator];
+		while (auth = [authEnum nextObject]) {
+			if ([auth isEqual:newAuth]) {
+				return auth;
+			}
+		}
+	}
+    
 	return nil;
 }
 

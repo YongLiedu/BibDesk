@@ -632,6 +632,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Authors of the publication.">
                 <cocoa key="pubAuthors"/>
             </element>
+            <element type="editor" name="editor"
+                description="Editors of the publication.">
+                <cocoa key="pubEditors"/>
+            </element>
             <element type="field"
                 description="The fields of the publication. These should be accessed by name.">
                 <cocoa key="bibFields"/>
@@ -779,6 +783,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <responds-to name="show">
                 <cocoa method=""/>
             </responds-to>
+        </class>
+        
+        <class name="editor" plural="editors" code="edtr" inherits="author"
+			description="Contains the name of an editor. Editors are authors.">
+            <cocoa class="BibAuthor"/>
         </class>
         
         <class name="macro" plural="macros" code="bmcr" inherits="item"
