@@ -88,7 +88,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         const char *name = [[aURL absoluteString] UTF8String];
         _diskCacheName = NSZoneMalloc([self zone], sizeof(char) * (strlen(name) + 1));
         strcpy(_diskCacheName, name);
-        
+        _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
+
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
             perror("pthread_mutex_init");
@@ -396,11 +397,9 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:NO];
     }
     else {
-        // Unreachable or failed to load.  Load a Finder icon and set the webview failure bit; we won't try again.
+        // Unreachable or failed to load.  Set the webview failure bit; we won't try again.
         _webviewFailed = YES;
         _isRendering = NO;
-        if (nil == _fallbackIcon)
-            _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
         [_fallbackIcon renderOffscreen];
     }
     pthread_mutex_unlock(&_mutex);
@@ -434,8 +433,6 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
             CGContextDrawImage(context, drawRect, _fullImageRef);
         else if (_thumbnailRef)
             CGContextDrawImage(context, drawRect, _thumbnailRef);
-        else if (NO == _webviewFailed || nil == _fallbackIcon)
-            [self _drawPlaceholderInRect:dstRect inCGContext:context];
         else 
             [_fallbackIcon drawInRect:dstRect inCGContext:context];
         
