@@ -50,7 +50,6 @@
     NSURL          *_fileURL;
     BOOL            _inDiskCache;
     char           *_diskCacheName;
-    BOOL            _isRendering;
     BOOL            _drawsLinkBadge;
     pthread_mutex_t _mutex;
 }

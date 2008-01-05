@@ -158,7 +158,6 @@ static CGAffineTransform __paperTransform;
         _thumbnailRef = NULL;
         _inDiskCache = NO;
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
-        _isRendering = NO;
         
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
@@ -184,9 +183,9 @@ static CGAffineTransform __paperTransform;
     // if we can't lock we're already rendering, which will give us both icons (so no render required)
     if (pthread_mutex_trylock(&_mutex) == 0) {
         if (size.height < _thumbnailSize.height * 1.2)
-            needsRender = (NULL == _thumbnailRef && NO == _isRendering);
+            needsRender = (NULL == _thumbnailRef);
         else 
-            needsRender = (NULL == _fullImageRef && NO == _isRendering);
+            needsRender = (NULL == _fullImageRef);
         pthread_mutex_unlock(&_mutex);
     }
     return needsRender;
@@ -239,8 +238,10 @@ static CGAffineTransform __paperTransform;
 
 - (void)renderOffscreen
 {
-    // !!! early return here after a cache check
+    // hold the lock to let needsRenderForSize: know that this icon doesn't need rendering
     pthread_mutex_lock(&_mutex);
+    
+    // !!! early return here after a cache check
     if (_inDiskCache) {
         CGImageRelease(_fullImageRef);
         _fullImageRef = [FVIconCache newImageNamed:_diskCacheName];
@@ -250,10 +251,7 @@ static CGAffineTransform __paperTransform;
             return;
         }
     }
-    
-    // set a flag instead of holding the lock the entire time, since we don't use mutable ivars until later
-    _isRendering = YES;
-    pthread_mutex_unlock(&_mutex);
+
     
     // definitely use the context cache for this, since these bitmaps are pretty huge
     CGContextRef ctxt = [FVBitmapContextCache newBitmapContextOfWidth:__paperSize.width height:__paperSize.height];
@@ -354,7 +352,6 @@ static CGAffineTransform __paperTransform;
     // restore the previous context
     [NSGraphicsContext restoreGraphicsState];
     
-    pthread_mutex_lock(&_mutex);
     CGImageRelease(_fullImageRef);
     _fullImageRef = CGBitmapContextCreateImage(ctxt);
     [FVIconCache cacheCGImage:_fullImageRef withName:_diskCacheName];
@@ -388,7 +385,7 @@ static CGAffineTransform __paperTransform;
         CGContextRestoreGState(ctxt);
         [FVBitmapContextCache disposeOfBitmapContext:ctxt];
     }
-    _isRendering = NO;
+
     pthread_mutex_unlock(&_mutex);
 }    
 
