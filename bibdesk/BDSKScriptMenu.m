@@ -115,19 +115,20 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 - (void)reloadScriptMenu;
 {
     NSMutableArray *scripts;
+    NSMutableArray *defaultScripts;
     NSArray *scriptFolders;
-    unsigned int scriptFolderIndex, scriptFolderCount;
+    unsigned int i, count;
     
     scripts = [[NSMutableArray alloc] init];
     scriptFolders = [self scriptPaths];
-    scriptFolderCount = [scriptFolders count];
+    count = [scriptFolders count];
     
     // must initialize this date before passing it by reference
     NSDate *modDate = earliestDateFromBaseScriptsFolders(scriptFolders);
     
     // walk the subdirectories for each domain
-    for (scriptFolderIndex = 0; scriptFolderIndex < scriptFolderCount; scriptFolderIndex++) {
-        NSString *scriptFolder = [scriptFolders objectAtIndex:scriptFolderIndex];
+    for (i = 0; i < count; i++) {
+        NSString *scriptFolder = [scriptFolders objectAtIndex:i];
         recursionDepth = 0;
 		[scripts addObjectsFromArray:[self directoryContentsAtPath:scriptFolder lastModified:&modDate]];
     }
@@ -138,6 +139,17 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
         cachedDate = [modDate retain];
         
         [scripts sortUsingDescriptors:sortDescriptors];
+        
+        defaultScripts = [[self directoryContentsAtPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"Scripts"] lastModified:&modDate] mutableCopy];
+        [defaultScripts sortUsingDescriptors:sortDescriptors];
+        
+        if (count = [defaultScripts count]) {
+            if ([scripts count])
+                [scripts insertObject:[NSDictionary dictionary] atIndex:0];
+            [scripts insertObjects:defaultScripts atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, count)]];
+        }
+        [scriptFolders release];
+        
         [self updateSubmenu:self withScripts:scripts];        
     }   
     [scripts release];
@@ -207,7 +219,9 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
         NSString *scriptName = [scriptFilename lastPathComponent];
 		NSMenuItem *item;
 		
-		if (folderContent) {
+		if (scriptName == nil) {
+			[menu addItem:[NSMenuItem separatorItem]];
+		} else if (folderContent) {
 			NSMenu *submenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptName];
 			
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptName action:NULL keyEquivalent:@""];
@@ -268,7 +282,6 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             [result addObject:[[[library stringByAppendingPathComponent:@"Application Support"] stringByAppendingPathComponent:appSupportDirectory] stringByAppendingPathComponent:@"Scripts"]];
         }
         
-        [result addObject:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"Scripts"]];
         scriptPaths = [result copy];
         [result release];
     }
