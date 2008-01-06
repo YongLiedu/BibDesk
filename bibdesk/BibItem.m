@@ -2553,6 +2553,7 @@ static void addFilesToArray(const void *value, void *context)
 
 // for main tableview sort descriptor
 - (NSNumber *)countOfLocalFilesAsNumber { return [NSNumber numberWithInt:[[self localFiles] count]]; }
+- (NSNumber *)countOfRemoteURLsAsNumber { return [NSNumber numberWithInt:[[self remoteURLs] count]]; }
 
 - (NSUInteger)countOfFiles { return [files count]; }
 
