@@ -1325,26 +1325,31 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
         [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
 }
 
+- (void)_redisplayIconAfterPageChanged:(FVIcon *)anIcon
+{
+    [self _updateButtonsForIcon:anIcon];
+    NSUInteger r, c;
+    // _getGridRow should always succeed; either arrow frame would work here, since both are in the same icon
+    if ([self _getGridRow:&r column:&c atPoint:_leftArrowFrame.origin]) {
+        // render immediately so the placeholder path doesn't draw
+        if ([anIcon needsRenderForSize:_iconSize])
+            [anIcon renderOffscreen];
+        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
+    }    
+}
+
 - (void)leftArrowAction:(id)sender
 {
     FVIcon *anIcon = [_leftArrow representedObject];
     [anIcon showPreviousPage];
-    [self _updateButtonsForIcon:anIcon];
-    NSUInteger r, c;
-    // _getGridRow should always succeed
-    if ([self _getGridRow:&r column:&c atPoint:_leftArrowFrame.origin])
-        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
+    [self _redisplayIconAfterPageChanged:anIcon];
 }
 
 - (void)rightArrowAction:(id)sender
 {
     FVIcon *anIcon = [_rightArrow representedObject];
     [anIcon showNextPage];
-    [self _updateButtonsForIcon:anIcon];
-    NSUInteger r, c;
-    // _getGridRow should always succeed
-    if ([self _getGridRow:&r column:&c atPoint:_rightArrowFrame.origin])
-        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
+    [self _redisplayIconAfterPageChanged:anIcon];
 }
 
 - (BOOL)_hasArrows {
