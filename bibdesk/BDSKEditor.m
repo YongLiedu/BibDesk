@@ -265,9 +265,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [fileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFileViewIconScaleKey]];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
     [fileView setEditable:isEditable];
-    
-    if ([fields count])
-        [self setKeyField:[fields firstObject]];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
