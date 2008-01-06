@@ -324,6 +324,17 @@ textRect.origin.y += floorf(vOffset); \
     settingUpFieldEditor = NO;
 }
 
+- (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView
+{
+    NSUInteger hit = [super hitTestForEvent:event inRect:cellFrame ofView:controlView];
+    // super returns 0 for button clicks, so -[NSTableView mouseDown:] doesn't track the cell
+    NSRect iconRect = [self iconRectForBounds:cellFrame];
+    NSPoint mouseLoc = [controlView convertPoint:[event locationInWindow] fromView:nil];
+    if (NSMouseInRect(mouseLoc, iconRect, [controlView isFlipped]))
+        hit = NSCellHitContentArea;
+    return hit;
+}
+
 @end
 
 @implementation BDSKGroupCell (Private)
