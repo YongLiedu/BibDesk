@@ -147,13 +147,8 @@ static CGPDFDocumentRef createCGPDFDocumentWithPostScriptURL(NSURL *fileURL)
             _pdfDoc = NULL;
             _pdfPage = NULL;
         }
-        
-        // seems OK to keep thumbnails around, now that they're 8 bit grayscale, but reset if the page has changed
-        //if (_currentPage != 0) {
-            //_pdfPage = NULL;
-            CGImageRelease(_thumbnailRef);
-            _thumbnailRef = NULL;
-        //}
+        CGImageRelease(_thumbnailRef);
+        _thumbnailRef = NULL;
         pthread_mutex_unlock(&_mutex);
     }
 }
