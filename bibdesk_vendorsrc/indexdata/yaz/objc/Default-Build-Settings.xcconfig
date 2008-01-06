@@ -14,3 +14,4 @@ HEADER_SEARCH_PATHS = /usr/include/libxml2 "$(SRCROOT)"/../include "$(SRCROOT)"/
 // Keep precomps in the build dir so that switching branches/products doesn't confuse the precomp builds
 SHARED_PRECOMPS_DIR = $(CONFIGURATION_BUILD_DIR)/SharedPrecompiledHeaders
 
+DEBUG_INFORMATION_FORMAT = dwarf
