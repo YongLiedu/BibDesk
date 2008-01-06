@@ -276,7 +276,6 @@ static CFDictionaryRef selectorTable = NULL;
         
         owner = nil;
         files = [NSMutableArray new];
-        sortedURLs = nil;
         
         fileOrder = nil;
         identifierURL = createUniqueURL();
@@ -332,7 +331,6 @@ static CFDictionaryRef selectorTable = NULL;
             // set by the document, which we don't archive
             owner = nil;
             fileOrder = nil;
-            sortedURLs = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
             // we don't bother encoding this
             spotlightMetadataChanged = YES;
@@ -371,7 +369,6 @@ static CFDictionaryRef selectorTable = NULL;
     [pubFields release];
     [people release];
 	[groups release];
-    [sortedURLs release];
 
     [pubType release];
     [fileType release];
@@ -2619,10 +2616,7 @@ static void addFilesToArray(const void *value, void *context)
 
 - (void)noteFilesChanged:(BOOL)isFile {
     // this is called after filing a linked file
-    // these are now stale, so rebuild
     NSString *key = isFile ? BDSKLocalFileString : BDSKRemoteURLString;
-    [sortedURLs release];
-    sortedURLs = nil;
     // this updates the search index
     [self updateMetadataForKey:key];
     // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
@@ -2646,20 +2640,18 @@ static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unus
     else return NSOrderedDescending;
 }
 
-// This only depends on the files array, so it only needs to be reset when that array is mutated.  It's cached because the document calls this each time one of the fileview datasource methods is called.  I'm not sure how to avoid that without using FSEvents to watch for file moves (not available on 10.4) or building the collection each time it's requested (slow).  Maintaining the collection in the document would be cleaner in some respects, but then it would have to observe changes to files in all of its items (and still be subject to stale URLs after a move).
+// Used by the document's FileView datasource
 - (NSArray *)sortedURLs
 {
-    if (nil == sortedURLs) {
-        sortedURLs = [NSMutableArray new];
-        NSEnumerator *fe = [files objectEnumerator];
-        NSURL *aURL;
-        BDSKLinkedFile *file;
-        while (file = [fe nextObject]) {
-            if (aURL = [file displayURL])
-                [sortedURLs addObject:aURL];
-        }
-        [sortedURLs sortUsingFunction:sortURLsByType context:NULL];
+    NSMutableArray *sortedURLs = [NSMutableArray array];
+    NSEnumerator *fe = [files objectEnumerator];
+    NSURL *aURL;
+    BDSKLinkedFile *file;
+    while (file = [fe nextObject]) {
+        if (aURL = [file displayURL])
+            [sortedURLs addObject:aURL];
     }
+    [sortedURLs sortUsingFunction:sortURLsByType context:NULL];
     return sortedURLs;
 }
 

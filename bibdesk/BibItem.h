@@ -84,7 +84,6 @@ enum {
     BOOL isImported;
     float searchScore;
     NSURL *identifierURL;
-    NSMutableArray *sortedURLs;
     NSMutableArray *files;
 }
 
