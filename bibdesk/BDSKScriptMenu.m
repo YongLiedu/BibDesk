@@ -147,9 +147,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             if ([scripts count])
                 [scripts insertObject:[NSDictionary dictionary] atIndex:0];
             [scripts insertObjects:defaultScripts atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, count)]];
-        }
-        [scriptFolders release];
-        
+        }        
         [self updateSubmenu:self withScripts:scripts];        
     }   
     [scripts release];
@@ -272,14 +270,14 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
         if (appSupportDirectory == nil)
             appSupportDirectory = [[NSProcessInfo processInfo] processName];
         
-        NSArray *libraries = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSAllDomainsMask, YES);
+        NSArray *libraries = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSAllDomainsMask, YES);
         unsigned int libraryIndex, libraryCount;
         libraryCount = [libraries count];
         NSMutableArray *result = [[NSMutableArray alloc] initWithCapacity:libraryCount + 1];
         for (libraryIndex = 0; libraryIndex < libraryCount; libraryIndex++) {
             NSString *library = [libraries objectAtIndex:libraryIndex];        
             
-            [result addObject:[[[library stringByAppendingPathComponent:@"Application Support"] stringByAppendingPathComponent:appSupportDirectory] stringByAppendingPathComponent:@"Scripts"]];
+            [result addObject:[[library stringByAppendingPathComponent:appSupportDirectory] stringByAppendingPathComponent:@"Scripts"]];
         }
         
         scriptPaths = [result copy];
