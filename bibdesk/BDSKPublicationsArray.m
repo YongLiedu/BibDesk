@@ -266,38 +266,30 @@
 
 - (NSArray *)itemsForAuthor:(BibAuthor *)anAuthor;
 {
-    NSMutableSet *auths = BDSKCreateFuzzyAuthorCompareMutableSet();
-    NSEnumerator *pubEnum = [publications objectEnumerator];
-    BibItem *bi;
-    NSMutableArray *anAuthorPubs = [NSMutableArray array];
-    
-    while(bi = [pubEnum nextObject]){
-        [auths addObjectsFromArray:[bi pubAuthors]];
-        if([auths containsObject:anAuthor]){
-            [anAuthorPubs addObject:bi];
-        }
-        [auths removeAllObjects];
-    }
-    [auths release];
-    return anAuthorPubs;
+    return [self itemsForPerson:anAuthor forField:BDSKAuthorString];
 }
 
 - (NSArray *)itemsForEditor:(BibAuthor *)anEditor;
 {
+    return [self itemsForPerson:anEditor forField:BDSKEditorString];
+}
+
+- (NSArray *)itemsForPerson:(BibAuthor *)aPerson forField:(NSString *)field;
+{
     NSMutableSet *auths = BDSKCreateFuzzyAuthorCompareMutableSet();
     NSEnumerator *pubEnum = [publications objectEnumerator];
     BibItem *bi;
-    NSMutableArray *anEditorPubs = [NSMutableArray array];
+    NSMutableArray *thePubs = [NSMutableArray array];
     
     while(bi = [pubEnum nextObject]){
-        [auths addObjectsFromArray:[bi pubEditors]];
-        if([auths containsObject:anEditor]){
-            [anEditorPubs addObject:bi];
+        [auths addObjectsFromArray:[bi peopleArrayForField:field]];
+        if([auths containsObject:aPerson]){
+            [thePubs addObject:bi];
         }
         [auths removeAllObjects];
     }
     [auths release];
-    return anEditorPubs;
+    return thePubs;
 }
 
 @end

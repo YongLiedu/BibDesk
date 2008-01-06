@@ -117,7 +117,7 @@
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
-    return [person name];
+    return [NSString stringWithFormat:@"%@ %C %@", [[person field] localizedFieldName], 0x2014, [person name]];
 }
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
@@ -128,7 +128,7 @@
 
 - (NSArray *)publications{
     if (publications == nil)
-        publications = [[[[[person publication] owner] publications] itemsForAuthor:person] retain];
+        publications = [[[[[person publication] owner] publications] itemsForPerson:person forField:[person field]] retain];
     return publications;
 }
 
@@ -201,8 +201,17 @@
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification;
 {
     id sender = [aNotification object];
-    if(sender == nameTextField && [sender isEditable]) // this shouldn't be called for uneditable cells, but it is
-        NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @"Message in alert dialog when trying to edit author name"),  NSLocalizedString(@"Yes", @"Button title"), NSLocalizedString(@"No", @"Button title"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[sender stringValue] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"));
+    if(sender == nameTextField && [sender isEditable]) {// this shouldn't be called for uneditable cells, but it is
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Really Change Name?", @"Message in alert dialog when trying to edit author name")
+                                         defaultButton:NSLocalizedString(@"Yes", @"Button title")
+                                       alternateButton:NSLocalizedString(@"No", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"This will change matching names in any \"%@\" field of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"), [person field]];
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:self 
+                         didEndSelector:@selector(changeNameWarningSheetDidEnd:returnCode:newName:) 
+                            contextInfo:[[sender stringValue] retain]];
+    }
 }
 
 - (void)changeNameToString:(NSString *)newNameString{
@@ -217,44 +226,36 @@
     BibItem *pub = nil;
     
     // @@ maybe handle this in the type manager?
-    NSArray *fieldNames = [[[BDSKTypeManager sharedManager] personFieldsSet] allObjects];
     NSArray *peopleFromString;
-    CFIndex numberOfFields = [fieldNames count];
-    NSString *fieldName;
-    
     CFMutableArrayRef people = CFArrayCreateMutable(CFAllocatorGetDefault(), 0, &BDSKAuthorFuzzyArrayCallBacks);
-    CFIndex idx, fieldIndex;
+    CFIndex idx;
     BibAuthor *newAuthor;
     
     // we set our person at some point in the iteration, so copy the current value now
     BibAuthor *oldPerson = [[person copy] autorelease];
-
+    NSString *fieldName = [person field];
+    
     while(pub = [pubE nextObject]){
         
-        // change for both author and editor, if possible; we don't know if this person is an author or editor for a given publication, but presumably we want uniform names throughout
-        for(fieldIndex = 0; fieldIndex < numberOfFields; fieldIndex++){
-            fieldName = [fieldNames objectAtIndex:fieldIndex];
+        // create a new array of BibAuthor objects from a person field (which may be nil or empty)
+        peopleFromString = [BDSKBibTeXParser authorsFromBibtexString:[pub valueOfField:fieldName] withPublication:pub forField:fieldName];
+                
+        if([peopleFromString count]){
             
-            // create a new array of BibAuthor objects from a person field (which may be nil or empty)
-            peopleFromString = [BDSKBibTeXParser authorsFromBibtexString:[pub valueOfField:fieldName] withPublication:pub forField:fieldName];
-                    
-            if([peopleFromString count]){
-                
-                CFRange range = CFRangeMake(0, [peopleFromString count]);            
-                CFArrayAppendArray(people, (CFArrayRef)peopleFromString, range);
-                
-                // use the fuzzy compare to find which author we're going to replace
-                idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson);
-                if(idx != -1){
-                    // replace this author, then create a new BibTeX author string
-                    newAuthor = [BibAuthor authorWithName:newNameString andPub:pub];
-                    CFArraySetValueAtIndex(people, idx, newAuthor);
-                    [pub setField:fieldName toValue:[(NSArray *)people componentsJoinedByString:@" and "]];
-                    if([pub isEqual:[person publication]])
-                        [self setPerson:newAuthor]; // changes the window title
-                }
-                CFArrayRemoveAllValues(people);
+            CFRange range = CFRangeMake(0, [peopleFromString count]);            
+            CFArrayAppendArray(people, (CFArrayRef)peopleFromString, range);
+            
+            // use the fuzzy compare to find which author we're going to replace
+            idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson);
+            if(idx != -1){
+                // replace this author, then create a new BibTeX author string
+                newAuthor = [BibAuthor authorWithName:newNameString andPub:pub];
+                CFArraySetValueAtIndex(people, idx, newAuthor);
+                [pub setField:fieldName toValue:[(NSArray *)people componentsJoinedByString:@" and "]];
+                if([pub isEqual:[person publication]])
+                    [self setPerson:[[pub peopleArrayForField:fieldName] objectAtIndex:idx]]; // changes the window title
             }
+            CFArrayRemoveAllValues(people);
         }
     }
     CFRelease(people);

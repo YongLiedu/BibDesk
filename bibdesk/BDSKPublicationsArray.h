@@ -55,5 +55,6 @@
 - (id)itemForIdentifierURL:(NSURL *)aURL;
 - (NSArray *)itemsForAuthor:(BibAuthor *)anAuthor;
 - (NSArray *)itemsForEditor:(BibAuthor *)anEditor;
+- (NSArray *)itemsForPerson:(BibAuthor *)aPerson forField:(NSString *)field;
 
 @end

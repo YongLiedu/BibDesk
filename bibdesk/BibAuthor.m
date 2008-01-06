@@ -260,11 +260,20 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 }
 
 - (NSComparisonResult)sortCompare:(BibAuthor *)otherAuth{ // used for tableview sorts; omits von and jr parts
-    if(self == emptyAuthorInstance)
-        return (otherAuth == emptyAuthorInstance ? NSOrderedSame : NSOrderedDescending);
-    if(otherAuth == emptyAuthorInstance)
-        return NSOrderedAscending;
-    return [sortableName localizedCaseInsensitiveCompare:[otherAuth sortableName]];
+    NSComparisonResult result;
+    if (self == emptyAuthorInstance) {
+        if (otherAuth == emptyAuthorInstance)
+            result = NSOrderedSame;
+        else
+            result = NSOrderedDescending;
+    } else if (otherAuth == emptyAuthorInstance) {
+        result = NSOrderedAscending;
+    } else {
+        result = [field localizedCaseInsensitiveCompare:[otherAuth field]];
+        if (result == NSOrderedSame)
+            result = [sortableName localizedCaseInsensitiveCompare:[otherAuth sortableName]];
+    }
+    return result;
 }
 
 
