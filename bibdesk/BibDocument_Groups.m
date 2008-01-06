@@ -808,7 +808,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
 	if(![field isEqualToString:currentGroupField]){
 		[self setCurrentGroupField:field];
-        [headerCell setTitle:[headerCell titleOfSelectedItem]];
+        [headerCell setTitle:[headerCell indexOfSelectedItem] == 0 ? @"" : [headerCell titleOfSelectedItem]];
 		
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
 															object:self
@@ -847,7 +847,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	[[headerCell itemAtIndex:[array count]] setRepresentedObject:newGroupField];
 	[self setCurrentGroupField:newGroupField];
 	[headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
-	[headerCell setTitle:[headerCell titleOfSelectedItem]];
+    [headerCell setTitle:[headerCell indexOfSelectedItem] == 0 ? @"" : [headerCell titleOfSelectedItem]];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
 														object:self
@@ -858,11 +858,13 @@ The groupedPublications array is a subset of the publications array, developed b
 - (IBAction)addGroupFieldAction:(id)sender{
 	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
 	
-    if ([currentGroupField isEqualToString:@""])
+    if ([currentGroupField isEqualToString:@""]) {
         [headerCell selectItemAtIndex:0];
-    else 
+        [headerCell setTitle:@""];
+    } else  {
         [headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
-	[headerCell setTitle:[headerCell titleOfSelectedItem]];
+        [headerCell setTitle:[headerCell titleOfSelectedItem]];
+    }
     
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
 	NSArray *groupFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey];
@@ -910,11 +912,13 @@ The groupedPublications array is a subset of the publications array, developed b
 - (IBAction)removeGroupFieldAction:(id)sender{
 	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
 	
-    if ([currentGroupField isEqualToString:@""])
+    if ([currentGroupField isEqualToString:@""]) {
         [headerCell selectItemAtIndex:0];
-    else 
+        [headerCell setTitle:@""];
+    } else  {
         [headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
-	[headerCell setTitle:[headerCell titleOfSelectedItem]];
+        [headerCell setTitle:[headerCell titleOfSelectedItem]];
+    }
     
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
                                                                                                        fieldsArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey]];
