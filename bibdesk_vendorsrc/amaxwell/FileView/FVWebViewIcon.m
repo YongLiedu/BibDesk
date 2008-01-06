@@ -150,7 +150,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 
 - (void)dealloc
 {
-    // it's very unlikely that we'll reach this on a non-main thread or with a non-nil webview, but just in case...
+    // it's very unlikely that we'll see this on a non-main thread, but just in case...
     [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES];
     
     pthread_mutex_destroy(&_mutex);
@@ -417,13 +417,23 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     [self renderOffscreenOnMainThread];
 }
 
+- (NSString *)debugDescription
+{
+    NSAssert1(pthread_mutex_trylock(&_mutex) == EBUSY, @"*** threading violation *** failed to lock before %@", NSStringFromSelector(_cmd));
+    return [NSString stringWithFormat:@"%@: { \n\tURL = %@\n\tFailed = %d\n\tRendering = %d\n\tWebView = %@\n\tFull image = %@\n\tThumbnail = %@\n }", [self description], _httpURL, _webviewFailed, _isRendering, _webView, _fullImageRef, _thumbnailRef];
+}
+    
+
 - (void)renderOffscreen
 {
     pthread_mutex_lock(&_mutex);
     
     // check the disk cache first
-    NSParameterAssert(NULL == _fullImageRef);
-    _fullImageRef = [FVIconCache newImageNamed:_diskCacheName];
+    if (NULL == _fullImageRef)
+        _fullImageRef = [FVIconCache newImageNamed:_diskCacheName];
+    else
+        NSLog(@"*** renderOffscreen called when we already have an image *** %@", [self debugDescription]);
+
     if (_fullImageRef) {
 
         // image may have been added to the disk cache by another instance; in that case, we need to create a new thumbnail
