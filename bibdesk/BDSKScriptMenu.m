@@ -147,7 +147,8 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             if ([scripts count])
                 [scripts insertObject:[NSDictionary dictionary] atIndex:0];
             [scripts insertObjects:defaultScripts atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, count)]];
-        }        
+        }
+        [defaultScripts release];
         [self updateSubmenu:self withScripts:scripts];        
     }   
     [scripts release];
