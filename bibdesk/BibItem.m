@@ -594,8 +594,8 @@ static CFDictionaryRef selectorTable = NULL;
 - (NSSet *)allPeople{
     NSArray *allArrays = [[self people] allValues];
     NSMutableSet *set = [NSMutableSet set];
-    
     unsigned i = [allArrays count];
+    
     while(i--)
         [set addObjectsFromArray:[allArrays objectAtIndex:i]];
     
@@ -603,11 +603,25 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (int)numberOfPeople{
+    NSArray *allArrays = [[self people] allValues];
+    unsigned count = 0, i = [allArrays count];
+    
+    while(i--)
+        count += [[allArrays objectAtIndex:i] count];
+    
     return [[self allPeople] count];
 }
 
 - (NSArray *)sortedPeople{
-    return [[[self allPeople] allObjects] sortedArrayUsingSelector:@selector(sortCompare:)];
+    NSArray *allArrays = [[self people] allValues];
+    NSMutableArray *array = [NSMutableArray array];
+    unsigned i = [allArrays count];
+    
+    while(i--)
+        [array addObjectsFromArray:[allArrays objectAtIndex:i]];
+    [array sortUsingSelector:@selector(sortCompare:)];
+    
+    return array;
 }
 
 - (NSArray *)peopleArrayForField:(NSString *)field{

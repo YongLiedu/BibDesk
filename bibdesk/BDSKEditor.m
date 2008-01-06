@@ -2708,6 +2708,14 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     }
 }
 
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
+	if ([tv isEqual:authorTableView]) {
+        BibAuthor *person = [[publication sortedPeople] objectAtIndex:row];
+        return [NSString stringWithFormat:@"%@ (%@)", [person displayName], [[person field] localizedFieldName]];
+    }
+    return nil;
+}
+
 #pragma mark Splitview delegate methods
 
 - (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
