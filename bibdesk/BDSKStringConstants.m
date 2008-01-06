@@ -286,7 +286,6 @@ NSString *BDSKDocSetPublicationsNotification = @"Set the publications of a docum
 NSString *BDSKDocAddItemNotification = @"Added a bibitem to a document";
 NSString *BDSKDocWillRemoveItemNotification = @"Will remove a bibitem from a document";
 NSString *BDSKDocDelItemNotification = @"Removed a bibitem from a document";
-NSString *BDSKAuthorPubListChangedNotification = @"added to or deleted a pub from an author";
 NSString *BDSKMacroDefinitionChangedNotification = @"BDSKMacroDefinitionChangedNotification";
 NSString *BDSKMacroTextFieldWindowWillCloseNotification = @"Macro TextField Window Will Close Notification";
 NSString *BDSKBibTypeInfoChangedNotification = @"TypeInfo Changed Notification";

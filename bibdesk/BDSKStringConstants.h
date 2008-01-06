@@ -275,7 +275,6 @@ extern NSString *BDSKDocSetPublicationsNotification;
 extern NSString *BDSKDocAddItemNotification;
 extern NSString *BDSKDocWillRemoveItemNotification;
 extern NSString *BDSKDocDelItemNotification;
-extern NSString *BDSKAuthorPubListChangedNotification;
 extern NSString *BDSKMacroDefinitionChangedNotification;
 extern NSString *BDSKMacroTextFieldWindowWillCloseNotification;
 extern NSString *BDSKBibTypeInfoChangedNotification;

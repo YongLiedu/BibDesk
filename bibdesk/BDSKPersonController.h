@@ -70,7 +70,7 @@
 #pragma mark actions
 - (void)show;
 - (void)updateUI;
-- (void)handlePubListChanged:(NSNotification *)notification;
+- (void)handleBibItemAddDel:(NSNotification *)note;
 - (void)handleBibItemChanged:(NSNotification *)note;
 - (void)handleGroupWillBeRemoved:(NSNotification *)note;
 - (void)openSelectedPub:(id)sender;

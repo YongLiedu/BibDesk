@@ -93,20 +93,29 @@
 	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
 	[imageView setDelegate:self];
 	[splitView setPositionAutosaveName:@"OASplitView Position BibPersonView"];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handlePubListChanged:)
-                                                 name:BDSKAuthorPubListChangedNotification 
-                                               object:nil]; 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleBibItemChanged:)
                                                  name:BDSKBibItemChangedNotification
                                                object:nil];
-    if(isEditable == NO)
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(handleGroupWillBeRemoved:)
-                                                         name:BDSKDidAddRemoveGroupNotification
-                                                       object:nil];
-
+    if (isEditable) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBibItemAddDel:)
+                                                     name:BDSKDocAddItemNotification
+                                                   object:[[person publication] owner]];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBibItemAddDel:)
+                                                     name:BDSKDocDelItemNotification
+                                                   object:[[person publication] owner]];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBibItemAddDel:)
+                                                     name:BDSKDocSetPublicationsNotification
+                                                   object:[[person publication] owner]];
+    } else {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleGroupWillBeRemoved:)
+                                                     name:BDSKDidAddRemoveGroupNotification
+                                                   object:nil];
+    }
 	[self updateUI];
     [pubsTableView setDoubleAction:@selector(openSelectedPub:)];
     
@@ -166,11 +175,13 @@
 	[pubsTableView reloadData];
 }
 
-- (void)handlePubListChanged:(NSNotification *)notification{
-	[self updateUI]; 
+- (void)handleBibItemChanged:(NSNotification *)note{
+    NSString *key = [[note userInfo] valueForKey:@"key"];
+    if ([key isEqualToString:[person field]] || key == nil)
+        [self setPublications:nil];
 }
 
-- (void)handleBibItemChanged:(NSNotification *)note{
+- (void)handleBibItemAddDel:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
     [self setPublications:nil];
 }
