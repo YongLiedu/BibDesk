@@ -1140,9 +1140,6 @@
     if (!infoWC) {
         infoWC = [(BDSKDocumentInfoWindowController *)[BDSKDocumentInfoWindowController alloc] initWithDocument:self];
     }
-    if ([[self windowControllers] containsObject:infoWC] == NO) {
-        [self addWindowController:infoWC];
-    }
     [infoWC beginSheetModalForWindow:documentWindow];
 }
 
