@@ -244,6 +244,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     pthread_mutex_lock(&_mutex);
     _webviewFailed = YES;
     [self _releaseWebView];
+    if (nil == _fallbackIcon)
+        _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
     [self _enqueueIconFinishedNotification];
     pthread_mutex_unlock(&_mutex);
 }
@@ -255,6 +257,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     pthread_mutex_lock(&_mutex);
     _webviewFailed = YES;
     [self _releaseWebView];
+    if (nil == _fallbackIcon)
+        _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
     [self _enqueueIconFinishedNotification];
     pthread_mutex_unlock(&_mutex);
 }
@@ -353,9 +357,11 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     }
     else if ([type isEqualToString:@"application/pdf"]) {
         
-        // next renderOffscreen will create a fallback icon
+        // next renderOffscreen will create a fallback icon too late
         pthread_mutex_lock(&_mutex);        
         _webviewFailed = YES;        
+        if (nil == _fallbackIcon)
+            _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
         pthread_mutex_unlock(&_mutex);  
         
         [listener ignore];
