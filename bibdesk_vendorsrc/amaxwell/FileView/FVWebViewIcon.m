@@ -142,7 +142,6 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         [_webView setPolicyDelegate:nil];
         [_webView setFrameLoadDelegate:nil];
         [_webView stopLoading:nil];
-        _isRendering = NO;
         [[self class] pushWebView:_webView];
         _webView = nil;
     }
@@ -163,12 +162,13 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 }
 
 - (void)releaseResources
-{ 
-    // the thumbnail is small enough to always keep around
-    pthread_mutex_lock(&_mutex);
-    
+{     
     // Cancel any pending loads; set _isRendering to NO if there was a non-nil webview (i.e. it was loading), or else -renderOffscreenOnMainThread will never complete if it gets called again.
     [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES];
+
+    // the thumbnail is small enough to always keep around
+    pthread_mutex_lock(&_mutex);
+    _isRendering = NO;
     
     CGImageRelease(_fullImageRef);
     _fullImageRef = NULL;
@@ -241,11 +241,11 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 {
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     NSParameterAssert([sender isEqual:_webView]);
+    [self _releaseWebView];
+
     pthread_mutex_lock(&_mutex);
     _webviewFailed = YES;
-    [self _releaseWebView];
-    if (nil == _fallbackIcon)
-        _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
+    _isRendering = NO;
     [self _enqueueIconFinishedNotification];
     pthread_mutex_unlock(&_mutex);
 }
@@ -254,11 +254,11 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 {
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     NSParameterAssert([sender isEqual:_webView]);
+    [self _releaseWebView];
+
     pthread_mutex_lock(&_mutex);
     _webviewFailed = YES;
-    [self _releaseWebView];
-    if (nil == _fallbackIcon)
-        _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
+     _isRendering = NO;
     [self _enqueueIconFinishedNotification];
     pthread_mutex_unlock(&_mutex);
 }
@@ -316,12 +316,17 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         CGImageRelease(largeImage);
         [FVBitmapContextCache disposeOfBitmapContext:context];        
     }
-
-    // post this regardless of failure, but webView:didFinishLoadForFrame: doesn't seem to be called in a failure case
-    [self _enqueueIconFinishedNotification];
-
+    
     // clear out the webview, since we won't need it again
     [self _releaseWebView];
+
+    // sets _isRendering before notifying observers we're done
+    pthread_mutex_lock(&_mutex);
+    _isRendering = NO;
+    pthread_mutex_unlock(&_mutex);
+    
+    // post this regardless of failure, but webView:didFinishLoadForFrame: doesn't seem to be called in a failure case
+    [self _enqueueIconFinishedNotification];
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
@@ -357,14 +362,12 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     }
     else if ([type isEqualToString:@"application/pdf"]) {
         
-        // next renderOffscreen will create a fallback icon too late
         pthread_mutex_lock(&_mutex);        
         _webviewFailed = YES;        
-        if (nil == _fallbackIcon)
-            _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
         pthread_mutex_unlock(&_mutex);  
-        
-        [listener ignore];
+
+        // unlock for this, since it calls a didFail delegate
+        [listener ignore];        
         [self _releaseWebView];
     }
     else if ([[sender class] canShowMIMEType:type]) {
@@ -426,9 +429,9 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 
 - (void)renderOffscreen
 {
-    // !!! early return here after a cache check
     pthread_mutex_lock(&_mutex);
     
+    // check the disk cache first
     NSParameterAssert(NULL == _fullImageRef);
     _fullImageRef = [FVIconCache newImageNamed:_diskCacheName];
     if (_fullImageRef) {
@@ -436,26 +439,14 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         // image may have been added to the disk cache by another instance; in that case, we need to create a new thumbnail
         if (NULL == _thumbnailRef)
             _thumbnailRef = [self _createResampledImageOfSize:[self _thumbnailSize] fromCGImage:_fullImageRef];
-        
-        pthread_mutex_unlock(&_mutex);
-        return;
     }
-        
-    // may have failed in one of the delegate methods, so we'll continue on and load the fallback icon here
-    if (NO == _webviewFailed && NO == _isRendering) {
+    else if (NO == _webviewFailed && NO == _isRendering) {
         // make sure needsRenderForSize: knows that we're actively rendering, so renderOffscreen doesn't get called again
         _isRendering = YES;
         [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:NO];
     }
-    else {
-        // Unreachable or failed to load.  Set the webview failure bit; we won't try again.
-        _webviewFailed = YES;
-        _isRendering = NO;
-        
-        // nil fallback icon used to signal shadow
-        if (nil == _fallbackIcon)
-            _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
-        [_fallbackIcon renderOffscreen];
+    else if (YES == _webviewFailed && nil == _fallbackIcon) {
+        _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
     }
     pthread_mutex_unlock(&_mutex);
 }
@@ -488,7 +479,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
             CGContextDrawImage(context, drawRect, _fullImageRef);
         else if (_thumbnailRef)
             CGContextDrawImage(context, drawRect, _thumbnailRef);
-        else if (NO == _webviewFailed)
+        else if (NO == _webviewFailed || nil == _fallbackIcon)
             [self _drawPlaceholderInRect:dstRect inCGContext:context];
         else
             [_fallbackIcon drawInRect:dstRect inCGContext:context];
