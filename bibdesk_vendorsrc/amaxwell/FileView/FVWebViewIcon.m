@@ -163,7 +163,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 
 - (void)releaseResources
 {     
-    // Cancel any pending loads; set _isRendering to NO if there was a non-nil webview (i.e. it was loading), or else -renderOffscreenOnMainThread will never complete if it gets called again.
+    // Cancel any pending loads; set _isRendering to NO or -renderOffscreenOnMainThread will never complete if it gets called again
     [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES];
 
     // the thumbnail is small enough to always keep around
@@ -227,26 +227,23 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     return smallImage;
 }
 
-- (void)_enqueueIconFinishedNotification
+- (void)_postIconFinishedNotification
 {
-    // All of the other FVIcon subclasses render synchronously in the FVIconQueue, which then calls back to the view when each batch is finished.  FVWebViewIcon loads asynchronously via WebKit, which runs its own threading; this worked better than the original attempt at a synchronous load, which blocked for too long.  The problem is that if we return YES from needsRenderForSize: while the webview is trying to load, the view keeps sending the web icons to the queue for rendering, and ultimately ends up drawing the placeholders at a fairly high rate until needsRenderForSize: finally returns NO.  This private notification is about the cleanest thing I can think of.  Coalescing on sender should be fine, but not on name, as the view may want to see which icon actually needs redrawing.
-    NSNotification *note = [NSNotification notificationWithName:FVWebIconUpdatedNotificationName object:self];
-    [[NSNotificationQueue defaultQueue] enqueueNotification:note 
-                                               postingStyle:NSPostWhenIdle 
-                                               coalesceMask:NSNotificationCoalescingOnSender 
-                                                   forModes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
+    // All of the other FVIcon subclasses render synchronously in the FVIconQueue, which then calls back to the view when each batch is finished.  FVWebViewIcon loads asynchronously via WebKit, which runs its own threading; this worked better than the original attempt at a synchronous load, which blocked for too long.  The problem is that if we return YES from needsRenderForSize: while the webview is trying to load, the view keeps sending the web icons to the queue for rendering, and ultimately ends up drawing the placeholders at a fairly high rate until needsRenderForSize: finally returns NO.  This private notification is about the cleanest thing I can think of.
+    [[NSNotificationCenter defaultCenter] postNotificationName:FVWebIconUpdatedNotificationName object:self];
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame;
 {
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     NSParameterAssert([sender isEqual:_webView]);
+    
     [self _releaseWebView];
-
+    
     pthread_mutex_lock(&_mutex);
     _webviewFailed = YES;
     _isRendering = NO;
-    [self _enqueueIconFinishedNotification];
+    [self _postIconFinishedNotification];
     pthread_mutex_unlock(&_mutex);
 }
 
@@ -254,12 +251,13 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 {
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     NSParameterAssert([sender isEqual:_webView]);
+
     [self _releaseWebView];
 
     pthread_mutex_lock(&_mutex);
     _webviewFailed = YES;
      _isRendering = NO;
-    [self _enqueueIconFinishedNotification];
+    [self _postIconFinishedNotification];
     pthread_mutex_unlock(&_mutex);
 }
 
@@ -326,7 +324,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     pthread_mutex_unlock(&_mutex);
     
     // post this regardless of failure, but webView:didFinishLoadForFrame: doesn't seem to be called in a failure case
-    [self _enqueueIconFinishedNotification];
+    [self _postIconFinishedNotification];
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
@@ -361,14 +359,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         }
     }
     else if ([type isEqualToString:@"application/pdf"]) {
-        
-        pthread_mutex_lock(&_mutex);        
-        _webviewFailed = YES;        
-        pthread_mutex_unlock(&_mutex);  
-
-        // unlock for this, since it calls a didFail delegate
+        // this triggers webView:didFailProvisionalLoadWithError:forFrame:
         [listener ignore];        
-        [self _releaseWebView];
     }
     else if ([[sender class] canShowMIMEType:type]) {
         [listener use];
@@ -380,10 +372,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 
 - (void)renderOffscreenOnMainThread 
 { 
-    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
-
-    // Originally just checked nil here, but logging showed that a webview was instantiated twice and the page loaded both times.  A nil webview is not a sufficient condition, since there's a delay between needsRenderForSize: and renderOffscreen; remember that the webview isn't rendering synchronously as in the other subclasses, so it may finish in between those calls.
-    
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));    
     NSAssert(nil == _webView, @"*** Render error *** renderOffscreenOnMainThread called when _webView already exists");
     
     _webView = [[self class] popWebView];
