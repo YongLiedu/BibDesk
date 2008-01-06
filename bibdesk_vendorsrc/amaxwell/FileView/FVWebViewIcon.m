@@ -128,8 +128,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         _diskCacheName = NSZoneMalloc([self zone], sizeof(char) * (strlen(name) + 1));
         strcpy(_diskCacheName, name);
 
-        NSInteger rc = pthread_mutex_init(&_mutex, NULL);
-        if (rc)
+        if (pthread_mutex_init(&_mutex, NULL) != 0)
             perror("pthread_mutex_init");
     }
     return self;
@@ -138,6 +137,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 - (void)_releaseWebView
 {
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
+    // in case we get -releaseResources or -dealloc while waiting for another webview
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconWebViewAvailableNotificationName object:[self class]];
     if (nil != _webView) {
         [_webView setPolicyDelegate:nil];
         [_webView setFrameLoadDelegate:nil];
