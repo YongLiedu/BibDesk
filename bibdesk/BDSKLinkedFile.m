@@ -466,7 +466,6 @@ static Class BDSKLinkedObjectClass = Nil;
     
     if (fileRef == NULL) {
         FSRef aRef;
-        short aliasCount = 1;
         Boolean hasRef = false;
         
         if (hasBaseRef && relativePath) {
