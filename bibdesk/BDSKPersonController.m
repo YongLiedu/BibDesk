@@ -237,7 +237,7 @@
     BibItem *pub = nil;
     
     // @@ maybe handle this in the type manager?
-    NSArray *peopleFromString;
+    NSArray *pubPeople;
     CFMutableArrayRef people = CFArrayCreateMutable(CFAllocatorGetDefault(), 0, &BDSKAuthorFuzzyArrayCallBacks);
     CFIndex idx;
     BibAuthor *newAuthor;
@@ -248,13 +248,13 @@
     
     while(pub = [pubE nextObject]){
         
-        // create a new array of BibAuthor objects from a person field (which may be nil or empty)
-        peopleFromString = [BDSKBibTeXParser authorsFromBibtexString:[pub valueOfField:fieldName inherit:NO] withPublication:pub forField:fieldName];
+        // get the array of BibAuthor objects from a person field (which may be nil or empty)
+        pubPeople = [pub peopleArrayForField:fieldName inherit:NO];
                 
-        if([peopleFromString count]){
+        if([pubPeople count]){
             
-            CFRange range = CFRangeMake(0, [peopleFromString count]);            
-            CFArrayAppendArray(people, (CFArrayRef)peopleFromString, range);
+            CFRange range = CFRangeMake(0, [pubPeople count]);            
+            CFArrayAppendArray(people, (CFArrayRef)pubPeople, range);
             
             // use the fuzzy compare to find which author we're going to replace
             idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson);
