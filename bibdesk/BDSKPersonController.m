@@ -243,13 +243,13 @@
     BibAuthor *newAuthor;
     
     // we set our person at some point in the iteration, so copy the current value now
-    BibAuthor *oldPerson = [[person copy] autorelease];
+    BibAuthor *oldPerson = [[person retain] autorelease];
     NSString *fieldName = [person field];
     
     while(pub = [pubE nextObject]){
         
         // create a new array of BibAuthor objects from a person field (which may be nil or empty)
-        peopleFromString = [BDSKBibTeXParser authorsFromBibtexString:[pub valueOfField:fieldName] withPublication:pub forField:fieldName];
+        peopleFromString = [BDSKBibTeXParser authorsFromBibtexString:[pub valueOfField:fieldName inherit:NO] withPublication:pub forField:fieldName];
                 
         if([peopleFromString count]){
             
@@ -262,7 +262,7 @@
                 // replace this author, then create a new BibTeX author string
                 newAuthor = [BibAuthor authorWithName:newNameString andPub:pub];
                 CFArraySetValueAtIndex(people, idx, newAuthor);
-                [pub setField:fieldName toValue:[(NSArray *)people componentsJoinedByString:@" and "]];
+                [pub setField:fieldName toValue:[[(NSArray *)people valueForKey:@"originalName"] componentsJoinedByString:@" and "]];
                 if([pub isEqual:[person publication]])
                     [self setPerson:[[pub peopleArrayForField:fieldName] objectAtIndex:idx]]; // changes the window title
             }
