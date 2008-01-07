@@ -88,10 +88,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [outlineView setAutoresizesOutlineColumn:NO];
     
     [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        [outlineView setDoubleAction:@selector(chooseFileDoubleAction:)];
-        [outlineView setTarget:self];
-    }
+    [outlineView setDoubleAction:@selector(chooseFileDoubleAction:)];
+    [outlineView setTarget:self];
 }
 
 - (void)dealloc
@@ -283,11 +281,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     NSString *identifier = [tableColumn identifier];
     if([item isLeaf]){
         if([identifier isEqualToString:BDSKTemplateNameString]){            
-            if (floor(NSAppKitVersionNumber) < NSAppKitVersionNumber10_4) {
-                [self chooseFileDoubleAction:nil];
-                // bypass the normal editing mechanism, or it'll reset the value
-                return NO;
-            }else return YES;
+            return NO;
         } else if([identifier isEqualToString:BDSKTemplateRoleString]){
             if([[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString])
                 return NO;
