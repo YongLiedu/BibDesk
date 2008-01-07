@@ -70,8 +70,7 @@ static BOOL FVQLIconDisabled = NO;
         _desiredSize = NSZeroSize;
         _quickLookFailed = NO;
         
-        NSInteger rc = pthread_mutex_init(&_mutex, NULL);
-        if (rc)
+        if (pthread_mutex_init(&_mutex, NULL) != 0)
             perror("pthread_mutex_init");
     }
     return self;
@@ -100,9 +99,9 @@ static BOOL FVQLIconDisabled = NO;
 // allow 20% difference in either dimension
 static inline bool checkSizes(NSSize currentSize, NSSize size)
 {
-    if (size.height > 1.2*currentSize.height && size.width > 1.2*currentSize.width)
+    if (size.height > 1.2 * currentSize.height && size.width > 1.2 * currentSize.width)
         return true;
-    else if (size.height < 0.8*currentSize.height && size.width < 0.8*currentSize.width)
+    else if (size.height < 0.5 * currentSize.height && size.width < 0.5 * currentSize.width)
         return true;
     return false;
 }
@@ -149,11 +148,7 @@ static inline bool checkSizes(NSSize currentSize, NSSize size)
 {
     BOOL didLock = (pthread_mutex_trylock(&_mutex) == 0);
     if (didLock && _imageRef) {
-        CGContextSaveGState(context);
-        // get rid of any shadow, as the image draws it
-        CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
         CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _imageRef);
-        CGContextRestoreGState(context);
     }
     else if (nil != _fallbackIcon) {
         [_fallbackIcon drawInRect:dstRect inCGContext:context];
