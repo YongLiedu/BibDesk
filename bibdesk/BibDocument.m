@@ -588,6 +588,8 @@ enum {
     pboardHelper = nil;
     
     [fileView removeObserver:self forKeyPath:@"iconScale"];
+    [fileView setDataSource:nil];
+    [fileView setDelegate:nil];
     
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
