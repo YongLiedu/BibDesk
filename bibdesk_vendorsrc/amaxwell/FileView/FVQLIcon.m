@@ -76,15 +76,6 @@ static BOOL FVQLIconDisabled = NO;
     return self;
 }
 
-- (void)releaseResources
-{
-    pthread_mutex_lock(&_mutex);
-    CGImageRelease(_imageRef);
-    _imageRef = NULL;
-    [_fallbackIcon releaseResources];
-    pthread_mutex_unlock(&_mutex);
-}
-
 - (void)dealloc
 {
     pthread_mutex_destroy(&_mutex);
@@ -92,6 +83,15 @@ static BOOL FVQLIconDisabled = NO;
     CGImageRelease(_imageRef);
     [_fallbackIcon release];
     [super dealloc];
+}
+
+- (void)releaseResources
+{
+    pthread_mutex_lock(&_mutex);
+    CGImageRelease(_imageRef);
+    _imageRef = NULL;
+    [_fallbackIcon releaseResources];
+    pthread_mutex_unlock(&_mutex);
 }
 
 - (NSSize)size { return _fullSize; }
@@ -148,7 +148,15 @@ static inline bool checkSizes(NSSize currentSize, NSSize size)
 {
     BOOL didLock = (pthread_mutex_trylock(&_mutex) == 0);
     if (didLock && _imageRef) {
-        CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _imageRef);
+        // Apple's QL plugins for multiple page types (.pages, .plist, .xls etc) draw text right up to the margin of the icon, so we'll add a small whitespace margin.  The decoration option will do this for us, but it also draws with a dog-ear, and I don't want that because it's inconsistent with our other thumbnail classes.
+        CGContextSaveGState(context);
+        CGContextSetRGBFillColor(context, 1.0, 1.0, 1.0, 1.0);
+        CGRect drawingRect = [self _drawingRectWithRect:dstRect];
+        CGContextFillRect(context, drawingRect);
+        drawingRect = CGRectInset(drawingRect, CGRectGetWidth(drawingRect) / 20, CGRectGetHeight(drawingRect) / 20);
+        CGContextClipToRect(context, drawingRect);
+        CGContextDrawImage(context, drawingRect, _imageRef);
+        CGContextRestoreGState(context);
     }
     else if (nil != _fallbackIcon) {
         [_fallbackIcon drawInRect:dstRect inCGContext:context];
