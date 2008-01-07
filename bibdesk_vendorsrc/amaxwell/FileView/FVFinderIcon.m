@@ -141,7 +141,7 @@
     }
     // We could use Icon Services to draw the badge, but it draws pure alpha with a centered badge at large sizes.  It also results in an offset image relative to the grid.
     if (_drawsLinkBadge)
-        [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:rect];
+        [self _drawBadgeInContext:context forIconInRect:dstRect];
 }
 
 @end
