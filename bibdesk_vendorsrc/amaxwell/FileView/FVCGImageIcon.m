@@ -130,14 +130,16 @@ static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbn
 - (BOOL)needsRenderForSize:(NSSize)size
 {
     // faster without trylock... why?
-    pthread_mutex_lock(&_mutex);
+    // trylock needed for scrolling, though
     BOOL needsRender = NO;
-    if (shouldDrawFullImageWithSize(size, _thumbnailSize))
-        needsRender = (NULL == _fullImageRef);
-    else
-        needsRender = (NULL == _thumbnailRef);
-    _desiredSize = size;
-    pthread_mutex_unlock(&_mutex);
+    if (pthread_mutex_trylock(&_mutex) == 0) {
+        if (shouldDrawFullImageWithSize(size, _thumbnailSize))
+            needsRender = (NULL == _fullImageRef);
+        else
+            needsRender = (NULL == _thumbnailRef);
+        _desiredSize = size;
+        pthread_mutex_unlock(&_mutex);
+    }
     return needsRender;
 }
 
@@ -244,7 +246,7 @@ static inline BOOL isBigImage(CGImageRef image)
             CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnailRef);
             pthread_mutex_unlock(&_mutex);
             if (_drawsLinkBadge)
-                [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:[self _drawingRectWithRect:dstRect]];
+                [self _drawBadgeInContext:context forIconInRect:dstRect];
         }
         else {
             pthread_mutex_unlock(&_mutex);
@@ -257,29 +259,24 @@ static inline BOOL isBigImage(CGImageRef image)
 - (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 {
     // locking immediately blocks the main thread if we have a huge image that's loading via ImageIO
-    if (pthread_mutex_trylock(&_mutex) == 0) {
+    BOOL didLock = (pthread_mutex_trylock(&_mutex) == 0);
+    if (didLock && (NULL != _thumbnailRef || NULL != _fullImageRef)) {
+        
         CGRect drawRect = [self _drawingRectWithRect:dstRect];
-        if (_fullImageRef || _thumbnailRef) {
-
-            CGImageRef image;
-            if (shouldDrawFullImageWithSize(((NSRect *)&drawRect)->size, _thumbnailSize) && _fullImageRef)
-                image = _fullImageRef;
-            else
-                image = _thumbnailRef;
-            
-            CGContextDrawImage(context, drawRect, image);
-            if (_drawsLinkBadge)
-                [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
-
-        }
-        else {
-            [self _drawPlaceholderInRect:dstRect inCGContext:context];
-        }
-        pthread_mutex_unlock(&_mutex);
+        CGImageRef image;
+        if (shouldDrawFullImageWithSize(((NSRect *)&drawRect)->size, _thumbnailSize) && _fullImageRef)
+            image = _fullImageRef;
+        else
+            image = _thumbnailRef;
+        
+        CGContextDrawImage(context, drawRect, image);
+        if (_drawsLinkBadge)
+            [self _drawBadgeInContext:context forIconInRect:dstRect];
     }
     else {
         [self _drawPlaceholderInRect:dstRect inCGContext:context];
     }
+    if (didLock) pthread_mutex_unlock(&_mutex);
 }
 
 @end
