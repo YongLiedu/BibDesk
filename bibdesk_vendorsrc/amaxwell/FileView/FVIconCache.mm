@@ -149,7 +149,7 @@ static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
 {
     DTCharArray array = FVCharArrayWithCGImage(image);
     pthread_mutex_lock(&__dataFileLock);
-    __dataFile->Save(array, name);
+    if (__dataFile) __dataFile->Save(array, name);
     pthread_mutex_unlock(&__dataFileLock);
 }
 
