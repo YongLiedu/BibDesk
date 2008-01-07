@@ -42,8 +42,15 @@
 @implementation FVCGImageIcon
 
 static CFDictionaryRef __imsrcOptions = NULL;
+
+// thumbnail size
 static const NSUInteger THUMBNAIL_THRESHOLD = 128;
-static const NSUInteger MAX_PIXEL_DIMENSION = 1024; /* maximum height or width allowed */
+
+// dimension at which we use FVIconCache
+static const NSUInteger FVICONCACHE_THRESHOLD = 1024;
+
+// max dimension for _fullImageRef
+static const NSUInteger MAX_PIXEL_DIMENSION = 512; /* maximum height or width allowed */
 
 + (void)initialize
 {
@@ -62,21 +69,20 @@ static const NSUInteger MAX_PIXEL_DIMENSION = 1024; /* maximum height or width a
 {
     self = [super init];
     if (self) {
+        
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
+        if (_drawsLinkBadge)
+            aURL = [[self class] _resolvedURLWithURL:aURL];   
+        
         _fileURL = [aURL copy];
         _fullImageRef = NULL;
         _thumbnailRef = NULL;
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
+        _thumbnailSize = NSZeroSize;
         _inDiskCache = NO;
-        _isRendering = NO;
         
-        NSInteger rc = pthread_mutex_init(&_mutex, NULL);
-        
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
-        if (_drawsLinkBadge)
-            aURL = [[self class] _resolvedURLWithURL:aURL];
-        
-        if (rc)
-            perror("pthread_mutex_init");        
+        if (pthread_mutex_init(&_mutex, NULL) != 0)
+            perror("pthread_mutex_init");             
     }
     return self;
 }
@@ -115,25 +121,29 @@ static const NSUInteger MAX_PIXEL_DIMENSION = 1024; /* maximum height or width a
     [super dealloc];
 }
 
-- (NSSize)size { return _fullSize; }
+// only guaranteed to have _thumbnailSize; returning NSZeroSize causes _drawingRectWithRect: to return garbage
+- (NSSize)size { return NSEqualSizes(_thumbnailSize, NSZeroSize) ? (NSSize) { 128, 128 } : _thumbnailSize; }
+
+static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbnailSize)
+{
+    return (desiredSize.height > 1.2 * thumbnailSize.height || desiredSize.width > 1.2 * thumbnailSize.width);
+}
 
 - (BOOL)needsRenderForSize:(NSSize)size
 {
-    // we can draw with either one
-    if (NULL == _thumbnailRef && NULL == _fullImageRef)
-        return YES;
+    // faster without trylock... why?
+    pthread_mutex_lock(&_mutex);
     BOOL needsRender = NO;
-    if (pthread_mutex_trylock(&_mutex) == 0) {
-        if (size.height > _thumbnailSize.height)
-            needsRender = (NULL == _fullImageRef && NO == _isRendering);
-        else
-            needsRender = (NULL == _thumbnailRef && NO == _isRendering);
-        pthread_mutex_unlock(&_mutex);
-    }
+    if (shouldDrawFullImageWithSize(size, _thumbnailSize))
+        needsRender = (NULL == _fullImageRef);
+    else
+        needsRender = (NULL == _thumbnailRef);
+    _desiredSize = size;
+    pthread_mutex_unlock(&_mutex);
     return needsRender;
 }
 
-// Huge images are slow to draw, so resample them first; we should store this in the disk cache, also, since ImageIO can be pretty slow reading really big images (10K by 10K pixels).
+// Huge images are slow to draw, so resample them first
 static CGImageRef createResampledImage(CGImageRef bigImage)
 {
     size_t width = CGImageGetWidth(bigImage);
@@ -175,47 +185,57 @@ static inline BOOL isBigImage(CGImageRef image)
             return;
         }
     }
+        
+    CGImageSourceRef src = NULL;
+    CFDataRef imageData = NULL;
     
-    _isRendering = YES;
-    pthread_mutex_unlock(&_mutex);
-    
-    CGImageSourceRef src;
     if (FVQTMovieType == _iconType) {
         QTMovie *movie = [[QTMovie alloc] initWithURL:_fileURL error:NULL];
-        NSData *TIFFData = [[movie posterImage] TIFFRepresentation];
+        imageData = (CFDataRef)[[movie posterImage] TIFFRepresentation];
         [movie release];
-        if (TIFFData)
-            src = CGImageSourceCreateWithData((CFDataRef)TIFFData, __imsrcOptions);
-        else
-            src = NULL;
     }
     else {
-        src = CGImageSourceCreateWithURL((CFURLRef)_fileURL, __imsrcOptions);
+        imageData = (CFDataRef)[NSData dataWithContentsOfURL:_fileURL options:NSMappedRead error:NULL];
     }
     
-    pthread_mutex_lock(&_mutex);
-
+    src = CGImageSourceCreateWithData(imageData, __imsrcOptions);
+    
     if (src) {
-        CGImageRelease(_thumbnailRef);
+        
+        // Should always be NULL if we get here.
         CGImageRelease(_fullImageRef);
-        CGImageRef bigImage = CGImageSourceCreateImageAtIndex(src, 0, __imsrcOptions);
-        // Only cache the image if it's large; smaller images we'll just re-read, since we have to hit the disk anyway, and we always have the thumbnail to draw while the big one is loading.
-        if (isBigImage(bigImage)) {
-            _fullImageRef = createResampledImage(bigImage);
-            CGImageRelease(bigImage);
-            [FVIconCache cacheCGImage:_fullImageRef withName:_diskCacheName];
-            _inDiskCache = YES;
-        }
-        else {
-            _fullImageRef = bigImage;
-        }
-        _thumbnailRef = CGImageSourceCreateThumbnailAtIndex(src, 0, __imsrcOptions);
+        _fullImageRef = NULL;
+        
+        if (NULL == _thumbnailRef)
+            _thumbnailRef = CGImageSourceCreateThumbnailAtIndex(src, 0, __imsrcOptions);
+        
+        // always initialize sizes
         _thumbnailSize = _thumbnailRef ? NSMakeSize(CGImageGetWidth(_thumbnailRef), CGImageGetHeight(_thumbnailRef)) : NSZeroSize;
-        _fullSize = _fullImageRef ? NSMakeSize(CGImageGetWidth(_fullImageRef), CGImageGetHeight(_fullImageRef)) : NSZeroSize;
+
+        // Now we have a thumbnail, see if we need to create the full image.
+        if (shouldDrawFullImageWithSize(_desiredSize, _thumbnailSize)) {
+
+            CGImageRef bigImage = CGImageSourceCreateImageAtIndex(src, 0, __imsrcOptions);
+            // Resample large bitmaps on the fly for better drawing/memory performance
+            if (bigImage && isBigImage(bigImage)) {
+                _fullImageRef = createResampledImage(bigImage);
+                CGImageRelease(bigImage);
+                // If it's huge, store in the disk cache since ImageIO can be slow for e.g. 10K by 10K pixel images.
+                // Otherwise, we'll count on ImageIO being just as fast at reading (which is probably optimistic).
+                if (CGImageGetWidth(_fullImageRef) >= FVICONCACHE_THRESHOLD || CGImageGetHeight(_fullImageRef) >= FVICONCACHE_THRESHOLD) {
+                    [FVIconCache cacheCGImage:_fullImageRef withName:_diskCacheName];
+                    _inDiskCache = YES;
+                }
+            }
+            else {
+                // Small enough to keep in-memory and draw
+                _fullImageRef = bigImage;
+            }
+        }
+                
         CFRelease(src);
     } 
     
-    _isRendering = NO;
     pthread_mutex_unlock(&_mutex);
 }    
 
@@ -238,25 +258,21 @@ static inline BOOL isBigImage(CGImageRef image)
 
 - (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 {
-    // this blocks the main thread if we have a huge image that's loading via ImageIO
+    // locking immediately blocks the main thread if we have a huge image that's loading via ImageIO
     if (pthread_mutex_trylock(&_mutex) == 0) {
         CGRect drawRect = [self _drawingRectWithRect:dstRect];
-        if (CGRectGetHeight(drawRect) > _thumbnailSize.height) {
-            // prefer the full image if we're drawing in a large rect and it's available
-            CGImageRef image = (_fullImageRef ? _fullImageRef : _thumbnailRef);
-            if (image) {
-                CGContextDrawImage(context, drawRect, image);
-                if (_drawsLinkBadge)
-                    [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
-            }
-            else {
-                [self _drawPlaceholderInRect:dstRect inCGContext:context];
-            }
-        }
-        else if (_thumbnailRef) {
-            CGContextDrawImage(context, drawRect, _thumbnailRef);
+        if (_fullImageRef || _thumbnailRef) {
+
+            CGImageRef image;
+            if (shouldDrawFullImageWithSize(((NSRect *)&drawRect)->size, _thumbnailSize) && _fullImageRef)
+                image = _fullImageRef;
+            else
+                image = _thumbnailRef;
+            
+            CGContextDrawImage(context, drawRect, image);
             if (_drawsLinkBadge)
                 [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
+
         }
         else {
             [self _drawPlaceholderInRect:dstRect inCGContext:context];

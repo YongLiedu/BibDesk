@@ -47,9 +47,8 @@
     CGImageRef      _thumbnailRef;
     NSSize          _thumbnailSize;
     CGImageRef      _fullImageRef;
-    NSSize          _fullSize;
+    NSSize          _desiredSize;
     FVIconType      _iconType;
-    BOOL            _isRendering;
     BOOL            _inDiskCache;
     char           *_diskCacheName;
     BOOL            _drawsLinkBadge;
