@@ -95,9 +95,7 @@ static CGPDFDocumentRef createCGPDFDocumentWithPostScriptURL(NSURL *fileURL)
     self = [super init];
     if (self) {
         
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
-        if (_drawsLinkBadge)
-            aURL = [[self class] _resolvedURLWithURL:aURL];
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&aURL];
 
         // PDF sucks because we have to read the file and parse it to find out the page size, even if we're not going to draw it.  Since that's not very efficient, don't even open the file until we have to draw it.
         

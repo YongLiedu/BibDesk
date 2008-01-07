@@ -60,8 +60,7 @@ typedef NSUInteger FVIconType;
 @interface FVIcon (Private)
 - (CGRect)_drawingRectWithRect:(NSRect)iconRect;
 - (void)_drawPlaceholderInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
-+ (BOOL)_shouldDrawBadgeForURL:(NSURL *)aURL;
-+ (NSURL *)_resolvedURLWithURL:(NSURL *)aURL;
++ (BOOL)_shouldDrawBadgeForURL:(NSURL **)aURL;
 - (void)_drawBadgeInContext:(CGContextRef)context forIconInRect:(NSRect)dstRect withDrawingRect:(CGRect)drawingRect;
 @end
 

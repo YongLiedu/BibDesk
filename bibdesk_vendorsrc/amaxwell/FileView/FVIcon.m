@@ -110,11 +110,11 @@ static NSURL *missingFileURL = nil;
     return [self iconWithURL:representedURL size:iconSize];
 }
 
-+ (BOOL)_shouldDrawBadgeForURL:(NSURL *)aURL
++ (BOOL)_shouldDrawBadgeForURL:(NSURL **)aURL
 {
-    NSParameterAssert([aURL isFileURL]);
+    NSParameterAssert([*aURL isFileURL]);
     
-    const UInt8 *fsPath = (void *)[[aURL path] UTF8String];
+    const UInt8 *fsPath = (void *)[[*aURL path] UTF8String];
     OSStatus err;
     FSRef fileRef;
     err = FSPathMakeRefWithOptions(fsPath, kFSPathMakeRefDoNotFollowLeafSymlink, &fileRef, NULL);   
@@ -127,23 +127,18 @@ static NSURL *missingFileURL = nil;
     BOOL drawBadge = (NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeResolvable));
     
     if (theUTI) CFRelease(theUTI);
+    
+    if (drawBadge) {
+        // replace the URL with the resolved URL in case it was an alias
+        Boolean isFolder, wasAliased;
+        err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
+        
+        // wasAliased is false for symlinks, but we can open those without resolving them
+        if (noErr == err && wasAliased)
+            *aURL = [(id)CFURLCreateFromFSRef(NULL, &fileRef) autorelease];
+    }
+    
     return drawBadge;
-}
-
-+ (NSURL *)_resolvedURLWithURL:(NSURL *)aURL
-{
-    const UInt8 *fsPath = (void *)[[aURL path] UTF8String];
-    OSStatus err;
-    FSRef fileRef;
-    err = FSPathMakeRefWithOptions(fsPath, kFSPathMakeRefDefaultOptions, &fileRef, NULL); 
-    
-    Boolean isFolder, wasAliased;
-    err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
-    
-    // wasAliased is false for symlinks, but we can open those without resolving them
-    if (noErr == err && wasAliased)
-        aURL = [(id)CFURLCreateFromFSRef(NULL, &fileRef) autorelease];
-    return aURL;
 }
     
 + (id)iconWithURL:(NSURL *)representedURL size:(NSSize)iconSize;

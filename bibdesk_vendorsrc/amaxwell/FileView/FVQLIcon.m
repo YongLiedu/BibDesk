@@ -68,9 +68,7 @@ static BOOL FVQLIconDisabled = NO;
         _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_fileURL];
         _quickLookFailed = NO;
         
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:theURL];
-        if (_drawsLinkBadge)
-            theURL = [[self class] _resolvedURLWithURL:theURL];
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&theURL];
         
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)

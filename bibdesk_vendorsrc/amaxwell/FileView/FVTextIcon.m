@@ -147,9 +147,7 @@ static CGAffineTransform __paperTransform;
     self = [super init];
     if (self) {
         
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
-        if (_drawsLinkBadge)
-            aURL = [[self class] _resolvedURLWithURL:aURL];
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&aURL];
         
         _fileURL = [aURL copy];
         _fullSize = __paperSize;

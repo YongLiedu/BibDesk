@@ -70,9 +70,7 @@ static const NSUInteger MAX_PIXEL_DIMENSION = 512; /* maximum height or width al
     self = [super init];
     if (self) {
         
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL];
-        if (_drawsLinkBadge)
-            aURL = [[self class] _resolvedURLWithURL:aURL];   
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&aURL];
         
         _fileURL = [aURL copy];
         _fullImageRef = NULL;

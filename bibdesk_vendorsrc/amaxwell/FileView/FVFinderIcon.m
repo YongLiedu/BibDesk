@@ -87,9 +87,7 @@
         _iconType = FVFinderIconType;
         _iconRef = NULL;
         
-        _drawsLinkBadge = theURL ? [[self class] _shouldDrawBadgeForURL:theURL] : NO;
-        if (_drawsLinkBadge)
-            theURL = [[self class] _resolvedURLWithURL:theURL];
+        _drawsLinkBadge = theURL ? [[self class] _shouldDrawBadgeForURL:&theURL] : NO;
         
         if (theURL) {
             OSStatus err;
