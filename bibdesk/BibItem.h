@@ -168,8 +168,6 @@ enum {
 */
 - (void)rebuildPeopleIfNeeded;
 - (NSSet *)allPeople;
-- (int)numberOfPeople;
-- (NSArray *)sortedPeople;
 - (NSArray *)peopleArrayForField:(NSString *)field;
 - (NSArray *)peopleArrayForField:(NSString *)field inherit:(BOOL)inherit;    
 - (NSDictionary *)people;

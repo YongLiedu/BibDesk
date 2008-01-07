@@ -58,6 +58,7 @@
 #import "NSSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSObject_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKStringNode.h"
@@ -591,34 +592,10 @@ static CFDictionaryRef selectorTable = NULL;
 - (NSSet *)allPeople{
     NSArray *allArrays = [[self people] allValues];
     NSMutableSet *set = [NSMutableSet set];
-    unsigned i = [allArrays count];
     
-    while(i--)
-        [set addObjectsFromArray:[allArrays objectAtIndex:i]];
+    [set performSelector:@selector(addObjectsFromArray:) withObjectsFromArray:allArrays];
     
     return set;
-}
-
-- (int)numberOfPeople{
-    NSArray *allArrays = [[self people] allValues];
-    unsigned count = 0, i = [allArrays count];
-    
-    while(i--)
-        count += [[allArrays objectAtIndex:i] count];
-    
-    return [[self allPeople] count];
-}
-
-- (NSArray *)sortedPeople{
-    NSArray *allArrays = [[self people] allValues];
-    NSMutableArray *array = [NSMutableArray array];
-    unsigned i = [allArrays count];
-    
-    while(i--)
-        [array addObjectsFromArray:[allArrays objectAtIndex:i]];
-    [array sortUsingSelector:@selector(sortCompare:)];
-    
-    return array;
 }
 
 - (NSArray *)peopleArrayForField:(NSString *)field{

@@ -1032,7 +1032,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if(i == -1)
         NSBeep();
     else
-        [[self document] showPerson:[[publication sortedPeople] objectAtIndex:i]];
+        [[self document] showPerson:[self personAtIndex:i]];
 }
 
 #pragma mark Menus
@@ -1499,6 +1499,32 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
+}
+
+#pragma mark People
+
+- (int)numberOfPersons {
+    NSArray *allArrays = [[publication people] allValues];
+    unsigned count = 0, i = [allArrays count];
+    
+    while(i--)
+        count += [[allArrays objectAtIndex:i] count];
+    
+    return count;
+}
+
+- (BibAuthor *)personAtIndex:(unsigned int)anIndex {
+    return [[self persons] objectAtIndex:anIndex];
+}
+
+- (NSArray *)persons {
+    NSArray *allArrays = [[publication people] allValues];
+    NSMutableArray *array = [NSMutableArray array];
+    
+    [array performSelector:@selector(addObjectsFromArray:) withObjectsFromArray:allArrays];
+    [array sortUsingSelector:@selector(sortCompare:)];
+    
+    return array;
 }
 
 #pragma mark Key field
@@ -2563,7 +2589,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	if ([tv isEqual:tableView]) {
         return [fields count];
 	} else if ([tv isEqual:authorTableView]) {
-        return [publication numberOfPeople];
+        return [self numberOfPersons];
     }
     return 0;
 }
@@ -2578,7 +2604,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             return [publication valueOfField:field];
         }
 	} else if ([tv isEqual:authorTableView]) {
-        return [[[publication sortedPeople] objectAtIndex:row] displayName];
+        return [[self personAtIndex:row] displayName];
     }
     return nil;
 }
@@ -2710,7 +2736,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
 	if ([tv isEqual:authorTableView]) {
-        BibAuthor *person = [[publication sortedPeople] objectAtIndex:row];
+        BibAuthor *person = [self personAtIndex:row];
         return [NSString stringWithFormat:@"%@ (%@)", [person displayName], [[person field] localizedFieldName]];
     }
     return nil;

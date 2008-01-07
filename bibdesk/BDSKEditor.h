@@ -325,6 +325,10 @@
 
 - (IBAction)showPersonDetail:(id)sender;
 
+- (int)numberOfPersons;
+- (BibAuthor *)personAtIndex:(unsigned int)anIndex;
+- (NSArray *)persons;
+
 #pragma mark Macro support
     
 - (BOOL)editSelectedCellAsMacro;
