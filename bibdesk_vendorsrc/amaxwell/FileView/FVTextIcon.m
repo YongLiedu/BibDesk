@@ -236,6 +236,15 @@ static CGAffineTransform __paperTransform;
     pthread_mutex_unlock(&_mutex);
 }
 
+// used to constrain thumbnail size for huge pages
+static inline void limitSize(NSSize *size)
+{
+    while (MIN(size->width, size->height) > 200) {
+        size->width *= 0.9;
+        size->height *= 0.9;
+    }
+}
+
 - (void)renderOffscreen
 {
     // hold the lock to let needsRenderForSize: know that this icon doesn't need rendering
@@ -360,6 +369,7 @@ static CGAffineTransform __paperTransform;
     // reset size while we have the lock, since it may be different now that we've read the string
     _fullSize = paperSize;
     _thumbnailSize = NSMakeSize(_fullSize.width / 2, _fullSize.height / 2);
+    limitSize(&_thumbnailSize);
         
     // now restore our cached bitmap context and push it back into the cache
     CGContextRestoreGState(ctxt);
