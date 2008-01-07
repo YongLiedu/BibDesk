@@ -133,14 +133,16 @@
         [[FVMissingFinderIcon sharedIcon] drawInRect:dstRect inCGContext:context];       
     }
     else {
+        CGContextSaveGState(context);
+        // get rid of any shadow, as the image draws it
+        CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
         PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, _iconRef);
+        CGContextRestoreGState(context);
     }
     // We could use Icon Services to draw the badge, but it draws pure alpha with a centered badge at large sizes.  It also results in an offset image relative to the grid.
     if (_drawsLinkBadge)
         [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:rect];
 }
-
-- (BOOL)needsShadow { return NO; }
 
 @end
 
@@ -195,11 +197,15 @@
 - (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 {
     CGRect rect = [self _drawingRectWithRect:dstRect];            
+    CGContextSaveGState(context);
+    // get rid of any shadow, as the image draws it
+    CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
     if (_iconRef)
         PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, _iconRef);
     rect = CGRectInset(rect, rect.size.width/4, rect.size.height/4);
     if (_questionIcon)
         PlotIconRefInContext(context, &rect, kAlignCenterBottom, kTransformNone, NULL, kIconServicesNoBadgeFlag, _questionIcon);          
+    CGContextRestoreGState(context);
 }
 
 

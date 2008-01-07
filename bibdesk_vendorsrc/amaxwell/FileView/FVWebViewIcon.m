@@ -491,6 +491,4 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     }
 }
 
-- (BOOL)needsShadow { return nil == _fallbackIcon || [_fallbackIcon needsShadow]; }
-
 @end

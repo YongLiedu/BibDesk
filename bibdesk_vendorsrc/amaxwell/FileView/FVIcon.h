@@ -82,8 +82,6 @@
 // fastDrawInRect: draws a lower quality version if available, using the same semantics as drawInRect:inCGContext:
 - (void)fastDrawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 
-- (BOOL)needsShadow;
-
 // The -currentPageIndex return value is 1-based, as in CGPDFDocumentGetPageCount; only useful for multi-page formats such as PDF and PS.  Multi-page TIFFs and text documents are not supported, and calling the showNextPage/showPreviousPage methods will have no effect.
 - (NSUInteger)pageCount;
 - (NSUInteger)currentPageIndex;

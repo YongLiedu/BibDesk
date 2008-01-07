@@ -1120,8 +1120,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                     CGContextSaveGState(cgContext);
                     
                     // draw a shadow behind the image/page
-                    if ([image needsShadow])
-                        [__shadow set];
+                    [__shadow set];
                     
                     // possibly better performance by caching all bitmaps in a flipped state, but bookkeeping is a pain
                     CGContextTranslateCTM(cgContext, 0, NSMaxY(iconRect));

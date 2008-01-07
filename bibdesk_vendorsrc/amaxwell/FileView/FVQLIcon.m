@@ -149,7 +149,11 @@ static inline bool checkSizes(NSSize currentSize, NSSize size)
 {
     BOOL didLock = (pthread_mutex_trylock(&_mutex) == 0);
     if (didLock && _imageRef) {
+        CGContextSaveGState(context);
+        // get rid of any shadow, as the image draws it
+        CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
         CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _imageRef);
+        CGContextRestoreGState(context);
     }
     else if (nil != _fallbackIcon) {
         [_fallbackIcon drawInRect:dstRect inCGContext:context];
@@ -159,7 +163,5 @@ static inline bool checkSizes(NSSize currentSize, NSSize size)
     }
     if (didLock) pthread_mutex_unlock(&_mutex);
 }
-
-- (BOOL)needsShadow { return (NULL != _imageRef || [_fallbackIcon needsShadow]); }
 
 @end
