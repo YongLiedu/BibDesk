@@ -266,8 +266,6 @@ static NSURL *missingFileURL = nil;
     
     // We don't know the size of the actual link arrow (and it changes with the size of dstRect), so fine-tuning the drawing isn't really possible as far as I can see.
     if (noErr == err) {
-        // get rid of any shadow
-        CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
         PlotIconRefInContext(context, (CGRect *)&dstRect, kAlignBottomLeft, kTransformNone, NULL, kPlotIconRefNormalFlags, linkBadge);
         ReleaseIconRef(linkBadge);
     }
