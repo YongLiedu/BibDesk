@@ -88,6 +88,10 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [outlineView setAutoresizesOutlineColumn:NO];
     
     [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        [outlineView setDoubleAction:@selector(chooseFileDoubleAction:)];
+        [outlineView setTarget:self];
+    }
 }
 
 - (void)dealloc
@@ -258,32 +262,32 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [self valuesHaveChanged];
 }
 
+// Formerly implemented in outlineView:shouldEditTableColumn:item:, but on Leopard a second click on the selected row (outside the double click interval) would cause the open panel to run.  This was highly annoying.
+- (IBAction)chooseFileDoubleAction:(id)sender
+{
+    int row = [outlineView clickedRow];
+    int column = [outlineView clickedColumn];
+    if (row >= 0 && column >= 0) {
+        
+        NSString *identifier = [[[outlineView tableColumns] objectAtIndex:column] identifier];
+        BDSKTemplate *node = [outlineView itemAtRow:row];
+        if ([node isLeaf] && [identifier isEqualToString:BDSKTemplateNameString])
+            [self chooseFile:sender];
+    }
+}
+
 - (BOOL)outlineView:(NSOutlineView *)ov shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item;
 {
     // leaf items are fully editable, but you can only edit the name of a parent item
 
     NSString *identifier = [tableColumn identifier];
     if([item isLeaf]){
-        // run an open panel for the filename
-        if([identifier isEqualToString:BDSKTemplateNameString]){
-            NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-            [openPanel setCanChooseDirectories:YES];
-            [openPanel setCanCreateDirectories:NO];
-            [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-            
-            // start the panel in the same directory as the item's existing path, or fall back to app support
-            NSString *dirPath = [[[item representedFileURL] path] stringByDeletingLastPathComponent];
-            if(nil == dirPath)
-                dirPath = dirPath;
-            [openPanel beginSheetForDirectory:dirPath 
-                                         file:nil 
-                                        types:nil 
-                               modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
-                                modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-                                  contextInfo:[item retain]];
-            
-            // bypass the normal editing mechanism, or it'll reset the value
-            return NO;
+        if([identifier isEqualToString:BDSKTemplateNameString]){            
+            if (floor(NSAppKitVersionNumber) < NSAppKitVersionNumber10_4) {
+                [self chooseFileDoubleAction:nil];
+                // bypass the normal editing mechanism, or it'll reset the value
+                return NO;
+            }else return YES;
         } else if([identifier isEqualToString:BDSKTemplateRoleString]){
             if([[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString])
                 return NO;
@@ -581,10 +585,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [openPanel setCanCreateDirectories:NO];
     [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     
-    // start the panel in the same directory as the item's existing path, or fall back to app support
+    // start the panel in the same directory as the item's existing path (may be nil)
     NSString *dirPath = [[[item representedFileURL] path] stringByDeletingLastPathComponent];
-    if(nil == dirPath)
-        dirPath = dirPath;
     [openPanel beginSheetForDirectory:dirPath 
                                  file:nil 
                                 types:nil 

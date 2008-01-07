@@ -69,6 +69,7 @@ typedef enum {
 
 - (IBAction)revealInFinder:(id)sender;
 - (IBAction)chooseFile:(id)sender;
+- (IBAction)chooseFileDoubleAction:(id)sender;
 
 - (IBAction)dismissChooseMainPageSheet:(id)sender;
 
