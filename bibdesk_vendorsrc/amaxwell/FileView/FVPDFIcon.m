@@ -343,7 +343,7 @@ static inline void limitSize(NSSize *size)
         CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnailRef);
         pthread_mutex_unlock(&_mutex);
         if (_drawsLinkBadge)
-            [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:[self _drawingRectWithRect:dstRect]];
+            [self _drawBadgeInContext:context forIconInRect:dstRect];
     }
     else {
         pthread_mutex_unlock(&_mutex);
@@ -367,7 +367,7 @@ static inline void limitSize(NSSize *size)
             if (NULL != _thumbnailRef) {
                 CGContextDrawImage(context, drawRect, _thumbnailRef);
                 if (_drawsLinkBadge)
-                    [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
+                    [self _drawBadgeInContext:context forIconInRect:dstRect];
             }
             else {
                 // draw a blank page as a placeholder, and the real icon will get picked up next time around
@@ -417,7 +417,7 @@ static inline void limitSize(NSSize *size)
             CGContextRestoreGState(context);
             
             if (_drawsLinkBadge)
-                [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
+                [self _drawBadgeInContext:context forIconInRect:dstRect];
 
         }
         pthread_mutex_unlock(&_mutex);

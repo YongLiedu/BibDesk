@@ -40,6 +40,8 @@
 #import "FVFinderIcon.h"
 #import <QuickLook/QLThumbnailImage.h>
 
+static const NSUInteger THUMBNAIL_MAX = 128;
+
 // see http://www.cocoabuilder.com/archive/message/cocoa/2005/6/15/138943 for linking; need to use bundle_loader flag to allow the linker to resolve our superclass
 
 @implementation FVQLIcon
@@ -65,8 +67,8 @@ static BOOL FVQLIconDisabled = NO;
         _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&theURL];
         
         _fileURL = [theURL copy];
-        _imageRef = NULL;
-        _fullSize = NSZeroSize;
+        _fullImageRef = NULL;
+        _thumbnailSize = NSZeroSize;
         _desiredSize = NSZeroSize;
         _quickLookFailed = NO;
         
@@ -80,7 +82,8 @@ static BOOL FVQLIconDisabled = NO;
 {
     pthread_mutex_destroy(&_mutex);
     [_fileURL release];
-    CGImageRelease(_imageRef);
+    CGImageRelease(_fullImageRef);
+    CGImageRelease(_thumbnailRef);
     [_fallbackIcon release];
     [super dealloc];
 }
@@ -88,22 +91,17 @@ static BOOL FVQLIconDisabled = NO;
 - (void)releaseResources
 {
     pthread_mutex_lock(&_mutex);
-    CGImageRelease(_imageRef);
-    _imageRef = NULL;
+    CGImageRelease(_fullImageRef);
+    _fullImageRef = NULL;
     [_fallbackIcon releaseResources];
     pthread_mutex_unlock(&_mutex);
 }
 
-- (NSSize)size { return _fullSize; }
+- (NSSize)size { return _thumbnailSize; }
 
-// allow 20% difference in either dimension
-static inline bool checkSizes(NSSize currentSize, NSSize size)
+static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbnailSize)
 {
-    if (size.height > 1.2 * currentSize.height && size.width > 1.2 * currentSize.width)
-        return true;
-    else if (size.height < 0.5 * currentSize.height && size.width < 0.5 * currentSize.width)
-        return true;
-    return false;
+    return (desiredSize.height > 1.2 * thumbnailSize.height || desiredSize.width > 1.2 * thumbnailSize.width);
 }
 
 - (BOOL)needsRenderForSize:(NSSize)size
@@ -112,33 +110,54 @@ static inline bool checkSizes(NSSize currentSize, NSSize size)
     if (pthread_mutex_trylock(&_mutex) == 0) {
         if (NO == _quickLookFailed) {
             // The _fullSize is zero or whatever quicklook returned last time, which may be something odd like 78x46.  Since we ask QL for a size but it constrains the size it actually returns based on the icon's aspect ratio, we have to check height and width.  Just checking height in this was causing an endless loop asking for a size it won't return.
-            needsRender = (NULL == _imageRef || checkSizes(_fullSize, size));
+            if (shouldDrawFullImageWithSize(size, _thumbnailSize))
+                needsRender = (NULL == _fullImageRef);
+            else
+                needsRender = (NULL == _thumbnailRef);
         }
         else {
             needsRender = [_fallbackIcon needsRenderForSize:size];
         }
         _desiredSize = size;
+        pthread_mutex_unlock(&_mutex);
     }
-    pthread_mutex_unlock(&_mutex);
     return needsRender;
 }
 
 - (void)renderOffscreen
 {        
     pthread_mutex_lock(&_mutex);
-    CGImageRelease(_imageRef);
-    _imageRef = NULL;
+    
+    CGImageRelease(_fullImageRef);
+    _fullImageRef = NULL;
 
-    if (NO == _quickLookFailed)
-        _imageRef = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, *(CGSize *)&_desiredSize, NULL);
+    if (NO == _quickLookFailed) {
+        
+        CGSize requestedSize = (CGSize) { THUMBNAIL_MAX, THUMBNAIL_MAX };
+        
+        if (NULL == _thumbnailRef)
+            _thumbnailRef = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, requestedSize, NULL);
+        
+        if (NULL == _thumbnailRef)
+            _quickLookFailed = YES;
+        
+        // always initialize sizes
+        _thumbnailSize = _thumbnailRef ? NSMakeSize(CGImageGetWidth(_thumbnailRef), CGImageGetHeight(_thumbnailRef)) : NSZeroSize;
 
-    if (NULL == _imageRef) {
-        _quickLookFailed = YES;
+        if (shouldDrawFullImageWithSize(_desiredSize, _thumbnailSize)) {
+            
+            requestedSize = *(CGSize *)&_desiredSize;
+            _fullImageRef = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, requestedSize, NULL);
+            
+            if (NULL == _fullImageRef)
+                _quickLookFailed = YES;
+        }
+    }
+    
+    // preceding calls may have set the failure flag
+    if (_quickLookFailed) {
         if ([_fallbackIcon needsRenderForSize:_desiredSize])
             [_fallbackIcon renderOffscreen];
-    }
-    else {
-        _fullSize = NSMakeSize(CGImageGetWidth(_imageRef), CGImageGetHeight(_imageRef));
     }
     
     pthread_mutex_unlock(&_mutex);
@@ -147,18 +166,32 @@ static inline bool checkSizes(NSSize currentSize, NSSize size)
 - (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 {
     BOOL didLock = (pthread_mutex_trylock(&_mutex) == 0);
-    if (didLock && _imageRef) {
+    if (didLock && (NULL != _thumbnailRef || NULL != _fullImageRef)) {
+        
+        CGRect drawRect = [self _drawingRectWithRect:dstRect];
+            
+        CGImageRef image;
+        // always fall back on the thumbnail
+        if (shouldDrawFullImageWithSize(((NSRect *)&drawRect)->size, _thumbnailSize) && _fullImageRef)
+            image = _fullImageRef;
+        else
+            image = _thumbnailRef;
+        
         // Apple's QL plugins for multiple page types (.pages, .plist, .xls etc) draw text right up to the margin of the icon, so we'll add a small whitespace margin.  The decoration option will do this for us, but it also draws with a dog-ear, and I don't want that because it's inconsistent with our other thumbnail classes.
         CGContextSaveGState(context);
         CGContextSetRGBFillColor(context, 1.0, 1.0, 1.0, 1.0);
-        CGRect drawingRect = [self _drawingRectWithRect:dstRect];
-        CGContextFillRect(context, drawingRect);
-        drawingRect = CGRectInset(drawingRect, CGRectGetWidth(drawingRect) / 20, CGRectGetHeight(drawingRect) / 20);
-        CGContextClipToRect(context, drawingRect);
-        CGContextDrawImage(context, drawingRect, _imageRef);
+        CGContextFillRect(context, drawRect);
+        drawRect = CGRectInset(drawRect, CGRectGetWidth(drawRect) / 20, CGRectGetHeight(drawRect) / 20);
+        CGContextClipToRect(context, drawRect);
+        CGContextDrawImage(context, drawRect, image);
         CGContextRestoreGState(context);
+        
+        if (_drawsLinkBadge)
+            [self _drawBadgeInContext:context forIconInRect:dstRect];
+        
+        pthread_mutex_unlock(&_mutex);
     }
-    else if (nil != _fallbackIcon) {
+    else if (_quickLookFailed && nil != _fallbackIcon) {
         [_fallbackIcon drawInRect:dstRect inCGContext:context];
     }
     else {

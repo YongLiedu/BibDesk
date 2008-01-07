@@ -61,7 +61,7 @@ typedef NSUInteger FVIconType;
 - (CGRect)_drawingRectWithRect:(NSRect)iconRect;
 - (void)_drawPlaceholderInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
 + (BOOL)_shouldDrawBadgeForURL:(NSURL **)aURL;
-- (void)_drawBadgeInContext:(CGContextRef)context forIconInRect:(NSRect)dstRect withDrawingRect:(CGRect)drawingRect;
+- (void)_drawBadgeInContext:(CGContextRef)context forIconInRect:(NSRect)dstRect;
 @end
 
 FV_PRIVATE_EXTERN char * FVCreateDiskCacheNameWithURL(NSURL *fileURL);

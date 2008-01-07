@@ -197,7 +197,7 @@ static CGAffineTransform __paperTransform;
         CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnailRef);
         pthread_mutex_unlock(&_mutex);
         if (_drawsLinkBadge)
-            [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:[self _drawingRectWithRect:dstRect]];
+            [self _drawBadgeInContext:context forIconInRect:dstRect];
     }
     else {
         pthread_mutex_unlock(&_mutex);
@@ -218,7 +218,7 @@ static CGAffineTransform __paperTransform;
         CGContextDrawImage(context, drawRect, toDraw);
         pthread_mutex_unlock(&_mutex);
         if (_drawsLinkBadge)
-            [self _drawBadgeInContext:context forIconInRect:dstRect withDrawingRect:drawRect];
+            [self _drawBadgeInContext:context forIconInRect:dstRect];
     }
     else {
         pthread_mutex_unlock(&_mutex);

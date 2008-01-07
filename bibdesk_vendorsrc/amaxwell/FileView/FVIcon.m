@@ -255,7 +255,7 @@ static NSURL *missingFileURL = nil;
 // this method is optional; some subclasses may not have a fast path
 - (void)fastDrawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context { [self drawInRect:dstRect inCGContext:context]; }
 
-- (void)_drawBadgeInContext:(CGContextRef)context forIconInRect:(NSRect)dstRect withDrawingRect:(CGRect)drawingRect
+- (void)_drawBadgeInContext:(CGContextRef)context forIconInRect:(NSRect)dstRect
 {
     IconRef linkBadge;
     OSStatus err;
