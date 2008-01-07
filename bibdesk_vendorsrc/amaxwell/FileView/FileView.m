@@ -1973,6 +1973,28 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     [self selectPreviousIcon:self];
 }
 
+- (void)moveToBeginningOfLine:(id)sender;
+{
+    if ([_selectedIndexes count] == 1) {
+        FVIcon *anIcon = [self _cachedIconForURL:[[self iconURLs] objectAtIndex:[_selectedIndexes firstIndex]]];
+        if ([anIcon currentPageIndex] > 1) {
+            [anIcon showPreviousPage];
+            [self _redisplayIconAfterPageChanged:anIcon];
+        }
+    }
+}
+
+- (void)moveToEndOfLine:(id)sender;
+{
+    if ([_selectedIndexes count] == 1) {
+        FVIcon *anIcon = [self _cachedIconForURL:[[self iconURLs] objectAtIndex:[_selectedIndexes firstIndex]]];
+        if ([anIcon currentPageIndex] < [anIcon pageCount]) {
+            [anIcon showNextPage];
+            [self _redisplayIconAfterPageChanged:anIcon];
+        }
+    }
+}
+
 - (void)insertNewline:(id)sender;
 {
     if ([_selectedIndexes count])
