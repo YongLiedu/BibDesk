@@ -59,16 +59,16 @@ static BOOL FVQLIconDisabled = NO;
         self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:theURL];
     }
     else if ((self = [super init])) {
+        // QL seems to fail a large percentage of the time on my system, and it's also pretty slow.  Since FVFinderIcon is now fast and relatively low overhead, preallocate the fallback icon to avoid waiting for QL to return NULL.
+        _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:theURL];
+        
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&theURL];
+        
         _fileURL = [theURL copy];
         _imageRef = NULL;
         _fullSize = NSZeroSize;
         _desiredSize = NSZeroSize;
-        
-        // QL seems to fail a large percentage of the time on my system, and it's also pretty slow.  Since FVFinderIcon is now fast and relatively low overhead, preallocate the fallback icon to avoid waiting for QL to return NULL.
-        _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_fileURL];
         _quickLookFailed = NO;
-        
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&theURL];
         
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
