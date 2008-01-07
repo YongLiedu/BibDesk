@@ -283,7 +283,15 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
 }
 
 - (id)transformedValue:(id)aURL {
-    return [aURL isFileURL] ? [[NSFileManager defaultManager] displayNameAtPath:[aURL path]] : [aURL absoluteString];
+    NSString *stringValue = nil;
+    if ([aURL isFileURL]) {
+        CFStringRef displayName = NULL;
+        LSCopyDisplayNameForURL((CFURLRef)aURL, &displayName);
+        stringValue = [(id)displayName autorelease];
+    }
+    if (nil == stringValue)
+        stringValue = [aURL absoluteString];
+    return stringValue;
 }
 
 @end

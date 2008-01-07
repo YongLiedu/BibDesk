@@ -435,7 +435,9 @@
 }
 
 - (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation {
-    return [[NSFileManager defaultManager] displayNameAtPath:[[[[resultsArrayController arrangedObjects] objectAtIndex:row] URL] path]];
+    CFStringRef displayName = NULL;
+    LSCopyDisplayNameForURL((CFURLRef)[[[resultsArrayController arrangedObjects] objectAtIndex:row] URL], &displayName);
+    return [(id)displayName autorelease];
 }
 
 - (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
