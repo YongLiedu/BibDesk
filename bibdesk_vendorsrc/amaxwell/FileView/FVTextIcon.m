@@ -262,6 +262,47 @@ static inline void limitSize(NSSize *size)
     [FVBitmapContextCache disposeOfBitmapContext:ctxt];
 }
 
+- (BOOL)_isHTML
+{
+    FSRef fileRef;
+    OSStatus err = noErr;
+    CFStringRef theUTI = NULL;
+    
+    // convert to an FSRef, to get the UTI of the actual URL
+    const UInt8 *fsPath = (void *)[[_fileURL path] UTF8String];
+    err = FSPathMakeRef(fsPath, &fileRef, NULL);
+    
+    // kLSItemContentType returns a CFStringRef, according to the header
+    if (noErr == err)
+        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
+            
+    // For a link/alias, get the target's UTI in order to determine which concrete subclass to create.  Subclasses that are file-based need to check the URL to see if it should be badged using _shouldDrawBadgeForURL, and then call _resolvedURLWithURL in order to actually load the file's content.
+    
+    // aliases and symlinks are kUTTypeResolvable, so the alias manager should handle either of them
+    if (NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeResolvable)) {
+        Boolean isFolder, wasAliased;
+        err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
+        // don't change the UTI if it couldn't be resolved; in that case, we should just show a finder icon
+        if (noErr == err) {
+            CFRelease(theUTI);
+            theUTI = NULL;
+            err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
+        }
+    }
+    
+    return NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeHTML);
+}
+
+- (void)_loadHTML:(NSMutableDictionary *)HTMLDict {
+    NSDictionary *documentAttributes = nil;
+    NSAttributedString *attrString = [[NSAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
+    if (attrString)
+        [HTMLDict setObject:attrString forKey:@"attributedString"];
+    if (documentAttributes)
+        [HTMLDict setObject:documentAttributes forKey:@"documentAttributes"];
+    [attrString release];
+}
+
 - (void)renderOffscreen
 {
     // hold the lock to let needsRenderForSize: know that this icon doesn't need rendering
@@ -294,8 +335,18 @@ static inline void limitSize(NSSize *size)
     // originally kept the attributed string as an ivar, but it's not worth it in most cases
     
     // no need to lock for -fileURL since it's invariant
-    NSDictionary *documentAttributes;
-    NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
+    NSDictionary *documentAttributes = nil;
+    NSMutableAttributedString *attrString = nil;
+    
+    // NSAttributedString uses WebKit for HTML, and is not thread safe on Tiger
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && [self _isHTML]) {
+        NSMutableDictionary *HTMLDict = [NSMutableDictionary dictionary];
+        [self performSelectorOnMainThread:@selector(_loadHTML:) withObject:HTMLDict waitUntilDone:YES];
+        attrString = [[HTMLDict objectForKey:@"attributedString"] mutableCopy];
+        documentAttributes = [HTMLDict objectForKey:@"documentAttributes"];
+    } else {
+        attrString = [[NSMutableAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
+    }
     
     CGAffineTransform pageTransform = __paperTransform;
     NSSize containerSize = __containerSize;
