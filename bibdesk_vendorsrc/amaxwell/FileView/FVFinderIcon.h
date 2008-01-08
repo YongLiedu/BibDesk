@@ -48,5 +48,4 @@
     BOOL            _drawsLinkBadge;
 }
 - (id)initWithFinderIconOfURL:(NSURL *)theURL;
-- (id)initWithURLScheme:(NSString *)scheme;
 @end

@@ -82,8 +82,11 @@
 // nil URL will draw the missing file
 - (id)initWithFinderIconOfURL:(NSURL *)theURL;
 {
-    self = [super init];
-    if (self) {
+    if ([theURL isFileURL] == NO && [theURL scheme] != nil) {
+        self = [self initWithURLScheme:[theURL scheme]];
+    }
+    else if ((self = [super init])) {
+
         _iconType = FVFinderIconType;
         _iconRef = NULL;
         

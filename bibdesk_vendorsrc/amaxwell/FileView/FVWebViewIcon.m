@@ -106,16 +106,12 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 - (id)initWithURL:(NSURL *)aURL;
 {    
     NSParameterAssert(nil != [aURL scheme]);
-    NSParameterAssert(NO == [aURL isFileURL] || [FVTextIcon canInitWithURL:aURL]); // we should only load local HTML files
     
     // if this is disabled or not an http URL, return a finder icon instead
     if (FVWebIconDisabled || (NO == [[aURL scheme] isEqualToString:@"http"] && NO == [aURL isFileURL])) {
         NSZone *zone = [self zone];
         [self release];
-        if ([aURL isFileURL])
-            self = [[FVTextIcon allocWithZone:zone] initWithTextAtURL:aURL];
-        else
-            self = [[FVFinderIcon allocWithZone:zone] initWithURLScheme:[aURL scheme]];
+        self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:aURL];
     }
     else if ((self = [super init])) {
         _httpURL = [aURL copy];
@@ -450,11 +446,9 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:NO];
     }
     else if (YES == _webviewFailed && nil == _fallbackIcon) {
-        if ([_httpURL isFileURL])
-            _fallbackIcon = [[FVTextIcon alloc] initWithTextAtURL:_httpURL];
-        else
-            _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
+        _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_httpURL];
     }
+    [_fallbackIcon renderOffscreen];
     pthread_mutex_unlock(&_mutex);
 }
 
