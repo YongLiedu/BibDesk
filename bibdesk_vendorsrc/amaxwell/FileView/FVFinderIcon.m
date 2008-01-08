@@ -79,38 +79,38 @@
     return self;
 }
 
-// nil URL will draw the missing file
 - (id)initWithFinderIconOfURL:(NSURL *)theURL;
 {
-    if ([theURL isFileURL] == NO && [theURL scheme] != nil) {
+    // missing file icon
+    if (nil == theURL) {
+        [self release];
+        self = [FVMissingFinderIcon sharedIcon];
+    }
+    else if ([theURL isFileURL] == NO && [theURL scheme] != nil) {
+        // non-file URLs
         self = [self initWithURLScheme:[theURL scheme]];
     }
     else if ((self = [super init])) {
-
+        
+        // this has to be a file icon, though the file itself may not exist
         _iconType = FVFinderIconType;
         _iconRef = NULL;
         
-        _drawsLinkBadge = theURL ? [[self class] _shouldDrawBadgeForURL:&theURL] : NO;
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&theURL];
         
-        if (theURL) {
-            OSStatus err;
-            FSRef fileRef;
-            if (FALSE == CFURLGetFSRef((CFURLRef)theURL, &fileRef))
-                err = fnfErr;
-            else
-                err = noErr;
-            err = GetIconRefFromFileInfo(&fileRef, 0, NULL, kFSCatInfoNone, NULL, kIconServicesNoBadgeFlag, &_iconRef, NULL);
-            if (noErr != err) {
-                // this will indicate that we should plot the question mark icon
-                _iconRef = NULL;
-            }
-            
-            // !!! docs don't say we own the reference from GetIconRefFromFileInfo
-            
-        }
-        else {
+        OSStatus err;
+        FSRef fileRef;
+        if (FALSE == CFURLGetFSRef((CFURLRef)theURL, &fileRef))
+            err = fnfErr;
+        else
+            err = noErr;
+        
+        // header doesn't specify that this increments the refcount, but the doc page does
+        err = GetIconRefFromFileInfo(&fileRef, 0, NULL, kFSCatInfoNone, NULL, kIconServicesNoBadgeFlag, &_iconRef, NULL);
+        
+        // file likely doesn't exist; can't just return FVMissingFinderIcon since we may need a link badge
+        if (noErr != err)
             _iconRef = NULL;
-        }
     }
     return self;   
 }
@@ -129,19 +129,19 @@
 - (NSSize)size { return NSMakeSize(128, 128); }
 
 - (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
-{
-    CGRect rect = [self _drawingRectWithRect:dstRect];
-    
+{    
     if (NULL == _iconRef) {
-        [[FVMissingFinderIcon sharedIcon] drawInRect:dstRect inCGContext:context];       
+        [[FVMissingFinderIcon sharedIcon] drawInRect:dstRect inCGContext:context];
     }
     else {
+        CGRect rect = [self _drawingRectWithRect:dstRect];
         CGContextSaveGState(context);
         // get rid of any shadow, as the image draws it
         CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
         PlotIconRefInContext(context, &rect, kAlignAbsoluteCenter, kTransformNone, NULL, kIconServicesNoBadgeFlag, _iconRef);
         CGContextRestoreGState(context);
     }
+    
     // We could use Icon Services to draw the badge, but it draws pure alpha with a centered badge at large sizes.  It also results in an offset image relative to the grid.
     if (_drawsLinkBadge)
         [self _drawBadgeInContext:context forIconInRect:dstRect];
