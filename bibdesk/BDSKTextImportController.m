@@ -1360,7 +1360,7 @@
 		[[[itemTableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	return [macroEditor attachToTableView:itemTableView atRow:row column:2 withValue:value];
+	return [macroEditor attachToTableView:itemTableView atRow:row column:2 withValue:value formatter:tableCellFormatter];
 }
 
 #pragma mark BDSKMacroFormatter delegate

@@ -1607,7 +1607,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		[[[tableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
 		[fieldEditor selectAll:self];
 	}
-	return [macroEditor attachToTableView:tableView atRow:row column:1 withValue:value];
+	return [macroEditor attachToTableView:tableView atRow:row column:1 withValue:value formatter:tableCellFormatter];
 }
 
 - (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {

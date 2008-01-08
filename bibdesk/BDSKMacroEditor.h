@@ -39,17 +39,18 @@
 
 #import <AppKit/AppKit.h>
 
-@class BDSKBackgroundView;
+@class BDSKBackgroundView, BDSKComplexStringFormatter;
 
 @interface BDSKMacroEditor : NSWindowController {
     IBOutlet NSTextField *expandedValueTextField;
     IBOutlet BDSKBackgroundView *backgroundView;
 	NSTableView *tableView;
+    BDSKComplexStringFormatter *formatter;
 	int row;
 	int column;
 }
 
-- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString;
+- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString formatter:(BDSKComplexStringFormatter *)aFormatter;
 - (BOOL)isEditing;
 
 @end

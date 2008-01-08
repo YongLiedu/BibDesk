@@ -68,6 +68,7 @@
 - (id)init {
 	if (self = [super initWithWindowNibName:[self windowNibName]]) {
 		tableView = nil;
+        formatter = nil;
 		row = -1;
 		column = -1;
 	}
@@ -82,11 +83,12 @@
     return @"MacroTextFieldWindow";
 }
 
-- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString {
+- (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString formatter:(BDSKComplexStringFormatter *)aFormatter {
 	if ([self isEditing]) 
 		return NO; // we are already busy editing
     
 	tableView = [aTableView retain];
+	formatter = [aFormatter retain];
 	row = aRow;
 	column = aColumn;
 	
@@ -179,6 +181,8 @@
 	// release the temporary objects
 	[tableView release];
 	tableView = nil; // we should set this to nil, as we use this as a flag that we are editing
+	[formatter release];
+	formatter = nil;
 	row = -1;
 	column = -1;
 }
@@ -273,8 +277,6 @@
 }
 
 - (void)controlTextDidChange:(NSNotification*)notification { 
-    BDSKComplexStringFormatter *formatter = [[self currentCell] formatter];
-	OBASSERT([formatter isKindOfClass:[BDSKComplexStringFormatter class]]);
 	NSString *error = [formatter parseError];
 	if (error)
 		[self setErrorReason:error errorMessage:[NSString stringWithFormat:NSLocalizedString(@"Invalid BibTeX string: %@. This change will not be recorded.", @"Tool tip message"),error]];
