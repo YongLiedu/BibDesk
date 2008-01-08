@@ -279,11 +279,13 @@
         if ([files count])
             [[BDSKFiler sharedFiler] filePapers:files fromDocument:document check:NO];
     }
+    
+    [[self undoManager] removeAllActions];
+    [item setOwner:nil];
     [item release];
     
     item = newItem;
     [item setOwner:self];
-    [[self undoManager] removeAllActions];
 	
 	int numItems = [itemsAdded count];
 	NSString *pubSingularPlural = (numItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
@@ -298,6 +300,10 @@
 - (IBAction)closeAction:(id)sender{
     // make the tableview stop editing:
     [self finalizeChangesPreservingSelection:NO];
+    [[self undoManager] removeAllActions];
+    [item setOwner:nil];
+    [item release];
+    item = nil;
     [super dismiss:sender];
 }
 
@@ -307,10 +313,11 @@
 }
 
 - (IBAction)clearAction:(id)sender{
+    [[self undoManager] removeAllActions];
+    [item setOwner:nil];
     [item release];
     item = [[BibItem alloc] init];
     [item setOwner:self];
-    [[self undoManager] removeAllActions];
     
     [itemTypeButton selectItemWithTitle:[item pubType]];
     [citeKeyField setStringValue:[item citeKey]];
