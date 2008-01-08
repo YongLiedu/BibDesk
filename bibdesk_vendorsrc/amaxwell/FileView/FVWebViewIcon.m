@@ -111,7 +111,10 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     if (FVWebIconDisabled || (NO == [[aURL scheme] isEqualToString:@"http"] && NO == [aURL isFileURL])) {
         NSZone *zone = [self zone];
         [self release];
-        self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:aURL];
+        if ([aURL isFileURL])
+            self = [[FVTextIcon allocWithZone:zone] initWithTextAtURL:aURL];
+        else
+            self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:aURL];
     }
     else if ((self = [super init])) {
         _httpURL = [aURL copy];
