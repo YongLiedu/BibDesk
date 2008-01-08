@@ -128,9 +128,6 @@ static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbn
 {        
     pthread_mutex_lock(&_mutex);
     
-    CGImageRelease(_fullImageRef);
-    _fullImageRef = NULL;
-
     if (NO == _quickLookFailed) {
         
         CGSize requestedSize = (CGSize) { THUMBNAIL_MAX, THUMBNAIL_MAX };
@@ -146,8 +143,21 @@ static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbn
 
         if (shouldDrawFullImageWithSize(_desiredSize, _thumbnailSize)) {
             
-            requestedSize = *(CGSize *)&_desiredSize;
-            _fullImageRef = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, requestedSize, NULL);
+            if (NULL != _fullImageRef) {
+                
+                NSSize currentSize = NSMakeSize(CGImageGetWidth(_fullImageRef), CGImageGetHeight(_fullImageRef));
+                
+                if (NSEqualSizes(currentSize, _desiredSize) == NO) {
+                    CGImageRelease(_fullImageRef);
+                    _fullImageRef = NULL;
+                }
+
+            }
+            
+            if (NULL == _fullImageRef) {
+                requestedSize = *(CGSize *)&_desiredSize;
+                _fullImageRef = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, requestedSize, NULL);
+            }
             
             if (NULL == _fullImageRef)
                 _quickLookFailed = YES;

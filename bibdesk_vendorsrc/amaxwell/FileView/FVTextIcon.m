@@ -154,7 +154,6 @@ static CGAffineTransform __paperTransform;
         _thumbnailSize = NSMakeSize(_fullSize.width / 2, _fullSize.height / 2);
         _fullImageRef = NULL;
         _thumbnailRef = NULL;
-        _inDiskCache = NO;
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
         
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
@@ -243,22 +242,49 @@ static inline void limitSize(NSSize *size)
     }
 }
 
+- (void)_createThumbnailFromFullImage
+{
+    NSParameterAssert(NULL == _thumbnailRef);
+    CGContextRef ctxt = [FVBitmapContextCache newBitmapContextOfWidth:_thumbnailSize.width height:_thumbnailSize.height];
+    CGContextSaveGState(ctxt);
+    
+    // take a small hit here for good interpolation so we can draw smaller icons at larger sizes
+    CGContextSetInterpolationQuality(ctxt, kCGInterpolationHigh);
+    CGRect imageRect = CGRectZero;
+    imageRect.size = *(CGSize *)&_thumbnailSize;
+    
+    if (_fullImageRef) {
+        CGContextDrawImage(ctxt, imageRect, _fullImageRef);
+        _thumbnailRef = CGBitmapContextCreateImage(ctxt);
+    }
+    
+    CGContextRestoreGState(ctxt);
+    [FVBitmapContextCache disposeOfBitmapContext:ctxt];
+}
+
 - (void)renderOffscreen
 {
     // hold the lock to let needsRenderForSize: know that this icon doesn't need rendering
     pthread_mutex_lock(&_mutex);
     
-    // !!! early return here after a cache check
-    if (_inDiskCache) {
-        CGImageRelease(_fullImageRef);
-        _fullImageRef = [FVIconCache newImageNamed:_diskCacheName];
-        BOOL success = (NULL != _fullImageRef);
-        if (success) {
-            pthread_mutex_unlock(&_mutex);
-            return;
-        }
+    // !!! two early returns here after a cache check
+
+    if (NULL != _fullImageRef) {
+        // note that _fullImageRef may be non-NULL if we were added to the FVIconQueue multiple times before renderOffscreen was called
+        pthread_mutex_unlock(&_mutex);
+        return;
+    } 
+    else if ((_fullImageRef = [FVIconCache newImageNamed:_diskCacheName]) != NULL) {
+        
+        // in case this was cached by another instance
+        if (NULL == _thumbnailRef)
+            [self _createThumbnailFromFullImage];
+        pthread_mutex_unlock(&_mutex);
+        return;
     }
 
+    NSParameterAssert(NULL == _fullImageRef);
+    NSParameterAssert(NULL == _thumbnailRef);
     
     // definitely use the context cache for this, since these bitmaps are pretty huge
     CGContextRef ctxt = [FVBitmapContextCache newBitmapContextOfWidth:__paperSize.width height:__paperSize.height];
@@ -362,7 +388,6 @@ static inline void limitSize(NSSize *size)
     CGImageRelease(_fullImageRef);
     _fullImageRef = CGBitmapContextCreateImage(ctxt);
     [FVIconCache cacheCGImage:_fullImageRef withName:_diskCacheName];
-    _inDiskCache = YES;
     
     // reset size while we have the lock, since it may be different now that we've read the string
     _fullSize = paperSize;
@@ -374,25 +399,8 @@ static inline void limitSize(NSSize *size)
     [FVBitmapContextCache disposeOfBitmapContext:ctxt];
     
     // repeat for the thumbnail image as needed, but this time just draw our bitmap again
-    if (NULL == _thumbnailRef) {
-        
-        ctxt = [FVBitmapContextCache newBitmapContextOfWidth:_thumbnailSize.width height:_thumbnailSize.height];
-        CGContextSaveGState(ctxt);
-        
-        // take a small hit here for good interpolation so we can draw smaller icons at larger sizes
-        CGContextSetInterpolationQuality(ctxt, kCGInterpolationHigh);
-        stringRect.origin = NSZeroPoint;
-        stringRect.size = _thumbnailSize;
-        
-        if (_fullImageRef) {
-            CGContextDrawImage(ctxt, *(CGRect *)&stringRect, _fullImageRef);
-            CGImageRelease(_thumbnailRef);
-            _thumbnailRef = CGBitmapContextCreateImage(ctxt);
-        }
-        
-        CGContextRestoreGState(ctxt);
-        [FVBitmapContextCache disposeOfBitmapContext:ctxt];
-    }
+    if (NULL == _thumbnailRef)
+        [self _createThumbnailFromFullImage];
 
     pthread_mutex_unlock(&_mutex);
 }    

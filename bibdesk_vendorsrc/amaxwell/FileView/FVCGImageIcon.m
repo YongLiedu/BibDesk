@@ -174,17 +174,29 @@ static inline BOOL isBigImage(CGImageRef image)
 
 - (void)renderOffscreen
 {      
-    // !!! early return here after a cache check
+    
     pthread_mutex_lock(&_mutex);
-    if (_inDiskCache) {
-        CGImageRelease(_fullImageRef);
+    
+    // !!! early returns here after a cache check
+    if (NULL != _fullImageRef) {
+        // note that _fullImageRef may be non-NULL if we were added to the FVIconQueue multiple times before renderOffscreen was called
+        NSParameterAssert(NULL != _thumbnailRef);
+        pthread_mutex_unlock(&_mutex);
+        return;
+    }
+    else if (_inDiskCache) {
+        // This check only applies to really huge icons, so we keep _inDiskCache per-instance.
+        // Normally it's about as fast to use ImageIO as FVIconCache, so we don't bother with it unless the image was resampled.
         _fullImageRef = [FVIconCache newImageNamed:_diskCacheName];
-        BOOL success = (NULL != _fullImageRef);
-        if (success) {
+        if (NULL != _fullImageRef) {
+            NSParameterAssert(NULL != _thumbnailRef);
             pthread_mutex_unlock(&_mutex);
             return;
         }
     }
+    
+    // at this point, _fullImageRef is NULL, but _thumbnailRef may be present (if we're recovering from -releaseResources)
+    NSParameterAssert(NULL == _fullImageRef);
         
     CGImageSourceRef src = NULL;
     CFDataRef imageData = NULL;
@@ -202,10 +214,7 @@ static inline BOOL isBigImage(CGImageRef image)
     
     if (src) {
         
-        // Should always be NULL if we get here.
-        CGImageRelease(_fullImageRef);
-        _fullImageRef = NULL;
-        
+        // may not be NULL
         if (NULL == _thumbnailRef)
             _thumbnailRef = CGImageSourceCreateThumbnailAtIndex(src, 0, __imsrcOptions);
         

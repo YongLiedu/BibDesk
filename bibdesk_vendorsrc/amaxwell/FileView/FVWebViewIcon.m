@@ -429,10 +429,9 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     pthread_mutex_lock(&_mutex);
     
     // check the disk cache first
+    // note that _fullImageRef may be non-NULL if we were added to the FVIconQueue multiple times before renderOffscreen was called
     if (NULL == _fullImageRef)
         _fullImageRef = [FVIconCache newImageNamed:_diskCacheName];
-    else
-        NSLog(@"*** renderOffscreen called when we already have an image *** %@", [self debugDescription]);
 
     if (_fullImageRef) {
 
