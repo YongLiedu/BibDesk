@@ -130,58 +130,34 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     NSURL *fileURL = nil;
     
     // HTML template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:NSLocalizedString(@"Default HTML template", @"template name") forKey:BDSKTemplateNameString];
-    [template setValue:@"html" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
-            
-    // main page template
     fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"htmlExportTemplate.html"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
-    
+    template = [BDSKTemplate templateWithName:NSLocalizedString(@"Default HTML template", @"template name") mainPageURL:fileURL fileType:@"html"];
     // a user could potentially have templates for multiple BibTeX types; we could add all of those, as well
     fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"htmlItemExportTemplate.html"]];
     [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
-    
     fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"htmlExportStyleSheet.css"]];
     [template addChildWithURL:fileURL role:BDSKTemplateAccessoryString];
+    [itemNodes addObject:template];
     
     // RTF template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:NSLocalizedString(@"Default RTF template", @"template name") forKey:BDSKTemplateNameString];
-    [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
     fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"rtfExportTemplate.rtf"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    template = [BDSKTemplate templateWithName:NSLocalizedString(@"Default RTF template", @"template name") mainPageURL:fileURL fileType:@"rtf"];
+    [itemNodes addObject:template];
     
     // RTFD template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:NSLocalizedString(@"Default RTFD template", @"template name") forKey:BDSKTemplateNameString];
-    [template setValue:@"rtfd" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
     fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"rtfdExportTemplate.rtfd"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    template = [BDSKTemplate templateWithName:NSLocalizedString(@"Default RTFD template", @"template name") mainPageURL:fileURL fileType:@"rtfd"];
+    [itemNodes addObject:template];
         
     // RSS template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:NSLocalizedString(@"Default RSS template", @"template name") forKey:BDSKTemplateNameString];
-    [template setValue:@"rss" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
     fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"rssExportTemplate.rss"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];    
+    template = [BDSKTemplate templateWithName:NSLocalizedString(@"Default RSS template", @"template name") mainPageURL:fileURL fileType:@"rss"];
+    [itemNodes addObject:template];
         
     // Doc template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:NSLocalizedString(@"Default Doc template", @"template name") forKey:BDSKTemplateNameString];
-    [template setValue:@"doc" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
     fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"docExportTemplate.doc"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];  
+    template = [BDSKTemplate templateWithName:NSLocalizedString(@"Default Doc template", @"template name") mainPageURL:fileURL fileType:@"doc"];
+    [itemNodes addObject:template];
             
     return [itemNodes autorelease];
 }
@@ -194,35 +170,24 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     NSURL *fileURL = nil;
     
     // Citation template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:NSLocalizedString(@"Citation Service template", @"template name") forKey:BDSKTemplateNameString];
-    [template setValue:@"txt" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/citeServiceTemplate.txt"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    template = [BDSKTemplate templateWithName:NSLocalizedString(@"Citation Service template", @"template name") mainPageURL:fileURL fileType:@"txt"];
+    [itemNodes addObject:template];
     
     // Text template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:NSLocalizedString(@"Text Service template", @"template name") forKey:BDSKTemplateNameString];
-    [template setValue:@"txt" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/textServiceTemplate.txt"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    template = [BDSKTemplate templateWithName:NSLocalizedString(@"Text Service template", @"template name") mainPageURL:fileURL fileType:@"txt"];
+    [itemNodes addObject:template];
     
     // RTF template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:NSLocalizedString(@"RTF Service template", @"template name") forKey:BDSKTemplateNameString];
-    [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfServiceTemplate.rtf"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    template = [BDSKTemplate templateWithName:NSLocalizedString(@"RTF Service template", @"template name") mainPageURL:fileURL fileType:@"rtf"];
+    [template setValue:NSLocalizedString(@"RTF Service template", @"template name") forKey:BDSKTemplateNameString];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfServiceTemplate default item.rtf"]];
     [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfServiceTemplate book.rtf"]];
     [template addChildWithURL:fileURL role:BDSKBookString];
+    [itemNodes addObject:template];
             
     return [itemNodes autorelease];
 }
@@ -344,6 +309,15 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 + (BDSKTemplate *)templateForRTFService;
 {
     return [[self serviceTemplates] lastObject];
+}
+
++ (BDSKTemplate *)templateWithName:(NSString *)name mainPageURL:(NSURL *)fileURL fileType:(NSString *)fileType;
+{
+    BDSKTemplate *template = [[[BDSKTemplate alloc] init] autorelease];
+    [template setValue:name forKey:BDSKTemplateNameString];
+    [template setValue:fileType forKey:BDSKTemplateRoleString];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    return template;
 }
 
 #pragma mark Instance methods
