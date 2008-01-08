@@ -187,6 +187,10 @@
     [[self attributedStringValue] drawInRect:cellFrame];
 }
 
+// make sure it uses black text on Leopard when the row is selected (see bug #1866083)
+- (NSBackgroundStyle)backgroundStyle { return NSBackgroundStyleLight; }
+- (NSBackgroundStyle)interiorBackgroundStyle { return NSBackgroundStyleLight; }
+
 - (NSSize)cellSize
 {
     NSSize cellSize = [super cellSize];
