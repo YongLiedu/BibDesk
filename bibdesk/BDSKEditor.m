@@ -2711,9 +2711,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	if ([tv isEqual:tableView]) {
         
-        // @@ Workaround for a macro editing bug when converting a string to a number (hit cmd-r, delete braces, start entering text).  This caused an exception since the cell's formatter was a BDSKCitationFormatter and it ended up being sent parseError:.  It looks like tableView:willDisplayCell:... is too late, at least on Leopard, so maybe the formatter could be set here regardless?
-        [self tableView:tv willDisplayCell:[tableColumn dataCellForRow:row] forTableColumn:tableColumn row:row];
-
         ignoreEdit = NO;
         // we always want to "edit" even when we are not editable, so we can always select, and the cell will prevent editing when isEditable == NO
         if ([[tableColumn identifier] isEqualToString:@"value"])
