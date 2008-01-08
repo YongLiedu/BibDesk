@@ -71,17 +71,24 @@
 		return @"";
 	}
 	
-	// the 'using' parameters gives the template name to use
-	NSString *templateStyle = [params objectForKey:@"using"];
-	// make sure we get something
+	// the 'using' parameters gives the template name or file to use
+	id templateStyle = [params objectForKey:@"using"];
+	BDSKTemplate *template = nil;
+    // make sure we get something
 	if (!templateStyle) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
 		return [NSArray array];
 	}
 	// make sure we get the right thing
-	if (![templateStyle isKindOfClass:[NSString class]] ) {
+	if ([templateStyle isKindOfClass:[NSString class]] ) {
+        template = [BDSKTemplate templateForStyle:templateStyle];
+	} else if ([templateStyle isKindOfClass:[NSURL class]] ) {
+        NSString *fileType = [[templateStyle path] pathExtension];
+        template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ? fileType : @"txt"];
+	}
+    if (template == nil) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-			return @"";
+        return @"";
 	}
 	
 	// the 'for' parameter can select the items to template
@@ -105,7 +112,6 @@
         items = publications;
     }
     
-    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
     NSString *templatedText = nil;
     
     if ([template templateFormat] & BDSKRichTextTemplateFormat) {
@@ -148,16 +154,23 @@
 	}
 	
 	// the 'using' parameters gives the template name to use
-	NSString *templateStyle = [params objectForKey:@"using"];
-	// make sure we get something
+	id templateStyle = [params objectForKey:@"using"];
+	BDSKTemplate *template = nil;
+    // make sure we get something
 	if (!templateStyle) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
 		return [NSArray array];
 	}
 	// make sure we get the right thing
-	if (![templateStyle isKindOfClass:[NSString class]] ) {
+	if ([templateStyle isKindOfClass:[NSString class]] ) {
+        template = [BDSKTemplate templateForStyle:templateStyle];
+	} else if ([templateStyle isKindOfClass:[NSURL class]] ) {
+        NSString *fileType = [[templateStyle path] pathExtension];
+        template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ? fileType : @"txt"];
+	}
+    if (template == nil) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-			return [[[NSTextStorage alloc] init] autorelease];;
+        return [[[NSTextStorage alloc] init] autorelease];;
 	}
 	
 	// the 'for' parameter can select the items to template
@@ -180,8 +193,6 @@
 	} else {
         items = publications;
     }
-    
-    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
     
     if ([template templateFormat] & BDSKRichTextTemplateFormat) {
         NSAttributedString *templatedRichText = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:document publications:items documentAttributes:NULL];

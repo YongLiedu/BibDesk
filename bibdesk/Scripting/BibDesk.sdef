@@ -883,8 +883,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="templatedText" class="BDSKTemplatedTextCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
-            <parameter name="using" code="usng" type="text"
-                description="The name of the template to use.">
+            <parameter name="using" code="usng"
+                description="The name or file of the template to use.">
+                <type type="text"/>
+                <type type="file"/>
                 <cocoa key="using"/>
             </parameter>
             <parameter name="for" code="for " optional="yes"
@@ -902,8 +904,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="templatedRichText" class="BDSKTemplatedRichTextCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
-            <parameter name="using" code="usng" type="text"
-                description="The name of the template to use.">
+            <parameter name="using" code="usng"
+                description="The name or file of the template to use.">
+                <type type="text"/>
+                <type type="file"/>
                 <cocoa key="using"/>
             </parameter>
             <parameter name="for" code="for " optional="yes"
@@ -921,8 +925,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="exportUsingTemplate" class="BDSKExportUsingTemplateCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
-            <parameter name="using template" code="uset" type="text"
-                description="The name of the template to use.">
+            <parameter name="using template" code="uset"
+                description="The name or file of the template to use.">
+                <type type="text"/>
+                <type type="file"/>
                 <cocoa key="using"/>
             </parameter>
             <parameter name="to" code="to  " type="file"

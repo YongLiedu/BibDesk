@@ -71,16 +71,23 @@
 	}
 	
 	// the 'using' parameters gives the template name to use
-	NSString *templateStyle = [params objectForKey:@"using"];
-	// make sure we get something
+	id templateStyle = [params objectForKey:@"using"];
+	BDSKTemplate *template = nil;
+    // make sure we get something
 	if (!templateStyle) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
 		return [NSArray array];
 	}
 	// make sure we get the right thing
-	if (![templateStyle isKindOfClass:[NSString class]] ) {
+	if ([templateStyle isKindOfClass:[NSString class]] ) {
+        template = [BDSKTemplate templateForStyle:templateStyle];
+	} else if ([templateStyle isKindOfClass:[NSURL class]] ) {
+        NSString *fileType = [[templateStyle path] pathExtension];
+        template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ? fileType : @"txt"];
+	}
+    if (template == nil) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-			return nil;
+        return nil;
 	}
 	
 	// the 'to' parameters gives the file to save to, either as a path or a url (it seems)
@@ -124,7 +131,6 @@
         items = publications;
     }
     
-    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
     NSData *fileData = nil;
     
     if ([template templateFormat] & BDSKRichTextTemplateFormat) {
