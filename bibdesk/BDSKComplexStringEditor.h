@@ -1,4 +1,4 @@
-// BDSKMacroEditor.h
+// BDSKComplexStringEditor.h
 // Created by Michael McCracken, January 2005
 
 // Inspired by and somewhat copied from Calendar, whose author I've
@@ -41,7 +41,7 @@
 
 @class BDSKBackgroundView, BDSKComplexStringFormatter;
 
-@interface BDSKMacroEditor : NSWindowController {
+@interface BDSKComplexStringEditor : NSWindowController {
     IBOutlet NSTextField *expandedValueTextField;
     IBOutlet BDSKBackgroundView *backgroundView;
 	NSTableView *tableView;

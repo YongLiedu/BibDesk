@@ -1,4 +1,4 @@
-// BDSKMacroEditor.m
+// BDSKComplexStringEditor.m
 // Created by Michael McCracken, January 2005
 
 /*
@@ -34,14 +34,14 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKMacroEditor.h"
+#import "BDSKComplexStringEditor.h"
 #import "BDSKComplexString.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKBackgroundView.h"
 #import <OmniBase/assertions.h>
 #import "NSWindowController_BDSKExtensions.h"
 
-@interface BDSKMacroEditor (Private)
+@interface BDSKComplexStringEditor (Private)
 
 - (void)endEditingAndOrderOut;
 
@@ -63,7 +63,7 @@
 
 @end
 
-@implementation BDSKMacroEditor
+@implementation BDSKComplexStringEditor
 
 - (id)init {
 	if (self = [super initWithWindowNibName:[self windowNibName]]) {
@@ -110,7 +110,7 @@
 
 @end
 
-@implementation BDSKMacroEditor (Private)
+@implementation BDSKComplexStringEditor (Private)
 
 - (void)registerForNotifications {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];

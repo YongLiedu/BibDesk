@@ -49,7 +49,7 @@
 /* Begin PBXBuildFile section */
 		2730077E07CF20B500F2E485 /* BDSKBorderlessKeyWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077707CF20B500F2E485 /* BDSKBorderlessKeyWindow.m */; };
 		2730077F07CF20B500F2E485 /* BDSKComplexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077807CF20B500F2E485 /* BDSKComplexString.m */; };
-		2730078107CF20B500F2E485 /* BDSKMacroEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077A07CF20B500F2E485 /* BDSKMacroEditor.m */; };
+		2730078107CF20B500F2E485 /* BDSKComplexStringEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077A07CF20B500F2E485 /* BDSKComplexStringEditor.m */; };
 		2730078307CF20B500F2E485 /* BDSKMacroWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */; };
 		2730079F07CF214E00F2E485 /* MacroTextFieldWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = 2730079B07CF214E00F2E485 /* MacroTextFieldWindow.nib */; };
 		273007A007CF214E00F2E485 /* MacroWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = 2730079D07CF214E00F2E485 /* MacroWindow.nib */; };
@@ -890,8 +890,8 @@
 		2730077607CF20B500F2E485 /* BDSKBorderlessKeyWindow.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKBorderlessKeyWindow.h; sourceTree = "<group>"; };
 		2730077707CF20B500F2E485 /* BDSKBorderlessKeyWindow.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKBorderlessKeyWindow.m; sourceTree = "<group>"; };
 		2730077807CF20B500F2E485 /* BDSKComplexString.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKComplexString.m; sourceTree = "<group>"; };
-		2730077907CF20B500F2E485 /* BDSKMacroEditor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKMacroEditor.h; sourceTree = "<group>"; };
-		2730077A07CF20B500F2E485 /* BDSKMacroEditor.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKMacroEditor.m; sourceTree = "<group>"; };
+		2730077907CF20B500F2E485 /* BDSKComplexStringEditor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKComplexStringEditor.h; sourceTree = "<group>"; };
+		2730077A07CF20B500F2E485 /* BDSKComplexStringEditor.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKComplexStringEditor.m; sourceTree = "<group>"; };
 		2730077B07CF20B500F2E485 /* BDSKMacroWindowController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKMacroWindowController.h; sourceTree = "<group>"; };
 		2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKMacroWindowController.m; sourceTree = "<group>"; };
 		2730079C07CF214E00F2E485 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/MacroTextFieldWindow.nib; sourceTree = "<group>"; };
@@ -2099,6 +2099,7 @@
 				CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */,
 				CEF83F360C77911F00A3AD51 /* BDSKBookmarkController.m */,
 				3D866C2708031CEC00FF1724 /* BDSKCharacterConversion.m */,
+				2730077A07CF20B500F2E485 /* BDSKComplexStringEditor.m */,
 				CE38FB85091D946A00BCB69D /* BDSKConditionController.m */,
 				F95ED68A0B07B87F00000BBF /* BDSKController.m */,
 				CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */,
@@ -2115,7 +2116,6 @@
 				F9022C6A075802E300C3F701 /* BDSKFiler.m */,
 				CE38FB8D091D94A100BCB69D /* BDSKFilterController.m */,
 				F97965F0086909EA00050427 /* BDSKFindController.m */,
-				2730077A07CF20B500F2E485 /* BDSKMacroEditor.m */,
 				2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */,
 				CEF71AD90B91BBCB003A2771 /* BDSKNotesWindowController.m */,
 				CE22E1CC0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.m */,
@@ -2431,6 +2431,7 @@
 				CE6003260AF3E465000B5680 /* BDSKColoredBox.h */,
 				CE3A0BD50B1634D500233208 /* BDSKCompletionServerProtocol.h */,
 				273007A407CF216700F2E485 /* BDSKComplexString.h */,
+				2730077907CF20B500F2E485 /* BDSKComplexStringEditor.h */,
 				F9022C480758027800C3F701 /* BDSKComplexStringFormatter.h */,
 				CE38FB82091D946900BCB69D /* BDSKCondition.h */,
 				CE38FB84091D946A00BCB69D /* BDSKConditionController.h */,
@@ -2495,7 +2496,6 @@
 				F90B093F0C283B5100144F1B /* BDSKLogUtilities.h */,
 				F9201DFF0B72504C007E45BB /* BDSKMacro.h */,
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
-				2730077907CF20B500F2E485 /* BDSKMacroEditor.h */,
 				2730077B07CF20B500F2E485 /* BDSKMacroWindowController.h */,
 				CE34A5710B249E0B00755730 /* BDSKMARCParser.h */,
 				F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */,
@@ -3590,7 +3590,7 @@
 				F916E69607A9F9AB009EF011 /* BDSKThreadSafeMutableDictionary.m in Sources */,
 				2730077E07CF20B500F2E485 /* BDSKBorderlessKeyWindow.m in Sources */,
 				2730077F07CF20B500F2E485 /* BDSKComplexString.m in Sources */,
-				2730078107CF20B500F2E485 /* BDSKMacroEditor.m in Sources */,
+				2730078107CF20B500F2E485 /* BDSKComplexStringEditor.m in Sources */,
 				2730078307CF20B500F2E485 /* BDSKMacroWindowController.m in Sources */,
 				F9A6742B07D04E8000782ACD /* BDSKFontManager.m in Sources */,
 				3D824AA907D099C300FB2F67 /* BDSKBackgroundView.m in Sources */,

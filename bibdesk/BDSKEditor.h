@@ -46,7 +46,7 @@
 @class BDSKComplexStringFormatter;
 @class BDSKCrossrefFormatter;
 @class BDSKCitationFormatter;
-@class BDSKMacroEditor;
+@class BDSKComplexStringEditor;
 @class BDSKImagePopUpButton;
 @class BibItem;
 @class BDSKStatusBar;
@@ -118,7 +118,7 @@
 	IBOutlet NSTableView *authorTableView;
 
     // Macro editing stuff
-    BDSKMacroEditor *macroEditor;
+    BDSKComplexStringEditor *complexStringEditor;
 
 	// edit field stuff
 	BOOL forceEndEditing;
