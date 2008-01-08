@@ -117,8 +117,7 @@ static CGPDFDocumentRef createCGPDFDocumentWithPostScriptURL(NSURL *fileURL)
         // initialize to zero so we know whether to load the PDF document
         _pageCount = 0;
         
-        NSInteger rc = pthread_mutex_init(&_mutex, NULL);
-        if (rc)
+        if (pthread_mutex_init(&_mutex, NULL))
             perror("pthread_mutex_init");
     }
     return self;
@@ -226,18 +225,35 @@ static inline void limitSize(NSSize *size)
     pthread_mutex_lock(&_mutex);
     
     // only the first page is cached to disk; ignore this branch if we should be drawing a later page or if the size has changed
+    
+    // handle the case where multiple render tasks were pushed into the queue before renderOffscreen was called
+    if ((NULL != _thumbnailRef || NULL != _pdfDoc) && 1 == _currentPage) {
+        
+        BOOL exitEarly;
+        // if _thumbnailRef is non-NULL, we're guaranteed that _thumbnailSize has been initialized correctly
+        
+        if (_desiredSize.height <= _thumbnailSize.height * 1.2)
+            exitEarly = (NULL != _thumbnailRef);
+        else
+            exitEarly = (NULL != _pdfDoc && NULL != _pdfPage);
+        
+        if (exitEarly) {
+            pthread_mutex_unlock(&_mutex);
+            return;
+        }
+    }
+    
     if (NULL == _thumbnailRef && 1 == _currentPage) {
         
         _thumbnailRef = [FVIconCache newImageNamed:_diskCacheName];
         BOOL exitEarly = NO;
-        
         
         // This is an optimization to avoid loading the PDF document unless absolutely necessary.  If the icon was cached by a different FVPDFIcon instance, _pageCount won't be correct and we have to continue on and load the PDF document.  In that case, our sizes will be overwritten, but the thumbnail won't be recreated.  If we need to render something that's larger than the thumbnail by 20%, we have to continue on and make sure the PDF doc is loaded as well.
         
         if (NULL != _thumbnailRef) {
             _thumbnailSize.width = CGImageGetWidth(_thumbnailRef);
             _thumbnailSize.height = CGImageGetHeight(_thumbnailRef);
-            exitEarly = _thumbnailSize.height <= _desiredSize.height * 1.2 && _pageCount > 0;
+            exitEarly = _desiredSize.height <= _thumbnailSize.height * 1.2 && _pageCount > 0;
         }
                 
         // !!! early return
