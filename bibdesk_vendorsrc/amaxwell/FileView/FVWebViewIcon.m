@@ -111,10 +111,14 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     if (FVWebIconDisabled || (NO == [[aURL scheme] isEqualToString:@"http"] && NO == [aURL isFileURL])) {
         NSZone *zone = [self zone];
         [self release];
-        if ([aURL isFileURL])
-            self = [[FVTextIcon allocWithZone:zone] initWithTextAtURL:aURL];
-        else
-            self = [[FVFinderIcon allocWithZone:zone] initWithURLScheme:[aURL scheme]];
+        if ([aURL isFileURL]) {
+            if ([FVTextIcon canInitWithURL:aURL])
+                self = [[FVTextIcon alloc] initWithTextAtURL:aURL];
+            else
+                self = [[FVFinderIcon alloc] initWithFinderIconOfURL:aURL];
+        } else {
+            self = [[FVFinderIcon alloc] initWithURLScheme:[aURL scheme]];
+        }
     }
     else if ((self = [super init])) {
         _httpURL = [aURL copy];
@@ -449,10 +453,14 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:NO];
     }
     else if (YES == _webviewFailed && nil == _fallbackIcon) {
-        if ([_httpURL isFileURL])
-            _fallbackIcon = [[FVTextIcon alloc] initWithTextAtURL:_httpURL];
-        else
+        if ([_httpURL isFileURL]) {
+            if ([FVTextIcon canInitWithURL:_httpURL])
+                _fallbackIcon = [[FVTextIcon alloc] initWithTextAtURL:_httpURL];
+            else
+                _fallbackIcon = [[FVFinderIcon alloc] initWithFinderIconOfURL:_httpURL];
+        } else {
             _fallbackIcon = [[FVFinderIcon alloc] initWithURLScheme:[_httpURL scheme]];
+        }
     }
     pthread_mutex_unlock(&_mutex);
 }
