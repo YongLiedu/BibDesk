@@ -73,11 +73,12 @@
 	
 	// the 'using' parameters gives the template name or file to use
 	id templateStyle = [params objectForKey:@"using"];
+	id templateString = [params objectForKey:@"usingText"];
 	BDSKTemplate *template = nil;
     // make sure we get something
-	if (!templateStyle) {
+	if (templateStyle == nil && templateString == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-		return [NSArray array];
+		return @"";
 	}
 	// make sure we get the right thing
 	if ([templateStyle isKindOfClass:[NSString class]] ) {
@@ -85,7 +86,9 @@
 	} else if ([templateStyle isKindOfClass:[NSURL class]] ) {
         NSString *fileType = [[templateStyle path] pathExtension];
         template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ? fileType : @"txt"];
-	}
+	} else if ([templateString isKindOfClass:[NSString class]] ) {
+        template = [BDSKTemplate templateWithString:templateString fileType:@"txt"];
+    }
     if (template == nil) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
         return @"";
@@ -155,22 +158,25 @@
 	
 	// the 'using' parameters gives the template name to use
 	id templateStyle = [params objectForKey:@"using"];
+	id templateAttrString = [params objectForKey:@"usingRichText"];
 	BDSKTemplate *template = nil;
     // make sure we get something
-	if (!templateStyle) {
+	if (templateStyle == nil && templateAttrString == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-		return [NSArray array];
+        return [[[NSTextStorage alloc] init] autorelease];
 	}
 	// make sure we get the right thing
 	if ([templateStyle isKindOfClass:[NSString class]] ) {
         template = [BDSKTemplate templateForStyle:templateStyle];
 	} else if ([templateStyle isKindOfClass:[NSURL class]] ) {
         NSString *fileType = [[templateStyle path] pathExtension];
-        template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ? fileType : @"txt"];
-	}
+        template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ? fileType : @"rtf"];
+	} else if ([templateAttrString isKindOfClass:[NSAttributedString class]] ) {
+        template = [BDSKTemplate templateWithAttributedString:templateAttrString fileType:@"rtf"];
+    }
     if (template == nil) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-        return [[[NSTextStorage alloc] init] autorelease];;
+        return [[[NSTextStorage alloc] init] autorelease];
 	}
 	
 	// the 'for' parameter can select the items to template

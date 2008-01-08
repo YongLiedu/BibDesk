@@ -45,6 +45,8 @@
 NSString *BDSKTemplateRoleString = @"role";
 NSString *BDSKTemplateNameString = @"name";
 NSString *BDSKTemplateFileURLString = @"representedFileURL";
+NSString *BDSKTemplateStringString = @"string";
+NSString *BDSKTemplateAttributedStringString = @"attributedString";
 NSString *BDSKExportTemplateTree = @"BDSKExportTemplateTree";
 NSString *BDSKServiceTemplateTree = @"BDSKServiceTemplateTree";
 NSString *BDSKTemplateAccessoryString = @"Accessory File";
@@ -320,16 +322,35 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     return template;
 }
 
++ (id)templateWithString:(NSString *)string fileType:(NSString *)fileType;
+{
+    BDSKTemplate *template = [[[BDSKTemplate alloc] init] autorelease];
+    [template setValue:fileType forKey:BDSKTemplateRoleString];
+    [template setValue:string forKey:BDSKTemplateStringString];
+    return template;
+}
+
++ (id)templateWithAttributedString:(NSAttributedString *)attributedString fileType:(NSString *)fileType;
+{
+    BDSKTemplate *template = [[[BDSKTemplate alloc] init] autorelease];
+    [template setValue:fileType forKey:BDSKTemplateRoleString];
+    [template setValue:attributedString forKey:BDSKTemplateAttributedStringString];
+    return template;
+}
+
 #pragma mark Instance methods
 
 - (BDSKTemplateFormat)templateFormat;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     NSString *extension = [[self valueForKey:BDSKTemplateRoleString] lowercaseString];
-    NSURL *url = [self mainPageTemplateURL];
     BDSKTemplateFormat format = BDSKUnknownTemplateFormat;
+    NSURL *url = [self mainPageTemplateURL];
+    NSString *string = nil;
+    NSAttributedString *attrString = nil;
+    BOOL isValid = (url = [self mainPageTemplateURL]) || (string = [self mainPageString]) || (attrString = [self mainPageAttributedStringWithDocumentAttributes:NULL]);
     
-    if (extension == nil || url == nil) {
+    if (extension == nil || isValid == NO) {
         format = BDSKUnknownTemplateFormat;
     } else if ([extension isEqualToString:@"rtf"]) {
         format = BDSKRTFTemplateFormat;
@@ -338,8 +359,10 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     } else if ([extension isEqualToString:@"doc"]) {
         format = BDSKDocTemplateFormat;
     } else if ([extension isEqualToString:@"html"] || [extension isEqualToString:@"htm"]) {
-        NSString *htmlString = [[[NSString alloc] initWithData:[NSData dataWithContentsOfURL:url] encoding:NSUTF8StringEncoding] autorelease];
-        if (htmlString == nil)
+        NSString *htmlString = url == nil ? string : [[[NSString alloc] initWithData:[NSData dataWithContentsOfURL:url] encoding:NSUTF8StringEncoding] autorelease];
+        if (attrString)
+            format = BDSKRichHTMLTemplateFormat;
+        else if (htmlString == nil)
             format = BDSKUnknownTemplateFormat;
         else if ([htmlString rangeOfString:@"<$"].location == NSNotFound && [htmlString rangeOfString:@"&lt;$"].location != NSNotFound)
             format = BDSKRichHTMLTemplateFormat;
@@ -353,25 +376,36 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSString *)fileExtension;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     return [self valueForKey:BDSKTemplateRoleString];
 }
 
 - (NSString *)mainPageString;
 {
-    OBASSERT([self isLeaf] == NO);
-    return [NSString stringWithContentsOfURL:[self mainPageTemplateURL] encoding:NSUTF8StringEncoding error:NULL];
+    OBASSERT([self parent] == nil);
+    NSURL *mainPageURL = [self mainPageTemplateURL];
+    if (mainPageURL) {
+        return [NSString stringWithContentsOfURL:[self mainPageTemplateURL] encoding:NSUTF8StringEncoding error:NULL];
+    } else {
+        return [self valueForKey:BDSKTemplateStringString];
+    }
 }
 
 - (NSAttributedString *)mainPageAttributedStringWithDocumentAttributes:(NSDictionary **)docAttributes;
 {
-    OBASSERT([self isLeaf] == NO);
-    return [[[NSAttributedString alloc] initWithURL:[self mainPageTemplateURL] documentAttributes:docAttributes] autorelease];
+    OBASSERT([self parent] == nil);
+    NSURL *mainPageURL = [self mainPageTemplateURL];
+    if (mainPageURL) {
+        return [[[NSAttributedString alloc] initWithURL:[self mainPageTemplateURL] documentAttributes:docAttributes] autorelease];
+    } else {
+        if (docAttributes) *docAttributes = nil;        
+        return [self valueForKey:BDSKTemplateAttributedStringString];
+    }
 }
 
 - (NSString *)stringForType:(NSString *)type;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     NSURL *theURL = nil;
     if(nil != type)
         theURL = [self templateURLForType:type];
@@ -383,13 +417,12 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     if([type isEqualToString:BDSKTemplateMainPageString] == NO)
         return nil;
     // get the item template from the main page template
-    theURL = [self mainPageTemplateURL];
-    return itemTemplateSubstring([NSString stringWithContentsOfURL:theURL encoding:NSUTF8StringEncoding error:NULL]);
+    return itemTemplateSubstring([self mainPageString]);
 }
 
 - (NSAttributedString *)attributedStringForType:(NSString *)type;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     NSURL *theURL = nil;
     if(nil != type)
         theURL = [self templateURLForType:type];
@@ -401,32 +434,32 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSString *)scriptPath;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     return [NSString stringWithContentsOfURL:[self scriptURL] encoding:NSUTF8StringEncoding error:NULL];
 }
 
 - (NSURL *)mainPageTemplateURL;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     return [self templateURLForType:BDSKTemplateMainPageString];
 }
 
 - (NSURL *)defaultItemTemplateURL;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     return [self templateURLForType:BDSKTemplateDefaultItemString];
 }
 
 - (NSURL *)templateURLForType:(NSString *)pubType;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     NSParameterAssert(nil != pubType);
     return [[self childForRole:pubType] representedFileURL];
 }
 
 - (NSArray *)accessoryFileURLs;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     NSMutableArray *fileURLs = [NSMutableArray array];
     NSEnumerator *childE = [[self children] objectEnumerator];
     BDSKTemplate *aChild;
@@ -443,7 +476,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSURL *)scriptURL;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     return [[self childForRole:BDSKTemplateScriptString] representedFileURL];
 }
 
@@ -464,7 +497,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (id)childForRole:(NSString *)role;
 {
-    OBASSERT([self isLeaf] == NO);
+    OBASSERT([self parent] == nil);
     NSParameterAssert(nil != role);
     NSEnumerator *nodeE = [[self children] objectEnumerator];
     id aNode = nil;

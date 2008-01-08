@@ -883,11 +883,15 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="templatedText" class="BDSKTemplatedTextCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
-            <parameter name="using" code="usng"
-                description="The name or file of the template to use.">
+            <parameter name="using" code="usng" optional="yes"
+                description="The name or file of the template to use. Either this or 'using text' should be used.">
                 <type type="text"/>
                 <type type="file"/>
                 <cocoa key="using"/>
+            </parameter>
+            <parameter name="using text" code="usTx" type="text" optional="yes"
+                description="The template text to use. Either this or 'using' should be used.">
+                <cocoa key="usingText"/>
             </parameter>
             <parameter name="for" code="for " optional="yes"
                 description="Specifies the publication or list of publications to parse.">
@@ -904,11 +908,15 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="templatedRichText" class="BDSKTemplatedRichTextCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
-            <parameter name="using" code="usng"
-                description="The name or file of the template to use.">
+            <parameter name="using" code="usng" optional="yes"
+                description="The name or file of the template to use. Either this or 'using rich text' should be used.">
                 <type type="text"/>
                 <type type="file"/>
                 <cocoa key="using"/>
+            </parameter>
+            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
+                description="The template rich text to use. Either this or 'using' should be used.">
+                <cocoa key="usingRichText"/>
             </parameter>
             <parameter name="for" code="for " optional="yes"
                 description="Specifies the publication or list of publications to parse.">
@@ -926,10 +934,18 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
             <parameter name="using template" code="uset"
-                description="The name or file of the template to use.">
+                description="The name or file of the template to use. Either this, 'using text', or 'using rich text' should be used.">
                 <type type="text"/>
                 <type type="file"/>
                 <cocoa key="using"/>
+            </parameter>
+            <parameter name="using text" code="usTx" type="text" optional="yes"
+                description="The template text to use. Either this, 'using', or 'using rich text' should be used.">
+                <cocoa key="usingText"/>
+            </parameter>
+            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
+                description="The template rich text to use. Either this, 'using', or 'using text' should be used.">
+                <cocoa key="usingRichText"/>
             </parameter>
             <parameter name="to" code="to  " type="file"
                 description="The file to export to">

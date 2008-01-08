@@ -92,6 +92,8 @@ extern NSString *BDSKTemplateLocalizedScriptString;
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 
 + (BDSKTemplate *)templateWithName:(NSString *)name mainPageURL:(NSURL *)fileURL fileType:(NSString *)fileType;
++ (id)templateWithString:(NSString *)string fileType:(NSString *)fileType;
++ (id)templateWithAttributedString:(NSAttributedString *)attributedString fileType:(NSString *)fileType;
 
 // service templates
 + (BDSKTemplate *)templateForCiteService;
