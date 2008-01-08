@@ -2,20 +2,14 @@
     IBClasses = (
         {CLASS = BDSKBackgroundView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKBorderlessKeyWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
-        {CLASS = BDSKScrollableTextField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
-            CLASS = MacroTextFieldWindowController; 
+            CLASS = BDSKComplexStringEditor; 
             LANGUAGE = ObjC; 
             OUTLETS = {backgroundView = BDSKBackgroundView; expandedValueTextField = NSTextField; }; 
             SUPERCLASS = NSWindowController; 
         }, 
-        {
-            CLASS = TextWindowController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {textField = NSTextField; }; 
-            SUPERCLASS = NSWindowController; 
-        }
+        {CLASS = BDSKScrollableTextField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
     ); 
     IBVersion = 1; 
 }
