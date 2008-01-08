@@ -116,8 +116,6 @@
                 
                 if (isEditable) {
                     [self selectRowIndexes:[NSIndexSet indexSetWithIndex:nextRow] byExtendingSelection:NO];
-                    if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
-                        [[self delegate] tableView:self willDisplayCell:[tableColumn dataCellForRow:nextRow] forTableColumn:tableColumn row:nextRow];
                     [self editColumn:editedColumn row:nextRow withEvent:nil select:YES];
                 }
             }
@@ -149,8 +147,6 @@
                                        [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:row]);
                     if (isEditable) {
                         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-                        if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
-                            [[self delegate] tableView:self willDisplayCell:[tableColumn dataCellForRow:row] forTableColumn:tableColumn row:row];
                         [self editColumn:column row:row withEvent:nil select:YES];
                         break;
                     }
