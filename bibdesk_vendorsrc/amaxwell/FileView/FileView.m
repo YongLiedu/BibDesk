@@ -1051,6 +1051,52 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     }
 }
 
+/*
+ These are ordered from right to left in the Finder context menu and were chosen from the bottom of each label using Digital Color Meter.  Apple seems to draw a gradient wash for the label, lighter at top.  I'm really not sure that's worth doing.  Using an alpha < 1.0 seems to compensate a bit, though some of the colors are pretty ugly to begin with.  Probably better to pick the colors from the middle of the swatch.
+ */
+#define ENABLE_LABEL_COLORS 0
+
+#if ENABLE_LABEL_COLORS
+- (NSColor *)_colorForFinderLabel:(NSUInteger)label
+{
+    NSColor *color = nil;
+    const CGFloat labelAlpha = 0.8;
+    switch (label) {
+        case 1:
+            color = [NSColor lightGrayColor];
+            break;
+        case 3:
+            // purple
+            color = [NSColor colorWithCalibratedRed:0.75 green:0.56 blue:0.85 alpha:labelAlpha]; 
+            break;
+        case 4:
+            // blue
+            color = [NSColor colorWithCalibratedRed:0.35 green:0.64 blue:1.0 alpha:labelAlpha];
+            break;
+        case 2:
+            // green
+            color = [NSColor colorWithCalibratedRed:0.70 green:0.84 blue:0.28 alpha:labelAlpha];
+            break;
+        case 5:
+            // yellow
+            color = [NSColor colorWithCalibratedRed:0.93 green:0.85 blue:0.28 alpha:labelAlpha];
+            break;
+        case 7:
+            // orange
+            color = [NSColor colorWithCalibratedRed:0.96 green:0.67 blue:0.27 alpha:labelAlpha];
+            break;
+        case 6:
+            // red
+            color = [NSColor colorWithCalibratedRed:0.98 green:0.39 blue:0.36 alpha:labelAlpha];
+            break;
+        default:
+            color = nil;
+            break;
+    }
+    return color;
+}
+#endif /* ENABLE_LABEL_COLORS */
+
 - (void)_drawIconsInRange:(NSRange)indexRange rows:(NSRange)rows columns:(NSRange)columns
 {
     BOOL isResizing = [self inLiveResize];
@@ -1159,6 +1205,28 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                     } else {
                         name = [aURL absoluteString];
                     }
+                    
+#if ENABLE_LABEL_COLORS
+                    MDItemRef mdItem = NULL;
+                    if ([aURL isFileURL])
+                        mdItem = MDItemCreate(NULL, (CFStringRef)[aURL path]);
+                    NSUInteger label = 0;
+                    if (mdItem) {
+                        CFNumberRef labelNumber = MDItemCopyAttribute(mdItem, CFSTR("kMDItemFSLabel"));
+                        label = [(id)labelNumber unsignedIntValue];
+                        if (labelNumber) CFRelease(labelNumber);
+                        CFRelease(mdItem);
+                    }
+                    if (label > 0) {
+                        // labeled title should use black text color for contrast
+                        CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
+                        NSRect labelRect = textRect;
+                        labelRect.size.height = titleHeight;
+                        [[self _colorForFinderLabel:label] setFill];
+                        [[NSBezierPath bezierPathWithRoundRect:labelRect xRadius:5 yRadius:5] fill];
+                    }
+#endif /* ENABLE_LABEL_COLORS*/
+                    
                     [name drawInRect:textRect withAttributes:__titleAttributes];  
                     if (useSubtitle) {
                         CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
