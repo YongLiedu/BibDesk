@@ -133,8 +133,8 @@ static NSURL *missingFileURL = nil;
         Boolean isFolder, wasAliased;
         err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
         
-        // wasAliased is false for symlinks, but we can open those without resolving them
-        if (noErr == err && wasAliased)
+        // wasAliased is false for symlinks, but use the resolved alias anyway
+        if (noErr == err)
             *aURL = [(id)CFURLCreateFromFSRef(NULL, &fileRef) autorelease];
     }
     
