@@ -100,13 +100,14 @@
             
                 NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:editedColumn];
                 BOOL isEditable = [tableColumn isEditable] && 
-                ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
-                 [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:nextRow]);
+                                  ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
+                                   [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:nextRow]);
                 
                 if (isEditable) {
                     [self selectRowIndexes:[NSIndexSet indexSetWithIndex:nextRow] byExtendingSelection:NO];
-                    [self editColumn:editedColumn row:nextRow withEvent:nil select:NO];
-                    [[aNotification object] selectAll:self];
+                    if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
+                        [[self delegate] tableView:self willDisplayCell:[tableColumn dataCellForRow:nextRow] forTableColumn:tableColumn row:nextRow];
+                    [self editColumn:editedColumn row:nextRow withEvent:nil select:YES];
                 }
             }
         }
@@ -132,10 +133,13 @@
             if (row != -1 && row < numRows) {
                 for (column = 0; column < numCols; column++) {
                     NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
-                    if ([tableColumn isEditable] && 
-                        ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
-                         [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:row])) {
+                    BOOL isEditable = [tableColumn isEditable] && 
+                                      ([[self delegate] respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)] == NO || 
+                                       [[self delegate] tableView:self shouldEditTableColumn:tableColumn row:row]);
+                    if (isEditable) {
                         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+                        if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
+                            [[self delegate] tableView:self willDisplayCell:[tableColumn dataCellForRow:row] forTableColumn:tableColumn row:row];
                         [self editColumn:column row:row withEvent:nil select:YES];
                         break;
                     }
