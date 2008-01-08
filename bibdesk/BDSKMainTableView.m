@@ -365,7 +365,8 @@
         }else if(title = [self headerTitleForField:colName]){
             [[tc headerCell] setStringValue:title];
         }else{	
-            [[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
+            NSString *localizedKey = [[NSBundle mainBundle] localizedStringForKey:colName value:@"" table:@"BibTeXKeys"];
+            [[tc headerCell] setStringValue:localizedKey];
         }
         
         if([colName isEqualToString:BDSKImportOrderString] == NO && (tcWidth = [defaultTableColumnWidths objectForKey:colName]))
