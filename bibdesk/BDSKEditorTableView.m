@@ -75,6 +75,17 @@
 	[super mouseDown:theEvent];
 }
 
+// @@ seems to be a bug in 10.5 with the wrong formatter being used occasionally; should try using an autoreleased formatter with zombies enabled and see if it crashes
+- (void)textDidBeginEditing:(NSNotification *)notification {
+    [super textDidBeginEditing:notification];
+    int column = [self editedColumn];
+    int row = [self editedRow];
+    NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
+    NSCell *cell = [tableColumn dataCellForRow:row];    
+    if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
+        [[self delegate] tableView:self willDisplayCell:cell forTableColumn:tableColumn row:row];
+}
+
 - (void)textDidEndEditing:(NSNotification *)aNotification {
     int editedRow = [self editedRow];
     int editedColumn = [self editedColumn];
