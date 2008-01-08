@@ -147,7 +147,15 @@ static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbn
                 
                 NSSize currentSize = NSMakeSize(CGImageGetWidth(_fullImageRef), CGImageGetHeight(_fullImageRef));
                 
-                if (NSEqualSizes(currentSize, _desiredSize) == NO) {
+                NSSize targetSize;
+#if __LP64__
+                targetSize.width = trunc(_desiredSize.width);
+                targetSize.height = trunc(_desiredSize.height);
+#else
+                targetSize.width = truncf(_desiredSize.width);
+                targetSize.height = truncf(_desiredSize.height);
+#endif
+                if (NSEqualSizes(currentSize, targetSize) == NO) {
                     CGImageRelease(_fullImageRef);
                     _fullImageRef = NULL;
                 }
