@@ -268,29 +268,18 @@ static inline void limitSize(NSSize *size)
     OSStatus err = noErr;
     CFStringRef theUTI = NULL;
     
-    // convert to an FSRef, to get the UTI of the actual URL
+    // convert to an FSRef; _fileURL is guaranteed not to be an alias or symlink
     const UInt8 *fsPath = (void *)[[_fileURL path] UTF8String];
     err = FSPathMakeRef(fsPath, &fileRef, NULL);
     
     // kLSItemContentType returns a CFStringRef, according to the header
     if (noErr == err)
         err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
-            
-    // For a link/alias, get the target's UTI in order to determine which concrete subclass to create.  Subclasses that are file-based need to check the URL to see if it should be badged using _shouldDrawBadgeForURL, and then call _resolvedURLWithURL in order to actually load the file's content.
     
-    // aliases and symlinks are kUTTypeResolvable, so the alias manager should handle either of them
-    if (NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeResolvable)) {
-        Boolean isFolder, wasAliased;
-        err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
-        // don't change the UTI if it couldn't be resolved; in that case, we should just show a finder icon
-        if (noErr == err) {
-            CFRelease(theUTI);
-            theUTI = NULL;
-            err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
-        }
-    }
+    BOOL isHTML = (NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeHTML));
+    if (theUTI) CFRelease(theUTI);
     
-    return NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeHTML);
+    return isHTML;
 }
 
 - (void)_loadHTML:(NSMutableDictionary *)HTMLDict {
