@@ -41,6 +41,7 @@
 #import "DTCharArray.h"
 #import "zlib.h"
 #import <sys/stat.h>
+#import <asl.h>
 
 static CGImageRef FVCreateCGImageWithCharArray(DTCharArray array);
 static DTCharArray FVCharArrayWithCGImage(CGImageRef image);
@@ -50,6 +51,10 @@ static DTCharArray FVCharArrayWithCGImage(CGImageRef image);
 static DTDataFile *__dataFile = NULL;
 static char *__tempName = NULL;        /* only a file static for debugging */
 static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
+
+#ifndef ENABLE_CACHE_LOGGING
+#define ENABLE_CACHE_LOGGING 0
+#endif
 
 + (void)initialize
 {
@@ -79,7 +84,7 @@ static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
         __dataFile = new DTDataFile(__tempName);
         
         // unlink the file immediately; since DTDataFile calls fopen() in its constructor, this is safe, and means we don't leave turds when the program crashes.  For debug builds, the file is unlinked when the app terminates, since otherwise the call to stat() fails with a file not found error (presumably since the link count is zero).
-#ifndef DEBUG
+#if !(ENABLE_CACHE_LOGGING)
         unlink(__tempName);
 #endif
         [[NSNotificationCenter defaultCenter] addObserver:self 
@@ -102,13 +107,19 @@ static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
     
     pthread_mutex_unlock(&__dataFileLock);
     
-#ifdef DEBUG
+#if ENABLE_CACHE_LOGGING
     // print the file size, just because I'm curious about it (before unlinking the file, though!)
     struct stat sb;
     if (0 == stat(__tempName, &sb)) {
         off_t fsize = sb.st_size;
         double mbSize = double(fsize) / 1024 / 1024;
-        NSLog(@"*** removing %s with cache size %.2f MB", __tempName, mbSize);
+        
+        aslclient client = asl_open("FileViewCache", NULL, ASL_OPT_NO_DELAY);
+        aslmsg m = asl_new(ASL_TYPE_MSG);
+        asl_set(m, ASL_KEY_SENDER, "FileViewCache");
+        asl_log(client, m, ASL_LEVEL_ERR, "removing %s with cache size = %.2f MB\n", __tempName, mbSize);
+        asl_free(m);
+        asl_close(client);
     }
     else {
         string errMsg = string("stat failed \"") + __tempName + "\"";
@@ -148,6 +159,14 @@ static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
 + (void)cacheCGImage:(CGImageRef)image withName:(const char *)name;
 {
     DTCharArray array = FVCharArrayWithCGImage(image);
+#if ENABLE_CACHE_LOGGING
+    aslclient client = asl_open("FileViewCache", NULL, ASL_OPT_NO_DELAY);
+    aslmsg m = asl_new(ASL_TYPE_MSG);
+    asl_set(m, ASL_KEY_SENDER, "FileViewCache");
+    asl_log(client, m, ASL_LEVEL_ERR, "caching image for %s, size = %.2f kBytes\n", name, double(array.Length()) / 1024);
+    asl_free(m);
+    asl_close(client);
+#endif
     pthread_mutex_lock(&__dataFileLock);
     if (__dataFile) __dataFile->Save(array, name);
     pthread_mutex_unlock(&__dataFileLock);
