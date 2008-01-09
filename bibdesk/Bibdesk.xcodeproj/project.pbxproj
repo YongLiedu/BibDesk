@@ -243,7 +243,6 @@
 		CE7F5E480B3F5F1800A919D0 /* searchFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7F5E470B3F5F1800A919D0 /* searchFolderIcon.tiff */; };
 		CE7F64C40B41694A00A919D0 /* BDSKSearchGroupView.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE7F64C20B41694A00A919D0 /* BDSKSearchGroupView.nib */; };
 		CE820EC90C8AE2F60020E6B0 /* BDSKPersonWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE820EC20C8AE2F60020E6B0 /* BDSKPersonWindow.nib */; };
-		CE83E3A50D294EE300BB7AD8 /* BDSKSortCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = CE83E3A30D294EE300BB7AD8 /* BDSKSortCommand.h */; };
 		CE83E3A60D294EE300BB7AD8 /* BDSKSortCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE83E3A40D294EE300BB7AD8 /* BDSKSortCommand.m */; };
 		CE89618A0CBEB59800EA2D98 /* BDSKToken.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961860CBEB59800EA2D98 /* BDSKToken.m */; };
 		CE89618C0CBEB59800EA2D98 /* BDSKTypeTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961880CBEB59800EA2D98 /* BDSKTypeTemplate.m */; };
@@ -2851,7 +2850,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE83E3A50D294EE300BB7AD8 /* BDSKSortCommand.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
