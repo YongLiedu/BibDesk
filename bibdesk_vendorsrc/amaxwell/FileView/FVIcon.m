@@ -218,6 +218,11 @@ static NSURL *missingFileURL = nil;
         anIcon = [[FVQLIconClass allocWithZone:[self zone]] initWithURL:representedURL];
     }
     
+    // In case some subclass returns nil, fall back to Quick Look.  If disabled, it returns nil.
+    if (nil == anIcon && Nil != FVQLIconClass)
+        anIcon = [[FVQLIconClass allocWithZone:[self zone]] initWithURL:representedURL];
+    
+    // In case all subclasses failed, fall back to a Finder icon.
     if (nil == anIcon)
         anIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:representedURL];
         
@@ -336,17 +341,21 @@ static char * FVCreateCStringWithInode(ino_t n)
     return strdup(temp);   
 }
 
-FV_PRIVATE_EXTERN char * FVCreateDiskCacheNameWithURL(NSURL *fileURL)
+FV_PRIVATE_EXTERN char * FVCreateDiskCacheNameWithURL(NSURL *aURL)
 {
+    NSCParameterAssert(nil != aURL);
 #if DEBUG
-    // this is a much more useful name for debugging, but it's slower and not unique
-    NSCParameterAssert([fileURL isFileURL]);
-    return strdup([[fileURL path] fileSystemRepresentation]);
+    // this is a much more useful name for debugging, but it's slower and breaks if the name changes
+    return strdup([[aURL absoluteString] fileSystemRepresentation]);
 #endif
-    struct stat sb;
     char *name = NULL;
-    if (0 == stat([[fileURL path] fileSystemRepresentation], &sb)) { 
-        name = FVCreateCStringWithInode(sb.st_ino);
+    if ([aURL isFileURL]) {
+        struct stat sb;
+        if (0 == stat([[aURL path] fileSystemRepresentation], &sb))
+            name = FVCreateCStringWithInode(sb.st_ino);
+    }
+    else {
+        name = strdup([[aURL absoluteString] fileSystemRepresentation]);
     }
     return name;
 }
