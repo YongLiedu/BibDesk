@@ -198,6 +198,8 @@ static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbn
         CGContextSaveGState(context);
         CGContextSetRGBFillColor(context, 1.0, 1.0, 1.0, 1.0);
         CGContextFillRect(context, drawRect);
+        // clear the shadow; clipping won't quite eliminate it
+        CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
         drawRect = CGRectInset(drawRect, CGRectGetWidth(drawRect) / 20, CGRectGetHeight(drawRect) / 20);
         CGContextClipToRect(context, drawRect);
         CGContextDrawImage(context, drawRect, image);
