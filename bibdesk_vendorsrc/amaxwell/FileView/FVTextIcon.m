@@ -167,7 +167,7 @@ static CGAffineTransform __paperTransform;
 // return the same thing as text; just a container for the URL, until actually asked to render the text file
 - (id)initWithHTMLAtURL:(NSURL *)aURL;
 {
-    if (self = [self initWithPDFAtURL:aURL]) {
+    if (self = [self initWithTextAtURL:aURL]) {
         _iconType = FVHTMLType;
     }
     return self;
