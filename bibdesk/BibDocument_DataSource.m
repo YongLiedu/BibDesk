@@ -1106,38 +1106,44 @@
         
         // this ivar stores the field name (e.g. Url, L2)
         NSString *fieldName = [self promiseDragColumnIdentifier];
-        BOOL isLocalFile = [fieldName isLocalFileField];
-        
+        BOOL isRemoteURLField = [fieldName isRemoteURLField];
+        NSEnumerator *fileEnum;
+        BDSKLinkedFile *file;
         NSString *originalPath;
         NSString *fileName;
         NSString *basePath = [dropDestination path];
-
+        int i = 0;
+        
+        OBASSERT(isRemoteURLField || [fieldName isEqualToString:BDSKRemoteURLString]);
+        
         while(rowIdx != NSNotFound){
             theBib = [shownPublications objectAtIndex:rowIdx];
-            if(isLocalFile){
-                originalPath = [[theBib localFileURLForField:fieldName] path];
-                fileName = [originalPath lastPathComponent];
-                NSParameterAssert(fileName);
-                fullPath = [basePath stringByAppendingPathComponent:fileName];
-                [fileNames addObject:fileName];
-                // create a dictionary with each original file path (source) as key, and destination path as value
-                [fullPathDict setValue:fullPath forKey:originalPath];
-                
-            } else if((url = [theBib remoteURLForField:fieldName])){
-                fullPath = [[basePath stringByAppendingPathComponent:[theBib displayTitle]] stringByAppendingPathExtension:@"webloc"];
-                // create a dictionary with each destination file path as key (handed to us from the Finder/dropDestination) and each item's URL as value
+            if(isRemoteURLField){
+                fileName = [theBib displayTitle];
+                fullPath = [[basePath stringByAppendingPathComponent:fileName] stringByAppendingPathExtension:@"webloc"];
+                url = [theBib remoteURLForField:fieldName];
                 [fullPathDict setValue:url forKey:fullPath];
-                [fileNames addObject:[theBib displayTitle]];
+                [fileNames addObject:fileName];
+            } else{
+                fileEnum = [[theBib remoteURLs] objectEnumerator];
+                i = 0;
+                while (file = [fileEnum nextObject]) {
+                    if (url = [file URL]) {
+                        fileName = [theBib displayTitle];
+                        if (i > 0)
+                            fileName = [fileName stringByAppendingFormat:@"-%i", i];
+                        i++;
+                        fullPath = [[basePath stringByAppendingPathComponent:fileName] stringByAppendingPathExtension:@"webloc"];
+                        [fullPathDict setValue:url forKey:fullPath];
+                        [fileNames addObject:fileName];
+                    }
+                }
             }
             rowIdx = [indexSet indexGreaterThanIndex:rowIdx];
         }
         [self setPromiseDragColumnIdentifier:nil];
         
-        // We generally want to run promised file creation in the background to avoid blocking our UI, although webloc files are so small it probably doesn't matter.
-        if(isLocalFile)
-            [[NSFileManager defaultManager] copyFilesInBackgroundThread:fullPathDict];
-        else
-            [[NSFileManager defaultManager] createWeblocFilesInBackgroundThread:fullPathDict];
+        [[NSFileManager defaultManager] createWeblocFilesInBackgroundThread:fullPathDict];
 
         return fileNames;
     } else if ([tv isEqual:groupTableView]) {
