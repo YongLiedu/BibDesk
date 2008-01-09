@@ -622,7 +622,7 @@
                     unsigned row = [rowIndexes firstIndex];
                     while(row != NSNotFound){
                         pub = [shownPublications objectAtIndex:row];
-                        if(url = [[pub remoteURLs] firstObject]){
+                        if(file = [[[pub remoteURLs] firstObject] URL]){
                             // put the URL and a webloc file promise on the pasteboard
                             [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
                             success = [pboard setPropertyList:[NSArray arrayWithObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]] forType:NSFilesPromisePboardType];
