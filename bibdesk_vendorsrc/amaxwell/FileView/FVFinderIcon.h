@@ -44,7 +44,6 @@
 {
 @protected
     IconRef         _iconRef;
-    FVIconType      _iconType;
     BOOL            _drawsLinkBadge;
 }
 - (id)initWithFinderIconOfURL:(NSURL *)theURL;

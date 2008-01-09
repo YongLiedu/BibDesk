@@ -93,7 +93,6 @@
     else if ((self = [super init])) {
         
         // this has to be a file icon, though the file itself may not exist
-        _iconType = FVFinderIconType;
         _iconRef = NULL;
         
         _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&theURL];
@@ -186,7 +185,6 @@
 {
     self = [super init];
     if (self) {
-        _iconType = FVFinderIconType;
         _drawsLinkBadge = NO;
         OSStatus err;
         err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kQuestionMarkIcon, &_questionIcon);
@@ -230,7 +228,6 @@
 {
     self = [super init];
     if (self) {
-        _iconType = FVFinderIconType;
         _drawsLinkBadge = NO;
         OSStatus err;
         err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationHTTPIcon, &_iconRef);
@@ -257,7 +254,6 @@
 {
     self = [super init];
     if (self) {
-        _iconType = FVFinderIconType;
         _drawsLinkBadge = NO;
         OSStatus err;
         err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kGenericURLIcon, &_iconRef);
@@ -284,7 +280,6 @@
 {
     self = [super init];
     if (self) {
-        _iconType = FVFinderIconType;
         _drawsLinkBadge = NO;
         OSStatus err;
         err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kInternetLocationFTPIcon, &_iconRef);

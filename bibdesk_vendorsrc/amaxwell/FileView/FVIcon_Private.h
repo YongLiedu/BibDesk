@@ -42,14 +42,10 @@
 #import "FVIconCache.h"
 #import <pthread.h>
 
-#ifndef FV_DUMMY_ICON_ALPHA
-#define FV_DUMMY_ICON_ALPHA 0.8f
-#endif
-
 @class FVIcon;
 
+// for subclasses that handle multiple types with minor variation
 enum {
-    FVFinderIconType,
     FVImageFileType,
     FVQTMovieType,
     FVPDFType,
