@@ -2045,7 +2045,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (void)moveToBeginningOfLine:(id)sender;
 {
     if ([_selectedIndexes count] == 1) {
-        FVIcon *anIcon = [self _cachedIconForURL:[[self iconURLs] objectAtIndex:[_selectedIndexes firstIndex]]];
+        FVIcon *anIcon = [self _cachedIconForURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]]];
         if ([anIcon currentPageIndex] > 1) {
             [anIcon showPreviousPage];
             [self _redisplayIconAfterPageChanged:anIcon];
@@ -2056,7 +2056,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (void)moveToEndOfLine:(id)sender;
 {
     if ([_selectedIndexes count] == 1) {
-        FVIcon *anIcon = [self _cachedIconForURL:[[self iconURLs] objectAtIndex:[_selectedIndexes firstIndex]]];
+        FVIcon *anIcon = [self _cachedIconForURL:[self iconURLAtIndex:[_selectedIndexes firstIndex]]];
         if ([anIcon currentPageIndex] < [anIcon pageCount]) {
             [anIcon showNextPage];
             [self _redisplayIconAfterPageChanged:anIcon];
