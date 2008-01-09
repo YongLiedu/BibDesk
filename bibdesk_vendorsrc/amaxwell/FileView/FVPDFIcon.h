@@ -59,5 +59,6 @@
     BOOL              _drawsLinkBadge;
 }
 - (id)initWithPDFAtURL:(NSURL *)aURL;
+- (id)initWithPDFDAtURL:(NSURL *)aURL;
 - (id)initWithPostscriptAtURL:(NSURL *)aURL;
 @end

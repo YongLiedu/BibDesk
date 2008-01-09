@@ -199,6 +199,9 @@ static NSURL *missingFileURL = nil;
     else if (UTTypeConformsTo(theUTI, CFSTR("com.adobe.postscript"))) {
         anIcon = [[FVPDFIcon allocWithZone:[self zone]] initWithPostscriptAtURL:representedURL];
     }
+    else if (UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd"))) {
+        anIcon = [[FVPDFIcon allocWithZone:[self zone]] initWithPDFDAtURL:representedURL];
+    }
     else if (UTTypeConformsTo(theUTI, kUTTypeImage)) {
         anIcon = [[FVCGImageIcon allocWithZone:[self zone]] initWithImageAtURL:representedURL];
     }

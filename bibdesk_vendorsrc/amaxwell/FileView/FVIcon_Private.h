@@ -53,6 +53,7 @@ enum {
     FVImageFileType,
     FVQTMovieType,
     FVPDFType,
+    FVPDFDType,
     FVPostscriptType
 };
 typedef NSUInteger FVIconType;

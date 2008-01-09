@@ -37,6 +37,7 @@
  */
 
 #import "FVPDFIcon.h"
+#import "FVFinderIcon.h"
 
 // cache these so we avoid hitting NSPrintInfo; we only care to have something that approximates a page size, anyway
 static NSSize __paperSize;
@@ -82,11 +83,46 @@ static CGPDFDocumentRef createCGPDFDocumentWithPostScriptURL(NSURL *fileURL)
     return pdfDoc;
 }
 
+static NSURL *PDFURLForPDFBundleURL(NSURL *aURL)
+{
+    NSString *filePath = [aURL path];
+    NSArray *files = [[NSFileManager defaultManager] subpathsAtPath:filePath];
+    NSString *fileName = [[[filePath lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"pdf"];
+    NSString *pdfFile = nil;
+    
+    if ([files containsObject:fileName]) {
+        pdfFile = fileName;
+    } else {
+        unsigned int idx = [[files valueForKeyPath:@"pathExtension.lowercaseString"] indexOfObject:@"pdf"];
+        if (idx != NSNotFound)
+            pdfFile = [files objectAtIndex:idx];
+    }
+    if (pdfFile)
+        pdfFile = [filePath stringByAppendingPathComponent:pdfFile];
+    return pdfFile ? [NSURL fileURLWithPath:pdfFile] : nil;
+}
+
 // return the same thing as PDF; just a container for the URL, until actually asked to render the PS file
 - (id)initWithPostscriptAtURL:(NSURL *)aURL;
 {
-    self = [self initWithPDFAtURL:aURL];
-    _iconType = FVPostscriptType;
+    if (self = [self initWithPDFAtURL:aURL]) {
+        _iconType = FVPostscriptType;
+    }
+    return self;
+}
+
+// return the same thing as PDF; just a container for the URL, until actually asked to render the PDF file
+- (id)initWithPDFDAtURL:(NSURL *)aURL;
+{
+    if (self = [self initWithPDFAtURL:aURL]) {
+        if (PDFURLForPDFBundleURL(_fileURL)) {
+            _iconType = FVPDFDType;
+        } else {
+            NSZone *zone = [self zone];
+            [self release];
+            self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:aURL];
+        }
+    }
     return self;
 }
 
@@ -268,6 +304,8 @@ static inline void limitSize(NSSize *size)
         if (NULL == _pdfDoc) {
             if (FVPDFType == _iconType)
                 _pdfDoc = CGPDFDocumentCreateWithURL((CFURLRef)_fileURL);
+            else if (FVPDFDType == _iconType)
+                _pdfDoc = CGPDFDocumentCreateWithURL((CFURLRef)PDFURLForPDFBundleURL(_fileURL));
             else
                 _pdfDoc = createCGPDFDocumentWithPostScriptURL(_fileURL);
             
