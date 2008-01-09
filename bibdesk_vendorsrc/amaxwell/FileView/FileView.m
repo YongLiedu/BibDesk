@@ -1426,7 +1426,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 - (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex
 {
     NSUInteger r, c;
-    
+
     if ([self _getGridRow:&r column:&c ofIndex:anIndex]) {
     
         FVIcon *anIcon = [self _cachedIconForURL:[self iconURLAtIndex:anIndex]];
@@ -1473,7 +1473,8 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     const NSTrackingRectTag tag = [event trackingNumber];
     NSUInteger anIndex;
     
-    if (CFDictionaryGetValueIfPresent(_trackingRectMap, (const void *)tag, (const void **)&anIndex))
+    // Finder doesn't show buttons unless it's the front app.  If Finder is the front app, it shows them for any window, regardless of main/key state, so we'll do the same.
+    if ([NSApp isActive] && CFDictionaryGetValueIfPresent(_trackingRectMap, (const void *)tag, (const void **)&anIndex))
         [self _showArrowsForIconAtIndex:anIndex];
     
     // !!! calling this before adding buttons seems to disable the tooltip on 10.4; what does it do on 10.5?
