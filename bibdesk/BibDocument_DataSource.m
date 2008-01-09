@@ -570,16 +570,29 @@
 				}else if([dragColumnId isRemoteURLField]){
 					// cache this so we know which column (field) was dragged
 					[self setPromiseDragColumnIdentifier:dragColumnId];
-					
-					BibItem *pub = [shownPublications objectAtIndex:[rowIndexes firstIndex]];
-					NSURL *url = [pub remoteURLForField:dragColumnId];
-					if(url != nil){
-						// put the URL and a webloc file promise on the pasteboard
-                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
-                        success = [pboard setPropertyList:[NSArray arrayWithObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]] forType:NSFilesPromisePboardType];
-                        [url writeToPasteboard:pboard];
-						return success;
+
+                    // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
+                    unsigned row = [rowIndexes firstIndex];
+                    BibItem *pub = nil;
+                    NSURL *url, *theURL = nil;
+                    NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+
+                    while(row != NSNotFound){
+                        pub = [shownPublications objectAtIndex:row];
+                        url = [pub remoteURLForField:dragColumnId];
+                        if(url != nil){
+                            if (theURL == nil)
+                                theURL = url;
+                            [filePaths addObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]];
+                        }
 					}
+                    
+                    if([filePaths count]){
+                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
+                        success = [pboard setPropertyList:filePaths forType:NSFilesPromisePboardType];
+                        [theURL writeToPasteboard:pboard];
+						return success;
+                    }
 				
                 }else if([dragColumnId isEqualToString:BDSKLocalFileString]){
 
@@ -596,8 +609,7 @@
                         fileEnum = [[pub localFiles] objectEnumerator];
                         
                         while(file = [fileEnum nextObject]){
-                            path = [file path];
-                            if(path != nil){
+                            if (path = [file path]) {
                                 [filePaths addObject:path];
                                 NSError *xerror = nil;
                                 // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
@@ -616,20 +628,35 @@
 				}else if([dragColumnId isEqualToString:BDSKRemoteURLString]){
 					// cache this so we know which column (field) was dragged
 					[self setPromiseDragColumnIdentifier:dragColumnId];
-					
-					BibItem *pub;
-                    NSURL *url;
+                    
                     unsigned row = [rowIndexes firstIndex];
+                    BibItem *pub = nil;
+                    NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[rowIndexes count]];
+                    NSString *fileName;
+                    NSEnumerator *fileEnum;
+                    BDSKLinkedFile *file;
+                    NSURL *url, *theURL = nil;
+                    
                     while(row != NSNotFound){
                         pub = [shownPublications objectAtIndex:row];
-                        if(url = [[[pub remoteURLs] firstObject] URL]){
-                            // put the URL and a webloc file promise on the pasteboard
-                            [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
-                            success = [pboard setPropertyList:[NSArray arrayWithObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]] forType:NSFilesPromisePboardType];
-                            [url writeToPasteboard:pboard];
-                            return success;
+                        fileName = [[pub displayTitle] stringByAppendingPathExtension:@"webloc"];
+                        fileEnum = [[pub remoteURLs] objectEnumerator];
+                        
+                        while(file = [fileEnum nextObject]){
+                            if (url = [file URL]) {
+                                if (theURL == nil)
+                                    theURL = url;
+                                [filePaths addObject:fileName];
+                            }
                         }
                         row = [rowIndexes indexGreaterThanIndex:row];
+                    }
+                    
+                    if([filePaths count]){
+                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
+                        success = [pboard setPropertyList:filePaths forType:NSFilesPromisePboardType];
+                        [theURL writeToPasteboard:pboard];
+                        return success;
                     }
 				}
 			}
@@ -759,6 +786,8 @@
         count = 1;
         image = [NSImage imageForURL:[NSURL URLFromPasteboard:pb]];
         isIcon = YES;
+        if ([pb availableTypeFromArray:[NSArray arrayWithObject:NSFilesPromisePboardType]])
+            count = MAX(1, (int)[[pb propertyListForType:NSFilesPromisePboardType] count]);
     
 	} else if ([dragType isEqualToString:NSFilesPromisePboardType]) {
 		NSArray *fileNames = [pb propertyListForType:NSFilesPromisePboardType];
