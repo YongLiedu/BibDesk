@@ -105,6 +105,7 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
 // return the same thing as PDF; just a container for the URL, until actually asked to render the PS file
 - (id)initWithPostscriptAtURL:(NSURL *)aURL;
 {
+    NSParameterAssert([aURL isFileURL]);
     if (self = [self initWithPDFAtURL:aURL]) {
         _iconType = FVPostscriptType;
     }
@@ -114,16 +115,15 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
 // return the same thing as PDF; just a container for the URL, until actually asked to render the PDF file
 - (id)initWithPDFDAtURL:(NSURL *)aURL;
 {
+    NSParameterAssert([aURL isFileURL]);
     if (self = [self initWithPDFAtURL:aURL]) {
         NSURL *fileURL = createPDFURLForPDFBundleURL(_fileURL);
         if (fileURL) {
             [_fileURL release];
             _fileURL = fileURL;
-            _iconType = FVPDFDType;
         } else {
-            NSZone *zone = [self zone];
             [self release];
-            self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:aURL];
+            self = nil;
         }
     }
     return self;
@@ -131,6 +131,7 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
 
 - (id)initWithPDFAtURL:(NSURL *)aURL;
 {
+    NSParameterAssert([aURL isFileURL]);
     self = [super init];
     if (self) {
         
