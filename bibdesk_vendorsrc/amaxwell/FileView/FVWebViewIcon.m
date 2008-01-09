@@ -112,7 +112,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         NSZone *zone = [self zone];
         [self release];
         if ([aURL isFileURL])
-            self = [[FVTextIcon allocWithZone:zone] initWithTextAtURL:aURL];
+            self = [[FVTextIcon allocWithZone:zone] initWithHTMLAtURL:aURL];
         else
             self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:aURL];
     }

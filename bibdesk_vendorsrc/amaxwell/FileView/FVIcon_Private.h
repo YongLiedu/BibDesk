@@ -48,6 +48,8 @@
 enum {
     FVImageFileType,
     FVQTMovieType,
+    FVTextType,
+    FVHTMLType,
     FVPDFType,
     FVPostscriptType
 };

@@ -155,10 +155,20 @@ static CGAffineTransform __paperTransform;
         _fullImageRef = NULL;
         _thumbnailRef = NULL;
         _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
+        _iconType = FVTextType;
         
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
             perror("pthread_mutex_init");
+    }
+    return self;
+}
+
+// return the same thing as text; just a container for the URL, until actually asked to render the text file
+- (id)initWithHTMLAtURL:(NSURL *)aURL;
+{
+    if (self = [self initWithPDFAtURL:aURL]) {
+        _iconType = FVHTMLType;
     }
     return self;
 }
@@ -262,26 +272,6 @@ static inline void limitSize(NSSize *size)
     [FVBitmapContextCache disposeOfBitmapContext:ctxt];
 }
 
-- (BOOL)_isHTML
-{
-    FSRef fileRef;
-    OSStatus err = noErr;
-    CFStringRef theUTI = NULL;
-    
-    // convert to an FSRef; _fileURL is guaranteed not to be an alias or symlink
-    const UInt8 *fsPath = (void *)[[_fileURL path] UTF8String];
-    err = FSPathMakeRef(fsPath, &fileRef, NULL);
-    
-    // kLSItemContentType returns a CFStringRef, according to the header
-    if (noErr == err)
-        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
-    
-    BOOL isHTML = (NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeHTML));
-    if (theUTI) CFRelease(theUTI);
-    
-    return isHTML;
-}
-
 - (void)_loadHTML:(NSMutableDictionary *)HTMLDict {
     NSDictionary *documentAttributes = nil;
     NSAttributedString *attrString = [[NSAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
@@ -328,7 +318,7 @@ static inline void limitSize(NSSize *size)
     NSMutableAttributedString *attrString = nil;
     
     // NSAttributedString uses WebKit for HTML, and is not thread safe on Tiger
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && [self _isHTML]) {
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && _iconType == FVHTMLType) {
         NSMutableDictionary *HTMLDict = [NSMutableDictionary dictionary];
         [self performSelectorOnMainThread:@selector(_loadHTML:) withObject:HTMLDict waitUntilDone:YES];
         attrString = [[HTMLDict objectForKey:@"attributedString"] mutableCopy];
