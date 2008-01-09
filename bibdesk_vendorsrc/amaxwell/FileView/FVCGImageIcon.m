@@ -75,7 +75,7 @@ static const NSUInteger MAX_PIXEL_DIMENSION = 512; /* maximum height or width al
         _fileURL = [aURL copy];
         _fullImageRef = NULL;
         _thumbnailRef = NULL;
-        _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
+        _diskCacheName = [FVIconCache createDiskCacheNameWithURL:_fileURL];
         _thumbnailSize = NSZeroSize;
         _inDiskCache = NO;
         

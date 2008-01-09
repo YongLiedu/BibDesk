@@ -127,7 +127,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         
         // keeps track of whether a webview has been created
         _isRendering = NO;
-        _diskCacheName = FVCreateDiskCacheNameWithURL(_httpURL);
+        _diskCacheName = [FVIconCache createDiskCacheNameWithURL:_httpURL];
 
         if (pthread_mutex_init(&_mutex, NULL) != 0)
             perror("pthread_mutex_init");

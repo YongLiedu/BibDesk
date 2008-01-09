@@ -154,7 +154,7 @@ static CGAffineTransform __paperTransform;
         _thumbnailSize = NSMakeSize(_fullSize.width / 2, _fullSize.height / 2);
         _fullImageRef = NULL;
         _thumbnailRef = NULL;
-        _diskCacheName = FVCreateDiskCacheNameWithURL(_fileURL);
+        _diskCacheName = [FVIconCache createDiskCacheNameWithURL:_fileURL];
         _iconType = FVTextType;
         
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);

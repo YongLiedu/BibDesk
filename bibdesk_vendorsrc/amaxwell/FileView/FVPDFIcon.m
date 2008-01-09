@@ -143,7 +143,7 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
         _fullSize = __paperSize;
         _thumbnailSize = _fullSize;
         _fileURL = [aURL copy];        
-        _diskCacheName = FVCreateDiskCacheNameWithURL(aURL);
+        _diskCacheName = [FVIconCache createDiskCacheNameWithURL:aURL];
         _iconType = FVPDFType;
         _pdfDoc = NULL;
         _pdfPage = NULL;

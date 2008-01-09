@@ -333,34 +333,6 @@ static NSURL *missingFileURL = nil;
 
 @end
 
-static char * FVCreateCStringWithInode(ino_t n)
-{
-    // LONG_MAX on x86_64 is 9223372036854775807, so 40 chars should be sufficient
-    char temp[40];
-    sprintf(temp,"%ld", (long)n);
-    return strdup(temp);   
-}
-
-FV_PRIVATE_EXTERN char * FVCreateDiskCacheNameWithURL(NSURL *aURL)
-{
-    NSCParameterAssert(nil != aURL);
-#if DEBUG
-    // this is a much more useful name for debugging, but it's slower and breaks if the name changes
-    return strdup([[aURL absoluteString] fileSystemRepresentation]);
-#endif
-    char *name = NULL;
-    if ([aURL isFileURL]) {
-        struct stat sb;
-        if (0 == stat([[aURL path] fileSystemRepresentation], &sb))
-            name = FVCreateCStringWithInode(sb.st_ino);
-    }
-    else {
-        name = strdup([[aURL absoluteString] fileSystemRepresentation]);
-    }
-    return name;
-}
-
-
 @interface NSBezierPath (Leopard)
 + (NSBezierPath*)bezierPathWithRoundedRect:(NSRect)rect xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius;
 @end

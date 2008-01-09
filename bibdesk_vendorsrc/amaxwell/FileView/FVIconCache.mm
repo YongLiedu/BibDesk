@@ -73,13 +73,18 @@ static DTDataFile *__dataFile = NULL;
 static char *__tempName = NULL;        /* only a file static for debugging */
 static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
 static NSMutableDictionary *__eventTable = nil;
-
-#define ENABLE_CACHE_LOGGING 0
+static NSInteger FVCacheLogLevel = 0;
 
 + (void)initialize
 {
     static BOOL didInit = NO;
     if (NO == didInit) {
+        
+        // Pass in args on command line: -FVCacheLogLevel 0
+        // 0 - disabled
+        // 1 - only print final stats
+        // 2 - print URL each as it's added
+        FVCacheLogLevel = [[NSUserDefaults standardUserDefaults] integerForKey:@"FVCacheLogLevel"];
                 
         // docs say this returns nil in case of failure...so we'll check for it just in case
         NSString *tempDir = NSTemporaryDirectory();
@@ -104,11 +109,12 @@ static NSMutableDictionary *__eventTable = nil;
         __dataFile = new DTDataFile(__tempName);
         
         // unlink the file immediately; since DTDataFile calls fopen() in its constructor, this is safe, and means we don't leave turds when the program crashes.  For debug builds, the file is unlinked when the app terminates, since otherwise the call to stat() fails with a file not found error (presumably since the link count is zero).
-#if ENABLE_CACHE_LOGGING
-        __eventTable = [NSMutableDictionary new];
-#else
-        unlink(__tempName);
-#endif
+        
+        if (FVCacheLogLevel > 0)
+            __eventTable = [NSMutableDictionary new];
+        else
+            unlink(__tempName);
+
         [[NSNotificationCenter defaultCenter] addObserver:self 
                                                  selector:@selector(handleAppTerminate:) 
                                                      name:NSApplicationWillTerminateNotification 
@@ -127,27 +133,27 @@ static NSMutableDictionary *__eventTable = nil;
     delete __dataFile;    
     __dataFile = NULL;
         
-#if ENABLE_CACHE_LOGGING
-    // print the file size, just because I'm curious about it (before unlinking the file, though!)
-    struct stat sb;
-    if (0 == stat(__tempName, &sb)) {
-        off_t fsize = sb.st_size;
-        double mbSize = double(fsize) / 1024 / 1024;
-        
-        aslclient client = asl_open("FileViewCache", NULL, ASL_OPT_NO_DELAY);
-        aslmsg m = asl_new(ASL_TYPE_MSG);
-        asl_set(m, ASL_KEY_SENDER, "FileViewCache");
-        asl_log(client, m, ASL_LEVEL_ERR, "removing %s with cache size = %.2f MB\n", __tempName, mbSize);
-        asl_log(client, m, ASL_LEVEL_ERR, "final cache content (compressed): %s\n", [[__eventTable description] UTF8String]);
-        asl_free(m);
-        asl_close(client);        
+    if (FVCacheLogLevel > 0) {
+        // print the file size, just because I'm curious about it (before unlinking the file, though!)
+        struct stat sb;
+        if (0 == stat(__tempName, &sb)) {
+            off_t fsize = sb.st_size;
+            double mbSize = double(fsize) / 1024 / 1024;
+            
+            aslclient client = asl_open("FileViewCache", NULL, ASL_OPT_NO_DELAY);
+            aslmsg m = asl_new(ASL_TYPE_MSG);
+            asl_set(m, ASL_KEY_SENDER, "FileViewCache");
+            asl_log(client, m, ASL_LEVEL_ERR, "removing %s with cache size = %.2f MB\n", __tempName, mbSize);
+            asl_log(client, m, ASL_LEVEL_ERR, "final cache content (compressed): %s\n", [[__eventTable description] UTF8String]);
+            asl_free(m);
+            asl_close(client);        
+        }
+        else {
+            string errMsg = string("stat failed \"") + __tempName + "\"";
+            perror(errMsg.c_str());
+        }
+        unlink(__tempName);
     }
-    else {
-        string errMsg = string("stat failed \"") + __tempName + "\"";
-        perror(errMsg.c_str());
-    }
-    unlink(__tempName);
-#endif
     
     // hold the lock for the event table as well
     pthread_mutex_unlock(&__dataFileLock);
@@ -166,13 +172,11 @@ static NSMutableDictionary *__eventTable = nil;
         if (__dataFile->Contains(name)) {
             DTCharArray array = __dataFile->ReadCharArray(name);
             toReturn = FVCreateCGImageWithCharArray(array);
-#ifdef DEBUG
-            if (NULL == toReturn)
+            if (FVCacheLogLevel > 0 && NULL == toReturn)
                 NSLog(@"failed reading %s from cache", name);
-#endif
         }
     }
-    else {
+    else if (FVCacheLogLevel > 0) {
         NSLog(@"must be quitting; the cache file is already gone");
     }
     pthread_mutex_unlock(&__dataFileLock);
@@ -219,23 +223,50 @@ static NSMutableDictionary *__eventTable = nil;
     if (scheme) CFRelease(scheme);
     if (theURL) CFRelease(theURL);
     
-    aslclient client = asl_open("FileViewCache", NULL, ASL_OPT_NO_DELAY);
-    aslmsg m = asl_new(ASL_TYPE_MSG);
-    asl_set(m, ASL_KEY_SENDER, "FileViewCache");
-    asl_log(client, m, ASL_LEVEL_ERR, "caching image for %s, size = %.2f kBytes\n", name, kbytes);
-    asl_free(m);
-    asl_close(client);
+    if (FVCacheLogLevel > 1) {
+        aslclient client = asl_open("FileViewCache", NULL, ASL_OPT_NO_DELAY);
+        aslmsg m = asl_new(ASL_TYPE_MSG);
+        asl_set(m, ASL_KEY_SENDER, "FileViewCache");
+        asl_log(client, m, ASL_LEVEL_ERR, "caching image for %s, size = %.2f kBytes\n", name, kbytes);
+        asl_free(m);
+        asl_close(client);
+    }
 }
 
 + (void)cacheCGImage:(CGImageRef)image withName:(const char *)name;
 {
     DTCharArray array = FVCharArrayWithCGImage(image);
     pthread_mutex_lock(&__dataFileLock);
-#if ENABLE_CACHE_LOGGING
-    [self _recordCacheEventWithName:name size:double(array.Length()) / 1024];
-#endif
+    if (FVCacheLogLevel > 0)
+        [self _recordCacheEventWithName:name size:double(array.Length()) / 1024];
     if (__dataFile) __dataFile->Save(array, name);
     pthread_mutex_unlock(&__dataFileLock);
+}
+
+static char * FVCreateCStringWithInode(ino_t n)
+{
+    // LONG_MAX on x86_64 is 9223372036854775807, so 40 chars should be sufficient
+    char temp[40];
+    sprintf(temp,"%ld", (long)n);
+    return strdup(temp);   
+}
+
+// changed from function to class method so +initialize gets called first and sets FVCacheLogLevel
++ (char *)createDiskCacheNameWithURL:(NSURL *)aURL
+{
+    NSParameterAssert(nil != aURL);
+    
+    char *name = NULL;
+    if (NO == [aURL isFileURL] || FVCacheLogLevel > 0) {
+        // this is a much more useful name for debugging, but it's slower and breaks if the name changes
+        name = strdup([[aURL absoluteString] fileSystemRepresentation]);
+    }
+    else {
+        struct stat sb;
+        if (0 == stat([[aURL path] fileSystemRepresentation], &sb))
+            name = FVCreateCStringWithInode(sb.st_ino);
+    }
+    return name;
 }
 
 @end

@@ -62,6 +62,5 @@ typedef NSUInteger FVIconType;
 - (void)_drawBadgeInContext:(CGContextRef)context forIconInRect:(NSRect)dstRect;
 @end
 
-FV_PRIVATE_EXTERN char * FVCreateDiskCacheNameWithURL(NSURL *aURL);
 FV_PRIVATE_EXTERN NSString * const FVWebIconUpdatedNotificationName;
 

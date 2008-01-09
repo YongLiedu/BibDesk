@@ -41,7 +41,9 @@
 
 @interface FVIconCache : NSObject
 
-// C-strings are used as names for compatibility with DTDataFile's use of std::string, and because it won't change.   Default is to use inode as name for release builds, and use the path as name for debug builds.  I was originally using -[[[NSURL path] lastPathComponent] fileSystemRepresentation] as the name when calling these methods, but it was creating a bunch of autoreleased objects and doing encoding conversions.
+// C-strings are used as names for compatibility with DTDataFile's use of std::string, and because it won't change.   Default is to use inode, and use the URL string as name for debug logging.  I was originally using -[[[NSURL path] lastPathComponent] fileSystemRepresentation] as the name when calling these methods, but it was creating a bunch of autoreleased objects and doing encoding conversions.
+
++ (char *)createDiskCacheNameWithURL:(NSURL *)aURL;
 
 // This always returns a new instance with a retain count of one, based on the data stored on disk.  It will return NULL if an error occurred in deserializing the image data or if the image could not be found in the cache.
 + (CGImageRef)newImageNamed:(const char *)name;
