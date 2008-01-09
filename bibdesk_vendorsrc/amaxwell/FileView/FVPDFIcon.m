@@ -83,7 +83,7 @@ static CGPDFDocumentRef createCGPDFDocumentWithPostScriptURL(NSURL *fileURL)
     return pdfDoc;
 }
 
-static NSURL *PDFURLForPDFBundleURL(NSURL *aURL)
+static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
 {
     NSString *filePath = [aURL path];
     NSArray *files = [[NSFileManager defaultManager] subpathsAtPath:filePath];
@@ -99,7 +99,7 @@ static NSURL *PDFURLForPDFBundleURL(NSURL *aURL)
     }
     if (pdfFile)
         pdfFile = [filePath stringByAppendingPathComponent:pdfFile];
-    return pdfFile ? [NSURL fileURLWithPath:pdfFile] : nil;
+    return pdfFile ? [[NSURL alloc] initFileURLWithPath:pdfFile] : nil;
 }
 
 // return the same thing as PDF; just a container for the URL, until actually asked to render the PS file
@@ -115,7 +115,10 @@ static NSURL *PDFURLForPDFBundleURL(NSURL *aURL)
 - (id)initWithPDFDAtURL:(NSURL *)aURL;
 {
     if (self = [self initWithPDFAtURL:aURL]) {
-        if (PDFURLForPDFBundleURL(_fileURL)) {
+        NSURL *fileURL = createPDFURLForPDFBundleURL(_fileURL);
+        if (fileURL) {
+            [_fileURL release];
+            _fileURL = fileURL;
             _iconType = FVPDFDType;
         } else {
             NSZone *zone = [self zone];
@@ -302,12 +305,10 @@ static inline void limitSize(NSSize *size)
     if (NULL == _pdfPage) {
         
         if (NULL == _pdfDoc) {
-            if (FVPDFType == _iconType)
-                _pdfDoc = CGPDFDocumentCreateWithURL((CFURLRef)_fileURL);
-            else if (FVPDFDType == _iconType)
-                _pdfDoc = CGPDFDocumentCreateWithURL((CFURLRef)PDFURLForPDFBundleURL(_fileURL));
-            else
+            if (FVPostscriptType == _iconType)
                 _pdfDoc = createCGPDFDocumentWithPostScriptURL(_fileURL);
+            else
+                _pdfDoc = CGPDFDocumentCreateWithURL((CFURLRef)_fileURL);
             
             _pageCount = CGPDFDocumentGetNumberOfPages(_pdfDoc);
         }
