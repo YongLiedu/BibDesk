@@ -1,5 +1,5 @@
 //
-//  FVArrowButton.h
+//  FVArrowButtonCell.h
 //  FileViewTest
 //
 //  Created by Adam Maxwell on 09/21/07.

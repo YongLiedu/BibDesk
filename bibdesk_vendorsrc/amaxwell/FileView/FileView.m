@@ -42,7 +42,7 @@
 #import "FVIcon_Private.h"
 #import "FVIconQueue.h"
 #import "FVPreviewer.h"
-#import "FVArrowButton.h"
+#import "FVArrowButtonCell.h"
 
 // functions for dealing with multiple URLs and weblocs on the pasteboard
 static NSArray *URLSFromPasteboard(NSPasteboard *pboard);

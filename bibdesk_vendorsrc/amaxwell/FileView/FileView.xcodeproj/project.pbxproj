@@ -32,8 +32,8 @@
 		F92C7C500D28250F004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
 		F94692020CA56EC500AC2772 /* FileView.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F70CA56EC500AC2772 /* FileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F94692030CA56EC500AC2772 /* FileView.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691F80CA56EC500AC2772 /* FileView.m */; };
-		F94692040CA56EC500AC2772 /* FVArrowButton.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F90CA56EC500AC2772 /* FVArrowButton.h */; };
-		F94692050CA56EC500AC2772 /* FVArrowButton.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691FA0CA56EC500AC2772 /* FVArrowButton.m */; };
+		F94692040CA56EC500AC2772 /* FVArrowButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */; };
+		F94692050CA56EC500AC2772 /* FVArrowButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */; };
 		F94692060CA56EC500AC2772 /* FVIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691FB0CA56EC500AC2772 /* FVIcon.h */; };
 		F94692070CA56EC500AC2772 /* FVIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691FC0CA56EC500AC2772 /* FVIcon.m */; };
 		F94692080CA56EC500AC2772 /* FVIconQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691FD0CA56EC500AC2772 /* FVIconQueue.h */; };
@@ -112,6 +112,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CE1CC8450D1FCC650087B955 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
+			remoteInfo = FileView;
+		};
 		F9F04CDA0CE260AC00F28ED2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
@@ -132,13 +139,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = FileView;
-		};
-		F9F04CFD0CE2624400F28ED2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F9F04CE10CE260EB00F28ED2;
-			remoteInfo = "Framework + Plugin";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -178,8 +178,8 @@
 		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
 		F94691F70CA56EC500AC2772 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
 		F94691F80CA56EC500AC2772 /* FileView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileView.m; sourceTree = "<group>"; };
-		F94691F90CA56EC500AC2772 /* FVArrowButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVArrowButton.h; sourceTree = "<group>"; };
-		F94691FA0CA56EC500AC2772 /* FVArrowButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVArrowButton.m; sourceTree = "<group>"; };
+		F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVArrowButtonCell.h; sourceTree = "<group>"; };
+		F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVArrowButtonCell.m; sourceTree = "<group>"; };
 		F94691FB0CA56EC500AC2772 /* FVIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVIcon.h; sourceTree = "<group>"; };
 		F94691FC0CA56EC500AC2772 /* FVIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVIcon.m; sourceTree = "<group>"; };
 		F94691FD0CA56EC500AC2772 /* FVIconQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVIconQueue.h; sourceTree = "<group>"; };
@@ -360,8 +360,8 @@
 				F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */,
 				F94691F70CA56EC500AC2772 /* FileView.h */,
 				F94691F80CA56EC500AC2772 /* FileView.m */,
-				F94691F90CA56EC500AC2772 /* FVArrowButton.h */,
-				F94691FA0CA56EC500AC2772 /* FVArrowButton.m */,
+				F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */,
+				F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */,
 				F94691FB0CA56EC500AC2772 /* FVIcon.h */,
 				F94691FC0CA56EC500AC2772 /* FVIcon.m */,
 				F94691FD0CA56EC500AC2772 /* FVIconQueue.h */,
@@ -478,7 +478,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F94692020CA56EC500AC2772 /* FileView.h in Headers */,
-				F94692040CA56EC500AC2772 /* FVArrowButton.h in Headers */,
+				F94692040CA56EC500AC2772 /* FVArrowButtonCell.h in Headers */,
 				F94692060CA56EC500AC2772 /* FVIcon.h in Headers */,
 				F94692080CA56EC500AC2772 /* FVIconQueue.h in Headers */,
 				F946920A0CA56EC500AC2772 /* FVPreviewer.h in Headers */,
@@ -567,7 +567,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				F9F04CFE0CE2624400F28ED2 /* PBXTargetDependency */,
+				CE1CC8460D1FCC650087B955 /* PBXTargetDependency */,
 			);
 			name = "FileView Program";
 			productName = "FileView Program";
@@ -648,7 +648,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F94692030CA56EC500AC2772 /* FileView.m in Sources */,
-				F94692050CA56EC500AC2772 /* FVArrowButton.m in Sources */,
+				F94692050CA56EC500AC2772 /* FVArrowButtonCell.m in Sources */,
 				F94692070CA56EC500AC2772 /* FVIcon.m in Sources */,
 				F94692090CA56EC500AC2772 /* FVIconQueue.m in Sources */,
 				F946920B0CA56EC500AC2772 /* FVPreviewer.m in Sources */,
@@ -697,6 +697,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		CE1CC8460D1FCC650087B955 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8DC2EF4F0486A6940098B216 /* FileView */;
+			targetProxy = CE1CC8450D1FCC650087B955 /* PBXContainerItemProxy */;
+		};
 		F9F04CDB0CE260AC00F28ED2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8DC2EF4F0486A6940098B216 /* FileView */;
@@ -711,11 +716,6 @@
 			isa = PBXTargetDependency;
 			target = 8DC2EF4F0486A6940098B216 /* FileView */;
 			targetProxy = F9F04CE60CE260FA00F28ED2 /* PBXContainerItemProxy */;
-		};
-		F9F04CFE0CE2624400F28ED2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */;
-			targetProxy = F9F04CFD0CE2624400F28ED2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

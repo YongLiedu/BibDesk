@@ -1,5 +1,5 @@
 //
-//  FVArrowButton.m
+//  FVArrowButtonCell.m
 //  FileViewTest
 //
 //  Created by Adam Maxwell on 09/21/07.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "FVArrowButton.h"
+#import "FVArrowButtonCell.h"
 
 
 @implementation FVArrowButtonCell
