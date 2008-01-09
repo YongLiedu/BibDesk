@@ -46,15 +46,35 @@
 static CGImageRef FVCreateCGImageWithCharArray(DTCharArray array);
 static DTCharArray FVCharArrayWithCGImage(CGImageRef image);
 
+@interface _FVIconCacheEventRecord : NSObject
+{
+@public
+    double      _kbytes;
+    NSUInteger  _count;
+    CFStringRef _identifier;
+}
+@end
+
+@implementation _FVIconCacheEventRecord
+
+- (void)dealloc
+{
+    CFRelease(_identifier);
+    [super dealloc];
+}
+- (NSString *)description { return [NSString stringWithFormat:@"%.2f kilobytes in %d files", _kbytes, _count]; }
+- (NSUInteger)hash { return CFHash(_identifier); }
+- (BOOL)isEqual:(id)other { return CFStringCompare(_identifier, ((_FVIconCacheEventRecord *)other)->_identifier, 0) == kCFCompareEqualTo; }
+@end
+
 @implementation FVIconCache
 
 static DTDataFile *__dataFile = NULL;
 static char *__tempName = NULL;        /* only a file static for debugging */
 static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
+static NSMutableDictionary *__eventTable = nil;
 
-#ifndef ENABLE_CACHE_LOGGING
 #define ENABLE_CACHE_LOGGING 0
-#endif
 
 + (void)initialize
 {
@@ -84,7 +104,9 @@ static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
         __dataFile = new DTDataFile(__tempName);
         
         // unlink the file immediately; since DTDataFile calls fopen() in its constructor, this is safe, and means we don't leave turds when the program crashes.  For debug builds, the file is unlinked when the app terminates, since otherwise the call to stat() fails with a file not found error (presumably since the link count is zero).
-#if !(ENABLE_CACHE_LOGGING)
+#if ENABLE_CACHE_LOGGING
+        __eventTable = [NSMutableDictionary new];
+#else
         unlink(__tempName);
 #endif
         [[NSNotificationCenter defaultCenter] addObserver:self 
@@ -104,9 +126,7 @@ static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
     __dataFile->Flush();
     delete __dataFile;    
     __dataFile = NULL;
-    
-    pthread_mutex_unlock(&__dataFileLock);
-    
+        
 #if ENABLE_CACHE_LOGGING
     // print the file size, just because I'm curious about it (before unlinking the file, though!)
     struct stat sb;
@@ -118,16 +138,19 @@ static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
         aslmsg m = asl_new(ASL_TYPE_MSG);
         asl_set(m, ASL_KEY_SENDER, "FileViewCache");
         asl_log(client, m, ASL_LEVEL_ERR, "removing %s with cache size = %.2f MB\n", __tempName, mbSize);
+        asl_log(client, m, ASL_LEVEL_ERR, "final cache content (compressed): %s\n", [[__eventTable description] UTF8String]);
         asl_free(m);
-        asl_close(client);
+        asl_close(client);        
     }
     else {
         string errMsg = string("stat failed \"") + __tempName + "\"";
         perror(errMsg.c_str());
     }
     unlink(__tempName);
-
 #endif
+    
+    // hold the lock for the event table as well
+    pthread_mutex_unlock(&__dataFileLock);
 }
 
 + (CGImageRef)newImageNamed:(const char *)name;
@@ -156,18 +179,61 @@ static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
     return toReturn;
 }
 
-+ (void)cacheCGImage:(CGImageRef)image withName:(const char *)name;
++ (void)_recordCacheEventWithName:(const char *)name size:(double)kbytes
 {
-    DTCharArray array = FVCharArrayWithCGImage(image);
-#if ENABLE_CACHE_LOGGING
+    const UInt8 *url_bytes = (const UInt8 *)name;
+    CFURLRef theURL = CFURLCreateWithBytes(NULL, url_bytes, strlen(name), kCFStringEncodingUTF8, NULL);
+    CFStringRef scheme = CFURLCopyScheme(theURL);
+    CFStringRef identifier = NULL;
+    if (scheme && CFStringCompare(scheme, CFSTR("file"), 0) == kCFCompareEqualTo) {
+        
+        FSRef fileRef;
+        if (CFURLGetFSRef(theURL, &fileRef)) {
+            CFStringRef theUTI;
+            LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
+            if (theUTI) identifier = theUTI;
+        }
+    }
+    else if (scheme) {
+        identifier = (CFStringRef)CFRetain(scheme);
+    }
+    else {
+        identifier = (CFStringRef)CFRetain(CFSTR("anonymous"));
+    }
+    
+    _FVIconCacheEventRecord *rec = [__eventTable objectForKey:(id)identifier];
+    if (nil != rec) {
+        rec->_kbytes += kbytes;
+        rec->_count += 1;
+    }
+    else {
+        rec = [_FVIconCacheEventRecord new];
+        rec->_kbytes = kbytes;
+        rec->_count = 1;
+        rec->_identifier = (CFStringRef)CFRetain(identifier);
+        [__eventTable setObject:rec forKey:(id)identifier];
+        [rec release];
+    }
+    
+    if (identifier) CFRelease(identifier);
+    if (scheme) CFRelease(scheme);
+    if (theURL) CFRelease(theURL);
+    
     aslclient client = asl_open("FileViewCache", NULL, ASL_OPT_NO_DELAY);
     aslmsg m = asl_new(ASL_TYPE_MSG);
     asl_set(m, ASL_KEY_SENDER, "FileViewCache");
-    asl_log(client, m, ASL_LEVEL_ERR, "caching image for %s, size = %.2f kBytes\n", name, double(array.Length()) / 1024);
+    asl_log(client, m, ASL_LEVEL_ERR, "caching image for %s, size = %.2f kBytes\n", name, kbytes);
     asl_free(m);
     asl_close(client);
-#endif
+}
+
++ (void)cacheCGImage:(CGImageRef)image withName:(const char *)name;
+{
+    DTCharArray array = FVCharArrayWithCGImage(image);
     pthread_mutex_lock(&__dataFileLock);
+#if ENABLE_CACHE_LOGGING
+    [self _recordCacheEventWithName:name size:double(array.Length()) / 1024];
+#endif
     if (__dataFile) __dataFile->Save(array, name);
     pthread_mutex_unlock(&__dataFileLock);
 }
