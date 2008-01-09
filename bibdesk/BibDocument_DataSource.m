@@ -568,7 +568,8 @@
                     }
                     
 				}else if([dragColumnId isRemoteURLField]){
-					// cache this so we know which column (field) was dragged
+					
+                    // cache this so we know which column (field) was dragged
 					[self setPromiseDragColumnIdentifier:dragColumnId];
 
                     // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
@@ -585,6 +586,7 @@
                                 theURL = url;
                             [filePaths addObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]];
                         }
+                        row = [rowIndexes indexGreaterThanIndex:row];
 					}
                     
                     if([filePaths count]){
