@@ -70,7 +70,7 @@ static NSArray *dcProperties(NSXMLNode *node, NSString *key)
 + (NSArray *)itemsFromString:(NSString *)xmlString error:(NSError **)outError
 {
     if (nil == xmlString)
-        return nil;
+        return [NSArray array];
     
     NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:xmlString options:0 error:outError];
     
