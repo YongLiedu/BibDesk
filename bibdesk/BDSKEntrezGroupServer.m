@@ -321,6 +321,9 @@
             pubs = [BDSKBibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath document:group encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
         } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
             pubs = [BDSKStringParser itemsFromString:contentString ofType:type error:&error];
+        } else {
+            // this branch exists strictly to ensure that the error is initialized before being embedded
+            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unknown data type", @"")];
         }
         if (pubs == nil || isPartialData) {
             failedDownload = YES;
