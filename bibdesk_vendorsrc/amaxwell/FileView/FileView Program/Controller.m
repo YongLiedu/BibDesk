@@ -107,8 +107,13 @@
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
 {
     NSArray *toMove = [[[arrayController arrangedObjects] objectsAtIndexes:aSet] copy];
+    // reduce idx by the number of smaller indexes in aSet
+    if (anIndex > 0) {
+        NSRange range = NSMakeRange(0, anIndex);
+        unsigned int buffer[anIndex];
+        anIndex -= [aSet getIndexes:buffer maxCount:anIndex inIndexRange:&range];
+    }
     [arrayController removeObjectsAtArrangedObjectIndexes:aSet];
-    
     aSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(anIndex, [aSet count])];
     [arrayController insertObjects:toMove atArrangedObjectIndexes:aSet];
     [toMove release];
