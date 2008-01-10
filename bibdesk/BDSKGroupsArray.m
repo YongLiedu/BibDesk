@@ -49,6 +49,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BibAuthor.h"
 #import "NSObject_BDSKExtensions.h"
+#import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKFilter.h"
 #import <OmniFoundation/NSArray-OFExtensions.h>
 
@@ -244,52 +245,31 @@
 }
 
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange sharedRange = [self rangeOfSharedGroups];
-    unsigned int maxCount = MIN([indexes count], sharedRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&sharedRange];
+    return [indexes numberOfIndexesInRange:[self rangeOfSharedGroups]];
 }
 
 - (unsigned int)numberOfURLGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange urlRange = [self rangeOfURLGroups];
-    unsigned int maxCount = MIN([indexes count], urlRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&urlRange];
+    return [indexes numberOfIndexesInRange:[self rangeOfURLGroups]];
 }
 
 - (unsigned int)numberOfScriptGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange scriptRange = [self rangeOfScriptGroups];
-    unsigned int maxCount = MIN([indexes count], scriptRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&scriptRange];
+    return [indexes numberOfIndexesInRange:[self rangeOfScriptGroups]];
 }
 
 - (unsigned int)numberOfSearchGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange searchRange = [self rangeOfSearchGroups];
-    unsigned int maxCount = MIN([indexes count], searchRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&searchRange];
+    return [indexes numberOfIndexesInRange:[self rangeOfSearchGroups]];
 }
 
 - (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange smartRange = [self rangeOfSmartGroups];
-    unsigned int maxCount = MIN([indexes count], smartRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&smartRange];
+    return [indexes numberOfIndexesInRange:[self rangeOfSmartGroups]];
 }
 
 - (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange staticRange = [self rangeOfStaticGroups];
-    unsigned int maxCount = MIN([indexes count], staticRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&staticRange];
+    return [indexes numberOfIndexesInRange:[self rangeOfStaticGroups]];
 }
 
 - (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange categoryRange = [self rangeOfCategoryGroups];
-    unsigned int maxCount = MIN([indexes count], categoryRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&categoryRange];
+    return [indexes numberOfIndexesInRange:[self rangeOfCategoryGroups]];
 }
 
 - (BOOL)hasWebGroupAtIndexes:(NSIndexSet *)indexes{

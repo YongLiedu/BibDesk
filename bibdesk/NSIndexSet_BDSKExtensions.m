@@ -65,4 +65,10 @@
     return NO;
 }
 
+- (unsigned int)numberOfIndexesInRange:(NSRange)range {
+    unsigned int maxCount = MIN([self count], range.length);
+    unsigned int buffer[maxCount];
+    return [self getIndexes:buffer maxCount:maxCount inIndexRange:&range];
+}
+
 @end
