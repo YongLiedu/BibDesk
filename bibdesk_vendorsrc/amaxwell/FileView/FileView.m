@@ -2358,96 +2358,81 @@ static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
     NSMutableSet *allURLsReadFromPasteboard = [NSMutableSet setWithCapacity:itemCount];
     
     // wtf? this has 1-based indexing!
-    for (itemIndex = 1; noErr == err && itemIndex <= itemCount; itemIndex++) {
-        
-        PasteboardItemID itemID;
-        CFArrayRef flavors;
-        CFIndex flavorIndex, flavorCount = 0;
-        
-        err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
-        
-        if (noErr == err)
-            err = PasteboardCopyItemFlavors(carbonPboard, itemID, &flavors);
-        
-        if (noErr == err)
-            flavorCount = CFArrayGetCount(flavors);
-        
-        CFURLRef fileURL = NULL;
-        CFURLRef destURL = NULL;
-        
-        for (flavorIndex = 0; noErr == err && flavorIndex < flavorCount; flavorIndex++) {
+    if (noErr == err) {
+    
+        for (itemIndex = 1; noErr == err && itemIndex <= itemCount; itemIndex++) {
             
-            CFStringRef flavor;
-            CFDataRef data;
-            CFIndex dataSize;
+            PasteboardItemID itemID;
+            CFArrayRef flavors = NULL;
             
-            flavor = CFArrayGetValueAtIndex(flavors, flavorIndex);
+            err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
+            if (noErr == err)
+                err = PasteboardCopyItemFlavors(carbonPboard, itemID, &flavors);
             
-            // !!! I'm assuming that the URL bytes are UTF-8, but that should be checked...
-            
-            // UTIs determined with PasteboardPeeker
-            
-            if (UTTypeConformsTo(flavor, kUTTypeFileURL)) {
+            if (noErr == err) {
                 
-                // this is the URL of a file on disk
-                err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
-                if (noErr == err && NULL != data) {
-                    dataSize = CFDataGetLength(data);
+                CFRange flavorRange = CFRangeMake(0, FArrayGetCount(flavors));
+                CFDataRef data;
+                CFURLRef destURL = NULL;
+                
+                // !!! I'm assuming that the URL bytes are UTF-8, but that should be checked...
+                
+                // UTIs determined with PasteboardPeeker
+                
+                if (CFArrayContainsValue(flavors, flavorRange, kUTTypeURL)) {
                     
-                    fileURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), dataSize, kCFStringEncodingUTF8, NULL);
-                    CFRelease(data);
-                }
-                
-            }
-            else if (UTTypeConformsTo(flavor, kUTTypeURL)) {
-                
-                // if we have a webloc or other URL, this is the URL that it points to
-                err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
-                if (noErr == err && NULL != data) {
-                    dataSize = CFDataGetLength(data);
-                    
-                    destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), dataSize, kCFStringEncodingUTF8, NULL);
-                    CFRelease(data);
-                }
-                
-            }
-            else if (UTTypeConformsTo(flavor, kUTTypeUTF8PlainText)) {
-                
-                // this is a string that may be a URL; FireFox and other apps don't use any of the standard URL pasteboard types
-                err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
-                if (noErr == err && NULL != data) {
-                    dataSize = CFDataGetLength(data);
-                    
-                    destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), dataSize, kCFStringEncodingUTF8, NULL);
-                    CFRelease(data);
-                    
-                    // CFURLCreateWithBytes will create a URL from any arbitrary string
-                    if (destURL && nil == [(NSURL *)destURL scheme]) {
-                        CFRelease(destURL);
-                        destURL = NULL;
+                    // if we have a webloc or other URL, this is the URL that it points to
+                    err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeURL, &data);
+                    if (noErr == err && NULL != data) {
+                        destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
+                        CFRelease(data);
                     }
+                    
+                }
+                
+                if (NULL == destURL && CFArrayContainsValue(flavors, flavorRange, kUTTypeFileURL)) {
+                    
+                    // this is the URL of a file on disk
+                    err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeFileURL, &data);
+                    if (noErr == err && NULL != data) {
+                        destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
+                        CFRelease(data);
+                    }
+                    
+                }
+                
+                // or should thius be checked before kUTTypeFileURL?
+                if (NULL == destURL && CFArrayContainsValue(flavors, flavorRange, kUTTypeUTF8PlainText)) {
+                    
+                    // this is a string that may be a URL; FireFox and other apps don't use any of the standard URL pasteboard types
+                    err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeUTF8PlainText, &data);
+                    if (noErr == err && NULL != data) {
+                        destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
+                        CFRelease(data);
+                        
+                        // CFURLCreateWithBytes will create a URL from any arbitrary string
+                        if (NULL != destURL && nil == [(NSURL *)destURL scheme]) {
+                            CFRelease(destURL);
+                            destURL = NULL;
+                        }
+                    }
+                    
+                }
+                
+                // ignore any other type; we don't care
+                
+                // always add this if it exists
+                if (NULL != destURL) {
+                    [toReturn addObject:(id)destURL];
+                    [allURLsReadFromPasteboard addObject:(id)destURL];
+                    CFRelease(destURL);
                 }
                 
             }
-            // ignore any other type; we don't care
-        }
-        
-        if (noErr == err && NULL != flavors)
-            CFRelease(flavors);
-        
-        // only add the file URL if the destination URL didn't exist
-        if (fileURL) {
-            [allURLsReadFromPasteboard addObject:(id)fileURL];
-            if (NULL == destURL)
-                [toReturn addObject:(id)fileURL];
-            CFRelease(fileURL);
-        }
-        
-        // always add this if it exists
-        if (destURL) {
-            [toReturn addObject:(id)destURL];
-            [allURLsReadFromPasteboard addObject:(id)destURL];
-            CFRelease(destURL);
+            
+            if (NULL != flavors)
+                CFRelease(flavors);
+            
         }
         
     }
