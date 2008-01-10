@@ -790,7 +790,7 @@
 		F5AC9DBB032D12E201B4A65D /* OAColorProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAColorProfile.h; sourceTree = "<group>"; };
 		F5AC9DBC032D12E201B4A65D /* OAColorProfile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAColorProfile.m; sourceTree = "<group>"; };
 		F5D4DA390222D61401B4A65D /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/OAScriptSheet.nib; sourceTree = "<group>"; };
-		F93C35340D35D697006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/OmniAppKit.strings; sourceTree = "<group>"; };
+		F93C35340D35D697006EB558 /* French */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/OmniAppKit.strings; sourceTree = "<group>"; };
 		F93C35350D35D6D1006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = file; name = French; path = "French.lproj/Classic Crayons.clr"; sourceTree = "<group>"; };
 		F93C353B0D35D6F8006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/OAFindPanel.nib; sourceTree = "<group>"; };
 		F93C353C0D35D707006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/OAScriptSheet.nib; sourceTree = "<group>"; };
