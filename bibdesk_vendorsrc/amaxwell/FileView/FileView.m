@@ -2364,6 +2364,7 @@ static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
             
             PasteboardItemID itemID;
             CFArrayRef flavors = NULL;
+            CFIndex flavorIndex, flavorCount = 0;
             
             err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
             if (noErr == err)
@@ -2371,55 +2372,54 @@ static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
             
             if (noErr == err) {
                 
-                CFRange flavorRange = CFRangeMake(0, CFArrayGetCount(flavors));
-                CFDataRef data;
                 CFURLRef destURL = NULL;
                 
-                // !!! I'm assuming that the URL bytes are UTF-8, but that should be checked...
-                
-                // UTIs determined with PasteboardPeeker
-                
-                if (CFArrayContainsValue(flavors, flavorRange, kUTTypeURL)) {
+                for (flavorIndex = 0; noErr == err && flavorIndex < flavorCount; flavorIndex++) {
                     
-                    // if we have a webloc or other URL, this is the URL that it points to
-                    err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeURL, &data);
-                    if (noErr == err && NULL != data) {
-                        destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
-                        CFRelease(data);
-                    }
+                    CFStringRef flavor;
+                    CFDataRef data;
                     
-                }
-                
-                if (NULL == destURL && CFArrayContainsValue(flavors, flavorRange, kUTTypeFileURL)) {
+                    flavor = CFArrayGetValueAtIndex(flavors, flavorIndex);
                     
-                    // this is the URL of a file on disk
-                    err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeFileURL, &data);
-                    if (noErr == err && NULL != data) {
-                        destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
-                        CFRelease(data);
-                    }
+                    // !!! I'm assuming that the URL bytes are UTF-8, but that should be checked...
                     
-                }
-                
-                // or should thius be checked before kUTTypeFileURL?
-                if (NULL == destURL && CFArrayContainsValue(flavors, flavorRange, kUTTypeUTF8PlainText)) {
+                    // UTIs determined with PasteboardPeeker
                     
-                    // this is a string that may be a URL; FireFox and other apps don't use any of the standard URL pasteboard types
-                    err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeUTF8PlainText, &data);
-                    if (noErr == err && NULL != data) {
-                        destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
-                        CFRelease(data);
+                    if (UTTypeConformsTo(flavor, kUTTypeURL)) {
+                        // this also includes kUTTypeFileURL
                         
-                        // CFURLCreateWithBytes will create a URL from any arbitrary string
-                        if (NULL != destURL && nil == [(NSURL *)destURL scheme]) {
-                            CFRelease(destURL);
-                            destURL = NULL;
+                        err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
+                        if (noErr == err && NULL != data) {
+                            // we may have already found a kUTTypeUTF8PlainText, overwrite by the URL
+                            if (NULL != destURL)
+                                CFRelease(destURL);
+                            destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
+                            CFRelease(data);
                         }
+                        
+                        if (NULL != destURL)
+                            break;
+                        
+                    } else if (UTTypeConformsTo(flavor, kUTTypeUTF8PlainText)) {
+                        
+                        // this is a string that may be a URL; FireFox and other apps don't use any of the standard URL pasteboard types
+                        err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeUTF8PlainText, &data);
+                        if (noErr == err && NULL != data) {
+                            destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
+                            CFRelease(data);
+                            
+                            // CFURLCreateWithBytes will create a URL from any arbitrary string
+                            if (NULL != destURL && nil == [(NSURL *)destURL scheme]) {
+                                CFRelease(destURL);
+                                destURL = NULL;
+                            }
+                        }
+                        
                     }
                     
+                    // ignore any other type; we don't care
+                    
                 }
-                
-                // ignore any other type; we don't care
                 
                 // always add this if it exists
                 if (NULL != destURL) {
