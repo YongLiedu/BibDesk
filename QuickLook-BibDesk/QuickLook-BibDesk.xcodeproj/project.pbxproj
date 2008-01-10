@@ -40,6 +40,8 @@
 		F920DC3C0B6C6FC500904F15 /* BDSKSpotlightIconController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSpotlightIconController.h; sourceTree = "<group>"; };
 		F920DC3D0B6C6FC500904F15 /* BDSKSpotlightIconController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSpotlightIconController.m; sourceTree = "<group>"; };
 		F920DC420B6C705200904F15 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SpotlightFileIconController.nib; sourceTree = "<group>"; };
+		F93C35550D35D89A006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F93C35560D35D8A7006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/SpotlightFileIconController.nib; sourceTree = "<group>"; };
 		F95147480B5B4672002F5D6B /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		F953AE330B5C9BC30053F12B /* BibDeskQuickLook.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = BibDeskQuickLook.html; sourceTree = "<group>"; };
 		F9C2351E0B752C2E00BC5A84 /* FolderPenIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = FolderPenIcon.icns; sourceTree = "<group>"; };
@@ -219,6 +221,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				089C167EFE841241C02AAC07 /* English */,
+				F93C35550D35D89A006EB558 /* French */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -227,6 +230,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F920DC420B6C705200904F15 /* English */,
+				F93C35560D35D8A7006EB558 /* French */,
 			);
 			name = SpotlightFileIconController.nib;
 			sourceTree = "<group>";
