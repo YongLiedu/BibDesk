@@ -1,55 +1,37 @@
 {
-    IBClasses =     (
-                {
-            ACTIONS =             {
-                openHelp = id;
-                performFindPanelAction = id;
-                toggleStatusBar = id;
-            };
-            CLASS = BDSKFindController;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                controlsView = NSView;
-                fieldToSearchComboBox = NSComboBox;
-                findAsMacroCheckbox = NSButton;
-                findComboBox = NSComboBox;
-                findOptionsBox = NSBox;
-                ignoreCaseCheckbox = NSButton;
-                replaceAsMacroCheckbox = NSButton;
-                replaceButton = NSButton;
-                replaceComboBox = NSComboBox;
-                searchScopePopUpButton = NSPopUpButton;
-                searchSelectionMatrix = NSMatrix;
-                searchTypePopUpButton = NSPopUpButton;
-                setOptionsBox = NSBox;
-                shouldSetCheckbox = NSButton;
-                statusBar = BDSKStatusBar;
-            };
-            SUPERCLASS = NSWindowController;
-        },
-                {
-            CLASS = BDSKFindFieldEditor;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSTextView;
-        },
-                {
-            CLASS = BDSKGradientView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = BDSKStatusBar;
-            LANGUAGE = ObjC;
-            SUPERCLASS = BDSKGradientView;
-        },
-                {
-            ACTIONS =             {
-                "" = id;
-            };
-            CLASS = FirstResponder;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
+    IBClasses = (
+        {
+            ACTIONS = {openHelp = id; performFindPanelAction = id; toggleStatusBar = id; }; 
+            CLASS = BDSKFindController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                controlsView = NSView; 
+                fieldToSearchComboBox = NSComboBox; 
+                findAsMacroCheckbox = NSButton; 
+                findComboBox = NSComboBox; 
+                findOptionsBox = NSBox; 
+                ignoreCaseCheckbox = NSButton; 
+                replaceAsMacroCheckbox = NSButton; 
+                replaceButton = NSButton; 
+                replaceComboBox = NSComboBox; 
+                searchScopePopUpButton = NSPopUpButton; 
+                searchSelectionMatrix = NSMatrix; 
+                searchTypePopUpButton = NSPopUpButton; 
+                setOptionsBox = NSBox; 
+                shouldSetCheckbox = NSButton; 
+                statusBar = BDSKStatusBar; 
+            }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {CLASS = BDSKFindFieldEditor; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
+        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = BDSKStatusBar; LANGUAGE = ObjC; SUPERCLASS = BDSKGradientView; }, 
+        {
+            ACTIONS = {"" = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
         }
-    );
-    IBVersion = 1;
+    ); 
+    IBVersion = 1; 
 }

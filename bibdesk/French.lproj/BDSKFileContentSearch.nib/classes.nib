@@ -1,124 +1,65 @@
 {
-    IBClasses =     (
-                {
-            CLASS = BDSKCollapsibleView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = BDSKContainerView;
-        },
-                {
-            CLASS = BDSKContainerView;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                contentView = id;
-            };
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = BDSKEdgeView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = BDSKContainerView;
-        },
-                {
-            ACTIONS =             {
-                cancelCurrentSearch = id;
-                search = id;
-                tableAction = id;
-            };
-            CLASS = BDSKFileContentSearchController;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                collapsibleView = BDSKCollapsibleView;
-                controlView = BDSKEdgeView;
-                indexProgressBar = NSProgressIndicator;
-                progressView = NSView;
-                resultsArrayController = BDSKSelectionPreservingArrayController;
-                stopButton = NSButton;
-                tableView = NSTableView;
-            };
-            SUPERCLASS = NSWindowController;
-        },
-                {
-            CLASS = BDSKGradientView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = BDSKLevelIndicatorCell;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSLevelIndicatorCell;
-        },
-                {
-            CLASS = BDSKSelectionPreservingArrayController;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSArrayController;
-        },
-                {
-            CLASS = BDSKTextWithIconCell;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSTextFieldCell;
-        },
-                {
-            CLASS = FirstResponder;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = NSControl;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = NSLevelIndicatorCell;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSActionCell;
-        },
-                {
-            CLASS = NSMenu;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = NSObject;
-            LANGUAGE = ObjC;
-        },
-                {
-            CLASS = NSScrollView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = NSTableHeaderView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            ACTIONS =             {
-                changeFont = id;
-                invertSelection = id;
-            };
-            CLASS = NSTableView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSControl;
-        },
-                {
-            CLASS = NSWindow;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSResponder;
-        },
-                {
-            ACTIONS =             {
-                hideWindow = id;
-                toggleShowingWindow = id;
-            };
-            CLASS = NSWindowController;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSResponder;
-        },
-                {
-            CLASS = OAGradientTableView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSTableView;
-        }
-    );
-    IBVersion = 1;
+    IBClasses = (
+        {
+            CLASS = BDSKCollapsibleView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = BDSKContainerView; 
+        }, 
+        {
+            CLASS = BDSKContainerView; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {contentView = id; }; 
+            SUPERCLASS = NSView; 
+        }, 
+        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
+        {
+            ACTIONS = {cancelCurrentSearch = id; search = id; tableAction = id; }; 
+            CLASS = BDSKFileContentSearchController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                collapsibleView = BDSKCollapsibleView; 
+                controlView = BDSKEdgeView; 
+                indexProgressBar = NSProgressIndicator; 
+                progressView = NSView; 
+                resultsArrayController = BDSKSelectionPreservingArrayController; 
+                stopButton = NSButton; 
+                tableView = NSTableView; 
+            }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {
+            CLASS = BDSKLevelIndicatorCell; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSLevelIndicatorCell; 
+        }, 
+        {
+            CLASS = BDSKSelectionPreservingArrayController; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSArrayController; 
+        }, 
+        {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSControl; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = NSLevelIndicatorCell; LANGUAGE = ObjC; SUPERCLASS = NSActionCell; }, 
+        {CLASS = NSMenu; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }, 
+        {CLASS = NSScrollView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = NSTableHeaderView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {
+            ACTIONS = {changeFont = id; invertSelection = id; }; 
+            CLASS = NSTableView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSControl; 
+        }, 
+        {CLASS = NSWindow; LANGUAGE = ObjC; SUPERCLASS = NSResponder; }, 
+        {
+            ACTIONS = {hideWindow = id; toggleShowingWindow = id; }; 
+            CLASS = NSWindowController; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSResponder; 
+        }, 
+        {CLASS = OAGradientTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }
+    ); 
+    IBVersion = 1; 
 }
