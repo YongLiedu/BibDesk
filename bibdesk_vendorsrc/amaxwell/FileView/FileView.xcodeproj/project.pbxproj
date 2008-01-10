@@ -176,6 +176,9 @@
 		F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVWebViewIcon.h; sourceTree = "<group>"; };
 		F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVWebViewIcon.m; sourceTree = "<group>"; };
 		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
+		F93C351E0D35D214006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/FileView.strings; sourceTree = "<group>"; };
+		F93C351F0D35D221006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F93C35200D35D23E006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/FVPreviewer.nib; sourceTree = "<group>"; };
 		F94691F70CA56EC500AC2772 /* FileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView.h; sourceTree = "<group>"; };
 		F94691F80CA56EC500AC2772 /* FileView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileView.m; sourceTree = "<group>"; };
 		F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVArrowButtonCell.h; sourceTree = "<group>"; };
@@ -724,6 +727,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				089C1667FE841158C02AAC07 /* English */,
+				F93C351F0D35D221006EB558 /* French */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -748,6 +752,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F94692010CA56EC500AC2772 /* English */,
+				F93C35200D35D23E006EB558 /* French */,
 			);
 			name = FVPreviewer.nib;
 			sourceTree = "<group>";
@@ -756,6 +761,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9E469360CFF6D12003E6C0A /* English */,
+				F93C351E0D35D214006EB558 /* French */,
 			);
 			name = FileView.strings;
 			sourceTree = "<group>";

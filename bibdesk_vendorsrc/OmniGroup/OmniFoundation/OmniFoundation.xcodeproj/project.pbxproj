@@ -959,6 +959,7 @@
 		F220577008CF6059004B6007 /* OFTimeSpanFormatterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFTimeSpanFormatterTest.m; sourceTree = "<group>"; };
 		F5FBE7A7025BEF9F0100084B /* OFMultipleNumberFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFMultipleNumberFormatter.m; sourceTree = "<group>"; };
 		F5FBE7A8025BEF9F0100084B /* OFMultipleNumberFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OFMultipleNumberFormatter.h; sourceTree = "<group>"; };
+		F93C352C0D35D641006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/OmniFoundation.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2533,6 +2534,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				16ACF159FFC40A50C697A14E /* English */,
+				F93C352C0D35D641006EB558 /* French */,
 			);
 			name = OmniFoundation.strings;
 			sourceTree = "<group>";
