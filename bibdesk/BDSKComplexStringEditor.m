@@ -80,7 +80,7 @@
 }
 
 - (NSString *)windowNibName {
-    return @"MacroTextFieldWindow";
+    return @"ComplexStringEditor";
 }
 
 - (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString formatter:(BDSKComplexStringFormatter *)aFormatter {
