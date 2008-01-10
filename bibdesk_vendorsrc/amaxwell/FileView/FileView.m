@@ -2373,8 +2373,10 @@ static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
             if (noErr == err) {
                 
                 CFURLRef destURL = NULL;
+                CFURLRef fileURL = NULL;
+                CFURLRef textURL = NULL;
                 
-                for (flavorIndex = 0; noErr == err && flavorIndex < flavorCount; flavorIndex++) {
+                for (flavorIndex = 0; flavorIndex < flavorCount; flavorIndex++) {
                     
                     CFStringRef flavor;
                     CFDataRef data;
@@ -2385,8 +2387,16 @@ static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
                     
                     // UTIs determined with PasteboardPeeker
                     
-                    if (UTTypeConformsTo(flavor, kUTTypeURL)) {
-                        // this also includes kUTTypeFileURL
+                    if (UTTypeConformsTo(flavor, kUTTypeFileURL)) {
+                        
+                        err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
+                        if (noErr == err && NULL != data) {
+                            // we may have already found a kUTTypeUTF8PlainText, overwrite by the URL
+                            fileURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
+                            CFRelease(data);
+                        }
+                        
+                    } else if (UTTypeConformsTo(flavor, kUTTypeURL)) {
                         
                         err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
                         if (noErr == err && NULL != data) {
@@ -2405,13 +2415,13 @@ static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
                         // this is a string that may be a URL; FireFox and other apps don't use any of the standard URL pasteboard types
                         err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeUTF8PlainText, &data);
                         if (noErr == err && NULL != data) {
-                            destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
+                            textURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
                             CFRelease(data);
                             
                             // CFURLCreateWithBytes will create a URL from any arbitrary string
-                            if (NULL != destURL && nil == [(NSURL *)destURL scheme]) {
-                                CFRelease(destURL);
-                                destURL = NULL;
+                            if (NULL != textURL && nil == [(NSURL *)textURL scheme]) {
+                                CFRelease(textURL);
+                                textURL = NULL;
                             }
                         }
                         
@@ -2421,6 +2431,22 @@ static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
                     
                 }
                 
+                // only add the textURL if the destURL or fileURL were not found
+                if (NULL != textURL) {
+                    if (NULL == destURL && NULL == fileURL) {
+                        [toReturn addObject:(id)textURL];
+                        [allURLsReadFromPasteboard addObject:(id)textURL];
+                    }
+                    CFRelease(textURL);
+                }
+                // only add the fileURL if the destURL was not found
+                if (NULL != fileURL) {
+                    if (NULL == destURL) {
+                        [toReturn addObject:(id)fileURL];
+                        [allURLsReadFromPasteboard addObject:(id)fileURL];
+                    }
+                    CFRelease(fileURL);
+                }
                 // always add this if it exists
                 if (NULL != destURL) {
                     [toReturn addObject:(id)destURL];
