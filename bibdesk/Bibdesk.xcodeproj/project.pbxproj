@@ -1458,6 +1458,7 @@
 		F92F4E4D0788DEFC001B8F82 /* BibPref_Files.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPref_Files.m; sourceTree = "<group>"; };
 		F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = yaz.xcodeproj; path = vendorsrc/indexdata/yaz/objc/yaz.xcodeproj; sourceTree = "<group>"; };
 		F93840890906DD1F00FC37F2 /* scripthook.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = scripthook.tiff; path = Images/scripthook.tiff; sourceTree = "<group>"; };
+		F93C35DF0D35D97B006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKFileMigration.nib; sourceTree = "<group>"; };
 		F940D1070B5568E400B5917A /* BDSKReferParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKReferParser.h; sourceTree = "<group>"; };
 		F940D1080B5568E400B5917A /* BDSKReferParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKReferParser.m; sourceTree = "<group>"; };
 		F941135209B549BF00EE8463 /* BDSKEditorTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKEditorTextView.h; sourceTree = "<group>"; };
@@ -4455,6 +4456,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9EF94EA0D16014000314058 /* English */,
+				F93C35DF0D35D97B006EB558 /* French */,
 			);
 			name = BDSKFileMigration.nib;
 			sourceTree = "<group>";

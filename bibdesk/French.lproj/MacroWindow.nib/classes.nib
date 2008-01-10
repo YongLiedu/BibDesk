@@ -1,28 +1,40 @@
 {
-    IBClasses = (
-        {CLASS = BDSKMacroTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {
-            ACTIONS = {
-                addMacro = id; 
-                changeShowAll = id; 
-                closeAction = id; 
-                editSelectedFieldAsRawBibTeX = id; 
-                removeSelectedMacros = id; 
-                search = id; 
-            }; 
-            CLASS = BDSKMacroWindowController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                addButton = NSButton; 
-                arrayController = NSArrayController; 
-                closeButton = NSButton; 
-                removeButton = NSButton; 
-                tableView = NSTableView; 
-            }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = MacroKeyFormatter; LANGUAGE = ObjC; SUPERCLASS = NSFormatter; }
-    ); 
-    IBVersion = 1; 
+    IBClasses =     (
+                {
+            CLASS = BDSKMacroTableView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSTableView;
+        },
+                {
+            ACTIONS =             {
+                addMacro = id;
+                changeShowAll = id;
+                closeAction = id;
+                editSelectedFieldAsRawBibTeX = id;
+                removeSelectedMacros = id;
+                search = id;
+            };
+            CLASS = BDSKMacroWindowController;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                addButton = NSButton;
+                arrayController = NSArrayController;
+                closeButton = NSButton;
+                removeButton = NSButton;
+                tableView = NSTableView;
+            };
+            SUPERCLASS = NSWindowController;
+        },
+                {
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = MacroKeyFormatter;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSFormatter;
+        }
+    );
+    IBVersion = 1;
 }

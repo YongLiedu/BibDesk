@@ -1,46 +1,83 @@
 {
-    IBClasses = (
-        {CLASS = BDSKBookmark; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {
-            ACTIONS = {
-                deleteBookmark = id; 
-                dismissAddBookmarkSheet = id; 
-                insertBookmark = id; 
-                insertBookmarkFolder = id; 
-                insertBookmarkSeparator = id; 
-            }; 
-            CLASS = BDSKBookmarkController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                addBookmarkSheet = NSWindow; 
-                bookmarkField = NSTextField; 
-                folderPopUp = NSPopUpButton; 
-                outlineView = NSOutlineView; 
-            }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {
-            CLASS = BDSKBookmarkOutlineView; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSOutlineView; 
-        }, 
-        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {
-            ACTIONS = {startAnimation = id; stopAnimation = id; }; 
-            CLASS = BDSKStatusBar; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {delegate = id; textCell = id; }; 
-            SUPERCLASS = BDSKGradientView; 
-        }, 
-        {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSObject; LANGUAGE = ObjC; }, 
-        {
-            ACTIONS = {addBookmark = id; }; 
-            CLASS = WebView; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSView; 
+    IBClasses =     (
+                {
+            CLASS = BDSKBookmark;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            ACTIONS =             {
+                deleteBookmark = id;
+                dismissAddBookmarkSheet = id;
+                insertBookmark = id;
+                insertBookmarkFolder = id;
+                insertBookmarkSeparator = id;
+            };
+            CLASS = BDSKBookmarkController;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                addBookmarkSheet = NSWindow;
+                bookmarkField = NSTextField;
+                folderPopUp = NSPopUpButton;
+                outlineView = NSOutlineView;
+            };
+            SUPERCLASS = NSWindowController;
+        },
+                {
+            CLASS = BDSKBookmarkOutlineView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSOutlineView;
+        },
+                {
+            CLASS = BDSKFilePathCell;
+            LANGUAGE = ObjC;
+            SUPERCLASS = BDSKTextWithIconCell;
+        },
+                {
+            CLASS = BDSKGradientView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSView;
+        },
+                {
+            ACTIONS =             {
+                startAnimation = id;
+                stopAnimation = id;
+            };
+            CLASS = BDSKStatusBar;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                delegate = id;
+                textCell = id;
+            };
+            SUPERCLASS = BDSKGradientView;
+        },
+                {
+            CLASS = BDSKTextWithIconCell;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSTextFieldCell;
+        },
+                {
+            CLASS = BDSKURLStringFormatter;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSFormatter;
+        },
+                {
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = NSObject;
+            LANGUAGE = ObjC;
+        },
+                {
+            ACTIONS =             {
+                addBookmark = id;
+            };
+            CLASS = WebView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSView;
         }
-    ); 
-    IBVersion = 1; 
+    );
+    IBVersion = 1;
 }

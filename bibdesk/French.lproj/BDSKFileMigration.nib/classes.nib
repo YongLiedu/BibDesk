@@ -2,42 +2,25 @@
     IBClasses =     (
                 {
             ACTIONS =             {
-                helpAction = id;
+                editPublication = id;
+                migrate = id;
+                openParentDirectory = id;
+                showHelp = id;
             };
-            CLASS = BDSKAlert;
+            CLASS = BDSKFileMigrationController;
             LANGUAGE = ObjC;
             OUTLETS =             {
-                checkButton = NSButton;
-                helpButton = NSButton;
-                imageView = NSImageView;
-                informationField = NSTextField;
-                messageField = NSTextField;
-            };
-            SUPERCLASS = BDSKSheetController;
-        },
-                {
-            ACTIONS =             {
-                dismiss = id;
-            };
-            CLASS = BDSKSheetController;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                theModalDelegate = id;
+                migrateButton = NSButton;
+                progressBar = NSProgressIndicator;
+                statusField = NSTextField;
+                tableView = NSTableView;
             };
             SUPERCLASS = NSWindowController;
         },
                 {
-            CLASS = FirstResponder;
+            CLASS = BDSKTextWithIconCell;
             LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            ACTIONS =             {
-                helpAction = id;
-            };
-            CLASS = NSButtonCell;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSActionCell;
+            SUPERCLASS = NSTextFieldCell;
         },
                 {
             CLASS = NSControl;
@@ -52,6 +35,25 @@
                 {
             CLASS = NSObject;
             LANGUAGE = ObjC;
+        },
+                {
+            CLASS = NSScrollView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSView;
+        },
+                {
+            CLASS = NSTableHeaderView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSView;
+        },
+                {
+            ACTIONS =             {
+                changeFont = id;
+                invertSelection = id;
+            };
+            CLASS = NSTableView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSControl;
         },
                 {
             CLASS = NSWindow;

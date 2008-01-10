@@ -1,126 +1,215 @@
 {
-    IBClasses = (
-        {
-            CLASS = BDSKContainerView; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {contentView = id; }; 
-            SUPERCLASS = NSView; 
-        }, 
-        {CLASS = BDSKDragWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
-        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
-        {
-            ACTIONS = {
-                addLinkedFileFromMenuItem = id; 
-                addRemoteURLFromMenuItem = id; 
-                bibTypeDidChange = id; 
-                changeFlag = id; 
-                changeRating = id; 
-                chooseLocalFile = id; 
-                chooseRemoteURL = id; 
-                consolidateLinkedFiles = id; 
-                copyNotesForLinkedFile = id; 
-                createNewPubUsingCrossrefAction = id; 
-                dismissChooseURLSheet = id; 
-                duplicateTitleToBooktitle = id; 
-                editSelectedFieldAsRawBibTeX = id; 
-                generateCiteKey = id; 
-                openLinkedFile = id; 
-                openLinkedURL = id; 
-                openParentItemAction = id; 
-                raiseAddField = id; 
-                raiseChangeFieldName = id; 
-                raiseDelField = id; 
-                revealLinkedFile = id; 
-                selectCrossrefParentAction = id; 
-                showCiteKeyWarning = id; 
-                showNotesForLinkedFile = id; 
-                showPersonDetailCmd = id; 
-                toggleStatusBar = id; 
-                trashLocalFile = id; 
-            }; 
-            CLASS = BDSKEditor; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                abstractView = NSTextView; 
-                actionButton = BDSKImagePopUpButton; 
-                actionMenu = NSMenu; 
-                addFieldButton = NSButton; 
-                authorTableView = NSTableView; 
-                bibTypeButton = NSPopUpButton; 
-                chooseURLField = NSTextField; 
-                chooseURLSheet = NSWindow; 
-                citeKeyField = NSTextField; 
-                citeKeyTitle = NSTextField; 
-                citeKeyWarningButton = NSButton; 
-                fileSplitView = BDSKSplitView; 
-                fileView = FileView; 
-                mainSplitView = BDSKSplitView; 
-                matrix = NSMatrix; 
-                notesView = NSTextView; 
-                rssDescriptionView = NSTextView; 
-                statusBar = BDSKStatusBar; 
-                tabView = NSTabView; 
-                tableView = BDSKEditorTableView; 
-            }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {CLASS = BDSKEditorTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {
-            CLASS = BDSKEditorTextFieldCell; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {buttonTarget = id; }; 
-            SUPERCLASS = NSTextFieldCell; 
-        }, 
-        {CLASS = BDSKEditorTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
-        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {
-            CLASS = BDSKImagePopUpButton; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {delegate = id; }; 
-            SUPERCLASS = NSPopUpButton; 
-        }, 
-        {
-            CLASS = BDSKLabelTextFieldCell; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSTextFieldCell; 
-        }, 
-        {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
-        {
-            ACTIONS = {startAnimation = id; stopAnimation = id; }; 
-            CLASS = BDSKStatusBar; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {delegate = id; textCell = id; }; 
-            SUPERCLASS = BDSKGradientView; 
-        }, 
-        {CLASS = BDSKTabView; LANGUAGE = ObjC; SUPERCLASS = NSTabView; }, 
-        {
-            ACTIONS = {delete = id; selectNextIcon = id; selectPreviousIcon = id; }; 
-            CLASS = FileView; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {dataSource = id; delegate = id; dragDataSource = id; }; 
-            SUPERCLASS = NSView; 
-        }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSControl; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {CLASS = NSMenu; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSMenuItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSObject; LANGUAGE = ObjC; }, 
-        {CLASS = NSScrollView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {
-            ACTIONS = {changeFont = id; invertSelection = id; }; 
-            CLASS = NSTableView; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSControl; 
-        }, 
-        {CLASS = NSTextView; LANGUAGE = ObjC; SUPERCLASS = NSText; }, 
-        {CLASS = NSWindow; LANGUAGE = ObjC; SUPERCLASS = NSResponder; }, 
-        {
-            ACTIONS = {hideWindow = id; toggleShowingWindow = id; }; 
-            CLASS = NSWindowController; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSResponder; 
-        }, 
-        {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }
-    ); 
-    IBVersion = 1; 
+    IBClasses =     (
+                {
+            CLASS = BDSKContainerView;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                contentView = id;
+            };
+            SUPERCLASS = NSView;
+        },
+                {
+            CLASS = BDSKDragWindow;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSWindow;
+        },
+                {
+            CLASS = BDSKEdgeView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = BDSKContainerView;
+        },
+                {
+            ACTIONS =             {
+                addLinkedFileFromMenuItem = id;
+                addRemoteURLFromMenuItem = id;
+                bibTypeDidChange = id;
+                changeFlag = id;
+                changeRating = id;
+                chooseLocalFile = id;
+                chooseRemoteURL = id;
+                consolidateLinkedFiles = id;
+                copyNotesForLinkedFile = id;
+                createNewPubUsingCrossrefAction = id;
+                dismissChooseURLSheet = id;
+                duplicateTitleToBooktitle = id;
+                editSelectedFieldAsRawBibTeX = id;
+                generateCiteKey = id;
+                openLinkedFile = id;
+                openLinkedURL = id;
+                openParentItemAction = id;
+                raiseAddField = id;
+                raiseChangeFieldName = id;
+                raiseDelField = id;
+                revealLinkedFile = id;
+                selectCrossrefParentAction = id;
+                showCiteKeyWarning = id;
+                showNotesForLinkedFile = id;
+                showPersonDetailCmd = id;
+                toggleStatusBar = id;
+                trashLocalFile = id;
+            };
+            CLASS = BDSKEditor;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                abstractView = NSTextView;
+                actionButton = BDSKImagePopUpButton;
+                actionMenu = NSMenu;
+                addFieldButton = NSButton;
+                authorTableView = NSTableView;
+                bibTypeButton = NSPopUpButton;
+                chooseURLField = NSTextField;
+                chooseURLSheet = NSWindow;
+                citeKeyField = NSTextField;
+                citeKeyTitle = NSTextField;
+                citeKeyWarningButton = NSButton;
+                fileSplitView = BDSKSplitView;
+                fileView = FileView;
+                mainSplitView = BDSKSplitView;
+                matrix = NSMatrix;
+                notesView = NSTextView;
+                rssDescriptionView = NSTextView;
+                statusBar = BDSKStatusBar;
+                tabView = NSTabView;
+                tableView = BDSKEditorTableView;
+            };
+            SUPERCLASS = NSWindowController;
+        },
+                {
+            CLASS = BDSKEditorTableView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSTableView;
+        },
+                {
+            CLASS = BDSKEditorTextFieldCell;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                buttonTarget = id;
+            };
+            SUPERCLASS = NSTextFieldCell;
+        },
+                {
+            CLASS = BDSKEditorTextView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSTextView;
+        },
+                {
+            CLASS = BDSKGradientView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSView;
+        },
+                {
+            CLASS = BDSKImagePopUpButton;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                delegate = id;
+            };
+            SUPERCLASS = NSPopUpButton;
+        },
+                {
+            CLASS = BDSKLabelTextFieldCell;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSTextFieldCell;
+        },
+                {
+            CLASS = BDSKSplitView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = OASplitView;
+        },
+                {
+            ACTIONS =             {
+                startAnimation = id;
+                stopAnimation = id;
+            };
+            CLASS = BDSKStatusBar;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                delegate = id;
+                textCell = id;
+            };
+            SUPERCLASS = BDSKGradientView;
+        },
+                {
+            CLASS = BDSKTabView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSTabView;
+        },
+                {
+            ACTIONS =             {
+                delete = id;
+                selectNextIcon = id;
+                selectPreviousIcon = id;
+            };
+            CLASS = FileView;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                dataSource = id;
+                delegate = id;
+                dragDataSource = id;
+            };
+            SUPERCLASS = NSView;
+        },
+                {
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = NSControl;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSView;
+        },
+                {
+            CLASS = NSMenu;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = NSMenuItem;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = NSObject;
+            LANGUAGE = ObjC;
+        },
+                {
+            CLASS = NSScrollView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSView;
+        },
+                {
+            ACTIONS =             {
+                changeFont = id;
+                invertSelection = id;
+            };
+            CLASS = NSTableView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSControl;
+        },
+                {
+            CLASS = NSTextView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSText;
+        },
+                {
+            CLASS = NSWindow;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSResponder;
+        },
+                {
+            ACTIONS =             {
+                hideWindow = id;
+                toggleShowingWindow = id;
+            };
+            CLASS = NSWindowController;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSResponder;
+        },
+                {
+            CLASS = OASplitView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSSplitView;
+        }
+    );
+    IBVersion = 1;
 }

@@ -1,34 +1,48 @@
 {
-    IBClasses = (
-        {
-            CLASS = BDSKFilePathCell; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = BDSKTextWithIconCell; 
-        }, 
-        {
-            ACTIONS = {done = id; dump = id; showFile = id; tryAgain = id; }; 
-            CLASS = BDSKFiler; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                contextMenu = NSMenu; 
-                forceCheckButton = NSButton; 
-                iconView = NSImageView; 
-                infoTextField = NSTextField; 
-                progressIndicator = NSProgressIndicator; 
-                progressSheet = NSPanel; 
-                tv = NSTableView; 
-                window = NSWindow; 
-            }; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
-        {
-            ACTIONS = {"" = id; }; 
-            CLASS = FirstResponder; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {CLASS = "java.lang.Object"; LANGUAGE = Java; }
-    ); 
-    IBVersion = 1; 
+    IBClasses =     (
+                {
+            CLASS = BDSKFilePathCell;
+            LANGUAGE = ObjC;
+            SUPERCLASS = BDSKTextWithIconCell;
+        },
+                {
+            ACTIONS =             {
+                done = id;
+                dump = id;
+                showFile = id;
+                tryAgain = id;
+            };
+            CLASS = BDSKFiler;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                contextMenu = NSMenu;
+                forceCheckButton = NSButton;
+                iconView = NSImageView;
+                infoTextField = NSTextField;
+                progressIndicator = NSProgressIndicator;
+                progressSheet = NSPanel;
+                tv = NSTableView;
+                window = NSWindow;
+            };
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = BDSKTextWithIconCell;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSTextFieldCell;
+        },
+                {
+            ACTIONS =             {
+                "" = id;
+            };
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = "java.lang.Object";
+            LANGUAGE = Java;
+        }
+    );
+    IBVersion = 1;
 }

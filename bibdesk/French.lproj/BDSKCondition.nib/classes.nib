@@ -1,44 +1,74 @@
 {
-    IBClasses = (
-        {
-            ACTIONS = {addNewCondition = id; changeRating = id; removeThisCondition = id; }; 
-            CLASS = BDSKConditionController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                addButton = NSButton; 
-                agoText = NSTextField; 
-                andNumberTextField = NSTextField; 
-                booleanButton = NSButton; 
-                comparisonBox = NSBox; 
-                comparisonPopUp = NSPopUpButton; 
-                dateComparisonPopUp = NSPopUpButton; 
-                dateTextField = NSTextField; 
-                keyComboBox = NSComboBox; 
-                numberTextField = NSTextField; 
-                periodPopUp = NSPopUpButton; 
-                ratingButton = BDSKRatingButton; 
-                removeButton = NSButton; 
-                toDateTextField = NSTextField; 
-                triStateButton = NSButton; 
-                valueBox = NSBox; 
-                valueTextField = NSTextField; 
-                view = NSView; 
-            }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {CLASS = BDSKRatingButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSControl; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {CLASS = NSMenu; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSMenuItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSObject; LANGUAGE = ObjC; }, 
-        {CLASS = NSWindow; LANGUAGE = ObjC; SUPERCLASS = NSResponder; }, 
-        {
-            ACTIONS = {hideWindow = id; toggleShowingWindow = id; }; 
-            CLASS = NSWindowController; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSResponder; 
+    IBClasses =     (
+                {
+            ACTIONS =             {
+                addNewCondition = id;
+                changeRating = id;
+                removeThisCondition = id;
+            };
+            CLASS = BDSKConditionController;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                addButton = NSButton;
+                agoText = NSTextField;
+                andNumberTextField = NSTextField;
+                booleanButton = NSButton;
+                comparisonBox = NSBox;
+                comparisonPopUp = NSPopUpButton;
+                countComparisonPopUp = NSPopUpButton;
+                countTextField = NSTextField;
+                dateComparisonPopUp = NSPopUpButton;
+                dateTextField = NSTextField;
+                keyComboBox = NSComboBox;
+                numberTextField = NSTextField;
+                periodPopUp = NSPopUpButton;
+                ratingButton = BDSKRatingButton;
+                removeButton = NSButton;
+                toDateTextField = NSTextField;
+                triStateButton = NSButton;
+                valueBox = NSBox;
+                valueTextField = NSTextField;
+                view = NSView;
+            };
+            SUPERCLASS = NSWindowController;
+        },
+                {
+            ACTIONS =             {
+                addNewCondition = id;
+                removeThisCondition = id;
+            };
+            CLASS = BDSKConditionController1;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                addButton = NSButton;
+                agoText = NSTextField;
+                andNumberTextField = NSTextField;
+                comparisonBox = NSBox;
+                comparisonPopUp = NSPopUpButton;
+                dateComparisonPopUp = NSPopUpButton;
+                dateTextField = NSTextField;
+                keyComboBox = NSComboBox;
+                numberTextField = NSTextField;
+                ownerController = NSObjectController;
+                periodPopUp = NSPopUpButton;
+                removeButton = NSButton;
+                toDateTextField = NSTextField;
+                valueBox = NSBox;
+                valueTextField = NSTextField;
+                view = NSView;
+            };
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = BDSKRatingButton;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSButton;
+        },
+                {
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
         }
-    ); 
-    IBVersion = 1; 
+    );
+    IBVersion = 1;
 }
