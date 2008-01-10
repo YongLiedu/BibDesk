@@ -2371,7 +2371,7 @@ static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
             
             if (noErr == err) {
                 
-                CFRange flavorRange = CFRangeMake(0, FArrayGetCount(flavors));
+                CFRange flavorRange = CFRangeMake(0, CFArrayGetCount(flavors));
                 CFDataRef data;
                 CFURLRef destURL = NULL;
                 
