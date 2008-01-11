@@ -981,7 +981,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 [[NSFileManager defaultManager] changeFileAttributes:fattrs atPath:[saveToURL path]];
         }
         
-        // if this is an overwriting operation, do an atomic swap of the files
+        // If this is not an overwriting operation, we already saved to absoluteURL, and we're done
+        
+        // If this is an overwriting operation, do an atomic swap of the files
         if (didSave && NSSaveOperation == saveOperation) {
             
             // at least on an AFP volume (Server 10.4.11), xattrs from the original file are preserved here
@@ -992,9 +994,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             if (CFURLGetFSRef((CFURLRef)absoluteURL, &originalRef) && CFURLGetFSRef((CFURLRef)saveToURL, &newRef))
                 err = FSExchangeObjects(&newRef, &originalRef);
             
+            // FSExchangeObjects requires both files to be on the same volume
             if (noErr != err) {
                 didSave = NO;
-                if (outError) *outError = nil;
+                if (outError) *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil];
             }
             else if ([self keepBackupFile] == NO) {
                 // not checking return value here; non-critical
