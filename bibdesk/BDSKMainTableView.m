@@ -106,8 +106,9 @@
 - (void)dealloc{
     [typeSelectHelper setDataSource:nil];
     [typeSelectHelper release];
-    [trackingRects release];
     [alternatingRowBackgroundColors release];
+    if (trackingRects != NULL)
+        CFRelease(trackingRects);
     [super dealloc];
 }
 
@@ -209,31 +210,32 @@
     if ([[self delegate] respondsToSelector:@selector(tableView:shouldTrackTableColumn:row:)] == NO)
         return;
     
-    if(trackingRects == nil){
-       trackingRects = OFCreateIntegerArray();
+    if(trackingRects == NULL){
+       trackingRects = CFArrayCreateMutable(kCFAllocatorDefault, 0, &OFIntegerArrayCallbacks);
     }else{
-        CFIndex idx = [trackingRects count];
-        while(idx--){
-            [self removeTrackingRect:(NSTrackingRectTag)[trackingRects objectAtIndex:idx]];
-            [trackingRects removeObjectAtIndex:idx];
-        }
+        CFIndex idx = CFArrayGetCount(trackingRects);
+        while (idx--)
+            [self removeTrackingRect:(NSTrackingRectTag)CFArrayGetValueAtIndex(trackingRects, idx)];
+        CFArrayRemoveAllValues(trackingRects);
     }
     
-    NSRange rowRange = [self rowsInRect:[self visibleRect]];
-    NSRange columnRange = [self columnsInRect:[self visibleRect]];
-    unsigned int rowIndex, columnIndex;
-	NSTableColumn *tableColumn;
-    int userData;
-    NSTrackingRectTag tag;
-    BOOL assumeInside = [[self delegate] respondsToSelector:@selector(tableView:mouseEnteredTableColumn:row:)];
-    
-    for (columnIndex = columnRange.location; columnIndex < NSMaxRange(columnRange); columnIndex++) {
-        tableColumn = [[self tableColumns] objectAtIndex:columnIndex];
-		for (rowIndex = rowRange.location; rowIndex < NSMaxRange(rowRange); rowIndex++) {
-            if ([[self delegate] tableView:self shouldTrackTableColumn:tableColumn row:rowIndex]) {
-                userData = rowIndex * [self numberOfColumns] + columnIndex;
-                tag = [self addTrackingRect:[self frameOfCellAtColumn:columnIndex row:rowIndex] owner:self userData:(void *)userData assumeInside:assumeInside];
-                [trackingRects addObject:(id)tag];
+    if ([self window]) {
+        NSRange rowRange = [self rowsInRect:[self visibleRect]];
+        NSRange columnRange = [self columnsInRect:[self visibleRect]];
+        unsigned int rowIndex, columnIndex;
+        NSTableColumn *tableColumn;
+        int userData;
+        NSTrackingRectTag tag;
+        BOOL assumeInside = [[self delegate] respondsToSelector:@selector(tableView:mouseEnteredTableColumn:row:)];
+        
+        for (columnIndex = columnRange.location; columnIndex < NSMaxRange(columnRange); columnIndex++) {
+            tableColumn = [[self tableColumns] objectAtIndex:columnIndex];
+            for (rowIndex = rowRange.location; rowIndex < NSMaxRange(rowRange); rowIndex++) {
+                if ([[self delegate] tableView:self shouldTrackTableColumn:tableColumn row:rowIndex]) {
+                    userData = rowIndex * [self numberOfColumns] + columnIndex;
+                    tag = [self addTrackingRect:[self frameOfCellAtColumn:columnIndex row:rowIndex] owner:self userData:(void *)userData assumeInside:assumeInside];
+                    CFArrayAppendValue(trackingRects, (void *)tag);
+                }
             }
         }
     }

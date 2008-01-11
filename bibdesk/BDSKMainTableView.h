@@ -46,7 +46,7 @@
     // for supporting type-ahead in the tableview:
     // datasource methods to support this are over in BibDocument_DataSource
     BDSKTypeSelectHelper *typeSelectHelper;
-    NSMutableArray *trackingRects;
+    CFMutableArrayRef trackingRects;
     NSArray *alternatingRowBackgroundColors;
 }
 
