@@ -927,6 +927,84 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [super runModalSavePanelForSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
 }
 
+- (BOOL)writeSafelyToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError;
+{
+    BOOL didSave = [super writeSafelyToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
+    
+    /* 
+     
+     This is a workaround for https://sourceforge.net/tracker/index.php?func=detail&aid=1867790&group_id=61487&atid=497423
+     
+     Filed as rdar://problem/5679370
+     
+     I'm not sure what the semantics of this operation are for NSAutosaveOperation, so it's excluded (but uses a different code path anyway, at least on Leopard).  This also doesn't get hit for save-as or save-to since they don't do a safe-save, but they're handled anyway.  FSExchangeObjects apparently avoids the bugs in FSPathReplaceObject, but doesn't preserve all of the metadata that those do.  It's a shame that Apple can't preserve the file content as well as they preserve the metadata; I'd rather lose the ACLs than lose my bibliography.
+     
+     TODO:  xattr handling, package vs. flat file (overwrite directory)?  Xattrs from BibDesk seem to be preserved, so I'm not going to bother with that.
+     
+     TESTED:  Only on AFP volume served by 10.4.11 Server, saving from 10.5.1 client.  Autosave, Save-As, and Save were tested.
+     
+     */
+    
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 && NO == didSave && [absoluteURL isFileURL] && NSAutosaveOperation != saveOperation) {
+                
+        // this will create a new file on the same volume as the original file, which we will overwrite
+        NSString *tmpPath = [[NSFileManager defaultManager] temporaryPathForWritingToPath:[absoluteURL path] allowOriginalDirectory:YES error:outError];
+        NSURL *saveToURL = nil;
+        
+        // at this point, we're guaranteed that absoluteURL is non-nil and is a fileURL, but the file may not exist
+
+        // save to or save as; file doesn't exist, so overwrite it
+        if (NSSaveOperation != saveOperation)
+            saveToURL = absoluteURL;
+        else if (nil != tmpPath)
+            saveToURL = [NSURL fileURLWithPath:tmpPath];
+        
+        // if tmpPath failed, saveToURL is nil
+        if (nil != saveToURL)
+            didSave = [self writeToURL:saveToURL ofType:typeName forSaveOperation:saveOperation originalContentsURL:absoluteURL error:outError];
+
+        if (didSave) {
+            NSMutableDictionary *fattrs = [NSMutableDictionary dictionary];
+            [fattrs addEntriesFromDictionary:[self fileAttributesToWriteToURL:saveToURL ofType:typeName forSaveOperation:saveOperation originalContentsURL:absoluteURL error:outError]];
+            
+            // copy POSIX permissions from the old file
+            NSNumber *posixPerms = nil;
+            
+            if ([[NSFileManager defaultManager] fileExistsAtPath:[absoluteURL path]])
+                posixPerms = [[[NSFileManager defaultManager] fileAttributesAtPath:[absoluteURL path] traverseLink:YES] objectForKey:NSFilePosixPermissions];
+            
+            if (nil != posixPerms)
+                [fattrs setObject:posixPerms forKey:NSFilePosixPermissions];
+            
+            // not checking return value here; non-critical
+            if ([fattrs count])
+                [[NSFileManager defaultManager] changeFileAttributes:fattrs atPath:[saveToURL path]];
+        }
+        
+        // if this is an overwriting operation, do an atomic swap of the files
+        if (didSave && NSSaveOperation == saveOperation) {
+            
+            // at least on an AFP volume (Server 10.4.11), xattrs from the original file are preserved here
+            FSRef originalRef, newRef;
+            OSStatus err = coreFoundationUnknownErr;
+            
+            // do an atomic swap of the files
+            if (CFURLGetFSRef((CFURLRef)absoluteURL, &originalRef) && CFURLGetFSRef((CFURLRef)saveToURL, &newRef))
+                err = FSExchangeObjects(&newRef, &originalRef);
+            
+            if (noErr != err) {
+                didSave = NO;
+                if (outError) *outError = nil;
+            }
+            else if ([self keepBackupFile] == NO) {
+                // not checking return value here; non-critical
+                [[NSFileManager defaultManager] removeFileAtPath:[saveToURL path] handler:nil];
+            }
+        }
+    }
+    return didSave;
+}
+
 - (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
     
     // Set the string encoding according to the popup.  
