@@ -166,6 +166,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
+- (void)insertInLinkedFiles:(NSURL *)newURL {
+    [self insertInLinkedFiles:newURL atIndex:[[self localFiles] count]];
+}
+
 - (void)removeFromLinkedFilesAtIndex:(unsigned int)idx {
     [[self mutableArrayValueForKey:@"files"] removeObject:[[self localFiles] objectAtIndex:idx]];
 }
@@ -188,6 +192,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
         }
         [self insertObject:file inFilesAtIndex:idx];
     }
+}
+
+- (void)insertInLinkedURLs:(NSString *)newURLString {
+    [self insertInLinkedURLs:newURLString atIndex:[[self remoteURLs] count]];
 }
 
 - (void)removeFromLinkedURLsAtIndex:(unsigned int)idx {
