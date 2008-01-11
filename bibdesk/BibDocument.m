@@ -932,16 +932,15 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     BOOL didSave = [super writeSafelyToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
     
     /* 
-     
      This is a workaround for https://sourceforge.net/tracker/index.php?func=detail&aid=1867790&group_id=61487&atid=497423
-     
      Filed as rdar://problem/5679370
      
      I'm not sure what the semantics of this operation are for NSAutosaveOperation, so it's excluded (but uses a different code path anyway, at least on Leopard).  This also doesn't get hit for save-as or save-to since they don't do a safe-save, but they're handled anyway.  FSExchangeObjects apparently avoids the bugs in FSPathReplaceObject, but doesn't preserve all of the metadata that those do.  It's a shame that Apple can't preserve the file content as well as they preserve the metadata; I'd rather lose the ACLs than lose my bibliography.
      
-     TODO:  xattr handling, package vs. flat file (overwrite directory)?  Xattrs from BibDesk seem to be preserved, so I'm not going to bother with that.
+     TODO:  xattr handling, package vs. flat file (overwrite directory)?  
+     xattrs from BibDesk seem to be preserved, so I'm not going to bother with that.
      
-     TESTED:  Only on AFP volume served by 10.4.11 Server, saving from 10.5.1 client.  Autosave, Save-As, and Save were tested.
+     TESTED:  On AFP volume served by 10.4.11 Server, saving from 10.5.1 client; on AFP volume served by 10.5.1 client, saving from 10.5.1 client.  Autosave, Save-As, and Save were tested.  Saving to a local HFS+ volume doesn't hit this code path, and neither does saving to a FAT-32 thumb drive.
      
      */
     
