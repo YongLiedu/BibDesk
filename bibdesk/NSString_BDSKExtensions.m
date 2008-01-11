@@ -1229,7 +1229,8 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     int length;
     
     length = [self length];
-    ptr = alloca(length * sizeof(unichar));
+    ptr = NSZoneMalloc([self zone], length * sizeof(unichar));
+    void *originalPtr = ptr;
     end = ptr + length;
     [self getCharacters:ptr];
     result = [NSMutableString stringWithCapacity:length];
@@ -1262,6 +1263,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
         ptr++;
     }
     APPEND_PREVIOUS();
+    NSZoneFree([self zone], originalPtr);
     return result;
 }
 
@@ -1274,15 +1276,18 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     BOOL isQuoted, needsSpace;
     
     length = [self length];
-    ptr = alloca(length * sizeof(unichar));
+    ptr = NSZoneMalloc([self zone], length * sizeof(unichar));
+    void *originalPtr = ptr;
     end = ptr + length;
     [self getCharacters:ptr];
     result = [NSMutableString stringWithCapacity:length];
     isQuoted = length > 0 && (*ptr == ' ' || *(end-1) == ' ');
     needsSpace = NO;
     
-    if(isQuoted == NO && [self containsCharacterInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n\r\t\","]] == NO)
+    if(isQuoted == NO && [self containsCharacterInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n\r\t\","]] == NO) {
+        NSZoneFree([self zone], originalPtr);
         return self;
+    }
     
     begin = ptr;
     while (ptr < end) {
@@ -1312,6 +1317,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
         [result insertString:@"\"" atIndex:0];
         [result appendString:@"\""];
     }
+    NSZoneFree([self zone], originalPtr);
     return result;
 }
 
@@ -1327,7 +1333,8 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     BOOL needsSpace;
     
     length = [self length];
-    ptr = alloca(length * sizeof(unichar));
+    ptr = NSZoneMalloc([self zone], length * sizeof(unichar));
+    void *originalPtr = ptr;
     end = ptr + length;
     [self getCharacters:ptr];
     result = [NSMutableString stringWithCapacity:length];
@@ -1353,6 +1360,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
         ptr++;
     }
     APPEND_PREVIOUS();
+    NSZoneFree([self zone], originalPtr);
     return result;
 }
 
