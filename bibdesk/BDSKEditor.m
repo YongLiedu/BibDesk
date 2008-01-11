@@ -1433,9 +1433,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSEnumerator *enumerator = [newURLs objectEnumerator];
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex];
-    while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
-        if (aFile) {
+    while (NSNotFound != idx) {
+        if ((aURL = [enumerator nextObject]) && 
+            (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
             NSURL *oldURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
             [publication removeObjectFromFilesAtIndex:idx];
             if (oldURL)
@@ -1471,9 +1471,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex], offset = 0;
-    while ((aURL = [enumerator nextObject]) != nil && NSNotFound != idx) {
-        aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication];
-        if (aFile) {
+    while (NSNotFound != idx) {
+        if ((aURL = [enumerator nextObject]) && 
+            (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
             [publication insertObject:aFile inFilesAtIndex:idx - offset];
             [[self document] userAddedURL:aURL forPublication:publication];
             [publication autoFileLinkedFile:aFile];
