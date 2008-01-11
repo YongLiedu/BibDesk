@@ -65,10 +65,21 @@
     return NO;
 }
 
+#define STACK_BUFFER_SIZE 256
+
 - (unsigned int)numberOfIndexesInRange:(NSRange)range {
     unsigned int maxCount = MIN([self count], range.length);
-    unsigned int buffer[maxCount];
-    return [self getIndexes:buffer maxCount:maxCount inIndexRange:&range];
+    unsigned int stackBuffer[STACK_BUFFER_SIZE];
+
+    unsigned int *buffer = stackBuffer;
+    if (maxCount > STACK_BUFFER_SIZE)
+        buffer = NSZoneMalloc([self zone], maxCount * sizeof(unsigned int));
+
+    unsigned int numberOfIndexes = [self getIndexes:buffer maxCount:maxCount inIndexRange:&range];
+    if (buffer != stackBuffer)
+        NSZoneFree([self zone], buffer);
+    
+    return numberOfIndexes;
 }
 
 @end
