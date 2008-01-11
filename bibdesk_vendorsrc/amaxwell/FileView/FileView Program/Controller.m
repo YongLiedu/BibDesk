@@ -101,8 +101,8 @@
     [super dealloc];
 }
 
-- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [_filePaths count]; }
-- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx { return [_filePaths objectAtIndex:idx]; }
+- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return 0; }
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx { return nil; }
 
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
 {
@@ -123,7 +123,8 @@
 - (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
 {
     if ([_filePaths count] > [aSet count]) {
-        [[self mutableArrayValueForKey:@"_filePaths"] replaceObjectsAtIndexes:aSet withObjects:newURLs];
+        [arrayController removeObjectsAtArrangedObjectIndexes:aSet];
+        [arrayController insertObjects:newURLs atArrangedObjectIndexes:aSet];
         return YES;
     }
     return NO;
