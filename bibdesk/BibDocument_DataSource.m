@@ -1140,7 +1140,6 @@
         BOOL isRemoteURLField = [fieldName isRemoteURLField];
         NSEnumerator *fileEnum;
         BDSKLinkedFile *file;
-        NSString *originalPath;
         NSString *fileName;
         NSString *basePath = [dropDestination path];
         int i = 0;
