@@ -214,10 +214,12 @@
 		buttonRect.size.width = minButtonSize.width;
 	if (numButtons == 0)
 		buttonRect.origin.x = NSMaxX([[[self window] contentView] bounds]) - NSWidth(buttonRect) - 14.0;
-	else
+	else if (numButtons == 2)
+		buttonRect.origin.x = NSMinX([[buttons lastObject] frame]) - NSWidth(buttonRect) - 16.0;
+    else
 		buttonRect.origin.x = NSMinX([[buttons lastObject] frame]) - NSWidth(buttonRect);
 	[button setFrame:buttonRect];
-	[button setAutoresizingMask:NSViewMinXMargin | NSViewMaxXMargin];
+	[button setAutoresizingMask:NSViewMinXMargin | NSViewMaxYMargin];
 	[[[self window] contentView] addSubview:button];
 	[buttons addObject:button];
 	[button release];
@@ -233,13 +235,16 @@
 	return checkButton;
 }
 
+#define MIN_BUTTON_X 98.0
+
 - (void)prepare {
 	NSString *title;
 	int numButtons = [buttons count];
 	NSRect buttonRect;
 	int i;
 	NSButton *button = nil;
-	float x;
+	float x = NSMinX([[buttons lastObject] frame]);
+    NSRect frame = [[self window] frame];
 	
 	switch (alertStyle) {
 		case NSCriticalAlertStyle: 
@@ -253,9 +258,14 @@
 			title = NSLocalizedString(@"Alert", @"Alert dialog window title");
 	}
 	[[self window] setTitle: title];
-	
+    
+    // see if we should resize the window to fit the buttons
+    if (x < MIN_BUTTON_X) {
+        frame.size.width += MIN_BUTTON_X - x;
+		[[self window] setFrame:frame display:NO];
+    }
+    
     // see if we should resize the message text
-    NSRect frame = [[self window] frame];
     NSRect messageFieldRect = [messageField frame];
     NSRect textRect = [[messageField attributedStringValue] boundingRectForDrawingInViewWithSize:NSMakeSize(NSWidth(messageFieldRect), 200.0)];
     float extraHeight = NSHeight(textRect) - NSHeight(messageFieldRect);
@@ -273,20 +283,6 @@
 
 		[[self window] setFrame:frame display:NO];
     }
-
-    // see if we should resize the informative text
-    frame = [[self window] frame];
-    NSRect infoRect = [informationField frame];
-    textRect = [[informationField attributedStringValue] boundingRectForDrawingInViewWithSize:NSMakeSize(NSWidth(infoRect), 200.0)];
-    extraHeight = NSHeight(textRect) - NSHeight(infoRect);
-
-    if (extraHeight > 0) {
-        frame.size.height += extraHeight;
-        infoRect.size.height += extraHeight;
-        infoRect.origin.y -= extraHeight;
-        [informationField setFrame:infoRect];
-		[[self window] setFrame:frame display:NO];
-    }
     
 	if (hasCheckButton == NO) {
 		frame.size.height -= 22.0;
@@ -296,16 +292,15 @@
 	
 	if (numButtons == 0)
 		[self addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
-	x = NSMinX([[buttons lastObject] frame]);
-	if (numButtons > 2 && x > 98.0) {
-		x = 98.0;
+	if (numButtons > 2) {
+		x = MIN_BUTTON_X;
 		i = numButtons;
 		while (--i > 1) {
 			button = [buttons objectAtIndex:i];
 			buttonRect = [button frame];
 			buttonRect.origin.x = x;
 			[button setFrame:buttonRect];
-			x += NSWidth(buttonRect) + 12.0;
+			x += NSWidth(buttonRect);
 		}
 	}
 	
