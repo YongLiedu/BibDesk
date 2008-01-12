@@ -1483,7 +1483,7 @@
 		F93840890906DD1F00FC37F2 /* scripthook.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = scripthook.tiff; path = Images/scripthook.tiff; sourceTree = "<group>"; };
 		F93C35DF0D35D97B006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKFileMigration.nib; sourceTree = "<group>"; };
 		F93C37AC0D387AEE006EB558 /* Leopard.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Leopard.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
-		F93C37AD0D387AEE006EB558 /* Leopard-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Leopard-Info.plist"; sourceTree = "<group>"; };
+		F93C37AD0D387AEE006EB558 /* Leopard-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Leopard-Info.plist"; sourceTree = "<group>"; };
 		F93C37B20D387B76006EB558 /* BibDocument_Leopard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibDocument_Leopard.h; sourceTree = "<group>"; };
 		F93C37B30D387B76006EB558 /* BibDocument_Leopard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibDocument_Leopard.m; sourceTree = "<group>"; };
 		F940D1070B5568E400B5917A /* BDSKReferParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKReferParser.h; sourceTree = "<group>"; };

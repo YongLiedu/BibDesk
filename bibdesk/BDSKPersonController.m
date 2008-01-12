@@ -66,22 +66,27 @@
     self = [super init];
 	if(self){
         [self setPerson:aPerson];
-        publications = nil;
+        publicationItems = nil;
+        names = [[NSSet alloc] init];
+        fields = [[[BDSKTypeManager sharedManager] personFieldsSet] copy];
         
         isEditable = [[[person publication] owner] isDocument];
         
         [person setPersonController:self];
+        
 	}
 	return self;
 
 }
 
 - (void)dealloc{
-    [pubsTableView setDelegate:nil];
-    [pubsTableView setDataSource:nil];
+    [publicationTableView setDelegate:nil];
+    [publicationTableView setDataSource:nil];
     [person setPersonController:nil];
     [person release];
-    [publications release];
+    [publicationItems release];
+    [names release];
+    [fields release];
     [super dealloc];
 }
 
@@ -117,34 +122,133 @@
                                                    object:nil];
     }
 	[self updateUI];
-    [pubsTableView setDoubleAction:@selector(openSelectedPub:)];
+    [publicationTableView setDoubleAction:@selector(openSelectedPub:)];
     
     if (isEditable)
         [imageView registerForDraggedTypes:[NSArray arrayWithObject:NSVCardPboardType]];
     
     [nameTextField setEditable:isEditable];
-}
-
-- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
-    return [NSString stringWithFormat:@"%@ %C %@", [[person field] localizedFieldName], 0x2014, [person name]];
+    
+    NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"publication.title" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
+    [publicationArrayController setSortDescriptors:[NSArray arrayWithObjects:sortDescriptor, nil]];
+    sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"self" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
+    [fieldArrayController setSortDescriptors:[NSArray arrayWithObjects:sortDescriptor, nil]];
+    sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"length" ascending:NO selector:@selector(compare:)] autorelease];
+    [nameArrayController setSortDescriptors:[NSArray arrayWithObjects:sortDescriptor, nil]];
+    
+    [self updatePublicationItems];
+    [publicationTableView reloadData];
+    [nameTableView selectAll:self];
+    [fieldTableView selectAll:self];
 }
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
     return [[[person publication] owner] isDocument] ? nil : @"";
 }
 
-#pragma mark accessors
-
-- (NSArray *)publications{
-    if (publications == nil)
-        publications = [[[[[person publication] owner] publications] itemsForPerson:person forField:[person field]] retain];
-    return publications;
+- (void)updateFilter {
+    NSSet *fieldSet = [NSSet setWithArray:[fieldArrayController selectedObjects]];
+    NSSet *nameSet = [NSSet setWithArray:[nameArrayController selectedObjects]];
+    
+    NSExpression *lhs, *rhs;
+    NSPredicate *fieldPredicate, *namePredicate, *predicate;
+    
+    lhs = [NSExpression expressionForKeyPath:@"fields"];
+    rhs = [NSExpression expressionForConstantValue:fieldSet ? fieldSet : [NSSet set]];
+    fieldPredicate = [NSComparisonPredicate predicateWithLeftExpression:lhs rightExpression:rhs customSelector:@selector(intersectsSet:)];
+    lhs = [NSExpression expressionForKeyPath:@"names"];
+    rhs = [NSExpression expressionForConstantValue:nameSet ? nameSet : [NSSet set]];
+    namePredicate = [NSComparisonPredicate predicateWithLeftExpression:lhs rightExpression:rhs customSelector:@selector(intersectsSet:)];
+    predicate = [NSCompoundPredicate andPredicateWithSubpredicates:[NSArray arrayWithObjects:fieldPredicate, namePredicate, nil]];
+    
+    [publicationArrayController setFilterPredicate:predicate];
 }
 
-- (void)setPublications:(NSArray *)pubs{
-    if(publications != pubs){
-        [publications release];
-        publications = [pubs copy];
+- (void)updatePublicationItems{
+    if (publicationItems)
+        [publicationItems release];
+    publicationItems = [[NSMutableArray alloc] init];
+    
+    NSMutableSet *theNames = [[NSMutableSet alloc] init];
+    NSMutableSet *peopleSet = BDSKCreateFuzzyAuthorCompareMutableSet();
+    NSEnumerator *pubEnum = [[[[person publication] owner] publications] objectEnumerator];
+    BibItem *pub;
+    
+    while (pub = [pubEnum nextObject]) {
+        NSEnumerator *fieldEnum = [fields objectEnumerator];
+        NSString *field;
+        
+        while (field = [fieldEnum nextObject]) {
+            NSArray *people = [pub peopleArrayForField:field];
+            
+            [peopleSet addObjectsFromArray:people];
+            
+            if ([peopleSet containsObject:person]) {
+                NSMutableSet *fieldSet = [[NSMutableSet alloc] init];
+                NSMutableSet *nameSet = [[NSMutableSet alloc] init];
+                NSEnumerator *personEnum = [people objectEnumerator];
+                BibAuthor *aPerson;
+                NSString *name;
+                
+                while (aPerson = [personEnum nextObject]) {
+                    if ([aPerson fuzzyEqual:person]) {
+                        name = [aPerson originalName];
+                        [nameSet addObject:name];
+                        [fieldSet addObject:field];
+                        [theNames addObject:name];
+                    }
+                }
+                
+                NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:
+                    pub, @"publication", nameSet, @"names", fieldSet, @"fields", nil];
+                [publicationItems addObject:info];
+                [info release];
+                [nameSet release];
+                [fieldSet release];
+            }
+            [peopleSet removeAllObjects];
+        }
+    }
+    [peopleSet release];
+    
+    // @@ probably want to try to preserve selection
+    [self setNames:theNames];
+}
+
+#pragma mark accessors
+
+- (NSArray *)publicationItems{
+    if (publicationItems == nil)
+        [self updatePublicationItems];
+    return publicationItems;
+}
+
+- (void)setPublicationItems:(NSArray *)items{
+    if(publicationItems != items){
+        [publicationItems release];
+        publicationItems = [items mutableCopy];
+    }
+}
+
+- (NSSet *)names {
+    return names;
+}
+
+- (void)setNames:(NSSet *)newNames {
+    if (names != newNames) {
+        [names release];
+        names = [newNames copy];
+    }
+}
+
+- (NSSet *)fields {
+    return fields;
+}
+
+- (void)setFields:(NSSet *)newFields {
+    if (fields != newFields) {
+        [fields release];
+        fields = [newFields copy];
     }
 }
 
@@ -172,18 +276,18 @@
 
 - (void)updateUI{
 	[nameTextField setStringValue:[person name]];
-	[pubsTableView reloadData];
+	[publicationTableView reloadData];
 }
 
 - (void)handleBibItemChanged:(NSNotification *)note{
     NSString *key = [[note userInfo] valueForKey:@"key"];
     if ([key isEqualToString:[person field]] || key == nil)
-        [self setPublications:nil];
+        [self setPublicationItems:nil];
 }
 
 - (void)handleBibItemAddDel:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    [self setPublications:nil];
+    [self setPublicationItems:nil];
 }
 
 - (void)handleGroupWillBeRemoved:(NSNotification *)note{
@@ -194,9 +298,9 @@
 }
 
 - (void)openSelectedPub:(id)sender{
-    int row = [pubsTableView selectedRow];
+    int row = [publicationTableView selectedRow];
     NSAssert(row >= 0, @"Cannot perform double-click action when no row is selected");
-    [(BibDocument *)[self document] editPub:[publications objectAtIndex:row]];
+    [(BibDocument *)[self document] editPub:[[[publicationArrayController arrangedObjects] objectAtIndex:row] valueForKey:@"publication"]];
 }
 
 - (void)changeNameWarningSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode newName:(NSString *)newNameString;
@@ -213,11 +317,12 @@
 {
     id sender = [aNotification object];
     if(sender == nameTextField && [sender isEditable]) {// this shouldn't be called for uneditable cells, but it is
+        NSString *selFields = [[fieldArrayController selectedObjects] componentsJoinedByCommaAndAnd];
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Really Change Name?", @"Message in alert dialog when trying to edit author name")
                                          defaultButton:NSLocalizedString(@"Yes", @"Button title")
                                        alternateButton:NSLocalizedString(@"No", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"This will change matching names in any \"%@\" field of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"), [person field]];
+                             informativeTextWithFormat:NSLocalizedString(@"This will change matching names in any %@ field of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"), selFields];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self 
                          didEndSelector:@selector(changeNameWarningSheetDidEnd:returnCode:newName:) 
@@ -225,6 +330,7 @@
     }
 }
 
+// @@ should we also filter for the selected names?
 - (void)changeNameToString:(NSString *)newNameString{
     
     NSUndoManager *undoManager = [[self window] undoManager];
@@ -233,7 +339,8 @@
     if(undoManager)
         [[undoManager prepareWithInvocationTarget:self] changeNameToString:[person name]];
     
-    NSEnumerator *pubE = [publications objectEnumerator];
+    NSEnumerator *itemE = [publicationItems objectEnumerator];
+    NSDictionary *item;
     BibItem *pub = nil;
     
     // @@ maybe handle this in the type manager?
@@ -242,31 +349,41 @@
     CFIndex idx;
     BibAuthor *newAuthor;
     
+    NSArray *selFields = [fieldArrayController selectedObjects];
+    NSEnumerator *fieldE;
+    NSString *field;
+    
     // we set our person at some point in the iteration, so copy the current value now
     BibAuthor *oldPerson = [[person retain] autorelease];
-    NSString *fieldName = [person field];
     
-    while(pub = [pubE nextObject]){
+    while(item = [itemE nextObject]){
         
-        // get the array of BibAuthor objects from a person field (which may be nil or empty)
-        pubPeople = [pub peopleArrayForField:fieldName inherit:NO];
+        pub = [item objectForKey:@"field"];
+        
+        fieldE = [selFields objectEnumerator];
+        
+        while (field = [fieldE nextObject]) {
+            
+            // get the array of BibAuthor objects from a person field (which may be nil or empty)
+            pubPeople = [pub peopleArrayForField:field inherit:NO];
+                    
+            if([pubPeople count]){
                 
-        if([pubPeople count]){
-            
-            CFRange range = CFRangeMake(0, [pubPeople count]);            
-            CFArrayAppendArray(people, (CFArrayRef)pubPeople, range);
-            
-            // use the fuzzy compare to find which author we're going to replace
-            idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson);
-            if(idx != -1){
-                // replace this author, then create a new BibTeX author string
-                newAuthor = [BibAuthor authorWithName:newNameString andPub:pub];
-                CFArraySetValueAtIndex(people, idx, newAuthor);
-                [pub setField:fieldName toValue:[[(NSArray *)people valueForKey:@"originalName"] componentsJoinedByString:@" and "]];
-                if([pub isEqual:[person publication]])
-                    [self setPerson:[[pub peopleArrayForField:fieldName] objectAtIndex:idx]]; // changes the window title
+                CFRange range = CFRangeMake(0, [pubPeople count]);            
+                CFArrayAppendArray(people, (CFArrayRef)pubPeople, range);
+                
+                // use the fuzzy compare to find which author we're going to replace
+                idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson);
+                if(idx != -1){
+                    // replace this author, then create a new BibTeX author string
+                    newAuthor = [BibAuthor authorWithName:newNameString andPub:pub];
+                    CFArraySetValueAtIndex(people, idx, newAuthor);
+                    [pub setField:field toValue:[[(NSArray *)people valueForKey:@"originalName"] componentsJoinedByString:@" and "]];
+                    if([pub isEqual:[person publication]])
+                        [self setPerson:[[pub peopleArrayForField:field] objectAtIndex:idx]]; // changes the window title
+                }
+                CFArrayRemoveAllValues(people);
             }
-            CFArrayRemoveAllValues(people);
         }
     }
     CFRelease(people);
@@ -281,15 +398,21 @@
 
 #pragma mark TableView delegate
 
+- (void)tableViewSelectionDidChange:(NSNotification *)notification {
+    if ([notification object] == nameTableView || [notification object] == fieldTableView) {
+        [self updateFilter];
+    }
+}
+
 - (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
-    if (tv == pubsTableView)
+    if (tv == publicationTableView)
         return BDSKPersonTableViewFontNameKey;
     else 
         return nil;
 }
 
 - (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
-    if (tv == pubsTableView)
+    if (tv == publicationTableView)
         return BDSKPersonTableViewFontSizeKey;
     else 
         return nil;

@@ -13,9 +13,14 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 collapsibleView = BDSKCollapsibleView; 
+                fieldArrayController = NSArrayController; 
+                fieldTableView = NSTableView; 
                 imageView = BDSKDragImageView; 
+                nameArrayController = NSArrayController; 
+                nameTableView = NSTableView; 
                 nameTextField = NSTextField; 
-                pubsTableView = NSTableView; 
+                publicationArrayController = NSArrayController; 
+                publicationTableView = NSTableView; 
                 splitView = OASplitView; 
             }; 
             SUPERCLASS = NSWindowController; 

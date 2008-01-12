@@ -47,13 +47,20 @@
 
 @interface BDSKPersonController : NSWindowController {
     BibAuthor *person;
-    NSArray *publications;
+    NSMutableArray *publicationItems;
+    NSSet *names;
+    NSSet *fields;
 	float lastPickerHeight;
     IBOutlet NSTextField *nameTextField;
     IBOutlet BDSKDragImageView *imageView;
-    IBOutlet NSTableView *pubsTableView;
+    IBOutlet NSTableView *publicationTableView;
+    IBOutlet NSTableView *nameTableView;
+    IBOutlet NSTableView *fieldTableView;
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet OASplitView *splitView;
+    IBOutlet NSArrayController *publicationArrayController;
+    IBOutlet NSArrayController *fieldArrayController;
+    IBOutlet NSArrayController *nameArrayController;
     BOOL isEditable;
 }
 
@@ -64,12 +71,18 @@
 #pragma mark accessors
 - (BibAuthor *)person;
 - (void)setPerson:(BibAuthor *)newPerson;
-- (NSArray *)publications;
-- (void)setPublications:(NSArray *)pubs;
+- (NSArray *)publicationItems;
+- (void)setPublicationItems:(NSArray *)items;
+- (NSSet *)names;
+- (void)setNames:(NSSet *)newNames;
+- (NSSet *)fields;
+- (void)setFields:(NSSet *)newFields;
 
 #pragma mark actions
 - (void)show;
 - (void)updateUI;
+- (void)updatePublicationItems;
+- (void)updateFilter;
 - (void)handleBibItemAddDel:(NSNotification *)note;
 - (void)handleBibItemChanged:(NSNotification *)note;
 - (void)handleGroupWillBeRemoved:(NSNotification *)note;
