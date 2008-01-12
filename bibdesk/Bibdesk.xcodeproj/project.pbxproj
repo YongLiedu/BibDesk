@@ -35,11 +35,13 @@
 			buildConfigurationList = F9CA0C8A0CDF944C0059D36D /* Build configuration list for PBXAggregateTarget "BibDesk+QuickLook" */;
 			buildPhases = (
 				F9CA0C890CDF944C0059D36D /* CopyFiles */,
+				F93C37D70D387DB0006EB558 /* CopyFiles */,
 			);
 			dependencies = (
 				F911D6C10CFE8EBD0009C77B /* PBXTargetDependency */,
 				F9CA0C810CDF93E30059D36D /* PBXTargetDependency */,
 				F9CA0C7F0CDF93D80059D36D /* PBXTargetDependency */,
+				F93C37D10D387D54006EB558 /* PBXTargetDependency */,
 			);
 			name = "BibDesk+QuickLook";
 			productName = "BibDesk+QuickLook";
@@ -442,6 +444,9 @@
 		F92F4E470788DEDD001B8F82 /* genericBibDocIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F92F4E460788DEDD001B8F82 /* genericBibDocIcon.tiff */; };
 		F92F4E4F0788DEFC001B8F82 /* BibPref_Files.m in Sources */ = {isa = PBXBuildFile; fileRef = F92F4E4D0788DEFC001B8F82 /* BibPref_Files.m */; };
 		F938408A0906DD1F00FC37F2 /* scripthook.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F93840890906DD1F00FC37F2 /* scripthook.tiff */; };
+		F93C37B70D387BCB006EB558 /* BibDocument_Leopard.m in Sources */ = {isa = PBXBuildFile; fileRef = F93C37B30D387B76006EB558 /* BibDocument_Leopard.m */; };
+		F93C37E60D387EA5006EB558 /* Leopard.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = F93C37AC0D387AEE006EB558 /* Leopard.bundle */; };
+		F93C38180D38820B006EB558 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		F940D10A0B5568E400B5917A /* BDSKReferParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F940D1080B5568E400B5917A /* BDSKReferParser.m */; };
 		F941135509B549BF00EE8463 /* BDSKEditorTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = F941135309B549BF00EE8463 /* BDSKEditorTextView.m */; };
 		F941B7EB08AA574200F04ECD /* BDSKOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F941B7E908AA574200F04ECD /* BDSKOverlay.m */; };
@@ -599,6 +604,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8DD76F960486AA7600D96B5E;
 			remoteInfo = SkimNotesAgent;
+		};
+		F93C37D00D387D54006EB558 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F93C37AB0D387AEE006EB558 /* Leopard */;
+			remoteInfo = Leopard;
 		};
 		F95CC112087F54BF002C5694 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -858,6 +870,16 @@
 				CEE23BF10BFBA827002B746B /* fonts.cfg in CopyFiles */,
 				CEE23BF20BFBA827002B746B /* ignore.cfg in CopyFiles */,
 				CEE23BF30BFBA827002B746B /* style.cfg in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F93C37D70D387DB0006EB558 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = BibDesk.app/Contents/Resources;
+			dstSubfolderSpec = 16;
+			files = (
+				F93C37E60D387EA5006EB558 /* Leopard.bundle in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1460,6 +1482,10 @@
 		F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = yaz.xcodeproj; path = vendorsrc/indexdata/yaz/objc/yaz.xcodeproj; sourceTree = "<group>"; };
 		F93840890906DD1F00FC37F2 /* scripthook.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = scripthook.tiff; path = Images/scripthook.tiff; sourceTree = "<group>"; };
 		F93C35DF0D35D97B006EB558 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKFileMigration.nib; sourceTree = "<group>"; };
+		F93C37AC0D387AEE006EB558 /* Leopard.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Leopard.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		F93C37AD0D387AEE006EB558 /* Leopard-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Leopard-Info.plist"; sourceTree = "<group>"; };
+		F93C37B20D387B76006EB558 /* BibDocument_Leopard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibDocument_Leopard.h; sourceTree = "<group>"; };
+		F93C37B30D387B76006EB558 /* BibDocument_Leopard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibDocument_Leopard.m; sourceTree = "<group>"; };
 		F940D1070B5568E400B5917A /* BDSKReferParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKReferParser.h; sourceTree = "<group>"; };
 		F940D1080B5568E400B5917A /* BDSKReferParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKReferParser.m; sourceTree = "<group>"; };
 		F941135209B549BF00EE8463 /* BDSKEditorTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKEditorTextView.h; sourceTree = "<group>"; };
@@ -1730,6 +1756,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F93C37AA0D387AEE006EB558 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F93C38180D38820B006EB558 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -1776,6 +1810,7 @@
 				8D1107320486CEB800E47090 /* BibDesk.app */,
 				275E270707838EE30070398A /* TestBibItem.bundle */,
 				27CD032407D82C7400806B7E /* TestComplexString.bundle */,
+				F93C37AC0D387AEE006EB558 /* Leopard.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1834,6 +1869,7 @@
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				F95C5EDE0D10F5F100C81970 /* Configurations */,
+				F93C37DD0D387DEE006EB558 /* Leopard */,
 			);
 			name = BibDesk;
 			sourceTree = "<group>";
@@ -2682,6 +2718,16 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		F93C37DD0D387DEE006EB558 /* Leopard */ = {
+			isa = PBXGroup;
+			children = (
+				F93C37B20D387B76006EB558 /* BibDocument_Leopard.h */,
+				F93C37B30D387B76006EB558 /* BibDocument_Leopard.m */,
+				F93C37AD0D387AEE006EB558 /* Leopard-Info.plist */,
+			);
+			name = Leopard;
+			sourceTree = "<group>";
+		};
 		F95C5EDE0D10F5F100C81970 /* Configurations */ = {
 			isa = PBXGroup;
 			children = (
@@ -2936,6 +2982,23 @@
 			productReference = 8D1107320486CEB800E47090 /* BibDesk.app */;
 			productType = "com.apple.product-type.application";
 		};
+		F93C37AB0D387AEE006EB558 /* Leopard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F93C37B10D387AF4006EB558 /* Build configuration list for PBXNativeTarget "Leopard" */;
+			buildPhases = (
+				F93C37A80D387AEE006EB558 /* Resources */,
+				F93C37A90D387AEE006EB558 /* Sources */,
+				F93C37AA0D387AEE006EB558 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Leopard;
+			productName = Leopard;
+			productReference = F93C37AC0D387AEE006EB558 /* Leopard.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -3004,6 +3067,7 @@
 				275E270607838EE30070398A /* TestBibItem */,
 				27CD032307D82C7400806B7E /* TestComplexString */,
 				F9CA0C7A0CDF93D10059D36D /* BibDesk+QuickLook */,
+				F93C37AB0D387AEE006EB558 /* Leopard */,
 			);
 		};
 /* End PBXProject section */
@@ -3345,6 +3409,13 @@
 				CE424B120D0F5C6800F824E7 /* BDSKEditor.nib in Resources */,
 				F9EF94EB0D16014000314058 /* BDSKFileMigration.nib in Resources */,
 				CEDB58F40D3692A400E40354 /* ComplexStringEditor.nib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F93C37A80D387AEE006EB558 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3804,6 +3875,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F93C37A90D387AEE006EB558 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F93C37B70D387BCB006EB558 /* BibDocument_Leopard.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -3826,6 +3905,11 @@
 			isa = PBXTargetDependency;
 			name = SkimNotesAgent;
 			targetProxy = F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */;
+		};
+		F93C37D10D387D54006EB558 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F93C37AB0D387AEE006EB558 /* Leopard */;
+			targetProxy = F93C37D00D387D54006EB558 /* PBXContainerItemProxy */;
 		};
 		F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4464,6 +4548,81 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		F93C37AE0D387AF4006EB558 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Leopard-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Leopard;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		F93C37AF0D387AF4006EB558 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Leopard-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Leopard;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		F93C37B00D387AF4006EB558 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Leopard-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Leopard;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = YES;
+			};
+			name = Test;
+		};
 		F993F1BD08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
@@ -4989,6 +5148,16 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		F93C37B10D387AF4006EB558 /* Build configuration list for PBXNativeTarget "Leopard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F93C37AE0D387AF4006EB558 /* Debug */,
+				F93C37AF0D387AF4006EB558 /* Release */,
+				F93C37B00D387AF4006EB558 /* Test */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		F993F1BC08553A61007A7657 /* Build configuration list for PBXNativeTarget "BibDesk" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

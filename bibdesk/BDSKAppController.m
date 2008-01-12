@@ -112,6 +112,9 @@ static void fixLegacyTableColumnIdentifiers()
     // make sure we use Spotlight's plugins on 10.4 and later
     SKLoadDefaultExtractorPlugIns();
 
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+        [[NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"Leopard" ofType:@"bundle"]] load];
+
     [NSDateFormatter setDefaultFormatterBehavior:NSDateFormatterBehavior10_4];
     
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
