@@ -927,6 +927,10 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [super runModalSavePanelForSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
 }
 
+#ifndef MAC_OS_X_VERSION_10_5 || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
+OSStatus FSGetVolumeParms(FSVolumeRefNum volume, GetVolParmsInfoBuffer *buffer, ByteCount bufferSize) { return -1; };
+#endif
+
 - (BOOL)writeSafelyToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError;
 {
     BOOL didSave = [super writeSafelyToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
@@ -995,9 +999,6 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             if (noErr == err)
                 err = FSGetCatalogInfo(&originalRef, kFSCatInfoVolume, &catalogInfo, NULL, NULL, NULL);
             
-#ifndef MAC_OS_X_VERSION_10_5 || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
-            extern OSStatus FSGetVolumeParms(FSVolumeRefNum volume, GetVolParmsInfoBuffer *buffer, ByteCount bufferSize) WEAK_IMPORT_ATTRIBUTE;
-#endif
             GetVolParmsInfoBuffer infoBuffer;
             err = FSGetVolumeParms(catalogInfo.volume, &infoBuffer, sizeof(GetVolParmsInfoBuffer));
             
