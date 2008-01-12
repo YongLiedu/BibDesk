@@ -927,14 +927,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [super runModalSavePanelForSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
 }
 
-#ifndef MAC_OS_X_VERSION_10_5 || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
-OSStatus FSGetVolumeParms(FSVolumeRefNum volume, GetVolParmsInfoBuffer *buffer, ByteCount bufferSize) { return -1; };
-#endif
-
 - (BOOL)writeSafelyToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError;
 {
     BOOL didSave = [super writeSafelyToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
-    
+ 
+#ifdef MAC_OS_X_VERSION_10_5 && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
+
     /* 
      This is a workaround for https://sourceforge.net/tracker/index.php?func=detail&aid=1867790&group_id=61487&atid=497423
      Filed as rdar://problem/5679370
@@ -1041,6 +1039,10 @@ OSStatus FSGetVolumeParms(FSVolumeRefNum volume, GetVolParmsInfoBuffer *buffer, 
             }
         }
     }
+#else
+#warning Safe save may be broken on Leopard
+#endif
+
     return didSave;
 }
 
