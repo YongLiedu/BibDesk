@@ -43,6 +43,7 @@
 #import "FVIconQueue.h"
 #import "FVPreviewer.h"
 #import "FVArrowButtonCell.h"
+#import "FVFinderLabel.h"
 
 // functions for dealing with multiple URLs and weblocs on the pasteboard
 static NSArray *URLSFromPasteboard(NSPasteboard *pboard);
@@ -78,6 +79,7 @@ static const CFTimeInterval ZOMBIE_TIMER_INTERVAL = 300.0;
 static void zombieTimerFired(CFRunLoopTimerRef timer, void *context);
 
 static NSDictionary *__titleAttributes = nil;
+static NSDictionary *__labeledAttributes = nil;
 static NSDictionary *__subtitleAttributes = nil;
 static NSShadow *__shadow = nil;
 
@@ -139,6 +141,9 @@ static NSShadow *__shadow = nil;
     [ta setObject:ps forKey:NSParagraphStyleAttributeName];
     [ps release];
     __titleAttributes = [ta copy];
+    
+    [ta setObject:[NSColor blackColor] forKey:NSForegroundColorAttributeName];
+    __labeledAttributes = [ta copy];
     
     [ta setObject:[NSFont systemFontOfSize:10.0] forKey:NSFontAttributeName];
     [ta setObject:[NSColor grayColor] forKey:NSForegroundColorAttributeName];
@@ -1051,51 +1056,20 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     }
 }
 
-/*
- These are ordered from right to left in the Finder context menu and were chosen from the bottom of each label using Digital Color Meter.  Apple seems to draw a gradient wash for the label, lighter at top.  I'm really not sure that's worth doing.  Using an alpha < 1.0 seems to compensate a bit, though some of the colors are pretty ugly to begin with.  Probably better to pick the colors from the middle of the swatch.
- */
-#define ENABLE_LABEL_COLORS 0
-
-#if ENABLE_LABEL_COLORS
-- (NSColor *)_colorForFinderLabel:(NSUInteger)label
+static NSUInteger _finderLabelForURL(NSURL *aURL)
 {
-    NSColor *color = nil;
-    const CGFloat labelAlpha = 0.8;
-    switch (label) {
-        case 1:
-            color = [NSColor lightGrayColor];
-            break;
-        case 3:
-            // purple
-            color = [NSColor colorWithCalibratedRed:0.75 green:0.56 blue:0.85 alpha:labelAlpha]; 
-            break;
-        case 4:
-            // blue
-            color = [NSColor colorWithCalibratedRed:0.35 green:0.64 blue:1.0 alpha:labelAlpha];
-            break;
-        case 2:
-            // green
-            color = [NSColor colorWithCalibratedRed:0.70 green:0.84 blue:0.28 alpha:labelAlpha];
-            break;
-        case 5:
-            // yellow
-            color = [NSColor colorWithCalibratedRed:0.93 green:0.85 blue:0.28 alpha:labelAlpha];
-            break;
-        case 7:
-            // orange
-            color = [NSColor colorWithCalibratedRed:0.96 green:0.67 blue:0.27 alpha:labelAlpha];
-            break;
-        case 6:
-            // red
-            color = [NSColor colorWithCalibratedRed:0.98 green:0.39 blue:0.36 alpha:labelAlpha];
-            break;
-        default:
-            color = nil;
-            break;
+    MDItemRef mdItem = NULL;
+    if ([aURL isFileURL])
+        mdItem = MDItemCreate(CFAllocatorGetDefault(), (CFStringRef)[aURL path]);
+    NSUInteger label = 0;
+    if (mdItem) {
+        CFNumberRef labelNumber = MDItemCopyAttribute(mdItem, CFSTR("kMDItemFSLabel"));
+        label = [(id)labelNumber unsignedIntValue];
+        if (labelNumber) CFRelease(labelNumber);
+        CFRelease(mdItem);
     }
-    return color;
+    return label;
 }
-#endif /* ENABLE_LABEL_COLORS */
 
 - (void)_drawIconsInRange:(NSRange)indexRange rows:(NSRange)rows columns:(NSRange)columns
 {
@@ -1187,8 +1161,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                 if (willDrawText) {
                     CGContextSaveGState(cgContext);
                     
+                    BOOL isFlippedContext = [ctxt isFlipped];
+                    
                     // @@ this is a hack for drawing into the drag image context
-                    if (NO == [ctxt isFlipped]) {
+                    if (NO == isFlippedContext) {
                         CGContextTranslateCTM(cgContext, 0, NSMaxY(textRect));
                         CGContextScaleCTM(cgContext, 1, -1);
                         textRect.origin.y = 0;
@@ -1206,31 +1182,28 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                         name = [aURL absoluteString];
                     }
                     
-#if ENABLE_LABEL_COLORS
-                    MDItemRef mdItem = NULL;
-                    if ([aURL isFileURL])
-                        mdItem = MDItemCreate(NULL, (CFStringRef)[aURL path]);
-                    NSUInteger label = 0;
-                    if (mdItem) {
-                        CFNumberRef labelNumber = MDItemCopyAttribute(mdItem, CFSTR("kMDItemFSLabel"));
-                        label = [(id)labelNumber unsignedIntValue];
-                        if (labelNumber) CFRelease(labelNumber);
-                        CFRelease(mdItem);
-                    }
+                    NSUInteger label = _finderLabelForURL(aURL);
                     if (label > 0) {
-                        // labeled title should use black text color for contrast
                         CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
-                        NSRect labelRect = textRect;
-                        labelRect.size.height = titleHeight;
-                        [[self _colorForFinderLabel:label] setFill];
-                        [[NSBezierPath bezierPathWithRoundRect:labelRect xRadius:5 yRadius:5] fill];
+                        CGRect labelRect = *(CGRect *)&textRect;
+                        
+                        // for drag image context
+                        if (NO == isFlippedContext)
+                            labelRect.origin.y += titleHeight;
+                        labelRect.size.height = titleHeight;                        
+                        [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:isFlippedContext];
+                        
+                        // labeled title uses black text for greater contrast
+                        [name drawInRect:NSInsetRect(textRect, 2.0, 0) withAttributes:__labeledAttributes]; 
+
                     }
-#endif /* ENABLE_LABEL_COLORS*/
+                    else {
+                        [name drawInRect:textRect withAttributes:__titleAttributes];  
+                    }
                     
-                    [name drawInRect:textRect withAttributes:__titleAttributes];  
                     if (useSubtitle) {
                         CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
-                        if ([ctxt isFlipped])
+                        if (isFlippedContext)
                             textRect.origin.y += titleHeight;
                         textRect.size.height -= titleHeight;
                         [[_dataSource fileView:self subtitleAtIndex:i] drawInRect:textRect withAttributes:__subtitleAttributes];
@@ -2220,6 +2193,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         return (nil != aURL) && [_selectedIndexes count] >= 1;
     else if (action == @selector(paste:))
         return [self isEditable];
+    else if (action == @selector(changeFinderLabel:) || action == @selector(submenuAction:))
+        return [_selectedIndexes count] >= 1;
     // need to handle print: and other actions
     return (action && [self respondsToSelector:action]);
 }
@@ -2266,6 +2241,49 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     return menu;
 }
 
+- (IBAction)changeFinderLabel:(id)sender;
+{
+    // Sender is an NSMenuItem, and tag corresponds to the Finder label integer
+    NSInteger label = [sender tag];
+    NSParameterAssert(label >= 0 && label <= 6);
+    
+    label = (label << 1);
+    
+    NSArray *selectedURLs = [self _selectedURLs];
+    NSUInteger i, iMax = [selectedURLs count];
+    for (i = 0; i < iMax; i++) {
+        
+        NSURL *aURL = [selectedURLs objectAtIndex:i];
+        FSRef fileRef;
+        
+        if ([aURL isFileURL] && CFURLGetFSRef((CFURLRef)aURL, &fileRef)) {
+    
+            FSCatalogInfo catalogInfo;    
+            OSStatus err;
+            
+            // get the current catalog info
+            err = FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo, &catalogInfo, NULL, NULL, NULL);
+            
+            if (noErr == err) {
+                
+                // coerce to FolderInfo or FileInfo as needed and set the color bit
+                if ((catalogInfo.nodeFlags & kFSNodeIsDirectoryMask) != 0) {
+                    FolderInfo *fInfo = (FolderInfo *)&catalogInfo.finderInfo;
+                    fInfo->finderFlags &= ~kColor;
+                    fInfo->finderFlags |= (label & kColor);
+                }
+                else {
+                    FileInfo *fInfo = (FileInfo *)&catalogInfo.finderInfo;
+                    fInfo->finderFlags &= ~kColor;
+                    fInfo->finderFlags |= (label & kColor);
+                }
+                FSSetCatalogInfo(&fileRef, kFSCatInfoFinderInfo, &catalogInfo);
+            }
+        }
+    }
+    [self setNeedsDisplay:YES];
+}
+
 + (NSMenu *)defaultMenu
 {
     static NSMenu *sharedMenu = nil;
@@ -2288,6 +2306,17 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [anItem setTag:FVZoomInMenuItemTag];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Zoom Out", @"FileView", bundle, @"context menu title") action:@selector(zoomOut:) keyEquivalent:@""];
         [anItem setTag:FVZoomOutMenuItemTag];
+        
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Set Finder Label", @"FileView", bundle, @"context menu title") action:NULL keyEquivalent:@""];
+        NSMenu *submenu = [[NSMenu allocWithZone:[sharedMenu zone]] initWithTitle:@""];
+        [anItem setSubmenu:submenu];
+        [submenu release];
+        
+        NSInteger i = 0;
+        for (i = 0; i < 7; i++) {
+            anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
+            [anItem setTag:i];
+        }
     }
     return sharedMenu;
 }
