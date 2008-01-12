@@ -947,6 +947,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 && NO == didSave && [absoluteURL isFileURL] && NSAutosaveOperation != saveOperation) {
                 
         // this will create a new file on the same volume as the original file, which we will overwrite
+        // FSExchangeObjects requires both files to be on the same volume
         NSString *tmpPath = [[NSFileManager defaultManager] temporaryPathForWritingToPath:[absoluteURL path] allowOriginalDirectory:YES error:outError];
         NSURL *saveToURL = nil;
         
@@ -981,25 +982,60 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         }
         
         // If this is not an overwriting operation, we already saved to absoluteURL, and we're done
-        
         // If this is an overwriting operation, do an atomic swap of the files
         if (didSave && NSSaveOperation == saveOperation) {
             
-            // at least on an AFP volume (Server 10.4.11), xattrs from the original file are preserved here
             FSRef originalRef, newRef;
             OSStatus err = coreFoundationUnknownErr;
             
-            // do an atomic swap of the files
-            if (CFURLGetFSRef((CFURLRef)absoluteURL, &originalRef) && CFURLGetFSRef((CFURLRef)saveToURL, &newRef))
-                err = FSExchangeObjects(&newRef, &originalRef);
+            FSCatalogInfo catalogInfo;
+            if (CFURLGetFSRef((CFURLRef)absoluteURL, &originalRef))
+                err = noErr;
             
-            // FSExchangeObjects requires both files to be on the same volume
+            if (noErr == err)
+                err = FSGetCatalogInfo(&originalRef, kFSCatInfoVolume, &catalogInfo, NULL, NULL, NULL);
+            
+#ifndef MAC_OS_X_VERSION_10_5 || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
+            extern OSStatus  FSGetVolumeParms(FSVolumeRefNum volume, GetVolParmsInfoBuffer *buffer, ByteCount bufferSize);
+#endif
+            GetVolParmsInfoBuffer infoBuffer;
+            err = FSGetVolumeParms(catalogInfo.volume, &infoBuffer, sizeof(GetVolParmsInfoBuffer));
+            
+            if (noErr == err) {
+                
+                // only meaningful in v3 or greater GetVolParmsInfoBuffer
+                SInt32 vmExtAttr = infoBuffer.vMExtendedAttributes;
+                
+                // in v2 or less or v3 without HFS+ support, the File Manager will implement FSExchangeObjects if bHasFileIDs is set
+                
+                // MoreFilesX.h has macros that show how to read the bitfields for the enums
+                if (infoBuffer.vMVersion > 2 && (vmExtAttr & (1L << bSupportsHFSPlusAPIs)) != 0 && (vmExtAttr & (1L << bSupportsFSExchangeObjects)) != 0)
+                    err = noErr;
+                else if ((infoBuffer.vMVersion <= 2 || (vmExtAttr & (1L << bSupportsHFSPlusAPIs)) == 0) && (infoBuffer.vMAttrib & (1L << bHasFileIDs)) != 0)
+                    err = noErr;
+                else
+                    err = errFSUnknownCall;
+                
+                // do an atomic swap of the files
+                // On an AFP volume (Server 10.4.11), xattrs from the original file are preserved using either function
+
+                if (noErr == err && CFURLGetFSRef((CFURLRef)saveToURL, &newRef)) {   
+                    // this avoids breaking aliases and FSRefs
+                    err = FSExchangeObjects(&newRef, &originalRef);
+                }
+                else /* if we couldn't get an FSRef or bSupportsFSExchangeObjects is not supported */ {
+                    // rename() is atomic, but it probably breaks aliases and FSRefs
+                    // FSExchangeObjects() uses exchangedata() so there's no point in trying that
+                    err = rename([[saveToURL path] fileSystemRepresentation], [[absoluteURL path] fileSystemRepresentation]);
+                }
+            }
+            
             if (noErr != err) {
                 didSave = NO;
                 if (outError) *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil];
             }
             else if ([self keepBackupFile] == NO) {
-                // not checking return value here; non-critical
+                // not checking return value here; non-critical, and fails if rename() was used
                 [[NSFileManager defaultManager] removeFileAtPath:[saveToURL path] handler:nil];
             }
         }
