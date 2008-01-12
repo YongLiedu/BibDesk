@@ -996,7 +996,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 err = FSGetCatalogInfo(&originalRef, kFSCatInfoVolume, &catalogInfo, NULL, NULL, NULL);
             
 #ifndef MAC_OS_X_VERSION_10_5 || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
-            extern OSStatus  FSGetVolumeParms(FSVolumeRefNum volume, GetVolParmsInfoBuffer *buffer, ByteCount bufferSize);
+            extern OSStatus FSGetVolumeParms(FSVolumeRefNum volume, GetVolParmsInfoBuffer *buffer, ByteCount bufferSize) WEAK_IMPORT_ATTRIBUTE;
 #endif
             GetVolParmsInfoBuffer infoBuffer;
             err = FSGetVolumeParms(catalogInfo.volume, &infoBuffer, sizeof(GetVolParmsInfoBuffer));
