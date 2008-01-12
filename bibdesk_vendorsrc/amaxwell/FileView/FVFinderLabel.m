@@ -261,7 +261,7 @@ static void ClipContextToCircleCappedPathInRect(CGContextRef context, CGRect rec
     CGPathRelease(path);
 }
 
-+ (void)drawFinderLabel:(NSUInteger)label inRect:(CGRect)rect ofContext:(CGContextRef)context flipped:(BOOL)isFlipped;
++ (void)drawFinderLabel:(NSUInteger)label inRect:(CGRect)rect ofContext:(CGContextRef)context flipped:(BOOL)isFlipped roundEnds:(BOOL)flag;
 {
     CGContextSaveGState(context);
     if (isFlipped) {
@@ -269,15 +269,18 @@ static void ClipContextToCircleCappedPathInRect(CGContextRef context, CGRect rec
         CGContextScaleCTM(context, 1, -1);
         rect.origin.y = 0;
     }
-    ClipContextToCircleCappedPathInRect(context, rect);
+    if (flag)
+        ClipContextToCircleCappedPathInRect(context, rect);
+    else
+        CGContextClipToRect(context, rect);
     CGContextDrawLayerInRect(context, rect, [self _layerForLabel:label context:context]);
     CGContextRestoreGState(context);
 }
 
-+ (void)drawFinderLabel:(NSUInteger)label inRect:(NSRect)rect;
++ (void)drawFinderLabel:(NSUInteger)label inRect:(NSRect)rect roundEnds:(BOOL)flag;
 {
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
-    [self drawFinderLabel:label inRect:*(CGRect *)&rect ofContext:[nsContext graphicsPort] flipped:[nsContext isFlipped]];
+    [self drawFinderLabel:label inRect:*(CGRect *)&rect ofContext:[nsContext graphicsPort] flipped:[nsContext isFlipped] roundEnds:flag];
 }
 
 @end

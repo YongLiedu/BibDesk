@@ -1191,7 +1191,7 @@ static NSUInteger _finderLabelForURL(NSURL *aURL)
                         if (NO == isFlippedContext)
                             labelRect.origin.y += titleHeight;
                         labelRect.size.height = titleHeight;                        
-                        [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:isFlippedContext];
+                        [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:isFlippedContext roundEnds:YES];
                         
                         // labeled title uses black text for greater contrast
                         [name drawInRect:NSInsetRect(textRect, 2.0, 0) withAttributes:__labeledAttributes]; 
@@ -2316,6 +2316,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         for (i = 0; i < 7; i++) {
             anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
             [anItem setTag:i];
+            NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(16, 16)];
+            [image lockFocus];
+            [FVFinderLabel drawFinderLabel:i inRect:NSMakeRect(0, 0, 16, 16) roundEnds:NO];
+            [image unlockFocus];
+            [anItem setImage:image];
+            [image release];
         }
     }
     return sharedMenu;

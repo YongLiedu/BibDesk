@@ -40,10 +40,10 @@
 
 @interface FVFinderLabel : NSObject
 
-+ (void)drawFinderLabel:(NSUInteger)label inRect:(CGRect)rect ofContext:(CGContextRef)context flipped:(BOOL)isFlipped;
++ (void)drawFinderLabel:(NSUInteger)label inRect:(CGRect)rect ofContext:(CGContextRef)context flipped:(BOOL)isFlipped roundEnds:(BOOL)flag;
 
 // draws in the currently focused graphics context
-+ (void)drawFinderLabel:(NSUInteger)label inRect:(NSRect)rect;
++ (void)drawFinderLabel:(NSUInteger)label inRect:(NSRect)rect roundEnds:(BOOL)flag;
 
 + (NSString *)localizedNameForLabel:(NSInteger)label;
 
