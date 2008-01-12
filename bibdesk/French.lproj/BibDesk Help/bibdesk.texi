@@ -4050,6 +4050,17 @@ a @emph{publication} item, a @emph{field} of a publication, an @emph{author} of 
 and a @emph{macro}. 
 
 
+@subheading Counters
+
+In the item template inside a collection tag you can use the special key "#" to get a counter for the items. 
+
+@example
+    <$#/>
+@end example
+
+You can modify the counter with value modifier keys for a number. 
+
+
 @heading Template Keys
 
 @menu
@@ -4378,6 +4389,18 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item componentsSeparatedByAnd
 @tab
 @item componentsSeparatedByFieldSeparators
+@tab
+@end multitable
+
+@subheading Numbers
+
+@multitable {greekCounterValue} {}
+@headitem Key @tab Description
+@item romanNumeralValue
+@tab
+@item alphaCounterValue
+@tab
+@item greekCounterValue
 @tab
 @end multitable
 
