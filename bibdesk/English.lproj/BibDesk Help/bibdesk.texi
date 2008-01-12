@@ -4171,6 +4171,16 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @end multitable
 
+@subheading Local file, Remote URL
+
+@multitable {value} {}
+@headitem Key @tab Description
+@item URL
+@tab 
+@item path
+@tab 
+@end multitable
+
 
 @heading Collection keys
 
@@ -4203,6 +4213,12 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item authors
 @tab 
 @item editors
+@tab 
+@item localFiles
+@tab 
+@item existingLocalFiles
+@tab 
+@item remoteURLs
 @tab 
 @end multitable
 

@@ -183,7 +183,7 @@ about the BibTeX file format.
 
 Portions of BibDesk:
 
-Copyright @copyright{} 2001 - 2007 Michael O. McCracken@*
+Copyright @copyright{} 2001 - 2008 Michael O. McCracken@*
 Copyright @copyright{} many others@*
 
 @c ======================================================================================
@@ -4171,6 +4171,16 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @end multitable
 
+@subheading Local file, Remote URL
+
+@multitable {value} {}
+@headitem Key @tab Description
+@item URL
+@tab 
+@item path
+@tab 
+@end multitable
+
 
 @heading Collection keys
 
@@ -4203,6 +4213,12 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item authors
 @tab 
 @item editors
+@tab 
+@item localFiles
+@tab 
+@item existingLocalFiles
+@tab 
+@item remoteURLs
 @tab 
 @end multitable
 
@@ -4464,14 +4480,14 @@ Below are lists of collection keys that could be used in BibDesk export template
 
 @multitable @columnfractions .12 .88
 @item Portions of BibDesk
-@item @tab Copyright @copyright{} 2001 - 2007 Michael O. McCracken@*
-@item @tab Copyright @copyright{} 2002 - 2007 Adam Maxwell@*
-@item @tab Copyright @copyright{} 2002 - 2007 Christiaan Hofman@* 
+@item @tab Copyright @copyright{} 2001 - 2008 Michael O. McCracken@*
+@item @tab Copyright @copyright{} 2002 - 2008 Adam Maxwell@*
+@item @tab Copyright @copyright{} 2002 - 2008 Christiaan Hofman@* 
 @item @tab Copyright @copyright{} many others.@*
 @item @tab
 @item Portions of this manual
-@item @tab Copyright @copyright{} 2001 - 2007 Michael O. McCracken (manual)@*
-@item @tab Copyright @copyright{} 2002 - 2007 Adam Maxwell@*
-@item @tab Copyright @copyright{} 2002 - 2007 Christiaan Hofman@* 
+@item @tab Copyright @copyright{} 2001 - 2008 Michael O. McCracken (manual)@*
+@item @tab Copyright @copyright{} 2002 - 2008 Adam Maxwell@*
+@item @tab Copyright @copyright{} 2002 - 2008 Christiaan Hofman@* 
 @item @tab Copyright @copyright{} many others.@*
 @end multitable
