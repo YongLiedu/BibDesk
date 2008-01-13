@@ -55,7 +55,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     }
 }
 
-typedef struct FVRGBAColor { 
+typedef struct _FVRGBAColor { 
     CGFloat red;
     CGFloat green; 
     CGFloat blue;
