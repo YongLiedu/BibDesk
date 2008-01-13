@@ -325,7 +325,10 @@
 
 - (void)handleBibItemAddDel:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
+    if ([[note name] isEqualToString:BDSKDocAddItemNotification] == NO && [note object] == [person publication])
+        [self close];
+    else
+        [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
 }
 
 - (void)handleGroupWillBeRemoved:(NSNotification *)note{
@@ -585,7 +588,7 @@
 #pragma mark Undo Manager
 
 - (NSUndoManager *)undoManager {
-	return [[self document] undoManager];
+	return [[person owner] undoManager];
 }
     
 // we want to have the same undoManager as our document, so we use this 
