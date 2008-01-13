@@ -345,7 +345,7 @@
     // @@ maybe handle this in the type manager?
     NSArray *pubPeople;
     CFMutableArrayRef people = CFArrayCreateMutable(CFAllocatorGetDefault(), 0, &BDSKAuthorFuzzyArrayCallBacks);
-    CFIndex idx;
+    CFIndex idx, count;
     BibAuthor *newAuthor;
     
     NSArray *selFields = [fieldArrayController selectedObjects];
@@ -355,24 +355,25 @@
     // we set our person at some point in the iteration, so copy the current value now
     BibAuthor *oldPerson = [[person retain] autorelease];
     
-    while(item = [itemE nextObject]){
+    while (item = [itemE nextObject]) {
         
         pub = [item objectForKey:@"publication"];
         
-        fieldE = [selFields objectEnumerator];
+        fieldE = [[item objectForKey:@"fields"] objectEnumerator];
         
         while (field = [fieldE nextObject]) {
             
             // get the array of BibAuthor objects from a person field (which may be nil or empty)
             pubPeople = [pub peopleArrayForField:field inherit:NO];
                     
-            if([pubPeople count]){
+            if ([pubPeople count]) {
                 
-                CFRange range = CFRangeMake(0, [pubPeople count]);
+                CFRange range = CFRangeMake(0, CFArrayGetCount([pubPeople count]));
                 
                 // sets people array to the value from this field
                 CFArrayAppendArray(people, (CFArrayRef)pubPeople, range);
-                range.length = CFArrayGetCount(people);
+                // @@ why is tis necessary?
+                range.length = count = CFArrayGetCount(people);
                 
                 // use the fuzzy compare to find which author we're going to replace
                 while (range.length && -1 != (idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson))) {
@@ -380,9 +381,9 @@
                     newAuthor = [BibAuthor authorWithName:newNameString andPub:pub];
                     CFArraySetValueAtIndex(people, idx, newAuthor);
                     [pub setField:field toValue:[[(NSArray *)people valueForKey:@"originalName"] componentsJoinedByString:@" and "]];
-                    if([pub isEqual:[person publication]] && [field isEqualToString:[person field]])
+                    if ([pub isEqual:[person publication]] && [field isEqualToString:[person field]])
                         [self setPerson:[[pub peopleArrayForField:field] objectAtIndex:idx]]; // changes the window title
-                    range = CFRangeMake(range.location + range.length, [pubPeople count] - range.location - range.length);
+                    range = CFRangeMake(idx + 1, count - idx - 1);
                 }
                 CFArrayRemoveAllValues(people);
             }
