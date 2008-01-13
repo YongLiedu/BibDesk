@@ -118,7 +118,7 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
             color = [NSColor colorWithDeviceRed:1.0 green:0.30 blue:0.34 alpha:LABEL_ALPHA];
             break;
         default:
-            color = nil;
+            color = [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.0 alpha:0.0];
             break;
     }
     return color;
@@ -157,7 +157,7 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
             color = [NSColor colorWithDeviceRed:1.0 green:0.66 blue:0.66 alpha:LABEL_ALPHA];
             break;
         default:
-            color = nil;
+            color = [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.0 alpha:0.0];
             break;
     }
     return color;
@@ -211,6 +211,7 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
     NSColor *upperColor = [self _upperColorForFinderLabel:label];
     NSColor *lowerColor = [self _lowerColorForFinderLabel:label];
     
+    // all colors were created using device RGB since we only draw to the screen, so we know that extracting components will work
     [lowerColor getRed:&gradientColor->color1.red green:&gradientColor->color1.green blue:&gradientColor->color1.blue alpha:&gradientColor->color1.alpha];
     [upperColor getRed:&gradientColor->color2.red green:&gradientColor->color2.green blue:&gradientColor->color2.blue alpha:&gradientColor->color2.alpha];
     
