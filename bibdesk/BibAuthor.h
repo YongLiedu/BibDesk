@@ -76,7 +76,6 @@ enum {
     NSString *abbreviatedName;
     NSString *abbreviatedNormalizedName;
     NSString *unpunctuatedAbbreviatedNormalizedName;
-    BDSKPersonController *personController; // unretained
     BibItem *publication;
     NSString *field;
     unsigned hash;
@@ -136,8 +135,6 @@ enum {
 
 - (NSString *)field;
 
-- (BDSKPersonController *)personController;
-- (void)setPersonController:(BDSKPersonController *)newPersonController;
 - (ABPerson *)personFromAddressBook;
 
 @end

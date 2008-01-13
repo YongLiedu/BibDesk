@@ -399,15 +399,6 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     return field;
 }
 
-// Accessors for personController - we don't retain it to avoid cycles.
-- (BDSKPersonController *)personController{
-    return personController; 
-}
-
-- (void)setPersonController:(BDSKPersonController *)newPersonController{
-	personController = newPersonController;
-}
-
 - (ABPerson *)personFromAddressBook{
     ABSearchElement *lastNameSearch = [ABPerson searchElementForProperty:kABLastNameProperty label:nil key:nil value:lastName comparison:kABEqualCaseInsensitive];
     ABSearchElement *firstNameSearch = [ABPerson searchElementForProperty:kABFirstNameProperty label:nil key:nil value:([firstNames count] ? [firstNames objectAtIndex:0] : @"") comparison:kABPrefixMatch];

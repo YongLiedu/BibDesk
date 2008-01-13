@@ -145,11 +145,6 @@
     return [[[person publication] owner] isDocument] ? nil : @"";
 }
 
-- (void)windowWillClose:(NSNotification *)notification {
-    // this is mainly used to set the person's personController to nil, but also to make sure we won't further access the person
-    [self setPerson:nil];
-}
-
 - (void)updateFilter {
     NSSet *fieldSet = [NSSet setWithArray:[fieldArrayController selectedObjects]];
     NSSet *nameSet = [NSSet setWithArray:[nameArrayController selectedObjects]];
@@ -264,12 +259,8 @@
 
 - (void)setPerson:(BibAuthor *)newPerson {
     if(newPerson != person){
-        [person setPersonController:nil];
-        
         [person release];
         person = [newPerson copy];
-        
-        [person setPersonController:self];
     }
 }
 

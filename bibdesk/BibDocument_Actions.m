@@ -438,7 +438,16 @@
 
 - (void)showPerson:(BibAuthor *)person{
     OBASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
-    BDSKPersonController *pc = [person personController];
+    BDSKPersonController *pc = nil;
+	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
+	NSWindowController *wc;
+	
+	while(wc = [wcEnum nextObject]){
+		if([wc isKindOfClass:[BDSKPersonController class]] && [[(BDSKPersonController *)wc person] fuzzyEqual:person]){
+			pc = (BDSKPersonController *)wc;
+			break;
+		}
+	}
     
     if(pc == nil){
         pc = [[BDSKPersonController alloc] initWithPerson:person];
