@@ -2183,7 +2183,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     SEL action = [anItem action];
     if (action == @selector(zoomOut:) || action == @selector(zoomIn:))
         return YES;
-    else if (action == @selector(revealInFinder:))
+    else if (action == @selector(revealInFinder:) || action == @selector(changeFinderLabel:))
         return [aURL isFileURL] && [_selectedIndexes count] == 1;
     else if (action == @selector(openSelectedURLs:) && nil != aURL)
         return YES;
@@ -2195,7 +2195,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         return (nil != aURL) && [_selectedIndexes count] >= 1;
     else if (action == @selector(paste:))
         return [self isEditable];
-    else if (action == @selector(changeFinderLabel:) || action == @selector(submenuAction:))
+    else if (action == @selector(submenuAction:))
         return [_selectedIndexes count] >= 1;
     // need to handle print: and other actions
     return (action && [self respondsToSelector:action]);
@@ -2218,13 +2218,19 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     i = [menu numberOfItems];
     BOOL wasSeparator = YES;
     while (i--) {
-        if ([[menu itemAtIndex:i] isSeparatorItem]) {
+        NSMenuItem *menuItem = [menu itemAtIndex:i];
+        if ([menuItem isSeparatorItem]) {
             // see if this is a double separator, if so remove it
             if (wasSeparator)
                 [menu removeItemAtIndex:i];
-        } else if ([self validateMenuItem:[menu itemAtIndex:i]]) {
-            // valid menu item, keep it, and it wasn't a separator
-            wasSeparator = NO;
+        } else if ([self validateMenuItem:menuItem]) {
+            if ([menuItem submenu] && [self validateMenuItem:[[menuItem submenu] itemAtIndex:0]] == NO) {
+                // disabled submenu item
+                [menu removeItemAtIndex:i];
+            } else {
+                // valid menu item, keep it, and it wasn't a separator
+                wasSeparator = NO;
+            }
         } else {
             // disabled menu item
             [menu removeItemAtIndex:i];
