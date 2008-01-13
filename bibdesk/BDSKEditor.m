@@ -1997,10 +1997,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		int editedRow = [tableView editedRow];
         if (editedRow != -1 && [[fields objectAtIndex:editedRow] isEqualToString:changeKey])
             [[tableView currentEditor] setString:newValue ? newValue : @""];
-        if ([NSString isEmptyAsComplexString:newValue] == [fields containsObject:changeKey]) {
-			// crossref field was added or removed
+        if ([changeKey isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:newValue] == [fields containsObject:changeKey]) {
+			// Crossref field was added or removed
             [self resetFields];
-		} else {
+        } else {
             // every field value could change, but not the displayed field names
             [self reloadTable];
         }
