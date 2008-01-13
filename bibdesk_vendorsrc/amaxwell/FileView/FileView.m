@@ -2313,7 +2313,6 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         NSRect iconRect = NSZeroRect;
         iconRect.size = NSMakeSize(16, 16);
         NSBezierPath *clipPath = [NSBezierPath bezierPathWithRoundRect:iconRect xRadius:3.0 yRadius:3.0];
-        NSBezierPath *outlinePath = [NSBezierPath bezierPathWithRoundRect:NSInsetRect(iconRect, 0.5, 0.5) xRadius:2.5 yRadius:2.5];
         
         for (i = 0; i < 7; i++) {
             anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
@@ -2323,9 +2322,9 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             // round off the corners, but don't draw the circular ends
             [clipPath addClip];
             [FVFinderLabel drawFinderLabel:i inRect:iconRect roundEnds:NO];
-            // stroke the path so the clear one stands out
+            // stroke the path so the clear one stands out; stroke is wide enough to display a thin line inside the clip region
             [[NSColor darkGrayColor] setStroke];
-            [outlinePath stroke];
+            [clipPath stroke];
             [image unlockFocus];
             [anItem setImage:image];
             [image release];
@@ -2407,112 +2406,109 @@ static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
     NSMutableArray *toReturn = [NSMutableArray arrayWithCapacity:itemCount];
     NSMutableSet *allURLsReadFromPasteboard = [NSMutableSet setWithCapacity:itemCount];
     
-    // wtf? this has 1-based indexing!
-    if (noErr == err) {
+    // Pasteboard has 1-based indexing!
     
-        for (itemIndex = 1; noErr == err && itemIndex <= itemCount; itemIndex++) {
+    for (itemIndex = 1; noErr == err && itemIndex <= itemCount; itemIndex++) {
+        
+        PasteboardItemID itemID;
+        CFArrayRef flavors = NULL;
+        CFIndex flavorIndex, flavorCount = 0;
+        
+        err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
+        if (noErr == err)
+            err = PasteboardCopyItemFlavors(carbonPboard, itemID, &flavors);
+        
+        if (noErr == err)
+            flavorCount = CFArrayGetCount(flavors);
+                    
+        // webloc has file and non-file URL, and we may only have a string type
+        CFURLRef destURL = NULL;
+        CFURLRef fileURL = NULL;
+        CFURLRef textURL = NULL;
+        
+        // flavorCount will be zero in case of an error...
+        for (flavorIndex = 0; flavorIndex < flavorCount; flavorIndex++) {
             
-            PasteboardItemID itemID;
-            CFArrayRef flavors = NULL;
-            CFIndex flavorIndex, flavorCount = 0;
+            CFStringRef flavor;
+            CFDataRef data;
             
-            err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
-            if (noErr == err)
-                err = PasteboardCopyItemFlavors(carbonPboard, itemID, &flavors);
+            flavor = CFArrayGetValueAtIndex(flavors, flavorIndex);
             
-            if (noErr == err) {
+            // !!! I'm assuming that the URL bytes are UTF-8, but that should be checked...
+            
+            // UTIs determined with PasteboardPeeker
+            
+            if (UTTypeConformsTo(flavor, kUTTypeFileURL)) {
                 
-                CFURLRef destURL = NULL;
-                CFURLRef fileURL = NULL;
-                CFURLRef textURL = NULL;
-                
-                for (flavorIndex = 0; flavorIndex < flavorCount; flavorIndex++) {
-                    
-                    CFStringRef flavor;
-                    CFDataRef data;
-                    
-                    flavor = CFArrayGetValueAtIndex(flavors, flavorIndex);
-                    
-                    // !!! I'm assuming that the URL bytes are UTF-8, but that should be checked...
-                    
-                    // UTIs determined with PasteboardPeeker
-                    
-                    if (UTTypeConformsTo(flavor, kUTTypeFileURL)) {
-                        
-                        err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
-                        if (noErr == err && NULL != data) {
-                            // we may have already found a kUTTypeUTF8PlainText, overwrite by the URL
-                            fileURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
-                            CFRelease(data);
-                        }
-                        
-                    } else if (UTTypeConformsTo(flavor, kUTTypeURL)) {
-                        
-                        err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
-                        if (noErr == err && NULL != data) {
-                            // we may have already found a kUTTypeUTF8PlainText, overwrite by the URL
-                            if (NULL != destURL)
-                                CFRelease(destURL);
-                            destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
-                            CFRelease(data);
-                        }
-                        
-                        if (NULL != destURL)
-                            break;
-                        
-                    } else if (UTTypeConformsTo(flavor, kUTTypeUTF8PlainText)) {
-                        
-                        // this is a string that may be a URL; FireFox and other apps don't use any of the standard URL pasteboard types
-                        err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeUTF8PlainText, &data);
-                        if (noErr == err && NULL != data) {
-                            textURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
-                            CFRelease(data);
-                            
-                            // CFURLCreateWithBytes will create a URL from any arbitrary string
-                            if (NULL != textURL && nil == [(NSURL *)textURL scheme]) {
-                                CFRelease(textURL);
-                                textURL = NULL;
-                            }
-                        }
-                        
-                    }
-                    
-                    // ignore any other type; we don't care
-                    
+                err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
+                if (noErr == err && NULL != data) {
+                    // we may have already found a kUTTypeUTF8PlainText, overwrite by the URL
+                    fileURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
+                    CFRelease(data);
                 }
                 
-                // only add the textURL if the destURL or fileURL were not found
-                if (NULL != textURL) {
-                    if (NULL == destURL && NULL == fileURL) {
-                        [toReturn addObject:(id)textURL];
-                        [allURLsReadFromPasteboard addObject:(id)textURL];
-                    }
-                    CFRelease(textURL);
+            } else if (UTTypeConformsTo(flavor, kUTTypeURL)) {
+                
+                err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
+                if (noErr == err && NULL != data) {
+                    // we may have already found a kUTTypeUTF8PlainText, overwrite by the URL
+                    if (NULL != destURL)
+                        CFRelease(destURL);
+                    destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
+                    CFRelease(data);
                 }
-                // only add the fileURL if the destURL was not found
-                if (NULL != fileURL) {
-                    if (NULL == destURL) {
-                        [toReturn addObject:(id)fileURL];
-                        [allURLsReadFromPasteboard addObject:(id)fileURL];
+                
+                if (NULL != destURL)
+                    break;
+                
+            } else if (UTTypeConformsTo(flavor, kUTTypeUTF8PlainText)) {
+                
+                // this is a string that may be a URL; FireFox and other apps don't use any of the standard URL pasteboard types
+                err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeUTF8PlainText, &data);
+                if (noErr == err && NULL != data) {
+                    textURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
+                    CFRelease(data);
+                    
+                    // CFURLCreateWithBytes will create a URL from any arbitrary string
+                    if (NULL != textURL && nil == [(NSURL *)textURL scheme]) {
+                        CFRelease(textURL);
+                        textURL = NULL;
                     }
-                    CFRelease(fileURL);
-                }
-                // always add this if it exists
-                if (NULL != destURL) {
-                    [toReturn addObject:(id)destURL];
-                    [allURLsReadFromPasteboard addObject:(id)destURL];
-                    CFRelease(destURL);
                 }
                 
             }
             
-            if (NULL != flavors)
-                CFRelease(flavors);
+            // ignore any other type; we don't care
             
         }
         
-    }
+        // only add the textURL if the destURL or fileURL were not found
+        if (NULL != textURL) {
+            if (NULL == destURL && NULL == fileURL) {
+                [toReturn addObject:(id)textURL];
+                [allURLsReadFromPasteboard addObject:(id)textURL];
+            }
+            CFRelease(textURL);
+        }
+        // only add the fileURL if the destURL (target of a remote URL or webloc) was not found
+        if (NULL != fileURL) {
+            if (NULL == destURL) {
+                [toReturn addObject:(id)fileURL];
+                [allURLsReadFromPasteboard addObject:(id)fileURL];
+            }
+            CFRelease(fileURL);
+        }
+        // always add this if it exists
+        if (NULL != destURL) {
+            [toReturn addObject:(id)destURL];
+            [allURLsReadFromPasteboard addObject:(id)destURL];
+            CFRelease(destURL);
+        }
     
+        if (NULL != flavors)
+            CFRelease(flavors);
+    }
+                        
     if (carbonPboard) CFRelease(carbonPboard);
 
     // NSPasteboard only allows a single NSURL for some idiotic reason, and NSURLPboardType isn't automagically coerced to a Carbon URL pboard type.  This step handles a program like BibDesk which presently adds a webloc promise + NSURLPboardType, where we want the NSURLPboardType data and ignore the HFS promise.  However, Finder puts all of these on the pboard, so don't add duplicate items to the array...since we may have already added the content (remote URL) if this is a webloc file.
