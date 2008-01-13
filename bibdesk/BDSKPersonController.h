@@ -62,6 +62,10 @@
     IBOutlet NSArrayController *publicationArrayController;
     IBOutlet NSArrayController *fieldArrayController;
     IBOutlet NSArrayController *nameArrayController;
+    IBOutlet NSButton *editButton;
+    IBOutlet NSWindow *editSheet;
+    IBOutlet NSTextField *editField;
+    IBOutlet NSTextField *editMessageField;
     BOOL isEditable;
 }
 
@@ -80,6 +84,8 @@
 - (void)setFields:(NSSet *)newFields;
 
 #pragma mark actions
+- (IBAction)edit:(id)sender;
+- (IBAction)dismissEditSheet:(id)sender;
 - (void)show;
 - (void)updateUI;
 - (void)updatePublicationItems;

@@ -8,11 +8,15 @@
         {CLASS = BDSKContainerView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKDragImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
         {
-            ACTIONS = {openSelectedPub = id; }; 
+            ACTIONS = {dismissEditSheet = id; edit = id; openSelectedPub = id; }; 
             CLASS = BDSKPersonController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 collapsibleView = BDSKCollapsibleView; 
+                editButton = NSButton; 
+                editField = NSTextField; 
+                editMessageField = NSTextField; 
+                editSheet = NSWindow; 
                 fieldArrayController = NSArrayController; 
                 fieldNameSplitView = OASplitView; 
                 fieldTableView = NSTableView; 

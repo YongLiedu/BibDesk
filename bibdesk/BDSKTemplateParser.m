@@ -969,6 +969,11 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
     return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@". %@", self];
 }
 
+- (NSString *)quotedStringIfNotEmpty 
+{ 
+    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@"\"%@\"", self];
+}
+
 - (NSString *)parenthesizedStringIfNotEmpty
 {
     return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@"(%@)", self];

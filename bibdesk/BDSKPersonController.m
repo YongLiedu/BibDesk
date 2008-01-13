@@ -122,7 +122,7 @@
     if (isEditable)
         [imageView registerForDraggedTypes:[NSArray arrayWithObject:NSVCardPboardType]];
     
-    [nameTextField setEditable:isEditable];
+    [editButton setEnabled:isEditable];
     
     NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"publication.title" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
     [publicationArrayController setSortDescriptors:[NSArray arrayWithObjects:sortDescriptor, nil]];
@@ -271,6 +271,35 @@
 
 #pragma mark actions
 
+- (void)editSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSOKButton) {
+        NSString *newName = [editField stringValue];
+        if ([NSString isEmptyString:newName] == NO)
+            [self changeNameToString:newName];
+    }
+}
+
+- (IBAction)edit:(id)sender {
+    NSString *selFields = [[fieldArrayController selectedObjects] valueForKeyPath:@"quotedStringIfNotEmpty.@componentsJoinedByCommaAndAnd"];
+    NSString *selNames = [[nameArrayController selectedObjects] valueForKeyPath:@"quotedStringIfNotEmpty.@componentsJoinedByCommaAndAnd"];
+	NSString *message = [NSString stringWithFormat:NSLocalizedString(@"This will change every occurrence of %@ in any %@ field of the displayed publications.", @"Informative text in alert dialog"), selNames, selFields];
+    
+    [editMessageField setStringValue:message];
+    [editField setStringValue:[[nameArrayController selectedObjects] objectAtIndex:0]];
+    [editField selectText:self];
+    
+    [NSApp beginSheet:editSheet
+	   modalForWindow:[self window]
+		modalDelegate:self
+	   didEndSelector:@selector(editSheetDidEnd:returnCode:contextInfo:)
+		  contextInfo:NULL];
+}
+
+- (IBAction)dismissEditSheet:(id)sender {
+    [NSApp endSheet:editSheet returnCode:[sender tag]];
+    [editSheet orderOut:self];
+}
+
 - (void)show{
     [self showWindow:self];
 }
@@ -304,34 +333,6 @@
     [(BibDocument *)[self document] editPub:[[[publicationArrayController arrangedObjects] objectAtIndex:row] valueForKey:@"publication"]];
 }
 
-- (void)changeNameWarningSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode newName:(NSString *)newNameString;
-{
-    if(returnCode == NSAlertDefaultReturn)
-        [self changeNameToString:newNameString];
-    else
-        [self updateUI];
-	[newNameString release];
-}
-
-
-- (void)controlTextDidEndEditing:(NSNotification *)aNotification;
-{
-    id sender = [aNotification object];
-    if(sender == nameTextField && [sender isEditable]) {// this shouldn't be called for uneditable cells, but it is
-        NSString *selFields = [[fieldArrayController selectedObjects] componentsJoinedByCommaAndAnd];
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Really Change Name?", @"Message in alert dialog when trying to edit author name")
-                                         defaultButton:NSLocalizedString(@"Yes", @"Button title")
-                                       alternateButton:NSLocalizedString(@"No", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"This will change person names matching the selected names in any %@ field of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"), selFields];
-        [alert beginSheetModalForWindow:[self window]
-                          modalDelegate:self 
-                         didEndSelector:@selector(changeNameWarningSheetDidEnd:returnCode:newName:) 
-                            contextInfo:[[sender stringValue] retain]];
-    }
-}
-
-// @@ should we also filter for the selected names?
 - (void)changeNameToString:(NSString *)newNameString{
     // keep copies as they may change during iteration, depending on NSArrayControllers implementation which we do not know
     NSArray *pubs = [[[publicationArrayController arrangedObjects] copy] autorelease];
