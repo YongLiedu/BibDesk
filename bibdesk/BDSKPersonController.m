@@ -173,6 +173,8 @@
         [publicationItems release];
     publicationItems = [[NSMutableArray alloc] init];
     
+    // @@ note that if a person is author and editor (in a collection, for instance), the same pub can appear twice in publicationItems
+    
     NSMutableSet *theNames = [[NSMutableSet alloc] init];
     NSMutableSet *peopleSet = BDSKCreateFuzzyAuthorCompareMutableSet();
     NSEnumerator *pubEnum = [[[[person publication] owner] publications] objectEnumerator];
@@ -366,8 +368,11 @@
                     
             if([pubPeople count]){
                 
-                CFRange range = CFRangeMake(0, [pubPeople count]);            
+                CFRange range = CFRangeMake(0, [pubPeople count]);
+                
+                // sets people array to the value from this field
                 CFArrayAppendArray(people, (CFArrayRef)pubPeople, range);
+                range.length = CFArrayGetCount(people);
                 
                 // use the fuzzy compare to find which author we're going to replace
                 while (range.length && -1 != (idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson))) {
