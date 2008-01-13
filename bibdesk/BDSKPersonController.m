@@ -69,11 +69,7 @@
         publicationItems = nil;
         names = [[NSSet alloc] init];
         fields = [[[BDSKTypeManager sharedManager] personFieldsSet] copy];
-        
         isEditable = [[[person publication] owner] isDocument];
-        
-        [person setPersonController:self];
-        
 	}
 	return self;
 
@@ -82,7 +78,6 @@
 - (void)dealloc{
     [publicationTableView setDelegate:nil];
     [publicationTableView setDataSource:nil];
-    [person setPersonController:nil];
     [person release];
     [publicationItems release];
     [names release];
@@ -150,6 +145,11 @@
     return [[[person publication] owner] isDocument] ? nil : @"";
 }
 
+- (void)windowWillClose:(NSNotification *)notification {
+    // this is mainly used to set the person's personController to nil, but also to make sure we won't further access the person
+    [self setPerson:nil];
+}
+
 - (void)updateFilter {
     NSSet *fieldSet = [NSSet setWithArray:[fieldArrayController selectedObjects]];
     NSSet *nameSet = [NSSet setWithArray:[nameArrayController selectedObjects]];
@@ -158,10 +158,10 @@
     NSPredicate *fieldPredicate, *namePredicate, *predicate;
     
     lhs = [NSExpression expressionForKeyPath:@"fields"];
-    rhs = [NSExpression expressionForConstantValue:fieldSet ? fieldSet : [NSSet set]];
+    rhs = [NSExpression expressionForConstantValue:fieldSet];
     fieldPredicate = [NSComparisonPredicate predicateWithLeftExpression:lhs rightExpression:rhs customSelector:@selector(intersectsSet:)];
     lhs = [NSExpression expressionForKeyPath:@"names"];
-    rhs = [NSExpression expressionForConstantValue:nameSet ? nameSet : [NSSet set]];
+    rhs = [NSExpression expressionForConstantValue:nameSet];
     namePredicate = [NSComparisonPredicate predicateWithLeftExpression:lhs rightExpression:rhs customSelector:@selector(intersectsSet:)];
     predicate = [NSCompoundPredicate andPredicateWithSubpredicates:[NSArray arrayWithObjects:fieldPredicate, namePredicate, nil]];
     
@@ -264,8 +264,12 @@
 
 - (void)setPerson:(BibAuthor *)newPerson {
     if(newPerson != person){
+        [person setPersonController:nil];
+        
         [person release];
         person = [newPerson copy];
+        
+        [person setPersonController:self];
     }
 }
 
@@ -328,7 +332,7 @@
                                          defaultButton:NSLocalizedString(@"Yes", @"Button title")
                                        alternateButton:NSLocalizedString(@"No", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"This will change matching names in any %@ field of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"), selFields];
+                             informativeTextWithFormat:NSLocalizedString(@"This will change person names matching the selected names in any %@ field of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"), selFields];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self 
                          didEndSelector:@selector(changeNameWarningSheetDidEnd:returnCode:newName:) 
@@ -338,58 +342,60 @@
 
 // @@ should we also filter for the selected names?
 - (void)changeNameToString:(NSString *)newNameString{
-    NSEnumerator *itemE = [publicationItems objectEnumerator];
+    // keep copies as they may change during iteration, depending on NSArrayControllers implementation which we do not know
+    NSArray *pubs = [[[publicationArrayController arrangedObjects] copy] autorelease];
+    NSSet *selFields = [NSSet setWithArray:[fieldArrayController selectedObjects]];
+    NSSet *selNames = [NSSet setWithArray:[nameArrayController selectedObjects]];
+    BibAuthor *origPerson = [[person retain] autorelease];
+    
+    NSEnumerator *itemE = [pubs objectEnumerator];
     NSDictionary *item;
-    BibItem *pub = nil;
-    
-    // @@ maybe handle this in the type manager?
-    NSArray *pubPeople;
-    CFMutableArrayRef people = CFArrayCreateMutable(CFAllocatorGetDefault(), 0, &BDSKAuthorFuzzyArrayCallBacks);
-    CFIndex idx, count;
-    BibAuthor *newAuthor;
-    
-    NSArray *selFields = [fieldArrayController selectedObjects];
     NSEnumerator *fieldE;
     NSString *field;
+    BibItem *pub;
+    BibAuthor *aPerson;
     
-    // we set our person at some point in the iteration, so copy the current value now
-    BibAuthor *oldPerson = [[person retain] autorelease];
+    NSMutableArray *people;
+    CFIndex idx, foundIdx;
+    
+    // this is only used as a placeholder for the name, so we don't care about its pub or field
+    BibAuthor *newPerson = [BibAuthor authorWithName:newNameString andPub:nil];
     
     while (item = [itemE nextObject]) {
         
         pub = [item objectForKey:@"publication"];
-        
         fieldE = [[item objectForKey:@"fields"] objectEnumerator];
         
         while (field = [fieldE nextObject]) {
-            
-            // get the array of BibAuthor objects from a person field (which may be nil or empty)
-            pubPeople = [pub peopleArrayForField:field inherit:NO];
-                    
-            if ([pubPeople count]) {
+            // we only replace in the selected fields
+            if ([selFields containsObject:field]) {
                 
-                CFRange range = CFRangeMake(0, CFArrayGetCount([pubPeople count]));
+                // get the array of BibAuthor objects from a person field, which should contain at least one fuzzyEqual person at this point
+                people = [[pub peopleArrayForField:field inherit:NO] mutableCopy];
+                idx = [people count];
+                foundIdx = -1;
                 
-                // sets people array to the value from this field
-                CFArrayAppendArray(people, (CFArrayRef)pubPeople, range);
-                // @@ why is tis necessary?
-                range.length = count = CFArrayGetCount(people);
-                
-                // use the fuzzy compare to find which author we're going to replace
-                while (range.length && -1 != (idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson))) {
-                    // replace this author, then create a new BibTeX author string
-                    newAuthor = [BibAuthor authorWithName:newNameString andPub:pub];
-                    CFArraySetValueAtIndex(people, idx, newAuthor);
-                    [pub setField:field toValue:[[(NSArray *)people valueForKey:@"originalName"] componentsJoinedByString:@" and "]];
-                    if ([pub isEqual:[person publication]] && [field isEqualToString:[person field]])
-                        [self setPerson:[[pub peopleArrayForField:field] objectAtIndex:idx]]; // changes the window title
-                    range = CFRangeMake(idx + 1, count - idx - 1);
+                while (idx--) {
+                    aPerson = [people objectAtIndex:idx];
+                    // we only replace the selected names
+                    if ([selNames containsObject:[aPerson originalName]]) {
+                        [people replaceObjectAtIndex:idx withObject:newPerson];
+                        foundIdx = idx;
+                    }
                 }
-                CFArrayRemoveAllValues(people);
+                
+                if (foundIdx != -1) {
+                    [pub setField:field toValue:[[people valueForKey:@"originalName"] componentsJoinedByString:@" and "]];
+                    if ([pub isEqual:[origPerson publication]] && [field isEqualToString:[origPerson field]])
+                        // we should set it to the actual BibAuthor in the publication, not our placeholder newPerson
+                        [self setPerson:[[pub peopleArrayForField:field] objectAtIndex:foundIdx]]; // changes the window title
+                }
+                
+                [people release];
+                
             }
         }
     }
-    CFRelease(people);
     
 	[[self  undoManager] setActionName:NSLocalizedString(@"Change Author Name", @"Undo action name")];
     
