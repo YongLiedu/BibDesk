@@ -58,6 +58,7 @@
     IBOutlet NSTableView *fieldTableView;
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet OASplitView *splitView;
+    IBOutlet OASplitView *fieldNameSplitView;
     IBOutlet NSArrayController *publicationArrayController;
     IBOutlet NSArrayController *fieldArrayController;
     IBOutlet NSArrayController *nameArrayController;
