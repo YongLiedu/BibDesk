@@ -1997,8 +1997,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 		int editedRow = [tableView editedRow];
         if (editedRow != -1 && [[fields objectAtIndex:editedRow] isEqualToString:changeKey])
             [[tableView currentEditor] setString:newValue ? newValue : @""];
-        // every field value could change, but not the displayed field names
-        [self reloadTable];
+        if ([NSString isEmptyAsComplexString:newValue] == [fields containsObject:changeKey]) {
+			// crossref field was added or removed
+            [self resetFields];
+		} else {
+            // every field value could change, but not the displayed field names
+            [self reloadTable];
+        }
 		[authorTableView reloadData];
 		[[self window] setTitle:[publication displayTitle]];
 	}
@@ -2732,6 +2737,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             else if ([field isCitationField])
                 formatter = citationFormatter;
             [cell setFormatter:formatter];
+            // @@ crossref field have a button if it's empty?
             [cell setHasButton:[[publication valueOfField:field] isInherited] || [field isEqualToString:BDSKCrossrefString]];
         }
     }
