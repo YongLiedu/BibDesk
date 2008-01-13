@@ -89,4 +89,6 @@
 - (void)openSelectedPub:(id)sender;
 - (void)changeNameToString:(NSString *)newNameString;
 
+- (NSUndoManager *)undoManager;
+
 @end

@@ -142,6 +142,10 @@
     [fieldTableView selectAll:self];
 }
 
+- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
+    return [person name];
+}
+
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
     return [[[person publication] owner] isDocument] ? nil : @"";
 }
@@ -332,13 +336,6 @@
 
 // @@ should we also filter for the selected names?
 - (void)changeNameToString:(NSString *)newNameString{
-    
-    NSUndoManager *undoManager = [[self window] undoManager];
-    
-    // @@ undo on our window is a no-op without this
-    if(undoManager)
-        [[undoManager prepareWithInvocationTarget:self] changeNameToString:[person name]];
-    
     NSEnumerator *itemE = [publicationItems objectEnumerator];
     NSDictionary *item;
     BibItem *pub = nil;
@@ -358,7 +355,7 @@
     
     while(item = [itemE nextObject]){
         
-        pub = [item objectForKey:@"field"];
+        pub = [item objectForKey:@"publication"];
         
         fieldE = [selFields objectEnumerator];
         
@@ -373,14 +370,14 @@
                 CFArrayAppendArray(people, (CFArrayRef)pubPeople, range);
                 
                 // use the fuzzy compare to find which author we're going to replace
-                idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson);
-                if(idx != -1){
+                while (range.length && -1 != (idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson))) {
                     // replace this author, then create a new BibTeX author string
                     newAuthor = [BibAuthor authorWithName:newNameString andPub:pub];
                     CFArraySetValueAtIndex(people, idx, newAuthor);
                     [pub setField:field toValue:[[(NSArray *)people valueForKey:@"originalName"] componentsJoinedByString:@" and "]];
-                    if([pub isEqual:[person publication]])
+                    if([pub isEqual:[person publication]] && [field isEqualToString:[person field]])
                         [self setPerson:[[pub peopleArrayForField:field] objectAtIndex:idx]]; // changes the window title
+                    range = CFRangeMake(range.location + range.length, [pubPeople count] - range.location - range.length);
                 }
                 CFArrayRemoveAllValues(people);
             }
@@ -388,7 +385,7 @@
     }
     CFRelease(people);
     
-	[undoManager setActionName:NSLocalizedString(@"Change Author Name", @"Undo action name")];
+	[[self  undoManager] setActionName:NSLocalizedString(@"Change Author Name", @"Undo action name")];
     
     // needed to update our tableview with the new publications list after setting a new person
     [self handleBibItemChanged:nil];
@@ -529,6 +526,18 @@
     [splitView adjustSubviews];
 	// fix for NSSplitView bug, which doesn't send this in adjustSubviews
 	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:splitView];
+}
+
+#pragma mark Undo Manager
+
+- (NSUndoManager *)undoManager {
+	return [[self document] undoManager];
+}
+    
+// we want to have the same undoManager as our document, so we use this 
+// NSWindow delegate method to return the doc's undomanager ...
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
+	return [self undoManager];
 }
 
 @end
