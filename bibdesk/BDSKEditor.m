@@ -2737,8 +2737,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             else if ([field isCitationField])
                 formatter = citationFormatter;
             [cell setFormatter:formatter];
-            // @@ crossref field have a button if it's empty?
-            [cell setHasButton:[[publication valueOfField:field] isInherited] || [field isEqualToString:BDSKCrossrefString]];
+            [cell setHasButton:[[publication valueOfField:field] isInherited] || ([field isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:[publication valueOfField:field inherit:NO]] == NO)];
         }
     }
 }
