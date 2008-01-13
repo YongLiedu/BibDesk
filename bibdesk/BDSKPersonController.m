@@ -76,6 +76,7 @@
 }
 
 - (void)dealloc{
+    [[self undoManager] removeAllActionsWithTarget:self];
     [publicationTableView setDelegate:nil];
     [publicationTableView setDataSource:nil];
     [person release];
