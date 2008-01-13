@@ -2300,29 +2300,41 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Reveal in Finder", @"FileView", bundle, @"context menu title") action:@selector(revealInFinder:) keyEquivalent:@""];
         [anItem setTag:FVRevealMenuItemTag];
         
+        // Finder label submenu
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Set Finder Label", @"FileView", bundle, @"context menu title") action:NULL keyEquivalent:@""];
+        NSMenu *submenu = [[NSMenu allocWithZone:[sharedMenu zone]] initWithTitle:@""];
+        [anItem setSubmenu:submenu];
+        [anItem setTag:FVChangeLabelMenuItemTag];
+        [submenu release];
+        
+        NSInteger i = 0;
+        NSRect iconRect = NSZeroRect;
+        iconRect.size = NSMakeSize(16, 16);
+        NSBezierPath *clipPath = [NSBezierPath bezierPathWithRoundRect:iconRect xRadius:3.0 yRadius:3.0];
+        
+        for (i = 0; i < 7; i++) {
+            anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
+            [anItem setTag:i];
+            NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
+            [image lockFocus];
+            // round off the corners, but don't draw the circular ends
+            [clipPath addClip];
+            [FVFinderLabel drawFinderLabel:i inRect:iconRect roundEnds:NO];
+            // stroke the path so the clear one stands out
+            [[NSColor darkGrayColor] setStroke];
+            [clipPath stroke];
+            [image unlockFocus];
+            [anItem setImage:image];
+            [image release];
+        }
+        
         [sharedMenu addItem:[NSMenuItem separatorItem]];
         
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Zoom In", @"FileView", bundle, @"context menu title") action:@selector(zoomIn:) keyEquivalent:@""];
         [anItem setTag:FVZoomInMenuItemTag];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Zoom Out", @"FileView", bundle, @"context menu title") action:@selector(zoomOut:) keyEquivalent:@""];
         [anItem setTag:FVZoomOutMenuItemTag];
-        
-        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Set Finder Label", @"FileView", bundle, @"context menu title") action:NULL keyEquivalent:@""];
-        NSMenu *submenu = [[NSMenu allocWithZone:[sharedMenu zone]] initWithTitle:@""];
-        [anItem setSubmenu:submenu];
-        [submenu release];
-        
-        NSInteger i = 0;
-        for (i = 0; i < 7; i++) {
-            anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
-            [anItem setTag:i];
-            NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(16, 16)];
-            [image lockFocus];
-            [FVFinderLabel drawFinderLabel:i inRect:NSMakeRect(0, 0, 16, 16) roundEnds:NO];
-            [image unlockFocus];
-            [anItem setImage:image];
-            [image release];
-        }
+
     }
     return sharedMenu;
 }
