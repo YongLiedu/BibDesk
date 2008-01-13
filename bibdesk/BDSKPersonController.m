@@ -146,6 +146,11 @@
     return [[[person publication] owner] isDocument] ? nil : @"";
 }
 
+- (void)windiwWillClose:(NSNotification *)note {
+    // make sure we won't try to access this, e.g. in a delayed setPublicationItems:
+    [self setPerson:nil];
+}
+
 - (void)updateFilter {
     NSSet *fieldSet = [NSSet setWithArray:[fieldArrayController selectedObjects]];
     NSSet *nameSet = [NSSet setWithArray:[nameArrayController selectedObjects]];
