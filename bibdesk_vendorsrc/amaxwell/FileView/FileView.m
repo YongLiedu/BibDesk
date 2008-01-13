@@ -1058,19 +1058,31 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     }
 }
 
-static NSUInteger _finderLabelForURL(NSURL *aURL)
+- (NSUInteger)_finderLabelForURL:(NSURL *)aURL;
 {
-    MDItemRef mdItem = NULL;
-    if ([aURL isFileURL])
-        mdItem = MDItemCreate(CFAllocatorGetDefault(), (CFStringRef)[aURL path]);
+    FSRef fileRef;
     NSUInteger label = 0;
-    if (mdItem) {
-        CFNumberRef labelNumber = MDItemCopyAttribute(mdItem, CFSTR("kMDItemFSLabel"));
-        label = [(id)labelNumber unsignedIntValue];
-        if (labelNumber) CFRelease(labelNumber);
-        CFRelease(mdItem);
+    
+    if ([aURL isFileURL] && CFURLGetFSRef((CFURLRef)aURL, &fileRef)) {
+        
+        FSCatalogInfo catalogInfo;    
+        OSStatus err;
+        
+        err = FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo, &catalogInfo, NULL, NULL, NULL);
+        if (noErr == err) {
+            
+            // coerce to FolderInfo or FileInfo as needed and get the color bit
+            if ((catalogInfo.nodeFlags & kFSNodeIsDirectoryMask) != 0) {
+                FolderInfo *fInfo = (FolderInfo *)&catalogInfo.finderInfo;
+                label = fInfo->finderFlags & kColor;
+            }
+            else {
+                FileInfo *fInfo = (FileInfo *)&catalogInfo.finderInfo;
+                label = fInfo->finderFlags & kColor;
+            }
+        }
     }
-    return label;
+    return (label >> 1L);
 }
 
 - (void)_drawIconsInRange:(NSRange)indexRange rows:(NSRange)rows columns:(NSRange)columns
@@ -1184,7 +1196,7 @@ static NSUInteger _finderLabelForURL(NSURL *aURL)
                         name = [aURL absoluteString];
                     }
                     
-                    NSUInteger label = _finderLabelForURL(aURL);
+                    NSUInteger label = [self _finderLabelForURL:aURL];
                     if (label > 0) {
                         CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
                         CGRect labelRect = *(CGRect *)&textRect;
@@ -1196,7 +1208,7 @@ static NSUInteger _finderLabelForURL(NSURL *aURL)
                         [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:isFlippedContext roundEnds:YES];
                         
                         // labeled title uses black text for greater contrast
-                        [name drawInRect:NSInsetRect(textRect, 2.0, 0) withAttributes:__labeledAttributes]; 
+                        [name drawInRect:NSInsetRect(textRect, titleHeight / 2.0, 0) withAttributes:__labeledAttributes]; 
 
                     }
                     else {
