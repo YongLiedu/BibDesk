@@ -259,8 +259,12 @@
 
 - (void)setPerson:(BibAuthor *)newPerson {
     if(newPerson != person){
-        [person release];
+        if (nil != person) {
+            [[[self undoManager] prepareWithInvocationTarget:self] setPerson:person];
+            [person release];
+        }
         person = [newPerson copy];
+        [self synchronizeWindowTitleWithDocumentName];
     }
 }
 
