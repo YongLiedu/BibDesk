@@ -866,9 +866,9 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
         [p appendBezierPathWithOvalInRect:rect];
     }
     [p setLineWidth:lineWidth];
-    [p setLineDash:NULL count:0 phase:0.0];
     [p stroke];
     [p fill];
+    [p setLineWidth:1.0];
 }
 
 - (void)_drawHighlightInRect:(NSRect)aRect;
@@ -882,10 +882,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     [strokeColor setStroke];
     [fillColor setFill];
     NSBezierPath *p = [NSBezierPath bezierPathWithRoundRect:aRect xRadius:5 yRadius:5];
-    [p setLineDash:NULL count:0 phase:0.0];
     [p setLineWidth:2.0f];
     [p fill];
     [p stroke];
+    [p setLineWidth:1.0];
 }
 
 - (void)_drawRubberbandRect
@@ -902,13 +902,15 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 {
     NSRect aRect = [self centerScanRect:NSInsetRect([self visibleRect], 20, 20)];
     NSBezierPath *path = [NSBezierPath bezierPathWithRoundRect:aRect xRadius:10 yRadius:10];
-    [path setLineWidth:3.0];
     CGFloat pattern[2] = { 12.0, 6.0 };
     
     // This sets all future paths to have a dash pattern, and it's not affected by save/restore gstate on Tiger.  Lame.
+    [path setLineWidth:3.0];
     [path setLineDash:pattern count:2 phase:0.0];
     [[NSColor lightGrayColor] setStroke];
     [path stroke];
+    [path setLineWidth:1.0];
+    [path setLineDash:NULL count:0 phase:0.0];
 
     NSBundle *bundle = [NSBundle bundleForClass:[FileView class]];
     NSString *message = NSLocalizedStringFromTableInBundle(@"Drop Files Here", @"FileView", bundle, @"placeholder message for empty file view");
@@ -2311,6 +2313,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         NSRect iconRect = NSZeroRect;
         iconRect.size = NSMakeSize(16, 16);
         NSBezierPath *clipPath = [NSBezierPath bezierPathWithRoundRect:iconRect xRadius:3.0 yRadius:3.0];
+        NSBezierPath *outlinePath = [NSBezierPath bezierPathWithRoundRect:NSInsetRect(iconRect, 0.5, 0.5) xRadius:2.5 yRadius:2.5];
         
         for (i = 0; i < 7; i++) {
             anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
@@ -2322,7 +2325,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             [FVFinderLabel drawFinderLabel:i inRect:iconRect roundEnds:NO];
             // stroke the path so the clear one stands out
             [[NSColor darkGrayColor] setStroke];
-            [clipPath stroke];
+            [outlinePath stroke];
             [image unlockFocus];
             [anItem setImage:image];
             [image release];

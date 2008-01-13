@@ -314,12 +314,14 @@ static NSURL *missingFileURL = nil;
     
     CGFloat radius = MIN(NSWidth(dstRect) / 4.0, 10.0);
     NSBezierPath *path = [NSBezierPath bezierPathWithRoundRect:dstRect xRadius:radius yRadius:radius];
-    [path setLineWidth:2.0];
     CGFloat pattern[2] = { 12.0, 6.0 };
     
+    [path setLineWidth:2.0];
     [path setLineDash:pattern count:2 phase:0.0];
     [[NSColor lightGrayColor] setStroke];
     [path stroke];
+    [path setLineWidth:1.0];
+    [path setLineDash:NULL count:0 phase:0.0];
     [nsContext restoreGraphicsState];
     [aShadow release];
     
