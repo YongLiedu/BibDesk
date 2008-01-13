@@ -284,15 +284,18 @@
     NSString *selNames = [[nameArrayController selectedObjects] valueForKeyPath:@"quotedStringIfNotEmpty.@componentsJoinedByCommaAndAnd"];
 	NSString *message = [NSString stringWithFormat:NSLocalizedString(@"This will change every occurrence of %@ in any %@ field of the displayed publications.", @"Informative text in alert dialog"), selNames, selFields];
     
-    [editMessageField setStringValue:message];
-    [editField setStringValue:[[nameArrayController selectedObjects] objectAtIndex:0]];
-    [editField selectText:self];
-    
-    [NSApp beginSheet:editSheet
-	   modalForWindow:[self window]
-		modalDelegate:self
-	   didEndSelector:@selector(editSheetDidEnd:returnCode:contextInfo:)
-		  contextInfo:NULL];
+    // @@ nameArrayController can be empty after undo; should edit be disabled in that case?
+    if ([[nameArrayController selectedObjects] count]) {
+        [editMessageField setStringValue:message];
+        [editField setStringValue:[[nameArrayController selectedObjects] objectAtIndex:0]];
+        [editField selectText:self];
+        
+        [NSApp beginSheet:editSheet
+           modalForWindow:[self window]
+            modalDelegate:self
+           didEndSelector:@selector(editSheetDidEnd:returnCode:contextInfo:)
+              contextInfo:NULL];
+    }
 }
 
 - (IBAction)dismissEditSheet:(id)sender {
