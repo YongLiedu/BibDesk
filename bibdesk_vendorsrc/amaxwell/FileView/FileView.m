@@ -2329,20 +2329,36 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         
         NSInteger i = 0;
         NSRect iconRect = NSZeroRect;
-        iconRect.size = NSMakeSize(16, 16);
+        iconRect.size = NSMakeSize(12, 12);
         NSBezierPath *clipPath = [NSBezierPath bezierPathWithRoundRect:iconRect xRadius:3.0 yRadius:3.0];
         
         for (i = 0; i < 7; i++) {
             anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
             [anItem setTag:i];
+            
             NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
             [image lockFocus];
-            // round off the corners, but don't draw the circular ends
+            
+            // round off the corners of the swatches, but don't draw the full rounded ends
             [clipPath addClip];
             [FVFinderLabel drawFinderLabel:i inRect:iconRect roundEnds:NO];
-            // stroke the path so the clear one stands out; stroke is wide enough to display a thin line inside the clip region
+            
+            // Finder displays an unbordered cross for clearing the label, so we'll do something similar
             [[NSColor darkGrayColor] setStroke];
-            [clipPath stroke];
+            if (0 == i) {
+                NSBezierPath *p = [NSBezierPath bezierPath];
+                [p moveToPoint:NSMakePoint(3, 3)];
+                [p lineToPoint:NSMakePoint(9, 9)];
+                [p stroke];
+                [p removeAllPoints];
+                [p moveToPoint:NSMakePoint(3, 9)];
+                [p lineToPoint:NSMakePoint(9, 3)];
+                [p stroke];
+            }
+            else {
+                // stroke clip path for a subtle border; stroke is wide enough to display a thin line inside the clip region
+                [clipPath stroke];
+            }
             [image unlockFocus];
             [anItem setImage:image];
             [image release];
