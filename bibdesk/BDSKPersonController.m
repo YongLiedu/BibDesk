@@ -65,25 +65,54 @@
 
     self = [super init];
 	if(self){
-        [self setPerson:aPerson];
         publicationItems = nil;
         names = nil;
         fields = [[[BDSKTypeManager sharedManager] personFieldsSet] copy];
-        isEditable = [[[person publication] owner] isDocument];
+        // set isEditable before setPerson, since setPerson has side effects
+        isEditable = [[[aPerson publication] owner] isDocument];
+        [self setPerson:aPerson];
 	}
 	return self;
 
 }
 
 - (void)dealloc{
-    [[self undoManager] removeAllActionsWithTarget:self];
-    [publicationTableView setDelegate:nil];
-    [publicationTableView setDataSource:nil];
     [person release];
     [publicationItems release];
     [names release];
     [fields release];
     [super dealloc];
+}
+
+- (void)registerForNotificationsForPerson:(BibAuthor *)aPerson {
+    
+    // may be called multiple times as setPerson: is called, so deregister as existing person
+    id owner = [[person publication] owner];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKDocAddItemNotification object:owner];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKDocDelItemNotification object:owner];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKDocSetPublicationsNotification object:owner];
+    
+    // @@ Should isEditable change?  Only if owner changes to a document, which it shouldn't in our case.
+    owner = [[aPerson publication] owner];
+    if (isEditable && nil != owner) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBibItemAddDel:)
+                                                     name:BDSKDocAddItemNotification
+                                                   object:owner];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBibItemAddDel:)
+                                                     name:BDSKDocDelItemNotification
+                                                   object:owner];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBibItemAddDel:)
+                                                     name:BDSKDocSetPublicationsNotification
+                                                   object:owner];
+    } else {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleGroupWillBeRemoved:)
+                                                     name:BDSKDidAddRemoveGroupNotification
+                                                   object:nil];
+    }    
 }
 
 - (void)awakeFromNib{
@@ -94,29 +123,12 @@
 	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
 	[imageView setDelegate:self];
 	[splitView setPositionAutosaveName:@"OASplitView Position BibPersonView"];
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleBibItemChanged:)
                                                  name:BDSKBibItemChangedNotification
                                                object:nil];
-    if (isEditable) {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleBibItemAddDel:)
-                                                     name:BDSKDocAddItemNotification
-                                                   object:[[person publication] owner]];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleBibItemAddDel:)
-                                                     name:BDSKDocDelItemNotification
-                                                   object:[[person publication] owner]];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleBibItemAddDel:)
-                                                     name:BDSKDocSetPublicationsNotification
-                                                   object:[[person publication] owner]];
-    } else {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleGroupWillBeRemoved:)
-                                                     name:BDSKDidAddRemoveGroupNotification
-                                                   object:nil];
-    }
+    
 	[self updateUI];
     [publicationTableView setDoubleAction:@selector(openSelectedPub:)];
     
@@ -146,9 +158,14 @@
     return [[[person publication] owner] isDocument] ? nil : @"";
 }
 
-- (void)windiwWillClose:(NSNotification *)note {
+- (void)windowWillClose:(NSNotification *)note {
     // make sure we won't try to access this, e.g. in a delayed setPublicationItems:
     [self setPerson:nil];
+    
+    [[self undoManager] removeAllActionsWithTarget:self];
+    [publicationTableView setDelegate:nil];
+    [publicationTableView setDataSource:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)updateFilter {
@@ -265,6 +282,9 @@
 
 - (void)setPerson:(BibAuthor *)newPerson {
     if(newPerson != person){
+        // call before releasing the current person instance
+        [self registerForNotificationsForPerson:newPerson];
+        
         if (nil != person) {
             [[[self undoManager] prepareWithInvocationTarget:self] setPerson:person];
             [person release];
@@ -330,7 +350,7 @@
 
 - (void)handleBibItemAddDel:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    if ([[note name] isEqualToString:BDSKDocAddItemNotification] == NO && [note object] == [person publication])
+    if ([[note name] isEqualToString:BDSKDocAddItemNotification] == NO && [[[note userInfo] objectForKey:@"pubs"] containsObject:[person publication]])
         [self close];
     else
         [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
@@ -593,7 +613,7 @@
 #pragma mark Undo Manager
 
 - (NSUndoManager *)undoManager {
-	return [[person owner] undoManager];
+	return [[[person publication] owner] undoManager];
 }
     
 // we want to have the same undoManager as our document, so we use this 
