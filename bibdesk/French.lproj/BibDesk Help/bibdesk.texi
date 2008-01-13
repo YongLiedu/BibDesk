@@ -643,9 +643,9 @@ The query operators that SKSearchCreate recognizes for non-similarity searching 
 
 The operators AND, OR, and NOT are case sensitive.
 
-Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `à', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
+Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `√†', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
 
-Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `à', `A', and `À'.
+Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `√†', `A', and `√Ä'.
 
 @node Find and Replace
 @c DO NOT LOCALIZE THE NEXT LINE
@@ -2074,6 +2074,12 @@ in the table, and choose the @buttontitle{-} button.
 @cindex BBEdit
 @cindex LyX
 
+@subheading Warning!
+
+@b{The input manager autocompletion plugin is not installed on Mac OS X 10.5 and greater.  Please
+encourage TeX front end developers to include this functionality.  Details and code are available by
+contacting the @uref{mailto:bibdesk-develop@@lists.sourceforge.net, BibDesk developers}.}
+
 BibDesk can install a plugin that lets you search your database and
 insert citation commands conveniently without leaving your text
 editing application. @xref{Autocompletion} to install
@@ -2575,6 +2581,12 @@ sharing password.  The password is stored in your keychain, and is never transmi
 @cindex completion
 @cindex external autocompletion
 @cindex autocompletion, external
+
+@subheading Warning!
+
+@b{The input manager autocompletion plugin is not installed on Mac OS X 10.5 and greater.  Please
+encourage TeX front end developers to include this functionality.  Details and code are available by
+contacting the @uref{mailto:bibdesk-develop@@lists.sourceforge.net, BibDesk developers}.}
 
 In the Completion pane you can configure the autocompletion system by installing
 citation autocompletion for external applications. 
