@@ -157,13 +157,12 @@
 }
 
 - (void)windowWillClose:(NSNotification *)note {
-    // make sure we won't try to access this, e.g. in a delayed setPublicationItems:
-    owner = nil;
-    
     [[self undoManager] removeAllActionsWithTarget:self];
     [publicationTableView setDelegate:nil];
     [publicationTableView setDataSource:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    // make sure we won't try to access this, e.g. in a delayed setPublicationItems:
+    owner = nil;
 }
 
 - (void)updateFilter {
