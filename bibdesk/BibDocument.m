@@ -1173,11 +1173,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSStringEncoding encoding = [self documentStringEncoding];
     NSParameterAssert(encoding != 0);
     
+    BOOL isBibTeX = [aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]];
+    
     // export operations need their own encoding
     if(NSSaveToOperation == docState.currentSaveOperationType)
         encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
     
-    if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
+    if (isBibTeX){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
         data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
@@ -1218,12 +1220,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             NSStringEncoding usedEncoding = [[error valueForKey:NSStringEncodingErrorKey] intValue];
             NSMutableString *message = [NSMutableString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.", @"Error informative text"), [NSString localizedNameOfStringEncoding:usedEncoding]];
             
-            [message appendString:@"  "];
-            [message appendString:[error valueForKey:NSLocalizedRecoverySuggestionErrorKey]];
+            // this is likely nil, so keep NSMutableString from raising
+            if ([error valueForKey:NSLocalizedRecoverySuggestionErrorKey]) {
+                [message appendString:@"  "];
+                [message appendString:[error valueForKey:NSLocalizedRecoverySuggestionErrorKey]];
+            }
             [message appendString:@"  "];
             
             // see if TeX conversion is enabled; it will help for ASCII, and possibly other encodings, but not UTF-8
-            if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == NO) {
+            // only for BibTeX, though!
+            if (isBibTeX && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == NO) {
                 [message appendFormat:NSLocalizedString(@"You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @"Error informative text"), [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding]];
             } else if (NSUTF8StringEncoding != usedEncoding){
                 // could suggest disabling TeX conversion, but the error might be from something out of the range of what we try to convert, so combining TeXify && UTF-8 would work
@@ -1419,7 +1425,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *RISString = [self RISStringForPublications:items];
     NSData *data = [RISString dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
-        OFErrorWithInfo(error, kBDSKDocumentSaveError, NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
+        OFErrorWithInfo(error, kBDSKStringEncodingError, NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
     }
 	return data;
 }
