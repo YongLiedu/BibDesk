@@ -1,286 +1,515 @@
-{
-    IBClasses =     (
-                {
-            CLASS = BDSKCollapsibleView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = BDSKContainerView;
-        },
-                {
-            CLASS = BDSKColoredBox;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSBox;
-        },
-                {
-            CLASS = BDSKContainerView;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                contentView = id;
-            };
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = BDSKEncodingPopUpButton;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSPopUpButton;
-        },
-                {
-            CLASS = BDSKGradientView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = BDSKGroupCell;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSTextFieldCell;
-        },
-                {
-            CLASS = BDSKGroupTableView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = OAGradientTableView;
-        },
-                {
-            CLASS = BDSKImagePopUpButton;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                delegate = id;
-            };
-            SUPERCLASS = NSPopUpButton;
-        },
-                {
-            CLASS = BDSKMainTableView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSTableView;
-        },
-                {
-            CLASS = BDSKPreviewTextView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSTextView;
-        },
-                {
-            CLASS = BDSKSplitView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = OASplitView;
-        },
-                {
-            ACTIONS =             {
-                startAnimation = id;
-                stopAnimation = id;
-            };
-            CLASS = BDSKStatusBar;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                delegate = id;
-                textCell = id;
-            };
-            SUPERCLASS = BDSKGradientView;
-        },
-                {
-            ACTIONS =             {
-                addBookmark = id;
-                addGroupButtonAction = id;
-                addGroupFieldAction = id;
-                addScriptGroupAction = id;
-                addSearchBookmark = id;
-                addSearchGroupAction = id;
-                addSmartGroupAction = id;
-                addStaticGroupAction = id;
-                addURLGroupAction = id;
-                alternateCut = id;
-                alternateDelete = id;
-                changeGroupFieldAction = id;
-                changeGroupTableFont = id;
-                changeIntersectGroupsAction = id;
-                changeMainTableFont = id;
-                changePreviewDisplay = id;
-                changeSearchType = id;
-                consolidateLinkedFiles = id;
-                copyAsAction = id;
-                copyNotesForLinkedFile = id;
-                copyNotesForLocalURL = id;
-                createNewPubUsingCrossrefAction = id;
-                deleteSelectedPubs = id;
-                deselectAllPublications = id;
-                dismissSearchBookmarkSheet = id;
-                duplicate = id;
-                duplicateTitleToBooktitle = id;
-                editAction = id;
-                editGroupAction = id;
-                editNewCategoryGroupWithSelection = id;
-                editNewGroupWithSelection = id;
-                editNewStaticGroupWithSelection = id;
-                editPubCmd = id;
-                editPubOrOpenURLAction = id;
-                emailPubCmd = id;
-                generateCiteKey = id;
-                importFromFileAction = id;
-                importFromPasteboardAction = id;
-                importFromWebAction = id;
-                makeSearchFieldKey = id;
-                mergeInExternalGroup = id;
-                mergeInExternalPublications = id;
-                newPub = id;
-                newSearchGroupFromBookmark = id;
-                openBookmark = id;
-                openLinkedFile = id;
-                openLinkedURL = id;
-                openLocalURL = id;
-                openRemoteURL = id;
-                pageDownInPreview = id;
-                pageUpInPreview = id;
-                performFindPanelAction = id;
-                postItemToWeblog = id;
-                refreshAllExternalGroups = id;
-                refreshScriptGroups = id;
-                refreshSearchGroups = id;
-                refreshSelectedGroups = id;
-                refreshSharedBrowsing = id;
-                refreshSharing = id;
-                refreshURLGroups = id;
-                removeGroupFieldAction = id;
-                removeSelectedGroups = id;
-                removeSelectedPubs = id;
-                renameGroupAction = id;
-                revealLinkedFile = id;
-                revealLocalURL = id;
-                search = id;
-                searchByContent = id;
-                selectAllPublications = id;
-                selectCrossrefParentAction = id;
-                selectDuplicates = id;
-                selectIncompletePublications = id;
-                selectLibraryGroup = id;
-                selectPossibleDuplicates = id;
-                sendToLyX = id;
-                showDocumentInfoWindow = id;
-                showMacrosWindow = id;
-                showNotesForLinkedFile = id;
-                showNotesForLocalURL = id;
-                sortForCrossrefs = id;
-                sortGroupsByCount = id;
-                sortGroupsByGroup = id;
-                toggleShowingCustomCiteDrawer = id;
-                toggleStatusBar = id;
-            };
-            CLASS = BibDocument;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                actionMenu = NSMenu;
-                actionMenuButton = BDSKImagePopUpButton;
-                currentPreviewView = NSView;
-                documentWindow = NSWindow;
-                exportAccessoryView = NSView;
-                exportSelectionCheckButton = NSButton;
-                fileCollapsibleView = BDSKCollapsibleView;
-                fileGradientView = BDSKGradientView;
-                fileView = FileView;
-                fileViewSlider = NSSlider;
-                groupActionButton = BDSKImagePopUpButton;
-                groupActionMenuButton = BDSKImagePopUpButton;
-                groupAddButton = NSButton;
-                groupCollapsibleView = BDSKCollapsibleView;
-                groupGradientView = BDSKGradientView;
-                groupMenu = NSMenu;
-                groupSplitView = BDSKSplitView;
-                groupTableView = BDSKGroupTableView;
-                mainBox = BDSKColoredBox;
-                mainView = NSView;
-                previewTextView = NSTextView;
-                saveAccessoryView = NSView;
-                saveTextEncodingPopupButton = BDSKEncodingPopUpButton;
-                searchBookmarkField = NSTextField;
-                searchBookmarkPopUp = NSPopUpButton;
-                searchBookmarkSheet = NSWindow;
-                searchField = NSSearchField;
-                splitView = BDSKSplitView;
-                statusBar = BDSKStatusBar;
-                tableView = BDSKMainTableView;
-            };
-            SUPERCLASS = NSDocument;
-        },
-                {
-            ACTIONS =             {
-                delete = id;
-                selectNextIcon = id;
-                selectPreviousIcon = id;
-            };
-            CLASS = FileView;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                dataSource = id;
-                delegate = id;
-                dragDataSource = id;
-            };
-            SUPERCLASS = NSView;
-        },
-                {
-            ACTIONS =             {
-                "" = id;
-                changeSearchType = id;
-                clearQuickSearch = id;
-                selectCrossrefParentAction = id;
-            };
-            CLASS = FirstResponder;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = NSControl;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = NSMenu;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = NSMenuItem;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = NSObject;
-            LANGUAGE = ObjC;
-        },
-                {
-            CLASS = NSScrollView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = NSTableHeaderView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            ACTIONS =             {
-                changeFont = id;
-                invertSelection = id;
-            };
-            CLASS = NSTableView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSControl;
-        },
-                {
-            CLASS = NSTextView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSText;
-        },
-                {
-            CLASS = NSWindow;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSResponder;
-        },
-                {
-            CLASS = OAGradientTableView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSTableView;
-        },
-                {
-            CLASS = OASplitView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSSplitView;
-        }
-    );
-    IBVersion = 1;
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>addBookmark</key>
+				<string>id</string>
+				<key>addGroupButtonAction</key>
+				<string>id</string>
+				<key>addGroupFieldAction</key>
+				<string>id</string>
+				<key>addScriptGroupAction</key>
+				<string>id</string>
+				<key>addSearchBookmark</key>
+				<string>id</string>
+				<key>addSearchGroupAction</key>
+				<string>id</string>
+				<key>addSmartGroupAction</key>
+				<string>id</string>
+				<key>addStaticGroupAction</key>
+				<string>id</string>
+				<key>addURLGroupAction</key>
+				<string>id</string>
+				<key>alternateCut</key>
+				<string>id</string>
+				<key>alternateDelete</key>
+				<string>id</string>
+				<key>changeGroupFieldAction</key>
+				<string>id</string>
+				<key>changeGroupTableFont</key>
+				<string>id</string>
+				<key>changeIntersectGroupsAction</key>
+				<string>id</string>
+				<key>changeMainTableFont</key>
+				<string>id</string>
+				<key>changePreviewDisplay</key>
+				<string>id</string>
+				<key>changeSearchType</key>
+				<string>id</string>
+				<key>consolidateLinkedFiles</key>
+				<string>id</string>
+				<key>copyAsAction</key>
+				<string>id</string>
+				<key>copyNotesForLinkedFile</key>
+				<string>id</string>
+				<key>copyNotesForLocalURL</key>
+				<string>id</string>
+				<key>createNewPubUsingCrossrefAction</key>
+				<string>id</string>
+				<key>deleteSelectedPubs</key>
+				<string>id</string>
+				<key>deselectAllPublications</key>
+				<string>id</string>
+				<key>dismissSearchBookmarkSheet</key>
+				<string>id</string>
+				<key>duplicate</key>
+				<string>id</string>
+				<key>duplicateTitleToBooktitle</key>
+				<string>id</string>
+				<key>editAction</key>
+				<string>id</string>
+				<key>editGroupAction</key>
+				<string>id</string>
+				<key>editNewCategoryGroupWithSelection</key>
+				<string>id</string>
+				<key>editNewGroupWithSelection</key>
+				<string>id</string>
+				<key>editNewStaticGroupWithSelection</key>
+				<string>id</string>
+				<key>editPubCmd</key>
+				<string>id</string>
+				<key>editPubOrOpenURLAction</key>
+				<string>id</string>
+				<key>emailPubCmd</key>
+				<string>id</string>
+				<key>generateCiteKey</key>
+				<string>id</string>
+				<key>importFromFileAction</key>
+				<string>id</string>
+				<key>importFromPasteboardAction</key>
+				<string>id</string>
+				<key>importFromWebAction</key>
+				<string>id</string>
+				<key>makeSearchFieldKey</key>
+				<string>id</string>
+				<key>mergeInExternalGroup</key>
+				<string>id</string>
+				<key>mergeInExternalPublications</key>
+				<string>id</string>
+				<key>migrateFiles</key>
+				<string>id</string>
+				<key>newPub</key>
+				<string>id</string>
+				<key>newSearchGroupFromBookmark</key>
+				<string>id</string>
+				<key>openBookmark</key>
+				<string>id</string>
+				<key>openLinkedFile</key>
+				<string>id</string>
+				<key>openLinkedURL</key>
+				<string>id</string>
+				<key>openLocalURL</key>
+				<string>id</string>
+				<key>openRemoteURL</key>
+				<string>id</string>
+				<key>pageDownInPreview</key>
+				<string>id</string>
+				<key>pageUpInPreview</key>
+				<string>id</string>
+				<key>performFindPanelAction</key>
+				<string>id</string>
+				<key>postItemToWeblog</key>
+				<string>id</string>
+				<key>previewAction</key>
+				<string>id</string>
+				<key>refreshAllExternalGroups</key>
+				<string>id</string>
+				<key>refreshScriptGroups</key>
+				<string>id</string>
+				<key>refreshSearchGroups</key>
+				<string>id</string>
+				<key>refreshSelectedGroups</key>
+				<string>id</string>
+				<key>refreshSharedBrowsing</key>
+				<string>id</string>
+				<key>refreshSharing</key>
+				<string>id</string>
+				<key>refreshURLGroups</key>
+				<string>id</string>
+				<key>removeGroupFieldAction</key>
+				<string>id</string>
+				<key>removeSelectedGroups</key>
+				<string>id</string>
+				<key>removeSelectedPubs</key>
+				<string>id</string>
+				<key>renameGroupAction</key>
+				<string>id</string>
+				<key>revealLinkedFile</key>
+				<string>id</string>
+				<key>revealLocalURL</key>
+				<string>id</string>
+				<key>search</key>
+				<string>id</string>
+				<key>searchByContent</key>
+				<string>id</string>
+				<key>selectAllPublications</key>
+				<string>id</string>
+				<key>selectCrossrefParentAction</key>
+				<string>id</string>
+				<key>selectDuplicates</key>
+				<string>id</string>
+				<key>selectIncompletePublications</key>
+				<string>id</string>
+				<key>selectLibraryGroup</key>
+				<string>id</string>
+				<key>selectPossibleDuplicates</key>
+				<string>id</string>
+				<key>sendToLyX</key>
+				<string>id</string>
+				<key>showDocumentInfoWindow</key>
+				<string>id</string>
+				<key>showMacrosWindow</key>
+				<string>id</string>
+				<key>showNotesForLinkedFile</key>
+				<string>id</string>
+				<key>showNotesForLocalURL</key>
+				<string>id</string>
+				<key>sortForCrossrefs</key>
+				<string>id</string>
+				<key>sortGroupsByCount</key>
+				<string>id</string>
+				<key>sortGroupsByGroup</key>
+				<string>id</string>
+				<key>toggleShowingCustomCiteDrawer</key>
+				<string>id</string>
+				<key>toggleStatusBar</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BibDocument</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>actionMenu</key>
+				<string>NSMenu</string>
+				<key>actionMenuButton</key>
+				<string>BDSKImagePopUpButton</string>
+				<key>currentPreviewView</key>
+				<string>NSView</string>
+				<key>documentWindow</key>
+				<string>NSWindow</string>
+				<key>exportAccessoryView</key>
+				<string>NSView</string>
+				<key>exportSelectionCheckButton</key>
+				<string>NSButton</string>
+				<key>fileCollapsibleView</key>
+				<string>BDSKCollapsibleView</string>
+				<key>fileGradientView</key>
+				<string>BDSKGradientView</string>
+				<key>fileView</key>
+				<string>FileView</string>
+				<key>fileViewSlider</key>
+				<string>NSSlider</string>
+				<key>groupActionButton</key>
+				<string>BDSKImagePopUpButton</string>
+				<key>groupActionMenuButton</key>
+				<string>BDSKImagePopUpButton</string>
+				<key>groupAddButton</key>
+				<string>NSButton</string>
+				<key>groupCollapsibleView</key>
+				<string>BDSKCollapsibleView</string>
+				<key>groupGradientView</key>
+				<string>BDSKGradientView</string>
+				<key>groupMenu</key>
+				<string>NSMenu</string>
+				<key>groupSplitView</key>
+				<string>BDSKSplitView</string>
+				<key>groupTableView</key>
+				<string>BDSKGroupTableView</string>
+				<key>mainBox</key>
+				<string>BDSKColoredBox</string>
+				<key>mainView</key>
+				<string>NSView</string>
+				<key>previewTextView</key>
+				<string>NSTextView</string>
+				<key>saveAccessoryView</key>
+				<string>NSView</string>
+				<key>saveTextEncodingPopupButton</key>
+				<string>BDSKEncodingPopUpButton</string>
+				<key>searchBookmarkField</key>
+				<string>NSTextField</string>
+				<key>searchBookmarkPopUp</key>
+				<string>NSPopUpButton</string>
+				<key>searchBookmarkSheet</key>
+				<string>NSWindow</string>
+				<key>searchField</key>
+				<string>NSSearchField</string>
+				<key>splitView</key>
+				<string>BDSKSplitView</string>
+				<key>statusBar</key>
+				<string>BDSKStatusBar</string>
+				<key>tableView</key>
+				<string>BDSKMainTableView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSDocument</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKGradientView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKPreviewTextView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTextView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKEncodingPopUpButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPopUpButton</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>delete</key>
+				<string>id</string>
+				<key>selectNextIcon</key>
+				<string>id</string>
+				<key>selectPreviousIcon</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FileView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>dataSource</key>
+				<string>id</string>
+				<key>delegate</key>
+				<string>id</string>
+				<key>dragDataSource</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSWindow</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSScrollView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKCollapsibleView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKContainerView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenuItem</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKMainTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKGroupCell</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTextFieldCell</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKSplitView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OASplitView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>OASplitView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSSplitView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key></key>
+				<string>id</string>
+				<key>changeSearchType</key>
+				<string>id</string>
+				<key>clearQuickSearch</key>
+				<string>id</string>
+				<key>selectCrossrefParentAction</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKGroupTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OAGradientTableView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSTableHeaderView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKImagePopUpButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>delegate</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSPopUpButton</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>OAGradientTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKColoredBox</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSBox</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSTextView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSText</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKContainerView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>contentView</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>startAnimation</key>
+				<string>id</string>
+				<key>stopAnimation</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKStatusBar</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>delegate</key>
+				<string>id</string>
+				<key>textCell</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>BDSKGradientView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeFont</key>
+				<string>id</string>
+				<key>invertSelection</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>NSTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSControl</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>
