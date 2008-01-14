@@ -36,12 +36,12 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "FileView.h"
+#import <FileView/FileView.h>
 #import <QTKit/QTKit.h>
 #import "FVIcon.h"
 #import "FVIcon_Private.h"
 #import "FVIconQueue.h"
-#import "FVPreviewer.h"
+#import <FileView/FVPreviewer.h>
 #import "FVArrowButtonCell.h"
 #import "FVFinderLabel.h"
 
