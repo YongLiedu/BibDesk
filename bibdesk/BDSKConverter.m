@@ -177,31 +177,41 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     
     UniChar ch;
     unsigned int idx, numberOfCharacters = CFStringGetLength((CFStringRef)precomposedString);
+    NSRange r;
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer((CFStringRef)precomposedString, &inlineBuffer, CFRangeMake(0, numberOfCharacters));
     
     for (idx = 0; (idx < numberOfCharacters); idx++) {
-            
+        
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
         
         if ([finalCharSet characterIsMember:ch]){
+            
+            r = [precomposedString rangeOfComposedCharacterSequenceAtIndex:idx];
+            
+            if (r.length > 1) {
+                // composed character could not be precomposed, we cannot handle this so leave it as is
+                idx += r.length - 1;
+                
+            } else {
+                tmpConv = [[NSMutableString alloc] initWithCharactersNoCopy:&ch length:1 freeWhenDone:NO];
         
-            tmpConv = [[NSMutableString alloc] initWithCharactersNoCopy:&ch length:1 freeWhenDone:NO];
-    
-            // try the dictionary first
-            if((TEXString = [texifyConversions objectForKey:tmpConv])){
-                [convertedSoFar replaceCharactersInRange:NSMakeRange((idx + offset), 1) withString:TEXString];
-                // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-                offset += [TEXString length] - 1;
-                
-            // fall back to Unicode decomposition/conversion of the mutable string
-            } else if(convertComposedCharacterToTeX(tmpConv, baseCharacterSetForTeX, accentCharSet, texifyAccents)){
-                [convertedSoFar replaceCharactersInRange:NSMakeRange((idx + offset), 1) withString:tmpConv];
-                // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-                offset += [tmpConv length] - 1;
-                
+                // try the dictionary first
+                if((TEXString = [texifyConversions objectForKey:tmpConv])){
+                    [convertedSoFar replaceCharactersInRange:NSMakeRange((idx + offset), 1) withString:TEXString];
+                    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
+                    offset += [TEXString length] - 1;
+                    
+                // fall back to Unicode decomposition/conversion of the mutable string
+                } else if(convertComposedCharacterToTeX(tmpConv, baseCharacterSetForTeX, accentCharSet, texifyAccents)){
+                    [convertedSoFar replaceCharactersInRange:NSMakeRange((idx + offset), 1) withString:tmpConv];
+                    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
+                    offset += [tmpConv length] - 1;
+                    
+                }
+                [tmpConv release];
             }
-            [tmpConv release];
+            
         }
     }
     
