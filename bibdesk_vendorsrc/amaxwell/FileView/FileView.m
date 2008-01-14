@@ -152,7 +152,6 @@ static CGFloat __subtitleHeight = 0.0;
     __subtitleAttributes = [ta copy];
     
     NSLayoutManager *lm = [[NSLayoutManager alloc] init];
-    [lm setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
     __titleHeight = [lm defaultLineHeightForFont:[__titleAttributes objectForKey:NSFontAttributeName]];
     __subtitleHeight = [lm defaultLineHeightForFont:[__subtitleAttributes objectForKey:NSFontAttributeName]];
     [lm release];
@@ -926,25 +925,48 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     CGFloat pattern[2] = { 12.0, 6.0 };
     
     // This sets all future paths to have a dash pattern, and it's not affected by save/restore gstate on Tiger.  Lame.
-    [path setLineWidth:3.0];
+    CGFloat previousLineWidth = [path lineWidth];
+    // ??? make this a continuous function of width <= 3
+    [path setLineWidth:(NSWidth(aRect) > 100 ? 3.0 : 2.0)];
     [path setLineDash:pattern count:2 phase:0.0];
     [[NSColor lightGrayColor] setStroke];
     [path stroke];
-    [path setLineWidth:1.0];
+    [path setLineWidth:previousLineWidth];
     [path setLineDash:NULL count:0 phase:0.0];
 
     NSBundle *bundle = [NSBundle bundleForClass:[FileView class]];
     NSString *message = NSLocalizedStringFromTableInBundle(@"Drop Files Here", @"FileView", bundle, @"placeholder message for empty file view");
     NSMutableAttributedString *attrString = [[[NSMutableAttributedString alloc] initWithString:message] autorelease];
-    [attrString addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:24.0f] range:NSMakeRange(0, [attrString length])];
+    CGFloat fontSize = 24.0;
+    [attrString addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:fontSize] range:NSMakeRange(0, [attrString length])];
     [attrString addAttribute:NSForegroundColorAttributeName value:[NSColor lightGrayColor] range:NSMakeRange(0, [attrString length])];
-    NSMutableParagraphStyle *ps = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+    
+    NSMutableParagraphStyle *ps = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
     [ps setAlignment:NSCenterTextAlignment];
     [attrString addAttribute:NSParagraphStyleAttributeName value:ps range:NSMakeRange(0, [attrString length])];
+    [ps release];
     
-    NSRect r = [attrString boundingRectWithSize:aRect.size options:0];
+    // avoid drawing text right up to the path at really small widths
+    aRect = NSInsetRect(aRect, NSWidth(aRect) / 10, 0);
+    
+    CGFloat singleLineHeight = NSHeight([attrString boundingRectWithSize:aRect.size options:0]);
+    
+    // NSLayoutManager's defaultLineHeightForFont doesn't include padding that NSStringDrawing uses
+    NSRect r = [attrString boundingRectWithSize:aRect.size options:NSStringDrawingUsesLineFragmentOrigin];
+    
+    /*  Assumes that localizations also use space to separate words; on 10.5 could use componentsSeparatedByCharactersInSet:.  Another route would be to use NSSpellChecker, but it's not clear what language to pass, and is buggy in some versions (only works if you're checking spelling).  Hence we'll just avoid overengineering here...
+     */
+    NSUInteger wordCount = [[message componentsSeparatedByString:@" "] count];
+    
+    // reduce font size until we have no more than wordCount lines
+    while (NSHeight(r) > wordCount * singleLineHeight) {
+        fontSize -= 1.0;
+        [attrString addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:fontSize] range:NSMakeRange(0, [attrString length])];
+        singleLineHeight = NSHeight([attrString boundingRectWithSize:aRect.size options:0]);
+        r = [attrString boundingRectWithSize:aRect.size options:NSStringDrawingUsesLineFragmentOrigin];
+    }
     aRect.origin.y = (NSHeight(aRect) - NSHeight(r)) * 1 / 2;
-    [attrString drawInRect:aRect];
+    [attrString drawWithRect:aRect options:NSStringDrawingUsesLineFragmentOrigin];
 }
 
 // redraw at full quality after a resize
@@ -1227,19 +1249,19 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                         labelRect.size.height = __titleHeight;                        
                         [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:isFlippedContext roundEnds:YES];
                         
-                        // labeled title uses black text for greater contrast
-                        [name drawInRect:NSInsetRect(textRect, __titleHeight / 2.0, 0) withAttributes:__labeledAttributes]; 
-
+                        // labeled title uses black text for greater contrast; inset horizontally because of the rounded end caps
+                        NSRect titleRect = NSInsetRect(textRect, __titleHeight / 2.0, 0);
+                        [name drawWithRect:titleRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:__labeledAttributes];
                     }
                     else {
-                        [name drawInRect:textRect withAttributes:__titleAttributes];  
+                        [name drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:__titleAttributes];
                     }
                     
                     if (useSubtitle) {
                         if (isFlippedContext)
                             textRect.origin.y += __titleHeight;
                         textRect.size.height -= __titleHeight;
-                        [[_dataSource fileView:self subtitleAtIndex:i] drawInRect:textRect withAttributes:__subtitleAttributes];
+                        [[_dataSource fileView:self subtitleAtIndex:i] drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:__subtitleAttributes];
                     }
                     CGContextRestoreGState(cgContext);
                 } 
