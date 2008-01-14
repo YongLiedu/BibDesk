@@ -62,12 +62,6 @@ static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20"
 static const NSSize DEFAULT_ICON_SIZE = { 64, 64 };
 static const CGFloat DEFAULT_PADDING = 32;          // 16 per side
 
-static NSSize _paddingForScale(CGFloat scale)
-{
-    // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
-    return NSMakeSize(5.0 * round(2.0 + scale), round(DEFAULT_PADDING * (1.0 + scale / 8.0)));
-}
-
 // don't bother removing icons from the cache if there are fewer than this value
 static const NSUInteger ZOMBIE_CACHE_THRESHOLD = 100;
 
@@ -82,6 +76,13 @@ static NSDictionary *__titleAttributes = nil;
 static NSDictionary *__labeledAttributes = nil;
 static NSDictionary *__subtitleAttributes = nil;
 static NSShadow *__shadow = nil;
+static CGFloat __titleHeight = 0.0;
+static CGFloat __subtitleHeight = 0.0;
+
+#define LEFT_MARGIN     _padding.width / 2 + 4.0
+#define RIGHT_MARGIN    _padding.width / 2 + 4.0
+#define TOP_MARGIN      __titleHeight
+#define BOTTOM_MARGIN   0.0
 
 #pragma mark -
 
@@ -96,6 +97,7 @@ static NSShadow *__shadow = nil;
 - (CGFloat)_columnWidth;
 - (CGFloat)_rowHeight;
 - (FVIcon *)_cachedIconForURL:(NSURL *)aURL;
+- (NSSize)_paddingForScale:(CGFloat)scale;
 - (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
 - (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
 - (NSArray *)_selectedURLs;
@@ -149,6 +151,12 @@ static NSShadow *__shadow = nil;
     [ta setObject:[NSColor grayColor] forKey:NSForegroundColorAttributeName];
     __subtitleAttributes = [ta copy];
     
+    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
+    [lm setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
+    __titleHeight = [lm defaultLineHeightForFont:[__titleAttributes objectForKey:NSFontAttributeName]];
+    __subtitleHeight = [lm defaultLineHeightForFont:[__subtitleAttributes objectForKey:NSFontAttributeName]];
+    [lm release];
+    
     __shadow = [[NSShadow alloc] init];
     // IconServices shadows look darker than the normal NSShadow (especially Leopard folder shadows) so try to match
     [__shadow setShadowColor:[NSColor colorWithCalibratedWhite:0 alpha:0.4]];
@@ -185,7 +193,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 - (void)_commonInit {
     _iconCache = [[NSMutableDictionary alloc] init];
     _iconSize = DEFAULT_ICON_SIZE;
-    _padding = _paddingForScale(1.0);
+    _padding = [self _paddingForScale:1.0];
     _lastMouseDownLocInView = NSZeroPoint;
     _dropRectForHighlight = NSZeroRect;
     _isRescaling = NO;
@@ -289,7 +297,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     NSParameterAssert(scale > 0);
     _iconSize.width = DEFAULT_ICON_SIZE.width * scale;
     _iconSize.height = DEFAULT_ICON_SIZE.height * scale;
-    _padding = _paddingForScale(scale);
+    _padding = [self _paddingForScale:scale];
     
     // arrows out of place now, they will be added again when required when resetting the tracking rects
     [self _hideArrows];
@@ -342,6 +350,8 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     // convenient time to do this, although the timer would also handle it
     [_iconCache removeAllObjects];
     
+    _padding = [self _paddingForScale:[self iconScale]];
+    
     [self _registerForDraggedTypes];
 }
 
@@ -382,7 +392,19 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     NSView *view = [self enclosingScrollView];
     if (nil == view)
         view = self;
-    return MAX(1, trunc((NSWidth([view frame]) - _padding.width / 2) / [self _columnWidth]));
+    return MAX(1, trunc((NSWidth([view frame]) - 2.0 - LEFT_MARGIN - RIGHT_MARGIN + _padding.width) / [self _columnWidth]));
+}
+
+- (NSSize)_paddingForScale:(CGFloat)scale;
+{
+    // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
+    NSSize size = NSZeroSize;
+    CGFloat extraMargin = round(4.0 * scale);
+    size.width = 10.0 + extraMargin;
+    size.height = __titleHeight + 4.0 + extraMargin;
+    if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
+        size.height += __subtitleHeight;
+    return size;
 }
 
 // This is the square rect the icon is drawn in.  It doesn't include padding, so rects aren't contiguous.
@@ -390,9 +412,9 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 - (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
 {
     NSPoint origin = [self bounds].origin;
-    CGFloat leftEdge = origin.x + _padding.width / 2 + ([self _columnWidth]) * column;
-    CGFloat bottomEdge = origin.y + _padding.height / 2 + ([self _rowHeight]) * row;
-    return NSMakeRect(leftEdge, bottomEdge, _iconSize.width, _iconSize.height);
+    CGFloat leftEdge = origin.x + LEFT_MARGIN + [self _columnWidth] * column;
+    CGFloat topEdge = origin.y + TOP_MARGIN + [self _rowHeight] * row;
+    return NSMakeRect(leftEdge, topEdge, _iconSize.width, _iconSize.height);
 }
 
 - (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
@@ -632,9 +654,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSClipView *cv = [[self enclosingScrollView] contentView];
     NSRect minFrame = cv ? [cv frame] : NSZeroRect;
     NSRect frame = NSZeroRect;
-    frame.size.width = MAX([self _columnWidth] * [self numberOfColumns], NSWidth(minFrame));
-    // Add half an extra padding for the top margin
-    frame.size.height = MAX([self _rowHeight] * [self numberOfRows] + 0.5 * _padding.height, NSHeight(minFrame));
+    frame.size.width = MAX([self _columnWidth] * [self numberOfColumns] - _padding.width + LEFT_MARGIN + RIGHT_MARGIN, NSWidth(minFrame));
+    frame.size.height = MAX([self _rowHeight] * [self numberOfRows] + TOP_MARGIN + BOTTOM_MARGIN, NSHeight(minFrame));
     
     if (NSEqualRects(frame, [self frame]) == NO)
         [self setFrame:frame];
@@ -693,7 +714,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex atPoint:(NSPoint)point;
 {
     // check for this immediately
-    if (point.x <= _padding.width / 2 || point.y <= _padding.height / 2)
+    if (point.x <= LEFT_MARGIN || point.y <= TOP_MARGIN)
         return NO;
     
     // column width is padding + icon width
@@ -705,7 +726,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     while (idx < nc) {
         
-        start = _padding.width / 2 + (_iconSize.width + _padding.width) * idx;
+        start = LEFT_MARGIN + (_iconSize.width + _padding.width) * idx;
         if (start < point.x && point.x < (start + _iconSize.width))
             break;
         idx++;
@@ -721,7 +742,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     while (idx < nr) {
         
-        start = _padding.height / 2 + (_iconSize.height + _padding.height) * idx;
+        start = TOP_MARGIN + (_iconSize.height + _padding.height) * idx;
         if (start < point.y && point.y < (start + _iconSize.height))
             break;
         idx++;
@@ -956,8 +977,8 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSRect bounds = [self bounds];
     
     // account for padding around edges of the view
-    bounds.origin.x += _padding.width / 2;
-    bounds.origin.y += _padding.height / 2;
+    bounds.origin.x += LEFT_MARGIN;
+    bounds.origin.y += TOP_MARGIN;
     
     rmin = (NSMinY(aRect) - NSMinY(bounds)) / [self _rowHeight];
     rmax = (NSMinY(aRect) - NSMinY(bounds)) / [self _rowHeight] + NSHeight(aRect) / [self _rowHeight];
@@ -1198,17 +1219,16 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                     
                     NSUInteger label = [self _finderLabelForURL:aURL];
                     if (label > 0) {
-                        CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
                         CGRect labelRect = *(CGRect *)&textRect;
                         
                         // for drag image context
                         if (NO == isFlippedContext)
-                            labelRect.origin.y += titleHeight;
-                        labelRect.size.height = titleHeight;                        
+                            labelRect.origin.y += __titleHeight;
+                        labelRect.size.height = __titleHeight;                        
                         [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:isFlippedContext roundEnds:YES];
                         
                         // labeled title uses black text for greater contrast
-                        [name drawInRect:NSInsetRect(textRect, titleHeight / 2.0, 0) withAttributes:__labeledAttributes]; 
+                        [name drawInRect:NSInsetRect(textRect, __titleHeight / 2.0, 0) withAttributes:__labeledAttributes]; 
 
                     }
                     else {
@@ -1216,10 +1236,9 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                     }
                     
                     if (useSubtitle) {
-                        CGFloat titleHeight = ([name sizeWithAttributes:__titleAttributes].height);
                         if (isFlippedContext)
-                            textRect.origin.y += titleHeight;
-                        textRect.size.height -= titleHeight;
+                            textRect.origin.y += __titleHeight;
+                        textRect.size.height -= __titleHeight;
                         [[_dataSource fileView:self subtitleAtIndex:i] drawInRect:textRect withAttributes:__subtitleAttributes];
                     }
                     CGContextRestoreGState(cgContext);
@@ -1797,17 +1816,17 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         if ([self _getGridRow:&r column:&c atPoint:left] && ([self _indexForGridRow:r column:c] < [self numberOfIcons])) {
             
             aRect = [self _rectOfIconInRow:r column:c];
-            // rect size is 1/5 of padding, and should be centered between icons vertically
-            aRect.origin.x += _iconSize.width + _padding.width * (c == [self numberOfColumns] - 1 ? 1 : 2) / 5;
-            aRect.size.width = _padding.width / 5;    
+            // rect size is 6, and should be centered between icons horizontally
+            aRect.origin.x += _iconSize.width + _padding.width / 2 - 3.0;
+            aRect.size.width = 6.0;    
             op = FVDropInsert;
             insertIndex = [self _indexForGridRow:r column:c] + 1;
         }
         else if ([self _getGridRow:&r column:&c atPoint:right] && ([self _indexForGridRow:r column:c] < [self numberOfIcons])) {
             
             aRect = [self _rectOfIconInRow:r column:c];
-            aRect.origin.x -= _padding.width * (c == 0 ? 2 : 3) / 5;
-            aRect.size.width = _padding.width / 5;
+            aRect.origin.x -= _padding.width / 2 + 3.0;
+            aRect.size.width = 6.0;
             op = FVDropInsert;
             insertIndex = [self _indexForGridRow:r column:c];
         }
