@@ -37,6 +37,7 @@
  */
 
 #import <AppKit/AppKit.h>
+#import "BDSKOwnerProtocol.h"
 
 @class BibDocument;
 @class BibAuthor;
@@ -47,6 +48,7 @@
 
 @interface BDSKPersonController : NSWindowController {
     BibAuthor *person;
+    id<BDSKOwner> owner;
     NSMutableArray *publicationItems;
     NSSet *names;
     NSSet *fields;

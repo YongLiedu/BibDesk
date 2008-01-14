@@ -130,8 +130,11 @@
 	[self updateUI];
     [publicationTableView setDoubleAction:@selector(openSelectedPub:)];
     
-    if (isEditable)
+    
+    if (isEditable) {
+        [nameTableView setDoubleAction:@selector(edit:)];
         [imageView registerForDraggedTypes:[NSArray arrayWithObject:NSVCardPboardType]];
+    }
     
     [editButton setEnabled:isEditable];
     
