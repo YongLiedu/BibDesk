@@ -38,7 +38,6 @@
 
 #import "BDSKPersonController.h"
 #import "BDSKTypeManager.h"
-#import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BibAuthor.h"
@@ -65,11 +64,11 @@
 
     self = [super init];
 	if(self){
+        owner = [[aPerson publication] owner];
         publicationItems = nil;
         names = nil;
         fields = [[[BDSKTypeManager sharedManager] personFieldsSet] copy];
-        // set isEditable before setPerson, since setPerson has side effects
-        isEditable = [[[aPerson publication] owner] isDocument];
+        isEditable = [owner isDocument];
         [self setPerson:aPerson];
 	}
 	return self;
@@ -87,7 +86,6 @@
 - (void)registerForNotificationsForPerson:(BibAuthor *)aPerson {
     
     // may be called multiple times as setPerson: is called, so deregister as existing person
-    id owner = [[person publication] owner];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKDocAddItemNotification object:owner];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKDocDelItemNotification object:owner];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKDocSetPublicationsNotification object:owner];
@@ -155,12 +153,12 @@
 }
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    return [[[person publication] owner] isDocument] ? nil : @"";
+    return [owner isDocument] ? nil : @"";
 }
 
 - (void)windowWillClose:(NSNotification *)note {
     // make sure we won't try to access this, e.g. in a delayed setPublicationItems:
-    [self setPerson:nil];
+    owner = nil;
     
     [[self undoManager] removeAllActionsWithTarget:self];
     [publicationTableView setDelegate:nil];
@@ -195,7 +193,7 @@
     
     NSMutableSet *theNames = [[NSMutableSet alloc] init];
     NSMutableSet *peopleSet = BDSKCreateFuzzyAuthorCompareMutableSet();
-    NSEnumerator *pubEnum = [[[[person publication] owner] publications] objectEnumerator];
+    NSEnumerator *pubEnum = [[owner publications] objectEnumerator];
     BibItem *pub;
     
     while (pub = [pubEnum nextObject]) {
@@ -344,22 +342,19 @@
 
 - (void)handleBibItemChanged:(NSNotification *)note{
     NSString *key = [[note userInfo] valueForKey:@"key"];
-    if ([key isEqualToString:[person field]] || key == nil)
+    if ([key isPersonField] || key == nil)
         [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
 }
 
 - (void)handleBibItemAddDel:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    if ([[note name] isEqualToString:BDSKDocAddItemNotification] == NO && [[[note userInfo] objectForKey:@"pubs"] containsObject:[person publication]])
-        [self close];
-    else
-        [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
+    [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
 }
 
 - (void)handleGroupWillBeRemoved:(NSNotification *)note{
 	NSArray *groups = [[note userInfo] objectForKey:@"groups"];
 	
-	if ([groups containsObject:[[person publication] owner]])
+	if ([groups containsObject:owner])
 		[self close];
 }
 
@@ -374,7 +369,6 @@
     NSArray *pubs = [[[publicationArrayController arrangedObjects] copy] autorelease];
     NSSet *selFields = [NSSet setWithArray:[fieldArrayController selectedObjects]];
     NSSet *selNames = [NSSet setWithArray:[nameArrayController selectedObjects]];
-    BibAuthor *origPerson = [[person retain] autorelease];
     
     NSEnumerator *itemE = [pubs objectEnumerator];
     NSDictionary *item;
@@ -412,18 +406,16 @@
                     }
                 }
                 
-                if (foundIdx != -1) {
+                if (foundIdx != -1)
                     [pub setField:field toValue:[[people valueForKey:@"originalName"] componentsJoinedByString:@" and "]];
-                    if ([pub isEqual:[origPerson publication]] && [field isEqualToString:[origPerson field]])
-                        // we should set it to the actual BibAuthor in the publication, not our placeholder newPerson
-                        [self setPerson:[[pub peopleArrayForField:field] objectAtIndex:foundIdx]]; // changes the window title
-                }
                 
                 [people release];
                 
             }
         }
     }
+    
+    [self setPerson:newPerson];
     
 	[[self  undoManager] setActionName:NSLocalizedString(@"Change Author Name", @"Undo action name")];
     
@@ -613,7 +605,7 @@
 #pragma mark Undo Manager
 
 - (NSUndoManager *)undoManager {
-	return [[[person publication] owner] undoManager];
+	return [owner undoManager];
 }
     
 // we want to have the same undoManager as our document, so we use this 
