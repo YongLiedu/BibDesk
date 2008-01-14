@@ -366,7 +366,8 @@
     BibAuthor *aPerson;
     
     NSMutableArray *people;
-    CFIndex idx, foundIdx;
+    CFIndex idx;
+    BOOL found;
     
     // this is only used as a placeholder for the name, so we don't care about its pub or field
     BibAuthor *newPerson = [BibAuthor authorWithName:newNameString andPub:nil];
@@ -380,21 +381,21 @@
             // we only replace in the selected fields
             if ([selFields containsObject:field]) {
                 
-                // get the array of BibAuthor objects from a person field, which should contain at least one fuzzyEqual person at this point
+                // get the array of BibAuthor objects from a person field
                 people = [[pub peopleArrayForField:field inherit:NO] mutableCopy];
                 idx = [people count];
-                foundIdx = -1;
+                found = NO;
                 
                 while (idx--) {
                     aPerson = [people objectAtIndex:idx];
                     // we only replace the selected names
                     if ([selNames containsObject:[aPerson originalName]]) {
                         [people replaceObjectAtIndex:idx withObject:newPerson];
-                        foundIdx = idx;
+                        found = YES;
                     }
                 }
                 
-                if (foundIdx != -1)
+                if (found)
                     [pub setField:field toValue:[[people valueForKey:@"originalName"] componentsJoinedByString:@" and "]];
                 
                 [people release];
