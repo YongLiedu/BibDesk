@@ -83,15 +83,15 @@
     [super dealloc];
 }
 
-- (void)registerForNotificationsForPerson:(BibAuthor *)aPerson {
-    
-    // may be called multiple times as setPerson: is called, so deregister as existing person
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKDocAddItemNotification object:owner];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKDocDelItemNotification object:owner];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:BDSKDocSetPublicationsNotification object:owner];
-    
-    // @@ Should isEditable change?  Only if owner changes to a document, which it shouldn't in our case.
-    owner = [[aPerson publication] owner];
+- (void)awakeFromNib{
+	if ([NSWindowController instancesRespondToSelector:@selector(awakeFromNib)]){
+        [super awakeFromNib];
+	}
+	
+	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
+	[imageView setDelegate:self];
+	[splitView setPositionAutosaveName:@"OASplitView Position BibPersonView"];
+
     if (isEditable && nil != owner) {
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleBibItemAddDel:)
@@ -110,18 +110,7 @@
                                                  selector:@selector(handleGroupWillBeRemoved:)
                                                      name:BDSKDidAddRemoveGroupNotification
                                                    object:nil];
-    }    
-}
-
-- (void)awakeFromNib{
-	if ([NSWindowController instancesRespondToSelector:@selector(awakeFromNib)]){
-        [super awakeFromNib];
-	}
-	
-	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
-	[imageView setDelegate:self];
-	[splitView setPositionAutosaveName:@"OASplitView Position BibPersonView"];
-
+    }   
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleBibItemChanged:)
                                                  name:BDSKBibItemChangedNotification
@@ -281,10 +270,7 @@
 }
 
 - (void)setPerson:(BibAuthor *)newPerson {
-    if(newPerson != person){
-        // call before releasing the current person instance
-        [self registerForNotificationsForPerson:newPerson];
-        
+    if(newPerson != person){        
         if (nil != person) {
             [[[self undoManager] prepareWithInvocationTarget:self] setPerson:person];
             [person release];
