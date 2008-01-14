@@ -3693,11 +3693,11 @@ Possible format specifiers are given in the table below.
 @item @specparam{%d, 1}
 @tab Random number, with (optional) number of digits (deprecated, use %n)
 @item @specparam{%u, 1}
-@tab Unique lowercase letter, with (optional) number of characters (only once)
+@tab Unique lowercase letter, with (optional) minimum number of characters (use only once)
 @item @specparam{%U, 1}
-@tab Unique uppercase letter, with (optional) number of characters (only once)
+@tab Unique uppercase letter, with (optional) minimum number of characters (use only once)
 @item @specparam{%n, 1}
-@tab Unique number, with (optional) number of characters (only once)
+@tab Unique number, with (optional) minimum number of characters (use only once)
 @item @spec{%0}
 @tab Escaped digit (0-9)
 @item @spec{%%}
