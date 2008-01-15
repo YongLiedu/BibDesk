@@ -2753,10 +2753,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         BOOL converted = [currentURLs containsObject:urlValue];
         if (converted == NO) {
             BDSKLinkedFile *file = [[BDSKLinkedFile alloc] initWithURL:urlValue delegate:self];
+            NSURL *fileURL = [file URL];
             // check again, because the URL may be given in a diffreent form, e.g. with an extra slash at the end for a folder
-            converted = [currentURLs containsObject:[file URL]];
+            converted = [currentURLs containsObject:fileURL];
             if (converted == NO) {
-                if (file) {
+                if (fileURL) {
                     [self->files addObject:file];
                     converted = YES;
                     (ctxt->numberOfAddedFiles)++;
