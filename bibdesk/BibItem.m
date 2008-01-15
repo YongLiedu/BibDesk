@@ -2292,7 +2292,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [s appendString:@"</title>\n<description>"];
     [s appendString:[[self valueOfField:BDSKRssDescriptionString] xmlString]];
     [s appendString:@"</description>\n<link>"];
-    [s appendString:[self valueOfField:BDSKUrlString]];
+    [s appendString:[[self valueOfField:BDSKUrlString] xmlString]];
     [s appendString:@"</link>\n</item>\n"];
     return s;
 }
