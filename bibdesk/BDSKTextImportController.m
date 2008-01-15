@@ -262,6 +262,8 @@
     [self finalizeChangesPreservingSelection:NO];
     
 	[itemsAdded addObject:item];
+    [[self undoManager] removeAllActions];
+    [item setOwner:nil];
     [document addPublication:item];
     
     if ([item hasEmptyOrDefaultCiteKey])
@@ -280,8 +282,6 @@
             [[BDSKFiler sharedFiler] filePapers:files fromDocument:document check:NO];
     }
     
-    [[self undoManager] removeAllActions];
-    [item setOwner:nil];
     [item release];
     
     item = newItem;
