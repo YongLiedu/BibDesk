@@ -45,6 +45,8 @@
 
 @interface BDSKSearchIndex (Private)
 
+- (NSSet *)allURLsInIndex;
+- (NSArray *)itemsToIndex:(NSArray *)items indexedURLs:(NSSet *)indexedURLs;
 - (void)buildIndexForItems:(NSArray *)items;
 - (void)indexFilesForItems:(NSArray *)items;
 - (void)indexFilesForItem:(id)anItem;
@@ -69,7 +71,6 @@
     self = [super init];
         
     if(nil != self){
-    
         CFMutableDataRef indexData = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
         index = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, NULL);
         CFRelease(indexData); // @@ doc bug: is this owned by the index now?  seems to be...
@@ -167,6 +168,128 @@
 
 @implementation BDSKSearchIndex (Private)
 
+- (NSSet *)allURLsInIndex
+{
+    NSMutableSet *allURLs = [NSMutableSet set];
+    SKIndexDocumentIteratorRef iterator = SKIndexDocumentIteratorCreate (index, NULL);
+    SKDocumentRef skDocument;
+    CFURLRef aURL;
+    
+    while (skDocument = SKIndexDocumentIteratorCopyNext(iterator)) {
+        if (aURL = SKDocumentCopyURL(skDocument)) {
+            [allURLs addObject:(NSURL *)aURL];
+            CFRelease(aURL);
+        }
+    }
+    return allURLs;
+}
+
+- (NSArray *)itemsToIndex:(NSArray *)items indexedURLs:(NSSet *)indexedURLs
+{
+    [items retain];
+    
+    NSMutableSet *URLsToRemove = [indexedURLs mutableCopy];
+    NSMutableArray *itemsToAdd = [NSMutableArray array];
+    
+    NSEnumerator *itemEnum = [items objectEnumerator];
+    id anItem = nil;
+    double totalObjectCount = [items count];
+    double numberIndexed = 0;
+    
+    // update the itemInfos with the items, find items to add and URLs to remove
+    OSMemoryBarrier();
+    while(flags.shouldKeepRunning == 1 && (anItem = [itemEnum nextObject])) {
+        
+        NSEnumerator *urlEnum = [[anItem valueForKey:@"urls"] objectEnumerator];
+        NSURL *url;
+        BOOL needsIndexing = NO;
+        
+        while (url = [urlEnum nextObject]) {
+            if ([indexedURLs containsObject:url]) {
+                [URLsToRemove removeObject:url];
+                @synchronized(itemInfos) {
+                    [itemInfos setObject:anItem forKey:url];
+                }
+            } else {
+                needsIndexing = YES;
+            }
+        }
+        
+        if (needsIndexing) {
+            [itemsToAdd addObject:anItem];
+        } else {
+            numberIndexed++;
+            @synchronized(self) {
+                progressValue = (numberIndexed / totalObjectCount) * 100;
+            }
+        }
+        OSMemoryBarrier();
+    }
+    
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1)
+        [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+        
+    // remove URLs we could not find in the database
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1 && [URLsToRemove count]) {
+        NSEnumerator *urlEnum = [URLsToRemove objectEnumerator];
+        NSURL *url;
+        SKDocumentRef skDocument;
+        volatile Boolean success;
+        
+        // loop through the array of URLs, create a new SKDocumentRef, and try to remove it
+        while (url = [urlEnum nextObject]) {
+            
+            skDocument = SKDocumentCreateWithURL((CFURLRef)url);
+            OBPOSTCONDITION(skDocument);
+            if(!skDocument) continue;
+            
+            success = SKIndexRemoveDocument(index, skDocument);
+            OBPOSTCONDITION(success);
+            
+            CFRelease(skDocument);
+        }
+    }
+    [URLsToRemove release];
+    
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1)
+        [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+    [items release];
+    
+    return itemsToAdd;
+}
+
+- (void)buildIndexForItems:(NSArray *)items
+{
+    NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
+    
+    OBPRECONDITION(items);
+    
+#if 0
+    // update cached index
+    NSSet *allURLs = [self allURLsInIndex];
+    
+    if ([allURLs count])
+        items = [self itemsToIndex:items indexedURLs:allURLs];
+#endif
+    
+    [items retain];
+    
+    // add items that were not yet indexed
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1 && [items count]) {
+        [self indexFilesForItems:items];
+    }
+    
+    [items release];
+    
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1)
+        [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
+}
+
 - (void)indexFilesForItems:(NSArray *)items
 {
     NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
@@ -208,20 +331,6 @@
     if (flags.shouldKeepRunning == 1)
         [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
     [pool release];
-}
-
-- (void)buildIndexForItems:(NSArray *)items
-{    
-    NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
-    
-    OBPRECONDITION(items);
-    [items retain];
-    [self indexFilesForItems:items];
-    [items release];
-    
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1)
-        [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
 }
 
 - (void)indexFilesForItem:(id)anItem
