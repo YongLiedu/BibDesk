@@ -2392,11 +2392,13 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
                 NSBezierPath *p = [NSBezierPath bezierPath];
                 [p moveToPoint:NSMakePoint(3, 3)];
                 [p lineToPoint:NSMakePoint(9, 9)];
-                [p stroke];
-                [p removeAllPoints];
                 [p moveToPoint:NSMakePoint(3, 9)];
                 [p lineToPoint:NSMakePoint(9, 3)];
+                [p setLineWidth:2.0];
+                [p setLineCapStyle:NSRoundLineCapStyle];
                 [p stroke];
+                [p setLineWidth:1.0];
+                [p setLineCapStyle:NSButtLineCapStyle];
             }
             else {
                 // stroke clip path for a subtle border; stroke is wide enough to display a thin line inside the clip region
