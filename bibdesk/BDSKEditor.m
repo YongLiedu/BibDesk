@@ -1086,14 +1086,15 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                          atIndex:++i];
                 [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
                 
-                item = [menu insertItemWithTitle:NSLocalizedString(@"Move To Trash",@"Menu item title")
-                                          action:@selector(trashLocalFile:)
+                item = [menu insertItemWithTitle:NSLocalizedString(@"Consolidate",@"Menu item title")
+                                          action:@selector(consolidateLinkedFiles:)
                                    keyEquivalent:@""
                                          atIndex:++i];
                 [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
                 
-                item = [menu insertItemWithTitle:NSLocalizedString(@"Consolidate",@"Menu item title")
-                                          action:@selector(consolidateLinkedFiles:)
+                i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
+                item = [menu insertItemWithTitle:NSLocalizedString(@"Move To Trash",@"Menu item title")
+                                          action:@selector(trashLocalFile:)
                                    keyEquivalent:@""
                                          atIndex:++i];
                 [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
