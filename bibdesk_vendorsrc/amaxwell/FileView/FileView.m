@@ -2360,6 +2360,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [anItem setTag:FVOpenMenuItemTag];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Reveal in Finder", @"FileView", bundle, @"context menu title") action:@selector(revealInFinder:) keyEquivalent:@""];
         [anItem setTag:FVRevealMenuItemTag];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Remove", @"FileView", bundle, @"context menu title") action:@selector(delete:) keyEquivalent:@""];
+        [anItem setTag:FVRemoveMenuItemTag];
         
         // Finder label submenu
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Set Finder Label", @"FileView", bundle, @"context menu title") action:NULL keyEquivalent:@""];

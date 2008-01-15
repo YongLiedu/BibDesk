@@ -68,7 +68,8 @@ enum {
     FVQuickLookMenuItemTag = 1003,
     FVOpenMenuItemTag = 1004,
     FVRevealMenuItemTag = 1005,
-    FVChangeLabelMenuItemTag = 1006
+    FVChangeLabelMenuItemTag = 1006,
+    FVRemoveMenuItemTag = 1007
 };
 
 @interface FileView : NSView 
