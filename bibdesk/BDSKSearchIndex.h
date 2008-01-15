@@ -57,6 +57,7 @@ typedef struct _BDSKSearchIndexFlags
 
 @interface BDSKSearchIndex : NSObject {
     SKIndexRef index;
+    CFMutableDataRef indexData;
     NSMutableDictionary *itemInfos;
     id delegate;
     
@@ -70,6 +71,7 @@ typedef struct _BDSKSearchIndexFlags
 
 // aDocument must respond to -publications; this should generally be called on the main thread
 - (id)initWithDocument:(id)aDocument;
+- (id)initWithDocument:(id)aDocument cacheURL:(NSURL *)cacheURL;
 
 // Warning:  it is /not/ safe to write to this SKIndexRef directly; use it only for reading.
 - (SKIndexRef)index;
@@ -82,6 +84,8 @@ typedef struct _BDSKSearchIndexFlags
 
 // Poll this for progress bar updates during indexing
 - (double)progressValue;
+
+- (BOOL)closeIndexAndCacheToURL:(NSURL *)cacheURL;
 
 @end
 

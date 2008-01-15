@@ -66,15 +66,33 @@
 
 - (id)initWithDocument:(id)aDocument
 {
+    return [self initWithDocument:aDocument cacheURL:nil];
+}
+
+- (id)initWithDocument:(id)aDocument cacheURL:(NSURL *)cacheURL
+{
     OBASSERT([NSThread inMainThread]);
 
     self = [super init];
         
     if(nil != self){
-        CFMutableDataRef indexData = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
-        index = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, NULL);
-        CFRelease(indexData); // @@ doc bug: is this owned by the index now?  seems to be...
-            
+        index = NULL;
+        if (cacheURL) {
+            indexData = (CFMutableDataRef)[[NSMutableData alloc] initWithContentsOfURL:cacheURL];
+            if (indexData != NULL) {
+                index = SKIndexOpenWithMutableData(indexData, NULL);
+                if (index == NULL) {
+                    CFRelease(indexData);
+                    indexData = NULL;
+                }
+            }
+        }
+        
+        if (index == NULL) {
+            indexData = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
+            index = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, NULL);
+        }
+        
         delegate = nil;
         
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
@@ -114,6 +132,7 @@
     [notificationQueue release];
     [itemInfos release];
     if(index) CFRelease(index);
+    if(indexData) CFRelease(indexData);
     [super dealloc];
 }
 
@@ -162,6 +181,18 @@
         theValue = progressValue;
     }
     return theValue;
+}
+
+- (BOOL)closeIndexAndCacheToURL:(NSURL *)cacheURL
+{
+    // I'm not sure if this is all safe
+    [self cancel];
+    while ([self isIndexing]);
+    if (index) {
+        SKIndexClose(index);
+        index = NULL;
+    }
+    return [(NSData *)indexData writeToURL:cacheURL atomically:YES];
 }
 
 @end
@@ -267,13 +298,11 @@
     
     OBPRECONDITION(items);
     
-#if 0
     // update cached index
     NSSet *allURLs = [self allURLsInIndex];
     
     if ([allURLs count])
         items = [self itemsToIndex:items indexedURLs:allURLs];
-#endif
     
     [items retain];
     
