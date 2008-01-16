@@ -424,13 +424,18 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
         OBPOSTCONDITION(skDocument);
         if(skDocument == NULL) continue;
         
+        NSData *signature = sha1SignatureForURL(url);
+        
         // SKIndexSetProperties is more generally useful, but is really slow when creating the index
         // SKIndexRenameDocument changes the URL, so it's not useful
         @synchronized(itemInfos) {
             [itemInfos setObject:anItem forKey:url];
         }
         @synchronized(signatures) {
-            [signatures setValue:sha1SignatureForURL(url) forKey:url];
+            if (signature)
+                [signatures setObject:signature forKey:url];
+            else
+                [signatures removeObjectForKey:url];
         }
         
         success = SKIndexAddDocument(index, skDocument, NULL, TRUE);
