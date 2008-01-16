@@ -264,10 +264,17 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         BOOL needsIndexing = NO;
         
         while (url = [urlEnum nextObject]) {
-            if ([indexedURLs containsObject:url] && [[self signatureForURL:url] isEqual:sha1SignatureForURL(url)]) {
-                [URLsToRemove removeObject:url];
-                @synchronized(itemInfos) {
-                    [itemInfos setObject:anItem forKey:url];
+            if ([indexedURLs containsObject:url]) {
+                if ([[self signatureForURL:url] isEqual:sha1SignatureForURL(url)]) {
+                    [URLsToRemove removeObject:url];
+                    @synchronized(itemInfos) {
+                        [itemInfos setObject:anItem forKey:url];
+                    }
+                } else {
+                    @synchronized(signatures) {
+                        [signatures removeObjectForKey:url];
+                    }
+                    needsIndexing = YES;
                 }
             } else {
                 needsIndexing = YES;
