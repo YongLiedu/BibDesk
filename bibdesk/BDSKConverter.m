@@ -137,33 +137,39 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     [self setDetexifyAccents:[wholeDict objectForKey:TEX_TO_ROMAN_ACCENTS_KEY]];
 }
 
+- (NSString *)copyComplexString:(BDSKComplexString *)cs byCopyingStringNodesUsingSelector:(SEL)copySelector {
+    NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
+    BDSKStringNode *node, *newNode;
+    NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:[[cs nodes] count]];
+    NSString *string;
+    
+    while(node = [nodeEnum nextObject]){
+        if([node type] == BSN_STRING){
+            string = [self performSelector:copySelector withObject:[node value]];
+            newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
+            [string release];
+        } else {
+            newNode = [node copy];
+        }
+        [nodes addObject:newNode];
+        [newNode release];
+    }
+    
+    string = [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
+    [nodes release];
+    return string;
+}
+
 - (NSString *)copyStringByTeXifyingString:(NSString *)s{
     
 	// TeXify only string nodes of complex strings;
 	if([s isComplex]){
-		BDSKComplexString *cs = (BDSKComplexString *)s;
-		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
-		BDSKStringNode *node, *newNode;
-		NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:[[cs nodes] count]];
-        NSString *string;
-		
-		while(node = [nodeEnum nextObject]){
-			if([node type] == BSN_STRING){
-				string = [self copyStringByTeXifyingString:[node value]];
-                if(string == nil) break;
-                newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
-                [string release];
-			} else {
-				newNode = [node copy];
-			}
-            [nodes addObject:newNode];
-			[newNode release];
-		}
-        
-        string = [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
-        [nodes release];
-		return string;
+        return [self copyComplexString:(BDSKComplexString *)s byCopyingStringNodesUsingSelector:_cmd];
 	}
+    
+    if([NSString isEmptyString:s]){
+        return [s retain];
+    }
 	
     // we expect to find composed accented characters, as this is also what we use in the CharacterConversion plist
     NSMutableString *precomposedString = [s mutableCopy];
@@ -264,31 +270,14 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 
 - (NSString *)copyStringByDeTeXifyingString:(NSString *)s{
 
+	// deTeXify only string nodes of complex strings;
+	if([s isComplex]){
+        return [self copyComplexString:(BDSKComplexString *)s byCopyingStringNodesUsingSelector:_cmd];
+	}
+    
     if([NSString isEmptyString:s]){
         return [s retain];
     }
-    
-	// deTeXify only string nodes of complex strings;
-	if([s isComplex]){
-		BDSKComplexString *cs = (BDSKComplexString *)s;
-		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
-		BDSKStringNode *node, *newNode;
-		NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:[[cs nodes] count]];
-		NSString *string;
-        
-		while(node = [nodeEnum nextObject]){
-			if([node type] == BSN_STRING){
-				string = [self copyStringByDeTeXifyingString:[node value]];
-				newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
-                [string release];
-			} else {
-				newNode = [node copy];
-			}
-            [nodes addObject:newNode];
-			[newNode release];
-		}
-		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
-	}
 	
     NSMutableString *tmpConv = nil;
     NSString *TEXString = nil;
@@ -328,8 +317,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
                 range = [convertedSoFar rangeOfString:@"{\\" options:0 range:NSMakeRange(replaceRange.location + 1, length - replaceRange.location - 1)];
             } else {
                 NSLog(@"missing brace in string %@", convertedSoFar);
-                [convertedSoFar release];
-                return nil;
+                range = NSMakeRange(NSNotFound, 0);
             }
             
         }
