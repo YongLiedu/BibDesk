@@ -1,5 +1,5 @@
 //
-//  BDSKSearchResult.h
+//  BDSKFileSearchResult.h
 //  Bibdesk
 //
 //  Created by Adam Maxwell on 10/12/05.
@@ -38,9 +38,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKSearchIndex, BDSKFile;
+@class BDSKFileSearchIndex, BDSKFile;
 
-@interface BDSKSearchResult : NSObject <NSCopying>
+@interface BDSKFileSearchResult : NSObject <NSCopying>
 {
     BDSKFile *file;
     // title of the search result (shown in table)
@@ -51,7 +51,7 @@
 }
 
 // This class is designed to be used in a hashing container (NSSet, NSDictionary) when you want the isEqual: and hash to be based on file comparison
-- (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
+- (id)initWithIndex:(BDSKFileSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
 
 // used by the table cell
 - (NSImage *)image;

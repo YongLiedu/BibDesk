@@ -37,7 +37,7 @@
  */
 
 #import "BDSKFileContentSearchController.h"
-#import "BDSKSearchIndex.h"
+#import "BDSKFileSearchIndex.h"
 #import "BDSKEdgeView.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKStatusBar.h"
@@ -48,8 +48,8 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKTextWithIconCell.h"
 #import "NSAttributedString_BDSKExtensions.h"
-#import "BDSKSearch.h"
-#import "BDSKSearchResult.h"
+#import "BDSKFileSearch.h"
+#import "BDSKFileSearchResult.h"
 #import "BDSKLevelIndicatorCell.h"
 #import "BibDocument_Search.h"
 #import "NSArray_BDSKExtensions.h"
@@ -73,8 +73,8 @@
     NSParameterAssert([aDocument conformsToProtocol:@protocol(BDSKSearchContentView)]);
     [self setDocument:aDocument];
     
-    searchIndex = [[BDSKSearchIndex alloc] initWithDocument:aDocument];
-    search = [[BDSKSearch alloc] initWithIndex:searchIndex delegate:self];
+    searchIndex = [[BDSKFileSearchIndex alloc] initWithDocument:aDocument];
+    search = [[BDSKFileSearch alloc] initWithIndex:searchIndex delegate:self];
     searchFieldDidEndEditing = NO;
     
     return self;
@@ -269,7 +269,7 @@
     } else {
         NSMutableArray *newFilteredResults = [NSMutableArray arrayWithCapacity:[results count]];
         NSEnumerator *resultEnum = [results objectEnumerator];
-        BDSKSearchResult *result;
+        BDSKFileSearchResult *result;
         
         while (result = [resultEnum nextObject])
             if ([filterURLs containsObject:[result identifierURL]])
@@ -325,7 +325,7 @@
     [sortDescriptors addObjectsFromArray:[NSUnarchiver unarchiveObjectWithData:data]];
     unsigned i = [sortDescriptors count];
     // see https://sourceforge.net/tracker/index.php?func=detail&aid=1837498&group_id=61487&atid=497423
-    // We changed BDSKSearchResult and started saving sort descriptors in EA at about the same time, so apparently a user ended up with a sort key of @"dictionary.string" in EA; this caused a bunch of ignored exceptions, and content search failed.  Another possibility (remote) is that the EA were corrupted somehow.  Anyway, check for the correct keys to avoid this in future.
+    // We changed BDSKFileSearchResult and started saving sort descriptors in EA at about the same time, so apparently a user ended up with a sort key of @"dictionary.string" in EA; this caused a bunch of ignored exceptions, and content search failed.  Another possibility (remote) is that the EA were corrupted somehow.  Anyway, check for the correct keys to avoid this in future.
     NSSet *keys = [NSSet setWithObjects:@"string", @"score", nil];
     while (i--) {
         NSSortDescriptor *sort = [sortDescriptors objectAtIndex:i];
@@ -357,7 +357,7 @@
 #pragma mark -
 #pragma mark SearchKit methods
 
-- (void)search:(BDSKSearch *)aSearch didUpdateWithResults:(NSArray *)anArray;
+- (void)search:(BDSKFileSearch *)aSearch didUpdateWithResults:(NSArray *)anArray;
 {
     if ([search isEqual:aSearch]) {
         
@@ -368,7 +368,7 @@
     }
 }
 
-- (void)search:(BDSKSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
+- (void)search:(BDSKFileSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
 {
     if ([search isEqual:aSearch]) {
         [stopButton setEnabled:NO];

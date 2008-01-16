@@ -1,5 +1,5 @@
 //
-//  BDSKSearchIndex.h
+//  BDSKFileSearchIndex.h
 //  Bibdesk
 //
 //  Created by Adam Maxwell on 10/11/05.
@@ -38,15 +38,15 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKSearchIndex, BDSKThreadSafeMutableArray;
+@class BDSKFileSearchIndex, BDSKThreadSafeMutableArray;
 
-@protocol BDSKSearchIndexDelegate <NSObject>
+@protocol BDSKFileSearchIndexDelegate <NSObject>
 
 // Sent on the main thread at periodic intervals to inform the delegate that new files have been added to the index, and that any searches in progress need to be updated.
-- (void)searchIndexDidUpdate:(BDSKSearchIndex *)index;
+- (void)searchIndexDidUpdate:(BDSKFileSearchIndex *)index;
 
 // Sent on the main thread after the initial indexing phase has finished.  This allows the delegate to update its search for the last time.
-- (void)searchIndexDidFinishInitialIndexing:(BDSKSearchIndex *)index;
+- (void)searchIndexDidFinishInitialIndexing:(BDSKFileSearchIndex *)index;
 @end
 
 typedef struct _BDSKSearchIndexFlags
@@ -55,7 +55,7 @@ typedef struct _BDSKSearchIndexFlags
     volatile int32_t isIndexing __attribute__ ((aligned (4)));  
 } BDSKSearchIndexFlags;
 
-@interface BDSKSearchIndex : NSObject {
+@interface BDSKFileSearchIndex : NSObject {
     SKIndexRef index;
     CFMutableDataRef indexData;
     NSMutableDictionary *itemInfos;
@@ -79,7 +79,7 @@ typedef struct _BDSKSearchIndexFlags
 // Required before disposing of the index.  After calling cancel, the index is no longer viable.
 - (void)cancel;
 - (BOOL)isIndexing;
-- (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject;
+- (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject;
 - (NSDictionary *)itemInfoForURL:(NSURL *)theURL;
 
 // Poll this for progress bar updates during indexing

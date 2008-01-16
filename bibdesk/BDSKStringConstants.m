@@ -307,7 +307,7 @@ NSString *BDSKSharingPasswordChangedNotification = @"BDSKSharingPasswordChangedN
 NSString *BDSKDocumentControllerAddDocumentNotification = @"BDSKDocumentControllerAddDocumentNotification";
 NSString *BDSKDocumentControllerRemoveDocumentNotification = @"BDSKDocumentControllerRemoveDocumentNotification";
 NSString *BDSKDocumentControllerDidChangeMainDocumentNotification = @"BDSKDocumentControllerDidChangeMainDocumentNotification";
-NSString *BDSKSearchIndexInfoChangedNotification = @"BDSKSearchIndexInfoChangedNotification";
+NSString *BDSKFileSearchIndexInfoChangedNotification = @"BDSKFileSearchIndexInfoChangedNotification";
 NSString *BDSKEncodingsListChangedNotification = @"BDSKEncodingsListChangedNotification";
 NSString *BDSKTemporaryFileMigrationNotification = @"BDSKTemporaryFileMigrationNotification";
 

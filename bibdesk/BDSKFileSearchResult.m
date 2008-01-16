@@ -1,5 +1,5 @@
 //
-//  BDSKSearchResult.m
+//  BDSKFileSearchResult.m
 //  Bibdesk
 //
 //  Created by Adam Maxwell on 10/12/05.
@@ -36,14 +36,14 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKSearchResult.h"
-#import "BDSKSearchIndex.h"
+#import "BDSKFileSearchResult.h"
+#import "BDSKFileSearchIndex.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKFile.h"
 
-@implementation BDSKSearchResult
+@implementation BDSKFileSearchResult
 
-- (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)theScore;
+- (id)initWithIndex:(BDSKFileSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)theScore;
 {
     
     NSParameterAssert(nil != anIndex);
@@ -83,7 +83,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    BDSKSearchResult *copy = [[[self class] allocWithZone:zone] init];
+    BDSKFileSearchResult *copy = [[[self class] allocWithZone:zone] init];
     copy->file = [file copy];
     copy->string = [string copy];
     copy->identifierURL = [identifierURL copy];
@@ -104,7 +104,7 @@
 
 - (BOOL)isEqual:(id)anObject
 {
-    return [anObject isKindOfClass:[self class]] ? [((BDSKSearchResult *)anObject)->file isEqual:file] : NO;
+    return [anObject isKindOfClass:[self class]] ? [((BDSKFileSearchResult *)anObject)->file isEqual:file] : NO;
 }
 
 - (NSImage *)image { return image; }

@@ -64,7 +64,7 @@ const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
 
 + (NSSet *)indexedFields;
 {
-    // file content is also indexed, but it's handled by a separate object (BDSKSearchIndex) and controller, since it's threaded
+    // file content is also indexed, but it's handled by a separate object (BDSKFileSearchIndex) and controller, since it's threaded
     static NSSet *indexedFields = nil;
     if (nil == indexedFields)
         indexedFields = [[NSSet alloc] initWithObjects:BDSKAllFieldsString, BDSKTitleString, BDSKPersonString, BDSKSkimNotesString, nil];

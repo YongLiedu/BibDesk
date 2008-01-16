@@ -430,8 +430,8 @@
 		F924FC310BC4322500672839 /* BDSKSearchButtonController.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FC2F0BC4322500672839 /* BDSKSearchButtonController.m */; };
 		F9252E2308F60D170045D563 /* BDSKFileContentSearchController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9252E2108F60D170045D563 /* BDSKFileContentSearchController.m */; };
 		F9252E2608F60D520045D563 /* BDSKFileContentSearch.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9252E2408F60D520045D563 /* BDSKFileContentSearch.nib */; };
-		F925332408FC9FB80045D563 /* BDSKSearchIndex.m in Sources */ = {isa = PBXBuildFile; fileRef = F925332208FC9FB80045D563 /* BDSKSearchIndex.m */; };
-		F925352A08FDFAE40045D563 /* BDSKSearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = F925352808FDFAE40045D563 /* BDSKSearchResult.m */; };
+		F925332408FC9FB80045D563 /* BDSKFileSearchIndex.m in Sources */ = {isa = PBXBuildFile; fileRef = F925332208FC9FB80045D563 /* BDSKFileSearchIndex.m */; };
+		F925352A08FDFAE40045D563 /* BDSKFileSearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = F925352808FDFAE40045D563 /* BDSKFileSearchResult.m */; };
 		F92B91C00BC6B51B008D5BC3 /* SearchButtonView.nib in Resources */ = {isa = PBXBuildFile; fileRef = F92B91BF0BC6B51B008D5BC3 /* SearchButtonView.nib */; };
 		F92BACCF0BCBFEE0008D5BC3 /* BDSKSkimReader.m in Sources */ = {isa = PBXBuildFile; fileRef = F92BACCD0BCBFEE0008D5BC3 /* BDSKSkimReader.m */; };
 		F92BACF50BCC0140008D5BC3 /* SkimNotesAgent in Resources */ = {isa = PBXBuildFile; fileRef = F92BACF20BCC00D2008D5BC3 /* SkimNotesAgent */; };
@@ -494,7 +494,7 @@
 		F9937E4E0AD826EB001D1DFB /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9B9E17E089479FC00C21B17 /* Quartz.framework */; };
 		F9937E6C0AD82700001D1DFB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9706DB909102DA800526FC8 /* QuartzCore.framework */; };
 		F99BC25F095A5C7000E018C3 /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */; };
-		F9A2245D0AE02C8E0046CA3D /* BDSKSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2245B0AE02C8E0046CA3D /* BDSKSearch.m */; };
+		F9A2245D0AE02C8E0046CA3D /* BDSKFileSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2245B0AE02C8E0046CA3D /* BDSKFileSearch.m */; };
 		F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */; };
 		F9A5B10C0B8CEA9600C52257 /* BDSKCenterScaledImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A5B10A0B8CEA9600C52257 /* BDSKCenterScaledImageCell.m */; };
 		F9A6742B07D04E8000782ACD /* BDSKFontManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A6742907D04E8000782ACD /* BDSKFontManager.m */; };
@@ -1460,10 +1460,10 @@
 		F9252E2008F60D170045D563 /* BDSKFileContentSearchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileContentSearchController.h; sourceTree = "<group>"; };
 		F9252E2108F60D170045D563 /* BDSKFileContentSearchController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileContentSearchController.m; sourceTree = "<group>"; };
 		F9252E2508F60D520045D563 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKFileContentSearch.nib; sourceTree = "<group>"; };
-		F925332108FC9FB80045D563 /* BDSKSearchIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchIndex.h; sourceTree = "<group>"; };
-		F925332208FC9FB80045D563 /* BDSKSearchIndex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchIndex.m; sourceTree = "<group>"; };
-		F925352708FDFAE40045D563 /* BDSKSearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchResult.h; sourceTree = "<group>"; };
-		F925352808FDFAE40045D563 /* BDSKSearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchResult.m; sourceTree = "<group>"; };
+		F925332108FC9FB80045D563 /* BDSKFileSearchIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileSearchIndex.h; sourceTree = "<group>"; };
+		F925332208FC9FB80045D563 /* BDSKFileSearchIndex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileSearchIndex.m; sourceTree = "<group>"; };
+		F925352708FDFAE40045D563 /* BDSKFileSearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileSearchResult.h; sourceTree = "<group>"; };
+		F925352808FDFAE40045D563 /* BDSKFileSearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileSearchResult.m; sourceTree = "<group>"; };
 		F92BACCC0BCBFEE0008D5BC3 /* BDSKSkimReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSkimReader.h; sourceTree = "<group>"; };
 		F92BACCD0BCBFEE0008D5BC3 /* BDSKSkimReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSkimReader.m; sourceTree = "<group>"; };
 		F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SkimNotesAgent.xcodeproj; path = SkimNotesAgent/SkimNotesAgent.xcodeproj; sourceTree = "<group>"; };
@@ -1568,8 +1568,8 @@
 		F994B8F607F5F65F00751DA1 /* RelNotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = RelNotes.rtf; sourceTree = "<group>"; };
 		F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSArray_BDSKExtensions.h; sourceTree = "<group>"; };
 		F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSArray_BDSKExtensions.m; sourceTree = "<group>"; };
-		F9A2245A0AE02C8E0046CA3D /* BDSKSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearch.h; sourceTree = "<group>"; };
-		F9A2245B0AE02C8E0046CA3D /* BDSKSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearch.m; sourceTree = "<group>"; };
+		F9A2245A0AE02C8E0046CA3D /* BDSKFileSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileSearch.h; sourceTree = "<group>"; };
+		F9A2245B0AE02C8E0046CA3D /* BDSKFileSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileSearch.m; sourceTree = "<group>"; };
 		F9A411EF0A0B1FEF008493C0 /* BDSKSpotlightView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSpotlightView.h; sourceTree = "<group>"; };
 		F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSpotlightView.m; sourceTree = "<group>"; };
 		F9A5B1090B8CEA9600C52257 /* BDSKCenterScaledImageCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCenterScaledImageCell.h; sourceTree = "<group>"; };
@@ -2200,7 +2200,7 @@
 				CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */,
 				CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */,
 				F94DB0F70B3E2FA1006F37A2 /* BDSKSearchGroup.m */,
-				F925332208FC9FB80045D563 /* BDSKSearchIndex.m */,
+				F925332208FC9FB80045D563 /* BDSKFileSearchIndex.m */,
 				CE9666440B46B70C003BAB9A /* BDSKServerInfo.m */,
 				F92EF32109E6242100A244D0 /* BDSKSharedGroup.m */,
 				CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */,
@@ -2218,7 +2218,7 @@
 				F9022C60075802E300C3F701 /* BibAuthor.m */,
 				F9022C6E075802E300C3F701 /* BibItem.m */,
 				F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */,
-				F925352808FDFAE40045D563 /* BDSKSearchResult.m */,
+				F925352808FDFAE40045D563 /* BDSKFileSearchResult.m */,
 				F9B8019D0B41E91F00A5A615 /* BDSKZoomGroupServer.m */,
 				F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */,
 				F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */,
@@ -2255,7 +2255,7 @@
 				CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */,
 				F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */,
 				CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */,
-				F9A2245B0AE02C8E0046CA3D /* BDSKSearch.m */,
+				F9A2245B0AE02C8E0046CA3D /* BDSKFileSearch.m */,
 				CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */,
 				F92ED7CB09E0A93400A244D0 /* BDSKSharingServer.m */,
 				F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */,
@@ -2569,14 +2569,14 @@
 				CEF7A6660915115B00BE9E02 /* BDSKScriptMenu.h */,
 				F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */,
 				F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */,
-				F9A2245A0AE02C8E0046CA3D /* BDSKSearch.h */,
+				F9A2245A0AE02C8E0046CA3D /* BDSKFileSearch.h */,
 				F94DB0F60B3E2FA1006F37A2 /* BDSKSearchGroup.h */,
 				CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */,
 				F924FC2E0BC4322500672839 /* BDSKSearchButtonController.h */,
 				F920DAFC075C2B69000C5FCA /* BDSKSearchForCommand.h */,
 				CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */,
-				F925332108FC9FB80045D563 /* BDSKSearchIndex.h */,
-				F925352708FDFAE40045D563 /* BDSKSearchResult.h */,
+				F925332108FC9FB80045D563 /* BDSKFileSearchIndex.h */,
+				F925352708FDFAE40045D563 /* BDSKFileSearchResult.h */,
 				CE9666430B46B70C003BAB9A /* BDSKServerInfo.h */,
 				F92EF32009E6242100A244D0 /* BDSKSharedGroup.h */,
 				CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */,
@@ -3687,8 +3687,8 @@
 				F9484D8E08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m in Sources */,
 				F9484D9008D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m in Sources */,
 				F9252E2308F60D170045D563 /* BDSKFileContentSearchController.m in Sources */,
-				F925332408FC9FB80045D563 /* BDSKSearchIndex.m in Sources */,
-				F925352A08FDFAE40045D563 /* BDSKSearchResult.m in Sources */,
+				F925332408FC9FB80045D563 /* BDSKFileSearchIndex.m in Sources */,
+				F925352A08FDFAE40045D563 /* BDSKFileSearchResult.m in Sources */,
 				CED65AB70906BCC6003EED90 /* BDSKScriptHook.m in Sources */,
 				CED65AB90906BCC6003EED90 /* BDSKScriptHookManager.m in Sources */,
 				CED65AC00906BE1F003EED90 /* BibPref_ScriptHooks.m in Sources */,
@@ -3787,7 +3787,7 @@
 				CE95AF180ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m in Sources */,
 				CE7596000ADDB0E1009C1329 /* BDSKContainerView.m in Sources */,
 				F9EA8FCB0ADE01F9005EFBE4 /* BDSKUpdateChecker.m in Sources */,
-				F9A2245D0AE02C8E0046CA3D /* BDSKSearch.m in Sources */,
+				F9A2245D0AE02C8E0046CA3D /* BDSKFileSearch.m in Sources */,
 				CE5C29CE0AE14FEC00C3E6B5 /* BibDocument_Actions.m in Sources */,
 				F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */,
 				F9F5ECD20AE5E7C8007EBB31 /* BDSKURLGroup.m in Sources */,

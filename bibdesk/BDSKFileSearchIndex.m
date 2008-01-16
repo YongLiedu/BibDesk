@@ -1,5 +1,5 @@
 //
-//  BDSKSearchIndex.m
+//  BDSKFileSearchIndex.m
 //  Bibdesk
 //
 //  Created by Adam Maxwell on 10/11/05.
@@ -36,14 +36,14 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKSearchIndex.h"
+#import "BDSKFileSearchIndex.h"
 #import "BibDocument.h"
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKThreadSafeMutableArray.h"
 #import "NSObject_BDSKExtensions.h"
 
-@interface BDSKSearchIndex (Private)
+@interface BDSKFileSearchIndex (Private)
 
 - (NSSet *)allURLsInIndex;
 - (NSArray *)itemsToIndex:(NSArray *)items indexedURLs:(NSSet *)indexedURLs;
@@ -59,7 +59,7 @@
 
 @end
 
-@implementation BDSKSearchIndex
+@implementation BDSKFileSearchIndex
 
 #define INDEX_STARTUP 1
 #define INDEX_STARTUP_COMPLETE 2
@@ -97,7 +97,7 @@
         
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         SEL handler = @selector(processNotification:);
-        [nc addObserver:self selector:handler name:BDSKSearchIndexInfoChangedNotification object:aDocument];
+        [nc addObserver:self selector:handler name:BDSKFileSearchIndexInfoChangedNotification object:aDocument];
         [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:aDocument];
         [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:aDocument];
         
@@ -157,10 +157,10 @@
     return flags.isIndexing == 1;
 }
 
-- (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject
+- (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject
 {
     if(anObject)
-        NSAssert1([(id)anObject conformsToProtocol:@protocol(BDSKSearchIndexDelegate)], @"%@ does not conform to BDSKSearchIndexDelegate protocol", [anObject class]);
+        NSAssert1([(id)anObject conformsToProtocol:@protocol(BDSKFileSearchIndexDelegate)], @"%@ does not conform to BDSKFileSearchIndexDelegate protocol", [anObject class]);
 
     delegate = anObject;
 }
@@ -197,7 +197,7 @@
 
 @end
 
-@implementation BDSKSearchIndex (Private)
+@implementation BDSKFileSearchIndex (Private)
 
 - (NSSet *)allURLsInIndex
 {
@@ -540,7 +540,7 @@
         NSString *name = [note name];
         [notificationQueue removeObjectAtIndex:0];
         // this is a background thread that can handle these notifications
-        if([name isEqualToString:BDSKSearchIndexInfoChangedNotification])
+        if([name isEqualToString:BDSKFileSearchIndexInfoChangedNotification])
             [self handleSearchIndexInfoChangedNotification:note];
         else if([name isEqualToString:BDSKDocAddItemNotification])
             [self handleDocAddItemNotification:note];

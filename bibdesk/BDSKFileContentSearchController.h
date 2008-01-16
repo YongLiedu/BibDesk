@@ -38,9 +38,9 @@
 
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSearch.h"
+#import "BDSKFileSearch.h"
 
-@class BDSKSearchIndex, BDSKCollapsibleView, BDSKEdgeView;
+@class BDSKFileSearchIndex, BDSKCollapsibleView, BDSKEdgeView;
 
 @interface BDSKSelectionPreservingArrayController : NSArrayController
 @end
@@ -50,8 +50,8 @@
     NSMutableArray *results;
     NSMutableArray *filteredResults;
     NSMutableSet *filterURLs;
-    BDSKSearch *search;
-    BDSKSearchIndex *searchIndex;
+    BDSKFileSearch *search;
+    BDSKFileSearchIndex *searchIndex;
     
     IBOutlet BDSKSelectionPreservingArrayController *resultsArrayController;
     IBOutlet NSTableView *tableView;

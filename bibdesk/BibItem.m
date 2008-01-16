@@ -3483,7 +3483,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     // Updates the document's file content search index, which depends on the title
     if([owner isDocument] && ([key isEqualToString:BDSKLocalFileString] || [key isEqualToString:BDSKTitleString] || allFieldsChanged)){
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchIndexInfoChangedNotification
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFileSearchIndexInfoChangedNotification
                                                             object:(BibDocument *)owner
                                                           userInfo:[self searchIndexInfo]];
     }

@@ -1,5 +1,5 @@
 //
-//  BDSKSearch.m
+//  BDSKFileSearch.m
 //  Bibdesk
 //
 //  Created by Adam Maxwell on 10/13/06.
@@ -36,10 +36,10 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKSearch.h"
+#import "BDSKFileSearch.h"
 #import "NSImage_BDSKExtensions.h"
-#import "BDSKSearchResult.h"
-#import "BDSKSearchIndex.h"
+#import "BDSKFileSearchResult.h"
+#import "BDSKFileSearchIndex.h"
 
 // Wrapper around a buffers to clean up the interface and avoid malloc/free every time
 // a search is performed.
@@ -65,7 +65,7 @@
 
 @end
 
-@interface BDSKSearch (Private)
+@interface BDSKFileSearch (Private)
 
 - (void)setSearchString:(NSString *)aString;
 - (void)setOptions:(SKSearchOptions)opts;
@@ -75,9 +75,9 @@
 
 @end
 
-@implementation BDSKSearch
+@implementation BDSKFileSearch
 
-- (id)initWithIndex:(BDSKSearchIndex *)anIndex delegate:(id <BDSKSearchDelegate>)aDelegate;
+- (id)initWithIndex:(BDSKFileSearchIndex *)anIndex delegate:(id <BDSKSearchDelegate>)aDelegate;
 {
     NSParameterAssert(nil != anIndex);
     if ((self = [super init])) {
@@ -119,7 +119,7 @@
         [[self delegate] search:self didFinishWithResults:[searchResults allObjects]];
 }
 
-- (void)searchIndexDidUpdate:(BDSKSearchIndex *)anIndex;
+- (void)searchIndexDidUpdate:(BDSKFileSearchIndex *)anIndex;
 {
     if ([anIndex isEqual:searchIndex]) {
         
@@ -133,7 +133,7 @@
     }
 }
 
-- (void)searchIndexDidFinishInitialIndexing:(BDSKSearchIndex *)anIndex;
+- (void)searchIndexDidFinishInitialIndexing:(BDSKFileSearchIndex *)anIndex;
 {
     if ([anIndex isEqual:searchIndex]) {
         [self searchIndexDidUpdate:anIndex];
@@ -152,7 +152,7 @@
 @end
 
 
-@implementation BDSKSearch (Private)
+@implementation BDSKFileSearch (Private)
 
 - (void)setSearch:(SKSearchRef)aSearch;
 {
@@ -168,7 +168,7 @@
 - (void)updateSearchResults;
 {    
     SKIndexRef skIndex = [searchIndex index];
-    NSAssert(NULL != skIndex, @"-[BDSKSearchIndex index] returned NULL");
+    NSAssert(NULL != skIndex, @"-[BDSKFileSearchIndex index] returned NULL");
     
     if (SKIndexFlush(skIndex) ==  FALSE) {
         NSLog(@"failed to flush index %@", searchIndex);
@@ -210,7 +210,7 @@
         SKDocumentRef *skDocuments = [data documentRefBuffer];
         SKIndexCopyDocumentRefsForDocumentIDs(skIndex, actualCount, documentIDs, skDocuments);
         
-        BDSKSearchResult *searchResult;
+        BDSKFileSearchResult *searchResult;
         SKDocumentRef skDocument;
         
         double maxValue = 0.0;
@@ -223,7 +223,7 @@
             // these scores are arbitrarily scaled, so we'll keep track of the search kit's max/min values
             maxValue = MAX(score, maxValue);
             
-            searchResult = [[BDSKSearchResult alloc] initWithIndex:searchIndex documentRef:skDocument score:score];            
+            searchResult = [[BDSKFileSearchResult alloc] initWithIndex:searchIndex documentRef:skDocument score:score];            
             [searchResults addObject:searchResult];            
             [searchResult release];
             
@@ -239,7 +239,7 @@
 - (void)normalizeScoresWithMaximumValue:(double)maxValue;
 {
     NSEnumerator *resultEnumerator = [searchResults objectEnumerator];
-    BDSKSearchResult *result;
+    BDSKFileSearchResult *result;
     
     while (result = [resultEnumerator nextObject]) {
         double score = [result score];
