@@ -239,7 +239,7 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
     CFRelease(iterator);
     
     if (isLeaf && inParentDocument && (aURL = SKDocumentCopyURL(inParentDocument))) {
-        CFSetAddObject(indexedURLs, aURL);
+        CFSetAddValue(indexedURLs, aURL);
         CFRelease(aURL);
     }
 }
