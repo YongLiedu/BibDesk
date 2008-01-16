@@ -45,8 +45,7 @@
 
 @interface BDSKFileSearchIndex (Private)
 
-- (NSSet *)allURLsInIndex;
-- (NSArray *)itemsToIndex:(NSArray *)items indexedURLs:(NSSet *)indexedURLs;
+- (NSArray *)itemsToIndex:(NSArray *)items;
 - (void)buildIndexForItems:(NSArray *)items;
 - (void)indexFilesForItems:(NSArray *)items;
 - (void)indexFilesForItem:(id)anItem;
@@ -225,32 +224,39 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 
 @end
 
-@implementation BDSKFileSearchIndex (Private)
 
-- (NSSet *)allURLsInIndex
-{
-    NSMutableSet *allURLs = [NSMutableSet set];
-    SKIndexDocumentIteratorRef iterator = SKIndexDocumentIteratorCreate (index, NULL);
+static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDocument, CFMutableSetRef indexedURLs) {
+    SKIndexDocumentIteratorRef iterator = SKIndexDocumentIteratorCreate (anIndex, inParentDocument);
     SKDocumentRef skDocument;
     CFURLRef aURL;
+    Boolean isLeaf = true;
     
-    // check for NULL iterator?
-    
-    // this only returns file://localhost/Volumes so we need to create an iterator from each document returned and iterate recursively through the entire index tree
     while (skDocument = SKIndexDocumentIteratorCopyNext(iterator)) {
+        isLeaf = false;
         if (aURL = SKDocumentCopyURL(skDocument)) {
-            [allURLs addObject:(NSURL *)aURL];
+            addLeafURLsInIndexToSet(anIndex, skDocument, indexedURLs);
             CFRelease(aURL);
         }
         CFRelease(skDocument);
     }
     CFRelease(iterator);
-    return allURLs;
+    
+    if (isLeaf)
+        CFSetAddObject(indexedURLs, aURL);
 }
 
-- (NSArray *)itemsToIndex:(NSArray *)items indexedURLs:(NSSet *)indexedURLs
+@implementation BDSKFileSearchIndex (Private)
+
+- (NSArray *)itemsToIndex:(NSArray *)items
 {
     [items retain];
+    
+    NSMutableSet *indexedURLs = [NSMutableSet set];
+    
+    addLeafURLsInIndexToSet(index, NULL, (CFMutableSetRef)indexedURLs);
+    
+    if ([indexedURLs count] == 0)
+        return [items autorelease];
     
     NSMutableSet *URLsToRemove = [indexedURLs mutableCopy];
     NSMutableArray *itemsToAdd = [NSMutableArray array];
@@ -338,11 +344,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     OBPRECONDITION(items);
     
-    // update cached index
-    NSSet *allURLs = [self allURLsInIndex];
-    
-    if ([allURLs count])
-        items = [self itemsToIndex:items indexedURLs:allURLs];
+    items = [self itemsToIndex:items];
     
     [items retain];
     
