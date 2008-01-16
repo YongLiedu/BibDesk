@@ -42,6 +42,7 @@
 @implementation FVFinderLabel
 
 static CFMutableDictionaryRef __layers = NULL;
+static NSArray *__labelNames = nil;
 
 static Boolean intEqual(const void *v1, const void *v2) { return v1 == v2; }
 static CFStringRef intDesc(const void *value) { return (CFStringRef)[[NSString alloc] initWithFormat:@"%ld", (long)value]; }
@@ -52,6 +53,45 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     if (NULL == __layers) {
         const CFDictionaryKeyCallBacks integerKeyCallBacks = { 0, NULL, NULL, intDesc, intEqual, intHash };
         __layers = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &integerKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    }
+   if (nil == __labelNames) {
+        NSBundle *bundle = [NSBundle bundleForClass:self];
+        NSDictionary *labelPrefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"com.apple.Labels.plist"];
+        NSMutableArray *names = [NSMutableArray arrayWithCapacity:8];
+        NSString *name;
+        name = [labelPrefs objectForKey:@"Label_Name_0"];
+        if (name == nil)
+            name = NSLocalizedStringFromTableInBundle(@"None", @"FileView", bundle, @"Finder label color");
+        [names addObject:name];
+        name = [labelPrefs objectForKey:@"Label_Name_1"];
+        if (name == nil)
+            name = NSLocalizedStringFromTableInBundle(@"Gray", @"FileView", bundle, @"Finder label color");
+        [names addObject:name];
+        name = [labelPrefs objectForKey:@"Label_Name_2"];
+        if (name == nil)
+            name = NSLocalizedStringFromTableInBundle(@"Green", @"FileView", bundle, @"Finder label color");
+        [names addObject:name];
+        name = [labelPrefs objectForKey:@"Label_Name_3"];
+        if (name == nil)
+            name = NSLocalizedStringFromTableInBundle(@"Purple", @"FileView", bundle, @"Finder label color");
+        [names addObject:name];
+        name = [labelPrefs objectForKey:@"Label_Name_4"];
+        if (name == nil)
+            name = NSLocalizedStringFromTableInBundle(@"Blue", @"FileView", bundle, @"Finder label color");
+        [names addObject:name];
+        name = [labelPrefs objectForKey:@"Label_Name_5"];
+        if (name == nil)
+            name = NSLocalizedStringFromTableInBundle(@"Yellow", @"FileView", bundle, @"Finder label color");
+        [names addObject:name];
+        name = [labelPrefs objectForKey:@"Label_Name_6"];
+        if (name == nil)
+            name = NSLocalizedStringFromTableInBundle(@"Red", @"FileView", bundle, @"Finder label color");
+        [names addObject:name];
+        name = [labelPrefs objectForKey:@"Label_Name_7"];
+        if (name == nil)
+            name = NSLocalizedStringFromTableInBundle(@"Orange", @"FileView", bundle, @"Finder label color");
+        [names addObject:name];
+        __labelNames = [names copy];
     }
 }
 
@@ -165,42 +205,7 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
 
 + (NSString *)localizedNameForLabel:(NSInteger)label
 {
-    NSString *name = nil;
-    NSBundle *bundle = [NSBundle bundleForClass:[FVFinderLabel self]];
-    switch (label) {
-        case 1:
-            // gray
-            name = NSLocalizedStringFromTableInBundle(@"Gray", @"FileView", bundle, @"Finder label color");
-            break;
-        case 3:
-            // purple
-            name = NSLocalizedStringFromTableInBundle(@"Purple", @"FileView", bundle, @"Finder label color"); 
-            break;
-        case 4:
-            // blue
-            name = NSLocalizedStringFromTableInBundle(@"Blue", @"FileView", bundle, @"Finder label color");
-            break;
-        case 2:
-            // green
-            name = NSLocalizedStringFromTableInBundle(@"Green", @"FileView", bundle, @"Finder label color");
-            break;
-        case 5:
-            // yellow
-            name = NSLocalizedStringFromTableInBundle(@"Yellow", @"FileView", bundle, @"Finder label color");
-            break;
-        case 7:
-            // orange
-            name = NSLocalizedStringFromTableInBundle(@"Orange", @"FileView", bundle, @"Finder label color");
-            break;
-        case 6:
-            // red
-            name = NSLocalizedStringFromTableInBundle(@"Red", @"FileView", bundle, @"Finder label color");
-            break;
-        default:
-            name = NSLocalizedStringFromTableInBundle(@"None", @"FileView", bundle, @"Finder label color");
-            break;
-    }
-    return name;
+    return [__labelNames objectAtIndex:label];
 }
 
 + (void)_drawLabel:(NSUInteger)label inRect:(NSRect)rect ofContext:(CGContextRef)context;
