@@ -73,7 +73,15 @@
     NSParameterAssert([aDocument conformsToProtocol:@protocol(BDSKSearchContentView)]);
     [self setDocument:aDocument];
     
-    searchIndex = [[BDSKFileSearchIndex alloc] initWithDocument:aDocument];
+    // @@ temporary: this is just a temporary setup for testing search index caching
+    NSString *cachePath = nil;
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldCacheFileSearchIndexKey"]) {
+        cachePath = [[[[self document] fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:cachePath] == NO)
+            cachePath = nil;
+    }
+    
+    searchIndex = [[BDSKFileSearchIndex alloc] initWithDocument:aDocument cacheURL:[NSURL fileURLWithPath:cachePath]];
     search = [[BDSKFileSearch alloc] initWithIndex:searchIndex delegate:self];
     searchFieldDidEndEditing = NO;
     
@@ -406,8 +414,16 @@
     // extra safety here; make sure the index stops messaging the search object now
     [searchIndex setDelegate:nil];
     
+    // @@ temporary: this is just a temporary setup for testing search index caching
+    NSString *cachePath = nil;
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldCacheFileSearchIndexKey"])
+        cachePath = [[[[self document] fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
+    
     // stops the search index runloop so it will release the document
-    [searchIndex cancel];
+    if (cachePath)
+        [searchIndex closeIndexAndCacheToURL:[NSURL fileURLWithPath:cachePath]];
+    else
+        [searchIndex cancel];
     [searchIndex release];
     searchIndex = nil;
 }
