@@ -89,15 +89,16 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         index = NULL;
         
         if (cacheURL) {
-            NSDictionary *cacheDict = [NSUnarchiver unarchiveObjectWithFile:[cacheURL path]];
+            NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:[cacheURL path]];
             indexData = (CFMutableDataRef)[[cacheDict objectForKey:@"indexData"] mutableCopy];
             if (indexData != NULL) {
                 index = SKIndexOpenWithMutableData(indexData, NULL);
-                if (index == NULL) {
+                if (index) {
+                    [signatures setDictionary:[cacheDict objectForKey:@"signatures"]];
+                } else {
                     CFRelease(indexData);
                     indexData = NULL;
                 }
-                [signatures setDictionary:[cacheDict objectForKey:@"signatures"]];
             }
         }
         
@@ -218,9 +219,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     NSDictionary *cacheDict = nil;
     @synchronized(signatures) {
         cacheDict = [NSDictionary dictionaryWithObjectsAndKeys:[[(NSData *)indexData copy] autorelease], @"indexData", [[signatures copy] autorelease], @"signatures", nil];
-        
     }
-    return [NSArchiver archiveRootObject:cacheDict toFile:[cacheURL path]];
+    return [NSKeyedArchiver archiveRootObject:cacheDict toFile:[cacheURL path]];
 }
 
 @end
