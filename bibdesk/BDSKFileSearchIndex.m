@@ -238,7 +238,7 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
     }
     CFRelease(iterator);
     
-    if (isLeaf && inParentDocument && (aURL = SKDocumentCopyURL(inParentDocument))) {
+    if (isLeaf && inParentDocument && kSKDocumentStateNotIndexed != SKIndexGetDocumentState(anIndex, inParentDocument) && (aURL = SKDocumentCopyURL(inParentDocument))) {
         CFSetAddValue(indexedURLs, aURL);
         CFRelease(aURL);
     }
@@ -430,7 +430,7 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
             [itemInfos setObject:anItem forKey:url];
         }
         @synchronized(signatures) {
-            [signatures setObject:sha1SignatureForURL(url) forKey:url];
+            [signatures setValue:sha1SignatureForURL(url) forKey:url];
         }
         
         success = SKIndexAddDocument(index, skDocument, NULL, TRUE);
