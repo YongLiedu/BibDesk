@@ -356,19 +356,14 @@ static void fixLegacyTableColumnIdentifiers()
 static BOOL fileIsInTrash(NSURL *fileURL)
 {
     NSCParameterAssert([fileURL isFileURL]);    
-    FSRef parentRef;
-    if (CFURLGetFSRef((CFURLRef)[fileURL URLByDeletingLastPathComponent], &parentRef)) {
-        OSStatus err;
-        FSRef fsRef;
-        err = FSFindFolder(kUserDomain, kTrashFolderType, TRUE, &fsRef);
-        if (noErr == err && noErr == FSCompareFSRefs(&fsRef, &parentRef))
-            return YES;
-        
-        err = FSFindFolder(kOnAppropriateDisk, kSystemTrashFolderType, TRUE, &fsRef);
-        if (noErr == err && noErr == FSCompareFSRefs(&fsRef, &parentRef))
-            return YES;
+    FSRef fileRef;
+    Boolean result = false;
+    if (CFURLGetFSRef((CFURLRef)fileURL, &fileRef)) {
+        FSDetermineIfRefIsEnclosedByFolder(0, kTrashFolderType, &fileRef, &result);
+        if (result == false)
+            FSDetermineIfRefIsEnclosedByFolder(0, kSystemTrashFolderType, &fileRef, &result);
     }
-    return NO;
+    return result;
 }
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
