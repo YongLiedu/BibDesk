@@ -56,7 +56,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     }
    if (nil == __labelNames) {
         NSBundle *bundle = [NSBundle bundleForClass:self];
-        NSDictionary *labelPrefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"com.apple.Labels.plist"];
+        NSDictionary *labelPrefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"com.apple.Labels"];
         NSMutableArray *names = [NSMutableArray arrayWithCapacity:8];
         NSString *name;
         name = [labelPrefs objectForKey:@"Label_Name_0"];
