@@ -45,7 +45,6 @@
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 
-static NSLayoutManager *layoutManager = nil;
 static CFMutableDictionaryRef integerStringDictionary = NULL;
 
 // names of these globals were changed to support key-value coding on BDSKGroup
@@ -62,9 +61,6 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 + (void)initialize;
 {
     OBINITIALIZE;
-    
-    layoutManager = [[NSLayoutManager alloc] init];
-    [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
     
     if (NULL == integerStringDictionary) {
         integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &OFIntegerDictionaryKeyCallbacks, &kCFTypeDictionaryValueCallBacks);
@@ -179,74 +175,72 @@ static NSString *stringWithInteger(int count)
 #define BORDER_BETWEEN_EDGE_AND_COUNT (2.0)
 #define BORDER_BETWEEN_COUNT_AND_TEXT (1.0)
 
-#define _calculateDrawingRectsAndSizes \
-NSRect ignored, imageRect, textRect, countRect; \
-\
-NSSize imageSize = NSMakeSize(NSHeight(aRect) + 1, NSHeight(aRect) + 1); \
-NSSize countSize = NSZeroSize; \
-BOOL failedDownload = [[self objectValue] failedDownload]; \
-BOOL isRetrieving = [[self objectValue] isRetrieving]; \
-BOOL controlViewIsFlipped = [controlView isFlipped]; \
-\
-float countSep = 0.0; \
-if(failedDownload || isRetrieving) { \
-    countSize = NSMakeSize(16, 16); \
-    countSep = 1.0; \
-} \
-else if([[self objectValue] count] > 0) { \
-    countSize = [countString size]; \
-    countSep = 0.5f * countSize.height - 0.5; \
-} \
-\
-/* set up the border around the image */ \
-NSDivideRect(aRect, &ignored, &aRect, BORDER_BETWEEN_EDGE_AND_IMAGE, NSMinXEdge); \
-NSDivideRect(aRect, &imageRect, &textRect, imageSize.width, NSMinXEdge); \
-NSDivideRect(textRect, &ignored, &textRect, BORDER_BETWEEN_IMAGE_AND_TEXT, NSMinXEdge); \
-if (countSize.width > 0) { \
-    /* set up the border around the count string */ \
-    NSDivideRect(textRect, &ignored, &textRect, BORDER_BETWEEN_EDGE_AND_COUNT + countSep, NSMaxXEdge); \
-    NSDivideRect(textRect, &countRect, &textRect, countSize.width, NSMaxXEdge); \
-    NSDivideRect(textRect, &ignored, &textRect, BORDER_BETWEEN_COUNT_AND_TEXT + countSep, NSMaxXEdge); \
-} \
-\
-/* this is the main difference from OATextWithIconCell, which ends up with a really weird text baseline for tall cells */\
-float vOffset = 0.5f * (NSHeight(aRect) - [layoutManager defaultLineHeightForFont:[self font]]); \
-\
-if (controlViewIsFlipped == NO) \
-textRect.origin.y -= floorf(vOffset); \
-else \
-textRect.origin.y += floorf(vOffset); \
+- (NSSize)iconSizeForBounds:(NSRect)aRect;
+{
+    return NSMakeSize(NSHeight(aRect) + 1, NSHeight(aRect) + 1);
+}
+
+- (NSRect)iconRectForBounds:(NSRect)aRect;
+{
+    NSSize imageSize = [self iconSizeForBounds:aRect];
+    NSRect imageRect, ignored;
+    NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE + SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
+    NSDivideRect(imageRect, &imageRect, &ignored, imageSize.width, NSMinXEdge);
+    return imageRect;
+}
+
+// compute the oval padding based on the overall height of the cell
+- (float)countPaddingForCellSize:(NSSize)aSize;
+{
+    return ([[self objectValue] failedDownload] || [[self objectValue] isRetrieving]) ? 1.0 : 0.5 * aSize.height + 0.5;
+}
+
+- (NSRect)countRectForBounds:(NSRect)aRect;
+{
+    NSSize countSize = NSZeroSize;
+    
+    float countSep = [self countPaddingForCellSize:aRect.size];
+    if([[self objectValue] failedDownload] || [[self objectValue] isRetrieving]) {
+        countSize = NSMakeSize(16, 16);
+    }
+    else if([[self objectValue] count] > 0) {
+        countSize = [countString boundingRectWithSize:aRect.size options:0].size;
+    }
+    NSRect countRect, ignored;
+    // set countRect origin to the string drawing origin (number has countSep on either side for oval padding)
+    NSDivideRect(aRect, &countRect, &ignored, countSize.width + countSep + BORDER_BETWEEN_EDGE_AND_COUNT + SIZE_OF_TEXT_FIELD_BORDER, NSMaxXEdge);
+    // now set the size of it to the string size
+    countRect.size = countSize;
+    return countRect;
+}    
+
+- (NSRect)textRectForBounds:(NSRect)aRect;
+{
+    NSRect textRect, ignored;
+    float countSep = [self countPaddingForCellSize:aRect.size];
+    // get rid of the icon region and padding
+    NSDivideRect(aRect, &ignored, &textRect, SIZE_OF_TEXT_FIELD_BORDER + BORDER_BETWEEN_EDGE_AND_IMAGE + NSWidth([self iconRectForBounds:aRect]), NSMinXEdge);
+    // use countRect origin to take care of some padding calculations
+    NSDivideRect(textRect, &ignored, &textRect, NSWidth(aRect) - NSMinX([self countRectForBounds:aRect]) + countSep + BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
+    return textRect;
+}
 
 - (NSSize)cellSize;
 {
     NSSize cellSize = [super cellSize];
     NSSize countSize = NSZeroSize;
-    float countSep = 0.0;
+    float countSep = [self countPaddingForCellSize:cellSize];
     if ([[self objectValue] isRetrieving] || [[self objectValue] failedDownload]) {
         countSize = NSMakeSize(16, 16);
-        countSep = 1.0;
     }
     else if ([[self objectValue] count] > 0) {
-        countSize = [countString size];
-        countSep = 0.5 * countSize.height - 0.5;
+        countSize = [countString boundingRectWithSize:cellSize options:0].size;
     }
     float countWidth = countSize.width + 2 * countSep + 2 * BORDER_BETWEEN_EDGE_AND_COUNT;
     // cellSize.height approximates the icon size
     cellSize.width += cellSize.height + countWidth;
     cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT + BORDER_BETWEEN_COUNT_AND_TEXT;
     return cellSize;
-}
-
-- (NSRect)textRectForBounds:(NSRect)aRect {
-    NSView *controlView = [self controlView];
-    _calculateDrawingRectsAndSizes;
-    return textRect;
-}
-
-- (NSRect)iconRectForBounds:(NSRect)aRect {
-    NSView *controlView = [self controlView];
-    _calculateDrawingRectsAndSizes;
-    return imageRect;
 }
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
@@ -275,18 +269,15 @@ textRect.origin.y += floorf(vOffset); \
 
     // Draw the text
     [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultClippingParagraphStyle] range:labelRange];
+    NSRect textRect = NSInsetRect([self textRectForBounds:aRect], 1.0f, 0.0); 
     
-    // calculate after adding all attributes
-    _calculateDrawingRectsAndSizes;
+    [label drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin];
     
-	// I am not sure about these, copied from OATextWithIconCell
-    NSDivideRect(textRect, &ignored, &textRect, SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
-    textRect = NSInsetRect(textRect, 1.0f, 0.0);    
+    BOOL controlViewIsFlipped = [controlView isFlipped];
+    NSRect countRect = [self countRectForBounds:aRect];
     
-    [label drawInRect:textRect];
-    
-    if (isRetrieving == NO) {
-        if (failedDownload) {
+    if ([[self objectValue] isRetrieving] == NO) {
+        if ([[self objectValue] failedDownload]) {
             NSImage *cautionImage = [NSImage imageNamed:@"BDSKSmallCautionIcon"];
             NSSize cautionImageSize = [cautionImage size];
             NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
@@ -294,18 +285,18 @@ textRect.origin.y += floorf(vOffset); \
                 [cautionImage drawFlippedInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
             else
                 [cautionImage drawInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
-        } else if (countSize.width > 0) {
+        } else if ([[self objectValue] count] > 0) {
             [NSGraphicsContext saveGraphicsState];
             [bgColor setFill];
-            [NSBezierPath fillHorizontalOvalAroundRect:NSIntegralRect(countRect)];
+            [NSBezierPath fillHorizontalOvalAroundRect:countRect];
             [NSGraphicsContext restoreGraphicsState];
 
-            [countString drawInRect:countRect];
+            [countString drawWithRect:countRect options:NSStringDrawingUsesLineFragmentOrigin];
         }
     }
     
     // Draw the image
-    imageRect = BDSKCenterRect(imageRect, imageSize, controlViewIsFlipped);
+    NSRect imageRect = BDSKCenterRect([self iconRectForBounds:aRect], [self iconSizeForBounds:aRect], controlViewIsFlipped);
     [NSGraphicsContext saveGraphicsState];
     [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
 	if (controlViewIsFlipped)
@@ -317,10 +308,9 @@ textRect.origin.y += floorf(vOffset); \
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength;
 {
-    _calculateDrawingRectsAndSizes;
     
     settingUpFieldEditor = YES;
-    [super selectWithFrame:textRect inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
+    [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
     settingUpFieldEditor = NO;
 }
 

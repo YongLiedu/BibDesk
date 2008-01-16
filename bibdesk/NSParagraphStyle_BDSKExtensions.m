@@ -46,6 +46,7 @@
     if (defaultClippingParagraphStyle == nil) {
         NSMutableParagraphStyle *tmpParagraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
         [tmpParagraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
+#warning same as defaultTruncatingTailParagraphStyle?
         defaultClippingParagraphStyle = [tmpParagraphStyle copy];
         [tmpParagraphStyle release];
     }
