@@ -89,7 +89,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         index = NULL;
         
         if (cacheURL) {
-            NSDictionary *cacheDict = [[NSDictionary alloc] initWithContentsOfURL:cacheURL];
+            NSDictionary *cacheDict = [NSUnarchiver unarchiveObjectWithFile:[cacheURL path]];
             indexData = (CFMutableDataRef)[[cacheDict objectForKey:@"indexData"] mutableCopy];
             if (indexData != NULL) {
                 index = SKIndexOpenWithMutableData(indexData, NULL);
@@ -99,7 +99,6 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                 }
                 [signatures setDictionary:[cacheDict objectForKey:@"signatures"]];
             }
-            [cacheDict release];
         }
         
         if (index == NULL) {
@@ -219,8 +218,9 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     NSDictionary *cacheDict = nil;
     @synchronized(signatures) {
         cacheDict = [NSDictionary dictionaryWithObjectsAndKeys:[[(NSData *)indexData copy] autorelease], @"indexData", [[signatures copy] autorelease], @"signatures", nil];
+        
     }
-    return [cacheDict writeToURL:cacheURL atomically:YES];
+    return [NSArchiver archiveRootObject:cacheDict toFile:[cacheURL path]];
 }
 
 @end
@@ -234,6 +234,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     SKDocumentRef skDocument;
     CFURLRef aURL;
     
+#warning fixme
+    // this only returns file://localhost/Volumes
     while (skDocument = SKIndexDocumentIteratorCopyNext(iterator)) {
         if (aURL = SKDocumentCopyURL(skDocument)) {
             [allURLs addObject:(NSURL *)aURL];
