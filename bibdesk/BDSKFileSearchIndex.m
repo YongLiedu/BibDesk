@@ -234,14 +234,17 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     SKDocumentRef skDocument;
     CFURLRef aURL;
     
-#warning fixme
-    // this only returns file://localhost/Volumes
+    // check for NULL iterator?
+    
+    // this only returns file://localhost/Volumes so we need to create an iterator from each document returned and iterate recursively through the entire index tree
     while (skDocument = SKIndexDocumentIteratorCopyNext(iterator)) {
         if (aURL = SKDocumentCopyURL(skDocument)) {
             [allURLs addObject:(NSURL *)aURL];
             CFRelease(aURL);
         }
+        CFRelease(skDocument);
     }
+    CFRelease(iterator);
     return allURLs;
 }
 
