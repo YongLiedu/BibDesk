@@ -74,14 +74,15 @@
     [self setDocument:aDocument];
     
     // @@ temporary: this is just a temporary setup for testing search index caching
-    NSString *cachePath = nil;
+    NSURL *cacheURL = nil;
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldCacheFileSearchIndexKey"]) {
+        NSString *cachePath;
         cachePath = [[[[self document] fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
-        if ([[NSFileManager defaultManager] fileExistsAtPath:cachePath] == NO)
-            cachePath = nil;
+        if ([[NSFileManager defaultManager] fileExistsAtPath:cachePath])
+            cacheURL = [NSURL fileURLWithPath:cachePath];
     }
     
-    searchIndex = [[BDSKFileSearchIndex alloc] initWithDocument:aDocument cacheURL:[NSURL fileURLWithPath:cachePath]];
+    searchIndex = [[BDSKFileSearchIndex alloc] initWithDocument:aDocument cacheURL:cacheURL];
     search = [[BDSKFileSearch alloc] initWithIndex:searchIndex delegate:self];
     searchFieldDidEndEditing = NO;
     
