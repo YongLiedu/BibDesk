@@ -233,16 +233,15 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
     
     while (skDocument = SKIndexDocumentIteratorCopyNext(iterator)) {
         isLeaf = false;
-        if (aURL = SKDocumentCopyURL(skDocument)) {
-            addLeafURLsInIndexToSet(anIndex, skDocument, indexedURLs);
-            CFRelease(aURL);
-        }
+        addLeafURLsInIndexToSet(anIndex, skDocument, indexedURLs);
         CFRelease(skDocument);
     }
     CFRelease(iterator);
     
-    if (isLeaf)
+    if (isLeaf && inParentDocument && (aURL = SKDocumentCopyURL(inParentDocument))) {
         CFSetAddObject(indexedURLs, aURL);
+        CFRelease(aURL);
+    }
 }
 
 @implementation BDSKFileSearchIndex (Private)
