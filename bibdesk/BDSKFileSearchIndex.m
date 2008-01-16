@@ -64,6 +64,13 @@
 #define INDEX_STARTUP 1
 #define INDEX_STARTUP_COMPLETE 2
 
+static inline NSData *sha1SignatureForURL(NSURL *aURL) {
+    NSData *data = [[NSData alloc] initWithContentsOfURL:aURL];
+    NSData *sha1Signature = [data sha1Signature];
+    [data release];
+    return sha1Signature;
+}
+
 - (id)initWithDocument:(id)aDocument
 {
     return [self initWithDocument:aDocument cacheURL:nil];
@@ -76,16 +83,23 @@
     self = [super init];
         
     if(nil != self){
+        // maintain dictionaries mapping URL -> sha1Signature, so we can check if a URL is outdated
+        signatures = [[NSMutableDictionary alloc] initWithCapacity:128];
+        
         index = NULL;
+        
         if (cacheURL) {
-            indexData = (CFMutableDataRef)[[NSMutableData alloc] initWithContentsOfURL:cacheURL];
+            NSDictionary *cacheDict = [[NSDictionary alloc] initWithContentsOfURL:cacheURL];
+            indexData = (CFMutableDataRef)[[cacheDict objectForKey:@"indexData"] mutableCopy];
             if (indexData != NULL) {
                 index = SKIndexOpenWithMutableData(indexData, NULL);
                 if (index == NULL) {
                     CFRelease(indexData);
                     indexData = NULL;
                 }
+                [signatures setDictionary:[cacheDict objectForKey:@"signatures"]];
             }
+            [cacheDict release];
         }
         
         if (index == NULL) {
@@ -131,6 +145,7 @@
     [notificationPort release];
     [notificationQueue release];
     [itemInfos release];
+    [signatures release];
     if(index) CFRelease(index);
     if(indexData) CFRelease(indexData);
     [super dealloc];
@@ -174,6 +189,15 @@
     return [itemInfo autorelease];
 }
 
+- (NSData *)signatureForURL:(NSURL *)theURL
+{
+    NSData *signature = nil;
+    @synchronized(signature) {
+        signature = [[signatures objectForKey:theURL] retain];
+    }
+    return [signature autorelease];
+}
+
 - (double)progressValue
 {
     double theValue;
@@ -192,7 +216,11 @@
         SKIndexClose(index);
         index = NULL;
     }
-    return [(NSData *)indexData writeToURL:cacheURL atomically:YES];
+    NSDictionary *cacheDict = nil;
+    @synchronized(signatures) {
+        cacheDict = [NSDictionary dictionaryWithObjectsAndKeys:[[(NSData *)indexData copy] autorelease], @"indexData", [[signatures copy] autorelease], @"signatures", nil];
+    }
+    return [cacheDict writeToURL:cacheURL atomically:YES];
 }
 
 @end
@@ -236,7 +264,7 @@
         BOOL needsIndexing = NO;
         
         while (url = [urlEnum nextObject]) {
-            if ([indexedURLs containsObject:url]) {
+            if ([indexedURLs containsObject:url] && [[self signatureForURL:url] isEqual:sha1SignatureForURL(url)]) {
                 [URLsToRemove removeObject:url];
                 @synchronized(itemInfos) {
                     [itemInfos setObject:anItem forKey:url];
@@ -388,6 +416,9 @@
         @synchronized(itemInfos) {
             [itemInfos setObject:anItem forKey:url];
         }
+        @synchronized(signatures) {
+            [signatures setObject:sha1SignatureForURL(url) forKey:url];
+        }
         
         success = SKIndexAddDocument(index, skDocument, NULL, TRUE);
         OBPOSTCONDITION(success);
@@ -502,6 +533,9 @@
             
             @synchronized(itemInfos) {
                 [itemInfos removeObjectForKey:url];
+            }
+            @synchronized(signatures) {
+                [signatures removeObjectForKey:url];
             }
 			
 			skDocument = SKDocumentCreateWithURL((CFURLRef)url);

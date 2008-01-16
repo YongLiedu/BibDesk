@@ -59,6 +59,7 @@ typedef struct _BDSKSearchIndexFlags
     SKIndexRef index;
     CFMutableDataRef indexData;
     NSMutableDictionary *itemInfos;
+    NSMutableDictionary *signatures;
     id delegate;
     
     BDSKThreadSafeMutableArray *notificationQueue;
@@ -81,6 +82,7 @@ typedef struct _BDSKSearchIndexFlags
 - (BOOL)isIndexing;
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject;
 - (NSDictionary *)itemInfoForURL:(NSURL *)theURL;
+- (NSData *)signatureForURL:(NSURL *)theURL;
 
 // Poll this for progress bar updates during indexing
 - (double)progressValue;
