@@ -75,6 +75,7 @@
 - (IBAction)addNewCondition:(id)sender;
 - (IBAction)removeThisCondition:(id)sender;
 - (IBAction)changeRating:(id)sender;
+- (IBAction)selectKeyText:(id)sender;
 - (BDSKCondition *)condition;
 - (BOOL)canRemove;
 - (void)setCanRemove:(BOOL)flag;

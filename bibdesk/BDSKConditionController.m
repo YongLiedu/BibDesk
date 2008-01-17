@@ -176,6 +176,10 @@
 	[filterController removeConditionController:self];
 }
 
+- (IBAction)selectKeyText:(id)sender {
+    [keyComboBox selectText:sender];
+}
+
 // we could implement binding in BDSKRatingButton, but that's a lot of hassle and exposes us to the binding-to-owner bug
 - (IBAction)changeRating:(id)sender {
     [condition setStringValue:[NSString stringWithFormat:@"%i", [sender rating]]];
