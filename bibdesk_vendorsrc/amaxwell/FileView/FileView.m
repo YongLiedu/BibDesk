@@ -43,7 +43,7 @@
 #import "FVIconQueue.h"
 #import <FileView/FVPreviewer.h>
 #import "FVArrowButtonCell.h"
-#import "FVFinderLabel.h"
+#import <FileView/FVFinderLabel.h>
 
 // functions for dealing with multiple URLs and weblocs on the pasteboard
 static NSArray *URLSFromPasteboard(NSPasteboard *pboard);
