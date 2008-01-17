@@ -117,7 +117,7 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
         index = NULL;
         
         // new document won't have a URL, so we'll have to wait for the controller to set it
-        indexCacheURL = [aDocument fileURL] ? copyIndexCacheURLForDocumentURL([aDocument fileURL]) : nil;
+        NSURL *indexCacheURL = [aDocument fileURL] ? copyIndexCacheURLForDocumentURL([aDocument fileURL]) : nil;
         if (indexCacheURL) {
             NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:[indexCacheURL path]];
             indexData = (CFMutableDataRef)[[cacheDict objectForKey:@"indexData"] mutableCopy];
@@ -130,11 +130,6 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
                     indexData = NULL;
                 }
             }
-        } else {
-            // Could use the doc name, but I keep different files with the same name on shared and local volumes, and presumably others do things that are just as weird.  This guarantees a unique name, so we'll just introspect the caches when loading them.  
-            NSString *cachePath = [cacheIndexFolder() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-            cachePath = [cachePath stringByAppendingPathExtension:@"bdskindex"];
-            indexCacheURL = [[NSURL alloc] initFileURLWithPath:cachePath];
         }
         
         if (index == NULL) {
@@ -175,7 +170,6 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
 
 - (void)dealloc
 {
-    [indexCacheURL release];
     [notificationPort release];
     [notificationQueue release];
     [itemInfos release];
@@ -489,15 +483,24 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 {
     NSParameterAssert([NSThread inMainThread]);
     NSParameterAssert([setupLock condition] == INDEX_THREAD_DONE);
-    if (index && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldCacheFileSearchIndexKey"]) {
+    if (index && documentURL && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldCacheFileSearchIndexKey"]) {
         // flush all pending updates and compact the index as needed before writing
         SKIndexCompact(index);
         CFRelease(index);
         index = NULL;
-
+        
+        NSURL *indexCacheURL = copyIndexCacheURLForDocumentURL(documentURL);
+        if (indexCacheURL) {
+            // Could use the doc name, but I keep different files with the same name on shared and local volumes, and presumably others do things that are just as weird.  This guarantees a unique name, so we'll just introspect the caches when loading them.  
+            NSString *cachePath = [cacheIndexFolder() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+            cachePath = [cachePath stringByAppendingPathExtension:@"bdskindex"];
+            indexCacheURL = [[NSURL alloc] initFileURLWithPath:cachePath];
+        }
+        
         NSDictionary *cacheDict = nil;
         cacheDict = [NSDictionary dictionaryWithObjectsAndKeys:(NSData *)indexData, @"indexData", signatures, @"signatures", documentURL, @"documentURL", nil];
         [NSKeyedArchiver archiveRootObject:cacheDict toFile:[indexCacheURL path]];
+        [indexCacheURL release];
     }
 }
 

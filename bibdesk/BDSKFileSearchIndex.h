@@ -61,7 +61,6 @@ typedef struct _BDSKSearchIndexFlags
     NSMutableDictionary *itemInfos;
     NSMutableDictionary *signatures;
     NSURL *documentURL;
-    NSURL *indexCacheURL;
     id delegate;
     
     BDSKThreadSafeMutableArray *notificationQueue;
