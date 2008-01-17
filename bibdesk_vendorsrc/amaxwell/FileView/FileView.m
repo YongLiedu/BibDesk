@@ -2223,8 +2223,23 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         return (nil != aURL) && [_selectedIndexes count] >= 1;
     else if (action == @selector(paste:))
         return [self isEditable];
-    else if (action == @selector(changeFinderLabel:) || action == @selector(submenuAction:))
+    else if (action == @selector(submenuAction:))
         return [_selectedIndexes count] > 1 || ([_selectedIndexes count] == 1 && [aURL isFileURL]);
+    else if (action == @selector(changeFinderLabel:)) {
+        NSEnumerator *urlEnum = [[self _selectedURLs] objectEnumerator];
+        NSURL *url;
+        BOOL enabled = NO;
+        int state = NSOffState;
+        while (url = [urlEnum nextObject]) {
+            if ([url isEqual:[NSNull null]] == NO && [url isFileURL]) {
+                enabled = YES;
+                if ([FVFinderLabel finderLabelForURL:url] == (NSUInteger)[anItem tag])
+                    state = NSOnState;
+            }
+        }
+        [anItem setState:state];
+        return enabled;
+    }
     // need to handle print: and other actions
     return (action && [self respondsToSelector:action]);
 }
