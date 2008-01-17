@@ -87,36 +87,80 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
 
 + (NSColor *)_lowerColorForFinderLabel:(NSUInteger)label
 {
-    NSArray *lowerColors = nil;
-    if (lowerColors == nil) {
-        lowerColors = [[NSArray alloc] initWithObjects:
-            [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.0 alpha:0.0], 
-            [NSColor colorWithDeviceRed:0.66 green:0.66 blue:0.66 alpha:LABEL_ALPHA], 
-            [NSColor colorWithDeviceRed:0.64 green:0.87 blue:0.24 alpha:LABEL_ALPHA], 
-            [NSColor colorWithDeviceRed:0.81 green:0.51 blue:0.86 alpha:LABEL_ALPHA],
-            [NSColor colorWithDeviceRed:0.22 green:0.64 blue:1.0 alpha:LABEL_ALPHA], 
-            [NSColor colorWithDeviceRed:0.95 green:0.86 blue:0.24 alpha:LABEL_ALPHA], 
-            [NSColor colorWithDeviceRed:1.0 green:0.30 blue:0.34 alpha:LABEL_ALPHA],
-            [NSColor colorWithDeviceRed:1.0 green:0.64 blue:0.23 alpha:LABEL_ALPHA], nil];
+    NSColor *color = nil;
+    switch (label) {
+        case 1:
+            // gray
+            color = [NSColor colorWithDeviceRed:0.66 green:0.66 blue:0.66 alpha:LABEL_ALPHA];
+            break;
+        case 3:
+            // purple
+            color = [NSColor colorWithDeviceRed:0.81 green:0.51 blue:0.86 alpha:LABEL_ALPHA]; 
+            break;
+        case 4:
+            // blue
+            color = [NSColor colorWithDeviceRed:0.22 green:0.64 blue:1.0 alpha:LABEL_ALPHA];
+            break;
+        case 2:
+            // green
+            color = [NSColor colorWithDeviceRed:0.64 green:0.87 blue:0.24 alpha:LABEL_ALPHA];
+            break;
+        case 5:
+            // yellow
+            color = [NSColor colorWithDeviceRed:0.95 green:0.86 blue:0.24 alpha:LABEL_ALPHA];
+            break;
+        case 7:
+            // orange
+            color = [NSColor colorWithDeviceRed:1.0 green:0.64 blue:0.23 alpha:LABEL_ALPHA];
+            break;
+        case 6:
+            // red
+            color = [NSColor colorWithDeviceRed:1.0 green:0.30 blue:0.34 alpha:LABEL_ALPHA];
+            break;
+        default:
+            color = [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.0 alpha:0.0];
+            break;
     }
-    return [lowerColors objectAtIndex:label];
+    return color;
 }
 
 + (NSColor *)_upperColorForFinderLabel:(NSUInteger)label
 {
-    NSArray *upperColors = nil;
-    if (upperColors == nil) {
-        upperColors = [[NSArray alloc] initWithObjects:
-            [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.0 alpha:0.0], 
-            [NSColor colorWithDeviceRed:0.84 green:0.84 blue:0.84 alpha:LABEL_ALPHA], 
-            [NSColor colorWithDeviceRed:0.84 green:0.94 blue:0.65 alpha:LABEL_ALPHA], 
-            [NSColor colorWithDeviceRed:0.92 green:0.77 blue:0.93 alpha:LABEL_ALPHA],
-            [NSColor colorWithDeviceRed:0.66 green:0.85 blue:1.0 alpha:LABEL_ALPHA], 
-            [NSColor colorWithDeviceRed:0.98 green:0.96 blue:0.64 alpha:LABEL_ALPHA], 
-            [NSColor colorWithDeviceRed:1.0 green:0.66 blue:0.66 alpha:LABEL_ALPHA],
-            [NSColor colorWithDeviceRed:1.0 green:0.83 blue:0.62 alpha:LABEL_ALPHA], nil];
+    NSColor *color = nil;
+    switch (label) {
+        case 1:
+            // gray
+            color = [NSColor colorWithDeviceRed:0.84 green:0.84 blue:0.84 alpha:LABEL_ALPHA];
+            break;
+        case 3:
+            // purple
+            color = [NSColor colorWithDeviceRed:0.92 green:0.77 blue:0.93 alpha:LABEL_ALPHA]; 
+            break;
+        case 4:
+            // blue
+            color = [NSColor colorWithDeviceRed:0.66 green:0.85 blue:1.0 alpha:LABEL_ALPHA];
+            break;
+        case 2:
+            // green
+            color = [NSColor colorWithDeviceRed:0.84 green:0.94 blue:0.65 alpha:LABEL_ALPHA];
+            break;
+        case 5:
+            // yellow
+            color = [NSColor colorWithDeviceRed:0.98 green:0.96 blue:0.64 alpha:LABEL_ALPHA];
+            break;
+        case 7:
+            // orange
+            color = [NSColor colorWithDeviceRed:1.0 green:0.83 blue:0.62 alpha:LABEL_ALPHA];
+            break;
+        case 6:
+            // red
+            color = [NSColor colorWithDeviceRed:1.0 green:0.66 blue:0.66 alpha:LABEL_ALPHA];
+            break;
+        default:
+            color = [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.0 alpha:0.0];
+            break;
     }
-    return [upperColors objectAtIndex:label];
+    return color;
 }
 
 + (NSString *)localizedNameForLabel:(NSInteger)label
@@ -125,7 +169,7 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
     if (nil == labelNames) {
         NSBundle *bundle = [NSBundle bundleForClass:[FVFinderLabel self]];
         
-        // this is apparently an unused/unsupported/hidden Apple preference for Finder label names
+        // Apple preference for Finder label names
         NSDictionary *labelPrefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"com.apple.Labels"];
         NSMutableArray *names = [NSMutableArray arrayWithCapacity:8];
         NSString *name;
@@ -166,6 +210,7 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
     return [labelNames objectAtIndex:label];
 }
 
+// Note: there is no optimization or caching here because this is only called once per color to draw the CGLayer
 + (void)_drawLabel:(NSUInteger)label inRect:(NSRect)rect ofContext:(CGContextRef)context;
 {
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();    
