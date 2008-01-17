@@ -54,41 +54,43 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
         const CFDictionaryKeyCallBacks integerKeyCallBacks = { 0, NULL, NULL, intDesc, intEqual, intHash };
         __layers = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &integerKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     }
-   if (nil == __labelNames) {
-        NSBundle *bundle = [NSBundle bundleForClass:self];
+    if (nil == __labelNames) {
+        NSBundle *bundle = [NSBundle bundleForClass:[FVFinderLabel self]];
+        
+        // this is apparently an unused/unsupported/hidden Apple preference for Finder label names
         NSDictionary *labelPrefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"com.apple.Labels"];
         NSMutableArray *names = [NSMutableArray arrayWithCapacity:8];
         NSString *name;
         name = [labelPrefs objectForKey:@"Label_Name_0"];
-        if (name == nil)
+        if (name == nil || [name isKindOfClass:[NSString class]] == NO)
             name = NSLocalizedStringFromTableInBundle(@"None", @"FileView", bundle, @"Finder label color");
         [names addObject:name];
         name = [labelPrefs objectForKey:@"Label_Name_1"];
-        if (name == nil)
+        if (name == nil || [name isKindOfClass:[NSString class]] == NO)
             name = NSLocalizedStringFromTableInBundle(@"Gray", @"FileView", bundle, @"Finder label color");
         [names addObject:name];
         name = [labelPrefs objectForKey:@"Label_Name_2"];
-        if (name == nil)
+        if (name == nil || [name isKindOfClass:[NSString class]] == NO)
             name = NSLocalizedStringFromTableInBundle(@"Green", @"FileView", bundle, @"Finder label color");
         [names addObject:name];
         name = [labelPrefs objectForKey:@"Label_Name_3"];
-        if (name == nil)
+        if (name == nil || [name isKindOfClass:[NSString class]] == NO)
             name = NSLocalizedStringFromTableInBundle(@"Purple", @"FileView", bundle, @"Finder label color");
         [names addObject:name];
         name = [labelPrefs objectForKey:@"Label_Name_4"];
-        if (name == nil)
+        if (name == nil || [name isKindOfClass:[NSString class]] == NO)
             name = NSLocalizedStringFromTableInBundle(@"Blue", @"FileView", bundle, @"Finder label color");
         [names addObject:name];
         name = [labelPrefs objectForKey:@"Label_Name_5"];
-        if (name == nil)
+        if (name == nil || [name isKindOfClass:[NSString class]] == NO)
             name = NSLocalizedStringFromTableInBundle(@"Yellow", @"FileView", bundle, @"Finder label color");
         [names addObject:name];
         name = [labelPrefs objectForKey:@"Label_Name_6"];
-        if (name == nil)
+        if (name == nil || [name isKindOfClass:[NSString class]] == NO)
             name = NSLocalizedStringFromTableInBundle(@"Red", @"FileView", bundle, @"Finder label color");
         [names addObject:name];
         name = [labelPrefs objectForKey:@"Label_Name_7"];
-        if (name == nil)
+        if (name == nil || [name isKindOfClass:[NSString class]] == NO)
             name = NSLocalizedStringFromTableInBundle(@"Orange", @"FileView", bundle, @"Finder label color");
         [names addObject:name];
         __labelNames = [names copy];
