@@ -100,6 +100,7 @@ static CGFloat __subtitleHeight = 0.0;
 - (NSSize)_paddingForScale:(CGFloat)scale;
 - (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
 - (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
+- (void)_setNeedsDisplayForIconInRow:(NSUInteger)row column:(NSUInteger)column;
 - (NSArray *)_selectedURLs;
 - (void)_removeAllTrackingRects;
 - (void)_resetTrackingRectsAndToolTips;
@@ -418,9 +419,15 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 
 - (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
 {
-    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect), NSWidth(iconRect), _padding.height);
+    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect), NSWidth(iconRect), _padding.height - round(4.0 * [self iconScale]));
     // allow the text rect to extend outside the grid cell
     return NSInsetRect(textRect, -_padding.width / 3.0, 2.0);
+}
+
+- (void)_setNeedsDisplayForIconInRow:(NSUInteger)row column:(NSUInteger)column {
+    NSRect dirtyRect = [self _rectOfIconInRow:row column:column];
+    dirtyRect = NSUnionRect(NSInsetRect(dirtyRect, -2.0 * [self iconScale], -[self iconScale]), [self _rectOfTextForIconRect:dirtyRect]);
+    [self setNeedsDisplayInRect:dirtyRect];
 }
 
 static void _removeTrackingRectTagFromView(const void *key, const void *value, void *context)
@@ -800,7 +807,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSArray *visibleIcons = [self iconsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(iMin, iMax - iMin)]];
     NSUInteger i;
     NSSet *updatedIconSet = [[NSSet alloc] initWithArray:updatedIcons];
-    CGFloat padding = 3.0 * [self iconScale];
     
     // If an icon isn't visible, there's no need to redisplay anything.  Similarly, if 20 icons are displayed and only 5 updated, there's no need to redraw all 20.  Geometry calculations are much faster than redrawing, in general.
     for (i = iMin; i < iMax; i++) {
@@ -808,7 +814,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         if ([updatedIconSet containsObject:[visibleIcons objectAtIndex:(i - iMin)]]) {
             NSUInteger r, c;
             if ([self _getGridRow:&r column:&c ofIndex:i])
-                [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -padding, -padding)];
+                [self _setNeedsDisplayForIconInRow:r column:c];
         }
     }
     [updatedIconSet release];
@@ -1177,11 +1183,10 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                 
                 NSURL *aURL = [self iconURLAtIndex:i];
                 
-                // we may only be drawing icon and/or text
                 // allow some extra for the shadow (-5)
-                BOOL willDrawIcon = [self needsToDrawRect:NSInsetRect(fileRect, -5, -5)];
                 NSRect textRect = [self _rectOfTextForIconRect:fileRect];
-                BOOL willDrawText = [self needsToDrawRect:textRect];
+                // always draw icon and text together, as they may overlap due to shadow and finder label, and redrawing a part may look odd
+                BOOL willDrawIcon = _isDrawingDragImage || [self needsToDrawRect:NSUnionRect(NSInsetRect(fileRect, -2.0 * [self iconScale], -[self iconScale]), textRect)];
                                 
                 if (willDrawIcon) {
 
@@ -1213,9 +1218,6 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                         [image drawInRect:iconRect inCGContext:cgContext];
 
                     CGContextRestoreGState(cgContext);
-                }
-                
-                if (willDrawText) {
                     CGContextSaveGState(cgContext);
                     
                     BOOL isFlippedContext = [ctxt isFlipped];
@@ -1417,7 +1419,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSUInteger r, c;
     // _getGridRow should always succeed.  Drawing entire icon since a mouseover can occur between the time the icon is loaded and drawn, so only the part of the icon below the buttons is drawn (at least, I think that's what happens...)
     if ([self _getGridRow:&r column:&c atPoint:_leftArrowFrame.origin])
-        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
+        [self _setNeedsDisplayForIconInRow:r column:c];
 }
 
 - (void)_redisplayIconAfterPageChanged:(FVIcon *)anIcon
@@ -1429,7 +1431,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
         // render immediately so the placeholder path doesn't draw
         if ([anIcon needsRenderForSize:_iconSize])
             [anIcon renderOffscreen];
-        [self setNeedsDisplayInRect:NSInsetRect([self _rectOfIconInRow:r column:c], -2.0 * [self iconScale], -3.0 * [self iconScale])];
+        [self _setNeedsDisplayForIconInRow:r column:c];
     }    
 }
 
