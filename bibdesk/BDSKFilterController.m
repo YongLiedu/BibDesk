@@ -153,7 +153,7 @@
         [self updateUI];
     }
     [conditionsView scrollRectToVisible:[[newController view] frame]];
-    [conditionController selectKeyText:self];
+    [newController selectKeyText:self];
 }
 
 - (void)removeConditionController:(BDSKConditionController *)aConditionController {
