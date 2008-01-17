@@ -257,7 +257,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAlloc
 }
 
 static inline Boolean
-__BDShouldRemoveUniChar(UniChar c){ return (c == '{' || c == '`' || c == '$' || c == '\\' || c == '(' || c == '"'); }
+__BDShouldRemoveUniChar(UniChar c){ return (c == '`' || c == '$' || c == '\\' || CFCharacterSetIsCharacterMember(CFCharacterSetGetPredefined(kCFCharacterSetPunctuation), c)); }
 
 // private function for removing some tex special characters from a string
 // (only those I consider relevant to sorting)
