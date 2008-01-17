@@ -41,6 +41,7 @@
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKThreadSafeMutableArray.h"
+#import "BDSKThreadSafeMutableDictionary.h"
 #import "NSObject_BDSKExtensions.h"
 
 @interface BDSKFileSearchIndex (Private)
@@ -76,7 +77,7 @@ static NSString *cacheIndexFolder()
 }
 
 // Read each cache file and see which one has a matching documentURL.  If this gets too slow, we could save a plist mapping URL -> UUID and use that instead.
-static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
+static NSString *indexCachePathForDocumentURL(NSURL *documentURL)
 {
     NSCParameterAssert(nil != documentURL);
     NSString *cacheFolder = cacheIndexFolder();
@@ -85,15 +86,15 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
     
     NSEnumerator *indexEnum = [existingIndexes objectEnumerator];
     NSString *path;
-    NSURL *indexCacheURL = nil;
+    NSString *indexCachePath = nil;
     
-    while ((path = [indexEnum nextObject]) && nil == indexCacheURL) {
+    while ((path = [indexEnum nextObject]) && nil == indexCachePath) {
         path = [cacheFolder stringByAppendingPathComponent:path];
         NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
         if ([[cacheDict objectForKey:@"documentURL"] isEqual:documentURL])
-            indexCacheURL = [[NSURL alloc] initFileURLWithPath:path];
+            indexCachePath = path;
     }
-    return indexCacheURL;
+    return indexCachePath;
 }
         
 
@@ -117,9 +118,9 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
         index = NULL;
         
         // new document won't have a URL, so we'll have to wait for the controller to set it
-        NSURL *indexCacheURL = [aDocument fileURL] ? copyIndexCacheURLForDocumentURL([aDocument fileURL]) : nil;
-        if (indexCacheURL) {
-            NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:[indexCacheURL path]];
+        NSString *indexCachePath = [aDocument fileURL] ? indexCachePathForDocumentURL([aDocument fileURL]) : nil;
+        if (indexCachePath) {
+            NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:indexCachePath];
             indexData = (CFMutableDataRef)[[cacheDict objectForKey:@"indexData"] mutableCopy];
             if (indexData != NULL) {
                 index = SKIndexOpenWithMutableData(indexData, NULL);
@@ -149,7 +150,7 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
         flags.shouldKeepRunning = 1;
         
         // maintain dictionaries mapping URL -> itemInfos, since SKIndex properties are slow
-        itemInfos = [[NSMutableDictionary alloc] initWithCapacity:128];
+        itemInfos = [[BDSKThreadSafeMutableDictionary alloc] initWithCapacity:128];
         
         progressValue = 0.0;
         
@@ -216,11 +217,7 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
 
 - (NSDictionary *)itemInfoForURL:(NSURL *)theURL
 {
-    NSDictionary *itemInfo = nil;
-    @synchronized(self) {
-        itemInfo = [[itemInfos objectForKey:theURL] retain];
-    }
-    return [itemInfo autorelease];
+    return [itemInfos objectForKey:theURL];
 }
 
 - (double)progressValue
@@ -285,7 +282,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     double totalObjectCount = [items count];
     
     // see comment later; may need tuning here since this is much faster, or else use a message queue instead of passing waitUntilDone:YES
-    const int32_t flushInterval = 20;
+    const int32_t flushInterval = 50;
     int32_t countSinceLastFlush = flushInterval;
     
     // update the itemInfos with the items, find items to add and URLs to remove
@@ -309,20 +306,19 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                 needsIndexing = YES;
             }
         }
-        
-        // ??? is it worth updating progress here since it runs so fast?  we'd also need to send delegate messages periodically
-        
+                
         if (needsIndexing) {
             [itemsToAdd addObject:anItem];
         } else {
             numberIndexed++;
             @synchronized(self) {
                 progressValue = (numberIndexed / totalObjectCount) * 100;
-                [itemInfos addEntriesFromDictionary:previouslyIndexedInfos];
-                [previouslyIndexedInfos removeAllObjects];
             }
+            // must update before sending the delegate message
+            [itemInfos addEntriesFromDictionary:previouslyIndexedInfos];
+            [previouslyIndexedInfos removeAllObjects];
             if (countSinceLastFlush-- == 0) {                
-                [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:YES];
+                [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
                 countSinceLastFlush = flushInterval;
             }
         }
@@ -453,9 +449,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         
         // SKIndexSetProperties is more generally useful, but is really slow when creating the index
         // SKIndexRenameDocument changes the URL, so it's not useful
-        @synchronized(self) {
-            [itemInfos setObject:anItem forKey:url];
-        }
+        [itemInfos setObject:anItem forKey:url];
         if (signature)
             [signatures setObject:signature forKey:url];
         else
@@ -482,18 +476,16 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         CFRelease(index);
         index = NULL;
         
-        NSURL *indexCacheURL = copyIndexCacheURLForDocumentURL(documentURL);
-        if (indexCacheURL) {
+        NSString *indexCachePath = indexCachePathForDocumentURL(documentURL);
+        if (nil == indexCachePath) {
             // Could use the doc name, but I keep different files with the same name on shared and local volumes, and presumably others do things that are just as weird.  This guarantees a unique name, so we'll just introspect the caches when loading them.  
-            NSString *cachePath = [cacheIndexFolder() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-            cachePath = [cachePath stringByAppendingPathExtension:@"bdskindex"];
-            indexCacheURL = [[NSURL alloc] initFileURLWithPath:cachePath];
+            indexCachePath = [cacheIndexFolder() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+            indexCachePath = [indexCachePath stringByAppendingPathExtension:@"bdskindex"];
         }
         
         NSDictionary *cacheDict = nil;
         cacheDict = [NSDictionary dictionaryWithObjectsAndKeys:(NSData *)indexData, @"indexData", signatures, @"signatures", documentURL, @"documentURL", nil];
-        [NSKeyedArchiver archiveRootObject:cacheDict toFile:[indexCacheURL path]];
-        [indexCacheURL release];
+        [NSKeyedArchiver archiveRootObject:cacheDict toFile:indexCachePath];
     }
 }
 
@@ -606,9 +598,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 			
 			url = [urls objectAtIndex:idx];
             
-            @synchronized(self) {
-                [itemInfos removeObjectForKey:url];
-            }
+            [itemInfos removeObjectForKey:url];
             [signatures removeObjectForKey:url];
 			
 			skDocument = SKDocumentCreateWithURL((CFURLRef)url);
