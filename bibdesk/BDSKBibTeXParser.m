@@ -908,8 +908,8 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned 
                     lengthOverrun = YES;
                     break;
                 }
-                if(data[cidx] == '{' && data[cidx-1] != '\\') braceDepth++;
-                if(data[cidx] == '}' && data[cidx-1] != '\\') braceDepth--;
+                if(data[cidx] == '{') braceDepth++;
+                if(data[cidx] == '}') braceDepth--;
             }
             cidx--;     // just advanced cidx one past the end of the field.
         }else if(data[cidx-1] == '"'){

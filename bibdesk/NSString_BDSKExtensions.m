@@ -347,7 +347,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 	int delimLoc = delimRange.location;
 	
 	while (delimLoc != NSNotFound) {
-		if (delimLoc == 0 || [self characterAtIndex:delimLoc - 1] != '\\') {
+		if (delimLoc == 0 || braces || [self characterAtIndex:delimLoc - 1] != '\\') {
 			// we found an unescaped delimiter
 			if (connected && nesting == 0) // connected quotes cannot have a nesting of 0 in the middle
 				return NO;
