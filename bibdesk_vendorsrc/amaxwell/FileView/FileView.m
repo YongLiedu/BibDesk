@@ -1503,7 +1503,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSEnumerator *e = [URLs objectEnumerator];
     NSURL *aURL;
     while (aURL = [e nextObject]) {
-        if ([aURL isEqual:[NSNull null]] == NO &&
+        if ([aURL isEqual:[FVIcon missingFileURL]] == NO &&
             [[self delegate] respondsToSelector:@selector(fileView:shouldOpenURL:)] == NO ||
             [[self delegate] fileView:self shouldOpenURL:aURL] == YES)
             [[NSWorkspace sharedWorkspace] openURL:aURL];
@@ -2231,7 +2231,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         BOOL enabled = NO;
         int state = NSOffState;
         while (url = [urlEnum nextObject]) {
-            if ([url isEqual:[NSNull null]] == NO && [url isFileURL]) {
+            if ([url isEqual:[FVIcon missingFileURL]] == NO && [url isFileURL]) {
                 enabled = YES;
                 if ([FVFinderLabel finderLabelForURL:url] == (NSUInteger)[anItem tag])
                     state = NSOnState;
