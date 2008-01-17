@@ -406,11 +406,8 @@
     // extra safety here; make sure the index stops messaging the search object now
     [searchIndex setDelegate:nil];
     
-    // let the index know the document's location so it can cache the index to disk
-    [searchIndex setDocumentURL:[[self document] fileURL]];
-    
-    // stops the search index runloop
-    [searchIndex cancel];
+    // stops the search index runloop, let the index know the document's location so it can cache the index to disk
+    [searchIndex cancelForDocumentURL:[[self document] fileURL]];
     [searchIndex release];
     searchIndex = nil;
 }
@@ -428,6 +425,7 @@
 - (void)handleApplicationWillTerminate:(NSNotification *)notification
 {
     [self saveSortDescriptors];
+    [searchIndex cancelForDocumentURL:[[self document] fileURL]];
 }
 
 #pragma mark TableView delegate

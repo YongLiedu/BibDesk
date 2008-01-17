@@ -60,7 +60,6 @@ typedef struct _BDSKSearchIndexFlags
     CFMutableDataRef indexData;
     NSMutableDictionary *itemInfos;
     NSMutableDictionary *signatures;
-    NSURL *documentURL;
     id delegate;
     
     BDSKThreadSafeMutableArray *notificationQueue;
@@ -78,15 +77,13 @@ typedef struct _BDSKSearchIndexFlags
 - (SKIndexRef)index;
 
 // Required before disposing of the index.  After calling cancel, the index is no longer viable.
-- (void)cancel;
+- (void)cancelForDocumentURL:(NSURL *)documentURL;
 - (BOOL)isIndexing;
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject;
 - (NSDictionary *)itemInfoForURL:(NSURL *)theURL;
 
 // Poll this for progress bar updates during indexing
 - (double)progressValue;
-
-- (void)setDocumentURL:(NSURL *)aURL;
 
 @end
 

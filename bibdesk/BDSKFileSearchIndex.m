@@ -55,7 +55,7 @@
 - (void)handleDocDelItemNotification:(NSNotification *)note;
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note;
 - (void)handleMachMessage:(void *)msg;
-- (void)writeIndexToDisk;
+- (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL;
 
 @end
 
@@ -144,7 +144,6 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
         [nc addObserver:self selector:handler name:BDSKFileSearchIndexInfoChangedNotification object:aDocument];
         [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:aDocument];
         [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:aDocument];
-        [nc addObserver:self selector:handler name:NSApplicationWillTerminateNotification object:aDocument];
         
         flags.isIndexing = 0;
         flags.shouldKeepRunning = 1;
@@ -181,7 +180,7 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
 }
 
 // cancel is always sent from the main thread
-- (void)cancel
+- (void)cancelForDocumentURL:(NSURL *)documentURL
 {
     NSParameterAssert([NSThread inMainThread]);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -192,7 +191,7 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
     
     // wait until the thread exits, so we have exclusive access to the ivars
     [setupLock lockWhenCondition:INDEX_THREAD_DONE];
-    [self writeIndexToDisk];
+    [self writeIndexToDiskForDocumentURL:documentURL];
     [setupLock unlock];
 }
 
@@ -231,12 +230,6 @@ static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
         theValue = progressValue;
     }
     return theValue;
-}
-
-- (void)setDocumentURL:(NSURL *)aURL
-{
-    [documentURL autorelease];
-    documentURL = [aURL copy];
 }
 
 @end
@@ -479,7 +472,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
 }
 
-- (void)writeIndexToDisk
+- (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL
 {
     NSParameterAssert([NSThread inMainThread]);
     NSParameterAssert([setupLock condition] == INDEX_THREAD_DONE);
@@ -568,14 +561,9 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 - (void)processNotification:(NSNotification *)note
 {    
     OBASSERT([NSThread inMainThread]);
-    if ([[note name] isEqualToString:NSApplicationWillTerminateNotification]) {
-        [self cancel];
-        
-    } else {
-        // Forward the notification to the correct thread
-        [notificationQueue addObject:note];
-        [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
-    }
+    // Forward the notification to the correct thread
+    [notificationQueue addObject:note];
+    [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
 }
 
 - (void)handleDocAddItemNotification:(NSNotification *)note
