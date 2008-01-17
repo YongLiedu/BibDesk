@@ -1107,33 +1107,6 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     }
 }
 
-- (NSUInteger)_finderLabelForURL:(NSURL *)aURL;
-{
-    FSRef fileRef;
-    NSUInteger label = 0;
-    
-    if ([aURL isFileURL] && CFURLGetFSRef((CFURLRef)aURL, &fileRef)) {
-        
-        FSCatalogInfo catalogInfo;    
-        OSStatus err;
-        
-        err = FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo, &catalogInfo, NULL, NULL, NULL);
-        if (noErr == err) {
-            
-            // coerce to FolderInfo or FileInfo as needed and get the color bit
-            if ((catalogInfo.nodeFlags & kFSNodeIsDirectoryMask) != 0) {
-                FolderInfo *fInfo = (FolderInfo *)&catalogInfo.finderInfo;
-                label = fInfo->finderFlags & kColor;
-            }
-            else {
-                FileInfo *fInfo = (FileInfo *)&catalogInfo.finderInfo;
-                label = fInfo->finderFlags & kColor;
-            }
-        }
-    }
-    return (label >> 1L);
-}
-
 - (void)_drawIconsInRange:(NSRange)indexRange rows:(NSRange)rows columns:(NSRange)columns
 {
     BOOL isResizing = [self inLiveResize];
@@ -1241,7 +1214,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                         name = [aURL absoluteString];
                     }
                     
-                    NSUInteger label = [self _finderLabelForURL:aURL];
+                    NSUInteger label = [FVFinderLabel finderLabelForURL:aURL];
                     if (label > 0) {
                         CGRect labelRect = *(CGRect *)&textRect;
                         
@@ -2315,34 +2288,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSArray *selectedURLs = [self _selectedURLs];
     NSUInteger i, iMax = [selectedURLs count];
     for (i = 0; i < iMax; i++) {
-        
-        NSURL *aURL = [selectedURLs objectAtIndex:i];
-        FSRef fileRef;
-        
-        if ([aURL isFileURL] && CFURLGetFSRef((CFURLRef)aURL, &fileRef)) {
-    
-            FSCatalogInfo catalogInfo;    
-            OSStatus err;
-            
-            // get the current catalog info
-            err = FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo, &catalogInfo, NULL, NULL, NULL);
-            
-            if (noErr == err) {
-                
-                // coerce to FolderInfo or FileInfo as needed and set the color bit
-                if ((catalogInfo.nodeFlags & kFSNodeIsDirectoryMask) != 0) {
-                    FolderInfo *fInfo = (FolderInfo *)&catalogInfo.finderInfo;
-                    fInfo->finderFlags &= ~kColor;
-                    fInfo->finderFlags |= (label & kColor);
-                }
-                else {
-                    FileInfo *fInfo = (FileInfo *)&catalogInfo.finderInfo;
-                    fInfo->finderFlags &= ~kColor;
-                    fInfo->finderFlags |= (label & kColor);
-                }
-                FSSetCatalogInfo(&fileRef, kFSCatInfoFinderInfo, &catalogInfo);
-            }
-        }
+        [FVFinderLabel setFinderLabel:label forURL:[selectedURLs objectAtIndex:i]];
     }
     [self setNeedsDisplay:YES];
 }

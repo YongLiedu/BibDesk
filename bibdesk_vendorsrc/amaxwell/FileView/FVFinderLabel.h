@@ -47,4 +47,7 @@
 
 + (NSString *)localizedNameForLabel:(NSInteger)label;
 
++ (NSUInteger)finderLabelForURL:(NSURL *)aURL;
++ (void)setFinderLabel:(NSUInteger)label forURL:(NSURL *)aURL;
+
 @end

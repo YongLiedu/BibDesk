@@ -247,4 +247,61 @@ static void ClipContextToCircleCappedPathInRect(CGContextRef context, CGRect rec
     [self drawFinderLabel:label inRect:*(CGRect *)&rect ofContext:[nsContext graphicsPort] flipped:[nsContext isFlipped] roundEnds:flag];
 }
 
++ (NSUInteger)finderLabelForURL:(NSURL *)aURL;
+{
+    FSRef fileRef;
+    NSUInteger label = 0;
+    
+    if ([aURL isFileURL] && CFURLGetFSRef((CFURLRef)aURL, &fileRef)) {
+        
+        FSCatalogInfo catalogInfo;    
+        OSStatus err;
+        
+        err = FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo, &catalogInfo, NULL, NULL, NULL);
+        if (noErr == err) {
+            
+            // coerce to FolderInfo or FileInfo as needed and get the color bit
+            if ((catalogInfo.nodeFlags & kFSNodeIsDirectoryMask) != 0) {
+                FolderInfo *fInfo = (FolderInfo *)&catalogInfo.finderInfo;
+                label = fInfo->finderFlags & kColor;
+            }
+            else {
+                FileInfo *fInfo = (FileInfo *)&catalogInfo.finderInfo;
+                label = fInfo->finderFlags & kColor;
+            }
+        }
+    }
+    return (label >> 1L);
+}
+
++ (void)setFinderLabel:(NSUInteger)label forURL:(NSURL *)aURL;
+{
+    FSRef fileRef;
+    
+    if ([aURL isFileURL] && CFURLGetFSRef((CFURLRef)aURL, &fileRef)) {
+
+        FSCatalogInfo catalogInfo;    
+        OSStatus err;
+        
+        // get the current catalog info
+        err = FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo, &catalogInfo, NULL, NULL, NULL);
+        
+        if (noErr == err) {
+            
+            // coerce to FolderInfo or FileInfo as needed and set the color bit
+            if ((catalogInfo.nodeFlags & kFSNodeIsDirectoryMask) != 0) {
+                FolderInfo *fInfo = (FolderInfo *)&catalogInfo.finderInfo;
+                fInfo->finderFlags &= ~kColor;
+                fInfo->finderFlags |= (label & kColor);
+            }
+            else {
+                FileInfo *fInfo = (FileInfo *)&catalogInfo.finderInfo;
+                fInfo->finderFlags &= ~kColor;
+                fInfo->finderFlags |= (label & kColor);
+            }
+            FSSetCatalogInfo(&fileRef, kFSCatInfoFinderInfo, &catalogInfo);
+        }
+    }
+}
+
 @end
