@@ -47,7 +47,7 @@
 
 - (NSArray *)itemsToIndex:(NSArray *)items;
 - (void)buildIndexForItems:(NSArray *)items;
-- (void)indexFilesForItems:(NSArray *)items;
+- (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount;
 - (void)indexFilesForItem:(id)anItem;
 - (void)runIndexThreadForItems:(NSArray *)items;
 - (void)processNotification:(NSNotification *)note;
@@ -55,27 +55,56 @@
 - (void)handleDocDelItemNotification:(NSNotification *)note;
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note;
 - (void)handleMachMessage:(void *)msg;
+- (void)writeIndexToDisk;
 
 @end
+
+static NSString *cacheIndexFolder()
+{
+    static NSString *cacheFolder = nil;
+    if (nil == cacheFolder) {
+        cacheFolder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+        cacheFolder = [cacheFolder stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
+        if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
+            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
+        cacheFolder = [cacheFolder stringByAppendingPathComponent:@"Search indexes"];
+        if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
+            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
+        cacheFolder = [cacheFolder copy];
+    }
+    return cacheFolder;
+}
+
+// Read each cache file and see which one has a matching documentURL.  If this gets too slow, we could save a plist mapping URL -> UUID and use that instead.
+static NSURL *copyIndexCacheURLForDocumentURL(NSURL *documentURL)
+{
+    NSCParameterAssert(nil != documentURL);
+    NSString *cacheFolder = cacheIndexFolder();
+    NSArray *existingIndexes = [[NSFileManager defaultManager] directoryContentsAtPath:cacheFolder];
+    existingIndexes = [existingIndexes pathsMatchingExtensions:[NSArray arrayWithObject:@"bdskindex"]];
+    
+    NSEnumerator *indexEnum = [existingIndexes objectEnumerator];
+    NSString *path;
+    NSURL *indexCacheURL = nil;
+    
+    while ((path = [indexEnum nextObject]) && nil == indexCacheURL) {
+        path = [cacheFolder stringByAppendingPathComponent:path];
+        NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+        if ([[cacheDict objectForKey:@"documentURL"] isEqual:documentURL])
+            indexCacheURL = [[NSURL alloc] initFileURLWithPath:path];
+    }
+    return indexCacheURL;
+}
+        
 
 @implementation BDSKFileSearchIndex
 
 #define INDEX_STARTUP 1
 #define INDEX_STARTUP_COMPLETE 2
-
-static inline NSData *sha1SignatureForURL(NSURL *aURL) {
-    NSData *data = [[NSData alloc] initWithContentsOfURL:aURL];
-    NSData *sha1Signature = [data sha1Signature];
-    [data release];
-    return sha1Signature;
-}
+#define INDEX_THREAD_WORKING 3
+#define INDEX_THREAD_DONE 4
 
 - (id)initWithDocument:(id)aDocument
-{
-    return [self initWithDocument:aDocument cacheURL:nil];
-}
-
-- (id)initWithDocument:(id)aDocument cacheURL:(NSURL *)cacheURL
 {
     OBASSERT([NSThread inMainThread]);
 
@@ -87,8 +116,10 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         
         index = NULL;
         
-        if (cacheURL) {
-            NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:[cacheURL path]];
+        // new document won't have a URL, so we'll have to wait for the controller to set it
+        indexCacheURL = [aDocument fileURL] ? copyIndexCacheURLForDocumentURL([aDocument fileURL]) : nil;
+        if (indexCacheURL) {
+            NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:[indexCacheURL path]];
             indexData = (CFMutableDataRef)[[cacheDict objectForKey:@"indexData"] mutableCopy];
             if (indexData != NULL) {
                 index = SKIndexOpenWithMutableData(indexData, NULL);
@@ -99,6 +130,11 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                     indexData = NULL;
                 }
             }
+        } else {
+            // Could use the doc name, but I keep different files with the same name on shared and local volumes, and presumably others do things that are just as weird.  This guarantees a unique name, so we'll just introspect the caches when loading them.  
+            NSString *cachePath = [cacheIndexFolder() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+            cachePath = [cachePath stringByAppendingPathExtension:@"bdskindex"];
+            indexCacheURL = [[NSURL alloc] initFileURLWithPath:cachePath];
         }
         
         if (index == NULL) {
@@ -113,6 +149,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         [nc addObserver:self selector:handler name:BDSKFileSearchIndexInfoChangedNotification object:aDocument];
         [nc addObserver:self selector:handler name:BDSKDocAddItemNotification object:aDocument];
         [nc addObserver:self selector:handler name:BDSKDocDelItemNotification object:aDocument];
+        [nc addObserver:self selector:handler name:NSApplicationWillTerminateNotification object:aDocument];
         
         flags.isIndexing = 0;
         flags.shouldKeepRunning = 1;
@@ -129,11 +166,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         
         // block until the NSMachPort is set up to receive messages
         [setupLock lockWhenCondition:INDEX_STARTUP_COMPLETE];
-        [setupLock unlock];
-        
-        // done with this lock, so get rid of it now
-        [setupLock release];
-        setupLock = nil;
+        [setupLock unlockWithCondition:INDEX_THREAD_WORKING];
+
     }
     
     return self;
@@ -141,23 +175,31 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 
 - (void)dealloc
 {
+    [indexCacheURL release];
     [notificationPort release];
     [notificationQueue release];
     [itemInfos release];
     [signatures release];
     if(index) CFRelease(index);
     if(indexData) CFRelease(indexData);
+    [setupLock release];
     [super dealloc];
 }
 
-// cancel is usually sent from the main thread
+// cancel is always sent from the main thread
 - (void)cancel
 {
+    NSParameterAssert([NSThread inMainThread]);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     OSAtomicCompareAndSwap32(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
     
     // wake the thread up so the runloop will exit
     [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
+    
+    // wait until the thread exits, so we have exclusive access to the ivars
+    [setupLock lockWhenCondition:INDEX_THREAD_DONE];
+    [self writeIndexToDisk];
+    [setupLock unlock];
 }
 
 - (SKIndexRef)index
@@ -182,19 +224,10 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 - (NSDictionary *)itemInfoForURL:(NSURL *)theURL
 {
     NSDictionary *itemInfo = nil;
-    @synchronized(itemInfos) {
+    @synchronized(self) {
         itemInfo = [[itemInfos objectForKey:theURL] retain];
     }
     return [itemInfo autorelease];
-}
-
-- (NSData *)signatureForURL:(NSURL *)theURL
-{
-    NSData *signature = nil;
-    @synchronized(signature) {
-        signature = [[signatures objectForKey:theURL] retain];
-    }
-    return [signature autorelease];
 }
 
 - (double)progressValue
@@ -206,20 +239,10 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     return theValue;
 }
 
-- (BOOL)closeIndexAndCacheToURL:(NSURL *)cacheURL
+- (void)setDocumentURL:(NSURL *)aURL
 {
-    // I'm not sure if this is all safe
-    [self cancel];
-    while ([self isIndexing]);
-    if (index) {
-        SKIndexClose(index);
-        index = NULL;
-    }
-    NSDictionary *cacheDict = nil;
-    @synchronized(signatures) {
-        cacheDict = [NSDictionary dictionaryWithObjectsAndKeys:[[(NSData *)indexData copy] autorelease], @"indexData", [[signatures copy] autorelease], @"signatures", nil];
-    }
-    return [NSKeyedArchiver archiveRootObject:cacheDict toFile:[cacheURL path]];
+    [documentURL autorelease];
+    documentURL = [aURL copy];
 }
 
 @end
@@ -229,7 +252,7 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
     SKIndexDocumentIteratorRef iterator = SKIndexDocumentIteratorCreate (anIndex, inParentDocument);
     SKDocumentRef skDocument;
     CFURLRef aURL;
-    Boolean isLeaf = true;
+    bool isLeaf = true;
     
     while (skDocument = SKIndexDocumentIteratorCopyNext(iterator)) {
         isLeaf = false;
@@ -245,6 +268,14 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
 }
 
 @implementation BDSKFileSearchIndex (Private)
+
+static inline NSData *sha1SignatureForURL(NSURL *aURL) {
+    // using the mapped data options will cause a crash in the sha1Signature method
+    NSData *data = [[NSData alloc] initWithContentsOfURL:aURL];
+    NSData *sha1Signature = [data sha1Signature];
+    [data release];
+    return sha1Signature;
+}
 
 - (NSArray *)itemsToIndex:(NSArray *)items
 {
@@ -262,8 +293,13 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
     
     NSEnumerator *itemEnum = [items objectEnumerator];
     id anItem = nil;
-    double totalObjectCount = [items count];
+    NSMutableDictionary *previouslyIndexedInfos = [NSMutableDictionary dictionary];
     double numberIndexed = 0;
+    double totalObjectCount = [items count];
+    
+    // see comment later; may need tuning here since this is much faster, or else use a message queue instead of passing waitUntilDone:YES
+    const int32_t flushInterval = 20;
+    int32_t countSinceLastFlush = flushInterval;
     
     // update the itemInfos with the items, find items to add and URLs to remove
     OSMemoryBarrier();
@@ -275,15 +311,11 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
         
         while (url = [urlEnum nextObject]) {
             if ([indexedURLs containsObject:url]) {
-                if ([[self signatureForURL:url] isEqual:sha1SignatureForURL(url)]) {
+                if ([[signatures objectForKey:url] isEqual:sha1SignatureForURL(url)]) {
                     [URLsToRemove removeObject:url];
-                    @synchronized(itemInfos) {
-                        [itemInfos setObject:anItem forKey:url];
-                    }
+                    [previouslyIndexedInfos setObject:anItem forKey:url];
                 } else {
-                    @synchronized(signatures) {
-                        [signatures removeObjectForKey:url];
-                    }
+                    [signatures removeObjectForKey:url];
                     needsIndexing = YES;
                 }
             } else {
@@ -291,20 +323,26 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
             }
         }
         
+        // ??? is it worth updating progress here since it runs so fast?  we'd also need to send delegate messages periodically
+        
         if (needsIndexing) {
             [itemsToAdd addObject:anItem];
         } else {
             numberIndexed++;
             @synchronized(self) {
                 progressValue = (numberIndexed / totalObjectCount) * 100;
+                [itemInfos addEntriesFromDictionary:previouslyIndexedInfos];
+                [previouslyIndexedInfos removeAllObjects];
+            }
+            if (countSinceLastFlush-- == 0) {                
+                [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:YES];
+                countSinceLastFlush = flushInterval;
             }
         }
+
         OSMemoryBarrier();
     }
-    
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1)
-        [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+
         
     // remove URLs we could not find in the database
     OSMemoryBarrier();
@@ -312,27 +350,23 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
         NSEnumerator *urlEnum = [URLsToRemove objectEnumerator];
         NSURL *url;
         SKDocumentRef skDocument;
-        volatile Boolean success;
         
         // loop through the array of URLs, create a new SKDocumentRef, and try to remove it
         while (url = [urlEnum nextObject]) {
             
             skDocument = SKDocumentCreateWithURL((CFURLRef)url);
-            OBPOSTCONDITION(skDocument);
-            if(!skDocument) continue;
-            
-            success = SKIndexRemoveDocument(index, skDocument);
-            OBPOSTCONDITION(success);
-            
-            CFRelease(skDocument);
+            if (skDocument) {
+                SKIndexRemoveDocument(index, skDocument);
+                CFRelease(skDocument);
+            }
         }
     }
     [URLsToRemove release];
-    
+    [items release];
+
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
         [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
-    [items release];
     
     return itemsToAdd;
 }
@@ -343,31 +377,35 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
     
     OBPRECONDITION(items);
     
+    // normally set in the indexFilesForItem: method, but we need to avoid returning NO for isIndexing here as well
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
+
+    double totalObjectCount = [items count];
     items = [self itemsToIndex:items];
+    double numberIndexed = totalObjectCount - [items count];
     
     [items retain];
     
     // add items that were not yet indexed
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1 && [items count]) {
-        [self indexFilesForItems:items];
+        [self indexFilesForItems:items numberPreviouslyIndexed:numberIndexed totalCount:totalObjectCount];
     }
     
     [items release];
-    
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
+
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
         [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
 }
 
-- (void)indexFilesForItems:(NSArray *)items
+- (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount
 {
     NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
     
     NSEnumerator *enumerator = [items objectEnumerator];
     id anObject = nil;
-    double totalObjectCount = [items count];
-    double numberIndexed = 0;
     
     // This threshold is sort of arbitrary; for small batches, frequent updates are better if the delegate has a progress indicator, but for large batches (initial indexing), it can kill performance to be continually flushing and searching while indexing.
     const int32_t flushInterval = [items count] > 20 ? 5 : 1;
@@ -428,15 +466,13 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
         
         // SKIndexSetProperties is more generally useful, but is really slow when creating the index
         // SKIndexRenameDocument changes the URL, so it's not useful
-        @synchronized(itemInfos) {
+        @synchronized(self) {
             [itemInfos setObject:anItem forKey:url];
         }
-        @synchronized(signatures) {
-            if (signature)
-                [signatures setObject:signature forKey:url];
-            else
-                [signatures removeObjectForKey:url];
-        }
+        if (signature)
+            [signatures setObject:signature forKey:url];
+        else
+            [signatures removeObjectForKey:url];
         
         success = SKIndexAddDocument(index, skDocument, NULL, TRUE);
         OBPOSTCONDITION(success);
@@ -447,6 +483,22 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
     OBASSERT(swap);
     
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
+}
+
+- (void)writeIndexToDisk
+{
+    NSParameterAssert([NSThread inMainThread]);
+    NSParameterAssert([setupLock condition] == INDEX_THREAD_DONE);
+    if (index && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldCacheFileSearchIndexKey"]) {
+        // flush all pending updates and compact the index as needed before writing
+        SKIndexCompact(index);
+        CFRelease(index);
+        index = NULL;
+
+        NSDictionary *cacheDict = nil;
+        cacheDict = [NSDictionary dictionaryWithObjectsAndKeys:(NSData *)indexData, @"indexData", signatures, @"signatures", documentURL, @"documentURL", nil];
+        [NSKeyedArchiver archiveRootObject:cacheDict toFile:[indexCacheURL path]];
+    }
 }
 
 - (void)runIndexThreadForItems:(NSArray *)items
@@ -464,6 +516,8 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
     
     notificationQueue = [[BDSKThreadSafeMutableArray alloc] initWithCapacity:5];
     [setupLock unlockWithCondition:INDEX_STARTUP_COMPLETE];
+    
+    [setupLock lockWhenCondition:INDEX_THREAD_WORKING];
     
     // an exception here can probably be ignored safely
     @try{
@@ -490,6 +544,12 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
     }
     @catch(id localException){
         NSLog(@"Exception %@ raised in search index; exiting thread run loop.", localException);
+        
+        // clean these up to make sure we have no chance of saving it to disk
+        if (index) CFRelease(index);
+        index = NULL;
+        if (indexData) CFRelease(indexData);
+        indexData = NULL;
         @throw;
     }
     @finally{
@@ -498,15 +558,21 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
         [notificationThread release];
         notificationThread = nil;
         [notificationPort invalidate];
+        [setupLock unlockWithCondition:INDEX_THREAD_DONE];
     }
 }
 
 - (void)processNotification:(NSNotification *)note
 {    
     OBASSERT([NSThread inMainThread]);
-    // Forward the notification to the correct thread
-    [notificationQueue addObject:note];
-    [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
+    if ([[note name] isEqualToString:NSApplicationWillTerminateNotification]) {
+        [self cancel];
+        
+    } else {
+        // Forward the notification to the correct thread
+        [notificationQueue addObject:note];
+        [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
+    }
 }
 
 - (void)handleDocAddItemNotification:(NSNotification *)note
@@ -517,7 +583,7 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
     OBPRECONDITION(searchIndexInfo);
             
     // this will update the delegate when all is complete
-    [self indexFilesForItems:searchIndexInfo];        
+    [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:1];        
 }
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
@@ -549,12 +615,10 @@ static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDo
 			
 			url = [urls objectAtIndex:idx];
             
-            @synchronized(itemInfos) {
+            @synchronized(self) {
                 [itemInfos removeObjectForKey:url];
             }
-            @synchronized(signatures) {
-                [signatures removeObjectForKey:url];
-            }
+            [signatures removeObjectForKey:url];
 			
 			skDocument = SKDocumentCreateWithURL((CFURLRef)url);
 			OBPOSTCONDITION(skDocument);
