@@ -46,6 +46,8 @@
 
 @interface BDSKFileSearchIndex (Private)
 
++ (NSString *)indexCacheFolder;
++ (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL;
 - (NSArray *)itemsToIndex:(NSArray *)items;
 - (void)buildIndexForItems:(NSArray *)items;
 - (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount;
@@ -59,43 +61,6 @@
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL;
 
 @end
-
-static NSString *cacheIndexFolder()
-{
-    static NSString *cacheFolder = nil;
-    if (nil == cacheFolder) {
-        cacheFolder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
-        cacheFolder = [cacheFolder stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
-        if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
-            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
-        cacheFolder = [cacheFolder stringByAppendingPathComponent:@"Search indexes"];
-        if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
-            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
-        cacheFolder = [cacheFolder copy];
-    }
-    return cacheFolder;
-}
-
-// Read each cache file and see which one has a matching documentURL.  If this gets too slow, we could save a plist mapping URL -> UUID and use that instead.
-static NSString *indexCachePathForDocumentURL(NSURL *documentURL)
-{
-    NSCParameterAssert(nil != documentURL);
-    NSString *cacheFolder = cacheIndexFolder();
-    NSArray *existingIndexes = [[NSFileManager defaultManager] directoryContentsAtPath:cacheFolder];
-    existingIndexes = [existingIndexes pathsMatchingExtensions:[NSArray arrayWithObject:@"bdskindex"]];
-    
-    NSEnumerator *indexEnum = [existingIndexes objectEnumerator];
-    NSString *path;
-    NSString *indexCachePath = nil;
-    
-    while ((path = [indexEnum nextObject]) && nil == indexCachePath) {
-        path = [cacheFolder stringByAppendingPathComponent:path];
-        NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
-        if ([[cacheDict objectForKey:@"documentURL"] isEqual:documentURL])
-            indexCachePath = path;
-    }
-    return indexCachePath;
-}
         
 
 @implementation BDSKFileSearchIndex
@@ -118,7 +83,7 @@ static NSString *indexCachePathForDocumentURL(NSURL *documentURL)
         index = NULL;
         
         // new document won't have a URL, so we'll have to wait for the controller to set it
-        NSString *indexCachePath = [aDocument fileURL] ? indexCachePathForDocumentURL([aDocument fileURL]) : nil;
+        NSString *indexCachePath = [aDocument fileURL] ? [[self class] indexCachePathForDocumentURL:[aDocument fileURL]] : nil;
         if (indexCachePath) {
             NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:indexCachePath];
             indexData = (CFMutableDataRef)[[cacheDict objectForKey:@"indexData"] mutableCopy];
@@ -259,6 +224,43 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     NSData *sha1Signature = [data sha1Signature];
     [data release];
     return sha1Signature;
+}
+
++ (NSString *)indexCacheFolder
+{
+    static NSString *cacheFolder = nil;
+    if (nil == cacheFolder) {
+        cacheFolder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+        cacheFolder = [cacheFolder stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
+        if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
+            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
+        cacheFolder = [cacheFolder stringByAppendingPathComponent:@"Search Indexes"];
+        if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
+            [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
+        cacheFolder = [cacheFolder copy];
+    }
+    return cacheFolder;
+}
+
+// Read each cache file and see which one has a matching documentURL.  If this gets too slow, we could save a plist mapping URL -> UUID and use that instead.
++ (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL
+{
+    NSCParameterAssert(nil != documentURL);
+    NSString *cacheFolder = [self indexCacheFolder];
+    NSArray *existingIndexes = [[NSFileManager defaultManager] directoryContentsAtPath:cacheFolder];
+    existingIndexes = [existingIndexes pathsMatchingExtensions:[NSArray arrayWithObject:@"bdskindex"]];
+    
+    NSEnumerator *indexEnum = [existingIndexes objectEnumerator];
+    NSString *path;
+    NSString *indexCachePath = nil;
+    
+    while ((path = [indexEnum nextObject]) && nil == indexCachePath) {
+        path = [cacheFolder stringByAppendingPathComponent:path];
+        NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+        if ([[cacheDict objectForKey:@"documentURL"] isEqual:documentURL])
+            indexCachePath = path;
+    }
+    return indexCachePath;
 }
 
 - (NSArray *)itemsToIndex:(NSArray *)items
@@ -476,10 +478,10 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         CFRelease(index);
         index = NULL;
         
-        NSString *indexCachePath = indexCachePathForDocumentURL(documentURL);
+        NSString *indexCachePath = [[self class] indexCachePathForDocumentURL:documentURL];
         if (nil == indexCachePath) {
             // Could use the doc name, but I keep different files with the same name on shared and local volumes, and presumably others do things that are just as weird.  This guarantees a unique name, so we'll just introspect the caches when loading them.  
-            indexCachePath = [cacheIndexFolder() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+            indexCachePath = [[[self class] indexCacheFolder] stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
             indexCachePath = [indexCachePath stringByAppendingPathExtension:@"bdskindex"];
         }
         
