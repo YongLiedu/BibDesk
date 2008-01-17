@@ -87,12 +87,14 @@ static inline CFIndex __BDSKGetStopwordCount(void) { return stopWordCache->numbe
 
 static CFCharacterSetRef whitespaceCharacterSet = NULL;
 static CFCharacterSetRef whitespaceAndNewlineCharacterSet = NULL;
+static CFCharacterSetRef punctuationCharacterSet = NULL;
 
 __attribute__((constructor))
 static void initializeStaticCharacterSets(void)
 {
     whitespaceCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
     whitespaceAndNewlineCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
+    punctuationCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetPunctuation));
 }
 
 static inline
@@ -107,6 +109,13 @@ BOOL __BDCharacterIsWhitespaceOrNewline(UniChar c)
 {
     // minor optimization: check for an ASCII character, since those are most common in TeX
     return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(whitespaceAndNewlineCharacterSet, c) );
+}
+
+static inline
+BOOL __BDCharacterIsPunctuation(UniChar c)
+{
+    // minor optimization: check for an ASCII character, since those are most common in TeX
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(punctuationCharacterSet, c) );
 }
 
 static inline
@@ -257,7 +266,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAlloc
 }
 
 static inline Boolean
-__BDShouldRemoveUniChar(UniChar c){ return (c == '`' || c == '$' || c == '\\' || CFCharacterSetIsCharacterMember(CFCharacterSetGetPredefined(kCFCharacterSetPunctuation), c)); }
+__BDShouldRemoveUniChar(UniChar c){ return (c == '`' || c == '$' || c == '\\' || __BDCharacterIsPunctuation(c)); }
 
 // private function for removing some tex special characters from a string
 // (only those I consider relevant to sorting)
@@ -315,18 +324,26 @@ void __BDDeleteArticlesForSorting(CFMutableStringRef mutableString)
         maxRemoveLength = MAX(CFStringGetLength(CFArrayGetValueAtIndex(articlesToRemove, idx)), maxRemoveLength);
     
     idx = count;
-    CFRange articleRange;
+    CFRange searchRange, articleRange;
     Boolean found;
-    CFIndex length;
-
+    CFIndex start = 0, length = CFStringGetLength(mutableString);
+    
+    while (start < length && __BDShouldRemoveUniChar(CFStringGetCharacterAtIndex(mutableString, start)))
+        start++;
+    
+    searchRange = CFRangeMake(start, MIN(length - start, maxRemoveLength));
+    
     while(idx--){
-        length = CFStringGetLength(mutableString);
-        found = CFStringFindWithOptions(mutableString, CFArrayGetValueAtIndex(articlesToRemove, idx), CFRangeMake(0, MIN(length, maxRemoveLength)), 0, &articleRange);
+        found = CFStringFindWithOptions(mutableString, CFArrayGetValueAtIndex(articlesToRemove, idx), CFRangeMake(0, MIN(length, maxRemoveLength)), kCFCompareAnchored | kCFCompareCaseInsensitive, &articleRange);
         
         // make sure the next character is whitespace before deleting, after checking bounds
         if(found && length > articleRange.length && 
-           __BDCharacterIsWhitespace(CFStringGetCharacterAtIndex(mutableString, articleRange.length++)))
+           (__BDCharacterIsWhitespace(CFStringGetCharacterAtIndex(mutableString, articleRange.length)) ||
+            __BDCharacterIsPunctuation(CFStringGetCharacterAtIndex(mutableString, articleRange.length)))) {
+            articleRange.length++;
             CFStringDelete(mutableString, articleRange);
+            break;
+        }
     }        
 }
 

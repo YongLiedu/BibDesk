@@ -824,8 +824,8 @@ http://home.planet.nl/~faase009/GNU.txt
 - (NSString *)stringByRemovingTeXAndStopWords;
 {
     CFMutableStringRef modifiedSelf = CFStringCreateMutableCopy(CFAllocatorGetDefault(), CFStringGetLength((CFStringRef)self), (CFStringRef)self);
-    BDDeleteTeXForSorting(modifiedSelf);
     BDDeleteArticlesForSorting(modifiedSelf);
+    BDDeleteTeXForSorting(modifiedSelf);
     return [(id)modifiedSelf autorelease];
 }
     
@@ -839,10 +839,10 @@ http://home.planet.nl/~faase009/GNU.txt
     CFMutableStringRef modifiedSelf = CFStringCreateMutableCopy(allocator, CFStringGetLength((CFStringRef)self), (CFStringRef)self);
     CFMutableStringRef modifiedOther = CFStringCreateMutableCopy(allocator, CFStringGetLength((CFStringRef)otherString), (CFStringRef)otherString);
     
-    BDDeleteTeXForSorting(modifiedSelf);
-    BDDeleteTeXForSorting(modifiedOther);
     BDDeleteArticlesForSorting(modifiedSelf);
     BDDeleteArticlesForSorting(modifiedOther);
+    BDDeleteTeXForSorting(modifiedSelf);
+    BDDeleteTeXForSorting(modifiedOther);
     
     // the mutating functions above should only create an empty string, not a nil string
     OBASSERT(modifiedSelf != nil);
