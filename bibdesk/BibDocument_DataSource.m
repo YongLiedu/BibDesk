@@ -1380,7 +1380,9 @@
         return NO;
     
     NSString *tcID = [tableColumn identifier];
-    return [tcID isURLField] && [[shownPublications objectAtIndex:row] URLForField:tcID];
+    return ([tcID isURLField] && [[shownPublications objectAtIndex:row] URLForField:tcID]) ||
+           ([tcID isEqualToString:BDSKLocalFileString] && [[[shownPublications objectAtIndex:row] localFiles] count]) ||
+           ([tcID isEqualToString:BDSKRemoteURLString] && [[[shownPublications objectAtIndex:row] remoteURLs] count]);
 }
 
 - (void)tableView:(NSTableView *)tv mouseEnteredTableColumn:(NSTableColumn *)tableColumn row:(int)row;
@@ -1388,10 +1390,18 @@
     if (row == -1 || row >= [self numberOfRowsInTableView:tv])
         return;
     
+    NSString *tcID = [tableColumn identifier];
     BibItem *pub = [shownPublications objectAtIndex:row];
-    NSURL *url = [pub URLForField:[tableColumn identifier]];
-    if (url)
-        [self setStatus:[url isFileURL] ? [[url path] stringByAbbreviatingWithTildeInPath] : [url absoluteString]];
+    
+    if ([tcID isURLField]) {
+        NSURL *url = [pub URLForField:[tableColumn identifier]];
+        if (url)
+            [self setStatus:[url isFileURL] ? [[url path] stringByAbbreviatingWithTildeInPath] : [url absoluteString]];
+    } else if ([tcID isEqualToString:BDSKLocalFileString]) {
+        [self setStatus:[[pub existingLocalFiles] valueForKeyPath:@"path.stringByAbbreviatingWithTildeInPath.@componentsJoinedByComma"]];
+    } else if ([tcID isEqualToString:BDSKRemoteURLString]) {
+        [self setStatus:[[pub remoteURLs] valueForKeyPath:@"URL.absoluteString.@componentsJoinedByComma"]];
+    }
 }
 
 - (void)tableView:(NSTableView *)tv mouseExitedTableColumn:(NSTableColumn *)tableColumn row:(int)row;
