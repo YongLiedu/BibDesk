@@ -234,7 +234,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         cacheFolder = [cacheFolder stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
         if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
             [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
-        cacheFolder = [cacheFolder stringByAppendingPathComponent:@"Search Indexes"];
+        cacheFolder = [cacheFolder stringByAppendingPathComponent:NSStringFromClass(self)];
         if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
             [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
         cacheFolder = [cacheFolder copy];
@@ -245,7 +245,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 // Read each cache file and see which one has a matching documentURL.  If this gets too slow, we could save a plist mapping URL -> UUID and use that instead.
 + (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL
 {
-    NSCParameterAssert(nil != documentURL);
+    NSParameterAssert(nil != documentURL);
     NSString *cacheFolder = [self indexCacheFolder];
     NSArray *existingIndexes = [[NSFileManager defaultManager] directoryContentsAtPath:cacheFolder];
     existingIndexes = [existingIndexes pathsMatchingExtensions:[NSArray arrayWithObject:@"bdskindex"]];
