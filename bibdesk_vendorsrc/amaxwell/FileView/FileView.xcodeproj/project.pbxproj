@@ -30,7 +30,7 @@
 		F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */; };
 		F92C7C4F0D282503004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
 		F92C7C500D28250F004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
-		F93C3AEB0D39473C006EB558 /* FVFinderLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = F93C3AE90D39473C006EB558 /* FVFinderLabel.h */; };
+		F93C3AEB0D39473C006EB558 /* FVFinderLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = F93C3AE90D39473C006EB558 /* FVFinderLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F93C3AEC0D39473C006EB558 /* FVFinderLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */; };
 		F94692020CA56EC500AC2772 /* FileView.h in Headers */ = {isa = PBXBuildFile; fileRef = F94691F70CA56EC500AC2772 /* FileView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F94692030CA56EC500AC2772 /* FileView.m in Sources */ = {isa = PBXBuildFile; fileRef = F94691F80CA56EC500AC2772 /* FileView.m */; };
@@ -114,12 +114,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		CE1CC8450D1FCC650087B955 /* PBXContainerItemProxy */ = {
+		CE2E6FBD0D3FE19D00340B39 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
-			remoteInfo = FileView;
+			remoteGlobalIDString = F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */;
+			remoteInfo = "Framework + Plugin";
 		};
 		F9F04CDA0CE260AC00F28ED2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -577,7 +577,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				CE1CC8460D1FCC650087B955 /* PBXTargetDependency */,
+				CE2E6FBE0D3FE19D00340B39 /* PBXTargetDependency */,
 			);
 			name = "FileView Program";
 			productName = "FileView Program";
@@ -708,10 +708,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		CE1CC8460D1FCC650087B955 /* PBXTargetDependency */ = {
+		CE2E6FBE0D3FE19D00340B39 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 8DC2EF4F0486A6940098B216 /* FileView */;
-			targetProxy = CE1CC8450D1FCC650087B955 /* PBXContainerItemProxy */;
+			target = F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */;
+			targetProxy = CE2E6FBD0D3FE19D00340B39 /* PBXContainerItemProxy */;
 		};
 		F9F04CDB0CE260AC00F28ED2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
