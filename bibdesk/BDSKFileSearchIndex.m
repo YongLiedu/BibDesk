@@ -283,8 +283,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     double numberIndexed = 0;
     double totalObjectCount = [items count];
     
-    // see comment later; may need tuning here since this is much faster, or else use a message queue instead of passing waitUntilDone:YES
-    const int32_t flushInterval = 50;
+    // see comment later; may need tuning here since this is much faster than adding new docs to the index
+    const int32_t flushInterval = 20;
     int32_t countSinceLastFlush = flushInterval;
     
     // update the itemInfos with the items, find items to add and URLs to remove
@@ -316,11 +316,12 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             @synchronized(self) {
                 progressValue = (numberIndexed / totalObjectCount) * 100;
             }
-            // must update before sending the delegate message
-            [itemInfos addEntriesFromDictionary:previouslyIndexedInfos];
-            [previouslyIndexedInfos removeAllObjects];
-            if (countSinceLastFlush-- == 0) {                
-                [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+            if (countSinceLastFlush-- == 0) {       
+                // must update before sending the delegate message
+                [itemInfos addEntriesFromDictionary:previouslyIndexedInfos];
+                [previouslyIndexedInfos removeAllObjects];
+                
+                [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate:) forObject:delegate withObject:self];
                 countSinceLastFlush = flushInterval;
             }
         }
@@ -328,6 +329,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         OSMemoryBarrier();
     }
 
+    // add any leftovers
+    [itemInfos addEntriesFromDictionary:previouslyIndexedInfos];
         
     // remove URLs we could not find in the database
     OSMemoryBarrier();
@@ -472,7 +475,12 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 {
     NSParameterAssert([NSThread inMainThread]);
     NSParameterAssert([setupLock condition] == INDEX_THREAD_DONE);
-    if (index && documentURL && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldCacheFileSearchIndexKey"]) {
+    
+    // @@ temporary for testing
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableFileSearchIndexCacheKey"])
+        return;
+    
+    if (index && documentURL) {
         // flush all pending updates and compact the index as needed before writing
         SKIndexCompact(index);
         CFRelease(index);
