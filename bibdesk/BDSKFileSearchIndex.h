@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKFileSearchIndex, BDSKThreadSafeMutableArray, BDSKThreadSafeMutableDictionary;
+@class BDSKFileSearchIndex, BDSKThreadSafeMutableArray, BDSKMultiValueDictionary;
 
 @protocol BDSKFileSearchIndexDelegate <NSObject>
 
@@ -58,9 +58,11 @@ typedef struct _BDSKSearchIndexFlags
 @interface BDSKFileSearchIndex : NSObject {
     SKIndexRef index;
     CFMutableDataRef indexData;
-    BDSKThreadSafeMutableDictionary *identifierURLs;
+    BDSKMultiValueDictionary *identifierURLs;
     NSMutableDictionary *signatures;
     id delegate;
+    
+    pthread_rwlock_t rwlock;
     
     BDSKThreadSafeMutableArray *notificationQueue;
     NSMachPort *notificationPort;
@@ -81,9 +83,9 @@ typedef struct _BDSKSearchIndexFlags
 - (BOOL)isIndexing;
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject;
 - (NSURL *)identifierURLForURL:(NSURL *)theURL;
+- (NSSet *)allIdentifierURLsForURL:(NSURL *)theURL;
 
 // Poll this for progress bar updates during indexing
 - (double)progressValue;
 
 @end
-

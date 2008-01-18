@@ -224,10 +224,14 @@
             maxValue = MAX(score, maxValue);
             
             NSURL *theURL = (NSURL *)SKDocumentCopyURL(skDocument);
-            NSURL *identifierURL = [searchIndex identifierURLForURL:theURL];
-            NSString *title = [[self delegate] search:self titleForIdentifierURL:(NSURL *)identifierURL];
+            NSSet *identifierURLs = [searchIndex allIdentifierURLsForURL:theURL];
+            NSString *title = nil;
+            NSEnumerator *idURLEnum = [identifierURLs objectEnumerator];
+            NSURL *idURL;
+            while (title == nil && (idURL = [idURLEnum nextObject]))
+                title = [[self delegate] search:self titleForIdentifierURL:idURL];
             
-            searchResult = [[BDSKFileSearchResult alloc] initWithURL:theURL identifierURL:identifierURL title:(NSString *)title score:score];            
+            searchResult = [[BDSKFileSearchResult alloc] initWithURL:theURL identifierURLs:identifierURLs title:(NSString *)title score:score];            
             [searchResults addObject:searchResult];            
             [searchResult release];
             [theURL release];

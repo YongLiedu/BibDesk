@@ -1,11 +1,11 @@
 //
-//  BDSKFileSearchResult.h
+//  BDSKMultiValueDictionary.h
 //  Bibdesk
 //
-//  Created by Adam Maxwell on 10/12/05.
+//  Created by Christiaan Hofman on 1/18/08.
 /*
- This software is Copyright (c) 2005-2008
- Adam Maxwell. All rights reserved.
+ This software is Copyright (c)2008
+  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -19,7 +19,7 @@
  the documentation and/or other materials provided with the
  distribution.
  
- - Neither the name of Adam Maxwell nor the names of any
+ - Neither the name of  Christiaan Hofman nor the names of any
  contributors may be used to endorse or promote products derived
  from this software without specific prior written permission.
  
@@ -38,28 +38,23 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKFile;
 
-@interface BDSKFileSearchResult : NSObject <NSCopying>
-{
-    BDSKFile *file;
-    // title of the search result (shown in table)
-    NSString *string;
-    NSImage *image;
-    double score;
-    NSSet *identifierURLs;
+@interface BDSKMultiValueDictionary : NSObject {
+    NSMutableDictionary *dictionary;
 }
 
-// This class is designed to be used in a hashing container (NSSet, NSDictionary) when you want the isEqual: and hash to be based on file comparison
-- (id)initWithURL:(NSURL *)aURL identifierURLs:(NSSet *)aSet title:(NSString *)aTitle score:(float)aScore;
-
-// used by the table cell
-- (NSImage *)image;
-- (NSString *)string;
-- (void)setScore:(double)newScore;
-- (double)score;
-- (NSSet *)identifierURLs;
-- (NSURL *)URL;
+- (unsigned int)count;
+- (NSSet *)setForKey:(id)aKey;
+- (id)anyObjectForKey:(id)aKey;
+- (void)addObject:(id)anObject forKey:(id)aKey;
+- (void)addObjects:(NSSet *)moreObjects forKey:(id)aKey;
+- (void)setObjects:(NSSet *)replacementObjects forKey:(id)aKey;
+- (void)removeObject:(id)anObject forKey:(id)aKey;
+- (void)removeAllObjects;
+- (void)addEntriesFromDictionary:(BDSKMultiValueDictionary *)otherDictionary;
+- (NSEnumerator *)keyEnumerator;
+- (NSArray *)allKeys;
+- (NSSet *)allValues;
+- (NSMutableDictionary *)dictionary;
 
 @end
-

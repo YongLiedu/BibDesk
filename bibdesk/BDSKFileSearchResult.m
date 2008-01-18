@@ -42,11 +42,11 @@
 
 @implementation BDSKFileSearchResult
 
-- (id)initWithURL:(NSURL *)aURL identifierURL:(NSURL *)anIdentifierURL title:(NSString *)aTitle score:(float)aScore;
+- (id)initWithURL:(NSURL *)aURL identifierURLs:(NSSet *)aSet title:(NSString *)aTitle score:(float)aScore;
 {
     
     NSParameterAssert(nil != aURL);
-    NSParameterAssert(nil != anIdentifierURL);
+    NSParameterAssert(nil != aSet);
         
     if ((self = [super init])) {
         
@@ -58,7 +58,7 @@
         if (string == nil)
             aTitle = [[aURL path] copy];
         
-        identifierURL = [anIdentifierURL copy];
+        identifierURLs = [aSet copy];
         
         score = aScore;
     }
@@ -70,7 +70,7 @@
 {
     [file release];
     [string release];
-    [identifierURL release];
+    [identifierURLs release];
     [image release];
     [super dealloc];
 }
@@ -80,7 +80,7 @@
     BDSKFileSearchResult *copy = [[[self class] allocWithZone:zone] init];
     copy->file = [file copy];
     copy->string = [string copy];
-    copy->identifierURL = [identifierURL copy];
+    copy->identifierURLs = [identifierURLs copy];
     copy->image = [image retain];
     copy->score = score;
     return copy;
@@ -103,7 +103,7 @@
 
 - (NSImage *)image { return image; }
 - (NSString *)string { return string; }
-- (NSURL *)identifierURL { return identifierURL; }
+- (NSSet *)identifierURLs { return identifierURLs; }
 - (NSURL *)URL { return [file fileURL]; }
 - (void)setScore:(double)newScore { score = newScore; }
 - (double)score { return score; }

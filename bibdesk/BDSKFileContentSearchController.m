@@ -273,7 +273,7 @@
         BDSKFileSearchResult *result;
         
         while (result = [resultEnum nextObject])
-            if ([filterURLs containsObject:[result identifierURL]])
+            if ([filterURLs intersectsSet:[result identifierURLs]])
                 [newFilteredResults addObject:result];
         [self setFilteredResults:newFilteredResults];
     }
@@ -338,9 +338,7 @@
 
 - (NSArray *)identifierURLsOfSelectedItems
 {
-    NSMutableArray *array = [NSMutableArray array];
-    [array addNonDuplicateObjectsFromArray:[[resultsArrayController selectedObjects] valueForKey:@"identifierURL"]];
-    return array;
+    return [[resultsArrayController selectedObjects] valueForKeyPath:@"@distinctUnionOfSets.identifierURLs"];
 }
 
 - (NSArray *)URLsOfSelectedItems {

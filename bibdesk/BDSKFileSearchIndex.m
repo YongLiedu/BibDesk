@@ -41,7 +41,7 @@
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKThreadSafeMutableArray.h"
-#import "BDSKThreadSafeMutableDictionary.h"
+#import "BDSKMultiValueDictionary.h"
 #import "NSObject_BDSKExtensions.h"
 
 @interface BDSKFileSearchIndex (Private)
@@ -115,7 +115,8 @@
         flags.shouldKeepRunning = 1;
         
         // maintain dictionaries mapping URL -> identifierURL, since SKIndex properties are slow
-        identifierURLs = [[BDSKThreadSafeMutableDictionary alloc] initWithCapacity:128];
+        identifierURLs = [[BDSKMultiValueDictionary alloc] init];
+		pthread_rwlock_init(&rwlock, NULL);
         
         progressValue = 0.0;
         
@@ -135,9 +136,13 @@
 
 - (void)dealloc
 {
+    pthread_rwlock_wrlock(&rwlock);
+	[identifierURLs release];
+    identifierURLs = nil;
+    pthread_rwlock_unlock(&rwlock);
+    pthread_rwlock_destroy(&rwlock);
     [notificationPort release];
     [notificationQueue release];
-    [identifierURLs release];
     [signatures release];
     if(index) CFRelease(index);
     if(indexData) CFRelease(indexData);
@@ -183,7 +188,18 @@
 
 - (NSURL *)identifierURLForURL:(NSURL *)theURL
 {
-    return [identifierURLs objectForKey:theURL];
+    pthread_rwlock_rdlock(&rwlock);
+    NSURL *identifierURL = [[[identifierURLs anyObjectForKey:theURL] retain] autorelease];
+    pthread_rwlock_unlock(&rwlock);
+    return identifierURL;
+}
+
+- (NSSet *)allIdentifierURLsForURL:(NSURL *)theURL
+{
+    pthread_rwlock_rdlock(&rwlock);
+    NSSet *set = [[[identifierURLs setForKey:theURL] retain] autorelease];
+    pthread_rwlock_unlock(&rwlock);
+    return set;
 }
 
 - (double)progressValue
@@ -280,7 +296,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     NSEnumerator *itemEnum = [items objectEnumerator];
     id anItem = nil;
-    NSMutableDictionary *previouslyIndexedItems = [NSMutableDictionary dictionary];
+    BDSKMultiValueDictionary *previouslyIndexedItems = [[[BDSKMultiValueDictionary alloc] init] autorelease];
     double numberIndexed = 0;
     double totalObjectCount = [items count];
     
@@ -302,7 +318,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                 if ([[signatures objectForKey:url] isEqual:sha1SignatureForURL(url)]) {
                     [URLsToRemove removeObject:url];
                     if (identifierURL)
-                        [previouslyIndexedItems setObject:identifierURL forKey:url];
+                        [previouslyIndexedItems addObject:identifierURL forKey:url];
                 } else {
                     [signatures removeObjectForKey:url];
                     needsIndexing = YES;
@@ -321,7 +337,9 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             }
             if (countSinceLastFlush-- == 0) {       
                 // must update before sending the delegate message
+                pthread_rwlock_wrlock(&rwlock);
                 [identifierURLs addEntriesFromDictionary:previouslyIndexedItems];
+                pthread_rwlock_unlock(&rwlock);
                 [previouslyIndexedItems removeAllObjects];
                 
                 [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate:) forObject:delegate withObject:self];
@@ -333,7 +351,11 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     }
 
     // add any leftovers
-    [identifierURLs addEntriesFromDictionary:previouslyIndexedItems];
+    if ([previouslyIndexedItems count]) {
+        pthread_rwlock_wrlock(&rwlock);
+        [identifierURLs addEntriesFromDictionary:previouslyIndexedItems];
+        pthread_rwlock_unlock(&rwlock);
+    }
         
     // remove URLs we could not find in the database
     OSMemoryBarrier();
@@ -460,7 +482,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         // SKIndexRenameDocument changes the URL, so it's not useful
         
         if (identifierURL)
-            [identifierURLs setObject:identifierURL forKey:url];
+            [identifierURLs addObject:identifierURL forKey:url];
         if (signature)
             [signatures setObject:signature forKey:url];
         else
@@ -597,6 +619,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     SKDocumentRef skDocument;
     volatile Boolean success;
     
+    NSURL *identifierURL = nil;
     NSArray *urls = nil;
     unsigned int idx, maxIdx;
     
@@ -606,6 +629,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     OBASSERT(swap);
 
 	while(anItem = [itemEnumerator nextObject]){
+        identifierURL = [anItem valueForKey:@"identifierURL"];
         urls = [anItem valueForKey:@"urls"];
         maxIdx = [urls count];
         
@@ -614,7 +638,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 			
 			url = [urls objectAtIndex:idx];
             
-            [identifierURLs removeObjectForKey:url];
+            [identifierURLs removeObject:identifierURL forKey:url];
             [signatures removeObjectForKey:url];
 			
 			skDocument = SKDocumentCreateWithURL((CFURLRef)url);
