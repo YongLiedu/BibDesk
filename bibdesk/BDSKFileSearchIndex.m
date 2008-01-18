@@ -51,6 +51,8 @@
 + (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL;
 - (NSArray *)itemsToIndex:(NSArray *)items;
 - (void)buildIndexForItems:(NSArray *)items;
+- (void)indexFileURL:(NSURL *)aURL signature:(NSData *)signature;
+- (void)removeFileURL:(NSURL *)aURL;
 - (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount;
 - (void)indexFileURLs:(NSSet *)urlstoBeAdded forIdentifierURL:(NSURL *)identifierURL;
 - (void)removeFileURLs:(NSSet *)urlstoBeAdded forIdentifierURL:(NSURL *)identifierURL;
@@ -246,7 +248,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     NSData *data = [[NSData alloc] initWithContentsOfURL:aURL];
     NSData *sha1Signature = [data sha1Signature];
     [data release];
-    return sha1Signature;
+    return sha1Signature ? sha1Signature : [NSData data];
 }
 
 + (NSString *)indexCacheFolder
@@ -364,18 +366,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     if (flags.shouldKeepRunning == 1 && [URLsToRemove count]) {
         NSEnumerator *urlEnum = [URLsToRemove objectEnumerator];
         NSURL *url;
-        SKDocumentRef skDocument;
-        
-        // loop through the array of URLs, create a new SKDocumentRef, and try to remove it
-        while (url = [urlEnum nextObject]) {
-            [signatures removeObjectForKey:url];
-            
-            skDocument = SKDocumentCreateWithURL((CFURLRef)url);
-            if (skDocument) {
-                SKIndexRemoveDocument(index, skDocument);
-                CFRelease(skDocument);
-            }
-        }
+        while (url = [urlEnum nextObject])
+            [self removeFileURL:url];
     }
     [URLsToRemove release];
     [items release];
@@ -414,6 +406,37 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
         [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
+}
+
+- (void)indexFileURL:(NSURL *)aURL signature:(NSData *)signature{
+    SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
+    
+    OBPOSTCONDITION(skDocument);
+    
+    if (skDocument != NULL) {
+        OBASSERT(signature);
+        
+        if (signature)
+            [signatures setObject:signature forKey:aURL];
+        else
+            [signatures removeObjectForKey:aURL];
+        
+        SKIndexAddDocument(index, skDocument, NULL, TRUE);
+        CFRelease(skDocument);
+    }
+}
+
+- (void)removeFileURL:(NSURL *)aURL{
+    SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
+    
+    OBPOSTCONDITION(skDocument);
+    
+    if (skDocument != NULL) {
+        [signatures removeObjectForKey:aURL];
+        
+        SKIndexRemoveDocument(index, skDocument);
+        CFRelease(skDocument);
+    }
 }
 
 - (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount
@@ -482,19 +505,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         [identifierURLs addObject:identifierURL forKey:url];
         pthread_rwlock_unlock(&rwlock);
         
-        if (shouldBeAdded) {
-            if (signature)
-                [signatures setObject:signature forKey:url];
-            else
-                [signatures removeObjectForKey:url];
-            
-            // @@ should adding signature be conditional on this
-            SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)url);
-            if(skDocument != NULL) {
-                SKIndexAddDocument(index, skDocument, NULL, TRUE);            
-                CFRelease(skDocument);
-            }
-        }
+        if (shouldBeAdded)
+            [self indexFileURL:url signature:signature];
     }
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     
@@ -526,16 +538,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         shouldBeRemoved = (0 == [[identifierURLs allObjectsForKey:url] count]);
         pthread_rwlock_unlock(&rwlock);
         
-        if (shouldBeRemoved) {
-            [signatures removeObjectForKey:url];
-            
-            skDocument = SKDocumentCreateWithURL((CFURLRef)url);
-            OBPOSTCONDITION(skDocument);
-            if (skDocument) {
-                SKIndexRemoveDocument(index, skDocument);                
-                CFRelease(skDocument);
-            }
-        }
+        if (shouldBeRemoved)
+            [self removeFileURL:url];
 	}
     
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
@@ -561,20 +565,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                 
         NSData *signature = sha1SignatureForURL(url);
         
-        if ([[signatures objectForKey:url] isEqual:signature] == NO) {
-            
-            skDocument = SKDocumentCreateWithURL((CFURLRef)url);
-            OBPOSTCONDITION(skDocument);
-            if(skDocument == NULL) continue;
-            
-            if (signature)
-                [signatures setObject:signature forKey:url];
-            else
-                [signatures removeObjectForKey:url];
-            
-            SKIndexAddDocument(index, skDocument, NULL, TRUE);
-            CFRelease(skDocument);
-        }
+        if ([[signatures objectForKey:url] isEqual:signature] == NO)
+            [self indexFileURL:url signature:signature];
     }
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     
