@@ -43,6 +43,7 @@
 #import "BDSKThreadSafeMutableArray.h"
 #import "BDSKMultiValueDictionary.h"
 #import "NSObject_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 @interface BDSKFileSearchIndex (Private)
 
@@ -617,9 +618,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         
         NSString *indexCachePath = [[self class] indexCachePathForDocumentURL:documentURL];
         if (nil == indexCachePath) {
-            // Could use the doc name, but I keep different files with the same name on shared and local volumes, and presumably others do things that are just as weird.  This guarantees a unique name, so we'll just introspect the caches when loading them.  
-            indexCachePath = [[[self class] indexCacheFolder] stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-            indexCachePath = [indexCachePath stringByAppendingPathExtension:@"bdskindex"];
+            indexCachePath = [[[[documentURL path] lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
+            indexCachePath = [[NSFileManager defaultManager] uniqueFilePathWithName:indexCachePath atPath:[[self class] indexCacheFolder]];
         }
         
         NSDictionary *cacheDict = nil;
