@@ -152,8 +152,9 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     OSAtomicCompareAndSwap32(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
     
-    // wake the thread up so the runloop will exit
-    [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
+    // wake the thread up so the runloop will exit; shouldKeepRunning may have already done that, so don't send if the port is already dead
+    if ([notificationPort isValid])
+        [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
     
     // wait until the thread exits, so we have exclusive access to the ivars
     [setupLock lockWhenCondition:INDEX_THREAD_DONE];
