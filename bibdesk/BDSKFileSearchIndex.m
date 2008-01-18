@@ -49,7 +49,6 @@
 
 + (NSString *)indexCacheFolder;
 + (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL;
-- (NSArray *)itemsToIndex:(NSArray *)items;
 - (void)buildIndexForItems:(NSArray *)items;
 - (void)indexFileURL:(NSURL *)aURL signature:(NSData *)signature;
 - (void)removeFileURL:(NSURL *)aURL;
@@ -222,25 +221,6 @@
 @end
 
 
-static void addLeafURLsInIndexToSet(SKIndexRef anIndex, SKDocumentRef inParentDocument, CFMutableSetRef indexedURLs) {
-    SKIndexDocumentIteratorRef iterator = SKIndexDocumentIteratorCreate (anIndex, inParentDocument);
-    SKDocumentRef skDocument;
-    CFURLRef aURL;
-    bool isLeaf = true;
-    
-    while (skDocument = SKIndexDocumentIteratorCopyNext(iterator)) {
-        isLeaf = false;
-        addLeafURLsInIndexToSet(anIndex, skDocument, indexedURLs);
-        CFRelease(skDocument);
-    }
-    CFRelease(iterator);
-    
-    if (isLeaf && inParentDocument && kSKDocumentStateNotIndexed != SKIndexGetDocumentState(anIndex, inParentDocument) && (aURL = SKDocumentCopyURL(inParentDocument))) {
-        CFSetAddValue(indexedURLs, aURL);
-        CFRelease(aURL);
-    }
-}
-
 @implementation BDSKFileSearchIndex (Private)
 
 static inline NSData *sha1SignatureForURL(NSURL *aURL) {
@@ -288,97 +268,6 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     return indexCachePath;
 }
 
-- (NSArray *)itemsToIndex:(NSArray *)items
-{
-    [items retain];
-    
-    NSMutableSet *indexedURLs = [NSMutableSet set];
-    
-    addLeafURLsInIndexToSet(index, NULL, (CFMutableSetRef)indexedURLs);
-    
-    if ([indexedURLs count] == 0)
-        return [items autorelease];
-    
-    NSMutableSet *URLsToRemove = [indexedURLs mutableCopy];
-    NSMutableArray *itemsToAdd = [NSMutableArray array];
-    
-    NSEnumerator *itemEnum = [items objectEnumerator];
-    id anItem = nil;
-    BDSKMultiValueDictionary *indexedIdentifierURLs = [[[BDSKMultiValueDictionary alloc] init] autorelease];
-    double numberIndexed = 0;
-    double totalObjectCount = [items count];
-    
-    // see comment later; may need tuning here since this is much faster than adding new docs to the index
-    const int32_t flushInterval = 20;
-    int32_t countSinceLastFlush = flushInterval;
-    
-    // update the identifierURLs with the items, find items to add and URLs to remove
-    OSMemoryBarrier();
-    while(flags.shouldKeepRunning == 1 && (anItem = [itemEnum nextObject])) {
-        
-        NSEnumerator *urlEnum = [[anItem valueForKey:@"urls"] objectEnumerator];
-        NSURL *identifierURL = [anItem objectForKey:@"identifierURL"];
-        NSURL *url;
-        NSMutableArray *missingURLs = nil;
-        
-        while (url = [urlEnum nextObject]) {
-            if ([indexedURLs containsObject:url] && [[signatures objectForKey:url] isEqual:sha1SignatureForURL(url)]) {
-                [URLsToRemove removeObject:url];
-                [indexedIdentifierURLs addObject:identifierURL forKey:url];
-            } else {
-                if (missingURLs == nil)
-                    missingURLs = [NSMutableArray array];
-                [missingURLs addObject:url];
-            }
-        }
-                
-        if ([missingURLs count]) {
-            [itemsToAdd addObject:[NSDictionary dictionaryWithObjectsAndKeys:identifierURL, @"identifierURL", missingURLs, @"urls", nil]];
-        } else {
-            numberIndexed++;
-            @synchronized(self) {
-                progressValue = (numberIndexed / totalObjectCount) * 100;
-            }
-            if (countSinceLastFlush-- == 0) {       
-                // must update before sending the delegate message
-                pthread_rwlock_wrlock(&rwlock);
-                [identifierURLs addEntriesFromDictionary:indexedIdentifierURLs];
-                pthread_rwlock_unlock(&rwlock);
-                [indexedIdentifierURLs removeAllObjects];
-                
-                [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate:) forObject:delegate withObject:self];
-                countSinceLastFlush = flushInterval;
-            }
-        }
-
-        OSMemoryBarrier();
-    }
-
-    // add any leftovers
-    if ([indexedIdentifierURLs count]) {
-        pthread_rwlock_wrlock(&rwlock);
-        [identifierURLs addEntriesFromDictionary:indexedIdentifierURLs];
-        pthread_rwlock_unlock(&rwlock);
-    }
-        
-    // remove URLs we could not find in the database
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1 && [URLsToRemove count]) {
-        NSEnumerator *urlEnum = [URLsToRemove objectEnumerator];
-        NSURL *url;
-        while (url = [urlEnum nextObject])
-            [self removeFileURL:url];
-    }
-    [URLsToRemove release];
-    [items release];
-
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1)
-        [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
-    
-    return itemsToAdd;
-}
-
 - (void)buildIndexForItems:(NSArray *)items
 {
     NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
@@ -389,10 +278,92 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
 
     double totalObjectCount = [items count];
-    items = [self itemsToIndex:items];
-    double numberIndexed = totalObjectCount - [items count];
+    double numberIndexed = 0;
     
     [items retain];
+    
+    if ([signatures count]) {
+        // cached index, update identifierURLs and remove unlinked or invalid indexed URLs
+        
+        NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
+        NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
+        
+        NSEnumerator *itemEnum = [items objectEnumerator];
+        id anItem = nil;
+        BDSKMultiValueDictionary *indexedIdentifierURLs = [[[BDSKMultiValueDictionary alloc] init] autorelease];
+        
+        // see comment later; may need tuning here since this is much faster than adding new docs to the index
+        const int32_t flushInterval = 20;
+        int32_t countSinceLastFlush = flushInterval;
+        
+        // update the identifierURLs with the items, find items to add and URLs to remove
+        OSMemoryBarrier();
+        while(flags.shouldKeepRunning == 1 && (anItem = [itemEnum nextObject])) {
+            
+            NSEnumerator *urlEnum = [[anItem valueForKey:@"urls"] objectEnumerator];
+            NSURL *identifierURL = [anItem objectForKey:@"identifierURL"];
+            NSURL *url;
+            NSMutableArray *missingURLs = nil;
+            NSData *signature;
+            
+            while (url = [urlEnum nextObject]) {
+                signature = [signatures objectForKey:url];
+                if (signature && [signature isEqual:sha1SignatureForURL(url)]) {
+                    [URLsToRemove removeObject:url];
+                    [indexedIdentifierURLs addObject:identifierURL forKey:url];
+                } else {
+                    if (missingURLs == nil)
+                        missingURLs = [NSMutableArray array];
+                    [missingURLs addObject:url];
+                }
+            }
+                    
+            if ([missingURLs count]) {
+                [itemsToAdd addObject:[NSDictionary dictionaryWithObjectsAndKeys:identifierURL, @"identifierURL", missingURLs, @"urls", nil]];
+            } else {
+                numberIndexed++;
+                @synchronized(self) {
+                    progressValue = (numberIndexed / totalObjectCount) * 100;
+                }
+                if (countSinceLastFlush-- == 0) {       
+                    // must update before sending the delegate message
+                    pthread_rwlock_wrlock(&rwlock);
+                    [identifierURLs addEntriesFromDictionary:indexedIdentifierURLs];
+                    pthread_rwlock_unlock(&rwlock);
+                    [indexedIdentifierURLs removeAllObjects];
+                    
+                    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate:) forObject:delegate withObject:self];
+                    countSinceLastFlush = flushInterval;
+                }
+            }
+
+            OSMemoryBarrier();
+        }
+
+        // add any leftovers
+        if ([indexedIdentifierURLs count]) {
+            pthread_rwlock_wrlock(&rwlock);
+            [identifierURLs addEntriesFromDictionary:indexedIdentifierURLs];
+            pthread_rwlock_unlock(&rwlock);
+        }
+            
+        // remove URLs we could not find in the database
+        OSMemoryBarrier();
+        if (flags.shouldKeepRunning == 1 && [URLsToRemove count]) {
+            NSEnumerator *urlEnum = [URLsToRemove objectEnumerator];
+            NSURL *url;
+            while (url = [urlEnum nextObject])
+                [self removeFileURL:url];
+        }
+        [URLsToRemove release];
+
+        OSMemoryBarrier();
+        if (flags.shouldKeepRunning == 1)
+            [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+        
+        [items release];
+        items = itemsToAdd;
+    }
     
     // add items that were not yet indexed
     OSMemoryBarrier();
@@ -416,10 +387,9 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     if (skDocument != NULL) {
         OBASSERT(signature);
         
-        if (signature)
-            [signatures setObject:signature forKey:aURL];
-        else
-            [signatures removeObjectForKey:aURL];
+        if (signature == nil)
+            signature = [NSData data];
+        [signatures setObject:signature forKey:aURL];
         
         SKIndexAddDocument(index, skDocument, NULL, TRUE);
         CFRelease(skDocument);
