@@ -114,7 +114,7 @@ static void addEntryFunction(const void *key, const void *value, void *context) 
 }
 
 - (void)addEntriesFromDictionary:(BDSKMultiValueDictionary *)otherDictionary {
-    CFDictionaryApplyFunction((CFDictionaryRef)[otherDictionary dictionary], &addEntryFunction, &self);
+    CFDictionaryApplyFunction((CFDictionaryRef)[otherDictionary dictionary], addEntryFunction, self);
 }
 
 - (NSEnumerator *)keyEnumerator {
@@ -131,7 +131,7 @@ static void addValuesFunction(const void *key, const void *value, void *context)
 
 - (NSSet *)allValues {
     NSMutableSet *values = [NSMutableSet set];
-    CFDictionaryApplyFunction((CFDictionaryRef)dictionary, &addValuesFunction, &values);
+    CFDictionaryApplyFunction((CFDictionaryRef)dictionary, addValuesFunction, values);
     return values;
 }
 
