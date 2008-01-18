@@ -210,9 +210,11 @@
                                      informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @"Informative text in alert dialog: You are about to remove [number] item(s) from [group \"Name\"]."), [self numberOfSelectedPubs], ([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item", @"")), groupName];
             [alert setHasCheckButton:YES];
             [alert setCheckValue:NO];
+            // use didDismissSelector because the action may pop up its own sheet
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:self 
-                             didEndSelector:@selector(removePubsAlertDidEnd:returnCode:contextInfo:) 
+                             didEndSelector:NULL 
+                         didDismissSelector:@selector(removePubsAlertDidEnd:returnCode:contextInfo:) 
                                 contextInfo:NULL];
             return;
         } else {
@@ -273,9 +275,11 @@
 								 informativeTextWithFormat:info];
 		[alert setHasCheckButton:YES];
 		[alert setCheckValue:NO];
+        // use didDismissSelector because the action may pop up its own sheet
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self 
-                         didEndSelector:@selector(deletePubsAlertDidEnd:returnCode:contextInfo:) 
+                         didEndSelector:NULL 
+                     didDismissSelector:@selector(deletePubsAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:NULL];
 	} else {
         [self deletePubsAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
