@@ -59,6 +59,7 @@ typedef struct _BDSKSearchIndexFlags
     SKIndexRef index;
     CFMutableDataRef indexData;
     BDSKMultiValueDictionary *identifierURLs;
+    BDSKMultiValueDictionary *fileURLs;
     NSMutableDictionary *signatures;
     id delegate;
     
