@@ -303,7 +303,6 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     NSEnumerator *itemEnum = [items objectEnumerator];
     id anItem = nil;
     BDSKMultiValueDictionary *indexedIdentifierURLs = [[[BDSKMultiValueDictionary alloc] init] autorelease];
-    BDSKMultiValueDictionary *indexedFileURLs = [[[BDSKMultiValueDictionary alloc] init] autorelease];
     double numberIndexed = 0;
     double totalObjectCount = [items count];
     
@@ -324,7 +323,6 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             if ([indexedURLs containsObject:url] && [[signatures objectForKey:url] isEqual:sha1SignatureForURL(url)]) {
                 [URLsToRemove removeObject:url];
                 [indexedIdentifierURLs addObject:identifierURL forKey:url];
-                [indexedFileURLs addObject:url forKey:identifierURL];
             } else {
                 if (missingURLs == nil)
                     missingURLs = [NSMutableArray array];
@@ -463,7 +461,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 {
     OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
     
-    // @@ can we assert identifierURL != nil and lose the test for it later?
+    OBASSERT(identifierURL);
     
     NSEnumerator *urlEnumerator = [urlsToAdd objectEnumerator];
     NSURL *url = nil;
@@ -479,12 +477,10 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         // SKIndexSetProperties is more generally useful, but is really slow when creating the index
         // SKIndexRenameDocument changes the URL, so it's not useful
         
-        if (identifierURL) {
-            pthread_rwlock_wrlock(&rwlock);
-            shouldBeAdded = (0 == [[identifierURLs allObjectsForKey:url] count] || [[signatures objectForKey:url] isEqual:signature] == NO);
-            [identifierURLs addObject:identifierURL forKey:url];
-            pthread_rwlock_unlock(&rwlock);
-        }
+        pthread_rwlock_wrlock(&rwlock);
+        shouldBeAdded = (0 == [[identifierURLs allObjectsForKey:url] count] || [[signatures objectForKey:url] isEqual:signature] == NO);
+        [identifierURLs addObject:identifierURL forKey:url];
+        pthread_rwlock_unlock(&rwlock);
         
         if (shouldBeAdded) {
             if (signature)
@@ -509,6 +505,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 {
     OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
+    OBASSERT(identifierURL);
+    
     SKDocumentRef skDocument;
     
     NSEnumerator *urlEnum = nil;
@@ -550,6 +548,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 - (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL
 {
     OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    
+    OBASSERT(identifierURL);
     
     SKDocumentRef skDocument;    
     NSEnumerator *urlEnumerator = [urlsToReindex objectEnumerator];
@@ -717,17 +717,29 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     NSDictionary *item = [note userInfo];
     NSURL *identifierURL = [item objectForKey:@"identifierURL"];
-    pthread_rwlock_rdlock(&rwlock);
-    NSSet *oldURLs = [[[identifierURLs allKeysForObject:identifierURL] copy] autorelease];
-    pthread_rwlock_unlock(&rwlock);
-    NSSet *newURLs = [NSSet setWithArray:[item valueForKey:@"urls"]];
-    NSMutableSet *removedURLs = [oldURLs mutableCopy];
-    NSMutableSet *addedURLs = [newURLs mutableCopy];
-    NSMutableSet *sameURLs = [newURLs mutableCopy];
     
+    NSSet *oldURLs;
+    NSSet *newURLs;
+    NSMutableSet *removedURLs;
+    NSMutableSet *addedURLs;
+    NSMutableSet *sameURLs;
+    
+    pthread_rwlock_rdlock(&rwlock);
+    oldURLs = [[identifierURLs allKeysForObject:identifierURL] copy];
+    pthread_rwlock_unlock(&rwlock);
+    newURLs = [[NSSet alloc] initWithArray:[item valueForKey:@"urls"]];
+    
+    removedURLs = [oldURLs mutableCopy];
     [removedURLs minusSet:newURLs];
+    
+    addedURLs = [newURLs mutableCopy];
     [addedURLs minusSet:oldURLs];
+    
+    sameURLs = [newURLs mutableCopy];
     [sameURLs intersectSet:oldURLs];
+    
+    [oldURLs release];
+    [newURLs release];
     
     if ([removedURLs count])
         [self removeFileURLs:removedURLs forIdentifierURL:identifierURL];
