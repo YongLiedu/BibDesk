@@ -117,6 +117,7 @@
 					unsigned int i, numAuth = 0;
 					NSString *authSep = @"";
 					NSString *etal = @"";
+                    BOOL isLast = NO;
 					if (NO == [scanner isAtEnd]) {
 						// look for [separator]
 						if ([scanner scanString:@"[" intoString:NULL]) {
@@ -130,7 +131,16 @@
 						}
 						if ([scanner peekCharacter:&nextChar]) {
 							// look for #names
-							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
+                            if (nextChar == '-') {
+                                [scanner setScanLocation:[scanner scanLocation]+1];
+                                if ([scanner peekCharacter:&nextChar] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
+                                    isLast = YES;
+                                } else {
+                                    [scanner setScanLocation:[scanner scanLocation]-1];
+                                    nextChar = '-';
+                                }
+                            }
+                            if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
 								numAuth = (unsigned)(nextChar - '0');
 								// scan for #chars per name
@@ -152,7 +162,7 @@
 						if (i > 0) {
 							[parsedStr appendString:authSep];
 						}
-						string = [self stringByStrictlySanitizingString:[[authArray objectAtIndex:i] lastName] forField:fieldName inFileType:[pub fileType]];
+						string = [self stringByStrictlySanitizingString:[[authArray objectAtIndex:isLast ? [authArray count] - numAuth + i : i] lastName] forField:fieldName inFileType:[pub fileType]];
 						if (isLocalFile) {
 							string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 						}
@@ -174,6 +184,7 @@
 					NSString *authSep = @";";
 					NSString *nameSep = @".";
 					NSString *etal = @"";
+                    BOOL isLast = NO;
 					if (NO == [scanner isAtEnd]) {
 						// look for [author separator]
 						if ([scanner scanString:@"[" intoString:NULL]) {
@@ -192,6 +203,15 @@
 						}
 						if ([scanner peekCharacter:&nextChar]) {
 							// look for #names
+                            if (nextChar == '-') {
+                                [scanner setScanLocation:[scanner scanLocation]+1];
+                                if ([scanner peekCharacter:&nextChar] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
+                                    isLast = YES;
+                                } else {
+                                    [scanner setScanLocation:[scanner scanLocation]-1];
+                                    nextChar = '-';
+                                }
+                            }
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
 								numAuth = (unsigned)(nextChar - '0');
@@ -212,7 +232,7 @@
 						if (i > 0) {
 							[parsedStr appendString:authSep];
 						}
-						BibAuthor *auth = [authArray objectAtIndex:i];
+						BibAuthor *auth = [authArray objectAtIndex:isLast ? [authArray count] - numAuth + i : i];
 						NSString *firstName = [self stringByStrictlySanitizingString:[auth firstName] forField:fieldName inFileType:[pub fileType]];
 						NSString *lastName = [self stringByStrictlySanitizingString:[auth lastName] forField:fieldName inFileType:[pub fileType]];
 						if ([firstName length] > 0) {
@@ -617,6 +637,7 @@
 				case '%':
 				case '[':
 				case ']':
+				case '-':
 				{
                 	// escaped character
 					[parsedStr appendFormat:@"%C", specifier];
@@ -890,6 +911,7 @@
 	static NSCharacterSet *validEscapeSpecifierChars = nil;
 	static NSCharacterSet *validArgSpecifierChars = nil;
 	static NSCharacterSet *validOptArgSpecifierChars = nil;
+	static NSCharacterSet *validAuthorSpecifierChars = nil;
 	static NSDictionary *specAttr = nil;
 	static NSDictionary *paramAttr = nil;
 	static NSDictionary *argAttr = nil;
@@ -904,7 +926,8 @@
 		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
 		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fcsi"] retain];
 		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfs"] retain];
-		
+		validAuthorSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApP"] retain];
+        
 		NSFont *font = [NSFont systemFontOfSize:0];
 		NSFont *boldFont = [NSFont boldSystemFontOfSize:0];
 		specAttr = [[NSDictionary alloc] initWithObjectsAndKeys:boldFont, NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
@@ -1011,9 +1034,16 @@
 		
 		// check numeric optional parameters
 		if ([validParamSpecifierChars characterIsMember:specifier]) {
-			if ([scanner scanCharactersFromSet:digitCharSet intoString:&string]) {
-				AppendStringToFormatStrings(string, paramAttr);
-			}
+            if ([validAuthorSpecifierChars characterIsMember:specifier] && [scanner scanString:@"-" intoString:NULL]) {
+                if ([scanner scanCharactersFromSet:digitCharSet intoString:&string]) {
+                    AppendStringToFormatStrings(@"-", paramAttr);
+                    AppendStringToFormatStrings(string, paramAttr);
+                } else {
+                    [scanner setScanLocation:[scanner scanLocation] - 1];
+                }
+            } else if ([scanner scanCharactersFromSet:digitCharSet intoString:&string]) {
+                AppendStringToFormatStrings(string, paramAttr);
+            }
 		}
 	}
 	
