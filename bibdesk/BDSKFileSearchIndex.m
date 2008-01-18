@@ -71,6 +71,9 @@
 #define INDEX_THREAD_WORKING 3
 #define INDEX_THREAD_DONE 4
 
+// increment if incompatible changes are introduced
+#define CACHE_VERSION @"0"
+
 - (id)initWithDocument:(id)aDocument
 {
     OBASSERT([NSThread inMainThread]);
@@ -255,7 +258,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         cacheFolder = [cacheFolder stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
         if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
             [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
-        cacheFolder = [cacheFolder stringByAppendingPathComponent:NSStringFromClass(self)];
+        cacheFolder = [cacheFolder stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-v%@", NSStringFromClass(self), CACHE_VERSION]];
         if (cacheFolder && [[NSFileManager defaultManager] fileExistsAtPath:cacheFolder] == NO)
             [[NSFileManager defaultManager] createDirectoryAtPath:cacheFolder attributes:nil];
         cacheFolder = [cacheFolder copy];
