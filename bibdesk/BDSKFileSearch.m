@@ -228,13 +228,14 @@
             NSString *title = nil;
             NSEnumerator *idURLEnum = [identifierURLs objectEnumerator];
             NSURL *idURL;
-            while (title == nil && (idURL = [idURLEnum nextObject]))
-                title = [[self delegate] search:self titleForIdentifierURL:idURL];
             
-            searchResult = [[BDSKFileSearchResult alloc] initWithURL:theURL identifierURLs:identifierURLs title:(NSString *)title score:score];            
-            [searchResults addObject:searchResult];            
-            [searchResult release];
-            [theURL release];
+            while (idURL = [idURLEnum nextObject]) {
+                title = [[self delegate] search:self titleForIdentifierURL:idURL];
+                searchResult = [[BDSKFileSearchResult alloc] initWithURL:theURL identifierURL:idURL title:title score:score];            
+                [searchResults addObject:searchResult];            
+                [searchResult release];
+                [theURL release];
+            }
             
             CFRelease(skDocument);
         }      
