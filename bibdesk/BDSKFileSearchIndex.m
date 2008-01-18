@@ -122,8 +122,6 @@
         // maintain dictionaries mapping URL -> identifierURL, since SKIndex properties are slow; this should be accessed with the rwlock
         identifierURLs = [[BDSKMultiValueDictionary alloc] init];
 		pthread_rwlock_init(&rwlock, NULL);
-        // this is the inverse dictionary, to see which URLs to add or remove; this should be accessed only on the notification thread
-        fileURLs = [[BDSKMultiValueDictionary alloc] init];
         
         progressValue = 0.0;
         
@@ -144,7 +142,6 @@
 - (void)dealloc
 {
     pthread_rwlock_wrlock(&rwlock);
-	[fileURLs release];
 	[identifierURLs release];
     identifierURLs = nil;
     pthread_rwlock_unlock(&rwlock);
@@ -205,7 +202,7 @@
 - (NSSet *)allIdentifierURLsForURL:(NSURL *)theURL
 {
     pthread_rwlock_rdlock(&rwlock);
-    NSSet *set = [[[identifierURLs setForKey:theURL] retain] autorelease];
+    NSSet *set = [[[identifierURLs allObjectsForKey:theURL] copy] autorelease];
     pthread_rwlock_unlock(&rwlock);
     return set;
 }
@@ -348,9 +345,6 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                 pthread_rwlock_unlock(&rwlock);
                 [indexedIdentifierURLs removeAllObjects];
                 
-                [fileURLs addEntriesFromDictionary:indexedFileURLs];
-                [indexedFileURLs removeAllObjects];
-                
                 [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate:) forObject:delegate withObject:self];
                 countSinceLastFlush = flushInterval;
             }
@@ -364,7 +358,6 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         pthread_rwlock_wrlock(&rwlock);
         [identifierURLs addEntriesFromDictionary:indexedIdentifierURLs];
         pthread_rwlock_unlock(&rwlock);
-        [fileURLs addEntriesFromDictionary:indexedFileURLs];
     }
         
     // remove URLs we could not find in the database
@@ -494,10 +487,9 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         
         if (identifierURL) {
             pthread_rwlock_wrlock(&rwlock);
-            shouldBeAdded = (0 == [[identifierURLs setForKey:url] count] || [[signatures objectForKey:url] isEqual:signature] == NO);
+            shouldBeAdded = (0 == [[identifierURLs allObjectsForKey:url] count] || [[signatures objectForKey:url] isEqual:signature] == NO);
             [identifierURLs addObject:identifierURL forKey:url];
             pthread_rwlock_unlock(&rwlock);
-            [fileURLs addObject:url forKey:identifierURL];
         }
         
         if (shouldBeAdded) {
@@ -541,10 +533,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         
         pthread_rwlock_wrlock(&rwlock);
         [identifierURLs removeObject:identifierURL forKey:url];
-        shouldBeRemoved = (0 == [[identifierURLs setForKey:url] count]);
+        shouldBeRemoved = (0 == [[identifierURLs allObjectsForKey:url] count]);
         pthread_rwlock_unlock(&rwlock);
-        
-        [fileURLs removeObject:url forKey:identifierURL];
         
         if (shouldBeRemoved) {
             [signatures removeObjectForKey:url];
@@ -575,7 +565,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     SKDocumentRef skDocument;
     volatile Boolean success;
     
-    NSEnumerator *urlEnumerator = [urlsToAdd objectEnumerator];
+    NSEnumerator *urlEnumerator = [urlsToReindex objectEnumerator];
     NSURL *url = nil;
         
     BOOL swap;
@@ -733,8 +723,11 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
 	while (anItem = [itemEnumerator nextObject]) {
         identifierURL = [anItem valueForKey:@"identifierURL"];
-        urlsToRemove = [[[fileURLs setForKey:identifierURL] copy] autorelease];
         
+        pthread_rwlock_rdlock(&rwlock);
+        urlsToRemove = [[[identifierURLs allKeysForObject:identifierURL] copy] autorelease];
+        pthread_rwlock_unlock(&rwlock);
+       
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
 	
@@ -747,7 +740,9 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     NSDictionary *item = [note userInfo];
     NSURL *identifierURL = [item objectForKey:@"identifierURL"];
-    NSSet *oldURLs = [fileURLs setForKey:identifierURL];
+    pthread_rwlock_rdlock(&rwlock);
+    NSSet *oldURLs = [[[identifierURLs allKeysForObject:identifierURL] copy] autorelease];
+    pthread_rwlock_unlock(&rwlock);
     NSSet *newURLs = [NSSet setWithArray:[item valueForKey:@"urls"]];
     NSMutableSet *removedURLs = [oldURLs mutableCopy];
     NSMutableSet *addedURLs = [newURLs mutableCopy];

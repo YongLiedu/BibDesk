@@ -44,12 +44,14 @@
 - (id)init {
     if (self = [super init]) {
         dictionary = [[NSMutableDictionary alloc] init];
+        inverseDictionary = [[NSMutableDictionary alloc] init];
     }
     return self;
 }
 
 - (void)dealloc {
     [dictionary release];
+    [inverseDictionary release];
     [super dealloc];
 }
 
@@ -68,75 +70,80 @@
     return value;
 }
 
-- (NSSet *)setForKey:(id)aKey {
+- (NSMutableSet *)_setForObject:(id)anObject create:(BOOL)create {
+    NSMutableSet *value = [inverseDictionary objectForKey:anObject];
+
+    if (create && value == nil) {
+        value = [[NSMutableSet alloc] init];
+        [inverseDictionary setObject:value forKey:anObject];
+        [value release];
+    }
+    return value;
+}
+
+- (NSSet *)allObjectsForKey:(id)aKey {
     return [self _setForKey:aKey create:NO];
+}
+
+- (NSSet *)allKeysForObject:(id)anObject {
+    return [self _setForObject:anObject create:NO];
 }
 
 - (id)anyObjectForKey:(id)aKey {
     return [[self _setForKey:aKey create:NO] anyObject];
 }
 
+- (id)anyKeyForObject:(id)anObject {
+    return [[self _setForObject:anObject create:NO] anyObject];
+}
+
 - (void)addObject:(id)anObject forKey:(id)aKey {
     [[self _setForKey:aKey create:YES] addObject:anObject];
-}
-
-- (void)addObjects:(NSSet *)moreObjects forKey:(id)aKey; {
-    if ([moreObjects count])
-        [[self _setForKey:aKey create:YES] unionSet:moreObjects];
-}
-
-- (void)setObjects:(NSSet *)replacementObjects forKey:(id)aKey {
-    if (replacementObjects != nil && [replacementObjects count] > 0) {
-        NSMutableSet *valueSet = [replacementObjects mutableCopy];
-        [dictionary setObject:valueSet forKey:aKey];
-        [valueSet release];
-    } else {
-        [dictionary removeObjectForKey:aKey];
-    }
+    [[self _setForObject:anObject create:YES] addObject:aKey];
 }
 
 - (void)removeObject:(id)anObject forKey:(id)aKey{
-    NSMutableSet *valueSet = [self _setForKey:aKey create:NO];
-    if (valueSet) {
-        [valueSet removeObject:anObject];
-        if ([valueSet count] == 0)
+    NSMutableSet *objectSet = [self _setForKey:aKey create:NO];
+    NSMutableSet *keySet = [self _setForObject:anObject create:NO];
+    if (objectSet) {
+        [objectSet removeObject:anObject];
+        if ([objectSet count] == 0)
             [dictionary removeObjectForKey:aKey];
+    }
+    if (keySet) {
+        [keySet removeObject:anObject];
+        if ([keySet count] == 0)
+            [inverseDictionary removeObjectForKey:anObject];
     }
 }
 
 - (void)removeAllObjects {
     [dictionary removeAllObjects];
+    [inverseDictionary removeAllObjects];
 }
 
+typedef struct _addEntryContext {
+    BDSKMultiValueDictionary *dict;
+    BOOL inverse;
+} addEntryContext;
+
 static void addEntryFunction(const void *key, const void *value, void *context) {
-    BDSKMultiValueDictionary *self = (BDSKMultiValueDictionary *)context;
-    [[self _setForKey:(id)key create:YES] unionSet:(NSSet *)value];
+    addEntryContext *ctxt = context;
+    NSMutableSet *set = nil;
+    if (ctxt->inverse)
+        [ctxt->dict _setForObject:(id)key create:YES];
+    else
+        [ctxt->dict _setForKey:(id)key create:YES];
+    [set unionSet:(NSSet *)value];
 }
 
 - (void)addEntriesFromDictionary:(BDSKMultiValueDictionary *)otherDictionary {
-    CFDictionaryApplyFunction((CFDictionaryRef)[otherDictionary dictionary], addEntryFunction, self);
-}
-
-- (NSEnumerator *)keyEnumerator {
-    return [dictionary keyEnumerator];
-}
-
-- (NSArray *)allKeys {
-    return [dictionary allKeys];
-}
-
-static void addValuesFunction(const void *key, const void *value, void *context) {
-    [(NSMutableSet *)context unionSet:(NSSet *)value];
-}
-
-- (NSSet *)allValues {
-    NSMutableSet *values = [NSMutableSet set];
-    CFDictionaryApplyFunction((CFDictionaryRef)dictionary, addValuesFunction, values);
-    return values;
-}
-
-- (NSMutableDictionary *)dictionary {
-    return dictionary;
+    addEntryContext ctxt = {self, NO};
+    ctxt.dict = self;
+    ctxt.inverse = NO;
+    CFDictionaryApplyFunction((CFDictionaryRef)(otherDictionary->dictionary), addEntryFunction, &ctxt);
+    ctxt.inverse = YES;
+    CFDictionaryApplyFunction((CFDictionaryRef)(otherDictionary->inverseDictionary), addEntryFunction, &ctxt);
 }
 
 @end

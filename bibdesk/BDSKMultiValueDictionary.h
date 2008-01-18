@@ -41,20 +41,17 @@
 
 @interface BDSKMultiValueDictionary : NSObject {
     NSMutableDictionary *dictionary;
+    NSMutableDictionary *inverseDictionary;
 }
 
 - (unsigned int)count;
-- (NSSet *)setForKey:(id)aKey;
+- (NSSet *)allObjectsForKey:(id)aKey;
+- (NSSet *)allKeysForObject:(id)anObject;
 - (id)anyObjectForKey:(id)aKey;
+- (id)anyKeyForObject:(id)anObject;
 - (void)addObject:(id)anObject forKey:(id)aKey;
-- (void)addObjects:(NSSet *)moreObjects forKey:(id)aKey;
-- (void)setObjects:(NSSet *)replacementObjects forKey:(id)aKey;
 - (void)removeObject:(id)anObject forKey:(id)aKey;
 - (void)removeAllObjects;
 - (void)addEntriesFromDictionary:(BDSKMultiValueDictionary *)otherDictionary;
-- (NSEnumerator *)keyEnumerator;
-- (NSArray *)allKeys;
-- (NSSet *)allValues;
-- (NSMutableDictionary *)dictionary;
 
 @end
