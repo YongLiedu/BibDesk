@@ -449,7 +449,7 @@
 					if (filename != nil) {
 						filename = [filename pathExtension];
 						if (NO == [filename isEqualToString:@""]) {
-							filename = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
+							filename = [self stringBySanitizingString:filename forField:fieldName inFileType:[pub fileType]]; 
 							[parsedStr appendFormat:@".%@", filename];
 						}
 					}
