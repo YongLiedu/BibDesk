@@ -2330,7 +2330,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (int)numberOfSelectedPubs{
     if ([self isDisplayingFileContentSearch])
-        return [[fileSearchController identifierURLsOfSelectedItems] count];
+        return [[fileSearchController selectedIdentifierURLs] count];
     else
         return [tableView numberOfSelectedRows];
 }
@@ -2340,7 +2340,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if ([self isDisplayingFileContentSearch]) {
         if ([[fileSearchController tableView] numberOfSelectedRows]) {
             NSMutableArray *tmpArray = [NSMutableArray array];
-            NSEnumerator *itemEnum = [[fileSearchController identifierURLsOfSelectedItems] objectEnumerator];
+            NSEnumerator *itemEnum = [[fileSearchController selectedIdentifierURLs] objectEnumerator];
             NSURL *idURL;
             BibItem *pub;
             while (idURL = [itemEnum nextObject]) {
@@ -2405,7 +2405,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSArray *)selectedFileURLs {
     if ([self isDisplayingFileContentSearch])
-        return [fileSearchController URLsOfSelectedItems];
+        return [fileSearchController selectedURLs];
     else
         return [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles.URL"];
 }

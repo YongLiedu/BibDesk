@@ -338,7 +338,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         [self hideSearchButtonView];
         
         // have to hide the search view before trying to select anything
-        NSArray *itemsToSelect = [fileSearchController identifierURLsOfSelectedItems];
+        NSArray *itemsToSelect = [fileSearchController selectedIdentifierURLs];
         
         if([itemsToSelect count]){
             

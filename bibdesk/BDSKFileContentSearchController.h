@@ -74,9 +74,8 @@
 // Use this to connect a search field and initiate a search
 - (void)setSearchField:(NSSearchField *)aSearchField;
 
-- (NSArray *)identifierURLsOfSelectedItems;
-- (NSArray *)URLsOfSelectedItems;
-- (NSArray *)titlesOfSelectedItems;
+- (NSArray *)selectedIdentifierURLs;
+- (NSArray *)selectedURLs;
 - (NSArray *)selectedResults;
 
 - (NSArray *)results;

@@ -336,19 +336,13 @@
     [resultsArrayController setSortDescriptors:sortDescriptors];
 }
 
-- (NSArray *)identifierURLsOfSelectedItems
+- (NSArray *)selectedIdentifierURLs
 {
-    NSMutableArray *array = [NSMutableArray array];
-    [array addNonDuplicateObjectsFromArray:[[resultsArrayController selectedObjects] valueForKey:@"identifierURL"]];
-    return array;
+    return [[resultsArrayController selectedObjects] valueForKey:@"identifierURL"];
 }
 
-- (NSArray *)URLsOfSelectedItems {
+- (NSArray *)selectedURLs {
     return [[resultsArrayController selectedObjects] valueForKey:@"URL"];
-}
-
-- (NSArray *)titlesOfSelectedItems {
-    return [[resultsArrayController selectedObjects] valueForKey:@"string"];
 }
 
 - (NSArray *)selectedResults {
