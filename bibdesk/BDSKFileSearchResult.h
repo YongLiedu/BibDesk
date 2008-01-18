@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKFileSearchIndex, BDSKFile;
+@class BDSKFile;
 
 @interface BDSKFileSearchResult : NSObject <NSCopying>
 {
@@ -51,7 +51,7 @@
 }
 
 // This class is designed to be used in a hashing container (NSSet, NSDictionary) when you want the isEqual: and hash to be based on file comparison
-- (id)initWithIndex:(BDSKFileSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
+- (id)initWithURL:(NSURL *)aURL identifierURL:(NSURL *)anIdentifierURL title:(NSString *)aTitle score:(float)aScore;
 
 // used by the table cell
 - (NSImage *)image;

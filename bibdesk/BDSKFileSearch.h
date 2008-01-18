@@ -48,6 +48,10 @@
 
 // sent when the search is complete (all matches returned); anArray includes all results
 - (void)search:(BDSKFileSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
+
+// sent to get the title for the BibItem used for display
+- (NSString *)search:(BDSKFileSearch *)aSearch titleForIdentifierURL:(NSURL *)identifierURL;
+
 @end
 
 @interface BDSKFileSearch : NSObject <BDSKFileSearchIndexDelegate>

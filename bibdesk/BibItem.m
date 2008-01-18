@@ -1453,7 +1453,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             [urls addObject:aURL];
     }
     
-    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self citeKey], @"citeKey", [self displayTitle], @"title", [self identifierURL], @"identifierURL", urls, @"urls", nil];
+    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self identifierURL], @"identifierURL", urls, @"urls", nil];
     [urls release];
     return info;
 }
@@ -3481,8 +3481,8 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         [self setDateModified:nil];
     }
     
-    // Updates the document's file content search index, which depends on the title
-    if([owner isDocument] && ([key isEqualToString:BDSKLocalFileString] || [key isEqualToString:BDSKTitleString] || allFieldsChanged)){
+    // Updates the document's file content search index
+    if([owner isDocument] && [key isEqualToString:BDSKLocalFileString]){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFileSearchIndexInfoChangedNotification
                                                             object:(BibDocument *)owner
                                                           userInfo:[self searchIndexInfo]];

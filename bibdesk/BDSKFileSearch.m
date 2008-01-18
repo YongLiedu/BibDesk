@@ -223,9 +223,14 @@
             // these scores are arbitrarily scaled, so we'll keep track of the search kit's max/min values
             maxValue = MAX(score, maxValue);
             
-            searchResult = [[BDSKFileSearchResult alloc] initWithIndex:searchIndex documentRef:skDocument score:score];            
+            NSURL *theURL = (NSURL *)SKDocumentCopyURL(skDocument);
+            NSURL *identifierURL = [searchIndex identifierURLForURL:theURL];
+            NSString *title = [[self delegate] search:self titleForIdentifierURL:(NSURL *)identifierURL];
+            
+            searchResult = [[BDSKFileSearchResult alloc] initWithURL:theURL identifierURL:identifierURL title:(NSString *)title score:score];            
             [searchResults addObject:searchResult];            
             [searchResult release];
+            [theURL release];
             
             CFRelease(skDocument);
         }      

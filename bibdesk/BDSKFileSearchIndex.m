@@ -114,8 +114,8 @@
         flags.isIndexing = 0;
         flags.shouldKeepRunning = 1;
         
-        // maintain dictionaries mapping URL -> itemInfos, since SKIndex properties are slow
-        itemInfos = [[BDSKThreadSafeMutableDictionary alloc] initWithCapacity:128];
+        // maintain dictionaries mapping URL -> identifierURL, since SKIndex properties are slow
+        identifierURLs = [[BDSKThreadSafeMutableDictionary alloc] initWithCapacity:128];
         
         progressValue = 0.0;
         
@@ -137,7 +137,7 @@
 {
     [notificationPort release];
     [notificationQueue release];
-    [itemInfos release];
+    [identifierURLs release];
     [signatures release];
     if(index) CFRelease(index);
     if(indexData) CFRelease(indexData);
@@ -181,9 +181,9 @@
     delegate = anObject;
 }
 
-- (NSDictionary *)itemInfoForURL:(NSURL *)theURL
+- (NSURL *)identifierURLForURL:(NSURL *)theURL
 {
-    return [itemInfos objectForKey:theURL];
+    return [identifierURLs objectForKey:theURL];
 }
 
 - (double)progressValue
@@ -280,7 +280,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     NSEnumerator *itemEnum = [items objectEnumerator];
     id anItem = nil;
-    NSMutableDictionary *previouslyIndexedInfos = [NSMutableDictionary dictionary];
+    NSMutableDictionary *previouslyIndexedItems = [NSMutableDictionary dictionary];
     double numberIndexed = 0;
     double totalObjectCount = [items count];
     
@@ -288,11 +288,12 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     const int32_t flushInterval = 20;
     int32_t countSinceLastFlush = flushInterval;
     
-    // update the itemInfos with the items, find items to add and URLs to remove
+    // update the identifierURLs with the items, find items to add and URLs to remove
     OSMemoryBarrier();
     while(flags.shouldKeepRunning == 1 && (anItem = [itemEnum nextObject])) {
         
         NSEnumerator *urlEnum = [[anItem valueForKey:@"urls"] objectEnumerator];
+        NSURL *identifierURL = [anItem objectForKey:@"identifierURL"];
         NSURL *url;
         BOOL needsIndexing = NO;
         
@@ -300,7 +301,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             if ([indexedURLs containsObject:url]) {
                 if ([[signatures objectForKey:url] isEqual:sha1SignatureForURL(url)]) {
                     [URLsToRemove removeObject:url];
-                    [previouslyIndexedInfos setObject:anItem forKey:url];
+                    if (identifierURL)
+                        [previouslyIndexedItems setObject:identifierURL forKey:url];
                 } else {
                     [signatures removeObjectForKey:url];
                     needsIndexing = YES;
@@ -319,8 +321,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             }
             if (countSinceLastFlush-- == 0) {       
                 // must update before sending the delegate message
-                [itemInfos addEntriesFromDictionary:previouslyIndexedInfos];
-                [previouslyIndexedInfos removeAllObjects];
+                [identifierURLs addEntriesFromDictionary:previouslyIndexedItems];
+                [previouslyIndexedItems removeAllObjects];
                 
                 [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate:) forObject:delegate withObject:self];
                 countSinceLastFlush = flushInterval;
@@ -331,7 +333,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     }
 
     // add any leftovers
-    [itemInfos addEntriesFromDictionary:previouslyIndexedInfos];
+    [identifierURLs addEntriesFromDictionary:previouslyIndexedItems];
         
     // remove URLs we could not find in the database
     OSMemoryBarrier();
@@ -452,10 +454,13 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         if(skDocument == NULL) continue;
         
         NSData *signature = sha1SignatureForURL(url);
+        NSURL *identifierURL = [anItem objectForKey:@"identifierURL"];
         
         // SKIndexSetProperties is more generally useful, but is really slow when creating the index
         // SKIndexRenameDocument changes the URL, so it's not useful
-        [itemInfos setObject:anItem forKey:url];
+        
+        if (identifierURL)
+            [identifierURLs setObject:identifierURL forKey:url];
         if (signature)
             [signatures setObject:signature forKey:url];
         else
@@ -609,7 +614,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 			
 			url = [urls objectAtIndex:idx];
             
-            [itemInfos removeObjectForKey:url];
+            [identifierURLs removeObjectForKey:url];
             [signatures removeObjectForKey:url];
 			
 			skDocument = SKDocumentCreateWithURL((CFURLRef)url);

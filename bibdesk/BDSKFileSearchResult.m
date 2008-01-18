@@ -37,36 +37,30 @@
  */
 
 #import "BDSKFileSearchResult.h"
-#import "BDSKFileSearchIndex.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKFile.h"
 
 @implementation BDSKFileSearchResult
 
-- (id)initWithIndex:(BDSKFileSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)theScore;
+- (id)initWithURL:(NSURL *)aURL identifierURL:(NSURL *)anIdentifierURL title:(NSString *)aTitle score:(float)aScore;
 {
     
-    NSParameterAssert(nil != anIndex);
-    NSParameterAssert(NULL != skDocument);
+    NSParameterAssert(nil != aURL);
+    NSParameterAssert(nil != anIdentifierURL);
         
     if ((self = [super init])) {
         
-        NSURL *theURL = (NSURL *)SKDocumentCopyURL(skDocument);
-        file = [[BDSKFile alloc] initWithURL:theURL];
+        file = [[BDSKFile alloc] initWithURL:aURL];
 
-        image = [[NSImage imageForURL:theURL] retain];
-        NSDictionary *theItem = [anIndex itemInfoForURL:theURL];
-        NSString *theTitle = [theItem valueForKey:@"title"];
+        image = [[NSImage imageForURL:aURL] retain];
         
-        if (nil == theTitle)
-            theTitle = [theURL path];
-
-        string = [theTitle copy];
-        [theURL release];
+        string = [aTitle copy];
+        if (string == nil)
+            aTitle = [[aURL path] copy];
         
-        identifierURL = [[theItem valueForKey:@"identifierURL"] copy];
+        identifierURL = [anIdentifierURL copy];
         
-        score = theScore;
+        score = aScore;
     }
     
     return self;

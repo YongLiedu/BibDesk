@@ -53,6 +53,7 @@
 #import "BDSKLevelIndicatorCell.h"
 #import "BibDocument_Search.h"
 #import "NSArray_BDSKExtensions.h"
+#import "BDSKPublicationsArray.h"
 
 
 @implementation BDSKFileContentSearchController
@@ -381,6 +382,11 @@
         // hides progress bar and text
         [progressView setHidden:YES];
     }
+}
+
+- (NSString *)search:(BDSKFileSearch *)aSearch titleForIdentifierURL:(NSURL *)identifierURL;
+{
+    return [[[[self document] publications] itemForIdentifierURL:identifierURL] displayTitle];
 }
 
 - (IBAction)cancelCurrentSearch:(id)sender
