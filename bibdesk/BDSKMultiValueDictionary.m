@@ -61,7 +61,7 @@
     NSMutableSet *value = [dictionary objectForKey:aKey];
 
     if (create && value == nil) {
-        value = [[NSMutableArray alloc] init];
+        value = [[NSMutableSet alloc] init];
         [dictionary setObject:value forKey:aKey];
         [value release];
     }
