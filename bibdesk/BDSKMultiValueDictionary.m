@@ -55,6 +55,10 @@
     [super dealloc];
 }
 
+- (NSString *)description {
+    return [dictionary description];
+}
+
 - (unsigned int)count {
     return [dictionary count];
 }
@@ -131,9 +135,9 @@ static void addEntryFunction(const void *key, const void *value, void *context) 
     addEntryContext *ctxt = context;
     NSMutableSet *set = nil;
     if (ctxt->inverse)
-        [ctxt->dict _setForObject:(id)key create:YES];
+        set = [ctxt->dict _setForObject:(id)key create:YES];
     else
-        [ctxt->dict _setForKey:(id)key create:YES];
+        set = [ctxt->dict _setForKey:(id)key create:YES];
     [set unionSet:(NSSet *)value];
 }
 
