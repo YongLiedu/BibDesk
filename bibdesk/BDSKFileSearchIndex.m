@@ -463,25 +463,18 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 {
     OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
     
-    SKDocumentRef skDocument;
-    volatile Boolean success;
+    // @@ can we assert identifierURL != nil and lose the test for it later?
     
     NSEnumerator *urlEnumerator = [urlsToAdd objectEnumerator];
     NSURL *url = nil;
-        
-    BOOL swap;
-    swap = OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
-    OBASSERT(swap);
     
+    // @@ should probably move this back out to caller; if it's called from a loop, we shouldn't be turning it on and off until all items are indexed
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
     
     while(url = [urlEnumerator nextObject]){
-                
-        skDocument = SKDocumentCreateWithURL((CFURLRef)url);
-        OBPOSTCONDITION(skDocument);
-        if(skDocument == NULL) continue;
         
         NSData *signature = sha1SignatureForURL(url);
-        BOOL shouldBeAdded;
+        BOOL shouldBeAdded = YES;
         
         // SKIndexSetProperties is more generally useful, but is really slow when creating the index
         // SKIndexRenameDocument changes the URL, so it's not useful
@@ -499,14 +492,15 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             else
                 [signatures removeObjectForKey:url];
             
-            success = SKIndexAddDocument(index, skDocument, NULL, TRUE);
-            OBPOSTCONDITION(success);
-            
-            CFRelease(skDocument);
+            // @@ should adding signature be conditional on this
+            SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)url);
+            if(skDocument != NULL) {
+                SKIndexAddDocument(index, skDocument, NULL, TRUE);            
+                CFRelease(skDocument);
+            }
         }
     }
-    swap = OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
-    OBASSERT(swap);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
 }
@@ -516,16 +510,13 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
     SKDocumentRef skDocument;
-    volatile Boolean success;
     
     NSEnumerator *urlEnum = nil;
     NSURL *url = nil;
     BOOL shouldBeRemoved;
     
     // set this here because we're adding to the index apart from indexFilesForItem:
-    BOOL swap;
-    swap = OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
-    OBASSERT(swap);
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
 
     urlEnum = [urlsToRemove objectEnumerator];
     
@@ -543,16 +534,13 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             skDocument = SKDocumentCreateWithURL((CFURLRef)url);
             OBPOSTCONDITION(skDocument);
             if (skDocument) {
-                success = SKIndexRemoveDocument(index, skDocument);
-                OBPOSTCONDITION(success);
-                
+                SKIndexRemoveDocument(index, skDocument);                
                 CFRelease(skDocument);
             }
         }
 	}
     
-    swap = OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
-    OBASSERT(swap);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
 	
@@ -563,16 +551,11 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 {
     OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
     
-    SKDocumentRef skDocument;
-    volatile Boolean success;
-    
+    SKDocumentRef skDocument;    
     NSEnumerator *urlEnumerator = [urlsToReindex objectEnumerator];
     NSURL *url = nil;
         
-    BOOL swap;
-    swap = OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
-    OBASSERT(swap);
-    
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);    
     
     while(url = [urlEnumerator nextObject]){
                 
@@ -589,14 +572,11 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             else
                 [signatures removeObjectForKey:url];
             
-            success = SKIndexAddDocument(index, skDocument, NULL, TRUE);
-            OBPOSTCONDITION(success);
-            
+            SKIndexAddDocument(index, skDocument, NULL, TRUE);
             CFRelease(skDocument);
         }
     }
-    swap = OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
-    OBASSERT(swap);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
 }
@@ -714,10 +694,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 
 	NSEnumerator *itemEnumerator = [[[note userInfo] valueForKey:@"searchIndexInfo"] objectEnumerator];
     id anItem;
-    
-    SKDocumentRef skDocument;
-    volatile Boolean success;
-    
+        
     NSURL *identifierURL = nil;
     NSSet *urlsToRemove;
     
