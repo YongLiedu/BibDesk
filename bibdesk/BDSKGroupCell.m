@@ -219,9 +219,9 @@ static NSString *stringWithInteger(int count)
     NSRect textRect, ignored;
     float countSep = [self countPaddingForCellSize:aRect.size];
     // get rid of the icon region and padding
-    NSDivideRect(aRect, &ignored, &textRect, SIZE_OF_TEXT_FIELD_BORDER + BORDER_BETWEEN_EDGE_AND_IMAGE + NSWidth([self iconRectForBounds:aRect]), NSMinXEdge);
+    NSDivideRect(aRect, &ignored, &textRect, NSWidth([self iconRectForBounds:aRect]) + BORDER_BETWEEN_IMAGE_AND_TEXT, NSMinXEdge);
     // use countRect origin to take care of some padding calculations
-    NSDivideRect(textRect, &ignored, &textRect, NSWidth(aRect) - NSMinX([self countRectForBounds:aRect]) + countSep + BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
+    NSDivideRect(textRect, &ignored, &textRect, NSWidth(aRect) - NSMinX([self countRectForBounds:aRect]) + countSep + BORDER_BETWEEN_COUNT_AND_TEXT, NSMaxXEdge);
     return textRect;
 }
 
@@ -244,7 +244,6 @@ static NSString *stringWithInteger(int count)
 }
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
-    /* Shark and sample indicate that we're spending a lot of time in NSAttributedString drawing, if you test by holding down an arrow key and scrolling through the main table */
 
     NSRange labelRange = NSMakeRange(0, [label length]);
     [label addAttribute:NSFontAttributeName value:[self font] range:labelRange];
@@ -268,7 +267,8 @@ static NSString *stringWithInteger(int count)
 	}
 
     // Draw the text
-    [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultClippingParagraphStyle] range:labelRange];
+    // @@ Mail.app uses NSLineBreakByTruncatingTail for this
+    [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultTruncatingTailParagraphStyle] range:labelRange];
     NSRect textRect = NSInsetRect([self textRectForBounds:aRect], 1.0f, 0.0); 
     
     [label drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin];
