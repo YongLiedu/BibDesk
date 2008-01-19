@@ -2296,9 +2296,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 {
     // Sender is an NSMenuItem, and tag corresponds to the Finder label integer
     NSInteger label = [sender tag];
-    NSParameterAssert(label >= 0 && label <= 6);
-    
-    label = (label << 1);
+    NSParameterAssert(label >= 0 && label <= 7);
     
     NSArray *selectedURLs = [self _selectedURLs];
     NSUInteger i, iMax = [selectedURLs count];
@@ -2338,7 +2336,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         iconRect.size = NSMakeSize(12, 12);
         NSBezierPath *clipPath = [NSBezierPath bezierPathWithRoundRect:iconRect xRadius:3.0 yRadius:3.0];
         
-        for (i = 0; i < 7; i++) {
+        for (i = 0; i < 8; i++) {
             anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
             [anItem setTag:i];
             

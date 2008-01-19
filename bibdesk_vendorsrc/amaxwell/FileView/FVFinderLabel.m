@@ -323,6 +323,10 @@ static void ClipContextToCircleCappedPathInRect(CGContextRef context, CGRect rec
 {
     FSRef fileRef;
     
+    NSParameterAssert(label <= 7);
+    
+    if (label > 7) label = 0;
+    
     if ([aURL isFileURL] && CFURLGetFSRef((CFURLRef)aURL, &fileRef)) {
 
         FSCatalogInfo catalogInfo;    
@@ -332,6 +336,8 @@ static void ClipContextToCircleCappedPathInRect(CGContextRef context, CGRect rec
         err = FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo, &catalogInfo, NULL, NULL, NULL);
         
         if (noErr == err) {
+            
+            label = (label << 1L);
             
             // coerce to FolderInfo or FileInfo as needed and set the color bit
             if ((catalogInfo.nodeFlags & kFSNodeIsDirectoryMask) != 0) {
