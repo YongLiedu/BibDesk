@@ -332,6 +332,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 }
 
 - (void)setFinderLabel:(int)label{
+    if (label < 0 || label > 7) label = 0;
     [FVFinderLabel setFinderLabel:label forURL:self];
 }
 
