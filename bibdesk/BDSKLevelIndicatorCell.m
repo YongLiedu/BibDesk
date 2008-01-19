@@ -156,6 +156,7 @@
     
     CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
     CGContextSaveGState(ctxt);
+    CGContextClipToRect(ctxt, *(CGRect *)&cellFrame);
     if ([controlView isFlipped]) {
         CGContextTranslateCTM(ctxt, 0, NSMaxY(r));
         CGContextScaleCTM(ctxt, 1, -1);
