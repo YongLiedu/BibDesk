@@ -488,9 +488,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
     OBASSERT(identifierURL);
-    
-    SKDocumentRef skDocument;
-    
+        
     NSEnumerator *urlEnum = nil;
     NSURL *url = nil;
     BOOL shouldBeRemoved;
@@ -525,7 +523,6 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     OBASSERT(identifierURL);
     
-    SKDocumentRef skDocument;    
     NSEnumerator *urlEnumerator = [urlsToReindex objectEnumerator];
     NSURL *url = nil;
         
