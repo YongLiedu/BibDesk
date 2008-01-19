@@ -50,13 +50,14 @@
 + (NSString *)indexCacheFolder;
 + (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL;
 - (void)buildIndexForItems:(NSArray *)items;
-- (void)indexFileURL:(NSURL *)aURL signature:(NSData *)signature;
+- (void)indexFileURL:(NSURL *)aURL;
 - (void)removeFileURL:(NSURL *)aURL;
 - (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount;
 - (void)indexFileURLs:(NSSet *)urlstoBeAdded forIdentifierURL:(NSURL *)identifierURL;
 - (void)removeFileURLs:(NSSet *)urlstoBeAdded forIdentifierURL:(NSURL *)identifierURL;
 - (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL;
 - (void)runIndexThreadForItems:(NSArray *)items;
+- (void)searchIndexDidUpdate;
 - (void)processNotification:(NSNotification *)note;
 - (void)handleDocAddItemNotification:(NSNotification *)note;
 - (void)handleDocDelItemNotification:(NSNotification *)note;
@@ -274,9 +275,6 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     OBPRECONDITION(items);
     
-    // normally set in the indexFilesForItem: method, but we need to avoid returning NO for isIndexing here as well
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
-
     double totalObjectCount = [items count];
     double numberIndexed = 0;
     
@@ -284,6 +282,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     if ([signatures count]) {
         // cached index, update identifierURLs and remove unlinked or invalid indexed URLs
+        
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
         
         NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
         NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
@@ -356,13 +356,13 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                 [self removeFileURL:url];
         }
         [URLsToRemove release];
-
-        OSMemoryBarrier();
-        if (flags.shouldKeepRunning == 1)
-            [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+        
+        [self searchIndexDidUpdate];
         
         [items release];
         items = itemsToAdd;
+        
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     }
     
     // add items that were not yet indexed
@@ -372,27 +372,33 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     }
     
     [items release];
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
 
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
         [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
 }
 
-- (void)indexFileURL:(NSURL *)aURL signature:(NSData *)signature{
-    SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
+- (void)indexFileURL:(NSURL *)aURL{
+    NSData *signature = sha1SignatureForURL(aURL);
     
-    OBPOSTCONDITION(skDocument);
-    
-    if (skDocument != NULL) {
-        OBASSERT(signature);
+    if ([[signatures objectForKey:aURL] isEqual:signature] == NO) {
+        // either the file was not indexed, or it has changed
         
-        if (signature == nil)
-            signature = [NSData data];
-        [signatures setObject:signature forKey:aURL];
+        SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
         
-        SKIndexAddDocument(index, skDocument, NULL, TRUE);
-        CFRelease(skDocument);
+        OBPOSTCONDITION(skDocument);
+        
+        if (skDocument != NULL) {
+            
+            OBASSERT(signature);
+            
+            if (signature == nil)
+                signature = [NSData data];
+            [signatures setObject:signature forKey:aURL];
+            
+            SKIndexAddDocument(index, skDocument, NULL, TRUE);
+            CFRelease(skDocument);
+        }
     }
 }
 
@@ -423,6 +429,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
+    
     OSMemoryBarrier();
     while(flags.shouldKeepRunning == 1 && (anObject = [enumerator nextObject])) {
         [self indexFileURLs:[NSSet setWithArray:[anObject objectForKey:@"urls"]] forIdentifierURL:[anObject objectForKey:@"identifierURL"]];
@@ -435,18 +443,18 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             [pool release];
             pool = [NSAutoreleasePool new];
             
-            [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+            [self searchIndexDidUpdate];
             countSinceLastFlush = flushInterval;
         }
         OSMemoryBarrier();
     }
     
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
+    
     // final update to catch any leftovers
     
     // it's possible that we've been told to stop, and the delegate is garbage; in that case, don't message it
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1)
-        [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+    [self searchIndexDidUpdate];
     [pool release];
 }
 
@@ -459,26 +467,16 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     NSEnumerator *urlEnumerator = [urlsToAdd objectEnumerator];
     NSURL *url = nil;
     
-    // @@ should probably move this back out to caller; if it's called from a loop, we shouldn't be turning it on and off until all items are indexed
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
-    
     while(url = [urlEnumerator nextObject]){
-        
-        NSData *signature = sha1SignatureForURL(url);
-        BOOL shouldBeAdded = YES;
-        
         // SKIndexSetProperties is more generally useful, but is really slow when creating the index
         // SKIndexRenameDocument changes the URL, so it's not useful
         
         pthread_rwlock_wrlock(&rwlock);
-        shouldBeAdded = (0 == [[identifierURLs allObjectsForKey:url] count] || [[signatures objectForKey:url] isEqual:signature] == NO);
         [identifierURLs addObject:identifierURL forKey:url];
         pthread_rwlock_unlock(&rwlock);
         
-        if (shouldBeAdded)
-            [self indexFileURL:url signature:signature];
+        [self indexFileURL:url];
     }
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
 }
@@ -493,9 +491,6 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     NSURL *url = nil;
     BOOL shouldBeRemoved;
     
-    // set this here because we're adding to the index apart from indexFilesForItem:
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
-
     urlEnum = [urlsToRemove objectEnumerator];
     
     // loop through the array of URLs, create a new SKDocumentRef, and try to remove it
@@ -510,11 +505,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             [self removeFileURL:url];
 	}
     
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
-    
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
-	
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
 }
 
 - (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL
@@ -526,16 +517,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     NSEnumerator *urlEnumerator = [urlsToReindex objectEnumerator];
     NSURL *url = nil;
         
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);    
-    
-    while(url = [urlEnumerator nextObject]){
-                
-        NSData *signature = sha1SignatureForURL(url);
-        
-        if ([[signatures objectForKey:url] isEqual:signature] == NO)
-            [self indexFileURL:url signature:signature];
-    }
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
+    while(url = [urlEnumerator nextObject])
+        [self indexFileURL:url];
     
     // the caller is responsible for updating the delegate, so we can throttle initial indexing
 }
@@ -628,6 +611,13 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     }
 }
 
+- (void)searchIndexDidUpdate
+{
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1)
+        [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+}
+
 - (void)processNotification:(NSNotification *)note
 {    
     OBASSERT([NSThread inMainThread]);
@@ -657,7 +647,9 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     NSURL *identifierURL = nil;
     NSSet *urlsToRemove;
     
-	while (anItem = [itemEnumerator nextObject]) {
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
+	
+    while (anItem = [itemEnumerator nextObject]) {
         identifierURL = [anItem valueForKey:@"identifierURL"];
         
         pthread_rwlock_rdlock(&rwlock);
@@ -666,8 +658,9 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
        
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
 	
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+    [self searchIndexDidUpdate];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
@@ -700,6 +693,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     [oldURLs release];
     [newURLs release];
     
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
+    
     if ([removedURLs count])
         [self removeFileURLs:removedURLs forIdentifierURL:identifierURL];
     
@@ -709,11 +704,13 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     if ([sameURLs count])
         [self reindexFileURLsIfNeeded:sameURLs forIdentifierURL:identifierURL];
     
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
+    
     [removedURLs release];
     [addedURLs release];
     [sameURLs release];
     
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+    [self searchIndexDidUpdate];
 }    
 
 - (void)handleMachMessage:(void *)msg
