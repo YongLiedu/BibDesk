@@ -47,6 +47,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKPreviewer.h"
+#import "BDSKAppController+Scripting.h"
 #import <Quartz/Quartz.h>
 
 @implementation BibDocument (Scripting)
@@ -278,6 +279,10 @@
     if(data == nil) return [[[NSTextStorage alloc] init] autorelease];
     	
 	return [[[NSTextStorage alloc] initWithRTF:data documentAttributes:NULL] autorelease];
+}
+
+- (id)clipboard {
+    return [[[BDSKClipboard alloc] init] autorelease];
 }
 
 @end

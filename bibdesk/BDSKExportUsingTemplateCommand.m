@@ -42,6 +42,7 @@
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BibItem.h"
+#import "BDSKAppController+Scripting.h"
 
 @implementation BDSKExportUsingTemplateCommand
 
@@ -98,7 +99,7 @@
 	
 	// the 'to' parameters gives the file to save to, either as a path or a url (it seems)
 	id fileObj = [params objectForKey:@"to"];
-    NSURL *fileURL;
+    NSURL *fileURL = nil;
 	// make sure we get something
 	if (!fileObj) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
@@ -111,6 +112,8 @@
             return nil;
     } else if ([fileObj isKindOfClass:[NSURL class]]) {
         fileURL = (NSURL*)fileObj;
+    } else if ([fileObj isKindOfClass:[BDSKClipboard class]]) {
+        fileURL = nil;
     } else {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
         return nil;
@@ -145,7 +148,21 @@
         fileData = [document stringDataForPublications:items usingTemplate:template];
     }
     
-    [fileData writeToURL:fileURL atomically:YES];
+    if (fileURL) {
+        [fileData writeToURL:fileURL atomically:YES];
+    } else {
+        NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+        NSString *string = nil;
+        if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+            [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, NSRTFPboardType, nil] owner:nil];
+            string = [[[[NSAttributedString alloc] initWithRTF:fileData documentAttributes:NULL] autorelease] string];
+            [pboard setData:fileData forType:NSRTFPboardType];
+        } else {
+            [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, nil] owner:nil];
+            string = [[[NSString alloc] initWithData:fileData encoding:NSUTF8StringEncoding] autorelease];
+        }
+        [pboard setString:string forType:NSStringPboardType];
+    }
     
 	return nil;
 }

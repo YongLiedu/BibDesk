@@ -37,11 +37,13 @@
  */
 
 #import "BDSKAppController+Scripting.h"
+#import "BDSKApplication.h"
 #import <OmniFoundation/OFPreference.h>
 #import "BDSKScriptHookManager.h"
 #import "BDSKTypeManager.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKMacro.h"
+
 
 /* ssp
 Category on BDSKAppController making the papers folder readable for scripting
@@ -66,6 +68,10 @@ Category on BDSKAppController making the papers folder readable for scripting
 
 - (NSArray *)allFieldNames {
 	return [[BDSKTypeManager sharedManager] allFieldNamesIncluding:nil excluding:nil];
+}
+
+- (id)clipboard {
+    return [[[BDSKClipboard alloc] init] autorelease];
 }
 
 - (BDSKScriptHook *)valueInScriptHooksWithUniqueID:(NSNumber *)uniqueID {
@@ -97,9 +103,24 @@ Category on BDSKAppController making the papers folder readable for scripting
 		[key isEqualToString:@"allTypes"] ||
 		[key isEqualToString:@"allFieldNames"] ||
 		[key isEqualToString:@"macros"] ||
-		[key isEqualToString:@"scriptHooks"]) 
+		[key isEqualToString:@"scriptHooks"] ||
+		[key isEqualToString:@"clipboard"]) 
 		return YES;
 	return NO;
+}
+
+@end
+
+
+@implementation BDSKClipboard
+
+- (NSScriptObjectSpecifier *)objectSpecifier {
+    // this is necessary as our container is the application 
+    NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[BDSKApplication class]];
+    return [[[NSPropertySpecifier allocWithZone: [self zone]] 
+          initWithContainerClassDescription: containerClassDescription 
+                         containerSpecifier: nil // the application is the null container
+                                        key: @"clipboard"] autorelease];
 }
 
 @end

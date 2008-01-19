@@ -524,6 +524,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				<type type="text" list="yes"/>
 				<cocoa key="allFieldNames"/>
 			</property>
+			<property name="clipboard" code="pcli" type="specifier" access="r"
+				description="The clipboard">
+				<cocoa key="clipboard"/>
+			</property>
 			<responds-to name="open">
 				<cocoa method="handleOpenScriptCommand:"/>
 			</responds-to>
@@ -589,6 +593,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The publications currently displayed. This can differ from all publications depending on the state of the filter field and recently added publications.">
 				<type type="publication" list="yes"/>
 				<cocoa key="shownPublications"/>
+			</property>
+			<property name="clipboard" code="pcli" type="specifier" access="r" hidden="yes"
+				description="The clipboard">
+				<cocoa key="clipboard"/>
 			</property>
 			<responds-to name="close">
 				<cocoa method="handleCloseScriptCommand:"/>
@@ -943,7 +951,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <result description="the templated rich text" type="rich text">
             </result>
         </command>
-        
+
         <command name="export" code="BDSKexpt"
 			description="Exports publications in the document using a template to file.">
             <cocoa name="exportUsingTemplate" class="BDSKExportUsingTemplateCommand"/>
@@ -963,8 +971,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The template rich text to use. Either this, 'using', or 'using text' should be used.">
                 <cocoa key="usingRichText"/>
             </parameter>
-            <parameter name="to" code="to  " type="file"
-                description="The file to export to">
+            <parameter name="to" code="to  "
+                description="The file to export to, or the clipboard">
+                <type type="file"/>
+                <type type="specifier"/>
                 <cocoa key="to"/>
             </parameter>
             <parameter name="for" code="for " optional="yes"

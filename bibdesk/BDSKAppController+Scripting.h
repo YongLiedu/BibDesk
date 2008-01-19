@@ -52,6 +52,8 @@
 
 - (NSArray *)allFieldNames;
 
+- (id)clipboard;
+
 - (BDSKScriptHook *)valueInScriptHooksWithUniqueID:(NSNumber *)uniqueID;
 
 - (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
@@ -62,3 +64,6 @@
 
 @end
 
+
+@interface BDSKClipboard : NSObject
+@end
