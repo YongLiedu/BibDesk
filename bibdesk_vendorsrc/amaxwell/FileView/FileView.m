@@ -2171,6 +2171,26 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [self reloadIcons];
 }
 
+- (IBAction)trashSelectedURLs:(id)sender;
+{
+    NSArray *selectedURLs = [self _selectedURLs];
+    if (NO == [self isEditable] || NO == [[self dataSource] fileView:self deleteURLsAtIndexes:_selectedIndexes]) {
+        NSBeep();
+    } else {
+        NSEnumerator *urlEnum = [selectedURLs objectEnumerator];
+        NSURL *url;
+        while (url = [urlEnum nextObject]) {
+            if ([url isFileURL] == NO || [url isEqual:[FVIcon missingFileURL]]) continue;
+            NSString *path = [url path];
+            NSString *folderPath = [path stringByDeletingLastPathComponent];
+            NSString *fileName = [path lastPathComponent];
+            int tag = 0;
+            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
+        }
+        [self reloadIcons];
+    }
+}
+
 - (IBAction)selectAll:(id)sender;
 {
     [self setSelectionIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfIcons])]];
@@ -2217,6 +2237,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         return YES;
     else if (action == @selector(delete:) || action == @selector(copy:) || action == @selector(cut:))
         return [self isEditable] && [_selectedIndexes count] > 0;
+    else if (action == @selector(trashSelectedURLs:))
+        return [self isEditable] && [[[self _selectedURLs] valueForKey:@"isFileURL"] containsObject:[NSNumber numberWithInt:1]];
     else if (action == @selector(selectAll:))
         return ([self numberOfIcons] > 0);
     else if (action == @selector(previewAction:))
@@ -2323,6 +2345,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [anItem setTag:FVRevealMenuItemTag];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Remove", @"FileView", bundle, @"context menu title") action:@selector(delete:) keyEquivalent:@""];
         [anItem setTag:FVRemoveMenuItemTag];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Move To Trash", @"FileView", bundle, @"context menu title") action:@selector(trashSelectedURLs:) keyEquivalent:@""];
+        [anItem setTag:FVTrashMenuItemTag];
         
         // Finder label submenu
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Set Finder Label", @"FileView", bundle, @"context menu title") action:NULL keyEquivalent:@""];
