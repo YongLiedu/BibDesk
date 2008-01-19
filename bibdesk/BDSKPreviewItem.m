@@ -136,7 +136,10 @@
 	NSString *relativeFile = [BDSKFormatParser parseFormat:localFileFormat forField:BDSKLocalUrlString ofItem:self];
 	if ([pw boolForKey:BDSKLocalFileLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
-    return [[papersFolderPath stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
+	if  ([NSString isEmptyString:[pw stringForKey:BDSKPapersFolderPathKey]])
+        return relativeFile;
+    else
+        return [[papersFolderPath stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
 }
 
 - (NSString *)suggestedCiteKey {
