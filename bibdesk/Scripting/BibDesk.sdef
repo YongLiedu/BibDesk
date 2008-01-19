@@ -624,8 +624,24 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<cocoa class="NSURL"/>
 			<type type="file"/>
             <property name="URL" code="rURL" type="text" access="r"
-                description="URL for the file.">
+                description="The URL of the file.">
                 <cocoa key="absoluteString"/>
+            </property>  
+            <property name="path" code="ppth" type="text" access="r"
+                description="The path of the file.">
+                <cocoa key="path"/>
+            </property>  
+            <property name="label index" code="labi" type="integer"
+                description="The Finder label of the file.">
+                <cocoa key="finderLabel"/>
+            </property>  
+            <property name="Skim notes" code="SKnt" type="text" access="r"
+                description="The Skim notes for the file.">
+                <cocoa key="textSkimNotes"/>
+            </property>  
+            <property name="rich Skim notes" code="rSKn" type="rich text" access="r"
+                description="The rich text Skim notes for the file.">
+                <cocoa key="styledTextSkimNotes"/>
             </property>  
 		</class>
 

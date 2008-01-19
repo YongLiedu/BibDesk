@@ -40,6 +40,7 @@
 #import "CFString_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKSkimReader.h"
+#import <FileView/FVFinderLabel.h>
 
 @implementation NSURL (BDSKExtensions)
 
@@ -319,6 +320,19 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 - (NSAttributedString *)richTextSkimNotes {
     NSData *data = [self isFileURL] ? [[BDSKSkimReader sharedReader] RTFNotesAtURL:self] : nil;
     return data ? [[[NSAttributedString alloc] initWithRTF:data documentAttributes:NULL] autorelease] : nil;
+}
+
+- (NSTextStorage *)styledTextSkimNotes {
+    NSAttributedString *richTextSkimNotes = [self richTextSkimNotes];
+    return richTextSkimNotes ? [[[NSTextStorage alloc] initWithAttributedString:richTextSkimNotes] autorelease] : nil;
+}
+
+- (int)finderLabel{
+    return [FVFinderLabel finderLabelForURL:self];
+}
+
+- (void)setFinderLabel:(int)label{
+    [FVFinderLabel setFinderLabel:label forURL:self];
 }
 
 @end
