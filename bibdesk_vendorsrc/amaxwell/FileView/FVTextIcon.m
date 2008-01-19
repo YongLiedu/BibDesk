@@ -378,11 +378,12 @@ static inline void limitSize(NSSize *size)
     NSRect stringRect = NSZeroRect;
     stringRect.size = paperSize;
     
+    CGContextSaveGState(ctxt);
+
     // assume a white page background; could maybe read from the attributed string's background color?
     CGContextSetRGBFillColor(ctxt, 1.0, 1.0, 1.0, 1.0);
     CGContextFillRect(ctxt, *(CGRect *)&stringRect);
     
-    CGContextSaveGState(ctxt);
     CGContextConcatCTM(ctxt, pageTransform);
     
     // we flipped the CTM in our bitmap context since NSLayoutManager expects a flipped context
