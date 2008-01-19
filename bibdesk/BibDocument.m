@@ -2599,7 +2599,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self updateFileView];
 
     BOOL shouldUpdateGroups = [NSString isEmptyString:[self currentGroupField]] == NO && (docState.itemChangeMask & BDSKItemChangedGroupFieldMask) != 0;
-	[self updateSmartGroupsCountAndContent:shouldUpdateGroups];
+    
+    // allow updating a smart group if it's selected
+	[self updateSmartGroupsCountAndContent:YES];
     
     if(shouldUpdateGroups){
         // this handles all UI updates if we call it, so don't bother with any others
