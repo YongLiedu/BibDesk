@@ -3221,43 +3221,63 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 }
 
 - (void)updateStatus{
-	int shownPubsCount = [shownPublications count];
-	int groupPubsCount = [groupedPublications count];
-	int totalPubsCount = [publications count];
 	NSMutableString *statusStr = [[NSMutableString alloc] init];
 	NSString *ofStr = NSLocalizedString(@"of", @"partial status message: [number] of [number] publications");
+    
+    if ([self isDisplayingFileContentSearch]) {
+        
+        int shownItemsCount = [[fileSearchController filteredResults] count];
+        int totalItemsCount = [[fileSearchController results] count];
+        
+        [statusStr appendFormat:@"%i %@", shownItemsCount, (shownItemsCount == 1) ? NSLocalizedString(@"item", @"item, in status message") : NSLocalizedString(@"items", @"items, in status message")];
+        
+        if (shownItemsCount != totalItemsCount) {
+            NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
+                [NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
+                NSLocalizedString(@"in multiple groups", @"Partial status message");
+            [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalItemsCount];
+        }
+        
+    } else {
 
-	if (shownPubsCount != groupPubsCount) { 
-		[statusStr appendFormat:@"%i %@ ", shownPubsCount, ofStr];
-	}
-	[statusStr appendFormat:@"%i %@", groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message")];
-	// we can have only a single external group selected at a time
-	if ([self hasWebGroupSelected] == YES) {
-        [statusStr appendFormat:@" %@", NSLocalizedString(@"in web group", @"Partial status message")];
-    } else if ([self hasSharedGroupsSelected] == YES) {
-        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
-	} else if ([self hasURLGroupsSelected] == YES) {
-        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
-	} else if ([self hasScriptGroupsSelected] == YES) {
-        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
-	} else if ([self hasSearchGroupsSelected] == YES) {
-        BDSKSearchGroup *group = [[self selectedGroups] firstObject];
-        [statusStr appendFormat:NSLocalizedString(@" in \"%@\" search group", @"Partial status message"), [[group serverInfo] name]];
-        int matchCount = [group numberOfAvailableResults];
-        if (matchCount == 1)
-            [statusStr appendFormat:NSLocalizedString(@". There was 1 match.", @"Partial status message")];
-        else if (matchCount > 1)
-            [statusStr appendFormat:NSLocalizedString(@". There were %i matches.", @"Partial status message"), matchCount];
-        if ([group hasMoreResults])
-            [statusStr appendString:NSLocalizedString(@" Hit \"Search\" to load more.", @"Partial status message")];
-        else if (groupPubsCount < matchCount)
-            [statusStr appendString:NSLocalizedString(@" Some results could not be parsed.", @"Partial status message")];
-	} else if (groupPubsCount != totalPubsCount) {
-		NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
-			[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
-			NSLocalizedString(@"in multiple groups", @"Partial status message");
-        [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalPubsCount];
-	}
+        int shownPubsCount = [shownPublications count];
+        int groupPubsCount = [groupedPublications count];
+        int totalPubsCount = [publications count];
+        
+        if (shownPubsCount != groupPubsCount) { 
+            [statusStr appendFormat:@"%i %@ ", shownPubsCount, ofStr];
+        }
+        [statusStr appendFormat:@"%i %@", groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message")];
+        // we can have only a single external group selected at a time
+        if ([self hasWebGroupSelected] == YES) {
+            [statusStr appendFormat:@" %@", NSLocalizedString(@"in web group", @"Partial status message")];
+        } else if ([self hasSharedGroupsSelected] == YES) {
+            [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
+        } else if ([self hasURLGroupsSelected] == YES) {
+            [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
+        } else if ([self hasScriptGroupsSelected] == YES) {
+            [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
+        } else if ([self hasSearchGroupsSelected] == YES) {
+            BDSKSearchGroup *group = [[self selectedGroups] firstObject];
+            [statusStr appendFormat:NSLocalizedString(@" in \"%@\" search group", @"Partial status message"), [[group serverInfo] name]];
+            int matchCount = [group numberOfAvailableResults];
+            if (matchCount == 1)
+                [statusStr appendFormat:NSLocalizedString(@". There was 1 match.", @"Partial status message")];
+            else if (matchCount > 1)
+                [statusStr appendFormat:NSLocalizedString(@". There were %i matches.", @"Partial status message"), matchCount];
+            if ([group hasMoreResults])
+                [statusStr appendString:NSLocalizedString(@" Hit \"Search\" to load more.", @"Partial status message")];
+            else if (groupPubsCount < matchCount)
+                [statusStr appendString:NSLocalizedString(@" Some results could not be parsed.", @"Partial status message")];
+        } else if (groupPubsCount != totalPubsCount) {
+            NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
+                [NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
+                NSLocalizedString(@"in multiple groups", @"Partial status message");
+            [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalPubsCount];
+        }
+        
+    }
+    
 	[self setStatus:statusStr];
     [statusStr release];
 }

@@ -277,6 +277,7 @@
                 [newFilteredResults addObject:result];
         [self setFilteredResults:newFilteredResults];
     }
+    [[self document] updateStatus];
 }
 
 - (void)setResults:(NSArray *)newResults
