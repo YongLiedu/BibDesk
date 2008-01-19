@@ -62,7 +62,7 @@ static CGAffineTransform __paperTransform;
     }
 }
 
-// A particular layout manager/text storage combination is not thread safe, so the AppKit string drawing routines must only be used from the main thread.  We're using the thread dictionary to cache our string drawing machinery on a per-thread basis.
+// A particular layout manager/text storage combination is not thread safe, so the AppKit string drawing routines must only be used from the main thread.  We're using the thread dictionary to cache our string drawing machinery on a per-thread basis.  Update:  for the record, Aki Inoue says that NSStringDrawing is supposed to be thread safe, so the crash I experienced may be something else.
 + (NSTextStorage *)textStorageForCurrentThread;
 {
     NSMutableDictionary *threadDictionary = [[NSThread currentThread] threadDictionary];
