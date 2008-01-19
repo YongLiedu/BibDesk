@@ -37,7 +37,6 @@
  */
 
 #import "BDSKAppController+Scripting.h"
-#import "BDSKApplication.h"
 #import <OmniFoundation/OFPreference.h>
 #import "BDSKScriptHookManager.h"
 #import "BDSKTypeManager.h"
@@ -71,7 +70,11 @@ Category on BDSKAppController making the papers folder readable for scripting
 }
 
 - (id)clipboard {
-    return [[[BDSKClipboard alloc] init] autorelease];
+    NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[NSApp class]];
+    return [[[NSPropertySpecifier allocWithZone: [self zone]] 
+          initWithContainerClassDescription: containerClassDescription 
+                         containerSpecifier: nil // the application is the null container
+                                        key: @"clipboard"] autorelease];
 }
 
 - (BDSKScriptHook *)valueInScriptHooksWithUniqueID:(NSNumber *)uniqueID {
@@ -110,18 +113,3 @@ Category on BDSKAppController making the papers folder readable for scripting
 }
 
 @end
-
-
-@implementation BDSKClipboard
-
-- (NSScriptObjectSpecifier *)objectSpecifier {
-    // this is necessary as our container is the application 
-    NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[BDSKApplication class]];
-    return [[[NSPropertySpecifier allocWithZone: [self zone]] 
-          initWithContainerClassDescription: containerClassDescription 
-                         containerSpecifier: nil // the application is the null container
-                                        key: @"clipboard"] autorelease];
-}
-
-@end
-

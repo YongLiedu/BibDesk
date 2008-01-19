@@ -42,7 +42,6 @@
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BibItem.h"
-#import "BDSKAppController+Scripting.h"
 
 @implementation BDSKExportUsingTemplateCommand
 
@@ -112,9 +111,7 @@
             return nil;
     } else if ([fileObj isKindOfClass:[NSURL class]]) {
         fileURL = (NSURL*)fileObj;
-    } else if ([fileObj isKindOfClass:[BDSKClipboard class]]) {
-        fileURL = nil;
-    } else {
+    } else if ([fileObj isKindOfClass:[NSPropertySpecifier class]] == NO || [[fileObj key] isEqualToString:@"clipboard"] == NO) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
         return nil;
 	}

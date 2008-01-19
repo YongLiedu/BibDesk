@@ -63,7 +63,3 @@
 
 
 @end
-
-
-@interface BDSKClipboard : NSObject
-@end

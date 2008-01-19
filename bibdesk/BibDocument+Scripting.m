@@ -47,7 +47,6 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKPreviewer.h"
-#import "BDSKAppController+Scripting.h"
 #import <Quartz/Quartz.h>
 
 @implementation BibDocument (Scripting)
@@ -282,7 +281,11 @@
 }
 
 - (id)clipboard {
-    return [[[BDSKClipboard alloc] init] autorelease];
+    NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[NSApp class]];
+    return [[[NSPropertySpecifier allocWithZone: [self zone]] 
+          initWithContainerClassDescription: containerClassDescription 
+                         containerSpecifier: nil // the application is the null container
+                                        key: @"clipboard"] autorelease];
 }
 
 @end
