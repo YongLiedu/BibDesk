@@ -30,6 +30,27 @@ typedef float CGFloat;
 #define NSAppKitVersionNumber10_4 824
 #endif
 
+#ifndef DEBUG
+#if !defined(NS_BLOCK_ASSERTIONS)
+#define NS_BLOCK_ASSERTIONS 1
+#endif /* NS_BLOCK_ASSERTIONS */
+#endif /* DEBUG */
+
+#if !defined(_FVAPIAssertBody)
+#define _FVAPIAssertBody(condition, desc, arg1, arg2) \
+do { if(!(condition)) { [NSException raise:NSInvalidArgumentException format:(desc), (arg1), (arg2)]; } } while(0)
+#endif /* _FVAPIAssertBody */
+
+// use NSAssert internally for debugging; these asserts are to enforce public API usage for framework clients
+#define FVAPIAssert(condition, desc) \
+_FVAPIAssertBody((condition), desc, 0, 0)
+
+#define FVAPIAssert1(condition, desc, arg1) \
+_FVAPIAssertBody((condition), (desc), (arg1), 0)
+
+#define FVAPIAssert2(condition, desc, arg1, arg2) \
+_FVAPIAssertBody((condition), (desc), (arg1), (arg2))
+
 // copied from AppKit
 #if defined(__MACH__)
 

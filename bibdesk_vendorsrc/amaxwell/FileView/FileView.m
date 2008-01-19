@@ -294,7 +294,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 
 - (void)setIconScale:(CGFloat)scale;
 {
-    NSParameterAssert(scale > 0);
+    FVAPIAssert(scale > 0, @"scale must be greater than zero");
     _iconSize.width = DEFAULT_ICON_SIZE.width * scale;
     _iconSize.height = DEFAULT_ICON_SIZE.height * scale;
     _padding = [self _paddingForScale:scale];
@@ -322,10 +322,18 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 - (void)_registerForDraggedTypes
 {
     if (_isEditable && _dataSource) {
-        NSParameterAssert([_dataSource respondsToSelector:@selector(fileView:insertURLs:atIndexes:)]);
-        NSParameterAssert([_dataSource respondsToSelector:@selector(fileView:replaceURLsAtIndexes:withURLs:)]);
-        NSParameterAssert([_dataSource respondsToSelector:@selector(fileView:moveURLsAtIndexes:toIndex:)]);
-        NSParameterAssert([_dataSource respondsToSelector:@selector(fileView:deleteURLsAtIndexes:)]);
+        const SEL selectors[] = 
+        { 
+            @selector(fileView:insertURLs:atIndexes:), 
+            @selector(fileView:insertURLs:atIndexes:),
+            @selector(fileView:replaceURLsAtIndexes:withURLs:), 
+            @selector(fileView:moveURLsAtIndexes:toIndex:),
+            @selector(fileView:deleteURLsAtIndexes:) 
+        };
+        NSUInteger i, iMax = sizeof(selectors) / sizeof(SEL);
+        for (i = 0; i < iMax; i++)
+            FVAPIAssert1([_dataSource respondsToSelector:selectors[i]], @"datasource must implement %@", NSStringFromSelector(selectors[i]));
+
         [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, (NSString *)kUTTypeUTF8PlainText, NSStringPboardType, nil]];
     } else {
         [self registerForDraggedTypes:nil];
@@ -343,8 +351,8 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 - (void)setDataSource:(id)obj;
 {
     if (obj) {
-        NSParameterAssert([obj respondsToSelector:@selector(numberOfIconsInFileView:)]);
-        NSParameterAssert([obj respondsToSelector:@selector(fileView:URLAtIndex:)]);
+        FVAPIAssert1([obj respondsToSelector:@selector(numberOfIconsInFileView:)], @"datasource must implement %@", NSStringFromSelector(@selector(numberOfIconsInFileView:)));
+        FVAPIAssert1([obj respondsToSelector:@selector(fileView:URLAtIndex:)], @"datasource must implement %@", NSStringFromSelector(@selector(fileView:URLAtIndex:)));
     }
     _dataSource = obj;
     // convenient time to do this, although the timer would also handle it
@@ -578,7 +586,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)setSelectionIndexes:(NSIndexSet *)indexSet;
 {
-    NSParameterAssert(nil != indexSet);
+    FVAPIAssert(nil != indexSet, @"index set must not be nil");
     [_selectedIndexes autorelease];
     _selectedIndexes = [indexSet mutableCopy];
 }
@@ -2318,7 +2326,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 {
     // Sender is an NSMenuItem, and tag corresponds to the Finder label integer
     NSInteger label = [sender tag];
-    NSParameterAssert(label >= 0 && label <= 7);
+    FVAPIAssert1(label >=0 && label <= 7, @"invalid label %d (must be between 0 and 7)", label);
     
     NSArray *selectedURLs = [self _selectedURLs];
     NSUInteger i, iMax = [selectedURLs count];

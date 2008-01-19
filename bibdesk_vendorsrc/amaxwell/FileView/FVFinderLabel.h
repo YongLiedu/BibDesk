@@ -48,6 +48,9 @@
 + (NSString *)localizedNameForLabel:(NSInteger)label;
 
 + (NSUInteger)finderLabelForURL:(NSURL *)aURL;
+
+// valid range is 0--7 (pass 0 to clear the label)
+// non-file: URL and non-existent files are silently ignored
 + (void)setFinderLabel:(NSUInteger)label forURL:(NSURL *)aURL;
 
 @end

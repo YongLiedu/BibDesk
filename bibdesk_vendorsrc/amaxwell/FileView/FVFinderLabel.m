@@ -165,6 +165,7 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
 
 + (NSString *)localizedNameForLabel:(NSInteger)label
 {
+    FVAPIAssert1(label <= 7, @"Invalid Finder label %d (must be in the range 0--7)", label);
     NSArray *labelNames = nil;
     if (nil == labelNames) {
         NSBundle *bundle = [NSBundle bundleForClass:[FVFinderLabel self]];
@@ -272,6 +273,7 @@ static void ClipContextToCircleCappedPathInRect(CGContextRef context, CGRect rec
 
 + (void)drawFinderLabel:(NSUInteger)label inRect:(CGRect)rect ofContext:(CGContextRef)context flipped:(BOOL)isFlipped roundEnds:(BOOL)flag;
 {
+    FVAPIAssert1(label <= 7, @"Invalid Finder label %d (must be in the range 0--7)", label);
     CGContextSaveGState(context);
     if (isFlipped) {
         CGContextTranslateCTM(context, 0, CGRectGetMaxY(rect));
@@ -323,10 +325,8 @@ static void ClipContextToCircleCappedPathInRect(CGContextRef context, CGRect rec
 {
     FSRef fileRef;
     
-    NSParameterAssert(label <= 7);
-    
-    if (label > 7) label = 0;
-    
+    FVAPIAssert1(label <= 7, @"Invalid Finder label %d (must be in the range 0--7)", label);
+        
     if ([aURL isFileURL] && CFURLGetFSRef((CFURLRef)aURL, &fileRef)) {
 
         FSCatalogInfo catalogInfo;    

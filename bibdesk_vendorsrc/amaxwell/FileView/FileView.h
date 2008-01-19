@@ -126,7 +126,7 @@ enum {
 - (IBAction)selectNextIcon:(id)sender;
 - (IBAction)delete:(id)sender;
 
-// sender must implement -tag to return a valid Finder label integer (0-6); non-file URLs are ignored
+// sender must implement -tag to return a valid Finder label integer (0-7); non-file URLs are ignored
 - (IBAction)changeFinderLabel:(id)sender;
 - (IBAction)openSelectedURLs:(id)sender;
 - (IBAction)trashSelectedURLs:(id)sender;
