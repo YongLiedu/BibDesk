@@ -151,8 +151,6 @@
 - (IBAction)chooseLocalFile:(id)sender;
 - (void)chooseLocalFilePanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
-- (IBAction)trashLocalFile:(id)sender;
-
 - (IBAction)chooseRemoteURL:(id)sender;
 - (IBAction)dismissChooseURLSheet:(id)sender;
 - (void)chooseRemoteURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;

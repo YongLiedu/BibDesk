@@ -552,21 +552,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
-- (IBAction)trashLocalFile:(id)sender{
-    unsigned int anIndex = [[sender representedObject] unsignedIntValue];
-    NSString *path = [[[publication objectInFilesAtIndex:anIndex] URL] path];
-    NSString *folderPath = [path stringByDeletingLastPathComponent];
-    NSString *fileName = [path lastPathComponent];
-    int tag = 0;
-    NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
-    [publication removeObjectFromFilesAtIndex:anIndex];
-    if (oldURL)
-        [[self document] userRemovedURL:oldURL forPublication:publication];
-    [oldURL release];
-    [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
-    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-}
-
 - (IBAction)chooseRemoteURL:(id)sender{
     unsigned int anIndex = NSNotFound;
     NSNumber *indexNumber = [sender representedObject];
@@ -1088,13 +1073,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                 
                 item = [menu insertItemWithTitle:NSLocalizedString(@"Consolidate",@"Menu item title")
                                           action:@selector(consolidateLinkedFiles:)
-                                   keyEquivalent:@""
-                                         atIndex:++i];
-                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
-                
-                i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
-                item = [menu insertItemWithTitle:NSLocalizedString(@"Move To Trash",@"Menu item title")
-                                          action:@selector(trashLocalFile:)
                                    keyEquivalent:@""
                                          atIndex:++i];
                 [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
