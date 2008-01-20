@@ -486,7 +486,6 @@
 		F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */; };
 		F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
-		F990C58B0D42D58D00B5425E /* BDSKDocumentSearch.h in Headers */ = {isa = PBXBuildFile; fileRef = F990C5890D42D58D00B5425E /* BDSKDocumentSearch.h */; };
 		F990C58C0D42D58D00B5425E /* BDSKDocumentSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F990C58A0D42D58D00B5425E /* BDSKDocumentSearch.m */; };
 		F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */; };
 		F9937E230AD8268E001D1DFB /* BDSKZoomablePDFView.m in Sources */ = {isa = PBXBuildFile; fileRef = F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */; };
@@ -2309,7 +2308,6 @@
 		CE38FABE091D2D0E00BCB69D /* Document */ = {
 			isa = PBXGroup;
 			children = (
-				F990C5890D42D58D00B5425E /* BDSKDocumentSearch.h */,
 				F990C58A0D42D58D00B5425E /* BDSKDocumentSearch.m */,
 				F9022C66075802E300C3F701 /* BibDocument.m */,
 				CE5C29CC0AE14FEC00C3E6B5 /* BibDocument_Actions.m */,
@@ -2497,6 +2495,7 @@
 				CE26481A0B5AB4B700D4B5B8 /* BDSKDragTextField.h */,
 				F9022C400758027800C3F701 /* BDSKMainTableView.h */,
 				F9022C420758027800C3F701 /* BDSKDragWindow.h */,
+				F990C5890D42D58D00B5425E /* BDSKDocumentSearch.h */,
 				CE28373F0917D31D006B4C63 /* BDSKEdgeView.h */,
 				CE4241330D0EAE0B00F824E7 /* BDSKEditorTableView.h */,
 				CE4241420D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.h */,
@@ -2910,7 +2909,6 @@
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
 				CE2E78CC0D40F6BB00340B39 /* BDSKMultiValueDictionary.h in Headers */,
-				F990C58B0D42D58D00B5425E /* BDSKDocumentSearch.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
