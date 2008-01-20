@@ -87,6 +87,7 @@
         
         data = [[BDSKSearchPrivateIvars alloc] init];
         [self setDelegate:aDelegate];
+        lastUpdateTime = CFAbsoluteTimeGetCurrent();
     }
     return self;
 }
@@ -125,7 +126,8 @@
         
         // if there's a search in progress, we'll cancel it and re-update
         // if not, we'll notify the delegate with an empty array, since the index is still working
-        if (NULL != search) {
+        // throttle the cancel/flush to 10 Hz, since that slows down indexing
+        if (NULL != search && (CFAbsoluteTimeGetCurrent() - lastUpdateTime) > 0.1) {
             [self cancel];
             [self updateSearchResults];
         }
@@ -170,10 +172,12 @@
     SKIndexRef skIndex = [searchIndex index];
     NSAssert(NULL != skIndex, @"-[BDSKFileSearchIndex index] returned NULL");
     
-    if (SKIndexFlush(skIndex) ==  FALSE) {
+    if (NULL == skIndex || SKIndexFlush(skIndex) ==  FALSE) {
         NSLog(@"failed to flush index %@", searchIndex);
         return;
     }
+    
+    lastUpdateTime = CFAbsoluteTimeGetCurrent();
     
     SKSearchRef skSearch = SKSearchCreate(skIndex, (CFStringRef)searchString, options);
     [self setSearch:skSearch];

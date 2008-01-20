@@ -293,10 +293,6 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         id anItem = nil;
         BDSKMultiValueDictionary *indexedIdentifierURLs = [[[BDSKMultiValueDictionary alloc] init] autorelease];
         
-        // see comment later; may need tuning here since this is much faster than adding new docs to the index
-        const int32_t flushInterval = 100;
-        int32_t countSinceLastFlush = 10;
-        
         // update the identifierURLs with the items, find items to add and URLs to remove
         OSMemoryBarrier();
         while(flags.shouldKeepRunning == 1 && (anItem = [itemEnum nextObject])) {
@@ -326,16 +322,13 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                 @synchronized(self) {
                     progressValue = (numberIndexed / totalObjectCount) * 100;
                 }
-                if (countSinceLastFlush-- == 0) {       
-                    // must update before sending the delegate message
-                    pthread_rwlock_wrlock(&rwlock);
-                    [identifierURLs addEntriesFromDictionary:indexedIdentifierURLs];
-                    pthread_rwlock_unlock(&rwlock);
-                    [indexedIdentifierURLs removeAllObjects];
-                    
-                    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self withObject:nil];
-                    countSinceLastFlush = flushInterval;
-                }
+                // must update before sending the delegate message
+                pthread_rwlock_wrlock(&rwlock);
+                [identifierURLs addEntriesFromDictionary:indexedIdentifierURLs];
+                pthread_rwlock_unlock(&rwlock);
+                [indexedIdentifierURLs removeAllObjects];
+                
+                [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
             }
 
             OSMemoryBarrier();
@@ -422,11 +415,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     NSEnumerator *enumerator = [items objectEnumerator];
     id anObject = nil;
-    
-    // This threshold is sort of arbitrary; for small batches, frequent updates are better if the delegate has a progress indicator, but for large batches (initial indexing), it can kill performance to be continually flushing and searching while indexing.
-    const int32_t flushInterval = [items count] > 20 ? 5 : 1;
-    int32_t countSinceLastFlush = flushInterval;
-    
+        
     // Use a local pool since initial indexing can use a fair amount of memory, and it's not released until the thread's run loop starts
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
@@ -440,13 +429,10 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             progressValue = (numberIndexed / totalObjectCount) * 100;
         }
         
-        if (countSinceLastFlush-- == 0) {
-            [pool release];
-            pool = [NSAutoreleasePool new];
-            
-            [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
-            countSinceLastFlush = flushInterval;
-        }
+        [pool release];
+        pool = [NSAutoreleasePool new];
+        
+        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
         OSMemoryBarrier();
     }
     
