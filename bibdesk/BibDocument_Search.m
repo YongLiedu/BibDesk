@@ -62,6 +62,7 @@
 #import "BDSKSharedGroup.h"
 #import "BDSKOwnerProtocol.h"
 #import "NSViewAnimation_BDSKExtensions.h"
+#import "BDSKDocumentSearch.h"
 
 @implementation BibDocument (Search)
 
@@ -113,19 +114,19 @@
         
         if([NSString isEmptyString:searchString]){
             [shownPublications setArray:groupedPublications];
-
+            
+            [tableView deselectAll:nil];
+            [self sortPubsByKey:nil];
+            [self updateStatus];
+            if([pubsToSelect count])
+                [self selectPublications:pubsToSelect];
+            
         } else {
             
-            [shownPublications setArray:[self publicationsMatchingSearchString:searchString indexName:field fromArray:groupedPublications]];
-            if([shownPublications count] == 1)
-                pubsToSelect = [NSMutableArray arrayWithObject:[shownPublications lastObject]];
+            [self displayPublicationsMatchingSearchString:searchString indexName:field];
+
         }
-        
-        [tableView deselectAll:nil];
-        [self sortPubsByKey:nil];
-        [self updateStatus];
-        if([pubsToSelect count])
-            [self selectPublications:pubsToSelect];
+         
     }
 }
 
@@ -217,73 +218,56 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     return searchFieldString;
 }
 
-#define SEARCH_BUFFER_MAX 100
-        
-- (NSArray *)publicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field fromArray:(NSArray *)arrayToSearch{
-    
-    searchString = BDSKSearchKitExpressionWithString(searchString);
-    
-    NSMutableArray *toReturn = [NSMutableArray arrayWithCapacity:[arrayToSearch count]];
-    
-    // we need the correct BDSKPublicationsArray for access to the identifierURLs
-    id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
-    SKIndexRef skIndex = [[owner searchIndexes] indexForField:field];
-    BDSKPublicationsArray *pubArray = [owner publications];
-    
-    NSAssert1(NULL != skIndex, @"No index for field %@", field);
-    
-    // note that the add/remove methods flush the index, so we don't have to do it again
-    SKSearchRef search = SKSearchCreate(skIndex, (CFStringRef)searchString, kSKSearchOptionDefault);
-    
-    SKDocumentID documents[SEARCH_BUFFER_MAX];
-    float scores[SEARCH_BUFFER_MAX];
-    CFIndex i, foundCount;
-    NSMutableSet *foundURLSet = [NSMutableSet set];
-    
-    Boolean more;
-    BibItem *aPub;
-    float maxScore = 0.0f;
-    
-    do {
-        
-        more = SKSearchFindMatches(search, SEARCH_BUFFER_MAX, documents, scores, 1.0, &foundCount);
-        
-        if (foundCount) {
-            CFURLRef documentURLs[SEARCH_BUFFER_MAX];
-            SKIndexCopyDocumentURLsForDocumentIDs(skIndex, foundCount, documents, documentURLs);
-            
-            for (i = 0; i < foundCount; i++) {
-                [foundURLSet addObject:(id)documentURLs[i]];
-                aPub = [pubArray itemForIdentifierURL:(NSURL *)documentURLs[i]];
-                CFRelease(documentURLs[i]);
-                [aPub setSearchScore:scores[i]];
-                maxScore = MAX(maxScore, scores[i]);
-            }
-        }
-                    
-    } while (foundCount && more);
-            
-    SKSearchCancel(search);
-    CFRelease(search);
+- (void)handleSearchCallbackWithIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
+{
+    id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;    
+    BDSKPublicationsArray *pubArray = [owner publications];    
     
     // we searched all publications, but we only want to keep the subset that's shown (if a group is selected)
-    NSMutableSet *identifierURLsToKeep = [NSMutableSet setWithArray:[arrayToSearch valueForKey:@"identifierURL"]];
+    NSMutableSet *foundURLSet = [[identifierURLs mutableCopy] autorelease];
+    NSMutableSet *identifierURLsToKeep = [NSMutableSet setWithArray:[groupedPublications valueForKey:@"identifierURL"]];
     [foundURLSet intersectSet:identifierURLsToKeep];
     
     NSEnumerator *keyEnum = [foundURLSet objectEnumerator];
     NSURL *aURL;
+    BibItem *aPub;
 
     // iterate and normalize search scores
     while (aURL = [keyEnum nextObject]) {
         aPub = [pubArray itemForIdentifierURL:aURL];
         if (aPub) {
-            [toReturn addObject:aPub];
-            float score = [aPub searchScore];
-            [aPub setSearchScore:(score/maxScore)];
+            [shownPublications addObject:aPub];
         }
     }
+            
+    NSEnumerator *pubEnum = [shownPublications objectEnumerator];
+    while (aPub = [pubEnum nextObject]) {
+        [aPub setSearchScore:[[scores objectForKey:[aPub identifierURL]] floatValue]];
+    }
+    
+    [self sortPubsByKey:nil];
+    [self updateStatus];
+    
+    [self selectPublications:[documentSearch previouslySelectedPublications]];
+}
+        
+- (void)displayPublicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field {
+    searchString = BDSKSearchKitExpressionWithString(searchString);
+        
+    // we need the correct BDSKPublicationsArray for access to the identifierURLs
+    id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
+    SKIndexRef skIndex = [[owner searchIndexes] indexForField:field];
+    
+    NSArray *selPubs = [[self selectedPublications] retain];
+    
+    [shownPublications removeAllObjects];
+    [tableView deselectAll:nil];
+    [self sortPubsByKey:nil];
+    [self updateStatus];
+    
+    [documentSearch searchForString:searchString index:skIndex selectedPublications:selPubs];
+    [selPubs release];
 
-    return toReturn;
 }
 
 #pragma mark File Content Search

@@ -486,6 +486,8 @@
 		F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */; };
 		F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
+		F990C58B0D42D58D00B5425E /* BDSKDocumentSearch.h in Headers */ = {isa = PBXBuildFile; fileRef = F990C5890D42D58D00B5425E /* BDSKDocumentSearch.h */; };
+		F990C58C0D42D58D00B5425E /* BDSKDocumentSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F990C58A0D42D58D00B5425E /* BDSKDocumentSearch.m */; };
 		F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */; };
 		F9937E230AD8268E001D1DFB /* BDSKZoomablePDFView.m in Sources */ = {isa = PBXBuildFile; fileRef = F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */; };
 		F9937E250AD82690001D1DFB /* PDFDocument_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */; };
@@ -1567,6 +1569,8 @@
 		F98DB3160A23C7730040D347 /* BDSKTemplate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplate.m; sourceTree = "<group>"; };
 		F98F33C80892D4B700C1427D /* BDSKZoomablePDFView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKZoomablePDFView.h; sourceTree = "<group>"; };
 		F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKZoomablePDFView.m; sourceTree = "<group>"; };
+		F990C5890D42D58D00B5425E /* BDSKDocumentSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDocumentSearch.h; sourceTree = "<group>"; };
+		F990C58A0D42D58D00B5425E /* BDSKDocumentSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDocumentSearch.m; sourceTree = "<group>"; };
 		F9936CC30BC746C300A32DC4 /* BDSKItemSearchIndexes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKItemSearchIndexes.h; sourceTree = "<group>"; };
 		F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKItemSearchIndexes.m; sourceTree = "<group>"; };
 		F994B8F607F5F65F00751DA1 /* RelNotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = RelNotes.rtf; sourceTree = "<group>"; };
@@ -2305,6 +2309,8 @@
 		CE38FABE091D2D0E00BCB69D /* Document */ = {
 			isa = PBXGroup;
 			children = (
+				F990C5890D42D58D00B5425E /* BDSKDocumentSearch.h */,
+				F990C58A0D42D58D00B5425E /* BDSKDocumentSearch.m */,
 				F9022C66075802E300C3F701 /* BibDocument.m */,
 				CE5C29CC0AE14FEC00C3E6B5 /* BibDocument_Actions.m */,
 				F9022C64075802E300C3F701 /* BibDocument_DataSource.m */,
@@ -2904,6 +2910,7 @@
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
 				CE2E78CC0D40F6BB00340B39 /* BDSKMultiValueDictionary.h in Headers */,
+				F990C58B0D42D58D00B5425E /* BDSKDocumentSearch.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3880,6 +3887,7 @@
 				CE4376F70D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m in Sources */,
 				CE83E3A60D294EE300BB7AD8 /* BDSKSortCommand.m in Sources */,
 				CE2E78CD0D40F6BB00340B39 /* BDSKMultiValueDictionary.m in Sources */,
+				F990C58C0D42D58D00B5425E /* BDSKDocumentSearch.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

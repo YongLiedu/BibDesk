@@ -123,6 +123,7 @@
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKFileMigrationController.h"
 #import "NSViewAnimation_BDSKExtensions.h"
+#import "BDSKDocumentSearch.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -252,7 +253,8 @@ enum {
         
         [self registerForNotifications];
         
-        searchIndexes = [[BDSKItemSearchIndexes alloc] init];        
+        searchIndexes = [[BDSKItemSearchIndexes alloc] init];   
+        documentSearch = [[BDSKDocumentSearch alloc] initWithDocument:(id)self];
     }
     return self;
 }
@@ -305,6 +307,7 @@ enum {
     [searchIndexes release];
     [searchButtonController release];
     [migrationController release];
+    [documentSearch release];
     [super dealloc];
 }
 
@@ -577,7 +580,9 @@ enum {
 
     docState.isDocumentClosed = YES;
 
+    [documentSearch terminate];
     [fileSearchController terminate];
+    
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
     [self saveSortOrder];
