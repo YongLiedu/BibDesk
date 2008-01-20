@@ -328,7 +328,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                 pthread_rwlock_unlock(&rwlock);
                 [indexedIdentifierURLs removeAllObjects];
                 
-                [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+                [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
             }
             [pool release];
             pool = [NSAutoreleasePool new];
@@ -352,7 +352,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         }
         [URLsToRemove release];
         
-        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
         
         [items release];
         items = itemsToAdd;
@@ -433,7 +433,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         [pool release];
         pool = [NSAutoreleasePool new];
         
-        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
         OSMemoryBarrier();
     }
     
@@ -442,7 +442,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     // final update to catch any leftovers
     
     // it's possible that we've been told to stop, and the delegate is garbage; in that case, don't message it
-    [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
     [pool release];
 }
 
@@ -657,7 +657,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 	}
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
 	
-    [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
@@ -707,7 +707,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     [addedURLs release];
     [sameURLs release];
     
-    [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
+    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
 }    
 
 - (void)handleMachMessage:(void *)msg
