@@ -131,6 +131,12 @@
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
     NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
+    // For some reason, the cell's vertical origin is still off by a point in a tableview, and none of the ...rectForBounds: methods seem to improve it.  Hardcoding a 1 point offset seems lame, but it works.
+    if ([controlView isFlipped])
+        r.origin.y -= 1;
+    else
+        r.origin.y += 1;
+    
     r = [controlView centerScanRect:r];
     
     unsigned i, iMax = floor([self doubleValue] / [self maxValue] * (NSWidth(r) / 2));
@@ -156,12 +162,9 @@
     
     CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
     CGContextSaveGState(ctxt);
+    
+    // clip since doubleValue may exceed maxValue
     CGContextClipToRect(ctxt, *(CGRect *)&cellFrame);
-    if ([controlView isFlipped]) {
-        CGContextTranslateCTM(ctxt, 0, NSMaxY(r));
-        CGContextScaleCTM(ctxt, 1, -1);
-        r.origin.y = 0;
-    }
     
     NSRect drawRect = r;
     drawRect.size.width = 2;
