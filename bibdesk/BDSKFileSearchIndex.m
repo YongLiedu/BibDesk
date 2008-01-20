@@ -44,6 +44,7 @@
 #import "BDSKMultiValueDictionary.h"
 #import "NSObject_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "NSData_BDSKExtensions.h"
 
 @interface BDSKFileSearchIndex (Private)
 
@@ -226,11 +227,8 @@
 @implementation BDSKFileSearchIndex (Private)
 
 static inline NSData *sha1SignatureForURL(NSURL *aURL) {
-    // using the mapped data options will cause a crash in the sha1Signature method
-    NSData *data = [[NSData alloc] initWithContentsOfURL:aURL];
-    NSData *sha1Signature = [data sha1Signature];
-    [data release];
-    return sha1Signature ? sha1Signature : [NSData data];
+    NSData *sha1Signature = [NSData copySha1SignatureForFile:[aURL path]];
+    return sha1Signature ? [sha1Signature autorelease] : [NSData data];
 }
 
 + (NSString *)indexCacheFolder

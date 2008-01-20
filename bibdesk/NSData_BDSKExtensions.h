@@ -40,6 +40,12 @@
 
 extern NSString *BDSKEncodingConversionException;
 
+@interface NSData (BDSKExtensions)
+
++ (NSData *)copySha1SignatureForFile:(NSString *)absolutePath;
+
+@end
+
 @interface NSMutableData (BDSKExtensions)
 
 /*!
