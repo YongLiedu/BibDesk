@@ -58,6 +58,7 @@
 - (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL;
 - (void)runIndexThreadForItems:(NSArray *)items;
 - (void)searchIndexDidUpdate;
+- (void)searchIndexDidFinishInitialIndexing;
 - (void)processNotification:(NSNotification *)note;
 - (void)handleDocAddItemNotification:(NSNotification *)note;
 - (void)handleDocDelItemNotification:(NSNotification *)note;
@@ -332,7 +333,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                     pthread_rwlock_unlock(&rwlock);
                     [indexedIdentifierURLs removeAllObjects];
                     
-                    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate:) forObject:delegate withObject:self];
+                    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self withObject:nil];
                     countSinceLastFlush = flushInterval;
                 }
             }
@@ -357,7 +358,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         }
         [URLsToRemove release];
         
-        [self searchIndexDidUpdate];
+        [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
         
         [items release];
         items = itemsToAdd;
@@ -375,7 +376,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
-        [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
+        [self performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing) withObject:nil waitUntilDone:NO];
 }
 
 - (void)indexFileURL:(NSURL *)aURL{
@@ -443,7 +444,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             [pool release];
             pool = [NSAutoreleasePool new];
             
-            [self searchIndexDidUpdate];
+            [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
             countSinceLastFlush = flushInterval;
         }
         OSMemoryBarrier();
@@ -454,7 +455,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     // final update to catch any leftovers
     
     // it's possible that we've been told to stop, and the delegate is garbage; in that case, don't message it
-    [self searchIndexDidUpdate];
+    [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
     [pool release];
 }
 
@@ -613,9 +614,18 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 
 - (void)searchIndexDidUpdate
 {
+    OBASSERT([NSThread inMainThread]);
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
-        [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+        [delegate searchIndexDidUpdate:self];
+}
+
+- (void)searchIndexDidFinishInitialIndexing
+{
+    OBASSERT([NSThread inMainThread]);
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1)
+        [delegate searchIndexDidFinishInitialIndexing:self];
 }
 
 - (void)processNotification:(NSNotification *)note
@@ -660,7 +670,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 	}
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
 	
-    [self searchIndexDidUpdate];
+    [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
@@ -710,7 +720,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     [addedURLs release];
     [sameURLs release];
     
-    [self searchIndexDidUpdate];
+    [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
 }    
 
 - (void)handleMachMessage:(void *)msg
