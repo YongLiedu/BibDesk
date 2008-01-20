@@ -295,6 +295,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         OSMemoryBarrier();
         while(flags.shouldKeepRunning == 1 && (anItem = [itemEnum nextObject])) {
             
+            NSAutoreleasePool *pool = [NSAutoreleasePool new];
+            
             NSEnumerator *urlEnum = [[anItem valueForKey:@"urls"] objectEnumerator];
             NSURL *identifierURL = [anItem objectForKey:@"identifierURL"];
             NSURL *url;
@@ -328,7 +330,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
                 
                 [self performSelectorOnMainThread:@selector(searchIndexDidUpdate) withObject:nil waitUntilDone:NO];
             }
-
+            [pool release];
+            pool = [NSAutoreleasePool new];
             OSMemoryBarrier();
         }
 
