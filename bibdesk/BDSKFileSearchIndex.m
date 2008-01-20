@@ -293,8 +293,8 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         BDSKMultiValueDictionary *indexedIdentifierURLs = [[[BDSKMultiValueDictionary alloc] init] autorelease];
         
         // see comment later; may need tuning here since this is much faster than adding new docs to the index
-        const int32_t flushInterval = 20;
-        int32_t countSinceLastFlush = flushInterval;
+        const int32_t flushInterval = 100;
+        int32_t countSinceLastFlush = 10;
         
         // update the identifierURLs with the items, find items to add and URLs to remove
         OSMemoryBarrier();
