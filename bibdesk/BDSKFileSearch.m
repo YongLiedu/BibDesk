@@ -170,7 +170,7 @@
 - (void)updateSearchResults;
 {    
     SKIndexRef skIndex = [searchIndex index];
-    NSAssert(NULL != skIndex, @"-[BDSKFileSearchIndex index] returned NULL");
+    OBPOSTCONDITION(NULL != skIndex);
     
     if (NULL == skIndex || SKIndexFlush(skIndex) ==  FALSE) {
         NSLog(@"failed to flush index %@", searchIndex);
