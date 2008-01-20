@@ -349,6 +349,13 @@ enum {
         
         OBPOSTCONDITION(fileURL != nil);
         if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
+            // strip extra search criteria
+            NSRange range = [searchString rangeOfString:@":"];
+            if (range.location != NSNotFound) {
+                range = [searchString rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet] options:NSBackwardsSearch range:NSMakeRange(0, range.location)];
+                if (range.location != NSNotFound && range.location > 0)
+                    searchString = [searchString substringWithRange:NSMakeRange(0, range.location)];
+            }
             [self selectLibraryGroup:nil];
             [self setSearchString:searchString];
         }
