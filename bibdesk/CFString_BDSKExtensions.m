@@ -114,8 +114,7 @@ BOOL __BDCharacterIsWhitespaceOrNewline(UniChar c)
 static inline
 BOOL __BDCharacterIsPunctuation(UniChar c)
 {
-    // minor optimization: check for an ASCII character, since those are most common in TeX
-    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(punctuationCharacterSet, c) );
+    return ( CFCharacterSetIsCharacterMember(punctuationCharacterSet, c) );
 }
 
 static inline
