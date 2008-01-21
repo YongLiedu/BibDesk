@@ -51,7 +51,7 @@
 
 + (NSString *)indexCacheFolder;
 + (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL;
-- (void)buildIndexForItems:(NSArray *)items indexCachePath:(NSString *)indexCachePath;
+- (void)buildIndexWithInfo:(NSDictionary *)info;
 - (void)indexFileURL:(NSURL *)aURL;
 - (void)removeFileURL:(NSURL *)aURL;
 - (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount;
@@ -94,9 +94,9 @@
         index = NULL;
         
         // new document won't have a URL, so we'll have to wait for the controller to set it
-        NSString *indexCachePath = [aDocument fileURL] ? [[self class] indexCachePathForDocumentURL:[aDocument fileURL]] : nil;
+        NSURL *documentURL = [aDocument fileURL];
         NSArray *items = [[aDocument publications] arrayByPerformingSelector:@selector(searchIndexInfo)];
-        NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:items, @"items", indexCachePath, @"indexCachePath", nil];
+        NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:items, @"items", documentURL, @"documentURL", nil];
         
         delegate = nil;
         
@@ -250,18 +250,21 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     return indexCachePath;
 }
 
-- (void)buildIndexForItems:(NSArray *)items indexCachePath:(NSString *)indexCachePath
+- (void)buildIndexWithInfo:(NSDictionary *)info
 {
     NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
     
-    OBPRECONDITION(items);
+    SKIndexRef tmpIndex = NULL;
+    NSURL *documentURL = [info objectForKey:@"documentURL"];
+    NSString *indexCachePath = documentURL ? [[self class] indexCachePathForDocumentURL:documentURL] : nil;
+    NSArray *items = [info objectForKey:@"items"];
     
     double totalObjectCount = [items count];
     double numberIndexed = 0;
     
-    [items retain];
+    OBPRECONDITION(items);
     
-    SKIndexRef tmpIndex = NULL;
+    [items retain];
     
     if (indexCachePath) {
         NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:indexCachePath];
@@ -555,12 +558,9 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     [setupLock lockWhenCondition:INDEX_THREAD_WORKING];
     
-    NSArray *items = [info objectForKey:@"items"];
-    NSString *indexCachePath = [info objectForKey:@"indexCachePath"];
-    
     // an exception here can probably be ignored safely
     @try{
-        [self buildIndexForItems:items indexCachePath:indexCachePath];
+        [self buildIndexWithInfo:info];
     }
     @catch(id localException){
         NSLog(@"Ignoring exception %@ raised while rebuilding index", localException);
