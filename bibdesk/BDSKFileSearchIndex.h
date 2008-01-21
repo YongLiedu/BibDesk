@@ -52,7 +52,7 @@
 typedef struct _BDSKSearchIndexFlags
 {
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
-    volatile int32_t isIndexing __attribute__ ((aligned (4)));  
+    volatile int32_t finishedInitialIndexing __attribute__ ((aligned (4)));  
 } BDSKSearchIndexFlags;
 
 @interface BDSKFileSearchIndex : NSObject {
@@ -80,7 +80,7 @@ typedef struct _BDSKSearchIndexFlags
 
 // Required before disposing of the index.  After calling cancel, the index is no longer viable.
 - (void)cancelForDocumentURL:(NSURL *)documentURL;
-- (BOOL)isIndexing;
+- (BOOL)finishedInitialIndexing;
 - (void)setDelegate:(id <BDSKFileSearchIndexDelegate>)anObject;
 - (NSURL *)identifierURLForURL:(NSURL *)theURL;
 - (NSSet *)allIdentifierURLsForURL:(NSURL *)theURL;

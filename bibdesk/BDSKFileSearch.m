@@ -113,12 +113,11 @@
     [self setSearchString:aString];
     [self setOptions:opts];
     [self updateSearchResults];
-    // if indexing is complete, all results are available immediately after the call to updateSearchResults
-#warning This check is wrong, it should check whether indexing has finished, not whether it is indexing
-    if ([searchIndex isIndexing])
-        [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
-    else
+    // If initial indexing is complete, all results are available immediately after the call to updateSearchResults and the controller can remove its progress indicator.  Future changes to the index will call searchIndexDidUpdate:.
+    if ([searchIndex finishedInitialIndexing])
         [[self delegate] search:self didFinishWithResults:[searchResults allObjects]];
+    else
+        [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
 }
 
 - (void)searchIndexDidUpdate:(BDSKFileSearchIndex *)anIndex;

@@ -236,7 +236,7 @@
         canceledSearch = NO;
         
         // may be hidden if we called restoreDocumentState while indexing
-        if ([searchIndex isIndexing] && [progressView isHiddenOrHasHiddenAncestor]) {
+        if ([searchIndex finishedInitialIndexing] == NO && [progressView isHiddenOrHasHiddenAncestor]) {
             [progressView setHidden:NO];
             // setHidden:NO doesn't seem to apply to subviews
             [indexProgressBar setHidden:NO];
