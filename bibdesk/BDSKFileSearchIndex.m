@@ -281,6 +281,15 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     return indexCachePath;
 }
 
+static void addItemFunction(const void *value, void *context) {
+    BDSKMultiValueDictionary *dict = (BDSKMultiValueDictionary *)context;
+    NSDictionary *item = (NSDictionary *)value;
+    NSURL *identifierURL = [item objectForKey:@"identifierURL"];
+    NSSet *keys = [[NSSet alloc] initWithArray:[item objectForKey:@"urls"]];
+    [dict addObject:identifierURL forKeys:keys];
+    [keys release];
+}
+
 - (void)buildIndexWithInfo:(NSDictionary *)info
 {
     NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
@@ -322,23 +331,30 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
     
     if ([signatures count]) {
         // cached index, update identifierURLs and remove unlinked or invalid indexed URLs
-                
+        
+        // set the identifierURLs map, so we can build search results immediately; no problem if it contains URLs that were not indexed or are replaced, we know these URLs should be added eventually
+        OSMemoryBarrier();
+        if (flags.shouldKeepRunning == 1) {
+            pthread_rwlock_wrlock(&rwlock);
+            CFArrayApplyFunction((CFArrayRef)items, CFRangeMake(0, [items count]), addItemFunction, (void *)identifierURLs);
+            pthread_rwlock_unlock(&rwlock);
+        }
+        
         NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
         NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
         
         NSEnumerator *itemEnum = [items objectEnumerator];
         id anItem = nil;
         
-        // update the identifierURLs with the items, find items to add and URLs to remove
+        // find URLs in the database that needs to be indexed, and URLs that were indexeed but are not in the database anymore
         OSMemoryBarrier();
         while(flags.shouldKeepRunning == 1 && (anItem = [itemEnum nextObject])) {
             
             NSAutoreleasePool *pool = [NSAutoreleasePool new];
             
-            NSEnumerator *urlEnum = [[anItem valueForKey:@"urls"] objectEnumerator];
             NSURL *identifierURL = [anItem objectForKey:@"identifierURL"];
+            NSEnumerator *urlEnum = [[anItem objectForKey:@"urls"] objectEnumerator];
             NSURL *url;
-            NSMutableSet *indexedURLs = nil;
             NSMutableArray *missingURLs = nil;
             NSData *signature;
             
@@ -346,22 +362,13 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
                 signature = [signatures objectForKey:url];
                 if (signature && [signature isEqual:sha1SignatureForURL(url)]) {
                     [URLsToRemove removeObject:url];
-                     if (indexedURLs == nil)
-                        indexedURLs = [NSMutableSet set];
-                    [indexedURLs addObject:url];
-               } else {
+                } else {
                     if (missingURLs == nil)
                         missingURLs = [NSMutableArray array];
                     [missingURLs addObject:url];
                 }
             }
             
-            if ([indexedURLs count]) {
-                pthread_rwlock_wrlock(&rwlock);
-                [identifierURLs addObject:identifierURL forKeys:indexedURLs];
-                pthread_rwlock_unlock(&rwlock);
-            }
-                    
             if ([missingURLs count]) {
                 [itemsToAdd addObject:[NSDictionary dictionaryWithObjectsAndKeys:identifierURL, @"identifierURL", missingURLs, @"urls", nil]];
             } else {
@@ -372,8 +379,8 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
                 
                 [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
             }
+            
             [pool release];
-            pool = [NSAutoreleasePool new];
             OSMemoryBarrier();
         }
             
