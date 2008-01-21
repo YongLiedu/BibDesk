@@ -81,7 +81,6 @@
 {
     NSParameterAssert(nil != anIndex);
     if ((self = [super init])) {
-        lastUpdateTime = CFAbsoluteTimeGetCurrent();
         searchResults = [[NSMutableSet alloc] initWithCapacity:128];
         
         data = [[BDSKSearchPrivateIvars alloc] init];
@@ -104,7 +103,6 @@
 
 - (void)cancel;
 {
-    [self setSearchString:nil];
     [self setSearch:NULL];
     [searchResults removeAllObjects];
 }
@@ -128,10 +126,9 @@
         // if there's a search in progress, we'll cancel it and re-update
         // if not, we'll notify the delegate with an empty array, since the index is still working
         // throttle the cancel/flush to 10 Hz, since that slows down indexing
-        if ([NSString isEmptyString:searchString] == NO && (CFAbsoluteTimeGetCurrent() - lastUpdateTime) > 0.1) {
-            [self setSearch:NULL];
-            [self updateSearchResults];
-        }
+        if (NULL != search)
+            [self cancel];
+        [self updateSearchResults];
         [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
     }
 }
@@ -178,9 +175,7 @@
         NSLog(@"failed to flush index %@", searchIndex);
         return;
     }
-    
-    lastUpdateTime = CFAbsoluteTimeGetCurrent();
-    
+        
     SKSearchRef skSearch = SKSearchCreate(skIndex, (CFStringRef)searchString, options);
     [self setSearch:skSearch];
     CFRelease(skSearch);

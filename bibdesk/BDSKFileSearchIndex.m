@@ -61,7 +61,6 @@
 - (void)runIndexThreadWithInfo:(NSDictionary *)info;
 - (void)searchIndexDidUpdate;
 - (void)searchIndexDidFinish;
-- (void)searchIndexFinishedLoop;
 - (void)processNotification:(NSNotification *)note;
 - (void)handleDocAddItemNotification:(NSNotification *)note;
 - (void)handleDocDelItemNotification:(NSNotification *)note;
@@ -70,15 +69,6 @@
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL;
 
 @end
-
-
-@interface OFMessageQueue (BDSKExtensions)
-
-- (void)removeQueueEntry:(OFInvocation *)aQueueEntry;
-- (void)removeSelector:(SEL)aSelector forObject:(id <NSObject>)anObject;
-
-@end
-
 
 @implementation BDSKFileSearchIndex
 
@@ -111,6 +101,7 @@
         [[self class] indexCacheFolder];
         
         delegate = nil;
+        lastUpdateTime = CFAbsoluteTimeGetCurrent();
         
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         SEL handler = @selector(processNotification:);
@@ -411,9 +402,7 @@ static void addItemFunction(const void *value, void *context) {
     [items release];
 
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.finishedInitialIndexing);
-    OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1)
-        [self performSelectorOnMainThread:@selector(searchIndexDidFinish) withObject:nil waitUntilDone:NO];
+    [self performSelectorOnMainThread:@selector(searchIndexDidFinish) withObject:nil waitUntilDone:NO];
 }
 
 - (void)indexFileURL:(NSURL *)aURL{
@@ -429,9 +418,6 @@ static void addItemFunction(const void *value, void *context) {
         if (skDocument != NULL) {
             
             OBASSERT(signature);
-            
-            if (signature == nil)
-                signature = [NSData data];
             [signatures setObject:signature forKey:aURL];
             
             SKIndexAddDocument(index, skDocument, NULL, TRUE);
@@ -478,10 +464,7 @@ static void addItemFunction(const void *value, void *context) {
         OSMemoryBarrier();
     }
         
-    // final update to catch any leftovers
-    
-    // it's possible that we've been told to stop, and the delegate is garbage; in that case, don't message it
-    [self searchIndexFinishedLoop];
+    // caller queues a final update
     
     [pool release];
 }
@@ -648,26 +631,26 @@ static void addItemFunction(const void *value, void *context) {
 {
     OBASSERT([NSThread inMainThread]);
     OSMemoryBarrier();
-    if (flags.shouldKeepRunning == 1)
-        [delegate searchIndexDidUpdate:self];
+    if (flags.shouldKeepRunning == 1) {
+        // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes.  Even though this is always queued and supposed to be sent once, it can still be sent too often.
+        if (CFAbsoluteTimeGetCurrent() - lastUpdateTime >= 0.5) {
+            [delegate searchIndexDidUpdate:self];
+            lastUpdateTime = CFAbsoluteTimeGetCurrent();
+        } else {
+            // Guarantees that the delegate message will always be sent eventually, so the delegate can never miss an update.
+            [[self class] cancelPreviousPerformRequestsWithTarget:self selector:_cmd object:nil];
+            [self performSelector:_cmd withObject:nil afterDelay:0.5];
+        }
+    }
 }
 
+// @@ only sent after the initial indexing so the controller knows to remove the progress bar; can possibly be removed entirely and delegate can check finishedInitialIndexing when it gets searchIndexDidUpdate:
 - (void)searchIndexDidFinish
 {
     OBASSERT([NSThread inMainThread]);
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
         [delegate searchIndexDidFinish:self];
-}
-
-- (void)searchIndexFinishedLoop
-{
-    if ([notificationQueue count]) {
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
-    } else {
-        [[OFMessageQueue mainQueue] removeSelector:@selector(searchIndexDidUpdate) forObject:self];
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidFinish) forObject:self];
-    }
 }
 
 - (void)processNotification:(NSNotification *)note
@@ -687,6 +670,7 @@ static void addItemFunction(const void *value, void *context) {
             
     // this will update the delegate when all is complete
     [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:1];        
+    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
 }
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
@@ -709,7 +693,7 @@ static void addItemFunction(const void *value, void *context) {
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
 	
-    [self searchIndexFinishedLoop];
+    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
@@ -755,7 +739,7 @@ static void addItemFunction(const void *value, void *context) {
     [addedURLs release];
     [sameURLs release];
     
-    [self searchIndexFinishedLoop];
+    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
 }    
 
 - (void)handleMachMessage:(void *)msg
@@ -777,34 +761,6 @@ static void addItemFunction(const void *value, void *context) {
             [NSException raise:NSInvalidArgumentException format:@"notification %@ is not handled by %@", note, self];
         [note release];
     }
-}
-
-@end
-
-
-@implementation OFMessageQueue (BDSKExtensions)
-
-- (void)removeQueueEntry:(OFInvocation *)aQueueEntry;
-{
-    BOOL alreadyContainsObject;
-    unsigned int idx;
-    
-    [queueLock lock];
-    while ((idx = [queue indexOfObject:aQueueEntry]) != NSNotFound)
-        [queue removeObjectAtIndex:idx];
-    [queueLock unlock];
-}
-
-- (void)removeSelector:(SEL)aSelector forObject:(id <NSObject>)anObject;
-{
-    OFInvocation *queueEntry;
-
-    if (!anObject)
-        return;
-    
-    queueEntry = [[OFInvocation alloc] initForObject:anObject selector:aSelector];
-    [self removeQueueEntry:queueEntry];
-    [queueEntry release];
 }
 
 @end

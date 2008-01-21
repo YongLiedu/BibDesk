@@ -66,7 +66,6 @@
    
     BDSKSearchPrivateIvars *data;
     id delegate;
-    CFAbsoluteTime lastUpdateTime;
 }
 
 /* 

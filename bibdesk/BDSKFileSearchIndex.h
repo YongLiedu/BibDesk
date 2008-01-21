@@ -70,6 +70,7 @@ typedef struct _BDSKSearchIndexFlags
     NSConditionLock *setupLock;
     BDSKSearchIndexFlags flags;
     double progressValue;
+    CFAbsoluteTime lastUpdateTime;
 }
 
 // aDocument must respond to -publications; this should generally be called on the main thread
