@@ -61,6 +61,7 @@
 - (void)runIndexThreadWithInfo:(NSDictionary *)info;
 - (void)searchIndexDidUpdate;
 - (void)searchIndexDidFinish;
+- (void)searchIndexFinishedLoop;
 - (void)processNotification:(NSNotification *)note;
 - (void)handleDocAddItemNotification:(NSNotification *)note;
 - (void)handleDocDelItemNotification:(NSNotification *)note;
@@ -69,7 +70,15 @@
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL;
 
 @end
-        
+
+
+@interface OFMessageQueue (BDSKExtensions)
+
+- (void)removeQueueEntry:(OFInvocation *)aQueueEntry;
+- (void)removeSelector:(SEL)aSelector forObject:(id <NSObject>)anObject;
+
+@end
+
 
 @implementation BDSKFileSearchIndex
 
@@ -447,10 +456,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     // final update to catch any leftovers
     
     // it's possible that we've been told to stop, and the delegate is garbage; in that case, don't message it
-    if ([notificationQueue count])
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
-    else
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidFinish) forObject:self];
+    [self searchIndexFinishedLoop];
     
     [pool release];
 }
@@ -624,6 +630,16 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         [delegate searchIndexDidFinish:self];
 }
 
+- (void)searchIndexFinishedLoop
+{
+    if ([notificationQueue count]) {
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    } else {
+        [[OFMessageQueue mainQueue] removeSelector:@selector(searchIndexDidUpdate) forObject:self];
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidFinish) forObject:self];
+    }
+}
+
 - (void)processNotification:(NSNotification *)note
 {    
     OBASSERT([NSThread inMainThread]);
@@ -663,10 +679,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
 	
-    if ([notificationQueue count])
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
-    else
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidFinish) forObject:self];
+    [self searchIndexFinishedLoop];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
@@ -712,10 +725,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     [addedURLs release];
     [sameURLs release];
     
-    if ([notificationQueue count])
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
-    else
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidFinish) forObject:self];
+    [self searchIndexFinishedLoop];
 }    
 
 - (void)handleMachMessage:(void *)msg
@@ -737,6 +747,34 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             [NSException raise:NSInvalidArgumentException format:@"notification %@ is not handled by %@", note, self];
         [note release];
     }
+}
+
+@end
+
+
+@implementation OFMessageQueue (BDSKExtensions)
+
+- (void)removeQueueEntry:(OFInvocation *)aQueueEntry;
+{
+    BOOL alreadyContainsObject;
+    unsigned int idx;
+    
+    [queueLock lock];
+    while ((idx = [queue indexOfObject:aQueueEntry]) != NSNotFound)
+        [queue removeObjectAtIndex:idx];
+    [queueLock unlock];
+}
+
+- (void)removeSelector:(SEL)aSelector forObject:(id <NSObject>)anObject;
+{
+    OFInvocation *queueEntry;
+
+    if (!anObject)
+        return;
+    
+    queueEntry = [[OFInvocation alloc] initForObject:anObject selector:aSelector];
+    [self removeQueueEntry:queueEntry];
+    [queueEntry release];
 }
 
 @end
