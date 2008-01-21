@@ -50,6 +50,8 @@
 - (id)anyObjectForKey:(id)aKey;
 - (id)anyKeyForObject:(id)anObject;
 - (void)addObject:(id)anObject forKey:(id)aKey;
+- (void)addObjects:(NSSet *)newObjects forKey:(id)aKey;
+- (void)addObject:(id)anObject forKeys:(NSSet *)newKeys;
 - (void)removeObject:(id)anObject forKey:(id)aKey;
 - (void)removeAllObjects;
 - (void)addEntriesFromDictionary:(BDSKMultiValueDictionary *)otherDictionary;

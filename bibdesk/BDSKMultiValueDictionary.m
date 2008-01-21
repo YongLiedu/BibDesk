@@ -106,6 +106,44 @@
     [[self _setForObject:anObject create:YES] addObject:aKey];
 }
 
+typedef struct _addValueContext {
+    BDSKMultiValueDictionary *dict;
+    id value;
+    BOOL inverse;
+} addValueContext;
+
+static void addValueFunction(const void *value, void *context) {
+    addValueContext *ctxt = context;
+    NSMutableSet *set = nil;
+    if (ctxt->inverse)
+        set = [ctxt->dict _setForObject:(id)value create:YES];
+    else
+        set = [ctxt->dict _setForKey:(id)value create:YES];
+    [set addObject:(id)(ctxt->value)];
+}
+
+- (void)addObjects:(NSSet *)newObjects forKey:(id)aKey {
+    if ([newObjects count]) {
+        [[self _setForKey:aKey create:YES] unionSet:newObjects];
+        addValueContext ctxt;
+        ctxt.dict = self;
+        ctxt.value = aKey;
+        ctxt.inverse = YES;
+        CFSetApplyFunction((CFSetRef)newObjects, addValueFunction, &ctxt);
+    }
+}
+
+- (void)addObject:(id)anObject forKeys:(NSSet *)newKeys {
+    if ([newKeys count]) {
+        [[self _setForObject:anObject create:YES] unionSet:newKeys];
+        addValueContext ctxt;
+        ctxt.dict = self;
+        ctxt.value = anObject;
+        ctxt.inverse = NO;
+        CFSetApplyFunction((CFSetRef)newKeys, addValueFunction, &ctxt);
+    }
+}
+
 - (void)removeObject:(id)anObject forKey:(id)aKey{
     NSMutableSet *objectSet = [self _setForKey:aKey create:NO];
     NSMutableSet *keySet = [self _setForObject:anObject create:NO];
@@ -126,13 +164,8 @@
     [inverseDictionary removeAllObjects];
 }
 
-typedef struct _addEntryContext {
-    BDSKMultiValueDictionary *dict;
-    BOOL inverse;
-} addEntryContext;
-
 static void addEntryFunction(const void *key, const void *value, void *context) {
-    addEntryContext *ctxt = context;
+    addValueContext *ctxt = context;
     NSMutableSet *set = nil;
     if (ctxt->inverse)
         set = [ctxt->dict _setForObject:(id)key create:YES];
@@ -142,8 +175,9 @@ static void addEntryFunction(const void *key, const void *value, void *context) 
 }
 
 - (void)addEntriesFromDictionary:(BDSKMultiValueDictionary *)otherDictionary {
-    addEntryContext ctxt = {self, NO};
+    addValueContext ctxt;
     ctxt.dict = self;
+    ctxt.value = nil;
     ctxt.inverse = NO;
     CFDictionaryApplyFunction((CFDictionaryRef)(otherDictionary->dictionary), addEntryFunction, &ctxt);
     ctxt.inverse = YES;

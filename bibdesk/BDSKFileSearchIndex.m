@@ -328,7 +328,6 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
         
         NSEnumerator *itemEnum = [items objectEnumerator];
         id anItem = nil;
-        BDSKMultiValueDictionary *indexedIdentifierURLs = [[[BDSKMultiValueDictionary alloc] init] autorelease];
         
         // update the identifierURLs with the items, find items to add and URLs to remove
         OSMemoryBarrier();
@@ -339,6 +338,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
             NSEnumerator *urlEnum = [[anItem valueForKey:@"urls"] objectEnumerator];
             NSURL *identifierURL = [anItem objectForKey:@"identifierURL"];
             NSURL *url;
+            NSMutableSet *indexedURLs = nil;
             NSMutableArray *missingURLs = nil;
             NSData *signature;
             
@@ -346,12 +346,20 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
                 signature = [signatures objectForKey:url];
                 if (signature && [signature isEqual:sha1SignatureForURL(url)]) {
                     [URLsToRemove removeObject:url];
-                    [indexedIdentifierURLs addObject:identifierURL forKey:url];
-                } else {
+                     if (indexedURLs == nil)
+                        indexedURLs = [NSMutableSet set];
+                    [indexedURLs addObject:url];
+               } else {
                     if (missingURLs == nil)
                         missingURLs = [NSMutableArray array];
                     [missingURLs addObject:url];
                 }
+            }
+            
+            if ([indexedURLs count]) {
+                pthread_rwlock_wrlock(&rwlock);
+                [identifierURLs addObject:identifierURL forKeys:indexedURLs];
+                pthread_rwlock_unlock(&rwlock);
             }
                     
             if ([missingURLs count]) {
@@ -361,24 +369,12 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
                 @synchronized(self) {
                     progressValue = (numberIndexed / totalObjectCount) * 100;
                 }
-                // must update before sending the delegate message
-                pthread_rwlock_wrlock(&rwlock);
-                [identifierURLs addEntriesFromDictionary:indexedIdentifierURLs];
-                pthread_rwlock_unlock(&rwlock);
-                [indexedIdentifierURLs removeAllObjects];
                 
                 [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
             }
             [pool release];
             pool = [NSAutoreleasePool new];
             OSMemoryBarrier();
-        }
-
-        // add any leftovers
-        if ([indexedIdentifierURLs count]) {
-            pthread_rwlock_wrlock(&rwlock);
-            [identifierURLs addEntriesFromDictionary:indexedIdentifierURLs];
-            pthread_rwlock_unlock(&rwlock);
         }
             
         // remove URLs we could not find in the database
