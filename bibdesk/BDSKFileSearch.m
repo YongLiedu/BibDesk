@@ -81,13 +81,13 @@
 {
     NSParameterAssert(nil != anIndex);
     if ((self = [super init])) {
-        searchIndex = [anIndex retain];
-        [anIndex setDelegate:self];
+        lastUpdateTime = CFAbsoluteTimeGetCurrent();
         searchResults = [[NSMutableSet alloc] initWithCapacity:128];
         
         data = [[BDSKSearchPrivateIvars alloc] init];
         [self setDelegate:aDelegate];
-        lastUpdateTime = CFAbsoluteTimeGetCurrent();
+        searchIndex = [anIndex retain];
+        [anIndex setDelegate:self];
     }
     return self;
 }
@@ -114,6 +114,7 @@
     [self setOptions:opts];
     [self updateSearchResults];
     // if indexing is complete, all results are available immediately after the call to updateSearchResults
+#warning This check is wrong, it should check whether indexing has finished, not whether it is indexing
     if ([searchIndex isIndexing])
         [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
     else
@@ -127,7 +128,7 @@
         // if there's a search in progress, we'll cancel it and re-update
         // if not, we'll notify the delegate with an empty array, since the index is still working
         // throttle the cancel/flush to 10 Hz, since that slows down indexing
-        if (NULL != search && (CFAbsoluteTimeGetCurrent() - lastUpdateTime) > 0.1) {
+        if ([NSString isEmptyString:searchString] == NO && (CFAbsoluteTimeGetCurrent() - lastUpdateTime) > 0.1) {
             [self cancel];
             [self updateSearchResults];
         }

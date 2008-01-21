@@ -45,19 +45,20 @@
 #import "NSObject_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
+#import "UKDirectoryEnumerator.h"
 
 @interface BDSKFileSearchIndex (Private)
 
 + (NSString *)indexCacheFolder;
 + (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL;
-- (void)buildIndexForItems:(NSArray *)items;
+- (void)buildIndexForItems:(NSArray *)items indexCachePath:(NSString *)indexCachePath;
 - (void)indexFileURL:(NSURL *)aURL;
 - (void)removeFileURL:(NSURL *)aURL;
 - (void)indexFilesForItems:(NSArray *)items numberPreviouslyIndexed:(double)numberIndexed totalCount:(double)totalObjectCount;
 - (void)indexFileURLs:(NSSet *)urlstoBeAdded forIdentifierURL:(NSURL *)identifierURL;
 - (void)removeFileURLs:(NSSet *)urlstoBeAdded forIdentifierURL:(NSURL *)identifierURL;
 - (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL;
-- (void)runIndexThreadForItems:(NSArray *)items;
+- (void)runIndexThreadWithInfo:(NSDictionary *)info;
 - (void)searchIndexDidUpdate;
 - (void)searchIndexDidFinishInitialIndexing;
 - (void)processNotification:(NSNotification *)note;
@@ -94,24 +95,8 @@
         
         // new document won't have a URL, so we'll have to wait for the controller to set it
         NSString *indexCachePath = [aDocument fileURL] ? [[self class] indexCachePathForDocumentURL:[aDocument fileURL]] : nil;
-        if (indexCachePath) {
-            NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:indexCachePath];
-            indexData = (CFMutableDataRef)[[cacheDict objectForKey:@"indexData"] mutableCopy];
-            if (indexData != NULL) {
-                index = SKIndexOpenWithMutableData(indexData, NULL);
-                if (index) {
-                    [signatures setDictionary:[cacheDict objectForKey:@"signatures"]];
-                } else {
-                    CFRelease(indexData);
-                    indexData = NULL;
-                }
-            }
-        }
-        
-        if (index == NULL) {
-            indexData = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
-            index = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, NULL);
-        }
+        NSArray *items = [[aDocument publications] arrayByPerformingSelector:@selector(searchIndexInfo)];
+        NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:items, @"items", indexCachePath, @"indexCachePath", nil];
         
         delegate = nil;
         
@@ -133,7 +118,7 @@
         setupLock = [[NSConditionLock alloc] initWithCondition:INDEX_STARTUP];
         
         // this will create a retain cycle, so we'll have to tickle the thread to exit properly in -cancel
-        [NSThread detachNewThreadSelector:@selector(runIndexThreadForItems:) toTarget:self withObject:[[aDocument publications] arrayByPerformingSelector:@selector(searchIndexInfo)]];
+        [NSThread detachNewThreadSelector:@selector(runIndexThreadWithInfo:) toTarget:self withObject:info];
         
         // block until the NSMachPort is set up to receive messages
         [setupLock lockWhenCondition:INDEX_STARTUP_COMPLETE];
@@ -251,24 +236,21 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
 + (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL
 {
     NSParameterAssert(nil != documentURL);
-    NSString *cacheFolder = [self indexCacheFolder];
-    NSArray *existingIndexes = [[NSFileManager defaultManager] directoryContentsAtPath:cacheFolder];
-    existingIndexes = [existingIndexes pathsMatchingExtensions:[NSArray arrayWithObject:@"bdskindex"]];
-    
-    NSEnumerator *indexEnum = [existingIndexes objectEnumerator];
+    UKDirectoryEnumerator *indexEnum = [UKDirectoryEnumerator enumeratorWithPath:[self indexCacheFolder]];
     NSString *path;
     NSString *indexCachePath = nil;
     
-    while ((path = [indexEnum nextObject]) && nil == indexCachePath) {
-        path = [cacheFolder stringByAppendingPathComponent:path];
-        NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
-        if ([[cacheDict objectForKey:@"documentURL"] isEqual:documentURL])
-            indexCachePath = path;
+    while ((path = [indexEnum nextObjectFullPath]) && nil == indexCachePath) {
+        if ([[path pathExtension] isEqualToString:@"bdskindex"]) {
+            NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+            if ([[cacheDict objectForKey:@"documentURL"] isEqual:documentURL])
+                indexCachePath = path;
+        }
     }
     return indexCachePath;
 }
 
-- (void)buildIndexForItems:(NSArray *)items
+- (void)buildIndexForItems:(NSArray *)items indexCachePath:(NSString *)indexCachePath
 {
     NSAssert2([[NSThread currentThread] isEqual:notificationThread], @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
     
@@ -278,6 +260,29 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     double numberIndexed = 0;
     
     [items retain];
+    
+    SKIndexRef tmpIndex = NULL;
+    
+    if (indexCachePath) {
+        NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:indexCachePath];
+        indexData = (CFMutableDataRef)[[cacheDict objectForKey:@"indexData"] mutableCopy];
+        if (indexData != NULL) {
+            tmpIndex = SKIndexOpenWithMutableData(indexData, NULL);
+            if (tmpIndex) {
+                [signatures setDictionary:[cacheDict objectForKey:@"signatures"]];
+            } else {
+                CFRelease(indexData);
+                indexData = NULL;
+            }
+        }
+    }
+    
+    if (tmpIndex == NULL) {
+        indexData = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
+        tmpIndex = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, NULL);
+    }
+    
+    index = tmpIndex;
     
     if ([signatures count]) {
         // cached index, update identifierURLs and remove unlinked or invalid indexed URLs
@@ -538,7 +543,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     }
 }
 
-- (void)runIndexThreadForItems:(NSArray *)items
+- (void)runIndexThreadWithInfo:(NSDictionary *)info
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
@@ -556,9 +561,12 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     
     [setupLock lockWhenCondition:INDEX_THREAD_WORKING];
     
+    NSArray *items = [info objectForKey:@"items"];
+    NSString *indexCachePath = [info objectForKey:@"indexCachePath"];
+    
     // an exception here can probably be ignored safely
     @try{
-        [self buildIndexForItems:items];
+        [self buildIndexForItems:items indexCachePath:indexCachePath];
     }
     @catch(id localException){
         NSLog(@"Ignoring exception %@ raised while rebuilding index", localException);
