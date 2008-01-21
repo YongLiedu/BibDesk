@@ -170,9 +170,10 @@
 - (void)updateSearchResults;
 {    
     SKIndexRef skIndex = [searchIndex index];
-    OBPOSTCONDITION(NULL != skIndex);
     
-    if (NULL == skIndex || SKIndexFlush(skIndex) ==  FALSE) {
+    if (NULL == skIndex)
+        return;
+    if (SKIndexFlush(skIndex) ==  FALSE) {
         NSLog(@"failed to flush index %@", searchIndex);
         return;
     }
