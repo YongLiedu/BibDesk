@@ -135,7 +135,7 @@
     }
 }
 
-- (void)searchIndexDidFinishInitialIndexing:(BDSKFileSearchIndex *)anIndex;
+- (void)searchIndexDidFinish:(BDSKFileSearchIndex *)anIndex;
 {
     if ([anIndex isEqual:searchIndex]) {
         [self searchIndexDidUpdate:anIndex];

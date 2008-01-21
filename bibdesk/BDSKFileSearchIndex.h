@@ -46,7 +46,7 @@
 - (void)searchIndexDidUpdate:(BDSKFileSearchIndex *)index;
 
 // Sent on the main thread after the initial indexing phase has finished.  This allows the delegate to update its search for the last time.
-- (void)searchIndexDidFinishInitialIndexing:(BDSKFileSearchIndex *)index;
+- (void)searchIndexDidFinish:(BDSKFileSearchIndex *)index;
 @end
 
 typedef struct _BDSKSearchIndexFlags

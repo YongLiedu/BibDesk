@@ -60,7 +60,7 @@
 - (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL;
 - (void)runIndexThreadWithInfo:(NSDictionary *)info;
 - (void)searchIndexDidUpdate;
-- (void)searchIndexDidFinishInitialIndexing;
+- (void)searchIndexDidFinish;
 - (void)processNotification:(NSNotification *)note;
 - (void)handleDocAddItemNotification:(NSNotification *)note;
 - (void)handleDocDelItemNotification:(NSNotification *)note;
@@ -97,6 +97,9 @@
         NSURL *documentURL = [aDocument fileURL];
         NSArray *items = [[aDocument publications] arrayByPerformingSelector:@selector(searchIndexInfo)];
         NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:items, @"items", documentURL, @"documentURL", nil];
+        
+        // setting up the cache folder is not thread safe, so make sure it's done on the main thread
+        [[self class] indexCacheFolder];
         
         delegate = nil;
         
@@ -376,7 +379,7 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.finishedInitialIndexing);
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
-        [self performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing) withObject:nil waitUntilDone:NO];
+        [self performSelectorOnMainThread:@selector(searchIndexDidFinish) withObject:nil waitUntilDone:NO];
 }
 
 - (void)indexFileURL:(NSURL *)aURL{
@@ -444,7 +447,11 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     // final update to catch any leftovers
     
     // it's possible that we've been told to stop, and the delegate is garbage; in that case, don't message it
-    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    if ([notificationQueue count])
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    else
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidFinish) forObject:self];
+    
     [pool release];
 }
 
@@ -609,12 +616,12 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         [delegate searchIndexDidUpdate:self];
 }
 
-- (void)searchIndexDidFinishInitialIndexing
+- (void)searchIndexDidFinish
 {
     OBASSERT([NSThread inMainThread]);
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
-        [delegate searchIndexDidFinishInitialIndexing:self];
+        [delegate searchIndexDidFinish:self];
 }
 
 - (void)processNotification:(NSNotification *)note
@@ -656,7 +663,10 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
 	
-    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    if ([notificationQueue count])
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    else
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidFinish) forObject:self];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
@@ -702,7 +712,10 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     [addedURLs release];
     [sameURLs release];
     
-    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    if ([notificationQueue count])
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    else
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidFinish) forObject:self];
 }    
 
 - (void)handleMachMessage:(void *)msg
