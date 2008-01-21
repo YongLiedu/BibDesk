@@ -104,6 +104,7 @@
 
 - (void)cancel;
 {
+    [self setSearchString:nil];
     [self setSearch:NULL];
     [searchResults removeAllObjects];
 }
