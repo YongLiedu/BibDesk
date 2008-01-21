@@ -88,7 +88,7 @@
 #define INDEX_THREAD_DONE 4
 
 // increment if incompatible changes are introduced
-#define CACHE_VERSION @"0"
+#define CACHE_VERSION @"1"
 
 - (id)initWithDocument:(id)aDocument
 {
@@ -244,18 +244,37 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     return cacheFolder;
 }
 
+static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL) {
+    BOOL isIndexCache = NO;
+    NSData *data = [NSData dataWithContentsOfMappedFile:path];
+    if (data) {
+        NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
+        isIndexCache = [[unarchiver decodeObjectForKey:@"documentURL"] isEqual:documentURL];
+        [unarchiver finishDecoding];
+        [unarchiver release];
+    }
+    return isIndexCache;
+}
+
 // Read each cache file and see which one has a matching documentURL.  If this gets too slow, we could save a plist mapping URL -> UUID and use that instead.
 + (NSString *)indexCachePathForDocumentURL:(NSURL *)documentURL
 {
     NSParameterAssert(nil != documentURL);
-    UKDirectoryEnumerator *indexEnum = [UKDirectoryEnumerator enumeratorWithPath:[self indexCacheFolder]];
-    NSString *path;
     NSString *indexCachePath = nil;
+    NSString *indexCacheFolder = [self indexCacheFolder];
+    NSString *defaultPath = [[[[documentURL path] lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bdskindex"];
     
-    while ((path = [indexEnum nextObjectFullPath]) && nil == indexCachePath) {
-        if ([[path pathExtension] isEqualToString:@"bdskindex"]) {
-            NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
-            if ([[cacheDict objectForKey:@"documentURL"] isEqual:documentURL])
+    defaultPath = [indexCacheFolder stringByAppendingPathComponent:defaultPath];
+    if (isIndexCacheForDocumentURL(defaultPath, documentURL)) {
+        indexCachePath = defaultPath;
+    } else {
+        UKDirectoryEnumerator *indexEnum = [UKDirectoryEnumerator enumeratorWithPath:indexCacheFolder];
+        NSString *path;
+        
+        while ((path = [indexEnum nextObjectFullPath]) && nil == indexCachePath) {
+            if ([[path pathExtension] isEqualToString:@"bdskindex"] && 
+                [path isEqualToString:defaultPath] == NO && 
+                isIndexCacheForDocumentURL(path, documentURL))
                 indexCachePath = path;
         }
     }
@@ -279,17 +298,19 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     [items retain];
     
     if (indexCachePath) {
-        NSDictionary *cacheDict = [NSKeyedUnarchiver unarchiveObjectWithFile:indexCachePath];
-        indexData = (CFMutableDataRef)[[cacheDict objectForKey:@"indexData"] mutableCopy];
+        NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:[NSData dataWithContentsOfFile:indexCachePath]];
+        indexData = (CFMutableDataRef)[[unarchiver decodeObjectForKey:@"indexData"] mutableCopy];
         if (indexData != NULL) {
             tmpIndex = SKIndexOpenWithMutableData(indexData, NULL);
             if (tmpIndex) {
-                [signatures setDictionary:[cacheDict objectForKey:@"signatures"]];
+                [signatures setDictionary:[unarchiver decodeObjectForKey:@"signatures"]];
             } else {
                 CFRelease(indexData);
                 indexData = NULL;
             }
         }
+        [unarchiver finishDecoding];
+        [unarchiver release];
     }
     
     if (tmpIndex == NULL) {
@@ -547,9 +568,14 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
             indexCachePath = [[NSFileManager defaultManager] uniqueFilePathWithName:indexCachePath atPath:[[self class] indexCacheFolder]];
         }
         
-        NSDictionary *cacheDict = nil;
-        cacheDict = [NSDictionary dictionaryWithObjectsAndKeys:(NSData *)indexData, @"indexData", signatures, @"signatures", documentURL, @"documentURL", nil];
-        [NSKeyedArchiver archiveRootObject:cacheDict toFile:indexCachePath];
+        NSMutableData *data = [NSMutableData data];
+        NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
+        [archiver encodeObject:documentURL forKey:@"documentURL"];
+        [archiver encodeObject:(NSMutableData *)indexData forKey:@"indexData"];
+        [archiver encodeObject:signatures forKey:@"signatures"];
+        [archiver finishEncoding];
+        [archiver release];
+        [data writeToFile:indexCachePath atomically:YES];
     }
 }
 
