@@ -99,7 +99,7 @@
 - (BOOL)isEqual:(id)anObject
 {
     // base equality on identifierURL, since items are now displayed per-pub and the same file may appear multiple times
-    return ([anObject isKindOfClass:[self class]] && [((BDSKFileSearchResult *)anObject)->identifierURL isEqual:identifierURL]);
+    return ([anObject isKindOfClass:[self class]] && [((BDSKFileSearchResult *)anObject)->file isEqual:file] && [((BDSKFileSearchResult *)anObject)->identifierURL isEqual:identifierURL]);
 }
 
 - (NSImage *)image { return image; }
