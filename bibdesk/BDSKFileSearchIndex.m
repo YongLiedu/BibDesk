@@ -340,9 +340,10 @@ static void addItemFunction(const void *value, void *context) {
             pthread_rwlock_unlock(&rwlock);
         }
         
+        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+        
         NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
         NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
-        
         NSEnumerator *itemEnum = [items objectEnumerator];
         id anItem = nil;
         
