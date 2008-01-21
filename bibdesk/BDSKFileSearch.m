@@ -129,7 +129,7 @@
         // if not, we'll notify the delegate with an empty array, since the index is still working
         // throttle the cancel/flush to 10 Hz, since that slows down indexing
         if ([NSString isEmptyString:searchString] == NO && (CFAbsoluteTimeGetCurrent() - lastUpdateTime) > 0.1) {
-            [self cancel];
+            [self setSearch:NULL];
             [self updateSearchResults];
         }
         [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
