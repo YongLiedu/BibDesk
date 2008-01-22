@@ -224,8 +224,14 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         // set some placeholder message, this will show up in red
         if ([identifier isEqualToString:BDSKTemplateRoleString])
             value = ([item isLeaf]) ? NSLocalizedString(@"Choose role", @"Default text for template role") : NSLocalizedString(@"Choose file type", @"Default text for template type");
-        else if ([identifier isEqualToString:BDSKTemplateNameString])
-            value = ([item isLeaf]) ? NSLocalizedString(@"Double-click to choose file", @"Default text for template file") : NSLocalizedString(@"Double-click to change name", @"Default text fo template name");
+        else if ([identifier isEqualToString:BDSKTemplateNameString]) {
+            if ([item isLeaf])
+                value = NSLocalizedString(@"Double-click to choose file", @"Default text for template file");
+            else if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+                value = NSLocalizedString(@"Double-click to change name", @"Default text for template name");
+            else
+                value = NSLocalizedString(@"Click twice to change name", @"Default text for template name");
+        }
     } else if ([identifier isEqualToString:BDSKTemplateRoleString]) {
         value = [BDSKTemplate localizedRoleString:value];
     }
