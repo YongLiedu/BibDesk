@@ -459,6 +459,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)handleBibItemChangedNotification:(NSNotification *)notification;
 
+- (void)handleSkimFileDidSaveNotification:(NSNotification *)notification;
 
 /*!
     @method     numberOfSelectedPubs

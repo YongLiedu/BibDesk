@@ -277,6 +277,7 @@ enum {
     // workaround for crash: to reproduce, create empty doc, hit cmd-n for new editor window, then cmd-q to quit, choose "don't save"; this results in an -undoManager message to the dealloced document
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
     [OFPreference removeObserver:self forPreference:nil];
     [pboardHelper setDelegate:nil];
     [pboardHelper release];
@@ -2529,6 +2530,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                selector:@selector(handleCustomFieldsDidChangeNotification:)
                    name:BDSKCustomFieldsChangedNotification
                  object:nil];
+        [[NSDistributedNotificationCenter defaultCenter] 
+            addObserver:self
+               selector:@selector(handleSkimFileDidSaveNotification:)
+                   name:@"SKSkimFileDidSaveNotification"
+                 object:nil];
         [OFPreference addObserver:self
                          selector:@selector(handleIgnoredSortTermsChangedNotification:)
                     forPreference:[OFPreference preferenceForKey:BDSKIgnoredSortTermsKey]];
@@ -2789,6 +2795,25 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     // display after the window loads so we can use a sheet, and the migration controller window is in front
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableMigrationWarning"] == NO)
         docState.displayMigrationAlert = YES;
+}
+
+- (void)handleSkimFileDidSaveNotification:(NSNotification *)notification{
+    // distributed notifications can be received on any thread
+    if ([NSThread inMainThread] == NO) {
+        [self performSelectorOnMainThread:_cmd withObject:notification waitUntilDone:NO];
+        return;
+    }
+    
+    NSString *path = [notification object];
+    NSEnumerator *pubEnum = [publications objectEnumerator];
+    BibItem *pub;
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    
+    while (pub = [pubEnum nextObject]) {
+        if ([[[pub existingLocalFiles] valueForKey:@"path"] containsObject:path])
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification object:pub userInfo:notifInfo];
+    }
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
