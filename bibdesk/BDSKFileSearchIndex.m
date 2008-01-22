@@ -87,7 +87,7 @@
     self = [super init];
         
     if(nil != self){
-        // maintain dictionaries mapping URL -> sha1Signature, so we can check if a URL is outdated
+        // maintain dictionaries mapping URL -> signature, so we can check if a URL is outdated
         signatures = [[NSMutableDictionary alloc] initWithCapacity:128];
         
         index = NULL;
@@ -214,9 +214,11 @@
 
 @implementation BDSKFileSearchIndex (Private)
 
-static inline NSData *sha1SignatureForURL(NSURL *aURL) {
-    NSData *sha1Signature = [NSData copySha1SignatureForFile:[aURL path]];
-    if (sha1Signature == nil) {
+// this can return any object conforming to NSCoding
+static inline id signatureForURL(NSURL *aURL) {
+    // Use the SHA1 signature if we can get it
+    id signature = [NSData copySha1SignatureForFile:[aURL path]];
+    if (signature == nil) {
         // this could happen for packages, use a timestamp instead
         FSRef fileRef;
         FSCatalogInfo info;
@@ -225,11 +227,10 @@ static inline NSData *sha1SignatureForURL(NSURL *aURL) {
         if (CFURLGetFSRef((CFURLRef)aURL, &fileRef) &&
             noErr == FSGetCatalogInfo(&fileRef, kFSCatInfoContentMod, &info, NULL, NULL, NULL) &&
             noErr == UCConvertUTCDateTimeToCFAbsoluteTime(&info.contentModDate, &absoluteTime)) {
-            NSDate *modDate = [NSDate dateWithTimeIntervalSinceReferenceDate:(NSTimeInterval)absoluteTime];
-            sha1Signature = [[NSKeyedArchiver archivedDataWithRootObject:modDate] retain];
+            signature = [[NSDate alloc] initWithTimeIntervalSinceReferenceDate:(NSTimeInterval)absoluteTime];
         }
     }
-    return sha1Signature ? [sha1Signature autorelease] : [NSData data];
+    return signature ? [signature autorelease] : [NSData data];
 }
 
 + (NSString *)indexCacheFolder
@@ -361,11 +362,11 @@ static void addItemFunction(const void *value, void *context) {
             NSEnumerator *urlEnum = [[anItem objectForKey:@"urls"] objectEnumerator];
             NSURL *url;
             NSMutableArray *missingURLs = nil;
-            NSData *signature;
+            id signature;
             
             while (url = [urlEnum nextObject]) {
                 signature = [signatures objectForKey:url];
-                if (signature && [signature isEqual:sha1SignatureForURL(url)]) {
+                if (signature && [signature isEqual:signatureForURL(url)]) {
                     [URLsToRemove removeObject:url];
                 } else {
                     if (missingURLs == nil)
@@ -419,7 +420,7 @@ static void addItemFunction(const void *value, void *context) {
 }
 
 - (void)indexFileURL:(NSURL *)aURL{
-    NSData *signature = sha1SignatureForURL(aURL);
+    id signature = signatureForURL(aURL);
     
     if ([[signatures objectForKey:aURL] isEqual:signature] == NO) {
         // either the file was not indexed, or it has changed
