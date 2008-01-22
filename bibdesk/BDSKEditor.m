@@ -895,6 +895,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (IBAction)consolidateLinkedFiles:(id)sender{
 	[self finalizeChangesPreservingSelection:YES];
 	
+    // context menu sets item index as represented object; otherwise we try to autofile everything
     NSNumber *indexNumber = [sender representedObject];
     unsigned int anIndex = NSNotFound;
 	BOOL canSet = YES;
@@ -1075,17 +1076,21 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [item setRepresentedObject:theURL];
             
             if (isEditable) {
+                [menu insertItem:[NSMenuItem separatorItem] atIndex:++i];
+                
+                // @@ Action menu title is "Auto File Linked Files"; "Auto File" (or worse, "Auto File File") is grammatically meaningless, but AutoFile is what we use in prefs and when describing the feature.  "Consolidate" is used on the main menu and is more meaningful, but the association with AutoFile is not obvious from the word alone.  Would "AutoFile Linked File" be more appropriate?
+                item = [menu insertItemWithTitle:NSLocalizedString(@"Auto File Linked File", @"Menu item title")
+                                          action:@selector(consolidateLinkedFiles:)
+                                   keyEquivalent:@""
+                                         atIndex:++i];
+                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+                
                 item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace File", @"Menu item title") stringByAppendingEllipsis]
                                           action:@selector(chooseLocalFile:)
                                    keyEquivalent:@""
                                          atIndex:++i];
                 [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
-                
-                item = [menu insertItemWithTitle:NSLocalizedString(@"Consolidate", @"Menu item title")
-                                          action:@selector(consolidateLinkedFiles:)
-                                   keyEquivalent:@""
-                                         atIndex:++i];
-                [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+
             }
         } else if (isEditable) {
             item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL", @"Menu item title") stringByAppendingEllipsis]
