@@ -2296,13 +2296,14 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             // see if this is a double separator, if so remove it
             if (wasSeparator)
                 [menu removeItemAtIndex:i];
+            wasSeparator = YES;
         } else if ([self validateMenuItem:menuItem]) {
             if ([menuItem submenu] && [self validateMenuItem:[[menuItem submenu] itemAtIndex:0]] == NO) {
                 // disabled submenu item
                 [menu removeItemAtIndex:i];
             } else {
-            // valid menu item, keep it, and it wasn't a separator
-            wasSeparator = NO;
+                // valid menu item, keep it, and it wasn't a separator
+                wasSeparator = NO;
             }
         } else {
             // disabled menu item
@@ -2351,6 +2352,9 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [anItem setTag:FVOpenMenuItemTag];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Reveal in Finder", @"FileView", bundle, @"context menu title") action:@selector(revealInFinder:) keyEquivalent:@""];
         [anItem setTag:FVRevealMenuItemTag];
+        
+        [sharedMenu addItem:[NSMenuItem separatorItem]];
+        
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Remove", @"FileView", bundle, @"context menu title") action:@selector(delete:) keyEquivalent:@""];
         [anItem setTag:FVRemoveMenuItemTag];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Move To Trash", @"FileView", bundle, @"context menu title") action:@selector(trashSelectedURLs:) keyEquivalent:@""];
