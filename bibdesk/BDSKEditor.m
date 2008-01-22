@@ -1076,6 +1076,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [item setRepresentedObject:theURL];
             
             if (isEditable) {
+                i = [menu indexOfItemWithTag:FVTrashMenuItemTag];
                 item = [menu insertItemWithTitle:NSLocalizedString(@"AutoFile Linked File", @"Menu item title")
                                           action:@selector(consolidateLinkedFiles:)
                                    keyEquivalent:@""
@@ -1090,6 +1091,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
             }
         } else if (isEditable) {
+            i = [menu indexOfItemWithTag:FVTrashMenuItemTag];
+            if (i == -1)
+                i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
             item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL", @"Menu item title") stringByAppendingEllipsis]
                                       action:@selector(chooseRemoteURL:)
                                keyEquivalent:@""
