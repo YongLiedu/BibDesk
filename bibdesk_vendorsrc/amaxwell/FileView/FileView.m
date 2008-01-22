@@ -2241,8 +2241,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         return YES;
     else if (action == @selector(revealInFinder:))
         return [aURL isFileURL] && [_selectedIndexes count] == 1;
-    else if (action == @selector(openSelectedURLs:) && nil != aURL)
-        return YES;
+    else if (action == @selector(openSelectedURLs:))
+        return nil != aURL;
     else if (action == @selector(delete:) || action == @selector(copy:) || action == @selector(cut:))
         return [self isEditable] && [_selectedIndexes count] > 0;
     else if (action == @selector(trashSelectedURLs:))
