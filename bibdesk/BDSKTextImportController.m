@@ -1004,7 +1004,7 @@
 		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Menu item title")];
 		return YES;
 	} else if ([menuItem action] == @selector(consolidateLinkedFiles:)) {
-		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Menu item title")];
+		[menuItem setTitle: NSLocalizedString(@"AutoFile Linked File", @"Menu item title")];
         return [[item localFiles] count] > 0;
 	}
 	return YES;

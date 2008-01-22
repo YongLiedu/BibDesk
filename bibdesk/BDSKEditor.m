@@ -1076,10 +1076,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [item setRepresentedObject:theURL];
             
             if (isEditable) {
-                [menu insertItem:[NSMenuItem separatorItem] atIndex:++i];
-                
-                // @@ Action menu title is "Auto File Linked Files"; "Auto File" (or worse, "Auto File File") is grammatically meaningless, but AutoFile is what we use in prefs and when describing the feature.  "Consolidate" is used on the main menu and is more meaningful, but the association with AutoFile is not obvious from the word alone.  Would "AutoFile Linked File" be more appropriate?
-                item = [menu insertItemWithTitle:NSLocalizedString(@"Auto File Linked File", @"Menu item title")
+                item = [menu insertItemWithTitle:NSLocalizedString(@"AutoFile Linked File", @"Menu item title")
                                           action:@selector(consolidateLinkedFiles:)
                                    keyEquivalent:@""
                                          atIndex:++i];

@@ -1249,7 +1249,7 @@
     NSArray *selectedFiles = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"];
     [[BDSKFiler sharedFiler] filePapers:selectedFiles fromDocument:self check:check];
 	
-	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files", @"Undo action name")];
+	[[self undoManager] setActionName:NSLocalizedString(@"AutoFile Files", @"Undo action name")];
 }
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
@@ -1257,7 +1257,7 @@
         NSBeep();
         return;
     }
-    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Consolidate Linked Files", @"Message in alert dialog when consolidating files")
+    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"AutoFile Linked Files", @"Message in alert dialog when consolidating files")
                                          defaultButton:NSLocalizedString(@"Move Complete Only", @"Button title")
                                        alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                            otherButton:NSLocalizedString(@"Move All", @"Button title")

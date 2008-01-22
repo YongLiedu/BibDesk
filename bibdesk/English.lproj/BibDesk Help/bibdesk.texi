@@ -1873,7 +1873,7 @@ Papers Folder as described in the
 
 @menu
 * Automatically Move Files::    How BibDesk can keep new papers organized automatically once you've consolidated them.
-* Consolidate Linked Files::    A command to move all linked files to your Papers Folder.
+* AutoFile Linked Files::    A command to move all linked files to your Papers Folder.
 * Customizing the Local File Format::  How to customize the generated location of used for AutoFile. 
 * Convert Files::  How to convert from Local-Url to aliases
 @end menu
@@ -1908,11 +1908,11 @@ status bar is shown.
 
 @c --------------------------------------------------------------------------------------
 
-@node Consolidate Linked Files
-@section Consolidate Linked Files
+@node AutoFile Linked Files
+@section AutoFile Linked Files
 @abstract{How to consolidate linked files.}
 
-@cindex consolidate linked files
+@cindex auto file linked files
 
 Choose this command to scan all selected publications in the file for linked
 files. A dialog will be opened that asks you for some options. 
@@ -1948,7 +1948,7 @@ on the Desktop by hitting the @buttontitle{Dump} button.
 Consolidating linked files is undoable, so feel free to experiment.
 
 You can also AutoFile a single linked file by choosing the 
-@menutitle{Auto File Paper} menu item in the action menu 
+@menutitle{AutoFile Paper} menu item in the action menu 
 of the Editor. 
 
 @c --------------------------------------------------------------------------------------
