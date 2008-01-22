@@ -299,6 +299,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [tableCellFormatter release];
     [crossrefFormatter release];
     [citationFormatter release];
+    [downloadFileName release];
     [super dealloc];
 }
 
@@ -609,6 +610,15 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 }
 
+- (IBAction)downloadRemoteURL:(NSMenuItem *)sender{
+    NSNumber *indexNumber = [sender representedObject];
+    OBASSERT(indexNumber);
+    unsigned int anIndex = [indexNumber unsignedIntValue];
+    NSURL *theURL = [[publication objectInFilesAtIndex:anIndex] URL];
+    OBASSERT(theURL != nil && [theURL isFileURL] == NO);
+    [self downloadURL:theURL];
+}
+ 
 - (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSArray *currentFields = [(NSArray *)contextInfo autorelease];
 	NSString *newField = [addFieldController field];
@@ -1047,39 +1057,45 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     if (theURL && [[aFileView selectionIndexes] count] <= 1) {
         i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
-        [menu insertItemWithTitle:[NSLocalizedString(@"Open With",@"Menu item title") stringByAppendingEllipsis]
+        [menu insertItemWithTitle:[NSLocalizedString(@"Open With", @"Menu item title") stringByAppendingEllipsis]
                 andSubmenuOfApplicationsForURL:theURL atIndex:++i];
         
         if ([theURL isFileURL]) {
             i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
-            item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes", @"Menu item title") stringByAppendingEllipsis]
                                       action:@selector(showNotesForLinkedFile:)
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:theURL];
             
-            item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes", @"Menu item title") stringByAppendingEllipsis]
                                       action:@selector(copyNotesForLinkedFile:)
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:theURL];
             
             if (isEditable) {
-                item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace File",@"Menu item title: Replace File...") stringByAppendingEllipsis]
+                item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace File", @"Menu item title") stringByAppendingEllipsis]
                                           action:@selector(chooseLocalFile:)
                                    keyEquivalent:@""
                                          atIndex:++i];
                 [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
                 
-                item = [menu insertItemWithTitle:NSLocalizedString(@"Consolidate",@"Menu item title")
+                item = [menu insertItemWithTitle:NSLocalizedString(@"Consolidate", @"Menu item title")
                                           action:@selector(consolidateLinkedFiles:)
                                    keyEquivalent:@""
                                          atIndex:++i];
                 [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
             }
         } else if (isEditable) {
-            item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL",@"Menu item title: Replace File...") stringByAppendingEllipsis]
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL", @"Menu item title") stringByAppendingEllipsis]
                                       action:@selector(chooseRemoteURL:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Download URL", @"Menu item title") stringByAppendingEllipsis]
+                                      action:@selector(downloadRemoteURL:)
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
@@ -1383,6 +1399,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
              theAction == @selector(raiseChangeFieldName:) || 
              theAction == @selector(chooseLocalFile:) || 
              theAction == @selector(chooseRemoteURL:) || 
+             theAction == @selector(downloadRemoteURL:) || 
              theAction == @selector(addLinkedFileFromMenuItem:) || 
              theAction == @selector(addRemoteURLFromMenuItem:)) {
         return isEditable;
@@ -2521,6 +2538,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
+    // cancel download for local file
+    [self cancelDownload];
+    
     // close so it's not hanging around by itself; this works if the doc window closes, also
     [complexStringEditor close];
     
@@ -2538,6 +2558,136 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     // @@ problem here:  BDSKEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
     [[self retain] autorelease];
+}
+
+#pragma mark URL downloading
+
+- (void)downloadURL:(NSURL *)linkURL{
+    if (isDownloading)
+        return;
+    if (linkURL) {
+		download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self];
+	}
+	if (nil == download) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid or Unsupported URL", @"Message in alert dialog when unable to download file for Local-Url")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog")];
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:nil
+                         didEndSelector:NULL
+                            contextInfo:NULL];
+	}
+}
+
+- (void)setDownloading:(BOOL)downloading{
+    if (isDownloading != downloading) {
+        isDownloading = downloading;
+        if (isDownloading) {
+			NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Status message"), 0] stringByAppendingEllipsis];
+            [statusBar startAnimation:self];
+			[self setStatus:message];
+            [downloadFileName release];
+			downloadFileName = nil;
+        } else {
+            [statusBar stopAnimation:self];
+			[self setStatus:@""];
+            [download release];
+            download = nil;
+            receivedContentLength = 0;
+        }
+    }
+}
+
+- (void)cancelDownload{
+	[download cancel];
+	[self setDownloading:NO];
+}
+
+- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSOKButton) {
+        [download setDestination:[sheet filename] allowOverwrite:YES];
+    } else {
+        [self cancelDownload];
+    }
+}
+
+#pragma mark NSURLDownloadDelegate methods
+
+- (void)downloadDidBegin:(NSURLDownload *)download{
+    [self setDownloading:YES];
+}
+
+- (NSWindow *)downloadWindowForAuthenticationSheet:(WebDownload *)download{
+    return [self window];
+}
+
+- (void)download:(NSURLDownload *)theDownload didReceiveResponse:(NSURLResponse *)response{
+    expectedContentLength = [response expectedContentLength];
+}
+
+- (void)download:(NSURLDownload *)theDownload decideDestinationWithSuggestedFilename:(NSString *)filename{
+	NSString *extension = [filename pathExtension];
+   
+	NSSavePanel *sPanel = [NSSavePanel savePanel];
+    if (NO == [extension isEqualToString:@""]) 
+		[sPanel setRequiredFileType:extension];
+	
+    [sPanel beginSheetForDirectory:nil
+                              file:filename
+                    modalForWindow:[self window]
+                     modalDelegate:self
+                    didEndSelector:@selector(saveDownloadPanelDidEnd:returnCode:contextInfo:)
+                       contextInfo:nil];
+}
+
+- (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned)length{
+    if (expectedContentLength > 0) {
+        receivedContentLength += length;
+        int percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
+		NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Tool tip message"), percent] stringByAppendingEllipsis];
+		[self setStatus:message];
+    }
+}
+
+- (BOOL)download:(NSURLDownload *)download shouldDecodeSourceDataOfMIMEType:(NSString *)encodingType;{
+    return YES;
+}
+
+- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path{
+    [downloadFileName release];
+	downloadFileName = [path copy];
+}
+
+- (void)downloadDidFinish:(NSURLDownload *)theDownload{
+    [self setDownloading:NO];
+    
+    NSURL *aURL = [NSURL fileURLWithPath:downloadFileName];
+    
+    [publication addFileForURL:aURL autoFile:YES runScriptHook:YES];
+    
+    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+}
+
+- (void)download:(NSURLDownload *)theDownload didFailWithError:(NSError *)error
+{
+    [self setDownloading:NO];
+        
+    NSString *errorDescription = [error localizedDescription];
+    if (nil == errorDescription) {
+        errorDescription = NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
+    }
+    
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
+                                     defaultButton:nil
+                                   alternateButton:nil
+                                       otherButton:nil
+                         informativeTextWithFormat:errorDescription];
+    [alert beginSheetModalForWindow:[self window]
+                      modalDelegate:nil
+                     didEndSelector:NULL
+                        contextInfo:NULL];
 }
 
 #pragma mark undo manager

@@ -102,6 +102,14 @@
     
     NSMutableSet *addedFields;
 // ----------------------------------------------------------------------------------------
+// URL downlaod stuff
+// ----------------------------------------------------------------------------------------
+	WebDownload *download;
+	BOOL isDownloading;
+	NSString *downloadFileName;
+    int receivedContentLength;
+    int expectedContentLength;
+// ----------------------------------------------------------------------------------------
 // status bar stuff
 // ----------------------------------------------------------------------------------------
     IBOutlet BDSKStatusBar *statusBar;
@@ -252,6 +260,8 @@
 */
 - (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender;
 
+- (IBAction)downloadRemoteURL:(NSMenuItem *)sender;
+
 /*!
     @method     showCiteKeyWarning:
     @abstract   Action of the cite-key warning button. Shows the error string in an alert panel.
@@ -331,6 +341,12 @@
     
 - (BOOL)editSelectedCellAsMacro;
 - (void)macrosDidChange:(NSNotification *)aNotification;
+
+#pragma mark URL downloading
+
+- (void)downloadURL:(NSURL *)linkURL;
+- (void)setDownloading:(BOOL)downloading;
+- (void)cancelDownload;
 
 @end
 
