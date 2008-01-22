@@ -3496,31 +3496,50 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 		// first = table, second = preview, zeroth = web
         float contentHeight = NSHeight([sender frame]) - i * [sender dividerThickness];
         float factor = contentHeight / (oldSize.height - i * [sender dividerThickness]);
-        secondFrame.size.height *= factor;
+        secondFrame = NSIntegralRect(secondFrame);
+        zerothFrame.size.height = floorf(factor * NSHeight(zerothFrame));
+        firstFrame.size.height = floorf(factor * NSHeight(firstFrame));
+        secondFrame.size.height = floorf(factor * NSHeight(secondFrame));
+        if (NSHeight(zerothFrame) < 1.0)
+            zerothFrame.size.height = 0.0;
+        if (NSHeight(firstFrame) < 1.0)
+            firstFrame.size.height = 0.0;
         if (NSHeight(secondFrame) < 1.0)
             secondFrame.size.height = 0.0;
-        secondFrame = NSIntegralRect(secondFrame);
-        zerothFrame.size.height *= factor;
-        zerothFrame = NSIntegralRect(zerothFrame);
-        firstFrame.size.height = contentHeight - NSHeight(secondFrame) - NSHeight(zerothFrame);
-        if (NSHeight(firstFrame) < 0.0) {
-            firstFrame.size.height = 0.0;
-            secondFrame.size.height = contentHeight - NSHeight(firstFrame) - NSHeight(zerothFrame);
+        // randomly divide the remaining gap over the two views; NSSplitView dumps it all over the last view, which grows that one more than the others
+        int gap = (int)(contentHeight - NSHeight(zerothFrame) - NSHeight(firstFrame) - NSHeight(secondFrame));
+        while (gap > 0) {
+            i = floorf((3.0f * rand()) / RAND_MAX);
+            if (i == 0 && NSHeight(zerothFrame) > 0.0) {
+                zerothFrame.size.height += 1.0;
+                gap--;
+            } else if (i == 1 && NSHeight(firstFrame) > 0.0) {
+                firstFrame.size.height += 1.0;
+                gap--;
+            } else if (i == 2 && NSHeight(secondFrame) > 0.0) {
+                secondFrame.size.height += 1.0;
+                gap--;
+            }
         }
         zerothFrame.size.width = firstFrame.size.width = secondFrame.size.width = NSWidth([sender frame]);
+        if (zerothView)
+            firstFrame.origin.x = NSMaxX(zerothFrame) + [sender dividerThickness];
+        secondFrame.origin.x = NSMaxX(firstFrame) + [sender dividerThickness];
 	} else {
 		// zeroth = group, first = table+preview, second = fileview
         float contentWidth = NSWidth([sender frame]) - 2 * [sender dividerThickness];
-        float factor = contentWidth / (oldSize.width - 2 * [sender dividerThickness]);
-        zerothFrame.size.width *= factor;
         if (NSWidth(zerothFrame) < 1.0)
             zerothFrame.size.width = 0.0;
-        zerothFrame = NSIntegralRect(zerothFrame);
-        secondFrame.size.width *= factor;
         if (NSWidth(secondFrame) < 1.0)
             secondFrame.size.width = 0.0;
-        secondFrame = NSIntegralRect(secondFrame);
+        if (contentWidth < NSWidth(zerothFrame) + NSWidth(secondFrame)) {
+            float factor = contentWidth / (oldSize.width - [sender dividerThickness]);
+            zerothFrame.size.width = floorf(factor * NSWidth(zerothFrame));
+            secondFrame.size.width = floorf(factor * NSWidth(secondFrame));
+        }
         firstFrame.size.width = contentWidth - NSWidth(zerothFrame) - NSWidth(secondFrame);
+        firstFrame.origin.x = NSMaxX(zerothFrame) + [sender dividerThickness];
+        secondFrame.origin.x = NSMaxX(firstFrame) + [sender dividerThickness];
         zerothFrame.size.height = firstFrame.size.height = secondFrame.size.height = NSHeight([sender frame]);
     }
 	
