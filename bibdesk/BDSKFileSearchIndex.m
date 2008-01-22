@@ -216,6 +216,19 @@
 
 static inline NSData *sha1SignatureForURL(NSURL *aURL) {
     NSData *sha1Signature = [NSData copySha1SignatureForFile:[aURL path]];
+    if (sha1Signature == nil) {
+        // this could happen for packages, use a timestamp instead
+        FSRef fileRef;
+        FSCatalogInfo info;
+        CFAbsoluteTime absoluteTime;
+        
+        if (CFURLGetFSRef((CFURLRef)aURL, &fileRef) &&
+            noErr == FSGetCatalogInfo(&fileRef, kFSCatInfoContentMod, &info, NULL, NULL, NULL) &&
+            noErr == UCConvertUTCDateTimeToCFAbsoluteTime(&info.contentModDate, &absoluteTime)) {
+            NSDate *modDate = [NSDate dateWithTimeIntervalSinceReferenceDate:(NSTimeInterval)absoluteTime];
+            sha1Signature = [[NSKeyedArchiver archivedDataWithRootObject:modDate] retain];
+        }
+    }
     return sha1Signature ? [sha1Signature autorelease] : [NSData data];
 }
 
