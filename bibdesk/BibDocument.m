@@ -3523,8 +3523,8 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         }
         zerothFrame.size.width = firstFrame.size.width = secondFrame.size.width = NSWidth([sender frame]);
         if (zerothView)
-            firstFrame.origin.x = NSMaxX(zerothFrame) + [sender dividerThickness];
-        secondFrame.origin.x = NSMaxX(firstFrame) + [sender dividerThickness];
+            firstFrame.origin.y = NSMaxY(zerothFrame) + [sender dividerThickness];
+        secondFrame.origin.y = NSMaxY(firstFrame) + [sender dividerThickness];
 	} else {
 		// zeroth = group, first = table+preview, second = fileview
         float contentWidth = NSWidth([sender frame]) - 2 * [sender dividerThickness];
