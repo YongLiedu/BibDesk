@@ -112,6 +112,22 @@
     [self setWebViewContextMenuDelegate:nil];
 }
 
+- (NSWindow *)animator
+{
+    NSWindow *theWindow = [self window];
+    return [theWindow respondsToSelector:@selector(animator)] ? [theWindow performSelector:@selector(animator)] : theWindow;
+}
+
+- (BOOL)windowShouldClose:(id)sender
+{
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        [[self animator] setAlphaValue:0.0];
+        [[self window] performSelector:@selector(close) withObject:nil afterDelay:0.5];
+        return NO;
+    }
+    return YES;
+}
+
 - (void)stopPreview:(NSNotification *)note
 {
     if ([qlTask isRunning])
@@ -369,6 +385,9 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             NSArray *subviews = [[theWindow contentView] subviews];
             NSView *oldView = [subviews count] ? [subviews objectAtIndex:0] : nil;
             
+            if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+                [theWindow setAlphaValue:0.0];
+            
             NSView *contentView = [theWindow contentView];
             if (oldView)
                 [contentView replaceSubview:oldView with:newView];
@@ -394,7 +413,14 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
                 // raises on nil
                 [theWindow setTitleWithRepresentedFilename:@""];
             }
-            [self showWindow:nil];
+
+            if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+                [[self animator] makeKeyAndOrderFront:nil];
+                [[self animator] setAlphaValue:1.0];
+            }
+            else {
+                [self showWindow:self];
+            }
             
             // make sure the view updates properly, in case it was previously on screen
             [[[self window] contentView] setNeedsDisplay:YES];
@@ -406,7 +432,13 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 }
 
 - (IBAction)previewAction:(id)sender {
-	[[self window] close];
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        [[self animator] setAlphaValue:0.0];
+        [[self window] performSelector:@selector(close) withObject:nil afterDelay:0.5];
+    }
+    else {
+        [[self window] performClose:self];
+    }
 }
 
 @end
