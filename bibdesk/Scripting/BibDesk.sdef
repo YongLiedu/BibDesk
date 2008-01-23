@@ -635,10 +635,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The URL of the file.">
                 <cocoa key="absoluteString"/>
             </property>  
-            <property name="path" code="ppth" type="text" access="r"
-                description="The path of the file.">
-                <cocoa key="path"/>
-            </property>  
             <property name="label index" code="labi" type="integer"
                 description="The Finder label of the file.">
                 <cocoa key="finderLabel"/>
