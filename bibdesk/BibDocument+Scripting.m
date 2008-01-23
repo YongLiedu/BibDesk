@@ -51,6 +51,10 @@
 
 @implementation BibDocument (Scripting)
 
++ (BOOL)accessInstanceVariablesDirectly {
+	return NO;
+}
+
 // fix a bug in Apple's implementation, which ignores the file type (for export)
 - (id)handleSaveScriptCommand:(NSScriptCommand *)command {
 	NSDictionary *args = [command evaluatedArguments];

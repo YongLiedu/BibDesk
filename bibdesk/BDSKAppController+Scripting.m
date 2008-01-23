@@ -49,6 +49,10 @@ Category on BDSKAppController making the papers folder readable for scripting
 */
 @implementation BDSKAppController (Scripting)
 
++ (BOOL)accessInstanceVariablesDirectly {
+	return NO;
+}
+
 - (NSString *)papersFolder {
 	return [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey] stringByStandardizingPath];
 }

@@ -49,6 +49,9 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 */
 @implementation BibItem (Scripting)
 
++ (BOOL)accessInstanceVariablesDirectly {
+	return NO;
+}
 
 /* 
  ssp 2004-07-10

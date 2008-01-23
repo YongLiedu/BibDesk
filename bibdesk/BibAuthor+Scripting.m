@@ -40,12 +40,11 @@
 #import "BDSKPublicationsArray.h"
 
 @implementation BibAuthor (Scripting)
-/* 
-ssp 2004-07-10
- Returns a path to a BibItem for a BibAuthor for Apple Script
- It isn't clear to me what status these objects have. Perhaps there should be a list of authors at the level of the document or application objects instead. 
- This tries to find _some_ instance of this class and return something along the lines of "author 4 of BibItem xxx"
-*/
+
++ (BOOL)accessInstanceVariablesDirectly {
+	return NO;
+}
+
 - (NSScriptObjectSpecifier *) objectSpecifier {
 	// NSLog(@"BibAuthor objectSpecifier");
     // only publications belonging to a BibDocument are scriptable

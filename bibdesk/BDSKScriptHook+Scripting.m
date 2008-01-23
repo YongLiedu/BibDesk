@@ -42,6 +42,10 @@
 
 @implementation BDSKScriptHook (Scripting)
 
++ (BOOL)accessInstanceVariablesDirectly {
+	return NO;
+}
+
 - (NSScriptObjectSpecifier *)objectSpecifier {
     if (uniqueID) {
         // this is necessary as our container is the application 
