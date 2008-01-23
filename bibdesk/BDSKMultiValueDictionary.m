@@ -63,47 +63,37 @@
     return [dictionary count];
 }
 
-- (NSMutableSet *)_setForKey:(id)aKey create:(BOOL)create {
-    NSMutableSet *value = [dictionary objectForKey:aKey];
+- (NSMutableSet *)_setForValue:(id)aValue inverse:(BOOL)inverse create:(BOOL)create {
+    NSMutableDictionary *dict = inverse ? inverseDictionary : dictionary;
+    NSMutableSet *value = [dict objectForKey:aValue];
 
     if (create && value == nil) {
         value = [[NSMutableSet alloc] init];
-        [dictionary setObject:value forKey:aKey];
-        [value release];
-    }
-    return value;
-}
-
-- (NSMutableSet *)_setForObject:(id)anObject create:(BOOL)create {
-    NSMutableSet *value = [inverseDictionary objectForKey:anObject];
-
-    if (create && value == nil) {
-        value = [[NSMutableSet alloc] init];
-        [inverseDictionary setObject:value forKey:anObject];
+        [dict setObject:value forKey:aValue];
         [value release];
     }
     return value;
 }
 
 - (NSSet *)allObjectsForKey:(id)aKey {
-    return [self _setForKey:aKey create:NO];
+    return [self _setForValue:aKey inverse:NO create:NO];
 }
 
 - (NSSet *)allKeysForObject:(id)anObject {
-    return [self _setForObject:anObject create:NO];
+    return [self _setForValue:anObject inverse:YES create:NO];
 }
 
 - (id)anyObjectForKey:(id)aKey {
-    return [[self _setForKey:aKey create:NO] anyObject];
+    return [[self _setForValue:aKey inverse:NO create:NO] anyObject];
 }
 
 - (id)anyKeyForObject:(id)anObject {
-    return [[self _setForObject:anObject create:NO] anyObject];
+    return [[self _setForValue:anObject inverse:YES create:NO] anyObject];
 }
 
 - (void)addObject:(id)anObject forKey:(id)aKey {
-    [[self _setForKey:aKey create:YES] addObject:anObject];
-    [[self _setForObject:anObject create:YES] addObject:aKey];
+    [[self _setForValue:aKey inverse:NO create:YES] addObject:anObject];
+    [[self _setForValue:anObject inverse:YES create:YES] addObject:aKey];
 }
 
 typedef struct _addValueContext {
@@ -114,17 +104,12 @@ typedef struct _addValueContext {
 
 static void addValueFunction(const void *value, void *context) {
     addValueContext *ctxt = context;
-    NSMutableSet *set = nil;
-    if (ctxt->inverse)
-        set = [ctxt->dict _setForObject:(id)value create:YES];
-    else
-        set = [ctxt->dict _setForKey:(id)value create:YES];
-    [set addObject:(id)(ctxt->value)];
+    [[ctxt->dict _setForValue:(id)value inverse:ctxt->inverse create:YES] addObject:(id)(ctxt->value)];
 }
 
 - (void)addObjects:(NSSet *)newObjects forKey:(id)aKey {
     if ([newObjects count]) {
-        [[self _setForKey:aKey create:YES] unionSet:newObjects];
+        [[self _setForValue:aKey inverse:NO create:YES] unionSet:newObjects];
         addValueContext ctxt;
         ctxt.dict = self;
         ctxt.value = aKey;
@@ -135,7 +120,7 @@ static void addValueFunction(const void *value, void *context) {
 
 - (void)addObject:(id)anObject forKeys:(NSSet *)newKeys {
     if ([newKeys count]) {
-        [[self _setForObject:anObject create:YES] unionSet:newKeys];
+        [[self _setForValue:anObject inverse:YES create:YES] unionSet:newKeys];
         addValueContext ctxt;
         ctxt.dict = self;
         ctxt.value = anObject;
@@ -145,8 +130,8 @@ static void addValueFunction(const void *value, void *context) {
 }
 
 - (void)removeObject:(id)anObject forKey:(id)aKey{
-    NSMutableSet *objectSet = [self _setForKey:aKey create:NO];
-    NSMutableSet *keySet = [self _setForObject:anObject create:NO];
+    NSMutableSet *objectSet = [self _setForValue:aKey inverse:NO create:NO];
+    NSMutableSet *keySet = [self _setForValue:anObject inverse:YES create:NO];
     if (objectSet) {
         [objectSet removeObject:anObject];
         if ([objectSet count] == 0)
@@ -166,12 +151,7 @@ static void addValueFunction(const void *value, void *context) {
 
 static void addEntryFunction(const void *key, const void *value, void *context) {
     addValueContext *ctxt = context;
-    NSMutableSet *set = nil;
-    if (ctxt->inverse)
-        set = [ctxt->dict _setForObject:(id)key create:YES];
-    else
-        set = [ctxt->dict _setForKey:(id)key create:YES];
-    [set unionSet:(NSSet *)value];
+    [[ctxt->dict _setForValue:(id)key inverse:ctxt->inverse create:YES] unionSet:(NSSet *)value];
 }
 
 - (void)addEntriesFromDictionary:(BDSKMultiValueDictionary *)otherDictionary {
