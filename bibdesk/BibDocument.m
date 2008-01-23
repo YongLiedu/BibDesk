@@ -2800,7 +2800,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)handleSkimFileDidSaveNotification:(NSNotification *)notification{
-    log_method();
     NSString *path = [notification object];
     NSEnumerator *pubEnum = [publications objectEnumerator];
     BibItem *pub;
