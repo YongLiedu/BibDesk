@@ -58,8 +58,6 @@
     
     IBOutlet BDSKEdgeView *controlView;
     IBOutlet BDSKCollapsibleView *collapsibleView;
-    IBOutlet NSButton *stopButton;
-    IBOutlet NSView *progressView;
     IBOutlet NSProgressIndicator *indexProgressBar;
     BOOL canceledSearch;
     BOOL searchFieldDidEndEditing;
@@ -73,6 +71,7 @@
 - (NSTableView *)tableView;
 // Use this to connect a search field and initiate a search
 - (void)setSearchField:(NSSearchField *)aSearchField;
+- (BOOL)shouldShowControlView;
 
 - (NSArray *)selectedIdentifierURLs;
 - (NSArray *)selectedURLs;

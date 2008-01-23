@@ -283,8 +283,6 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     
     [fileSearchController filterUsingURLs:[groupedPublications valueForKey:@"identifierURL"]];
     
-    [self insertControlView:[fileSearchController controlView] atTop:NO];
-    
     NSView *oldView = [tableView enclosingScrollView];
     NSView *newView = [[fileSearchController tableView] enclosingScrollView];
     
@@ -292,6 +290,9 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [mainView addSubview:newView];
     [NSViewAnimation animateFadeOutView:oldView fadeInView:newView];
     [oldView removeFromSuperview];
+    
+    if ([fileSearchController shouldShowControlView])
+        [self insertControlView:[fileSearchController controlView] atTop:NO];
     
     // connect the searchfield to the controller and start the search
     [fileSearchController setSearchField:searchField];

@@ -115,9 +115,9 @@
 
     // Do custom view setup 
     NSRect frame = [collapsibleView frame];
-    frame.size.width = 400.0;
+    frame.size.width = 350.0;
     [collapsibleView setMinSize:frame.size];
-    [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMinYEdgeMask];
+    [collapsibleView setCollapseEdges:BDSKMinXEdgeMask | BDSKMinYEdgeMask];
     [controlView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     [controlView setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
 
@@ -144,6 +144,11 @@
     if(controlView == nil)
         [self window]; // this forces a load of the nib
     return controlView;
+}
+
+- (BOOL)shouldShowControlView
+{
+    return [searchIndex finishedInitialIndexing] == NO;
 }
 
 - (NSTableView *)tableView
@@ -231,13 +236,11 @@
         searchFieldDidEndEditing = NO;
         // empty array; this takes care of updating the table for us
         [self setResults:[NSArray array]];        
-        [stopButton setEnabled:YES];
         // set before starting the search, or we can end up updating with it == YES
         canceledSearch = NO;
         
         // may be hidden if we called restoreDocumentState while indexing
-        if ([searchIndex finishedInitialIndexing] == NO && [progressView isHiddenOrHasHiddenAncestor]) {
-            [progressView setHidden:NO];
+        if ([searchIndex finishedInitialIndexing] == NO && [indexProgressBar isHiddenOrHasHiddenAncestor]) {
             // setHidden:NO doesn't seem to apply to subviews
             [indexProgressBar setHidden:NO];
         }
@@ -255,7 +258,7 @@
     [self setSearchField:nil];
     
     // hide this so it doesn't flash during the transition
-    [progressView setHidden:YES];
+    [indexProgressBar setHidden:YES];
     
     [[self document] removeFileContentSearch:self];
 }
@@ -367,15 +370,14 @@
 - (void)search:(BDSKFileSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
 {
     if ([search isEqual:aSearch]) {
-        [stopButton setEnabled:NO];
-        
         // don't reset the array if we canceled updates
         if (NO == canceledSearch)
             [self setResults:anArray];
         [indexProgressBar setDoubleValue:[searchIndex progressValue]];
         
         // hides progress bar and text
-        [progressView setHidden:YES];
+        [indexProgressBar setHidden:YES];
+        [[self document] removeControlView:[self controlView]];
     }
 }
 
@@ -387,7 +389,6 @@
 - (IBAction)cancelCurrentSearch:(id)sender
 {
     [search cancel];
-    [stopButton setEnabled:NO];
     
     // this will cancel updates to the tableview
     canceledSearch = YES;

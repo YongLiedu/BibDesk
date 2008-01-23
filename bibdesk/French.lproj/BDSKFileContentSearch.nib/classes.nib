@@ -20,9 +20,7 @@
                 collapsibleView = BDSKCollapsibleView; 
                 controlView = BDSKEdgeView; 
                 indexProgressBar = NSProgressIndicator; 
-                progressView = NSView; 
                 resultsArrayController = BDSKSelectionPreservingArrayController; 
-                stopButton = NSButton; 
                 tableView = NSTableView; 
             }; 
             SUPERCLASS = NSWindowController; 
