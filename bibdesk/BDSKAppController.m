@@ -602,6 +602,24 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [item setTag:BDSKTemplateDragCopyType + i];
         }
         
+    } else if ([menu isEqual:previewTemplateMenu]) {
+    
+        NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFileType:@"rtf"]];
+        [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"rtfd"]];
+        [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"doc"]];
+        [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"html"]];
+        
+        while ([menu numberOfItems])
+            [menu removeItemAtIndex:0];
+        
+        NSMenuItem *item;
+        NSEnumerator *styleEnum = [styles objectEnumerator];
+        NSString *style;
+        while (style = [styleEnum nextObject]) {
+            item = [menu addItemWithTitle:style action:@selector(changePreviewTemplate:) keyEquivalent:@""];
+            [item setRepresentedObject:style];
+        }
+        
     } else if ([menu isEqual:searchBookmarksMenu]) {
         
         NSArray *bookmarks = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarks];

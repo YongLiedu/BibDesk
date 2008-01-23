@@ -523,8 +523,13 @@
 
 - (BOOL)validateChangePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
     [menuItem setState:([menuItem tag] == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]) ? NSOnState : NSOffState];
-    if ([menuItem tag] == BDSKTemplatePreviewDisplay && [[BDSKTemplate allStyleNamesForFileType:@"rtf"] count] == 0)
+    if ([menuItem tag] == BDSKTemplatePreviewDisplay && ([[BDSKTemplate allStyleNamesForFormat:BDSKRichTextTemplateFormat] count] == 0 && [[BDSKTemplate allStyleNamesForFileType:@"html"] count] == 0))
         return NO;
+    return YES;
+}
+
+- (BOOL)validateChangePreviewTemplateMenuItem:(NSMenuItem *)menuItem {
+    [menuItem setState:[[menuItem representedObject] isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPreviewTemplateStyleKey]] ? NSOnState : NSOffState];
     return YES;
 }
 
@@ -801,6 +806,9 @@
     }
     else if (act == @selector(changePreviewDisplay:)){
         return [self validateChangePreviewDisplayMenuItem:menuItem];
+    }
+    else if (act == @selector(changePreviewTemplate:)){
+        return [self validateChangePreviewTemplateMenuItem:menuItem];
     }
     else if (act == @selector(changeIntersectGroupsAction:)){
         return [self validateChangeIntersectGroupsMenuItem:menuItem];

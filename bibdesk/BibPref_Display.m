@@ -46,13 +46,15 @@
 - (void)awakeFromNib{
     [super awakeFromNib];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handlePreviewDisplayChangedNotification:)
-                                                 name:BDSKPreviewDisplayChangedNotification
-                                               object:nil];
     [OFPreference addObserver:self 
                      selector:@selector(handleTemplatePrefsChangedNotification:) 
                 forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
+    [OFPreference addObserver:self 
+                     selector:@selector(handlePreviewDisplayChangedNotification:) 
+                forPreference:[OFPreference preferenceForKey:BDSKPreviewDisplayKey]];
+    [OFPreference addObserver:self 
+                     selector:@selector(handlePreviewDisplayChangedNotification:) 
+                forPreference:[OFPreference preferenceForKey:BDSKPreviewTemplateStyleKey]];
     
     [self handleTemplatePrefsChangedNotification:nil];
     
@@ -69,6 +71,7 @@
 		[previewMaxNumberComboBox setIntValue:maxNumber];
     
     [previewTemplatePopup setEnabled:[defaults integerForKey:BDSKPreviewDisplayKey] == 3];
+    [previewTemplatePopup selectItemWithTitle:[defaults stringForKey:BDSKPreviewTemplateStyleKey]];
 }
 
 - (void)updateUI{

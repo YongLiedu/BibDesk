@@ -242,6 +242,7 @@
 - (IBAction)changeGroupTableFont:(id)sender;
 
 - (IBAction)changePreviewDisplay:(id)sender;
+- (IBAction)changePreviewTemplate:(id)sender;
 
 /*!
     @method     pageDownInPreview:

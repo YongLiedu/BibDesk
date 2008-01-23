@@ -60,6 +60,7 @@
 	IBOutlet NSMenu *columnsMenu;
 	IBOutlet NSMenu *groupSortMenu;
 	IBOutlet NSMenu *copyAsTemplateMenu;
+	IBOutlet NSMenu *previewTemplateMenu;
 	IBOutlet NSMenu *searchBookmarksMenu;
 	IBOutlet NSMenu *bookmarksMenu;
 

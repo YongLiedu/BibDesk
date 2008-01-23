@@ -1084,9 +1084,22 @@
 
 - (IBAction)changePreviewDisplay:(id)sender{
     int tag = [sender tag];
-    if(tag != [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]){
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:tag forKey:BDSKPreviewDisplayKey];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    
+    if(tag != [pw integerForKey:BDSKPreviewDisplayKey]){
+        [pw setInteger:tag forKey:BDSKPreviewDisplayKey];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+    }
+}
+
+- (IBAction)changePreviewTemplate:(id)sender{
+    NSString *style = [sender representedObject];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    
+    if(NO == [style isEqualToString:[pw stringForKey:BDSKPreviewTemplateStyleKey]]){
+        [pw setObject:style forKey:BDSKPreviewTemplateStyleKey];
+        if (BDSKTemplatePreviewDisplay == [pw integerForKey:BDSKPreviewDisplayKey])
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
     }
 }
 
