@@ -59,10 +59,6 @@
     return [dictionary description];
 }
 
-- (unsigned int)count {
-    return [dictionary count];
-}
-
 - (NSMutableSet *)_setForValue:(id)aValue inverse:(BOOL)inverse create:(BOOL)create {
     NSMutableDictionary *dict = inverse ? inverseDictionary : dictionary;
     NSMutableSet *value = [dict objectForKey:aValue];
@@ -73,6 +69,22 @@
         [value release];
     }
     return value;
+}
+
+- (unsigned int)keyCount {
+    return [dictionary count];
+}
+
+- (unsigned int)objectCount {
+    return [inverseDictionary count];
+}
+
+- (unsigned int)countForKey:(id)aKey {
+    return [[self _setForValue:aKey inverse:NO create:NO] count];
+}
+
+- (unsigned int)countForObject:(id)anObject {
+    return [[self _setForValue:anObject inverse:YES create:NO] count];
 }
 
 - (NSSet *)allObjectsForKey:(id)aKey {

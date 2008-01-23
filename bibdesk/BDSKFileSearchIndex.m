@@ -341,7 +341,7 @@ static void addItemFunction(const void *value, void *context) {
         OSMemoryBarrier();
         if (flags.shouldKeepRunning == 1) {
             pthread_rwlock_wrlock(&rwlock);
-            CFArrayApplyFunction((CFArrayRef)items, CFRangeMake(0, [items count]), addItemFunction, (void *)identifierURLs);
+            CFArrayApplyFunction((CFArrayRef)items, CFRangeMake(0, totalObjectCount), addItemFunction, (void *)identifierURLs);
             pthread_rwlock_unlock(&rwlock);
         }
         
@@ -523,7 +523,7 @@ static void addItemFunction(const void *value, void *context) {
         
         pthread_rwlock_wrlock(&rwlock);
         [identifierURLs removeObject:identifierURL forKey:url];
-        shouldBeRemoved = (0 == [[identifierURLs allObjectsForKey:url] count]);
+        shouldBeRemoved = (0 == [identifierURLs countForKey:url]);
         pthread_rwlock_unlock(&rwlock);
         
         if (shouldBeRemoved)
