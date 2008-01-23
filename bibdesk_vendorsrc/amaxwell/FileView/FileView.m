@@ -1317,13 +1317,41 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
 #pragma mark Drag source
 
+- (void)trashAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
+{
+    NSArray *selectedURLs = [(NSArray *)contextInfo autorelease];
+    if (returnCode == NSAlertAlternateReturn) {
+        NSEnumerator *urlEnum = [selectedURLs objectEnumerator];
+        NSURL *url;
+        while (url = [urlEnum nextObject]) {
+            if ([url isFileURL] == NO || [url isEqual:[FVIcon missingFileURL]]) continue;
+            NSString *path = [url path];
+            NSString *folderPath = [path stringByDeletingLastPathComponent];
+            NSString *fileName = [path lastPathComponent];
+            int tag = 0;
+            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
+        }
+    }
+}
+
 - (void)draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation;
 {
     // only called if we originated the drag, so the row/column must be valid
     if ((operation & NSDragOperationDelete) != 0 && [self isEditable]) {
+        NSArray *selectedURLs = [[self _selectedURLs] copy];
         [[self dataSource] fileView:self deleteURLsAtIndexes:_selectedIndexes];
         [self setSelectionIndexes:[NSIndexSet indexSet]];
         [self reloadIcons];
+        NSBundle *bundle = [NSBundle bundleForClass:[FileView class]];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedStringFromTableInBundle(@"Move Files to Trash?", @"FileView", bundle, @"Message in alert dialog when dragging files to the trash")
+                                         defaultButton:NSLocalizedStringFromTableInBundle(@"No", @"FileView", bundle, @"Button title")
+                                       alternateButton:NSLocalizedStringFromTableInBundle(@"Yes", @"FileView", bundle, @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedStringFromTableInBundle(@"Do you want to move the removed files to the trash?", @"FileView", bundle, @"Informative text in alert dialog when dragging files to the trash")];
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:self 
+                         didEndSelector:@selector(trashAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:selectedURLs];
     }
 }
 
