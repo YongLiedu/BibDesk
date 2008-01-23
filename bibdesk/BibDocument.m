@@ -2530,11 +2530,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                selector:@selector(handleCustomFieldsDidChangeNotification:)
                    name:BDSKCustomFieldsChangedNotification
                  object:nil];
+        // Header says NSNotificationSuspensionBehaviorCoalesce is the default if suspensionBehavior isn't specified, but at least on 10.5 it appears to be NSNotificationSuspensionBehaviorDeliverImmediately.
         [[NSDistributedNotificationCenter defaultCenter] 
             addObserver:self
                selector:@selector(handleSkimFileDidSaveNotification:)
                    name:@"SKSkimFileDidSaveNotification"
-                 object:nil];
+                 object:nil
+     suspensionBehavior:NSNotificationSuspensionBehaviorCoalesce];
         [OFPreference addObserver:self
                          selector:@selector(handleIgnoredSortTermsChangedNotification:)
                     forPreference:[OFPreference preferenceForKey:BDSKIgnoredSortTermsKey]];
@@ -2798,17 +2800,11 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)handleSkimFileDidSaveNotification:(NSNotification *)notification{
-    // distributed notifications can be received on any thread
-    if ([NSThread inMainThread] == NO) {
-        [self performSelectorOnMainThread:_cmd withObject:notification waitUntilDone:NO];
-        return;
-    }
-    
+    log_method();
     NSString *path = [notification object];
     NSEnumerator *pubEnum = [publications objectEnumerator];
     BibItem *pub;
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:BDSKLocalFileString, @"key", nil];
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     
     while (pub = [pubEnum nextObject]) {
         if ([[[pub existingLocalFiles] valueForKey:@"path"] containsObject:path])
