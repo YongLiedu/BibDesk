@@ -64,7 +64,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
     // page size
     char buffer[4096];
 
-    size_t bytesRead;
+    ssize_t bytesRead;
     while ((bytesRead = read(fd, buffer, sizeof(buffer))) > 0)
         status = EVP_DigestUpdate(&mdctx, buffer, bytesRead);
     
