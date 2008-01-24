@@ -88,37 +88,61 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
 + (NSColor *)_lowerColorForFinderLabel:(NSUInteger)label
 {
     NSColor *color = nil;
+    NSColorSpace *cspace = [NSColorSpace genericRGBColorSpace];
+    CGFloat components[4] = { 0, 0, 0, LABEL_ALPHA };
+
     switch (label) {
         case 1:
             // gray
-            color = [NSColor colorWithDeviceRed:0.66 green:0.66 blue:0.66 alpha:LABEL_ALPHA];
+            components[0] = 168.0/255.0;
+            components[1] = 168.0/255.0;
+            components[2] = 168.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 3:
             // purple
-            color = [NSColor colorWithDeviceRed:0.81 green:0.51 blue:0.86 alpha:LABEL_ALPHA]; 
+            components[0] = 193.0/255.0;
+            components[1] = 140.0/255.0;
+            components[2] = 217.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 4:
             // blue
-            color = [NSColor colorWithDeviceRed:0.22 green:0.64 blue:1.0 alpha:LABEL_ALPHA];
+            components[0] =  95.0/255.0;
+            components[1] = 165.0/255.0;
+            components[2] = 251.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 2:
             // green
-            color = [NSColor colorWithDeviceRed:0.64 green:0.87 blue:0.24 alpha:LABEL_ALPHA];
+            components[0] = 178.0/255.0;
+            components[1] = 217.0/255.0;
+            components[2] =  73.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 5:
             // yellow
-            color = [NSColor colorWithDeviceRed:0.95 green:0.86 blue:0.24 alpha:LABEL_ALPHA];
+            components[0] = 238.0/255.0;
+            components[1] = 219.0/255.0;
+            components[2] =  73.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 7:
             // orange
-            color = [NSColor colorWithDeviceRed:1.0 green:0.64 blue:0.23 alpha:LABEL_ALPHA];
+            components[0] = 239.0/255.0;
+            components[1] = 168.0/255.0;
+            components[2] =  67.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 6:
             // red
-            color = [NSColor colorWithDeviceRed:1.0 green:0.30 blue:0.34 alpha:LABEL_ALPHA];
+            components[0] = 228.0/255.0;
+            components[1] =  92.0/255.0;
+            components[2] =  90.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         default:
-            color = [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.0 alpha:0.0];
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
     }
     return color;
@@ -127,37 +151,61 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
 + (NSColor *)_upperColorForFinderLabel:(NSUInteger)label
 {
     NSColor *color = nil;
+    NSColorSpace *cspace = [NSColorSpace genericRGBColorSpace];
+    CGFloat components[4] = { 0, 0, 0, LABEL_ALPHA };
+    
     switch (label) {
         case 1:
             // gray
-            color = [NSColor colorWithDeviceRed:0.84 green:0.84 blue:0.84 alpha:LABEL_ALPHA];
+            components[0] = 207.0/255.0;
+            components[1] = 207.0/255.0;
+            components[2] = 207.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 3:
             // purple
-            color = [NSColor colorWithDeviceRed:0.92 green:0.77 blue:0.93 alpha:LABEL_ALPHA]; 
+            components[0] = 229.0/255.0;
+            components[1] = 206.0/255.0;
+            components[2] = 239.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 4:
             // blue
-            color = [NSColor colorWithDeviceRed:0.66 green:0.85 blue:1.0 alpha:LABEL_ALPHA];
+            components[0] = 174.0/255.0;
+            components[1] = 212.0/255.0;
+            components[2] = 253.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 2:
             // green
-            color = [NSColor colorWithDeviceRed:0.84 green:0.94 blue:0.65 alpha:LABEL_ALPHA];
+            components[0] = 224.0/255.0;
+            components[1] = 240.0/255.0;
+            components[2] = 180.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 5:
             // yellow
-            color = [NSColor colorWithDeviceRed:0.98 green:0.96 blue:0.64 alpha:LABEL_ALPHA];
+            components[0] = 250.0/255.0;
+            components[1] = 244.0/255.0;
+            components[2] = 161.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 7:
             // orange
-            color = [NSColor colorWithDeviceRed:1.0 green:0.83 blue:0.62 alpha:LABEL_ALPHA];
+            components[0] = 246.0/255.0;
+            components[1] = 208.0/255.0;
+            components[2] = 148.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         case 6:
             // red
-            color = [NSColor colorWithDeviceRed:1.0 green:0.66 blue:0.66 alpha:LABEL_ALPHA];
+            components[0] = 239.0/255.0;
+            components[1] = 172.0/255.0;
+            components[2] = 168.0/255.0;
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         default:
-            color = [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.0 alpha:0.0];
+            color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
     }
     return color;
@@ -214,11 +262,11 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
 // Note: there is no optimization or caching here because this is only called once per color to draw the CGLayer
 + (void)_drawLabel:(NSUInteger)label inRect:(NSRect)rect ofContext:(CGContextRef)context;
 {
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();    
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
     FVGradientColor *gradientColor = CFAllocatorAllocate(CFAllocatorGetDefault(), sizeof(FVGradientColor), 0);
     
-    NSColor *upperColor = [self _upperColorForFinderLabel:label];
-    NSColor *lowerColor = [self _lowerColorForFinderLabel:label];
+    NSColor *upperColor = [[self _upperColorForFinderLabel:label] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+    NSColor *lowerColor = [[self _lowerColorForFinderLabel:label] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
     
     // all colors were created using device RGB since we only draw to the screen, so we know that extracting components will work
     [lowerColor getRed:&gradientColor->color1.red green:&gradientColor->color1.green blue:&gradientColor->color1.blue alpha:&gradientColor->color1.alpha];
