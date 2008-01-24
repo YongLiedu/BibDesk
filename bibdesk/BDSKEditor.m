@@ -2649,6 +2649,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         isDownloading = downloading;
         if (isDownloading) {
 			NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Status message"), 0] stringByAppendingEllipsis];
+            [statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
             [statusBar startAnimation:self];
 			[self setStatus:message];
             [downloadFileName release];
