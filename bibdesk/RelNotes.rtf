@@ -1,5 +1,5 @@
 {\rtf1\ansi\ansicpg1252\cocoartf949\cocoasubrtf270
-{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 LucidaGrande;\f2\fnil\fcharset0 LucidaSans-Typewriter;
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 LucidaGrande;\f2\fnil\fcharset204 LucidaSans-Typewriter;
 \f3\fnil\fcharset0 Geneva;\f4\fnil\fcharset0 Verdana;\f5\fnil\fcharset129 AppleGothic;
 }
 {\colortbl;\red255\green255\blue255;\red255\green0\blue3;\red85\green85\blue85;}
@@ -34,15 +34,15 @@
 {\list\listtemplateid29\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid29}
 {\list\listtemplateid30\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid30}}
 {\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}{\listoverride\listid4\listoverridecount0\ls4}{\listoverride\listid5\listoverridecount0\ls5}{\listoverride\listid6\listoverridecount0\ls6}{\listoverride\listid7\listoverridecount0\ls7}{\listoverride\listid8\listoverridecount0\ls8}{\listoverride\listid9\listoverridecount0\ls9}{\listoverride\listid10\listoverridecount0\ls10}{\listoverride\listid11\listoverridecount0\ls11}{\listoverride\listid12\listoverridecount0\ls12}{\listoverride\listid13\listoverridecount0\ls13}{\listoverride\listid14\listoverridecount0\ls14}{\listoverride\listid15\listoverridecount0\ls15}{\listoverride\listid16\listoverridecount0\ls16}{\listoverride\listid17\listoverridecount0\ls17}{\listoverride\listid18\listoverridecount0\ls18}{\listoverride\listid19\listoverridecount0\ls19}{\listoverride\listid20\listoverridecount0\ls20}{\listoverride\listid21\listoverridecount0\ls21}{\listoverride\listid22\listoverridecount0\ls22}{\listoverride\listid23\listoverridecount0\ls23}{\listoverride\listid24\listoverridecount0\ls24}{\listoverride\listid25\listoverridecount0\ls25}{\listoverride\listid26\listoverridecount0\ls26}{\listoverride\listid27\listoverridecount0\ls27}{\listoverride\listid28\listoverridecount0\ls28}{\listoverride\listid29\listoverridecount0\ls29}{\listoverride\listid30\listoverridecount0\ls30}}
-\vieww12620\viewh13760\viewkind0
+\vieww9580\viewh14400\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
 \f0\fs60 \cf0 BibDesk Release Notes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\fs22 \cf0 \
-Last update: 17 January 2008 (rev 
-\f2\fs20 12550)
+Last update: 24 January 2008 (rev 
+\f2\fs20 12659)
 \f1\fs22 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -56,13 +56,17 @@ New Features\
 \ls1\ilvl0
 \f1\i0\b0\fs22 \cf0 {\listtext	\'95	}Can now filter publications in the person window by field and name, and have better control over changing names\
 {\listtext	\'95	}Linked files now display Finder label colors, and context menu can be used to set label\
-{\listtext	\'95	}Added "Remove" context menu to linked files\
+{\listtext	\'95	}Added "Remove" and "Trash" context menu to linked files\
 {\listtext	\'95	}File content search indexes are now saved to disk, so should be regenerated less often\
 {\listtext	\'95	}Punctuation is ignored when sorting\
-\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+{\listtext	\'95	}File content search results now display all pubs and files in case a file is associated with multiple items\
+{\listtext	\'95	}Skim notes and Finder labels of linked files are scriptable\
+{\listtext	\'95	}URL downloading is available via the linked URL context menu\
+\pard\tx560\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f0\i\b\fs26 \cf0 \
-Bugs Fixed\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+\cf0 Bugs Fixed\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
 \ls2\ilvl0
 \f1\i0\b0\fs22 \cf0 {\listtext	\'95	}Exceptions are always logged to the console now\
@@ -87,6 +91,16 @@ Bugs Fixed\
 {\listtext	\'95	}Backslash-escaped braces are no longer ignored when computing brace depth\
 {\listtext	\'95	}Key combo box of new smart group condition is now selected\
 {\listtext	\'95	}Added status display for new local file and remote URL columns\
+{\listtext	\'95	}Fixed a crash problem with OmniAppKit's sheet queuing (bug #1874371)\
+{\listtext	\'95	}Smart group contents now update properly when an edit adds/removes an item from the group\
+{\listtext	\'95	}Preview of local file format displays relative path instead of tilde-abbreviated path\
+{\listtext	\'95	}Clipboard is now allowed as a parameter for "export using template" in AppleScript, which works around Apple's rich text bugs\
+{\listtext	\'95	}Level indicator cells are now clipped properly\
+{\listtext	\'95	}Spotlight search goo is now stripped when opening a file in response to Spotlight\
+{\listtext	\'95	}Document searches are now performed asynchronously, which improves performance with very large files\
+{\listtext	\'95	}Level indicator cells now draw their content correctly centered\
+{\listtext	\'95	}Worked around Apple's splitview resizing bugs in the main window so the divider doesn't creep upwards\
+{\listtext	\'95	}Failure to convert username when saving a file is no longer a critical error\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f0\b\fs28 \cf0 \
