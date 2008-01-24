@@ -69,8 +69,7 @@ enum {
     FVOpenMenuItemTag = 1004,
     FVRevealMenuItemTag = 1005,
     FVChangeLabelMenuItemTag = 1006,
-    FVRemoveMenuItemTag = 1007,
-    FVTrashMenuItemTag = 1008
+    FVRemoveMenuItemTag = 1007
 };
 
 @interface FileView : NSView 
@@ -129,7 +128,6 @@ enum {
 // sender must implement -tag to return a valid Finder label integer (0-7); non-file URLs are ignored
 - (IBAction)changeFinderLabel:(id)sender;
 - (IBAction)openSelectedURLs:(id)sender;
-- (IBAction)trashSelectedURLs:(id)sender;
 
 - (BOOL)isEditable;
 - (void)setEditable:(BOOL)flag;
