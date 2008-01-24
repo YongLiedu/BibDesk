@@ -39,6 +39,7 @@
 #import "NSData_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import <openssl/evp.h>
+#import <unistd.h>
 
 NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 
