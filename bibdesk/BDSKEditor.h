@@ -262,7 +262,7 @@
 
 - (IBAction)downloadRemoteURL:(NSMenuItem *)sender;
 
-- (IBAction)trashLinkedfiles:(id)sender;
+- (IBAction)trashLinkedFiles:(id)sender;
 
 /*!
     @method     showCiteKeyWarning:

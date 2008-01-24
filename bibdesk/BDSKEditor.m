@@ -619,7 +619,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self downloadURL:theURL];
 }
 
-- (IBAction)trashLinkedfiles:(id)sender{
+- (IBAction)trashLinkedFiles:(id)sender{
     [self deleteURLsAtIndexes:[sender representedObject] moveToTrash:1];
 }
 
@@ -1114,8 +1114,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         NSIndexSet *selectedIndexes = [fileView selectionIndexes];
         if ([[[[publication valueForKey:@"files"] objectsAtIndexes:selectedIndexes] valueForKey:@"isFileURL"] containsObject:[NSNumber numberWithInt:1]]) {
             i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
-            item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL", @"Menu item title") stringByAppendingEllipsis]
-                                      action:@selector(chooseRemoteURL:)
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Move To Trash", @"Menu item title") stringByAppendingEllipsis]
+                                      action:@selector(trashLinkedFiles:)
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:selectedIndexes];
