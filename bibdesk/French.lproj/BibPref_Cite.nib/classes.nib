@@ -1,51 +1,68 @@
 {
-    IBClasses = (
-        {
-            CLASS = BDSKDragCopyCiteKeyFormatter; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSFormatter; 
-        }, 
-        {
-            ACTIONS = {
-                changeAlternateDragCopyFormat = id; 
-                changeAlternateDragCopyTemplate = id; 
-                changeDefaultDragCopyFormat = id; 
-                changeDefaultDragCopyTemplate = id; 
-                changePrependTilde = id; 
-                changeSeparateCite = id; 
-                citeStringFieldChanged = id; 
-                setCitationBracketStyle = id; 
-            }; 
-            CLASS = "BibPref_Cite"; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                alternateDragCopyPopup = NSPopUpButton; 
-                alternateDragCopyTemplatePopup = NSPopUpButton; 
-                citeBehaviorLine = NSTextField; 
-                citeBracketRadio = NSMatrix; 
-                citeStringField = NSTextField; 
-                defaultDragCopyPopup = NSPopUpButton; 
-                defaultDragCopyTemplatePopup = NSPopUpButton; 
-                prependTildeCheckButton = NSButton; 
-                separateCiteCheckButton = NSButton; 
-            }; 
-            SUPERCLASS = OAPreferenceClient; 
-        }, 
-        {
-            ACTIONS = {"" = id; }; 
-            CLASS = FirstResponder; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {
-            ACTIONS = {restoreDefaults = id; setValueForSender = id; }; 
-            CLASS = OAPreferenceClient; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {controlBox = NSView; initialFirstResponder = NSView; lastKeyView = NSView; }; 
-            SUPERCLASS = OFObject; 
-        }, 
-        {CLASS = OBObject; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = OFObject; LANGUAGE = ObjC; SUPERCLASS = OBObject; }
-    ); 
-    IBVersion = 1; 
+    IBClasses =     (
+                {
+            CLASS = BDSKDragCopyCiteKeyFormatter;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSFormatter;
+        },
+                {
+            ACTIONS =             {
+                changeAlternateDragCopyFormat = id;
+                changeAlternateDragCopyTemplate = id;
+                changeDefaultDragCopyFormat = id;
+                changeDefaultDragCopyTemplate = id;
+                changePrependTilde = id;
+                changeSeparateCite = id;
+                citeStringFieldChanged = id;
+                setCitationBracketStyle = id;
+            };
+            CLASS = "BibPref_Cite";
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                alternateDragCopyPopup = NSPopUpButton;
+                alternateDragCopyTemplatePopup = NSPopUpButton;
+                citeBehaviorLine = NSTextField;
+                citeBracketRadio = NSMatrix;
+                citeStringField = NSTextField;
+                defaultDragCopyPopup = NSPopUpButton;
+                defaultDragCopyTemplatePopup = NSPopUpButton;
+                prependTildeCheckButton = NSButton;
+                separateCiteCheckButton = NSButton;
+            };
+            SUPERCLASS = OAPreferenceClient;
+        },
+                {
+            ACTIONS =             {
+                "" = id;
+            };
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            ACTIONS =             {
+                restoreDefaults = id;
+                setValueForSender = id;
+            };
+            CLASS = OAPreferenceClient;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                controlBox = NSView;
+                initialFirstResponder = NSView;
+                lastKeyView = NSView;
+            };
+            SUPERCLASS = OFObject;
+        },
+                {
+            CLASS = OBObject;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = OFObject;
+            LANGUAGE = ObjC;
+            SUPERCLASS = OBObject;
+        }
+    );
+    IBVersion = 1;
 }

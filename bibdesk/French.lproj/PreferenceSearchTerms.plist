@@ -71,20 +71,6 @@
 		<string>Affichage</string>
 		<string>Annoté, résumé, détails, modèles, PDF, texte</string>
 	</array>
-	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.export</key>
-	<array>
-		<string>Fichiers HTML</string>
-		<string>Modèles</string>
-		<string>Fichiers texte</string>
-		<string>Export</string>
-		<string>Service</string>
-		<string>Fichiers RTF</string>
-		<string>Fichiers RTFD</string>
-		<string>Fichiers Microsoft Words</string>
-		<string>Fichiers RSS</string>
-		<string>Page Web</string>
-		<string>Formats de fichiers</string>
-	</array>
 	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.files</key>
 	<array>
 		<string>Enregistrer les fichiers</string>
@@ -122,6 +108,20 @@
 		<string>Connexion au serveur</string>
 		<string>Bonjour (Rendezvous)</string>
 		<string>Mot de passe</string>
+	</array>
+	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.export</key>
+	<array>
+		<string>Fichiers HTML</string>
+		<string>Modèles</string>
+		<string>Fichiers texte</string>
+		<string>Export</string>
+		<string>Service</string>
+		<string>Fichiers RTF</string>
+		<string>Fichiers RTFD</string>
+		<string>Fichiers Microsoft Words</string>
+		<string>Fichiers RSS</string>
+		<string>Page Web</string>
+		<string>Formats de fichiers</string>
 	</array>
 </dict>
 </plist>

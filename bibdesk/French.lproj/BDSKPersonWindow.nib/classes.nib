@@ -17,15 +17,27 @@
         },
                 {
             ACTIONS =             {
+                dismissEditSheet = id;
+                edit = id;
                 openSelectedPub = id;
             };
             CLASS = BDSKPersonController;
             LANGUAGE = ObjC;
             OUTLETS =             {
                 collapsibleView = BDSKCollapsibleView;
+                editButton = NSButton;
+                editField = NSTextField;
+                editMessageField = NSTextField;
+                editSheet = NSWindow;
+                fieldArrayController = NSArrayController;
+                fieldNameSplitView = OASplitView;
+                fieldTableView = NSTableView;
                 imageView = BDSKDragImageView;
+                nameArrayController = NSArrayController;
+                nameTableView = NSTableView;
                 nameTextField = NSTextField;
-                pubsTableView = NSTableView;
+                publicationArrayController = NSArrayController;
+                publicationTableView = NSTableView;
                 splitView = OASplitView;
             };
             SUPERCLASS = NSWindowController;
