@@ -1114,7 +1114,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         NSIndexSet *selectedIndexes = [fileView selectionIndexes];
         if ([[[[publication valueForKey:@"files"] objectsAtIndexes:selectedIndexes] valueForKey:@"isFileURL"] containsObject:[NSNumber numberWithInt:1]]) {
             i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
-            item = [menu insertItemWithTitle:[NSLocalizedString(@"Move To Trash", @"Menu item title") stringByAppendingEllipsis]
+            item = [menu insertItemWithTitle:NSLocalizedString(@"Move To Trash", @"Menu item title")
                                       action:@selector(trashLinkedFiles:)
                                keyEquivalent:@""
                                      atIndex:++i];
