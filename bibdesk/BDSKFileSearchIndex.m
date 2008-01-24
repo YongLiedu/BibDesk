@@ -153,7 +153,7 @@
 {
     NSParameterAssert([NSThread inMainThread]);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    OSAtomicCompareAndSwap32(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
+    OSAtomicCompareAndSwap32Barrier(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
     
     // wake the thread up so the runloop will exit; shouldKeepRunning may have already done that, so don't send if the port is already dead
     if ([notificationPort isValid])
