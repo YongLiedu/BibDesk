@@ -142,6 +142,7 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
             color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         default:
+            components[3] = 0.0;
             color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
     }
@@ -205,6 +206,7 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
             color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
         default:
+            components[3] = 0.0;
             color = [NSColor colorWithColorSpace:cspace components:components count:sizeof(components)/sizeof(CGFloat)];
             break;
     }
