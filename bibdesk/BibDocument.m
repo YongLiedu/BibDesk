@@ -1335,7 +1335,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if (templateFile == nil)
             templateFile = [NSMutableString string];
         
-        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
+        NSString *userName = NSFullUserName();
+        if ([userName canBeConvertedToEncoding:encoding] == NO)
+            userName = [[[NSString alloc] initWithData:[userName dataUsingEncoding:encoding allowLossyConversion:YES] encoding:encoding] autorelease];
+        
+        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", userName, [NSCalendarDate calendarDate]];
 
         [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
         
