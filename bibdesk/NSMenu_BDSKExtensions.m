@@ -145,30 +145,59 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     NSMenuItem *item;
     
     NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-    NSEnumerator *appEnum = [[workspace editorAndViewerURLsForURL:aURL] objectEnumerator];
     NSURL *defaultEditorURL = [workspace defaultEditorOrViewerURLForURL:aURL];
+    NSArray *appURLs = [workspace editorAndViewerURLsForURL:aURL];
     
+    NSURL *appURL;
+    NSString *appName;
     NSString *menuTitle;
+    NSString *version;
     NSDictionary *representedObject;
-    NSURL *applicationURL;
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSMutableArray *appNames = [NSMutableArray array];
+    NSMutableArray *titles = [NSMutableArray array];
+    NSMutableIndexSet *versionedIndexes = [NSMutableIndexSet indexSet];
+    unsigned int idx, i, count = [appURLs count];
     
-    while(applicationURL = [appEnum nextObject]){
-        menuTitle = [[applicationURL lastPathComponent] stringByDeletingPathExtension];
+    for (i = 0; i < count; i++) {
+        appURL = [appURLs objectAtIndex:i];
+        appName = [fm displayNameAtPath:[appURL path]];
+        menuTitle = appName;
+        idx = [appNames indexOfObject:appName];
+        
+        if (idx != NSNotFound) {
+            [versionedIndexes addIndex:i];
+            if (version = [[[NSBundle bundleWithPath:[appURL path]] infoDictionary] objectForKey:@"CFBundleShortVersionString"])
+                menuTitle = [appName stringByAppendingFormat:@" (%@)", version];
+            if ([versionedIndexes containsIndex:idx] == NO) {
+                [versionedIndexes addIndex:idx];
+                if (version = [[[NSBundle bundleWithPath:[[appURLs objectAtIndex:idx] path]] infoDictionary] objectForKey:@"CFBundleShortVersionString"]) {
+                    [titles replaceObjectAtIndex:idx withObject:[[appNames objectAtIndex:idx] stringByAppendingFormat:@" (%@)", version]];
+                }
+            }
+        }
+        [titles addObject:menuTitle];
+        [appNames addObject:appName];
+    }
+    
+    for (i = 0; i < count; i++) {
+        appURL = [appURLs objectAtIndex:i];
+        menuTitle = [titles objectAtIndex:i];
         
         // mark the default app, if we have one
-        if([defaultEditorURL isEqual:applicationURL])
+        if([defaultEditorURL isEqual:appURL])
             menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Menu item title, Need a single leading space")];
         
         // BDSKOpenWithMenuController singleton implements openURLWithApplication:
         item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];        
         [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
-        representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, applicationURL, BDSKMenuApplicationURL, nil];
+        representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, appURL, BDSKMenuApplicationURL, nil];
         [item setRepresentedObject:representedObject];
         
         // use NSWorkspace to get an image; using [NSImage imageForURL:] doesn't work for some reason
-        [item setImageAndSize:[workspace iconForFileURL:applicationURL]];
+        [item setImageAndSize:[workspace iconForFileURL:appURL]];
         [representedObject release];
-        if([defaultEditorURL isEqual:applicationURL]){
+        if([defaultEditorURL isEqual:appURL]){
             [self insertItem:item atIndex:0];
             [self insertItem:[NSMenuItem separatorItem] atIndex:1];
         }else{
