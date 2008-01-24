@@ -262,6 +262,8 @@
 
 - (IBAction)downloadRemoteURL:(NSMenuItem *)sender;
 
+- (IBAction)trashLinkedfiles:(id)sender;
+
 /*!
     @method     showCiteKeyWarning:
     @abstract   Action of the cite-key warning button. Shows the error string in an alert panel.
@@ -328,6 +330,8 @@
 - (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (NSUndoManager *)undoManager;
+
+- (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(int)moveToTrash;
 
 #pragma mark Person controller
 

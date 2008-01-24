@@ -148,6 +148,7 @@ NSString *BDSKShowWarningsKey = @"Show Warnings in Error Panel";
 NSString *BDSKWarnOnDeleteKey = @"BDSKWarnOnDelete";
 NSString *BDSKWarnOnRenameGroupKey = @"BDSKWarnOnRenameGroup";
 NSString *BDSKWarnOnRemovalFromGroupKey = @"BDSKWarnOnRemovalFromGroupKey";
+NSString *BDSKAskToTrashFilesKey = @"BDSKAskToTrashFilesKey";
 
 NSString *BDSKPapersFolderPathKey = @"Path to the papers folder";
 NSString *BDSKFilePapersAutomaticallyKey = @"File papers into the papers folder automatically";

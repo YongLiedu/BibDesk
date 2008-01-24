@@ -618,7 +618,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     OBASSERT(theURL != nil && [theURL isFileURL] == NO);
     [self downloadURL:theURL];
 }
- 
+
+- (IBAction)trashLinkedfiles:(id)sender{
+    [self deleteURLsAtIndexes:[sender representedObject] moveToTrash:1];
+}
+
 - (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSArray *currentFields = [(NSArray *)contextInfo autorelease];
 	NSString *newField = [addFieldController field];
@@ -1076,7 +1080,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [item setRepresentedObject:theURL];
             
             if (isEditable) {
-                i = [menu indexOfItemWithTag:FVTrashMenuItemTag];
+                i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
                 item = [menu insertItemWithTitle:NSLocalizedString(@"AutoFile Linked File", @"Menu item title")
                                           action:@selector(consolidateLinkedFiles:)
                                    keyEquivalent:@""
@@ -1091,9 +1095,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
             }
         } else if (isEditable) {
-            i = [menu indexOfItemWithTag:FVTrashMenuItemTag];
-            if (i == -1)
-                i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
+            i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
             item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL", @"Menu item title") stringByAppendingEllipsis]
                                       action:@selector(chooseRemoteURL:)
                                keyEquivalent:@""
@@ -1109,6 +1111,16 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     }
     
     if (isEditable) {
+        NSIndexSet *selectedIndexes = [fileView selectionIndexes];
+        if ([[[[publication valueForKey:@"files"] objectsAtIndexes:selectedIndexes] valueForKey:@"isFileURL"] containsObject:[NSNumber numberWithInt:1]]) {
+            i = [menu indexOfItemWithTag:FVRemoveMenuItemTag];
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Replace URL", @"Menu item title") stringByAppendingEllipsis]
+                                      action:@selector(chooseRemoteURL:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:selectedIndexes];
+        }
+        
         [menu addItem:[NSMenuItem separatorItem]];
         
         [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis]
@@ -1455,15 +1467,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 {
-    NSUInteger idx = [indexSet lastIndex];
-    while (NSNotFound != idx) {
-        NSURL *aURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
-        [publication removeObjectFromFilesAtIndex:idx];
-        if (aURL)
-            [[self document] userRemovedURL:aURL forPublication:publication];
-        [aURL release];
-        idx = [indexSet indexLessThanIndex:idx];
-    }
+    int moveToTrash = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
+    [self deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
     return YES;
 }
 
@@ -1493,6 +1498,58 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         return [[NSWorkspace sharedWorkspace] openLinkedFile:[aURL path]] == NO;
     else
         return YES;
+}
+
+- (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
+{
+    if (alert && [alert checkValue])
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKAskToTrashFilesKey];
+    NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
+    if (returnCode == NSAlertAlternateReturn) {
+        NSEnumerator *urlEnum = [fileURLs objectEnumerator];
+        NSURL *url;
+        while (url = [urlEnum nextObject]) {
+            NSString *path = [url path];
+            NSString *folderPath = [path stringByDeletingLastPathComponent];
+            NSString *fileName = [path lastPathComponent];
+            int tag = 0;
+            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
+        }
+    }
+}
+
+// moveToTrash: 0 = no, 1 = yes, -1 = ask
+- (void)deleteURLsAtIndexes:(NSIndexSet *)indexSet moveToTrash:(int)moveToTrash{
+    NSUInteger idx = [indexSet lastIndex];
+    NSMutableArray *fileURLs = [NSMutableArray array];
+    while (NSNotFound != idx) {
+        NSURL *aURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
+        if ([aURL isFileURL])
+            [fileURLs addObject:aURL];
+        [publication removeObjectFromFilesAtIndex:idx];
+        if (aURL)
+            [[self document] userRemovedURL:aURL forPublication:publication];
+        [aURL release];
+        idx = [indexSet indexLessThanIndex:idx];
+    }
+    if ([fileURLs count]) {
+        if (moveToTrash == 1) {
+            [self trashAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[fileURLs retain]];
+        } else if (moveToTrash == -1) {
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
+                                                 defaultButton:NSLocalizedString(@"No", @"Button title")
+                                               alternateButton:NSLocalizedString(@"Yes", @"Button title")
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+            [alert setHasCheckButton:YES];
+            [alert setCheckValue:NO];
+            [alert beginSheetModalForWindow:[self window]
+                              modalDelegate:self 
+                             didEndSelector:@selector(trashAlertDidEnd:returnCode:contextInfo:)  
+                         didDismissSelector:NULL 
+                                contextInfo:[fileURLs retain]];
+        }
+    }
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {

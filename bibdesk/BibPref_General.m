@@ -47,6 +47,7 @@
     [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnRemovalFromGroupKey]];
     [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnRenameGroupKey]];
     [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnCiteKeyChangeKey]];
+    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKAskToTrashFilesKey]];
     [OFPreference addObserver:self selector:@selector(handleTemplatePrefsChanged:) forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
     [self handleTemplatePrefsChanged:nil];
 }
@@ -72,6 +73,7 @@
     [warnOnRemovalFromGroupButton setState:[defaults boolForKey:BDSKWarnOnRemovalFromGroupKey] ? NSOnState : NSOffState];
     [warnOnRenameGroupButton setState:[defaults boolForKey:BDSKWarnOnRenameGroupKey] ? NSOnState : NSOffState];
     [warnOnGenerateCiteKeysButton setState:[defaults boolForKey:BDSKWarnOnCiteKeyChangeKey] ? NSOnState : NSOffState];
+    [askToTrashFilesButton setState:[defaults boolForKey:BDSKAskToTrashFilesKey] ? NSOnState : NSOffState];
 }
 
 - (void)updateUI{
@@ -173,6 +175,11 @@
 
 - (IBAction)changeWarnOnGenerateCiteKeys:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnCiteKeyChangeKey];
+    [defaults autoSynchronize];
+}
+
+- (IBAction)changeAskToTrashFiles:(id)sender{
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKAskToTrashFilesKey];
     [defaults autoSynchronize];
 }
 

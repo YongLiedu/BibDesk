@@ -47,6 +47,7 @@
     IBOutlet NSButton *warnOnRemovalFromGroupButton;
     IBOutlet NSButton *warnOnRenameGroupButton;
     IBOutlet NSButton *warnOnGenerateCiteKeysButton;
+    IBOutlet NSButton *askToTrashFilesButton;
     IBOutlet NSTextField *defaultBibFileTextField;
     IBOutlet NSButton *defaultBibFileButton;
 
@@ -62,6 +63,7 @@
 - (IBAction)changeWarnOnRemovalFromGroup:(id)sender;
 - (IBAction)changeWarnOnRenameGroup:(id)sender;
 - (IBAction)changeWarnOnGenerateCiteKeys:(id)sender;
+- (IBAction)changeAskToTrashFiles:(id)sender;
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)handleWarningPrefChanged:(NSNotification *)notification;

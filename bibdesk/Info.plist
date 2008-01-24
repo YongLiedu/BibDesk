@@ -919,6 +919,8 @@
 					<true/>
 					<key>BDSKWarnOnRenameGroup</key>
 					<true/>
+					<key>BDSKAskToTrashFile</key>
+					<true/>
 					<key>BibEditor window autosave name</key>
 					<string></string>
 					<key>Check spelling continuously while editing</key>

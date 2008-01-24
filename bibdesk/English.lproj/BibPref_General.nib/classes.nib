@@ -2,6 +2,7 @@
     IBClasses = (
         {
             ACTIONS = {
+                changeAskToTrashFiles = id; 
                 changeEditOnPaste = id; 
                 changeEmailTemplate = id; 
                 changeStartupBehavior = id; 
@@ -16,6 +17,7 @@
             CLASS = "BibPref_General"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                askToTrashFilesButton = NSButton; 
                 checkForUpdatesButton = NSPopUpButton; 
                 defaultBibFileButton = NSButton; 
                 defaultBibFileTextField = NSTextField; 
