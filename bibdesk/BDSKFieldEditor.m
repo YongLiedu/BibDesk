@@ -292,9 +292,9 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
     NSArray *completions = nil;
     
     if([delegate respondsToSelector:delegateSEL])
-        completions = [delegate control:delegate textView:self completions:nil forPartialWordRange:[self rangeForUserCompletion] indexOfSelectedItem:idx];
+        completions = [delegate control:delegate textView:self completions:nil forPartialWordRange:charRange indexOfSelectedItem:idx];
     else if([[[self window] delegate] respondsToSelector:delegateSEL])
-        completions = [[[self window] delegate] control:delegate textView:self completions:nil forPartialWordRange:[self rangeForUserCompletion] indexOfSelectedItem:idx];
+        completions = [[[self window] delegate] control:delegate textView:self completions:nil forPartialWordRange:charRange indexOfSelectedItem:idx];
     
     // Default is to call -[NSSpellChecker completionsForPartialWordRange:inString:language:inSpellDocumentWithTag:], but this apparently sends a DO message to CocoAspell (in a separate process), and we block the main runloop until it returns a long time later.  Lacking a way to determine whether the system speller (which works fine) or CocoAspell is in use, we'll just return our own completions.
     return completions;
