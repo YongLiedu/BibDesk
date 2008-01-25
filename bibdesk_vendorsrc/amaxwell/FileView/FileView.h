@@ -72,6 +72,12 @@ enum {
     FVRemoveMenuItemTag = 1007
 };
 
+typedef enum _FVDropOperation {
+    FVDropOn,
+    FVDropBefore,
+    FVDropAfter
+} FVDropOperation;
+
 @interface FileView : NSView 
 {
 @private
@@ -82,8 +88,9 @@ enum {
     CFRunLoopTimerRef       _zombieTimer;
     NSMutableIndexSet      *_selectedIndexes;
     NSUInteger              _lastClickedIndex;
+    NSUInteger              _dropOperation;
+    NSUInteger              _dropIndex;
     NSRect                  _rubberBandRect;
-    NSRect                  _dropRectForHighlight;
     NSSize                  _padding;
     NSSize                  _iconSize;
     NSPoint                 _lastMouseDownLocInView;
@@ -180,5 +187,8 @@ enum {
 
 // If unimplemented or returns YES, fileview will open the URL using NSWorkspace
 - (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL;
+
+// If unimplemented, uses the proposedDragOperation
+- (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
 
 @end

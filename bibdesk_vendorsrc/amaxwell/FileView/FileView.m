@@ -46,16 +46,8 @@
 #import <FileView/FVFinderLabel.h>
 
 // functions for dealing with multiple URLs and weblocs on the pasteboard
-static NSArray *URLSFromPasteboard(NSPasteboard *pboard);
+static NSArray *URLsFromPasteboard(NSPasteboard *pboard);
 static BOOL writeURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard);
-static BOOL pasteboardHasURL(NSPasteboard *pboard);
-
-enum {
-    FVDropOnIcon,
-    FVDropOnView,
-    FVDropInsert
-};
-typedef NSUInteger FVDropOperation;
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
@@ -109,7 +101,7 @@ static CGFloat __subtitleHeight = 0.0;
 - (NSUInteger)_indexForGridRow:(NSUInteger)rowIndex column:(NSUInteger)colIndex;
 - (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex ofIndex:(NSUInteger)anIndex;
 - (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex atPoint:(NSPoint)point;
-- (void)_drawDropHighlightInRect:(NSRect)aRect;
+- (void)_drawDropHighlight;
 - (void)_drawHighlightInRect:(NSRect)aRect;
 - (void)_drawRubberbandRect;
 - (void)_drawDropMessage;
@@ -125,7 +117,7 @@ static CGFloat __subtitleHeight = 0.0;
 - (NSURL *)_URLAtPoint:(NSPoint)point;
 - (NSIndexSet *)_allIndexesInRubberBandRect;
 - (BOOL)_isLocalDraggingInfo:(id <NSDraggingInfo>)sender;
-- (FVDropOperation)_dropOperationAtPointInView:(NSPoint)point highlightRect:(NSRect *)dropRect insertionIndex:(NSUInteger *)anIndex;
+- (void)_updateDropOperationAndIndexAtPoint:(NSPoint)point;
 
 @end
 
@@ -195,7 +187,9 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     _iconSize = DEFAULT_ICON_SIZE;
     _padding = [self _paddingForScale:1.0];
     _lastMouseDownLocInView = NSZeroPoint;
-    _dropRectForHighlight = NSZeroRect;
+    // the next two are set to an illegal combination to indicate that no drop is in progress
+    _dropIndex = NSNotFound;
+    _dropOperation = FVDropBefore;
     _isRescaling = NO;
     _selectedIndexes = [[NSMutableIndexSet alloc] init];
     _lastClickedIndex = NSNotFound;
@@ -869,40 +863,71 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 
 // no save/restore needed because of when these are called in -drawRect: (this is why they're private)
 
-- (void)_drawDropHighlightInRect:(NSRect)aRect;
+- (void)_drawDropHighlight;
 {
-    [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.2] setFill];
-    [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.8] setStroke];
     CGFloat lineWidth = 2.0;
     NSBezierPath *p;
     NSUInteger r, c;
+    NSRect aRect = NSZeroRect;
     
-    if (NSEqualRects(aRect, [self visibleRect]) || [self _getGridRow:&r column:&c atPoint:NSMakePoint(NSMidX(aRect), NSMidY(aRect))]) {
-        // it's either a drop on the whole table or on top of a cell
-        p = [NSBezierPath bezierPathWithRoundRect:NSInsetRect(aRect, 0.5 * lineWidth, 0.5 * lineWidth) xRadius:7 yRadius:7];
+    switch (_dropOperation) {
+        case FVDropOn:
+            if (_dropIndex == NSNotFound) {
+                aRect = [self visibleRect];
+            } else {
+                [self _getGridRow:&r column:&c ofIndex:_dropIndex];
+                aRect = [self _rectOfIconInRow:r column:c];
+            }
+            break;
+        case FVDropBefore:
+            [self _getGridRow:&r column:&c ofIndex:_dropIndex];
+            aRect = [self _rectOfIconInRow:r column:c];
+            // aRect size is 6, and should be centered between icons horizontally
+            aRect.origin.x -= _padding.width / 2 + 3.0;
+            aRect.size.width = 6.0;    
+            break;
+        case FVDropAfter:
+            [self _getGridRow:&r column:&c ofIndex:_dropIndex];
+            aRect = [self _rectOfIconInRow:r column:c];
+            // aRect size is 6, and should be centered between icons horizontally
+            aRect.origin.x += _iconSize.width + _padding.width / 2 - 3.0;
+            aRect.size.width = 6.0;
+            break;
+        default:
+            break;
     }
-    else {
+    
+    if (NSIsEmptyRect(aRect) == NO) {
+        aRect = [self centerScanRect:aRect];
         
-        // similar to NSTableView's between-row drop indicator
-        NSRect rect = aRect;
-        rect.size.height = NSWidth(aRect);
-        rect.origin.y -= NSWidth(aRect);
-        p = [NSBezierPath bezierPathWithOvalInRect:rect];
-        
-        NSPoint point = NSMakePoint(NSMidX(aRect), NSMinY(aRect));
-        [p moveToPoint:point];
-        point = NSMakePoint(NSMidX(aRect), NSMaxY(aRect));
-        [p lineToPoint:point];
-        
-        rect = aRect;
-        rect.origin.y = NSMaxY(aRect);
-        rect.size.height = NSWidth(aRect);
-        [p appendBezierPathWithOvalInRect:rect];
+        if (_dropOperation == FVDropOn) {
+            // it's either a drop on the whole table or on top of a cell
+            p = [NSBezierPath bezierPathWithRoundRect:NSInsetRect(aRect, 0.5 * lineWidth, 0.5 * lineWidth) xRadius:7 yRadius:7];
+        }
+        else {
+            // similar to NSTableView's between-row drop indicator
+            NSRect rect = aRect;
+            rect.size.height = NSWidth(aRect);
+            rect.origin.y -= NSWidth(aRect);
+            p = [NSBezierPath bezierPathWithOvalInRect:rect];
+            
+            NSPoint point = NSMakePoint(NSMidX(aRect), NSMinY(aRect));
+            [p moveToPoint:point];
+            point = NSMakePoint(NSMidX(aRect), NSMaxY(aRect));
+            [p lineToPoint:point];
+            
+            rect = aRect;
+            rect.origin.y = NSMaxY(aRect);
+            rect.size.height = NSWidth(aRect);
+            [p appendBezierPathWithOvalInRect:rect];
+        }
+        [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.2] setFill];
+        [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.8] setStroke];
+        [p setLineWidth:lineWidth];
+        [p stroke];
+        [p fill];
+        [p setLineWidth:1.0];
     }
-    [p setLineWidth:lineWidth];
-    [p stroke];
-    [p fill];
-    [p setLineWidth:1.0];
 }
 
 - (void)_drawHighlightInRect:(NSRect)aRect;
@@ -1307,8 +1332,8 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     }
     
     // drop highlight and rubber band are mutually exclusive
-    if (NSIsEmptyRect(_dropRectForHighlight) == NO) {
-        [self _drawDropHighlightInRect:[self centerScanRect:_dropRectForHighlight]];
+    if (_dropIndex != NSNotFound || _dropOperation == FVDropOn) {
+        [self _drawDropHighlight];
     }
     else if (NSIsEmptyRect(_rubberBandRect) == NO) {
         [self _drawRubberbandRect];
@@ -1792,118 +1817,78 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (BOOL)wantsPeriodicDraggingUpdates { return NO; }
 
-- (FVDropOperation)_dropOperationAtPointInView:(NSPoint)point highlightRect:(NSRect *)dropRect insertionIndex:(NSUInteger *)anIndex
-{
-    NSUInteger r, c;
-    FVDropOperation op;
-    NSRect aRect;
-    NSUInteger insertIndex = NSNotFound;
-
-    if ([self _getGridRow:&r column:&c atPoint:point]) {
-        
-        // check to avoid highlighting empty cells as individual icons; that's a DropOnView, not DropOnIcon
-
-        if ([self _indexForGridRow:r column:c] > [self numberOfIcons]) {
-            aRect = [self visibleRect];
-            op = FVDropOnView;
-        }
-        else {
-            aRect = [self _rectOfIconInRow:r column:c];
-            op = FVDropOnIcon;
-        }
-    }
-    else {
-            
-        NSPoint left = NSMakePoint(point.x - _iconSize.width, point.y), right = NSMakePoint(point.x + _iconSize.width, point.y);
-        
-        // can't insert between nonexisting cells either, so check numberOfIcons first...
-
-        if ([self _getGridRow:&r column:&c atPoint:left] && ([self _indexForGridRow:r column:c] < [self numberOfIcons])) {
-            
-            aRect = [self _rectOfIconInRow:r column:c];
-            // rect size is 6, and should be centered between icons horizontally
-            aRect.origin.x += _iconSize.width + _padding.width / 2 - 3.0;
-            aRect.size.width = 6.0;    
-            op = FVDropInsert;
-            insertIndex = [self _indexForGridRow:r column:c] + 1;
-        }
-        else if ([self _getGridRow:&r column:&c atPoint:right] && ([self _indexForGridRow:r column:c] < [self numberOfIcons])) {
-            
-            aRect = [self _rectOfIconInRow:r column:c];
-            aRect.origin.x -= _padding.width / 2 + 3.0;
-            aRect.size.width = 6.0;
-            op = FVDropInsert;
-            insertIndex = [self _indexForGridRow:r column:c];
-        }
-        else {
-            
-            aRect = [self visibleRect];
-            op = FVDropOnView;
-        }
-    }
-    
-    if (NULL != dropRect) *dropRect = aRect;
-    if (NULL != anIndex) *anIndex = insertIndex;
-    return op;
-}
-
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender
 {
-    NSPoint dragLoc = [sender draggingLocation];
-    dragLoc = [self convertPoint:dragLoc fromView:nil];
-    NSDragOperation dragOp = NSDragOperationNone;
-    
+    NSPoint dragLoc = [self convertPoint:[sender draggingLocation] fromView:nil];
+    NSPoint p = dragLoc;
+    NSUInteger r, c;
+    NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
     NSUInteger insertIndex, firstIndex, endIndex;
-    // this will set a default highlight based on geometry, but does no validation
-    FVDropOperation dropOp = [self _dropOperationAtPointInView:dragLoc highlightRect:&_dropRectForHighlight insertionIndex:&insertIndex];
+    
+    NSArray *draggedURLs = URLsFromPasteboard([sender draggingPasteboard]);
     
     // We have to make sure the pasteboard really has a URL here, since most NSStrings aren't valid URLs
-    if (pasteboardHasURL([sender draggingPasteboard]) == NO) {
+    if ([draggedURLs count] == 0) {
         
         dragOp = NSDragOperationNone;
-        _dropRectForHighlight = NSZeroRect;
+        _dropIndex = NSNotFound;
+        _dropOperation = FVDropBefore;
     }
-    else if (FVDropOnIcon == dropOp) {
+    else {
         
-        if ([self _isLocalDraggingInfo:sender]) {
+        // update the _dropOperation and _dropIndex based on the mouse location
+        // check whether the index is not NSNotFound, because the grid cell can be empty
+        
+        if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+            _dropOperation = FVDropOn;
+        } else {
+            p = NSMakePoint(dragLoc.x + _iconSize.width - 0.5, dragLoc.y);
+
+            if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+                _dropOperation = FVDropBefore;
+            } else {
+                p = NSMakePoint(dragLoc.x - _iconSize.width + 0.5, dragLoc.y);
                 
-            dragOp = NSDragOperationNone;
-            _dropRectForHighlight = NSZeroRect;
-        } 
-        else {
-            dragOp = NSDragOperationLink;
-        }
-    } 
-    else if (FVDropOnView == dropOp) {
-        
-        // drop on the whole view (add operation) makes no sense for a local drag
-        if ([self _isLocalDraggingInfo:sender]) {
-            
-            dragOp = NSDragOperationNone;
-            _dropRectForHighlight = NSZeroRect;
-        } 
-        else {
-            dragOp = NSDragOperationLink;
-        }
-    } 
-    else if (FVDropInsert == dropOp) {
-        
-        // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection
-        if ([self _isLocalDraggingInfo:sender]) {
-            firstIndex = [_selectedIndexes firstIndex], endIndex = [_selectedIndexes lastIndex] + 1;
-            if ([_selectedIndexes containsIndexesInRange:NSMakeRange(firstIndex, endIndex - firstIndex)] &&
-                insertIndex >= firstIndex && insertIndex <= endIndex) {
-                dragOp = NSDragOperationNone;
-                _dropRectForHighlight = NSZeroRect;
-            } 
-            else {
-                dragOp = NSDragOperationMove;
+                if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+                    _dropOperation = FVDropAfter;
+                } else {
+                    // drop on the whole view
+                    _dropOperation = FVDropOn;
+                    _dropIndex = NSNotFound;
+                }
             }
-        } 
-        else {
-            dragOp = NSDragOperationLink;
+        }
+        
+        // invalidate some local drags, otherwise make sure we use a Move operation
+        if ([self _isLocalDraggingInfo:sender]) {
+            if (FVDropOn == _dropOperation) {
+                // drop on the whole view (add operation) or an icon (replace operation) makes no sense for a local drag
+                
+                dragOp = NSDragOperationNone;
+                _dropIndex = NSNotFound;
+                _dropOperation = FVDropBefore;
+            } 
+            else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation) {
+            
+                // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection
+                insertIndex = FVDropAfter == _dropOperation ? _dropIndex + 1 : _dropIndex;
+                firstIndex = [_selectedIndexes firstIndex], endIndex = [_selectedIndexes lastIndex] + 1;
+                if ([_selectedIndexes containsIndexesInRange:NSMakeRange(firstIndex, endIndex - firstIndex)] &&
+                    insertIndex >= firstIndex && insertIndex <= endIndex) {
+                    dragOp = NSDragOperationNone;
+                    _dropIndex = NSNotFound;
+                    _dropOperation = FVDropBefore;
+                } 
+                else {
+                    dragOp = NSDragOperationMove;
+                }
+            }
         }
     }
+    
+    // we could allow the delegate to change the _dropIndex and _dropOperation as NSTableView does, but we don't use that at present
+    if ([[self delegate] respondsToSelector:@selector(fileView:validateDrop:draggedURLs:proposedIndex:proposedDropOperation:proposedDragOperation:)])
+        dragOp = [[self delegate] fileView:self validateDrop:sender draggedURLs:draggedURLs proposedIndex:_dropIndex proposedDropOperation:_dropOperation proposedDragOperation:dragOp];
     
     [self setNeedsDisplay:YES];
     return dragOp;
@@ -1912,47 +1897,54 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 // this is called as soon as the mouse is moved to start a drag, or enters the window from outside
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
-    if ([self _isLocalDraggingInfo:sender] || pasteboardHasURL([sender draggingPasteboard]))
-        return NSDragOperationLink;
-    else
-        return NSDragOperationNone;
+    return [self draggingUpdated:sender];
 }
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender
 {
-    _dropRectForHighlight = NSZeroRect;
+    _dropIndex = NSNotFound;
+    _dropOperation = FVDropBefore;
     [self setNeedsDisplay:YES];
 }
 
 // only invoked if performDragOperation returned YES
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender;
 {
-    _dropRectForHighlight = NSZeroRect;
+    _dropIndex = NSNotFound;
+    _dropOperation = FVDropBefore;
     [self reloadIcons];
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
-    NSPoint dragLoc = [sender draggingLocation];
-    dragLoc = [self convertPoint:dragLoc fromView:nil];
     NSPasteboard *pboard = [sender draggingPasteboard];
-    
     BOOL didPerform = NO;
     
-    // if we return NO, concludeDragOperation doesn't get called
-    _dropRectForHighlight = NSZeroRect;
-    [self setNeedsDisplay:YES];
+    // @@ if we want to support modifiers, we should somehow pass the draggingInfo, or at least the dragOperation, to the delegate
     
-    NSUInteger r, c, idx;
+    if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation) {
         
-    NSUInteger insertIndex;
-    FVDropOperation dropOp = [self _dropOperationAtPointInView:dragLoc highlightRect:NULL insertionIndex:&insertIndex];
-
-    // see if we're targeting a particular cell, then make sure that cell is a legal replace operation
-    [self _getGridRow:&r column:&c atPoint:dragLoc];
-    if (FVDropOnIcon == dropOp && (idx = [self _indexForGridRow:r column:c]) < [self numberOfIcons]) {
+        // _dropIndex should never be NSNotFound at this point, but check for it anyway
+        if (NSNotFound != _dropIndex) {
+            NSArray *allURLs = URLsFromPasteboard([sender draggingPasteboard]);
+            NSUInteger insertIndex = FVDropAfter == _dropOperation ? _dropIndex + 1 : _dropIndex;
+            
+            if ([self _isLocalDraggingInfo:sender]) {
+                
+                didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex];
+                
+            } else {
+                
+                NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertIndex, [allURLs count])];
+                [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet];
+                didPerform = YES;
+            }
+        }
+    }
+    else if (NSNotFound != _dropIndex) {
+        // we're targeting a particular cell, make sure that cell is a legal replace operation
         
-        NSURL *aURL = [URLSFromPasteboard(pboard) lastObject];
+        NSURL *aURL = [URLsFromPasteboard(pboard) lastObject];
         
         // only drop a single file on a given cell!
         
@@ -1960,37 +1952,23 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             aURL = [NSURL fileURLWithPath:[[pboard propertyListForType:NSFilenamesPboardType] lastObject]];
         }
         if (aURL)
-            didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:idx] withURLs:[NSArray arrayWithObject:aURL]];
-    }
-    else if (FVDropInsert == dropOp) {
-        
-        NSArray *allURLs = URLSFromPasteboard([sender draggingPasteboard]);
-        
-        // move is implemented as delete/insert
-        if ([self _isLocalDraggingInfo:sender]) {
-            
-            // if inserting after the ones we're removing, let the delegate handle the offset the insertion index if necessary
-            if ([_selectedIndexes containsIndex:insertIndex] || [_selectedIndexes containsIndex:insertIndex - 1]) {
-                didPerform = NO;
-            }
-            else {
-                didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex];
-            }
-        } else {
-            NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertIndex, [allURLs count])];
-            [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet];
-            didPerform = YES;
-        }
+            didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL]];
     }
     else if ([self _isLocalDraggingInfo:sender] == NO) {
            
         // this must be an add operation, and only non-local drag sources can do that
-        NSArray *allURLs = URLSFromPasteboard(pboard);
+        NSArray *allURLs = URLsFromPasteboard(pboard);
         NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [allURLs count])];
         [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet];
         didPerform = YES;
 
     }
+    
+    // if we return NO, concludeDragOperation doesn't get called
+    _dropIndex = NSNotFound;
+    _dropOperation = FVDropBefore;
+    [self setNeedsDisplay:YES];
+    
     // reload is handled in concludeDragOperation:
     return didPerform;
 }
@@ -2204,7 +2182,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (IBAction)paste:(id)sender;
 {
     if ([self isEditable]) {
-        NSArray *URLs = URLSFromPasteboard([NSPasteboard generalPasteboard]);
+        NSArray *URLs = URLsFromPasteboard([NSPasteboard generalPasteboard]);
         if ([URLs count])
             [[self dataSource] fileView:self insertURLs:URLs atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [URLs count])]];
         else
@@ -2432,14 +2410,8 @@ void CLog(NSString *format, ...)
 
 #pragma mark Pasteboard URL functions
 
-static BOOL pasteboardHasURL(NSPasteboard *pboard)
-{ 	 
-    // also catches case of file URL, which conforms to kUTTypeURL, and strings that might be URLs
-    return [URLSFromPasteboard(pboard) count] > 0;
-}
-
 // NSPasteboard only lets us read a single webloc or NSURL instance from the pasteboard, which isn't very considerate of it.  Fortunately, we can create a Carbon pasteboard that isn't as fundamentally crippled (except in its moderately annoying API).  
-static NSArray *URLSFromPasteboard(NSPasteboard *pboard)
+static NSArray *URLsFromPasteboard(NSPasteboard *pboard)
 {
     OSStatus err;
     
