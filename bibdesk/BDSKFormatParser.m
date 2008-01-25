@@ -162,14 +162,14 @@
 						if (i > 0) {
 							[parsedStr appendString:authSep];
 						}
-						string = [self stringByStrictlySanitizingString:[[authArray objectAtIndex:isLast ? [authArray count] - numAuth + i : i] lastName] forField:fieldName inFileType:[pub fileType]];
+						NSString *authName = [self stringByStrictlySanitizingString:[[authArray objectAtIndex:isLast ? [authArray count] - numAuth + i : i] lastName] forField:fieldName inFileType:[pub fileType]];
 						if (isLocalFile) {
-							string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
+							authName = [authName stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 						}
-						if ([string length] > numChars && numChars > 0) {
-							string = [string substringToIndex:numChars];
+						if ([authName length] > numChars && numChars > 0) {
+							authName = [authName substringToIndex:numChars];
 						}
-						[parsedStr appendString:string];
+						[parsedStr appendString:authName];
 					}
 					if (numAuth < [authArray count]) {
 						[parsedStr appendString:etal];
@@ -233,18 +233,18 @@
 							[parsedStr appendString:authSep];
 						}
 						BibAuthor *auth = [authArray objectAtIndex:isLast ? [authArray count] - numAuth + i : i];
-						NSString *firstName = [self stringByStrictlySanitizingString:[auth firstName] forField:fieldName inFileType:[pub fileType]];
+						NSString *authName;
+                        NSString *firstName = [self stringByStrictlySanitizingString:[auth firstName] forField:fieldName inFileType:[pub fileType]];
 						NSString *lastName = [self stringByStrictlySanitizingString:[auth lastName] forField:fieldName inFileType:[pub fileType]];
 						if ([firstName length] > 0) {
-							string = [NSString stringWithFormat:@"%@%@%C", 
-											lastName, nameSep, [firstName characterAtIndex:0]];
+							authName = [NSString stringWithFormat:@"%@%@%C", lastName, nameSep, [firstName characterAtIndex:0]];
 						} else {
-							string = lastName;
+							authName = lastName;
 						}
 						if (isLocalFile) {
-							string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
+							authName = [authName stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 						}
-						[parsedStr appendString:string];
+						[parsedStr appendString:authName];
 					}
 					if (numAuth < [authArray count]) {
 						[parsedStr appendString:etal];
@@ -381,7 +381,7 @@
                         NSString *keyword;
 						// split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
                         NSCharacterSet *sepCharSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:BDSKKeywordsString];
-                        NSRange keywordPunctuationRange = [string rangeOfCharacterFromSet:sepCharSet];
+                        NSRange keywordPunctuationRange = [keywordsString rangeOfCharacterFromSet:sepCharSet];
 						if (keywordPunctuationRange.location != NSNotFound) {
 							NSScanner *wordScanner = [NSScanner scannerWithString:keywordsString];
 							[wordScanner setCharactersToBeSkipped:nil];
@@ -559,7 +559,7 @@
 						if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
                         intValue = [pub intValueOfField:key];
                         value = (intValue == 0 ? noValue : (intValue == 1 ? yesValue : mixedValue));
-                        if (numChars > 0 && [string length] > numChars) {
+                        if (numChars > 0 && [value length] > numChars) {
                             [parsedStr appendString:[value substringToIndex:numChars]];
                         } else {
                             [parsedStr appendString:value];
