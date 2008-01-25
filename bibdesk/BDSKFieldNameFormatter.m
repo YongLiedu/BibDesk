@@ -81,6 +81,7 @@
     NSRange r = [partialString rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
     if ( r.location != NSNotFound || 
         ([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) ) {
+        *newString = nil;
         if (error) *error = NSLocalizedString(@"The first character must not be a digit", @"field name warning");
 		return NO; // BibTeX chokes if the first character of a field name is a digit
     }

@@ -69,8 +69,11 @@
             newEditingString:(NSString **)newString
             errorDescription:(NSString **)error{
     NSRange r = [partialString rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
-    if ( r.location != NSNotFound)
+    if ( r.location != NSNotFound) {
+        // formatter will delete the last character entered
+        *newString = nil;
         return NO;
+    }
     r = [partialString rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]];
     if ( r.location != NSNotFound) {
         // this is a BibDesk requirement, since we expect type names to be lowercase
