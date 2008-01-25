@@ -1472,24 +1472,32 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return YES;
 }
 
-- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet fromDrop:(id <NSDraggingInfo>)info;
 {
-    BDSKLinkedFile *aFile;
-    NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
-    NSURL *aURL;
-    NSUInteger idx = [aSet firstIndex], offset = 0;
-    while (NSNotFound != idx) {
-        if ((aURL = [enumerator nextObject]) && 
-            (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
-            [publication insertObject:aFile inFilesAtIndex:idx - offset];
-            [[self document] userAddedURL:aURL forPublication:publication];
-            [publication autoFileLinkedFile:aFile];
-            [aFile release];
-        } else {
-            // the indexes in aSet assume that we inserted the file
-            offset++;
+    if ([info draggingSourceOperationMask] == NSDragOperationCopy && [absoluteURLs count] == 1 && [[absoluteURLs lastObject] isFileURL] == NO) {
+        
+        [self downloadURL:[absoluteURLs lastObject]];
+        
+    } else {
+        
+        BDSKLinkedFile *aFile;
+        NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
+        NSURL *aURL;
+        NSUInteger idx = [aSet firstIndex], offset = 0;
+        
+        while (NSNotFound != idx) {
+            if ((aURL = [enumerator nextObject]) && 
+                (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
+                [publication insertObject:aFile inFilesAtIndex:idx - offset];
+                [[self document] userAddedURL:aURL forPublication:publication];
+                [publication autoFileLinkedFile:aFile];
+                [aFile release];
+            } else {
+                // the indexes in aSet assume that we inserted the file
+                offset++;
+            }
+            idx = [aSet indexGreaterThanIndex:idx];
         }
-        idx = [aSet indexGreaterThanIndex:idx];
     }
 }
 
@@ -1504,6 +1512,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     // leave invalid drags and local moves unaltered, we want to link remote drags
     if (dragOperation == NSDragOperationMove || dragOperation == NSDragOperationNone)
         return dragOperation;
+    else if (dragOperation == NSDragOperationCopy && [draggedURLs count] == 1 && [[draggedURLs lastObject] isFileURL] == NO) 
+        return NSDragOperationCopy;
     else
         return NSDragOperationLink;
 }
