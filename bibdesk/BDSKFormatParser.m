@@ -257,15 +257,17 @@
                     unsigned int numChars = 0;
                     NSString *title = [pub title];
 					title = [self stringByStrictlySanitizingString:title forField:fieldName inFileType:[pub fileType]];
-					if (isLocalFile) {
-						title = [title stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
-					}
-					if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
-					if (numChars > 0 && [title length] > numChars) {
-						[parsedStr appendString:[title substringToIndex:numChars]];
-					} else {
-						[parsedStr appendString:title];
-					}
+					if ([NSString isEmptyString:title] == NO) {
+                        if (isLocalFile) {
+                            title = [title stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
+                        }
+                        if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
+                        if (numChars > 0 && [title length] > numChars) {
+                            [parsedStr appendString:[title substringToIndex:numChars]];
+                        } else {
+                            [parsedStr appendString:title];
+                        }
+                    }
 					break;
 				}
                 case 'T':
@@ -283,7 +285,7 @@
                         [scanner scanString:@"]" intoString:NULL];
                     }
 					if (NO == [scanner scanUnsignedInt:&numWords]) numWords = 0;
-					if (title != nil) {
+					if ([NSString isEmptyString:title] == NO) {
 						NSMutableArray *words = [NSMutableArray array];
                         NSString *word;
 						// split the title into words using the same methodology as addString:forCompletionEntry:
@@ -374,7 +376,7 @@
 					NSString *keywordsString = [pub stringValueOfField:BDSKKeywordsString];
 					unsigned int i, numWords = 0;
                     if (NO == [scanner scanUnsignedInt:&numWords]) numWords = 0;
-					if (keywordsString != nil) {
+					if ([NSString isEmptyString:keywordsString] == NO) {
 						NSMutableArray *keywords = [NSMutableArray array];
                         NSString *keyword;
 						// split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
@@ -393,10 +395,10 @@
 							[keywords addObject:keywordsString];
 						}
 						for (i = 0; i < [keywords count] && (numWords == 0 || i < numWords); i++) { 
-							keyword = [[keywords objectAtIndex:i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]; 
+                            keyword = [[keywords objectAtIndex:i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]; 
                             keyword = [self stringByStrictlySanitizingString:keyword forField:fieldName inFileType:[pub fileType]]; 
 							if (NO == [slash isEqualToString:@"/"])
-								keyword = [string stringByReplacingCharactersInSet:slashCharSet withString:slash];
+								keyword = [keyword stringByReplacingCharactersInSet:slashCharSet withString:slash];
 							[parsedStr appendString:keyword]; 
 						}
 					}
@@ -490,7 +492,7 @@
 						} else {
 							value = [pub stringValueOfField:key];
 						}
-						if (value != nil) {
+						if ([NSString isEmptyString:value] == NO) {
 							value = [self stringByStrictlySanitizingString:value forField:fieldName inFileType:[pub fileType]];
 							if (NO == [slash isEqualToString:@"/"])
 								value = [value stringByReplacingCharactersInSet:slashCharSet withString:slash];
@@ -580,7 +582,7 @@
 					
 						if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
                         value = [pub documentInfoForKey:key];
-						if (value != nil) {
+						if ([NSString isEmptyString:value] == NO) {
 							value = [self stringByStrictlySanitizingString:value forField:fieldName inFileType:[pub fileType]];
 							if (numChars > 0 && [value length] > numChars) {
 								[parsedStr appendString:[value substringToIndex:numChars]];
