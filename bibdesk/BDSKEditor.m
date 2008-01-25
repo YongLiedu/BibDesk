@@ -1500,6 +1500,14 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         return YES;
 }
 
+- (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
+    // leave invalid drags and local moves unaltered, we want to link remote drags
+    if (dragOperation == NSDragOperationMove || dragOperation == NSDragOperationNone)
+        return dragOperation;
+    else
+        return NSDragOperationLink;
+}
+
 - (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
 {
     if (alert && [alert checkValue])
