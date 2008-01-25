@@ -301,9 +301,10 @@ static int BDSKCompletionMinHeight = 20;
 
     int idx = -1;
     NSArray *newCompletions = nil;
+    // may return { NSNotFound, 0 }
     NSRange charRange = [textView rangeForUserCompletion];
     
-    if([[textView string] isEqualToString:@""] == NO && [[textView string] length] >= NSMaxRange(charRange))
+    if(NSNotFound != charRange.location && [[textView string] isEqualToString:@""] == NO && [[textView string] length] >= NSMaxRange(charRange))
         newCompletions = [textView completionsForPartialWordRange:charRange indexOfSelectedItem:&idx];
     
     // if there are no completions, we should go away in order to avoid catching keystrokes when the completion window isn't visible; if the textview/delegate come up with a new list of completions, we'll be redisplayed anyway
