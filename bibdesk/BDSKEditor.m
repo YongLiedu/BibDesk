@@ -1436,7 +1436,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return [[publication objectInFilesAtIndex:idx] displayURL];
 }
 
-- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info;
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
         [self downloadURLs:[[publication valueForKeyPath:@"files.URL"] objectsAtIndexes:aSet]];
@@ -1447,7 +1447,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return YES;
 }
 
-- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info;
+- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     BDSKLinkedFile *aFile = nil;
     NSEnumerator *enumerator = [newURLs objectEnumerator];
@@ -1476,14 +1476,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return YES;
 }
 
-- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
-{
-    int moveToTrash = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
-    [self deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
-    return YES;
-}
-
-- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info;
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
         
@@ -1510,6 +1503,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             idx = [aSet indexGreaterThanIndex:idx];
         }
     }
+}
+
+- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+{
+    int moveToTrash = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
+    [self deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
+    return YES;
 }
 
 - (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL {
