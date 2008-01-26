@@ -109,6 +109,9 @@
 	NSString *downloadFileName;
     int receivedContentLength;
     int expectedContentLength;
+    
+    NSMutableArray *URLQueue;
+    BOOL isURLQueueBusy;
 // ----------------------------------------------------------------------------------------
 // status bar stuff
 // ----------------------------------------------------------------------------------------
@@ -351,6 +354,11 @@
 - (void)downloadURL:(NSURL *)linkURL;
 - (void)setDownloading:(BOOL)downloading;
 - (void)cancelDownload;
+
+- (void)copyFileURL:(NSURL *)linkURL;
+
+- (void)queueURLs:(NSArray *)linkURLs;
+- (void)dequeueNextURL;
 
 @end
 
