@@ -102,7 +102,37 @@
 }
 
 - (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return 0; }
+
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx { return nil; }
+
+- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
+{
+    return @"This is only a test.";
+}
+
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info;
+{
+    [arrayController insertObjects:absoluteURLs atArrangedObjectIndexes:aSet];
+}
+
+- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexes;
+{
+    if ([_filePaths count] >= [indexes count]) {
+        [arrayController removeObjectsAtArrangedObjectIndexes:indexes];
+        return YES;
+    }
+    return NO;
+}
+
+- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info;
+{
+    if ([_filePaths count] > [aSet count]) {
+        [arrayController removeObjectsAtArrangedObjectIndexes:aSet];
+        [arrayController insertObjects:newURLs atArrangedObjectIndexes:aSet];
+        return YES;
+    }
+    return NO;
+}
 
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
 {
@@ -120,33 +150,9 @@
     return YES;
 }    
 
-- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
+- (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
 {
-    if ([_filePaths count] > [aSet count]) {
-        [arrayController removeObjectsAtArrangedObjectIndexes:aSet];
-        [arrayController insertObjects:newURLs atArrangedObjectIndexes:aSet];
-        return YES;
-    }
-    return NO;
-}
-
-- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexes;
-{
-    if ([_filePaths count] >= [indexes count]) {
-        [arrayController removeObjectsAtArrangedObjectIndexes:indexes];
-        return YES;
-    }
-    return NO;
-}
-
-- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
-{
-    [arrayController insertObjects:absoluteURLs atArrangedObjectIndexes:aSet];
-}
-
-- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
-{
-    return @"This is only a test.";
+    return dragOperation;
 }
 
 @end
