@@ -318,8 +318,8 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     if (_isEditable && _dataSource) {
         const SEL selectors[] = 
         { 
-            @selector(fileView:insertURLs:atIndexes:fromDrop:), 
-            @selector(fileView:replaceURLsAtIndexes:withURLs:), 
+            @selector(fileView:insertURLs:atIndexes:forDrop:), 
+            @selector(fileView:replaceURLsAtIndexes:withURLs:forDrop:), 
             @selector(fileView:moveURLsAtIndexes:toIndex:),
             @selector(fileView:deleteURLsAtIndexes:) 
         };
@@ -1933,7 +1933,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             } else {
                 
                 NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertIndex, [allURLs count])];
-                [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet fromDrop:sender];
+                [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender];
                 didPerform = YES;
             }
         }
@@ -1949,14 +1949,14 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             aURL = [NSURL fileURLWithPath:[[pboard propertyListForType:NSFilenamesPboardType] lastObject]];
         }
         if (aURL)
-            didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL]];
+            didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL] forDrop:sender];
     }
     else if ([self _isLocalDraggingInfo:sender] == NO) {
            
         // this must be an add operation, and only non-local drag sources can do that
         NSArray *allURLs = URLsFromPasteboard(pboard);
         NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [allURLs count])];
-        [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet fromDrop:sender];
+        [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender];
         didPerform = YES;
 
     }
@@ -2181,7 +2181,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     if ([self isEditable]) {
         NSArray *URLs = URLsFromPasteboard([NSPasteboard generalPasteboard]);
         if ([URLs count])
-            [[self dataSource] fileView:self insertURLs:URLs atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [URLs count])] fromDrop:nil];
+            [[self dataSource] fileView:self insertURLs:URLs atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [URLs count])] forDrop:nil];
         else
             NSBeep();
     }
