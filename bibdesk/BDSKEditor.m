@@ -1513,7 +1513,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     // leave invalid drags and local moves unaltered, we want to link remote drags
     if (dragOperation == NSDragOperationMove || dragOperation == NSDragOperationNone)
         return dragOperation;
-    else if (dragOperation == NSDragOperationCopy) 
+    else if (dragOperation == NSDragOperationCopy && (dropOperation != FVDropOn || anIndex == NSNotFound)) 
         return NSDragOperationCopy;
     else
         return NSDragOperationLink;
