@@ -110,8 +110,7 @@
     int receivedContentLength;
     int expectedContentLength;
     
-    NSMutableArray *URLQueue;
-    BOOL isURLQueueBusy;
+    NSMutableArray *downloadQueue;
 // ----------------------------------------------------------------------------------------
 // status bar stuff
 // ----------------------------------------------------------------------------------------
@@ -351,14 +350,10 @@
 
 #pragma mark URL downloading
 
-- (void)downloadURL:(NSURL *)linkURL;
+- (void)downloadURLs:(NSArray *)linkURLs;
+- (void)downloadNextURL;
 - (void)setDownloading:(BOOL)downloading;
 - (void)cancelDownload;
-
-- (void)copyFileURL:(NSURL *)linkURL;
-
-- (void)queueURLs:(NSArray *)linkURLs;
-- (void)dequeueNextURL;
 
 @end
 

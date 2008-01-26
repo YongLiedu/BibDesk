@@ -300,7 +300,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [crossrefFormatter release];
     [citationFormatter release];
     [downloadFileName release];
-    [URLQueue release];
+    [downloadQueue release];
     [super dealloc];
 }
 
@@ -617,7 +617,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     unsigned int anIndex = [indexNumber unsignedIntValue];
     NSURL *theURL = [[publication objectInFilesAtIndex:anIndex] URL];
     OBASSERT(theURL != nil && [theURL isFileURL] == NO);
-    [self queueURLs:[NSArray arrayWithObjects:theURL, nil]];
+    [self downloadURLs:[NSArray arrayWithObjects:theURL, nil]];
 }
 
 - (IBAction)trashLinkedFiles:(id)sender{
@@ -1477,7 +1477,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 {
     if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
         
-        [self queueURLs:absoluteURLs];
+        [self downloadURLs:absoluteURLs];
         
     } else {
         
@@ -1513,7 +1513,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     // leave invalid drags and local moves unaltered, we want to link remote drags
     if (dragOperation == NSDragOperationMove || dragOperation == NSDragOperationNone)
         return dragOperation;
-    else if (dragOperation == NSDragOperationCopy && [draggedURLs count] == 1 && [[draggedURLs lastObject] isFileURL] == NO) 
+    else if (dragOperation == NSDragOperationCopy) 
         return NSDragOperationCopy;
     else
         return NSDragOperationLink;
@@ -2621,8 +2621,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)windowWillClose:(NSNotification *)notification{
     // cancel download for local file
-    [URLQueue release];
-    URLQueue = nil;
+    [downloadQueue release];
+    downloadQueue = nil;
     [self cancelDownload];
     
     // close so it's not hanging around by itself; this works if the doc window closes, also
@@ -2644,69 +2644,21 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [[self retain] autorelease];
 }
 
-#pragma mark URL queue
-
-- (void)queueURLs:(NSArray *)linkURLs{
-    if (URLQueue == nil)
-        URLQueue = [[NSMutableArray alloc] init];
-    [URLQueue addObjectsFromArray:linkURLs];
-    if (isURLQueueBusy == NO)
-        [self dequeueNextURL];
-}
-
-- (void)dequeueNextURL {
-    if ([URLQueue count]) {
-        NSURL *linkURL = [[[URLQueue lastObject] retain] autorelease];
-        [URLQueue removeLastObject];
-        isURLQueueBusy = YES;
-        if ([linkURL isFileURL])
-            [self copyFileURL:linkURL];
-        else
-            [self downloadURL:linkURL];
-    } else {
-        isURLQueueBusy = NO;
-    }
-}
-
-- (void)saveFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSURL *linkURL = [(NSURL *)contextInfo autorelease];
-    
-    if (returnCode == NSOKButton) {
-        NSURL *fileURL = [sheet URL];
-        NSString *path = [sheet filename];
-        
-        if ([[NSFileManager defaultManager] copyPath:[linkURL path] toPath:[fileURL path] handler:nil]) {
-            [publication addFileForURL:fileURL autoFile:YES runScriptHook:YES];
-            
-            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-        }
-    }
-    [self dequeueNextURL];
-}
-
-// don't call this directly, use queueURLs instead
-- (void)copyFileURL:(NSURL *)linkURL{
-	NSString *filename = [[linkURL path] lastPathComponent];
-    NSString *extension = [filename pathExtension];
-   
-	NSSavePanel *sPanel = [NSSavePanel savePanel];
-    if (NO == [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
-	
-    [sPanel beginSheetForDirectory:nil
-                              file:filename
-                    modalForWindow:[self window]
-                     modalDelegate:self
-                    didEndSelector:@selector(saveFilePanelDidEnd:returnCode:contextInfo:)
-                       contextInfo:[linkURL retain]];
-}
-
 #pragma mark URL downloading
 
-// don't call this directly, use queueURLs instead
-- (void)downloadURL:(NSURL *)linkURL{
-    if (isDownloading)
+- (void)downloadURLs:(NSArray *)linkURLs{
+    if (downloadQueue == nil)
+        downloadQueue = [[NSMutableArray alloc] init];
+    [downloadQueue addObjectsFromArray:linkURLs];
+    [self downloadNextURL];
+}
+
+- (void)downloadNextURL{
+    if (isDownloading || [downloadQueue count] == 0)
         return;
+    
+    NSURL *linkURL = [[[downloadQueue lastObject] retain] autorelease];
+    [downloadQueue removeLastObject];
     if (linkURL) {
 		download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self];
 	}
@@ -2812,7 +2764,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     
-    [self dequeueNextURL];
+    [self downloadNextURL];
 }
 
 - (void)download:(NSURLDownload *)theDownload didFailWithError:(NSError *)error
@@ -2834,7 +2786,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                      didEndSelector:NULL
                         contextInfo:NULL];
     
-    [self dequeueNextURL];
+    [self downloadNextURL];
 }
 
 #pragma mark undo manager
