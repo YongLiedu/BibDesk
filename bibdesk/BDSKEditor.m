@@ -1436,9 +1436,14 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return [[publication objectInFilesAtIndex:idx] displayURL];
 }
 
-- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info;
 {
-    [publication moveFilesAtIndexes:aSet toIndex:anIndex];
+    if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
+        [self downloadURLs:[[publication valueForKeyPath:@"files.URL"] objectsAtIndexes:aSet]];
+    } else {
+        OBASSERT(anIndex != NSNotFound);
+        [publication moveFilesAtIndexes:aSet toIndex:anIndex];
+    }
     return YES;
 }
 
@@ -1516,12 +1521,17 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
     // leave invalid drags and local moves unaltered, we want to link remote drags
-    if (dragOperation == NSDragOperationMove || dragOperation == NSDragOperationNone)
-        return dragOperation;
-    else if (dragOperation == NSDragOperationCopy) 
-        return NSDragOperationCopy;
-    else
-        return NSDragOperationLink;
+    NSDragOperation dragOp = dragOperation;
+    if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
+        // we copy, which means download, both for local and remote drags
+        dragOp = NSDragOperationCopy;
+        // download does not care about insertion point, so we drop on the whole view
+        [fileView setDropIndex:NSNotFound dropOperation:FVDropOn];
+    } else if (dragOperation != NSDragOperationMove && dragOperation != NSDragOperationNone) {
+        // any other remote drag is interpreted as a link
+        dragOp = NSDragOperationLink;
+    }
+    return dragOp;
 }
 
 - (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
@@ -2648,7 +2658,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     // @@ problem here:  BDSKEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
     [[self retain] autorelease];
 }
-
 #pragma mark URL downloading
 
 - (void)downloadURLs:(NSArray *)linkURLs{
@@ -2658,13 +2667,17 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [self downloadNextURL];
 }
 
+- (void)downloadAlertDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    [self downloadNextURL];
+}
+
 - (void)downloadNextURL{
     if (isDownloading || [downloadQueue count] == 0)
         return;
     
     NSURL *linkURL = [[[downloadQueue lastObject] retain] autorelease];
     [downloadQueue removeLastObject];
-    if (linkURL) {
+    if (linkURL && [linkURL isEqual:[NSNull null]] == NO) {
 		download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self];
 	}
 	if (nil == download) {
@@ -2674,8 +2687,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                                            otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window]
-                          modalDelegate:nil
-                         didEndSelector:NULL
+                          modalDelegate:self
+                         didEndSelector:@selector(downloadAlertDidEnd:returnCode:contextInfo:)
                             contextInfo:NULL];
 	}
 }
