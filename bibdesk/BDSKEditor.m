@@ -1442,27 +1442,32 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return YES;
 }
 
-- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
+- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info;
 {
-    BDSKLinkedFile *aFile;
+    BDSKLinkedFile *aFile = nil;
     NSEnumerator *enumerator = [newURLs objectEnumerator];
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex];
+    BOOL isCopy = [info draggingSourceOperationMask] == NSDragOperationCopy;
     while (NSNotFound != idx) {
         if ((aURL = [enumerator nextObject]) && 
-            (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
+            (isCopy || (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication]))) {
             NSURL *oldURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
             [publication removeObjectFromFilesAtIndex:idx];
             if (oldURL)
                 [[self document] userRemovedURL:oldURL forPublication:publication];
             [oldURL release];
-            [publication insertObject:aFile inFilesAtIndex:idx];
-            [[self document] userAddedURL:aURL forPublication:publication];
-            [publication autoFileLinkedFile:aFile];
-            [aFile release];
+            if (isCopy == NO) {
+                [publication insertObject:aFile inFilesAtIndex:idx];
+                [[self document] userAddedURL:aURL forPublication:publication];
+                [publication autoFileLinkedFile:aFile];
+                [aFile release];
+            }
         }
         idx = [aSet indexGreaterThanIndex:idx];
     }
+    if (isCopy)
+        [self downloadURLs:newURLs];
     return YES;
 }
 
@@ -1473,7 +1478,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return YES;
 }
 
-- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet fromDrop:(id <NSDraggingInfo>)info;
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info;
 {
     if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
         
@@ -1513,7 +1518,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     // leave invalid drags and local moves unaltered, we want to link remote drags
     if (dragOperation == NSDragOperationMove || dragOperation == NSDragOperationNone)
         return dragOperation;
-    else if (dragOperation == NSDragOperationCopy && (dropOperation != FVDropOn || anIndex == NSNotFound)) 
+    else if (dragOperation == NSDragOperationCopy) 
         return NSDragOperationCopy;
     else
         return NSDragOperationLink;
