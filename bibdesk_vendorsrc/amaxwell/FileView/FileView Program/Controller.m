@@ -134,7 +134,7 @@
     return NO;
 }
 
-- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info;
 {
     NSArray *toMove = [[[arrayController arrangedObjects] objectsAtIndexes:aSet] copy];
     // reduce idx by the number of smaller indexes in aSet

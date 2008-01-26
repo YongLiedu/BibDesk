@@ -320,7 +320,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
         { 
             @selector(fileView:insertURLs:atIndexes:forDrop:), 
             @selector(fileView:replaceURLsAtIndexes:withURLs:forDrop:), 
-            @selector(fileView:moveURLsAtIndexes:toIndex:),
+            @selector(fileView:moveURLsAtIndexes:toIndex:forDrop:),
             @selector(fileView:deleteURLsAtIndexes:) 
         };
         NSUInteger i, iMax = sizeof(selectors) / sizeof(SEL);
@@ -1809,6 +1809,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 #pragma mark Drop target
 
+- (void)setDropIndex:(NSUInteger)anIndex dropOperation:(FVDropOperation)anOperation
+{
+    _dropIndex = anIndex;
+    _dropOperation = anOperation;
+}
+
 - (BOOL)_isLocalDraggingInfo:(id <NSDraggingInfo>)sender
 {
     return [[sender draggingSource] isEqual:self];
@@ -1826,61 +1832,49 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     
     NSArray *draggedURLs = URLsFromPasteboard([sender draggingPasteboard]);
     
-    // We have to make sure the pasteboard really has a URL here, since most NSStrings aren't valid URLs
-    if ([draggedURLs count] == 0) {
-        
-        dragOp = NSDragOperationNone;
-        _dropIndex = NSNotFound;
-        _dropOperation = FVDropBefore;
-    }
-    else {
-        
-        // update the _dropOperation and _dropIndex based on the mouse location
-        // check whether the index is not NSNotFound, because the grid cell can be empty
-        
-        if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
-            _dropOperation = FVDropOn;
-        } else {
-            p = NSMakePoint(dragLoc.x + _iconSize.width - 0.5, dragLoc.y);
+    // First determine the drop location, check whether the index is not NSNotFound, because the grid cell can be empty
+    if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+        _dropOperation = FVDropOn;
+    } else {
+        p = NSMakePoint(dragLoc.x + _iconSize.width - 0.5, dragLoc.y);
 
+        if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
+            _dropOperation = FVDropBefore;
+        } else {
+            p = NSMakePoint(dragLoc.x - _iconSize.width + 0.5, dragLoc.y);
+            
             if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
-                _dropOperation = FVDropBefore;
+                _dropOperation = FVDropAfter;
             } else {
-                p = NSMakePoint(dragLoc.x - _iconSize.width + 0.5, dragLoc.y);
-                
-                if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
-                    _dropOperation = FVDropAfter;
-                } else {
-                    // drop on the whole view
-                    _dropOperation = FVDropOn;
-                    _dropIndex = NSNotFound;
-                }
+                // drop on the whole view
+                _dropOperation = FVDropOn;
+                _dropIndex = NSNotFound;
             }
         }
-        
+    }
+    
+    // We won't reset the drop location info when we propose NSDragOperationNone, because the delegate may want to override our decision, we will reset it at the end
+    
+    if ([draggedURLs count] == 0) {
+        // We have to make sure the pasteboard really has a URL here, since most NSStrings aren't valid URLs, but the delegate may accept other types
+        dragOp = NSDragOperationNone;
+    }
+    else if ([self _isLocalDraggingInfo:sender]) {
         // invalidate some local drags, otherwise make sure we use a Move operation
-        if ([self _isLocalDraggingInfo:sender]) {
-            if (FVDropOn == _dropOperation) {
-                // drop on the whole view (add operation) or an icon (replace operation) makes no sense for a local drag
-                
+        if (FVDropOn == _dropOperation) {
+            // drop on the whole view (add operation) or an icon (replace operation) makes no sense for a local drag, but the delegate may override
+            dragOp = NSDragOperationNone;
+        } 
+        else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation) {
+            // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection; the delegate may override
+            insertIndex = FVDropAfter == _dropOperation ? _dropIndex + 1 : _dropIndex;
+            firstIndex = [_selectedIndexes firstIndex], endIndex = [_selectedIndexes lastIndex] + 1;
+            if ([_selectedIndexes containsIndexesInRange:NSMakeRange(firstIndex, endIndex - firstIndex)] &&
+                insertIndex >= firstIndex && insertIndex <= endIndex) {
                 dragOp = NSDragOperationNone;
-                _dropIndex = NSNotFound;
-                _dropOperation = FVDropBefore;
             } 
-            else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation) {
-            
-                // inserting inside the block we're dragging doesn't make sense; this does allow dropping a disjoint selection at some locations within the selection
-                insertIndex = FVDropAfter == _dropOperation ? _dropIndex + 1 : _dropIndex;
-                firstIndex = [_selectedIndexes firstIndex], endIndex = [_selectedIndexes lastIndex] + 1;
-                if ([_selectedIndexes containsIndexesInRange:NSMakeRange(firstIndex, endIndex - firstIndex)] &&
-                    insertIndex >= firstIndex && insertIndex <= endIndex) {
-                    dragOp = NSDragOperationNone;
-                    _dropIndex = NSNotFound;
-                    _dropOperation = FVDropBefore;
-                } 
-                else {
-                    dragOp = NSDragOperationMove;
-                }
+            else {
+                dragOp = NSDragOperationMove;
             }
         }
     }
@@ -1888,6 +1882,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     // we could allow the delegate to change the _dropIndex and _dropOperation as NSTableView does, but we don't use that at present
     if ([[self delegate] respondsToSelector:@selector(fileView:validateDrop:draggedURLs:proposedIndex:proposedDropOperation:proposedDragOperation:)])
         dragOp = [[self delegate] fileView:self validateDrop:sender draggedURLs:draggedURLs proposedIndex:_dropIndex proposedDropOperation:_dropOperation proposedDragOperation:dragOp];
+    
+    // make sure we're consistent, also see comment above
+    if (dragOp == NSDragOperationNone) {
+        _dropIndex = NSNotFound;
+        _dropOperation = FVDropBefore;
+    }
     
     [self setNeedsDisplay:YES];
     return dragOp;
@@ -1928,7 +1928,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             
             if ([self _isLocalDraggingInfo:sender]) {
                 
-                didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex];
+                didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex forDrop:sender];
                 
             } else {
                 
@@ -1938,7 +1938,23 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             }
         }
     }
-    else if (NSNotFound != _dropIndex) {
+    else if ([self _isLocalDraggingInfo:sender]) {
+        
+        // @@ we don't make a difference between local drag on and before an icon, should we use replaceURLsAtIndexes instead?
+        
+        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:_dropIndex forDrop:sender];
+        
+    }
+    else if (NSNotFound == _dropIndex) {
+           
+        // drop on the whole view
+        NSArray *allURLs = URLsFromPasteboard(pboard);
+        NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [allURLs count])];
+        [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender];
+        didPerform = YES;
+
+    }
+    else {
         // we're targeting a particular cell, make sure that cell is a legal replace operation
         
         NSURL *aURL = [URLsFromPasteboard(pboard) lastObject];
@@ -1950,15 +1966,6 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         }
         if (aURL)
             didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL] forDrop:sender];
-    }
-    else if ([self _isLocalDraggingInfo:sender] == NO) {
-           
-        // this must be an add operation, and only non-local drag sources can do that
-        NSArray *allURLs = URLsFromPasteboard(pboard);
-        NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [allURLs count])];
-        [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender];
-        didPerform = YES;
-
     }
     
     // if we return NO, concludeDragOperation doesn't get called

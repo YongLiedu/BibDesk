@@ -139,6 +139,8 @@ typedef enum _FVDropOperation {
 - (BOOL)isEditable;
 - (void)setEditable:(BOOL)flag;
 
+- (void)setDropIndex:(NSUInteger)anIndex dropOperation:(FVDropOperation)anOperation;
+
 // required for drag-and-drop support
 - (void)setDataSource:(id)obj;
 - (id)dataSource;
@@ -171,7 +173,7 @@ typedef enum _FVDropOperation {
 - (BOOL)fileView:(FileView *)aFileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info;
 
 // rearranging files in the view
-- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info;
 
 // does not delete the file from disk; this is the datasource's responsibility
 - (BOOL)fileView:(FileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
