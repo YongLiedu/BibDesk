@@ -110,21 +110,12 @@
     return @"This is only a test.";
 }
 
-- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info;
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     [arrayController insertObjects:absoluteURLs atArrangedObjectIndexes:aSet];
 }
 
-- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexes;
-{
-    if ([_filePaths count] >= [indexes count]) {
-        [arrayController removeObjectsAtArrangedObjectIndexes:indexes];
-        return YES;
-    }
-    return NO;
-}
-
-- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info;
+- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     if ([_filePaths count] > [aSet count]) {
         [arrayController removeObjectsAtArrangedObjectIndexes:aSet];
@@ -134,7 +125,7 @@
     return NO;
 }
 
-- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info;
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
     NSArray *toMove = [[[arrayController arrangedObjects] objectsAtIndexes:aSet] copy];
     // reduce idx by the number of smaller indexes in aSet
@@ -149,6 +140,15 @@
     [toMove release];
     return YES;
 }    
+
+- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexes;
+{
+    if ([_filePaths count] >= [indexes count]) {
+        [arrayController removeObjectsAtArrangedObjectIndexes:indexes];
+        return YES;
+    }
+    return NO;
+}
 
 - (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;
 {

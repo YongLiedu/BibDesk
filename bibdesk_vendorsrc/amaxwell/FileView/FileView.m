@@ -318,9 +318,9 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     if (_isEditable && _dataSource) {
         const SEL selectors[] = 
         { 
-            @selector(fileView:insertURLs:atIndexes:forDrop:), 
-            @selector(fileView:replaceURLsAtIndexes:withURLs:forDrop:), 
-            @selector(fileView:moveURLsAtIndexes:toIndex:forDrop:),
+            @selector(fileView:insertURLs:atIndexes:forDrop:dropOperation:), 
+            @selector(fileView:replaceURLsAtIndexes:withURLs:forDrop:dropOperation:), 
+            @selector(fileView:moveURLsAtIndexes:toIndex:forDrop:dropOperation:),
             @selector(fileView:deleteURLsAtIndexes:) 
         };
         NSUInteger i, iMax = sizeof(selectors) / sizeof(SEL);
@@ -1928,12 +1928,12 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             
             if ([self _isLocalDraggingInfo:sender]) {
                 
-                didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex forDrop:sender];
+                didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex forDrop:sender dropOperation:_dropOperation];
                 
             } else {
                 
                 NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertIndex, [allURLs count])];
-                [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender];
+                [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender dropOperation:_dropOperation];
                 didPerform = YES;
             }
         }
@@ -1942,7 +1942,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         
         // @@ we don't make a difference between local drag on and before an icon, should we use replaceURLsAtIndexes instead?
         
-        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:_dropIndex forDrop:sender];
+        didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:_dropIndex forDrop:sender dropOperation:_dropOperation];
         
     }
     else if (NSNotFound == _dropIndex) {
@@ -1950,7 +1950,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         // drop on the whole view
         NSArray *allURLs = URLsFromPasteboard(pboard);
         NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [allURLs count])];
-        [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender];
+        [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender dropOperation:_dropOperation];
         didPerform = YES;
 
     }
@@ -1965,7 +1965,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             aURL = [NSURL fileURLWithPath:[[pboard propertyListForType:NSFilenamesPboardType] lastObject]];
         }
         if (aURL)
-            didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL] forDrop:sender];
+            didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL] forDrop:sender dropOperation:_dropOperation];
     }
     
     // if we return NO, concludeDragOperation doesn't get called
@@ -2188,7 +2188,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     if ([self isEditable]) {
         NSArray *URLs = URLsFromPasteboard([NSPasteboard generalPasteboard]);
         if ([URLs count])
-            [[self dataSource] fileView:self insertURLs:URLs atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [URLs count])] forDrop:nil];
+            [[self dataSource] fileView:self insertURLs:URLs atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [URLs count])] forDrop:nil dropOperation:FVDropOn];
         else
             NSBeep();
     }
