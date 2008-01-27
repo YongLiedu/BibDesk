@@ -193,9 +193,12 @@
         [self displayUpdateAvailableWindow:[remoteVersion cleanVersionString] alternativeVersion:nil];
     } else if(remoteVersionForCurrentMajor || remoteVersion){
         // tell user software is up to date
-        NSRunAlertPanel(NSLocalizedString(@"BibDesk is up to date", @"Title of alert when a the user's software is up to date."),
-                        NSLocalizedString(@"You have the most recent version of BibDesk.", @"Alert text when the user's software is up to date."),
-                        nil, nil, nil);                
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"BibDesk is up to date", @"Title of alert when a the user's software is up to date.")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"You have the most recent version of BibDesk.", @"Alert text when the user's software is up to date.")];
+        [alert runModal];
     } else {
         
         // likely an error page or other download failure

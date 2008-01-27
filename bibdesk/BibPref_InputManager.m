@@ -197,9 +197,15 @@ static int tableIconSize = 24;
 }
 
 - (IBAction)enableAutocompletion:(id)sender{
-    
-    NSBeginAlertSheet(NSLocalizedString(@"Warning!", @"Message in alert dialog"), NSLocalizedString(@"Proceed", @"Button title"), NSLocalizedString(@"Cancel", @"Button title"), nil, [[self controlBox] window], self, @selector(enableCompletionSheetDidEnd:returnCode:contextInfo:), NULL, NULL, NSLocalizedString(@"This will install a plugin bundle in ~/Library/InputManagers/BibDeskInputManager.  If you experience text input problems or strange application behavior after installing the plugin, try removing the \"BibDeskInputManager\" subfolder.", @"Informative text in alert dialog"));
-    
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning!", @"Message in alert dialog")
+                                     defaultButton:NSLocalizedString(@"Proceed", @"Button title")
+                                   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                       otherButton:nil
+                         informativeTextWithFormat:NSLocalizedString(@"This will install a plugin bundle in ~/Library/InputManagers/BibDeskInputManager.  If you experience text input problems or strange application behavior after installing the plugin, try removing the \"BibDeskInputManager\" subfolder.", @"Informative text in alert dialog")];
+    [alert beginSheetModalForWindow:[[self controlBox] window]
+                      modalDelegate:self
+                     didEndSelector:@selector(enableCompletionSheetDidEnd:returnCode:contextInfo:)
+                        contextInfo:NULL];
 }
 
 - (IBAction)addApplication:(id)sender{

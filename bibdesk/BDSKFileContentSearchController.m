@@ -180,20 +180,22 @@
     OBASSERT(searchField);
 
     if(![[NSFileManager defaultManager] fileExistsAtPath:[fileURL path] isDirectory:&isDir]){
-        NSBeginAlertSheet(NSLocalizedString(@"File Does Not Exist", @"Message in alert dialog when file could not be found"),
-                          nil /*default button*/,
-                          nil /*alternate button*/,
-                          nil /*other button*/,
-                          [tableView window],nil,NULL,NULL,NULL,NSLocalizedString(@"The file at \"%@\" no longer exists.", @"Informative text in alert dialog "), [fileURL path]);
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"File Does Not Exist", @"Message in alert dialog when file could not be found")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The file at \"%@\" no longer exists.", @"Informative text in alert dialog "), [fileURL path]];
+        [alert beginSheetModalForWindow:[tableView window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     } else if(isDir){
         // just open it with the Finder; we shouldn't have folders in our index, though
         [[NSWorkspace sharedWorkspace] openURL:fileURL];
     } else if(![[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:[searchField stringValue]]){
-        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @"Message in alert dialog when unable to open file"),
-                          nil /*default button*/,
-                          nil /*alternate button*/,
-                          nil /*other button*/,
-                          [tableView window],nil,NULL,NULL,NULL,NSLocalizedString(@"I was unable to open the file at \"%@.\"  You may wish to check permissions on the file or directory.", @"Informative text in alert dialog "), [fileURL path]);
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Open File", @"Message in alert dialog when unable to open file")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"I was unable to open the file at \"%@.\"  You may wish to check permissions on the file or directory.", @"Informative text in alert dialog "), [fileURL path]];
+        [alert beginSheetModalForWindow:[tableView window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
 }
 

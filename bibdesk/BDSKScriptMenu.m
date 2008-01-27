@@ -299,23 +299,22 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     scriptName = [[NSFileManager defaultManager] displayNameAtPath:scriptFilename];
     script = [[[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:scriptFilename] error:&errorDictionary] autorelease];
     if (script == nil) {
-        NSString *errorText, *messageText, *okButton;
-        
-        errorText = [NSString stringWithFormat:NSLocalizedString(@"The script file '%@' could not be opened.", @"Message in alert dialog when failing to load script"), scriptName];
-        messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
-        okButton = NSLocalizedString(@"OK", @"Button title");
-        NSRunAlertPanel([errorText safeFormatString], [messageText safeFormatString], okButton, nil, nil);
+        NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script file '%@' could not be opened.", @"Message in alert dialog when failing to load script"), scriptName]
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
+        [alert runModal];
         return;
     }
     result = [script executeAndReturnError:&errorDictionary];
     if (result == nil) {
-        NSString *errorText, *messageText, *okButton, *editButton;
-        
-        errorText = [NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"Message in alert dialog when failing to execute script"), scriptName];
-        messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
-        okButton = NSLocalizedString(@"OK", "Button title");
-        editButton = NSLocalizedString(@"Edit Script", @"Button title");
-        if (NSRunAlertPanel([errorText safeFormatString], [messageText safeFormatString], okButton, editButton, nil) == NSAlertAlternateReturn) {
+        NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"Message in alert dialog when failing to execute script"), scriptName]
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Edit Script", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
+        if ([alert runModal] == NSAlertAlternateReturn) {
             [[NSWorkspace sharedWorkspace] openFile:scriptFilename];
         }
         return;

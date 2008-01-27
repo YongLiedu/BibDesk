@@ -122,14 +122,12 @@ static NSSet *standardStyles = nil;
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error
 {
-	NSBeginAlertSheet(NSLocalizedString(@"Invalid Path",@"Message in alert dialog when binary path for TeX preview is invalid"), 
-    nil, nil, nil, 
-    [[self controlBox] window], 
-    self, 
-    NULL, 
-    NULL, 
-    nil, 
-    error);
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Path",@"Message in alert dialog when binary path for TeX preview is invalid")
+                                     defaultButton:nil
+                                   alternateButton:nil
+                                       otherButton:nil
+                         informativeTextWithFormat:@"%@", error];
+    [alert beginSheetModalForWindow:[controlBox window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         
     // allow the user to end editing and ignore the warning, since TeX may not be installed
     return YES;
@@ -209,8 +207,17 @@ static NSSet *standardStyles = nil;
 
     url = [NSURL fileURLWithPath:path];
     
-    if([[NSWorkspace sharedWorkspace] openURL:url] == NO && [[NSWorkspace sharedWorkspace] openURLs:[NSArray arrayWithObject:url] withAppBundleIdentifier:@"com.apple.textedit" options:0 additionalEventParamDescriptor:nil launchIdentifiers:NULL] == NO)
-        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @"Message in alert dialog when unable to open file"), NSLocalizedString(@"Reveal", @"Button title"), NSLocalizedString(@"Cancel", @"Button title"), nil, [[BDSKPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @"Informative text in alert dialog"));
+    if([[NSWorkspace sharedWorkspace] openURL:url] == NO && [[NSWorkspace sharedWorkspace] openURLs:[NSArray arrayWithObject:url] withAppBundleIdentifier:@"com.apple.textedit" options:0 additionalEventParamDescriptor:nil launchIdentifiers:NULL] == NO) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Open File", @"Message in alert dialog when unable to open file")
+                                         defaultButton:NSLocalizedString(@"Reveal", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @"Informative text in alert dialog")];
+        [alert beginSheetModalForWindow:[[self controlBox] window]
+                          modalDelegate:self
+                         didEndSelector:@selector(openTemplateFailureSheetDidEnd:returnCode:path:)
+                            contextInfo:[[url path] retain]];
+    }
 }
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{

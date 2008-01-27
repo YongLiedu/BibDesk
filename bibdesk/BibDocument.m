@@ -1642,11 +1642,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(success == NO){
         int rv;
         // run a modal dialog asking if we want to use partial data or give up
-        rv = NSRunCriticalAlertPanel([error localizedDescription] ? [[error localizedDescription] safeFormatString] : NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file"),
-                                     [NSString stringWithFormat:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog"), [error localizedDescription]],
-                                     NSLocalizedString(@"Give Up", @"Button title"),
-                                     NSLocalizedString(@"Edit File", @"Button title"),
-                                     NSLocalizedString(@"Keep Going", @"Button title"));
+        NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription] ? [error localizedDescription] : NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")
+                                         defaultButton:NSLocalizedString(@"Give Up", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Edit File", @"Button title")
+                                           otherButton:NSLocalizedString(@"Keep Going", @"Button title")
+                             informativeTextWithFormat:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog")];
+        [alert setAlertStyle:NSCriticalAlertStyle];
+        rv = [alert runModal];
         if (rv == NSAlertDefaultReturn) {
             // the user said to give up
             [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:NO]; // this hands the errors to a new error editor and sets that as the documentForErrors

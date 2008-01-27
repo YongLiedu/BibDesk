@@ -442,7 +442,12 @@
 }
 
 - (IBAction)showCiteKeyWarning:(id)sender{
-    NSBeginAlertSheet(NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found"),nil,nil,nil,[self window],nil,NULL,NULL,NULL,NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide a unique one.", @"Informative text in alert dialog"));
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found")
+                                     defaultButton:nil
+                                   alternateButton:nil
+                                       otherButton:nil
+                         informativeTextWithFormat:NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide a unique one.", @"Informative text in alert dialog")];
+    [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
 
 - (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -558,11 +563,12 @@
 		download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self];
 	}
 	if (!download) {
-		NSBeginAlertSheet(NSLocalizedString(@"Invalid or Unsupported URL", @"Message in alert dialog when unable to download file for Local-Url"),
-						  nil, nil, nil, 
-						  [self window], 
-						  nil, nil, nil, nil,
-						  NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog"));
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid or Unsupported URL", @"Message in alert dialog when unable to download file for Local-Url")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog")];
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 	}
 }
 
@@ -880,8 +886,12 @@
         
         if(url == nil){
             [sheet orderOut:nil];
-            NSBeginAlertSheet(NSLocalizedString(@"Error", @"Message in alert dialog when error occurs"), nil, nil, nil, [self window], nil, nil, nil, nil, 
-                              NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog") );
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error", @"Message in alert dialog when error occurs")
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog")];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         } else {        
             NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
             [[webView mainFrame] loadRequest:urlreq];
@@ -1163,11 +1173,12 @@
         errorDescription = NSLocalizedString(@"An error occured during page load.", @"Informative text in alert dialog");
     }
     
-    NSBeginAlertSheet(NSLocalizedString(@"Page Load Failed", @"Message in alert dialog when web page did not load"), 
-					  nil, nil, nil, 
-					  [self window], 
-					  nil, nil, nil, nil, 
-					  errorDescription);
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Page Load Failed", @"Message in alert dialog when web page did not load")
+                                     defaultButton:nil
+                                   alternateButton:nil
+                                       otherButton:nil
+                         informativeTextWithFormat:@"%@", errorDescription];
+    [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
@@ -1182,11 +1193,12 @@
         errorDescription = NSLocalizedString(@"An error occured during page load.", @"Informative text in alert dialog");
     }
     
-    NSBeginAlertSheet(NSLocalizedString(@"Page Load Failed", @"Message in alert dialog when web page did not load"), 
-					  nil, nil, nil, 
-					  [self window], 
-					  nil, nil, nil, nil, 
-					  errorDescription);
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Page Load Failed", @"Message in alert dialog when web page did not load")
+                                     defaultButton:nil
+                                   alternateButton:nil
+                                       otherButton:nil
+                         informativeTextWithFormat:@"%@", errorDescription];
+    [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
 
 #pragma mark NSURLDownloadDelegate methods
@@ -1249,11 +1261,12 @@
         errorDescription = NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
     }
     
-    NSBeginAlertSheet(NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed"), 
-					  nil, nil, nil, 
-					  [self window], 
-					  nil, nil, nil, nil, 
-					  errorDescription);
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
+                                     defaultButton:nil
+                                   alternateButton:nil
+                                       otherButton:nil
+                         informativeTextWithFormat:@"%@", errorDescription];
+    [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
 
 #pragma mark Editing

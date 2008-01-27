@@ -266,9 +266,13 @@
 - (void)showProblems{
     if (window == nil) {
         if([NSBundle loadNibNamed:@"AutoFile" owner:self] == NO){
-            NSRunCriticalAlertPanel(NSLocalizedString(@"Error loading AutoFile window module.", @"Message in alert dialog when unable to load window"),
-                                    NSLocalizedString(@"There was an error loading the AutoFile window module. BibDesk will still run, and automatically filing papers that are dragged in should still work fine. Please report this error to the developers. Sorry!", @"Informative text in alert dialog"),
-                                    NSLocalizedString(@"OK", @"Button title"),nil,nil);
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error loading AutoFile window module.", @"Message in alert dialog when unable to load window")
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"There was an error loading the AutoFile window module. BibDesk will still run, and automatically filing papers that are dragged in should still work fine. Please report this error to the developers. Sorry!", @"Informative text in alert dialog")];
+            [alert setAlertStyle:NSCriticalAlertStyle];
+            [alert runModal];
             return;
         }
 	}

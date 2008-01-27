@@ -509,8 +509,12 @@
             docState.dragFromExternalGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
 		}
 		if([pubs count] == 0 && [self hasSearchGroupsSelected] == NO){
-            NSBeginAlertSheet(NSLocalizedString(@"Empty Groups", @"Message in alert dialog when dragging from empty groups"),nil,nil,nil,documentWindow,nil,NULL,NULL,NULL,
-                              NSLocalizedString(@"The groups you want to drag do not contain any items.", @"Informative text in alert dialog"));
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Groups", @"Message in alert dialog when dragging from empty groups")
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The groups you want to drag do not contain any items.", @"Informative text in alert dialog")];
+            [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
             return NO;
         }
 			

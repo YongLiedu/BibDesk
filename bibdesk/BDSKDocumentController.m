@@ -360,10 +360,12 @@
         NSString *filterOutput = [BDSKShellTask runShellCommand:shellCommand withInputString:fileInputString];
         
         if ([NSString isEmptyString:filterOutput]){
-            NSRunAlertPanel(NSLocalizedString(@"Unable To Open With Filter", @"Message in alert dialog when unable to open a document with filter"),
-                            NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Informative text in alert dialog"),
-                            NSLocalizedString(@"OK", @"Button title"),
-                            nil, nil, nil, nil);
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable To Open With Filter", @"Message in alert dialog when unable to open a document with filter")
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Informative text in alert dialog")];
+            [alert runModal];
         } else {
             doc = [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:&error];
             if (nil == doc)

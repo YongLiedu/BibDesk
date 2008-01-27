@@ -104,10 +104,15 @@ static void *nullQueryMarker = @"Null MDQuery Marker"; /* any CFTypeRef would wo
             CFDictionaryAddValue(queries, (const void *)queryString, nullQueryMarker);
 #if OMNI_FORCE_ASSERTIONS
             // warning for developers, in case of using an incorrect query string
-            NSRunAlertPanel([NSString stringWithFormat:@"Sorry, %@, I'm afraid I can't do that", NSUserName()], @"Either the query \"%@\" was not valid, or your Spotlight cache requires repair.", @"Doh!", nil, nil, [queryString safeFormatString]);
+            NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Sorry, %@, I'm afraid I can't do that", NSUserName()]
+                                             defaultButton:@"Doh!"
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:@"Either the query \"%@\" was not valid, or your Spotlight cache requires repair.", queryString];
+            [alert runModal];
 #else
             // log message for users,
-            NSLog(@"Unable to execute Spotlight query \"%@\" with search scopes %@", [queryString safeFormatString], searchScopes);
+            NSLog(@"Unable to execute Spotlight query \"%@\" with search scopes %@", queryString, searchScopes);
 #endif
         }
     }
