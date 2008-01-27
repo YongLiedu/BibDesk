@@ -2750,6 +2750,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSSavePanel *sPanel = [NSSavePanel savePanel];
     if (NO == [extension isEqualToString:@""]) 
 		[sPanel setRequiredFileType:extension];
+    [sPanel setAllowsOtherFileTypes:YES];
     [sPanel setCanSelectHiddenExtension:YES];
 	
     [sPanel beginSheetForDirectory:nil
