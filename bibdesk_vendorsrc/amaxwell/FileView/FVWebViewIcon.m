@@ -348,6 +348,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     // Documentation says the default implementation checks "If request is not a directory", which is...odd.
     // See http://trac.webkit.org/projects/webkit/browser/trunk/WebKit/mac/DefaultDelegates/WebDefaultPolicyDelegate.m
     
+    CFStringRef theUTI = UTTypeCreatePreferredIdentifierForTag((CFStringRef)type, kUTTagClassMIMEType, NULL);
+    
     // This class should never get a file URL, but we'll implement it in the standard way for consistency.
     if ([[request URL] isFileURL]) {
         BOOL isDirectory = NO;
@@ -360,7 +362,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
             [listener ignore];
         }
     }
-    else if ([type isEqualToString:@"application/pdf"]) {
+    else if (theUTI != NULL && (UTTypeConformsTo(theUTI, kUTTypeCompositeContent) || UTTypeConformsTo(theUTI, kUTTypeArchive) || UTTypeConformsTo(theUTI, CFSTR("public.audiovisual-content")) || UTTypeConformsTo(theUTI, CFSTR("com.adobe.postscript")))) {
         // this triggers webView:didFailProvisionalLoadWithError:forFrame:
         [listener ignore];        
     }
