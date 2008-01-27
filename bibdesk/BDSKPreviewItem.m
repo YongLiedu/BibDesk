@@ -134,8 +134,6 @@
     return ([field isEqualToString:BDSKAuthorString]) ? pubAuthors : [NSArray array];
 }
 
-- (NSString *)documentInfoForKey:(NSString *)key { return key; }
-
 - (BOOL)isValidCiteKey:(NSString *)key { return YES; }
 
 - (BOOL)isValidLocalFilePath:(NSString *)path { return YES; }

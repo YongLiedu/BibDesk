@@ -820,8 +820,6 @@ enum {
 
 - (BOOL)isValidLocalFilePath:(NSString *)proposedPath;
 
-- (NSString *)documentInfoForKey:(NSString *)key;
-
 - (void)customFieldsDidChange:(NSNotification *)aNotification;
 
 - (void)duplicateTitleToBooktitleOverwriting:(BOOL)overwrite;

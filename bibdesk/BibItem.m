@@ -2928,10 +2928,6 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	return NO;
 }
 
-- (NSString *)documentInfoForKey:(NSString *)key {
-    return [owner documentInfoForKey:key];
-}
-
 #pragma mark -
 #pragma mark Groups
 

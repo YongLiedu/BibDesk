@@ -581,7 +581,7 @@
 						[scanner scanString:@"}" intoString:NULL]) {
 					
 						if (NO == [scanner scanUnsignedInt:&numChars]) numChars = 0;
-                        value = [pub documentInfoForKey:key];
+                        value = [[pub owner] documentInfoForKey:key];
 						if ([NSString isEmptyString:value] == NO) {
 							value = [self stringByStrictlySanitizingString:value forField:fieldName inFileType:[pub fileType]];
 							if (numChars > 0 && [value length] > numChars) {
