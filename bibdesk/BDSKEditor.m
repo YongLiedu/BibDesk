@@ -2718,8 +2718,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)cancelDownload{
-	[download cancel];
-	[self setDownloading:NO];
+    if (isDownloading) {
+        [download cancel];
+        [self setDownloading:NO];
+        [self downloadNextURL];
+    }
 }
 
 #pragma mark NSURLDownloadDelegate methods
@@ -2789,7 +2792,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)download:(NSURLDownload *)theDownload didFailWithError:(NSError *)error
-{
+{log_method();
     [self setDownloading:NO];
         
     NSString *errorDescription = [error localizedDescription];
@@ -2802,10 +2805,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                                    alternateButton:nil
                                        otherButton:nil
                          informativeTextWithFormat:errorDescription];
-    [alert beginSheetModalForWindow:[self window]
-                      modalDelegate:nil
-                     didEndSelector:NULL
-                        contextInfo:NULL];
+    [alert runModal];
     
     [self downloadNextURL];
 }
