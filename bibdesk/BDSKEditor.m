@@ -2697,10 +2697,14 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if (isDownloading != downloading) {
         isDownloading = downloading;
         if (isDownloading) {
-			NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Status message"), 0] stringByAppendingEllipsis];
+			NSString *message = nil;
+            if ([[[download request] URL] isFileURL])
+                message = [NSString stringWithFormat:NSLocalizedString(@"Copying file. Received %i%%", @"Status message"), 0];
+            else
+                message = [NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Status message"), 0];
             [statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
             [statusBar startAnimation:self];
-			[self setStatus:message];
+			[self setStatus:[message stringByAppendingEllipsis]];
             [downloadFileName release];
 			downloadFileName = nil;
         } else {
@@ -2759,8 +2763,12 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if (expectedContentLength > 0) {
         receivedContentLength += length;
         int percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
-		NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Tool tip message"), percent] stringByAppendingEllipsis];
-		[self setStatus:message];
+		NSString *message = nil;
+        if ([[[theDownload request] URL] isFileURL])
+            message = [NSString stringWithFormat:NSLocalizedString(@"Copying file. Received %i%%", @"Status message"), percent];
+        else
+            message = [NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Status message"), percent];
+		[self setStatus:[message stringByAppendingEllipsis]];
     }
 }
 
