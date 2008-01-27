@@ -220,11 +220,13 @@ static void fixLegacyTableColumnIdentifiers()
         [pw setObject:formatString forKey:BDSKCiteKeyFormatKey];
         [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     }else{
-        button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format"), 
-                                         @"%@",
-                                         NSLocalizedString(@"Go to Preferences", @"Button title"), 
-                                         NSLocalizedString(@"Revert to Default", @"Button title"), 
-                                         nil, [error safeFormatString], nil);
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format")
+                                         defaultButton:NSLocalizedString(@"Go to Preferences", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Revert to Default", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:@"%@", error];
+        [alert setAlertStyle:NSCriticalAlertStyle];
+        button = [alert runModal];
         if (button == NSAlertAlternateReturn){
             formatString = [[pw preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
             [pw setObject:formatString forKey:BDSKCiteKeyFormatKey];
@@ -268,11 +270,13 @@ static void fixLegacyTableColumnIdentifiers()
         [pw setObject:formatString forKey:BDSKLocalFileFormatKey];
         [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     }else{
-        button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format"), 
-                                         @"%@",
-                                         NSLocalizedString(@"Go to Preferences", @"Button title"), 
-                                         NSLocalizedString(@"Revert to Default", @"Button title"), 
-                                         nil, [error safeFormatString], nil);
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format")
+                                         defaultButton:NSLocalizedString(@"Go to Preferences", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Revert to Default", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:@"%@", error];
+        [alert setAlertStyle:NSCriticalAlertStyle];
+        button = [alert runModal];
         if (button == NSAlertAlternateReturn){
             formatString = [[pw preferenceForKey:BDSKLocalFileFormatKey] defaultObjectValue];			
             [pw setObject:formatString forKey:BDSKLocalFileFormatKey];
