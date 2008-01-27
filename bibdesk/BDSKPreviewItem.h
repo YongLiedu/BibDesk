@@ -39,12 +39,13 @@
 #import "BDSKFormatParser.h"
 
 
-@protocol BDSKOwner;
+@class BDSKPreviewOwner, BDSKPreviewLinkedFile;
 
 @interface BDSKPreviewItem : NSObject <BDSKParseableItem> {
     NSDictionary *pubFields;
     NSArray *pubAuthors;
-    id<BDSKOwner> owner;
+    BDSKPreviewOwner *owner;
+    BDSKPreviewLinkedFile *linkedFile;
 }
 
 + (BDSKPreviewItem *)sharedItem;

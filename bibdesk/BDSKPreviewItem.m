@@ -47,9 +47,14 @@
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <OmniFoundation/NSArray-OFExtensions.h>
 #import "BDSKOwnerProtocol.h"
+#import "BDSKLinkedFile.h"
 
 
 @interface BDSKPreviewOwner : NSObject <BDSKOwner>
+@end
+
+
+@interface BDSKPreviewLinkedFile : BDSKLinkedFile
 @end
 
 
@@ -80,6 +85,7 @@
             [BibAuthor authorWithName:@"Routley, M." andPub:nil], 
             [BibAuthor authorWithName:@"Spiegel, S." andPub:nil], nil];
         owner = [[BDSKPreviewOwner alloc] init];
+        linkedFile = [[BDSKPreviewLinkedFile alloc] init];
     }
     return self;
 }
@@ -88,6 +94,7 @@
     [pubFields release];
     [pubAuthors release];
     [owner release];
+    [linkedFile release];
     [super dealloc];
 }
 
@@ -137,13 +144,10 @@
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *localFileFormat = [pw objectForKey:BDSKLocalFileFormatKey];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
-	NSString *relativeFile = [BDSKFormatParser parseFormat:localFileFormat forField:BDSKLocalUrlString ofItem:self];
+	NSString *relativeFile = [BDSKFormatParser parseFormat:localFileFormat forField:BDSKLocalFileString linkedFile:linkedFile ofItem:self suggestion:nil];
 	if ([pw boolForKey:BDSKLocalFileLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
-	//if  ([NSString isEmptyString:[pw stringForKey:BDSKPapersFolderPathKey]])
-    //    return relativeFile;
-    //else
-        return [[papersFolderPath stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
+    return [[papersFolderPath stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
 }
 
 - (NSString *)suggestedCiteKey {
@@ -192,5 +196,16 @@
 - (NSString *)documentInfoForKey:(NSString *)key { return key; }
 
 - (BDSKItemSearchIndexes *)searchIndexes { return nil; }
+
+@end
+
+
+@implementation BDSKPreviewLinkedFile
+
+- (NSURL *)URL {
+    return [NSURL fileURLWithPath:NSLocalizedString(@"Local File Name.pdf", @"Local-Url for preview item in preferences")];
+}
+
+- (BOOL)isFile { return YES; }
 
 @end
