@@ -460,7 +460,7 @@
                 case 'b':
 				{
                 	// document filename
-					NSString *filename = [pub basePath];
+					NSString *filename = [[[[[pub owner] fileURL] path] lastPathComponent] stringByDeletingPathExtension];
 					if (filename != nil) {
 						filename = [self stringBySanitizingString:filename forField:fieldName inFileType:[pub fileType]]; 
 						[parsedStr appendString:filename];

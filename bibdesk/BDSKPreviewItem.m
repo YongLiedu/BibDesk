@@ -49,6 +49,10 @@
 #import "BDSKOwnerProtocol.h"
 
 
+@interface BDSKPreviewOwner : NSObject <BDSKOwner>
+@end
+
+
 @implementation BDSKPreviewItem
 
 + (BDSKPreviewItem *)sharedItem {
@@ -75,6 +79,7 @@
             [BibAuthor authorWithName:@"Howison, J." andPub:nil], 
             [BibAuthor authorWithName:@"Routley, M." andPub:nil], 
             [BibAuthor authorWithName:@"Spiegel, S." andPub:nil], nil];
+        owner = [[BDSKPreviewOwner alloc] init];
     }
     return self;
 }
@@ -82,6 +87,7 @@
 - (void)dealloc {
     [pubFields release];
     [pubAuthors release];
+    [owner release];
     [super dealloc];
 }
 
@@ -121,8 +127,6 @@
     return ([field isEqualToString:BDSKAuthorString]) ? pubAuthors : [NSArray array];
 }
 
-- (NSString *)basePath { return NSLocalizedString(@"/path/to/document", @"Document base path for preview item in preferences"); }
-
 - (NSString *)documentInfoForKey:(NSString *)key { return key; }
 
 - (BOOL)isValidCiteKey:(NSString *)key { return YES; }
@@ -132,13 +136,13 @@
 - (NSString *)suggestedLocalFilePath {
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *localFileFormat = [pw objectForKey:BDSKLocalFileFormatKey];
-	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:nil];
+	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
 	NSString *relativeFile = [BDSKFormatParser parseFormat:localFileFormat forField:BDSKLocalUrlString ofItem:self];
 	if ([pw boolForKey:BDSKLocalFileLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
-	if  ([NSString isEmptyString:[pw stringForKey:BDSKPapersFolderPathKey]])
-        return relativeFile;
-    else
+	//if  ([NSString isEmptyString:[pw stringForKey:BDSKPapersFolderPathKey]])
+    //    return relativeFile;
+    //else
         return [[papersFolderPath stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
 }
 
@@ -151,7 +155,7 @@
 	return ck;
 }
 
-- (id<BDSKOwner>)owner { return  nil; }
+- (id<BDSKOwner>)owner { return owner; }
 
 - (NSString *)displayText {
     NSMutableArray *authors = [NSMutableArray arrayWithCapacity:[pubAuthors count]];
@@ -167,5 +171,26 @@
                           [pubFields objectForKey:BDSKYearString], @".", nil];
     return string;
 }
+
+@end
+
+
+@implementation BDSKPreviewOwner
+
+- (BOOL)isDocument { return NO; }
+
+- (BDSKPublicationsArray *)publications { return nil; }
+
+- (BDSKMacroResolver *)macroResolver { return nil; }
+
+- (NSUndoManager *)undoManager { return nil; }
+
+- (NSURL *)fileURL {
+    return [NSURL fileURLWithPath:[NSLocalizedString(@"~/path/to/document/Document File Name.bib", @"Document file name for preview item in preferences") stringByExpandingTildeInPath]];
+}
+
+- (NSString *)documentInfoForKey:(NSString *)key { return key; }
+
+- (BDSKItemSearchIndexes *)searchIndexes { return nil; }
 
 @end

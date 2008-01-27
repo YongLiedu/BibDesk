@@ -38,9 +38,13 @@
 
 #import "BDSKFormatParser.h"
 
+
+@protocol BDSKOwner;
+
 @interface BDSKPreviewItem : NSObject <BDSKParseableItem> {
     NSDictionary *pubFields;
     NSArray *pubAuthors;
+    id<BDSKOwner> owner;
 }
 
 + (BDSKPreviewItem *)sharedItem;
