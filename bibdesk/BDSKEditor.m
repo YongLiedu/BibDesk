@@ -2722,14 +2722,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[self setDownloading:NO];
 }
 
-- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        [download setDestination:[sheet filename] allowOverwrite:YES];
-    } else {
-        [self cancelDownload];
-    }
-}
-
 #pragma mark NSURLDownloadDelegate methods
 
 - (void)downloadDidBegin:(NSURLDownload *)download{
@@ -2753,12 +2745,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     [sPanel setAllowsOtherFileTypes:YES];
     [sPanel setCanSelectHiddenExtension:YES];
 	
-    [sPanel beginSheetForDirectory:nil
-                              file:filename
-                    modalForWindow:[self window]
-                     modalDelegate:self
-                    didEndSelector:@selector(saveDownloadPanelDidEnd:returnCode:contextInfo:)
-                       contextInfo:nil];
+    // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
+    int returnCode = [sPanel runModalForDirectory:nil file:filename];
+    if (returnCode == NSOKButton) {
+        [download setDestination:[sPanel filename] allowOverwrite:YES];
+    } else {
+        [self cancelDownload];
+    }
 }
 
 - (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned)length{
