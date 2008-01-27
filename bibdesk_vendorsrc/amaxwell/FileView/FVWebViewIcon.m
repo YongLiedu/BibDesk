@@ -348,7 +348,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     // Documentation says the default implementation checks "If request is not a directory", which is...odd.
     // See http://trac.webkit.org/projects/webkit/browser/trunk/WebKit/mac/DefaultDelegates/WebDefaultPolicyDelegate.m
     
-    CFStringRef theUTI = UTTypeCreatePreferredIdentifierForTag((CFStringRef)type, kUTTagClassMIMEType, NULL);
+    CFStringRef theUTI = type == nil ? NULL : UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (CFStringRef)type, NULL);
     
     // This class should never get a file URL, but we'll implement it in the standard way for consistency.
     if ([[request URL] isFileURL]) {
