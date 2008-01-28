@@ -147,41 +147,52 @@ static BOOL fileIsInApplicationsOrSystem(NSURL *fileURL)
     return result;
 }
 
+static inline NSString *displayNameForURL(NSURL *appURL) {
+    return [[[NSFileManager defaultManager] displayNameAtPath:[appURL path]] stringByDeletingPathExtension];
+}
+
 static inline NSArray *uniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSString *appName, NSURL *defaultAppURL) {
     NSMutableArray *uniqueNamesAndURLs = [NSMutableArray array];
-    NSMutableSet *versionStrings = [[NSMutableSet alloc] init];
     int i, count = [appURLs count];
     
-    for (i = 0; i < count; i++) {
-        NSURL *appURL = [appURLs objectAtIndex:i];
-        NSDictionary *appInfo = [[NSBundle bundleWithPath:[appURL path]] infoDictionary];
-        NSString *versionString = [appInfo objectForKey:@"CFBundleShortVersionString"];
-        if (versionString == nil)
-            versionString = [appInfo objectForKey:@"CFBundleVersion"];
-        // we make sure the default app is always included, and we prefer apps in Applications or System
-        if ([versionStrings containsObject:versionString] && ([defaultAppURL isEqual:appURL] || fileIsInApplicationsOrSystem(appURL))) {
-            unsigned int idx = [[uniqueNamesAndURLs valueForKey:@"versionString"] indexOfObject:versionString];
-            if (idx != NSNotFound && [[[uniqueNamesAndURLs objectAtIndex:idx] objectForKey:@"appURL"] isEqual:defaultAppURL] == NO) {
-                [uniqueNamesAndURLs removeObjectAtIndex:idx];
-                [versionStrings removeObject:versionString];
+    if (count > 1) {
+        NSMutableSet *versionStrings = [[NSMutableSet alloc] init];
+        
+        for (i = 0; i < count; i++) {
+            NSURL *appURL = [appURLs objectAtIndex:i];
+            NSDictionary *appInfo = [[NSBundle bundleWithPath:[appURL path]] infoDictionary];
+            NSString *versionString = [appInfo objectForKey:@"CFBundleShortVersionString"];
+            if (versionString == nil)
+                versionString = [appInfo objectForKey:@"CFBundleVersion"];
+            // we make sure the default app is always included, and we prefer apps in Applications or System
+            if ([versionStrings containsObject:versionString] && ([defaultAppURL isEqual:appURL] || fileIsInApplicationsOrSystem(appURL))) {
+                unsigned int idx = [[uniqueNamesAndURLs valueForKey:@"versionString"] indexOfObject:versionString];
+                if (idx != NSNotFound && [[[uniqueNamesAndURLs objectAtIndex:idx] objectForKey:@"appURL"] isEqual:defaultAppURL] == NO) {
+                    [uniqueNamesAndURLs removeObjectAtIndex:idx];
+                    [versionStrings removeObject:versionString];
+                }
+            }
+            if ([versionStrings containsObject:versionString] == NO) {
+                OFVersionNumber *versionNumber = versionString ? [[OFVersionNumber alloc] initWithVersionString:versionString] : nil;
+                NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", appName, @"appName", versionString, @"versionString", versionNumber, @"versionNumber", nil];
+                if (versionString)
+                    [versionStrings addObject:versionString];
+                [versionNumber release];
+                [uniqueNamesAndURLs addObject:dict];
+                [dict release];
             }
         }
-        if ([versionStrings containsObject:versionString] == NO) {
-            OFVersionNumber *versionNumber = versionString ? [[OFVersionNumber alloc] initWithVersionString:versionString] : nil;
-            NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", appName, @"appName", versionString, @"versionString", versionNumber, @"versionNumber", nil];
-            if (versionString)
-                [versionStrings addObject:versionString];
-            [versionNumber release];
-            [uniqueNamesAndURLs addObject:dict];
-            [dict release];
-        }
+        
+        [versionStrings release];
+        
+        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"versionNumber" ascending:NO selector:@selector(compareToVersionNumber:)];
+        [uniqueNamesAndURLs sortUsingDescriptors:[NSArray arrayWithObject:sort]];
+        [sort release];
+    } else if (count == 1) {
+        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:[appURLs lastObject], @"appURL", appName, @"appName", nil];
+        [uniqueNamesAndURLs addObject:dict];
+        [dict release];
     }
-    
-    [versionStrings release];
-    
-    NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"versionNumber" ascending:NO selector:@selector(compareToVersionNumber:)];
-    [uniqueNamesAndURLs sortUsingDescriptors:[NSArray arrayWithObject:sort]];
-    [sort release];
     
     return uniqueNamesAndURLs;
 }
@@ -206,27 +217,21 @@ static inline NSArray *uniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSSt
     NSString *version;
     NSDictionary *representedObject;
     NSDictionary *dict;
-    NSFileManager *fm = [NSFileManager defaultManager];
     unsigned int idx, i, j, subCount, count = [appURLs count], defaultIndex = NSNotFound;
     BOOL wasDuplicate = NO;
     
     for (i = 0; i < count; i++) {
         appURL = [appURLs objectAtIndex:i];
-        appName = [[fm displayNameAtPath:[appURL path]] stringByDeletingPathExtension];
+        appName = displayNameForURL(appURL);
         
-        if ([appName isEqualToString:lastAppName]) {
-            j = i + 1;
-            while (j < count && [[[fm displayNameAtPath:[[appURLs objectAtIndex:j] path]] stringByDeletingPathExtension] isEqualToString:lastAppName])
-                j++;
-            namesAndURLs = uniqueVersionedNamesAndURLsForURLs([appURLs subarrayWithRange:NSMakeRange(i - 1, j - i + 1)], appName, defaultAppURL);
-            
-            [self removeItemAtIndex:[self numberOfItems] - 1];
-            i = j - 1;
-        } else {
-            dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", appName, @"appName", nil];
-            namesAndURLs = [NSArray arrayWithObject:dict];
-            [dict release];
+        j = i + 1;
+        if ([lastAppName isEqualToString:appName]) {
+            while (j < count && [displayNameForURL([appURLs objectAtIndex:j]) isEqualToString:appName]) j++;
+            [self removeItemAtIndex:[self numberOfItems] - 2];
+            i--;
         }
+        namesAndURLs = uniqueVersionedNamesAndURLsForURLs([appURLs subarrayWithRange:NSMakeRange(i, j - i)], appName, defaultAppURL);
+        i = j - 1;
         lastAppName = appName;
         
         subCount = [namesAndURLs count];
