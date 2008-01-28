@@ -1527,6 +1527,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         dragOp = NSDragOperationCopy;
         // download does not care about insertion point, so we drop on the whole view
         [fileView setDropIndex:NSNotFound dropOperation:FVDropOn];
+    } else if ([[info draggingSource] isEqual:fileView] && dropOperation == FVDropOn) {
+        // redirect local drop on icon and drop on view
+        dragOp = NSDragOperationMove;
+        if (anIndex == NSNotFound) // note that the count must be > 0, or we wouldn't have a local drag
+            [fileView setDropIndex:[publication countOfFiles] - 1 dropOperation:FVDropAfter];
+        else
+            [fileView setDropIndex:NSNotFound dropOperation:FVDropBefore];
     } else if (dragOperation != NSDragOperationMove && dragOperation != NSDragOperationNone) {
         // any other remote drag is interpreted as a link
         dragOp = NSDragOperationLink;
