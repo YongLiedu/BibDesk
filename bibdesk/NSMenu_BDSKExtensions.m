@@ -152,8 +152,8 @@ static inline NSString *displayNameForURL(NSURL *appURL) {
     return [[[NSFileManager defaultManager] displayNameAtPath:[appURL path]] stringByDeletingPathExtension];
 }
 
-static inline NSArray *uniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSString *appName, NSURL *defaultAppURL) {
-    NSMutableArray *uniqueNamesAndURLs = [NSMutableArray array];
+static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSString *appName, NSURL *defaultAppURL) {
+    NSMutableArray *uniqueNamesAndURLs = [[NSMutableArray alloc] init];
     int i, count = [appURLs count];
     
     if (count > 1) {
@@ -214,39 +214,30 @@ static inline NSArray *uniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSSt
     NSArray *namesAndURLs;
     NSURL *appURL;
     NSString *appName;
-    NSString *lastAppName = nil;
     NSString *version;
-    NSDictionary *representedObject;
     NSDictionary *dict;
-    unsigned int idx, i, j, subCount, count = [appURLs count], defaultIndex = NSNotFound;
-    BOOL wasDuplicate = NO;
+    unsigned int idx, i, j, subCount, count = [appURLs count];
     
     for (i = 0; i < count; i++) {
         appURL = [appURLs objectAtIndex:i];
         appName = displayNameForURL(appURL);
         
         j = i + 1;
-        if ([lastAppName isEqualToString:appName]) {
-            while (j < count && [displayNameForURL([appURLs objectAtIndex:j]) isEqualToString:appName]) j++;
-            [self removeItemAtIndex:[self numberOfItems] - 2];
-            i--;
-        }
-        namesAndURLs = uniqueVersionedNamesAndURLsForURLs([appURLs subarrayWithRange:NSMakeRange(i, j - i)], appName, defaultAppURL);
+        while (j < count && [displayNameForURL([appURLs objectAtIndex:j]) isEqualToString:appName]) j++;
+        namesAndURLs = copyUniqueVersionedNamesAndURLsForURLs([appURLs subarrayWithRange:NSMakeRange(i, j - i)], appName, defaultAppURL);
         i = j - 1;
-        lastAppName = appName;
         
         subCount = [namesAndURLs count];
         for (j = 0; j < subCount; j++) {
             dict = [namesAndURLs objectAtIndex:j];
             appURL = [dict objectForKey:@"appURL"];
             appName = [dict objectForKey:@"appName"];
+            if ([appURL isEqual:defaultAppURL])
+                appName = [appName stringByAppendingString:NSLocalizedString(@" (default)", @"Menu item title, Need a single leading space")];
             if (subCount > 1 && (version = [dict objectForKey:@"versionString"]))
                 appName = [appName stringByAppendingFormat:@" (%@)", version];
             item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:appName action:@selector(openURLWithApplication:) keyEquivalent:@""];        
             [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
-            
-            if ([appURL isEqual:defaultAppURL])
-                defaultIndex = [self numberOfItems] - 1;
             
             dict = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, appURL, BDSKMenuApplicationURL, nil];
             [item setRepresentedObject:dict];
@@ -254,22 +245,18 @@ static inline NSArray *uniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSSt
             
             // use NSWorkspace to get an image; using [NSImage imageForURL:] doesn't work for some reason
             [item setImageAndSize:[workspace iconForFileURL:appURL]];
-            [self insertItem:item atIndex:[self numberOfItems] - 1];
+            if ([appURL isEqual:defaultAppURL]) {
+                [self insertItem:[NSMenuItem separatorItem] atIndex:0];
+                [self insertItem:item atIndex:0];
+            } else {
+                [self insertItem:item atIndex:[self numberOfItems] - 1];
+            }
             [item release];
         }
+        [namesAndURLs release];
     }
     
-    // mark the default app and move it to the front, if we have one
-    if (defaultIndex != NSNotFound) {
-        item = [[self itemAtIndex:defaultIndex] retain];
-        [item setTitle:[[item title] stringByAppendingString:NSLocalizedString(@" (Default)", @"Menu item title, Need a single leading space")]];
-        [self removeItemAtIndex:defaultIndex];
-        [self insertItem:[NSMenuItem separatorItem] atIndex:0];
-        [self insertItem:item atIndex:0];
-        [item release];
-    }
-    
-    if ([self numberOfItems] > 3)
+    if ([self numberOfItems] > 1 && [[self itemAtIndex:[self numberOfItems] - 2] isSeparatorItem])
         [self insertItem:[NSMenuItem separatorItem] atIndex:[self numberOfItems] - 1];
 }
 
