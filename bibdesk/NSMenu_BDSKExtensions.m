@@ -134,8 +134,56 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 
 @implementation NSMenu (BDSKPrivate)
 
-static inline NSString *shortVersionStringForURL(NSURL *bundleURL) {
-    return [[[NSBundle bundleWithPath:[bundleURL path]] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+static BOOL fileIsInApplicationsOrSystem(NSURL *fileURL)
+{
+    NSCParameterAssert([fileURL isFileURL]);    
+    FSRef fileRef;
+    Boolean result = false;
+    if (CFURLGetFSRef((CFURLRef)fileURL, &fileRef)) {
+        FSDetermineIfRefIsEnclosedByFolder(0, kApplicationsFolderType, &fileRef, &result);
+        if (result == false)
+            FSDetermineIfRefIsEnclosedByFolder(0, kSystemFolderType, &fileRef, &result);
+    }
+    return result;
+}
+
+static inline NSArray *uniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSString *appName, NSURL *defaultAppURL) {
+    NSMutableArray *uniqueNamesAndURLs = [NSMutableArray array];
+    NSMutableSet *versionStrings = [[NSMutableSet alloc] init];
+    int i, count = [appURLs count];
+    
+    for (i = 0; i < count; i++) {
+        NSURL *appURL = [appURLs objectAtIndex:i];
+        NSDictionary *appInfo = [[NSBundle bundleWithPath:[appURL path]] infoDictionary];
+        NSString *versionString = [appInfo objectForKey:@"CFBundleShortVersionString"];
+        if (versionString == nil)
+            versionString = [appInfo objectForKey:@"CFBundleVersion"];
+        // we make sure the default app is always included, and we prefer apps in Applications or System
+        if ([versionStrings containsObject:versionString] && ([defaultAppURL isEqual:appURL] || fileIsInApplicationsOrSystem(appURL))) {
+            unsigned int idx = [[uniqueNamesAndURLs valueForKey:@"versionString"] indexOfObject:versionString];
+            if (idx != NSNotFound && [[[uniqueNamesAndURLs objectAtIndex:idx] objectForKey:@"appURL"] isEqual:defaultAppURL] == NO) {
+                [uniqueNamesAndURLs removeObjectAtIndex:idx];
+                [versionStrings removeObject:versionString];
+            }
+        }
+        if ([versionStrings containsObject:versionString] == NO) {
+            OFVersionNumber *versionNumber = versionString ? [[OFVersionNumber alloc] initWithVersionString:versionString] : nil;
+            NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", appName, @"appName", versionString, @"versionString", versionNumber, @"versionNumber", nil];
+            if (versionString)
+                [versionStrings addObject:versionString];
+            [versionNumber release];
+            [uniqueNamesAndURLs addObject:dict];
+            [dict release];
+        }
+    }
+    
+    [versionStrings release];
+    
+    NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"versionNumber" ascending:NO selector:@selector(compareToVersionNumber:)];
+    [uniqueNamesAndURLs sortUsingDescriptors:[NSArray arrayWithObject:sort]];
+    [sort release];
+    
+    return uniqueNamesAndURLs;
 }
 
 - (void)replaceAllItemsWithApplicationsForURL:(NSURL *)aURL;
@@ -150,50 +198,66 @@ static inline NSString *shortVersionStringForURL(NSURL *bundleURL) {
     
     NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
     NSArray *appURLs = [workspace editorAndViewerURLsForURL:aURL];
+    NSURL *defaultAppURL = [workspace defaultEditorOrViewerURLForURL:aURL];
+    NSArray *namesAndURLs;
     NSURL *appURL;
-    NSString *menuTitle;
-    NSString *lastMenuTitle = nil;
+    NSString *appName;
+    NSString *lastAppName = nil;
     NSString *version;
     NSDictionary *representedObject;
+    NSDictionary *dict;
     NSFileManager *fm = [NSFileManager defaultManager];
-    unsigned int idx, i, count = [appURLs count];
+    unsigned int idx, i, j, subCount, count = [appURLs count], defaultIndex = NSNotFound;
     BOOL wasDuplicate = NO;
     
     for (i = 0; i < count; i++) {
         appURL = [appURLs objectAtIndex:i];
-        menuTitle = [[fm displayNameAtPath:[appURL path]] stringByDeletingPathExtension];
+        appName = [[fm displayNameAtPath:[appURL path]] stringByDeletingPathExtension];
         
-        // add a version after duplicates
-        if ([menuTitle isEqualToString:lastMenuTitle]) {
-            if (wasDuplicate == NO && (version = shortVersionStringForURL([appURLs objectAtIndex:i - 1])))
-                [item setTitle:[[item title] stringByAppendingFormat:@" (%@)", version]];
-            if (version = shortVersionStringForURL(appURL))
-                menuTitle = [menuTitle stringByAppendingFormat:@" (%@)", version];
-            wasDuplicate = YES;
+        if ([appName isEqualToString:lastAppName]) {
+            j = i + 1;
+            while (j < count && [[[fm displayNameAtPath:[[appURLs objectAtIndex:j] path]] stringByDeletingPathExtension] isEqualToString:lastAppName])
+                j++;
+            namesAndURLs = uniqueVersionedNamesAndURLsForURLs([appURLs subarrayWithRange:NSMakeRange(i - 1, j - i + 1)], appName, defaultAppURL);
+            
+            [self removeItemAtIndex:[self numberOfItems] - 1];
+            i = j - 1;
         } else {
-            wasDuplicate = NO;
+            dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", appName, @"appName", nil];
+            namesAndURLs = [NSArray arrayWithObject:dict];
+            [dict release];
         }
-        lastMenuTitle = menuTitle;
+        lastAppName = appName;
         
-        // BDSKOpenWithMenuController singleton implements openURLWithApplication:
-        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];        
-        [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
-        representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, appURL, BDSKMenuApplicationURL, nil];
-        [item setRepresentedObject:representedObject];
-        [representedObject release];
-        
-        // use NSWorkspace to get an image; using [NSImage imageForURL:] doesn't work for some reason
-        [item setImageAndSize:[workspace iconForFileURL:appURL]];
-        [self insertItem:item atIndex:[self numberOfItems] - 1];
-        [item release];
+        subCount = [namesAndURLs count];
+        for (j = 0; j < subCount; j++) {
+            dict = [namesAndURLs objectAtIndex:j];
+            appURL = [dict objectForKey:@"appURL"];
+            appName = [dict objectForKey:@"appName"];
+            if (subCount > 1 && (version = [dict objectForKey:@"versionString"]))
+                appName = [appName stringByAppendingFormat:@" (%@)", version];
+            item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:appName action:@selector(openURLWithApplication:) keyEquivalent:@""];        
+            [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
+            
+            if ([appURL isEqual:defaultAppURL])
+                defaultIndex = [self numberOfItems] - 1;
+            
+            dict = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, appURL, BDSKMenuApplicationURL, nil];
+            [item setRepresentedObject:dict];
+            [dict release];
+            
+            // use NSWorkspace to get an image; using [NSImage imageForURL:] doesn't work for some reason
+            [item setImageAndSize:[workspace iconForFileURL:appURL]];
+            [self insertItem:item atIndex:[self numberOfItems] - 1];
+            [item release];
+        }
     }
     
     // mark the default app and move it to the front, if we have one
-    i = [appURLs indexOfObject:[workspace defaultEditorOrViewerURLForURL:aURL]];
-    if (i != NSNotFound) {
-        item = [[self itemAtIndex:i] retain];
+    if (defaultIndex != NSNotFound) {
+        item = [[self itemAtIndex:defaultIndex] retain];
         [item setTitle:[[item title] stringByAppendingString:NSLocalizedString(@" (Default)", @"Menu item title, Need a single leading space")]];
-        [self removeItemAtIndex:i];
+        [self removeItemAtIndex:defaultIndex];
         [self insertItem:[NSMenuItem separatorItem] atIndex:0];
         [self insertItem:item atIndex:0];
         [item release];
