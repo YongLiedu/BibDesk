@@ -42,7 +42,7 @@
 #import <OmniFoundation/OFResourceFork.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
-#import <OmniFoundation/OFVersionNumber.h>
+#import "BDSKVersionNumber.h"
 
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
@@ -361,7 +361,7 @@ static void createTemporaryDirectory()
     NSDirectoryEnumerator *dirEnum = [fm enumeratorAtPath:appSupportPath];
     NSString *file;
     NSString *lyxPipePath = nil;
-    OFVersionNumber *version = nil;
+    BDSKVersionNumber *version = nil;
     
     while (file = [dirEnum nextObject]) {
         NSString *fullPath = [appSupportPath stringByAppendingPathComponent:file];
@@ -373,11 +373,11 @@ static void createTemporaryDirectory()
                 if (version == nil) {
                     lyxPipePath = pipePath;
                 } else {
-                    OFVersionNumber *fileVersion = nil;
+                    BDSKVersionNumber *fileVersion = nil;
                     if ([file hasPrefix:@"LyX-"])
-                        fileVersion = [[[OFVersionNumber alloc] initWithVersionString:[file substringFromIndex:4]] autorelease];
+                        fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:[file substringFromIndex:4]] autorelease];
                     else
-                        fileVersion = [[[OFVersionNumber alloc] initWithVersionString:@""] autorelease];
+                        fileVersion = [[[BDSKVersionNumber alloc] initWithVersionString:@""] autorelease];
                     if ([fileVersion compareToVersionNumber:version] == NSOrderedDescending) {
                         lyxPipePath = pipePath;
                         version = fileVersion;

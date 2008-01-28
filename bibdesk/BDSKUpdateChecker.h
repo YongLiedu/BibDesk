@@ -47,14 +47,14 @@ typedef enum {
     BDSKCheckForUpdatesMonthly =  3
 } BDSKUpdateCheckInterval;
 
-@class BDSKRelNotesController, OFVersionNumber;
+@class BDSKRelNotesController, BDSKVersionNumber;
 
 @interface BDSKUpdateChecker : NSObject {
     NSLock *plistLock;
     NSDictionary *propertyListFromServer;
     BDSKRelNotesController *releaseNotesWindowController;
     NSTimer *updateTimer;
-    OFVersionNumber *localVersionNumber;
+    BDSKVersionNumber *localVersionNumber;
     NSString *keyForCurrentMajorVersion;
 }
 

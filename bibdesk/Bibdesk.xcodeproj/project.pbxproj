@@ -186,6 +186,8 @@
 		CE38FB91091D94A100BCB69D /* BDSKFilterController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE38FB8D091D94A100BCB69D /* BDSKFilterController.m */; };
 		CE38FB94091D953900BCB69D /* BDSKFilter.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE38FB92091D953900BCB69D /* BDSKFilter.nib */; };
 		CE38FB97091D954E00BCB69D /* BDSKCondition.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE38FB95091D954E00BCB69D /* BDSKCondition.nib */; };
+		CE38FEFE0D4E7EC700D0A886 /* BDSKVersionNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = CE38FEFC0D4E7EC700D0A886 /* BDSKVersionNumber.h */; };
+		CE38FEFF0D4E7EC700D0A886 /* BDSKVersionNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = CE38FEFD0D4E7EC700D0A886 /* BDSKVersionNumber.m */; };
 		CE392ED508D034E4001CEAC8 /* BDSKRatingButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE392ED308D034E4001CEAC8 /* BDSKRatingButtonCell.m */; };
 		CE392F5E08D04083001CEAC8 /* BDSKRatingButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */; };
 		CE3A1A570B19C2F700233208 /* SelectEncodingsPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE3A1A560B19C2F700233208 /* SelectEncodingsPanel.nib */; };
@@ -1073,6 +1075,8 @@
 		CE38FB8D091D94A100BCB69D /* BDSKFilterController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKFilterController.m; sourceTree = "<group>"; };
 		CE38FB93091D953900BCB69D /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKFilter.nib; sourceTree = "<group>"; };
 		CE38FB96091D954E00BCB69D /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKCondition.nib; sourceTree = "<group>"; };
+		CE38FEFC0D4E7EC700D0A886 /* BDSKVersionNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKVersionNumber.h; sourceTree = "<group>"; };
+		CE38FEFD0D4E7EC700D0A886 /* BDSKVersionNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKVersionNumber.m; sourceTree = "<group>"; };
 		CE392ED208D034E4001CEAC8 /* BDSKRatingButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRatingButtonCell.h; sourceTree = "<group>"; };
 		CE392ED308D034E4001CEAC8 /* BDSKRatingButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRatingButtonCell.m; sourceTree = "<group>"; };
 		CE392F5B08D04083001CEAC8 /* BDSKRatingButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRatingButton.h; sourceTree = "<group>"; };
@@ -2233,6 +2237,7 @@
 				F963E42B0A1D7ADD00695DDC /* BDSKTreeNode.m */,
 				CE8961880CBEB59800EA2D98 /* BDSKTypeTemplate.m */,
 				F9F5ECD00AE5E7C8007EBB31 /* BDSKURLGroup.m */,
+				CE38FEFD0D4E7EC700D0A886 /* BDSKVersionNumber.m */,
 				4575382B0B70170D00C0E49B /* BDSKWebGroup.m */,
 				F9B8019D0B41E91F00A5A615 /* BDSKZoomGroupServer.m */,
 				F9022C60075802E300C3F701 /* BibAuthor.m */,
@@ -2636,6 +2641,7 @@
 				F9EA8FC80ADE01F9005EFBE4 /* BDSKUpdateChecker.h */,
 				F9F5ECCF0AE5E7C8007EBB31 /* BDSKURLGroup.h */,
 				CEEFDE000B03ED0200668BB0 /* BDSKURLGroupSheetController.h */,
+				CE38FEFC0D4E7EC700D0A886 /* BDSKVersionNumber.h */,
 				4575382A0B70170D00C0E49B /* BDSKWebGroup.h */,
 				4575382C0B70170D00C0E49B /* BDSKWebGroupViewController.h */,
 				F9E069B40981A03B00AEFBE7 /* BDSKWebOfScienceParser.h */,
@@ -2917,6 +2923,7 @@
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
 				CE2E78CC0D40F6BB00340B39 /* BDSKMultiValueDictionary.h in Headers */,
+				CE38FEFE0D4E7EC700D0A886 /* BDSKVersionNumber.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3894,6 +3901,7 @@
 				CE83E3A60D294EE300BB7AD8 /* BDSKSortCommand.m in Sources */,
 				CE2E78CD0D40F6BB00340B39 /* BDSKMultiValueDictionary.m in Sources */,
 				F990C58C0D42D58D00B5425E /* BDSKDocumentSearch.m in Sources */,
+				CE38FEFF0D4E7EC700D0A886 /* BDSKVersionNumber.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -39,6 +39,7 @@
 #import "BDSKUpdateChecker.h"
 #import "BDSKReadMeController.h"
 #import "NSError_BDSKExtensions.h"
+#import "BDSKVersionNumber.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 
 #define PROPERTY_LIST_URL @"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"
@@ -50,10 +51,10 @@
 - (NSURL *)propertyListURL;
 - (NSURL *)releaseNotesURLForVersion:(NSString *)versionString;
 - (NSString *)keyForVersion:(NSString *)versionString;
-- (OFVersionNumber *)latestReleasedVersionNumber;
-- (OFVersionNumber *)latestReleasedVersionNumberForCurrentMajor;
-- (OFVersionNumber *)latestNotifiedVersionNumber;
-- (OFVersionNumber *)localVersionNumber;
+- (BDSKVersionNumber *)latestReleasedVersionNumber;
+- (BDSKVersionNumber *)latestReleasedVersionNumberForCurrentMajor;
+- (BDSKVersionNumber *)latestNotifiedVersionNumber;
+- (BDSKVersionNumber *)localVersionNumber;
 - (BOOL)downloadPropertyListFromServer:(NSError **)error;
 
 - (void)handleUpdateIntervalChanged:(NSNotification *)note;
@@ -91,7 +92,7 @@
         updateTimer = nil;
         
         NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-        localVersionNumber = [[OFVersionNumber alloc] initWithVersionString:versionString];
+        localVersionNumber = [[BDSKVersionNumber alloc] initWithVersionString:versionString];
         keyForCurrentMajorVersion = [[self keyForVersion:versionString] retain];
         
         [OFPreference addObserver:self 
@@ -171,10 +172,10 @@
         return;
     }
     
-    OFVersionNumber *remoteVersion = [self latestReleasedVersionNumber];
-    OFVersionNumber *remoteVersionForCurrentMajor = [self latestReleasedVersionNumberForCurrentMajor];
-    OFVersionNumber *localVersion = [self localVersionNumber];
-    OFVersionNumber *notifiedVersion = [self latestNotifiedVersionNumber];
+    BDSKVersionNumber *remoteVersion = [self latestReleasedVersionNumber];
+    BDSKVersionNumber *remoteVersionForCurrentMajor = [self latestReleasedVersionNumberForCurrentMajor];
+    BDSKVersionNumber *localVersion = [self localVersionNumber];
+    BDSKVersionNumber *notifiedVersion = [self latestNotifiedVersionNumber];
     
     // simplification if we already have the latest major
     if(remoteVersionForCurrentMajor && [remoteVersionForCurrentMajor compareToVersionNumber:remoteVersion] != NSOrderedAscending){
@@ -243,38 +244,38 @@
 // string of the form BibDesk1.3 for BibDesk 1.3.x; update check info is keyed to a specific branch of development
 - (NSString *)keyForVersion:(NSString *)versionString;
 {
-    OFVersionNumber *versionNumber = [[[OFVersionNumber alloc] initWithVersionString:versionString] autorelease];
+    BDSKVersionNumber *versionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:versionString] autorelease];
     NSAssert([versionNumber componentCount] > 1, @"expect at least 2 version components");
     return [NSString stringWithFormat:@"%@%d.%d", BIBDESK_VERSION_KEY, [versionNumber componentAtIndex:0], [versionNumber componentAtIndex:1]];
 }
 
-- (OFVersionNumber *)latestReleasedVersionNumber;
+- (BDSKVersionNumber *)latestReleasedVersionNumber;
 {
     [plistLock lock];
     NSString *versionString = [[[propertyListFromServer objectForKey:BIBDESK_VERSION_KEY] copy] autorelease];
     [plistLock unlock];
-    OFVersionNumber *versionNumber = versionString ? [[[OFVersionNumber alloc] initWithVersionString:versionString] autorelease] : nil;
+    BDSKVersionNumber *versionNumber = versionString ? [[[BDSKVersionNumber alloc] initWithVersionString:versionString] autorelease] : nil;
     return versionNumber;
 }
 
-- (OFVersionNumber *)latestReleasedVersionNumberForCurrentMajor;
+- (BDSKVersionNumber *)latestReleasedVersionNumberForCurrentMajor;
 {
     [plistLock lock];
     NSDictionary *thisBranchDictionary = [[propertyListFromServer objectForKey:keyForCurrentMajorVersion] copy];
     [plistLock unlock];
-    OFVersionNumber *versionNumber = thisBranchDictionary ? [[[OFVersionNumber alloc] initWithVersionString:[thisBranchDictionary valueForKey:@"LatestVersion"]] autorelease] : nil;
+    BDSKVersionNumber *versionNumber = thisBranchDictionary ? [[[BDSKVersionNumber alloc] initWithVersionString:[thisBranchDictionary valueForKey:@"LatestVersion"]] autorelease] : nil;
     [thisBranchDictionary release];
     return versionNumber;
 }
 
-- (OFVersionNumber *)latestNotifiedVersionNumber;
+- (BDSKVersionNumber *)latestNotifiedVersionNumber;
 {
     NSString *versionString = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKUpdateLatestNotifiedVersionKey];
-    OFVersionNumber *versionNumber = [[[OFVersionNumber alloc] initWithVersionString:versionString] autorelease];
+    BDSKVersionNumber *versionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:versionString] autorelease];
     return versionNumber;
 }
 
-- (OFVersionNumber *)localVersionNumber;
+- (BDSKVersionNumber *)localVersionNumber;
 {
     return localVersionNumber;
 }
@@ -485,10 +486,10 @@
     // make sure our plist is current
     [self downloadPropertyListFromServer:&error];
     
-    OFVersionNumber *remoteVersion = [self latestReleasedVersionNumber];
-    OFVersionNumber *remoteVersionForCurrentMajor = [self latestReleasedVersionNumberForCurrentMajor];
-    OFVersionNumber *localVersion = [self localVersionNumber];
-    OFVersionNumber *notifiedVersion = [self latestNotifiedVersionNumber];
+    BDSKVersionNumber *remoteVersion = [self latestReleasedVersionNumber];
+    BDSKVersionNumber *remoteVersionForCurrentMajor = [self latestReleasedVersionNumberForCurrentMajor];
+    BDSKVersionNumber *localVersion = [self localVersionNumber];
+    BDSKVersionNumber *notifiedVersion = [self latestNotifiedVersionNumber];
     
     // simplification if we're already have the latest major
     if(remoteVersionForCurrentMajor && [remoteVersionForCurrentMajor compareToVersionNumber:remoteVersion] != NSOrderedAscending){

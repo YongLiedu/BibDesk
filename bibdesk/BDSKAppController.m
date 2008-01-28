@@ -80,6 +80,7 @@
 #import "BDSKFileMatcher.h"
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKBookmarkController.h"
+#import "BDSKVersionNumber.h"
 
 @implementation BDSKAppController
 
@@ -1432,7 +1433,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
     NSBundle *importerBundle = [NSBundle bundleWithPath:importerPath];
     NSString *importerVersion = [importerBundle objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
     if (importerVersion) {
-        OFVersionNumber *importerVersionNumber = [[[OFVersionNumber alloc] initWithVersionString:importerVersion] autorelease];
+        BDSKVersionNumber *importerVersionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:importerVersion] autorelease];
         NSDictionary *versionInfo = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSpotlightVersionInfo];
         
         long sysVersion;
@@ -1443,7 +1444,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
             runImporter = YES;
         } else {
             NSString *lastImporterVersion = [versionInfo objectForKey:@"lastImporterVersion"];
-            OFVersionNumber *lastImporterVersionNumber = [[[OFVersionNumber alloc] initWithVersionString:lastImporterVersion] autorelease];
+            BDSKVersionNumber *lastImporterVersionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:lastImporterVersion] autorelease];
             
             long lastSysVersion = [[versionInfo objectForKey:@"lastSysVersion"] longValue];
             

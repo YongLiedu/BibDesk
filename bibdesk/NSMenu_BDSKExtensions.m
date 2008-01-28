@@ -41,6 +41,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
+#import "BDSKVersionNumber.h"
 
 static NSString *BDSKMenuTargetURL = @"BDSKMenuTargetURL";
 static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
@@ -173,7 +174,7 @@ static inline NSArray *uniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSSt
                 }
             }
             if ([versionStrings containsObject:versionString] == NO) {
-                OFVersionNumber *versionNumber = versionString ? [[OFVersionNumber alloc] initWithVersionString:versionString] : nil;
+                BDSKVersionNumber *versionNumber = versionString ? [[BDSKVersionNumber alloc] initWithVersionString:versionString] : nil;
                 NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", appName, @"appName", versionString, @"versionString", versionNumber, @"versionNumber", nil];
                 if (versionString)
                     [versionStrings addObject:versionString];
