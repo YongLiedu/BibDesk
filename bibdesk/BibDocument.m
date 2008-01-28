@@ -2955,7 +2955,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"string"];
 }
 
-- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView {
+- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView {
     return [[self shownFiles] count];
 }
 
