@@ -59,6 +59,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
+#import "NSParagraphStyle_BDSKExtensions.h"
 
 @interface BDSKMainTableView (Private)
 
@@ -303,11 +304,7 @@
             [tc setDataCell:imageCell];
         }else if([colName isEqualToString:BDSKLocalFileString] || [colName isEqualToString:BDSKRemoteURLString]){
             BDSKTextWithIconCell *textIconCell = [[[BDSKTextWithIconCell alloc] init] autorelease];
-            NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-            // Mail.app word wraps its paperclip cell, and BDSKTextWithIconCell ignores setLineBreakMode:
-            [style setLineBreakMode:NSLineBreakByWordWrapping];
-            [textIconCell setParagraphStyle:style];
-            [style release];
+            [textIconCell setParagraphStyle:[NSParagraphStyle defaultClippingParagraphStyle]];
             [tc setDataCell:textIconCell];
         }else if([colName isRatingField]){
             BDSKRatingButtonCell *ratingCell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];
