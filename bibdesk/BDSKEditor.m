@@ -1429,7 +1429,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 #pragma mark FileView support
 
-- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
+- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView { return [publication countOfFiles]; }
 
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
 {
