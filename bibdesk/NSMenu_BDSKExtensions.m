@@ -161,7 +161,7 @@ static inline NSString *shortVersionStringForURL(NSURL *bundleURL) {
     
     for (i = 0; i < count; i++) {
         appURL = [appURLs objectAtIndex:i];
-        menuTitle = [fm displayNameAtPath:[appURL path]];
+        menuTitle = [[fm displayNameAtPath:[appURL path]] stringByDeletingPathExtension];
         
         // add a version after duplicates
         if ([menuTitle isEqualToString:lastMenuTitle]) {
@@ -180,11 +180,11 @@ static inline NSString *shortVersionStringForURL(NSURL *bundleURL) {
         [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
         representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, appURL, BDSKMenuApplicationURL, nil];
         [item setRepresentedObject:representedObject];
+        [representedObject release];
         
         // use NSWorkspace to get an image; using [NSImage imageForURL:] doesn't work for some reason
         [item setImageAndSize:[workspace iconForFileURL:appURL]];
-        [representedObject release];
-        [self addItem:item];
+        [self insertItem:item atIndex:[self numberOfItems] - 1];
         [item release];
     }
     
@@ -194,11 +194,13 @@ static inline NSString *shortVersionStringForURL(NSURL *bundleURL) {
         item = [[self itemAtIndex:i] retain];
         [item setTitle:[[item title] stringByAppendingString:NSLocalizedString(@" (Default)", @"Menu item title, Need a single leading space")]];
         [self removeItemAtIndex:i];
-        if ([self numberOfItems])
-            [self insertItem:[NSMenuItem separatorItem] atIndex:0];
+        [self insertItem:[NSMenuItem separatorItem] atIndex:0];
         [self insertItem:item atIndex:0];
         [item release];
     }
+    
+    if ([self numberOfItems] > 3)
+        [self insertItem:[NSMenuItem separatorItem] atIndex:[self numberOfItems] - 1];
 }
 
 @end
