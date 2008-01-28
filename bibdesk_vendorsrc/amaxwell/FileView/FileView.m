@@ -344,7 +344,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 - (void)setDataSource:(id)obj;
 {
     if (obj) {
-        FVAPIAssert1([obj respondsToSelector:@selector(numberOfIconsInFileView:)], @"datasource must implement %@", NSStringFromSelector(@selector(numberOfIconsInFileView:)));
+        FVAPIAssert1([obj respondsToSelector:@selector(numberOfURLsInFileView:)], @"datasource must implement %@", NSStringFromSelector(@selector(numberOfURLsInFileView:)));
         FVAPIAssert1([obj respondsToSelector:@selector(fileView:URLAtIndex:)], @"datasource must implement %@", NSStringFromSelector(@selector(fileView:URLAtIndex:)));
     }
     _dataSource = obj;
@@ -606,7 +606,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (NSUInteger)numberOfIcons
 {
-    return nil == _iconURLs ? [_dataSource numberOfIconsInFileView:self] : [_iconURLs count];
+    return nil == _iconURLs ? [_dataSource numberOfURLsInFileView:self] : [_iconURLs count];
 }
 
 - (FVIcon *)_cachedIconForURL:(NSURL *)aURL;

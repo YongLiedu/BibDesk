@@ -101,7 +101,7 @@
     [super dealloc];
 }
 
-- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return 0; }
+- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView { return 0; }
 
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx { return nil; }
 

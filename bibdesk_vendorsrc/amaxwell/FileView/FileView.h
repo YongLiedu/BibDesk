@@ -155,7 +155,7 @@ typedef enum _FVDropOperation {
 @interface NSObject (FileViewDataSource)
 
 // delegate must return an NSURL or nil (a missing value) for each index < numberOfFiles
-- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView;
+- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView;
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex;
 
 // optional method for a subtitle
