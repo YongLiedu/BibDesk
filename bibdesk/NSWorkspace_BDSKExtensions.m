@@ -336,10 +336,11 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     NSString *bundleID;
     NSMutableSet *set = [[NSMutableSet alloc] init];
     NSMutableArray *applications = [NSMutableArray array];
+    NSFileManager *fm = [NSFileManager defaultManager];
     
     while(bundleID = [idEnum nextObject]){
         if ([set containsObject:bundleID]) continue;
-        NSString *name = [[[self absolutePathForAppBundleWithIdentifier:bundleID] lastPathComponent] stringByDeletingPathExtension];
+        NSString *name = [[fm displayNameAtPath:[self absolutePathForAppBundleWithIdentifier:bundleID]] stringByDeletingPathExtension];
         if (name == nil) continue;
         NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:bundleID, @"bundleID", name, @"name", nil];
         [applications addObject:dict];
