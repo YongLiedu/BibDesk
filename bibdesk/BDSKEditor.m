@@ -1529,11 +1529,18 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         [fileView setDropIndex:NSNotFound dropOperation:FVDropOn];
     } else if ([[info draggingSource] isEqual:fileView] && dropOperation == FVDropOn) {
         // redirect local drop on icon and drop on view
-        dragOp = NSDragOperationMove;
-        if (anIndex == NSNotFound) // note that the count must be > 0, or we wouldn't have a local drag
-            [fileView setDropIndex:[publication countOfFiles] - 1 dropOperation:FVDropAfter];
-        else
-            [fileView setDropIndex:NSNotFound dropOperation:FVDropBefore];
+        NSIndexSet *dragIndexes = [fileView selectionIndexes];
+        NSUInteger firstIndex = [dragIndexes firstIndex], endIndex = [dragIndexes lastIndex] + 1, count = [publication countOfFiles];
+        if (anIndex == NSNotFound)
+            anIndex = count;
+        // if we're dragging a continuous range, don't move when we drop on that range
+        if ([dragIndexes count] != endIndex - firstIndex || anIndex < firstIndex || anIndex > endIndex) {
+            dragOp = NSDragOperationMove;
+            if (anIndex == count) // note that the count must be > 0, or we wouldn't have a local drag
+                [fileView setDropIndex:count - 1 dropOperation:FVDropAfter];
+            else
+                [fileView setDropIndex:anIndex dropOperation:FVDropBefore];
+        }
     } else if (dragOperation != NSDragOperationMove && dragOperation != NSDragOperationNone) {
         // any other remote drag is interpreted as a link
         dragOp = NSDragOperationLink;
