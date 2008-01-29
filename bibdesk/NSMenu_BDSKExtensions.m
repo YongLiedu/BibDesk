@@ -165,15 +165,18 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
             NSString *versionString = [appInfo objectForKey:@"CFBundleShortVersionString"];
             if (versionString == nil)
                 versionString = [appInfo objectForKey:@"CFBundleVersion"];
-            // we make sure the default app is always included, and we prefer apps in Applications or System
-            if ([versionStrings containsObject:versionString] && ([defaultAppURL isEqual:appURL] || fileIsInApplicationsOrSystem(appURL))) {
+            // we always include the default app and any version in Applications or System
+            BOOL isPreferred = [defaultAppURL isEqual:appURL] || fileIsInApplicationsOrSystem(appURL);
+            if (isPreferred) {
+                // if it's preferred, remove any alternative
                 unsigned int idx = [[uniqueNamesAndURLs valueForKey:@"versionString"] indexOfObject:versionString];
-                if (idx != NSNotFound && [[[uniqueNamesAndURLs objectAtIndex:idx] objectForKey:@"appURL"] isEqual:defaultAppURL] == NO) {
-                    [uniqueNamesAndURLs removeObjectAtIndex:idx];
-                    [versionStrings removeObject:versionString];
+                if (idx != NSNotFound) {
+                    NSURL *altURL = [[uniqueNamesAndURLs objectAtIndex:idx] objectForKey:@"appURL"];
+                    if ([defaultAppURL isEqual:altURL] == NO && fileIsInApplicationsOrSystem(altURL) == NO)
+                        [uniqueNamesAndURLs removeObjectAtIndex:idx];
                 }
             }
-            if ([versionStrings containsObject:versionString] == NO) {
+            if ([versionStrings containsObject:versionString] == NO || isPreferred) {
                 BDSKVersionNumber *versionNumber = versionString ? [[BDSKVersionNumber alloc] initWithVersionString:versionString] : nil;
                 NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", appName, @"appName", versionString, @"versionString", versionNumber, @"versionNumber", nil];
                 if (versionString)
