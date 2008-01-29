@@ -20,6 +20,8 @@
 
 @implementation BDSKVersionNumber
 
+// This allows version numbers like "1.3", "v1.3", "1.0b2", "1.0rc1", "198v3", "1.0-alpha-5", and ignores spaces
+
 // Initializes the receiver from a string representation of a version number.  The input string may have an optional leading 'v' or 'V' followed by a sequence of positive integers separated by '.'s.  Any trailing component of the input string that doesn't match this pattern is ignored.  If no portion of this string matches the pattern, nil is returned.
 - (id)initWithVersionString:(NSString *)versionString;
 {
@@ -36,55 +38,56 @@
         
         NSMutableString *mutableVersionString = [[NSMutableString alloc] init];
         NSScanner *scanner = [[NSScanner alloc] initWithString:versionString];
+        NSString *sep = @"";
         
-        [scanner setCharactersToBeSkipped:nil];
+        [scanner setCharactersToBeSkipped:[NSCharacterSet whitespaceCharacterSet]];
         
-        unichar c = [versionString length] ? [versionString characterAtIndex:0] : 0;
-        if (c == 'v' || c == 'V')
-            [scanner setScanLocation:1];
-
-        while ([scanner isAtEnd] == NO) {
+        // ignore a leading "version" or "v", possibly followed by "-"
+        if ([scanner scanString:@"version" intoString:NULL] || [scanner scanString:@"v" intoString:NULL])
+            [scanner scanString:@"-" intoString:NULL];
+        
+        while ([scanner isAtEnd] == NO && sep != nil) {
             int component;
             
-            if ([scanner scanInt:&component] == NO || component < 0)
-                // Failed to scan integer
-                break;
+            if ([scanner scanInt:&component] && component >= 0) {
             
-            [mutableVersionString appendFormat: @"%@%i", c == '.' ? @"." : @"", component];
-            
-            componentCount++;
-            components = realloc(components, sizeof(*components) * componentCount);
-            components[componentCount - 1] = component;
-            
-            if ([scanner isAtEnd])
-                break;
-            
-            c = [versionString characterAtIndex:[scanner scanLocation]];
-            if (c == '.') {
-            } else if (releaseType == BDSKReleaseVersionType) {
-                if (c == 'a' || c == 'A') {
-                    releaseType = BDSKAlphaVersionType;
-                    [mutableVersionString appendString:c == 'a' ? @"a" : @"A"];
-                } else if (c == 'b' || c == 'B') {
-                    releaseType = BDSKBetaVersionType;
-                    [mutableVersionString appendString:c == 'b' ? @"b" : @"B"];
-                } else if (c == 'r' || c == 'R') {
-                    [scanner setScanLocation:[scanner scanLocation] + 1];
-                    c = [versionString characterAtIndex:[scanner scanLocation]];
-                    if (c == 'c' || c == 'C') {
-                        releaseType = BDSKReleaseCandidateVersionType;
-                        [mutableVersionString appendString:c == 'c' ? @"rc" : @"RC"];
-                    } else
-                        break;
-                } else 
-                    break;
+                [mutableVersionString appendFormat:@"%@%i", sep, component];
                 
                 componentCount++;
                 components = realloc(components, sizeof(*components) * componentCount);
-                components[componentCount - 1] = -releaseType;
-            } else
-                break;
-            [scanner setScanLocation:[scanner scanLocation] + 1];
+                components[componentCount - 1] = component;
+            
+                if ([scanner isAtEnd] == NO) {
+                    sep = nil;
+                    if ([scanner scanString:@"." intoString:NULL] || [scanner scanString:@"-" intoString:NULL] || [scanner scanString:@"version" intoString:NULL] || [scanner scanString:@"v" intoString:NULL]) {
+                        sep = @".";
+                    }
+                    if (releaseType == BDSKReleaseVersionType) {
+                        if ([scanner scanString:@"alpha" intoString:NULL] || [scanner scanString:@"a" intoString:NULL]) {
+                            releaseType = BDSKAlphaVersionType;
+                            [mutableVersionString appendString:@"a"];
+                        } else if ([scanner scanString:@"beta" intoString:NULL] || [scanner scanString:@"b" intoString:NULL]) {
+                            releaseType = BDSKBetaVersionType;
+                            [mutableVersionString appendString:@"b"];
+                        } else if ([scanner scanString:@"release candidate" intoString:NULL] || [scanner scanString:@"rc" intoString:NULL]) {
+                            releaseType = BDSKReleaseCandidateVersionType;
+                            [mutableVersionString appendString:@"rc"];
+                        }
+                        
+                        if (releaseType != BDSKReleaseVersionType) {
+                            // we scanned an "a", "b", or "rc"
+                            componentCount++;
+                            components = realloc(components, sizeof(*components) * componentCount);
+                            components[componentCount - 1] = -releaseType;
+                            
+                            sep = @"";
+                            
+                            // ignore a "." or "-"
+                            [scanner scanString:@"." intoString:NULL] || [scanner scanString:@"-" intoString:NULL];
+                        }
+                    }
+                }
+            }
         }
         
         if ([mutableVersionString isEqualToString:originalVersionString])
