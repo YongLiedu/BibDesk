@@ -4120,16 +4120,6 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item pubAuthorsForDisplay
 @tab 
-@item localUrlPath
-@tab 
-@item localURL
-@tab 
-@item remoteURL
-@tab 
-@item textSkimNotes
-@tab 
-@item richTextSkimNotes
-@tab 
 @item pubDate
 @tab 
 @item dateAdded
@@ -4142,10 +4132,20 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item fileOrder
 @tab 
+@item localUrlPath
+@tab deprecated, use the localURLs collection key
+@item localURL
+@tab deprecated, use the localURLs collection key
+@item remoteURL
+@tab deprecated, use the remoteURLs collection key
+@item textSkimNotes
+@tab deprecated, use the localURLs collection key
+@item richTextSkimNotes
+@tab deprecated, use the localURLs collection key
 @item fields.FieldName
 @tab FieldName can be the name of any field
 @item urls.FieldName
-@tab FieldName can be the name of any local or remote URL field
+@tab FieldName can be the name of any local or remote URL field, these are not the linked files and URLs
 @end multitable
 
 @subheading Field
