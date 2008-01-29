@@ -290,7 +290,7 @@ static void fixLegacyTableColumnIdentifiers()
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format")
                                          defaultButton:NSLocalizedString(@"Go to Preferences", @"Button title")
                                        alternateButton:NSLocalizedString(@"Revert to Default", @"Button title")
-                                           otherButton:nil
+                                           otherButton:otherButton
                              informativeTextWithFormat:@"%@", error];
         [alert setAlertStyle:NSCriticalAlertStyle];
         button = [alert runModal];
