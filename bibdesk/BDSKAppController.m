@@ -282,8 +282,11 @@ static void fixLegacyTableColumnIdentifiers()
         } else if ([formatString rangeOfString:@"."].length) {
             fixedFormatString = [[[formatString stringByDeletingPathExtension] stringByAppendingString:@"%n0"] stringByAppendingPathExtension:[formatString pathExtension]];
         }
-        if (fixedFormatString && [BDSKFormatParser validateFormat:&fixedFormatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:NULL])
+        if (fixedFormatString && [BDSKFormatParser validateFormat:&fixedFormatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:NULL]) {
+            [pw setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
+            [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             otherButton = NSLocalizedString(@"Fix", @"Button title");
+        }
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for local files is invalid.", @"Message in alert dialog when detecting invalid local file format")
                                          defaultButton:NSLocalizedString(@"Go to Preferences", @"Button title")
                                        alternateButton:NSLocalizedString(@"Revert to Default", @"Button title")
@@ -291,16 +294,15 @@ static void fixLegacyTableColumnIdentifiers()
                              informativeTextWithFormat:@"%@", error];
         [alert setAlertStyle:NSCriticalAlertStyle];
         button = [alert runModal];
-        if (button == NSAlertAlternateReturn) {
+        if (button == NSAlertDefaultReturn) {
+            [pw setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
+            [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
+            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+        } else if (button == NSAlertAlternateReturn) {
             formatString = [[pw preferenceForKey:BDSKLocalFileFormatKey] defaultObjectValue];			
             [pw setObject:formatString forKey:BDSKLocalFileFormatKey];
             [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-        } else if (button == NSAlertOtherReturn) {
-            [pw setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
-            [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
-        } else {
-            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
         }
     }
 
