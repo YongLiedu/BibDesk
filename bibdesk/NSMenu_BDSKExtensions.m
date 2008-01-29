@@ -217,6 +217,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
     NSArray *namesAndURLs;
     NSURL *appURL;
     NSString *appName;
+    NSString *menuTitle;
     NSString *version;
     NSDictionary *dict;
     unsigned int idx, i, j, subCount, count = [appURLs count];
@@ -234,11 +235,12 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
         for (j = 0; j < subCount; j++) {
             dict = [namesAndURLs objectAtIndex:j];
             appURL = [dict objectForKey:@"appURL"];
+            menuTitle = appName;
             if ([appURL isEqual:defaultAppURL])
-                appName = [appName stringByAppendingString:NSLocalizedString(@" (Default)", @"Menu item title, Need a single leading space")];
+                menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Menu item title, Need a single leading space")];
             if (subCount > 1 && (version = [dict objectForKey:@"versionString"]))
-                appName = [appName stringByAppendingFormat:@" (%@)", version];
-            item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:appName action:@selector(openURLWithApplication:) keyEquivalent:@""];        
+                menuTitle = [menuTitle stringByAppendingFormat:@" (%@)", version];
+            item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];        
             [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
             
             dict = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, appURL, BDSKMenuApplicationURL, nil];
