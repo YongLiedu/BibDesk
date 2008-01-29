@@ -57,10 +57,6 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
             [tag setKey:@"editors"];
     } else if ([field isURLField]) {
         tag = [[BDSKURLTagToken alloc] initWithTitle:field];
-        if ([field isEqualToString:BDSKLocalUrlString])
-            [tag setKey:@"localURL"];
-        if ([field isEqualToString:BDSKUrlString])
-            [tag setKey:@"remoteURL"];
     } else if ([field isEqualToString:@"Rich Text"]) {
         tag = [[BDSKTextToken alloc] initWithTitle:field];
     } else if ([field isEqualToString:BDSKDateAddedString] || [field isEqualToString:BDSKDateModifiedString] || [field isEqualToString:BDSKPubDateString]) {
