@@ -87,7 +87,8 @@
                         }
                     }
                 }
-            }
+            } else
+                sep = nil;
         }
         
         if ([mutableVersionString isEqualToString:originalVersionString])
