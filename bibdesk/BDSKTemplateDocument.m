@@ -179,6 +179,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         
         [specialTokens addObject:[self tokenForField:BDSKPubTypeString]];
         [specialTokens addObject:[self tokenForField:BDSKCiteKeyString]];
+        [specialTokens addObject:[self tokenForField:BDSKLocalFileString]];
+        [specialTokens addObject:[self tokenForField:BDSKRemoteURLString]];
+        [specialTokens addObject:[self tokenForField:BDSKCiteKeyString]];
         [specialTokens addObject:[self tokenForField:BDSKItemNumberString]];
         [specialTokens addObject:[self tokenForField:NSLocalizedString(@"Rich Text", @"Name for template token")]];
         [specialTokens addObject:[self tokenForField:BDSKDateAddedString]];
@@ -758,6 +761,18 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [menuToken setValue:newValue forKey:@"joinmStyleKey"];
 }
 
+- (IBAction)changeLinkedFileFormat:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"linkedFileFormatKey"];
+}
+
+- (IBAction)changeLinkedFileJoinStyle:(id)sender {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
+    [menuToken setValue:newValue forKey:@"linkedFileJoinStyleKey"];
+}
+
 - (IBAction)changeUrlFormat:(id)sender {
     NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
     NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
@@ -850,6 +865,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     SETUP_SUBMENU(personOptionsMenu, 2, @"casing", @selector(changeCasing:));
     SETUP_SUBMENU(personOptionsMenu, 3, @"cleaning", @selector(changeCleaning:));
     SETUP_SUBMENU(personOptionsMenu, 4, @"appending", @selector(changeAppending:));
+    SETUP_SUBMENU(linkedFileOptionsMenu, 0, @"linkedFileFormat", @selector(changeLinkedFileFormat:));
+    SETUP_SUBMENU(linkedFileOptionsMenu, 1, @"linkedFileJoinStyle", @selector(changeLinkedFileJoinStyle:));
+    SETUP_SUBMENU(linkedFileOptionsMenu, 2, @"appending", @selector(changeAppending:));
     SETUP_SUBMENU(dateOptionsMenu, 0, @"dateFormat", @selector(changeDateFormat:));
     SETUP_SUBMENU(dateOptionsMenu, 1, @"casing", @selector(changeCasing:));
     SETUP_SUBMENU(dateOptionsMenu, 2, @"cleaning", @selector(changeCleaning:));
@@ -915,16 +933,19 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     if (selectedToken && [selectedToken isKindOfClass:[BDSKToken class]]) {
         switch ([selectedToken type]) {
             case BDSKFieldTokenType:
-                optionViews = [NSMutableArray arrayWithObjects:fieldOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:fieldOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKURLTokenType:
-                optionViews = [NSMutableArray arrayWithObjects:urlOptionsView, fieldOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:urlOptionsView, fieldOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKPersonTokenType:
-                optionViews = [NSMutableArray arrayWithObjects:personOptionsView, fieldOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:personOptionsView, fieldOptionsView, appendingOptionsView, nil];
+                break;
+            case BDSKLinkedFileTokenType:
+                optionViews = [NSMutableArray arrayWithObjects:linkedFileOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKDateTokenType:
-                optionViews = [NSMutableArray arrayWithObjects:dateOptionsView, fieldOptionsView, nil];
+                optionViews = [NSMutableArray arrayWithObjects:dateOptionsView, fieldOptionsView, appendingOptionsView, nil];
                 break;
             case BDSKNumberTokenType:
                 optionViews = [NSMutableArray arrayWithObjects:numberOptionsView, nil];
@@ -1084,6 +1105,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
             case BDSKFieldTokenType: menu = fieldOptionsMenu; break;
             case BDSKURLTokenType: menu = urlOptionsMenu; break;
             case BDSKPersonTokenType: menu = personOptionsMenu; break;
+            case BDSKLinkedFileTokenType: menu = linkedFileOptionsMenu; break;
             case BDSKDateTokenType: menu = dateOptionsMenu; break;
             case BDSKNumberTokenType: menu = numberOptionsMenu; break;
             default: menu = nil; break;

@@ -263,6 +263,58 @@
             key = "@firstObject";
         }
     );
+    linkedFileFormat = (
+        {
+            displayName = "URL";
+            key = "URL.absoluteString";
+        },
+        {
+            displayName = "Path";
+            key = "path";
+        },
+        {
+            displayName = "File name";
+            key = "path.lastPathComponent";
+        },
+        {
+            displayName = "Container path";
+            key = "path.stringByDeletingLastPathComponent";
+        },
+        {
+            displayName = "Path extension";
+            key = "path.pathExtension";
+        },
+        {
+            displayName = "Tilde abbreviated path";
+            key = "path.stringByAbbreviatingWithTildeInPath";
+        },
+        {
+            displayName = "Path without extension";
+            key = "path.stringByDeletingPathExtension";
+        },
+        {
+            displayName = "Resolved path";
+            key = "path.stringByResolvingSymlinksInPath";
+        },
+        {
+            displayName = "Standardized path";
+            key = "path.stringByStandardizingPath";
+        },
+        {
+            displayName = "Normalized path";
+            key = "path.stringByNormalizingPath";
+        }
+    );
+    linkedFileJoinStyle = (
+        {
+            displayName = "A, B, C";
+            key = "@componentsJoinedByComma";
+        },
+        {
+            displayName = "First only";
+            key = "@firstObject";
+        }
+    );
     dateFormat = (
         {
             displayName = "Standard";

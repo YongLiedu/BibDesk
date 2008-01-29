@@ -42,6 +42,7 @@ enum {
     BDSKFieldTokenType,
     BDSKURLTokenType,
     BDSKPersonTokenType,
+    BDSKLinkedFileTokenType,
     BDSKDateTokenType,
     BDSKNumberTokenType,
     BDSKTextTokenType
@@ -105,19 +106,11 @@ extern NSString *BDSKTokenDidChangeNotification;
 
 #pragma mark -
 
-@interface BDSKFieldTagToken : BDSKTagToken {
-    NSString *casingKey;
-    NSString *cleaningKey;
+@interface BDSKValueTagToken : BDSKTagToken {
     NSString *appendingKey;
     NSString *prefix;
     NSString *suffix;
 }
-
-- (NSString *)casingKey;
-- (void)setCasingKey:(NSString *)newCasingKey;
-
-- (NSString *)cleaningKey;
-- (void)setCleaningKey:(NSString *)newCleaningKey;
 
 - (NSString *)appendingKey;
 - (void)setAppendingKey:(NSString *)newAppendingKey;
@@ -127,6 +120,21 @@ extern NSString *BDSKTokenDidChangeNotification;
 
 - (NSString *)suffix;
 - (void)setSuffix:(NSString *)newSuffix;
+
+@end
+
+#pragma mark -
+
+@interface BDSKFieldTagToken : BDSKValueTagToken {
+    NSString *casingKey;
+    NSString *cleaningKey;
+}
+
+- (NSString *)casingKey;
+- (void)setCasingKey:(NSString *)newCasingKey;
+
+- (NSString *)cleaningKey;
+- (void)setCleaningKey:(NSString *)newCleaningKey;
 
 @end
 
@@ -153,6 +161,21 @@ extern NSString *BDSKTokenDidChangeNotification;
 
 - (NSString *)joinStyleKey;
 - (void)setJoinStyleKey:(NSString *)newJoinStyleKey;
+
+@end
+
+#pragma mark -
+
+@interface BDSKLinkedFileTagToken : BDSKValueTagToken {
+    NSString *linkedFileFormatKey;
+    NSString *linkedFileJoinStyleKey;
+}
+
+- (NSString *)linkedFileFormatKey;
+- (void)setLinkedFileFormatKey:(NSString *)newLinkedFileFormatKey;
+
+- (NSString *)linkedFileJoinStyleKey;
+- (void)setLinkedFileJoinStyleKey:(NSString *)newLinkedFileJoinStyleKey;
 
 @end
 

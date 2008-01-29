@@ -55,6 +55,12 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
             [tag setKey:@"authors"];
         else if ([field isEqualToString:BDSKEditorString])
             [tag setKey:@"editors"];
+    } else if ([field isEqualToString:BDSKLocalFileString]) {
+        tag = [[BDSKLinkedFileTagToken alloc] initWithTitle:BDSKLocalFileString];
+        [tag setKey:@"localFiles"];
+    } else if ([field isEqualToString:BDSKRemoteURLString]) {
+        tag = [[BDSKLinkedFileTagToken alloc] initWithTitle:BDSKRemoteURLString];
+        [tag setKey:@"remoteURLs"];
     } else if ([field isURLField]) {
         tag = [[BDSKURLTagToken alloc] initWithTitle:field];
     } else if ([field isEqualToString:@"Rich Text"]) {
@@ -343,12 +349,10 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 
 #pragma mark -
 
-@implementation BDSKFieldTagToken
+@implementation BDSKValueTagToken
 
 - (id)initWithTitle:(NSString *)aTitle {
     if (self = [super initWithTitle:aTitle]) {
-        casingKey = nil;
-        cleaningKey = nil;
         appendingKey = nil;
         prefix = nil;
         suffix = nil;
@@ -359,14 +363,10 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
         if ([decoder allowsKeyedCoding]) {
-            casingKey = [[decoder decodeObjectForKey:@"casingKey"] retain];
-            cleaningKey = [[decoder decodeObjectForKey:@"cleaningKey"] retain];
             appendingKey = [[decoder decodeObjectForKey:@"appendingKey"] retain];
             prefix = [[decoder decodeObjectForKey:@"prefix"] retain];
             suffix = [[decoder decodeObjectForKey:@"suffix"] retain];
         } else {
-            casingKey = [[decoder decodeObject] retain];
-            cleaningKey = [[decoder decodeObject] retain];
             appendingKey = [[decoder decodeObject] retain];
             prefix = [[decoder decodeObject] retain];
             suffix = [[decoder decodeObject] retain];
@@ -378,14 +378,10 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [super encodeWithCoder:encoder];
     if ([encoder allowsKeyedCoding]) {
-        [encoder encodeObject:casingKey forKey:@"casingKey"];
-        [encoder encodeObject:cleaningKey forKey:@"cleaningKey"];
         [encoder encodeObject:appendingKey forKey:@"appendingKey"];
         [encoder encodeObject:prefix forKey:@"prefix"];
         [encoder encodeObject:suffix forKey:@"suffix"];
     } else {
-        [encoder encodeObject:casingKey];
-        [encoder encodeObject:cleaningKey];
         [encoder encodeObject:appendingKey];
         [encoder encodeObject:prefix];
         [encoder encodeObject:suffix];
@@ -393,9 +389,7 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
-    BDSKFieldTagToken *copy = [super copyWithZone:aZone];
-    copy->casingKey = [casingKey retain];
-    copy->cleaningKey = [cleaningKey retain];
+    BDSKValueTagToken *copy = [super copyWithZone:aZone];
     copy->appendingKey = [appendingKey retain];
     copy->prefix = [prefix retain];
     copy->suffix = [suffix retain];
@@ -403,8 +397,6 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 }
 
 - (void)dealloc {
-    [casingKey release];
-    [cleaningKey release];
     [appendingKey release];
     [prefix release];
     [suffix release];
@@ -413,42 +405,11 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
 /*
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] &&
-           EQUAL_OR_NIL_STRINGS(casingKey, [other casingKey]) &&
-           EQUAL_OR_NIL_STRINGS(cleaningKey, [other cleaningKey]) &&
            EQUAL_OR_NIL_STRINGS(appendingKey, [other appendingKey]) &&
            EQUAL_OR_NIL_STRINGS(prefix, [other prefix]) &&
            EQUAL_OR_NIL_STRINGS(suffix, [other suffix]);
 }
 */
-- (int)type {
-    return BDSKFieldTokenType;
-}
-
-- (NSString *)casingKey {
-    return casingKey;
-}
-
-- (void)setCasingKey:(NSString *)newCasingKey {
-    if (casingKey != newCasingKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setCasingKey:casingKey];
-        [casingKey release];
-        casingKey = [newCasingKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
-    }
-}
-
-- (NSString *)cleaningKey {
-    return cleaningKey;
-}
-
-- (void)setCleaningKey:(NSString *)newCleaningKey {
-    if (cleaningKey != newCleaningKey) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setCleaningKey:cleaningKey];
-        [cleaningKey release];
-        cleaningKey = [newCleaningKey retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
-    }
-}
 
 - (NSString *)appendingKey {
     return appendingKey;
@@ -485,6 +446,135 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
         [[[self undoManager] prepareWithInvocationTarget:self] setSuffix:suffix];
         [suffix release];
         suffix = [newSuffix retain];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
+    }
+}
+
+- (NSArray *)keys {
+    NSMutableArray *keys = [NSMutableArray array];
+    
+    if (key) {
+        [keys addObject:key];
+    } else {
+        [keys addObject:@"fields"];
+        [keys addObject:title];
+    }
+    if ([appendingKey length])
+        [keys addObject:appendingKey];
+    return keys;
+}
+
+- (NSString *)string {
+    NSString *keyPath = [[self keys] componentsJoinedByString:@"."];
+    if ([prefix length] || [suffix length]) {
+        NSMutableString *string = [NSMutableString stringWithFormat:@"<$%@?>", keyPath];
+        if ([prefix length])
+            [string appendString:prefix];
+        [string appendFormat:@"<$%@/>", keyPath];
+        if ([suffix length])
+            [string appendString:suffix];
+        [string appendFormat:@"</$%@?>", keyPath];
+        return string;
+    } else {
+        return [super string];
+    }
+}
+
+- (NSAttributedString *)attributedString {
+    NSFont *font = [NSFont fontWithName:fontName size:fontSize];
+    NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
+    return [[[NSAttributedString alloc] initWithString:[self string] attributes:attrs] autorelease];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKFieldTagToken
+
+- (id)initWithTitle:(NSString *)aTitle {
+    if (self = [super initWithTitle:aTitle]) {
+        casingKey = nil;
+        cleaningKey = nil;
+        appendingKey = nil;
+        prefix = nil;
+        suffix = nil;
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        if ([decoder allowsKeyedCoding]) {
+            casingKey = [[decoder decodeObjectForKey:@"casingKey"] retain];
+            cleaningKey = [[decoder decodeObjectForKey:@"cleaningKey"] retain];
+        } else {
+            casingKey = [[decoder decodeObject] retain];
+            cleaningKey = [[decoder decodeObject] retain];
+        }
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+    [super encodeWithCoder:encoder];
+    if ([encoder allowsKeyedCoding]) {
+        [encoder encodeObject:casingKey forKey:@"casingKey"];
+        [encoder encodeObject:cleaningKey forKey:@"cleaningKey"];
+    } else {
+        [encoder encodeObject:casingKey];
+        [encoder encodeObject:cleaningKey];
+        [encoder encodeObject:appendingKey];
+        [encoder encodeObject:prefix];
+        [encoder encodeObject:suffix];
+    }
+}
+
+- (id)copyWithZone:(NSZone *)aZone {
+    BDSKFieldTagToken *copy = [super copyWithZone:aZone];
+    copy->casingKey = [casingKey retain];
+    copy->cleaningKey = [cleaningKey retain];
+    return copy;
+}
+
+- (void)dealloc {
+    [casingKey release];
+    [cleaningKey release];
+    [super dealloc];
+}
+/*
+- (BOOL)isEqual:(id)other {
+    return [super isEqual:other] &&
+           EQUAL_OR_NIL_STRINGS(casingKey, [other casingKey]) &&
+           EQUAL_OR_NIL_STRINGS(cleaningKey, [other cleaningKey]);
+}
+*/
+- (int)type {
+    return BDSKFieldTokenType;
+}
+
+- (NSString *)casingKey {
+    return casingKey;
+}
+
+- (void)setCasingKey:(NSString *)newCasingKey {
+    if (casingKey != newCasingKey) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setCasingKey:casingKey];
+        [casingKey release];
+        casingKey = [newCasingKey retain];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
+    }
+}
+
+- (NSString *)cleaningKey {
+    return cleaningKey;
+}
+
+- (void)setCleaningKey:(NSString *)newCleaningKey {
+    if (cleaningKey != newCleaningKey) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setCleaningKey:cleaningKey];
+        [cleaningKey release];
+        cleaningKey = [newCleaningKey retain];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
     }
 }
@@ -720,6 +810,112 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
     if ([appendingKey length])
         [keys addObject:appendingKey];
     [keys addObject:joinStyleKey];
+    return keys;
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKLinkedFileTagToken
+
+- (id)initWithTitle:(NSString *)aTitle {
+    if (self = [super initWithTitle:aTitle]) {
+        linkedFileFormatKey = [([aTitle isEqualToString:BDSKLocalFileString] ? @"path" : @"URL.absoluteString" ) retain];
+        linkedFileJoinStyleKey = [@"@firstObject" retain];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        if ([decoder allowsKeyedCoding]) {
+            linkedFileFormatKey = [[decoder decodeObjectForKey:@"linkedFileFormatKey"] retain];
+            linkedFileJoinStyleKey = [[decoder decodeObjectForKey:@"linkedFileJoinStyleKey"] retain];
+        } else {
+            linkedFileFormatKey = [[decoder decodeObject] retain];
+            linkedFileJoinStyleKey = [[decoder decodeObject] retain];
+        }
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+    [super encodeWithCoder:encoder];
+    if ([encoder allowsKeyedCoding]) {
+        [encoder encodeObject:linkedFileFormatKey forKey:@"linkedFileFormatKey"];
+        [encoder encodeObject:linkedFileJoinStyleKey forKey:@"linkedFileJoinStyleKey"];
+    } else {
+        [encoder encodeObject:linkedFileFormatKey];
+        [encoder encodeObject:linkedFileJoinStyleKey];
+    }
+}
+
+- (id)copyWithZone:(NSZone *)aZone {
+    BDSKLinkedFileTagToken *copy = [super copyWithZone:aZone];
+    copy->linkedFileFormatKey = [linkedFileFormatKey retain];
+    copy->linkedFileJoinStyleKey = [linkedFileJoinStyleKey retain];
+    return copy;
+}
+
+- (void)dealloc {
+    [linkedFileFormatKey release];
+    [linkedFileJoinStyleKey release];
+    [super dealloc];
+}
+/*
+- (BOOL)isEqual:(id)other {
+    return [super isEqual:other] &&
+           EQUAL_OR_NIL_STRINGS(linkedFileFormatKey, [other linkedFileFormatKey]) &&
+           EQUAL_OR_NIL_STRINGS(linkedFileJoinStyleKey, [other linkedFileJoinStyleKey]);
+}
+*/
+- (int)type {
+    return BDSKLinkedFileTokenType;
+}
+
+
+- (NSString *)linkedFileFormatKey {
+    return [[linkedFileFormatKey retain] autorelease];
+}
+
+- (void)setLinkedFileFormatKey:(NSString *)newLinkedFileFormatKey {
+    if (linkedFileFormatKey != newLinkedFileFormatKey) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setLinkedFileFormatKey:linkedFileFormatKey];
+        [linkedFileFormatKey release];
+        linkedFileFormatKey = [newLinkedFileFormatKey retain];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
+    }
+}
+
+- (NSString *)linkedFileJoinStyleKey {
+    return [[linkedFileJoinStyleKey retain] autorelease];
+}
+
+- (void)setLinkedFileJoinStyleKey:(NSString *)newLinkedFileJoinStyleKey {
+    if (linkedFileJoinStyleKey != newLinkedFileJoinStyleKey) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setLinkedFileJoinStyleKey:linkedFileJoinStyleKey];
+        [linkedFileJoinStyleKey release];
+        linkedFileJoinStyleKey = [newLinkedFileJoinStyleKey retain];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTokenDidChangeNotification object:self];
+    }
+}
+
+- (NSArray *)keys {
+    NSMutableArray *keys = [NSMutableArray array];
+    
+    if (key) {
+        [keys addObject:key];
+    } else {
+        // shouldn't happen
+        [keys addObject:@"fields"];
+        [keys addObject:title];
+    }
+    if ([linkedFileFormatKey length])
+        [keys addObject:linkedFileFormatKey];
+    if ([appendingKey length])
+        [keys addObject:appendingKey];
+    [keys addObject:linkedFileJoinStyleKey];
     return keys;
 }
 
