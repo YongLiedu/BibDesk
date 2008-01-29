@@ -152,7 +152,7 @@ static inline NSString *displayNameForURL(NSURL *appURL) {
     return [[[NSFileManager defaultManager] displayNameAtPath:[appURL path]] stringByDeletingPathExtension];
 }
 
-static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSString *appName, NSURL *defaultAppURL) {
+static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, NSURL *defaultAppURL) {
     NSMutableArray *uniqueNamesAndURLs = [[NSMutableArray alloc] init];
     int i, count = [appURLs count];
     
@@ -178,7 +178,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
             }
             if ([versionStrings containsObject:versionString] == NO || isPreferred) {
                 BDSKVersionNumber *versionNumber = versionString ? [[BDSKVersionNumber alloc] initWithVersionString:versionString] : nil;
-                NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", appName, @"appName", versionString, @"versionString", versionNumber, @"versionNumber", nil];
+                NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", versionString, @"versionString", versionNumber, @"versionNumber", nil];
                 if (versionString)
                     [versionStrings addObject:versionString];
                 [versionNumber release];
@@ -193,7 +193,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
         [uniqueNamesAndURLs sortUsingDescriptors:[NSArray arrayWithObject:sort]];
         [sort release];
     } else if (count == 1) {
-        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:[appURLs lastObject], @"appURL", appName, @"appName", nil];
+        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:[appURLs lastObject], @"appURL", nil];
         [uniqueNamesAndURLs addObject:dict];
         [dict release];
     }
@@ -227,16 +227,15 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
         
         j = i + 1;
         while (j < count && [displayNameForURL([appURLs objectAtIndex:j]) isEqualToString:appName]) j++;
-        namesAndURLs = copyUniqueVersionedNamesAndURLsForURLs([appURLs subarrayWithRange:NSMakeRange(i, j - i)], appName, defaultAppURL);
+        namesAndURLs = copyUniqueVersionedNamesAndURLsForURLs([appURLs subarrayWithRange:NSMakeRange(i, j - i)], defaultAppURL);
         i = j - 1;
         
         subCount = [namesAndURLs count];
         for (j = 0; j < subCount; j++) {
             dict = [namesAndURLs objectAtIndex:j];
             appURL = [dict objectForKey:@"appURL"];
-            appName = [dict objectForKey:@"appName"];
             if ([appURL isEqual:defaultAppURL])
-                appName = [appName stringByAppendingString:NSLocalizedString(@" (default)", @"Menu item title, Need a single leading space")];
+                appName = [appName stringByAppendingString:NSLocalizedString(@" (Default)", @"Menu item title, Need a single leading space")];
             if (subCount > 1 && (version = [dict objectForKey:@"versionString"]))
                 appName = [appName stringByAppendingFormat:@" (%@)", version];
             item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:appName action:@selector(openURLWithApplication:) keyEquivalent:@""];        
@@ -259,7 +258,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
         [namesAndURLs release];
     }
     
-    if ([self numberOfItems] > 1 && [[self itemAtIndex:[self numberOfItems] - 2] isSeparatorItem])
+    if ([self numberOfItems] > 1 && [[self itemAtIndex:[self numberOfItems] - 2] isSeparatorItem] == NO)
         [self insertItem:[NSMenuItem separatorItem] atIndex:[self numberOfItems] - 1];
 }
 
