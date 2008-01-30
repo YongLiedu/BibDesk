@@ -479,7 +479,7 @@ static Class BDSKLinkedObjectClass = Nil;
 - (NSURL *)URL;
 {
     BOOL hadFileRef = fileRef != NULL;
-    CFURLRef aURL = hadFileRef ? CFURLCreateFromFSRef(NULL, fileRef) : NULL;
+    CFURLRef aURL = (hadFileRef || [self fileRef]) ? CFURLCreateFromFSRef(NULL, fileRef) : NULL;
     
     if (aURL == NULL && hadFileRef) {
         // fileRef was invalid, try to update it
