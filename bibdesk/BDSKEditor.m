@@ -666,7 +666,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)removeFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [removeFieldController field];
-    NSString *oldValue = [[[publication valueOfField:oldField] retain] autorelease];
+    NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
     NSArray *removableFields = [removeFieldController fieldsArray];
     
     if (returnCode == NSOKButton && oldField != nil && [removableFields count]) {
@@ -716,7 +716,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)changeFieldSheetDidEnd:(BDSKChangeFieldSheetController *)changeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [changeFieldController field];
     NSString *newField = [changeFieldController newField];
-    NSString *oldValue = [[[publication valueOfField:oldField] retain] autorelease];
+    NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
     int autoGenerateStatus = 0;
     
     if (returnCode == NSOKButton && [NSString isEmptyString:newField] == NO  && 
@@ -725,7 +725,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         [addedFields removeObject:oldField];
         [addedFields addObject:newField];
         [tabView selectFirstTabViewItem:nil];
-        [publication setField:newField toValue:[publication valueOfField:oldField inherit:NO]];
+        [publication setField:oldField toValue:nil];
+        [publication setField:newField toValue:oldValue];
         autoGenerateStatus = [self userChangedField:oldField from:oldValue to:@""];
         [self userChangedField:newField from:@"" to:oldValue didAutoGenerate:autoGenerateStatus];
         [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name", @"Undo action name")];
