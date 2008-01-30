@@ -252,6 +252,7 @@ static CFDictionaryRef selectorTable = NULL;
                      fileType:BDSKBibtexString 
                       citeKey:BDSKDefaultCiteKey 
                     pubFields:nil 
+                        files:nil 
                         isNew:YES];
 	if (self) {
         // reset this here, since designated init's updateMetadataForKey set it to YES
@@ -262,12 +263,22 @@ static CFDictionaryRef selectorTable = NULL;
 
 // this is the designated initializer.
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew{ 
+    return [self initWithType:type fileType:inFileType citeKey:key pubFields:fieldsDict files:nil isNew:isNew];
+}
+
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict files:(NSArray *)filesArray isNew:(BOOL)isNew{ 
     if (self = [super init]){
 		if(fieldsDict){
 			pubFields = [fieldsDict mutableCopy];
 		}else{
 			pubFields = [[NSMutableDictionary alloc] initWithCapacity:7];
 		}
+        if (filesArray) {
+            files = [filesArray mutableCopy];
+            [files makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
+        } else {
+            files = [[NSMutableArray alloc] initWithCapacity:2];
+        }
 		if (isNew){
 			NSString *nowStr = [[NSCalendarDate date] description];
 			[pubFields setObject:nowStr forKey:BDSKDateAddedString];
@@ -277,7 +288,6 @@ static CFDictionaryRef selectorTable = NULL;
         people = nil;
         
         owner = nil;
-        files = [NSMutableArray new];
         
         fileOrder = nil;
         identifierURL = createUniqueURL();
@@ -311,10 +321,9 @@ static CFDictionaryRef selectorTable = NULL;
 // Never copy between different documents, as this messes up the macroResolver for complex string values
 - (id)copyWithZone:(NSZone *)zone{
     // We set isNew to YES as copied items are always added as new items to a document, e.g. for duplicates and text import, so the Date-Added should be reset.  Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
-    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields isNew:YES];
     NSArray *filesCopy = [[NSArray allocWithZone: zone] initWithArray:files copyItems:YES];
-    [filesCopy makeObjectsPerformSelector:@selector(setDelegate:) withObject:theCopy];
-    [theCopy->files setArray:filesCopy];
+    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields files:filesCopy isNew:YES];
+    [filesCopy release];
     [theCopy setDate: pubDate];
 	
     return theCopy;
