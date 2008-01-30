@@ -312,6 +312,9 @@ static CFDictionaryRef selectorTable = NULL;
 - (id)copyWithZone:(NSZone *)zone{
     // We set isNew to YES as copied items are always added as new items to a document, e.g. for duplicates and text import, so the Date-Added should be reset.  Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields isNew:YES];
+    NSArray *filesCopy = [[NSArray allocWithZone: zone] initWithArray:files copyItems:YES];
+    [filesCopy makeObjectsPerformSelector:@selector(setDelegate:) withObject:theCopy];
+    [theCopy->files setArray:filesCopy];
     [theCopy setDate: pubDate];
 	
     return theCopy;

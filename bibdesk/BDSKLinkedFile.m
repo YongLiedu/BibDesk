@@ -388,8 +388,7 @@ static Class BDSKLinkedObjectClass = Nil;
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    // or should this be a real copy, as it is mutable?
-    return [self retain];
+    return [[[self class] allocWithZone:aZone] initWithAliasData:[self aliasDataRelativeToPath:[delegate basePathForLinkedFile:self]] relativePath:relativePath delegate:delegate];
 }
 
 // Should we implement -isEqual: and -hash?
@@ -625,7 +624,7 @@ static Class BDSKLinkedObjectClass = Nil;
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    return [[[self class] alloc] initWithURL:URL delegate:nil];
+    return [[[self class] allocWithZone:aZone] initWithURL:URL delegate:nil];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
