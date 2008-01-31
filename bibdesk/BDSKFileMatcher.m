@@ -53,6 +53,7 @@
 #import "CIImage_BDSKExtensions.h"
 #import "BDSKLevelIndicatorCell.h"
 #import "BDSKLinkedFile.h"
+#import "NSParagraphStyle_BDSKExtensions.h"
 
 #define MAX_SEARCHKIT_RESULTS 10
 static float LEAF_ROW_HEIGHT = 20.0;
@@ -631,6 +632,7 @@ static NSDictionary *attributes = nil;
         
         [newAttrs setObject:[NSFont boldSystemFontOfSize:[NSFont systemFontSize]] forKey:NSFontAttributeName];
         [newAttrs setObject:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] forKey:NSForegroundColorAttributeName];
+        [newAttrs setObject:[NSParagraphStyle defaultTruncatingTailParagraphStyle] forKey:NSParagraphStyleAttributeName];
 
         attributes = [newAttrs copy];
         [newAttrs release];

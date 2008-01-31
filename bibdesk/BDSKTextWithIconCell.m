@@ -243,8 +243,11 @@
 
 - (void)drawWithFrame:(NSRect)aRect inView:(NSView *)controlView;
 {
-    // let super draw the text
-    [super drawWithFrame:[self textRectForBounds:aRect] inView:controlView];
+    // let super draw the text, but vertically center the text for tall cells, because NSTextFieldCell aligns at the top
+    NSRect textRect = [self textRectForBounds:aRect];
+    if (NSHeight(textRect) > [self cellSize].height + 2.0)
+        textRect = BDSKCenterRectVertically(textRect, [self cellSize].height + 2.0, [controlView isFlipped]);
+    [super drawWithFrame:textRect inView:controlView];
     
     // Draw the image
     NSRect imageRect = [self iconRectForBounds:aRect];
