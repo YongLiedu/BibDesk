@@ -39,17 +39,11 @@
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
-#import "NSParagraphStyle_BDSKExtensions.h"
 #import "NSLayoutManager_BDSKExtensions.h"
 
 /* Almost all of this code is copy-and-paste from OATextWithIconCell, except for the text layout (which seems wrong in OATextWithIconCell). */
 
 @implementation BDSKTextWithIconCell
-
-+ (NSParagraphStyle *)paragraphStyle;
-{
-    return [NSParagraphStyle defaultTruncatingTailParagraphStyle];
-}
 
 // Init and dealloc
 
@@ -60,6 +54,7 @@
         [self setEditable:YES];
         [self setDrawsHighlight:YES];
         [self setScrollable:YES];
+        [self setLineBreakMode:NSLineBreakByTruncatingTail];
     }
     return self;
 }
@@ -76,7 +71,6 @@
 - (void)dealloc;
 {
     [icon release];
-    [paragraphStyle release];
     [super dealloc];
 }
 
@@ -88,22 +82,8 @@
     
     copy->icon = [icon retain];
     copy->_oaFlags.drawsHighlight = _oaFlags.drawsHighlight;
-    copy->paragraphStyle = [paragraphStyle retain];
     
     return copy;
-}
-
-- (NSParagraphStyle *)paragraphStyle;
-{
-    return (nil == paragraphStyle) ? [[self class] paragraphStyle] : paragraphStyle;
-}
-
-- (void)setParagraphStyle:(NSParagraphStyle *)style;
-{
-    if (paragraphStyle != style) {
-        [paragraphStyle release];
-        paragraphStyle = [style copy];
-    }
 }
 
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
@@ -138,14 +118,13 @@
     return color;
 }
 
-#define BORDER_BETWEEN_EDGE_AND_IMAGE (2.0)
-#define BORDER_BETWEEN_IMAGE_AND_TEXT (3.0)
-#define SIZE_OF_TEXT_FIELD_BORDER (1.0)
+#define BORDER_BETWEEN_EDGE_AND_IMAGE (1.0)
+#define BORDER_BETWEEN_IMAGE_AND_TEXT (0.0)
 
 - (NSSize)cellSize;
 {
     NSSize cellSize = [super cellSize];
-    cellSize.width += cellSize.height + BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT + SIZE_OF_TEXT_FIELD_BORDER;
+    cellSize.width += cellSize.height + BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT;
     return cellSize;
 }
 
@@ -218,66 +197,63 @@
     }
 }
 
-#define _calculateDrawingRectsAndSizes \
-NSRectEdge rectEdge;  \
-NSSize imageSize; \
-\
-if (_oaFlags.imagePosition == NSImageLeft) { \
-    rectEdge = NSMinXEdge; \
-        imageSize = NSMakeSize(NSHeight(aRect) - 1, NSHeight(aRect) - 1); \
-} else { \
-    rectEdge =  NSMaxXEdge; \
-        if (icon == nil) \
-            imageSize = NSZeroSize; \
-                else \
-                    imageSize = [icon size]; \
-} \
-\
-NSRect cellFrame = aRect, ignored; \
-if (imageSize.width > 0) \
-NSDivideRect(cellFrame, &ignored, &cellFrame, BORDER_BETWEEN_EDGE_AND_IMAGE, rectEdge); \
-\
-NSRect imageRect, textRect; \
-NSDivideRect(cellFrame, &imageRect, &textRect, imageSize.width, rectEdge); \
-\
-if (imageSize.width > 0) \
-NSDivideRect(textRect, &ignored, &textRect, BORDER_BETWEEN_IMAGE_AND_TEXT, rectEdge); \
-\
-/* this is the main difference from OATextWithIconCell, which ends up with a really weird text baseline for tall cells */\
-float vOffset = 0.5f * (NSHeight(aRect) - [NSLayoutManager defaultViewLineHeightForFont:[self font]]); \
-\
-if (![controlView isFlipped]) \
-textRect.origin.y -= vOffset; \
-else \
-textRect.origin.y += vOffset; \
-
-- (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView;
+- (NSRect)textRectForBounds:(NSRect)aRect;
 {
-    _calculateDrawingRectsAndSizes;
-    
-    NSDivideRect(textRect, &ignored, &textRect, SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
-    textRect = NSInsetRect(textRect, 1.0f, 0.0);
-    
-    // Draw the text
-    NSMutableAttributedString *label = [[NSMutableAttributedString alloc] initWithAttributedString:[self attributedStringValue]];
-    NSRange labelRange = NSMakeRange(0, [label length]);
-    NSColor *highlightColor = [self highlightColorWithFrame:cellFrame inView:controlView];
-    BOOL highlighted = [self isHighlighted];
-    
-    if (highlighted && [highlightColor isEqual:[NSColor alternateSelectedControlColor]]) {
-        // add the alternate text color attribute.
-        [label addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:labelRange];
+    NSRectEdge rectEdge; 
+    float imageWidth = 0.0;
+
+    if (_oaFlags.imagePosition == NSImageLeft) {
+        rectEdge = NSMinXEdge;
+        imageWidth = NSHeight(aRect) - 1;
     } else {
-        // when using an attributed string from setObjectValue:, -textColor isn't called, even though we need it for the highlight drawing
-        [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
+        rectEdge =  NSMaxXEdge;
+        if (icon)
+            imageWidth = [icon size].width;
     }
+
+    NSRect ignored, textRect = aRect;
+    if (imageWidth > 0)
+        NSDivideRect(aRect, &ignored, &textRect, BORDER_BETWEEN_EDGE_AND_IMAGE + imageWidth + BORDER_BETWEEN_IMAGE_AND_TEXT, rectEdge);
     
-    [label addAttribute:NSParagraphStyleAttributeName value:[self paragraphStyle] range:labelRange];
-    [label drawInRect:textRect];
-    [label release];
+    return textRect;
+}
+
+- (NSRect)iconRectForBounds:(NSRect)aRect;
+{
+    NSRectEdge rectEdge; 
+    float imageWidth = 0.0;
+
+    if (_oaFlags.imagePosition == NSImageLeft) {
+        rectEdge = NSMinXEdge;
+        imageWidth = NSHeight(aRect) - 1;
+    } else {
+        rectEdge =  NSMaxXEdge;
+        if (icon == nil)
+            imageWidth = [icon size].width;
+    }
+
+    NSRect ignored, imageRect = aRect;
+    if (imageWidth > 0)
+        NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE, rectEdge);
+
+    NSDivideRect(imageRect, &imageRect, &ignored, imageWidth, rectEdge);
+    
+    return imageRect;
+}
+
+- (void)drawWithFrame:(NSRect)aRect inView:(NSView *)controlView;
+{
+    // let super draw the text
+    [super drawWithFrame:[self textRectForBounds:aRect] inView:controlView];
     
     // Draw the image
-    imageRect = BDSKCenterRect(imageRect, imageSize, [controlView isFlipped]);
+    NSRect imageRect = [self iconRectForBounds:aRect];
+    float imageHeight = 0.0;
+    if (_oaFlags.imagePosition == NSImageLeft)
+        imageHeight = NSHeight(aRect) - 1;
+    else if (icon == nil)
+        imageHeight = [icon size].height;
+    imageRect = BDSKCenterRectVertically(imageRect, imageHeight, [controlView isFlipped]);
     [self drawIconWithFrame:imageRect inView:controlView];
 }
 
@@ -295,10 +271,8 @@ textRect.origin.y += vOffset; \
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength;
 {
-    _calculateDrawingRectsAndSizes;
-    
     _oaFlags.settingUpFieldEditor = YES;
-    [super selectWithFrame:textRect inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
+    [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
     _oaFlags.settingUpFieldEditor = NO;
 }
 
@@ -348,15 +322,11 @@ textRect.origin.y += vOffset; \
 
 @implementation BDSKFilePathCell
 
-+ (NSParagraphStyle *)paragraphStyle;
-{
-    return [NSParagraphStyle defaultTruncatingMiddleParagraphStyle];
-}
-
 - (id)init;
 {
     if (self = [super init]) {
         [self setDisplayType:1];
+        [self setLineBreakMode:NSLineBreakByTruncatingMiddle];
     }
     return self;
 }

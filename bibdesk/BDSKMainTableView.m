@@ -304,7 +304,7 @@
             [tc setDataCell:imageCell];
         }else if([colName isEqualToString:BDSKLocalFileString] || [colName isEqualToString:BDSKRemoteURLString]){
             BDSKTextWithIconCell *textIconCell = [[[BDSKTextWithIconCell alloc] init] autorelease];
-            [textIconCell setParagraphStyle:[NSParagraphStyle defaultClippingParagraphStyle]];
+            [textIconCell setLineBreakMode:NSLineBreakByClipping];
             [tc setDataCell:textIconCell];
         }else if([colName isRatingField]){
             BDSKRatingButtonCell *ratingCell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];
