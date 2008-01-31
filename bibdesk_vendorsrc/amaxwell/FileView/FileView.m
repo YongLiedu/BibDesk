@@ -899,32 +899,25 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     if (NSIsEmptyRect(aRect) == NO) {
         aRect = [self centerScanRect:aRect];
         
+        [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.2] setFill];
+        [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.8] setStroke];
+        
         if (_dropOperation == FVDropOn) {
             // it's either a drop on the whole table or on top of a cell
             p = [NSBezierPath bezierPathWithRoundRect:NSInsetRect(aRect, 0.5 * lineWidth, 0.5 * lineWidth) xRadius:7 yRadius:7];
+            [p fill];
         }
         else {
             // similar to NSTableView's between-row drop indicator
-            NSRect rect = aRect;
-            rect.size.height = NSWidth(aRect);
-            rect.origin.y -= NSWidth(aRect);
-            p = [NSBezierPath bezierPathWithOvalInRect:rect];
-            
-            NSPoint point = NSMakePoint(NSMidX(aRect), NSMinY(aRect));
-            [p moveToPoint:point];
-            point = NSMakePoint(NSMidX(aRect), NSMaxY(aRect));
-            [p lineToPoint:point];
-            
-            rect = aRect;
-            rect.origin.y = NSMaxY(aRect);
-            rect.size.height = NSWidth(aRect);
-            [p appendBezierPathWithOvalInRect:rect];
+            CGFloat radius = NSWidth(aRect) / 2;
+            NSPoint point = NSMakePoint(NSMidX(aRect), NSMaxY(aRect));
+            p = [NSBezierPath bezierPath];
+            [p appendBezierPathWithArcWithCenter:point radius:radius startAngle:-90 endAngle:270];
+            point.y = NSMinY(aRect);
+            [p appendBezierPathWithArcWithCenter:point radius:radius startAngle:90 endAngle:450];
         }
-        [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.2] setFill];
-        [[[NSColor alternateSelectedControlColor] colorWithAlphaComponent:0.8] setStroke];
         [p setLineWidth:lineWidth];
         [p stroke];
-        [p fill];
         [p setLineWidth:1.0];
     }
 }
