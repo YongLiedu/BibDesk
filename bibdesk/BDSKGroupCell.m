@@ -184,7 +184,7 @@ static NSString *stringWithInteger(int count)
 {
     NSSize imageSize = [self iconSizeForBounds:aRect];
     NSRect imageRect, ignored;
-    NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE + SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
+    NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE, NSMinXEdge);
     NSDivideRect(imageRect, &imageRect, &ignored, imageSize.width, NSMinXEdge);
     return imageRect;
 }
@@ -208,7 +208,7 @@ static NSString *stringWithInteger(int count)
     }
     NSRect countRect, ignored;
     // set countRect origin to the string drawing origin (number has countSep on either side for oval padding)
-    NSDivideRect(aRect, &countRect, &ignored, countSize.width + countSep + BORDER_BETWEEN_EDGE_AND_COUNT + SIZE_OF_TEXT_FIELD_BORDER, NSMaxXEdge);
+    NSDivideRect(aRect, &countRect, &ignored, countSize.width + countSep + BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
     // now set the size of it to the string size
     countRect.size = countSize;
     return countRect;
@@ -216,12 +216,9 @@ static NSString *stringWithInteger(int count)
 
 - (NSRect)textRectForBounds:(NSRect)aRect;
 {
-    NSRect textRect, ignored;
-    float countSep = [self countPaddingForCellSize:aRect.size];
-    // get rid of the icon region and padding
-    NSDivideRect(aRect, &ignored, &textRect, NSWidth([self iconRectForBounds:aRect]) + BORDER_BETWEEN_IMAGE_AND_TEXT, NSMinXEdge);
-    // use countRect origin to take care of some padding calculations
-    NSDivideRect(textRect, &ignored, &textRect, NSWidth(aRect) - NSMinX([self countRectForBounds:aRect]) + countSep + BORDER_BETWEEN_COUNT_AND_TEXT, NSMaxXEdge);
+    NSRect textRect = aRect;
+    textRect.origin.x = NSMaxX([self iconRectForBounds:aRect]) + BORDER_BETWEEN_IMAGE_AND_TEXT;
+    textRect.size.width = NSMinX([self countRectForBounds:aRect]) - BORDER_BETWEEN_COUNT_AND_TEXT - [self countPaddingForCellSize:aRect.size] - NSMinX(textRect);
     return textRect;
 }
 
@@ -236,7 +233,7 @@ static NSString *stringWithInteger(int count)
     else if ([[self objectValue] count] > 0) {
         countSize = [countString boundingRectWithSize:cellSize options:0].size;
     }
-    float countWidth = countSize.width + 2 * countSep + 2 * BORDER_BETWEEN_EDGE_AND_COUNT;
+    float countWidth = countSize.width + 2 * countSep + BORDER_BETWEEN_EDGE_AND_COUNT;
     // cellSize.height approximates the icon size
     cellSize.width += cellSize.height + countWidth;
     cellSize.width += BORDER_BETWEEN_EDGE_AND_IMAGE + BORDER_BETWEEN_IMAGE_AND_TEXT + BORDER_BETWEEN_COUNT_AND_TEXT;
@@ -269,7 +266,7 @@ static NSString *stringWithInteger(int count)
     // Draw the text
     // @@ Mail.app uses NSLineBreakByTruncatingTail for this
     [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultTruncatingTailParagraphStyle] range:labelRange];
-    NSRect textRect = NSInsetRect([self textRectForBounds:aRect], 1.0f, 0.0); 
+    NSRect textRect = NSInsetRect([self textRectForBounds:aRect], SIZE_OF_TEXT_FIELD_BORDER, 0.0); 
     
     [label drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin];
     
