@@ -2911,15 +2911,15 @@ typedef struct _fileViewObjectContext {
 static void addFileViewObjectForURLToArray(const void *value, void *context)
 {
     fileViewObjectContext *ctxt = context;
-    // value is NSURL *
-    BDSKFileViewObject *obj = [[BDSKFileViewObject alloc] initWithURL:(id)value string:ctxt->title];
+    // value is BDSKLinkedFile *
+    BDSKFileViewObject *obj = [[BDSKFileViewObject alloc] initWithURL:[(BDSKLinkedFile *)value displayURL] string:ctxt->title];
     CFArrayAppendValue(ctxt->array, obj);
     [obj release];
 }
 
 static void addAllFileViewObjectsForItemToArray(const void *value, void *context)
 {
-    CFArrayRef allURLs = (CFArrayRef)[(BibItem *)value sortedURLs];
+    CFArrayRef allURLs = (CFArrayRef)[(BibItem *)value files];
     if (CFArrayGetCount(allURLs)) {
         fileViewObjectContext ctxt;
         ctxt.array = context;

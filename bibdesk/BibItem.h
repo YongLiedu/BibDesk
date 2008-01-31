@@ -87,6 +87,7 @@ enum {
     NSMutableArray *files;
 }
 
+- (NSArray *)files;
 - (NSUInteger)countOfFiles;
 - (BDSKLinkedFile *)objectInFilesAtIndex:(NSUInteger)idx;
 - (void)insertObject:(BDSKLinkedFile *)aFile inFilesAtIndex:(NSUInteger)idx;

@@ -2542,6 +2542,8 @@ static void addFilesToArray(const void *value, void *context)
 - (NSNumber *)countOfLocalFilesAsNumber { return [NSNumber numberWithInt:[[self localFiles] count]]; }
 - (NSNumber *)countOfRemoteURLsAsNumber { return [NSNumber numberWithInt:[[self remoteURLs] count]]; }
 
+- (NSArray *)files { return files; }
+
 - (NSUInteger)countOfFiles { return [files count]; }
 
 - (BDSKLinkedFile *)objectInFilesAtIndex:(NSUInteger)idx
