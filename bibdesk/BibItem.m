@@ -2614,35 +2614,6 @@ static void addFilesToArray(const void *value, void *context)
                                                       userInfo:notifInfo];
 }
 
-static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unused)
-{
-    BOOL firstIsFile = [first isFileURL];
-    BOOL secondIsFile = [second isFileURL];
-    
-    if (firstIsFile && secondIsFile)
-        return [[first lastPathComponent] caseInsensitiveCompare:[second lastPathComponent]];
-    else if (firstIsFile == NO && secondIsFile == NO)
-        return [[first absoluteString] caseInsensitiveCompare:[second absoluteString]];
-    else if (firstIsFile)
-        return NSOrderedAscending;
-    else return NSOrderedDescending;
-}
-
-// Used by the document's FileView datasource
-- (NSArray *)sortedURLs
-{
-    NSMutableArray *sortedURLs = [NSMutableArray array];
-    NSEnumerator *fe = [files objectEnumerator];
-    NSURL *aURL;
-    BDSKLinkedFile *file;
-    while (file = [fe nextObject]) {
-        if (aURL = [file displayURL])
-            [sortedURLs addObject:aURL];
-    }
-    [sortedURLs sortUsingFunction:sortURLsByType context:NULL];
-    return sortedURLs;
-}
-
 - (NSImage *)imageForURLField:(NSString *)field{
     
     NSURL *url = [self URLForField:field];
