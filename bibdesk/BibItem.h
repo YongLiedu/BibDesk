@@ -98,7 +98,6 @@ enum {
 
 - (void)noteFilesChanged:(BOOL)isFile;
 
-- (NSArray *)sortedURLs;
 - (BOOL)migrateFilesWithRemoveOptions:(int)removeMask numberOfAddedFiles:(int *)numberOfAddedFiles numberOfRemovedFields:(int *)numberOfRemovedFields error:(NSError **)outError;
 
 - (NSString *)basePath;
