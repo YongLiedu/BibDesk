@@ -61,6 +61,25 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 
+enum {
+    BDSKColumnTypeText,
+    BDSKColumnTypeURL,
+    BDSKColumnTypeLocalFile,
+    BDSKColumnTypeRating,
+    BDSKColumnTypeBoolean,
+    BDSKColumnTypeTriState,
+    BDSKColumnTypeCrossref,
+    BDSKColumnTypeImportOrder,
+    BDSKColumnTypeRelevance
+};
+
+@interface BDSKTableColumn : NSTableColumn {
+    int columnType;
+}
+- (int)columnType;
+- (void)setColumnType:(int)type;
+@end
+
 @interface BDSKMainTableView (Private)
 
 - (NSImage *)headerImageForField:(NSString *)field;
@@ -270,112 +289,113 @@
 
 #pragma mark TableColumn setup
 
-- (id)configuredDataCell:(id)aCell forIdentifier:(NSString *)colName {
+- (int)columnTypeForField:(NSString *)colName {
+    int type = 0;
+    if([colName isURLField])
+        type = BDSKColumnTypeURL;
+    else if([colName isEqualToString:BDSKLocalFileString] || [colName isEqualToString:BDSKRemoteURLString])
+        type = BDSKColumnTypeLocalFile;
+    else if([colName isRatingField])
+        type = BDSKColumnTypeRating;
+    else if([colName isBooleanField])
+        type = BDSKColumnTypeBoolean;
+    else if([colName isTriStateField])
+        type = BDSKColumnTypeTriState;
+    else if ([colName isEqualToString:BDSKCrossrefString]) 
+        type = BDSKColumnTypeCrossref;
+    else if ([colName isEqualToString:BDSKImportOrderString])
+        type = BDSKColumnTypeImportOrder;
+    else if ([colName isEqualToString:BDSKImportOrderString])
+        type = BDSKColumnTypeRelevance;
+    else
+        type = BDSKColumnTypeText;
+    return type;
+}
+
+- (id)dataCellForColumnType:(int)columnType {
     id cell = nil;
     
-    if([colName isURLField]){
-        if ([aCell isMemberOfClass:[BDSKCenterScaledImageCell class]]) {
-            cell = aCell;
-        } else {
+    switch(columnType) {
+        case BDSKColumnTypeURL:
             cell = [[[BDSKCenterScaledImageCell alloc] init] autorelease];
-        }
-    }else if([colName isEqualToString:BDSKLocalFileString] || [colName isEqualToString:BDSKRemoteURLString]){
-        if ([aCell isMemberOfClass:[BDSKTextWithIconCell class]]) {
-            cell = aCell;
-        } else {
+            break;
+        case BDSKColumnTypeLocalFile:
             cell = [[[BDSKTextWithIconCell alloc] init] autorelease];
             [cell setLineBreakMode:NSLineBreakByClipping];
-        }
-    }else if([colName isRatingField]){
-        if ([aCell isMemberOfClass:[BDSKRatingButtonCell class]]) {
-            cell = aCell;
-        } else {
+            break;
+        case BDSKColumnTypeRating:
             cell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];
             [cell setBordered:NO];
             [cell setAlignment:NSCenterTextAlignment];
-        }
-    }else if([colName isBooleanField]){
-        if ([aCell isMemberOfClass:[NSButtonCell class]]) {
-            cell = aCell;
-        } else {
+            break;
+        case BDSKColumnTypeBoolean:
             cell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
-        }
-        [cell setButtonType:NSSwitchButton];
-        [cell setImagePosition:NSImageOnly];
-        [cell setControlSize:NSSmallControlSize];
-        [cell setAllowsMixedState:NO];
-    }else if([colName isTriStateField]){
-        if ([aCell isMemberOfClass:[NSButtonCell class]]) {
-            cell = aCell;
-        } else {
+            [cell setButtonType:NSSwitchButton];
+            [cell setImagePosition:NSImageOnly];
+            [cell setControlSize:NSSmallControlSize];
+            [cell setAllowsMixedState:NO];
+            break;
+        case BDSKColumnTypeTriState:
             cell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
-        }
-        [cell setButtonType:NSSwitchButton];
-        [cell setImagePosition:NSImageOnly];
-        [cell setControlSize:NSSmallControlSize];
-        [cell setAllowsMixedState:YES];
-    }else if ([colName isEqualToString:BDSKCrossrefString]) { 
-        if ([aCell isMemberOfClass:[NSButtonCell class]]) {
-            cell = aCell;
-        } else {
+            [cell setButtonType:NSSwitchButton];
+            [cell setImagePosition:NSImageOnly];
+            [cell setControlSize:NSSmallControlSize];
+            [cell setAllowsMixedState:YES];
+            break;
+        case BDSKColumnTypeCrossref: 
             cell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
-        }
-        [cell setButtonType:NSMomentaryChangeButton];
-        [cell setBordered:NO];
-        [cell setImagePosition:NSImageOnly];
-        [cell setControlSize:NSSmallControlSize];
-        [cell setImage:[NSImage imageNamed:@"ArrowImage"]];
-        [cell setAlternateImage:[NSImage imageNamed:@"ArrowImage_Pressed"]];
-        [cell setAction:@selector(openParentItem:)];
-        [cell setTarget:self];
-    }else if ([colName isEqualToString:BDSKImportOrderString]){
-        if ([aCell isMemberOfClass:[BDSKRoundRectButtonCell class]]) {
-            cell = aCell;
-        } else {
+            [cell setButtonType:NSMomentaryChangeButton];
+            [cell setBordered:NO];
+            [cell setImagePosition:NSImageOnly];
+            [cell setControlSize:NSSmallControlSize];
+            [cell setImage:[NSImage imageNamed:@"ArrowImage"]];
+            [cell setAlternateImage:[NSImage imageNamed:@"ArrowImage_Pressed"]];
+            [cell setAction:@selector(openParentItem:)];
+            [cell setTarget:self];
+            break;
+        case BDSKColumnTypeImportOrder:
             cell = [[[BDSKRoundRectButtonCell alloc] initTextCell:NSLocalizedString(@"Import", @"button title")] autorelease];
             [cell setImagePosition:NSNoImage];
             [cell setControlSize:NSSmallControlSize];
             [cell setAction:@selector(importItem:)];
             [cell setTarget:self];
-        }
-    }else if ([colName isEqualToString:BDSKRelevanceString]) { 
-        if ([aCell isMemberOfClass:[BDSKLevelIndicatorCell class]]) {
-            cell = aCell;
-        } else {
+            break;
+        case BDSKColumnTypeRelevance: 
             cell = [[[BDSKLevelIndicatorCell alloc] initWithLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle] autorelease];
             [cell setMaxValue:(double)1.0];
             [cell setEnabled:NO];
             [(BDSKLevelIndicatorCell *)cell setMaxHeight:(17.0 * 0.7)];
-        }
-    }else{
-        // this is our default cell; need to explicitly set if changing column type from e.g. image->text
-        if ([aCell isMemberOfClass:[NSTextFieldCell class]]) {
-            cell = aCell;
-        } else {
+            break;
+        case BDSKColumnTypeText:
+        default:
             cell = [[[NSTextFieldCell alloc] initTextCell:@""] autorelease];
             [cell setBordered:NO];
             [cell setLineBreakMode:NSLineBreakByTruncatingTail];
-        }
+            break;
     }
     
     return cell;
 }
 
-- (NSTableColumn *)configuredTableColumnForIdentifier:(NSString *)colName {
-    NSTableColumn *tc = [self tableColumnWithIdentifier:colName];
+- (NSTableColumn *)configuredTableColumnForField:(NSString *)colName {
+    BDSKTableColumn *tc = (BDSKTableColumn *)[self tableColumnWithIdentifier:colName];
     id dataCell = [tc dataCell];
+    int columnType = [self columnTypeForField:colName];
     
     if(tc == nil){
         // it is a new column, so create it
-        tc = [[[NSTableColumn alloc] initWithIdentifier:colName] autorelease];
+        tc = [[[BDSKTableColumn alloc] initWithIdentifier:colName] autorelease];
         [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
         [tc setEditable:NO];
         [tc setMinWidth:16.0];
     }
     
     // this may be called in response to a field type change, so the cell may also need to change, even if the column is already in the tableview
-    dataCell = [self configuredDataCell:dataCell forIdentifier:colName];
-    [tc setDataCell:dataCell];
+    if (dataCell == nil || [tc columnType] != columnType) {
+        dataCell = [self dataCellForColumnType:columnType];
+        [tc setDataCell:dataCell];
+        [tc setColumnType:columnType];
+    }
 
     NSImage *image;
     NSString *title;
@@ -387,7 +407,7 @@
     else
         [headerCell setStringValue:[[NSBundle mainBundle] localizedStringForKey:colName value:@"" table:@"BibTeXKeys"]];
     
-    if ([dataCell isKindOfClass:[NSButtonCell class]] || [dataCell isKindOfClass:[NSImageCell class]])
+    if (columnType != BDSKColumnTypeText && columnType != BDSKColumnTypeLocalFile && columnType != BDSKColumnTypeRelevance)
         [tc setWidth:fmaxf([dataCell cellSize].width, [headerCell cellSize].width)];
     
     return tc;
@@ -407,7 +427,7 @@
     NSMutableArray *columns = [NSMutableArray arrayWithCapacity:[identifiers count]];
 	
 	while(colName = [shownColNamesE nextObject]){
-		tc = [self configuredTableColumnForIdentifier:colName];
+		tc = [self configuredTableColumnForField:colName];
         
         if([colName isEqualToString:BDSKImportOrderString] == NO && (tcWidth = [defaultTableColumnWidths objectForKey:colName]))
             [tc setWidth:[tcWidth floatValue]];
@@ -679,6 +699,15 @@
     if([[self delegate] respondsToSelector:@selector(tableView:openParentForItemAtRow:)])
         [[self delegate] tableView:self openParentForItemAtRow:row];
 }
+
+@end
+
+
+@implementation BDSKTableColumn
+
+- (int)columnType { return columnType; }
+
+- (void)setColumnType:(int)type { columnType = type; }
 
 @end
 
