@@ -23,7 +23,7 @@
                 columnsMenu = NSMenu; 
                 copyAsTemplateMenu = NSMenu; 
                 groupSortMenu = NSMenu; 
-                previewTemplateMenu = NSMenu; 
+                previewDisplayMenu = NSMenu; 
                 searchBookmarksMenu = NSMenu; 
             }; 
             SUPERCLASS = NSObject; 

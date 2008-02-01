@@ -625,21 +625,23 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [item setTag:BDSKTemplateDragCopyType + i];
         }
         
-    } else if ([menu isEqual:previewTemplateMenu]) {
+    } else if ([menu isEqual:previewDisplayMenu]) {
     
         NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFileType:@"rtf"]];
         [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"rtfd"]];
         [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"doc"]];
         [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"html"]];
         
-        while ([menu numberOfItems])
-            [menu removeItemAtIndex:0];
+        int i = [menu numberOfItems];
+        while (i-- && [[menu itemAtIndex:i] tag] == 3)
+            [menu removeItemAtIndex:i];
         
         NSMenuItem *item;
         NSEnumerator *styleEnum = [styles objectEnumerator];
         NSString *style;
         while (style = [styleEnum nextObject]) {
-            item = [menu addItemWithTitle:style action:@selector(changePreviewTemplate:) keyEquivalent:@""];
+            item = [menu addItemWithTitle:style action:@selector(changePreviewDisplay:) keyEquivalent:@""];
+            [item setTag:BDSKTemplatePreviewDisplay];
             [item setRepresentedObject:style];
         }
         

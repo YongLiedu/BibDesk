@@ -1,168 +1,149 @@
 {
-    IBClasses =     (
-                {
-            ACTIONS =             {
-                checkForUpdates = id;
-                editSearchBookmarks = id;
-                reportBug = id;
-                requestFeature = id;
-                showBookmarks = id;
-                showPreferencePanel = id;
-                showReadMeFile = id;
-                showRelNotes = id;
-                toggleShowingErrorPanel = id;
-                toggleShowingOrphanedFilesPanel = id;
-                toggleShowingPreviewPanel = id;
-                visitWebSite = id;
-                visitWiki = id;
-            };
-            CLASS = BDSKAppController;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                bookmarksMenu = NSMenu;
-                columnsMenu = NSMenu;
-                copyAsTemplateMenu = NSMenu;
-                groupSortMenu = NSMenu;
-                previewTemplateMenu = NSMenu;
-                searchBookmarksMenu = NSMenu;
-            };
-            SUPERCLASS = NSObject;
-        },
-                {
-            ACTIONS =             {
-                newTemplateDocument = id;
-                openDocumentUsingFilter = id;
-                openDocumentUsingPhonyCiteKeys = id;
-                openTemplateDocument = id;
-            };
-            CLASS = BDSKDocumentController;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                mainDocument = id;
-                openTextEncodingAccessoryView = NSView;
-                openTextEncodingPopupButton = BDSKEncodingPopUpButton;
-                openUsingFilterAccessoryView = NSView;
-                openUsingFilterComboBox = NSComboBox;
-            };
-            SUPERCLASS = NSDocumentController;
-        },
-                {
-            CLASS = BDSKEncodingPopUpButton;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSPopUpButton;
-        },
-                {
-            ACTIONS =             {
-                addBookmark = id;
-                addScriptGroupAction = id;
-                addSearchBookmark = id;
-                addSearchGroupAction = id;
-                addSmartGroupAction = id;
-                addStaticGroupAction = id;
-                addURLGroupAction = id;
-                alternateCut = id;
-                alternateDelete = id;
-                changePreviewDisplay = id;
-                columnsMenuAddTableColumn = id;
-                consolidateLinkedFiles = id;
-                copyAsAction = id;
-                createNewPubUsingCrossrefAction = id;
-                deleteSelectedPubs = id;
-                deselectAll = id;
-                deselectAllPublications = id;
-                duplicate = id;
-                duplicateTitleToBooktitle = id;
-                editAction = id;
-                editIgnoredSortPrefixes = id;
-                editNewCategoryGroupWithSelection = id;
-                editNewStaticGroupWithSelection = id;
-                editPubCmd = id;
-                editSelectedFieldAsRawBibTeX = id;
-                emailPubCmd = id;
-                find = id;
-                generateCiteKey = id;
-                importFromFileAction = id;
-                importFromPasteboardAction = id;
-                importFromWebAction = id;
-                invertSelection = id;
-                makeNewEmptyCollection = id;
-                makeNewExternalSource = id;
-                makeNewNotepad = id;
-                makeSearchFieldKey = id;
-                matchFiles = id;
-                mergeInExternalPublications = id;
-                migrateFiles = id;
-                newBDSKLibrary = id;
-                newPub = id;
-                newTemplateDocument = id;
-                openDocumentUsingFilter = id;
-                openDocumentUsingPhonyCiteKeys = id;
-                openLinkedFile = id;
-                openRemoteURL = id;
-                openTemplateDocument = id;
-                previewAction = id;
-                refreshAllExternalGroups = id;
-                refreshScriptGroups = id;
-                refreshSharedBrowsing = id;
-                refreshURLGroups = id;
-                removeSelectedPubs = id;
-                reportBug = id;
-                requestFeature = id;
-                revealLinkedFile = id;
-                saveAsBDSKDocument = id;
-                searchByContent = id;
-                selectAllPublications = id;
-                selectCrossrefParentAction = id;
-                selectDuplicates = id;
-                selectIncompletePublications = id;
-                selectLibraryGroup = id;
-                selectPossibleDuplicates = id;
-                sendToLyX = id;
-                showDocumentInfoWindow = id;
-                showFindPanel = id;
-                showMacrosWindow = id;
-                showNotesForLinkedFile = id;
-                showReadMe = id;
-                showRelNotes = id;
-                sortForCrossrefs = id;
-                sortGroupsByCount = id;
-                sortGroupsByGroup = id;
-                toggle = id;
-                toggleShowingCustomCiteDrawer = id;
-                toggleShowingErrorPanel = id;
-                toggleShowingOrphanedFilesPanel = id;
-                toggleShowingPreviewPanel = id;
-                toggleSnoopDrawer = id;
-                toggleStatusBar = id;
-            };
-            CLASS = FirstResponder;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = NSControl;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = NSFontManager;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = NSMenu;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = NSMenuItem;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = NSObject;
-            LANGUAGE = ObjC;
-        }
-    );
-    IBVersion = 1;
+    IBClasses = (
+        {
+            ACTIONS = {
+                checkForUpdates = id; 
+                editSearchBookmarks = id; 
+                reportBug = id; 
+                requestFeature = id; 
+                showBookmarks = id; 
+                showPreferencePanel = id; 
+                showReadMeFile = id; 
+                showRelNotes = id; 
+                toggleShowingErrorPanel = id; 
+                toggleShowingOrphanedFilesPanel = id; 
+                toggleShowingPreviewPanel = id; 
+                visitWebSite = id; 
+                visitWiki = id; 
+            }; 
+            CLASS = BDSKAppController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                bookmarksMenu = NSMenu; 
+                columnsMenu = NSMenu; 
+                copyAsTemplateMenu = NSMenu; 
+                groupSortMenu = NSMenu; 
+                previewDisplayMenu = NSMenu; 
+                searchBookmarksMenu = NSMenu; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {
+            ACTIONS = {
+                newTemplateDocument = id; 
+                openDocumentUsingFilter = id; 
+                openDocumentUsingPhonyCiteKeys = id; 
+                openTemplateDocument = id; 
+            }; 
+            CLASS = BDSKDocumentController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                mainDocument = id; 
+                openTextEncodingAccessoryView = NSView; 
+                openTextEncodingPopupButton = BDSKEncodingPopUpButton; 
+                openUsingFilterAccessoryView = NSView; 
+                openUsingFilterComboBox = NSComboBox; 
+            }; 
+            SUPERCLASS = NSDocumentController; 
+        }, 
+        {
+            CLASS = BDSKEncodingPopUpButton; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSPopUpButton; 
+        }, 
+        {
+            ACTIONS = {
+                addBookmark = id; 
+                addScriptGroupAction = id; 
+                addSearchBookmark = id; 
+                addSearchGroupAction = id; 
+                addSmartGroupAction = id; 
+                addStaticGroupAction = id; 
+                addURLGroupAction = id; 
+                alternateCut = id; 
+                alternateDelete = id; 
+                changePreviewDisplay = id; 
+                columnsMenuAddTableColumn = id; 
+                consolidateLinkedFiles = id; 
+                copyAsAction = id; 
+                createNewPubUsingCrossrefAction = id; 
+                deleteSelectedPubs = id; 
+                deselectAll = id; 
+                deselectAllPublications = id; 
+                duplicate = id; 
+                duplicateTitleToBooktitle = id; 
+                editAction = id; 
+                editIgnoredSortPrefixes = id; 
+                editNewCategoryGroupWithSelection = id; 
+                editNewStaticGroupWithSelection = id; 
+                editPubCmd = id; 
+                editSelectedFieldAsRawBibTeX = id; 
+                emailPubCmd = id; 
+                find = id; 
+                generateCiteKey = id; 
+                importFromFileAction = id; 
+                importFromPasteboardAction = id; 
+                importFromWebAction = id; 
+                invertSelection = id; 
+                makeNewEmptyCollection = id; 
+                makeNewExternalSource = id; 
+                makeNewNotepad = id; 
+                makeSearchFieldKey = id; 
+                matchFiles = id; 
+                mergeInExternalPublications = id; 
+                migrateFiles = id; 
+                newBDSKLibrary = id; 
+                newPub = id; 
+                newTemplateDocument = id; 
+                openDocumentUsingFilter = id; 
+                openDocumentUsingPhonyCiteKeys = id; 
+                openLinkedFile = id; 
+                openRemoteURL = id; 
+                openTemplateDocument = id; 
+                previewAction = id; 
+                refreshAllExternalGroups = id; 
+                refreshScriptGroups = id; 
+                refreshSharedBrowsing = id; 
+                refreshURLGroups = id; 
+                removeSelectedPubs = id; 
+                reportBug = id; 
+                requestFeature = id; 
+                revealLinkedFile = id; 
+                saveAsBDSKDocument = id; 
+                searchByContent = id; 
+                selectAllPublications = id; 
+                selectCrossrefParentAction = id; 
+                selectDuplicates = id; 
+                selectIncompletePublications = id; 
+                selectLibraryGroup = id; 
+                selectPossibleDuplicates = id; 
+                sendToLyX = id; 
+                showDocumentInfoWindow = id; 
+                showFindPanel = id; 
+                showMacrosWindow = id; 
+                showNotesForLinkedFile = id; 
+                showReadMe = id; 
+                showRelNotes = id; 
+                sortForCrossrefs = id; 
+                sortGroupsByCount = id; 
+                sortGroupsByGroup = id; 
+                toggle = id; 
+                toggleShowingCustomCiteDrawer = id; 
+                toggleShowingErrorPanel = id; 
+                toggleShowingOrphanedFilesPanel = id; 
+                toggleShowingPreviewPanel = id; 
+                toggleSnoopDrawer = id; 
+                toggleStatusBar = id; 
+            }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = NSControl; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = NSFontManager; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSMenu; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSMenuItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }
+    ); 
+    IBVersion = 1; 
 }

@@ -1084,23 +1084,20 @@
 
 - (IBAction)changePreviewDisplay:(id)sender{
     int tag = [sender tag];
+    NSString *style = [sender representedObject];
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    BOOL didChange = NO;
     
     if(tag != [pw integerForKey:BDSKPreviewDisplayKey]){
         [pw setInteger:tag forKey:BDSKPreviewDisplayKey];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+        didChange = YES;
     }
-}
-
-- (IBAction)changePreviewTemplate:(id)sender{
-    NSString *style = [sender representedObject];
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    
-    if(NO == [style isEqualToString:[pw stringForKey:BDSKPreviewTemplateStyleKey]]){
+    if(BDSKTemplatePreviewDisplay == tag && NO == [style isEqualToString:[pw stringForKey:BDSKPreviewTemplateStyleKey]]){
         [pw setObject:style forKey:BDSKPreviewTemplateStyleKey];
-        if (BDSKTemplatePreviewDisplay == [pw integerForKey:BDSKPreviewDisplayKey])
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+        didChange = YES;
     }
+    if (didChange)
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
 }
 
 - (void)pageDownInPreview:(id)sender{
