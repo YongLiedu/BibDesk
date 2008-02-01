@@ -329,6 +329,13 @@ static CFDictionaryRef selectorTable = NULL;
     return theCopy;
 }
 
+- (id)copyWithMacroResolver:(BDSKMacroResolver *)macroResolver{
+    [BDSKComplexString setMacroResolverForUnarchiving:macroResolver];
+	id theCopy = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:self]];
+    [BDSKComplexString setMacroResolverForUnarchiving:nil];
+    return theCopy;
+}
+
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         if(self = [super init]){

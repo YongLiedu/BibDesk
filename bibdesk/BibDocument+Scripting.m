@@ -160,6 +160,8 @@
 }
 
 - (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)idx {
+    if ([pub owner])
+        pub = [[pub copyWithMacroResolver:[self macroResolver]] autorelease];
 	[self insertPublication:pub atIndex:idx];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
