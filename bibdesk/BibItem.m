@@ -2739,20 +2739,16 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         if (converted == NO) {
             BDSKLinkedFile *file = [[BDSKLinkedFile alloc] initWithURL:urlValue delegate:self];
             NSURL *fileURL = [file URL];
-            // check again, because the URL may be given in a diffreent form, e.g. with an extra slash at the end for a folder
-            converted = [currentURLs containsObject:fileURL];
-            if (converted == NO) {
-                if (fileURL) {
-                    [self->files addObject:file];
-                    converted = YES;
-                    (ctxt->numberOfAddedFiles)++;
-                }
-                else {
-                    // @@ this error message is lame
-                    NSDictionary *message = [[NSDictionary alloc] initWithObjectsAndKeys:urlValue, @"URL", NSLocalizedString(@"File or URL not found", @""), @"error", nil];
-                    [ctxt->messages addObject:message];
-                    [message release];
-                }
+            if (fileURL == nil) {
+                // @@ this error message is lame
+                NSDictionary *message = [[NSDictionary alloc] initWithObjectsAndKeys:urlValue, @"URL", NSLocalizedString(@"File or URL not found", @""), @"error", nil];
+                [ctxt->messages addObject:message];
+                [message release];
+            } else if ([currentURLs containsObject:fileURL] == NO) {
+                // checked again for containment, as fileURL may not be exactly the same as urlValue, e.g. an extra slash at the end for a folder
+                [self->files addObject:file];
+                converted = YES;
+                (ctxt->numberOfAddedFiles)++;
             }
             [file release];
         }
