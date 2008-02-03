@@ -103,7 +103,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
      
      */
 
-    AGRegex *btRegex = [[AGRegex alloc] initWithPattern:/* spaces       */ @"^[ \\t]*"
+    AGRegex *btRegex = [[AGRegex alloc] initWithPattern:/* spaces       */ @"^([ \\t]*((%[^\\n\\r]*)?[\\n\\r]+)*)*"
                                                         /* type of item */ @"@[[:alpha:]]+[ \\t]*[{(]" 
                                                         /* spaces       */ @"[ \\n\\r\\t]*" 
                                                         /* cite key     */ @"[a-zA-Z0-9\\.,:/*!&$^_-]+?" 
@@ -119,7 +119,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
 + (BOOL)canParseStringAfterFixingKeys:(NSString *)string{
 	// ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get from Bookends and EndNote, respectively.
     // same regex used in -[NSString stringWithPhoneyCiteKeys:]
-	AGRegex *theRegex = [[AGRegex alloc]  initWithPattern:@"^[ \\t]*@[[:alpha:]]+[ \\t]*{[ \\t]*,?$" options:AGRegexMultiline];
+	AGRegex *theRegex = [[AGRegex alloc]  initWithPattern:@"^([ \\t]*((%[^\\n\\r]*)?[\\n\\r]+)*)*@[[:alpha:]]+[ \\t]*{[ \\t]*,?$" options:AGRegexMultiline];
     BOOL found = ([theRegex findInString:string] != nil);
     [theRegex release];
 				
