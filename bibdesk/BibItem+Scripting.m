@@ -205,11 +205,9 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     [[self mutableArrayValueForKey:@"files"] removeObject:[[self remoteURLs] objectAtIndex:idx]];
 }
 
-/* ssp: 2004-09-21
-Extra wrapping of the created and modified date methods to 
-- return some value when there is none
-- do some NSDate -> NSCalendarDate conversion
-*/
+- (id)asDocument {
+    return [owner isDocument] ? owner : [NSNull null];
+}
 
 - (NSString *)asType {
 	return [self pubType];

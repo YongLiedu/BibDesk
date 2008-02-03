@@ -755,7 +755,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>
             <property name="document" code="docu" type="document" access="r"
                 description="The bibliography containing this publication record.">
-                <cocoa key="owner"/>
+                <cocoa key="asDocument"/>
             </property>  
             <responds-to name="show">
                 <cocoa method=""/>

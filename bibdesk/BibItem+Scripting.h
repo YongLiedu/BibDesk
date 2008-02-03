@@ -56,6 +56,8 @@
 - (BibAuthor *)valueInAsEditorsAtIndex:(unsigned int)idx;
 - (BibAuthor *)valueInAsEditorsWithName:(NSString *)name;
 
+- (id)asDocument;
+
 - (void)setBibTeXString:(NSString*) btString;
 
 - (NSString *)asCiteKey;
