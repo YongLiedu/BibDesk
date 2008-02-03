@@ -393,26 +393,23 @@ error:(NSError **)outError{
                 if([scanner scanUpToCharactersFromSet:bracesQuotesAndCommaCharSet intoString:&s])
                     [value appendString:s];
                 if([scanner scanCharacter:&ch] == NO) break;
-                if([stringContents characterAtIndex:[scanner scanLocation] - 2] != '\\'){
-                    // we found an unquoted brace
-                    if(ch == '{'){
-                        if(nesting == 1)
-                            quoted = NO;
+                if(ch == '{'){
+                    if(nesting == 1)
+                        quoted = NO;
+                    ++nesting;
+                }else if(ch == '}'){
+                    if(nesting == 1)
+                        endOfValue = YES;
+                    --nesting;
+                }else if(ch == '"'){
+                    if(nesting == 1){
+                        quoted = YES;
                         ++nesting;
-                    }else if(ch == '}'){
-                        if(nesting == 1)
-                            endOfValue = YES;
+                    }else if(quoted && nesting == 2)
                         --nesting;
-                    }else if(ch == '"'){
-                        if(nesting == 1){
-                            quoted = YES;
-                            ++nesting;
-                        }else if(quoted && nesting == 2)
-                            --nesting;
-                    }else if(ch == ','){
-                        if(nesting == 1)
-                            endOfValue = YES;
-                    }
+                }else if(ch == ','){
+                    if(nesting == 1)
+                        endOfValue = YES;
                 }
                 if (endOfValue == NO) // we don't include the outer braces or the separating commas
                     [value appendCharacter:ch];
@@ -493,21 +490,19 @@ error:(NSError **)outError{
             if([scanner scanUpToCharactersFromSet:bracesAndQuotesCharSet intoString:&s])
                 [value appendString:s];
             if([scanner scanCharacter:&ch] == NO) break;
-            if([styleContents characterAtIndex:[scanner scanLocation] - 2] != '\\'){
-                // we found an unquoted brace
-                if(ch == '{'){
-                    if(nesting == 1)
-                        quoted = NO;
+            // we found an unquoted brace
+            if(ch == '{'){
+                if(nesting == 1)
+                    quoted = NO;
+                ++nesting;
+            }else if(ch == '}'){
+                --nesting;
+            }else if(ch == '"'){
+                if(nesting == 1){
+                    quoted = YES;
                     ++nesting;
-                }else if(ch == '}'){
+                }else if(quoted && nesting == 2)
                     --nesting;
-                }else if(ch == '"'){
-                    if(nesting == 1){
-                        quoted = YES;
-                        ++nesting;
-                    }else if(quoted && nesting == 2)
-                        --nesting;
-                }
             }
             if (nesting > 0) // we don't include the outer braces
                 [value appendFormat:@"%C",ch];
