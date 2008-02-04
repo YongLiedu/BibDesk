@@ -206,7 +206,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (id)asDocument {
-    return [owner isDocument] ? owner : [NSNull null];
+    return [owner isDocument] ? (id)owner : (id)[NSNull null];
 }
 
 - (NSString *)asType {
