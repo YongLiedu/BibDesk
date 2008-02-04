@@ -91,8 +91,14 @@ A wrapper object around the fields to access them in AppleScript.
 }
 
 - (void)setValue:(NSString *)newValue {
-    [bibItem setField:name toValue:newValue];
-	[[bibItem undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[bibItem owner] isDocument]) {
+        [bibItem setField:name toValue:newValue];
+        [[bibItem undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 - (BibItem *)publication {
@@ -106,13 +112,20 @@ A wrapper object around the fields to access them in AppleScript.
 }
 
 - (void)setBibTeXString:(NSString *)newValue {
-    NS_DURING
-		NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:[[bibItem owner] macroResolver]];
-		[bibItem setField:name toValue:value];
-        [[bibItem undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    NS_HANDLER
-		NSBeep();
-    NS_ENDHANDLER
+    if ([[bibItem owner] isDocument]) {
+        @try {
+            NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:[[bibItem owner] macroResolver]];
+            [bibItem setField:name toValue:value];
+            [[bibItem undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+        }
+        @catch (id exception) {
+            NSBeep();
+        }
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 - (BOOL)isInherited {

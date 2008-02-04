@@ -155,17 +155,23 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)insertInLinkedFiles:(NSURL *)newURL atIndex:(unsigned int)idx {
-    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
-    if (file) {
-        NSArray *localFiles = [self localFiles];
-        if (idx > 0) {
-            idx = [files indexOfObject:[localFiles objectAtIndex:idx - 1]];
-            if (idx == NSNotFound)
-                idx = 0;
-            else
-                idx++;
+    if ([[self owner] isDocument]) {
+        BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
+        if (file) {
+            NSArray *localFiles = [self localFiles];
+            if (idx > 0) {
+                idx = [files indexOfObject:[localFiles objectAtIndex:idx - 1]];
+                if (idx == NSNotFound)
+                    idx = 0;
+                else
+                    idx++;
+            }
+            [self insertObject:file inFilesAtIndex:idx];
         }
-        [self insertObject:file inFilesAtIndex:idx];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
     }
 }
 
@@ -182,18 +188,24 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)insertInLinkedURLs:(NSString *)newURLString atIndex:(unsigned int)idx {
-    NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:newURLString];
-    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
-    if (file) {
-        NSArray *remoteURLs = [self remoteURLs];
-        if (idx < [remoteURLs count]) {
-            idx = [files indexOfObject:[remoteURLs objectAtIndex:idx]];
-            if (idx == NSNotFound)
+    if ([[self owner] isDocument]) {
+        NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:newURLString];
+        BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
+        if (file) {
+            NSArray *remoteURLs = [self remoteURLs];
+            if (idx < [remoteURLs count]) {
+                idx = [files indexOfObject:[remoteURLs objectAtIndex:idx]];
+                if (idx == NSNotFound)
+                    idx = [self countOfFiles];
+            } else {
                 idx = [self countOfFiles];
-        } else {
-            idx = [self countOfFiles];
+            }
+            [self insertObject:file inFilesAtIndex:idx];
         }
-        [self insertObject:file inFilesAtIndex:idx];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
     }
 }
 
@@ -214,8 +226,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setAsType:(NSString *)newType {
-	[self setPubType:(NSString *)newType];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[self owner] isDocument]) {
+        [self setPubType:(NSString *)newType];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 - (NSString *)asCiteKey {
@@ -223,8 +241,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setAsCiteKey:(NSString *)newKey {
-	[self setCiteKey:(NSString *)newKey];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[self owner] isDocument]) {
+        [self setCiteKey:(NSString *)newKey];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 - (NSString*)asTitle {
@@ -232,8 +256,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setAsTitle:(NSString*)newTitle {
-	[self setField:BDSKTitleString toValue:newTitle];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[self owner] isDocument]) {
+        [self setField:BDSKTitleString toValue:newTitle];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 - (NSString *) month {
@@ -242,8 +272,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setMonth:(NSString*) newMonth {
-	[self setField:BDSKMonthString toValue:newMonth];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[self owner] isDocument]) {
+        [self setField:BDSKMonthString toValue:newMonth];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 - (NSString *) year {
@@ -252,8 +288,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setYear:(NSString*) newYear {
-	[self setField:BDSKYearString toValue:newYear];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[self owner] isDocument]) {
+        [self setField:BDSKYearString toValue:newYear];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 
@@ -289,20 +331,26 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setRemoteURLString:(NSString*) newURLString{
-    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURLString:newURLString] autorelease];
-    if (file == nil)
-        return;
-    NSArray *remoteURLs = [self remoteURLs];
-    unsigned int idx = [self countOfFiles];
-    if ([remoteURLs count]) {
-        idx = [files indexOfObject:[remoteURLs objectAtIndex:0]];
-        if (idx == NSNotFound)
-            idx = [self countOfFiles];
-        else
-            [self removeObjectFromFilesAtIndex:idx];
+    if ([[self owner] isDocument]) {
+        BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURLString:newURLString] autorelease];
+        if (file == nil)
+            return;
+        NSArray *remoteURLs = [self remoteURLs];
+        unsigned int idx = [self countOfFiles];
+        if ([remoteURLs count]) {
+            idx = [files indexOfObject:[remoteURLs objectAtIndex:0]];
+            if (idx == NSNotFound)
+                idx = [self countOfFiles];
+            else
+                [self removeObjectFromFilesAtIndex:idx];
+        }
+        [self insertObject:file inFilesAtIndex:idx];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
     }
-    [self insertObject:file inFilesAtIndex:idx];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (NSString*) localURLString {
@@ -311,23 +359,29 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setLocalURLString:(NSString*) newPath {
-	NSURL *newURL = [newPath hasPrefix:@"file://"] ? [NSURL URLWithString:newPath] : [NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]];
-    if (newURL == nil)
-        return;
-    BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
-    if (file == nil)
-        return;
-    NSArray *localFiles = [self localFiles];
-    unsigned int idx = 0;
-    if ([localFiles count]) {
-        idx = [files indexOfObject:[localFiles objectAtIndex:0]];
-        if (idx == NSNotFound)
-            idx = 0;
-        else
-            [self removeObjectFromFilesAtIndex:idx];
+    if ([[self owner] isDocument]) {
+        NSURL *newURL = [newPath hasPrefix:@"file://"] ? [NSURL URLWithString:newPath] : [NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]];
+        if (newURL == nil)
+            return;
+        BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
+        if (file == nil)
+            return;
+        NSArray *localFiles = [self localFiles];
+        unsigned int idx = 0;
+        if ([localFiles count]) {
+            idx = [files indexOfObject:[localFiles objectAtIndex:0]];
+            if (idx == NSNotFound)
+                idx = 0;
+            else
+                [self removeObjectFromFilesAtIndex:idx];
+        }
+        [self insertObject:file inFilesAtIndex:idx];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
     }
-    [self insertObject:file inFilesAtIndex:idx];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (NSString*) abstract {
@@ -335,8 +389,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setAbstract:(NSString*) newAbstract {
-	[self setField:BDSKAbstractString toValue:newAbstract];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[self owner] isDocument]) {
+        [self setField:BDSKAbstractString toValue:newAbstract];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 - (NSString*) annotation {
@@ -344,8 +404,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setAnnotation:(NSString*) newAnnotation {
-	[self setField:BDSKAnnoteString toValue:newAnnotation];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[self owner] isDocument]) {
+        [self setField:BDSKAnnoteString toValue:newAnnotation];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 - (NSString*)rssDescription {
@@ -353,8 +419,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void) setRssDescription:(NSString*) newDesc {
-	[self setField:BDSKRssDescriptionString toValue:newDesc];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[self owner] isDocument]) {
+        [self setField:BDSKRssDescriptionString toValue:newDesc];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 - (NSString*)rssString {
@@ -377,8 +449,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setKeywords:(NSString *)keywords{
-    [self setField:BDSKKeywordsString toValue:keywords];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[self owner] isDocument]) {
+        [self setField:BDSKKeywordsString toValue:keywords];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 - (int)asRating{
@@ -386,8 +464,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)setAsRating:(int)rating{
-    [self setRating:rating];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([[self owner] isDocument]) {
+        [self setRating:rating];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
 }
 
 /*
@@ -400,7 +484,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	NSScriptCommand * cmd = [NSScriptCommand currentCommand];
 
 	// we do not allow setting the bibtex string after an edit, only at initialization
-	if([self hasBeenEdited]){
+    if ([[self owner] isDocument] == NO) {
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+	} else if([self hasBeenEdited]){
 		if (cmd) {
 			[cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
 			[cmd setScriptErrorString:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Error description")];

@@ -100,12 +100,18 @@
 }
 
 - (void)setName:(NSString *)newName {
-    if (name != newName) {
-        if ([macroResolver valueOfMacro:name] != nil)
-            [macroResolver changeMacroKey:name to:newName];
-        [[macroResolver undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-        [name release];
-        name = [newName copy];
+    if ([macroResolver owner] && [[macroResolver owner] isDocument]) {
+        if (name != newName) {
+            if ([macroResolver valueOfMacro:name] != nil)
+                [macroResolver changeMacroKey:name to:newName];
+            [[macroResolver undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+            [name release];
+            name = [newName copy];
+        }
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external macro.",@"Error description")];
     }
 }
 
@@ -117,8 +123,14 @@
 }
 
 - (void)setValue:(NSString *)newValue {
-    [macroResolver setMacroDefinition:newValue forMacro:name];
-	[[macroResolver undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    if ([macroResolver owner] && [[macroResolver owner] isDocument]) {
+        [macroResolver setMacroDefinition:newValue forMacro:name];
+        [[macroResolver undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external macro.",@"Error description")];
+    }
 }
 
 - (id)bibTeXString {
@@ -129,13 +141,20 @@
 }
 
 - (void)setBibTeXString:(NSString *)newValue {
-    NS_DURING
-		NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:macroResolver];
-        [macroResolver setMacroDefinition:value forMacro:name];
-        [[macroResolver undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-    NS_HANDLER
-		NSBeep();
-    NS_ENDHANDLER
+    if ([macroResolver owner] && [[macroResolver owner] isDocument]) {
+        @try{
+            NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:macroResolver];
+            [macroResolver setMacroDefinition:value forMacro:name];
+            [[macroResolver undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+        }
+        @catch(id exception) {
+            NSBeep();
+        }
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external macro.",@"Error description")];
+    }
 }
 
 - (BDSKMacroResolver *)macroResolver {

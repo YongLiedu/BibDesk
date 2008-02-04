@@ -65,7 +65,9 @@
 	if ([pub isKindOfClass:[BibItem class]] == NO) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		return nil;
-	}
+	} else if ([[pub owner] isDocument] == NO) {
+        [self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+    }
     
     NSArray *localFiles = [pub localFiles];
 	
