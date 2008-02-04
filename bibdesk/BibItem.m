@@ -331,7 +331,7 @@ static CFDictionaryRef selectorTable = NULL;
 
 - (id)copyWithMacroResolver:(BDSKMacroResolver *)macroResolver{
     [BDSKComplexString setMacroResolverForUnarchiving:macroResolver];
-	id theCopy = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:self]];
+	id theCopy = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:self]] retain];
     [BDSKComplexString setMacroResolverForUnarchiving:nil];
     return theCopy;
 }
