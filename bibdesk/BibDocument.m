@@ -2923,7 +2923,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             if (previewPdfView == nil) {
                 previewPdfView = [[BDSKZoomablePDFView alloc] init];
                 NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-                [previewPdfView setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewLinkedFileScaleFactorKey defaultValue:1.0]];
+                [previewPdfView setScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewLinkedFileScaleFactorKey defaultValue:1.0]];
                 previewBox = [[BDSKEdgeView alloc] init];
                 [previewBox setEdges:BDSKEveryEdgeMask];
                 [previewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
