@@ -78,6 +78,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKSearchButtonController.h"
+#import "BDSKSharingClient.h"
 
 @implementation BibDocument (Groups)
 
@@ -358,15 +359,32 @@ The groupedPublications array is a subset of the publications array, developed b
     [groupTableView setDelegate:nil];
 	NSArray *selectedGroups = [self selectedGroups];
 	
-    NSMutableArray *array = [[[BDSKSharingBrowser sharedBrowser] sharedGroups] mutableCopy];
+    NSMutableSet *clients = [[[BDSKSharingBrowser sharedBrowser] sharingClients] mutableCopy];
+    NSMutableArray *currentGroups = [[groups sharedGroups] mutableCopy];
+    NSArray *currentClients = [currentGroups valueForKey:@"client"];
+    NSSet *currentClientsSet = [NSSet setWithArray:currentClients];
+    NSMutableSet *clientsToRemove = [currentClientsSet mutableCopy];
+    NSMutableSet *clientsToAdd = [clients mutableCopy];
     
-    if (array != nil) {
-        // now sort using the current column and order
-        SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
-        [array sortUsingSelector:sortSelector ascending:!docState.sortGroupsDescending];
-    }
-    [groups setSharedGroups:array];
-    [array release];
+    [clientsToRemove minusSet:clients];
+    [clientsToAdd minusSet:currentClientsSet];
+    
+    [currentGroups removeObjectsAtIndexes:[currentClients indexesOfObjects:[clientsToRemove allObjects]]];
+    
+    NSEnumerator *clientEnum = [clientsToAdd objectEnumerator];
+    BDSKSharingClient *client;
+    
+    while (client = [clientEnum nextObject])
+        [currentGroups addObject:[[[BDSKSharedGroup alloc] initWithClient:client] autorelease]];
+    
+    SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
+    [currentGroups sortUsingSelector:sortSelector ascending:!docState.sortGroupsDescending];
+    [groups setSharedGroups:currentGroups];
+    
+    [clients release];
+    [clientsToRemove release];
+    [clientsToAdd release];
+    [currentGroups release];
     
     [groupTableView reloadData];
 	

@@ -337,7 +337,9 @@
         
         [sharedGroups removeObjectsInArray:array];
         [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:sharedGroups];
+        [sharedGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
         [sharedGroups setArray:array]; 
+        [sharedGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:[self document]];
     }
 }
 

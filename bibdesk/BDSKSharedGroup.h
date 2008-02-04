@@ -40,13 +40,13 @@
 #import "BDSKGroup.h"
 #import "BDSKOwnerProtocol.h"
 
-@class BDSKSharedGroupServer, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
+@class BDSKSharingClient, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
 
 @interface BDSKSharedGroup : BDSKGroup <BDSKOwner>
 {
     BDSKPublicationsArray *publications;
     BDSKMacroResolver *macroResolver;
-    BDSKSharedGroupServer *server;
+    BDSKSharingClient *client;
     BOOL needsUpdate;
     BDSKItemSearchIndexes *searchIndexes;
 }
@@ -55,11 +55,14 @@
 + (NSImage *)lockedIcon;
 + (NSImage *)unlockedIcon;
 
-- (id)initWithService:(NSNetService *)aService;
+- (id)initWithClient:(BDSKSharingClient *)aClient;
+- (BDSKSharingClient *)client;
 - (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
 - (BOOL)isRetrieving;
 - (BOOL)needsUpdate;
 - (void)setNeedsUpdate:(BOOL)flag;
+
+- (void)handleClientUpdatedNotification:(NSNotification *)notification;
 
 @end

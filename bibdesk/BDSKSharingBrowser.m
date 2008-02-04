@@ -39,10 +39,9 @@
 #import "BDSKSharingBrowser.h"
 #import "BDSKStringConstants.h"
 #import "BibDocument_Groups.h"
-#import "BDSKSharedGroup.h"
+#import "BDSKSharingClient.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKSharingServer.h"
-#import "BDSKSharedGroup.h"
 
 // Registered at http://www.dns-sd.org/ServiceTypes.html with TXT keys "txtvers" and "authenticate."
 NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
@@ -63,7 +62,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (id)init{
     if (self = [super init]){
-        sharedGroups = nil;
+        sharingClients = nil;
         browser = nil;
         unresolvedNetServices = nil;        
     }
@@ -71,14 +70,14 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 }
 
 - (void)dealloc{
-    [sharedGroups release];
+    [sharingClients release];
     [browser release];
     [unresolvedNetServices release];
     [super dealloc];
 }
 
-- (NSArray *)sharedGroups{
-    return sharedGroups;
+- (NSSet *)sharingClients{
+    return sharingClients;
 }
 
 #pragma mark Reading other data
@@ -99,15 +98,15 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     [aNetService setDelegate:nil];
 
     if([self shouldAddService:aNetService]){
-        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
-        [sharedGroups addObject:group];
-        [group release];
+        BDSKSharingClient *client = [[BDSKSharingClient alloc] initWithService:aNetService];
+        [sharingClients addObject:client];
+        [client release];
     }
     
     // remove from the list of unresolved services
     [unresolvedNetServices removeObject:aNetService];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];
 }
 
 - (void)netService:(NSNetService *)aNetService didNotResolve:(NSDictionary *)errorDict
@@ -137,51 +136,51 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         [unresolvedNetServices removeObject:aNetService];
     }else{
         NSString *name = [aNetService name];
-        NSEnumerator *e = [sharedGroups objectEnumerator];
-        BDSKSharedGroup *group = nil;
+        NSEnumerator *e = [sharingClients objectEnumerator];
+        BDSKSharingClient *client = nil;
         
         // find the group we should remove
-        while(group = [e nextObject]){
-            if([[group name] isEqualToString:name])
+        while(client = [e nextObject]){
+            if([[client name] isEqualToString:name])
                 break;
         }
-        if(group != nil){
-            [sharedGroups removeObject:group];
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+        if(client != nil){
+            [sharingClients removeObject:client];
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];
         }
     }
 }
 
 - (BOOL)isBrowsing;
 {
-    return sharedGroups != nil;
+    return sharingClients != nil;
 }
 
 - (void)enableSharedBrowsing;
 {
     if([self isBrowsing] == NO){
-        sharedGroups = [[NSMutableArray alloc] initWithCapacity:5];
+        sharingClients = [[NSMutableSet alloc] initWithCapacity:5];
         browser = [[NSNetServiceBrowser alloc] init];
         [browser setDelegate:self];
         [browser searchForServicesOfType:BDSKNetServiceDomain inDomain:@""];    
         unresolvedNetServices = [[NSMutableArray alloc] initWithCapacity:5];
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];
     }
 }
 
 - (void)disableSharedBrowsing;
 {
     if([self isBrowsing]){
-        [sharedGroups release];
-        sharedGroups = nil;
+        [sharingClients release];
+        sharingClients = nil;
         [browser release];
         browser = nil;
         [unresolvedNetServices makeObjectsPerformSelector:@selector(setDelegate:) withObject:nil];
         [unresolvedNetServices release];
         unresolvedNetServices = nil;
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];
     }
 }
 

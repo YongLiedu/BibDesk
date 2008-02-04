@@ -1,10 +1,10 @@
 //
-//  BDSKSharingBrowser.h
+//  BDSKSharingClient.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 4/2/06.
+//  Created by Christiaan Hofman on 2/4/08.
 /*
- This software is Copyright (c) 2005-2008
+ This software is Copyright (c) 2008
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,25 +38,34 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern NSString *BDSKNetServiceDomain;
 
-extern NSString *BDSKComputerName();
+@class BDSKSharingClientServer;
 
-@interface BDSKSharingBrowser : NSObject {
-    NSMutableSet *sharingClients;
-    NSNetServiceBrowser *browser;
-    NSMutableArray *unresolvedNetServices;
+@interface BDSKSharingClient : NSObject {
+    NSData *archivedPublications;
+    NSData *archivedMacros;
+    BOOL needsUpdate;
+    NSString *name;
+    BDSKSharingClientServer *server;
 }
 
-+ (id)sharedBrowser;
-+ (NSString *)requiredProtocolVersion;
+- (id)initWithService:(NSNetService *)aService;
 
-- (NSSet *)sharingClients;
+- (NSData *)archivedPublications;
+- (void)setArchivedPublications:(NSData *)newArchivedPublications;
 
-- (BOOL)isBrowsing;
+- (NSData *)archivedMacros;
+- (void)setArchivedMacros:(NSData *)newArchivedMacros;
 
-- (void)enableSharedBrowsing;
-- (void)disableSharedBrowsing;
-- (void)restartSharedBrowsingIfNeeded;
+- (BOOL)needsUpdate;
+- (void)setNeedsUpdate:(BOOL)flag;
+
+- (BOOL)isRetrieving;
+- (BOOL)failedDownload;
+- (BOOL)needsAuthentication;
+
+- (NSString *)name;
+
+- (void)retrievePublications;
 
 @end

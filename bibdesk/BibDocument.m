@@ -2495,7 +2495,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                  object:nil];
         [nc addObserver:self
                selector:@selector(handleSharedGroupsChangedNotification:)
-                   name:BDSKSharedGroupsChangedNotification
+                   name:BDSKSharingClientsChangedNotification
                  object:nil];
         [nc addObserver:self
                selector:@selector(handleURLGroupUpdatedNotification:)
