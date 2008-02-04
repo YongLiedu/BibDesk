@@ -665,6 +665,9 @@ enum {
             [dictionary setFloatValue:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
             [dictionary setFloatValue:[previewer RTFScaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
         }
+        if(previewPdfView){
+            [dictionary setFloatValue:[previewPdfView autoScales] ? 0.0 : [previewPdfView scaleFactor] forKey:BDSKPreviewLinkedFileScaleFactorKey];
+        }
         
         if(fileSearchController){
             [dictionary setObject:[fileSearchController sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
@@ -2903,105 +2906,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [attrString release];
 }
 
-typedef struct _fileViewObjectContext {
-    CFMutableArrayRef array;
-    NSString *title;
-} fileViewObjectContext;
-
-static void addFileViewObjectForURLToArray(const void *value, void *context)
-{
-    fileViewObjectContext *ctxt = context;
-    // value is BDSKLinkedFile *
-    BDSKFileViewObject *obj = [[BDSKFileViewObject alloc] initWithURL:[(BDSKLinkedFile *)value displayURL] string:ctxt->title];
-    CFArrayAppendValue(ctxt->array, obj);
-    [obj release];
-}
-
-static void addAllFileViewObjectsForItemToArray(const void *value, void *context)
-{
-    CFArrayRef allURLs = (CFArrayRef)[(BibItem *)value files];
-    if (CFArrayGetCount(allURLs)) {
-        fileViewObjectContext ctxt;
-        ctxt.array = context;
-        ctxt.title = [(BibItem *)value displayTitle];
-        CFArrayApplyFunction(allURLs, CFRangeMake(0, CFArrayGetCount(allURLs)), addFileViewObjectForURLToArray, &ctxt);
-    }
-}
-
-- (NSArray *)shownFiles {
-    if (shownFiles == nil) {
-        if ([self isDisplayingFileContentSearch]) {
-            shownFiles = [[fileSearchController selectedResults] mutableCopy];
-        } else {
-            NSArray *selPubs = [self selectedPublications];
-            if (selPubs) {
-                shownFiles = [[NSMutableArray alloc] initWithCapacity:[selPubs count]];
-                CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllFileViewObjectsForItemToArray, shownFiles);
-            }
-        }
-    }
-    return shownFiles;
-}
-
-- (void)updateFileView {
-    [shownFiles release];
-    shownFiles = nil;
-    
-    [fileView reloadIcons];
-}
-
-- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
-{
-    return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"string"];
-}
-
-- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView {
-    return [[self shownFiles] count];
-}
-
-- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex {
-    return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
-}
-
-- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL {
-    if ([aURL isFileURL]) {
-        NSString *searchString = @"";
-        // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
-        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
-            searchString = [searchField stringValue];
-        return [[NSWorkspace sharedWorkspace] openURL:aURL withSearchString:searchString] == NO;
-    } else {
-        return YES;
-    }
-}
-
-- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
-    NSURL *theURL = anIndex == NSNotFound ? nil : [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
-    int i;
-    NSMenuItem *item;
-    
-    if (theURL && [[aFileView selectionIndexes] count] <= 1) {
-        i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
-        [menu insertItemWithTitle:[NSLocalizedString(@"Open With", @"Menu item title") stringByAppendingEllipsis]
-                andSubmenuOfApplicationsForURL:theURL atIndex:++i];
-        
-        if ([theURL isFileURL]) {
-            i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
-            item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
-                                      action:@selector(showNotesForLinkedFile:)
-                               keyEquivalent:@""
-                                     atIndex:++i];
-            [item setRepresentedObject:theURL];
-            
-            item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
-                                      action:@selector(copyNotesForLinkedFile:)
-                               keyEquivalent:@""
-                                     atIndex:++i];
-            [item setRepresentedObject:theURL];
-        }
-    }
-}
-
 - (void)displayLinkedFileInPreviewPane{
     NSView *view = [previewTextView enclosingScrollView];
     [[previewer progressOverlay] remove];
@@ -3018,6 +2922,8 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             // set up the view hierarchy
             if (previewPdfView == nil) {
                 previewPdfView = [[BDSKZoomablePDFView alloc] init];
+                NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+                [previewPdfView setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewLinkedFileScaleFactorKey defaultValue:1.0]];
                 previewBox = [[BDSKEdgeView alloc] init];
                 [previewBox setEdges:BDSKEveryEdgeMask];
                 [previewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
@@ -3243,6 +3149,107 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         [self displayLinkedFileInPreviewPane];
     }else{
         [self displayAttributedTextPreviewInPreviewPane];
+    }
+}
+
+#pragma mark FileView
+
+typedef struct _fileViewObjectContext {
+    CFMutableArrayRef array;
+    NSString *title;
+} fileViewObjectContext;
+
+static void addFileViewObjectForURLToArray(const void *value, void *context)
+{
+    fileViewObjectContext *ctxt = context;
+    // value is BDSKLinkedFile *
+    BDSKFileViewObject *obj = [[BDSKFileViewObject alloc] initWithURL:[(BDSKLinkedFile *)value displayURL] string:ctxt->title];
+    CFArrayAppendValue(ctxt->array, obj);
+    [obj release];
+}
+
+static void addAllFileViewObjectsForItemToArray(const void *value, void *context)
+{
+    CFArrayRef allURLs = (CFArrayRef)[(BibItem *)value files];
+    if (CFArrayGetCount(allURLs)) {
+        fileViewObjectContext ctxt;
+        ctxt.array = context;
+        ctxt.title = [(BibItem *)value displayTitle];
+        CFArrayApplyFunction(allURLs, CFRangeMake(0, CFArrayGetCount(allURLs)), addFileViewObjectForURLToArray, &ctxt);
+    }
+}
+
+- (NSArray *)shownFiles {
+    if (shownFiles == nil) {
+        if ([self isDisplayingFileContentSearch]) {
+            shownFiles = [[fileSearchController selectedResults] mutableCopy];
+        } else {
+            NSArray *selPubs = [self selectedPublications];
+            if (selPubs) {
+                shownFiles = [[NSMutableArray alloc] initWithCapacity:[selPubs count]];
+                CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllFileViewObjectsForItemToArray, shownFiles);
+            }
+        }
+    }
+    return shownFiles;
+}
+
+- (void)updateFileView {
+    [shownFiles release];
+    shownFiles = nil;
+    
+    [fileView reloadIcons];
+}
+
+- (NSString *)fileView:(FileView *)aFileView subtitleAtIndex:(NSUInteger)anIndex;
+{
+    return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"string"];
+}
+
+- (NSUInteger)numberOfURLsInFileView:(FileView *)aFileView {
+    return [[self shownFiles] count];
+}
+
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)anIndex {
+    return [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
+}
+
+- (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL {
+    if ([aURL isFileURL]) {
+        NSString *searchString = @"";
+        // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
+        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
+            searchString = [searchField stringValue];
+        return [[NSWorkspace sharedWorkspace] openURL:aURL withSearchString:searchString] == NO;
+    } else {
+        return YES;
+    }
+}
+
+- (void)fileView:(FileView *)aFileView willPopUpMenu:(NSMenu *)menu onIconAtIndex:(NSUInteger)anIndex {
+    NSURL *theURL = anIndex == NSNotFound ? nil : [[[self shownFiles] objectAtIndex:anIndex] valueForKey:@"URL"];
+    int i;
+    NSMenuItem *item;
+    
+    if (theURL && [[aFileView selectionIndexes] count] <= 1) {
+        i = [menu indexOfItemWithTag:FVOpenMenuItemTag];
+        [menu insertItemWithTitle:[NSLocalizedString(@"Open With", @"Menu item title") stringByAppendingEllipsis]
+                andSubmenuOfApplicationsForURL:theURL atIndex:++i];
+        
+        if ([theURL isFileURL]) {
+            i = [menu indexOfItemWithTag:FVRevealMenuItemTag];
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Skim Notes",@"Menu item title: Skim Note...") stringByAppendingEllipsis]
+                                      action:@selector(showNotesForLinkedFile:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:theURL];
+            
+            item = [menu insertItemWithTitle:[NSLocalizedString(@"Copy Skim Notes",@"Menu item title: Copy Skim Notes...") stringByAppendingEllipsis]
+                                      action:@selector(copyNotesForLinkedFile:)
+                               keyEquivalent:@""
+                                     atIndex:++i];
+            [item setRepresentedObject:theURL];
+        }
     }
 }
 

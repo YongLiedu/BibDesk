@@ -98,6 +98,7 @@ extern NSString *BDSKPreviewMaxNumberKey;
 extern NSString *BDSKPreviewTemplateStyleKey;
 extern NSString *BDSKPreviewPDFScaleFactorKey;
 extern NSString *BDSKPreviewRTFScaleFactorKey;
+extern NSString *BDSKPreviewLinkedFileScaleFactorKey;
 extern NSString *BDSKCustomCiteStringsKey;
 extern NSString *BDSKCitePrependTildeKey;
 extern NSString *BDSKCiteStringKey;
