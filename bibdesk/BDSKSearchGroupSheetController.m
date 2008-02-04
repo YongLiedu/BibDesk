@@ -328,6 +328,7 @@ static BOOL isSearchFileAtPath(NSString *path)
             group = [[BDSKSearchGroup alloc] initWithType:type serverInfo:serverInfo searchTerm:nil];
         }else{
             [group setServerInfo:serverInfo];
+            [[group undoManager] setActionName:NSLocalizedString(@"Edit Search Group", @"Undo action name")];
         }
     }
     

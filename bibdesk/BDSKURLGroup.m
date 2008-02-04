@@ -290,7 +290,7 @@
     return macroResolver;
 }
 
-- (NSUndoManager *)undoManager { return nil; }
+- (NSUndoManager *)undoManager { return [super undoManager]; }
 
 - (NSURL *)fileURL { return [NSURL fileURLWithPath:filePath]; }
 

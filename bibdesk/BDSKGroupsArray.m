@@ -63,11 +63,13 @@
 
 @implementation BDSKGroupsArray 
 
-- (id)init {
+- (id)initWithDocument:(BibDocument *)aDocument {
     if(self = [super init]) {
         libraryGroup = [[BDSKGroup alloc] initLibraryGroup];
+        [libraryGroup setDocument:aDocument];
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShowWebGroupPrefKey]){
             webGroup = [[BDSKWebGroup alloc] initWithName:NSLocalizedString(@"Web", @"Web")];
+            [webGroup setDocument:aDocument];
         }else{
             webGroup = nil;
         }
@@ -80,6 +82,7 @@
         staticGroups = [[NSMutableArray alloc] init];
         tmpStaticGroups = nil;
         categoryGroups = nil;
+        document = aDocument;
         spinners = nil;
     }
     return self;
@@ -320,10 +323,12 @@
 #pragma mark Mutable accessors
 
 - (void)setLastImportedPublications:(NSArray *)pubs{
-    if(lastImportGroup == nil)
+    if(lastImportGroup == nil) {
         lastImportGroup = [[BDSKStaticGroup alloc] initWithLastImport:pubs];
-    else 
+        [lastImportGroup setDocument:[self document]];
+    } else {
         [lastImportGroup setPublications:pubs];
+    }
 }
 
 - (void)setSharedGroups:(NSArray *)array{
@@ -340,7 +345,7 @@
 	[[[self undoManager] prepareWithInvocationTarget:self] removeURLGroup:group];
     
 	[urlGroups addObject:group];
-	[group setUndoManager:[self undoManager]];
+    [group setDocument:[self document]];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
@@ -352,7 +357,7 @@
     
     [self removeSpinnerForGroup:group];
     
-	[group setUndoManager:nil];
+    [group setDocument:nil];
 	[urlGroups removeObjectIdenticalTo:group];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -362,7 +367,7 @@
 	[[[self undoManager] prepareWithInvocationTarget:self] removeScriptGroup:group];
     
 	[scriptGroups addObject:group];
-	[group setUndoManager:[self undoManager]];
+    [group setDocument:[self document]];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
@@ -374,7 +379,7 @@
     
     [self removeSpinnerForGroup:group];
     
-	[group setUndoManager:nil];
+    [group setDocument:nil];
 	[scriptGroups removeObjectIdenticalTo:group];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -382,6 +387,7 @@
 
 - (void)addSearchGroup:(BDSKSearchGroup *)group {
 	[searchGroups addObject:group];
+    [group setDocument:[self document]];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
@@ -391,6 +397,7 @@
     
     [self removeSpinnerForGroup:group];
     
+    [group setDocument:nil];
 	[searchGroups removeObjectIdenticalTo:group];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -403,7 +410,7 @@
 	[group filterItems:[document publications]];
 	
 	[smartGroups addObject:group];
-	[group setUndoManager:[self undoManager]];
+    [group setDocument:[self document]];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
@@ -413,7 +420,7 @@
     
 	[[[self undoManager] prepareWithInvocationTarget:self] addSmartGroup:group];
 	
-	[group setUndoManager:nil];
+    [group setDocument:nil];
 	[smartGroups removeObjectIdenticalTo:group];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
@@ -422,7 +429,7 @@
 - (void)addStaticGroup:(BDSKStaticGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] removeStaticGroup:group];
 	
-	[group setUndoManager:[self undoManager]];
+    [group setDocument:[self document]];
     [self updateStaticGroupsIfNeeded];
     [staticGroups addObject:group];
     
@@ -434,7 +441,7 @@
     
 	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
 	
-	[group setUndoManager:nil];
+    [group setDocument:nil];
     [self updateStaticGroupsIfNeeded];
     [staticGroups removeObjectIdenticalTo:group];
     
@@ -445,8 +452,10 @@
     if(categoryGroups != array){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
         
+        [categoryGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
         [categoryGroups release];
         categoryGroups = [array mutableCopy]; 
+        [categoryGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:[self document]];
     }
 }
 
@@ -456,13 +465,26 @@
     [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:scriptGroups];
     
     [lastImportGroup setPublications:[NSArray array]];
+    [urlGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [urlGroups removeAllObjects];
+    [scriptGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [scriptGroups removeAllObjects];
+    [searchGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [searchGroups removeAllObjects];
+    [staticGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [staticGroups removeAllObjects];
+    [smartGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [smartGroups removeAllObjects];
+    [staticGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [staticGroups removeAllObjects];
+    [categoryGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [categoryGroups removeAllObjects];
+}
+
+#pragma mark Document
+
+- (BibDocument *)document{
+    return document;
 }
 
 #pragma mark Spinners
@@ -499,16 +521,6 @@
         [spinner removeFromSuperview];
         [spinners removeObjectForKey:group];
     }
-}
-
-#pragma mark Document
-
-- (BibDocument *)document{
-    return document;
-}
-
-- (void)setDocument:(BibDocument *)newDocument{
-    document = newDocument;
 }
 
 #pragma mark Sorting
@@ -587,8 +599,7 @@
         while (groupDict = [groupEnum nextObject]) {
             @try {
                 group = [[groupClass alloc] initWithDictionary:groupDict];
-                if ([group respondsToSelector:@selector(setUndoManager:)])
-                    [(BDSKMutableGroup *)group setUndoManager:[self undoManager]];
+                [group setDocument:[self document]];
                 [array addObject:group];
             }
             @catch(id exception) {
@@ -672,7 +683,7 @@
             while (key = [keyEnum nextObject]) 
                 [pubArray addObjectsFromArray:[[document publications] allItemsForCiteKey:key]];
             group = [[BDSKStaticGroup alloc] initWithName:name publications:pubArray];
-            [group setUndoManager:[self undoManager]];
+            [group setDocument:[self document]];
             [staticGroups addObject:group];
         }
         @catch(id exception) {

@@ -134,13 +134,13 @@
 		[[[self undoManager] prepareWithInvocationTarget:self] setFilter:filter];
         [filter release];
         filter = [newFilter copy];
-		[filter setUndoManager:undoManager];
+		[filter setUndoManager:[self undoManager]];
     }
 }
 
-- (void)setUndoManager:(NSUndoManager *)newUndoManager{
-    [super setUndoManager:newUndoManager];
-    [filter setUndoManager:newUndoManager];
+- (void)setDocument:(BibDocument *)newDocument{
+    [super setDocument:newDocument];
+    [filter setUndoManager:[self undoManager]];
 }
 
 - (BOOL)containsItem:(BibItem *)item {

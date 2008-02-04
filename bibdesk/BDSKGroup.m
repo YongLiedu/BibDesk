@@ -40,6 +40,7 @@
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
+#import "BibDocument.h"
 #import <OmniBase/OBUtilities.h>
 
 
@@ -67,6 +68,7 @@
     if (self = [super init]) {
         name = [aName copy];
         count = aCount;
+        document = nil;
     }
     return self;
 }
@@ -186,6 +188,14 @@
     return [self stringValue];
 }
 
+- (BibDocument *)document{
+    return document;
+}
+
+- (void)setDocument:(BibDocument *)newDocument{
+    document = newDocument;
+}
+
 // comparisons
 
 - (NSComparisonResult)nameCompare:(BDSKGroup *)otherGroup {
@@ -243,19 +253,6 @@ static NSString *BDSKLibraryLocalizedString = nil;
 
 @implementation BDSKMutableGroup
 
-- (id)initWithName:(id)aName count:(int)aCount {
-    if (self = [super initWithName:aName count:aCount]) {
-        undoManager = nil;
-    }
-    return self;
-}
-
-- (void)dealloc {
-	[[self undoManager] removeAllActionsWithTarget:self];
-    [undoManager release];
-    [super dealloc];
-}
-
 - (void)setName:(id)newName {
     if (name != newName) {
 		[(BDSKMutableGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
@@ -266,14 +263,7 @@ static NSString *BDSKLibraryLocalizedString = nil;
 }
 
 - (NSUndoManager *)undoManager {
-    return undoManager;
-}
-
-- (void)setUndoManager:(NSUndoManager *)newUndoManager {
-    if (undoManager != newUndoManager) {
-        [undoManager release];
-        undoManager = [newUndoManager retain];
-    }
+    return [document undoManager];
 }
 
 - (BOOL)hasEditableName { return YES; }

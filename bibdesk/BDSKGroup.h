@@ -38,13 +38,14 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibItem;
+@class BibItem, BibDocument;
 
 /* note that NSCoding support is presently limited in some cases */
 
 @interface BDSKGroup : NSObject <NSCopying, NSCoding> {
 	id name;
 	int count;
+    BibDocument *document;
 }
 
 /*!
@@ -199,6 +200,9 @@
 
 - (NSString *)toolTip;
 
+- (BibDocument *)document;
+- (void)setDocument:(BibDocument *)newDocument;
+
 /*!
 	@method nameCompare:
 	@abstract Compares the string value of the receiver and the otherGroup. 
@@ -227,7 +231,6 @@
 
 
 @interface BDSKMutableGroup : BDSKGroup {
-	NSUndoManager *undoManager;
 }
 
 /*!
@@ -244,13 +247,5 @@
 	@discussion -
 */
 - (NSUndoManager *)undoManager;
-
-/*!
-	@method setUndoManager:
-	@abstract Sets the undo manager for the group.
-	@discussion -
-	@param newUndoManager The new undo manager to set.
-*/
-- (void)setUndoManager:(NSUndoManager *)newUndoManager;
 
 @end

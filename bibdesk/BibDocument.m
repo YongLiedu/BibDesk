@@ -204,8 +204,7 @@ enum {
         publications = [[BDSKPublicationsArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         groupedPublications = [[NSMutableArray alloc] initWithCapacity:1];
-        groups = [[BDSKGroupsArray alloc] init];
-        [groups setDocument:self];
+        groups = [(BDSKGroupsArray *)[BDSKGroupsArray alloc] initWithDocument:self];
         
         frontMatter = [[NSMutableString alloc] initWithString:@""];
         documentInfo = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];

@@ -246,7 +246,7 @@ NSString *BDSKSearchGroupISI = @"isi";
     return macroResolver;
 }
 
-- (NSUndoManager *)undoManager { return nil; }
+- (NSUndoManager *)undoManager { return [super undoManager]; }
 
 - (NSURL *)fileURL { return nil; }
 
@@ -302,6 +302,7 @@ NSString *BDSKSearchGroupISI = @"isi";
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
+    [(BDSKSearchGroup *)[[self undoManager] prepareWithInvocationTarget:self] setServerInfo:[self serverInfo]];
     NSString *newType = [info type];
     if([newType isEqualToString:type] == NO){
         [type release];

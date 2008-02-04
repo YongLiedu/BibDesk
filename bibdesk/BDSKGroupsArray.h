@@ -66,6 +66,8 @@ enum {
     BibDocument *document;
 }
 
+- (id)initWithDocument:(BibDocument *)aDocument;
+
 - (NSRange)rangeOfSharedGroups;
 - (NSRange)rangeOfURLGroups;
 - (NSRange)rangeOfScriptGroups;
@@ -124,7 +126,6 @@ enum {
 - (void)removeSpinnerForGroup:(BDSKGroup *)group;
 
 - (BibDocument *)document;
-- (void)setDocument:(BibDocument *)newDocument;
 
 - (void)setGroupsOfType:(int)groupType fromSerializedData:(NSData *)data;
 - (NSData *)serializedGroupsDataOfType:(int)groupType;
