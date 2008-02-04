@@ -45,16 +45,7 @@
 @interface BibAuthor (Private)
 
 - (void)splitName:(NSString *)newName;
-- (void)setNormalizedName:(NSString *)theName;
-- (void)setFullLastName:(NSString *)theName;
-- (void)setSortableName:(NSString *)theName;
-- (void)cacheNames;
-- (void)setVonPart:(NSString *)newVonPart;
-- (void)setLastName:(NSString *)newLastName;
-- (void)setFirstName:(NSString *)newFirstName;
-- (void)setJrPart:(NSString *)newJrPart;
-- (void)setFuzzyName:(NSString *)theName;
-- (NSString *)fuzzyName; // this is an implementation detail, so other classes mustn't rely on it
+- (void)setupNames;
 - (void)setupAbbreviatedNames;
 
 @end
@@ -446,7 +437,12 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
     // @@ this is necessary because the hash method depends on the internal state of the object (which is itself necessary since we can have multiple author instances of the same author)
     if(name != nil)
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Attempt to modify non-nil attribute of immutable object %@", self] userInfo:nil];
-        
+    
+    OBASSERT(firstName == nil);
+    OBASSERT(vonPart == nil);
+    OBASSERT(lastName == nil);
+    OBASSERT(jrPart == nil);
+    
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     
     // we need to remove newlines and collapse whitespace before using bt_split_name 
@@ -497,77 +493,35 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
     
     nameString = createNameStringForComponent(alloc, theName, BTN_FIRST, encoding);
     if (nameString) {
-        [self setFirstName:nameString];
+        firstName = [nameString copy];
         [nameString release];
         flags.hasFirst = YES;
     }
     
     nameString = createNameStringForComponent(alloc, theName, BTN_VON, encoding);
     if (nameString) {
-        [self setVonPart:nameString];
+        vonPart = [nameString copy];
         [nameString release];
         flags.hasVon = YES;
     }
     
     nameString = createNameStringForComponent(alloc, theName, BTN_LAST, encoding);
     if (nameString) {
-        [self setLastName:nameString];
+        lastName = [nameString copy];
         [nameString release];
         flags.hasLast = YES;
     }
     
     nameString = createNameStringForComponent(alloc, theName, BTN_JR, encoding);
     if (nameString) {
-        [self setJrPart:nameString];
+        jrPart = [nameString copy];
         [nameString release];
         flags.hasJr = YES;
     }
     
     bt_free_name(theName);
         
-    [self cacheNames];    
-}
-
-- (void)setVonPart:(NSString *)newVonPart{
-    if(vonPart != newVonPart){
-        [vonPart release];
-        vonPart = [newVonPart copy];
-    }
-}
-
-- (void)setLastName:(NSString *)newLastName{
-    if(lastName != newLastName){
-        [lastName release];
-        lastName = [newLastName copy];
-    }
-}
-
-- (void)setFirstName:(NSString *)newFirstName{
-    if(firstName != newFirstName){
-        [firstName release];
-        firstName = [newFirstName copy];
-    }
-}
-
-- (void)setJrPart:(NSString *)newJrPart{
-    if(jrPart != newJrPart){
-        [jrPart release];
-        jrPart = [newJrPart copy];
-    }
-}
-
-- (void)setNormalizedName:(NSString *)theName{
-    if(normalizedName != theName){
-        [normalizedName release];
-        normalizedName = [theName copy];
-    }
-}
-
-- (void)setFullLastName:(NSString *)theName{
-    if(fullLastName != theName){
-        [fullLastName release];
-        fullLastName = [theName copy];
-    }
+    [self setupNames];    
 }
 
 // This follows the recommendations from Oren Patashnik's btxdoc.tex:
@@ -579,7 +533,12 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
 */
 // Note that if there is only one word/token, it is the lastName, so that's assumed to always be there.
 
-- (void)cacheNames{
+- (void)setupNames{
+    
+    OBASSERT(name == nil);
+    OBASSERT(fullLastName == nil);
+    OBASSERT(normalizedName == nil);
+    OBASSERT(sortableName == nil);
 	
 	// temporary string storage
     NSMutableString *theName = [[NSMutableString alloc] initWithCapacity:14];
@@ -623,14 +582,14 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
         [theName appendString:jrPart];
     }
     
-    [self setFullLastName:theName];
+    fullLastName = [theName copy];
     
     if(flags.hasFirst){
         [theName appendString:@", "];
         [theName appendString:firstName];
     }
     
-    [self setNormalizedName:theName];
+    normalizedName = [theName copy];
     
     // our hash is based upon the normalized name, so isEqual: must also be based upon the normalized name
     hash = [normalizedName hash];
@@ -644,7 +603,7 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
     [theName appendString:(flags.hasFirst ? @" " : @"")];
     [theName appendString:(flags.hasFirst ? firstName : @"")];
     [theName deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
-    [self setSortableName:theName];
+    sortableName = [theName copy];
     
     // components of the first name used in fuzzy comparisons
     
@@ -662,49 +621,10 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
 
     if(flags.hasVon) [theName appendString:vonPart];
 	if(flags.hasLast) [theName appendString:lastName];
-    [self setFuzzyName:theName];
+    fuzzyName = [theName copy];
     
     // dispose of the temporary mutable string
     [theName release];
-}
-
-- (void)setFuzzyName:(NSString *)theName{
-    if(fuzzyName != theName){
-        [fuzzyName release];
-        fuzzyName = [theName copy];
-    }
-}
-
-- (NSString *)fuzzyName{
-    return fuzzyName;
-}
-
-- (void)setSortableName:(NSString *)theName{
-    if(sortableName != theName){
-        [sortableName release];
-        sortableName = [theName copy];
-    }
-}
-
-- (void)setAbbreviatedName:(NSString *)aName{
-    if(aName != abbreviatedName){
-        [abbreviatedName release];
-        abbreviatedName = [aName copy];
-    }
-}
-
-- (void)setAbbreviatedNormalizedName:(NSString *)aName{
-    if(aName != abbreviatedNormalizedName){
-        [abbreviatedNormalizedName release];
-        abbreviatedNormalizedName = [aName copy];
-    }
-}
-
-- (void)setUnpunctuatedAbbreviatedNormalizedName:(NSString *)aName{
-    if(aName != unpunctuatedAbbreviatedNormalizedName){
-        [unpunctuatedAbbreviatedNormalizedName release];
-        unpunctuatedAbbreviatedNormalizedName = [aName copy];
-    }
 }
 
 // Bug #1436631 indicates that "Pomies, M.-P." was displayed as "M. -. Pomies", so we'll grab the first letter character instead of substringToIndex:1.  The technically correct solution may be to use "M. Pomies" in this case, but we split the first name at "." boundaries to generate the firstNames array.
@@ -717,6 +637,10 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
 
 - (void)setupAbbreviatedNames
 {
+    OBASSERT(abbreviatedName == nil);
+    OBASSERT(abbreviatedNormalizedName == nil);
+    OBASSERT(unpunctuatedAbbreviatedNormalizedName == nil);
+    
     CFArrayRef theFirstNames = (CFArrayRef)firstNames;
     CFIndex idx, firstNameCount = CFArrayGetCount(theFirstNames);
     CFStringRef fragment = nil;
@@ -759,7 +683,7 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
     
     CFStringAppend(abbrevName, (CFStringRef)fullLastName);
     
-    [self setAbbreviatedName:(NSString *)abbrevName];
+    abbreviatedName = [(NSString *)abbrevName copy];
     
     // now for the normalized abbreviated form; start with only the last name
     CFStringReplaceAll(abbrevName, (CFStringRef)fullLastName);
@@ -772,7 +696,7 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
         CFRelease(abbrevFirstName);
     }
     
-    [self setAbbreviatedNormalizedName:(NSString *)abbrevName];
+    abbreviatedNormalizedName = [(NSString *)abbrevName copy];
     
     // now for the unpunctuated normalized abbreviated form
     CFStringReplaceAll(abbrevName, CFSTR(""));
@@ -799,7 +723,7 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
         CFStringAppend(abbrevName, (CFStringRef)jrPart);
     }
     
-    [self setUnpunctuatedAbbreviatedNormalizedName:(NSString *)abbrevName];
+    unpunctuatedAbbreviatedNormalizedName = [(NSString *)abbrevName copy];
     CFRelease(abbrevName);
 }
 
