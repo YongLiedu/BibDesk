@@ -266,56 +266,174 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return idx == NSNotFound ? nil : [groups objectAtIndex:idx];
 }
 
+- (void)insertInGroups:(BDSKGroup *)group {
+    if ([group document]) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
+        return;
+    } else if ([group isSmart] == YES) {
+        [groups addSmartGroup:(BDSKSmartGroup *)group];
+    } else if ([group isStatic] == YES && [group isEqual:[groups lastImportGroup]] == NO) {
+        [groups addStaticGroup:(BDSKStaticGroup *)group];
+    } else if ([group isURL] == YES) {
+        [groups addURLGroup:(BDSKURLGroup *)group];
+    } else if ([group isScript] == YES) {
+        [groups addScriptGroup:(BDSKScriptGroup *)group];
+    } else if ([group isSearch] == YES) {
+        [groups addSearchGroup:(BDSKSearchGroup *)group];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
+        return;
+    }
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (void)insertInGroups:(BDSKGroup *)group atIndex:(unsigned int)idx {
+    [self insertInGroups:group];
+}
+
+- (void)insertObject:(BDSKGroup *)group inGroupsAtIndex:(unsigned int)idx {
+    [self insertInGroups:group];
+}
+
+- (void)removeFromGroupsAtIndex:(unsigned int)idx {
+    BDSKGroup *group = [[groups staticGroups] objectAtIndex:idx];
+    if ([group isSmart] == YES) {
+        [groups removeSmartGroup:(BDSKSmartGroup *)group];
+    } else if ([group isStatic] == YES && [group isEqual:[groups lastImportGroup]] == NO) {
+        [groups removeStaticGroup:(BDSKStaticGroup *)group];
+    } else if ([group isURL] == YES) {
+        [groups removeURLGroup:(BDSKURLGroup *)group];
+    } else if ([group isScript] == YES) {
+        [groups removeScriptGroup:(BDSKScriptGroup *)group];
+    } else if ([group isSearch] == YES) {
+        [groups removeSearchGroup:(BDSKSearchGroup *)group];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot remove group.",@"Error description")];
+        return;
+    }
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    [self displaySelectedGroups];
+}
+
+- (void)removeObjectFromGroupsAtIndex:(unsigned int)idx {
+    return [self removeFromGroupsAtIndex:idx];
+}
+
+#pragma mark -
 
 - (unsigned int)countOfStaticGroups {
     return [[groups staticGroups] count];
 }
 
-- (BDSKGroup *)valueInStaticGroupsAtIndex:(unsigned int)idx {
+- (BDSKStaticGroup *)valueInStaticGroupsAtIndex:(unsigned int)idx {
     return [[groups staticGroups] objectAtIndex:idx];
 }
 
-- (BDSKGroup *)objectInStaticGroupsAtIndex:(unsigned int)idx {
-    return [self valueInGroupsAtIndex:idx];
+- (BDSKStaticGroup *)objectInStaticGroupsAtIndex:(unsigned int)idx {
+    return [self valueInStaticGroupsAtIndex:idx];
 }
 
-- (BDSKGroup *)valueInStaticGroupsWithName:(NSString *)name {
+- (BDSKStaticGroup *)valueInStaticGroupsWithName:(NSString *)name {
     unsigned int idx = [[[groups staticGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups staticGroups] objectAtIndex:idx];
 }
 
+- (void)insertInStaticGroups:(BDSKStaticGroup *)group {
+    if ([group document]) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
+    } else {
+        [groups addStaticGroup:group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    }
+}
+
+- (void)insertInStaticGroups:(BDSKStaticGroup *)group atIndex:(unsigned int)idx {
+    [self insertInStaticGroups:group];
+}
+
+- (void)insertObject:(BDSKStaticGroup *)group inStaticGroupsAtIndex:(unsigned int)idx {
+    [self insertInStaticGroups:group];
+}
+
+- (void)removeFromStaticGroupsAtIndex:(unsigned int)idx {
+	[groups removeStaticGroup:[[groups staticGroups] objectAtIndex:idx]];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (void)removeObjectFromStaticGroupsAtIndex:(unsigned int)idx {
+    return [self removeFromStaticGroupsAtIndex:idx];
+}
+
+#pragma mark -
 
 - (unsigned int)countOfSmartGroups {
     return [[groups smartGroups] count];
 }
 
-- (BDSKGroup *)valueInSmartGroupsAtIndex:(unsigned int)idx {
+- (BDSKSmartGroup *)valueInSmartGroupsAtIndex:(unsigned int)idx {
     return [[groups smartGroups] objectAtIndex:idx];
 }
 
-- (BDSKGroup *)objectInSmartGroupsAtIndex:(unsigned int)idx {
+- (BDSKSmartGroup *)objectInSmartGroupsAtIndex:(unsigned int)idx {
     return [self valueInSmartGroupsAtIndex:idx];
 }
 
-- (BDSKGroup *)valueInSmartGroupsWithName:(NSString *)name {
+- (BDSKSmartGroup *)valueInSmartGroupsWithName:(NSString *)name {
     unsigned int idx = [[[groups smartGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups smartGroups] objectAtIndex:idx];
 }
 
+- (void)insertInSmartGroups:(BDSKSmartGroup *)group {
+    if ([group document]) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
+    } else {
+        [groups addSmartGroup:group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    }
+}
+
+- (void)insertInSmartGroups:(BDSKSmartGroup *)group atIndex:(unsigned int)idx {
+    [self insertInSmartGroups:group];
+}
+
+- (void)insertObject:(BDSKSmartGroup *)group inSmartGroupsAtIndex:(unsigned int)idx {
+    [self insertInSmartGroups:group];
+}
+
+- (void)removeFromSmartGroupsAtIndex:(unsigned int)idx {
+	[groups removeSmartGroup:[[groups smartGroups] objectAtIndex:idx]];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (void)removeObjectFromSmartGroupsAtIndex:(unsigned int)idx {
+    return [self removeFromSmartGroupsAtIndex:idx];
+}
+
+#pragma mark -
 
 - (unsigned int)countOfFieldGroups {
     return [[groups categoryGroups] count];
 }
 
-- (BDSKGroup *)valueInFieldGroupsAtIndex:(unsigned int)idx {
+- (BDSKCategoryGroup *)valueInFieldGroupsAtIndex:(unsigned int)idx {
     return [[groups categoryGroups] objectAtIndex:idx];
 }
 
-- (BDSKGroup *)objectInFieldGroupsAtIndex:(unsigned int)idx {
+- (BDSKCategoryGroup *)objectInFieldGroupsAtIndex:(unsigned int)idx {
     return [self valueInFieldGroupsAtIndex:idx];
 }
 
-- (BDSKGroup *)valueInFieldGroupsWithName:(NSString *)name {
+- (BDSKCategoryGroup *)valueInFieldGroupsWithName:(NSString *)name {
     id field = [self currentGroupField];
     NSArray *names = [[groups categoryGroups] valueForKey:@"name"];
     id fuzzyName = name;
@@ -332,60 +450,167 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return idx == NSNotFound ? nil : [[groups categoryGroups] objectAtIndex:idx];
 }
 
+#pragma mark -
 
 - (unsigned int)countOfExternalFileGroups {
     return [[groups URLGroups] count];
 }
 
-- (BDSKGroup *)valueInExternalFileGroupsAtIndex:(unsigned int)idx {
+- (BDSKURLGroup *)valueInExternalFileGroupsAtIndex:(unsigned int)idx {
     return [[groups URLGroups] objectAtIndex:idx];
 }
 
-- (BDSKGroup *)objectInExternalFileGroupsAtIndex:(unsigned int)idx {
+- (BDSKURLGroup *)objectInExternalFileGroupsAtIndex:(unsigned int)idx {
     return [self valueInExternalFileGroupsAtIndex:idx];
 }
 
-- (BDSKGroup *)valueInExternalFileGroupsWithName:(NSString *)name {
+- (BDSKURLGroup *)valueInExternalFileGroupsWithName:(NSString *)name {
     unsigned int idx = [[[groups URLGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups URLGroups] objectAtIndex:idx];
 }
 
+- (void)insertInExternalFileGroups:(BDSKURLGroup *)group {
+    if ([group document]) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
+    } else {
+        [groups addURLGroup:group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    }
+}
+
+- (void)insertInExternalFileGroups:(BDSKURLGroup *)group atIndex:(unsigned int)idx {
+    [self insertInExternalFileGroups:group];
+}
+
+- (void)insertObject:(BDSKURLGroup *)group inExternalFileGroupsAtIndex:(unsigned int)idx {
+    [self insertInExternalFileGroups:group];
+}
+
+- (void)removeFromExternalFileGroupsAtIndex:(unsigned int)idx {
+	[groups removeURLGroup:[[groups scriptGroups] objectAtIndex:idx]];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (void)removeObjectFromExternalFileGroupsAtIndex:(unsigned int)idx {
+    return [self removeFromExternalFileGroupsAtIndex:idx];
+}
+
+#pragma mark -
 
 - (unsigned int)countOfScriptGroups {
     return [[groups scriptGroups] count];
 }
 
-- (BDSKGroup *)valueInScriptGroupsAtIndex:(unsigned int)idx {
+- (BDSKScriptGroup *)valueInScriptGroupsAtIndex:(unsigned int)idx {
     return [[groups scriptGroups] objectAtIndex:idx];
 }
 
-- (BDSKGroup *)objectInScriptGroupsAtIndex:(unsigned int)idx {
+- (BDSKScriptGroup *)objectInScriptGroupsAtIndex:(unsigned int)idx {
     return [self valueInScriptGroupsAtIndex:idx];
 }
 
-- (BDSKGroup *)valueInScriptGroupsWithName:(NSString *)name {
+- (BDSKScriptGroup *)valueInScriptGroupsWithName:(NSString *)name {
     unsigned int idx = [[[groups scriptGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups scriptGroups] objectAtIndex:idx];
 }
 
+- (void)insertInScriptGroups:(BDSKScriptGroup *)group {
+    if ([group document]) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
+    } else {
+        [groups addScriptGroup:group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    }
+}
+
+- (void)insertInScriptGroups:(BDSKScriptGroup *)group atIndex:(unsigned int)idx {
+    [self insertInScriptGroups:group];
+}
+
+- (void)insertObject:(BDSKScriptGroup *)group inScriptGroupsAtIndex:(unsigned int)idx {
+    [self insertInScriptGroups:group];
+}
+
+- (void)removeFromScriptGroupsAtIndex:(unsigned int)idx {
+	[groups removeScriptGroup:[[groups scriptGroups] objectAtIndex:idx]];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (void)removeObjectFromScriptGroupsAtIndex:(unsigned int)idx {
+    return [self removeFromScriptGroupsAtIndex:idx];
+}
+
+#pragma mark -
+
+- (unsigned int)countOfSearchGroups {
+    return [[groups searchGroups] count];
+}
+
+- (BDSKSearchGroup *)valueInSearchGroupsAtIndex:(unsigned int)idx {
+    return [[groups searchGroups] objectAtIndex:idx];
+}
+
+- (BDSKSearchGroup *)objectInSearchGroupsAtIndex:(unsigned int)idx {
+    return [self valueInSearchGroupsAtIndex:idx];
+}
+
+- (BDSKSearchGroup *)valueInSearchGroupsWithName:(NSString *)name {
+    unsigned int idx = [[[groups searchGroups] valueForKey:@"name"] indexOfObject:name];
+    return idx == NSNotFound ? nil : [[groups searchGroups] objectAtIndex:idx];
+}
+
+- (void)insertInSearchGroups:(BDSKSearchGroup *)group {
+    if ([group document]) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
+    } else {
+        [groups addSearchGroup:group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleSearch",@"Undo action name for AppleSearch")];
+    }
+}
+
+- (void)insertInSearchGroups:(BDSKSearchGroup *)group atIndex:(unsigned int)idx {
+    [self insertInSearchGroups:group];
+}
+
+- (void)insertObject:(BDSKSearchGroup *)group inSearchGroupsAtIndex:(unsigned int)idx {
+    [self insertInSearchGroups:group];
+}
+
+- (void)removeFromSearchGroupsAtIndex:(unsigned int)idx {
+	[groups removeSearchGroup:[[groups searchGroups] objectAtIndex:idx]];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleSearch",@"Undo action name for AppleSearch")];
+}
+
+- (void)removeObjectFromSearchGroupsAtIndex:(unsigned int)idx {
+    return [self removeFromSearchGroupsAtIndex:idx];
+}
+
+#pragma mark -
 
 - (unsigned int)countOfSharedGroups {
     return [[groups sharedGroups] count];
 }
 
-- (BDSKGroup *)valueInSharedGroupsAtIndex:(unsigned int)idx {
+- (BDSKSharedGroup *)valueInSharedGroupsAtIndex:(unsigned int)idx {
     return [[groups sharedGroups] objectAtIndex:idx];
 }
 
-- (BDSKGroup *)objectInSharedGroupsAtIndex:(unsigned int)idx {
+- (BDSKSharedGroup *)objectInSharedGroupsAtIndex:(unsigned int)idx {
     return [self valueInSharedGroupsAtIndex:idx];
 }
 
-- (BDSKGroup *)valueInSharedGroupsWithName:(NSString *)name {
+- (BDSKSharedGroup *)valueInSharedGroupsWithName:(NSString *)name {
     unsigned int idx = [[[groups sharedGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups sharedGroups] objectAtIndex:idx];
 }
 
+#pragma mark -
 
 - (unsigned int)countOfLibraryGroups {
     return 1;
@@ -404,6 +629,7 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return [[group name] isEqualToString:name] ? group : nil;
 }
 
+#pragma mark -
 
 - (unsigned int)countOfLastImportGroups {
     BDSKGroup *group = [[self groups] lastImportGroup];
@@ -423,35 +649,53 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return [[group name] isEqualToString:name] && [group count] ? group : nil;
 }
 
+#pragma mark -
 
 - (unsigned int)countOfWebGroups {
     return [[self groups] webGroup] ? 1 : 0;
 }
 
-- (BDSKGroup *)valueInWebGroupsAtIndex:(unsigned int)idx {
+- (BDSKWebGroup *)valueInWebGroupsAtIndex:(unsigned int)idx {
     return [[self groups] webGroup];
 }
 
-- (BDSKGroup *)objectInWebGroupsAtIndex:(unsigned int)idx {
+- (BDSKWebGroup *)objectInWebGroupsAtIndex:(unsigned int)idx {
     return [[self groups] webGroup];
 }
 
-- (BDSKGroup *)valueInWebGroupsWithName:(NSString *)name {
-    BDSKGroup *group = [[self groups] webGroup];
+- (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name {
+    BDSKWebGroup *group = [[self groups] webGroup];
     return [[group name] isEqualToString:name] ? group : nil;
 }
 
 #pragma mark Properties
 
-- (NSArray*) selection { 
+- (NSArray *)selection { 
     return [self selectedPublications];
 }
 
-- (void) setSelection: (NSArray *) newSelection {
+- (void)setSelection:(NSArray *)newSelection {
 	// on Tiger: debugging revealed that we get an array of NSIndexSpecifiers and not of BibItem
     // the index is relative to all the publications the document (AS container), not the shownPublications
-	NSArray *pubsToSelect = [[newSelection lastObject] isKindOfClass:[BibItem class]] ? newSelection : [publications objectsAtIndexSpecifiers:newSelection];
+	NSArray *pubsToSelect = newSelection;
+    id lastObject = [newSelection lastObject];
+    if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+        pubsToSelect = [newSelection arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
 	[self selectPublications:pubsToSelect];
+}
+
+- (NSArray *)groupSelection { 
+    return [self selectedGroups];
+}
+
+- (void)setGroupSelection:(NSArray *)newSelection {
+	// on Tiger: debugging revealed that we get an array of NSIndexSpecifiers and not of BibItem
+    // the index is relative to all the publications the document (AS container), not the shownPublications
+    NSArray *groupsToSelect = newSelection;
+    id lastObject = [newSelection lastObject];
+    if ([lastObject isKindOfClass:[BDSKGroup class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+        groupsToSelect = [newSelection arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+    [self selectGroups:groupsToSelect];
 }
 
 - (NSTextStorage*) textStorageForPublications:(NSArray *)pubs {

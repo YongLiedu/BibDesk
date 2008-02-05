@@ -38,7 +38,7 @@
 
 #import "BibDocument.h"
 
-@class BDSKMacro;
+@class BDSKMacro, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKCategoryGroup, BDSKURLGroup, BDSKScriptGroup, BDSKSearchGroup, BDSKSharedGroup, BDSKLibraryGroup, BDSKLastImportGroup, BDSKWebGroup;
 
 @interface BibDocument (Scripting) 
 
@@ -60,8 +60,97 @@
 - (NSArray *)editors;
 - (BibAuthor *)valueInEditorsWithName:(NSString *)name;
 
+- (unsigned int)countOfGroups;
+- (BDSKGroup *)valueInGroupsAtIndex:(unsigned int)idx;
+- (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)idx;
+- (BDSKGroup *)valueInGroupsWithName:(NSString *)name;
+- (void)insertInGroups:(BDSKGroup *)group;
+- (void)insertInGroups:(BDSKGroup *)group atIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKGroup *)group inGroupsAtIndex:(unsigned int)idx;
+- (void)removeFromGroupsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromGroupsAtIndex:(unsigned int)idx;
+
+- (unsigned int)countOfStaticGroups;
+- (BDSKStaticGroup *)valueInStaticGroupsAtIndex:(unsigned int)idx;
+- (BDSKStaticGroup *)objectInStaticGroupsAtIndex:(unsigned int)idx;
+- (BDSKStaticGroup *)valueInStaticGroupsWithName:(NSString *)name;
+- (void)insertInStaticGroups:(BDSKStaticGroup *)group;
+- (void)insertInStaticGroups:(BDSKStaticGroup *)group atIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKStaticGroup *)group inStaticGroupsAtIndex:(unsigned int)idx;
+- (void)removeFromStaticGroupsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromStaticGroupsAtIndex:(unsigned int)idx;
+
+- (unsigned int)countOfSmartGroups;
+- (BDSKSmartGroup *)valueInSmartGroupsAtIndex:(unsigned int)idx;
+- (BDSKSmartGroup *)objectInSmartGroupsAtIndex:(unsigned int)idx;
+- (BDSKSmartGroup *)valueInSmartGroupsWithName:(NSString *)name;
+- (void)insertInSmartGroups:(BDSKSmartGroup *)group;
+- (void)insertInSmartGroups:(BDSKSmartGroup *)group atIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKSmartGroup *)group inSmartGroupsAtIndex:(unsigned int)idx;
+- (void)removeFromSmartGroupsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromSmartGroupsAtIndex:(unsigned int)idx;
+
+- (unsigned int)countOfFieldGroups;
+- (BDSKCategoryGroup *)valueInFieldGroupsAtIndex:(unsigned int)idx;
+- (BDSKCategoryGroup *)objectInFieldGroupsAtIndex:(unsigned int)idx;
+- (BDSKCategoryGroup *)valueInFieldGroupsWithName:(NSString *)name;
+
+- (unsigned int)countOfExternalFileGroups;
+- (BDSKURLGroup *)valueInExternalFileGroupsAtIndex:(unsigned int)idx;
+- (BDSKURLGroup *)objectInExternalFileGroupsAtIndex:(unsigned int)idx;
+- (BDSKURLGroup *)valueInExternalFileGroupsWithName:(NSString *)name;
+- (void)insertInExternalFileGroups:(BDSKURLGroup *)group;
+- (void)insertInExternalFileGroups:(BDSKURLGroup *)group atIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKURLGroup *)group inExternalFileGroupsAtIndex:(unsigned int)idx;
+- (void)removeFromExternalFileGroupsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromExternalFileGroupsAtIndex:(unsigned int)idx;
+
+- (unsigned int)countOfScriptGroups;
+- (BDSKScriptGroup *)valueInScriptGroupsAtIndex:(unsigned int)idx;
+- (BDSKScriptGroup *)objectInScriptGroupsAtIndex:(unsigned int)idx;
+- (BDSKScriptGroup *)valueInScriptGroupsWithName:(NSString *)name;
+- (void)insertInScriptGroups:(BDSKScriptGroup *)group;
+- (void)insertInScriptGroups:(BDSKScriptGroup *)group atIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKScriptGroup *)group inScriptGroupsAtIndex:(unsigned int)idx;
+- (void)removeFromScriptGroupsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromScriptGroupsAtIndex:(unsigned int)idx;
+
+- (unsigned int)countOfSearchGroups;
+- (BDSKSearchGroup *)valueInSearchGroupsAtIndex:(unsigned int)idx;
+- (BDSKSearchGroup *)objectInSearchGroupsAtIndex:(unsigned int)idx;
+- (BDSKSearchGroup *)valueInSearchGroupsWithName:(NSString *)name;
+- (void)insertInSearchGroups:(BDSKSearchGroup *)group;
+- (void)insertInSearchGroups:(BDSKSearchGroup *)group atIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKSearchGroup *)group inSearchGroupsAtIndex:(unsigned int)idx;
+- (void)removeFromSearchGroupsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromSearchGroupsAtIndex:(unsigned int)idx;
+
+- (unsigned int)countOfSharedGroups;
+- (BDSKSharedGroup *)valueInSharedGroupsAtIndex:(unsigned int)idx;
+- (BDSKSharedGroup *)objectInSharedGroupsAtIndex:(unsigned int)idx;
+- (BDSKSharedGroup *)valueInSharedGroupsWithName:(NSString *)name;
+
+- (unsigned int)countOfLibraryGroups;
+- (BDSKGroup *)valueInLibraryGroupsAtIndex:(unsigned int)idx;
+- (BDSKGroup *)objectInLibraryGroupsAtIndex:(unsigned int)idx;
+- (BDSKGroup *)valueInLibraryGroupsWithName:(NSString *)name;
+
+- (unsigned int)countOfLastImportGroups;
+- (BDSKGroup *)valueInLastImportGroupsAtIndex:(unsigned int)idx;
+- (BDSKGroup *)objectInLastImportGroupsAtIndex:(unsigned int)idx;
+- (BDSKGroup *)valueInLastImportGroupsWithName:(NSString *)name;
+
+- (unsigned int)countOfWebGroups;
+- (BDSKWebGroup *)valueInWebGroupsAtIndex:(unsigned int)idx;
+- (BDSKWebGroup *)objectInWebGroupsAtIndex:(unsigned int)idx;
+- (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name;
+
+
 - (NSArray*) selection;
 - (void) setSelection: (NSArray*) newSelection;
+
+- (NSArray *)groupSelection;
+- (void)setGroupSelection:(NSArray *)newSelection;
 
 - (NSTextStorage*) textStorageForPublications:(NSArray *)pubs;
 

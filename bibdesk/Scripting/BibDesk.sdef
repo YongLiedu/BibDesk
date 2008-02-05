@@ -633,6 +633,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				<type type="publication" list="yes"/>
 				<cocoa key="selection"/>
 			</property>
+			<property name="group selection" code="GSel"
+				description="The selected groups.">
+				<type type="group" list="yes"/>
+				<cocoa key="groupSelection"/>
+			</property>
 			<property name="displayed publications" code="disp" access="r"
 				description="The publications currently displayed. This can differ from all publications depending on the state of the filter field and recently added publications.">
 				<type type="publication" list="yes"/>
