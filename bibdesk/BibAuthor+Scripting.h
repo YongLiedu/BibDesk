@@ -41,6 +41,14 @@
 
 @interface BibAuthor (Scripting)
 
++ (NSArray *)authorsInPublications:(NSArray *)publications;
++ (BibAuthor *)authorWithName:(NSString *)aName inPublications:(NSArray *)publications;
+
++ (NSArray *)editorsInPublications:(NSArray *)publications;
++ (BibAuthor *)editorWithName:(NSString *)aName inPublications:(NSArray *)publications;
+
 - (NSArray *)publications;
+
+- (BOOL)isExternal;
 
 @end

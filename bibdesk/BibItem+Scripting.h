@@ -57,6 +57,9 @@
 - (BibAuthor *)valueInAsEditorsWithName:(NSString *)name;
 
 - (id)asDocument;
+- (id)group;
+
+- (BOOL)isExternal;
 
 - (void)setBibTeXString:(NSString*) btString;
 

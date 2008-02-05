@@ -42,10 +42,6 @@
 #import <OmniBase/OBUtilities.h>
 
 
-// a private subclass for the Last Import group
-@interface BDSKLastImportGroup : BDSKStaticGroup @end
-
-
 @implementation BDSKStaticGroup
 
 static NSString *BDSKLastImportLocalizedString = nil;
@@ -168,6 +164,8 @@ static NSString *BDSKLastImportLocalizedString = nil;
 - (NSImage *)icon {
 	return [NSImage imageNamed:@"importFolderIcon"];
 }
+
+- (void)setName:(NSString *)newName {}
 
 - (BOOL)hasEditableName { return NO; }
 

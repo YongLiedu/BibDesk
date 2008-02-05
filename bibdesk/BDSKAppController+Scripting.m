@@ -41,6 +41,7 @@
 #import "BDSKScriptHookManager.h"
 #import "BDSKTypeManager.h"
 #import "BDSKMacroResolver.h"
+#import "BDSKMacroResolver+Scripting.h"
 #import "BDSKMacro.h"
 
 
@@ -85,22 +86,12 @@ Category on BDSKAppController making the papers folder readable for scripting
 	return [[BDSKScriptHookManager sharedManager] scriptHookWithUniqueID:uniqueID];
 }
 
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)name {
-	return [[[BDSKMacro alloc] initWithName:name macroResolver:[BDSKMacroResolver defaultMacroResolver]] autorelease];
+- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
+    return [[BDSKMacroResolver defaultMacroResolver] valueInMacrosWithName:aName];
 }
 
 - (NSArray *)macros {
-    NSEnumerator *mEnum = [[[BDSKMacroResolver defaultMacroResolver] macroDefinitions] keyEnumerator];
-	NSString *name = nil;
-	BDSKMacro *macro = nil;
-	NSMutableArray *macros = [NSMutableArray arrayWithCapacity:5];
-	
-	while (name = [mEnum nextObject]) {
-		macro = [[BDSKMacro alloc] initWithName:name macroResolver:[BDSKMacroResolver defaultMacroResolver]];
-		[macros addObject:macro];
-		[macro release];
-	}
-	return macros;
+    return [[BDSKMacroResolver defaultMacroResolver] macros];
 }
 
 - (BOOL)application:(NSApplication *)sender delegateHandlesKey:(NSString *)key {

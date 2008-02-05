@@ -110,3 +110,7 @@
 - (void)removePublicationsInArray:(NSArray *)items;
 
 @end
+
+
+@interface BDSKLastImportGroup : BDSKStaticGroup
+@end

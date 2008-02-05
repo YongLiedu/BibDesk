@@ -164,6 +164,8 @@ NSString *BDSKSearchGroupISI = @"isi";
     return [NSString isEmptyString:[self searchTerm]] ? NSLocalizedString(@"Empty", @"Name for empty search group") : [self searchTerm];
 }
 
+- (void)setName:(NSString *)newName {}
+
 - (NSString *)toolTip {
     return [NSString stringWithFormat:@"%@: %@", [[self serverInfo] name] ? [[self serverInfo] name] : @"", [self name]];
 }

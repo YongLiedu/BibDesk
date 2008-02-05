@@ -42,10 +42,14 @@
 
 @interface BibDocument (Scripting) 
 
+- (unsigned int)countOfPublications;
+- (BibItem *)objectInPublicationsAtIndex:(unsigned int)idx;
 - (BibItem *)valueInPublicationsAtIndex:(unsigned int)index;
 - (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)index;
 - (void)insertInPublications:(BibItem *)pub;
+- (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx;
 - (void)removeFromPublicationsAtIndex:(unsigned int)index;
+- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx;
 
 - (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
 - (NSArray *)macros;

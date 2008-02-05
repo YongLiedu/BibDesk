@@ -38,11 +38,73 @@
 #import "BibAuthor+Scripting.h"
 #import "BibDocument.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKOwnerProtocol.h"
+#import "NSObject_BDSKExtensions.h"
 
 @implementation BibAuthor (Scripting)
 
 + (BOOL)accessInstanceVariablesDirectly {
 	return NO;
+}
+
++ (NSArray *)authorsInPublications:(NSArray *)publications {
+	NSMutableSet *auths = [NSMutableSet set];
+    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
+	return [auths allObjects];
+}
+
++ (BibAuthor *)authorWithName:(NSString *)aName inPublications:(NSArray *)publications {
+    // create a new author so we can use BibAuthor's isEqual: method for comparison
+    // instead of trying to do string comparisons
+    BibAuthor *newAuth = [BibAuthor authorWithName:aName andPub:nil];
+    
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	NSEnumerator *authEnum;
+	BibItem *pub;
+	BibAuthor *auth;
+	BibAuthor *author = nil;
+
+	while (author == nil && (pub = [pubEnum nextObject])) {
+		authEnum = [[pub pubAuthors] objectEnumerator];
+		while (auth = [authEnum nextObject]) {
+			if ([auth isEqual:newAuth]) {
+				author = auth;
+                break;
+            }
+		}
+	}
+    
+	return author;
+}
+
++ (NSArray *)editorsInPublications:(NSArray *)publications {
+	NSMutableSet *auths = [NSMutableSet set];
+    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubEditors)];
+	return [auths allObjects];
+}
+
++ (BibAuthor *)editorWithName:(NSString *)aName inPublications:(NSArray *)publications {
+    // create a new author so we can use BibAuthor's isEqual: method for comparison
+    // instead of trying to do string comparisons
+    BibAuthor *newAuth = [BibAuthor authorWithName:aName andPub:nil];
+    
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	NSEnumerator *authEnum;
+	BibItem *pub;
+	BibAuthor *auth;
+    BibAuthor *editor = nil;
+
+	while (editor == nil && (pub = [pubEnum nextObject])) {
+		authEnum = [[pub pubEditors] objectEnumerator];
+		while (auth = [authEnum nextObject]) {
+			if ([auth isEqual:newAuth]) {
+				editor = auth;
+                break;
+            }
+		}
+	}
+    
+	return editor;
 }
 
 - (NSScriptObjectSpecifier *) objectSpecifier {
@@ -65,6 +127,10 @@
             return [[myDoc publications] itemsForAuthor:self];
 	}
     return [NSArray array];
+}
+
+- (BOOL)isExternal {
+    return [[[self publication] owner] isDocument] == NO;
 }
 
 @end

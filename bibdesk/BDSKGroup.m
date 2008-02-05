@@ -44,10 +44,6 @@
 #import <OmniBase/OBUtilities.h>
 
 
-// a private subclass for the All Publication group
-@interface BDSKLibraryGroup : BDSKGroup @end
-
-
 @implementation BDSKGroup
 
 // super's designated initializer

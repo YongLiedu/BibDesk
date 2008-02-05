@@ -250,6 +250,10 @@
 		CE820EC90C8AE2F60020E6B0 /* BDSKPersonWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE820EC20C8AE2F60020E6B0 /* BDSKPersonWindow.nib */; };
 		CE82B2D10D57AE0B00A2E8C5 /* BDSKSharingClient.h in Headers */ = {isa = PBXBuildFile; fileRef = CE82B2CF0D57AE0B00A2E8C5 /* BDSKSharingClient.h */; };
 		CE82B2D20D57AE0B00A2E8C5 /* BDSKSharingClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82B2D00D57AE0B00A2E8C5 /* BDSKSharingClient.m */; };
+		CE82B4730D57EECF00A2E8C5 /* BDSKGroup+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = CE82B4710D57EECF00A2E8C5 /* BDSKGroup+Scripting.h */; };
+		CE82B4740D57EECF00A2E8C5 /* BDSKGroup+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82B4720D57EECF00A2E8C5 /* BDSKGroup+Scripting.m */; };
+		CE82BE8C0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = CE82BE8A0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h */; };
+		CE82BE8D0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82BE8B0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.m */; };
 		CE83E3A60D294EE300BB7AD8 /* BDSKSortCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE83E3A40D294EE300BB7AD8 /* BDSKSortCommand.m */; };
 		CE89618A0CBEB59800EA2D98 /* BDSKToken.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961860CBEB59800EA2D98 /* BDSKToken.m */; };
 		CE89618C0CBEB59800EA2D98 /* BDSKTypeTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961880CBEB59800EA2D98 /* BDSKTypeTemplate.m */; };
@@ -1178,6 +1182,10 @@
 		CE820ECC0C8AE30F0020E6B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKPersonWindow.nib; sourceTree = "<group>"; };
 		CE82B2CF0D57AE0B00A2E8C5 /* BDSKSharingClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSharingClient.h; sourceTree = "<group>"; };
 		CE82B2D00D57AE0B00A2E8C5 /* BDSKSharingClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSharingClient.m; sourceTree = "<group>"; };
+		CE82B4710D57EECF00A2E8C5 /* BDSKGroup+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "BDSKGroup+Scripting.h"; sourceTree = "<group>"; };
+		CE82B4720D57EECF00A2E8C5 /* BDSKGroup+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "BDSKGroup+Scripting.m"; sourceTree = "<group>"; };
+		CE82BE8A0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "BDSKMacroResolver+Scripting.h"; sourceTree = "<group>"; };
+		CE82BE8B0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "BDSKMacroResolver+Scripting.m"; sourceTree = "<group>"; };
 		CE83E3A30D294EE300BB7AD8 /* BDSKSortCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSortCommand.h; sourceTree = "<group>"; };
 		CE83E3A40D294EE300BB7AD8 /* BDSKSortCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSortCommand.m; sourceTree = "<group>"; };
 		CE8961850CBEB59800EA2D98 /* BDSKToken.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKToken.h; sourceTree = "<group>"; };
@@ -2023,7 +2031,9 @@
 				CEAC484F0A96589A00B8DF43 /* BDSKTemplatedTextCommand.m */,
 				F9022FBC07580B9400C3F701 /* BDSKAppController+Scripting.m */,
 				3DD300F5075C054D003FD2D7 /* BDSKField.m */,
+				CE82B4720D57EECF00A2E8C5 /* BDSKGroup+Scripting.m */,
 				F9201E000B72504C007E45BB /* BDSKMacro.m */,
+				CE82BE8B0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.m */,
 				F9022FBE07580B9400C3F701 /* BibAuthor+Scripting.m */,
 				F9022FC307580B9400C3F701 /* BibDocument+Scripting.m */,
 				F9022FC507580B9400C3F701 /* BibItem+Scripting.m */,
@@ -2539,6 +2549,7 @@
 				45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */,
 				F9706DE309102DF500526FC8 /* BDSKGradientView.h */,
 				CE21D10809208B9D0075E607 /* BDSKGroup.h */,
+				CE82B4710D57EECF00A2E8C5 /* BDSKGroup+Scripting.h */,
 				CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */,
 				CEEFE6C10B0403E700668BB0 /* BDSKGroupsArray.h */,
 				F97BE8EF0907321F0063504B /* BDSKGroupTableView.h */,
@@ -2559,6 +2570,7 @@
 				F90B093F0C283B5100144F1B /* BDSKLogUtilities.h */,
 				F9201DFF0B72504C007E45BB /* BDSKMacro.h */,
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
+				CE82BE8A0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h */,
 				2730077B07CF20B500F2E485 /* BDSKMacroWindowController.h */,
 				CE34A5710B249E0B00755730 /* BDSKMARCParser.h */,
 				F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */,
@@ -2931,6 +2943,8 @@
 				CE2E78CC0D40F6BB00340B39 /* BDSKMultiValueDictionary.h in Headers */,
 				CE38FEFE0D4E7EC700D0A886 /* BDSKVersionNumber.h in Headers */,
 				CE82B2D10D57AE0B00A2E8C5 /* BDSKSharingClient.h in Headers */,
+				CE82B4730D57EECF00A2E8C5 /* BDSKGroup+Scripting.h in Headers */,
+				CE82BE8C0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3910,6 +3924,8 @@
 				F990C58C0D42D58D00B5425E /* BDSKDocumentSearch.m in Sources */,
 				CE38FEFF0D4E7EC700D0A886 /* BDSKVersionNumber.m in Sources */,
 				CE82B2D20D57AE0B00A2E8C5 /* BDSKSharingClient.m in Sources */,
+				CE82B4740D57EECF00A2E8C5 /* BDSKGroup+Scripting.m in Sources */,
+				CE82BE8D0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

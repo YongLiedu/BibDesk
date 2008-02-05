@@ -1,28 +1,28 @@
 //
-//  BDSKMacro.h
+//  BDSKMacroResolver+Scripting.m
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 2/1/07.
+//  Created by Christiaan Hofman on 2/5/08.
 /*
- This software is Copyright (c) 2004-2008
+ This software is Copyright (c) 2008
  Christiaan Hofman. All rights reserved.
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
  are met:
- 
+
  - Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
+   notice, this list of conditions and the following disclaimer.
+
  - Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
  - Neither the name of Christiaan Hofman nor the names of any
- contributors may be used to endorse or promote products derived
- from this software without specific prior written permission.
- 
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -36,28 +36,28 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import "BDSKMacroResolver+Scripting.h"
+#import "BDSKMacro.h"
 
-@class BDSKMacroResolver;
 
-@interface BDSKMacro : NSObject {
-	NSString *name;
-    BDSKMacroResolver *macroResolver;
+@implementation BDSKMacroResolver (Scripting)
+
+- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
+	return [[[BDSKMacro alloc] initWithName:aName macroResolver:self] autorelease];
 }
 
-- (id)initWithName:(NSString *)aName macroResolver:(BDSKMacroResolver *)aMacroResolver;
-
-- (NSString *)name;
-- (void)setName:(NSString *)newName;
-
-- (id)value;
-- (void)setValue:(NSString *)newValue;
-
-- (id)bibTeXString;
-- (void)setBibTeXString:(NSString *)newValue;
-
-- (BDSKMacroResolver *)macroResolver;
-
-- (BOOL)isExternal;
+- (NSArray *)macros {
+    NSEnumerator *mEnum = [[self macroDefinitions] keyEnumerator];
+	NSString *key = nil;
+	BDSKMacro *macro = nil;
+	NSMutableArray *macros = [NSMutableArray arrayWithCapacity:5];
+	
+	while (key = [mEnum nextObject]) {
+		macro = [[BDSKMacro alloc] initWithName:key macroResolver:self];
+		[macros addObject:macro];
+		[macro release];
+	}
+	return macros;
+}
 
 @end

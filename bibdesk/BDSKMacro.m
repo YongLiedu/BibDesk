@@ -68,7 +68,6 @@
         NSScriptObjectSpecifier *containerRef = nil;
 		NSScriptClassDescription *containerClassDescription = nil;
         if (owner) {
-            OBASSERT([owner isDocument]);
             containerRef = [owner objectSpecifier];
             containerClassDescription = [containerRef keyClassDescription];
         } else {
@@ -159,6 +158,10 @@
 
 - (BDSKMacroResolver *)macroResolver {
     return macroResolver;
+}
+
+- (BOOL)isExternal {
+    return [[macroResolver owner] isDocument] == NO;
 }
 
 @end

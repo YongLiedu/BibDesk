@@ -230,6 +230,10 @@
 @end
 
 
+@interface BDSKLibraryGroup : BDSKGroup
+@end
+
+
 @interface BDSKMutableGroup : BDSKGroup {
 }
 

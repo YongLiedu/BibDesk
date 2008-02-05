@@ -60,11 +60,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 */
 - (NSScriptObjectSpecifier *) objectSpecifier {
     // only items belonging to a BibDocument are scriptable
-    BibDocument *myDoc = (BibDocument *)[self owner];
-	NSArray * ar = [myDoc publications];
+	NSArray *ar = [[self owner] publications];
 	unsigned idx = [ar indexOfObjectIdenticalTo:self];
-    if (idx != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [myDoc objectSpecifier];
+    if ([self owner] && idx != NSNotFound) {
+        NSScriptObjectSpecifier *containerRef = [(id)[self owner] objectSpecifier];
         return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"publications" index:idx] autorelease];
     } else {
         return nil;
@@ -218,7 +217,15 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (id)asDocument {
-    return [owner isDocument] ? (id)owner : (id)[NSNull null];
+    return [owner isDocument] ? (id)owner : [owner respondsToSelector:@selector(document)] ? (id)[(id)owner document] : nil;
+}
+
+- (id)group {
+    return [owner isDocument] ? (id)[NSNull null] : (id)owner;
+}
+
+- (BOOL)isExternal {
+    return [[self owner] isDocument] == NO;
 }
 
 - (NSString *)asType {

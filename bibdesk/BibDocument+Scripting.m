@@ -36,6 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import "BibDocument+Scripting.h"
+#import "BibDocument_Groups.h"
 #import "BibAuthor.h"
 #import "BibItem.h"
 #import "BDSKMacro.h"
@@ -43,11 +44,35 @@
 #import "BDSKItemPasteboardHelper.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKGroup.h"
+#import "BDSKSharedGroup.h"
+#import "BDSKURLGroup.h"
+#import "BDSKScriptGroup.h"
+#import "BDSKSearchGroup.h"
+#import "BDSKSmartGroup.h"
+#import "BDSKStaticGroup.h"
+#import "BDSKCategoryGroup.h"
+#import "BDSKWebGroup.h"
+#import "BDSKGroupsArray.h"
 #import "NSObject_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKMacroResolver.h"
+#import "BDSKMacroResolver+Scripting.h"
 #import "BDSKPreviewer.h"
+#import "BibAuthor.h"
+#import "BibAuthor+Scripting.h"
+#import "BDSKTypeManager.h"
 #import <Quartz/Quartz.h>
+#import <OmniFoundation/OFCFCallbacks.h>
+
+
+const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
+    0,
+    OFNSObjectRetain,
+    OFCFTypeRelease,
+    OFCFTypeCopyDescription,
+    OFCaseInsensitiveStringIsEqual
+};
 
 @implementation BibDocument (Scripting)
 
@@ -155,6 +180,16 @@
     }
 }
 
+#pragma mark Publications
+
+- (unsigned int)countOfPublications {
+    return [[self publications] count];
+}
+
+- (BibItem *)objectInPublicationsAtIndex:(unsigned int)idx {
+    return [self valueInPublicationsAtIndex:idx];
+}
+
 - (BibItem *)valueInPublicationsAtIndex:(unsigned int)idx {
     return [publications objectAtIndex:idx];
 }
@@ -162,7 +197,7 @@
 - (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)idx {
     if ([pub owner])
         pub = [[pub copyWithMacroResolver:[self macroResolver]] autorelease];
-	[self insertPublication:pub atIndex:idx];
+    [self insertPublication:pub atIndex:idx];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
@@ -171,101 +206,245 @@
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
+- (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx {
+    return [self insertInPublications:pub atIndex:idx];
+}
+
 - (void)removeFromPublicationsAtIndex:(unsigned int)idx {
 	[self removePublicationsAtIndexes:[NSIndexSet indexSetWithIndex:idx]];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)name
-{
-	return [[[BDSKMacro alloc] initWithName:name macroResolver:[self macroResolver]] autorelease];
+- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx {
+    return [self removeFromPublicationsAtIndex:idx];
 }
 
-- (NSArray *)macros
-{
-    NSEnumerator *mEnum = [[[self macroResolver] macroDefinitions] keyEnumerator];
-	NSString *name = nil;
-	BDSKMacro *macro = nil;
-	NSMutableArray *macros = [NSMutableArray arrayWithCapacity:5];
-	
-	while (name = [mEnum nextObject]) {
-		macro = [[BDSKMacro alloc] initWithName:name macroResolver:[self macroResolver]];
-		[macros addObject:macro];
-		[macro release];
-	}
-	return macros;
+#pragma mark Macros
+
+- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
+    return [[self macroResolver] valueInMacrosWithName:aName];
 }
+
+- (NSArray *)macros {
+    return [[self macroResolver] macros];
+}
+
+#pragma mark Authors and Editors
 
 - (NSArray *)authors {
-	NSMutableSet *auths = [NSMutableSet set];
-    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
-	return [auths allObjects];
+    return [BibAuthor authorsInPublications:[self publications]];
 }
 
-- (BibAuthor *)valueInAuthorsWithName:(NSString*) name {
-    // create a new author so we can use BibAuthor's isEqual: method for comparison
-    // instead of trying to do string comparisons
-    BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
-    
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	NSEnumerator *authEnum;
-	BibItem *pub;
-	BibAuthor *auth;
-	BibAuthor *author = nil;
-
-	while (author == nil && (pub = [pubEnum nextObject])) {
-		authEnum = [[pub pubAuthors] objectEnumerator];
-		while (auth = [authEnum nextObject]) {
-			if ([auth isEqual:newAuth]) {
-				author = auth;
-                break;
-            }
-		}
-	}
-    
-	return author;
+- (BibAuthor *)valueInAuthorsWithName:(NSString *)aName {
+    return [BibAuthor authorWithName:aName inPublications:[self publications]];
 }
 
 - (NSArray *)editors {
-	NSMutableSet *auths = [NSMutableSet set];
-    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubEditors)];
-	return [auths allObjects];
+    return [BibAuthor editorsInPublications:[self publications]];
 }
 
-- (BibAuthor *)valueInEditorsWithName:(NSString*) name {
-    // create a new author so we can use BibAuthor's isEqual: method for comparison
-    // instead of trying to do string comparisons
-    BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
-    
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	NSEnumerator *authEnum;
-	BibItem *pub;
-	BibAuthor *auth;
-    BibAuthor *editor = nil;
-
-	while (editor == nil && (pub = [pubEnum nextObject])) {
-		authEnum = [[pub pubEditors] objectEnumerator];
-		while (auth = [authEnum nextObject]) {
-			if ([auth isEqual:newAuth]) {
-				editor = auth;
-                break;
-            }
-		}
-	}
-    
-	return editor;
+- (BibAuthor *)valueInEditorsWithName:(NSString *)aName {
+    return [BibAuthor editorWithName:aName inPublications:[self publications]];
 }
+
+#pragma mark Groups
+
+- (unsigned int)countOfGroups {
+    return [groups count];
+}
+
+- (BDSKGroup *)valueInGroupsAtIndex:(unsigned int)idx {
+    return [groups objectAtIndex:idx];
+}
+
+- (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)idx {
+    return [self valueInGroupsAtIndex:idx];
+}
+
+- (BDSKGroup *)valueInGroupsWithName:(NSString *)name {
+    unsigned int idx = [[groups valueForKey:@"stringValue"] indexOfObject:name];
+    return idx == NSNotFound ? nil : [groups objectAtIndex:idx];
+}
+
+
+- (unsigned int)countOfStaticGroups {
+    return [[groups staticGroups] count];
+}
+
+- (BDSKGroup *)valueInStaticGroupsAtIndex:(unsigned int)idx {
+    return [[groups staticGroups] objectAtIndex:idx];
+}
+
+- (BDSKGroup *)objectInStaticGroupsAtIndex:(unsigned int)idx {
+    return [self valueInGroupsAtIndex:idx];
+}
+
+- (BDSKGroup *)valueInStaticGroupsWithName:(NSString *)name {
+    unsigned int idx = [[[groups staticGroups] valueForKey:@"name"] indexOfObject:name];
+    return idx == NSNotFound ? nil : [[groups staticGroups] objectAtIndex:idx];
+}
+
+
+- (unsigned int)countOfSmartGroups {
+    return [[groups smartGroups] count];
+}
+
+- (BDSKGroup *)valueInSmartGroupsAtIndex:(unsigned int)idx {
+    return [[groups smartGroups] objectAtIndex:idx];
+}
+
+- (BDSKGroup *)objectInSmartGroupsAtIndex:(unsigned int)idx {
+    return [self valueInSmartGroupsAtIndex:idx];
+}
+
+- (BDSKGroup *)valueInSmartGroupsWithName:(NSString *)name {
+    unsigned int idx = [[[groups smartGroups] valueForKey:@"name"] indexOfObject:name];
+    return idx == NSNotFound ? nil : [[groups smartGroups] objectAtIndex:idx];
+}
+
+
+- (unsigned int)countOfFieldGroups {
+    return [[groups categoryGroups] count];
+}
+
+- (BDSKGroup *)valueInFieldGroupsAtIndex:(unsigned int)idx {
+    return [[groups categoryGroups] objectAtIndex:idx];
+}
+
+- (BDSKGroup *)objectInFieldGroupsAtIndex:(unsigned int)idx {
+    return [self valueInFieldGroupsAtIndex:idx];
+}
+
+- (BDSKGroup *)valueInFieldGroupsWithName:(NSString *)name {
+    id field = [self currentGroupField];
+    NSArray *names = [[groups categoryGroups] valueForKey:@"name"];
+    id fuzzyName = name;
+    NSMutableArray *fuzzyNames = nil;
+    if ([field isPersonField]) {
+        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &BDSKAuthorFuzzyArrayCallBacks);
+        fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name andPub:nil];
+    } else {
+        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &BDSKCaseInsensitiveStringArrayCallBacks);
+    }
+    [fuzzyNames addObjectsFromArray:names];
+    unsigned int idx = [fuzzyNames indexOfObject:fuzzyName];
+    [fuzzyNames release];
+    return idx == NSNotFound ? nil : [[groups categoryGroups] objectAtIndex:idx];
+}
+
+
+- (unsigned int)countOfExternalFileGroups {
+    return [[groups URLGroups] count];
+}
+
+- (BDSKGroup *)valueInExternalFileGroupsAtIndex:(unsigned int)idx {
+    return [[groups URLGroups] objectAtIndex:idx];
+}
+
+- (BDSKGroup *)objectInExternalFileGroupsAtIndex:(unsigned int)idx {
+    return [self valueInExternalFileGroupsAtIndex:idx];
+}
+
+- (BDSKGroup *)valueInExternalFileGroupsWithName:(NSString *)name {
+    unsigned int idx = [[[groups URLGroups] valueForKey:@"name"] indexOfObject:name];
+    return idx == NSNotFound ? nil : [[groups URLGroups] objectAtIndex:idx];
+}
+
+
+- (unsigned int)countOfScriptGroups {
+    return [[groups scriptGroups] count];
+}
+
+- (BDSKGroup *)valueInScriptGroupsAtIndex:(unsigned int)idx {
+    return [[groups scriptGroups] objectAtIndex:idx];
+}
+
+- (BDSKGroup *)objectInScriptGroupsAtIndex:(unsigned int)idx {
+    return [self valueInScriptGroupsAtIndex:idx];
+}
+
+- (BDSKGroup *)valueInScriptGroupsWithName:(NSString *)name {
+    unsigned int idx = [[[groups scriptGroups] valueForKey:@"name"] indexOfObject:name];
+    return idx == NSNotFound ? nil : [[groups scriptGroups] objectAtIndex:idx];
+}
+
+
+- (unsigned int)countOfSharedGroups {
+    return [[groups sharedGroups] count];
+}
+
+- (BDSKGroup *)valueInSharedGroupsAtIndex:(unsigned int)idx {
+    return [[groups sharedGroups] objectAtIndex:idx];
+}
+
+- (BDSKGroup *)objectInSharedGroupsAtIndex:(unsigned int)idx {
+    return [self valueInSharedGroupsAtIndex:idx];
+}
+
+- (BDSKGroup *)valueInSharedGroupsWithName:(NSString *)name {
+    unsigned int idx = [[[groups sharedGroups] valueForKey:@"name"] indexOfObject:name];
+    return idx == NSNotFound ? nil : [[groups sharedGroups] objectAtIndex:idx];
+}
+
+
+- (unsigned int)countOfLibraryGroups {
+    return 1;
+}
+
+- (BDSKGroup *)valueInLibraryGroupsAtIndex:(unsigned int)idx {
+    return [[self groups] libraryGroup];
+}
+
+- (BDSKGroup *)objectInLibraryGroupsAtIndex:(unsigned int)idx {
+    return [[self groups] libraryGroup];
+}
+
+- (BDSKGroup *)valueInLibraryGroupsWithName:(NSString *)name {
+    BDSKGroup *group = [[self groups] libraryGroup];
+    return [[group name] isEqualToString:name] ? group : nil;
+}
+
+
+- (unsigned int)countOfLastImportGroups {
+    BDSKGroup *group = [[self groups] lastImportGroup];
+    return [group count] ? 1 : 0;
+}
+
+- (BDSKGroup *)valueInLastImportGroupsAtIndex:(unsigned int)idx {
+    return [[self groups] lastImportGroup];
+}
+
+- (BDSKGroup *)objectInLastImportGroupsAtIndex:(unsigned int)idx {
+    return [[self groups] lastImportGroup];
+}
+
+- (BDSKGroup *)valueInLastImportGroupsWithName:(NSString *)name {
+    BDSKGroup *group = [[self groups] lastImportGroup];
+    return [[group name] isEqualToString:name] && [group count] ? group : nil;
+}
+
+
+- (unsigned int)countOfWebGroups {
+    return [[self groups] webGroup] ? 1 : 0;
+}
+
+- (BDSKGroup *)valueInWebGroupsAtIndex:(unsigned int)idx {
+    return [[self groups] webGroup];
+}
+
+- (BDSKGroup *)objectInWebGroupsAtIndex:(unsigned int)idx {
+    return [[self groups] webGroup];
+}
+
+- (BDSKGroup *)valueInWebGroupsWithName:(NSString *)name {
+    BDSKGroup *group = [[self groups] webGroup];
+    return [[group name] isEqualToString:name] ? group : nil;
+}
+
+#pragma mark Properties
 
 - (NSArray*) selection { 
-    NSMutableArray *selection = [NSMutableArray arrayWithCapacity:[self numberOfSelectedPubs]];
-    NSEnumerator *pubE = [[self selectedPublications] objectEnumerator];
-    BibItem *pub;
-    
-    // only items belonging to the document can be accessed through AppleScript
-    // items from external groups have no scriptable container, and AppleScript accesses properties of the document
-    while ((pub = [pubE nextObject]) && ([[pub owner] isEqual:self])) 
-        [selection addObject:pub];
-    return selection;
+    return [self selectedPublications];
 }
 
 - (void) setSelection: (NSArray *) newSelection {

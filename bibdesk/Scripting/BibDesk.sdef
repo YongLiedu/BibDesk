@@ -564,6 +564,50 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="Macros defined in the bibliography">
 				<cocoa key="macros"/>
 			</element>
+			<element type="group"
+				description="Groups in the document">
+				<cocoa key="groups"/>
+			</element>
+			<element type="library group"
+				description="The library group in the document">
+				<cocoa key="libraryGroups"/>
+			</element>
+			<element type="last import group"
+				description="The last import group in the document">
+				<cocoa key="lastImportGroups"/>
+			</element>
+			<element type="static group"
+				description="The static groups in the document">
+				<cocoa key="staticGroups"/>
+			</element>
+			<element type="smart group"
+				description="The smart groups in the document">
+				<cocoa key="smartGroups"/>
+			</element>
+			<element type="field group"
+				description="The field groups in the document">
+				<cocoa key="fieldGroups"/>
+			</element>
+			<element type="external file group"
+				description="The external file groups in the document">
+				<cocoa key="externalFileGroups"/>
+			</element>
+			<element type="script group"
+				description="Groups in the document">
+				<cocoa key="scriptGroups"/>
+			</element>
+			<element type="search group"
+				description="The search groups in the document">
+				<cocoa key="searchGroups"/>
+			</element>
+			<element type="shared group"
+				description="The shared groups in the document">
+				<cocoa key="sharedGroups"/>
+			</element>
+			<element type="web group"
+				description="The web group in the document">
+				<cocoa key="webGroups"/>
+			</element>
 			<property name="name" code="pnam" type="text" access="r"
 				description="The document's name.">
 				<cocoa key="displayName"/>
@@ -757,6 +801,14 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The bibliography containing this publication record.">
                 <cocoa key="asDocument"/>
             </property>  
+            <property name="group" code="Grup" type="group" access="r"
+                description="The external group containing this publication record, if any.">
+                <cocoa key="group"/>
+            </property>  
+            <property name="external" code="Extl" type="boolean" access="r"
+                description="Whether the publication is external.">
+                <cocoa key="isExternal"/>
+            </property>  
             <responds-to name="show">
                 <cocoa method=""/>
             </responds-to>
@@ -768,6 +820,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
         <class name="author" plural="authors" code="auth" inherits="item"
 			description="Contains the name of an author, tries to analyze it and list all publications of that author. Author names can be split into four e.g. '(Jean) (de la) (Fontaine) (Jr.)'">
             <cocoa class="BibAuthor"/>
+            <element type="publication" access="r"
+                description="Publications of the author.">
+                <cocoa key="publications"/>
+            </element>
             <property name="name" code="pnam" type="text" access="r"
                 description="The author's name. This name is normalized as 'von Last, Jr, First'.">
                 <cocoa key="normalizedName"/>
@@ -800,10 +856,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="A normalized form of the name with first name(s) as initials (e.g. 'von Last, Jr, F.').">
                 <cocoa key="abbreviatedNormalizedName"/>
             </property>  
-            <element type="publication" access="r"
-                description="Publications of the author.">
-                <cocoa key="publications"/>
-            </element>
+            <property name="external" code="Extl" type="boolean" access="r"
+                description="Whether the author is external.">
+                <cocoa key="isExternal"/>
+            </property>  
             <responds-to name="show">
                 <cocoa method=""/>
             </responds-to>
@@ -829,6 +885,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The value of the macro as raw BibTeX">
                 <cocoa key="bibTeXString"/>
             </property>  
+            <property name="external" code="Extl" type="boolean" access="r"
+                description="Whether the macro is external.">
+                <cocoa key="isExternal"/>
+            </property>  
         </class>
         
         <class name="field" plural="fields" code="bfld" inherits="item"
@@ -850,6 +910,129 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Whether the value of the field is inherited (crossreffed)">
                 <cocoa key="isInherited"/>
             </property>  
+        </class>
+        
+        <class name="group" plural="groups" code="Grup" inherits="item"
+			description="A group containing publications.">
+            <cocoa class="BDSKGroup"/>
+            <element type="publication"
+                description="Publications in the group.">
+                <cocoa key="publications"/>
+            </element>
+			<element type="author" access="r"
+				description="Authors of publications in the group">
+				<cocoa key="authors"/>
+			</element>
+            <element type="editor" name="editor" access="r"
+                description="Editors of publications in the group.">
+                <cocoa key="editors"/>
+            </element>
+            <property name="name" code="pnam" type="text"
+                description="The group's name.">
+                <cocoa key="asName"/>
+            </property>
+            <property name="document" code="docu" type="document" access="r"
+                description="The document containing this group.">
+                <cocoa key="document"/>
+            </property>  
+            <property name="external" code="Extl" type="boolean" access="r"
+                description="Whether the group is external.">
+                <cocoa key="isExternal"/>
+            </property>  
+        </class>
+        
+        <class name="library group" plural="library groups" code="Libr" inherits="group"
+			description="The library group containing all the publications in the document.">
+            <cocoa class="BDSKLibraryGroup"/>
+        </class>
+        
+        <class name="static group" plural="static groups" code="StGp" inherits="group"
+			description="A static group containing publications.">
+            <cocoa class="BDSKStaticGroup"/>
+        </class>
+        
+        <class name="last import group" plural="last import groups" code="LIGp" inherits="static group"
+			description="A group containing the last imported publications.">
+            <cocoa class="BDSKLastImportGroup"/>
+        </class>
+        
+        <class name="smart group" plural="smart groups" code="SmGp" inherits="group"
+			description="A smart group containing publications.">
+            <cocoa class="BDSKSmartGroup"/>
+        </class>
+        
+        <class name="field group" plural="field groups" code="FdGp" inherits="group"
+			description="A field group containing publications.">
+            <cocoa class="BDSKCategoryGroup"/>
+            <property name="field name" code="fnam" type="text"
+                description="The field name for the field group">
+                <cocoa key="key"/>
+            </property>  
+        </class>
+        
+        <class name="external file group" plural="external file groups" code="ExGp" inherits="group"
+			description="A group containing publications from an external file.">
+            <cocoa class="BDSKURLGroup"/>
+			<element type="macro" access="r"
+				description="Macros defined in the group">
+				<cocoa key="macros"/>
+			</element>
+            <property name="URL" code="rURL" type="text"
+                description="The URL for the external group">
+                <cocoa key="URLString"/>
+            </property>  
+            <property name="file" code="file" type="file"
+                description="The file for the external group">
+                <cocoa key="fileURL"/>
+            </property>  
+        </class>
+        
+        <class name="script group" plural="script groups" code="ScGp" inherits="group"
+			description="A group containing publications generated by a script.">
+            <cocoa class="BDSKScriptGroup"/>
+			<element type="macro" access="r"
+				description="Macros defined in the group">
+				<cocoa key="macros"/>
+			</element>
+            <property name="script file" code="SGFl" type="file"
+                description="The script file for the group">
+                <cocoa key="scriptURL"/>
+            </property>  
+            <property name="script arguments" code="SGAr" type="text"
+                description="The script arguments for the group">
+                <cocoa key="asScriptArguments"/>
+            </property>  
+        </class>
+        
+        <class name="search group" plural="search groups" code="SrGp" inherits="group"
+			description="A group containing publications generated by a search.">
+            <cocoa class="BDSKSearchGroup"/>
+			<element type="macro" access="r"
+				description="Macros defined in the group">
+				<cocoa key="macros"/>
+			</element>
+            <property name="search term" code="Term" type="text"
+                description="The search term for the search group">
+                <cocoa key="searchTerm"/>
+            </property>  
+        </class>
+        
+        <class name="shared group" plural="shared groups" code="ShGp" inherits="group"
+			description="A group containing shared publications.">
+            <cocoa class="BDSKSharedGroup"/>
+			<element type="macro" access="r"
+				description="Macros defined in the group">
+				<cocoa key="macros"/>
+			</element>
+        </class>
+        
+        <class name="web group" plural="web groups" code="WbGp" inherits="group"
+			description="The web group of the document.">
+            <cocoa class="BDSKWebGroup"/>
+			<element type="macro" access="r"
+				description="Macros defined in the group">
+				<cocoa key="macros"/>
+			</element>
         </class>
         
         <class name="script hook" plural="script hooks" code="bshk" inherits="item"
