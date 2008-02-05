@@ -103,7 +103,9 @@
 		if ([obj isKindOfClass:[BibItem class]]) {
             items = [NSArray arrayWithObject:obj];
 		} else if ([obj isKindOfClass:[NSArray class]]) {
-            items = [[obj lastObject] isKindOfClass:[BibItem class]] ? obj : [publications objectsAtIndexSpecifiers:(NSArray *)obj];
+            id lastObject = [obj lastObject];
+            if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
@@ -188,7 +190,9 @@
 		if ([obj isKindOfClass:[BibItem class]]) {
             items = [NSArray arrayWithObject:obj];
 		} else if ([obj isKindOfClass:[NSArray class]]) {
-            items = [[obj lastObject] isKindOfClass:[BibItem class]] ? obj : [publications objectsAtIndexSpecifiers:(NSArray *)obj];
+            id lastObject = [obj lastObject];
+            if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];

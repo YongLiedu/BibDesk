@@ -79,11 +79,9 @@ static NSString *normalizedKey(NSString *key) {
     else if ([dP count] == 0)
         return dP;
     
-	NSIndexSpecifier *indexSpec = [dP objectAtIndex:0];
-    if ([indexSpec isKindOfClass:[NSScriptObjectSpecifier class]]) {
-        BibDocument *doc = [[indexSpec containerSpecifier] objectsByEvaluatingSpecifier];
-        dP = [[dP lastObject] isKindOfClass:[BibItem class]] ? dP : [[doc publications] objectsAtIndexSpecifiers:(NSArray *)dP];
-    }
+    id lastObject = [dP lastObject];
+    if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+        dP = [dP arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
     
     NSDictionary *args = [self evaluatedArguments];
     NSString *key = [args objectForKey:@"by"];
