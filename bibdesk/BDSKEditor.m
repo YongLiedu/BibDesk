@@ -2807,7 +2807,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)download:(NSURLDownload *)theDownload didFailWithError:(NSError *)error
-{log_method();
+{
     [self setDownloading:NO];
         
     NSString *errorDescription = [error localizedDescription];
