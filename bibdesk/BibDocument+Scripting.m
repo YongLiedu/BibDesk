@@ -202,6 +202,8 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 }
 
 - (void)insertInPublications:(BibItem *)pub {
+    if ([pub owner])
+        pub = [[pub copyWithMacroResolver:[self macroResolver]] autorelease];
 	[self addPublication:pub];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -262,7 +264,14 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 }
 
 - (BDSKGroup *)valueInGroupsWithName:(NSString *)name {
-    unsigned int idx = [[groups valueForKey:@"stringValue"] indexOfObject:name];
+    NSArray *names = [groups valueForKey:@"stringValue"];
+    unsigned int idx = [names indexOfObject:name];
+    if (idx == NSNotFound) {
+        NSMutableArray *fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &BDSKCaseInsensitiveStringArrayCallBacks);
+        [fuzzyNames addObjectsFromArray:names];
+        idx = [fuzzyNames indexOfObject:name];
+        [fuzzyNames release];
+    }
     return idx == NSNotFound ? nil : [groups objectAtIndex:idx];
 }
 

@@ -269,15 +269,15 @@ enum {
 }
 
 - (void)dealloc{
-    [fileSearchController release];
-    if ([self undoManager]) {
-        [[self undoManager] removeAllActionsWithTarget:self];
-    }
-    // workaround for crash: to reproduce, create empty doc, hit cmd-n for new editor window, then cmd-q to quit, choose "don't save"; this results in an -undoManager message to the dealloced document
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
+    if ([self undoManager])
+        [[self undoManager] removeAllActions];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
     [OFPreference removeObserver:self forPreference:nil];
+    // workaround for crash: to reproduce, create empty doc, hit cmd-n for new editor window, then cmd-q to quit, choose "don't save"; this results in an -undoManager message to the dealloced document
+    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
+    [groups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+    [fileSearchController release];
     [pboardHelper setDelegate:nil];
     [pboardHelper release];
     [macroResolver release];

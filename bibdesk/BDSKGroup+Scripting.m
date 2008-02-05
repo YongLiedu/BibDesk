@@ -228,7 +228,9 @@
     if ([[pub owner] isEqual:[self document]] == NO) {
         pub = [[pub copyWithMacroResolver:[[self document] macroResolver]] autorelease];
         [[self document] addPublication:pub];
-	}
+	} else if ([self containsItem:pub]) {
+        return;
+    }
     [self addPublication:pub];
     [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
@@ -320,7 +322,9 @@
     if ([[pub owner] isEqual:[self document]] == NO) {
         pub = [[pub copyWithMacroResolver:[[self document] macroResolver]] autorelease];
         [[self document] addPublication:pub];
-	}
+	} else if ([self containsItem:pub]) {
+        return;
+    }
     [[self document] addPublications:[NSArray arrayWithObject:pub] toGroup:self];
     [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
