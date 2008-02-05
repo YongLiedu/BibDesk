@@ -3528,12 +3528,12 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     
     // add unresolved URLs back in, and make sure the remaining keys are contiguous
     if (unresolvedFileCount) {
-        for (i = 1; i <= unresolvedFileCount; i++)
-            [pubFields setObject:[unresolvedFiles objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%d", i]];
+        for (i = 0; i < unresolvedFileCount; i++)
+            [pubFields setObject:[unresolvedFiles objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%d", i + 1]];
     }
     if (unresolvedURLCount) {
-        for (i = 1; i <= unresolvedURLCount; i++)
-            [pubFields setObject:[unresolvedURLs objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-Url-%d", i]];
+        for (i = 0; i < unresolvedURLCount; i++)
+            [pubFields setObject:[unresolvedURLs objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-Url-%d", i + 1]];
     }
     
     if (0 == [files count]) {
