@@ -202,7 +202,7 @@
 	return [[self numberValue] compare:[otherGroup numberValue]];
 }
 
-- (BOOL)containsItem:(BibItem *)item { return YES; }
+- (BOOL)containsItem:(BibItem *)item { return NO; }
 
 @end
 
@@ -232,7 +232,7 @@ static NSString *BDSKLibraryLocalizedString = nil;
 }
 
 - (BOOL)containsItem:(BibItem *)item {
-    return [[item owner] isDocument];
+    return [[item owner] isEqual:[self document]];
 }
 
 - (BOOL)isEqual:(id)other { return self == other; }
