@@ -318,14 +318,28 @@ static CFDictionaryRef selectorTable = NULL;
     return self;
 }
 
-// Never copy between different documents, as this messes up the macroResolver for complex string values
+// Never copy between different documents, as this messes up the macroResolver for complex string values, unfortunately we don't always control that
 - (id)copyWithZone:(NSZone *)zone{
-    // We set isNew to YES as copied items are always added as new items to a document, e.g. for duplicates and text import, so the Date-Added should be reset.  Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
-    NSArray *filesCopy = [[NSArray allocWithZone: zone] initWithArray:files copyItems:YES];
-    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields files:filesCopy isNew:YES];
-    [filesCopy release];
-    [theCopy setDate: pubDate];
-	
+    BibItem *theCopy = nil;
+    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+    
+    if ([cmd isKindOfClass:[NSCloneCommand class]]) {
+        // if this is called from AppleScript 'duplicate', we need to use the correct macroResolver, as we may be copying from another source
+        BDSKMacroResolver *macroResolver = nil;
+        id container = [[[cmd evaluatedArguments] valueForKey:@"ToLocation"] insertionContainer];
+        // the container of the location should be either a document or a local group
+        if ([container respondsToSelector:@selector(macroResolver)] == NO && [container respondsToSelector:@selector(document)])
+            container = [container document];
+        if ([container respondsToSelector:@selector(macroResolver)])
+            macroResolver = [container macroResolver];
+        theCopy = [self copyWithMacroResolver:macroResolver];
+    } else {
+        // We set isNew to YES as copied items are always added as new items to a document, e.g. for duplicates and text import, so the Date-Added should be reset.  Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
+        NSArray *filesCopy = [[NSArray allocWithZone: zone] initWithArray:files copyItems:YES];
+        theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields files:filesCopy isNew:YES];
+        [filesCopy release];
+        [theCopy setDate: pubDate];
+    }
     return theCopy;
 }
 
