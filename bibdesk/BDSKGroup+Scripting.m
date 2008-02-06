@@ -150,12 +150,12 @@
 }
 
 - (void)insertInPublications:(BibItem *)pub {
-    if ([[pub owner] isEqual:[self document]] == NO || [self containsItem:pub] == NO)
+    if ([[pub owner] isEqual:[self document]] == NO)
         [[self document] insertInPublications:pub];
 }
 
 - (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx {
-    if ([[pub owner] isEqual:[self document]] == NO || [self containsItem:pub] == NO)
+    if ([[pub owner] isEqual:[self document]] == NO)
         [[self document] insertObject:pub inPublicationsAtIndex:idx];
 }
 
