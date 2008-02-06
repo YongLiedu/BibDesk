@@ -146,23 +146,25 @@
 }
 
 - (void)insertInPublications:(BibItem *)pub atIndex:(unsigned int)idx {
-    return [[self document] insertInPublications:pub atIndex:idx];
+    [[self document] insertInPublications:pub atIndex:idx];
 }
 
 - (void)insertInPublications:(BibItem *)pub {
-    return [[self document] insertInPublications:pub];
+    if ([[pub owner] isEqual:[self document]] == NO || [self containsItem:pub] == NO)
+        [[self document] insertInPublications:pub];
 }
 
 - (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx {
-    return [[self document] insertObject:pub inPublicationsAtIndex:idx];
+    if ([[pub owner] isEqual:[self document]] == NO || [self containsItem:pub] == NO)
+        [[self document] insertObject:pub inPublicationsAtIndex:idx];
 }
 
 - (void)removeFromPublicationsAtIndex:(unsigned int)idx {
-    return [[self document] removeFromPublicationsAtIndex:idx];
+    [[self document] removeFromPublicationsAtIndex:idx];
 }
 
 - (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx {
-    return [[self document] removeObjectFromPublicationsAtIndex:idx];
+    [[self document] removeObjectFromPublicationsAtIndex:idx];
 }
 
 - (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
