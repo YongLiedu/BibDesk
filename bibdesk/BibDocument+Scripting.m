@@ -635,7 +635,7 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 
 - (BDSKGroup *)valueInLibraryGroupsWithName:(NSString *)name {
     BDSKGroup *group = [[self groups] libraryGroup];
-    return [[group name] isEqualToString:name] ? group : nil;
+    return [[group name] caseInsensitiveCompare:name] == NSOrderedSame ? group : nil;
 }
 
 #pragma mark -
@@ -655,7 +655,7 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 
 - (BDSKGroup *)valueInLastImportGroupsWithName:(NSString *)name {
     BDSKGroup *group = [[self groups] lastImportGroup];
-    return [[group name] isEqualToString:name] && [group count] ? group : nil;
+    return [[group name] caseInsensitiveCompare:name] == NSOrderedSame && [group count] ? group : nil;
 }
 
 #pragma mark -
@@ -674,7 +674,7 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 
 - (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name {
     BDSKWebGroup *group = [[self groups] webGroup];
-    return [[group name] isEqualToString:name] ? group : nil;
+    return [[group name] caseInsensitiveCompare:name] == NSOrderedSame ? group : nil;
 }
 
 #pragma mark Properties
