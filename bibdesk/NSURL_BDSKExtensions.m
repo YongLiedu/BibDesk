@@ -47,9 +47,11 @@
 @implementation NSURL (BDSKExtensions)
 
 + (void)load {
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
     [NSAppleEventDescriptor registerConversionHandler:self
                                              selector:@selector(fileURLWithAEDesc:)
                                    forDescriptorTypes:typeFileURL, typeFSS, typeAlias, typeFSRef, nil];
+    [pool release];
 }
 
 + (NSURL *)fileURLWithAEDesc:(NSAppleEventDescriptor *)desc {
