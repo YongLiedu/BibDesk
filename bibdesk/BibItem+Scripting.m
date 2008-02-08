@@ -195,7 +195,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (void)removeObjectFromLinkedFilesAtIndex:(unsigned int)idx {
-    [self removeFromLinkedFilesAtIndex:idx]];
+    [self removeFromLinkedFilesAtIndex:idx];
 }
 
 - (NSArray *)linkedURLs {
@@ -207,7 +207,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (NSString *)objectInLinkedURLsAtIndex:(unsigned int)idx {
-    retirn [[[[self remoteURLs] objectAtIndex:idx] URL] absoluteString];
+    return [[[[self remoteURLs] objectAtIndex:idx] URL] absoluteString];
 }
 
 - (void)insertInLinkedURLs:(NSString *)newURLString atIndex:(unsigned int)idx {
