@@ -95,18 +95,16 @@
         } else {
             insertionContainer = [locationSpecifier objectsByEvaluatingSpecifier];
             containerClassDescription = [[insertionContainer objectSpecifier] keyClassDescription];
-            NSString *key = [containerClassDescription defaultSubcontainerAttributeKey];
-            NSScriptClassDescription *keyClassDescription = key ? [containerClassDescription classDescriptionForKey:key] : nil;
-            if ([className isEqualToString:[keyClassDescription className]] == NO || [containerClassDescription isLocationRequiredToCreateForKey:key]) {
-                NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
-                while (key = [keyEnum nextObject]) {
-                    keyClassDescription = [containerClassDescription classDescriptionForKey:key];
-                    if ([className isEqualToString:[keyClassDescription className]] &&
-                        [containerClassDescription isLocationRequiredToCreateForKey:key] == NO)
-                        break;
+            NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
+            NSString *key;
+            while (key = [keyEnum nextObject]) {
+                NSScriptClassDescription *keyClassDescription = [containerClassDescription classDescriptionForKey:key];
+                if ([className isEqualToString:[keyClassDescription className]] &&
+                    [containerClassDescription isLocationRequiredToCreateForKey:key] == NO) {
+                    insertionKey = key;
+                    break;
                 }
             }
-            insertionKey = key;
         }
         
         // check if the insertion location is valid
