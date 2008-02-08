@@ -40,9 +40,32 @@
 #import "CFString_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKSkimReader.h"
+#import "NSAppleEventDescriptor_BDSKExtensions.h"
 #import <FileView/FVFinderLabel.h>
+#import "KFASHandlerAdditions-TypeTranslation.h"
 
 @implementation NSURL (BDSKExtensions)
+
++ (void)load {
+    [NSAppleEventDescriptor registerConversionHandler:self
+                                             selector:@selector(fileURLWithAEDesc:)
+                                   forDescriptorTypes:typeFileURL, typeFSS, typeAlias, typeFSRef, nil];
+}
+
++ (NSURL *)fileURLWithAEDesc:(NSAppleEventDescriptor *)desc {
+    return [desc fileURLValue];
+}
+
+- (NSAppleEventDescriptor *)aeDescriptorValue {
+    NSAppleEventDescriptor *resultDesc = nil;
+    
+    NSData *data = (NSData *)CFURLCreateData(nil, (CFURLRef)self, kCFStringEncodingUTF8, true);
+    if (data)
+        resultDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:data];
+    [data release];
+    
+    return resultDesc;
+}
 
 /* This could as easily have been implemented in the NSFileManager category, but it mainly uses CFURL (and Carbon File Manager) functionality.  Omni has a method in their NSFileManager category that does the same thing, but it assumes PATH_MAX*4 for a max path length, uses malloc instead of NSZoneMalloc, uses path buffers instead of string/URL objects, uses some unnecessary autoreleases, and will resolve aliases on remote volumes.  Of course, it's also been debugged more thoroughly than my version. */
 

@@ -37,6 +37,8 @@
  */
 
 #import "NSAppleEventDescriptor_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
+#import "KFASHandlerAdditions-TypeTranslation.h"
 
 
 @implementation NSAppleEventDescriptor (BDSKExtensions)

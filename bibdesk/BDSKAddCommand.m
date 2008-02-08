@@ -38,6 +38,8 @@
 
 #import "BDSKAddCommand.h"
 #import "NSAppleEventDescriptor_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
+#import "KFASHandlerAdditions-TypeTranslation.h"
 
 
 @implementation BDSKAddCommand
@@ -57,7 +59,6 @@
     if ([obj respondsToSelector:@selector(keyClassDescription)]) {
         className = [[obj keyClassDescription] className];
         insertionObjects = receiver;
-        returnValue = directParameter;
     } else if ([obj isKindOfClass:[NSAppleEventDescriptor class]]) {
         DescType descType = [obj descriptorType];
         if ([obj fileURLValue]) {
@@ -69,8 +70,6 @@
         } else {
             insertionObjects = nil;
         }
-        if (insertionObjects)
-            returnValue = directParameter;
     }
     
     if (insertionObjects == nil) {
@@ -113,10 +112,10 @@
         if ([[containerClassDescription toManyRelationshipKeys] containsObject:insertionKey] == NO ||
             [className isEqualToString:[[containerClassDescription classDescriptionForKey:insertionKey] className]] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];
-            returnValue = nil;
+            insertionObjects = nil;
         } else if (insertionIndex == -1 && [containerClassDescription isLocationRequiredToCreateForKey:insertionKey]) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];
-            returnValue = nil;
+            insertionObjects = nil;
         } else {
             // insert using scripting KVC
             if ([insertionObjects isKindOfClass:[NSArray class]] == NO)
@@ -130,8 +129,27 @@
                 while (obj = [objEnum nextObject])
                     [insertionContainer insertValue:obj inPropertyWithKey:insertionKey];
             }
+            
+            if ([insertionObjects isKindOfClass:[NSArray class]]) {
+                returnValue = [NSMutableArray array];
+                objEnum = [insertionObjects objectEnumerator];
+                while (obj = [objEnum nextObject]) {
+                    if ([obj respondsToSelector:@selector(objectSpecifier)])
+                        obj = [obj objectSpecifier];
+                    else
+                        obj = [obj aeDescriptorValue];
+                    if (obj)
+                        [returnValue addObject:obj];
+                }
+            } else {
+                if ([obj respondsToSelector:@selector(objectSpecifier)])
+                    returnValue = [obj objectSpecifier];
+                else
+                    returnValue = [obj aeDescriptorValue];
+            }
         }
     }
+    
     return returnValue;
 }
 

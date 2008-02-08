@@ -40,6 +40,9 @@
 
 @interface NSURL (BDSKExtensions)
 
++ (NSURL *)fileURLWithAEDesc:(NSAppleEventDescriptor *)desc;
+- (NSAppleEventDescriptor *)aeDescriptorValue;
+
 - (NSURL *)fileURLByResolvingAliases;
 - (NSURL *)fileURLByResolvingAliasesBeforeLastPathComponent;
 - (NSURL *)URLByDeletingLastPathComponent;
