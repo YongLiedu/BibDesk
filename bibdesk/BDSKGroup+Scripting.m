@@ -150,12 +150,12 @@
 }
 
 - (void)insertInPublications:(BibItem *)pub {
-    if ([[pub owner] isEqual:[self document]] == NO)
+    if ([pub owner] == nil)
         [[self document] insertInPublications:pub];
 }
 
 - (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx {
-    if ([[pub owner] isEqual:[self document]] == NO)
+    if ([pub owner] == nil)
         [[self document] insertObject:pub inPublicationsAtIndex:idx];
 }
 
@@ -227,14 +227,16 @@
 }
 
 - (void)insertInPublications:(BibItem *)pub {
-    if ([[pub owner] isEqual:[self document]] == NO) {
-        pub = [[pub copyWithMacroResolver:[[self document] macroResolver]] autorelease];
+    if ([pub owner] == nil)
         [[self document] addPublication:pub];
-	} else if ([self containsItem:pub]) {
-        return;
+	if ([[pub owner] isEqual:[self document]] == NO) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add publication from another document or external group, use duplicate.",@"Error description")];
+    } else if ([self containsItem:pub] == NO) {
+        [self addPublication:pub];
+        [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
-    [self addPublication:pub];
-    [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx {
@@ -321,14 +323,16 @@
 }
 
 - (void)insertInPublications:(BibItem *)pub {
-    if ([[pub owner] isEqual:[self document]] == NO) {
-        pub = [[pub copyWithMacroResolver:[[self document] macroResolver]] autorelease];
+    if ([pub owner] == nil)
         [[self document] addPublication:pub];
-	} else if ([self containsItem:pub]) {
-        return;
+	if ([[pub owner] isEqual:[self document]] == NO) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add publication from another document or external group, use duplicate.",@"Error description")];
+    } else if ([self containsItem:pub] == NO) {
+        [[self document] addPublications:[NSArray arrayWithObject:pub] toGroup:self];
+        [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
-    [[self document] addPublications:[NSArray arrayWithObject:pub] toGroup:self];
-    [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx {

@@ -195,17 +195,25 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 }
 
 - (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)idx {
-    if ([pub owner])
-        pub = [[pub copyWithMacroResolver:[self macroResolver]] autorelease];
-    [self insertPublication:pub atIndex:idx];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+	if ([pub owner] == nil) {
+        [self insertPublication:pub atIndex:idx];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else if ([[pub owner] isEqual:self] == NO) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add publication from another document or external group, use duplicate.",@"Error description")];
+    } 
 }
 
 - (void)insertInPublications:(BibItem *)pub {
-    if ([pub owner])
-        pub = [[pub copyWithMacroResolver:[self macroResolver]] autorelease];
-	[self addPublication:pub];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+	if ([pub owner] == nil) {
+        [self addPublication:pub];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else if ([[pub owner] isEqual:self] == NO) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add publication from another document or external group.",@"Error description")];
+    } 
 }
 
 - (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx {
