@@ -212,7 +212,7 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return [self insertInPublications:pub atIndex:idx];
 }
 
-- (void)removeFromPublicationsAtIndex:(unsigned int)idx {
+- (void)removeFromPublicationsAtIndex:(unsigned int)idx {log_method();
 	[self removePublicationsAtIndexes:[NSIndexSet indexSetWithIndex:idx]];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }

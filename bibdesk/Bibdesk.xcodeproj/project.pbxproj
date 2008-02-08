@@ -171,6 +171,12 @@
 		CE2C18920A0A43BE006F0A73 /* importFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */; };
 		CE2E78CC0D40F6BB00340B39 /* BDSKMultiValueDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = CE2E78CA0D40F6BB00340B39 /* BDSKMultiValueDictionary.h */; };
 		CE2E78CD0D40F6BB00340B39 /* BDSKMultiValueDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2E78CB0D40F6BB00340B39 /* BDSKMultiValueDictionary.m */; };
+		CE3011A20D5CC41D00C0B7FA /* BDSKAddCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3011A00D5CC41C00C0B7FA /* BDSKAddCommand.h */; };
+		CE3011A30D5CC41D00C0B7FA /* BDSKAddCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011A10D5CC41D00C0B7FA /* BDSKAddCommand.m */; };
+		CE3011AC0D5CC46F00C0B7FA /* BDSKRemoveCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3011AA0D5CC46F00C0B7FA /* BDSKRemoveCommand.h */; };
+		CE3011AD0D5CC46F00C0B7FA /* BDSKRemoveCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011AB0D5CC46F00C0B7FA /* BDSKRemoveCommand.m */; };
+		CE3011B90D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3011B70D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h */; };
+		CE3011BA0D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011B80D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m */; };
 		CE30FAD80919713100CB1A19 /* BDSKStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */; };
 		CE31E4100A07928C00F5BD47 /* staticFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */; };
 		CE3256000A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */; };
@@ -1055,6 +1061,12 @@
 		CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = importFolderIcon.tiff; path = Images/importFolderIcon.tiff; sourceTree = "<group>"; };
 		CE2E78CA0D40F6BB00340B39 /* BDSKMultiValueDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMultiValueDictionary.h; sourceTree = "<group>"; };
 		CE2E78CB0D40F6BB00340B39 /* BDSKMultiValueDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMultiValueDictionary.m; sourceTree = "<group>"; };
+		CE3011A00D5CC41C00C0B7FA /* BDSKAddCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAddCommand.h; sourceTree = "<group>"; };
+		CE3011A10D5CC41D00C0B7FA /* BDSKAddCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAddCommand.m; sourceTree = "<group>"; };
+		CE3011AA0D5CC46F00C0B7FA /* BDSKRemoveCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRemoveCommand.h; sourceTree = "<group>"; };
+		CE3011AB0D5CC46F00C0B7FA /* BDSKRemoveCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRemoveCommand.m; sourceTree = "<group>"; };
+		CE3011B70D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSAppleEventDescriptor_BDSKExtensions.h; sourceTree = "<group>"; };
+		CE3011B80D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAppleEventDescriptor_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStatusBar.h; sourceTree = "<group>"; };
 		CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStatusBar.m; sourceTree = "<group>"; };
 		CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = staticFolderIcon.tiff; path = Images/staticFolderIcon.tiff; sourceTree = "<group>"; };
@@ -2021,6 +2033,7 @@
 			isa = PBXGroup;
 			children = (
 				F9022FBF07580B9400C3F701 /* BibDesk.sdef */,
+				CE3011A10D5CC41D00C0B7FA /* BDSKAddCommand.m */,
 				CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */,
 				CE9DBEDE093CF2640008648B /* BDSKBibliographyCommand.m */,
 				CEAC51550A97730800B8DF43 /* BDSKExportUsingTemplateCommand.m */,
@@ -2034,10 +2047,11 @@
 				CE82B4720D57EECF00A2E8C5 /* BDSKGroup+Scripting.m */,
 				F9201E000B72504C007E45BB /* BDSKMacro.m */,
 				CE82BE8B0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.m */,
+				CE3011AB0D5CC46F00C0B7FA /* BDSKRemoveCommand.m */,
+				CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */,
 				F9022FBE07580B9400C3F701 /* BibAuthor+Scripting.m */,
 				F9022FC307580B9400C3F701 /* BibDocument+Scripting.m */,
 				F9022FC507580B9400C3F701 /* BibItem+Scripting.m */,
-				CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */,
 				CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */,
 			);
 			name = Scripting;
@@ -2138,6 +2152,7 @@
 				45DB3E4C0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m */,
 				F90B09400C283B5100144F1B /* BDSKLogUtilities.m */,
 				F9025F2F0969D66F008A551C /* CFString_BDSKExtensions.m */,
+				CE3011B80D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m */,
 				F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */,
 				CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */,
 				F9025DC80969AD2C008A551C /* NSCharacterSet_BDSKExtensions.m */,
@@ -2475,6 +2490,7 @@
 		F918104307583A6E00CF822D /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				CE3011A00D5CC41C00C0B7FA /* BDSKAddCommand.h */,
 				45DB3E470CAADFC3001EACDA /* BDSKACMDLParser.h */,
 				CE2209A5093639B0004D7D92 /* BDSKAlert.h */,
 				F920DAFA075C2B69000C5FCA /* BDSKAppController+Scripting.h */,
@@ -2599,6 +2615,7 @@
 				F940D1070B5568E400B5917A /* BDSKReferParser.h */,
 				CE601A4C0AF4C488000B5680 /* BDSKReferenceMinerParser.h */,
 				CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */,
+				CE3011AA0D5CC46F00C0B7FA /* BDSKRemoveCommand.h */,
 				CE600E2D0AF405D6000B5680 /* BDSKRISParser.h */,
 				F90C4ACB0C7395FB0035DD50 /* BDSKSciFinderParser.h */,
 				CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */,
@@ -2700,6 +2717,7 @@
 				CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */,
 				F9022C9B0758038000C3F701 /* html2tex.h */,
 				F9A6772B07D2D57F00782ACD /* MultiplePageView.h */,
+				CE3011B70D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h */,
 				F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */,
 				CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */,
 				F97BF0B7090AE7520063504B /* NSBezierPath_BDSKExtensions.h */,
@@ -2945,6 +2963,9 @@
 				CE82B2D10D57AE0B00A2E8C5 /* BDSKSharingClient.h in Headers */,
 				CE82B4730D57EECF00A2E8C5 /* BDSKGroup+Scripting.h in Headers */,
 				CE82BE8C0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h in Headers */,
+				CE3011A20D5CC41D00C0B7FA /* BDSKAddCommand.h in Headers */,
+				CE3011AC0D5CC46F00C0B7FA /* BDSKRemoveCommand.h in Headers */,
+				CE3011B90D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3926,6 +3947,9 @@
 				CE82B2D20D57AE0B00A2E8C5 /* BDSKSharingClient.m in Sources */,
 				CE82B4740D57EECF00A2E8C5 /* BDSKGroup+Scripting.m in Sources */,
 				CE82BE8D0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.m in Sources */,
+				CE3011A30D5CC41D00C0B7FA /* BDSKAddCommand.m in Sources */,
+				CE3011AD0D5CC46F00C0B7FA /* BDSKRemoveCommand.m in Sources */,
+				CE3011BA0D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

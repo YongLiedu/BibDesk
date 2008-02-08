@@ -293,7 +293,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
 		<command name="make" code="corecrel"
 			description="Make a new object.">
-			<cocoa class="NSCreateCommand"/>
+			<cocoa class="BDSKCreateCommand"/>
 			<parameter name="new" code="kocl" type="type"
 				description="The class of the new object.">
 				<cocoa key="ObjectClass"/>
@@ -674,6 +674,12 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="A linked URL. This is a string.">
 			<cocoa class="NSString"/>
 			<type type="text"/>
+            <responds-to name="add">
+                <cocoa method=""/>
+            </responds-to>
+            <responds-to name="remove">
+                <cocoa method=""/>
+            </responds-to>
 		</class>
 
 		<class name="linked file" plural="linked files" code="File" inherits="item"
@@ -683,6 +689,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <property name="URL" code="rURL" type="text" access="r"
                 description="The URL of the file.">
                 <cocoa key="absoluteString"/>
+            </property>  
+            <property name="POSIX path" code="psxp" type="text" access="r"
+                description="The POSIX path of the file.">
+                <cocoa key="path"/>
             </property>  
             <property name="label index" code="labi" type="integer"
                 description="The Finder label of the file.">
@@ -696,6 +706,12 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The rich text Skim notes for the file.">
                 <cocoa key="styledTextSkimNotes"/>
             </property>  
+            <responds-to name="add">
+                <cocoa method=""/>
+            </responds-to>
+            <responds-to name="remove">
+                <cocoa method=""/>
+            </responds-to>
 		</class>
 
 		<class name="publication" plural="publications" code="bibi" inherits="item"
@@ -814,6 +830,12 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Whether the publication is external.">
                 <cocoa key="isExternal"/>
             </property>  
+            <responds-to name="add">
+                <cocoa method=""/>
+            </responds-to>
+            <responds-to name="remove">
+                <cocoa method=""/>
+            </responds-to>
             <responds-to name="show">
                 <cocoa method=""/>
             </responds-to>
@@ -1282,6 +1304,45 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <parameter name="for script hook" code="fshk" type="script hook"
                 description="The script hook that was invoked.">
                 <cocoa key="forScriptHook"/>
+            </parameter>
+        </command>
+        
+        <command name="add" code="BDSKAdd "
+			description="Add items to a collection.">
+            <cocoa class="BDSKAddScriptCommand"/>
+            <direct-parameter
+				description="the object(s) to add.">
+                <type type="specifier"/>
+                <type type="specifier" list="yes"/>
+                <type type="any"/>
+                <type type="any" list="yes"/>
+            </direct-parameter>
+            <parameter name="to" code="insh"
+                description="The container or location to add the item to.">
+                <cocoa key="ToLocation"/>
+                <type type="specifier"/>
+                <type type="location specifier"/>
+            </parameter>
+            <result description="the added item">
+                <type type="specifier"/>
+                <type type="specifier" list="yes"/>
+                <type type="any"/>
+                <type type="any" list="yes"/>
+            </result>
+        </command>
+        
+        <command name="remove" code="BDSKRemv"
+			description="Remove items from a collection.">
+            <cocoa class="BDSKRemoveScriptCommand"/>
+            <direct-parameter
+				description="the object(s) to remove.">
+                <type type="specifier"/>
+                <type type="specifier" list="yes"/>
+            </direct-parameter>
+            <parameter name="from" code="from" optional="yes"
+                description="The container to remove the object(s) from.">
+                <cocoa key="FromContainer"/>
+                <type type="specifier"/>
             </parameter>
         </command>
         
