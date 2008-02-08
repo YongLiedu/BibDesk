@@ -734,4 +734,200 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
                                         key: @"clipboard"] autorelease];
 }
 
+#pragma mark -
+
+// The following "indicesOf..." methods are in support of scripting.  They allow more flexible range and relative specifiers to be used with the different group keys of a SKTDrawDocument.
+// The scripting engine does not know about the fact that the "static groups" key is really just a subset of the "groups" key, so script code like "groups from static group 1 to field group 4" don't make sense to it.  But BibDesk does know and can answer such questions itself, with a little work.
+// This is copied from Apple's Sketch sample code
+- (NSArray *)indicesOfObjectsByEvaluatingRangeSpecifier:(NSRangeSpecifier *)rangeSpec {
+    NSString *key = [rangeSpec key];
+    NSSet *groupKeys = [NSSet setWithObjects:@"groups", @"staticGroups", @"smartGroups", @"fieldGroups", @"externalFileGroups", @"scriptGroups", @"searchGroups", @"sharedGroups", @"libraryGroups", @"lastImportGroups", @"webGroups", nil];
+
+    if ([groupKeys containsObject:key]) {
+        // This is one of the keys we might want to deal with.
+        NSScriptObjectSpecifier *startSpec = [rangeSpec startSpecifier];
+        NSScriptObjectSpecifier *endSpec = [rangeSpec endSpecifier];
+        NSString *startKey = [startSpec key];
+        NSString *endKey = [endSpec key];
+
+        if ((startSpec == nil) && (endSpec == nil))
+            // We need to have at least one of these...
+            return nil;
+        
+        if ([groups count] == 0)
+            // If there are no groups, there can be no match.  Just return now.
+            return [NSArray array];
+
+        if ((startSpec == nil || [groupKeys containsObject:startKey]) && (endSpec == nil || [groupKeys containsObject:endKey])) {
+            int startIndex;
+            int endIndex;
+
+            // The start and end keys are also ones we want to handle.
+
+            // The strategy here is going to be to find the index of the start and stop object in the full groups array, regardless of what its key is.  Then we can find what we're looking for in that range of the groups key (weeding out objects we don't want, if necessary).
+
+            // First find the index of the first start object in the groups array
+            if (startSpec) {
+                id startObject = [startSpec objectsByEvaluatingSpecifier];
+                if ([startObject isKindOfClass:[NSArray class]]) {
+                    startObject = [startObject count] ? [startObject objectAtIndex:0] : nil;
+                }
+                if (startObject == nil)
+                    // Oops.  We could not find the start object.
+                    return nil;
+                
+                startIndex = [groups indexOfObjectIdenticalTo:startObject];
+                if (startIndex == NSNotFound)
+                    // Oops.  We couldn't find the start object in the groups array.  This should not happen.
+                    return nil;
+                
+            } else {
+                startIndex = 0;
+            }
+
+            // Now find the index of the last end object in the groups array
+            if (endSpec) {
+                id endObject = [endSpec objectsByEvaluatingSpecifier];
+                if ([endObject isKindOfClass:[NSArray class]]) {
+                    endObject = [endObject count] ? [endObject lastObject] : nil;
+                }
+                if (endObject == nil)
+                    // Oops.  We could not find the end object.
+                    return nil;
+                
+                endIndex = [groups indexOfObjectIdenticalTo:endObject];
+                if (endIndex == NSNotFound)
+                    // Oops.  We couldn't find the end object in the groups array.  This should not happen.
+                    return nil;
+                
+            } else {
+                endIndex = [groups count] - 1;
+            }
+
+            if (endIndex < startIndex) {
+                // Accept backwards ranges gracefully
+                int temp = endIndex;
+                endIndex = startIndex;
+                startIndex = temp;
+            }
+
+            // Now startIndex and endIndex specify the end points of the range we want within the groups array.
+            // We will traverse the range and pick the objects we want.
+            // We do this by getting each object and seeing if it actually appears in the real key that we are trying to evaluate in.
+            NSMutableArray *result = [NSMutableArray array];
+            BOOL keyIsGroups = [key isEqual:@"groups"];
+            NSArray *rangeKeyObjects = (keyIsGroups ? nil : [self valueForKey:key]);
+            id curObj;
+            unsigned int curKeyIndex;
+            int i;
+
+            for (i = startIndex; i <= endIndex; i++) {
+                if (keyIsGroups) {
+                    [result addObject:[NSNumber numberWithInt:i]];
+                } else {
+                    curObj = [groups objectAtIndex:i];
+                    curKeyIndex = [rangeKeyObjects indexOfObjectIdenticalTo:curObj];
+                    if (curKeyIndex != NSNotFound)
+                        [result addObject:[NSNumber numberWithInt:curKeyIndex]];
+                }
+            }
+            return result;
+        }
+    }
+    return nil;
+}
+
+- (NSArray *)indicesOfObjectsByEvaluatingRelativeSpecifier:(NSRelativeSpecifier *)relSpec {
+    NSString *key = [relSpec key];
+    NSSet *groupKeys = [NSSet setWithObjects:@"groups", @"staticGroups", @"smartGroups", @"fieldGroups", @"externalFileGroups", @"scriptGroups", @"searchGroups", @"sharedGroups", @"libraryGroups", @"lastImportGroups", @"webGroups", nil];
+
+    if ([groupKeys containsObject:key]) {
+        // This is one of the keys we might want to deal with.
+        NSScriptObjectSpecifier *baseSpec = [relSpec baseSpecifier];
+        NSString *baseKey = [baseSpec key];
+        NSRelativePosition relPos = [relSpec relativePosition];
+
+        if (baseSpec == nil)
+            // We need to have one of these...
+            return nil;
+        
+        if ([groups count] == 0)
+            // If there are no groups, there can be no match.  Just return now.
+            return [NSArray array];
+
+        if ([groupKeys containsObject:baseKey]) {
+            int baseIndex;
+
+            // The base key is also one we want to handle.
+
+            // The strategy here is going to be to find the index of the base object in the full groups array, regardless of what its key is.  Then we can find what we're looking for before or after it.
+
+            // First find the index of the first or last base object in the groups array
+            // Base specifiers are to be evaluated within the same container as the relative specifier they are the base of.  That's this document.
+            id baseObject = [baseSpec objectsByEvaluatingWithContainers:self];
+            if ([baseObject isKindOfClass:[NSArray class]]) {
+                if ([baseObject count] == 0)
+                    // Oops.  We could not find the base object.
+                    return nil;
+                
+                baseObject = (relPos == NSRelativeBefore ? [baseObject objectAtIndex:0] : [baseObject lastObject]);
+            }
+
+            baseIndex = [groups indexOfObjectIdenticalTo:baseObject];
+            if (baseIndex == NSNotFound)
+                // Oops.  We couldn't find the base object in the groups array.  This should not happen.
+                return nil;
+
+            // Now baseIndex specifies the base object for the relative spec in the groups array.
+            // We will start either right before or right after and look for an object that matches the type we want.
+            // We do this by getting each object and seeing if it actually appears in the real key that we are trying to evaluate in.
+            NSMutableArray *result = [NSMutableArray array];
+            BOOL keyIsGroups = [key isEqual:@"groups"];
+            NSArray *relKeyObjects = (keyIsGroups ? nil : [self valueForKey:key]);
+            id curObj;
+            unsigned curKeyIndex;
+            int groupCount = [groups count];
+
+            if (relPos == NSRelativeBefore)
+                baseIndex--;
+            else
+                baseIndex++;
+            
+            while ((baseIndex >= 0) && (baseIndex < groupCount)) {
+                if (keyIsGroups) {
+                    [result addObject:[NSNumber numberWithInt:baseIndex]];
+                    break;
+                } else {
+                    curObj = [groups objectAtIndex:baseIndex];
+                    curKeyIndex = [relKeyObjects indexOfObjectIdenticalTo:curObj];
+                    if (curKeyIndex != NSNotFound) {
+                        [result addObject:[NSNumber numberWithInt:curKeyIndex]];
+                        break;
+                    }
+                }
+                if (relPos == NSRelativeBefore)
+                    baseIndex--;
+                else
+                    baseIndex++;
+            }
+
+            return result;
+        }
+    }
+    return nil;
+}
+    
+- (NSArray *)indicesOfObjectsByEvaluatingObjectSpecifier:(NSScriptObjectSpecifier *)specifier {
+    // We want to handle some range and relative specifiers ourselves in order to support such things as "groups from static group 3 to static group 5" or "static groups from groups 7 to groups 10" or "static group before smart group 1".
+    // Returning nil from this method will cause the specifier to try to evaluate itself using its default evaluation strategy.
+	
+    if ([specifier isKindOfClass:[NSRangeSpecifier class]])
+        return [self indicesOfObjectsByEvaluatingRangeSpecifier:(NSRangeSpecifier *)specifier];
+    else if ([specifier isKindOfClass:[NSRelativeSpecifier class]])
+        return [self indicesOfObjectsByEvaluatingRelativeSpecifier:(NSRelativeSpecifier *)specifier];
+
+    // If we didn't handle it, return nil so that the default object specifier evaluation will do it.
+    return nil;
+}
+
 @end

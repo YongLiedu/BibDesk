@@ -96,6 +96,9 @@
             removeKey = [containerSpecifier key];
         } else if (containerSpecifier) {
             removeContainer = [containerSpecifier objectsByEvaluatingSpecifier];
+            // make sure this is a valid object, so not something like a range specifier
+            if ([removeContainer respondsToSelector:@selector(objectSpecifier)] == NO)
+                removeContainer = nil;
             containerClassDescription = [[removeContainer objectSpecifier] keyClassDescription];
             NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
             NSString *key;

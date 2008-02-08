@@ -93,6 +93,9 @@
             insertionKey = [locationSpecifier key];
         } else {
             insertionContainer = [locationSpecifier objectsByEvaluatingSpecifier];
+            // make sure this is a valid object, so not something like a range specifier
+            if ([insertionContainer respondsToSelector:@selector(objectSpecifier)] == NO)
+                insertionContainer = nil;
             containerClassDescription = [[insertionContainer objectSpecifier] keyClassDescription];
             NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
             NSString *key;
