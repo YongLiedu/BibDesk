@@ -113,6 +113,14 @@
     return [BibAuthor editorWithName:aName inPublications:[self publicationsInGroup]];
 }
 
+- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
+    return [[self document] valueInMacrosWithName:aName];
+}
+
+- (NSArray *)macros {
+    return [[self document] macros];
+}
+
 - (NSString *)asName {
     return [self stringValue];
 }
@@ -165,14 +173,6 @@
 
 - (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx {
     [[self document] removeObjectFromPublicationsAtIndex:idx];
-}
-
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
-    return [[self document] valueInMacrosWithName:aName];
-}
-
-- (NSArray *)macros {
-    return [[self document] macros];
 }
 
 - (NSArray *)authors {
