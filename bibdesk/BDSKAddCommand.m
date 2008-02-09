@@ -48,28 +48,23 @@
     // get the actual objects to insert
     id directParameter = [self directParameter];
     id receiver = [self evaluatedReceivers];
-    id insertionObjects = nil;
-    id returnValue = nil;
-    NSString *className = nil;
+    NSArray *insertionObjects = nil;
+    NSMutableArray *returnValue = nil;
     NSEnumerator *objEnum;
-    id obj = directParameter;
+    id obj;
+    BOOL isArray = [directParameter isKindOfClass:[NSArray class]] || [receiver isKindOfClass:[NSArray class]];
     
-    if ([directParameter isKindOfClass:[NSArray class]])
-        obj = [directParameter lastObject];
+    if (directParameter && [directParameter isKindOfClass:[NSArray class]] == NO)
+        directParameter = [NSArray arrayWithObjects:directParameter, nil];
+    
+    obj = [directParameter lastObject];
     if ([obj respondsToSelector:@selector(keyClassDescription)]) {
-        className = [[obj keyClassDescription] className];
-        insertionObjects = receiver;
+        insertionObjects = (receiver && [receiver isKindOfClass:[NSArray class]]) ? receiver : [NSArray arrayWithObjects:receiver, nil];
     } else if ([obj isKindOfClass:[NSAppleEventDescriptor class]]) {
-        DescType descType = [obj descriptorType];
-        if ([obj fileURLValue]) {
-            className = @"linked file";
+        if ([obj fileURLValue])
             insertionObjects = [directParameter valueForKey:@"fileURLValue"];
-        } else if ((obj = [obj stringValue]) && [NSURL URLWithString:obj]) {
-            className = @"linked URL";
+        else if ((obj = [obj stringValue]) && [NSURL URLWithString:obj])
             insertionObjects = [directParameter valueForKey:@"stringValue"];
-        } else {
-            insertionObjects = nil;
-        }
     }
     
     if (insertionObjects == nil) {
@@ -91,7 +86,7 @@
         } else if ([locationSpecifier isKindOfClass:[NSPropertySpecifier class]]) {
             insertionContainer = [[locationSpecifier containerSpecifier] objectsByEvaluatingSpecifier];
             insertionKey = [locationSpecifier key];
-        } else {
+        } else if (locationSpecifier) {
             insertionContainer = [locationSpecifier objectsByEvaluatingSpecifier];
             // make sure this is a valid object, so not something like a range specifier
             if ([insertionContainer respondsToSelector:@selector(objectSpecifier)] == NO)
@@ -102,7 +97,7 @@
             NSString *key;
             while (key = [keyEnum nextObject]) {
                 NSScriptClassDescription *keyClassDescription = [containerClassDescription classDescriptionForKey:key];
-                if ([className isEqualToString:[keyClassDescription className]] &&
+                if ([[insertionObjects lastObject] isKindOfClass:NSClassFromString([keyClassDescription typeForKey:key])] &&
                     [containerClassDescription isLocationRequiredToCreateForKey:key] == NO) {
                     insertionKey = key;
                     break;
@@ -111,52 +106,49 @@
         }
         
         // check if the insertion location is valid
-        if (containerClassDescription == nil) {
+        if (containerClassDescription == nil && insertionContainer) {
             containerClassDescription = (NSScriptClassDescription *)[insertionContainer classDescription];
             OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
         }
-        if ([[containerClassDescription toManyRelationshipKeys] containsObject:insertionKey] == NO ||
-            [className isEqualToString:[[containerClassDescription classDescriptionForKey:insertionKey] className]] == NO) {
-            [self setScriptErrorNumber:NSArgumentsWrongScriptError];
-            insertionObjects = nil;
-        } else if (insertionIndex == -1 && [containerClassDescription isLocationRequiredToCreateForKey:insertionKey]) {
+        if (insertionContainer == nil || insertionKey == nil || 
+            [[containerClassDescription toManyRelationshipKeys] containsObject:insertionKey] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];
             insertionObjects = nil;
         } else {
-            // insert using scripting KVC
-            if ([insertionObjects isKindOfClass:[NSArray class]] == NO)
-                insertionObjects = [NSArray arrayWithObject:insertionObjects];
-            if (insertionIndex >= 0) {
-                objEnum = [insertionObjects reverseObjectEnumerator];
-                while (obj = [objEnum nextObject])
-                    [insertionContainer insertValue:obj atIndex:insertionIndex inPropertyWithKey:insertionKey];
-            } else {
-                objEnum = [insertionObjects objectEnumerator];
-                while (obj = [objEnum nextObject])
-                    [insertionContainer insertValue:obj inPropertyWithKey:insertionKey];
+            // check if the inserted objects are valid for the insertion container key
+            Class requiredClass = NSClassFromString([containerClassDescription typeForKey:insertionKey]);
+            BOOL isValid = YES;
+            
+            returnValue = [NSMutableArray array];
+            objEnum = [insertionObjects objectEnumerator];
+            while (isValid && (obj = [objEnum nextObject])) {
+                if ([obj isKindOfClass:requiredClass] == NO)
+                    isValid = NO;
+                obj = [obj respondsToSelector:@selector(objectSpecifier)] ? (id)[obj objectSpecifier] : (id)[obj aeDescriptorValue];
+                if (obj)
+                    [returnValue addObject:obj];
             }
             
-            if ([insertionObjects isKindOfClass:[NSArray class]]) {
-                returnValue = [NSMutableArray array];
-                objEnum = [insertionObjects objectEnumerator];
-                while (obj = [objEnum nextObject]) {
-                    if ([obj respondsToSelector:@selector(objectSpecifier)])
-                        obj = [obj objectSpecifier];
-                    else
-                        obj = [obj aeDescriptorValue];
-                    if (obj)
-                        [returnValue addObject:obj];
-                }
+            if (isValid == NO || (insertionIndex == -1 && [containerClassDescription isLocationRequiredToCreateForKey:insertionKey])) {
+                [self setScriptErrorNumber:NSArgumentsWrongScriptError];
+                insertionObjects = nil;
+                returnValue = nil;
             } else {
-                if ([obj respondsToSelector:@selector(objectSpecifier)])
-                    returnValue = [obj objectSpecifier];
-                else
-                    returnValue = [obj aeDescriptorValue];
+                // insert using scripting KVC
+                if (insertionIndex >= 0) {
+                    objEnum = [insertionObjects reverseObjectEnumerator];
+                    while (obj = [objEnum nextObject])
+                        [insertionContainer insertValue:obj atIndex:insertionIndex inPropertyWithKey:insertionKey];
+                } else {
+                    objEnum = [insertionObjects objectEnumerator];
+                    while (obj = [objEnum nextObject])
+                        [insertionContainer insertValue:obj inPropertyWithKey:insertionKey];
+                }
             }
         }
     }
     
-    return returnValue;
+    return isArray ? returnValue : [returnValue lastObject];
 }
 
 @end

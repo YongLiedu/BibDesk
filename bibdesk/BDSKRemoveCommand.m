@@ -46,32 +46,15 @@
     // get the actual objects to remove
     id directParameter = [self directParameter];
     id receiver = [self evaluatedReceivers];
-    id removeObjects = nil;
-    id returnValue = nil;
-    NSString *className = nil;
+    NSArray *removeObjects = nil;
     NSEnumerator *objEnum;
     id obj = directParameter;
     
-    if ([directParameter isKindOfClass:[NSArray class]])
-        obj = [directParameter lastObject];
-    if ([obj respondsToSelector:@selector(keyClassDescription)]) {
-        className = [[obj keyClassDescription] className];
-        removeObjects = receiver;
-        returnValue = directParameter;
-    } else if ([obj isKindOfClass:[NSAppleEventDescriptor class]]) {
-        DescType descType = [obj descriptorType];
-        if ([obj fileURLValue]) {
-            className = @"linked file";
-            removeObjects = [directParameter valueForKey:@"fileURLValue"];
-        } else if ((obj = [obj stringValue]) && [NSURL URLWithString:obj]) {
-            className = @"linked URL";
-            removeObjects = [directParameter valueForKey:@"stringValue"];
-        } else {
-            removeObjects = nil;
-        }
-        if (removeObjects)
-            returnValue = directParameter;
-    }
+    if (directParameter && [directParameter isKindOfClass:[NSArray class]] == NO)
+        directParameter = [NSArray arrayWithObjects:directParameter, nil];
+    
+    obj = [directParameter lastObject];
+    removeObjects = (receiver && [receiver isKindOfClass:[NSArray class]]) ? receiver : [NSArray arrayWithObjects:receiver, nil];
     
     if (removeObjects == nil) {
         [self setScriptErrorNumber:NSArgumentsWrongScriptError];
@@ -105,8 +88,7 @@
             NSString *key;
             while (key = [keyEnum nextObject]) {
                 NSScriptClassDescription *keyClassDescription = [containerClassDescription classDescriptionForKey:key];
-                if ([className isEqualToString:[keyClassDescription className]] &&
-                    [containerClassDescription isLocationRequiredToCreateForKey:key] == NO) {
+                if ([[removeObjects lastObject] isKindOfClass:NSClassFromString([keyClassDescription typeForKey:key])]) {
                     removeKey = key;
                     break;
                 }
@@ -114,19 +96,28 @@
         }
         
         // check if the remove location is valid
-        if (containerClassDescription == nil) {
+        if (containerClassDescription == nil && removeContainer) {
             containerClassDescription = (NSScriptClassDescription *)[removeContainer classDescription];
             OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
         }
-        if ([[containerClassDescription toManyRelationshipKeys] containsObject:removeKey] == NO ||
-            [className isEqualToString:[[containerClassDescription classDescriptionForKey:removeKey] className]] == NO) {
+        if (removeContainer == nil || removeKey == nil || 
+            [[containerClassDescription toManyRelationshipKeys] containsObject:removeKey] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];
-            returnValue = nil;
         } else {
-            // remove using KVC, I don't know how to use scripting KVC as I don't know how to get the indexes in general
-            if ([removeObjects isKindOfClass:[NSArray class]] == NO)
-                removeObjects = [NSArray arrayWithObject:removeObjects];
-            [[removeContainer mutableArrayValueForKey:removeKey] removeObjectsInArray:removeObjects];
+            Class requiredClass = NSClassFromString([containerClassDescription typeForKey:removeKey]);
+            BOOL isValid = YES;
+            
+            objEnum = [removeObjects objectEnumerator];
+            while (isValid && (obj = [objEnum nextObject])) {
+                if ([obj isKindOfClass:requiredClass] == NO)
+                    isValid = NO;
+            }
+            if (isValid == NO) {
+                [self setScriptErrorNumber:NSArgumentsWrongScriptError];
+            } else {
+                // remove using KVC, I don't know how to use scripting KVC as I don't know how to get the indexes in general
+                [[removeContainer mutableArrayValueForKey:removeKey] removeObjectsInArray:removeObjects];
+            }
         }
     }
     return nil;
