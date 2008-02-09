@@ -44,21 +44,6 @@
 
 @implementation BDSKAddCommand
 
-// this is to avoid a serious crashing bug on Tiger, sometimes it returns an invalid class description
-static inline NSScriptClassDescription *scriptClassDescriptionForClass(Class aClass) {
-    NSScriptClassDescription *classDescription = nil;
-    BOOL isValid = YES;
-    do {
-        @try {
-            classDescription = (NSScriptClassDescription *)[NSScriptClassDescription classDescriptionForClass:aClass];
-            [classDescription toManyRelationshipKeys];
-            isValid = YES;
-        }
-        @catch (id exception) { isValid = NO; }
-    } while (isValid == NO);
-    return classDescription;
-}
-
  - (id)performDefaultImplementation {
     // get the actual objects to insert
     id directParameter = [self directParameter];
@@ -97,7 +82,7 @@ static inline NSScriptClassDescription *scriptClassDescriptionForClass(Class aCl
         NSString *insertionKey = nil;
         int insertionIndex = -1;
         
-        NSScriptClassDescription *containerClassDescription;
+        NSScriptClassDescription *containerClassDescription = nil;
         
         if ([locationSpecifier isKindOfClass:[NSPositionalSpecifier class]]) {
             insertionContainer = [locationSpecifier insertionContainer];
@@ -111,7 +96,8 @@ static inline NSScriptClassDescription *scriptClassDescriptionForClass(Class aCl
             // make sure this is a valid object, so not something like a range specifier
             if ([insertionContainer respondsToSelector:@selector(objectSpecifier)] == NO)
                 insertionContainer = nil;
-            containerClassDescription = scriptClassDescriptionForClass([insertionContainer class]);
+            containerClassDescription = (NSScriptClassDescription *)[insertionContainer classDescription];
+            OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
             NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
             NSString *key;
             while (key = [keyEnum nextObject]) {
@@ -125,8 +111,10 @@ static inline NSScriptClassDescription *scriptClassDescriptionForClass(Class aCl
         }
         
         // check if the insertion location is valid
-        if (containerClassDescription == nil)
-            containerClassDescription = scriptClassDescriptionForClass([insertionContainer class]);
+        if (containerClassDescription == nil) {
+            containerClassDescription = (NSScriptClassDescription *)[insertionContainer classDescription];
+            OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
+        }
         if ([[containerClassDescription toManyRelationshipKeys] containsObject:insertionKey] == NO ||
             [className isEqualToString:[[containerClassDescription classDescriptionForKey:insertionKey] className]] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];

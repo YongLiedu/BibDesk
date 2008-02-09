@@ -42,21 +42,6 @@
 
 @implementation BDSKRemoveCommand
 
-// this is to avoid a serious crashing bug on Tiger, sometimes it returns an invalid class description
-static inline NSScriptClassDescription *scriptClassDescriptionForClass(Class aClass) {
-    NSScriptClassDescription *classDescription = nil;
-    BOOL isValid = YES;
-    do {
-        @try {
-            classDescription = (NSScriptClassDescription *)[NSScriptClassDescription classDescriptionForClass:aClass];
-            [classDescription toManyRelationshipKeys];
-            isValid = YES;
-        }
-        @catch (id exception) { isValid = NO; }
-    } while (isValid == NO);
-    return classDescription;
-}
-
  - (id)performDefaultImplementation {
     // get the actual objects to remove
     id directParameter = [self directParameter];
@@ -97,7 +82,7 @@ static inline NSScriptClassDescription *scriptClassDescriptionForClass(Class aCl
         id removeContainer = nil;
         NSString *removeKey = nil;
         
-        NSScriptClassDescription *containerClassDescription;
+        NSScriptClassDescription *containerClassDescription = nil;
         
         if (containerSpecifier == nil) {
             obj = directParameter;
@@ -114,7 +99,8 @@ static inline NSScriptClassDescription *scriptClassDescriptionForClass(Class aCl
             // make sure this is a valid object, so not something like a range specifier
             if ([removeContainer respondsToSelector:@selector(objectSpecifier)] == NO)
                 removeContainer = nil;
-            containerClassDescription = scriptClassDescriptionForClass([removeContainer class]);
+            containerClassDescription = (NSScriptClassDescription *)[removeContainer classDescription];
+            OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
             NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
             NSString *key;
             while (key = [keyEnum nextObject]) {
@@ -128,8 +114,10 @@ static inline NSScriptClassDescription *scriptClassDescriptionForClass(Class aCl
         }
         
         // check if the remove location is valid
-        if (containerClassDescription == nil)
-            containerClassDescription = scriptClassDescriptionForClass([removeContainer class]);
+        if (containerClassDescription == nil) {
+            containerClassDescription = (NSScriptClassDescription *)[removeContainer classDescription];
+            OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
+        }
         if ([[containerClassDescription toManyRelationshipKeys] containsObject:removeKey] == NO ||
             [className isEqualToString:[[containerClassDescription classDescriptionForKey:removeKey] className]] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];
