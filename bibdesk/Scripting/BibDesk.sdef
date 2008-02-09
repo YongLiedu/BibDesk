@@ -670,50 +670,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</responds-to>
 		</class>
 
-		<class name="linked URL" plural="linked URLs" code="URL " inherits="item"
-			description="A linked URL. This is a string.">
-			<cocoa class="NSString"/>
-			<type type="text"/>
-            <responds-to name="add">
-                <cocoa method=""/>
-            </responds-to>
-            <responds-to name="remove">
-                <cocoa method=""/>
-            </responds-to>
-		</class>
-
-		<class name="linked file" plural="linked files" code="File" inherits="item"
-			description="A linked file. This is a file or alias.">
-			<cocoa class="NSURL"/>
-			<type type="file"/>
-            <property name="URL" code="rURL" type="text" access="r"
-                description="The URL of the file.">
-                <cocoa key="absoluteString"/>
-            </property>  
-            <property name="POSIX path" code="psxp" type="text" access="r"
-                description="The POSIX path of the file.">
-                <cocoa key="path"/>
-            </property>  
-            <property name="label index" code="labi" type="integer"
-                description="The Finder label of the file.">
-                <cocoa key="finderLabel"/>
-            </property>  
-            <property name="Skim notes" code="SKnt" type="text" access="r"
-                description="The Skim notes for the file.">
-                <cocoa key="textSkimNotes"/>
-            </property>  
-            <property name="rich Skim notes" code="rSKn" type="rich text" access="r"
-                description="The rich text Skim notes for the file.">
-                <cocoa key="styledTextSkimNotes"/>
-            </property>  
-            <responds-to name="add">
-                <cocoa method=""/>
-            </responds-to>
-            <responds-to name="remove">
-                <cocoa method=""/>
-            </responds-to>
-		</class>
-
 		<class name="publication" plural="publications" code="bibi" inherits="item"
 			description="A publication.">
             <cocoa class="BibItem"/>
@@ -938,6 +894,50 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="isInherited"/>
             </property>  
         </class>
+
+		<class name="linked URL" plural="linked URLs" code="URL " inherits="item"
+			description="A linked URL. This is a string.">
+			<cocoa class="NSString"/>
+			<type type="text"/>
+            <responds-to name="add">
+                <cocoa method=""/>
+            </responds-to>
+            <responds-to name="remove">
+                <cocoa method=""/>
+            </responds-to>
+		</class>
+
+		<class name="linked file" plural="linked files" code="File" inherits="item"
+			description="A linked file. This is a file or alias.">
+			<cocoa class="NSURL"/>
+			<type type="file"/>
+            <property name="URL" code="rURL" type="text" access="r"
+                description="The URL of the file.">
+                <cocoa key="absoluteString"/>
+            </property>  
+            <property name="POSIX path" code="psxp" type="text" access="r"
+                description="The POSIX path of the file.">
+                <cocoa key="path"/>
+            </property>  
+            <property name="label index" code="labi" type="integer"
+                description="The Finder label of the file.">
+                <cocoa key="finderLabel"/>
+            </property>  
+            <property name="Skim notes" code="SKnt" type="text" access="r"
+                description="The Skim notes for the file.">
+                <cocoa key="textSkimNotes"/>
+            </property>  
+            <property name="rich Skim notes" code="rSKn" type="rich text" access="r"
+                description="The rich text Skim notes for the file.">
+                <cocoa key="styledTextSkimNotes"/>
+            </property>  
+            <responds-to name="add">
+                <cocoa method=""/>
+            </responds-to>
+            <responds-to name="remove">
+                <cocoa method=""/>
+            </responds-to>
+		</class>
         
         <class name="group" plural="groups" code="Grup" inherits="item"
 			description="A group containing publications.">
@@ -1077,102 +1077,43 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
         </class>
         
-        <command name="bibliography for" code="BDSKbibf"
-			description="Returns bibliography information for the publications passed to the command.">
-            <cocoa name="bibliographyFor" class="BDSKBibliographyCommand"/>
-            <direct-parameter description="The list of publications to generate a bibliography for.">
-                <type type="publication" list="yes"/>
-            </direct-parameter>
-            <result type="rich text"
-			description="Bibliography as styled text"/>
-        </command>
-        
-        <command name="selectionToClipboard" code="BDSKsbtc" hidden="yes" 
-			description="Deprecated. Generates a bibliography from the selected items and puts it on the clipboard. This command has to be sent to a document.">
-            <!-- This is a silly command name. But AppleScript choked on all the reasonable ones as they contained words like copy or bibliography, which are already taken. =&gt; Ugly but less confusing. -->
-        </command>    
-        
-        <command name="templated text" code="BDSKttxt"
-			description="Returns a string representation of publications in the document using a template.">
-            <cocoa name="templatedText" class="BDSKTemplatedTextCommand"/>
-            <direct-parameter type="document"
-                description="The object responding to the command, the document."/>
-            <parameter name="using" code="usng" optional="yes"
-                description="The name or file of the template to use. Either this or 'using text' should be used.">
-                <type type="text"/>
-                <type type="file"/>
-                <cocoa key="using"/>
-            </parameter>
-            <parameter name="using text" code="usTx" type="text" optional="yes"
-                description="The template text to use. Either this or 'using' should be used.">
-                <cocoa key="usingText"/>
-            </parameter>
-            <parameter name="for" code="for " optional="yes"
-                description="Specifies the publication or list of publications to parse.">
-                <type type="publication" list="yes"/>
-                <type type="publication"/>
-                <cocoa key="for"/>
-            </parameter>                
-            <result description="the templated text" type="text">
-            </result>
-        </command>
-        
-        <command name="templated rich text" code="BDSKtrtx"
-			description="Returns a styled text representation of publications in the document using a template.">
-            <cocoa name="templatedRichText" class="BDSKTemplatedRichTextCommand"/>
-            <direct-parameter type="document"
-                description="The object responding to the command, the document."/>
-            <parameter name="using" code="usng" optional="yes"
-                description="The name or file of the template to use. Either this or 'using rich text' should be used.">
-                <type type="text"/>
-                <type type="file"/>
-                <cocoa key="using"/>
-            </parameter>
-            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
-                description="The template rich text to use. Either this or 'using' should be used.">
-                <cocoa key="usingRichText"/>
-            </parameter>
-            <parameter name="for" code="for " optional="yes"
-                description="Specifies the publication or list of publications to parse.">
-                <type type="publication" list="yes"/>
-                <type type="publication"/>
-                <cocoa key="for"/>
-            </parameter>                
-            <result description="the templated rich text" type="rich text">
-            </result>
-        </command>
-
-        <command name="export" code="BDSKexpt"
-			description="Exports publications in the document using a template to file.">
-            <cocoa name="exportUsingTemplate" class="BDSKExportUsingTemplateCommand"/>
-            <direct-parameter type="document"
-                description="The object responding to the command, the document."/>
-            <parameter name="using template" code="uset"
-                description="The name or file of the template to use. Either this, 'using text', or 'using rich text' should be used.">
-                <type type="text"/>
-                <type type="file"/>
-                <cocoa key="using"/>
-            </parameter>
-            <parameter name="using text" code="usTx" type="text" optional="yes"
-                description="The template text to use. Either this, 'using', or 'using rich text' should be used.">
-                <cocoa key="usingText"/>
-            </parameter>
-            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
-                description="The template rich text to use. Either this, 'using', or 'using text' should be used.">
-                <cocoa key="usingRichText"/>
-            </parameter>
-            <parameter name="to" code="to  "
-                description="The file to export to, or the clipboard">
-                <type type="file"/>
+        <command name="add" code="BDSKAdd "
+			description="Add items to a collection.">
+            <cocoa class="BDSKAddCommand"/>
+            <direct-parameter
+				description="the object(s) to add.">
                 <type type="specifier"/>
-                <cocoa key="to"/>
+                <type type="specifier" list="yes"/>
+                <type type="any"/>
+                <type type="any" list="yes"/>
+            </direct-parameter>
+            <parameter name="to" code="insh"
+                description="The container or location to add the item to.">
+                <cocoa key="ToLocation"/>
+                <type type="specifier"/>
+                <type type="location specifier"/>
             </parameter>
-            <parameter name="for" code="for " optional="yes"
-                description="Specifies the publication or list of publications to export.">
-                <type type="publication" list="yes"/>
-                <type type="publication"/>
-                <cocoa key="for"/>
-            </parameter>                
+            <result description="the added item">
+                <type type="specifier"/>
+                <type type="specifier" list="yes"/>
+                <type type="any"/>
+                <type type="any" list="yes"/>
+            </result>
+        </command>
+        
+        <command name="remove" code="BDSKRemv"
+			description="Remove items from a collection.">
+            <cocoa class="BDSKRemoveCommand"/>
+            <direct-parameter
+				description="the object(s) to remove.">
+                <type type="specifier"/>
+                <type type="specifier" list="yes"/>
+            </direct-parameter>
+            <parameter name="from" code="from" optional="yes"
+                description="The container to remove the object(s) from.">
+                <cocoa key="FromContainer"/>
+                <type type="specifier"/>
+            </parameter>
         </command>
         
         <command name="show" code="BDSKshow"
@@ -1228,6 +1169,104 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <type type="publication" list="yes"/>
             </result>
         </command>
+
+        <command name="export" code="BDSKexpt"
+			description="Exports publications in the document using a template to file.">
+            <cocoa name="exportUsingTemplate" class="BDSKExportUsingTemplateCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using template" code="uset"
+                description="The name or file of the template to use. Either this, 'using text', or 'using rich text' should be used.">
+                <type type="text"/>
+                <type type="file"/>
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="using text" code="usTx" type="text" optional="yes"
+                description="The template text to use. Either this, 'using', or 'using rich text' should be used.">
+                <cocoa key="usingText"/>
+            </parameter>
+            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
+                description="The template rich text to use. Either this, 'using', or 'using text' should be used.">
+                <cocoa key="usingRichText"/>
+            </parameter>
+            <parameter name="to" code="to  "
+                description="The file to export to, or the clipboard">
+                <type type="file"/>
+                <type type="specifier"/>
+                <cocoa key="to"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to export.">
+                <type type="publication" list="yes"/>
+                <type type="publication"/>
+                <cocoa key="for"/>
+            </parameter>                
+        </command>
+        
+        <command name="templated text" code="BDSKttxt"
+			description="Returns a string representation of publications in the document using a template.">
+            <cocoa name="templatedText" class="BDSKTemplatedTextCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using" code="usng" optional="yes"
+                description="The name or file of the template to use. Either this or 'using text' should be used.">
+                <type type="text"/>
+                <type type="file"/>
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="using text" code="usTx" type="text" optional="yes"
+                description="The template text to use. Either this or 'using' should be used.">
+                <cocoa key="usingText"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to parse.">
+                <type type="publication" list="yes"/>
+                <type type="publication"/>
+                <cocoa key="for"/>
+            </parameter>                
+            <result description="the templated text" type="text">
+            </result>
+        </command>
+        
+        <command name="templated rich text" code="BDSKtrtx"
+			description="Returns a styled text representation of publications in the document using a template.">
+            <cocoa name="templatedRichText" class="BDSKTemplatedRichTextCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using" code="usng" optional="yes"
+                description="The name or file of the template to use. Either this or 'using rich text' should be used.">
+                <type type="text"/>
+                <type type="file"/>
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
+                description="The template rich text to use. Either this or 'using' should be used.">
+                <cocoa key="usingRichText"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to parse.">
+                <type type="publication" list="yes"/>
+                <type type="publication"/>
+                <cocoa key="for"/>
+            </parameter>                
+            <result description="the templated rich text" type="rich text">
+            </result>
+        </command>
+        
+        <command name="bibliography for" code="BDSKbibf"
+			description="Returns bibliography information for the publications passed to the command.">
+            <cocoa name="bibliographyFor" class="BDSKBibliographyCommand"/>
+            <direct-parameter description="The list of publications to generate a bibliography for.">
+                <type type="publication" list="yes"/>
+            </direct-parameter>
+            <result type="rich text"
+			description="Bibliography as styled text"/>
+        </command>
+        
+        <command name="selectionToClipboard" code="BDSKsbtc" hidden="yes" 
+			description="Deprecated. Generates a bibliography from the selected items and puts it on the clipboard. This command has to be sent to a document.">
+            <!-- This is a silly command name. But AppleScript choked on all the reasonable ones as they contained words like copy or bibliography, which are already taken. =&gt; Ugly but less confusing. -->
+        </command>    
         
         <command name="parse format" code="BDSKpfmt"
 			description="Parses a format string for a field from a publication. Does not set the field.">
@@ -1288,45 +1327,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <parameter name="for script hook" code="fshk" type="script hook"
                 description="The script hook that was invoked.">
                 <cocoa key="forScriptHook"/>
-            </parameter>
-        </command>
-        
-        <command name="add" code="BDSKAdd "
-			description="Add items to a collection.">
-            <cocoa class="BDSKAddCommand"/>
-            <direct-parameter
-				description="the object(s) to add.">
-                <type type="specifier"/>
-                <type type="specifier" list="yes"/>
-                <type type="any"/>
-                <type type="any" list="yes"/>
-            </direct-parameter>
-            <parameter name="to" code="insh"
-                description="The container or location to add the item to.">
-                <cocoa key="ToLocation"/>
-                <type type="specifier"/>
-                <type type="location specifier"/>
-            </parameter>
-            <result description="the added item">
-                <type type="specifier"/>
-                <type type="specifier" list="yes"/>
-                <type type="any"/>
-                <type type="any" list="yes"/>
-            </result>
-        </command>
-        
-        <command name="remove" code="BDSKRemv"
-			description="Remove items from a collection.">
-            <cocoa class="BDSKRemoveCommand"/>
-            <direct-parameter
-				description="the object(s) to remove.">
-                <type type="specifier"/>
-                <type type="specifier" list="yes"/>
-            </direct-parameter>
-            <parameter name="from" code="from" optional="yes"
-                description="The container to remove the object(s) from.">
-                <cocoa key="FromContainer"/>
-                <type type="specifier"/>
             </parameter>
         </command>
         
