@@ -326,7 +326,14 @@ static CFDictionaryRef selectorTable = NULL;
     if ([cmd isKindOfClass:[NSCloneCommand class]]) {
         // if this is called from AppleScript 'duplicate', we need to use the correct macroResolver, as we may be copying from another source
         BDSKMacroResolver *macroResolver = nil;
-        id container = [[[cmd evaluatedArguments] valueForKey:@"ToLocation"] insertionContainer];
+        id container = [[[[cmd arguments] valueForKey:@"ToLocation"] insertionContainer] objectsByEvaluatingSpecifier];
+        if ([container isKindOfClass:[NSArray class]]) {
+            if ([container count] > 1) {
+                [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
+                return nil;
+            }
+            container = [container lastObject];
+        }
         // the container of the location should be either a document or a local group
         if ([container respondsToSelector:@selector(macroResolver)] == NO && [container respondsToSelector:@selector(document)])
             container = [container document];
