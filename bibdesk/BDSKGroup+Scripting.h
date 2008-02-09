@@ -63,6 +63,9 @@
 - (NSArray *)editors;
 - (BibAuthor *)valueInEditorsWithName:(NSString *)aName;
 
+- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName;
+- (NSArray *)macros;
+
 - (NSString *)asName;
 
 @end
@@ -76,9 +79,6 @@
 - (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx;
 - (void)removeFromPublicationsAtIndex:(unsigned int)index;
 - (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx;
-
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName;
-- (NSArray *)macros;
 
 @end
 
@@ -128,9 +128,6 @@
 
 @interface BDSKURLGroup (Scripting)
 
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
-- (NSArray *)macros;
-
 - (NSString *)URLString;
 - (void)setURLString:(NSString *)newURLString;
 
@@ -143,9 +140,6 @@
 
 @interface BDSKScriptGroup (Scripting)
 
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
-- (NSArray *)macros;
-
 - (NSURL *)scriptURL;
 - (void)setScriptURL:(NSURL *)newScriptURL;
 
@@ -157,26 +151,14 @@
 #pragma mark -
 
 @interface BDSKSearchGroup (Scripting)
-
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
-- (NSArray *)macros;
-
 @end
 
 #pragma mark -
 
 @interface BDSKSharedGroup (Scripting)
-
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
-- (NSArray *)macros;
-
 @end
 
 #pragma mark -
 
 @interface BDSKWebGroup (Scripting)
-
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
-- (NSArray *)macros;
-
 @end
