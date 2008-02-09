@@ -1309,7 +1309,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="add" code="BDSKAdd "
 			description="Add items to a collection.">
-            <cocoa class="BDSKAddScriptCommand"/>
+            <cocoa class="BDSKAddCommand"/>
             <direct-parameter
 				description="the object(s) to add.">
                 <type type="specifier"/>
@@ -1333,7 +1333,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="remove" code="BDSKRemv"
 			description="Remove items from a collection.">
-            <cocoa class="BDSKRemoveScriptCommand"/>
+            <cocoa class="BDSKRemoveCommand"/>
             <direct-parameter
 				description="the object(s) to remove.">
                 <type type="specifier"/>

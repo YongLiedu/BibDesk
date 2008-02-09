@@ -42,6 +42,24 @@
 
 @implementation BDSKRemoveCommand
 
+// this is to avoid a serious crashing bug on Tiger, sometimes it returns an invalid class description
+static inline NSScriptClassDescription *scriptClassDescriptionForObject(id object) {
+    NSScriptClassDescription *classDescription = nil;
+    if ([object respondsToSelector:@selector(objectSpecifier)]) {
+        NSScriptObjectSpecifier *objectSpecifier = [object objectSpecifier];
+        BOOL isValid = YES;
+        do {
+            @try {
+                classDescription = [objectSpecifier keyClassDescription];
+                [classDescription toManyRelationshipKeys];
+                isValid = YES;
+            }
+            @catch (id exception) { isValid = NO; }
+        } while (isValid == NO);
+    }
+    return classDescription;
+}
+
  - (id)performDefaultImplementation {
     // get the actual objects to remove
     id directParameter = [self directParameter];
@@ -99,7 +117,7 @@
             // make sure this is a valid object, so not something like a range specifier
             if ([removeContainer respondsToSelector:@selector(objectSpecifier)] == NO)
                 removeContainer = nil;
-            containerClassDescription = [[removeContainer objectSpecifier] keyClassDescription];
+            containerClassDescription = scriptClassDescriptionForObject(removeContainer);
             NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
             NSString *key;
             while (key = [keyEnum nextObject]) {
@@ -114,7 +132,7 @@
         
         // check if the remove location is valid
         if (containerClassDescription == nil)
-            containerClassDescription = [[removeContainer objectSpecifier] keyClassDescription];
+            containerClassDescription = scriptClassDescriptionForObject(removeContainer);
         if ([[containerClassDescription toManyRelationshipKeys] containsObject:removeKey] == NO ||
             [className isEqualToString:[[containerClassDescription classDescriptionForKey:removeKey] className]] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];

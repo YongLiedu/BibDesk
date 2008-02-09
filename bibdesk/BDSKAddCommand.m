@@ -44,6 +44,24 @@
 
 @implementation BDSKAddCommand
 
+// this is to avoid a serious crashing bug on Tiger, sometimes it returns an invalid class description
+static inline NSScriptClassDescription *scriptClassDescriptionForObject(id object) {
+    NSScriptClassDescription *classDescription = nil;
+    if ([object respondsToSelector:@selector(objectSpecifier)]) {
+        NSScriptObjectSpecifier *objectSpecifier = [object objectSpecifier];
+        BOOL isValid = YES;
+        do {
+            @try {
+                classDescription = [objectSpecifier keyClassDescription];
+                [classDescription toManyRelationshipKeys];
+                isValid = YES;
+            }
+            @catch (id exception) { isValid = NO; }
+        } while (isValid == NO);
+    }
+    return classDescription;
+}
+
  - (id)performDefaultImplementation {
     // get the actual objects to insert
     id directParameter = [self directParameter];
@@ -96,7 +114,7 @@
             // make sure this is a valid object, so not something like a range specifier
             if ([insertionContainer respondsToSelector:@selector(objectSpecifier)] == NO)
                 insertionContainer = nil;
-            containerClassDescription = [[insertionContainer objectSpecifier] keyClassDescription];
+            containerClassDescription = scriptClassDescriptionForObject(insertionContainer);
             NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
             NSString *key;
             while (key = [keyEnum nextObject]) {
@@ -111,7 +129,7 @@
         
         // check if the insertion location is valid
         if (containerClassDescription == nil)
-            containerClassDescription = [[insertionContainer objectSpecifier] keyClassDescription];
+            containerClassDescription = scriptClassDescriptionForObject(insertionContainer);
         if ([[containerClassDescription toManyRelationshipKeys] containsObject:insertionKey] == NO ||
             [className isEqualToString:[[containerClassDescription classDescriptionForKey:insertionKey] className]] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];
