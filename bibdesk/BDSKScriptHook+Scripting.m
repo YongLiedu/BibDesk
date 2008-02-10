@@ -63,23 +63,23 @@
 // Use separate accessors for AppleScript, to ensure the read-only properties. 
 // Also make sure we don't return nil and break a script.
 
-- (NSString *)asName {
+- (NSString *)scriptingName {
     return name;
 }
 
-- (NSNumber *)asUniqueID {
+- (NSNumber *)scriptingUniqueID {
     return uniqueID;
 }
 
-- (NSString *)asField {
+- (NSString *)scriptingField {
     return field ? field : @"";
 }
 
-- (NSArray *)asOldValues {
+- (NSArray *)scriptingOldValues {
     return oldValues ? oldValues : [NSArray array];
 }
 
-- (NSArray *)asNewValues {
+- (NSArray *)scriptingNewValues {
     return newValues ? newValues : [NSArray array];
 }
 

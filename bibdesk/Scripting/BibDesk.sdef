@@ -675,11 +675,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa class="BibItem"/>
             <element type="author" name="author" access="r"
                 description="Authors of the publication.">
-                <cocoa key="asAuthors"/>
+                <cocoa key="scriptingAuthors"/>
             </element>
             <element type="editor" name="editor" access="r"
                 description="Editors of the publication.">
-                <cocoa key="asEditors"/>
+                <cocoa key="scriptingEditors"/>
             </element>
             <element type="field"
                 description="The fields of the publication. These should be accessed by name.">
@@ -695,7 +695,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </element>
             <property name="cite key" code="ckey" type="text"
                 description="Key for citing the publication.">
-                <cocoa key="asCiteKey"/>
+                <cocoa key="scriptingCiteKey"/>
             </property>  
             <property name="generated cite key" code="gcky" type="text" access="r"
                 description="Auto-generated key for the publication.">
@@ -703,7 +703,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
             <property name="title" code="titl" type="text"
                 description="The publication's title.">
-                <cocoa key="asTitle"/>
+                <cocoa key="scriptingTitle"/>
             </property>  
             <property name="abstract" code="abst" type="text"
                 description="The publication's abstract.">
@@ -723,12 +723,12 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
             <property name="type" code="type" type="text"
                 description="The publication's type. E.g. article, book, unpublished.">
-                <cocoa key="asType"/>
+                <cocoa key="scriptingType"/>
                 <!-- Provide constants for these? This might be bad wrt to using types which aren't provided as constants. -->
             </property>  
             <property name="rating" code="rate" type="integer"
                 description="The publication's rating.">
-                <cocoa key="asRating"/>
+                <cocoa key="scriptingRating"/>
             </property>  
             <property name="publication date" code="pdat" type="date" hidden="yes"
                 description="Deprecated. Use publication year and publication month instead.">
@@ -744,11 +744,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
             <property name="added date" code="adat" type="date" access="r"
                 description="Date on which the publication's record was added to the bibliography.">
-                <cocoa key="asDateAdded"/>
+                <cocoa key="scriptingDateAdded"/>
             </property>
             <property name="modified date" code="mdat" type="date" access="r"
                 description="Date on which the publication's record was last modified in the bibliography.">
-                <cocoa key="asDateModified"/>
+                <cocoa key="scriptingDateModified"/>
             </property>
             <property name="RSS description" code="RSSd" type="text"
                 description="The publication's RSS description as seen in the RSS Description tab.">
@@ -776,7 +776,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>
             <property name="document" code="docu" type="document" access="r"
                 description="The bibliography containing this publication record.">
-                <cocoa key="asDocument"/>
+                <cocoa key="scriptingDocument"/>
             </property>  
             <property name="group" code="Grup" type="group" access="r"
                 description="The external group containing this publication record, if any.">
@@ -960,7 +960,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</element>
             <property name="name" code="pnam" type="text"
                 description="The group's name.">
-                <cocoa key="asName"/>
+                <cocoa key="scriptingName"/>
             </property>
             <property name="document" code="docu" type="document" access="r"
                 description="The document containing this group.">
@@ -1023,7 +1023,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
             <property name="script arguments" code="SGAr" type="text"
                 description="The script arguments for the group">
-                <cocoa key="asScriptArguments"/>
+                <cocoa key="scriptingScriptArguments"/>
             </property>  
         </class>
         
@@ -1051,11 +1051,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa class="BDSKScriptHook"/>
             <property name="name" code="pnam" type="text" access="r"
                 description="Name of the script hook.">
-                <cocoa key="asName"/>
+                <cocoa key="scriptingName"/>
             </property>  
             <property name="id" code="ID  " type="integer" access="r"
                 description="Unique ID of the script hook.">
-                <cocoa key="asUniqueID"/>
+                <cocoa key="scriptingUniqueID"/>
             </property>  
             <property name="document" code="docu" type="document" access="r"
                 description="Document for the script hook.">
@@ -1063,17 +1063,17 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
             <property name="field name" code="fnam" type="text" access="r"
                 description="Name of the field relevant for the script hook. This is only set when the there are relevant old and new values for the script hook.">
-                <cocoa key="asField"/>
+                <cocoa key="scriptingField"/>
             </property>  
             <property name="old values" code="oVal" access="r"
                 description="List of old values for the field relevant for the script hook. This is only set if the field name is set.">
                 <type type="text" list="yes"/>
-                <cocoa key="asOldValues"/>
+                <cocoa key="scriptingOldValues"/>
             </property>  
             <property name="new values" code="nVal" access="r"
                 description="List of new values for the field relevant for the script hook. This is only set if the field name is set.">
                 <type type="text" list="yes"/>
-                <cocoa key="asNewValues"/>
+                <cocoa key="scriptingNewValues"/>
             </property>  
         </class>
         

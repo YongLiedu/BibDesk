@@ -66,7 +66,7 @@
 - (BDSKMacro *)valueInMacrosWithName:(NSString *)aName;
 - (NSArray *)macros;
 
-- (NSString *)asName;
+- (NSString *)scriptingName;
 
 @end
 
@@ -86,7 +86,7 @@
 
 @interface BDSKMutableGroup (Scripting)
 
-- (void)setAsName:(NSString *)newName;
+- (void)setScriptingName:(NSString *)newName;
 
 @end
 
@@ -143,8 +143,8 @@
 - (NSURL *)scriptURL;
 - (void)setScriptURL:(NSURL *)newScriptURL;
 
-- (NSString *)asScriptArguments;
-- (void)setAsScriptArguments:(NSString *)newArguments;
+- (NSString *)scriptingScriptArguments;
+- (void)setScriptingScriptArguments:(NSString *)newArguments;
 
 @end
 

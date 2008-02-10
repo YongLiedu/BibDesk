@@ -99,15 +99,15 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	return [[self pubAuthors] count];
 }
 
-- (BibAuthor *)objectInAsAuthorsAtIndex:(unsigned int)idx {
+- (BibAuthor *)objectInScriptingAuthorsAtIndex:(unsigned int)idx {
 	return [[self pubAuthors] objectAtIndex:idx];
 }
 
-- (BibAuthor *)valueInAsAuthorsAtIndex:(unsigned int)idx {
-    return [self objectInAsAuthorsAtIndex:idx];
+- (BibAuthor *)valueInScriptingAuthorsAtIndex:(unsigned int)idx {
+    return [self objectInScriptingAuthorsAtIndex:idx];
 }
 
-- (BibAuthor *)valueInAsAuthorsWithName:(NSString *)name {
+- (BibAuthor *)valueInScriptingAsAuthorsWithName:(NSString *)name {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
@@ -122,19 +122,19 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	return nil;
 }
 
-- (unsigned int)countOfAsEditors {
+- (unsigned int)countOfScriptingEditors {
 	return [[self pubEditors] count];
 }
 
-- (BibAuthor *)objectInAsEditorsAtIndex:(unsigned int)idx {
+- (BibAuthor *)objectInScriptingEditorsAtIndex:(unsigned int)idx {
 	return [[self pubEditors] objectAtIndex:idx];
 }
 
 - (BibAuthor *)valueInAsEditorsAtIndex:(unsigned int)idx {
-    return [self objectInAsEditorsAtIndex:idx];
+    return [self objectInScriptingEditorsAtIndex:idx];
 }
 
-- (BibAuthor *)valueInAsEditorsWithName:(NSString *)name {
+- (BibAuthor *)valueInScriptingEditorsWithName:(NSString *)name {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
@@ -248,7 +248,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     [self removeFromLinkedURLsAtIndex:idx];
 }
 
-- (id)asDocument {
+- (id)scriptingDocument {
     return [owner isDocument] ? (id)owner : [owner respondsToSelector:@selector(document)] ? (id)[(id)owner document] : nil;
 }
 
@@ -260,11 +260,11 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     return [[self owner] isDocument] == NO;
 }
 
-- (NSString *)asType {
+- (NSString *)scriptingType {
 	return [self pubType];
 }
 
-- (void)setAsType:(NSString *)newType {
+- (void)setScriptingType:(NSString *)newType {
     if ([[self owner] isDocument]) {
         [self setPubType:(NSString *)newType];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
@@ -275,11 +275,11 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (NSString *)asCiteKey {
+- (NSString *)scriptingCiteKey {
 	return [self citeKey];
 }
 
-- (void)setAsCiteKey:(NSString *)newKey {
+- (void)setScriptingCiteKey:(NSString *)newKey {
     if ([[self owner] isDocument]) {
         [self setCiteKey:(NSString *)newKey];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
@@ -290,11 +290,11 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (NSString*)asTitle {
+- (NSString*)scriptingTitle {
 	return [self valueOfField:BDSKTitleString];
 }
 
-- (void)setAsTitle:(NSString*)newTitle {
+- (void)setScriptingTitle:(NSString*)newTitle {
     if ([[self owner] isDocument]) {
         [self setField:BDSKTitleString toValue:newTitle];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
@@ -338,14 +338,14 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 
-- (NSDate*)asDateAdded {
+- (NSDate*)scriptingDateAdded {
 	NSDate * d = [self dateAdded];
 	
 	if (!d) return [NSDate dateWithTimeIntervalSince1970:0];
 	else return d;
 }
 
-- (NSDate*)asDateModified {
+- (NSDate*)scriptingDateModified {
 	NSDate * d = [self dateModified];
 	
 	if (!d) return [NSDate dateWithTimeIntervalSince1970:0];
@@ -498,11 +498,11 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (int)asRating{
+- (int)scriptingRating{
     return [self rating];
 }
 
-- (void)setAsRating:(int)rating{
+- (void)setScriptingRating:(int)rating{
     if ([[self owner] isDocument]) {
         [self setRating:rating];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];

@@ -46,34 +46,34 @@
 	@abstract Returns the name of the script hook for AppleScript.
 	@discussion -
 */
-- (NSString *)asName;
+- (NSString *)scriptingName;
 
 /*!
 	@method asUniqueID
 	@abstract Returns the unique ID of the script hook for AppleScript.
 	@discussion -
 */
-- (NSNumber *)asUniqueID;
+- (NSNumber *)scriptingUniqueID;
 
 /*!
 	@method asField
 	@abstract Returns the field name for the script hook event for AppleScript.
 	@discussion -
 */
-- (NSString *)asField;
+- (NSString *)scriptingField;
 
 /*!
 	@method asOldValues
 	@abstract Returns the array of old values for the field of the script hook event for AppleScript.
 	@discussion -
 */
-- (NSArray *)asOldValues;
+- (NSArray *)scriptingOldValues;
 
 /*!
 	@method asNewValues
 	@abstract Returns the array of new values for the field of the script hook event.
 	@discussion -
 */
-- (NSArray *)asNewValues;
+- (NSArray *)scriptingNewValues;
 
 @end

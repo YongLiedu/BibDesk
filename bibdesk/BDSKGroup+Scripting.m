@@ -121,7 +121,7 @@
     return [[self document] macros];
 }
 
-- (NSString *)asName {
+- (NSString *)scriptingName {
     return [self stringValue];
 }
 
@@ -197,7 +197,7 @@
 
 @implementation BDSKMutableGroup (Scripting)
 
-- (void)setAsName:(NSString *)newName {
+- (void)setScriptingName:(NSString *)newName {
     if ([self hasEditableName]) {
         [self setName:newName];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
@@ -432,12 +432,12 @@
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
-- (NSString *)asScriptArguments {
+- (NSString *)scriptingScriptArguments {
     NSString *arguments = [self scriptArguments];
     return arguments ? arguments : @"";
 }
 
-- (void)setAsScriptArguments:(NSString *)newArguments {
+- (void)setScriptingScriptArguments:(NSString *)newArguments {
     [self setScriptArguments:newArguments];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }

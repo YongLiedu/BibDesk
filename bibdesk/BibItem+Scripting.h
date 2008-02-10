@@ -46,32 +46,32 @@
 - (BDSKField *)valueInBibFieldsWithName:(NSString *)name;
 - (NSArray *)bibFields;
 
-- (unsigned int)countOfAsAuthors;
-- (BibAuthor *)objectInAsAuthorsAtIndex:(unsigned int)idx;
-- (BibAuthor *)valueInAsAuthorsAtIndex:(unsigned int)idx;
-- (BibAuthor*)valueInAsAuthorsWithName:(NSString*)name;
+- (unsigned int)countOfScriptingAuthors;
+- (BibAuthor *)objectInScriptingAuthorsAtIndex:(unsigned int)idx;
+- (BibAuthor *)valueInScriptingAuthorsAtIndex:(unsigned int)idx;
+- (BibAuthor*)valueInScriptingAuthorsWithName:(NSString*)name;
 
-- (unsigned int)countOfAsEditors;
-- (BibAuthor *)objectInAsEditorsAtIndex:(unsigned int)idx;
-- (BibAuthor *)valueInAsEditorsAtIndex:(unsigned int)idx;
-- (BibAuthor *)valueInAsEditorsWithName:(NSString *)name;
+- (unsigned int)countOfScriptingEditors;
+- (BibAuthor *)objectInScriptingEditorsAtIndex:(unsigned int)idx;
+- (BibAuthor *)valueInScriptingEditorsAtIndex:(unsigned int)idx;
+- (BibAuthor *)valueInScriptingEditorsWithName:(NSString *)name;
 
-- (id)asDocument;
+- (id)scriptingDocument;
 - (id)group;
 
 - (BOOL)isExternal;
 
 - (void)setBibTeXString:(NSString*) btString;
 
-- (NSString *)asCiteKey;
-- (void)setAsCiteKey:(NSString *)newKey;
+- (NSString *)scriptingCiteKey;
+- (void)setScriptingCiteKey:(NSString *)newKey;
 
-- (NSString*)asTitle;
-- (void)setAsTitle:(NSString *)newTitle;
+- (NSString*)scriptingTitle;
+- (void)setScriptingTitle:(NSString *)newTitle;
 
 // wrapping original methods 
-- (NSDate*)asDateAdded;
-- (NSDate*)asDateModified;
+- (NSDate*)scriptingDateAdded;
+- (NSDate*)scriptingDateModified;
 
 // more (pseudo) accessors for key-value coding
 - (NSString*)remoteURLString;
@@ -98,8 +98,8 @@
 - (NSString *)keywords;
 - (void)setKeywords:(NSString *)keywords;
 
-- (int)asRating;
-- (void)setAsRating:(int)rating;
+- (int)scriptingRating;
+- (void)setScriptingRating:(int)rating;
 
 - (NSScriptObjectSpecifier *) objectSpecifier;
 
