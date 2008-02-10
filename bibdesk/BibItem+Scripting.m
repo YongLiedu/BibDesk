@@ -95,7 +95,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	return bibFields;
 }
 
-- (unsigned int)countOfAsAuthors {
+- (unsigned int)countOfScriptingAuthors {
 	return [[self pubAuthors] count];
 }
 
@@ -107,7 +107,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     return [self objectInScriptingAuthorsAtIndex:idx];
 }
 
-- (BibAuthor *)valueInScriptingAsAuthorsWithName:(NSString *)name {
+- (BibAuthor *)valueInScriptingAuthorsWithName:(NSString *)name {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
     BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
@@ -130,7 +130,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	return [[self pubEditors] objectAtIndex:idx];
 }
 
-- (BibAuthor *)valueInAsEditorsAtIndex:(unsigned int)idx {
+- (BibAuthor *)valueInScriptingEditorsAtIndex:(unsigned int)idx {
     return [self objectInScriptingEditorsAtIndex:idx];
 }
 
