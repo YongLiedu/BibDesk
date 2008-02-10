@@ -41,6 +41,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
+#import "BDSKMacroResolver.h"
 #import <OmniBase/OBUtilities.h>
 
 
@@ -190,6 +191,10 @@
 
 - (void)setDocument:(BibDocument *)newDocument{
     document = newDocument;
+}
+
+- (BDSKMacroResolver *)macroResolver{
+    return [[self document] macroResolver];
 }
 
 // comparisons

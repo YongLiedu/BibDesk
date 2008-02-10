@@ -113,12 +113,12 @@
     return [BibAuthor editorWithName:aName inPublications:[self publicationsInGroup]];
 }
 
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
-    return [[self document] valueInMacrosWithName:aName];
+- (NSArray *)macros {
+    return [[self macroResolver] macros];
 }
 
-- (NSArray *)macros {
-    return [[self document] macros];
+- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
+    return [[self macroResolver] valueInMacrosWithName:aName];
 }
 
 - (NSString *)scriptingName {
@@ -173,22 +173,6 @@
 
 - (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx {
     [[self document] removeObjectFromPublicationsAtIndex:idx];
-}
-
-- (NSArray *)authors {
-    return [[self document] authors];
-}
-
-- (BibAuthor *)valueInAuthorsWithName:(NSString *)aName {
-    return [[self document] valueInAuthorsWithName:aName];
-}
-
-- (NSArray *)editors {
-    return [[self document] editors];
-}
-
-- (BibAuthor *)valueInEditorsWithName:(NSString *)aName {
-    return [[self document] valueInEditorsWithName:aName];
 }
 
 @end
@@ -370,14 +354,6 @@
     }
 }
 
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
-    return [[self macroResolver] valueInMacrosWithName:aName];
-}
-
-- (NSArray *)macros {
-    return [[self macroResolver] macros];
-}
-
 - (NSString *)URLString {
     return [[self URL] absoluteString];
 }
@@ -413,14 +389,6 @@
     } else {
         return nil;
     }
-}
-
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
-    return [[self macroResolver] valueInMacrosWithName:aName];
-}
-
-- (NSArray *)macros {
-    return [[self macroResolver] macros];
 }
 
 - (NSURL *)scriptURL {
@@ -460,14 +428,6 @@
     }
 }
 
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
-    return [[self macroResolver] valueInMacrosWithName:aName];
-}
-
-- (NSArray *)macros {
-    return [[self macroResolver] macros];
-}
-
 @end
 
 #pragma mark -
@@ -486,14 +446,6 @@
     }
 }
 
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
-    return [[self macroResolver] valueInMacrosWithName:aName];
-}
-
-- (NSArray *)macros {
-    return [[self macroResolver] macros];
-}
-
 @end
 
 #pragma mark -
@@ -504,14 +456,6 @@
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
     return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"webGroups" index:0] autorelease];
-}
-
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
-    return [[self macroResolver] valueInMacrosWithName:aName];
-}
-
-- (NSArray *)macros {
-    return [[self macroResolver] macros];
 }
 
 @end

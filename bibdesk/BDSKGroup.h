@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibItem, BibDocument;
+@class BibItem, BibDocument, BDSKMacroResolver;
 
 /* note that NSCoding support is presently limited in some cases */
 
@@ -202,6 +202,8 @@
 
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)newDocument;
+
+- (BDSKMacroResolver *)macroResolver;
 
 /*!
 	@method nameCompare:

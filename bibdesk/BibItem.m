@@ -335,8 +335,6 @@ static CFDictionaryRef selectorTable = NULL;
             container = [container lastObject];
         }
         // the container of the location should be either a document or a local group
-        if ([container respondsToSelector:@selector(macroResolver)] == NO && [container respondsToSelector:@selector(document)])
-            container = [container document];
         if ([container respondsToSelector:@selector(macroResolver)])
             macroResolver = [container macroResolver];
         theCopy = [self copyWithMacroResolver:macroResolver];
