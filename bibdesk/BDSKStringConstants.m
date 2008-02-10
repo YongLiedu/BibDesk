@@ -140,6 +140,10 @@ NSString *BDSKPersonFieldsKey = @"Person fields";
 NSString *BDSKDefaultViewersKey = @"BDSKDefaultViewersKey";
 NSString *BDSKOutputTemplateFileKey = @"Output Template File";
 
+NSString *BDSKAutomaticallyConvertURLFieldsKey = @"BDSKAutomaticallyConvertURLFieldsKey";
+NSString *BDSKRemoveConvertedLocalFileFieldsKey = @"BDSKRemoveConvertedLocalFileFieldsKey";
+NSString *BDSKRemoveConvertedRemoteURLFieldsKey = @"BDSKRemoveConvertedRemoteURLFieldsKey";
+
 NSString *BDSKCustomCiteStringsKey = @"Custom CiteStrings";
 NSString *BDSKExportTemplateStyleKey = @"BDSKExportTemplateStyleKey";
 

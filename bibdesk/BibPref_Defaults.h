@@ -41,6 +41,9 @@
 
 @interface BibPref_Defaults : OAPreferenceClient
 {
+    IBOutlet NSButton* convertURLFieldsButton;
+    IBOutlet NSButton* removeLocalFileFieldsButton;
+    IBOutlet NSButton* removeRemoteURLFieldsButton;
     IBOutlet NSButton* delSelectedDefaultFieldButton;
     IBOutlet NSButton* addDefaultFieldButton;
     IBOutlet NSWindow* globalMacroFileSheet;
@@ -54,6 +57,10 @@
     NSMutableArray *globalMacroFiles;
     BDSKMacroWindowController *macroWC;
 }
+
+- (IBAction)changeConvertURLFields:(id)sender;
+- (IBAction)changeRemoveLocalFileFields:(id)sender;
+- (IBAction)changeRemoveRemoteURLFields:(id)sender;
 
 - (IBAction)delSelectedDefaultField:(id)sender;
 - (IBAction)addDefaultField:(id)sender;

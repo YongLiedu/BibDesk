@@ -269,7 +269,13 @@ static NSSet *alwaysDisabledFields = nil;
 }
 
 - (void)updateUI{	
-	int row = [defaultFieldsTableView selectedRow];
+    [convertURLFieldsButton setState:[defaults boolForKey:BDSKAutomaticallyConvertURLFieldsKey] ? NSOnState : NSOffState];
+    [removeLocalFileFieldsButton setState:[defaults boolForKey:BDSKRemoveConvertedLocalFileFieldsKey] ? NSOnState : NSOffState];
+    [removeRemoteURLFieldsButton setState:[defaults boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey] ? NSOnState : NSOffState];
+	[removeLocalFileFieldsButton setEnabled:[defaults boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
+	[removeRemoteURLFieldsButton setEnabled:[defaults boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
+    
+    int row = [defaultFieldsTableView selectedRow];
 	if(row == -1){
 		[delSelectedDefaultFieldButton setEnabled:NO];
 		return;
@@ -290,6 +296,25 @@ static NSSet *alwaysDisabledFields = nil;
     [super dealloc];
 }
 
+#pragma mark URL field conversion
+
+- (IBAction)changeConvertURLFields:(id)sender {
+    BOOL autoConvert = [sender state] == NSOnState;
+    [defaults setBool:autoConvert forKey:BDSKAutomaticallyConvertURLFieldsKey];
+	[removeLocalFileFieldsButton setEnabled:autoConvert];
+	[removeRemoteURLFieldsButton setEnabled:autoConvert];
+    [defaults autoSynchronize];
+}
+
+- (IBAction)changeRemoveLocalFileFields:(id)sender {
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKRemoveConvertedLocalFileFieldsKey];
+    [defaults autoSynchronize];
+}
+
+- (IBAction)changeRemoveRemoteURLFields:(id)sender {
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKRemoveConvertedRemoteURLFieldsKey];
+    [defaults autoSynchronize];
+}
 
 #pragma mark TableView DataSource methods
 

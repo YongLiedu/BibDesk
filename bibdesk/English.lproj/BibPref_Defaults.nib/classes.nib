@@ -10,7 +10,10 @@
             ACTIONS = {
                 addDefaultField = id; 
                 addGlobalMacroFile = id; 
+                changeConvertURLFields = id; 
                 changeDefaultPDFViewer = id; 
+                changeRemoveLocalFileFields = id; 
+                changeRemoveRemoteURLFields = id; 
                 closeMacroFileWindow = id; 
                 delGlobalMacroFiles = id; 
                 delSelectedDefaultField = id; 
@@ -22,6 +25,7 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 addDefaultFieldButton = NSButton; 
+                convertURLFieldsButton = NSButton; 
                 defaultFieldsTableView = NSTableView; 
                 delSelectedDefaultFieldButton = NSButton; 
                 editGlobalMacroDefsButton = NSButton; 
@@ -29,6 +33,8 @@
                 globalMacroFileSheet = NSWindow; 
                 globalMacroFilesTableView = NSTableView; 
                 pdfViewerPopup = NSPopUpButton; 
+                removeLocalFileFieldsButton = NSButton; 
+                removeRemoteURLFieldsButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 

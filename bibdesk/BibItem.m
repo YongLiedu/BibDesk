@@ -3555,9 +3555,16 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
             [pubFields setObject:[unresolvedURLs objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-Url-%d", i + 1]];
     }
     
-    if (0 == [files count]) {
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    
+    if (0 == [files count] && [pw boolForKey:BDSKAutomaticallyConvertURLFieldsKey]) {
         int added;
-        [self migrateFilesWithRemoveOptions:BDSKRemoveNoFields numberOfAddedFiles:&added numberOfRemovedFields:NULL error:NULL];
+        int removeMask = BDSKRemoveNoFields;
+        if ([pw boolForKey:BDSKRemoveConvertedLocalFileFieldsKey])
+            removeMask |= BDSKRemoveLocalFileFieldsMask;
+        if ([pw boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey])
+            removeMask |= BDSKRemoveRemoteURLFieldsMask;
+        [self migrateFilesWithRemoveOptions:removeMask numberOfAddedFiles:&added numberOfRemovedFields:NULL error:NULL];
         // Don't post this unless the owner is a document.  At present, if we open a URL group using a local file on disk that has valid URLs, this method will be called and it will end up with BDSKLinkedFile instances.  If we then click the "Import" button in the document, no warning is displayed because we don't call migrateFilesAndRemove:... again.
         if (added > 0 && [[self owner] isDocument]) {
             NSNotification *note = [NSNotification notificationWithName:BDSKTemporaryFileMigrationNotification object:[self owner]];

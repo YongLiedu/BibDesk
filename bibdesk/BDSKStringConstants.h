@@ -182,6 +182,10 @@ extern NSString *BDSKSharingRequiresPasswordKey;
 extern NSString *BDSKSharingNameKey;
 extern NSString *BDSKWarnOnCiteKeyChangeKey;
 
+extern NSString *BDSKAutomaticallyConvertURLFieldsKey;
+extern NSString *BDSKRemoveConvertedLocalFileFieldsKey;
+extern NSString *BDSKRemoveConvertedRemoteURLFieldsKey;
+
 extern NSString *BDSKAuthorNameDisplayKey;
 
 extern NSString *BDSKUpdateCheckIntervalKey;

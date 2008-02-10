@@ -603,6 +603,12 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>BDSKAutomaticallyConvertURLFieldsKey</key>
+					<true/>
+					<key>BDSKRemoveConvertedLocalFileFieldsKey</key>
+					<false/>
+					<key>BDSKRemoveConvertedRemoteURLFieldsKey</key>
+					<false/>
 					<key>BDSKDefaultViewersKey</key>
 					<dict/>
 					<key>BDSKGlobalMacroDefinitionsKey</key>
