@@ -114,12 +114,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		CE2A61C40D4281F800C643E3 /* PBXContainerItemProxy */ = {
+		CE3A673E0D60F24200D20AC7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
-			remoteInfo = FileView;
+			remoteGlobalIDString = F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */;
+			remoteInfo = "Framework + Plugin";
 		};
 		F9F04CDA0CE260AC00F28ED2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -577,7 +577,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				CE2A61C50D4281F800C643E3 /* PBXTargetDependency */,
+				CE3A673F0D60F24200D20AC7 /* PBXTargetDependency */,
 			);
 			name = "FileView Program";
 			productName = "FileView Program";
@@ -708,10 +708,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		CE2A61C50D4281F800C643E3 /* PBXTargetDependency */ = {
+		CE3A673F0D60F24200D20AC7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 8DC2EF4F0486A6940098B216 /* FileView */;
-			targetProxy = CE2A61C40D4281F800C643E3 /* PBXContainerItemProxy */;
+			target = F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */;
+			targetProxy = CE3A673E0D60F24200D20AC7 /* PBXContainerItemProxy */;
 		};
 		F9F04CDB0CE260AC00F28ED2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
