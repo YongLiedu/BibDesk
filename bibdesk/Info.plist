@@ -833,6 +833,8 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>BDSKAskToTrashFilesKey</key>
+					<true/>
 					<key>BDSKCiteseerHostKey</key>
 					<string>http://citeseer.ist.psu.edu/</string>
 					<key>BDSKCurrentGroupFieldKey</key>
