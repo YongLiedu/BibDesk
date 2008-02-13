@@ -50,6 +50,7 @@
 #import "BDSKFiler.h"
 #import "BDSKAlert.h"
 #import "BDSKFindFieldEditor.h"
+#import "BDSKLinkedFile.h"
 
 #define MAX_HISTORY_COUNT	10
 
@@ -123,7 +124,7 @@ enum {
 
 - (void)awakeFromNib{
     BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
-    NSMutableArray *extraFields = [NSMutableArray arrayWithObjects:BDSKCiteKeyString, BDSKPubTypeString, nil];
+    NSMutableArray *extraFields = [NSMutableArray arrayWithObjects:BDSKCiteKeyString, BDSKPubTypeString, BDSKRemoteURLString, nil];
     [extraFields addObjectsFromArray:[[btm noteFieldsSet] allObjects]];
 	[fieldToSearchComboBox removeAllItems];
 	[fieldToSearchComboBox addItemsWithObjectValues:[btm allFieldNamesIncluding:extraFields excluding:nil]];
@@ -166,6 +167,10 @@ enum {
         [searchScopePopUpButton setEnabled:FCOperationFindAndReplace == [self operation]];
 		[statusBar setStringValue:@""];
     }
+    
+    BOOL isRemoteURL = [[self field] isEqualToString:BDSKRemoteURLString];
+    [findAsMacroCheckbox setEnabled:NO == isRemoteURL];
+    [replaceAsMacroCheckbox setEnabled:NO == isRemoteURL];
     
 	if (FCOperationOverwrite == [self operation]) {
 		[self setReplaceLabel:NSLocalizedString(@"Value to set:", @"Label message")];
@@ -237,6 +242,11 @@ enum {
 
 - (void)setField:(NSString *)newField {
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newField forKey:BDSKFindControllerLastFindAndReplaceFieldKey];
+    if ([newField isEqualToString:BDSKRemoteURLString]) {
+        [self setFindAsMacro:NO];
+        [self setReplaceAsMacro:NO];
+    }
+    [self updateUI];
 }
 
 - (NSString *)findString {
@@ -863,18 +873,44 @@ enum {
     pubE = [publications objectEnumerator];
     
     while(bibItem = [pubE nextObject]){
-        origStr = [bibItem valueOfField:field inherit:NO];
-        
-        if(origStr == nil || findAsMacro != [origStr isComplex])
-            continue; // we don't want to add a field or set it to nil, or find expanded values of a complex string, or interpret an ordinary string as a macro
-        
-		if(searchScope == FCWholeFieldSearch){
-			if([findStr compareAsComplexString:origStr options:searchOpts] == NSOrderedSame)
-				[arrayOfItems addObject:bibItem];
-		}else{
-			if ([origStr hasSubstring:findStr options:searchOpts])
-				[arrayOfItems addObject:bibItem];
-		}
+        if ([field isEqualToString:BDSKRemoteURLString]) {
+            
+            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
+            BDSKLinkedFile *file;
+            BDSKLinkedFile *replFile;
+            
+        while (file = [fileEnum nextObject]) {
+                origStr = [[file URL] absoluteString];
+                
+                if(searchScope == FCWholeFieldSearch){
+                    if([findStr compare:origStr options:searchOpts] == NSOrderedSame){
+                        [arrayOfItems addObject:bibItem];
+                        break;
+                    }
+                }else{
+                    if([origStr hasSubstring:findStr options:searchOpts]){
+                        [arrayOfItems addObject:bibItem];
+                        break;
+                    }
+                }
+            }
+            
+        } else {
+            
+            origStr = [bibItem valueOfField:field inherit:NO];
+            
+            if(origStr == nil || findAsMacro != [origStr isComplex])
+                continue; // we don't want to add a field or set it to nil, or find expanded values of a complex string, or interpret an ordinary string as a macro
+            
+            if(searchScope == FCWholeFieldSearch){
+                if([findStr compareAsComplexString:origStr options:searchOpts] == NSOrderedSame)
+                    [arrayOfItems addObject:bibItem];
+            }else{
+                if ([origStr hasSubstring:findStr options:searchOpts])
+                    [arrayOfItems addObject:bibItem];
+            }
+            
+        }
     }
     return ([arrayOfItems count] ? arrayOfItems : nil);
 }
@@ -896,15 +932,32 @@ enum {
     pubE = [publications objectEnumerator];
     
     while(bibItem = [pubE nextObject]){
-        origStr = [bibItem valueOfField:field inherit:NO];
-        
-        if(origStr == nil || findAsMacro != [origStr isComplex])
-            continue; // we don't want to add a field or set it to nil, or find expanded values of a complex string, or interpret an ordinary string as a macro
-        
-		if(findAsMacro)
-			origStr = [origStr stringAsBibTeXString];
-		if([theRegex findInString:origStr]){
-			[arrayOfItems addObject:bibItem];
+        if ([field isEqualToString:BDSKRemoteURLString]) {
+            
+            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
+            BDSKLinkedFile *file;
+            
+            while (file = [fileEnum nextObject]) {
+                origStr = [[file URL] absoluteString];
+                if([theRegex findInString:origStr]){
+                    [arrayOfItems addObject:bibItem];
+                    break;
+                }
+            }
+            
+        } else {
+            
+            origStr = [bibItem valueOfField:field inherit:NO];
+            
+            if(origStr == nil || findAsMacro != [origStr isComplex])
+                continue; // we don't want to add a field or set it to nil, or find expanded values of a complex string, or interpret an ordinary string as a macro
+            
+            if(findAsMacro)
+                origStr = [origStr stringAsBibTeXString];
+            if([theRegex findInString:origStr]){
+                [arrayOfItems addObject:bibItem];
+            }
+            
         }
     }
     return ([arrayOfItems count] ? arrayOfItems : nil);
@@ -955,23 +1008,54 @@ enum {
         if ([bibItem owner] != theDocument) 
             continue;
         
-        origStr = [bibItem valueOfField:field inherit:NO];
-        
-        if(origStr == nil || findAsMacro != [origStr isComplex])
-            continue; // we don't want to add a field or set it to nil, or replace expanded values of a complex string, or interpret an ordinary string as a macro
-		
-		if(searchScope == FCWholeFieldSearch){
-			if([findStr compareAsComplexString:origStr options:searchOpts] == NSOrderedSame){
-                [bibItem setField:field toValue:replStr];
-				number++;
-			}
-		}else{
-			newStr = [origStr stringByReplacingOccurrencesOfString:findStr withString:replStr options:searchOpts replacements:&numRepl];
-			if(numRepl > 0){
-                [bibItem setField:field toValue:newStr];
-				number++;
-			}
-		}
+        if ([field isEqualToString:BDSKRemoteURLString]) {
+            
+            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
+            BDSKLinkedFile *file;
+            BDSKLinkedFile *replFile;
+            unsigned int idx;
+            
+            while (file = [fileEnum nextObject]) {
+                idx = [[bibItem files] indexOfObjectIdenticalTo:file];
+                if (idx == NSNotFound) continue;
+                origStr = [[file URL] absoluteString];
+                newStr = nil;
+                if(searchScope == FCWholeFieldSearch){
+                    if([findStr compare:origStr options:searchOpts] == NSOrderedSame)
+                        newStr = replStr;
+                }else{
+                    newStr = [origStr stringByReplacingOccurrencesOfString:findStr withString:replStr options:searchOpts replacements:&numRepl];
+                    if(numRepl == 0)
+                        newStr = nil;
+                }
+                if (newStr && (replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:newStr]])) {
+                    [[bibItem mutableArrayValueForKey:@"files"] replaceObjectAtIndex:idx withObject:replFile];
+                    number++;
+                    [replFile release];
+                }
+            }
+            
+        } else {
+            
+            origStr = [bibItem valueOfField:field inherit:NO];
+            
+            if(origStr == nil || findAsMacro != [origStr isComplex])
+                continue; // we don't want to add a field or set it to nil, or replace expanded values of a complex string, or interpret an ordinary string as a macro
+            
+            if(searchScope == FCWholeFieldSearch){
+                if([findStr compareAsComplexString:origStr options:searchOpts] == NSOrderedSame){
+                    [bibItem setField:field toValue:replStr];
+                    number++;
+                }
+            }else{
+                newStr = [origStr stringByReplacingOccurrencesOfString:findStr withString:replStr options:searchOpts replacements:&numRepl];
+                if(numRepl > 0){
+                    [bibItem setField:field toValue:newStr];
+                    number++;
+                }
+            }
+            
+        }
     }
 
 	return number;
@@ -1000,28 +1084,55 @@ enum {
         if ([bibItem owner] != theDocument) 
             continue;
         
-        origStr = [bibItem valueOfField:field inherit:NO];
-        
-        if(origStr == nil || findAsMacro != [origStr isComplex])
-            continue; // we don't want to add a field or set it to nil, or replace expanded values of a complex string, or interpret an ordinary string as a macro
-        
-		if(findAsMacro)
-			origStr = [origStr stringAsBibTeXString];
-		if([theRegex findInString:origStr]){
-			origStr = [theRegex replaceWithString:replStr inString:origStr];
-			if(replaceAsMacro || findAsMacro){
-				NS_DURING
-					complexStr = [NSString stringWithBibTeXString:origStr macroResolver:[theDocument macroResolver]];
-                    [bibItem setField:field toValue:complexStr];
-					number++;
-				NS_HANDLER
-					if(![[localException name] isEqualToString:BDSKComplexStringException])
-						[localException raise];
-				NS_ENDHANDLER
-			} else {
-                [bibItem setField:field toValue:origStr];
-				number++;
-			}            
+        if ([field isEqualToString:BDSKRemoteURLString]) {
+            
+            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
+            BDSKLinkedFile *file;
+            BDSKLinkedFile *replFile;
+            unsigned int idx;
+            
+            while (file = [fileEnum nextObject]) {
+                idx = [[bibItem files] indexOfObjectIdenticalTo:file];
+                if (idx == NSNotFound) continue;
+                origStr = [[file URL] absoluteString];
+                if([theRegex findInString:origStr]){
+                    origStr = [theRegex replaceWithString:replStr inString:origStr];
+                    if (replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:origStr]]) {
+                        [[bibItem mutableArrayValueForKey:@"files"] replaceObjectAtIndex:idx withObject:replFile];
+                        number++;
+                        [replFile release];
+                    }
+                }
+            }
+            
+        } else {
+            
+            origStr = [bibItem valueOfField:field inherit:NO];
+            
+            if(origStr == nil || findAsMacro != [origStr isComplex])
+                continue; // we don't want to add a field or set it to nil, or replace expanded values of a complex string, or interpret an ordinary string as a macro
+            
+            if(findAsMacro)
+                origStr = [origStr stringAsBibTeXString];
+            if([theRegex findInString:origStr]){
+                origStr = [theRegex replaceWithString:replStr inString:origStr];
+                if(replaceAsMacro || findAsMacro){
+                    @try {
+                        complexStr = [NSString stringWithBibTeXString:origStr macroResolver:[theDocument macroResolver]];
+                        [bibItem setField:field toValue:complexStr];
+                        number++;
+                    }
+                    @catch (NSException *exception) {
+                         if([[exception name] isEqualToString:BDSKComplexStringException] == NO)
+                            [exception raise];
+                    }
+                    @catch (id exception) {}
+                } else {
+                    [bibItem setField:field toValue:origStr];
+                    number++;
+                }            
+            }
+            
         }
     }
 	
@@ -1049,16 +1160,37 @@ enum {
         if ([bibItem owner] != theDocument) 
             continue;
         
-        origStr = [bibItem valueOfField:field inherit:NO];
-        if(origStr == nil || [origStr isEqualAsComplexString:@""]){
-            if(shouldSetWhenEmpty == NO) continue;
-            origStr = @"";
+        if ([field isEqualToString:BDSKRemoteURLString]) {
+            
+            NSArray *remoteURLs = [bibItem remoteURLs];
+            NSMutableArray *files = [bibItem mutableArrayValueForKey:@"files"];
+            BDSKLinkedFile *replFile;
+            
+            if (replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:replStr]]) {
+                if([remoteURLs count] == 0){
+                    if(shouldSetWhenEmpty == NO) continue;
+                }else{
+                    [files removeObjectsInArray:remoteURLs];
+                }
+                [files addObject:replFile];
+                number++;
+                [replFile release];
+            }
+            
+        } else {
+            
+            origStr = [bibItem valueOfField:field inherit:NO];
+            if(origStr == nil || [origStr isEqualAsComplexString:@""]){
+                if(shouldSetWhenEmpty == NO) continue;
+                origStr = @"";
+            }
+            
+            if([replStr compareAsComplexString:origStr] != NSOrderedSame){
+                [bibItem setField:field toValue:replStr];
+                number++;
+            }
+            
         }
-        
-		if([replStr compareAsComplexString:origStr] != NSOrderedSame){
-            [bibItem setField:field toValue:replStr];
-			number++;
-		}
     }
 	
 	return number;
@@ -1088,14 +1220,36 @@ enum {
         if ([bibItem owner] != theDocument) 
             continue;
         
-        origStr = [bibItem valueOfField:field inherit:NO];
-        if(origStr == nil || [origStr isEqualAsComplexString:@""]){
-            if(shouldSetWhenEmpty == NO) continue;
-            origStr = @"";
+        if ([field isEqualToString:BDSKRemoteURLString]) {
+            
+            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
+            BDSKLinkedFile *file;
+            BDSKLinkedFile *replFile;
+            unsigned int idx;
+            
+            while (file = [fileEnum nextObject]) {
+                idx = [[bibItem files] indexOfObjectIdenticalTo:file];
+                if (idx == NSNotFound) continue;
+                origStr = [[file URL] absoluteString];
+                if (replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:[replStr stringByAppendingString:origStr]]]) {
+                    [[bibItem mutableArrayValueForKey:@"files"] replaceObjectAtIndex:idx withObject:replFile];
+                    number++;
+                    [replFile release];
+                }
+            }
+            
+        } else {
+                
+            origStr = [bibItem valueOfField:field inherit:NO];
+            if(origStr == nil || [origStr isEqualAsComplexString:@""]){
+                if(shouldSetWhenEmpty == NO) continue;
+                origStr = @"";
+            }
+            
+            [bibItem setField:field toValue:[replStr stringByAppendingString:origStr]];
+            number++;
+            
         }
-        
-        [bibItem setField:field toValue:[replStr stringByAppendingString:origStr]];
-        number++;
     }
 	
 	return number;
@@ -1125,14 +1279,36 @@ enum {
         if ([bibItem owner] != theDocument) 
             continue;
         
-        origStr = [bibItem valueOfField:field inherit:NO];
-        if(origStr == nil || [origStr isEqualAsComplexString:@""]){
-            if(shouldSetWhenEmpty == NO) continue;
-            origStr = @"";
+        if ([field isEqualToString:BDSKRemoteURLString]) {
+            
+            NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
+            BDSKLinkedFile *file;
+            BDSKLinkedFile *replFile;
+            unsigned int idx;
+            
+            while (file = [fileEnum nextObject]) {
+                idx = [[bibItem files] indexOfObjectIdenticalTo:file];
+                if (idx == NSNotFound) continue;
+                origStr = [[file URL] absoluteString];
+                if (replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:[origStr stringByAppendingString:replStr]]]) {
+                    [[bibItem mutableArrayValueForKey:@"files"] replaceObjectAtIndex:idx withObject:replFile];
+                    number++;
+                    [replFile release];
+                }
+            }
+            
+        } else {
+                
+            origStr = [bibItem valueOfField:field inherit:NO];
+            if(origStr == nil || [origStr isEqualAsComplexString:@""]){
+                if(shouldSetWhenEmpty == NO) continue;
+                origStr = @"";
+            }
+            
+            [bibItem setField:field toValue:[origStr stringByAppendingString:replStr]];
+            number++;
+            
         }
-        
-        [bibItem setField:field toValue:[origStr stringByAppendingString:replStr]];
-        number++;
     }
 	
 	return number;
