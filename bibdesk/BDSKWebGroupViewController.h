@@ -64,6 +64,9 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 - (BDSKWebGroup *)group;
 - (void)setGroup:(BDSKWebGroup *)newGroup;
 
+- (NSString *)URLString;
+- (void)setURLString:(NSString *)newURLString;
+
 - (void)loadURL:(NSURL *)theURL;
 
 - (IBAction)changeURL:(id)sender;

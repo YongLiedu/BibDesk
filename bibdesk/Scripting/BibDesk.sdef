@@ -1048,6 +1048,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
         <class name="web group" plural="web groups" code="WbGp" inherits="group"
 			description="The web group of the document.">
             <cocoa class="BDSKWebGroup"/>
+            <property name="URL" code="rURL" type="text"
+                description="The URL for the web group">
+                <cocoa key="URLString"/>
+            </property>  
         </class>
         
         <class name="script hook" plural="script hooks" code="bshk" inherits="item"
@@ -1127,8 +1131,8 @@ Having all three of these seems to work best for Panther. For Tiger include this
         <enumeration name="search server type" code="SrvT">
             <enumerator name="Entrez" code="Entr"
                 description="Entrez search server."/>
-            <enumerator name="Z39.50" code="Zoom"
-                description="Z39.50 search server."/>
+            <enumerator name="Z3950" code="Zoom"
+                description="Z3950 search server."/>
             <enumerator name="ISI" code="ISI "
                 description="ISI Web of Sciences search server."/>
         </enumeration>

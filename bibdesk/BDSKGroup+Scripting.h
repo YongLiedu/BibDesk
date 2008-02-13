@@ -168,4 +168,8 @@
 #pragma mark -
 
 @interface BDSKWebGroup (Scripting)
+
+- (NSString *)URLString;
+- (void)setURLString:(NSString *)newURLString;
+
 @end

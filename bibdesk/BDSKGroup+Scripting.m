@@ -50,6 +50,7 @@
 #import "BibAuthor+Scripting.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
+#import "BDSKWebGroupViewController.h"
 
 
 @implementation BDSKGroup (Scripting)
@@ -586,6 +587,15 @@
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
     return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"webGroups" index:0] autorelease];
+}
+
+- (NSString *)URLString {
+    NSString *URLString = [[[self document] webGroupViewController] URLString];
+    return URLString ? URLString : @"";
+}
+
+- (void)setURLString:(NSString *)newURLString {
+    [[[self document] webGroupViewController] setURLString:newURLString];
 }
 
 @end

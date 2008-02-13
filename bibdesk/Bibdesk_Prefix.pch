@@ -88,6 +88,21 @@ typedef NSInteger NSBackgroundStyle;
 - (NSRect)expansionFrameWithFrame:(NSRect)aRect inView:(NSView *)controlView;
 @end
 
+typedef enum _NSSegmentStyle {
+    NSSegmentStyleAutomatic,
+    NSSegmentStyleRounded,
+    NSSegmentStyleTexturedRounded,
+    NSSegmentStyleRoundRect,
+    NSSegmentStyleTexturedSquare,
+    NSSegmentStyleCapsule,
+    NSSegmentStyleSmallSquare
+} NSSegmentStyle;
+
+@interface NSSegmentedControl (BDSKLeopardOnly)
+- (NSSegmentStyle)segmentStyle;
+- (void)setSegmentStyle:(NSSegmentStyle)style;
+@end
+
 #import <WebKit/WebKit.h>
 enum {
     WebCacheModelDocumentViewer = 0,

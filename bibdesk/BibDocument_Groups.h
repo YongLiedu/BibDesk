@@ -38,7 +38,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-@class BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController, BDSKWebGroup;
+@class BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKWebGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController, BDSKWebGroupViewController;
 
 @interface BibDocument (Groups)
 
@@ -71,6 +71,11 @@
 - (IBAction)changeGroupFieldAction:(id)sender;
 - (IBAction)addGroupFieldAction:(id)sender;
 - (IBAction)removeGroupFieldAction:(id)sender;
+
+- (BDSKWebGroupViewController *)webGroupViewController;
+
+- (void)showWebGroupView;
+- (void)hideWebGroupView;
 
 - (void)showSearchGroupView;
 - (void)hideSearchGroupView;

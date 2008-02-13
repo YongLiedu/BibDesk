@@ -291,7 +291,7 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
         return;
     } else if ([group isSmart] == YES) {
         [groups addSmartGroup:(BDSKSmartGroup *)group];
-    } else if ([group isStatic] == YES && [group isEqual:[groups lastImportGroup]] == NO) {
+    } else if ([group isStatic] == YES && [group isKindOfClass:[BDSKLastImportGroup class]] == NO) {
         [groups addStaticGroup:(BDSKStaticGroup *)group];
     } else if ([group isURL] == YES) {
         [groups addURLGroup:(BDSKURLGroup *)group];

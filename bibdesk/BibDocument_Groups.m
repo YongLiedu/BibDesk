@@ -170,12 +170,16 @@ The groupedPublications array is a subset of the publications array, developed b
 
 #pragma mark Web Group 
 
+- (BDSKWebGroupViewController *)webGroupViewController {
+    if (webGroupViewController == nil && [groups webGroup])
+        webGroupViewController = [[BDSKWebGroupViewController alloc] initWithGroup:[groups webGroup] document:self];
+    return webGroupViewController;
+}
+
 - (void)showWebGroupView {
     NSAssert([groups webGroup], @"tried to show WebGroupView when web group pref was false");
-    if (nil == webGroupViewController)
-        webGroupViewController = [[BDSKWebGroupViewController alloc] initWithGroup:[groups webGroup] document:self];
-    NSView *webGroupView = [webGroupViewController view];
-    NSView *webView = [webGroupViewController webView];
+    NSView *webGroupView = [[self webGroupViewController] view];
+    NSView *webView = [[self webGroupViewController] webView];
     
     if ([self isDisplayingWebGroupView] == NO) {
         [self insertControlView:webGroupView atTop:NO];
@@ -206,10 +210,9 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)hideWebGroupView{
-    NSView *webGroupView = [webGroupViewController view];
-    NSView *webView = [webGroupViewController webView];
-    
     if ([self isDisplayingWebGroupView]) {
+        NSView *webGroupView = [[self webGroupViewController] view];
+        NSView *webView = [[self webGroupViewController] webView];
         id firstResponder = [documentWindow firstResponder];
         if ([firstResponder respondsToSelector:@selector(isDescendantOf:)] && [firstResponder isDescendantOf:webGroupView])
             [documentWindow makeFirstResponder:tableView];
@@ -1354,21 +1357,18 @@ The groupedPublications array is a subset of the publications array, developed b
     // switch to the web group
     if ([self hasWebGroupSelected] == NO) {
         // make sure the controller and its nib are loaded
-        if (nil == webGroupViewController) {
-            webGroupViewController = [[BDSKWebGroupViewController alloc] initWithGroup:[groups webGroup] document:self];
-            [webGroupViewController window];
-        }
+        [[self webGroupViewController] window];
         if ([self selectGroup:[groups webGroup]] == NO) {
             NSBeep();
             return;
         }
     }
-    [webGroupViewController loadURL:[sender representedObject]];
+    [[self webGroupViewController] loadURL:[sender representedObject]];
 }
 
 - (IBAction)addBookmark:(id)sender {
     if ([self hasWebGroupSelected]) {
-        [webGroupViewController addBookmark:sender];
+        [[self webGroupViewController] addBookmark:sender];
     } else
         NSBeep();
 }

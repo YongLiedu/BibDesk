@@ -144,7 +144,7 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib {
+- (void)windowDidLoad {
     [collapsibleView setMinSize:[collapsibleView frame].size];
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     [view setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
@@ -153,9 +153,12 @@
     NSRect frame = [backForwardButton frame];
     frame.size.height = 25.0;
     [backForwardButton setFrame:frame];
+    if ([backForwardButton respondsToSelector:@selector(setSegmentStyle:)])
+        [backForwardButton setSegmentStyle:NSSegmentStyleTexturedRounded];
     [stopOrReloadButton setImagePosition:NSImageOnly];
     [stopOrReloadButton setImage:[NSImage imageNamed:@"ReloadAdorn"]];
     [webView setEditingDelegate:self];
+    
 }
 
 - (NSView *)view {
@@ -179,6 +182,17 @@
     }
 }
 
+- (NSString *)URLString {
+    [self window];
+    return [urlField stringValue];
+}
+
+- (void)setURLString:(NSString *)newURLString {
+    [self window];
+    [urlField setStringValue:newURLString];
+    [self changeURL:urlField];
+}
+
 - (void)loadURL:(NSURL *)theURL {
     if (theURL && [[[[[webView mainFrame] dataSource] request] URL] isEqual:theURL] == NO)
         [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:theURL]];
@@ -189,9 +203,12 @@
     
     if ([NSString isEmptyString:newURLString]) return;
     
-    if (! [newURLString hasPrefix:@"http://"]){
-        newURLString = [NSString stringWithFormat:@"http://%@", newURLString];
-    }
+    NSURL *theURL = [NSURL URLWithString:newURLString];
+    if ([theURL scheme] == nil)
+        theURL = [NSURL URLWithString:[@"http://" stringByAppendingString:newURLString]];
+    
+    if (theURL == nil) return;
+    
     [self loadURL:[NSURL URLWithString:newURLString]];
 }
 
