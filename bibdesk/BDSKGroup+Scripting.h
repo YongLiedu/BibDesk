@@ -151,6 +151,13 @@
 #pragma mark -
 
 @interface BDSKSearchGroup (Scripting)
+
+- (NSString *)scriptingSearchTerm;
+- (void)setScriptingSearchTerm:(NSString *)newSerachTerm;
+
+- (NSDictionary *)scriptingServerInfo;
+- (void)setScriptingServerInfo:(NSDictionary *)info;
+
 @end
 
 #pragma mark -

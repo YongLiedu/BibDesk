@@ -49,6 +49,7 @@
 #import "BibAuthor.h"
 #import "BibAuthor+Scripting.h"
 #import "NSObject_BDSKExtensions.h"
+#import "BDSKServerInfo.h"
 
 
 @implementation BDSKGroup (Scripting)
@@ -426,6 +427,135 @@
     } else {
         return nil;
     }
+}
+
+- (NSString *)scriptingSearchTerm {
+    return [self searchTerm];
+}
+
+- (void)setScriptingSearchTerm:(NSString *)newSerachTerm {
+    [self setSearchTerm:newSerachTerm];
+}
+
+- (NSDictionary *)scriptingServerInfo {
+    BDSKServerInfo *serverInfo = [self serverInfo];
+    NSMutableDictionary *info = [NSMutableDictionary dictionary];
+    int serverType = 0;
+    
+    if ([serverInfo isEntrez])
+        serverType = 'Entr';
+    else if ([serverInfo isZoom])
+        serverType = 'Zoom';
+    else if ([serverInfo isISI])
+        serverType = 'ISI ';
+    else
+        return nil;
+    
+    [info setValue:[NSNumber numberWithInt:serverType] forKey:@"type"];
+    [info setValue:[serverInfo name] forKey:@"name"];
+    [info setValue:[serverInfo database] forKey:@"database"];
+    if ([serverInfo isZoom]) {
+        [info setValue:[serverInfo host] forKey:@"host"];
+        [info setValue:[serverInfo port] forKey:@"port"];
+        [info setValue:[serverInfo username] forKey:@"username"];
+        [info setValue:[serverInfo password] forKey:@"password"];
+        [info setValue:[serverInfo recordSyntax] forKey:@"recordSyntax"];
+        [info setValue:[serverInfo resultEncoding] forKey:@"resultEncoding"];
+        [info setValue:[NSNumber numberWithBool:[serverInfo removeDiacritics]] forKey:@"removeDiacritics"];
+    }
+    
+    return info;
+}
+
+- (void)setScriptingServerInfo:(NSDictionary *)info {
+    NSString *serverType = nil;
+     
+    switch ([[info objectForKey:@"type"] intValue]) {
+        case 'Entr':
+            serverType = BDSKSearchGroupEntrez;
+            break;
+        case 'Zoom':
+            serverType = BDSKSearchGroupZoom;
+            break;
+        case 'ISI ':
+            serverType = BDSKSearchGroupISI;
+            break;
+        default:
+            serverType = [[self serverInfo] type];
+    }
+    
+    BDSKMutableServerInfo *serverInfo = [[self serverInfo] mutableCopy];
+    NSString *serverName = [info valueForKey:@"name"];
+    NSString *database = [info valueForKey:@"database"];
+    NSString *host = [info valueForKey:@"host"];
+    NSString *port = [info valueForKey:@"port"];
+    NSString *resultEncoding = [info valueForKey:@"resultEncoding"];
+    
+    if ([[serverInfo type] isEqualToString:type]) {
+        serverInfo = [[self serverInfo] mutableCopy];
+        
+        NSString *value;
+        NSNumber *number;
+        
+        if (serverName)
+            [serverInfo setName:serverName];
+        if (database)
+            [serverInfo setDatabase:database];
+        if ([serverType isEqualToString:BDSKSearchGroupZoom]) {
+            if (host)
+                [serverInfo setHost:host];
+            if (port)
+                [serverInfo setPort:port];
+            if (value = [info valueForKey:@"username"])
+                [serverInfo setUsername:value];
+            if (value = [info valueForKey:@"password"])
+                [serverInfo setPassword:value];
+            if (value = [info valueForKey:@"recordSyntax"])
+                [serverInfo setRecordSyntax:value];
+            if (value = [info valueForKey:@"resultEncoding"])
+                [serverInfo setResultEncoding:value];
+            if (number = [info valueForKey:@"removeDiacritics"])
+                [serverInfo setRemoveDiacritics:[number boolValue]];
+        }
+    } else {
+        NSMutableDictionary *options = nil;
+        
+         if ([serverType isEqualToString:BDSKSearchGroupZoom]) {
+            options = [NSMutableDictionary dictionary];
+            [options setValue:[info valueForKey:@"username"] forKey:@"username"];
+            [options setValue:[info valueForKey:@"password"] forKey:@"password"];
+            [options setValue:[info valueForKey:@"resultEncoding"] forKey:@"resultEncoding"];
+            [options setValue:[info valueForKey:@"removeDiacritics"] forKey:@"removeDiacritics"];
+        }
+        
+        serverInfo = [[BDSKMutableServerInfo alloc] initWithType:serverType name:serverName host:host port:port database:database options:options];
+    }
+    
+    BOOL isValid = YES;
+    NSEnumerator *keyEnum = [info keyEnumerator];
+    NSString *key;
+    id value, validatedValue;
+    
+    if ([NSString isEmptyString:[serverInfo name]] || [NSString isEmptyString:[serverInfo database]])
+        isValid = NO;
+    else if ([serverInfo isZoom] && ([NSString isEmptyString:[serverInfo host]] || [[serverInfo port] intValue] == 0))
+        isValid = NO;
+    while (isValid && (key = [keyEnum nextObject])) {
+        value = validatedValue = [info valueForKey:key];
+        if ((isValid = [serverInfo validateValue:&validatedValue forKey:key error:NULL]) && 
+            [validatedValue isEqual:value] == NO)
+            [serverInfo setValue:validatedValue forKey:key];
+    }
+    
+    if (isValid) {
+        [self setServerInfo:serverInfo];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Invalid server info.",@"Error description")];
+    }
+    [serverInfo release];
 }
 
 @end

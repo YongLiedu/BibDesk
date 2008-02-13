@@ -1032,7 +1032,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa class="BDSKSearchGroup"/>
             <property name="search term" code="Term" type="text"
                 description="The search term for the search group">
-                <cocoa key="searchTerm"/>
+                <cocoa key="scriptingSearchTerm"/>
+            </property>  
+            <property name="server info" code="SrvI" type="search server info"
+                description="The server information for the search group">
+                <cocoa key="scriptingServerInfo"/>
             </property>  
         </class>
         
@@ -1076,6 +1080,58 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="scriptingNewValues"/>
             </property>  
         </class>
+        
+        <record-type name="search server info" code="SrvI">
+            <property name="name" code="pnam" type="text"
+                description="The name of the server.">
+                <cocoa key="name"/>
+            </property>
+            <property name="server type" code="STyp" type="search server type"
+                description="The type of the server.">
+                <cocoa key="type"/>
+            </property>
+            <property name="database" code="Dbas" type="text"
+                description="The database of the server.">
+                <cocoa key="database"/>
+            </property>
+            <property name="host" code="Host" type="text"
+                description="The name of the Z39.50 server.">
+                <cocoa key="host"/>
+            </property>
+            <property name="port" code="Port" type="text"
+                description="The port of the Z39.50 server.">
+                <cocoa key="port"/>
+            </property>
+            <property name="username" code="User" type="text"
+                description="The username of the Z39.50 server.">
+                <cocoa key="username"/>
+            </property>
+            <property name="password" code="Pswd" type="text"
+                description="The port of the Z39.50 server.">
+                <cocoa key="password"/>
+            </property>
+            <property name="record syntax" code="RSyn" type="text"
+                description="The record syntax of the Z39.50 server results.">
+                <cocoa key="recordSyntax"/>
+            </property>
+            <property name="encoding" code="REnc" type="text"
+                description="The encoding of the Z39.50 server result.">
+                <cocoa key="resultEncoding"/>
+            </property>
+            <property name="remove diacritics" code="RmDi" type="boolean"
+                description="Whether diacritics should be removed.">
+                <cocoa key="removeDiacritics"/>
+            </property>
+        </record-type>
+
+        <enumeration name="search server type" code="SrvT">
+            <enumerator name="Entrez" code="Entr"
+                description="Entrez search server."/>
+            <enumerator name="Z39.50" code="Zoom"
+                description="Z39.50 search server."/>
+            <enumerator name="ISI" code="ISI "
+                description="ISI Web of Sciences search server."/>
+        </enumeration>
         
         <command name="add" code="BDSKAdd "
 			description="Add items to a collection.">
