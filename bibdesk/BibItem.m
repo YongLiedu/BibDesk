@@ -2276,7 +2276,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [s appendString:@"<pdf-urls>"];
     while (file = [fileE nextObject]){
         if (value = [[file URL] absoluteString])
-            [s appendStrings:@"<url>", value, @"</url>", nil];
+            [s appendStrings:@"<url>", [value stringByEscapingBasicXMLEntitiesUsingUTF8], @"</url>", nil];
     }
     [s appendString:@"</pdf-urls>"];
     
@@ -2284,7 +2284,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [s appendString:@"<related-urls>"];
     while (file = [fileE nextObject]){
         if (value = [[file URL] absoluteString])
-            [s appendStrings:@"<url>", value, @"</url>", nil];
+            [s appendStrings:@"<url>", [value stringByEscapingBasicXMLEntitiesUsingUTF8], @"</url>", nil];
     }
     [s appendString:@"</related-urls>"];
     [s appendString:@"</urls>"];
