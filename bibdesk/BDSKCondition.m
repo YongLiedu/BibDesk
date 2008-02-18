@@ -59,8 +59,8 @@
 @implementation BDSKCondition
 
 + (void)initialize {
-    [self setKeys:[NSArray arrayWithObjects:@"stringComparison", @"dateComparison", nil] triggerChangeNotificationsForDependentKey:@"comparison"];
-    [self setKeys:[NSArray arrayWithObjects:@"dateComparison", @"numberValue", @"andNumberValue", @"periodValue", @"dateValue", @"toDateValue", nil] triggerChangeNotificationsForDependentKey:@"value"];
+    [self setKeys:[NSArray arrayWithObjects:@"stringComparison", @"countComparison", @"dateComparison", nil] triggerChangeNotificationsForDependentKey:@"comparison"];
+    [self setKeys:[NSArray arrayWithObjects:@"stringValue", @"countValue", @"numberValue", @"andNumberValue", @"periodValue", @"dateValue", @"toDateValue", nil] triggerChangeNotificationsForDependentKey:@"value"];
 }
 
 + (NSString *)dictionaryVersion {
@@ -473,25 +473,52 @@
     return [key fieldType] == BDSKLinkedField;
 }
 
+- (void)setDefaultComparison {
+    // set some default comparison
+    switch ([key fieldType]) {
+        case BDSKDateField:
+            [self setDateComparison:BDSKToday];
+            break;
+        case BDSKLinkedField:
+            [self setCountComparison:BDSKCountNotEqual];
+            break;
+        case BDSKStringField:
+            [self setStringComparison:BDSKContain];
+            break;
+        default:
+            [self setStringComparison:BDSKEqual];
+            break;
+    }
+}
+
 - (void)setDefaultValue {
     // set some default values
-    if ([self isDateCondition]) {
-        NSCalendarDate *today = [NSCalendarDate date];
-        [self setNumberValue:7];
-        [self setAndNumberValue:9];
-        [self setPeriodValue:BDSKPeriodDay];
-        [self setDateValue:today];
-        [self setToDateValue:today];
-    } else if ([key isBooleanField]) {
-        [self setStringValue:[NSString stringWithBool:NO]];
-    } else if ([key isTriStateField]) {
-        [self setStringValue:[NSString stringWithTriStateValue:NSOffState]];
-    } else if ([key isRatingField]) {
-        [self setStringValue:@"0"];
-    } else if ([self isCountCondition]) {
-        [self setCountValue:0];
-    } else {
-        [self setStringValue:@""];
+    switch ([key fieldType]) {
+        case BDSKDateField:
+        {
+            NSCalendarDate *today = [NSCalendarDate date];
+            [self setNumberValue:7];
+            [self setAndNumberValue:9];
+            [self setPeriodValue:BDSKPeriodDay];
+            [self setDateValue:today];
+            [self setToDateValue:today];
+            break;
+        }
+        case BDSKLinkedField:
+            [self setCountValue:0];
+            break;
+        case BDSKBooleanField:
+            [self setStringValue:[NSString stringWithBool:NO]];
+            break;
+        case BDSKTriStateField:
+            [self setStringValue:[NSString stringWithTriStateValue:NSOffState]];
+            break;
+        case BDSKRatingField:
+            [self setStringValue:@"0"];
+            break;
+        default:
+            [self setStringValue:@""];
+            break;
     }
 }
 
@@ -646,22 +673,14 @@
         int oldFieldType = [oldKey fieldType];
         int newFieldType = [newKey fieldType];
         if(oldFieldType != newFieldType){
-            if (newFieldType == BDSKDateField) {
-                [self setDateComparison:BDSKToday];
-                [self setDefaultValue];
-            } else if (newFieldType == BDSKLinkedField) {
-                [self setCountComparison:BDSKCountNotEqual];
-                [self setDefaultValue];
-            } else {
+            if (oldFieldType == BDSKDateField)
                 [self updateCachedDates]; // remove the cached date and stop the timer
-                [self setStringComparison:newFieldType == BDSKStringField ? BDSKContain : BDSKEqual];
-                [self setDefaultValue];
-            }
+            [self setDefaultComparison];
+            [self setDefaultValue];
         }
     } else if ([keyPath isEqualToString:@"value"]) {
-        if ([self isDateCondition]) {
+        if ([self isDateCondition])
             [self updateCachedDates];
-        }
     }
 }
 
@@ -673,14 +692,14 @@
 - (int)fieldType {
     if ([self isEqualToString:BDSKDateAddedString] || [self isEqualToString:BDSKDateModifiedString])
         return BDSKDateField;
+    else if ([self isEqualToString:BDSKLocalFileString] || [self isEqualToString:BDSKRemoteURLString])
+        return BDSKLinkedField;
     else if ([self isBooleanField])
         return BDSKBooleanField;
     else if ([self isTriStateField])
         return BDSKTriStateField;
     else if ([self isRatingField])
         return BDSKRatingField;
-    else if ([self isEqualToString:BDSKLocalFileString] || [self isEqualToString:BDSKRemoteURLString])
-        return BDSKLinkedField;
     else
         return BDSKStringField;
 }
