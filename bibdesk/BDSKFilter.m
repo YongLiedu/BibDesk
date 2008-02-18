@@ -37,6 +37,10 @@
  */
 
 #import "BDSKFilter.h"
+#import "BDSKCondition.h"
+#import "BibItem.h"
+#import "BDSKSmartGroup.h"
+#import "BDSKOwnerProtocol.h"
 #import <OmniFoundation/NSArray-OFExtensions.h>
 
 
@@ -55,7 +59,7 @@
 	if (self = [super init]) {
 		conditions = [newConditions mutableCopy];
 		conjunction = BDSKAnd;
-		undoManager = nil;
+		group = nil;
 	}
 	return self;
 }
@@ -86,7 +90,7 @@
 	if (self = [super init]) {
 		conditions = [[decoder decodeObjectForKey:@"conditions"] retain];
 		conjunction = [decoder decodeIntForKey:@"conjunction"];
-		undoManager = nil;
+		group = nil;
 	}
 	return self;
 }
@@ -97,8 +101,7 @@
 }
 
 - (void)dealloc {
-	[[self undoManager] removeAllActionsWithTarget:self];
-    [undoManager release];
+	[[group undoManager] removeAllActionsWithTarget:self];
     [conditions makeObjectsPerformSelector:@selector(invalidateCacheTimer)];
 	[conditions release];
 	[super dealloc];
@@ -166,10 +169,12 @@
     if (![conditions isEqualToArray:newConditions]) {
 		[[[self undoManager] prepareWithInvocationTarget:self] setConditions:conditions];
         
+        [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:nil];
 		[conditions release];
         conditions = [newConditions mutableCopy];
+        [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:group];
 		
-		if ([self undoManager]) { // only notify when we are attched to a group
+		if ([self undoManager]) { // only notify when we are attached to a group
 			[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFilterChangedNotification
 																object:self
 															  userInfo:[NSDictionary dictionary]];
@@ -186,22 +191,24 @@
 	
 	conjunction = newConjunction;
 	
-	if ([self undoManager]) { // only notify when we are attched to a group
+	if ([self undoManager]) { // only notify when we are attached to a group
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFilterChangedNotification
 															object:self
 														  userInfo:[NSDictionary dictionary]];
 	}
 }
 
-- (NSUndoManager *)undoManager {
-    return undoManager;
+- (BDSKSmartGroup *)group {
+    return group;
 }
 
-- (void)setUndoManager:(NSUndoManager *)newUndoManager {
-    if (undoManager != newUndoManager) {
-        [undoManager release];
-        undoManager = [newUndoManager retain];
-    }
+- (void)setGroup:(BDSKSmartGroup *)newGroup {
+    group = newGroup;
+    [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:group];
+}
+
+- (NSUndoManager *)undoManager {
+    return [group undoManager];
 }
 
 @end

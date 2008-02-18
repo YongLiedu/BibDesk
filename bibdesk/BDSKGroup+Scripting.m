@@ -51,6 +51,8 @@
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKServerInfo.h"
 #import "BDSKWebGroupViewController.h"
+#import "BDSKCondition.h"
+#import "BDSKFilter.h"
 
 
 @implementation BDSKGroup (Scripting)
@@ -288,6 +290,50 @@
     } else {
         return nil;
     }
+}
+
+- (BDSKCondition *)objectInConditionsAtIndex:(unsigned int)idx {
+    return [[[self filter] conditions] objectAtIndex:idx];
+}
+
+- (BDSKCondition *)valueInConditionsAtIndex:(unsigned int)idx {
+    return [self objectInConditionsAtIndex:idx];
+}
+
+- (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(unsigned int)idx {
+	NSMutableArray *conditions = [[[self filter] conditions] mutableCopy];
+    [conditions insertObject:condition atIndex:idx];
+    [[self filter] setConditions:conditions];
+    [conditions release];
+    [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (void)insertInConditions:(BDSKCondition *)condition atIndex:(unsigned int)idx {
+    [self insertObject:condition inConditionsAtIndex:idx];
+}
+
+- (void)insertInConditions:(BDSKCondition *)condition {
+    [self insertObject:condition inConditionsAtIndex:[[[self filter] conditions] count]];
+}
+
+- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx {
+	NSMutableArray *conditions = [[[self filter] conditions] mutableCopy];
+    [conditions removeObjectAtIndex:idx];
+    [[self filter] setConditions:conditions];
+    [conditions release];
+    [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (void)removeFromConditionsAtIndex:(unsigned int)idx {
+	[self removeObjectFromPublicationsAtIndex:idx];
+}
+
+- (BOOL)satisfyAll {
+    return [[self filter] conjunction] == BDSKAnd;
+}
+
+- (void)setSatisfyAll:(BOOL)flag {
+    return [[self filter] setConjunction:flag ? BDSKAnd : BDSKOr];
 }
 
 @end

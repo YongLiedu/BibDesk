@@ -56,7 +56,7 @@
 - (id)initWithName:(id)aName count:(int)aCount filter:(BDSKFilter *)aFilter {
     if (self = [super initWithName:aName count:aCount]) {
         filter = [aFilter copy];
-		[filter setUndoManager:nil];
+        [filter setGroup:self];
     }
     return self;
 }
@@ -89,6 +89,7 @@
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
         filter = [[decoder decodeObjectForKey:@"filter"] retain];
+        [filter setGroup:self];
     }
     return self;
 }
@@ -99,6 +100,7 @@
 }
 
 - (void)dealloc {
+    [filter setGroup:nil];
     [filter release];
     [super dealloc];
 }
@@ -132,15 +134,11 @@
 - (void)setFilter:(BDSKFilter *)newFilter {
     if (filter != newFilter) {
 		[[[self undoManager] prepareWithInvocationTarget:self] setFilter:filter];
+        [filter setGroup:nil];
         [filter release];
         filter = [newFilter copy];
-		[filter setUndoManager:[self undoManager]];
+        [filter setGroup:self];
     }
-}
-
-- (void)setDocument:(BibDocument *)newDocument{
-    [super setDocument:newDocument];
-    [filter setUndoManager:[self undoManager]];
 }
 
 - (BOOL)containsItem:(BibItem *)item {

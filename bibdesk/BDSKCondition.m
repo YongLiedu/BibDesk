@@ -42,6 +42,8 @@
 #import "NSDate_BDSKExtensions.h"
 #import <OmniBase/assertions.h>
 #import "BDSKTypeManager.h"
+#import "BDSKSmartGroup.h"
+#import "BDSKCondition+Scripting.h"
 
 @interface BDSKCondition (Private)
 - (NSDate *)cachedEndDate;
@@ -68,8 +70,11 @@
 }
 
 - (id)init {
-    self = [super init];
-    if (self) {
+    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+    if ([cmd isKindOfClass:[NSCreateCommand class]] &
+        [[[(NSCreateCommand *)cmd createClassDescription] className] isEqualToString:@"condition"]) {
+        self = [self initWithScriptProperties:[(NSCreateCommand *)cmd resolvedKeyDictionary]];
+    } else if (self = [super init]) {
         key = [@"" retain];
         stringValue = [@"" retain];
         stringComparison = BDSKContain;
@@ -81,6 +86,7 @@
         periodValue = BDSKPeriodDay;
         dateValue = nil;
         toDateValue = nil;
+        group = nil;
         cachedStartDate = nil;
         cachedEndDate = nil;
 		cacheTimer = nil;
@@ -141,8 +147,8 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder {
 	[coder encodeObject:[self key] forKey:@"key"];
-	[coder encodeObject:[self value] forKey:@"value"];
 	[coder encodeInt:[self comparison] forKey:@"comparison"];
+	[coder encodeObject:[self value] forKey:@"value"];
 }
 
 - (void)dealloc {
@@ -520,6 +526,14 @@
             [self setStringValue:@""];
             break;
     }
+}
+
+- (BDSKSmartGroup *)group {
+    return group;
+}
+
+- (void)setGroup:(BDSKSmartGroup *)newGroup {
+    group = newGroup;
 }
 
 // @@ workaround for timer retain cycle; could also use a CFRunLoopTimer that doesn't retain its context

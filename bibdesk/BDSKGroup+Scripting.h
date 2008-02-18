@@ -47,7 +47,7 @@
 #import "BDSKSharedGroup.h"
 #import "BDSKWebGroup.h"
 
-@class BDSKMacro, BibItem, BibAuthor;
+@class BDSKMacro, BibItem, BibAuthor, BDSKCondition;
 
 @interface BDSKGroup (Scripting)
 
@@ -110,6 +110,18 @@
 #pragma mark -
 
 @interface BDSKSmartGroup (Scripting)
+
+- (BDSKCondition *)objectInConditionsAtIndex:(unsigned int)idx;
+- (BDSKCondition *)valueInConditionsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(unsigned int)idx;
+- (void)insertInConditions:(BDSKCondition *)condition atIndex:(unsigned int)idx;
+- (void)insertInConditions:(BDSKCondition *)condition;
+- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx;
+- (void)removeFromConditionsAtIndex:(unsigned int)idx;
+
+- (BOOL)satisfyAll;
+- (void)setSatisfyAll:(BOOL)flag;
+
 @end
 
 #pragma mark -

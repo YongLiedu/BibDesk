@@ -1,10 +1,10 @@
 //
-//  BDSKFilter.h
+//  BDSKCondition+Scripting.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 17/3/05.
+//  Created by Christiaan Hofman on 2/18/08.
 /*
- This software is Copyright (c) 2005-2008
+ This software is Copyright (c) 2008
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,37 +37,20 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKCondition.h"
 
-typedef enum {
-	BDSKAnd = 0,
-	BDSKOr = 1
-} BDSKConjunction;
+@interface BDSKCondition (Scripting)
 
-@class BDSKCondition, BibItem, BDSKSmartGroup;
+- (id)initWithScriptProperties:(NSDictionary *)dictionary;
 
-@interface BDSKFilter : NSObject <NSCopying, NSCoding> {
-	NSMutableArray *conditions;
-	BDSKConjunction conjunction;
-    BDSKSmartGroup *group;
-	NSUndoManager *undoManager;
-}
-
-- (id)initWithConditions:(NSArray *)newConditions;
-- (id)initWithDictionary:(NSDictionary *)dictionary;
-
-- (NSDictionary *)dictionaryValue;
-
-- (NSArray *)filterItems:(NSArray *)items;
-- (BOOL)testItem:(BibItem *)item;
-
-- (NSArray *)conditions;
-- (void)setConditions:(NSArray *)newConditions;
-- (BDSKConjunction)conjunction;
-- (void)setConjunction:(BDSKConjunction)newConjunction;
-
-- (BDSKSmartGroup *)group;
-- (void)setGroup:(BDSKSmartGroup *)newGroup;
-
-- (NSUndoManager *)undoManager;
+- (NSString *)scriptingKey;
+- (int)scriptingComparison;
+- (NSString *)scriptingStringValue;
+- (int)scriptingCountValue;
+- (int)scriptingNumberValue;
+- (int)scriptingAndNumberValue;
+- (int)scriptingPeriodValue;
+- (NSDate *)scriptingDateValue;
+- (NSDate *)scriptingToDateValue;
 
 @end

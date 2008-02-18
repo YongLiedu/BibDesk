@@ -38,8 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibItem;
-
 // this should correspond to the tags of the items in the popup
 typedef enum {
 	BDSKGroupContain = 0,
@@ -87,6 +85,8 @@ enum {
     BDSKRatingField
 };
 
+@class BibItem, BDSKSmartGroup;
+
 @interface BDSKCondition : NSObject <NSCopying, NSCoding> {
 	NSString *key;
 	BDSKStringComparison stringComparison;
@@ -99,6 +99,7 @@ enum {
     int periodValue;
     NSCalendarDate *dateValue;
     NSCalendarDate *toDateValue;
+    BDSKSmartGroup *group;
 	NSDate *cachedStartDate;
 	NSDate *cachedEndDate;
 	NSTimer *cacheTimer;
@@ -154,6 +155,9 @@ enum {
 
 - (BOOL)isDateCondition;
 - (BOOL)isCountCondition;
+
+- (BDSKSmartGroup *)group;
+- (void)setGroup:(BDSKSmartGroup *)newGroup;
 
 @end
 

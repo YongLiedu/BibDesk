@@ -237,6 +237,8 @@
 		CE6C0CB90BEE4974007BF0B5 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE6C0CB80BEE4974007BF0B5 /* MainMenu.nib */; };
 		CE6C962C0CD9014A0022D69F /* NSScrollView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6C962A0CD9014A0022D69F /* NSScrollView_BDSKExtensions.m */; };
 		CE6DACC50A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */; };
+		CE6DCA220D6A0237003A072F /* BDSKCondition+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6DCA200D6A0237003A072F /* BDSKCondition+Scripting.h */; };
+		CE6DCA230D6A0237003A072F /* BDSKCondition+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6DCA210D6A0237003A072F /* BDSKCondition+Scripting.m */; };
 		CE6FB32309DFFCB5005E3E14 /* BDSKSharingBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */; };
 		CE7596000ADDB0E1009C1329 /* BDSKContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7595FE0ADDB0E0009C1329 /* BDSKContainerView.m */; };
 		CE76A5430B430EA500E61066 /* BDSKSearchGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE76A53D0B430EA500E61066 /* BDSKSearchGroupSheet.nib */; };
@@ -1166,6 +1168,8 @@
 		CE6C962A0CD9014A0022D69F /* NSScrollView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSScrollView_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6DACC20A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAToolbarItem_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAToolbarItem_BDSKExtensions.m; sourceTree = "<group>"; };
+		CE6DCA200D6A0237003A072F /* BDSKCondition+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "BDSKCondition+Scripting.h"; sourceTree = "<group>"; };
+		CE6DCA210D6A0237003A072F /* BDSKCondition+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "BDSKCondition+Scripting.m"; sourceTree = "<group>"; };
 		CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSharingBrowser.h; sourceTree = "<group>"; };
 		CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSharingBrowser.m; sourceTree = "<group>"; };
 		CE7595FD0ADDB0E0009C1329 /* BDSKContainerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKContainerView.h; sourceTree = "<group>"; };
@@ -2043,6 +2047,7 @@
 				CE83E3A40D294EE300BB7AD8 /* BDSKSortCommand.m */,
 				CEAC484F0A96589A00B8DF43 /* BDSKTemplatedTextCommand.m */,
 				F9022FBC07580B9400C3F701 /* BDSKAppController+Scripting.m */,
+				CE6DCA210D6A0237003A072F /* BDSKCondition+Scripting.m */,
 				3DD300F5075C054D003FD2D7 /* BDSKField.m */,
 				CE82B4720D57EECF00A2E8C5 /* BDSKGroup+Scripting.m */,
 				F9201E000B72504C007E45BB /* BDSKMacro.m */,
@@ -2518,6 +2523,7 @@
 				2730077907CF20B500F2E485 /* BDSKComplexStringEditor.h */,
 				F9022C480758027800C3F701 /* BDSKComplexStringFormatter.h */,
 				CE38FB82091D946900BCB69D /* BDSKCondition.h */,
+				CE6DCA200D6A0237003A072F /* BDSKCondition+Scripting.h */,
 				CE38FB84091D946A00BCB69D /* BDSKConditionController.h */,
 				CE34E9770A03C16B00222942 /* BDSKConditionsView.h */,
 				CE7595FD0ADDB0E0009C1329 /* BDSKContainerView.h */,
@@ -2966,6 +2972,7 @@
 				CE3011A20D5CC41D00C0B7FA /* BDSKAddCommand.h in Headers */,
 				CE3011AC0D5CC46F00C0B7FA /* BDSKRemoveCommand.h in Headers */,
 				CE3011B90D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h in Headers */,
+				CE6DCA220D6A0237003A072F /* BDSKCondition+Scripting.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3950,6 +3957,7 @@
 				CE3011A30D5CC41D00C0B7FA /* BDSKAddCommand.m in Sources */,
 				CE3011AD0D5CC46F00C0B7FA /* BDSKRemoveCommand.m in Sources */,
 				CE3011BA0D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m in Sources */,
+				CE6DCA230D6A0237003A072F /* BDSKCondition+Scripting.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
