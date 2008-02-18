@@ -293,7 +293,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
 		<command name="make" code="corecrel"
 			description="Make a new object.">
-			<cocoa class="BDSKCreateCommand"/>
+			<cocoa class="NSCreateCommand"/>
 			<parameter name="new" code="kocl" type="type"
 				description="The class of the new object.">
 				<cocoa key="ObjectClass"/>
