@@ -149,6 +149,7 @@ enum {
 - (NSCalendarDate *)toDateValue;
 - (void)setToDateValue:(NSCalendarDate *)value;
 
+- (void)setDefaultComparison;
 - (void)setDefaultValue;
 
 - (BOOL)isDateCondition;
