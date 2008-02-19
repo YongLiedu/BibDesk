@@ -1195,7 +1195,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         <enumeration name="comparison type" code="CmpT">
             <enumerator name="group containment" code="CGCt"
                 description="Groups contain generic comparison."/>
-            <enumerator name="group no containment" code="CGNC"
+            <enumerator name="no group containment" code="CGNC"
                 description="Groups do not contain generic comparison."/>
             <enumerator name="containment" code="CCnt"
                 description="Contains generic comparison."/>
@@ -1215,13 +1215,13 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Comes after generic comparison."/>
             <enumerator name="count equality" code="CCEq"
                 description="Count is equal attachment comparison."/>
-            <enumerator name="count unequality" code="CCNE"
+            <enumerator name="no count equality" code="CCNE"
                 description="Count is not equal attachment comparison."/>
             <enumerator name="count larger" code="CCLa"
                 description="Count larger than attachment comparison."/>
             <enumerator name="count smaller" code="CCSm"
                 description="Count smaller than attachment comparison."/>
-            <enumerator name="compare today" code="CTdy"
+            <enumerator name="today" code="CTdy"
                 description="Is today date comparison."/>
             <enumerator name="yesterday" code="CYst"
                 description="Is yesterday date comparison."/>
