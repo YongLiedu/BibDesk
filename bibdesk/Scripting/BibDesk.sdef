@@ -1104,7 +1104,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The comparison of the condition.">
                 <cocoa key="scriptingComparison"/>
             </property>  
-            <property name="value" code="valu" type="text" access="r"
+            <property name="value" code="fldv" access="r"
                 description="The value of the condition. Text for a generic condition, an attachment count for an attachment condition, a record containg one or two periods, or a record containing one or two dates.">
                 <type type="period condition value"/>
                 <type type="date condition value"/>
@@ -1115,26 +1115,26 @@ Having all three of these seems to work best for Panther. For Tiger include this
         </class>
         
         <record-type name="period condition value" code="CPVl">
-            <property name="period" code="Perd" type="integer" access="r"
+            <property name="period" code="Perd" type="integer"
                 description="The amount of a period of the date condition.">
                 <cocoa key="numberValue"/>
             </property>  
-            <property name="end period" code="EPer" type="integer" access="r"
+            <property name="end period" code="EPer" type="integer"
                 description="The end amount of a period range of the date condition.">
                 <cocoa key="andNumberValue"/>
             </property>  
-            <property name="period type" code="TPer" type="period unit" access="r"
+            <property name="period type" code="TPer" type="period unit"
                 description="The kind of period of the date condition.">
                 <cocoa key="periodValue"/>
             </property>  
         </record-type>
         
         <record-type name="date condition value" code="CTVl">
-            <property name="date" code="ldt " type="date" access="r"
+            <property name="date" code="ldt " type="date"
                 description="The date of the date condition.">
                 <cocoa key="dateValue"/>
             </property>  
-            <property name="end date" code="Eldt" type="date" access="r"
+            <property name="end date" code="Eldt" type="date"
                 description="The end date for a date range of the date condition.">
                 <cocoa key="toDateValue"/>
             </property>  
@@ -1193,57 +1193,57 @@ Having all three of these seems to work best for Panther. For Tiger include this
         </enumeration>
 
         <enumeration name="comparison type" code="CmpT">
-            <enumerator name="compare groups contain" code="CGCt"
+            <enumerator name="group containment" code="CGCt"
                 description="Groups contain generic comparison."/>
-            <enumerator name="compare groups do not contain" code="CGNC"
+            <enumerator name="group no containment" code="CGNC"
                 description="Groups do not contain generic comparison."/>
-            <enumerator name="compare contain" code="CCnt"
+            <enumerator name="containment" code="CCnt"
                 description="Contains generic comparison."/>
-            <enumerator name="compare does not contain" code="CNCt"
+            <enumerator name="no containment" code="CNCt"
                 description="Does not contain generic comparison."/>
-            <enumerator name="compare equal" code="CEqu"
+            <enumerator name="equality" code="CEqu"
                 description="Is equal comparison."/>
-            <enumerator name="compare not equal" code="CNEq"
+            <enumerator name="no equality" code="CNEq"
                 description="Is not equal generic comparison."/>
-            <enumerator name="compare start" code="CStt"
+            <enumerator name="prefix" code="CStt"
                 description="Starts with generic comparison."/>
-            <enumerator name="compare end" code="CEnd"
+            <enumerator name="suffix" code="CEnd"
                 description="Ends with generic comparison."/>
-            <enumerator name="compare before" code="CBef"
+            <enumerator name="smaller" code="CBef"
                 description="Comes before generic comparison."/>
-            <enumerator name="compare after" code="CAft"
+            <enumerator name="larger" code="CAft"
                 description="Comes after generic comparison."/>
-            <enumerator name="compare count equal" code="CCEq"
+            <enumerator name="count equality" code="CCEq"
                 description="Count is equal attachment comparison."/>
-            <enumerator name="compare count not equal" code="CCNE"
+            <enumerator name="count unequality" code="CCNE"
                 description="Count is not equal attachment comparison."/>
-            <enumerator name="compare count larger" code="CCLa"
+            <enumerator name="count larger" code="CCLa"
                 description="Count larger than attachment comparison."/>
-            <enumerator name="compare count smaller" code="CCSm"
+            <enumerator name="count smaller" code="CCSm"
                 description="Count smaller than attachment comparison."/>
             <enumerator name="compare today" code="CTdy"
                 description="Is today date comparison."/>
-            <enumerator name="compare yesterday" code="CYst"
+            <enumerator name="yesterday" code="CYst"
                 description="Is yesterday date comparison."/>
-            <enumerator name="compare this week" code="CTWk"
+            <enumerator name="this week" code="CTWk"
                 description="Is this week date comparison."/>
-            <enumerator name="compare last week" code="CLWk"
+            <enumerator name="previous week" code="CLWk"
                 description="Is last week date comparison."/>
-            <enumerator name="compare period ago" code="CAgo"
+            <enumerator name="period ago" code="CAgo"
                 description="Is exactly in a period ago date comparison."/>
-            <enumerator name="compare in last period" code="CLPe"
+            <enumerator name="previous period" code="CLPe"
                 description="Is in last perdiod date comparison."/>
-            <enumerator name="compare not in last period" code="CNLP"
+            <enumerator name="no previous period" code="CNLP"
                 description="Is not in last period date comparison."/>
-            <enumerator name="compare period range" code="CPeR"
+            <enumerator name="period range" code="CPeR"
                 description="Is in period range comparison."/>
-            <enumerator name="compare date" code="CDat"
+            <enumerator name="at date" code="CDat"
                 description="Is at date date comparison."/>
-            <enumerator name="compare after date" code="CADt"
+            <enumerator name="later date" code="CADt"
                 description="Is after date date comparison."/>
-            <enumerator name="compare before date" code="CBDt"
+            <enumerator name="earlier date" code="CBDt"
                 description="Is before date date comparison."/>
-            <enumerator name="compare date range" code="CDtR"
+            <enumerator name="date range" code="CDtR"
                 description="Is in date range date comparison."/>
         </enumeration>
 

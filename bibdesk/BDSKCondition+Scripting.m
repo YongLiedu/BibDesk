@@ -72,7 +72,7 @@ enum {
     BDSKASBetween = 'CPeR', 
     BDSKASDate = 'CDat', 
     BDSKASAfterDate = 'CADt', 
-    BDSKASBeforeDate = 'CCDt', 
+    BDSKASBeforeDate = 'CBDt', 
     BDSKASInDateRange = 'CDtR'
 };
 
@@ -264,12 +264,12 @@ enum {
                 if (value = [newValue objectForKey:@"andNumberValue"])
                     [self setAndNumberValue:[value intValue]];
             } else if (value = [newValue objectForKey:@"dateValue"]) {
-                [self setDateValue:value];
+                [self setDateValue:[[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:value] autorelease]];
                 if (value = [newValue objectForKey:@"toDateValue"])
-                    [self setToDateValue:value];
+                    [self setToDateValue:[[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:value] autorelease]];
             }
         } else if ([newValue isKindOfClass:[NSDate class]]) {
-            [self setDateValue:newValue];
+            [self setDateValue:[[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:newValue] autorelease]];
         } else if (newValue && [newValue isEqual:[NSNull null]] == NO) {
             [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
             [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
