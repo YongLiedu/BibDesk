@@ -41,8 +41,6 @@
 
 @interface BDSKCondition (Scripting)
 
-- (id)initWithScriptProperties:(NSDictionary *)dictionary;
-
 - (NSString *)scriptingKey;
 - (int)scriptingComparison;
 - (id)scriptingValue;

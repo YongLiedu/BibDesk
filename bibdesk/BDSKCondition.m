@@ -70,12 +70,13 @@
 }
 
 - (id)init {
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    if ([cmd isKindOfClass:[NSCreateCommand class]] &
-        [[[(NSCreateCommand *)cmd createClassDescription] className] isEqualToString:@"condition"]) {
-        self = [self initWithScriptProperties:[(NSCreateCommand *)cmd resolvedKeyDictionary]];
-    } else if (self = [super init]) {
-        key = [@"" retain];
+    if (self = [super init]) {
+        // when called from scripting we need to set the key first, so scripting setters know what type of field it is
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        if ([cmd isKindOfClass:[NSCreateCommand class]] && [[[(NSCreateCommand *)cmd createClassDescription] className] isEqualToString:@"condition"])
+            key = [[[(NSCreateCommand *)cmd resolvedKeyDictionary] objectForKey:@"scriptingKey"] retain];
+        if (key == nil)
+            key = [@"" retain];
         stringValue = [@"" retain];
         stringComparison = BDSKContain;
         countComparison = BDSKCountNotEqual;

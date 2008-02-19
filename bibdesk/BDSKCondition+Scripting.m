@@ -89,32 +89,6 @@ enum {
 
 @implementation BDSKCondition (Scripting)
 
-- (id)initWithScriptProperties:(NSDictionary *)dictionary {
-    if (self = [super init]) {
-        stringValue = [@"" retain];
-        stringComparison = BDSKContain;
-        countComparison = BDSKCountNotEqual;
-        countValue = 0;
-        dateComparison = BDSKToday;
-        numberValue = 0;
-        andNumberValue = 0;
-        periodValue = BDSKPeriodDay;
-        dateValue = nil;
-        toDateValue = nil;
-        group = nil;
-        cachedStartDate = nil;
-        cachedEndDate = nil;
-		cacheTimer = nil;
-        
-        key = [[dictionary objectForKey:@"scriptingKey"] retain];
-        if (key == nil)
-            key = [@"" retain];
-        
-        [self startObserving];
-    }
-    return self;
-}
-
 - (NSScriptObjectSpecifier *)objectSpecifier {
 	NSArray *conditions = [[[self group] filter] conditions];
 	unsigned idx = [conditions indexOfObjectIdenticalTo:self];
@@ -139,96 +113,45 @@ enum {
 }
 
 - (int)scriptingComparison {
-    int scriptingComparison = 0;
     if ([self isDateCondition]) {
         switch ([self dateComparison]) {
-            case BDSKToday:
-                scriptingComparison = BDSKASToday;
-                break; 
-            case BDSKYesterday:
-                scriptingComparison = BDSKASYesterday;
-                break; 
-            case BDSKThisWeek:
-                scriptingComparison = BDSKASThisWeek;
-                break; 
-            case BDSKLastWeek:
-                scriptingComparison = BDSKASLastWeek;
-                break; 
-            case BDSKExactly:
-                scriptingComparison = BDSKASExactly;
-                break; 
-            case BDSKInLast:
-                scriptingComparison = BDSKASInLast;
-                break; 
-            case BDSKNotInLast:
-                scriptingComparison = BDSKASNotInLast;
-                break; 
-            case BDSKBetween:
-                scriptingComparison = BDSKASBetween;
-                break; 
-            case BDSKDate:
-                scriptingComparison = BDSKASDate;
-                break; 
-            case BDSKAfterDate:
-                scriptingComparison = BDSKASAfterDate;
-                break; 
-            case BDSKBeforeDate:
-                scriptingComparison = BDSKASBeforeDate;
-                break; 
-            case BDSKInDateRange:
-                scriptingComparison = BDSKInDateRange;
-                break;
+            case BDSKToday:         return BDSKASToday;
+            case BDSKYesterday:     return BDSKASYesterday;
+            case BDSKThisWeek:      return BDSKASThisWeek;
+            case BDSKLastWeek:      return BDSKASLastWeek;
+            case BDSKExactly:       return BDSKASExactly;
+            case BDSKInLast:        return BDSKASInLast;
+            case BDSKNotInLast:     return BDSKASNotInLast;
+            case BDSKBetween:       return BDSKASBetween;
+            case BDSKDate:          return BDSKASDate;
+            case BDSKAfterDate:     return BDSKASAfterDate;
+            case BDSKBeforeDate:    return BDSKASBeforeDate;
+            case BDSKInDateRange:   return BDSKInDateRange;
+            default:                return BDSKASToday;
         }
     } else if ([self isCountCondition]) {
         switch ([self countComparison]) {
-            case BDSKCountEqual:
-                scriptingComparison = BDSKASCountEqual;
-                break;
-            case BDSKCountNotEqual:
-                scriptingComparison = BDSKASCountNotEqual;
-                break;
-            case BDSKCountLarger:
-                scriptingComparison = BDSKASCountLarger;
-                break;
-            case BDSKCountSmaller:
-                scriptingComparison = BDSKASCountSmaller;
-                break;
+            case BDSKCountEqual:    return BDSKASCountEqual;
+            case BDSKCountNotEqual: return BDSKASCountNotEqual;
+            case BDSKCountLarger:   return BDSKASCountLarger;
+            case BDSKCountSmaller:  return BDSKASCountSmaller;
+            default:                return BDSKASCountEqual;
         }
     } else {
         switch ([self stringComparison]) {
-            case BDSKGroupContain:
-                scriptingComparison = BDSKASGroupContain;
-                break;
-            case BDSKGroupNotContain:
-                scriptingComparison = BDSKASGroupNotContain;
-                break;
-            case BDSKContain:
-                scriptingComparison = BDSKASContain;
-                break;
-            case BDSKNotContain:
-                scriptingComparison = BDSKASNotContain;
-                break;
-            case BDSKEqual:
-                scriptingComparison = BDSKASEqual;
-                break;
-            case BDSKNotEqual:
-                scriptingComparison = BDSKASNotEqual;
-                break;
-            case BDSKStartWith:
-                scriptingComparison = BDSKASStartWith;
-                break;
-            case BDSKEndWith:
-                scriptingComparison = BDSKASEndWith;
-                break;
-            case BDSKSmaller:
-                scriptingComparison = BDSKASSmaller;
-                break;
-            case BDSKLarger:
-                scriptingComparison = BDSKASLarger;
-                break;
+            case BDSKGroupContain:      return BDSKASGroupContain;
+            case BDSKGroupNotContain:   return BDSKASGroupNotContain;
+            case BDSKContain:           return BDSKASContain;
+            case BDSKNotContain:        return BDSKASNotContain;
+            case BDSKEqual:             return BDSKASEqual;
+            case BDSKNotEqual:          return BDSKASNotEqual;
+            case BDSKStartWith:         return BDSKASStartWith;
+            case BDSKEndWith:           return BDSKASEndWith;
+            case BDSKSmaller:           return BDSKASSmaller;
+            case BDSKLarger:            return BDSKASLarger;
+            default:                    return BDSKASContain;
         }
     }
-    return scriptingComparison;
 }
 
 - (void)setScriptingComparison:(int)newComparison {
@@ -239,42 +162,18 @@ enum {
     } else {
         if ([self isDateCondition]) {
             switch (newComparison) {
-                case BDSKASToday:
-                    dateComparison = BDSKToday;
-                    break; 
-                case BDSKASYesterday:
-                    dateComparison = BDSKYesterday;
-                    break; 
-                case BDSKASThisWeek:
-                    dateComparison = BDSKThisWeek;
-                    break; 
-                case BDSKASLastWeek:
-                    dateComparison = BDSKLastWeek;
-                    break; 
-                case BDSKASExactly:
-                    dateComparison = BDSKExactly;
-                    break; 
-                case BDSKASInLast:
-                    dateComparison = BDSKInLast;
-                    break; 
-                case BDSKASNotInLast:
-                    dateComparison = BDSKNotInLast;
-                    break; 
-                case BDSKASBetween:
-                    dateComparison = BDSKBetween;
-                    break; 
-                case BDSKASDate:
-                    dateComparison = BDSKDate;
-                    break; 
-                case BDSKASAfterDate:
-                    dateComparison = BDSKAfterDate;
-                    break; 
-                case BDSKASBeforeDate:
-                    dateComparison = BDSKBeforeDate;
-                    break; 
-                case BDSKASInDateRange:
-                    dateComparison = BDSKInDateRange;
-                    break;
+                case BDSKASToday:       [self setDateComparison:BDSKToday];         break; 
+                case BDSKASYesterday:   [self setDateComparison:BDSKYesterday];     break; 
+                case BDSKASThisWeek:    [self setDateComparison:BDSKThisWeek];      break; 
+                case BDSKASLastWeek:    [self setDateComparison:BDSKLastWeek];      break; 
+                case BDSKASExactly:     [self setDateComparison:BDSKExactly];       break; 
+                case BDSKASInLast:      [self setDateComparison:BDSKInLast];        break; 
+                case BDSKASNotInLast:   [self setDateComparison:BDSKNotInLast];     break; 
+                case BDSKASBetween:     [self setDateComparison:BDSKBetween];       break; 
+                case BDSKASDate:        [self setDateComparison:BDSKDate];          break; 
+                case BDSKASAfterDate:   [self setDateComparison:BDSKAfterDate];     break; 
+                case BDSKASBeforeDate:  [self setDateComparison:BDSKBeforeDate];    break; 
+                case BDSKASInDateRange: [self setDateComparison:BDSKInDateRange];   break;
                 default:
                     [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
                     [cmd setScriptErrorString:NSLocalizedString(@"Invalid condition for smart condition.",@"Error description")];
@@ -282,18 +181,10 @@ enum {
             }
         } else if ([self isCountCondition]) {
             switch (newComparison) {
-                case BDSKASCountEqual:
-                    countComparison = BDSKCountEqual;
-                    break;
-                case BDSKASCountNotEqual:
-                    countComparison = BDSKCountNotEqual;
-                    break;
-                case BDSKASCountLarger:
-                    countComparison = BDSKCountLarger;
-                    break;
-                case BDSKASCountSmaller:
-                    countComparison = BDSKCountSmaller;
-                    break;
+                case BDSKASCountEqual:      [self setCountComparison:BDSKCountEqual];       break;
+                case BDSKASCountNotEqual:   [self setCountComparison:BDSKCountNotEqual];    break;
+                case BDSKASCountLarger:     [self setCountComparison:BDSKCountLarger];      break;
+                case BDSKASCountSmaller:    [self setCountComparison:BDSKCountSmaller];     break;
                 default:
                     [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
                     [cmd setScriptErrorString:NSLocalizedString(@"Invalid condition for smart condition.",@"Error description")];
@@ -301,73 +192,41 @@ enum {
             }
         } else {
             switch (newComparison) {
-                case BDSKASGroupContain:
-                    stringComparison = BDSKGroupContain;
-                    break;
-                case BDSKASGroupNotContain:
-                    stringComparison = BDSKGroupNotContain;
-                    break;
-                case BDSKASContain:
-                    stringComparison = BDSKContain;
-                    break;
-                case BDSKASNotContain:
-                    stringComparison = BDSKNotContain;
-                    break;
-                case BDSKASEqual:
-                    stringComparison = BDSKEqual;
-                    break;
-                case BDSKASNotEqual:
-                    stringComparison = BDSKNotEqual;
-                    break;
-                case BDSKASStartWith:
-                    stringComparison = BDSKStartWith;
-                    break;
-                case BDSKASEndWith:
-                    stringComparison = BDSKEndWith;
-                    break;
-                case BDSKASSmaller:
-                    stringComparison = BDSKSmaller;
-                    break;
-                case BDSKASLarger:
-                    stringComparison = BDSKLarger;
-                    break;
+                case BDSKASGroupContain:    [self setStringComparison:BDSKGroupContain];    break;
+                case BDSKASGroupNotContain: [self setStringComparison:BDSKGroupNotContain]; break;
+                case BDSKASContain:         [self setStringComparison:BDSKContain];         break;
+                case BDSKASNotContain:      [self setStringComparison:BDSKNotContain];      break;
+                case BDSKASEqual:           [self setStringComparison:BDSKEqual];           break;
+                case BDSKASNotEqual:        [self setStringComparison:BDSKNotEqual];        break;
+                case BDSKASStartWith:       [self setStringComparison:BDSKStartWith];       break;
+                case BDSKASEndWith:         [self setStringComparison:BDSKEndWith];         break;
+                case BDSKASSmaller:         [self setStringComparison:BDSKSmaller];         break;
+                case BDSKASLarger:          [self setStringComparison:BDSKLarger];          break;
                 default:
                     [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
                     [cmd setScriptErrorString:NSLocalizedString(@"Invalid condition for smart condition.",@"Error description")];
                     break;
-           }
+            }
         }
     }
 }
 
-- (int)scriptingPeriodValue {
-    int scriptingPeriodValue = 0;
-    switch ([self periodValue]) {
-        case BDSKPeriodDay:
-            scriptingPeriodValue = BDSKASPeriodDay;
-            break;
-        case BDSKPeriodWeek:
-            scriptingPeriodValue = BDSKASPeriodWeek;
-            break;
-        case BDSKPeriodMonth:
-            scriptingPeriodValue = BDSKASPeriodMonth;
-            break;
-        case BDSKPeriodYear:
-            scriptingPeriodValue = BDSKASPeriodYear;
-            break;
-    }
-    return scriptingPeriodValue;
-}
-
 - (id)scriptingValue {
     if ([self isDateCondition]) {
-        switch (dateComparison) {
+        int scriptingPeriodValue = BDSKASPeriodDay;
+        switch ([self periodValue]) {
+            case BDSKPeriodDay:     scriptingPeriodValue = BDSKASPeriodDay;     break;
+            case BDSKPeriodWeek:    scriptingPeriodValue = BDSKASPeriodWeek;    break;
+            case BDSKPeriodMonth:   scriptingPeriodValue = BDSKASPeriodMonth;   break;
+            case BDSKPeriodYear:    scriptingPeriodValue = BDSKASPeriodYear;    break;
+        }
+        switch ([self dateComparison]) {
             case BDSKExactly: 
             case BDSKInLast: 
             case BDSKNotInLast: 
-                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:numberValue], @"numberValue", [NSNumber numberWithInt:[self scriptingPeriodValue]], @"periodValue", nil];
+                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:numberValue], @"numberValue", [NSNumber numberWithInt:scriptingPeriodValue], @"periodValue", nil];
             case BDSKBetween:
-                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:numberValue], @"numberValue", [NSNumber numberWithInt:andNumberValue], @"andNumberValue", [NSNumber numberWithInt:[self scriptingPeriodValue]], @"periodValue", nil];
+                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:numberValue], @"numberValue", [NSNumber numberWithInt:andNumberValue], @"andNumberValue", [NSNumber numberWithInt:scriptingPeriodValue], @"periodValue", nil];
             case BDSKDate: 
             case BDSKAfterDate: 
             case BDSKBeforeDate: 
@@ -390,28 +249,16 @@ enum {
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot edit smart condition.",@"Error description")];
     } else if ([self isDateCondition]) {
-        if (newValue == nil || [newValue isEqual:[NSNull null]]) {
-        } else if ([newValue isKindOfClass:[NSDictionary class]] == NO) {
-            [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-            [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
-        } else {
+        if ([newValue isKindOfClass:[NSDictionary class]]) {
             id value;
             if (value = [newValue objectForKey:@"numberValue"]) {
                 [self setNumberValue:[value intValue]];
                 if (value = [newValue objectForKey:@"periodValue"]) {
                     switch ([value intValue]) {
-                        case BDSKASPeriodDay:
-                            periodValue = BDSKPeriodDay;
-                            break;
-                        case BDSKASPeriodWeek:
-                            periodValue = BDSKPeriodWeek;
-                            break;
-                        case BDSKASPeriodMonth:
-                            periodValue = BDSKPeriodMonth;
-                            break;
-                        case BDSKASPeriodYear:
-                            periodValue = BDSKPeriodYear;
-                            break;
+                        case BDSKASPeriodDay:   [self setPeriodValue:BDSKPeriodDay];    break;
+                        case BDSKASPeriodWeek:  [self setPeriodValue:BDSKPeriodWeek];   break;
+                        case BDSKASPeriodMonth: [self setPeriodValue:BDSKPeriodMonth];  break;
+                        case BDSKASPeriodYear:  [self setPeriodValue:BDSKPeriodYear];   break;
                     }
                 }
                 if (value = [newValue objectForKey:@"andNumberValue"])
@@ -421,20 +268,25 @@ enum {
                 if (value = [newValue objectForKey:@"toDateValue"])
                     [self setToDateValue:value];
             }
+        } else if ([newValue isKindOfClass:[NSDate class]]) {
+            [self setDateValue:newValue];
+        } else if (newValue && [newValue isEqual:[NSNull null]] == NO) {
+            [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
+            [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
         }
     } else if ([self isCountCondition]) {
-        if ([newValue isKindOfClass:[NSNumber class]] == NO && [newValue isKindOfClass:[NSString class]] == NO) {
+        if ([newValue isKindOfClass:[NSNumber class]] || [newValue isKindOfClass:[NSString class]]) {
+            [self setCountValue:[newValue intValue]];
+        } else {
             [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
             [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
-        } else {
-            [self setCountValue:[newValue intValue]];
         }
     } else {
-        if ([newValue isKindOfClass:[NSString class]] == NO) {
+        if ([newValue isKindOfClass:[NSString class]]) {
+            [self setStringValue:newValue];
+        } else {
             [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
             [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
-        } else {
-            [self setStringValue:newValue];
         }
     }
 }
