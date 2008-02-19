@@ -1209,9 +1209,9 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Starts with generic comparison."/>
             <enumerator name="suffix" code="CEnd"
                 description="Ends with generic comparison."/>
-            <enumerator name="smaller" code="CBef"
+            <enumerator name="comes before" code="CBef"
                 description="Comes before generic comparison."/>
-            <enumerator name="larger" code="CAft"
+            <enumerator name="comes after" code="CAft"
                 description="Comes after generic comparison."/>
             <enumerator name="count equality" code="CCEq"
                 description="Count is equal attachment comparison."/>
