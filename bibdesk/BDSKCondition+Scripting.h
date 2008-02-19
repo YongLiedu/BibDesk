@@ -45,12 +45,6 @@
 
 - (NSString *)scriptingKey;
 - (int)scriptingComparison;
-- (NSString *)scriptingStringValue;
-- (int)scriptingCountValue;
-- (int)scriptingNumberValue;
-- (int)scriptingAndNumberValue;
-- (int)scriptingPeriodValue;
-- (NSDate *)scriptingDateValue;
-- (NSDate *)scriptingToDateValue;
+- (id)scriptingValue;
 
 @end

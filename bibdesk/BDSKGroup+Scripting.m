@@ -292,6 +292,10 @@
     }
 }
 
+- (unsigned int)countOfConditions {
+    return [[[self filter] conditions] count];
+}
+
 - (BDSKCondition *)objectInConditionsAtIndex:(unsigned int)idx {
     return [[[self filter] conditions] objectAtIndex:idx];
 }

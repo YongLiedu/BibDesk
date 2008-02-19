@@ -1105,34 +1105,40 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="scriptingComparison"/>
             </property>  
             <property name="value" code="valu" type="text" access="r"
-                description="The text value of the generic condition.">
-                <cocoa key="scriptingStringValue"/>
+                description="The value of the condition. Text for a generic condition, an attachment count for an attachment condition, a record containg one or two periods, or a record containing one or two dates.">
+                <type type="period condition value"/>
+                <type type="date condition value"/>
+                <type type="text"/>
+                <type type="integer"/>
+                <cocoa key="scriptingValue"/>
             </property>  
-            <property name="attachment count" code="ACnt" type="integer" access="r"
-                description="The attachment count of the attachment condition.">
-                <cocoa key="scriptingCountValue"/>
-            </property>  
+        </class>
+        
+        <record-type name="period condition value" code="CPVl">
             <property name="period" code="Perd" type="integer" access="r"
                 description="The amount of a period of the date condition.">
-                <cocoa key="scriptingNumberValue"/>
+                <cocoa key="numberValue"/>
             </property>  
             <property name="end period" code="EPer" type="integer" access="r"
                 description="The end amount of a period range of the date condition.">
-                <cocoa key="scriptingAndNumberValue"/>
+                <cocoa key="andNumberValue"/>
             </property>  
             <property name="period type" code="TPer" type="period unit" access="r"
                 description="The kind of period of the date condition.">
-                <cocoa key="scriptingPeriodValue"/>
+                <cocoa key="periodValue"/>
             </property>  
+        </record-type>
+        
+        <record-type name="date condition value" code="CTVl">
             <property name="date" code="ldt " type="date" access="r"
                 description="The date of the date condition.">
-                <cocoa key="scriptingDateValue"/>
+                <cocoa key="dateValue"/>
             </property>  
             <property name="end date" code="Eldt" type="date" access="r"
                 description="The end date for a date range of the date condition.">
-                <cocoa key="scriptingToDateValue"/>
+                <cocoa key="toDateValue"/>
             </property>  
-        </class>
+        </record-type>
         
         <record-type name="search server info" code="SrvI">
             <property name="name" code="pnam" type="text"

@@ -142,54 +142,6 @@ enum {
     int scriptingComparison = 0;
     if ([self isDateCondition]) {
         switch ([self dateComparison]) {
-            case BDSKGroupContain:
-                scriptingComparison = BDSKASGroupContain;
-                break;
-            case BDSKGroupNotContain:
-                scriptingComparison = BDSKASGroupNotContain;
-                break;
-            case BDSKContain:
-                scriptingComparison = BDSKASContain;
-                break;
-            case BDSKNotContain:
-                scriptingComparison = BDSKASNotContain;
-                break;
-            case BDSKEqual:
-                scriptingComparison = BDSKASEqual;
-                break;
-            case BDSKNotEqual:
-                scriptingComparison = BDSKASNotEqual;
-                break;
-            case BDSKStartWith:
-                scriptingComparison = BDSKASStartWith;
-                break;
-            case BDSKEndWith:
-                scriptingComparison = BDSKASEndWith;
-                break;
-            case BDSKSmaller:
-                scriptingComparison = BDSKASSmaller;
-                break;
-            case BDSKLarger:
-                scriptingComparison = BDSKASLarger;
-                break;
-        }
-    } else if ([self isCountCondition]) {
-        switch ([self countComparison]) {
-            case BDSKCountEqual:
-                scriptingComparison = BDSKASCountEqual;
-                break;
-            case BDSKCountNotEqual:
-                scriptingComparison = BDSKASCountNotEqual;
-                break;
-            case BDSKCountLarger:
-                scriptingComparison = BDSKASCountLarger;
-                break;
-            case BDSKCountSmaller:
-                scriptingComparison = BDSKASCountSmaller;
-                break;
-        }
-    } else {
-        switch ([self stringComparison]) {
             case BDSKToday:
                 scriptingComparison = BDSKASToday;
                 break; 
@@ -225,6 +177,54 @@ enum {
                 break; 
             case BDSKInDateRange:
                 scriptingComparison = BDSKInDateRange;
+                break;
+        }
+    } else if ([self isCountCondition]) {
+        switch ([self countComparison]) {
+            case BDSKCountEqual:
+                scriptingComparison = BDSKASCountEqual;
+                break;
+            case BDSKCountNotEqual:
+                scriptingComparison = BDSKASCountNotEqual;
+                break;
+            case BDSKCountLarger:
+                scriptingComparison = BDSKASCountLarger;
+                break;
+            case BDSKCountSmaller:
+                scriptingComparison = BDSKASCountSmaller;
+                break;
+        }
+    } else {
+        switch ([self stringComparison]) {
+            case BDSKGroupContain:
+                scriptingComparison = BDSKASGroupContain;
+                break;
+            case BDSKGroupNotContain:
+                scriptingComparison = BDSKASGroupNotContain;
+                break;
+            case BDSKContain:
+                scriptingComparison = BDSKASContain;
+                break;
+            case BDSKNotContain:
+                scriptingComparison = BDSKASNotContain;
+                break;
+            case BDSKEqual:
+                scriptingComparison = BDSKASEqual;
+                break;
+            case BDSKNotEqual:
+                scriptingComparison = BDSKASNotEqual;
+                break;
+            case BDSKStartWith:
+                scriptingComparison = BDSKASStartWith;
+                break;
+            case BDSKEndWith:
+                scriptingComparison = BDSKASEndWith;
+                break;
+            case BDSKSmaller:
+                scriptingComparison = BDSKASSmaller;
+                break;
+            case BDSKLarger:
+                scriptingComparison = BDSKASLarger;
                 break;
         }
     }
@@ -340,74 +340,6 @@ enum {
     }
 }
 
-- (NSString *)scriptingStringValue {
-    return [self stringValue];
-}
-
-- (void)setScriptingStringValue:(NSString *)newStringValue {
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    if ([cmd isKindOfClass:[NSCreateCommand class]] == NO) {
-        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Cannot edit smart condition.",@"Error description")];
-    } else if ([self isDateCondition] || [self isCountCondition]) {
-        [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
-    } else {
-        [self setStringValue:newStringValue];
-    }
-}
-
-- (int)scriptingCountValue {
-    return [self countValue];
-}
-
-- (void)setScriptingCountValue:(int)newCountValue {
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    if ([cmd isKindOfClass:[NSCreateCommand class]] == NO) {
-        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Cannot edit smart condition.",@"Error description")];
-    } else if ([self isCountCondition]) {
-        [self setCountValue:newCountValue];
-    } else {
-        [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
-    }
-}
-
-- (int)scriptingNumberValue {
-    return [self andNumberValue];
-}
-
-- (void)setScriptingNumberValue:(int)newNumberValue {
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    if ([cmd isKindOfClass:[NSCreateCommand class]] == NO) {
-        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Cannot edit smart condition.",@"Error description")];
-    } else if ([self isDateCondition]) {
-        [self setNumberValue:newNumberValue];
-    } else {
-        [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
-    }
-}
-
-- (int)scriptingAndNumberValue {
-    return [self numberValue];
-}
-
-- (void)setScriptingAndNumberValue:(int)newAndNumberValue {
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    if ([cmd isKindOfClass:[NSCreateCommand class]] == NO) {
-        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Cannot edit smart condition.",@"Error description")];
-    } else if ([self isDateCondition]) {
-        [self setAndNumberValue:newAndNumberValue];
-    } else {
-        [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
-    }
-}
-
 - (int)scriptingPeriodValue {
     int scriptingPeriodValue = 0;
     switch ([self periodValue]) {
@@ -427,67 +359,83 @@ enum {
     return scriptingPeriodValue;
 }
 
-- (void)setScriptingPeriodValue:(int)newPeriodValue {
+- (id)scriptingValue {
+    if ([self isDateCondition]) {
+        switch (dateComparison) {
+            case BDSKExactly: 
+            case BDSKInLast: 
+            case BDSKNotInLast: 
+                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:numberValue], @"numberValue", [NSNumber numberWithInt:[self scriptingPeriodValue]], @"periodValue", nil];
+            case BDSKBetween:
+                return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:numberValue], @"numberValue", [NSNumber numberWithInt:andNumberValue], @"andNumberValue", [NSNumber numberWithInt:[self scriptingPeriodValue]], @"periodValue", nil];
+            case BDSKDate: 
+            case BDSKAfterDate: 
+            case BDSKBeforeDate: 
+                return [NSDictionary dictionaryWithObjectsAndKeys:dateValue, @"dateValue", nil];
+            case BDSKInDateRange:
+                return [NSDictionary dictionaryWithObjectsAndKeys:dateValue, @"dateValue", toDateValue, @"dateValue", nil];
+            default:
+                return [NSNull null];
+        }
+    } else if ([self isCountCondition]) {
+        return [NSNumber numberWithInt:countValue];
+    } else {
+        return [self stringValue];
+    }
+}
+
+- (void)setScriptingValue:(id)newValue {
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
     if ([cmd isKindOfClass:[NSCreateCommand class]] == NO) {
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot edit smart condition.",@"Error description")];
     } else if ([self isDateCondition]) {
-        switch (newPeriodValue) {
-            case BDSKASPeriodDay:
-                periodValue = BDSKPeriodDay;
-                break;
-            case BDSKASPeriodWeek:
-                periodValue = BDSKPeriodWeek;
-                break;
-            case BDSKASPeriodMonth:
-                periodValue = BDSKPeriodMonth;
-                break;
-            case BDSKASPeriodYear:
-                periodValue = BDSKPeriodYear;
-                break;
-            default:
-                [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-                [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
-                break;
+        if (newValue == nil || [newValue isEqual:[NSNull null]]) {
+        } else if ([newValue isKindOfClass:[NSDictionary class]] == NO) {
+            [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
+            [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
+        } else {
+            id value;
+            if (value = [newValue objectForKey:@"numberValue"]) {
+                [self setNumberValue:[value intValue]];
+                if (value = [newValue objectForKey:@"periodValue"]) {
+                    switch ([value intValue]) {
+                        case BDSKASPeriodDay:
+                            periodValue = BDSKPeriodDay;
+                            break;
+                        case BDSKASPeriodWeek:
+                            periodValue = BDSKPeriodWeek;
+                            break;
+                        case BDSKASPeriodMonth:
+                            periodValue = BDSKPeriodMonth;
+                            break;
+                        case BDSKASPeriodYear:
+                            periodValue = BDSKPeriodYear;
+                            break;
+                    }
+                }
+                if (value = [newValue objectForKey:@"andNumberValue"])
+                    [self setAndNumberValue:[value intValue]];
+            } else if (value = [newValue objectForKey:@"dateValue"]) {
+                [self setDateValue:value];
+                if (value = [newValue objectForKey:@"toDateValue"])
+                    [self setToDateValue:value];
+            }
+        }
+    } else if ([self isCountCondition]) {
+        if ([newValue isKindOfClass:[NSNumber class]] == NO && [newValue isKindOfClass:[NSString class]] == NO) {
+            [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
+            [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
+        } else {
+            [self setCountValue:[newValue intValue]];
         }
     } else {
-        [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
-    }
-}
-
-- (NSDate *)scriptingDateValue {
-    return [self dateValue];
-}
-
-- (void)setScriptingDateValue:(NSDate *)newDateValue {
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    if ([cmd isKindOfClass:[NSCreateCommand class]] == NO) {
-        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Cannot edit smart condition.",@"Error description")];
-    } else if ([self isDateCondition]) {
-        [self setDateValue:[[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:newDateValue] autorelease]];
-    } else {
-        [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
-    }
-}
-
-- (NSDate *)scriptingToDateValue {
-    return [self toDateValue];
-}
-
-- (void)setScriptingToDateValue:(NSDate *)newToDateValue {
-    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-    if ([cmd isKindOfClass:[NSCreateCommand class]] == NO) {
-        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Cannot edit smart condition.",@"Error description")];
-    } else if ([self isDateCondition]) {
-        [self setToDateValue:[[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:newToDateValue] autorelease]];
-    } else {
-        [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
-        [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
+        if ([newValue isKindOfClass:[NSString class]] == NO) {
+            [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
+            [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
+        } else {
+            [self setStringValue:newValue];
+        }
     }
 }
 

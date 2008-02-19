@@ -111,6 +111,7 @@
 
 @interface BDSKSmartGroup (Scripting)
 
+- (unsigned int)countOfConditions;
 - (BDSKCondition *)objectInConditionsAtIndex:(unsigned int)idx;
 - (BDSKCondition *)valueInConditionsAtIndex:(unsigned int)idx;
 - (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(unsigned int)idx;
