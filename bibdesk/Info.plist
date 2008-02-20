@@ -794,7 +794,7 @@
 					<key>BDSKStringEncodingsKey</key>
 					<array/>
 					<key>Default string encoding for opening and saving</key>
-					<integer>1</integer>
+					<integer>4</integer>
 					<key>Load files in background</key>
 					<false/>
 					<key>Output Template File</key>
