@@ -1106,7 +1106,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
             <property name="value" code="fldv" access="r"
                 description="The value of the condition. Text for a generic condition, an attachment count for an attachment condition, a record containg one or two periods, or a record containing one or two dates.">
-                <type type="period condition value"/>
                 <type type="date condition value"/>
                 <type type="text"/>
                 <type type="integer"/>
@@ -1114,7 +1113,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
         </class>
         
-        <record-type name="period condition value" code="CPVl">
+        <record-type name="date condition value" code="CDVl">
             <property name="period" code="Perd" type="integer"
                 description="The amount of a period of the date condition.">
                 <cocoa key="numberValue"/>
@@ -1127,9 +1126,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The kind of period of the date condition.">
                 <cocoa key="periodValue"/>
             </property>  
-        </record-type>
-        
-        <record-type name="date condition value" code="CTVl">
             <property name="date" code="ldt " type="date"
                 description="The date of the date condition.">
                 <cocoa key="dateValue"/>
@@ -1139,58 +1135,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="toDateValue"/>
             </property>  
         </record-type>
-        
-        <record-type name="search server info" code="SrvI">
-            <property name="name" code="pnam" type="text"
-                description="The name of the server.">
-                <cocoa key="name"/>
-            </property>
-            <property name="server type" code="STyp" type="search server type"
-                description="The type of the server.">
-                <cocoa key="type"/>
-            </property>
-            <property name="database" code="Dbas" type="text"
-                description="The database of the server.">
-                <cocoa key="database"/>
-            </property>
-            <property name="host" code="Host" type="text"
-                description="The name of the Z39.50 server.">
-                <cocoa key="host"/>
-            </property>
-            <property name="port" code="Port" type="text"
-                description="The port of the Z39.50 server.">
-                <cocoa key="port"/>
-            </property>
-            <property name="username" code="User" type="text"
-                description="The username of the Z39.50 server.">
-                <cocoa key="username"/>
-            </property>
-            <property name="password" code="Pswd" type="text"
-                description="The port of the Z39.50 server.">
-                <cocoa key="password"/>
-            </property>
-            <property name="record syntax" code="RSyn" type="text"
-                description="The record syntax of the Z39.50 server results.">
-                <cocoa key="recordSyntax"/>
-            </property>
-            <property name="encoding" code="REnc" type="text"
-                description="The encoding of the Z39.50 server result.">
-                <cocoa key="resultEncoding"/>
-            </property>
-            <property name="remove diacritics" code="RmDi" type="boolean"
-                description="Whether diacritics should be removed.">
-                <cocoa key="removeDiacritics"/>
-            </property>
-        </record-type>
-
-        <enumeration name="search server type" code="SrvT">
-            <enumerator name="Entrez" code="Entr"
-                description="Entrez search server."/>
-            <enumerator name="Z3950" code="Zoom"
-                description="Z3950 search server."/>
-            <enumerator name="ISI" code="ISI "
-                description="ISI Web of Sciences search server."/>
-        </enumeration>
 
         <enumeration name="comparison type" code="CmpT">
             <enumerator name="group containment" code="CGCt"
@@ -1256,6 +1200,58 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="A period in months."/>
             <enumerator name="year period" code="PYer"
                 description="A period in years."/>
+        </enumeration>
+        
+        <record-type name="search server info" code="SrvI">
+            <property name="name" code="pnam" type="text"
+                description="The name of the server.">
+                <cocoa key="name"/>
+            </property>
+            <property name="server type" code="STyp" type="search server type"
+                description="The type of the server.">
+                <cocoa key="type"/>
+            </property>
+            <property name="database" code="Dbas" type="text"
+                description="The database of the server.">
+                <cocoa key="database"/>
+            </property>
+            <property name="host" code="Host" type="text"
+                description="The name of the Z39.50 server.">
+                <cocoa key="host"/>
+            </property>
+            <property name="port" code="Port" type="text"
+                description="The port of the Z39.50 server.">
+                <cocoa key="port"/>
+            </property>
+            <property name="username" code="User" type="text"
+                description="The username of the Z39.50 server.">
+                <cocoa key="username"/>
+            </property>
+            <property name="password" code="Pswd" type="text"
+                description="The port of the Z39.50 server.">
+                <cocoa key="password"/>
+            </property>
+            <property name="record syntax" code="RSyn" type="text"
+                description="The record syntax of the Z39.50 server results.">
+                <cocoa key="recordSyntax"/>
+            </property>
+            <property name="encoding" code="REnc" type="text"
+                description="The encoding of the Z39.50 server result.">
+                <cocoa key="resultEncoding"/>
+            </property>
+            <property name="remove diacritics" code="RmDi" type="boolean"
+                description="Whether diacritics should be removed.">
+                <cocoa key="removeDiacritics"/>
+            </property>
+        </record-type>
+
+        <enumeration name="search server type" code="SrvT">
+            <enumerator name="Entrez" code="Entr"
+                description="Entrez search server."/>
+            <enumerator name="Z3950" code="Zoom"
+                description="Z3950 search server."/>
+            <enumerator name="ISI" code="ISI "
+                description="ISI Web of Sciences search server."/>
         </enumeration>
         
         <command name="add" code="BDSKAdd "
