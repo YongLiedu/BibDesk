@@ -51,7 +51,7 @@
 - (NSDate *)cachedStartDate;
 - (void)setCachedStartDate:(NSDate *)newCachedDate;
 - (void)updateCachedDates;
-- (void)getStartDate:(NSCalendarDate **)startDate endDate:(NSCalendarDate **)endDate;
+- (void)getStartDate:(NSDate **)startDate endDate:(NSDate **)endDate;
 - (void)refreshCachedDate:(NSTimer *)timer;
 
 - (void)startObserving;
@@ -355,13 +355,13 @@
             case BDSKDate: 
             case BDSKAfterDate: 
             case BDSKBeforeDate: 
-                [self setDateValue:[NSCalendarDate dateWithString:newValue]];
+                [self setDateValue:[NSDate dateWithString:newValue]];
                 break;
             case BDSKInDateRange:
                 values = [newValue componentsSeparatedByString:@" to "];
                 OBASSERT([values count] == 2);
-                [self setDateValue:[NSCalendarDate dateWithString:[values objectAtIndex:0]]];
-                [self setToDateValue:[NSCalendarDate dateWithString:[values objectAtIndex:1]]];
+                [self setDateValue:[NSDate dateWithString:[values objectAtIndex:0]]];
+                [self setToDateValue:[NSDate dateWithString:[values objectAtIndex:1]]];
                 break;
             default:
                 break;
@@ -448,22 +448,22 @@
     periodValue = newPeriod;
 }
 
-- (NSCalendarDate *)dateValue {
+- (NSDate *)dateValue {
     return [[dateValue retain] autorelease];
 }
 
-- (void)setDateValue:(NSCalendarDate *)newDate {
+- (void)setDateValue:(NSDate *)newDate {
     if (dateValue != newDate) {
         [dateValue release];
         dateValue = [newDate retain];
     }
 }
 
-- (NSCalendarDate *)toDateValue {
+- (NSDate *)toDateValue {
     return [[toDateValue retain] autorelease];
 }
 
-- (void)setToDateValue:(NSCalendarDate *)newDate {
+- (void)setToDateValue:(NSDate *)newDate {
     if (toDateValue != newDate) {
         [toDateValue release];
         toDateValue = [newDate retain];
@@ -503,7 +503,7 @@
     switch ([key fieldType]) {
         case BDSKDateField:
         {
-            NSCalendarDate *today = [NSCalendarDate date];
+            NSDate *today = [NSDate date];
             [self setNumberValue:7];
             [self setAndNumberValue:9];
             [self setPeriodValue:BDSKPeriodDay];
@@ -570,8 +570,8 @@
 }
 
 - (void)updateCachedDates {
-    NSCalendarDate *startDate = nil;
-    NSCalendarDate *endDate = nil;
+    NSDate *startDate = nil;
+    NSDate *endDate = nil;
     
     [cacheTimer invalidate];
     cacheTimer = nil;
@@ -580,7 +580,10 @@
         [self getStartDate:&startDate endDate:&endDate];
         if (dateComparison < BDSKDate && group) {
             // we fire every day at 1 second past midnight, because the condition changes at midnight
-            NSCalendarDate *fireDate = [[[NSCalendarDate date] startOfDay] dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:1];
+            NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+            NSDateComponents *components = [NSDateComponents dateComponentsWithYear:0 month:0 day:1 hour:0 minute:0 second:1];
+            NSDate *fireDate = [calendar dateByAddingComponents:components toDate:[[NSDate date] startOfDay] options:0];
+            [calendar release];
             NSTimeInterval refreshInterval = 24 * 3600;
             cacheTimer = [[NSTimer alloc] initWithFireDate:fireDate interval:refreshInterval target:self selector:@selector(refreshCachedDate:) userInfo:NULL repeats:YES];
             [[NSRunLoop currentRunLoop] addTimer:cacheTimer forMode:NSDefaultRunLoopMode];
@@ -593,8 +596,8 @@
 }
 
 - (void)refreshCachedDate:(NSTimer *)timer {
-    NSCalendarDate *startDate = nil;
-    NSCalendarDate *endDate = nil;
+    NSDate *startDate = nil;
+    NSDate *endDate = nil;
     BOOL changed = NO;
     
 	[self getStartDate:&startDate endDate:&endDate];
@@ -612,8 +615,8 @@
     }
 }
 
-- (void)getStartDate:(NSCalendarDate **)startDate endDate:(NSCalendarDate **)endDate {
-    NSCalendarDate *today = [[NSCalendarDate date] startOfDay];
+- (void)getStartDate:(NSDate **)startDate endDate:(NSDate **)endDate {
+    NSDate *today = [[NSDate date] startOfDay];
     
     switch (dateComparison) {
         case BDSKToday:
@@ -621,7 +624,7 @@
             *endDate = nil;
             break;
         case BDSKYesterday: 
-            *startDate = [today dateByAddingYears:0 months:0 days:-1 hours:0 minutes:0 seconds:0];
+            *startDate = [today dateByAddingNumber:-1 ofPeriod:BDSKPeriodDay];
             *endDate = today;
             break;
         case BDSKThisWeek: 
@@ -630,7 +633,7 @@
             break;
         case BDSKLastWeek: 
             *endDate = [today startOfWeek];
-            *startDate = [*endDate dateByAddingYears:0 months:0 days:-7 hours:0 minutes:0 seconds:0];
+            *startDate = [*endDate dateByAddingNumber:-1 ofPeriod:BDSKPeriodWeek];
             break;
         case BDSKExactly: 
             *startDate = [today dateByAddingNumber:-numberValue ofPeriod:periodValue];
@@ -650,7 +653,7 @@
             break;
         case BDSKDate: 
             *startDate = (dateValue == nil) ? nil : [dateValue startOfDay];
-            *endDate = [*startDate dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:0];
+            *endDate = [*startDate dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
             break;
         case BDSKAfterDate: 
             *startDate = (dateValue == nil) ? nil : [dateValue endOfDay];

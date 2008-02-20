@@ -59,28 +59,33 @@ enum {
 */
 - (id)initWithMonthDayYearString:(NSString *)dateString;
 
-@end
-
-@interface NSCalendarDate (BDSKExtensions)
-
-- (NSCalendarDate *)initWithNaturalLanguageString:(NSString *)dateString;
 - (NSString *)dateDescription;
 - (NSString *)shortDateDescription;
 - (NSString *)rssDescription;
 - (NSString *)standardDescription;
 
-- (NSCalendarDate *)startOfHour;
-- (NSCalendarDate *)endOfHour;
-- (NSCalendarDate *)startOfDay;
-- (NSCalendarDate *)endOfDay;
-- (NSCalendarDate *)startOfWeek;
-- (NSCalendarDate *)endOfWeek;
-- (NSCalendarDate *)startOfMonth;
-- (NSCalendarDate *)endOfMonth;
-- (NSCalendarDate *)startOfYear;
-- (NSCalendarDate *)endOfYear;
-- (NSCalendarDate *)startOfPeriod:(int)period;
-- (NSCalendarDate *)endOfPeriod:(int)period;
-- (NSCalendarDate *)dateByAddingNumber:(int)number ofPeriod:(int)period;
+- (NSDate *)startOfHour;
+- (NSDate *)endOfHour;
+- (NSDate *)startOfDay;
+- (NSDate *)endOfDay;
+- (NSDate *)startOfWeek;
+- (NSDate *)endOfWeek;
+- (NSDate *)startOfMonth;
+- (NSDate *)endOfMonth;
+- (NSDate *)startOfYear;
+- (NSDate *)endOfYear;
+- (NSDate *)startOfPeriod:(int)period;
+- (NSDate *)endOfPeriod:(int)period;
+- (NSDate *)dateByAddingNumber:(int)number ofPeriod:(int)period;
 
+@end
+
+@interface NSCalendarDate (BDSKExtensions)
+
+- (NSCalendarDate *)initWithNaturalLanguageString:(NSString *)dateString;
+
+@end
+
+@interface NSDateComponents (BDSKExtensions)
++ (NSDateComponents *)dateComponentsWithYear:(int)year month:(int)month day:(int)day hour:(int)hour minute:(int)minute second:(int)second;
 @end

@@ -97,8 +97,8 @@ enum {
     int numberValue;
     int andNumberValue;
     int periodValue;
-    NSCalendarDate *dateValue;
-    NSCalendarDate *toDateValue;
+    NSDate *dateValue;
+    NSDate *toDateValue;
     BDSKSmartGroup *group;
 	NSDate *cachedStartDate;
 	NSDate *cachedEndDate;
@@ -142,10 +142,10 @@ enum {
 - (void)setAndNumberValue:(int)value;
 - (int)periodValue;
 - (void)setPeriodValue:(int)value;
-- (NSCalendarDate *)dateValue;
-- (void)setDateValue:(NSCalendarDate *)value;
-- (NSCalendarDate *)toDateValue;
-- (void)setToDateValue:(NSCalendarDate *)value;
+- (NSDate *)dateValue;
+- (void)setDateValue:(NSDate *)value;
+- (NSDate *)toDateValue;
+- (void)setToDateValue:(NSDate *)value;
 
 - (void)setDefaultComparison;
 - (void)setDefaultValue;

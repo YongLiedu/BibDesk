@@ -110,6 +110,237 @@ static CFDateFormatterRef numericDateFormatter = NULL;
     return [[NSDate dateWithNaturalLanguageString:dateString locale:locale] retain];
 }
 
+- (NSString *)dateDescription{
+    // Saturday, March 24, 2001 (NSDateFormatString)
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [formatter setDateStyle:NSDateFormatterFullStyle];
+    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    return [formatter stringFromDate:self];
+}
+
+- (NSString *)shortDateDescription{
+    // 31/10/01 (NSShortDateFormatString)
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [formatter setDateStyle:NSDateFormatterShortStyle];
+    [formatter setTimeStyle:NSDateFormatterNoStyle];
+    return [formatter stringFromDate:self];
+}
+
+- (NSString *)rssDescription{
+    // see RFC 822, %a, %d %b %Y %H:%M:%S %z
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [formatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss ZZZ"];
+    return [formatter stringFromDate:self];
+}
+
+- (NSString *)standardDescription{
+    // %Y-%m-%d %H:%M:%S %z
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss ZZZ"];
+    return [formatter stringFromDate:self];
+}
+
+- (NSDate *)startOfHour;
+{
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit | NSHourCalendarUnit;
+    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
+    [components setMinute:0];
+    [components setSecond:0];
+    NSDate *date = [calendar dateFromComponents:components];
+    [calendar release];
+    return date;
+}
+
+- (NSDate *)endOfHour;
+{
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit | NSHourCalendarUnit;
+    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
+    [components setMinute:59];
+    [components setSecond:59];
+    NSDate *date = [calendar dateFromComponents:components];
+    [calendar release];
+    return date;
+}
+
+- (NSDate *)startOfDay;
+{
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit;
+    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
+    [components setHour:0];
+    [components setMinute:0];
+    [components setSecond:0];
+    NSDate *date = [calendar dateFromComponents:components];
+    [calendar release];
+    return date;
+}
+
+- (NSDate *)endOfDay;
+{
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekdayCalendarUnit | NSDayCalendarUnit;
+    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
+    [components setHour:23];
+    [components setMinute:59];
+    [components setSecond:59];
+    NSDate *date = [calendar dateFromComponents:components];
+    [calendar release];
+    return date;
+}
+
+- (NSDate *)startOfWeek;
+{
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit;
+    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
+    // @@ or should we use -firstWeekday?
+    [components setWeekday:1];
+    [components setHour:0];
+    [components setMinute:0];
+    [components setSecond:0];
+    NSDate *date = [calendar dateFromComponents:components];
+    [calendar release];
+    return date;
+}
+
+- (NSDate *)endOfWeek;
+{
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSDateComponents *components = [NSDateComponents dateComponentsWithYear:0 month:NSUndefinedDateComponent day:0 hour:0 minute:0 second:-1];
+    [components setWeek:1];
+    NSDate *date = [calendar dateByAddingComponents:components toDate:[self startOfWeek] options:0];
+    [calendar release];
+    return date;
+}
+
+- (NSDate *)startOfMonth;
+{
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit;
+    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
+    [components setDay:1];
+    [components setHour:0];
+    [components setMinute:0];
+    [components setSecond:0];
+    NSDate *date = [calendar dateFromComponents:components];
+    [calendar release];
+    return date;
+}
+
+- (NSDate *)endOfMonth;
+{
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSDateComponents *components = [NSDateComponents dateComponentsWithYear:0 month:1 day:0 hour:0 minute:0 second:-1];
+    NSDate *date = [calendar dateByAddingComponents:components toDate:[self startOfMonth] options:0];
+    [calendar release];
+    [components release];
+    return date;
+}
+
+- (NSDate *)startOfYear;
+{
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    unsigned unitFlags = NSYearCalendarUnit;
+    NSDateComponents *components = [calendar components:unitFlags fromDate:self];
+    [components setMonth:1];
+    [components setDay:1];
+    [components setHour:0];
+    [components setMinute:0];
+    [components setSecond:0];
+    NSDate *date = [calendar dateFromComponents:components];
+    [calendar release];
+    return date;
+}
+
+- (NSDate *)endOfYear;
+{
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSDateComponents *components = [NSDateComponents dateComponentsWithYear:1 month:0 day:0 hour:0 minute:0 second:-1];
+    NSDate *date = [calendar dateByAddingComponents:components toDate:[self startOfYear] options:0];
+    [calendar release];
+    return date;
+}
+
+- (NSDate *)startOfPeriod:(int)period;
+{
+    switch (period) {
+        case BDSKPeriodHour:
+            return [self startOfHour];
+        case BDSKPeriodDay:
+            return [self startOfDay];
+        case BDSKPeriodWeek:
+            return [self startOfWeek];
+        case BDSKPeriodMonth:
+            return [self startOfMonth];
+        case BDSKPeriodYear:
+            return [self startOfYear];
+        default:
+            NSLog(@"Unknown period %d",period);
+            return self;
+    }
+}
+
+- (NSDate *)endOfPeriod:(int)period;
+{
+    switch (period) {
+        case BDSKPeriodHour:
+            return [self endOfHour];
+        case BDSKPeriodDay:
+            return [self endOfDay];
+        case BDSKPeriodWeek:
+            return [self endOfWeek];
+        case BDSKPeriodMonth:
+            return [self endOfMonth];
+        case BDSKPeriodYear:
+            return [self endOfYear];
+        default:
+            NSLog(@"Unknown period %d",period);
+            return self;
+    }
+}
+
+- (NSDate *)dateByAddingNumber:(int)number ofPeriod:(int)period {
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSDateComponents *components = [[NSDateComponents alloc] init];
+    [components setYear:0];
+    [components setMonth:0];
+    [components setDay:0];
+    [components setHour:0];
+    [components setMinute:0];
+    [components setSecond:0];
+    switch (period) {
+        case BDSKPeriodHour:
+            [components setHour:number];
+            break;
+        case BDSKPeriodDay:
+            [components setDay:number];
+            break;
+        case BDSKPeriodWeek:
+            [components setWeek:number];
+            [components setMonth:NSUndefinedDateComponent];
+            break;
+        case BDSKPeriodMonth:
+            [components setMonth:number];
+            break;
+        case BDSKPeriodYear:
+            [components setYear:number];
+            break;
+        default:
+            NSLog(@"Unknown period %d",period);
+            break;
+    }
+    NSDate *date = [calendar dateByAddingComponents:components toDate:self options:0];
+    [calendar release];
+    [components release];
+    return date;
+}
+
 @end
 
 @implementation NSCalendarDate (BDSKExtensions)
@@ -133,141 +364,20 @@ static CFDateFormatterRef numericDateFormatter = NULL;
     return self;
 }
 
-- (NSString *)dateDescription{
-    // Saturday, March 24, 2001 (NSDateFormatString)
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-    [formatter setDateStyle:NSDateFormatterFullStyle];
-    [formatter setTimeStyle:NSDateFormatterNoStyle];
-    return [formatter stringFromDate:self];
-}
+@end
 
-- (NSString *)shortDateDescription{
-    // 31/10/01 (NSShortDateFormatString)
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-    [formatter setDateStyle:NSDateFormatterShortStyle];
-    [formatter setTimeStyle:NSDateFormatterNoStyle];
-    return [formatter stringFromDate:self];
-}
+@implementation NSDateComponents (BDSKExtensions)
 
-- (NSString *)rssDescription{
-    return [self descriptionWithCalendarFormat:@"%a, %d %b %Y %H:%M:%S %z"];
-}
-
-- (NSString *)standardDescription{
-    return [self descriptionWithCalendarFormat:@"%Y-%m-%d %H:%M:%S %z"];
-}
-
-- (NSCalendarDate *)startOfHour;
++ (NSDateComponents *)dateComponentsWithYear:(int)year month:(int)month day:(int)day hour:(int)hour minute:(int)minute second:(int)second
 {
-    NSCalendarDate *startHour = [[NSCalendarDate alloc] initWithYear:[self yearOfCommonEra] month:[self monthOfYear] day:[self dayOfMonth] hour:[self hourOfDay] minute:0 second:0 timeZone:[self timeZone]];
-    return [startHour autorelease];
-}
-
-- (NSCalendarDate *)endOfHour;
-{
-    return [[self startOfHour] dateByAddingYears:0 months:0 days:0 hours:1 minutes:0 seconds:-1];
-}
-
-- (NSCalendarDate *)startOfDay;
-{
-    NSCalendarDate *startDay = [[NSCalendarDate alloc] initWithYear:[self yearOfCommonEra] month:[self monthOfYear] day:[self dayOfMonth] hour:0 minute:0 second:0 timeZone:[self timeZone]];
-    return [startDay autorelease];
-}
-
-- (NSCalendarDate *)endOfDay;
-{
-    return [[self startOfDay] dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:-1];
-}
-
-- (NSCalendarDate *)startOfWeek;
-{
-    NSCalendarDate *startDay = [self startOfDay];
-    return [startDay dateByAddingYears:0 months:0 days:-[startDay dayOfWeek] hours:0 minutes:0 seconds:0];
-}
-
-- (NSCalendarDate *)endOfWeek;
-{
-    return [[self startOfWeek] dateByAddingYears:0 months:0 days:7 hours:0 minutes:0 seconds:-1];
-}
-
-- (NSCalendarDate *)startOfMonth;
-{
-    NSCalendarDate *startDay = [[NSCalendarDate alloc] initWithYear:[self yearOfCommonEra] month:[self monthOfYear] day:1 hour:0 minute:0 second:0 timeZone:[self timeZone]];
-    return [startDay autorelease];
-}
-
-- (NSCalendarDate *)endOfMonth;
-{
-    return [[self startOfMonth] dateByAddingYears:0 months:1 days:0 hours:0 minutes:0 seconds:-1];
-}
-
-- (NSCalendarDate *)startOfYear;
-{
-    NSCalendarDate *startDay = [[NSCalendarDate alloc] initWithYear:[self yearOfCommonEra] month:1 day:1 hour:0 minute:0 second:0 timeZone:[self timeZone]];
-    return [startDay autorelease];
-}
-
-- (NSCalendarDate *)endOfYear;
-{
-    return [[self startOfYear] dateByAddingYears:1 months:0 days:0 hours:0 minutes:0 seconds:-1];
-}
-
-- (NSCalendarDate *)startOfPeriod:(int)period;
-{
-    switch (period) {
-        case BDSKPeriodHour:
-            return [self startOfHour];
-        case BDSKPeriodDay:
-            return [self startOfDay];
-        case BDSKPeriodWeek:
-            return [self startOfWeek];
-        case BDSKPeriodMonth:
-            return [self startOfMonth];
-        case BDSKPeriodYear:
-            return [self startOfYear];
-        default:
-            NSLog(@"Unknown period %d",period);
-            return self;
-    }
-}
-
-- (NSCalendarDate *)endOfPeriod:(int)period;
-{
-    switch (period) {
-        case BDSKPeriodHour:
-            return [self endOfHour];
-        case BDSKPeriodDay:
-            return [self endOfDay];
-        case BDSKPeriodWeek:
-            return [self endOfWeek];
-        case BDSKPeriodMonth:
-            return [self endOfMonth];
-        case BDSKPeriodYear:
-            return [self endOfYear];
-        default:
-            NSLog(@"Unknown period %d",period);
-            return self;
-    }
-}
-
-- (NSCalendarDate *)dateByAddingNumber:(int)number ofPeriod:(int)period {
-    switch (period) {
-        case BDSKPeriodHour:
-            return [self dateByAddingYears:0 months:0 days:0 hours:number minutes:0 seconds:0];
-        case BDSKPeriodDay:
-            return [self dateByAddingYears:0 months:0 days:number hours:0 minutes:0 seconds:0];
-        case BDSKPeriodWeek:
-            return [self dateByAddingYears:0 months:0 days:7 * number hours:0 minutes:0 seconds:0];
-        case BDSKPeriodMonth:
-            return [self dateByAddingYears:0 months:number days:0 hours:0 minutes:0 seconds:0];
-        case BDSKPeriodYear:
-            return [self dateByAddingYears:number months:0 days:0 hours:0 minutes:0 seconds:0];
-        default:
-            NSLog(@"Unknown period %d",period);
-            return self;
-    }
+    NSDateComponents *components = [[[NSDateComponents alloc] init] autorelease];
+    [components setYear:year];
+    [components setMonth:month];
+    [components setDay:day];
+    [components setHour:hour];
+    [components setMinute:minute];
+    [components setSecond:second];
+    return components;
 }
 
 @end
