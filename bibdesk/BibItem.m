@@ -355,16 +355,23 @@ static CFDictionaryRef selectorTable = NULL;
     return theCopy;
 }
 
+static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
+    if (date == nil || [date isKindOfClass:[NSCalendarDate class]])
+        return (NSCalendarDate *)date;
+    else
+        return [[[NSCalendarDate alloc] initWithTimeInterval:0.0 sinceDate:date] autorelease];
+}
+
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         if(self = [super init]){
             pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
             [self setFileType:[coder decodeObjectForKey:@"fileType"]];
             [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
-            [self setDate:[coder decodeObjectForKey:@"pubDate"]];
-            [self setDateAdded:[coder decodeObjectForKey:@"dateAdded"]];
+            [self setDate:ensureCalendarDate([coder decodeObjectForKey:@"pubDate"])];
+            [self setDateAdded:ensureCalendarDate([coder decodeObjectForKey:@"dateAdded"])];
+            [self setDateModified:ensureCalendarDate([coder decodeObjectForKey:@"dateModified"])];
             [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
-            [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             files = [[coder decodeObjectForKey:@"files"] mutableCopy];
             [files makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
