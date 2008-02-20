@@ -45,6 +45,7 @@
 	IBOutlet NSTableView *tableView;
 	IBOutlet NSButton *addButton;
 	IBOutlet NSButton *removeButton;
+    NSSet *defaultOneWayRomanSet;
 	NSMutableDictionary *oneWayDict;
 	NSMutableDictionary *twoWayDict;
 	NSMutableDictionary *currentDict;

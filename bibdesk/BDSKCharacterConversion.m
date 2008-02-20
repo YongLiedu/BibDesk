@@ -58,6 +58,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		
 		oneWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
 		twoWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
+        defaultOneWayRomanSet = nil;
 		romanSet = [[NSMutableSet alloc] initWithCapacity:1];
 		texSet = [[NSMutableSet alloc] initWithCapacity:1];
 		currentDict = twoWayDict;
@@ -76,6 +77,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
     [twoWayDict release];
 	[currentArray release];
 	[texFormatter release];
+    [defaultOneWayRomanSet release];
 	[romanSet release];
 	[texSet release];
     [super dealloc];
@@ -97,12 +99,14 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
 	NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME]];
 	
+    if (defaultOneWayRomanSet == nil)
+        defaultOneWayRomanSet = [[NSSet alloc] initWithArray:[[tmpDict objectForKey:ONE_WAY_CONVERSION_KEY] allKeys]];
+    
 	[oneWayDict removeAllObjects];
 	[twoWayDict removeAllObjects];
 	[romanSet removeAllObjects];
 	[texSet removeAllObjects];
 	
-	[romanSet addObjectsFromArray:[[tmpDict objectForKey:ONE_WAY_CONVERSION_KEY] allKeys]];
 	[romanSet addObjectsFromArray:[[tmpDict objectForKey:ROMAN_TO_TEX_KEY] allKeys]];
 	[texSet addObjectsFromArray:[[tmpDict objectForKey:TEX_TO_ROMAN_KEY] allKeys]];
 	
@@ -337,17 +341,30 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				
 				[tableView reloadData];
 			} else {
-				[currentArray replaceObjectAtIndex:row withObject:object];
-				[currentDict setObject:tex forKey:object];
-				[currentDict removeObjectForKey:roman];
-                if (validRoman)
-                    [romanSet removeObject:roman];
-				[romanSet addObject:object];
-				
-				validRoman = YES;
-				
-				[self setDocumentEdited:YES];
-				[self updateButtons];
+                int rv = NSAlertDefaultReturn;
+                if ([defaultOneWayRomanSet containsObject:object]) {
+                    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Duplicate Unicode Character", @"Message in alert dialog when trying to add duplicate character for TeX conversion")
+                                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                                           otherButton:nil
+                                             informativeTextWithFormat:NSLocalizedString(@"The character %@ you entered already has a one-way TeX equivalent defined internally by BibDesk. Do you want to overwrite this?", @"Informative text in alert dialog"), object];
+                    rv = [alert runSheetModalForWindow:[self window]];
+                }
+                if (rv == NSAlertDefaultReturn) {
+                    [currentArray replaceObjectAtIndex:row withObject:object];
+                    [currentDict setObject:tex forKey:object];
+                    [currentDict removeObjectForKey:roman];
+                    if (validRoman)
+                        [romanSet removeObject:roman];
+                    [romanSet addObject:object];
+                    
+                    validRoman = YES;
+                    
+                    [self setDocumentEdited:YES];
+                    [self updateButtons];
+                } else {
+                    [tableView reloadData];
+                }
 			}
 		}
 	}
