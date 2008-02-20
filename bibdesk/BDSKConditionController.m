@@ -136,9 +136,9 @@
     
     [ratingButton setRating:[[condition stringValue] unsignedIntValue]];
     
-    // @@ can we safely upgrade to NSDateFormatterShortStyle and drop natural language?
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] allowNaturalLanguage:YES] autorelease];
-    [formatter setGeneratesCalendarDates:YES];
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+    [formatter setDateStyle:NSDateFormatterShortStyle];
+    [formatter setTimeStyle:NSDateFormatterNoStyle];
     [dateTextField setFormatter:formatter];
     [toDateTextField setFormatter:formatter];
 	
