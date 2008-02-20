@@ -534,13 +534,11 @@
 }
 
 - (void)setGroup:(BDSKSmartGroup *)newGroup {
-    group = newGroup;
-}
-
-// @@ workaround for timer retain cycle; could also use a CFRunLoopTimer that doesn't retain its context
-- (void)invalidateCacheTimer {
-    [cacheTimer invalidate];
-    cacheTimer = nil;
+    if (group != newGroup) {
+        group = newGroup;
+        if ([self isDateCondition])
+            [self updateCachedDates];
+    }
 }
 
 @end
@@ -580,7 +578,7 @@
     
     if ([self isDateCondition]) {
         [self getStartDate:&startDate endDate:&endDate];
-        if (dateComparison < BDSKDate) {
+        if (dateComparison < BDSKDate && group) {
             // we fire every day at 1 second past midnight, because the condition changes at midnight
             NSCalendarDate *fireDate = [[[NSCalendarDate date] startOfDay] dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:1];
             NSTimeInterval refreshInterval = 24 * 3600;
@@ -609,8 +607,8 @@
         changed = YES;
     }
     
-    if (changed) {
-		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFilterChangedNotification object:self];
+    if (changed && group) {
+		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFilterChangedNotification object:group];
     }
 }
 
@@ -673,11 +671,13 @@
 
 - (void)startObserving {
     [self addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
+    [self addObserver:self forKeyPath:@"comparison" options:0  context:NULL];
     [self addObserver:self forKeyPath:@"value" options:0  context:NULL];
 }
 
 - (void)endObserving {
     [self removeObserver:self forKeyPath:@"key"];
+    [self removeObserver:self forKeyPath:@"comparison"];
     [self removeObserver:self forKeyPath:@"value"];
 }
 
@@ -693,9 +693,8 @@
             [self setDefaultComparison];
             [self setDefaultValue];
         }
-    } else if ([keyPath isEqualToString:@"value"]) {
-        if ([self isDateCondition])
-            [self updateCachedDates];
+    } else if (([keyPath isEqualToString:@"comparison"] || [keyPath isEqualToString:@"value"]) && [self isDateCondition]) {
+        [self updateCachedDates];
     }
 }
 

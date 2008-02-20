@@ -109,9 +109,6 @@ enum {
 
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 
-// call when disposing of the condition in order to break a retain cycle
-- (void)invalidateCacheTimer;
-
 - (NSDictionary *)dictionaryValue;
 
 - (BOOL)isSatisfiedByItem:(BibItem *)item;

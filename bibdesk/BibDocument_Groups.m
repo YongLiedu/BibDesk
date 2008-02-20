@@ -234,7 +234,8 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification{
-	[self updateSmartGroupsCountAndContent:YES];
+    if ([[groups smartGroups] containsObjectIdenticalTo:[notification object]])
+        [self updateSmartGroupsCountAndContent:YES];
 }
 
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification{

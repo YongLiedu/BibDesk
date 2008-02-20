@@ -102,7 +102,7 @@
 
 - (void)dealloc {
 	[[group undoManager] removeAllActionsWithTarget:self];
-    [conditions makeObjectsPerformSelector:@selector(invalidateCacheTimer)];
+    [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:nil]; // this stops the date cache timer
 	[conditions release];
 	[super dealloc];
 }
@@ -166,7 +166,7 @@
 }
 
 - (void)setConditions:(NSArray *)newConditions {
-    if (![conditions isEqualToArray:newConditions]) {
+    if (NO == [conditions isEqualToArray:newConditions]) {
 		[[[self undoManager] prepareWithInvocationTarget:self] setConditions:conditions];
         
         [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:nil];
@@ -174,11 +174,8 @@
         conditions = [newConditions mutableCopy];
         [conditions makeObjectsPerformSelector:@selector(setGroup:) withObject:group];
 		
-		if ([self undoManager]) { // only notify when we are attached to a group
-			[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFilterChangedNotification
-																object:self
-															  userInfo:[NSDictionary dictionary]];
-		}
+		if ([self group]) // only notify when we are attached to a group
+			[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFilterChangedNotification object:group];
 	}
 }
 
@@ -187,15 +184,14 @@
 }
 
 - (void)setConjunction:(BDSKConjunction)newConjunction {
-	[[[self undoManager] prepareWithInvocationTarget:self] setConjunction:conjunction];
-	
-	conjunction = newConjunction;
-	
-	if ([self undoManager]) { // only notify when we are attached to a group
-		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFilterChangedNotification
-															object:self
-														  userInfo:[NSDictionary dictionary]];
-	}
+	if (conjunction != newConjunction) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setConjunction:conjunction];
+        
+        conjunction = newConjunction;
+        
+        if ([self group]) // only notify when we are attached to a group
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFilterChangedNotification object:group];
+    }
 }
 
 - (BDSKSmartGroup *)group {
