@@ -74,6 +74,8 @@
             docType = NSRTFDTextDocumentType;
         else if(templateFormat == BDSKDocTemplateFormat)
             docType = NSDocFormatTextDocumentType;
+        else if(templateFormat == BDSKOdtTemplateFormat && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+            docType = NSOpenDocumentTextDocumentType;
         NSData *data = [self dataByParsingTemplate:template withObject:anObject publications:items];
         attrString = [[[NSAttributedString alloc] initWithData:data options:[NSDictionary dictionaryWithObjectsAndKeys:docType, NSDocumentTypeDocumentOption, nil] documentAttributes:NULL error:NULL] autorelease];
     }
