@@ -62,8 +62,6 @@ typedef float CGFloat;
 #define CGFLOAT_DEFINED 1
 #endif /* CGFLOAT_DEFINED */
 
-extern NSString *NSOpenDocumentTextDocumentType;
-
 enum {
     // An empty area, or did not hit in the cell
     NSCellHitNone = 0,

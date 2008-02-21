@@ -1508,7 +1508,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     } else if (format & BDSKDocTemplateFormat) {
         return [fileTemplate docFormatFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
     } else if ((format & BDSKOdtTemplateFormat) && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        [mutableAttributes setObject:NSOpenDocumentTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
+        [mutableAttributes setObject:@"NSOpenDocument" forKey:NSDocumentTypeDocumentAttribute];
         NSError *error = nil;
         return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
     } else return nil;
