@@ -550,7 +550,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<cocoa class="BibDocument"/>
 			<element type="publication"
 				description="Publications in the bibliography">
-				<cocoa key="publications"/>
+				<cocoa key="scriptingPublications"/>
 			</element>
 			<element type="author" access="r"
 				description="Authors of publications in the bibliography">
@@ -805,7 +805,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa class="BibAuthor"/>
             <element type="publication" access="r"
                 description="Publications of the author.">
-                <cocoa key="publications"/>
+                <cocoa key="scriptingPublications"/>
             </element>
             <property name="name" code="pnam" type="text" access="r"
                 description="The author's name. This name is normalized as 'von Last, Jr, First'.">
@@ -944,7 +944,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa class="BDSKGroup"/>
             <element type="publication"
                 description="Publications in the group.">
-                <cocoa key="publications"/>
+                <cocoa key="scriptingPublications"/>
             </element>
 			<element type="author" access="r"
 				description="Authors of publications in the group">

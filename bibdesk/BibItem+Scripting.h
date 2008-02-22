@@ -46,15 +46,21 @@
 - (BDSKField *)valueInBibFieldsWithName:(NSString *)name;
 - (NSArray *)bibFields;
 
-- (unsigned int)countOfScriptingAuthors;
-- (BibAuthor *)objectInScriptingAuthorsAtIndex:(unsigned int)idx;
-- (BibAuthor *)valueInScriptingAuthorsAtIndex:(unsigned int)idx;
+- (NSArray *)scriptingAuthors;
 - (BibAuthor*)valueInScriptingAuthorsWithName:(NSString*)name;
 
-- (unsigned int)countOfScriptingEditors;
-- (BibAuthor *)objectInScriptingEditorsAtIndex:(unsigned int)idx;
-- (BibAuthor *)valueInScriptingEditorsAtIndex:(unsigned int)idx;
+- (NSArray *)scriptingEditors;
 - (BibAuthor *)valueInScriptingEditorsWithName:(NSString *)name;
+
+- (NSArray *)linkedFiles;
+- (void)insertInLinkedFiles:(NSURL *)newURL;
+- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(unsigned int)idx;
+- (void)removeObjectFromLinkedFilesAtIndex:(unsigned int)idx;
+
+- (NSArray *)linkedURLs;
+- (void)insertInLinkedURLs:(NSString *)newURLString;
+- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromLinkedURLsAtIndex:(unsigned int)idx;
 
 - (id)scriptingDocument;
 - (id)group;

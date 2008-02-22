@@ -51,11 +51,7 @@
 
 @interface BDSKGroup (Scripting)
 
-- (NSArray *)publicationsInGroup;
-
-- (unsigned int)countOfPublications;
-- (BibItem *)objectInPublicationsAtIndex:(unsigned int)idx;
-- (BibItem *)valueInPublicationsAtIndex:(unsigned int)idx;
+- (NSArray *)scriptingPublications;
 
 - (NSArray *)authors;
 - (BibAuthor *)valueInAuthorsWithName:(NSString *)aName;
@@ -74,11 +70,9 @@
 
 @interface BDSKLibraryGroup (Scripting)
 
-- (void)insertInPublications:(BibItem *)pub atIndex:(unsigned int)index;
-- (void)insertInPublications:(BibItem *)pub;
-- (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx;
-- (void)removeFromPublicationsAtIndex:(unsigned int)index;
-- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx;
+- (void)insertInScriptingPublications:(BibItem *)pub;
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx;
 
 @end
 
@@ -94,11 +88,9 @@
 
 @interface BDSKStaticGroup (Scripting)
 
-- (void)insertInPublications:(BibItem *)pub;
-- (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx;
-- (void)insertInPublications:(BibItem *)pub atIndex:(unsigned int)idx;
-- (void)removeFromPublicationsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx;
+- (void)insertInScriptingPublications:(BibItem *)pub;
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx;
 
 @end
 
@@ -111,14 +103,10 @@
 
 @interface BDSKSmartGroup (Scripting)
 
-- (unsigned int)countOfConditions;
-- (BDSKCondition *)objectInConditionsAtIndex:(unsigned int)idx;
-- (BDSKCondition *)valueInConditionsAtIndex:(unsigned int)idx;
-- (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(unsigned int)idx;
-- (void)insertInConditions:(BDSKCondition *)condition atIndex:(unsigned int)idx;
+- (NSArray *)conditions;
 - (void)insertInConditions:(BDSKCondition *)condition;
-- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx;
-- (void)removeFromConditionsAtIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromConditionsAtIndex:(unsigned int)idx;
 
 - (BOOL)satisfyAll;
 - (void)setSatisfyAll:(BOOL)flag;
@@ -129,11 +117,9 @@
 
 @interface BDSKCategoryGroup (Scripting)
 
-- (void)insertInPublications:(BibItem *)pub;
-- (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx;
-- (void)insertInPublications:(BibItem *)pub atIndex:(unsigned int)idx;
-- (void)removeFromPublicationsAtIndex:(unsigned int)idx;
-- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx;
+- (void)insertInScriptingPublications:(BibItem *)pub;
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx;
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx;
 
 @end
 

@@ -95,16 +95,8 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	return bibFields;
 }
 
-- (unsigned int)countOfScriptingAuthors {
-	return [[self pubAuthors] count];
-}
-
-- (BibAuthor *)objectInScriptingAuthorsAtIndex:(unsigned int)idx {
-	return [[self pubAuthors] objectAtIndex:idx];
-}
-
-- (BibAuthor *)valueInScriptingAuthorsAtIndex:(unsigned int)idx {
-    return [self objectInScriptingAuthorsAtIndex:idx];
+- (NSArray *)scriptingAuthors {
+	return [self pubAuthors];
 }
 
 - (BibAuthor *)valueInScriptingAuthorsWithName:(NSString *)name {
@@ -122,16 +114,8 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	return nil;
 }
 
-- (unsigned int)countOfScriptingEditors {
-	return [[self pubEditors] count];
-}
-
-- (BibAuthor *)objectInScriptingEditorsAtIndex:(unsigned int)idx {
-	return [[self pubEditors] objectAtIndex:idx];
-}
-
-- (BibAuthor *)valueInScriptingEditorsAtIndex:(unsigned int)idx {
-    return [self objectInScriptingEditorsAtIndex:idx];
+- (NSArray *)scriptingEditors {
+	return [self pubEditors];
 }
 
 - (BibAuthor *)valueInScriptingEditorsWithName:(NSString *)name {
@@ -153,15 +137,11 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     return [[self localFiles] valueForKey:@"URL"];
 }
 
-- (unsigned int )countOfLinkedFiles {
-    return [[self localFiles] count];
+- (void)insertInLinkedFiles:(NSURL *)newURL {
+    [self insertObject:newURL inLinkedFilesAtIndex:[[self localFiles] count]];
 }
 
-- (NSURL *)objectinLinkedFilesAtIndex:(unsigned int)idx {
-    return [[[self localFiles] objectAtIndex:idx] URL];
-}
-
-- (void)insertInLinkedFiles:(NSURL *)newURL atIndex:(unsigned int)idx {
+- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(unsigned int)idx {
     if ([[self owner] isDocument]) {
         BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
         if (file) {
@@ -182,35 +162,19 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (void)insertInLinkedFiles:(NSURL *)newURL {
-    [self insertInLinkedFiles:newURL atIndex:[[self localFiles] count]];
-}
-
-- (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(unsigned int)idx {
-    [self insertInLinkedFiles:newURL atIndex:idx];
-}
-
-- (void)removeFromLinkedFilesAtIndex:(unsigned int)idx {
-    [[self mutableArrayValueForKey:@"files"] removeObject:[[self localFiles] objectAtIndex:idx]];
-}
-
 - (void)removeObjectFromLinkedFilesAtIndex:(unsigned int)idx {
-    [self removeFromLinkedFilesAtIndex:idx];
+    [[self mutableArrayValueForKey:@"files"] removeObject:[[self localFiles] objectAtIndex:idx]];
 }
 
 - (NSArray *)linkedURLs {
     return [[self remoteURLs] valueForKeyPath:@"URL.absoluteString"];
 }
 
-- (unsigned int)countOfLinkedURLs {
-    return [[self remoteURLs] count];
+- (void)insertInLinkedURLs:(NSString *)newURLString {
+    [self insertObject:newURLString inLinkedURLsAtIndex:[[self remoteURLs] count]];
 }
 
-- (NSString *)objectInLinkedURLsAtIndex:(unsigned int)idx {
-    return [[[[self remoteURLs] objectAtIndex:idx] URL] absoluteString];
-}
-
-- (void)insertInLinkedURLs:(NSString *)newURLString atIndex:(unsigned int)idx {
+- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(unsigned int)idx {
     if ([[self owner] isDocument]) {
         NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:newURLString];
         BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
@@ -232,20 +196,8 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     }
 }
 
-- (void)insertInLinkedURLs:(NSString *)newURLString {
-    [self insertInLinkedURLs:newURLString atIndex:[[self remoteURLs] count]];
-}
-
-- (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(unsigned int)idx {
-    [self insertInLinkedURLs:newURLString atIndex:idx];
-}
-
-- (void)removeFromLinkedURLsAtIndex:(unsigned int)idx {
-    [[self mutableArrayValueForKey:@"files"] removeObject:[[self remoteURLs] objectAtIndex:idx]];
-}
-
 - (void)removeObjectFromLinkedURLsAtIndex:(unsigned int)idx {
-    [self removeFromLinkedURLsAtIndex:idx];
+    [[self mutableArrayValueForKey:@"files"] removeObject:[[self remoteURLs] objectAtIndex:idx]];
 }
 
 - (id)scriptingDocument {

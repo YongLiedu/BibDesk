@@ -72,49 +72,37 @@
     }
 }
 
-- (NSArray *)publicationsInGroup {
+- (NSArray *)scriptingPublications {
     if ([self respondsToSelector:@selector(publications)]) {
         return [(id)self publications];
     } else {
         NSEnumerator *pubEnum = [[document publications] objectEnumerator];
         BibItem *pub;
-        NSMutableArray *filteredArray = [NSMutableArray array];
+        NSMutableArray *scriptingPublications = [NSMutableArray array];
         
         while (pub = [pubEnum nextObject]) {
             if ([self containsItem:pub])
-                [filteredArray addObject:pub];
+                [scriptingPublications addObject:pub];
         }
         
-        return filteredArray;
+        return scriptingPublications;
     }
 }
 
-- (unsigned int)countOfPublications {
-    return [[self publicationsInGroup] count];
-}
-
-- (BibItem *)objectInPublicationsAtIndex:(unsigned int)idx {
-    return [[self publicationsInGroup] objectAtIndex:idx];
-}
-
-- (BibItem *)valueInPublicationsAtIndex:(unsigned int)idx {
-    return [[self publicationsInGroup] objectAtIndex:idx];
-}
-
 - (NSArray *)authors {
-    return [BibAuthor authorsInPublications:[self publicationsInGroup]];
+    return [BibAuthor authorsInPublications:[self scriptingPublications]];
 }
 
 - (BibAuthor *)valueInAuthorsWithName:(NSString *)aName {
-    return [BibAuthor authorWithName:aName inPublications:[self publicationsInGroup]];
+    return [BibAuthor authorWithName:aName inPublications:[self scriptingPublications]];
 }
 
 - (NSArray *)editors {
-    return [BibAuthor editorsInPublications:[self publicationsInGroup]];
+    return [BibAuthor editorsInPublications:[self scriptingPublications]];
 }
 
 - (BibAuthor *)valueInEditorsWithName:(NSString *)aName {
-    return [BibAuthor editorWithName:aName inPublications:[self publicationsInGroup]];
+    return [BibAuthor editorWithName:aName inPublications:[self scriptingPublications]];
 }
 
 - (NSArray *)macros {
@@ -141,42 +129,21 @@
     return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"libraryGroups" index:0] autorelease];
 }
 
-- (NSArray *)publicationsInGroup {
-    return [[self document] publications];
+- (NSArray *)scriptingPublications {
+    return [[self document] scriptingPublications];
 }
 
-- (unsigned int)countOfPublications {
-    return [[self document] countOfPublications];
+- (void)insertInScriptingPublications:(BibItem *)pub {
+    [[self document] insertInScriptingPublications:pub];
 }
 
-- (BibItem *)valueInPublicationsAtIndex:(unsigned int)idx {
-    return [[self document] valueInPublicationsAtIndex:idx];
-}
-
-- (BibItem *)objectInPublicationsAtIndex:(unsigned int)idx {
-    return [[self document] objectInPublicationsAtIndex:idx];
-}
-
-- (void)insertInPublications:(BibItem *)pub atIndex:(unsigned int)idx {
-    [[self document] insertInPublications:pub atIndex:idx];
-}
-
-- (void)insertInPublications:(BibItem *)pub {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
     if ([pub owner] == nil)
-        [[self document] insertInPublications:pub];
+        [[self document] insertObject:pub inScriptingPublicationsAtIndex:idx];
 }
 
-- (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx {
-    if ([pub owner] == nil)
-        [[self document] insertObject:pub inPublicationsAtIndex:idx];
-}
-
-- (void)removeFromPublicationsAtIndex:(unsigned int)idx {
-    [[self document] removeFromPublicationsAtIndex:idx];
-}
-
-- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx {
-    [[self document] removeObjectFromPublicationsAtIndex:idx];
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
+    [[self document] removeObjectFromScriptingPublicationsAtIndex:idx];
 }
 
 @end
@@ -214,7 +181,7 @@
     }
 }
 
-- (void)insertInPublications:(BibItem *)pub {
+- (void)insertInScriptingPublications:(BibItem *)pub {
     if ([pub owner] == nil)
         [[self document] addPublication:pub];
 	if ([[pub owner] isEqual:[self document]] == NO) {
@@ -227,21 +194,13 @@
     }
 }
 
-- (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx {
-    [self insertInPublications:pub];
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
+    [self insertInScriptingPublications:pub];
 }
 
-- (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)idx {
-	[self insertInPublications:pub];
-}
-
-- (void)removeFromPublicationsAtIndex:(unsigned int)idx {
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
     [self removePublication:[publications objectAtIndex:idx]];
     [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-}
-
-- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx {
-	[self removeFromPublicationsAtIndex:idx];
 }
 
 @end
@@ -262,13 +221,19 @@
     [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of last import group.",@"Error description")];
 }
 
-- (void)insertInPublications:(BibItem *)pub {
+- (void)insertInScriptingPublications:(BibItem *)pub {
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
     [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
     [cmd setScriptErrorString:NSLocalizedString(@"Cannot modify publications of last import group.",@"Error description")];
 }
 
-- (void)removeFromPublicationsAtIndex:(unsigned int)idx {
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
+    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+    [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+    [cmd setScriptErrorString:NSLocalizedString(@"Cannot modify publications of last import group.",@"Error description")];
+}
+
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
     NSScriptCommand *cmd = [NSScriptCommand currentCommand];
     [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
     [cmd setScriptErrorString:NSLocalizedString(@"Cannot modify publications of last import group.",@"Error description")];
@@ -292,16 +257,12 @@
     }
 }
 
-- (unsigned int)countOfConditions {
-    return [[[self filter] conditions] count];
+- (NSArray *)conditions {
+    return [[self filter] conditions];
 }
 
-- (BDSKCondition *)objectInConditionsAtIndex:(unsigned int)idx {
-    return [[[self filter] conditions] objectAtIndex:idx];
-}
-
-- (BDSKCondition *)valueInConditionsAtIndex:(unsigned int)idx {
-    return [self objectInConditionsAtIndex:idx];
+- (void)insertInConditions:(BDSKCondition *)condition {
+    [self insertObject:condition inConditionsAtIndex:[[[self filter] conditions] count]];
 }
 
 - (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(unsigned int)idx {
@@ -312,24 +273,12 @@
     [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
-- (void)insertInConditions:(BDSKCondition *)condition atIndex:(unsigned int)idx {
-    [self insertObject:condition inConditionsAtIndex:idx];
-}
-
-- (void)insertInConditions:(BDSKCondition *)condition {
-    [self insertObject:condition inConditionsAtIndex:[[[self filter] conditions] count]];
-}
-
-- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx {
+- (void)removeObjectFromConditionsAtIndex:(unsigned int)idx {
 	NSMutableArray *conditions = [[[self filter] conditions] mutableCopy];
     [conditions removeObjectAtIndex:idx];
     [[self filter] setConditions:conditions];
     [conditions release];
     [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-}
-
-- (void)removeFromConditionsAtIndex:(unsigned int)idx {
-	[self removeObjectFromPublicationsAtIndex:idx];
 }
 
 - (BOOL)satisfyAll {
@@ -358,7 +307,7 @@
     }
 }
 
-- (void)insertInPublications:(BibItem *)pub {
+- (void)insertInScriptingPublications:(BibItem *)pub {
     if ([pub owner] == nil)
         [[self document] addPublication:pub];
 	if ([[pub owner] isEqual:[self document]] == NO) {
@@ -371,21 +320,13 @@
     }
 }
 
-- (void)insertObject:(BibItem *)pub inPublicationsAtIndex:(unsigned int)idx {
-    [self insertInPublications:pub];
+- (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
+    [self insertInScriptingPublications:pub];
 }
 
-- (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)idx {
-	[self insertInPublications:pub];
-}
-
-- (void)removeFromPublicationsAtIndex:(unsigned int)idx {
-    [[self document] removePublications:[[self publicationsInGroup] subarrayWithRange:NSMakeRange(idx, 1)] fromGroups:[NSArray arrayWithObject:self]];
+- (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
+    [[self document] removePublications:[[self scriptingPublications] subarrayWithRange:NSMakeRange(idx, 1)] fromGroups:[NSArray arrayWithObject:self]];
     [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-}
-
-- (void)removeObjectFromPublicationsAtIndex:(unsigned int)idx {
-	[self removeFromPublicationsAtIndex:idx];
 }
 
 @end
