@@ -41,6 +41,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "NSScriptClassDescription_BDSKExtensions.h"
+#import "NSObject_BDSKExtensions.h"
 
 
 @implementation BDSKAddCommand
@@ -70,6 +71,7 @@
     
     if (insertionObjects == nil) {
         [self setScriptErrorNumber:NSArgumentsWrongScriptError];
+        [self setScriptErrorString:NSLocalizedString(@"Invalid or missing objects to add", @"Error description")];
     } else {
         
         // get the location to insert
@@ -77,8 +79,9 @@
         id insertionContainer = nil;
         NSString *insertionKey = nil;
         int insertionIndex = -1;
-        
         NSScriptClassDescription *containerClassDescription = nil;
+        NSArray *classDescriptions = [insertionObjects valueForKey:@"scriptClassDescription"];
+        NSScriptClassDescription *insertionClassDescription = [classDescriptions containsObject:[NSNull null]] ? nil : [NSScriptClassDescription commonAncestorForClassDescriptions:insertionObjects];
         
         if ([locationSpecifier isKindOfClass:[NSPositionalSpecifier class]]) {
             insertionContainer = [locationSpecifier insertionContainer];
@@ -92,27 +95,25 @@
             // make sure this is a valid object, so not something like a range specifier
             if ([insertionContainer respondsToSelector:@selector(objectSpecifier)] == NO)
                 insertionContainer = nil;
-            containerClassDescription = (NSScriptClassDescription *)[insertionContainer classDescription];
-            OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
-            NSScriptClassDescription *classDescription = (NSScriptClassDescription *)[[insertionObjects lastObject] classDescription];
-            OBASSERT([classDescription isKindOfClass:[NSScriptClassDescription class]]);
-            NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
-            NSString *key;
-            while (key = [keyEnum nextObject]) {
-                NSScriptClassDescription *keyClassDescription = [containerClassDescription classDescriptionForKey:key];
-                if ([classDescription isKindOfClassDescription:keyClassDescription] &&
-                    [containerClassDescription isLocationRequiredToCreateForKey:key] == NO) {
-                    insertionKey = key;
-                    break;
+            containerClassDescription = [insertionContainer scriptClassDescription];
+            if ([classDescriptions containsObject:[NSNull null]] == NO) {
+                insertionClassDescription = [NSScriptClassDescription commonAncestorForClassDescriptions:insertionObjects];
+                NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
+                NSString *key;
+                while (key = [keyEnum nextObject]) {
+                    NSScriptClassDescription *keyClassDescription = [containerClassDescription classDescriptionForKey:key];
+                    if ([insertionClassDescription isKindOfClassDescription:keyClassDescription] &&
+                        [containerClassDescription isLocationRequiredToCreateForKey:key] == NO) {
+                        insertionKey = key;
+                        break;
+                    }
                 }
             }
         }
         
         // check if the insertion location is valid
-        if (containerClassDescription == nil && insertionContainer) {
-            containerClassDescription = (NSScriptClassDescription *)[insertionContainer classDescription];
-            OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
-        }
+        if (containerClassDescription == nil && insertionContainer)
+            containerClassDescription = [insertionContainer scriptClassDescription];
         if (insertionContainer == nil || insertionKey == nil || 
             [[containerClassDescription toManyRelationshipKeys] containsObject:insertionKey] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];
@@ -120,27 +121,12 @@
             insertionObjects = nil;
         } else {
             // check if the inserted objects are valid for the insertion container key
-            NSScriptClassDescription *requiredClassDescription = (NSScriptClassDescription *)[containerClassDescription classDescriptionForKey:insertionKey];
-            OBASSERT([requiredClassDescription isKindOfClass:[NSScriptClassDescription class]]);
-            BOOL isValid = YES;
+            NSScriptClassDescription *requiredClassDescription = [containerClassDescription classDescriptionForKey:insertionKey];
             
-            returnValue = [NSMutableArray array];
-            objEnum = [insertionObjects objectEnumerator];
-            while (isValid && (obj = [objEnum nextObject])) {
-                NSScriptClassDescription *classDescription = (NSScriptClassDescription *)[obj classDescription];
-                OBASSERT([classDescription isKindOfClass:[NSScriptClassDescription class]]);
-                if ([classDescription isKindOfClassDescription:requiredClassDescription] == NO)
-                    isValid = NO;
-                obj = [obj respondsToSelector:@selector(objectSpecifier)] ? (id)[obj objectSpecifier] : (id)[obj aeDescriptorValue];
-                if (obj)
-                    [returnValue addObject:obj];
-            }
-            
-            if (isValid == NO || (insertionIndex == -1 && [containerClassDescription isLocationRequiredToCreateForKey:insertionKey])) {
+            if ([insertionClassDescription isKindOfClassDescription:requiredClassDescription] == NO || 
+                (insertionIndex == -1 && [containerClassDescription isLocationRequiredToCreateForKey:insertionKey])) {
                 [self setScriptErrorNumber:NSArgumentsWrongScriptError];
                 [self setScriptErrorString:NSLocalizedString(@"Invalid container to add to", @"Error description")];
-                insertionObjects = nil;
-                returnValue = nil;
             } else {
                 // insert using scripting KVC
                 if (insertionIndex >= 0) {
@@ -152,10 +138,23 @@
                     while (obj = [objEnum nextObject])
                         [insertionContainer insertValue:obj inPropertyWithKey:insertionKey];
                 }
+                
+                // get the return value, either by getting the objectSpecifier or the AppleEventDescriptor
+                returnValue = [NSMutableArray array];
+                objEnum = [insertionObjects objectEnumerator];
+                while (obj = [objEnum nextObject]) {
+                    id returnObj = nil;
+                    if ([obj respondsToSelector:@selector(objectSpecifier)])
+                        returnObj = [obj objectSpecifier];
+                    if (returnObj == nil)
+                        returnObj = [obj aeDescriptorValue];
+                    if (returnObj)
+                        [returnValue addObject:returnObj];
+                }
+                
             }
         }
     }
-    
     return isArray ? returnValue : [returnValue lastObject];
 }
 

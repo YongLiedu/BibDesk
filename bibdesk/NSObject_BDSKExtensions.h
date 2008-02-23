@@ -41,6 +41,8 @@
 
 @interface NSObject (BDSKExtensions)
 
+- (NSScriptClassDescription *)scriptClassDescription;
+
 - (void)performSelector:(SEL)selector withObjectsFromArray:(NSArray *)objects;
 - (void)performSelector:(SEL)selector withObjectsFromArray:(NSArray *)objects withObject:(id)anObject;
 - (void)performSelector:(SEL)selector withObject:(id)anObject withObjectsFromArray:(NSArray *)objects;

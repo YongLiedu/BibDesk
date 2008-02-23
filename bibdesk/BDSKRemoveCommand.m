@@ -39,6 +39,7 @@
 #import "BDSKRemoveCommand.h"
 #import "NSAppleEventDescriptor_BDSKExtensions.h"
 #import "NSScriptClassDescription_BDSKExtensions.h"
+#import "NSObject_BDSKExtensions.h"
 
 
 @implementation BDSKRemoveCommand
@@ -59,14 +60,16 @@
     
     if (removeObjects == nil) {
         [self setScriptErrorNumber:NSArgumentsWrongScriptError];
+        [self setScriptErrorString:NSLocalizedString(@"Invalid or missing objects to remove", @"Error description")];
     } else {
         
         // get the container to remove from
         id containerSpecifier = [[self arguments] objectForKey:@"FromContainer"];
         id removeContainer = nil;
         NSString *removeKey = nil;
-        
         NSScriptClassDescription *containerClassDescription = nil;
+        NSArray *classDescriptions = [removeObjects valueForKey:@"scriptClassDescription"];
+        NSScriptClassDescription *removeClassDescription = [classDescriptions containsObject:[NSNull null]] ? nil : [NSScriptClassDescription commonAncestorForClassDescriptions:removeObjects];
         
         if (containerSpecifier == nil) {
             obj = directParameter;
@@ -83,15 +86,12 @@
             // make sure this is a valid object, so not something like a range specifier
             if ([removeContainer respondsToSelector:@selector(objectSpecifier)] == NO)
                 removeContainer = nil;
-            containerClassDescription = (NSScriptClassDescription *)[removeContainer classDescription];
-            OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
-            NSScriptClassDescription *classDescription = (NSScriptClassDescription *)[[removeObjects lastObject] classDescription];
-            OBASSERT([classDescription isKindOfClass:[NSScriptClassDescription class]]);
+            containerClassDescription = [removeContainer scriptClassDescription];
             NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
             NSString *key;
             while (key = [keyEnum nextObject]) {
                 NSScriptClassDescription *keyClassDescription = [containerClassDescription classDescriptionForKey:key];
-                if ([classDescription isKindOfClassDescription:keyClassDescription]) {
+                if ([removeClassDescription isKindOfClassDescription:keyClassDescription]) {
                     removeKey = key;
                     break;
                 }
@@ -99,27 +99,16 @@
         }
         
         // check if the remove location is valid
-        if (containerClassDescription == nil && removeContainer) {
-            containerClassDescription = (NSScriptClassDescription *)[removeContainer classDescription];
-            OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
-        }
+        if (containerClassDescription == nil && removeContainer)
+            containerClassDescription = [removeContainer scriptClassDescription];
         if (removeContainer == nil || removeKey == nil || 
             [[containerClassDescription toManyRelationshipKeys] containsObject:removeKey] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"Could not find container to remove from", @"Error description")];
         } else {
-            NSScriptClassDescription *requiredClassDescription = (NSScriptClassDescription *)[containerClassDescription classDescriptionForKey:removeKey];
-            OBASSERT([requiredClassDescription isKindOfClass:[NSScriptClassDescription class]]);
-            BOOL isValid = YES;
+            NSScriptClassDescription *requiredClassDescription = [containerClassDescription classDescriptionForKey:removeKey];
             
-            objEnum = [removeObjects objectEnumerator];
-            while (isValid && (obj = [objEnum nextObject])) {
-                NSScriptClassDescription *classDescription = (NSScriptClassDescription *)[obj classDescription];
-                OBASSERT([classDescription isKindOfClass:[NSScriptClassDescription class]]);
-                if ([classDescription isKindOfClassDescription:requiredClassDescription] == NO)
-                    isValid = NO;
-            }
-            if (isValid == NO) {
+            if ([removeClassDescription isKindOfClassDescription:requiredClassDescription] == NO) {
                 [self setScriptErrorNumber:NSArgumentsWrongScriptError];
                 [self setScriptErrorString:NSLocalizedString(@"Invalid container to remove from", @"Error description")];
             } else {

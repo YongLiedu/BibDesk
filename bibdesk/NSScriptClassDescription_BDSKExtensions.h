@@ -41,6 +41,12 @@
 
 @interface NSScriptClassDescription (BDSKExtensions)
 
++ (NSScriptClassDescription *)scriptClassDescriptionForClass:(Class)aClass;
+
++ (NSScriptClassDescription *)commonAncestorForClassDescriptions:(NSArray *)classDescriptionArray;
+
+- (NSScriptClassDescription *)commonAncestorForClassDescription:(NSScriptClassDescription *)aClassDescription;
+
 - (BOOL)isKindOfClassDescription:(NSScriptClassDescription *)aClassDescription;
 
 @end

@@ -41,18 +41,47 @@
 
 @implementation NSScriptClassDescription (SKExtensions)
 
++ (NSScriptClassDescription *)scriptClassDescriptionForClass:(Class)aClass {
+    id classDescription = [self classDescriptionForClass:aClass];
+    return [classDescription isKindOfClass:[NSScriptClassDescription class]] ? classDescription : nil;
+}
+
++ (NSScriptClassDescription *)commonAncestorForClassDescriptions:(NSArray *)classDescriptionArray {
+    NSEnumerator *cdEnum = [classDescriptionArray objectEnumerator];
+    NSScriptClassDescription *classDescription = [cdEnum nextObject];
+    NSScriptClassDescription *ancestor = classDescription;
+    
+    while (ancestor && (classDescription = [cdEnum nextObject]))
+        ancestor = [ancestor commonAncestorForClassDescription:classDescription];
+    
+    return ancestor;
+}
+
+- (NSScriptClassDescription *)commonAncestorForClassDescription:(NSScriptClassDescription *)aClassDescription {
+    NSScriptClassDescription *myAncestor = self;
+    NSScriptClassDescription *otherAncestor = aClassDescription;
+    NSMutableArray *otherAncestors = [NSMutableArray arrayWithObjects:otherAncestor, nil];
+    
+    while (otherAncestor = [otherAncestor superclassDescription])
+        [otherAncestors addObject:otherAncestor];
+    do {
+        NSEnumerator *ancestorEnum = [otherAncestors objectEnumerator];
+        while (otherAncestor = [ancestorEnum nextObject]) {
+            if ([myAncestor isEqual:otherAncestor])
+                return myAncestor;
+        }
+    } while (myAncestor = [myAncestor superclassDescription]);
+    
+    return nil;
+}
+
 - (BOOL)isKindOfClassDescription:(NSScriptClassDescription *)aClassDescription {
-    NSString *className = [self className];
-    NSString *aClassName = [aClassDescription className];
-    NSScriptClassDescription *superclassDescription;
-    if (aClassName == nil || className == nil)
+    if (aClassDescription == nil)
         return NO;
-    else if ([className isEqualToString:aClassName])
+    else if ([self isEqual:aClassDescription])
         return YES;
-    else if (superclassDescription = [self superclassDescription])
-        return [superclassDescription isKindOfClassDescription:aClassDescription];
     else
-        return NO;
+        return [[self superclassDescription] isKindOfClassDescription:aClassDescription];
 }
 
 @end
