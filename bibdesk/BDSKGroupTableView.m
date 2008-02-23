@@ -172,17 +172,16 @@
 }
 
 - (void)mouseDown:(NSEvent *)theEvent{
-    if ([theEvent clickCount] == 2) {
-        NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        int row = [self rowAtPoint:point];
-        int column = [self columnAtPoint:point];
-        if (row != -1 && column == 0) {
-            BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
-            NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
-            if (NSPointInRect(point, iconRect)) {
+    NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    int row = [self rowAtPoint:point];
+    int column = [self columnAtPoint:point];
+    if (row != -1 && column == 0) {
+        BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
+        NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
+        if (NSPointInRect(point, iconRect)) {
+            if ([theEvent clickCount] == 2)
                 [[self delegate] tableView:self doubleClickedOnIconOfRow:row];
-                return;
-            }
+            return;
         }
     }
     [super mouseDown:theEvent];
