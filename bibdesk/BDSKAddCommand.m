@@ -81,7 +81,7 @@
         int insertionIndex = -1;
         NSScriptClassDescription *containerClassDescription = nil;
         NSArray *classDescriptions = [insertionObjects valueForKey:@"scriptClassDescription"];
-        NSScriptClassDescription *insertionClassDescription = [classDescriptions containsObject:[NSNull null]] ? nil : [NSScriptClassDescription commonAncestorForClassDescriptions:insertionObjects];
+        NSScriptClassDescription *insertionClassDescription = [classDescriptions containsObject:[NSNull null]] ? nil : [NSScriptClassDescription commonAncestorForClassDescriptions:classDescriptions];
         
         if ([locationSpecifier isKindOfClass:[NSPositionalSpecifier class]]) {
             insertionContainer = [locationSpecifier insertionContainer];

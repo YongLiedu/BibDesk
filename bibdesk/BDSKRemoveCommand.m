@@ -69,7 +69,7 @@
         NSString *removeKey = nil;
         NSScriptClassDescription *containerClassDescription = nil;
         NSArray *classDescriptions = [removeObjects valueForKey:@"scriptClassDescription"];
-        NSScriptClassDescription *removeClassDescription = [classDescriptions containsObject:[NSNull null]] ? nil : [NSScriptClassDescription commonAncestorForClassDescriptions:removeObjects];
+        NSScriptClassDescription *removeClassDescription = [classDescriptions containsObject:[NSNull null]] ? nil : [NSScriptClassDescription commonAncestorForClassDescriptions:classDescriptions];
         
         if (containerSpecifier == nil) {
             obj = directParameter;
