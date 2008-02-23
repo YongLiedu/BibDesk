@@ -179,9 +179,12 @@
         BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
         NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
         if (NSPointInRect(point, iconRect)) {
-            if ([theEvent clickCount] == 2)
+            if ([theEvent clickCount] == 2) {
                 [[self delegate] tableView:self doubleClickedOnIconOfRow:row];
-            return;
+                return;
+            } else if ([self isRowSelected:row]) {
+                return;
+            }
         }
     }
     [super mouseDown:theEvent];
