@@ -64,7 +64,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	unsigned idx = [ar indexOfObjectIdenticalTo:self];
     if ([self owner] && idx != NSNotFound) {
         NSScriptObjectSpecifier *containerRef = [(id)[self owner] objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"publications" index:idx] autorelease];
+        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"scriptingPublications" index:idx] autorelease];
     } else {
         return nil;
     }
