@@ -40,6 +40,7 @@
 #import "NSAppleEventDescriptor_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
+#import "NSScriptClassDescription_BDSKExtensions.h"
 
 
 @implementation BDSKAddCommand
@@ -93,11 +94,13 @@
                 insertionContainer = nil;
             containerClassDescription = (NSScriptClassDescription *)[insertionContainer classDescription];
             OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
+            NSScriptClassDescription *classDescription = (NSScriptClassDescription *)[[insertionObjects lastObject] classDescription];
+            OBASSERT([classDescription isKindOfClass:[NSScriptClassDescription class]]);
             NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
             NSString *key;
             while (key = [keyEnum nextObject]) {
                 NSScriptClassDescription *keyClassDescription = [containerClassDescription classDescriptionForKey:key];
-                if ([[insertionObjects lastObject] isKindOfClass:NSClassFromString([keyClassDescription typeForKey:key])] &&
+                if ([classDescription isKindOfClassDescription:keyClassDescription] &&
                     [containerClassDescription isLocationRequiredToCreateForKey:key] == NO) {
                     insertionKey = key;
                     break;
@@ -113,16 +116,20 @@
         if (insertionContainer == nil || insertionKey == nil || 
             [[containerClassDescription toManyRelationshipKeys] containsObject:insertionKey] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];
+			[self setScriptErrorString:NSLocalizedString(@"Could not find container to add to", @"Error description")];
             insertionObjects = nil;
         } else {
             // check if the inserted objects are valid for the insertion container key
-            Class requiredClass = NSClassFromString([containerClassDescription typeForKey:insertionKey]);
+            NSScriptClassDescription *requiredClassDescription = (NSScriptClassDescription *)[containerClassDescription classDescriptionForKey:insertionKey];
+            OBASSERT([requiredClassDescription isKindOfClass:[NSScriptClassDescription class]]);
             BOOL isValid = YES;
             
             returnValue = [NSMutableArray array];
             objEnum = [insertionObjects objectEnumerator];
             while (isValid && (obj = [objEnum nextObject])) {
-                if ([obj isKindOfClass:requiredClass] == NO)
+                NSScriptClassDescription *classDescription = (NSScriptClassDescription *)[obj classDescription];
+                OBASSERT([classDescription isKindOfClass:[NSScriptClassDescription class]]);
+                if ([classDescription isKindOfClassDescription:requiredClassDescription] == NO)
                     isValid = NO;
                 obj = [obj respondsToSelector:@selector(objectSpecifier)] ? (id)[obj objectSpecifier] : (id)[obj aeDescriptorValue];
                 if (obj)
@@ -131,6 +138,7 @@
             
             if (isValid == NO || (insertionIndex == -1 && [containerClassDescription isLocationRequiredToCreateForKey:insertionKey])) {
                 [self setScriptErrorNumber:NSArgumentsWrongScriptError];
+                [self setScriptErrorString:NSLocalizedString(@"Invalid container to add to", @"Error description")];
                 insertionObjects = nil;
                 returnValue = nil;
             } else {

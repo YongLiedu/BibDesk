@@ -138,6 +138,8 @@
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		CE023F5D0CC50F87003F52E5 /* Add_Small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */; };
+		CE117D230D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE117D210D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.h */; };
+		CE117D240D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE117D220D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.m */; };
 		CE11A2B40AE662EB008C47AC /* BDSKTextViewCompletionController.m in Sources */ = {isa = PBXBuildFile; fileRef = F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */; };
 		CE11A6350AE6BB77008C47AC /* urlFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */; };
 		CE11AC0B0AE7E0DC008C47AC /* BDSKScriptGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */; };
@@ -1019,6 +1021,8 @@
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Add_Small.tiff; path = Images/Add_Small.tiff; sourceTree = "<group>"; };
+		CE117D210D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSScriptClassDescription_BDSKExtensions.h; sourceTree = "<group>"; };
+		CE117D220D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSScriptClassDescription_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -2171,6 +2175,7 @@
 				CE573D2509F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m */,
 				CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */,
 				CE564D240AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m */,
+				CE117D220D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.m */,
 				F9022C9F0758038000C3F701 /* NSString_BDSKExtensions.m */,
 				F9463F4409436F7500CC4549 /* NSSet_BDSKExtensions.m */,
 				F97AF8EE09575E8B00D1F1B0 /* NSURL_BDSKExtensions.m */,
@@ -2743,6 +2748,7 @@
 				CE8C731C0B0CA6C500E31E5A /* NSObject_BDSKExtensions.h */,
 				CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */,
 				CE564D230AECBA5B002F0A24 /* NSScanner_BDSKExtensions.h */,
+				CE117D210D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.h */,
 				CE6C96290CD9014A0022D69F /* NSScrollView_BDSKExtensions.h */,
 				F9463F4309436F7500CC4549 /* NSSet_BDSKExtensions.h */,
 				F9022C9E0758038000C3F701 /* NSString_BDSKExtensions.h */,
@@ -2973,6 +2979,7 @@
 				CE3011AC0D5CC46F00C0B7FA /* BDSKRemoveCommand.h in Headers */,
 				CE3011B90D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h in Headers */,
 				CE6DCA220D6A0237003A072F /* BDSKCondition+Scripting.h in Headers */,
+				CE117D230D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3958,6 +3965,7 @@
 				CE3011AD0D5CC46F00C0B7FA /* BDSKRemoveCommand.m in Sources */,
 				CE3011BA0D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m in Sources */,
 				CE6DCA230D6A0237003A072F /* BDSKCondition+Scripting.m in Sources */,
+				CE117D240D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

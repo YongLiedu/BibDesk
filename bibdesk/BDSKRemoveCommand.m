@@ -38,6 +38,7 @@
 
 #import "BDSKRemoveCommand.h"
 #import "NSAppleEventDescriptor_BDSKExtensions.h"
+#import "NSScriptClassDescription_BDSKExtensions.h"
 
 
 @implementation BDSKRemoveCommand
@@ -84,11 +85,13 @@
                 removeContainer = nil;
             containerClassDescription = (NSScriptClassDescription *)[removeContainer classDescription];
             OBASSERT([containerClassDescription isKindOfClass:[NSScriptClassDescription class]]);
+            NSScriptClassDescription *classDescription = (NSScriptClassDescription *)[[removeObjects lastObject] classDescription];
+            OBASSERT([classDescription isKindOfClass:[NSScriptClassDescription class]]);
             NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
             NSString *key;
             while (key = [keyEnum nextObject]) {
                 NSScriptClassDescription *keyClassDescription = [containerClassDescription classDescriptionForKey:key];
-                if ([[removeObjects lastObject] isKindOfClass:NSClassFromString([keyClassDescription typeForKey:key])]) {
+                if ([classDescription isKindOfClassDescription:keyClassDescription]) {
                     removeKey = key;
                     break;
                 }
@@ -103,17 +106,22 @@
         if (removeContainer == nil || removeKey == nil || 
             [[containerClassDescription toManyRelationshipKeys] containsObject:removeKey] == NO) {
             [self setScriptErrorNumber:NSArgumentsWrongScriptError];
+			[self setScriptErrorString:NSLocalizedString(@"Could not find container to remove from", @"Error description")];
         } else {
-            Class requiredClass = NSClassFromString([containerClassDescription typeForKey:removeKey]);
+            NSScriptClassDescription *requiredClassDescription = (NSScriptClassDescription *)[containerClassDescription classDescriptionForKey:removeKey];
+            OBASSERT([requiredClassDescription isKindOfClass:[NSScriptClassDescription class]]);
             BOOL isValid = YES;
             
             objEnum = [removeObjects objectEnumerator];
             while (isValid && (obj = [objEnum nextObject])) {
-                if ([obj isKindOfClass:requiredClass] == NO)
+                NSScriptClassDescription *classDescription = (NSScriptClassDescription *)[obj classDescription];
+                OBASSERT([classDescription isKindOfClass:[NSScriptClassDescription class]]);
+                if ([classDescription isKindOfClassDescription:requiredClassDescription] == NO)
                     isValid = NO;
             }
             if (isValid == NO) {
                 [self setScriptErrorNumber:NSArgumentsWrongScriptError];
+                [self setScriptErrorString:NSLocalizedString(@"Invalid container to remove from", @"Error description")];
             } else {
                 // remove using KVC, I don't know how to use scripting KVC as I don't know how to get the indexes in general
                 [[removeContainer mutableArrayValueForKey:removeKey] removeObjectsInArray:removeObjects];
