@@ -382,7 +382,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     if (tmpValue)
         return;
     
-    subValue = [[subValue stringByRemovingPunctuationCharactersAndBracketedText] copy];
+    subValue = [[[subValue stringByRemovingPunctuationCharactersAndBracketedText] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] copy];
     [pubDict setObject:subValue forKey:key];
     [subValue release];
 }
