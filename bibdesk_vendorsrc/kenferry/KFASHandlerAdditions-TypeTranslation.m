@@ -51,10 +51,18 @@
                                  atIndex:i++];
         }
     }
-    else if ([self respondsToSelector:@selector(objectSpecifier)] &&
-             [NSScriptObjectSpecifier instancesRespondToSelector:@selector(_asDescriptor)]) // use the script object specifier
+    else if ([self respondsToSelector:@selector(objectSpecifier)]) // use the script object specifier
     {
-        resultDesc = [[self objectSpecifier] performSelector:@selector(_asDescriptor)];
+        NSScriptObjectSpecifier *objectSpecifier = [self objectSpecifier];
+        
+        if (objectSpecifier && [objectSpecifier respondsToSelector:@selector(_asDescriptor)])
+        {
+            resultDesc = [[self objectSpecifier] performSelector:@selector(_asDescriptor)];
+        }
+        else
+        {
+            resultDesc = [[self description] aeDescriptorValue];
+        }
     }
     else // encode the description as a fallback - this is pretty useless, only helpful for debugging
     {
