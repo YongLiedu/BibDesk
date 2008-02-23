@@ -138,8 +138,7 @@
 }
 
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx {
-    if ([pub owner] == nil)
-        [[self document] insertObject:pub inScriptingPublicationsAtIndex:idx];
+    [[self document] insertObject:pub inScriptingPublicationsAtIndex:idx];
 }
 
 - (void)removeObjectFromScriptingPublicationsAtIndex:(unsigned int)idx {
