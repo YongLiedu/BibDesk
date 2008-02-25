@@ -220,7 +220,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
     NSString *menuTitle;
     NSString *version;
     NSDictionary *dict;
-    unsigned int idx, i, j, subCount, count = [appURLs count];
+    unsigned int i, j, subCount, count = [appURLs count];
     
     for (i = 0; i < count; i++) {
         appURL = [appURLs objectAtIndex:i];
