@@ -375,34 +375,6 @@
 			};
 			name = Release;
 		};
-		F93566720912D56F002B6957 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = "";
-				FRAMEWORK_VERSION = A;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					SUPPORT_UTF8,
-					"POSIX_MALLOC_THRESHOLD=10",
-				);
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "Info-AGRegex.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks/";
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-Wl,-prebind,-image_base,0xC5000000";
-				PRODUCT_NAME = AGRegex;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				WRAPPER_EXTENSION = framework;
-			};
-			name = Default;
-		};
 		F935668A0912D56F002B6957 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -448,30 +420,12 @@
 			};
 			name = Release;
 		};
-		F935668C0912D56F002B6957 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = "Info-RegexTest.plist";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = RegexTest;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				WRAPPER_EXTENSION = app;
-			};
-			name = Default;
-		};
 		F93566980912D572002B6957 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH)";
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Debug;
 		};
@@ -482,22 +436,10 @@
 					ppc,
 					i386,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Release;
-		};
-		F935669A0912D572002B6957 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-			};
-			name = Default;
 		};
 /* End XCBuildConfiguration section */
 
@@ -507,30 +449,27 @@
 			buildConfigurations = (
 				F93566700912D56F002B6957 /* Debug */,
 				F93566710912D56F002B6957 /* Release */,
-				F93566720912D56F002B6957 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		F93566890912D56F002B6957 /* Build configuration list for PBXNativeTarget "RegexTest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F935668A0912D56F002B6957 /* Debug */,
 				F935668B0912D56F002B6957 /* Release */,
-				F935668C0912D56F002B6957 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		F93566970912D572002B6957 /* Build configuration list for PBXProject "AGRegex" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F93566980912D572002B6957 /* Debug */,
 				F93566990912D572002B6957 /* Release */,
-				F935669A0912D572002B6957 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

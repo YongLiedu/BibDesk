@@ -21,14 +21,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = F9A46E2C0D12FF02001ED26C /* yaz.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 8DC2EF5B0486A6940098B216 /* yaz.framework */;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = yaz;
 		};
 		F9A46E330D12FF10001ED26C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9A46E2C0D12FF02001ED26C /* yaz.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* yaz */;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = yaz;
 		};
 /* End PBXContainerItemProxy section */
