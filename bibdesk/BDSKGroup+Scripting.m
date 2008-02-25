@@ -480,7 +480,6 @@
     NSString *database = [info valueForKey:@"database"];
     NSString *host = [info valueForKey:@"host"];
     NSString *port = [info valueForKey:@"port"];
-    NSString *resultEncoding = [info valueForKey:@"resultEncoding"];
     
     if ([[serverInfo type] isEqualToString:type]) {
         serverInfo = [[self serverInfo] mutableCopy];

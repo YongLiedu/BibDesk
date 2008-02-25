@@ -49,7 +49,6 @@
     id directParameter = [self directParameter];
     id receiver = [self evaluatedReceivers];
     NSArray *removeObjects = nil;
-    NSEnumerator *objEnum;
     id obj = directParameter;
     
     if (directParameter && [directParameter isKindOfClass:[NSArray class]] == NO)
