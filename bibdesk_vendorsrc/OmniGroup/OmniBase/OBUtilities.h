@@ -59,8 +59,8 @@ OmniBase_EXTERN Class OBClassImplementingMethod(Class cls, SEL sel);
 static inline BOOL OBPointerIsClass(id object)
 {
     if (object) {
-        Class cls = object_getClass(object);
-        return class_isMetaClass(cls);
+        Class cls = OB_object_getClass(object);
+        return OB_class_isMetaClass(cls);
     }
     return NO;
 }
@@ -84,7 +84,7 @@ static inline BOOL OBClassIsSubclassOfClass(Class subClass, Class superClass)
         if (subClass == superClass)
             return YES;
         else
-            subClass = class_getSuperclass(subClass);
+            subClass = OB_class_getSuperclass(subClass);
     }
     return NO;
 }

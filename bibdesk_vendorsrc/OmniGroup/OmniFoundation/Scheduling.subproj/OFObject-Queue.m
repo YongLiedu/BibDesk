@@ -138,8 +138,8 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 	method = class_getInstanceMethod(isa, aSelector);
         if (!method)
-            [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", class_getName(isa), (unsigned)self, NSStringFromSelector(aSelector)];
-	method_getImplementation(method)(self, aSelector, aBool);
+            [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", OB_class_getName(isa), (unsigned)self, NSStringFromSelector(aSelector)];
+	OB_method_getImplementation(method)(self, aSelector, aBool);
     } else
 	[self queueSelector:aSelector withBool:aBool];
 }
@@ -151,8 +151,8 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 	method = class_getInstanceMethod(isa, aSelector);
         if (!method)
-            [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", class_getName(isa), (unsigned)self, NSStringFromSelector(aSelector)];
-	method_getImplementation(method)(self, aSelector, anInt);
+            [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", OB_class_getName(isa), (unsigned)self, NSStringFromSelector(aSelector)];
+	OB_method_getImplementation(method)(self, aSelector, anInt);
     } else
 	[self queueSelector:aSelector withInt:anInt];
 }
@@ -164,8 +164,8 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 	method = class_getInstanceMethod(isa, aSelector);
         if (!method)
-            [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", class_getName(isa), (unsigned)self, NSStringFromSelector(aSelector)];
-	method_getImplementation(method)(self, aSelector, anInt, anInt2);
+            [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", OB_class_getName(isa), (unsigned)self, NSStringFromSelector(aSelector)];
+	OB_method_getImplementation(method)(self, aSelector, anInt, anInt2);
     } else
 	[self queueSelector:aSelector withInt:anInt withInt:anInt2];
 }

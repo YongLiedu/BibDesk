@@ -188,12 +188,12 @@ char *OFNameForPointer(id object, char *pointerName)
 
 BOOL OFInstanceIsKindOfClass(id instance, Class aClass)
 {
-    Class sourceClass = object_getClass(instance);
+    Class sourceClass = OB_object_getClass(instance);
 
     while (sourceClass) {
         if (sourceClass == aClass)
             return YES;
-        sourceClass = class_getSuperclass(sourceClass);
+        sourceClass = OB_class_getSuperclass(sourceClass);
     }
     return NO;
 }

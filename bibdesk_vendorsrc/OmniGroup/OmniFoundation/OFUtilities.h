@@ -32,7 +32,7 @@ OmniFoundation_EXTERN NSObject *OFGetIvar(NSObject *object, NSString *ivarName);
 static inline Class OFRootClassForClass(Class aClass)
 {
     Class superClass;
-    while ((superClass = class_getSuperclass(aClass)))
+    while ((superClass = OB_class_getSuperclass(aClass)))
 	aClass = superClass;
     return superClass;
 }

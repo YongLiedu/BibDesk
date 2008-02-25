@@ -17,7 +17,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 static BOOL _OBRegisterMethod(IMP imp, Class cls, const char *types, SEL name)
 {
-    return class_addMethod(cls, name, imp, types);
+    return OB_class_addMethod(cls, name, imp, types);
 }
 
 IMP OBRegisterInstanceMethodWithSelector(Class aClass, SEL oldSelector, SEL newSelector)
@@ -26,8 +26,8 @@ IMP OBRegisterInstanceMethodWithSelector(Class aClass, SEL oldSelector, SEL newS
     IMP oldImp = NULL;
 
     if ((thisMethod = class_getInstanceMethod(aClass, oldSelector))) {
-        oldImp = method_getImplementation(thisMethod);
-        _OBRegisterMethod(oldImp, aClass, method_getTypeEncoding(thisMethod), newSelector);
+        oldImp = OB_method_getImplementation(thisMethod);
+        _OBRegisterMethod(oldImp, aClass, OB_method_getTypeEncoding(thisMethod), newSelector);
     }
 
     return oldImp;
@@ -40,25 +40,26 @@ IMP OBReplaceMethodImplementation(Class aClass, SEL oldSelector, IMP newImp)
     extern void _objc_flush_caches(Class);
 
     if ((localMethod = class_getInstanceMethod(aClass, oldSelector))) {
-	oldImp = method_getImplementation(localMethod);
-        Class superCls = class_getSuperclass(aClass);
+	oldImp = OB_method_getImplementation(localMethod);
+        Class superCls = OB_class_getSuperclass(aClass);
 	superMethod = superCls ? class_getInstanceMethod(superCls, oldSelector) : NULL;
 
 	if (superMethod == localMethod) {
 	    // We are inheriting this method from the superclass.  We do *not* want to clobber the superclass's Method as that would replace the implementation on a greater scope than the caller wanted.  In this case, install a new method at this class and return the superclass's implementation as the old implementation (which it is).
-	    _OBRegisterMethod(newImp, aClass, method_getTypeEncoding(localMethod), oldSelector);
+	    _OBRegisterMethod(newImp, aClass, OB_method_getTypeEncoding(localMethod), oldSelector);
 	} else {
 	    // Replace the method in place
 #ifdef OMNI_ASSERTIONS_ON
             IMP previous = 
 #endif
-            method_setImplementation(localMethod, newImp);
-            OBASSERT(oldImp == previous); // method_setImplementation is supposed to return the old implementation, but we already grabbed it.
+            OB_method_setImplementation(localMethod, newImp);
+            OBASSERT(oldImp == previous); // OB_method_setImplementation is supposed to return the old implementation, but we already grabbed it.
 	}
 	
 #if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
 	// Flush the method cache
-	_objc_flush_caches(aClass);
+	if (_objc_flush_caches != NULL)
+        _objc_flush_caches(aClass);
 #endif
     }
 
@@ -70,7 +71,7 @@ IMP OBReplaceMethodImplementationWithSelector(Class aClass, SEL oldSelector, SEL
     Method newMethod = class_getInstanceMethod(aClass, newSelector);
     OBASSERT(newMethod);
     
-    return OBReplaceMethodImplementation(aClass, oldSelector, method_getImplementation(newMethod));
+    return OBReplaceMethodImplementation(aClass, oldSelector, OB_method_getImplementation(newMethod));
 }
 
 IMP OBReplaceMethodImplementationWithSelectorOnClass(Class destClass, SEL oldSelector, Class sourceClass, SEL newSelector)
@@ -78,7 +79,7 @@ IMP OBReplaceMethodImplementationWithSelectorOnClass(Class destClass, SEL oldSel
     Method newMethod = class_getInstanceMethod(sourceClass, newSelector);
     OBASSERT(newMethod);
 
-    return OBReplaceMethodImplementation(destClass, oldSelector, method_getImplementation(newMethod));
+    return OBReplaceMethodImplementation(destClass, oldSelector, OB_method_getImplementation(newMethod));
 }
 
 // Returns the class in the inheritance chain of 'cls' that actually implements the given selector, or Nil if it isn't implemented
@@ -90,7 +91,7 @@ Class OBClassImplementingMethod(Class cls, SEL sel)
 
     // *Some* class must implement it
     Class superClass;
-    while ((superClass = class_getSuperclass(cls))) {
+    while ((superClass = OB_class_getSuperclass(cls))) {
 	Method superMethod = class_getInstanceMethod(superClass, sel);
 	if (superMethod != method)
 	    return cls;
@@ -117,7 +118,7 @@ void OBRejectUnusedImplementation(id self, SEL _cmd)
 
 void _OBRejectInvalidCall(id self, SEL _cmd, const char *file, unsigned int line, NSString *format, ...)
 {
-    const char *className = class_getName(OBClassForPointer(self));
+    const char *className = OB_class_getName(OBClassForPointer(self));
     const char *methodName = sel_getName(_cmd);
     
     va_list argv;

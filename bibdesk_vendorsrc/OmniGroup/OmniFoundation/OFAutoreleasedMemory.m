@@ -32,7 +32,7 @@ static NSZone *defaultMallocZone = NULL;
     memory = (OFAutoreleasedMemory *)NSAllocateObject(aClass, length, defaultMallocZone);
     [memory autorelease];
 
-    buffer = (char *)memory + class_getInstanceSize(aClass);
+    buffer = (char *)memory + OB_class_getInstanceSize(aClass);
     return (void *)buffer;
 }
 

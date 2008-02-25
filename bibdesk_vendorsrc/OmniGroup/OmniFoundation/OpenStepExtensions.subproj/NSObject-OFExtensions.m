@@ -23,17 +23,17 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 static BOOL implementsInstanceMethod(Class cls, SEL aSelector)
 {
     // In ObjC 2.0, it isn't documented whether class_getInstanceMethod/class_getClassMethod search the superclass or not.  Radar #5063446.
-    // class_copyMethodList is documented to NOT look at the superclass, so we'll use that, even though it requires memory allocation/deallocation.
+    // OB_class_copyMethodList is documented to NOT look at the superclass, so we'll use that, even though it requires memory allocation/deallocation.
     
     unsigned int methodIndex;
-    Method *methods = class_copyMethodList(cls, &methodIndex);
+    Method *methods = OB_class_copyMethodList(cls, &methodIndex);
     if (!methods)
         return NO;
     
     BOOL result = NO;
     while (methodIndex--) {
         Method m = methods[methodIndex];
-        if (sel_isEqual(method_getName(m), aSelector)) {
+        if (OB_sel_isEqual(OB_method_getName(m), aSelector)) {
             result = YES;
             break;
         }
@@ -50,7 +50,7 @@ static BOOL implementsInstanceMethod(Class cls, SEL aSelector)
     while (aClass) {
         if (implementsInstanceMethod(aClass, aSelector))
             return aClass;
-        aClass = class_getSuperclass(aClass);
+        aClass = OB_class_getSuperclass(aClass);
     }
 
     return Nil;
@@ -498,13 +498,13 @@ typedef long  (*longImp_t)(id self, SEL _cmd, id arg);
         // TODO: change this to @encode at some point
     case 'c':
     case 'C': {
-        byteImp_t byteImp = (typeof(byteImp))method_getImplementation(method);
+        byteImp_t byteImp = (typeof(byteImp))OB_method_getImplementation(method);
         selectorResult = byteImp(self, sel, object) != 0;
         break;
     }
     case 's':
     case 'S': {
-        shortImp_t shortImp = (typeof(shortImp))method_getImplementation(method);
+        shortImp_t shortImp = (typeof(shortImp))OB_method_getImplementation(method);
         selectorResult = shortImp(self, sel, object) != 0;
         break;
     }
@@ -512,7 +512,7 @@ typedef long  (*longImp_t)(id self, SEL _cmd, id arg);
         assert(sizeof(id) == sizeof(long)); // 64-bit pointers may happen someday
     case 'i':
     case 'I': {
-        longImp_t longImp = (typeof(longImp))method_getImplementation(method);
+        longImp_t longImp = (typeof(longImp))OB_method_getImplementation(method);
         selectorResult = longImp(self, sel, object) != 0;
         break;
     }

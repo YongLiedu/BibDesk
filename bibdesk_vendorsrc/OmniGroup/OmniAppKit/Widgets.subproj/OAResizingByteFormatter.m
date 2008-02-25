@@ -56,7 +56,7 @@ static void _addFormatter(NSMutableArray *results, NSString *formatString)
 
 - (NSString *)stringForObjectValue:(id)obj;
 {
-#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5  // Uses API deprecated on 10.5
+#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5  // Uses API deprecated on 10.5
     NSString *bytesString = @"";
     NSCell *dataCell = [nonretainedTableColumn dataCell];
     double scaledBytes = [obj doubleValue];

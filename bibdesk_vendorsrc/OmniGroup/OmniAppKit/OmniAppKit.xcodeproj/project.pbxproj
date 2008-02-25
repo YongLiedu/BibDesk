@@ -2601,6 +2601,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 4AB8F09C08AD0A0600DBB061 /* Omni-Global-Debug.xcconfig */;
 			buildSettings = {
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Debug;
 		};
@@ -2608,6 +2609,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 4AB8F09D08AD0A0600DBB061 /* Omni-Global-Release.xcconfig */;
 			buildSettings = {
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Release;
 		};
@@ -2615,6 +2617,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 4AB8F09B08AD0A0600DBB061 /* Omni-Global-Coverage.xcconfig */;
 			buildSettings = {
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Coverage;
 		};

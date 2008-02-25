@@ -178,7 +178,7 @@ static NSString * const DefaultDateBinding = @"defaultDateBinding";
     // Sadly can't set this in IB 2.x; only 3.x; smack it for now.
     Class cls = [OADatePickerTextFieldCell class];
     
-    OBASSERT(class_getInstanceSize(cls) == class_getInstanceSize(class_getSuperclass(cls))); // Must not add ivars
+    OBASSERT(OB_class_getInstanceSize(cls) == OB_class_getInstanceSize(OB_class_getSuperclass(cls))); // Must not add ivars
     NSCell *cell = [self cell];
     OBASSERT([cell class] == [NSTextFieldCell class]);
     *(Class *)cell = cls;

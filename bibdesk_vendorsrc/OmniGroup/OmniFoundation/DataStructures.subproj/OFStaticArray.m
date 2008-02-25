@@ -34,7 +34,7 @@ static NSZone *OFStaticArrayZone;
         return nil;
 
     objectClass = aClass;
-    objectLength = class_getInstanceSize(aClass);
+    objectLength = OB_class_getInstanceSize(aClass);
     count = 0;
     extensionSize = extendBy;
     if (aCapacity < extensionSize)

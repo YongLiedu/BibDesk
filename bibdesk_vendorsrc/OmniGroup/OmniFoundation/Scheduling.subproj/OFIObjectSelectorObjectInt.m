@@ -34,12 +34,12 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 - (void)invoke;
 {
-    Class cls = object_getClass(object);
+    Class cls = OB_object_getClass(object);
     Method method = class_getInstanceMethod(cls, selector);
     if (!method)
-        [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", class_getName(cls), (unsigned)object, NSStringFromSelector(selector)];
+        [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", OB_class_getName(cls), (unsigned)object, NSStringFromSelector(selector)];
 
-    method_getImplementation(method)(object, selector, withObject, theInt);
+    OB_method_getImplementation(method)(object, selector, withObject, theInt);
 }
 
 - (unsigned int)hash;
@@ -52,7 +52,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     OFIObjectSelectorObjectInt *otherObject;
 
     otherObject = anObject;
-    if (object_getClass(otherObject) != isa)
+    if (OB_object_getClass(otherObject) != isa)
         return NO;
     return object == otherObject->object && selector == otherObject->selector && withObject == otherObject->withObject && theInt == otherObject->theInt;
 }

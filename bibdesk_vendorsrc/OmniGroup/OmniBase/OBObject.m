@@ -47,7 +47,7 @@ static BOOL OBObjectDebug = NO;
         initialized = YES;
 
         descriptionMethod = class_getInstanceMethod([NSObject class], @selector(description));
-        nsObjectDescription = method_getImplementation(descriptionMethod);
+        nsObjectDescription = OB_method_getImplementation(descriptionMethod);
 
 #ifdef DEBUG_INITIALIZE
 #warning OBObject initialize debugging enabled

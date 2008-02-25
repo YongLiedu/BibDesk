@@ -103,10 +103,10 @@ static inline OFSimpleLockType *_lockForObject(OFObject *obj)
 
     if (NSKeepAllocationStatistics) {
         // Repord our allocation statistics to make OOM and oh happy
-#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-        NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self);
-#else
+#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
         NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self, NULL, NULL, NULL);
+#else
+        NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self);
 #endif
     }
     retainCount++;
@@ -123,10 +123,10 @@ static inline OFSimpleLockType *_lockForObject(OFObject *obj)
 
     if (NSKeepAllocationStatistics) {
         // Report our allocation statistics to make OOM and oh happy
-#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-        NSRecordAllocationEvent(NSObjectInternalRefDecrementedEvent, self);
+#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
+        NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self, NULL, NULL, NULL);
 #else
-        NSRecordAllocationEvent(NSObjectInternalRefDecrementedEvent, self, NULL, NULL, NULL);
+        NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self);
 #endif
     }
 

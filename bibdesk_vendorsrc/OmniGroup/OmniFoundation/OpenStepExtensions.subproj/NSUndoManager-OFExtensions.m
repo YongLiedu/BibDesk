@@ -200,7 +200,7 @@ void _OFUndoManagerPushCallSite(NSUndoManager *undoManager, id self, SEL _cmd)
 {
     if ((OFUndoManagerLoggingOptions != OFUndoManagerNoLogging) && [undoManager isUndoRegistrationEnabled]) {
         Class cls = [self class];
-        OFUndoManagerLoggingState *state = _log(undoManager, YES, @"<%s:0x%08x> %s {\n", class_getName(cls), self, _cmd);
+        OFUndoManagerLoggingState *state = _log(undoManager, YES, @"<%s:0x%08x> %s {\n", OB_class_getName(cls), self, _cmd);
         state->indentLevel++;
     }
 }
@@ -245,7 +245,7 @@ void _OFUndoManagerPopCallSite(NSUndoManager *undoManager)
 {
     if ((OFUndoManagerLoggingOptions != OFUndoManagerNoLogging)) {
         Class cls = [target class];
-        _log(self, NO, @"%p REMOVE ACTIONS target=<%s:0x%08x>\n", self, class_getName(cls), target);
+        _log(self, NO, @"%p REMOVE ACTIONS target=<%s:0x%08x>\n", self, OB_class_getName(cls), target);
     }
     original_removeAllActionsWithTarget(self, _cmd, target);
 }
@@ -257,7 +257,7 @@ void _OFUndoManagerPopCallSite(NSUndoManager *undoManager)
 
     if ((OFUndoManagerLoggingOptions != OFUndoManagerNoLogging) && [self isUndoRegistrationEnabled]) {
         Class cls = [target class];
-        _log(self, YES, @">> target=<%s:0x%08x> selector=%s object=%@\n", class_getName(cls), target, selector, anObject);
+        _log(self, YES, @">> target=<%s:0x%08x> selector=%s object=%@\n", OB_class_getName(cls), target, selector, anObject);
     }
 }
 
@@ -271,7 +271,7 @@ void _OFUndoManagerPopCallSite(NSUndoManager *undoManager)
 
     if ((OFUndoManagerLoggingOptions != OFUndoManagerNoLogging) && [self isUndoRegistrationEnabled]) {
         Class cls = [target class];
-        _log(self, YES, @">> <%s:0x%08x> %s ", class_getName(cls), target, [anInvocation selector]);
+        _log(self, YES, @">> <%s:0x%08x> %s ", OB_class_getName(cls), target, [anInvocation selector]);
 
         NSMethodSignature *signature = [anInvocation methodSignature];
         unsigned int argIndex, argCount;

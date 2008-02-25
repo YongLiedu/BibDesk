@@ -11,7 +11,7 @@
 // We only support Mac OS X currently but we'll keep the macros defined here.
 
 // This header has gone missing on 10.5.  We should wean ourselves off of it.
-#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
 #import <sys/version.h>
 
 #define OBOperatingSystemMajorVersion KERNEL_MAJOR_VERSION

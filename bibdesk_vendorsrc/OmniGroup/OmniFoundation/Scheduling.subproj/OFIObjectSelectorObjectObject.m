@@ -42,12 +42,12 @@ static Class myClass;
 
 - (void)invoke;
 {
-    Class cls = object_getClass(object);
+    Class cls = OB_object_getClass(object);
     Method method = class_getInstanceMethod(cls, selector);
     if (!method)
-        [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", class_getName(cls), (unsigned)object, NSStringFromSelector(selector)];
+        [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", OB_class_getName(cls), (unsigned)object, NSStringFromSelector(selector)];
 
-    method_getImplementation(method)(object, selector, object1, object2);
+    OB_method_getImplementation(method)(object, selector, object1, object2);
 }
 
 - (unsigned int)hash;
@@ -58,7 +58,7 @@ static Class myClass;
 - (BOOL)isEqual:(id)anObject;
 {
     OFIObjectSelectorObjectObject *otherObject = anObject;
-    if (object_getClass(otherObject) != myClass)
+    if (OB_object_getClass(otherObject) != myClass)
 	return NO;
     return object == otherObject->object && selector == otherObject->selector && object1 == otherObject->object1 && object2 == otherObject->object2;
 }

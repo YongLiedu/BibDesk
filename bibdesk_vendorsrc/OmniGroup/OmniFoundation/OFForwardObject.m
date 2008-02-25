@@ -16,7 +16,7 @@ static IMP nsObjectForward = NULL;
 + (void)initialize
 {
     Method method = class_getInstanceMethod([NSObject class], @selector(forward::));
-    nsObjectForward = method_getImplementation(method);
+    nsObjectForward = OB_method_getImplementation(method);
     return;
 }
 
