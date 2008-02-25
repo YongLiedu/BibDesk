@@ -31,7 +31,7 @@
 #import <fcntl.h>
 
 // <c.h> is no longer present on 10.5
-#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+#if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
 #import <c.h> // For MIN(), etc.
 #endif
 
