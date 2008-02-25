@@ -521,14 +521,16 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // Problem exposed in BibDesk: select all, scroll halfway down in file pane, then change selection to a single row.  FileView content didn't update correctly, even though reloadIcons was called.  Logging drawRect: indicated that the wrong region was being updated, but calling _recalculateGridSize here fixed it.
     [self _recalculateGridSize];
     
-    // As of r12243, tracking rects were not being invalidated by passing self to invalidateCursorRectsForView: unless the scrollview changed.  As a consequence, minor changes in scale that didn't result in addition of a vertical scroller were not triggering resetCursorRects.  Passing the scrollview to invalidateCursorRectsForView: fixed that.
-    NSView *view = [self enclosingScrollView];
-    if (nil == view) view = self;
-    
     // grid may have changed, so do a full redisplay
-    [view setNeedsDisplay:YES];
-    // any time the grid or scale changes, cursor rects are garbage
-    [[self window] invalidateCursorRectsForView:view];
+    [self setNeedsDisplay:YES];
+    
+    /* 
+     Any time the number of icons or scale changes, cursor rects are garbage and need to be reset.  The approved way to do this is by calling invalidateCursorRectsForView:, and the docs say to never invoke -[NSView resetCursorRects] manually.  Unfortunately, tracking rects are still active even though the window isn't key, and we show buttons for non-key windows.  As a consequence, if the number of icons just changed from (say) 3 to 1 in a non-key view, it can receive mouseEntered: events for the now-missing icons.  Possibly we don't need to reset cursor rects since they only change for the key window, but we'll reset everything manually just in case.  Allow NSWindow to handle it if the window is key.
+     */
+    NSWindow *window = [self window];
+    [window invalidateCursorRectsForView:self];
+    if ([window isKeyWindow] == NO)
+        [self resetCursorRects];
 }
 
 #pragma mark Binding support
