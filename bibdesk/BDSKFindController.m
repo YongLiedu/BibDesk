@@ -877,7 +877,6 @@ enum {
             
             NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
             BDSKLinkedFile *file;
-            BDSKLinkedFile *replFile;
             
         while (file = [fileEnum nextObject]) {
                 origStr = [[file URL] absoluteString];
