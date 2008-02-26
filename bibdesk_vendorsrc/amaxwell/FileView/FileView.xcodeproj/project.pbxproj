@@ -16,7 +16,6 @@
 			comments = "This target just copies the plugin into the framework's bundle, since the bundle needs to link against the framework.";
 			dependencies = (
 				F9F04CE50CE260F400F28ED2 /* PBXTargetDependency */,
-				F9F04CE70CE260FA00F28ED2 /* PBXTargetDependency */,
 			);
 			name = "FileView + Leopard";
 			productName = "Bundle QL plugin";
@@ -134,13 +133,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = F94692120CA56F4300AC2772;
 			remoteInfo = "FileView-Leopard";
-		};
-		F9F04CE60CE260FA00F28ED2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
-			remoteInfo = FileView;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -599,8 +591,8 @@
 			targets = (
 				8DC2EF4F0486A6940098B216 /* FileView */,
 				F94692120CA56F4300AC2772 /* FileView-Leopard */,
-				F94692500CA575F000AC2772 /* FileView Program */,
 				F9F04CE10CE260EB00F28ED2 /* FileView + Leopard */,
+				F94692500CA575F000AC2772 /* FileView Program */,
 			);
 		};
 /* End PBXProject section */
@@ -722,11 +714,6 @@
 			isa = PBXTargetDependency;
 			target = F94692120CA56F4300AC2772 /* FileView-Leopard */;
 			targetProxy = F9F04CE40CE260F400F28ED2 /* PBXContainerItemProxy */;
-		};
-		F9F04CE70CE260FA00F28ED2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 8DC2EF4F0486A6940098B216 /* FileView */;
-			targetProxy = F9F04CE60CE260FA00F28ED2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
