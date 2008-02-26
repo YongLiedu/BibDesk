@@ -4,7 +4,7 @@
 
 // Common settings
 
-SDKROOT = $(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk
+SDKROOT = $(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk
 MACOSX_DEPLOYMENT_TARGET = 10.4
 
 FRAMEWORK_SEARCH_PATHS = $(value) /Library/Frameworks
