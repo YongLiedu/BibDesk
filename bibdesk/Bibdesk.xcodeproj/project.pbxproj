@@ -1274,6 +1274,9 @@
 		CEEA4C680B57B0D400434059 /* BDSKBooleanValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKBooleanValueTransformer.m; sourceTree = "<group>"; };
 		CEEA4C690B57B0D400434059 /* BDSKBooleanValueTransformer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKBooleanValueTransformer.h; sourceTree = "<group>"; };
 		CEEA5E9F0B595EE200434059 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ChangeFieldSheet.nib; sourceTree = "<group>"; };
+		CEEBA6850D746DD7000204B8 /* BibDesk-Common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Common.xcconfig"; sourceTree = "<group>"; };
+		CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Debug.xcconfig"; sourceTree = "<group>"; };
+		CEEBA6870D746DD7000204B8 /* BibDesk-Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Release.xcconfig"; sourceTree = "<group>"; };
 		CEEC6C52093A411D00A64F54 /* BDSKCollapsibleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCollapsibleView.h; sourceTree = "<group>"; };
 		CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCollapsibleView.m; sourceTree = "<group>"; };
 		CEEC70DF093B6EC200A64F54 /* BDSKDragImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDragImageView.h; sourceTree = "<group>"; };
@@ -1551,9 +1554,6 @@
 		F94DB0F70B3E2FA1006F37A2 /* BDSKSearchGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroup.m; sourceTree = "<group>"; };
 		F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPersistentSearch.h; sourceTree = "<group>"; };
 		F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPersistentSearch.m; sourceTree = "<group>"; };
-		F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Release.xcconfig"; sourceTree = "<group>"; };
-		F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Debug.xcconfig"; sourceTree = "<group>"; };
-		F95C5E990D10E89500C81970 /* BibDesk-Common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "BibDesk-Common.xcconfig"; sourceTree = "<group>"; };
 		F95CC0C0087F5378002C5694 /* NSFileManager_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSFileManager_BDSKExtensions.h; sourceTree = "<group>"; };
 		F95CC0C1087F5378002C5694 /* NSFileManager_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSFileManager_BDSKExtensions.m; sourceTree = "<group>"; };
 		F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibImporter.xcodeproj; path = BibImporter/BibImporter.xcodeproj; sourceTree = "<group>"; };
@@ -1917,8 +1917,8 @@
 				F98F307A088E0F2800C1427D /* Subprojects */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				F95C5EDE0D10F5F100C81970 /* Configurations */,
 				F93C37DD0D387DEE006EB558 /* Leopard */,
+				CEEBA6840D746DAF000204B8 /* Configurations */,
 			);
 			name = BibDesk;
 			sourceTree = "<group>";
@@ -2387,6 +2387,16 @@
 			name = "Shared Support";
 			sourceTree = "<group>";
 		};
+		CEEBA6840D746DAF000204B8 /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				CEEBA6850D746DD7000204B8 /* BibDesk-Common.xcconfig */,
+				CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */,
+				CEEBA6870D746DD7000204B8 /* BibDesk-Release.xcconfig */,
+			);
+			name = Configurations;
+			sourceTree = "<group>";
+		};
 		F9022D410758073E00C3F701 /* cfg */ = {
 			isa = PBXGroup;
 			children = (
@@ -2799,16 +2809,6 @@
 				F93C37AD0D387AEE006EB558 /* Leopard-Info.plist */,
 			);
 			name = Leopard;
-			sourceTree = "<group>";
-		};
-		F95C5EDE0D10F5F100C81970 /* Configurations */ = {
-			isa = PBXGroup;
-			children = (
-				F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */,
-				F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */,
-				F95C5E990D10E89500C81970 /* BibDesk-Common.xcconfig */,
-			);
-			name = Configurations;
 			sourceTree = "<group>";
 		};
 		F95CC10F087F54BF002C5694 /* Products */ = {
@@ -4721,7 +4721,6 @@
 		};
 		F993F1BD08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1041;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -4755,7 +4754,6 @@
 		};
 		F993F1BE08553A61007A7657 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 1041;
@@ -4811,7 +4809,6 @@
 		};
 		F993F1BF08553A61007A7657 /* Test */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1041;
@@ -5163,7 +5160,7 @@
 		};
 		F993F20308553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
+			baseConfigurationReference = CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
@@ -5178,7 +5175,7 @@
 		};
 		F993F20408553A61007A7657 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */;
+			baseConfigurationReference = CEEBA6870D746DD7000204B8 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_OPTIMIZATION_LEVEL = s;
@@ -5187,7 +5184,7 @@
 		};
 		F993F20508553A61007A7657 /* Test */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
+			baseConfigurationReference = CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				GCC_AUTO_VECTORIZATION = NO;
 			};
@@ -5195,7 +5192,6 @@
 		};
 		F9CA0C7B0CDF93D20059D36D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -5207,7 +5203,6 @@
 		};
 		F9CA0C7C0CDF93D20059D36D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -5220,7 +5215,6 @@
 		};
 		F9CA0C7D0CDF93D20059D36D /* Test */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				PRODUCT_NAME = "BibDesk+QuickLook";
