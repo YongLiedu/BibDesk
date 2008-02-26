@@ -4713,6 +4713,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Leopard;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				WRAPPER_EXTENSION = bundle;
 				ZERO_LINK = YES;
 			};
@@ -4723,7 +4724,6 @@
 			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1041;
-				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -4746,7 +4746,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = BibDesk;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = "-Wfloat-equal";
 				WRAPPER_EXTENSION = app;
@@ -4758,10 +4757,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 1041;
 				FRAMEWORK_SEARCH_PATHS = "";
@@ -4801,7 +4796,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = BibDesk;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = (
 					"-Wall",
@@ -4817,10 +4811,10 @@
 		};
 		F993F1BF08553A61007A7657 /* Test */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1041;
-				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -4847,7 +4841,6 @@
 				);
 				PRODUCT_NAME = BibDesk;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = app;
@@ -5170,14 +5163,10 @@
 		};
 		F993F20308553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
-				CURRENT_PROJECT_VERSION = 1041;
-				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = (
 					"-Wall",
@@ -5191,55 +5180,51 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
-				ARCHS = (
-					i386,
-					ppc,
-				);
-				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_OPTIMIZATION_LEVEL = s;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Release;
 		};
 		F993F20508553A61007A7657 /* Test */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
-				ARCHS = ppc;
-				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Test;
 		};
 		F9CA0C7B0CDF93D20059D36D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "BibDesk+QuickLook";
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Debug;
 		};
 		F9CA0C7C0CDF93D20059D36D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F95C5E950D10E85400C81970 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PRODUCT_NAME = "BibDesk+QuickLook";
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		F9CA0C7D0CDF93D20059D36D /* Test */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F95C5E970D10E87C00C81970 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				PRODUCT_NAME = "BibDesk+QuickLook";
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Test;
 		};
