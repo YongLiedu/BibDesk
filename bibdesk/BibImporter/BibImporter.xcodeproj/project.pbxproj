@@ -288,15 +288,22 @@
 		};
 		F95CC106087F54B2002C5694 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CEB10D610D7446E50053B916 /* BibDesk-Debug.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH)";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Debug;
 		};
 		F95CC107087F54B2002C5694 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CEB10D620D7446E50053B916 /* BibDesk-Release.xcconfig */;
 			buildSettings = {
+				ARCHS = (
+					i386,
+					ppc,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Release;
 		};
