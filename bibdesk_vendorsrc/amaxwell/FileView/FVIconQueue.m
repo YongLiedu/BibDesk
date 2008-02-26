@@ -38,15 +38,6 @@
 
 #import "FVIconQueue.h"
 
-#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
-@interface NSThread (BDSKLeopardOnly)
-- (NSString *)name;
-- (void)setName:(NSString *)newName;
-@end
-#else
-#warning 10.5: remove this
-#endif
-
 
 @implementation FVIconQueue
 
