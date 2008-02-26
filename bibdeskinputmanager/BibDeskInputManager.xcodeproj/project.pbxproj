@@ -362,36 +362,6 @@
 			};
 			name = Release;
 		};
-		CE67E7BD092C9C3700410758 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = "";
-				GCC_ENABLE_TRIGRAPHS = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = Bibdesk_Prefix.pch;
-				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
-				GCC_WARN_UNKNOWN_PRAGMAS = NO;
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LIBRARY_SEARCH_PATHS = "";
-				LIBRARY_STYLE = Bundle;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = BibDeskInputManager;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				WRAPPER_EXTENSION = bundle;
-			};
-			name = Default;
-		};
 		CE67E7BF092C9C3700410758 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -437,22 +407,6 @@
 			};
 			name = Release;
 		};
-		CE67E7C1092C9C3700410758 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = Install;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Default;
-		};
 		CE67E7C3092C9C3700410758 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -461,7 +415,7 @@
 				GCC_USE_GCC3_PFE_SUPPORT = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Debug;
 		};
@@ -476,24 +430,9 @@
 				GCC_USE_GCC3_PFE_SUPPORT = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
 			name = Release;
-		};
-		CE67E7C5092C9C3700410758 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
-				GCC_ENABLE_SYMBOL_SEPARATION = NO;
-				GCC_USE_GCC3_PFE_SUPPORT = NO;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-			};
-			name = Default;
 		};
 /* End XCBuildConfiguration section */
 
@@ -503,30 +442,27 @@
 			buildConfigurations = (
 				CE67E7BB092C9C3700410758 /* Debug */,
 				CE67E7BC092C9C3700410758 /* Release */,
-				CE67E7BD092C9C3700410758 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		CE67E7BE092C9C3700410758 /* Build configuration list for PBXAggregateTarget "Install" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CE67E7BF092C9C3700410758 /* Debug */,
 				CE67E7C0092C9C3700410758 /* Release */,
-				CE67E7C1092C9C3700410758 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		CE67E7C2092C9C3700410758 /* Build configuration list for PBXProject "BibDeskInputManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CE67E7C3092C9C3700410758 /* Debug */,
 				CE67E7C4092C9C3700410758 /* Release */,
-				CE67E7C5092C9C3700410758 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
