@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
-		F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */ = {
+		F9F04CE10CE260EB00F28ED2 /* FileView + Leopard */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = F9F04CE80CE2612D00F28ED2 /* Build configuration list for PBXAggregateTarget "Framework + Plugin" */;
+			buildConfigurationList = F9F04CE80CE2612D00F28ED2 /* Build configuration list for PBXAggregateTarget "FileView + Leopard" */;
 			buildPhases = (
 				F9F04CE00CE260EB00F28ED2 /* CopyFiles */,
 			);
@@ -18,7 +18,7 @@
 				F9F04CE50CE260F400F28ED2 /* PBXTargetDependency */,
 				F9F04CE70CE260FA00F28ED2 /* PBXTargetDependency */,
 			);
-			name = "Framework + Plugin";
+			name = "FileView + Leopard";
 			productName = "Bundle QL plugin";
 		};
 /* End PBXAggregateTarget section */
@@ -600,7 +600,7 @@
 				8DC2EF4F0486A6940098B216 /* FileView */,
 				F94692120CA56F4300AC2772 /* FileView-Leopard */,
 				F94692500CA575F000AC2772 /* FileView Program */,
-				F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */,
+				F9F04CE10CE260EB00F28ED2 /* FileView + Leopard */,
 			);
 		};
 /* End PBXProject section */
@@ -710,7 +710,7 @@
 /* Begin PBXTargetDependency section */
 		CE3A673F0D60F24200D20AC7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */;
+			target = F9F04CE10CE260EB00F28ED2 /* FileView + Leopard */;
 			targetProxy = CE3A673E0D60F24200D20AC7 /* PBXContainerItemProxy */;
 		};
 		F9F04CDB0CE260AC00F28ED2 /* PBXTargetDependency */ = {
@@ -1032,7 +1032,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F9F04CE80CE2612D00F28ED2 /* Build configuration list for PBXAggregateTarget "Framework + Plugin" */ = {
+		F9F04CE80CE2612D00F28ED2 /* Build configuration list for PBXAggregateTarget "FileView + Leopard" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F9F04CE20CE260EB00F28ED2 /* Debug */,
