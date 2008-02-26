@@ -105,6 +105,8 @@ static inline OFSimpleLockType *_lockForObject(OFObject *obj)
         // Repord our allocation statistics to make OOM and oh happy
 #if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
         NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self, NULL, NULL, NULL);
+#elif MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+        // CMH: I don't know how to do this cross-compatible
 #else
         NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self);
 #endif
@@ -125,6 +127,8 @@ static inline OFSimpleLockType *_lockForObject(OFObject *obj)
         // Report our allocation statistics to make OOM and oh happy
 #if !defined(MAC_OS_X_VERSION_10_5) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
         NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self, NULL, NULL, NULL);
+#elif MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+        // CMH: I don't know how to do this cross-compatible
 #else
         NSRecordAllocationEvent(NSObjectInternalRefIncrementedEvent, self);
 #endif
