@@ -549,14 +549,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D57630D048677EA00EA77CD /* BibDesk */;
+			remoteGlobalIDString = 8D57630D048677EA00EA77CD;
 			remoteInfo = BibDesk;
 		};
 		CEEBA8490D749DB7000204B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F911D6A80CFE8E420009C77B /* FileView.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = F9F04CE10CE260EB00F28ED2 /* Framework + Plugin */;
+			remoteGlobalIDString = F9F04CE10CE260EB00F28ED2;
 			remoteInfo = "Framework + Plugin";
 		};
 		F90B13000C298FC900144F1B /* PBXContainerItemProxy */ = {
