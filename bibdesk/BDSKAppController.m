@@ -1063,6 +1063,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         NSNumber *port = [theURL port];
         NSString *path = [[theURL path] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSString *database = [path hasPrefix:@"/"] ? [path substringFromIndex:1] : @"";
+        NSString *name = database;
         NSString *query = [theURL query];
         NSString *password = [theURL password];
         NSString *username = [theURL user];
@@ -1085,6 +1086,8 @@ static BOOL fileIsInTrash(NSURL *fileURL)
                 NSString *value = [[query substringFromIndex:idx + 1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
                 if ([key caseInsensitiveCompare:@"searchTerm"] == NSOrderedSame || [key caseInsensitiveCompare:@"term"] == NSOrderedSame)
                     searchTerm = value;
+                else if ([key caseInsensitiveCompare:@"name"] == NSOrderedSame)
+                    name = value;
                 else if ([key caseInsensitiveCompare:@"password"] == NSOrderedSame)
                     password = value;
                 else if ([key caseInsensitiveCompare:@"username"] == NSOrderedSame)
@@ -1102,7 +1105,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
         NSMutableDictionary *info = [NSMutableDictionary dictionaryWithCapacity:7];
         [info setValue:type forKey:@"type"];
-        [info setValue:database forKey:@"name"];
+        [info setValue:name forKey:@"name"];
         [info setValue:database forKey:@"database"];
         if ([type isEqualToString:BDSKSearchGroupZoom]) {
             [info setValue:host forKey:@"host"];
