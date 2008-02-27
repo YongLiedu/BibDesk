@@ -275,6 +275,21 @@
 	<string>1.3.14</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+        <dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>bdsk</string>
+			</array>
+		</dict>
+        <dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>bdsksearch</string>
+			</array>
+		</dict>
+    </array>
 	<key>CFBundleVersion</key>
 	<string>v${CURRENT_PROJECT_VERSION}</string>
 	<key>LSMinimumSystemVersion</key>

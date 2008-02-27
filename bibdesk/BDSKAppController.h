@@ -203,4 +203,6 @@
 */
 - (void)doSpotlightImportIfNeeded;
 
+- (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent;
+
 @end
