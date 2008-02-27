@@ -643,9 +643,9 @@ The query operators that SKSearchCreate recognizes for non-similarity searching 
 
 The operators AND, OR, and NOT are case sensitive.
 
-Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `à', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
+Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `√†', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
 
-Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `à', `A', and `À'.
+Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `√†', `A', and `√Ä'.
 
 @node Find and Replace
 @c DO NOT LOCALIZE THE NEXT LINE
@@ -4289,6 +4289,10 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item stringByRemovingWhitespace
 @tab 
 @item stringByRemovingReturns
+@tab 
+@item stringByAddingPercentEscapes
+@tab 
+@item stringByReplacingPercentEscapes
 @tab 
 @item fullyEncodeAsIURI
 @tab 

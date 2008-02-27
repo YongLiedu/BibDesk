@@ -92,6 +92,11 @@
     return [self count] > 9 ? [self objectAtIndex:9] : nil;
 }
 
+- (NSArray *)firstOneObjects;
+{
+    return [self count] > 1 ? [self subarrayWithRange:NSMakeRange(0, 1)] : self;
+}
+
 - (NSArray *)firstTwoObjects;
 {
     return [self count] > 2 ? [self subarrayWithRange:NSMakeRange(0, 2)] : self;

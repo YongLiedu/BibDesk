@@ -51,6 +51,7 @@
 - (id)eighthObject;
 - (id)ninthObject;
 - (id)tenthObject;
+- (NSArray *)firstOneObjects;
 - (NSArray *)firstTwoObjects;
 - (NSArray *)firstThreeObjects;
 - (NSArray *)firstFourObjects;

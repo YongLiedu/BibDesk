@@ -1571,6 +1571,14 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [self length] ? [self substringToIndex:1] : nil;
 }
 
+- (NSString *)stringByAddingPercentEscapes{
+    return [self stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+}
+
+- (NSString *)stringByReplacingPercentEscapes{
+    return [self stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+}
+
 @end
 
 
