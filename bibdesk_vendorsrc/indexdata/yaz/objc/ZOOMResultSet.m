@@ -30,8 +30,8 @@
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */ 
 
-#import "ZOOMResultSet.h"
-#import "ZOOMRecord.h"
+#import <yaz/ZOOMResultSet.h>
+#import <yaz/ZOOMRecord.h>
 
 @implementation ZOOMResultSet
 

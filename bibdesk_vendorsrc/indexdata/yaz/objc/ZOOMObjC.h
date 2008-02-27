@@ -7,10 +7,10 @@
  */
 
 #import <yaz/zoom.h>
-#import "ZOOMConnection.h"
-#import "ZOOMResultSet.h"
-#import "ZOOMRecord.h"
-#import "ZOOMQuery.h"
+#import <yaz/ZOOMConnection.h>
+#import <yaz/ZOOMResultSet.h>
+#import <yaz/ZOOMRecord.h>
+#import <yaz/ZOOMQuery.h>
 
 /*!
     @header ZOOMObjC

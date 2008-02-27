@@ -30,10 +30,10 @@
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */ 
 
-#import "ZOOMRecord.h"
+#import <yaz/ZOOMRecord.h>
 #import <yaz/yaz-iconv.h>
 #import <yaz/z-core.h>
-#include "zoom-p.h"
+#include <yaz/zoom-p.h>
 
 @interface NSString (ZOOMExtensions)
 // avoid polluting the NSString namespace by using this ugly prefix...

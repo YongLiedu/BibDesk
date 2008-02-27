@@ -30,9 +30,9 @@
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-#import "ZOOMConnection.h"
-#import "ZOOMQuery.h"
-#import "ZOOMRecord.h"
+#import <yaz/ZOOMConnection.h>
+#import <yaz/ZOOMQuery.h>
+#import <yaz/ZOOMRecord.h>
 #import <yaz/log.h>
 
 @implementation ZOOMConnection

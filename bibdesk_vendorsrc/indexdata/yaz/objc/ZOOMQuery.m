@@ -30,7 +30,7 @@
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */ 
 
-#import "ZOOMQuery.h"
+#import <yaz/ZOOMQuery.h>
 #import <yaz/yaz-iconv.h>
 
 @implementation ZOOMQuery
