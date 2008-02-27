@@ -97,7 +97,6 @@
                 insertionContainer = nil;
             containerClassDescription = [insertionContainer scriptClassDescription];
             if ([classDescriptions containsObject:[NSNull null]] == NO) {
-                insertionClassDescription = [NSScriptClassDescription commonAncestorForClassDescriptions:insertionObjects];
                 NSEnumerator *keyEnum = [[containerClassDescription toManyRelationshipKeys] objectEnumerator];
                 NSString *key;
                 while (key = [keyEnum nextObject]) {
