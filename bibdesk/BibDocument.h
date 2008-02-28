@@ -60,15 +60,16 @@ enum {
 
 // these should correspond to the tags of copy-as menu items, as well as the default drag/copy type
 enum {
-	BDSKBibTeXDragCopyType, 
-	BDSKCiteDragCopyType, 
-	BDSKPDFDragCopyType, 
-	BDSKRTFDragCopyType, 
-	BDSKLaTeXDragCopyType, 
-	BDSKLTBDragCopyType, 
-	BDSKMinimalBibTeXDragCopyType, 
-	BDSKRISDragCopyType,
-    BDSKTemplateDragCopyType
+	BDSKBibTeXDragCopyType = 0, 
+	BDSKCiteDragCopyType = 1, 
+	BDSKPDFDragCopyType = 2, 
+	BDSKRTFDragCopyType = 3, 
+	BDSKLaTeXDragCopyType = 4, 
+	BDSKLTBDragCopyType = 5, 
+	BDSKMinimalBibTeXDragCopyType = 6, 
+	BDSKRISDragCopyType = 7,
+	BDSKURLDragCopyType = 8,
+    BDSKTemplateDragCopyType = 100
 };
 
 enum {

@@ -472,7 +472,8 @@
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
     int idx = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
-	int dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:idx] intValue];
+    NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKDefaultDragCopyTypeKey : BDSKAlternateDragCopyTypeKey;
+	int dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
@@ -670,7 +671,8 @@
     }
     
     if (dragCopyType == BDSKTemplateDragCopyType) {
-        NSString *template = [[sud arrayForKey:BDSKDragCopyTemplatesKey] objectAtIndex:idx];
+        NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKDefaultDragCopyTemplateKey : BDSKAlternateDragCopyTemplateKey;
+        NSString *template = [sud stringForKey:dragCopyTemplateKey];
         unsigned templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
             dragCopyType += templateIdx;
@@ -690,6 +692,7 @@
 	NSString *mainType = nil;
 	NSString *string = nil;
 	NSData *data = nil;
+    NSArray *URLs = nil;
 	
 	switch(dragCopyType){
 		case BDSKBibTeXDragCopyType:
@@ -721,37 +724,43 @@
 			mainType = NSStringPboardType;
 			string = [self RISStringForPublications:pubs];
 			break;
-		default:
-            {
-            NSString *style = [[BDSKTemplate allStyleNames] objectAtIndex:dragCopyType - BDSKTemplateDragCopyType];
-            BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
-            BDSKTemplateFormat format = [template templateFormat];
-            if (format & BDSKTextTemplateFormat) {
-                mainType = NSStringPboardType;
-                string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:pubs];
-            } else if (format & BDSKRichTextTemplateFormat) {
-                NSDictionary *docAttributes = nil;
-                NSAttributedString *templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:&docAttributes];
-                if (format & BDSKRTFDTemplateFormat) {
-                    mainType = NSRTFDPboardType;
-                    data = [templateString RTFDFromRange:NSMakeRange(0,[templateString length]) documentAttributes:docAttributes];
-                } else {
-                    mainType = NSRTFPboardType;
-                    data = [templateString RTFFromRange:NSMakeRange(0,[templateString length]) documentAttributes:docAttributes];
+		case BDSKURLDragCopyType:
+			mainType = NSURLPboardType;
+			URLs = [pubs valueForKey:@"bdskURL"];
+			break;
+        default:
+            if (dragCopyType >= BDSKTemplateDragCopyType ) {
+                NSString *style = [[BDSKTemplate allStyleNames] objectAtIndex:dragCopyType - BDSKTemplateDragCopyType];
+                BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
+                BDSKTemplateFormat format = [template templateFormat];
+                if (format & BDSKTextTemplateFormat) {
+                    mainType = NSStringPboardType;
+                    string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:pubs];
+                } else if (format & BDSKRichTextTemplateFormat) {
+                    NSDictionary *docAttributes = nil;
+                    NSAttributedString *templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:&docAttributes];
+                    if (format & BDSKRTFDTemplateFormat) {
+                        mainType = NSRTFDPboardType;
+                        data = [templateString RTFDFromRange:NSMakeRange(0,[templateString length]) documentAttributes:docAttributes];
+                    } else {
+                        mainType = NSRTFPboardType;
+                        data = [templateString RTFFromRange:NSMakeRange(0,[templateString length]) documentAttributes:docAttributes];
+                    }
                 }
-            }
             }
 	}
     
 	[pboardHelper declareType:mainType dragCopyType:dragCopyType forItems:pubs forPasteboard:pboard];
     
-    if(string != nil)
+    if(string != nil) {
         [pboardHelper setString:string forType:mainType forPasteboard:pboard];
-	else if(data != nil)
+	} else if(data != nil) {
         [pboardHelper setData:data forType:mainType forPasteboard:pboard];
-    else if(dragCopyType >= BDSKTemplateDragCopyType)
+    } else if (URLs != nil) {
+        [pboardHelper setURLs:URLs forType:mainType forPasteboard:pboard];
+    } else if(dragCopyType >= BDSKTemplateDragCopyType) {
         [pboardHelper setData:nil forType:mainType forPasteboard:pboard];
-        
+    }
     return YES;
 }
 
@@ -805,11 +814,11 @@
     
 	} else {
 		OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-        int idx = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
 		NSMutableString *s = [NSMutableString string];
+        NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKDefaultDragCopyTypeKey : BDSKAlternateDragCopyTypeKey;
         
-        dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:idx] intValue];
-		
+        dragCopyType = [sud integerForKey:dragCopyTypeKey];
+        
 		// don't depend on this being non-zero; this method gets called for drags where promisedDraggedItems is nil
 		count = [promisedDraggedItems count];
 		

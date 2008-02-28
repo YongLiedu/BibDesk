@@ -80,8 +80,10 @@ NSString *BDSKBibTeXBinPathKey = @"BibTeX Binary Path";
 NSString *BDSKBTStyleKey = @"BibTeX Style";
 NSString *BDSKUsesTeXKey = @"Uses TeX";
 
-NSString *BDSKDragCopyTypesKey = @"BDSKDragCopyTypesKey";
-NSString *BDSKDragCopyTemplatesKey = @"BDSKDragCopyTemplatesKey";
+NSString *BDSKDefaultDragCopyTypeKey = @"BDSKDefaultDragCopyTypeKey";
+NSString *BDSKDefaultDragCopyTemplateKey = @"BDSKDefaultDragCopyTemplateKey";
+NSString *BDSKAlternateDragCopyTypeKey = @"BDSKAlternateDragCopyTypeKey";
+NSString *BDSKAlternateDragCopyTemplateKey = @"BDSKAlternateDragCopyTemplateKey";
 NSString *BDSKEditOnPasteKey = @"Edit on Paste";
 NSString *BDSKSeparateCiteKey = @"Separate Cite";
 NSString *BDSKCitePrependTildeKey = @"Cite Prepend Tilde";

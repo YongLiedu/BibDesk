@@ -3320,7 +3320,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         isImported = flag;
     }
 }
-     
+  
+- (NSURL *)bdskURL {
+    return [NSURL URLWithString:[@"bdsk://" stringByAppendingString:[[self citeKey] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+}
+           
 @end
 
 #pragma mark -

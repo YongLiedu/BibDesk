@@ -80,14 +80,7 @@
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKSearchButtonController.h"
 #import "BDSKSharingClient.h"
-
-
-// Private WebKit class to read and write URLs with titles. I really see no reason why this is not API other than to annoy us, it's even open source
-@interface WebURLsWithTitles : NSObject
-+ (void)writeURLs:(NSArray *)URLs andTitles:(NSArray *)titles toPasteboard:(NSPasteboard *)pasteboard;
-+ (NSArray *)URLsFromPasteboard:(NSPasteboard *)pasteboard;
-+ (NSArray *)titlesFromPasteboard:(NSPasteboard *)pasteboard;
-@end
+#import "WebURLsWithTitles.h"
 
 
 @implementation BibDocument (Groups)

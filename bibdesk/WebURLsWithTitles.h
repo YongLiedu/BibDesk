@@ -1,7 +1,8 @@
 //
-//  BDSKItemPasteboardHelper.h
+// WebURLsWithTitles.h
+// Bibdesk
 //
-//  Created by Christiaan Hofman on 13/10/06.
+//Created by Christiaan Hofman on 2/28/08.
 /*
  This software is Copyright (c) 2006-2008
  Christiaan Hofman. All rights reserved.
@@ -36,34 +37,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <WebKit/WebKit.h>
 
-@class BDSKTeXTask;
-
-@interface BDSKItemPasteboardHelper : NSObject {
-    NSMutableDictionary *promisedPboardTypes;
-    BDSKTeXTask *texTask;
-    id delegate;
-}
-
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
-
-- (void)declareType:(NSString *)type dragCopyType:(int)dragCopyType forItems:(NSArray *)items forPasteboard:(NSPasteboard *)pboard;
-- (void)addTypes:(NSArray *)newTypes forPasteboard:(NSPasteboard *)pboard;
-- (BOOL)setString:(NSString *)string forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
-- (BOOL)setData:(NSData *)data forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
-- (BOOL)setPropertyList:(id)propertyList forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
-- (BOOL)setURLs:(NSArray *)URLs forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
-
-- (NSArray *)promisedItemsForPasteboard:(NSPasteboard *)pboard;
-- (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard;
-
-@end
-
-
-@interface NSObject (BDSKItemPasteboardHelperDelegate)
-// this one is compulsory
-- (NSString *)pasteboardHelper:(BDSKItemPasteboardHelper *)pboardHelper bibTeXStringForItems:(NSArray *)items;
-- (NSString *)pasteboardHelperWillBeginGenerating:(BDSKItemPasteboardHelper *)pboardHelper;
-- (NSString *)pasteboardHelperDidEndGenerating:(BDSKItemPasteboardHelper *)pboardHelper;
+// Private WebKit class to read and write URLs with titles. I really see no reason why this is not API other than to annoy us, it's even open source
+@interface WebURLsWithTitles : NSObject
++ (void)writeURLs:(NSArray *)URLs andTitles:(NSArray *)titles toPasteboard:(NSPasteboard *)pasteboard;
++ (NSArray *)URLsFromPasteboard:(NSPasteboard *)pasteboard;
++ (NSArray *)titlesFromPasteboard:(NSPasteboard *)pasteboard;
 @end

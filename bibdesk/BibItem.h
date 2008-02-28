@@ -844,6 +844,8 @@ enum {
 - (float)searchScore;
 - (NSString *)skimNotesForLocalURL;
 
+- (NSURL *)bdskURL;
+
 @end
 
 @class PDFMetadata;

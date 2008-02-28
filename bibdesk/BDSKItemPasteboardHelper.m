@@ -41,6 +41,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
 #import <OmniBase/assertions.h>
+#import "WebURLsWithTitles.h"
 
 
 @interface BDSKItemPasteboardHelper (Private)
@@ -101,6 +102,17 @@
 
 - (void)declareType:(NSString *)type dragCopyType:(int)dragCopyType forItems:(NSArray *)items forPasteboard:(NSPasteboard *)pboard{
 	NSMutableArray *types = [NSMutableArray arrayWithObjects:type, BDSKBibItemPboardType, nil];
+    
+    if ([type isEqualToString:NSURLPboardType]) {
+        Class WebURLsWithTitlesClass = NSClassFromString(@"WebURLsWithTitles");
+        if (WebURLsWithTitlesClass && [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)])
+            [types addObject:@"WebURLsWithTitlesPboardType"];
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+            [types addObject:(NSString *)kUTTypeURL];
+            [types addObject:@"public.url-name"];
+        }
+        [types addObject:NSStringPboardType];
+    }
     [self clearPromisedTypesForPasteboard:pboard];
     [pboard declareTypes:types owner:self];
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:items, @"items", types, @"types", [NSNumber numberWithInt:dragCopyType], @"dragCopyType", nil];
@@ -126,6 +138,40 @@
 - (BOOL)setPropertyList:(id)propertyList forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard{
     [self removePromisedType:type forPasteboard:pboard];
     return [pboard setPropertyList:propertyList forType:type];
+}
+
+- (BOOL)setURLs:(NSArray *)URLs forType:(NSString *)type forPasteboard:(NSPasteboard *)pboard{
+    if ([URLs count] == 0)
+        return NO;
+    
+    NSArray *titles = [[self promisedItemsForPasteboard:pboard] valueForKey:@"citeKey"];
+    if (titles == nil)
+        titles = [URLs valueForKey:@"absoluteString"];
+    
+    NSURL *firstURL = [URLs objectAtIndex:0];
+    NSString *firstTitle = [titles objectAtIndex:0];
+    
+    Class WebURLsWithTitlesClass = NSClassFromString(@"WebURLsWithTitles");
+    
+    if (WebURLsWithTitlesClass && [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)]) {
+        [self removePromisedType:@"WebURLsWithTitlesPboardType" forPasteboard:pboard];
+        [WebURLsWithTitlesClass writeURLs:URLs andTitles:titles toPasteboard:pboard];
+    }
+    
+    [self removePromisedType:NSURLPboardType forPasteboard:pboard];
+    [self removePromisedType:NSStringPboardType forPasteboard:pboard];
+    [firstURL writeToPasteboard:pboard];
+    [pboard setString:[firstURL absoluteString] forType:NSStringPboardType];
+    
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        NSData *data = [(NSData *)CFURLCreateData(nil, (CFURLRef)firstURL, kCFStringEncodingUTF8, true) autorelease];
+        [self removePromisedType:(NSString *)kUTTypeURL forPasteboard:pboard];
+        [self removePromisedType:@"public.url-name" forPasteboard:pboard];
+        [pboard setData:data forType:(NSString *)kUTTypeURL];
+        [pboard setString:firstTitle forType:@"public.url-name"];
+    }
+    
+    return YES;
 }
 
 #pragma mark NSPasteboard delegate methods
