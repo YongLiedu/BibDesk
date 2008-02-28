@@ -149,8 +149,6 @@
     if ([self isZoom]) {
         [info setValue:[self host] forKey:@"host"];
         [info setValue:[self port] forKey:@"port"];
-        [info setValue:[self password] forKey:@"password"];
-        [info setValue:[self username] forKey:@"username"];
         [info setValue:[self options] forKey:@"options"];
     }
     return info;

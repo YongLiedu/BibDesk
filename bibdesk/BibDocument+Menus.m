@@ -404,6 +404,14 @@
 	}
 } 
 
+- (BOOL) validateCopyGroupURLMenuItem:(NSMenuItem *)menuItem{
+	if ([self hasSearchGroupsSelected] || [self hasURLGroupsSelected] || [self hasScriptGroupsSelected]) {
+		return YES;
+	} else {
+		return NO;
+	}
+} 
+
 - (BOOL) validateEditGroupMenuItem:(NSMenuItem *)menuItem{
     if ([documentWindow isKeyWindow] == NO)
         return NO;
@@ -755,6 +763,9 @@
 	}
 	else if (act == @selector(renameGroupAction:)) {
         return [self validateRenameGroupMenuItem:menuItem];
+	}
+	else if (act == @selector(copyGroupURLAction:)) {
+        return [self validateCopyGroupURLMenuItem:menuItem];
 	}
 	else if (act == @selector(removeGroupFieldAction:)) {
 		// don't allow the removal of the last item

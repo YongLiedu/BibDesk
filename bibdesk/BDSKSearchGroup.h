@@ -74,6 +74,7 @@ extern NSString *BDSKSearchGroupISI;
 
 - (id)initWithName:(NSString *)aName;
 - (id)initWithType:(NSString *)aType serverInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
+- (id)initWithURL:(NSURL *)bdsksearchURL;
 
 - (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
@@ -99,5 +100,7 @@ extern NSString *BDSKSearchGroupISI;
 
 - (void)resetServerWithInfo:(BDSKServerInfo *)info;
 - (NSFormatter *)searchStringFormatter;
+
+- (NSURL *)bdsksearchURL;
 
 @end

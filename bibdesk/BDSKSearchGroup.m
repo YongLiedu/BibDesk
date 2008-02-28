@@ -100,6 +100,73 @@ NSString *BDSKSearchGroupISI = @"isi";
     return self;
 }
 
+- (id)initWithURL:(NSURL *)bdsksearchURL {
+    OBPRECONDITION([[bdsksearchURL scheme] isEqualToString:@"bdsksearch"]);
+    
+    NSString *aHost = [[bdsksearchURL host] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *aPort = [[bdsksearchURL port] stringValue];
+    NSString *aPath = [[bdsksearchURL path] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *aDatabase = [aPath hasPrefix:@"/"] ? [aPath substringFromIndex:1] : aPath ? aPath : @"";
+    NSString *aName = aDatabase;
+    NSString *query = [bdsksearchURL query];
+    NSString *aSearchTerm = nil;
+    NSString *aType = BDSKSearchGroupZoom;
+    NSMutableDictionary *options = [NSMutableDictionary dictionary];
+    NSEnumerator *queryEnum = [[query componentsSeparatedByString:@"&"] objectEnumerator];
+    
+    [options setValue:[bdsksearchURL password] forKey:@"password"];
+    [options setValue:[bdsksearchURL user] forKey:@"username"];
+   
+    if (aPort == nil) {
+        if ([aType caseInsensitiveCompare:BDSKSearchGroupEntrez])
+            aType = BDSKSearchGroupEntrez;
+        else if ([aType caseInsensitiveCompare:BDSKSearchGroupISI])
+            aType = BDSKSearchGroupISI;
+    }
+    
+    while (query = [queryEnum nextObject]) {
+        unsigned int idx = [query rangeOfString:@"="].location;
+        if (idx != NSNotFound && idx > 0) {
+            NSString *key = [query substringToIndex:idx];
+            NSString *value = [[query substringFromIndex:idx + 1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+            if ([key caseInsensitiveCompare:@"searchTerm"] == NSOrderedSame || [key caseInsensitiveCompare:@"term"] == NSOrderedSame) {
+                aSearchTerm = value;
+            } else if ([key caseInsensitiveCompare:@"name"] == NSOrderedSame) {
+                aName = value;
+            } else {
+                if ([key caseInsensitiveCompare:@"password"] == NSOrderedSame) {
+                    key = @"password";
+                } else if ([key caseInsensitiveCompare:@"username"] == NSOrderedSame) {
+                    key = @"username";
+                } else if ([key caseInsensitiveCompare:@"recordSyntax"] == NSOrderedSame) {
+                    key = @"recordSyntax";
+                } else if ([key caseInsensitiveCompare:@"resultEncoding"] == NSOrderedSame) {
+                    key = @"resultEncoding";
+                } else if ([key caseInsensitiveCompare:@"removeDiacritics"] == NSOrderedSame) {
+                    key = @"removeDiacritics";
+                    if ([value boolValue])
+                        value = @"YES";
+                    else continue;
+                }
+                [options setValue:value forKey:key];
+            }
+        }
+    }
+    
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:7];
+    [dictionary setValue:aType forKey:@"type"];
+    [dictionary setValue:aName forKey:@"name"];
+    [dictionary setValue:aDatabase forKey:@"database"];
+    [dictionary setValue:aSearchTerm forKey:@"search term"];
+    if ([aType isEqualToString:BDSKSearchGroupZoom]) {
+        [dictionary setValue:aHost forKey:@"host"];
+        [dictionary setValue:aPort forKey:@"port"];
+        [dictionary setValue:options forKey:@"options"];
+    }
+    
+    return [self initWithDictionary:dictionary];
+}
+
 - (NSDictionary *)dictionaryValue {
     NSMutableDictionary *groupDict = [[[self serverInfo] dictionaryValue] mutableCopy];
     
@@ -350,6 +417,28 @@ NSString *BDSKSearchGroupISI = @"isi";
 - (BOOL)hasMoreResults;
 {
     return [server numberOfAvailableResults] > [server numberOfFetchedResults];
+}
+
+- (NSURL *)bdsksearchURL {
+    NSMutableString *string = [NSMutableString stringWithString:@"bdsksearch://"];
+    BDSKServerInfo *serverInfo = [self serverInfo];
+    if ([serverInfo isZoom])
+        [string appendFormat:@"%@:%@", [serverInfo host], [serverInfo port]];
+    else
+        [string appendString:type];
+    [string appendFormat:@"/%@", [[serverInfo database] stringByAddingPercentEscapes]];
+    [string appendFormat:@"?name=%@", [[serverInfo name] stringByAddingPercentEscapes]];
+    if ([serverInfo isZoom]) {
+        NSEnumerator *keyEnum = [[serverInfo options] keyEnumerator];
+        NSString *key;
+        while (key = [keyEnum nextObject]) {
+            NSString *value = [[serverInfo options] objectForKey:key];
+            if ([key isEqualToString:@"removeDiacritics"])
+                value = [serverInfo removeDiacritics] ? @"y" : @"n";
+            [string appendFormat:@"&%@=%@", key, [value stringByAddingPercentEscapes]];
+        }
+    }
+    return [NSURL URLWithString:string];
 }
 
 @end

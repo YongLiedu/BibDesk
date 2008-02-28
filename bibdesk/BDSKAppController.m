@@ -1040,88 +1040,26 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent{
     NSString *theURLString = [[event descriptorForKeyword:keyDirectObject] stringValue];
     NSURL *theURL = theURLString ? [NSURL URLWithString:theURLString] : nil;
+    BibDocument *document = nil;
+    NSError *error = nil;
     
     if ([[theURL scheme] isEqualToString:@"bdsk"]) {
+        
         NSString *citeKey = [[theURLString substringFromIndex:7] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSString *path = [[NSFileManager defaultManager] spotlightCacheFilePathWithCiteKey:citeKey];
-        NSURL *fileURL = path ? [NSURL fileURLWithPath:path] : nil;
-        BibDocument *document = nil;
-        NSError *error = nil;
+        NSURL *fileURL;
         
-        if (path == nil) {
-            error = [NSError mutableLocalErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get item from bdsk:// URL.", @"error when opening bdskURL")];
-        } else {
+        if (path && (fileURL = [NSURL fileURLWithPath:path])) {
             document = [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:&error];
+        } else {
+            error = [NSError mutableLocalErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get item from bdsk:// URL.", @"error when opening bdskURL")];
         }
-        
-        if (document == nil && error)
-            [NSApp presentError:error];
         
     } else if ([[theURL scheme] isEqualToString:@"bdsksearch"]) {
         
-        NSString *host = [[theURL host] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSNumber *port = [theURL port];
-        NSString *path = [[theURL path] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSString *database = [path hasPrefix:@"/"] ? [path substringFromIndex:1] : @"";
-        NSString *name = database;
-        NSString *query = [theURL query];
-        NSString *password = [theURL password];
-        NSString *username = [theURL user];
-        NSString *searchTerm = nil;
-        NSString *type = BDSKSearchGroupZoom;
-        NSMutableDictionary *options = [NSMutableDictionary dictionary];
-        NSEnumerator *queryEnum = [[query componentsSeparatedByString:@"&"] objectEnumerator];
+        BDSKSearchGroup *group = [[BDSKSearchGroup alloc] initWithURL:theURL];
         
-        if (port == nil) {
-            if ([type caseInsensitiveCompare:BDSKSearchGroupEntrez])
-                type = BDSKSearchGroupEntrez;
-            else if ([type caseInsensitiveCompare:BDSKSearchGroupISI])
-                type = BDSKSearchGroupISI;
-        }
-        
-        while (query = [queryEnum nextObject]) {
-            unsigned int idx = [query rangeOfString:@"="].location;
-            if (idx != NSNotFound && idx > 0) {
-                NSString *key = [query substringToIndex:idx];
-                NSString *value = [[query substringFromIndex:idx + 1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-                if ([key caseInsensitiveCompare:@"searchTerm"] == NSOrderedSame || [key caseInsensitiveCompare:@"term"] == NSOrderedSame)
-                    searchTerm = value;
-                else if ([key caseInsensitiveCompare:@"name"] == NSOrderedSame)
-                    name = value;
-                else if ([key caseInsensitiveCompare:@"password"] == NSOrderedSame)
-                    password = value;
-                else if ([key caseInsensitiveCompare:@"username"] == NSOrderedSame)
-                    username = value;
-                else if ([key caseInsensitiveCompare:@"recordSyntax"] == NSOrderedSame)
-                    [options setValue:value forKey:@"recordSyntax"];
-                else if ([key caseInsensitiveCompare:@"resultEncoding"] == NSOrderedSame)
-                    [options setValue:value forKey:@"resultEncoding"];
-                else if ([key caseInsensitiveCompare:@"removeDiacritics"] == NSOrderedSame)
-                    [options setValue:[NSNumber numberWithBool:[value boolValue]] forKey:@"removeDiacritics"];
-                else
-                    [options setValue:value forKey:key];
-            }
-        }
-        
-        NSMutableDictionary *info = [NSMutableDictionary dictionaryWithCapacity:7];
-        [info setValue:type forKey:@"type"];
-        [info setValue:name forKey:@"name"];
-        [info setValue:database forKey:@"database"];
-        if ([type isEqualToString:BDSKSearchGroupZoom]) {
-            [info setValue:host forKey:@"host"];
-            [info setValue:port forKey:@"port"];
-            [info setValue:password forKey:@"password"];
-            [info setValue:username forKey:@"username"];
-            [info setValue:options forKey:@"options"];
-        }
-        
-        BDSKSearchGroup *group = [[BDSKSearchGroup alloc] initWithDictionary:info];
-        BibDocument *document = nil;
-        NSError *error = nil;
-        
-        if (nil == group) {
-            error = [NSError mutableLocalErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get search group from bdsksearch:// URL.", @"error when opening bdsksearch URL")];
-        } else {
+        if (group) {
             // try the main document first
             document = [[NSDocumentController sharedDocumentController] mainDocument];
             if (nil == document) {
@@ -1131,11 +1069,13 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             
             [[document groups] addSearchGroup:group];
             [group release];
+        } else {
+            error = [NSError mutableLocalErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get search group from bdsksearch:// URL.", @"error when opening bdsksearch URL")];
         }
-        
-        if (document == nil && error)
-            [NSApp presentError:error];
     }
+    
+    if (document == nil && error)
+        [NSApp presentError:error];
 }
 
 #pragma mark Service code

@@ -81,6 +81,15 @@
 #import "BDSKSearchButtonController.h"
 #import "BDSKSharingClient.h"
 
+
+// Private WebKit class to read and write URLs with titles. I really see no reason why this is not API other than to annoy us, it's even open source
+@interface WebURLsWithTitles : NSObject
++ (void)writeURLs:(NSArray *)URLs andTitles:(NSArray *)titles toPasteboard:(NSPasteboard *)pasteboard;
++ (NSArray *)URLsFromPasteboard:(NSPasteboard *)pasteboard;
++ (NSArray *)titlesFromPasteboard:(NSPasteboard *)pasteboard;
+@end
+
+
 @implementation BibDocument (Groups)
 
 #pragma mark Selected group types
@@ -1231,6 +1240,40 @@ The groupedPublications array is a subset of the publications array, developed b
     if([self tableView:groupTableView shouldEditTableColumn:[[groupTableView tableColumns] objectAtIndex:0] row:row])
 		[groupTableView editColumn:0 row:row withEvent:nil select:YES];
 	
+}
+
+- (IBAction)copyGroupURLAction:(id)sender {
+	if ([self hasExternalGroupsSelected] == NO) {
+		NSBeep();
+		return;
+	} 
+	id group = [[self selectedGroups] lastObject];
+    NSURL *url = nil;
+    NSString *title = nil;
+    if ([group isSearch]) {
+        url = [(BDSKSearchGroup *)group bdsksearchURL];
+        title = [[(BDSKSearchGroup *)group serverInfo] name];
+    } else if ([group isURL]) {
+        url = [(BDSKURLGroup *)group URL];
+    } else if ([group isScript] && [(BDSKScriptGroup *)group scriptPath]) {
+        url = [NSURL fileURLWithPath:[(BDSKScriptGroup *)group scriptPath]];
+    }
+    if (url == nil) {
+		NSBeep();
+		return;
+	} 
+	NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    Class WebURLsWithTitlesClass = NSClassFromString(@"WebURLsWithTitles");
+    if (WebURLsWithTitlesClass && [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)]) {
+        if (title == nil)
+            title = [[url path] lastPathComponent];
+        [pboard declareTypes:[NSArray arrayWithObjects:@"WebURLsWithTitlesPboardType", NSURLPboardType, nil] owner:nil];
+        [WebURLsWithTitlesClass writeURLs:[NSArray arrayWithObjects:url, nil] andTitles:[NSArray arrayWithObjects:title, nil] toPasteboard:pboard];
+        [url writeToPasteboard:pboard];
+    } else {
+        [pboard declareTypes:[NSArray arrayWithObject:NSURLPboardType] owner:nil];
+        [url writeToPasteboard:pboard];
+    }
 }
 
 - (IBAction)selectLibraryGroup:(id)sender {

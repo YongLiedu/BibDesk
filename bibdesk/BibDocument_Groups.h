@@ -110,6 +110,7 @@
 - (void)editGroupAtRow:(int)row;
 - (IBAction)editGroupAction:(id)sender;
 - (IBAction)renameGroupAction:(id)sender;
+- (IBAction)copyGroupURLAction:(id)sender;
 - (IBAction)selectLibraryGroup:(id)sender;
 - (IBAction)changeIntersectGroupsAction:(id)sender;
 - (IBAction)editNewStaticGroupWithSelection:(id)sender;
