@@ -2569,20 +2569,21 @@ static BOOL writeURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard)
     for (i = 0; i < iMax && noErr == err; i++) {
         
         NSURL *theURL = [URLs objectAtIndex:i];
-        NSString *string = [theURL absoluteString];
-        CFDataRef utf8Data = (CFDataRef)[string dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataRef utf8Data = CFURLCreateData(nil, (CFURLRef)theURL, kCFStringEncodingUTF8, true);
         
         // any pointer type; private to the creating application
         PasteboardItemID itemID = (void *)theURL;
         
         // Finder adds a file URL and destination URL for weblocs, but only a file URL for regular files
         // could also put a string representation of the URL, but Finder doesn't do that
-
-        if ([theURL isFileURL]) {
-            err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeFileURL, utf8Data, kPasteboardFlavorNoFlags);
-        }
-        else {
-            err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeURL, utf8Data, kPasteboardFlavorNoFlags);
+        
+        if (NULL != utf8Data) {
+            if ([theURL isFileURL]) {
+                err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeFileURL, utf8Data, kPasteboardFlavorNoFlags);
+            } else {
+                err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeURL, utf8Data, kPasteboardFlavorNoFlags);
+            }
+            CFRelease(utf8Data);
         }
     }
     
