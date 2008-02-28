@@ -803,6 +803,8 @@
         isIcon = YES;
         if ([pb availableTypeFromArray:[NSArray arrayWithObject:NSFilesPromisePboardType]])
             count = MAX(1, (int)[[pb propertyListForType:NSFilesPromisePboardType] count]);
+        else if ([pb availableTypeFromArray:[NSArray arrayWithObject:@"WebURLsWithTitlesPboardType"]])
+            count = MAX(1, (int)[[pboardHelper promisedItemsForPasteboard:pb] count]);
     
 	} else if ([dragType isEqualToString:NSFilesPromisePboardType]) {
 		NSArray *fileNames = [pb propertyListForType:NSFilesPromisePboardType];
@@ -863,6 +865,14 @@
                     if (count > 1) 
                         [s appendString:[NSString horizontalEllipsisString]];
                     inside = YES;
+                    break;
+                case BDSKURLDragCopyType:
+                    // in fact, this should already be handled above
+                    count = 1;
+                    image = [NSImage imageForURL:[NSURL URLFromPasteboard:pb]];
+                    isIcon = YES;
+                    if ([pb availableTypeFromArray:[NSArray arrayWithObject:@"WebURLsWithTitlesPboardType"]])
+                        count = MAX(1, (int)[[pboardHelper promisedItemsForPasteboard:pb] count]);
                     break;
                 default:
                     [s appendString:@"["];
