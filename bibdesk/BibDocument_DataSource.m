@@ -472,7 +472,7 @@
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
     int idx = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
-    NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKDefaultDragCopyTypeKey : BDSKAlternateDragCopyTypeKey;
+    NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	int dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
@@ -815,7 +815,7 @@
 	} else {
 		OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
 		NSMutableString *s = [NSMutableString string];
-        NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKDefaultDragCopyTypeKey : BDSKAlternateDragCopyTypeKey;
+        NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
         
         dragCopyType = [sud integerForKey:dragCopyTypeKey];
         
