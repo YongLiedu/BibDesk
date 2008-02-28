@@ -1250,6 +1250,9 @@ The groupedPublications array is a subset of the publications array, developed b
 	id group = [[self selectedGroups] lastObject];
     NSURL *url = nil;
     NSString *title = nil;
+    NSString *theUTI = nil;
+    NSData *data = nil;
+    
     if ([group isSearch]) {
         url = [(BDSKSearchGroup *)group bdsksearchURL];
         title = [[(BDSKSearchGroup *)group serverInfo] name];
@@ -1262,17 +1265,31 @@ The groupedPublications array is a subset of the publications array, developed b
 		NSBeep();
 		return;
 	} 
-	NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    if (title == nil)
+        title = [url isFileURL] ? [[url path] lastPathComponent] : [url absoluteString];
+	
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
     Class WebURLsWithTitlesClass = NSClassFromString(@"WebURLsWithTitles");
-    if (WebURLsWithTitlesClass && [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)]) {
-        if (title == nil)
-            title = [[url path] lastPathComponent];
-        [pboard declareTypes:[NSArray arrayWithObjects:@"WebURLsWithTitlesPboardType", NSURLPboardType, nil] owner:nil];
+    if (NO == [WebURLsWithTitlesClass respondsToSelector:@selector(writeURLs:andTitles:toPasteboard:)])
+        WebURLsWithTitlesClass = Nil;
+    
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 &&
+        (data = [(NSData *)CFURLCreateData(nil, (CFURLRef)url, kCFStringEncodingUTF8, true) autorelease]))
+            theUTI = (NSString *)([url isFileURL] ? kUTTypeFileURL : kUTTypeURL);
+    
+    if (WebURLsWithTitlesClass) {
+        [pboard declareTypes:[NSArray arrayWithObjects:@"WebURLsWithTitlesPboardType", NSURLPboardType, NSStringPboardType, theUTI, @"public.url-name", nil] owner:nil];
         [WebURLsWithTitlesClass writeURLs:[NSArray arrayWithObjects:url, nil] andTitles:[NSArray arrayWithObjects:title, nil] toPasteboard:pboard];
-        [url writeToPasteboard:pboard];
     } else {
-        [pboard declareTypes:[NSArray arrayWithObject:NSURLPboardType] owner:nil];
-        [url writeToPasteboard:pboard];
+        [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, NSStringPboardType, theUTI, @"public.url-name", nil] owner:nil];
+    }
+    
+    [url writeToPasteboard:pboard];
+    [pboard setString:[url absoluteString] forType:NSStringPboardType];
+    
+    if (theUTI) {
+        [pboard setData:data forType:theUTI];
+        [pboard setString:title forType:@"public.url-name"];
     }
 }
 
