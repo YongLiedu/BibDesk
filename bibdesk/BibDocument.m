@@ -2050,6 +2050,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // set up the smart group that shows the latest import
     // @@ do this for items added via the editor?  doesn't seem as useful
     [groups setLastImportedPublications:newPubs];
+
+	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKImportPublicationsScriptHookName forPublications:newPubs document:self];
     
     if(tmpCiteKey != nil)
         [self reportTemporaryCiteKeys:tmpCiteKey forNewDocument:NO];

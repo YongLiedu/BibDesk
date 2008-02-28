@@ -51,6 +51,7 @@ NSString *BDSKWillAutoFileScriptHookName = @"Will Auto File";
 NSString *BDSKDidAutoFileScriptHookName = @"Did Auto File";
 NSString *BDSKWillGenerateCiteKeyScriptHookName = @"Will Generate Cite Key";
 NSString *BDSKDidGenerateCiteKeyScriptHookName = @"Did Generate Cite Key";
+NSString *BDSKImportPublicationsScriptHookName = @"Import Publications";
 NSString *BDSKSaveDocumentScriptHookName = @"Save Document";
 
 static BDSKScriptHookManager *sharedManager = nil;
@@ -75,6 +76,7 @@ static NSArray *scriptHookNames = nil;
 														   BDSKDidAutoFileScriptHookName, 
 														   BDSKWillGenerateCiteKeyScriptHookName, 
 														   BDSKDidGenerateCiteKeyScriptHookName, 
+                                                           BDSKImportPublicationsScriptHookName, 
 														   BDSKSaveDocumentScriptHookName, nil];
     }
     return scriptHookNames;
