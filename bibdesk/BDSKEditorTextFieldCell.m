@@ -48,12 +48,12 @@
     [self setBezeled:YES];
     [self setDrawsBackground:YES];
     [self setHasButton:NO];
-    NSImage *arrowImage = [NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate];
-    if (arrowImage) {
-        arrowImage = [[arrowImage copy] autorelease];
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        NSImage *arrowImage = [[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] copy];
         [arrowImage setScalesWhenResized:YES];
         [arrowImage setSize:NSMakeSize(12, 12)];
         buttonCell = [[NSButtonCell alloc] initImageCell:arrowImage];
+        [arrowImage release];
     } else {
         buttonCell = [[NSButtonCell alloc] initImageCell:[NSImage imageNamed:@"ArrowImage"]];
         [buttonCell setAlternateImage:[NSImage imageNamed:@"ArrowImage_Pressed"]];
