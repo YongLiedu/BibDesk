@@ -1572,7 +1572,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 }
 
 - (NSString *)stringByAddingPercentEscapes{
-    return [self stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    return [(NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)self, NULL, CFSTR(";/?:@&=+$,"), kCFStringEncodingUTF8) autorelease];
 }
 
 - (NSString *)stringByReplacingPercentEscapes{
