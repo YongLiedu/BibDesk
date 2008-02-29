@@ -278,16 +278,28 @@
 	<key>CFBundleURLTypes</key>
 	<array>
         <dict>
+			<key>CFBundleURLName</key>
+			<string>BibDesk publication URL</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>bdsk</string>
 			</array>
+			<key>LSIsAppleDefaultForScheme</key>
+            <true/>
 		</dict>
         <dict>
+			<key>CFBundleURLName</key>
+			<string>Search group server URL</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>bdsksearch</string>
 			</array>
+			<key>LSIsAppleDefaultForScheme</key>
+            <true/>
 		</dict>
     </array>
 	<key>CFBundleVersion</key>
