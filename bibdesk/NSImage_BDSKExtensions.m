@@ -230,6 +230,20 @@ static NSImage *createPaperclipImageWithColor(NSColor *color) {
     return image;
 }
 
++ (NSImage *)arrowImage {
+    static NSImage *arrowImage = nil;
+    if (arrowImage == nil) {
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+            arrowImage = [[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] copy];
+            [arrowImage setScalesWhenResized:YES];
+            [arrowImage setSize:NSMakeSize(12, 12)];
+        } else {
+            arrowImage = [[NSImage imageNamed:@"ArrowImage"] retain];
+        }
+    }
+    return arrowImage;
+}
+
 - (NSImage *)imageFlippedHorizontally;
 {
 	NSImage *flippedImage;

@@ -37,6 +37,7 @@
  */
 
 #import "BDSKEditorTextFieldCell.h"
+#import "NSImage_BDSKExtensions.h"
 
 #define BUTTON_MARGIN 2.0
 
@@ -48,16 +49,7 @@
     [self setBezeled:YES];
     [self setDrawsBackground:YES];
     [self setHasButton:NO];
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        NSImage *arrowImage = [[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate] copy];
-        [arrowImage setScalesWhenResized:YES];
-        [arrowImage setSize:NSMakeSize(12, 12)];
-        buttonCell = [[NSButtonCell alloc] initImageCell:arrowImage];
-        [arrowImage release];
-    } else {
-        buttonCell = [[NSButtonCell alloc] initImageCell:[NSImage imageNamed:@"ArrowImage"]];
-        [buttonCell setAlternateImage:[NSImage imageNamed:@"ArrowImage_Pressed"]];
-    }
+    buttonCell = [[NSButtonCell alloc] initImageCell:[NSImage arrowImage]];
     [buttonCell setButtonType:NSMomentaryChangeButton];
     [buttonCell setBordered:NO];
     [buttonCell setImagePosition:NSImageOnly];

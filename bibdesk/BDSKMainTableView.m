@@ -348,8 +348,7 @@ enum {
             [cell setBordered:NO];
             [cell setImagePosition:NSImageOnly];
             [cell setControlSize:NSSmallControlSize];
-            [cell setImage:[NSImage imageNamed:@"ArrowImage"]];
-            [cell setAlternateImage:[NSImage imageNamed:@"ArrowImage_Pressed"]];
+            [cell setImage:[NSImage arrowImage]];
             [cell setAction:@selector(openParentItem:)];
             [cell setTarget:self];
             break;
@@ -558,7 +557,7 @@ enum {
         NSImage *paperclip = [[[NSImage paperclipImage] copy] autorelease];
         [paperclip setScalesWhenResized:YES];
         [paperclip setSize:NSMakeSize(16, 16)];
-		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, [NSImage imageNamed:@"ArrowImage"], BDSKCrossrefString, nil];
+		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, [NSImage arrowImage], BDSKCrossrefString, nil];
 		if (paths) {
 			NSEnumerator *keyEnum = [paths keyEnumerator];
 			NSString *key, *path;

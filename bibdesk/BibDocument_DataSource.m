@@ -210,8 +210,7 @@
             } else if ([[aTableColumn identifier] isEqualToString:BDSKCrossrefString]) {
                 if ([[shownPublications objectAtIndex:row] crossrefParent]) {
                     [aCell setEnabled:YES];
-                    [aCell setImage:[NSImage imageNamed:@"ArrowImage"]];
-                    [aCell setAlternateImage:[NSImage imageNamed:@"ArrowImage_Pressed"]];
+                    [aCell setImage:[NSImage arrowImage]];
                 } else {
                     [aCell setEnabled:YES];
                     [aCell setImage:nil];
