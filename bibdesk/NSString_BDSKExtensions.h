@@ -486,6 +486,7 @@ An inline buffer is used for speed in accessing each character.
 
 - (NSString *)firstLetter;
 
+- (NSString *)stringByAddingPercentEscapesIncludingReserved;
 - (NSString *)stringByAddingPercentEscapes;
 - (NSString *)stringByReplacingPercentEscapes;
 

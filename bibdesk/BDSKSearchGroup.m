@@ -426,8 +426,8 @@ NSString *BDSKSearchGroupISI = @"isi";
         [string appendFormat:@"%@:%@", [serverInfo host], [serverInfo port]];
     else
         [string appendString:type];
-    [string appendFormat:@"/%@", [[serverInfo database] stringByAddingPercentEscapes]];
-    [string appendFormat:@"?name=%@", [[serverInfo name] stringByAddingPercentEscapes]];
+    [string appendFormat:@"/%@", [[serverInfo database] stringByAddingPercentEscapesIncludingReserved]];
+    [string appendFormat:@"?name=%@", [[serverInfo name] stringByAddingPercentEscapesIncludingReserved]];
     if ([serverInfo isZoom]) {
         NSEnumerator *keyEnum = [[serverInfo options] keyEnumerator];
         NSString *key;
@@ -435,7 +435,7 @@ NSString *BDSKSearchGroupISI = @"isi";
             NSString *value = [[serverInfo options] objectForKey:key];
             if ([key isEqualToString:@"removeDiacritics"])
                 value = [serverInfo removeDiacritics] ? @"y" : @"n";
-            [string appendFormat:@"&%@=%@", key, [value stringByAddingPercentEscapes]];
+            [string appendFormat:@"&%@=%@", key, [value stringByAddingPercentEscapesIncludingReserved]];
         }
     }
     return [NSURL URLWithString:string];

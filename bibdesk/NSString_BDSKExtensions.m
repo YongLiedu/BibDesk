@@ -1571,8 +1571,12 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [self length] ? [self substringToIndex:1] : nil;
 }
 
-- (NSString *)stringByAddingPercentEscapes{
+- (NSString *)stringByAddingPercentEscapesIncludingReserved{
     return [(NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)self, NULL, CFSTR(";/?:@&=+$,"), kCFStringEncodingUTF8) autorelease];
+}
+
+- (NSString *)stringByAddingPercentEscapes{
+    return [self stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 }
 
 - (NSString *)stringByReplacingPercentEscapes{
