@@ -71,6 +71,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKSearchGroup.h"
+#import "BDSKURLGroup.h"
 #import "BDSKLinkedFile.h"
 #import "NSArray_BDSKExtensions.h"
 
@@ -957,25 +958,28 @@
                 return NSDragOperationNone;
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
+        } else if (isDragFromDrawer || isDragFromGroupTable || type == nil) {
+            return NSDragOperationNone;
         }
         
-        if(op == NSTableViewDropAbove){
+        if (op == NSTableViewDropAbove || (row >= 0 && [[groups objectAtIndex:row] isValidDropTarget] == NO)) {
             // here we actually target the whole table, as we don't insert in a specific location
             row = -1;
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
         }
         
-        if(isDragFromDrawer || isDragFromGroupTable || type == nil || (row >= 0 && [[groups objectAtIndex:row]  isValidDropTarget] == NO) || (row == 0 && isDragFromMainTable))
-            return NSDragOperationNone;
-        
-        if(isDragFromMainTable){
-            if([type isEqualToString:BDSKBibItemPboardType])
+        if (isDragFromMainTable) {
+            if([type isEqualToString:BDSKBibItemPboardType] && row > 0)
                 return NSDragOperationLink;
             else
                 return NSDragOperationNone;
         } else if([type isEqualToString:BDSKBibItemPboardType]){
             return NSDragOperationCopy; // @@ can't drag row indexes from another document; should use NSArchiver instead
-        }else{
+        } else if ([[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type] &&
+                   ([NSApp currentModifierFlags] & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask) ){
+            [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+            return NSDragOperationLink;
+        } else {
             return NSDragOperationEvery;
         }
     }
@@ -1085,7 +1089,7 @@
         // retain is required to fix bug #1356183
         BDSKGroup *group = row == -1 ? nil : [[[groups objectAtIndex:row] retain] autorelease];
         BOOL shouldSelect = row == -1 || [[self selectedGroups] containsObject:group];
-		
+        
 		if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups && row == 0) {
             return [self addPublicationsFromPasteboard:pboard selectLibrary:NO verbose:YES error:NULL];
         } else if(isDragFromGroupTable || isDragFromDrawer || (row >= 0 && [group isValidDropTarget] == NO)) {
@@ -1094,6 +1098,47 @@
             // we already have these publications, so we just want to add them to the group, not the document
             
 			pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
+        } else if ([[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type] &&
+                   ([NSApp currentModifierFlags] & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask) ){
+            NSArray *urls = nil;
+            
+            if ([type isEqualToString:BDSKWeblocFilePboardType]) {
+                urls = [NSArray arrayWithObjects:[NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]], nil]; 	
+            } else if ([type isEqualToString:NSURLPboardType]) {
+                urls = [NSArray arrayWithObjects:[NSURL URLFromPasteboard:pboard], nil];
+            } else if ([type isEqualToString:NSFilenamesPboardType]) {
+                NSEnumerator *fileEnum = [[pboard propertyListForType:NSFilenamesPboardType] objectEnumerator];
+                NSString *file;
+                urls = [NSMutableArray array];
+                while (file = [fileEnum nextObject])
+                    [(NSMutableArray *)urls addObject:[NSURL fileURLWithPath:file]];
+            }
+            
+            NSEnumerator *urlEnum = [urls objectEnumerator];
+            NSURL *url;
+            group = nil;
+            
+            while (url = [urlEnum nextObject]) {
+                if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
+                    NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:url];
+                    Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
+                    group = [[[(groupClass ? groupClass : [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
+                    if(group)
+                        [groups addSearchGroup:(BDSKSearchGroup *)group];
+                } else {
+                    group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease];
+                    [groups addURLGroup:(BDSKURLGroup *)group];
+                }
+            }
+            if (urlGroup)
+                [self selectGroup:group];
+            if ([urls count]) {
+                [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
+                return YES;
+            } else {
+                return NO;
+            }
+            
         } else {
             
             if([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL] == NO)
