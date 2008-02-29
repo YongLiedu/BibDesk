@@ -1130,7 +1130,7 @@
                     [groups addURLGroup:(BDSKURLGroup *)group];
                 }
             }
-            if (urlGroup)
+            if (group)
                 [self selectGroup:group];
             if ([urls count]) {
                 [[self undoManager] setActionName:NSLocalizedString(@"Add Group", @"Undo action name")];
