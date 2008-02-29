@@ -104,13 +104,6 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
         [command setArguments:arguments];
         [arguments release];
     }
-    if ([fileType isEqualToString:@"BibTeX"]) {
-        fileType = BDSKBibTeXDocumentType;
-        NSMutableDictionary *arguments = [[command arguments] mutableCopy];
-        [arguments setObject:fileType forKey:@"FileType"];
-        [command setArguments:arguments];
-        [arguments release];
-    }
     if (fileURL) {
         if ([fileURL isKindOfClass:[NSURL class]] == NO) {
             [command setScriptErrorNumber:NSArgumentsWrongScriptError];

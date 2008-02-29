@@ -164,11 +164,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<direct-parameter type="specifier"
 				description="The document(s) or window(s) to save."/>
 			<parameter name="in" code="kfil" type="file" optional="yes"
-				description="The file in which to save the document.">
+				description="The file in which to save the document. Uses Save As when this is supplied and the'as' argument is not supplied.">
 				<cocoa key="File"/>
 			</parameter>
 			<parameter name="as" code="fltp" type="text" optional="yes"
-				description="The type of file to save.">
+				description="The type of file to save. Uses Export when this is supplied.">
 				<cocoa key="FileType"/>
 			</parameter>
 		</command>
