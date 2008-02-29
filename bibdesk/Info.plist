@@ -301,6 +301,20 @@
 			<key>LSIsAppleDefaultForScheme</key>
             <true/>
 		</dict>
+        <dict>
+			<key>CFBundleURLName</key>
+			<string>External file group URL</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>bdskfile</string>
+				<string>bdskhttp</string>
+				<string>bdskhttps</string>
+			</array>
+			<key>LSIsAppleDefaultForScheme</key>
+            <true/>
+		</dict>
     </array>
 	<key>CFBundleVersion</key>
 	<string>v${CURRENT_PROJECT_VERSION}</string>

@@ -81,6 +81,7 @@
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKBookmarkController.h"
 #import "BDSKVersionNumber.h"
+#import "BDSKURLGroup.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKServerInfo.h"
 #import "BDSKGroupsArray.h"
@@ -1072,6 +1073,27 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         } else {
             error = [NSError mutableLocalErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get search group from bdsksearch:// URL.", @"error when opening bdsksearch URL")];
         }
+        
+    } else if ([[theURL scheme] isEqualToString:@"bdskfile"] || [[theURL scheme] isEqualToString:@"bdskhttp"] || [[theURL scheme] isEqualToString:@"bdskhttps"]) {
+        
+        theURL = [NSURL URLWithString:[[theURL absoluteString] substringFromIndex:4]];
+        
+        BDSKURLGroup *group = [[BDSKURLGroup alloc] initWithURL:theURL];
+        
+        if (group) {
+            // try the main document first
+            document = [[NSDocumentController sharedDocumentController] mainDocument];
+            if (nil == document) {
+                document = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:&error];
+                [document showWindows];
+            }
+            
+            [[document groups] addURLGroup:group];
+            [group release];
+        } else {
+            error = [NSError mutableLocalErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get external file group from bdskfile://, bdskhttp:// or bdskhttps:// URL.", @"error when opening bdsksearch URL")];
+        }
+        
     }
     
     if (document == nil && error)
