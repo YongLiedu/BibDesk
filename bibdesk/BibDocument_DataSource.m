@@ -1123,6 +1123,10 @@
                     group = [[[(groupClass ? groupClass : [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
                     if(group)
                         [groups addSearchGroup:(BDSKSearchGroup *)group];
+                } else if ([[url scheme] isEqualToString:@"x-bdsk-search"]) {
+                    group = [[[BDSKSearchGroup alloc] initWithURL:url] autorelease];
+                    if(group)
+                        [groups addSearchGroup:(BDSKSearchGroup *)group];
                 } else {
                     group = [[[BDSKURLGroup alloc] initWithURL:url] autorelease];
                     [groups addURLGroup:(BDSKURLGroup *)group];
