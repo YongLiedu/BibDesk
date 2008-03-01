@@ -372,7 +372,7 @@ enum {
                                              defaultButton:verify 
                                            alternateButton:NSLocalizedString(@"Later", @"") 
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"BibDesk now uses a more flexible storage format for these fields.  Choose \"%@\" to manually verify the conversion and optionally remove the old fields.  Conversion can be done at any time from the \"%@\" menu.", @"alert text"), verify, NSLocalizedString(@"Database", @"Database main menu title")];
+                                 informativeTextWithFormat:NSLocalizedString(@"These fields are being deprecated.  BibDesk now uses a more flexible storage format in place of these fields.  Choose \"%@\" to manually verify the conversion and optionally remove the old fields.  Conversion can be done at any time from the \"%@\" menu.  See the Defaults preferences for more options.", @"alert text"), verify, NSLocalizedString(@"Database", @"Database main menu title")];
         
         // @@ Should we show a check button? If the user saves the doc as-is, it'll have local-url and bdsk-file fields in it, and there will be no warning the next time it's opened.  Someone who uses a script hook to convert bdsk-file back to local-url won't want to see it, though.
         [alert setHasCheckButton:YES];
