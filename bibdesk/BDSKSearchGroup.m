@@ -101,24 +101,21 @@ NSString *BDSKSearchGroupISI = @"isi";
 }
 
 - (id)initWithURL:(NSURL *)bdsksearchURL {
-    OBPRECONDITION([[bdsksearchURL scheme] isEqualToString:@"bdsksearch"]);
+    OBPRECONDITION([[bdsksearchURL scheme] isEqualToString:@"x-bdsk-search"]);
     
     NSString *aHost = [[bdsksearchURL host] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSString *aPort = [[bdsksearchURL port] stringValue];
     NSString *path = [bdsksearchURL path];
-    NSArray *pathComponents = [path pathComponents];
-    NSString *aDatabase = @"";
-    NSString *aName = [[path lastPathComponent] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *aDatabase = [([path hasPrefix:@"/"] ? [path substringFromIndex:1] : path ? path : @"") stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *aName = [[bdsksearchURL parameterString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSString *query = [bdsksearchURL query];
     NSString *aSearchTerm = nil;
     NSString *aType = BDSKSearchGroupZoom;
     NSMutableDictionary *options = [NSMutableDictionary dictionary];
     NSEnumerator *queryEnum = [[query componentsSeparatedByString:@"&"] objectEnumerator];
     
-    if ([pathComponents count] > 1 && [[pathComponents objectAtIndex:0] isEqualToString:@"/"])
-        aDatabase = [pathComponents objectAtIndex:1];
-    else if ([pathComponents count] > 0 && [[pathComponents objectAtIndex:0] isEqualToString:@"/"] == NO)
-        aDatabase = [pathComponents objectAtIndex:0];
+    if (aName == nil)
+        aName = aDatabase;
     
     [options setValue:[bdsksearchURL password] forKey:@"password"];
     [options setValue:[bdsksearchURL user] forKey:@"username"];
@@ -428,14 +425,23 @@ NSString *BDSKSearchGroupISI = @"isi";
 }
 
 - (NSURL *)bdsksearchURL {
-    NSMutableString *string = [NSMutableString stringWithString:@"bdsksearch://"];
+    NSMutableString *string = [NSMutableString stringWithString:@"x-bdsk-search://"];
     BDSKServerInfo *serverInfo = [self serverInfo];
-    if ([serverInfo isZoom])
+    NSString *password = [serverInfo password];
+    NSString *username = [serverInfo username];
+    if ([serverInfo isZoom]) {
+        if (username) {
+            [string appendString:[username stringByAddingPercentEscapesIncludingReserved]];
+            if (password)
+                [string appendFormat:@":%@", [password stringByAddingPercentEscapesIncludingReserved]];
+           [string appendString:@"@"];
+        }
         [string appendFormat:@"%@:%@", [[serverInfo host] stringByAddingPercentEscapesIncludingReserved], [serverInfo port]];
-    else
+    } else {
         [string appendString:type];
+    }
     [string appendFormat:@"/%@", [[serverInfo database] stringByAddingPercentEscapesIncludingReserved]];
-    [string appendFormat:@"/%@", [[serverInfo name] stringByAddingPercentEscapesIncludingReserved]];
+    [string appendFormat:@";%@", [[serverInfo name] stringByAddingPercentEscapesIncludingReserved]];
     if ([serverInfo isZoom]) {
         NSEnumerator *keyEnum = [[serverInfo options] keyEnumerator];
         NSString *key;
@@ -443,6 +449,8 @@ NSString *BDSKSearchGroupISI = @"isi";
             NSString *value = [[serverInfo options] objectForKey:key];
             if ([key isEqualToString:@"removeDiacritics"])
                 value = [serverInfo removeDiacritics] ? @"y" : @"n";
+            else if (username && ([key isEqualToString:@"username"] || [key isEqualToString:@"password"]))
+                continue;
             [string appendFormat:@"&%@=%@", key, [value stringByAddingPercentEscapesIncludingReserved]];
         }
     }

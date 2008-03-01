@@ -3322,7 +3322,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
   
 - (NSURL *)bdskURL {
-    return [NSURL URLWithString:[@"bdsk://" stringByAppendingString:[[self citeKey] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    return [NSURL URLWithString:[@"x-bdsk://" stringByAppendingString:[[self citeKey] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
 }
            
 @end

@@ -284,7 +284,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>bdsk</string>
+				<string>x-bdsk</string>
 			</array>
 			<key>LSIsAppleDefaultForScheme</key>
             <true/>
@@ -296,7 +296,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>bdsksearch</string>
+				<string>x-bdsk-search</string>
 			</array>
 			<key>LSIsAppleDefaultForScheme</key>
             <true/>
