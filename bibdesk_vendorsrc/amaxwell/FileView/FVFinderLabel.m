@@ -216,7 +216,7 @@ static const CGFunctionCallbacks linearFunctionCallbacks = {0, &linearColorBlend
 + (NSString *)localizedNameForLabel:(NSInteger)label
 {
     FVAPIAssert1(label <= 7, @"Invalid Finder label %d (must be in the range 0--7)", label);
-    NSArray *labelNames = nil;
+    static NSArray *labelNames = nil;
     if (nil == labelNames) {
         NSBundle *bundle = [NSBundle bundleForClass:[FVFinderLabel self]];
         
