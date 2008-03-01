@@ -72,7 +72,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 + (void)initialize
 {
     // apparently NSURLConnection has bug(s) on Tiger. We get crash reports on 10.4.10, see bug # 1904921, while on 10.4.11 it also is known to have a serious crasher, see http://www.red-sweater.com/blog/452/nsurlconnection-crashing-epidemic 
-    FVWebIconDisabled = (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) && [[NSUserDefaults standardUserDefaults] boolForKey:@"FVWebIconDisabled"];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4], @"FVWebIconDisabled", nil]];
+    FVWebIconDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"FVWebIconDisabled"];
     NSInteger maxViews = [[NSUserDefaults standardUserDefaults] integerForKey:@"FVWebIconMaximumNumberOfWebViews"];
     if (maxViews > 0)
         __maxWebViews = maxViews;
