@@ -165,11 +165,6 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     [super dealloc];
 }
 
-- (BOOL)canReleaseResources;
-{
-    return (nil != _webView || NULL != _fullImage || NULL != _thumbnail || [_fallbackIcon canReleaseResources]);
-}
-
 - (void)releaseResources
 {     
     // Cancel any pending loads; set _isRendering to NO or -renderOffscreenOnMainThread will never complete if it gets called again
@@ -179,7 +174,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     pthread_mutex_lock(&_mutex);
     _isRendering = NO;
     
-    CGImageRelease(_fullImageRef);
+    if (_fullImageRef != NULL)
+        CGImageRelease(_fullImageRef);
     _fullImageRef = NULL;
     
     // currently a noop
