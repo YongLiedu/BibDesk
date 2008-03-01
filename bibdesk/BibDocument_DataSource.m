@@ -1033,7 +1033,6 @@
             return YES;
             
         }else{
-            NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSStringPboardType, nil]];
             
             [self selectLibraryGroup:nil];
             
@@ -1086,6 +1085,7 @@
             return [self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:NULL];
         }
     } else if(tv == groupTableView){
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSStringPboardType, nil]];
         NSArray *pubs = nil;
         BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
         BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupTableView];
