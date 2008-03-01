@@ -72,7 +72,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 + (void)initialize
 {
     // apparently NSURLConnection has bug(s) on Tiger. We get crash reports on 10.4.10, see bug # 1904921, while on 10.4.11 it also is known to have a serious crasher, see http://www.red-sweater.com/blog/452/nsurlconnection-crashing-epidemic 
-    [[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4], @"FVWebIconDisabled", nil]];
+    //[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4], @"FVWebIconDisabled", nil]];
     FVWebIconDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"FVWebIconDisabled"];
     NSInteger maxViews = [[NSUserDefaults standardUserDefaults] integerForKey:@"FVWebIconMaximumNumberOfWebViews"];
     if (maxViews > 0)
@@ -154,7 +154,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 - (void)dealloc
 {
     // it's very unlikely that we'll see this on a non-main thread, but just in case...
-    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES];
+    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
     
     pthread_mutex_destroy(&_mutex);
     CGImageRelease(_fullImageRef);
@@ -165,10 +165,15 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     [super dealloc];
 }
 
+- (BOOL)canReleaseResources;
+{
+    return (nil != _webView || NULL != _fullImage || NULL != _thumbnail || [_fallbackIcon canReleaseResources]);
+}
+
 - (void)releaseResources
 {     
     // Cancel any pending loads; set _isRendering to NO or -renderOffscreenOnMainThread will never complete if it gets called again
-    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES];
+    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
 
     // the thumbnail is small enough to always keep around
     pthread_mutex_lock(&_mutex);
@@ -270,7 +275,11 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
 
     // the delegate methods will tell us if the load failed; I see no other way to ask for status    
-    if (NO == _webviewFailed) {
+    pthread_mutex_lock(&_mutex);
+    BOOL didFail = _webviewFailed;
+    pthread_mutex_unlock(&_mutex);
+    
+    if (NO == didFail) {
         
         // display the main frame's view directly to avoid showing the scrollers
         
@@ -374,14 +383,17 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     else {
         [listener ignore];
     }
+    
+    if (theUTI) CFRelease(theUTI);
 }
 
 - (void)renderOffscreenOnMainThread 
 { 
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));    
-    NSAssert(nil == _webView, @"*** Render error *** renderOffscreenOnMainThread called when _webView already exists");
+    // NSAssert(nil == _webView, @"*** Render error *** renderOffscreenOnMainThread called when _webView already exists");
     
-    _webView = [[self class] popWebView];
+    if (nil == _webView)
+        _webView = [[self class] popWebView];
 
     if (nil == _webView) {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleWebViewAvailableNotification:) name:FVWebIconWebViewAvailableNotificationName object:[self class]];
