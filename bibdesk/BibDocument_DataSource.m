@@ -923,12 +923,13 @@
        proposedDropOperation:(NSTableViewDropOperation)op{
     
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
     BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupTableView];
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
     if(tv == tableView){
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
+        
         if([self hasExternalGroupsSelected] || type == nil) 
 			return NSDragOperationNone;
 		if (isDragFromGroupTable && docState.dragFromExternalGroups && [self hasLibraryGroupSelected]) {
@@ -953,7 +954,9 @@
         else
             return NSDragOperationEvery;
     }else if(tv == groupTableView){
-		if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups) {
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSStringPboardType, nil]];
+		
+        if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromExternalGroups) {
             if (row != 0)
                 return NSDragOperationNone;
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
@@ -993,9 +996,10 @@
     dropOperation:(NSTableViewDropOperation)op{
 	
     NSPasteboard *pboard = [info draggingPasteboard];
-    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     
     if(tv == tableView){
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
+        
         if([self hasExternalGroupsSelected])
             return NO;
 		if(row != -1){
@@ -1029,6 +1033,8 @@
             return YES;
             
         }else{
+            NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSStringPboardType, nil]];
+            
             [self selectLibraryGroup:nil];
             
             if([type isEqualToString:NSFilenamesPboardType]){
