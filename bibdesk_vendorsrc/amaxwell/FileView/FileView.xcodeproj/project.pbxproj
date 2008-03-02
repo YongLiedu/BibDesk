@@ -107,8 +107,8 @@
 		F9A2D3B30CCBB7A7002F517B /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F9A2D3B20CCBB7A7002F517B /* libbz2.dylib */; };
 		F9A2D3DA0CCBDDDF002F517B /* FVBitmapContextCache.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3D80CCBDDDF002F517B /* FVBitmapContextCache.h */; };
 		F9A2D3DB0CCBDDDF002F517B /* FVBitmapContextCache.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3D90CCBDDDF002F517B /* FVBitmapContextCache.m */; };
-		F9A2D3E80CCBE12B002F517B /* FVCGImageIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3E60CCBE12B002F517B /* FVCGImageIcon.h */; };
-		F9A2D3E90CCBE12B002F517B /* FVCGImageIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3E70CCBE12B002F517B /* FVCGImageIcon.m */; };
+		F9A2D3E80CCBE12B002F517B /* FVImageIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3E60CCBE12B002F517B /* FVImageIcon.h */; };
+		F9A2D3E90CCBE12B002F517B /* FVImageIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3E70CCBE12B002F517B /* FVImageIcon.m */; };
 		F9A2D3EC0CCBE13F002F517B /* FVFinderIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3EA0CCBE13F002F517B /* FVFinderIcon.h */; };
 		F9A2D3ED0CCBE13F002F517B /* FVFinderIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2D3EB0CCBE13F002F517B /* FVFinderIcon.m */; };
 		F9A2D3F00CCBE14E002F517B /* FVPDFIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A2D3EE0CCBE14E002F517B /* FVPDFIcon.h */; };
@@ -261,8 +261,8 @@
 		F9A2D3B20CCBB7A7002F517B /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = /usr/lib/libbz2.dylib; sourceTree = "<absolute>"; };
 		F9A2D3D80CCBDDDF002F517B /* FVBitmapContextCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVBitmapContextCache.h; sourceTree = "<group>"; };
 		F9A2D3D90CCBDDDF002F517B /* FVBitmapContextCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVBitmapContextCache.m; sourceTree = "<group>"; };
-		F9A2D3E60CCBE12B002F517B /* FVCGImageIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVCGImageIcon.h; sourceTree = "<group>"; };
-		F9A2D3E70CCBE12B002F517B /* FVCGImageIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVCGImageIcon.m; sourceTree = "<group>"; };
+		F9A2D3E60CCBE12B002F517B /* FVImageIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVImageIcon.h; sourceTree = "<group>"; };
+		F9A2D3E70CCBE12B002F517B /* FVImageIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVImageIcon.m; sourceTree = "<group>"; };
 		F9A2D3EA0CCBE13F002F517B /* FVFinderIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVFinderIcon.h; sourceTree = "<group>"; };
 		F9A2D3EB0CCBE13F002F517B /* FVFinderIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVFinderIcon.m; sourceTree = "<group>"; };
 		F9A2D3EE0CCBE14E002F517B /* FVPDFIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVPDFIcon.h; sourceTree = "<group>"; };
@@ -396,8 +396,8 @@
 				F9A2D39C0CCBB3B5002F517B /* FVIconCache.mm */,
 				F9A2D3D80CCBDDDF002F517B /* FVBitmapContextCache.h */,
 				F9A2D3D90CCBDDDF002F517B /* FVBitmapContextCache.m */,
-				F9A2D3E60CCBE12B002F517B /* FVCGImageIcon.h */,
-				F9A2D3E70CCBE12B002F517B /* FVCGImageIcon.m */,
+				F9A2D3E60CCBE12B002F517B /* FVImageIcon.h */,
+				F9A2D3E70CCBE12B002F517B /* FVImageIcon.m */,
 				F9A2D3EA0CCBE13F002F517B /* FVFinderIcon.h */,
 				F9A2D3EB0CCBE13F002F517B /* FVFinderIcon.m */,
 				F9A2D3EE0CCBE14E002F517B /* FVPDFIcon.h */,
@@ -534,7 +534,7 @@
 				F9A2D34E0CCA7A09002F517B /* DTEndianSwap.h in Headers */,
 				F9A2D39D0CCBB3B5002F517B /* FVIconCache.h in Headers */,
 				F9A2D3DA0CCBDDDF002F517B /* FVBitmapContextCache.h in Headers */,
-				F9A2D3E80CCBE12B002F517B /* FVCGImageIcon.h in Headers */,
+				F9A2D3E80CCBE12B002F517B /* FVImageIcon.h in Headers */,
 				F9A2D3EC0CCBE13F002F517B /* FVFinderIcon.h in Headers */,
 				F9A2D3F00CCBE14E002F517B /* FVPDFIcon.h in Headers */,
 				F9A2D3F40CCBE15C002F517B /* FVTextIcon.h in Headers */,
@@ -705,7 +705,7 @@
 				F9A2D34F0CCA7A09002F517B /* DTEndianSwap.cpp in Sources */,
 				F9A2D39E0CCBB3B5002F517B /* FVIconCache.mm in Sources */,
 				F9A2D3DB0CCBDDDF002F517B /* FVBitmapContextCache.m in Sources */,
-				F9A2D3E90CCBE12B002F517B /* FVCGImageIcon.m in Sources */,
+				F9A2D3E90CCBE12B002F517B /* FVImageIcon.m in Sources */,
 				F9A2D3ED0CCBE13F002F517B /* FVFinderIcon.m in Sources */,
 				F9A2D3F10CCBE14E002F517B /* FVPDFIcon.m in Sources */,
 				F9A2D3F50CCBE15C002F517B /* FVTextIcon.m in Sources */,
