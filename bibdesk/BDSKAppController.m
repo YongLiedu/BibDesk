@@ -1046,7 +1046,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     
     if ([[theURL scheme] isEqualToString:@"x-bdsk"]) {
         
-        NSString *citeKey = [[theURLString substringFromIndex:7] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        NSString *citeKey = [[theURLString substringFromIndex:9] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSString *path = [[NSFileManager defaultManager] spotlightCacheFilePathWithCiteKey:citeKey];
         NSURL *fileURL;
         
