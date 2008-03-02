@@ -37,7 +37,7 @@
  */
 
 #import "FVIcon.h"
-#import "FVCGImageIcon.h"
+#import "FVImageIcon.h"
 #import "FVFinderIcon.h"
 #import "FVPDFIcon.h"
 #import "FVTextIcon.h"

@@ -1,5 +1,5 @@
 //
-//  FVCGImageIcon.m
+//  FVImageIcon.m
 //  FileView
 //
 //  Created by Adam Maxwell on 10/21/07.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "FVCGImageIcon.h"
+#import "FVImageIcon.h"
 #import <QTKit/QTKit.h>
 
 @implementation FVImageIcon

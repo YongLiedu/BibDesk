@@ -1,5 +1,5 @@
 //
-//  FVCGImageIcon.h
+//  FVImageIcon.h
 //  FileView
 //
 //  Created by Adam Maxwell on 10/21/07.
