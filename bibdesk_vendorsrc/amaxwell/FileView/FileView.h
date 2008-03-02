@@ -88,10 +88,12 @@ typedef enum _FVDropOperation {
     NSColor                *_backgroundColor;
     CFRunLoopTimerRef       _zombieTimer;
     NSMutableIndexSet      *_selectedIndexes;
+    CGLayerRef              _selectionOverlay;
     NSUInteger              _lastClickedIndex;
     NSUInteger              _dropOperation;
     NSUInteger              _dropIndex;
     NSRect                  _rubberBandRect;
+    BOOL                    _isMouseDown;
     NSSize                  _padding;
     NSSize                  _iconSize;
     NSPoint                 _lastMouseDownLocInView;

@@ -37,14 +37,17 @@
  */
 
 #import <FileView/FileView.h>
+#import <FileView/FVFinderLabel.h>
+#import <FileView/FVPreviewer.h>
+
 #import <QTKit/QTKit.h>
+
 #import "FVIcon.h"
 #import "FVIcon_Private.h"
 #import "FVIconQueue.h"
-#import <FileView/FVPreviewer.h>
 #import "FVArrowButtonCell.h"
-#import <FileView/FVFinderLabel.h>
 #import "FVUtilities.h"
+#import "FVColorMenuView.h"
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
@@ -63,9 +66,9 @@ static const CFTimeInterval ZOMBIE_TIMER_INTERVAL = 300.0;
 static NSDictionary *_titleAttributes = nil;
 static NSDictionary *_labeledAttributes = nil;
 static NSDictionary *_subtitleAttributes = nil;
-static NSShadow *_shadow = nil;
 static CGFloat _titleHeight = 0.0;
 static CGFloat _subtitleHeight = 0.0;
+static CGColorRef _shadowColor = NULL;
 
 #pragma mark -
 
@@ -75,40 +78,14 @@ static CGFloat _subtitleHeight = 0.0;
 - (NSURL *)iconURLAtIndex:(NSUInteger)anIndex;
 - (NSUInteger)numberOfIcons;
 
-- (void)_commonInit;
-- (void)_registerForDraggedTypes;
-- (CGFloat)_columnWidth;
-- (CGFloat)_rowHeight;
+// only declare methods here to shut the compiler up if we can't rearrange
 - (FVIcon *)_cachedIconForURL:(NSURL *)aURL;
 - (NSSize)_paddingForScale:(CGFloat)scale;
-- (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
-- (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
-- (void)_setNeedsDisplayForIconInRow:(NSUInteger)row column:(NSUInteger)column;
-- (NSArray *)_selectedURLs;
-- (void)_removeAllTrackingRects;
-- (void)_resetTrackingRectsAndToolTips;
-- (void)_discardTrackingRectsAndToolTips;
 - (void)_recalculateGridSize;
-- (NSUInteger)_indexForGridRow:(NSUInteger)rowIndex column:(NSUInteger)colIndex;
-- (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex ofIndex:(NSUInteger)anIndex;
-- (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex atPoint:(NSPoint)point;
-- (void)_drawDropHighlight;
-- (void)_drawHighlightInRect:(NSRect)aRect;
-- (void)_drawRubberbandRect;
-- (void)_drawDropMessage;
-- (CGFloat)_scrollVelocity;
 - (void)_getRangeOfRows:(NSRange *)rowRange columns:(NSRange *)columnRange inRect:(NSRect)aRect;
-- (BOOL)_isFastScrolling;
-- (void)_scheduleIconsInRange:(NSRange)indexRange;
-- (void)_drawIconsInRange:(NSRange)indexRange rows:(NSRange)rows columns:(NSRange)columns;
-- (void)_updateButtonsForIcon:(FVIcon *)anIcon;
 - (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex;
 - (void)_hideArrows;
 - (BOOL)_hasArrows;
-- (NSURL *)_URLAtPoint:(NSPoint)point;
-- (NSIndexSet *)_allIndexesInRubberBandRect;
-- (BOOL)_isLocalDraggingInfo:(id <NSDraggingInfo>)sender;
-- (void)_updateDropOperationAndIndexAtPoint:(NSPoint)point;
 
 @end
 
@@ -140,12 +117,10 @@ static CGFloat _subtitleHeight = 0.0;
     _subtitleHeight = [lm defaultLineHeightForFont:[_subtitleAttributes objectForKey:NSFontAttributeName]];
     [lm release];
     
-    _shadow = [[NSShadow alloc] init];
-    // IconServices shadows look darker than the normal NSShadow (especially Leopard folder shadows) so try to match
-    [_shadow setShadowColor:[NSColor colorWithCalibratedWhite:0 alpha:0.4]];
-    [_shadow setShadowOffset:NSMakeSize(0.0, -2.0)];
-    // this will have to be scaled when drawing, since it's in a global coordinate space
-    [_shadow setShadowBlurRadius:5.0];
+    CGColorSpaceRef cspace = CGColorSpaceCreateDeviceRGB();
+    CGFloat shadowComponents[] = { 0, 0, 0, 0.4 };
+    _shadowColor = CGColorCreate(cspace, shadowComponents);
+    CGColorSpaceRelease(cspace);
     
     // QTMovie raises if +initialize isn't sent on the AppKit thread
     [QTMovie class];
@@ -160,7 +135,7 @@ static CGFloat _subtitleHeight = 0.0;
 {
     // from Mail.app on 10.4
     CGFloat red = (231.0f/255.0f), green = (237.0f/255.0f), blue = (246.0f/255.0f);
-    return [NSColor colorWithCalibratedRed:red green:green blue:blue alpha:1.0];
+    return [[NSColor colorWithCalibratedRed:red green:green blue:blue alpha:1.0] colorUsingColorSpaceName:NSDeviceRGBColorSpace];
 }
 
 + (BOOL)accessInstanceVariablesDirectly { return NO; }
@@ -181,9 +156,11 @@ static CGFloat _subtitleHeight = 0.0;
     _selectedIndexes = [[NSMutableIndexSet alloc] init];
     _lastClickedIndex = NSNotFound;
     _rubberBandRect = NSZeroRect;
+    _isMouseDown = NO;
     _iconURLs = nil;
     _isEditable = NO;
     [self setBackgroundColor:[[self class] defaultBackgroundColor]];
+    _selectionOverlay = NULL;
         
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     
@@ -251,6 +228,7 @@ static CGFloat _subtitleHeight = 0.0;
     // this variable is accessed in super's dealloc, so set it to NULL
     CFRelease(_trackingRectMap);
     _trackingRectMap = NULL;
+    CGLayerRelease(_selectionOverlay);
     [super dealloc];
 }
 
@@ -281,6 +259,9 @@ static CGFloat _subtitleHeight = 0.0;
     
     // arrows out of place now, they will be added again when required when resetting the tracking rects
     [self _hideArrows];
+    
+    CGLayerRelease(_selectionOverlay);
+    _selectionOverlay = NULL;
     
     // the full view will likely need repainting
     [self reloadIcons];
@@ -539,6 +520,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 {
     // Problem exposed in BibDesk: select all, scroll halfway down in file pane, then change selection to a single row.  FileView content didn't update correctly, even though reloadIcons was called.  Logging drawRect: indicated that the wrong region was being updated, but calling _recalculateGridSize here fixed it.
     [self _recalculateGridSize];
+    [self _rebuildIconIndexMap];
     
     // grid may have changed, so do a full redisplay
     [self setNeedsDisplay:YES];
@@ -617,10 +599,11 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 // this returns nil when the datasource or bound array returns NSNull, or else we end up with exceptions everywhere
 - (NSURL *)iconURLAtIndex:(NSUInteger)anIndex
 {
+    NSParameterAssert(anIndex < [self numberOfIcons]);
     NSURL *aURL = [[self iconURLs] objectAtIndex:anIndex];
     if (nil == aURL)
         aURL = [_dataSource fileView:self URLAtIndex:anIndex];
-    if (nil == aURL || [[NSNull null] isEqual:aURL])
+    if (nil == aURL || [NSNull null] == (id)aURL)
         aURL = [FVIcon missingFileURL];
     return aURL;
 }
@@ -802,36 +785,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 #pragma mark Cache thread
 
-// drawRect: uses -releaseResources on icons that aren't visible but present in the datasource, so we just need a way to cull icons that are cached but not currently in the datasource
-- (void)_zombieTimerFired:(CFRunLoopTimerRef)timer
-{
-    NSUInteger i, iMax = [self numberOfIcons];
-    
-    // don't do anything unless there's a meaningful discrepancy between the number of items reported by the datasource and our cache
-    if ((iMax + ZOMBIE_CACHE_THRESHOLD) < [_iconCache count]) {
-        
-        NSMutableSet *iconURLsToKeep = [NSMutableSet set];        
-        for (i = 0; i < iMax; i++) {
-            NSURL *aURL = [self iconURLAtIndex:i];
-            if (aURL) [iconURLsToKeep addObject:aURL];
-        }
-        
-        NSMutableSet *toRemove = [NSMutableSet setWithArray:[_iconCache allKeys]];
-        [toRemove minusSet:iconURLsToKeep];
-        
-        // anything remaining in toRemove is not present in the dataSource, so remove it from the cache
-        NSEnumerator *keyEnum = [toRemove objectEnumerator];
-        NSURL *aURL;
-        while ((aURL = [keyEnum nextObject]))
-            [_iconCache removeObjectForKey:aURL];
-    }
-}
-
-- (void)_handleWebIconNotification:(NSNotification *)aNote
-{
-    [self iconQueueUpdated:[NSArray arrayWithObject:[aNote object]]];
-}
-
 - (void)_rescaleComplete;
 {    
     NSUInteger scrollIndex = [_selectedIndexes firstIndex];
@@ -880,6 +833,36 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         }
     }
     [updatedIconSet release];
+}
+
+// drawRect: uses -releaseResources on icons that aren't visible but present in the datasource, so we just need a way to cull icons that are cached but not currently in the datasource
+- (void)_zombieTimerFired:(CFRunLoopTimerRef)timer
+{
+    NSUInteger i, iMax = [self numberOfIcons];
+    
+    // don't do anything unless there's a meaningful discrepancy between the number of items reported by the datasource and our cache
+    if ((iMax + ZOMBIE_CACHE_THRESHOLD) < [_iconCache count]) {
+        
+        NSMutableSet *iconURLsToKeep = [NSMutableSet set];        
+        for (i = 0; i < iMax; i++) {
+            NSURL *aURL = [self iconURLAtIndex:i];
+            if (aURL) [iconURLsToKeep addObject:aURL];
+        }
+        
+        NSMutableSet *toRemove = [NSMutableSet setWithArray:[_iconCache allKeys]];
+        [toRemove minusSet:iconURLsToKeep];
+        
+        // anything remaining in toRemove is not present in the dataSource, so remove it from the cache
+        NSEnumerator *keyEnum = [toRemove objectEnumerator];
+        NSURL *aURL;
+        while ((aURL = [keyEnum nextObject]))
+            [_iconCache removeObjectForKey:aURL];
+    }
+}
+
+- (void)_handleWebIconNotification:(NSNotification *)aNote
+{
+    [self iconQueueUpdated:[NSArray arrayWithObject:[aNote object]]];
 }
 
 #pragma mark Drawing
@@ -948,19 +931,43 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)_drawHighlightInRect:(NSRect)aRect;
 {
-    static NSColor *strokeColor = nil;
-    static NSColor *fillColor = nil;
-    if (nil == strokeColor) {
-        strokeColor = [[NSColor colorWithCalibratedWhite:1.0 alpha:0.8] retain];
-        fillColor = [[NSColor colorWithCalibratedWhite:0.0 alpha:0.2] retain];
+    CGContextRef drawingContext = [[NSGraphicsContext currentContext] graphicsPort];
+    
+    // drawing into a CGImage and then overlaying it keeps the rubber band highlight much more responsive
+    if (NULL == _selectionOverlay) {
+        
+        _selectionOverlay = CGLayerCreateWithContext(drawingContext, CGSizeMake(NSWidth(aRect), NSHeight(aRect)), NULL);
+        CGContextRef layerContext = CGLayerGetContext(_selectionOverlay);
+        NSRect imageRect = NSZeroRect;
+        CGSize layerSize = CGLayerGetSize(_selectionOverlay);
+        imageRect.size.height = layerSize.height;
+        imageRect.size.width = layerSize.width;
+        CGContextClearRect(layerContext, *(CGRect *)&imageRect);
+        
+        [NSGraphicsContext saveGraphicsState];
+        NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:layerContext flipped:YES];
+        [NSGraphicsContext setCurrentContext:nsContext];
+        [nsContext saveGraphicsState];
+        
+        NSColor *strokeColor = [[NSColor colorWithCalibratedWhite:1.0 alpha:0.8] colorUsingColorSpaceName:NSDeviceRGBColorSpace];
+        NSColor *fillColor = [[NSColor colorWithCalibratedWhite:0.0 alpha:0.2] colorUsingColorSpaceName:NSDeviceRGBColorSpace];
+        [strokeColor setStroke];
+        [fillColor setFill];
+        imageRect = NSInsetRect(imageRect, 1.0, 1.0);
+        NSBezierPath *p = [NSBezierPath fv_bezierPathWithRoundRect:imageRect xRadius:5 yRadius:5];
+        [p setLineWidth:2.0];
+        [p fill];
+        [p stroke];
+        [p setLineWidth:1.0];
+        
+        [nsContext restoreGraphicsState];
+        [NSGraphicsContext restoreGraphicsState];
     }
-    [strokeColor setStroke];
-    [fillColor setFill];
-    NSBezierPath *p = [NSBezierPath fv_bezierPathWithRoundRect:aRect xRadius:5 yRadius:5];
-    [p setLineWidth:2.0f];
-    [p fill];
-    [p stroke];
-    [p setLineWidth:1.0];
+    // make sure we use source over for drawing the image
+    CGContextSaveGState(drawingContext);
+    CGContextSetBlendMode(drawingContext, kCGBlendModeNormal);
+    CGContextDrawLayerInRect(drawingContext, *(CGRect *)&aRect, _selectionOverlay);
+    CGContextRestoreGState(drawingContext);
 }
 
 - (void)_drawRubberbandRect
@@ -969,7 +976,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSRect r = [self centerScanRect:NSInsetRect(_rubberBandRect, 0.5, 0.5)];
     NSRectFillUsingOperation(r, NSCompositeSourceOver);
     // NSFrameRect doesn't respect setStroke
-    [[NSColor lightGrayColor] set];
+    [[NSColor lightGrayColor] setFill];
     NSFrameRectWithWidth(r, 1.0);
 }
 
@@ -1094,49 +1101,11 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     if (iMax > iMin)
         [visibleIndexes addIndexesInRange:NSMakeRange(iMin, iMax - iMin)];
     
-    NSMutableIndexSet *additionalIndexes = [NSMutableIndexSet indexSet];
-    
-    NSMutableArray *iconsToRender = [[NSMutableArray alloc] initWithArray:[self iconsAtIndexes:visibleIndexes]];
-    CGFloat velocity = [self _scrollVelocity];
-    
-    // don't bother with the extra computation if the view isn't moving or we have no icons
-    if ([visibleIndexes count] && ABS(velocity) > 10.0f) {
-        
-        NSUInteger nc = [self numberOfColumns];
-        NSUInteger visibleRows = [visibleIndexes count] / nc;
-        
-        // this is a heuristic, and it's untuned so far
-        
-        // going down
-        if (velocity > 0) { 
-            NSUInteger lastIdx = [visibleIndexes lastIndex], newLast = MIN([self numberOfIcons] - 1, lastIdx + (visibleRows * nc));
-            [additionalIndexes addIndexesInRange:NSMakeRange(lastIdx, newLast - lastIdx)];
-        }
-        else {
-            // going up
-            NSUInteger firstIdx = [visibleIndexes firstIndex], newFirst = visibleRows * nc;
-            newFirst = firstIdx > newFirst ? firstIdx - newFirst : 0;
-            [additionalIndexes addIndexesInRange:NSMakeRange(newFirst, firstIdx - newFirst)];
-        }
-    }
-    
-    if ([additionalIndexes count] > 0)
-        [iconsToRender addObjectsFromArray:[self iconsAtIndexes:additionalIndexes]];
-    
-    NSUInteger cnt = [iconsToRender count];
-    
-    // if it doesn't need to be rendered, then remove it from this array
-    
-    // call needsRenderForSize: after initial display has taken place, since it may flush the icon's cache
+    // Queuing will call needsRenderForSize: after initial display has taken place, since it may flush the icon's cache
     // this isn't obvious from the method name; it all takes place in a single op to avoid locking twice
     
-    while (cnt--) {
-        if ([[iconsToRender objectAtIndex:cnt] needsRenderForSize:_iconSize] == NO)
-            [iconsToRender removeObjectAtIndex:cnt];
-    }
-    
-    [self _updateThreadQueue:iconsToRender];
-    [iconsToRender release];
+    // enqueue visible icons with high priority
+    [self _updateThreadQueue:[self iconsAtIndexes:visibleIndexes]];
     
     // Call this only for icons that we're not going to display "soon."  The problem with this approach is that if you only have a single icon displayed at a time (say in a master-detail view), FVIcon cache resources will continue to be used up since each one is cached and then never touched again (if it doesn't show up in this loop, that is).  We handle this by using a timer that culls icons which are no longer present in the datasource.  I suppose this is only a symptom of the larger problem of a view maintaining a cache of model objects...but expecting a client to be aware of our caching strategy and icon management is a bit much.  
     
@@ -1147,7 +1116,20 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         // make sure we don't call this on any icons that we just added to the render queue
         NSMutableIndexSet *unusedIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfIcons])];
         [unusedIndexes removeIndexes:visibleIndexes];
-        [unusedIndexes removeIndexes:additionalIndexes];
+        
+        // If scrolling quickly, avoid releasing icons that may become visible
+        CGFloat velocity = [self _scrollVelocity];
+        
+        if (ABS(velocity) > 10.0f && [unusedIndexes count] > 0) {
+            // going down: don't release anything between end of visible range and the last icon
+            // going up: don't release anything between the first icon and the start of visible range
+            if (velocity > 0) { 
+                [unusedIndexes removeIndexesInRange:NSMakeRange([visibleIndexes lastIndex], [self numberOfIcons] - [visibleIndexes lastIndex])];
+            }
+            else {
+                [unusedIndexes removeIndexesInRange:NSMakeRange(0, [visibleIndexes firstIndex])];
+            }
+        }
 
         if ([unusedIndexes count]) {
             [[FVIconQueue sharedQueue] enqueueReleaseResourcesForIcons:[self iconsAtIndexes:unusedIndexes]];
@@ -1188,8 +1170,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     BOOL useSubtitle = [_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)];
     
     // shadow needs to be scaled as the icon scale changes to approximate the IconServices shadow
-    [_shadow setShadowBlurRadius:2.0 * [self iconScale]];
-    [_shadow setShadowOffset:NSMakeSize(0.0, -[self iconScale])];
+    CGFloat shadowBlur = 2.0 * [self iconScale];
+    CGSize shadowOffset = CGSizeMake(0.0, -[self iconScale]);
     
     // iterate each row/column to see if it's in the dirty rect, and evaluate the current cache state
     for (r = rMin; r < rMax; r++) 
@@ -1224,7 +1206,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
                     CGContextSaveGState(cgContext);
                     
                     // draw a shadow behind the image/page
-                    [_shadow set];
+                    CGContextSetShadowWithColor(cgContext, shadowOffset, shadowBlur, _shadowColor);
                     
                     // possibly better performance by caching all bitmaps in a flipped state, but bookkeeping is a pain
                     CGContextTranslateCTM(cgContext, 0, NSMaxY(iconRect));
@@ -1478,7 +1460,10 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex
 {
     NSUInteger r, c;
-
+    
+    // this can happen if we screwed up in managing cursor rects
+    NSParameterAssert(anIndex < [self numberOfIcons]);
+    
     if ([self _getGridRow:&r column:&c ofIndex:anIndex]) {
     
         FVIcon *anIcon = [self _cachedIconForURL:[self iconURLAtIndex:anIndex]];
@@ -1489,7 +1474,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
             
             // determine a min/max size for the arrow buttons
             CGFloat side;
-#if _LP64__
+#if __LP64__
             side = round(NSHeight(iconRect) / 5);
 #else
             side = roundf(NSHeight(iconRect) / 5);
@@ -1551,10 +1536,10 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 {
     NSEnumerator *e = [URLs objectEnumerator];
     NSURL *aURL;
-    while (aURL = [e nextObject]) {
+    while ((aURL = [e nextObject])) {
         if ([aURL isEqual:[FVIcon missingFileURL]] == NO &&
-            [[self delegate] respondsToSelector:@selector(fileView:shouldOpenURL:)] == NO ||
-            [[self delegate] fileView:self shouldOpenURL:aURL] == YES)
+            ([[self delegate] respondsToSelector:@selector(fileView:shouldOpenURL:)] == NO ||
+             [[self delegate] fileView:self shouldOpenURL:aURL] == YES))
             [[NSWorkspace sharedWorkspace] openURL:aURL];
     }
 }
@@ -1607,6 +1592,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)mouseDown:(NSEvent *)event
 {
+    _isMouseDown = YES;
+    
     NSPoint p = [event locationInWindow];
     p = [self convertPoint:p fromView:nil];
     _lastMouseDownLocInView = p;
@@ -1710,11 +1697,11 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     rect.origin.x = MIN(aPoint.x, bPoint.x);
     rect.origin.y = MIN(aPoint.y, bPoint.y);
 #if __LP64__
-    rect.size.width = MAX(3.0, fmax(aPoint.x, bPoint.x) - NSMinX(rect));
-    rect.size.height = MAX(3.0, fmax(aPoint.y, bPoint.y) - NSMinY(rect));
+    rect.size.width = fmax(3.0, fmax(aPoint.x, bPoint.x) - NSMinX(rect));
+    rect.size.height = fmax(3.0, fmax(aPoint.y, bPoint.y) - NSMinY(rect));
 #else
-    rect.size.width = MAX(3.0, fmaxf(aPoint.x, bPoint.x) - NSMinX(rect));
-    rect.size.height = MAX(3.0, fmaxf(aPoint.y, bPoint.y) - NSMinY(rect));
+    rect.size.width = fmaxf(3.0, fmaxf(aPoint.x, bPoint.x) - NSMinX(rect));
+    rect.size.height = fmaxf(3.0, fmaxf(aPoint.y, bPoint.y) - NSMinY(rect));
 #endif
     return rect;
 }
@@ -1765,6 +1752,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (void)mouseUp:(NSEvent *)event
 {
+    _isMouseDown = NO;
     if (NO == NSIsEmptyRect(_rubberBandRect)) {
         [self setNeedsDisplayInRect:_rubberBandRect];
         _rubberBandRect = NSZeroRect;
@@ -1778,7 +1766,9 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
     NSURL *pointURL = [self _URLAtPoint:p];
     
-    if (NSEqualRects(_rubberBandRect, NSZeroRect) && nil != pointURL) {
+    // _isMouseDown tells us if the mouseDown: event originated in this view; if not, just ignore it
+    
+    if (NSEqualRects(_rubberBandRect, NSZeroRect) && nil != pointURL && _isMouseDown) {
         // No previous rubber band selection, so check to see if we're dragging an icon at this point.
         // The condition is also false when we're getting a repeated call to mouseDragged: for rubber band drawing.
         
@@ -1818,10 +1808,10 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         }
         
     }
-    else {   
+    else if (_isMouseDown) {   
         
         // no icons to drag, so we must draw the rubber band rectangle
-        _rubberBandRect = _rectWithCorners(_lastMouseDownLocInView, p);
+        _rubberBandRect = NSIntersectionRect(_rectWithCorners(_lastMouseDownLocInView, p), [self bounds]);
         [self setSelectionIndexes:[self _allIndexesInRubberBandRect]];
         [self setNeedsDisplayInRect:_rubberBandRect];
         [self autoscroll:event];
@@ -2217,38 +2207,66 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     else NSBeep();
 }
 
+#pragma mark Context menu
+
 - (BOOL)validateMenuItem:(NSMenuItem *)anItem
 {
     NSURL *aURL = [[self _selectedURLs] lastObject];  
     SEL action = [anItem action];
+    
+    // generally only check this for actions that are dependent on single selection
+    BOOL isMissing = [aURL isEqual:[FVIcon missingFileURL]];
+    BOOL selectionCount = [_selectedIndexes count];
+    
     if (action == @selector(zoomOut:) || action == @selector(zoomIn:))
         return YES;
     else if (action == @selector(revealInFinder:))
-        return [aURL isFileURL] && [_selectedIndexes count] == 1;
+        return [aURL isFileURL] && [_selectedIndexes count] == 1 && NO == isMissing;
     else if (action == @selector(openSelectedURLs:))
-        return nil != aURL;
+        return selectionCount > 0;
     else if (action == @selector(delete:) || action == @selector(copy:) || action == @selector(cut:))
-        return [self isEditable] && [_selectedIndexes count] > 0;
+        return [self isEditable] && selectionCount > 0;
     else if (action == @selector(selectAll:))
         return ([self numberOfIcons] > 0);
     else if (action == @selector(previewAction:))
-        return (nil != aURL) && [_selectedIndexes count] >= 1;
+        return selectionCount > 0;
     else if (action == @selector(paste:))
         return [self isEditable];
     else if (action == @selector(submenuAction:))
-        return [_selectedIndexes count] > 1 || ([_selectedIndexes count] == 1 && [aURL isFileURL]);
-    else if (action == @selector(changeFinderLabel:)) {
-        NSEnumerator *urlEnum = [[self _selectedURLs] objectEnumerator];
-        NSURL *url;
+        return selectionCount > 1 || ([_selectedIndexes count] == 1 && [aURL isFileURL]);
+    else if (action == @selector(changeFinderLabel:) || [anItem tag] == FVChangeLabelMenuItemTag) {
+
         BOOL enabled = NO;
-        int state = NSOffState;
-        while (url = [urlEnum nextObject]) {
-            if ([url isEqual:[FVIcon missingFileURL]] == NO && [url isFileURL]) {
-                enabled = YES;
-                if ([FVFinderLabel finderLabelForURL:url] == (NSUInteger)[anItem tag])
-                    state = NSOnState;
+        NSInteger state = NSOffState;
+
+        // if multiple selection, enable unless all the selected URLs are missing or non-files
+        if (selectionCount > 1) {
+            NSEnumerator *urlEnum = [[self _selectedURLs] objectEnumerator];
+            NSURL *url;
+            while ((url = [urlEnum nextObject])) {
+                // if we find a single file URL that isn't the missing file URL, enable the menu
+                if ([url isEqual:[FVIcon missingFileURL]] == NO && [url isFileURL])
+                    enabled = YES;
             }
         }
+        else if (selectionCount == 1 && NO == isMissing && [aURL isFileURL]) {
+            
+            NSInteger label = [FVFinderLabel finderLabelForURL:aURL];
+            // 10.4
+            if (label == [anItem tag])
+                state = NSOnState;
+            
+            // 10.5+
+            if ([anItem respondsToSelector:@selector(setView:)])
+                [(FVColorMenuView *)[anItem view] selectLabel:label];
+            
+            enabled = YES;
+        }
+        
+        if ([anItem respondsToSelector:@selector(setView:)])
+            [(FVColorMenuView *)[anItem view] setTarget:self];
+        
+        // no effect on menu items with a custom view
         [anItem setState:state];
         return enabled;
     }
@@ -2305,9 +2323,10 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     return menu;
 }
 
+// sender must respond to -tag, and may respond to -enclosingMenuItem
 - (IBAction)changeFinderLabel:(id)sender;
 {
-    // Sender is an NSMenuItem, and tag corresponds to the Finder label integer
+    // Sender tag corresponds to the Finder label integer
     NSInteger label = [sender tag];
     FVAPIAssert1(label >=0 && label <= 7, @"invalid label %d (must be between 0 and 7)", label);
     
@@ -2317,6 +2336,52 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [FVFinderLabel setFinderLabel:label forURL:[selectedURLs objectAtIndex:i]];
     }
     [self setNeedsDisplay:YES];
+    
+    // we have to close the menu manually; FVColorMenuCell returns its control view's menu item
+    if ([sender respondsToSelector:@selector(enclosingMenuItem)] && [[[sender enclosingMenuItem] menu] respondsToSelector:@selector(cancelTracking)])
+        [[[sender enclosingMenuItem] menu] cancelTracking];
+}
+
+static void addFinderLabelsToSubmenu(NSMenu *submenu)
+{
+    NSInteger i = 0;
+    NSRect iconRect = NSZeroRect;
+    iconRect.size = NSMakeSize(12, 12);
+    NSBezierPath *clipPath = [NSBezierPath fv_bezierPathWithRoundRect:iconRect xRadius:3.0 yRadius:3.0];
+    
+    for (i = 0; i < 8; i++) {
+        NSMenuItem *anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
+        [anItem setTag:i];
+        
+        NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
+        [image lockFocus];
+        
+        // round off the corners of the swatches, but don't draw the full rounded ends
+        [clipPath addClip];
+        [FVFinderLabel drawFinderLabel:i inRect:iconRect roundEnds:NO];
+        
+        // Finder displays an unbordered cross for clearing the label, so we'll do something similar
+        [[NSColor darkGrayColor] setStroke];
+        if (0 == i) {
+            NSBezierPath *p = [NSBezierPath bezierPath];
+            [p moveToPoint:NSMakePoint(3, 3)];
+            [p lineToPoint:NSMakePoint(9, 9)];
+            [p moveToPoint:NSMakePoint(3, 9)];
+            [p lineToPoint:NSMakePoint(9, 3)];
+            [p setLineWidth:2.0];
+            [p setLineCapStyle:NSRoundLineCapStyle];
+            [p stroke];
+            [p setLineWidth:1.0];
+            [p setLineCapStyle:NSButtLineCapStyle];
+        }
+        else {
+            // stroke clip path for a subtle border; stroke is wide enough to display a thin line inside the clip region
+            [clipPath stroke];
+        }
+        [image unlockFocus];
+        [anItem setImage:image];
+        [image release];
+    }
 }
 
 + (NSMenu *)defaultMenu
@@ -2340,50 +2405,23 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Remove", @"FileView", bundle, @"context menu title") action:@selector(delete:) keyEquivalent:@""];
         [anItem setTag:FVRemoveMenuItemTag];
         
-        // Finder label submenu
+        // Finder labels: submenu on 10.4, NSView on 10.5
+        if ([anItem respondsToSelector:@selector(setView:)])
+            [sharedMenu addItem:[NSMenuItem separatorItem]];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Set Finder Label", @"FileView", bundle, @"context menu title") action:NULL keyEquivalent:@""];
-        NSMenu *submenu = [[NSMenu allocWithZone:[sharedMenu zone]] initWithTitle:@""];
-        [anItem setSubmenu:submenu];
         [anItem setTag:FVChangeLabelMenuItemTag];
-        [submenu release];
         
-        NSInteger i = 0;
-        NSRect iconRect = NSZeroRect;
-        iconRect.size = NSMakeSize(12, 12);
-        NSBezierPath *clipPath = [NSBezierPath fv_bezierPathWithRoundRect:iconRect xRadius:3.0 yRadius:3.0];
-        
-        for (i = 0; i < 8; i++) {
-            anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
-            [anItem setTag:i];
-            
-            NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
-            [image lockFocus];
-            
-            // round off the corners of the swatches, but don't draw the full rounded ends
-            [clipPath addClip];
-            [FVFinderLabel drawFinderLabel:i inRect:iconRect roundEnds:NO];
-            
-            // Finder displays an unbordered cross for clearing the label, so we'll do something similar
-            [[NSColor darkGrayColor] setStroke];
-            if (0 == i) {
-                NSBezierPath *p = [NSBezierPath bezierPath];
-                [p moveToPoint:NSMakePoint(3, 3)];
-                [p lineToPoint:NSMakePoint(9, 9)];
-                [p moveToPoint:NSMakePoint(3, 9)];
-                [p lineToPoint:NSMakePoint(9, 3)];
-                [p setLineWidth:2.0];
-                [p setLineCapStyle:NSRoundLineCapStyle];
-                [p stroke];
-                [p setLineWidth:1.0];
-                [p setLineCapStyle:NSButtLineCapStyle];
-            }
-            else {
-                // stroke clip path for a subtle border; stroke is wide enough to display a thin line inside the clip region
-                [clipPath stroke];
-            }
-            [image unlockFocus];
-            [anItem setImage:image];
-            [image release];
+        if ([anItem respondsToSelector:@selector(setView:)]) {
+            FVColorMenuView *view = [FVColorMenuView menuView];
+            [view setTarget:nil];
+            [view setAction:@selector(changeFinderLabel:)];
+            [anItem setView:view];
+        }
+        else {
+            NSMenu *submenu = [[NSMenu allocWithZone:[sharedMenu zone]] initWithTitle:@""];
+            [anItem setSubmenu:submenu];
+            [submenu release];
+            addFinderLabelsToSubmenu(submenu);
         }
         
         [sharedMenu addItem:[NSMenuItem separatorItem]];
