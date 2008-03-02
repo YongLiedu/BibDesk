@@ -1,5 +1,5 @@
 //
-//  FVQLIcon.m
+//  FVQuickLookIcon.m
 //  FileViewTest
 //
 //  Created by Adam Maxwell on 09/16/07.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "FVQLIcon.h"
+#import "FVQuickLookIcon.h"
 #import "FVFinderIcon.h"
 #import <QuickLook/QLThumbnailImage.h>
 
@@ -44,7 +44,7 @@ static const NSUInteger THUMBNAIL_MAX = 128;
 
 // see http://www.cocoabuilder.com/archive/message/cocoa/2005/6/15/138943 for linking; need to use bundle_loader flag to allow the linker to resolve our superclass
 
-@implementation FVQLIcon
+@implementation FVQuickLookIcon
 
 static BOOL FVQLIconDisabled = NO;
 

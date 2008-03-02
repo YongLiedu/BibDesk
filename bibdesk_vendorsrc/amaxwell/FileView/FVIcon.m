@@ -41,7 +41,7 @@
 #import "FVFinderIcon.h"
 #import "FVPDFIcon.h"
 #import "FVTextIcon.h"
-#import "FVQLIcon.h"
+#import "FVQuickLookIcon.h"
 #import "FVWebViewIcon.h"
 #import "FVUtilities.h"
 #import <sys/stat.h>
@@ -52,7 +52,7 @@
 // FVIcon abstract class stuff
 static FVIcon *defaultPlaceholderIcon = nil;
 static Class FVIconClass = Nil;
-static Class FVQLIconClass = Nil;
+static Class FVQuickLookIconClass = Nil;
 static NSURL *missingFileURL = nil;
 
 @implementation FVIcon
@@ -64,7 +64,7 @@ static NSURL *missingFileURL = nil;
         if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
             NSBundle *frameworkBundle = [NSBundle bundleForClass:FVIconClass];
             [[NSBundle bundleWithPath:[frameworkBundle pathForResource:@"FileView-Leopard" ofType:@"bundle"]] load];
-            FVQLIconClass = NSClassFromString(@"FVQLIcon");
+            FVQuickLookIconClass = NSClassFromString(@"FVQuickLookIcon");
         }
         defaultPlaceholderIcon = (FVIcon *)NSAllocateObject(FVIconClass, 0, [self zone]);
         missingFileURL = [[NSURL alloc] initWithScheme:@"x-fileview" host:@"localhost" path:@"/missing"];
@@ -215,13 +215,13 @@ static NSURL *missingFileURL = nil;
     else if ([FVTextIcon canInitWithUTI:(NSString *)theUTI]) {
         anIcon = [[FVTextIcon allocWithZone:[self zone]] initWithTextAtURL:representedURL];
     }
-    else if (Nil != FVQLIconClass) {
-        anIcon = [[FVQLIconClass allocWithZone:[self zone]] initWithURL:representedURL];
+    else if (Nil != FVQuickLookIconClass) {
+        anIcon = [[FVQuickLookIconClass allocWithZone:[self zone]] initWithURL:representedURL];
     }
     
     // In case some subclass returns nil, fall back to Quick Look.  If disabled, it returns nil.
-    if (nil == anIcon && Nil != FVQLIconClass)
-        anIcon = [[FVQLIconClass allocWithZone:[self zone]] initWithURL:representedURL];
+    if (nil == anIcon && Nil != FVQuickLookIconClass)
+        anIcon = [[FVQuickLookIconClass allocWithZone:[self zone]] initWithURL:representedURL];
     
     // In case all subclasses failed, fall back to a Finder icon.
     if (nil == anIcon)

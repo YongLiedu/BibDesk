@@ -1,5 +1,5 @@
 //
-//  FVQLIcon.h
+//  FVQuickLookIcon.h
 //  FileView
 //
 //  Created by Adam Maxwell on 10/21/07.
@@ -40,7 +40,7 @@
 #import "FVIcon.h"
 #import "FVIcon_Private.h"
 
-@interface FVQLIcon : FVIcon
+@interface FVQuickLookIcon : FVIcon
 {
 @private
     NSURL          *_fileURL;
