@@ -64,17 +64,12 @@ static const NSUInteger RELEASE_CACHE_THRESHOLD = 25;
 static const CFTimeInterval ZOMBIE_TIMER_INTERVAL = 300.0;
 static void zombieTimerFired(CFRunLoopTimerRef timer, void *context);
 
-static NSDictionary *__titleAttributes = nil;
-static NSDictionary *__labeledAttributes = nil;
-static NSDictionary *__subtitleAttributes = nil;
-static NSShadow *__shadow = nil;
-static CGFloat __titleHeight = 0.0;
-static CGFloat __subtitleHeight = 0.0;
-
-#define LEFT_MARGIN     _padding.width / 2 + 4.0
-#define RIGHT_MARGIN    _padding.width / 2 + 4.0
-#define TOP_MARGIN      __titleHeight
-#define BOTTOM_MARGIN   0.0
+static NSDictionary *_titleAttributes = nil;
+static NSDictionary *_labeledAttributes = nil;
+static NSDictionary *_subtitleAttributes = nil;
+static NSShadow *_shadow = nil;
+static CGFloat _titleHeight = 0.0;
+static CGFloat _subtitleHeight = 0.0;
 
 #pragma mark -
 
@@ -135,26 +130,26 @@ static CGFloat __subtitleHeight = 0.0;
     [ps setAlignment:NSCenterTextAlignment];
     [ta setObject:ps forKey:NSParagraphStyleAttributeName];
     [ps release];
-    __titleAttributes = [ta copy];
+    _titleAttributes = [ta copy];
     
     [ta setObject:[NSColor blackColor] forKey:NSForegroundColorAttributeName];
-    __labeledAttributes = [ta copy];
+    _labeledAttributes = [ta copy];
     
     [ta setObject:[NSFont systemFontOfSize:10.0] forKey:NSFontAttributeName];
     [ta setObject:[NSColor grayColor] forKey:NSForegroundColorAttributeName];
-    __subtitleAttributes = [ta copy];
+    _subtitleAttributes = [ta copy];
     
     NSLayoutManager *lm = [[NSLayoutManager alloc] init];
-    __titleHeight = [lm defaultLineHeightForFont:[__titleAttributes objectForKey:NSFontAttributeName]];
-    __subtitleHeight = [lm defaultLineHeightForFont:[__subtitleAttributes objectForKey:NSFontAttributeName]];
+    _titleHeight = [lm defaultLineHeightForFont:[_titleAttributes objectForKey:NSFontAttributeName]];
+    _subtitleHeight = [lm defaultLineHeightForFont:[_subtitleAttributes objectForKey:NSFontAttributeName]];
     [lm release];
     
-    __shadow = [[NSShadow alloc] init];
+    _shadow = [[NSShadow alloc] init];
     // IconServices shadows look darker than the normal NSShadow (especially Leopard folder shadows) so try to match
-    [__shadow setShadowColor:[NSColor colorWithCalibratedWhite:0 alpha:0.4]];
-    [__shadow setShadowOffset:NSMakeSize(0.0, -2.0)];
+    [_shadow setShadowColor:[NSColor colorWithCalibratedWhite:0 alpha:0.4]];
+    [_shadow setShadowOffset:NSMakeSize(0.0, -2.0)];
     // this will have to be scaled when drawing, since it's in a global coordinate space
-    [__shadow setShadowBlurRadius:5.0];
+    [_shadow setShadowBlurRadius:5.0];
     
     // QTMovie raises if +initialize isn't sent on the AppKit thread
     [QTMovie class];
@@ -214,6 +209,8 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     const CFDictionaryValueCallBacks integerValueCallBacks = { 0, NULL, NULL, intDesc, intEqual };
     _trackingRectMap = CFDictionaryCreateMutable(alloc, 0, &integerKeyCallBacks, &integerValueCallBacks);
     
+    _iconIndexMap = CFDictionaryCreateMutable(alloc, 0, &integerKeyCallBacks, NULL);
+    
     _leftArrow = [[FVArrowButtonCell alloc] initWithArrowDirection:FVArrowLeft];
     [_leftArrow setTarget:self];
     [_leftArrow setAction:@selector(leftArrowAction:)];
@@ -257,6 +254,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     [_leftArrow release];
     [_rightArrow release];
     [_iconURLs release];
+    CFRelease(_iconIndexMap);
     CFRunLoopTimerInvalidate(_zombieTimer);
     CFRelease(_zombieTimer);
     [_iconCache release];
@@ -350,6 +348,7 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     _dataSource = obj;
     // convenient time to do this, although the timer would also handle it
     [_iconCache removeAllObjects];
+    CFDictionaryRemoveAllValues(_iconIndexMap);
     
     _padding = [self _paddingForScale:[self iconScale]];
     
@@ -379,6 +378,12 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 
 - (id)delegate { return _delegate; }
 
+// overall borders around the view
+- (CGFloat)_leftMargin { return _padding.width / 2 + 10.0; }
+- (CGFloat)_rightMargin { return _padding.width / 2 + 10.0; }
+- (CGFloat)_topMargin { return _titleHeight; }
+- (CGFloat)_bottomMargin { return 0.0; }
+
 - (NSUInteger)numberOfRows;
 {
     NSUInteger nc = [self numberOfColumns];
@@ -393,18 +398,22 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     NSView *view = [self enclosingScrollView];
     if (nil == view)
         view = self;
-    return MAX(1, trunc((NSWidth([view frame]) - 2.0 - LEFT_MARGIN - RIGHT_MARGIN + _padding.width) / [self _columnWidth]));
+    return MAX(1, trunc((NSWidth([view frame]) - 2.0 - [self _leftMargin] - [self _rightMargin] + _padding.width) / [self _columnWidth]));
 }
 
 - (NSSize)_paddingForScale:(CGFloat)scale;
 {
     // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
     NSSize size = NSZeroSize;
+#if __LP64__
     CGFloat extraMargin = round(4.0 * scale);
+#else
+    CGFloat extraMargin = roundf(4.0 * scale);
+#endif
     size.width = 10.0 + extraMargin;
-    size.height = __titleHeight + 4.0 + extraMargin;
+    size.height = _titleHeight + 4.0 + extraMargin;
     if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
-        size.height += __subtitleHeight;
+        size.height += _subtitleHeight;
     return size;
 }
 
@@ -413,8 +422,8 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
 - (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
 {
     NSPoint origin = [self bounds].origin;
-    CGFloat leftEdge = origin.x + LEFT_MARGIN + [self _columnWidth] * column;
-    CGFloat topEdge = origin.y + TOP_MARGIN + [self _rowHeight] * row;
+    CGFloat leftEdge = origin.x + [self _leftMargin] + [self _columnWidth] * column;
+    CGFloat topEdge = origin.y + [self _topMargin] + [self _rowHeight] * row;
     return NSMakeRect(leftEdge, topEdge, _iconSize.width, _iconSize.height);
 }
 
@@ -514,6 +523,28 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     [super resetCursorRects];
     [self _discardTrackingRectsAndToolTips];
     [self _resetTrackingRectsAndToolTips];
+}
+
+- (void)_rebuildIconIndexMap
+{
+    CFDictionaryRemoveAllValues(_iconIndexMap);
+    
+    // -[FileView _cachedIconForURL:]
+    id (*cachedIcon)(id, SEL, id);
+    cachedIcon = (id (*)(id, SEL, id))[self methodForSelector:@selector(_cachedIconForURL:)];
+    
+    // -[FileView iconURLAtIndex:]
+    id (*iconURLAtIndex)(id, SEL, NSUInteger);
+    iconURLAtIndex = (id (*)(id, SEL, NSUInteger))[self methodForSelector:@selector(iconURLAtIndex:)];
+    
+    NSUInteger i, iMax = [self numberOfIcons];
+    
+    for (i = 0; i < iMax; i++) {
+        NSURL *aURL = iconURLAtIndex(self, @selector(iconURLAtIndex:), i);
+        FVIcon *icon = cachedIcon(self, @selector(_cachedIconForURL:), aURL);
+        NSParameterAssert(nil != icon);
+        CFDictionarySetValue(_iconIndexMap, (const void *)i, (const void *)icon);
+    }    
 }
 
 - (void)reloadIcons;
@@ -629,18 +660,33 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 // use this instead of iterating _cachedIconForURL: when you want more than a few icons, since it may fetch in bulk
 - (NSArray *)iconsAtIndexes:(NSIndexSet *)indexes
 {
+    // I was using [_iconCache objectsForKeys:notFoundMarker], but that assumed that _iconCache was fully populated (and it's filled lazily).  Likewise, using -iconURLs directly causes problems since it may contain NSNull, so there's really no way to get icons in bulk here.
     NSMutableArray *icons = [NSMutableArray arrayWithCapacity:[indexes count]];
-    if ([self iconURLs] != nil) {
-        icons = (id)[_iconCache objectsForKeys:[[self iconURLs] objectsAtIndexes:indexes] 
-                                notFoundMarker:[[FVIcon new] autorelease]];
-    }
-    else {
-        NSUInteger anIndex = [indexes firstIndex];
-        while (NSNotFound != anIndex) {
-            [icons addObject:[self _cachedIconForURL:[self iconURLAtIndex:anIndex]]];
-            anIndex = [indexes indexGreaterThanIndex:anIndex];
+        
+    // -[NSMutableArray addObject:]
+    void (*addObject)(id, SEL, id);
+    addObject = (void (*)(id, SEL, id))[icons methodForSelector:@selector(addObject:)];
+    
+    NSUInteger buffer[512];
+    NSRange range = NSMakeRange([indexes firstIndex], [indexes lastIndex] - [indexes firstIndex] + 1);
+    NSUInteger i, iMax;
+    
+    // ??? why isn't this created initially when bindings are used?
+    if (0 == CFDictionaryGetCount(_iconIndexMap))
+        [self _rebuildIconIndexMap];
+    
+    NSParameterAssert(CFDictionaryGetCount(_iconIndexMap) == (CFIndex)[self numberOfIcons]);
+    
+    while ((iMax = [indexes getIndexes:buffer maxCount:sizeof(buffer)/sizeof(NSUInteger) inIndexRange:&range]) > 0) {
+
+        for (i = 0; i < iMax; i++) {
+            NSUInteger indexInView = buffer[i];
+            FVIcon *icon = (id)CFDictionaryGetValue(_iconIndexMap, (const void *)indexInView);
+            NSParameterAssert(nil != icon);
+            addObject(icons, @selector(addObject:), icon);
         }
     }
+    
     return icons;
 }
 
@@ -663,8 +709,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     NSClipView *cv = [[self enclosingScrollView] contentView];
     NSRect minFrame = cv ? [cv frame] : NSZeroRect;
     NSRect frame = NSZeroRect;
-    frame.size.width = MAX([self _columnWidth] * [self numberOfColumns] - _padding.width + LEFT_MARGIN + RIGHT_MARGIN, NSWidth(minFrame));
-    frame.size.height = MAX([self _rowHeight] * [self numberOfRows] + TOP_MARGIN + BOTTOM_MARGIN, NSHeight(minFrame));
+    frame.size.width = MAX([self _columnWidth] * [self numberOfColumns] - _padding.width + [self _leftMargin] + [self _rightMargin], NSWidth(minFrame));
+    frame.size.height = MAX([self _rowHeight] * [self numberOfRows] + [self _topMargin] + [self _bottomMargin], NSHeight(minFrame));
     
     if (NSEqualRects(frame, [self frame]) == NO)
         [self setFrame:frame];
@@ -723,7 +769,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (BOOL)_getGridRow:(NSUInteger *)rowIndex column:(NSUInteger *)colIndex atPoint:(NSPoint)point;
 {
     // check for this immediately
-    if (point.x <= LEFT_MARGIN || point.y <= TOP_MARGIN)
+    if (point.x <= [self _leftMargin] || point.y <= [self _topMargin])
         return NO;
     
     // column width is padding + icon width
@@ -735,7 +781,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     while (idx < nc) {
         
-        start = LEFT_MARGIN + (_iconSize.width + _padding.width) * idx;
+        start = [self _leftMargin] + (_iconSize.width + _padding.width) * idx;
         if (start < point.x && point.x < (start + _iconSize.width))
             break;
         idx++;
@@ -751,7 +797,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     while (idx < nr) {
         
-        start = TOP_MARGIN + (_iconSize.height + _padding.height) * idx;
+        start = [self _topMargin] + (_iconSize.height + _padding.height) * idx;
         if (start < point.y && point.y < (start + _iconSize.height))
             break;
         idx++;
@@ -807,14 +853,14 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     else
         iMax = MIN([self numberOfIcons], iMin + rowRange.length * [self numberOfColumns]);
     
-    NSArray *visibleIcons = [self iconsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(iMin, iMax - iMin)]];
     NSUInteger i;
     NSSet *updatedIconSet = [[NSSet alloc] initWithArray:updatedIcons];
     
     // If an icon isn't visible, there's no need to redisplay anything.  Similarly, if 20 icons are displayed and only 5 updated, there's no need to redraw all 20.  Geometry calculations are much faster than redrawing, in general.
     for (i = iMin; i < iMax; i++) {
         
-        if ([updatedIconSet containsObject:[visibleIcons objectAtIndex:(i - iMin)]]) {
+        FVIcon *anIcon = (id)CFDictionaryGetValue(_iconIndexMap, (const void *)i);
+        if ([updatedIconSet containsObject:anIcon]) {
             NSUInteger r, c;
             if ([self _getGridRow:&r column:&c ofIndex:i])
                 [self _setNeedsDisplayForIconInRow:r column:c];
@@ -1032,8 +1078,8 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     NSRect bounds = [self bounds];
     
     // account for padding around edges of the view
-    bounds.origin.x += LEFT_MARGIN;
-    bounds.origin.y += TOP_MARGIN;
+    bounds.origin.x += [self _leftMargin];
+    bounds.origin.y += [self _topMargin];
     
     rmin = (NSMinY(aRect) - NSMinY(bounds)) / [self _rowHeight];
     rmax = (NSMinY(aRect) - NSMinY(bounds)) / [self _rowHeight] + NSHeight(aRect) / [self _rowHeight];
@@ -1166,8 +1212,8 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     BOOL useSubtitle = [_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)];
     
     // shadow needs to be scaled as the icon scale changes to approximate the IconServices shadow
-    [__shadow setShadowBlurRadius:2.0 * [self iconScale]];
-    [__shadow setShadowOffset:NSMakeSize(0.0, -[self iconScale])];
+    [_shadow setShadowBlurRadius:2.0 * [self iconScale]];
+    [_shadow setShadowOffset:NSMakeSize(0.0, -[self iconScale])];
     
     // iterate each row/column to see if it's in the dirty rect, and evaluate the current cache state
     for (r = rMin; r < rMax; r++) 
@@ -1202,7 +1248,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                     CGContextSaveGState(cgContext);
                     
                     // draw a shadow behind the image/page
-                    [__shadow set];
+                    [_shadow set];
                     
                     // possibly better performance by caching all bitmaps in a flipped state, but bookkeeping is a pain
                     CGContextTranslateCTM(cgContext, 0, NSMaxY(iconRect));
@@ -1247,23 +1293,23 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
                         
                         // for drag image context
                         if (NO == isFlippedContext)
-                            labelRect.origin.y += __titleHeight;
-                        labelRect.size.height = __titleHeight;                        
+                            labelRect.origin.y += _titleHeight;
+                        labelRect.size.height = _titleHeight;                        
                         [FVFinderLabel drawFinderLabel:label inRect:labelRect ofContext:cgContext flipped:isFlippedContext roundEnds:YES];
                         
                         // labeled title uses black text for greater contrast; inset horizontally because of the rounded end caps
-                        NSRect titleRect = NSInsetRect(textRect, __titleHeight / 2.0, 0);
-                        [name drawWithRect:titleRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:__labeledAttributes];
+                        NSRect titleRect = NSInsetRect(textRect, _titleHeight / 2.0, 0);
+                        [name drawWithRect:titleRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:_labeledAttributes];
                     }
                     else {
-                        [name drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:__titleAttributes];
+                        [name drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:_titleAttributes];
                     }
                     
                     if (useSubtitle) {
                         if (isFlippedContext)
-                            textRect.origin.y += __titleHeight;
-                        textRect.size.height -= __titleHeight;
-                        [[_dataSource fileView:self subtitleAtIndex:i] drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:__subtitleAttributes];
+                            textRect.origin.y += _titleHeight;
+                        textRect.size.height -= _titleHeight;
+                        [[_dataSource fileView:self subtitleAtIndex:i] drawWithRect:textRect options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingOneShot attributes:_subtitleAttributes];
                     }
                     CGContextRestoreGState(cgContext);
                 } 
@@ -1467,7 +1513,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
             
             // determine a min/max size for the arrow buttons
             CGFloat side;
-#if __LP64__
+#if _LP64__
             side = round(NSHeight(iconRect) / 5);
 #else
             side = roundf(NSHeight(iconRect) / 5);
@@ -1687,8 +1733,13 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSRect rect;
     rect.origin.x = MIN(aPoint.x, bPoint.x);
     rect.origin.y = MIN(aPoint.y, bPoint.y);
+#if __LP64__
+    rect.size.width = MAX(3.0, fmax(aPoint.x, bPoint.x) - NSMinX(rect));
+    rect.size.height = MAX(3.0, fmax(aPoint.y, bPoint.y) - NSMinY(rect));
+#else
     rect.size.width = MAX(3.0, fmaxf(aPoint.x, bPoint.x) - NSMinX(rect));
     rect.size.height = MAX(3.0, fmaxf(aPoint.y, bPoint.y) - NSMinY(rect));
+#endif
     return rect;
 }
 
