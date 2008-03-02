@@ -206,7 +206,7 @@ static NSDictionary *__textAttributes = nil;
         CGContextSetShouldAntialias(ctxt, true);
         CGContextSetInterpolationQuality(ctxt, kCGInterpolationHigh);
     }     
-    [_icon drawInRect:NSInsetRect(iconRect, 5.0f, 5.0f) inCGContext:ctxt];
+    [_icon drawInRect:NSInsetRect(iconRect, 5.0f, 5.0f) ofContext:ctxt];
     
 }
 

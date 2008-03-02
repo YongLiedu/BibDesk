@@ -37,56 +37,82 @@
  */
 
 #import "FVTextIcon.h"
+#import "FVIcon_Private.h"
 
 @implementation FVTextIcon
 
 // cache these so we avoid hitting NSPrintInfo; we only care to have something that approximates a page size, anyway
-static NSSize __paperSize;
-static NSSize __containerSize;
-static CGAffineTransform __paperTransform;
+static NSSize _paperSize;
+static NSSize _containerSize;
+static CGAffineTransform _paperTransform;
+static NSMutableSet *_cachedTextSystems = nil;
+static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
+
+#define MAX_CACHED_TEXT_SYSTEMS 10
 
 + (void)initialize
 {
-    static BOOL didInit = NO;
-    if (NO == didInit) {
-        NSPrintInfo *pInfo = [NSPrintInfo sharedPrintInfo];
-        __paperSize = [pInfo paperSize];
-        CGAffineTransform t1 = CGAffineTransformMakeTranslation([pInfo leftMargin], __paperSize.height - [pInfo topMargin]);
-        CGAffineTransform t2 = CGAffineTransformMakeScale(1, -1);
-        __paperTransform = CGAffineTransformConcat(t2, t1);
-        // could add in NSTextContainer's default lineFragmentPadding
-        __containerSize = __paperSize;
-        __containerSize.width -= 2 * [pInfo leftMargin];
-        __containerSize.height -= 2* [pInfo topMargin];
-        didInit = YES;
-    }
+    FVINITIALIZE(FVTextIcon);
+
+    NSPrintInfo *pInfo = [NSPrintInfo sharedPrintInfo];
+    _paperSize = [pInfo paperSize];
+    CGAffineTransform t1 = CGAffineTransformMakeTranslation([pInfo leftMargin], _paperSize.height - [pInfo topMargin]);
+    CGAffineTransform t2 = CGAffineTransformMakeScale(1, -1);
+    _paperTransform = CGAffineTransformConcat(t2, t1);
+    // could add in NSTextContainer's default lineFragmentPadding
+    _containerSize = _paperSize;
+    _containerSize.width -= 2 * [pInfo leftMargin];
+    _containerSize.height -= 2* [pInfo topMargin];
+    
+    // make sure we compare with pointer equality; all I really want is a bag
+    _cachedTextSystems = (NSMutableSet *)CFSetCreateMutable(NULL, MAX_CACHED_TEXT_SYSTEMS, &FVNSObjectPointerSetCallBacks);
 }
 
 // A particular layout manager/text storage combination is not thread safe, so the AppKit string drawing routines must only be used from the main thread.  We're using the thread dictionary to cache our string drawing machinery on a per-thread basis.  Update:  for the record, Aki Inoue says that NSStringDrawing is supposed to be thread safe, so the crash I experienced may be something else.
-+ (NSTextStorage *)textStorageForCurrentThread;
++ (NSTextStorage *)_newTextStorage;
 {
-    NSMutableDictionary *threadDictionary = [[NSThread currentThread] threadDictionary];
-    NSString *key = @"FVTextIconTextStorage";
-    NSTextStorage *textStorage = [threadDictionary objectForKey:key];
-    if (nil == textStorage) {
-        textStorage = [[NSTextStorage alloc] init];
-        NSLayoutManager *lm = [[NSLayoutManager alloc] init];
-        NSTextContainer *tc = [[NSTextContainer alloc] init];
-        [tc setContainerSize:__containerSize];
-        [lm addTextContainer:tc];
-        // don't let the layout manager use its threaded layout (see header)
-        [lm setBackgroundLayoutEnabled:NO];
-        [textStorage addLayoutManager:lm];
-        // retained by layout manager
-        [tc release];
-        // retained by text storage
-        [lm release];
-        // see header; the CircleView example sets it to NO
-        [lm setUsesScreenFonts:YES];
-        [threadDictionary setObject:textStorage forKey:key];
-        [textStorage release];
-    }
+    NSTextStorage *textStorage = [[NSTextStorage alloc] init];
+    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
+    NSTextContainer *tc = [[NSTextContainer alloc] init];
+    [tc setContainerSize:_containerSize];
+    [lm addTextContainer:tc];
+    // don't let the layout manager use its threaded layout (see header)
+    [lm setBackgroundLayoutEnabled:NO];
+    [textStorage addLayoutManager:lm];
+    // retained by layout manager
+    [tc release];
+    // retained by text storage
+    [lm release];
+    // see header; the CircleView example sets it to NO
+    [lm setUsesScreenFonts:YES];
     return textStorage;
+}
+
+// caller will own the returned object
++ (NSTextStorage *)popTextStorage
+{
+    OSSpinLockLock(&_cacheLock);
+    NSTextStorage *textStorage = [_cachedTextSystems anyObject];
+    if (textStorage) {
+        [textStorage retain];
+        [_cachedTextSystems removeObject:textStorage];
+    }
+    OSSpinLockUnlock(&_cacheLock);
+    if (nil == textStorage)
+        textStorage = [self _newTextStorage];
+    return textStorage;
+}
+
+// assumes the object was retrieved from +popTextStorage and /not/ (auto)released
++ (void)pushTextStorage:(NSTextStorage *)textStorage
+{
+    OSSpinLockLock(&_cacheLock);
+    if ([_cachedTextSystems count] < MAX_CACHED_TEXT_SYSTEMS)
+        [_cachedTextSystems addObject:textStorage];
+    OSSpinLockUnlock(&_cacheLock);
+    
+    // either retained by the set, or we'll just let it go away
+    [textStorage release];
 }
 
 // allows a crude sniffing, so initWithTextAtURL: doesn't have to immediately instantiate an attributed string ivar and return nil if that fails
@@ -103,7 +129,7 @@ static CGAffineTransform __paperTransform;
     CFStringRef aUTI;
     
     // checking OSType and extension gives lots of duplicates, but the set filters them out
-    while (aType = [typeEnum nextObject]) {
+    while ((aType = [typeEnum nextObject])) {
         OSType osType = NSHFSTypeCodeFromFileType(aType);
         if (0 != osType) {
             aUTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassOSType, (CFStringRef)aType, NULL);
@@ -123,8 +149,13 @@ static CGAffineTransform __paperTransform;
 + (BOOL)canInitWithUTI:(NSString *)aUTI
 {
     static NSArray *types = nil;
-    if (nil == types)
-        types = [[self _supportedUTIs] copyWithZone:[self zone]];
+    if (nil == types) {
+        NSMutableArray *a = [NSMutableArray arrayWithArray:[self _supportedUTIs]];
+        // avoid threading issues on 10.4; this class should never be asked to render HTML anyway, since that's now handled by FVWebViewIcon
+        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+            [a removeObject:(id)kUTTypeHTML];
+        types = [a copyWithZone:[self zone]];
+    }
 
     NSUInteger cnt = [types count];
     while (cnt--)
@@ -147,15 +178,15 @@ static CGAffineTransform __paperTransform;
     self = [super init];
     if (self) {
         
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&aURL];
-        
-        _fileURL = [aURL copy];
-        _fullSize = __paperSize;
-        _thumbnailSize = NSMakeSize(_fullSize.width / 2, _fullSize.height / 2);
-        _fullImageRef = NULL;
-        _thumbnailRef = NULL;
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL copyTargetURL:&_fileURL];                
+        _fullSize = _paperSize;
+        _thumbnailSize = _paperSize;
+        // first approximation
+        FVIconLimitThumbnailSize(&_thumbnailSize);
+        _desiredSize = NSZeroSize;
+        _fullImage = NULL;
+        _thumbnail = NULL;
         _diskCacheName = [FVIconCache createDiskCacheNameWithURL:_fileURL];
-        _iconType = FVTextType;
         
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
@@ -164,172 +195,152 @@ static CGAffineTransform __paperTransform;
     return self;
 }
 
-// return the same thing as text; just a container for the URL, until actually asked to render the text file
-- (id)initWithHTMLAtURL:(NSURL *)aURL;
-{
-    if (self = [self initWithTextAtURL:aURL]) {
-        _iconType = FVHTMLType;
-    }
-    return self;
-}
-
 - (void)dealloc
 {
     pthread_mutex_destroy(&_mutex);
     [_fileURL release];
-    CGImageRelease(_fullImageRef);
-    CGImageRelease(_thumbnailRef);
+    CGImageRelease(_fullImage);
+    CGImageRelease(_thumbnail);
     free(_diskCacheName);
     [super dealloc];
 }
+
+- (BOOL)tryLock { return pthread_mutex_trylock(&_mutex) == 0; }
+- (void)lock { pthread_mutex_lock(&_mutex); }
+- (void)unlock { pthread_mutex_unlock(&_mutex); }
 
 - (NSSize)size { return _fullSize; }
 
 - (BOOL)needsRenderForSize:(NSSize)size { 
     BOOL needsRender = NO;
     // if we can't lock we're already rendering, which will give us both icons (so no render required)
-    if (pthread_mutex_trylock(&_mutex) == 0) {
-        if (size.height < _thumbnailSize.height * 1.2)
-            needsRender = (NULL == _thumbnailRef);
-        else 
-            needsRender = (NULL == _fullImageRef);
-        pthread_mutex_unlock(&_mutex);
+    if ([self tryLock]) {
+        _desiredSize = size;
+        if (FVShouldDrawFullImageWithThumbnailSize(size, _thumbnailSize))
+            needsRender = (NULL == _fullImage);
+        else
+            needsRender = (NULL == _thumbnail);
+        [self unlock];
     }
     return needsRender;
 }
 
-// It turns out to be fairly important to draw small text icons if possible, since the bitmaps have a pretty huge memory footprint (if we draw _fullImageRef all the time, dragging in the view is unbearably slow if there are more than a couple of text icons).
-- (void)fastDrawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
+// It turns out to be fairly important to draw small text icons if possible, since the bitmaps have a pretty huge memory footprint (if we draw _fullImage all the time, dragging in the view is unbearably slow if there are more than a couple of text icons).  Using trylock for drawing to avoid stalling the main thread while rendering; there are some degenerate cases where rendering is really slow (e.g. a huge ASCII grid file).
+- (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {
-    pthread_mutex_lock(&_mutex);
-    if (_thumbnailRef) {
-        CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnailRef);
-        pthread_mutex_unlock(&_mutex);
+    // draw thumbnail if present, regardless of the size requested
+    if (NO == [self tryLock]) {
+        // no lock, so just draw the blank page and bail out
+        [self _drawPlaceholderInRect:dstRect ofContext:context];
+    }
+    else if (NULL == _thumbnail) {
+        [self unlock];
+        [self _drawPlaceholderInRect:dstRect ofContext:context];
+    }
+    else if (_thumbnail) {
+        CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnail);
+        [self unlock];
         if (_drawsLinkBadge)
-            [self _drawBadgeInContext:context forIconInRect:dstRect];
+            [self _badgeIconInRect:dstRect ofContext:context];
     }
     else {
-        pthread_mutex_unlock(&_mutex);
-        [self drawInRect:dstRect inCGContext:context];
+        [self unlock];
+        // let drawInRect: handle the rect conversion
+        [self drawInRect:dstRect ofContext:context];
     }
 }
 
-- (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
+- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {
-    pthread_mutex_lock(&_mutex);
-    CGRect drawRect = [self _drawingRectWithRect:dstRect];
-    CGImageRef toDraw = _thumbnailRef;
-    if (drawRect.size.height > _thumbnailSize.height * 1.2)
-        toDraw = _fullImageRef;
-    
-    // draw the image if it's been created, or just draw a dummy icon
-    if (toDraw) {
-        CGContextDrawImage(context, drawRect, toDraw);
-        pthread_mutex_unlock(&_mutex);
-        if (_drawsLinkBadge)
-            [self _drawBadgeInContext:context forIconInRect:dstRect];
+    if (NO == [self tryLock]) {
+        [self _drawPlaceholderInRect:dstRect ofContext:context];
     }
     else {
-        pthread_mutex_unlock(&_mutex);
-        [self _drawPlaceholderInRect:dstRect inCGContext:context];
+        CGRect drawRect = [self _drawingRectWithRect:dstRect];
+        CGImageRef toDraw = _thumbnail;
+        
+        if (FVShouldDrawFullImageWithThumbnailSize(dstRect.size, _thumbnailSize))
+            toDraw = _fullImage;
+        
+        // draw the image if it's been created, or just draw a dummy icon
+        if (toDraw) {
+            CGContextDrawImage(context, drawRect, toDraw);
+            [self unlock];
+            if (_drawsLinkBadge)
+                [self _badgeIconInRect:dstRect ofContext:context];
+        }
+        else {
+            [self unlock];
+            [self _drawPlaceholderInRect:dstRect ofContext:context];
+        }
     }
+}
+
+- (BOOL)canReleaseResources;
+{
+    return (NULL != _fullImage || NULL != _thumbnail);
 }
 
 - (void)releaseResources
 {
-    pthread_mutex_lock(&_mutex);
-    CGImageRelease(_fullImageRef);
-    _fullImageRef = NULL;
-    pthread_mutex_unlock(&_mutex);
-}
-
-// used to constrain thumbnail size for huge pages
-static inline void limitSize(NSSize *size)
-{
-    while (MIN(size->width, size->height) > 200) {
-        size->width *= 0.9;
-        size->height *= 0.9;
-    }
-}
-
-- (void)_createThumbnailFromFullImage
-{
-    NSParameterAssert(NULL == _thumbnailRef);
-    CGContextRef ctxt = [FVBitmapContextCache newBitmapContextOfWidth:_thumbnailSize.width height:_thumbnailSize.height];
-    CGContextSaveGState(ctxt);
-    
-    // take a small hit here for good interpolation so we can draw smaller icons at larger sizes
-    CGContextSetInterpolationQuality(ctxt, kCGInterpolationHigh);
-    CGRect imageRect = CGRectZero;
-    imageRect.size = *(CGSize *)&_thumbnailSize;
-    
-    if (_fullImageRef) {
-        CGContextDrawImage(ctxt, imageRect, _fullImageRef);
-        _thumbnailRef = CGBitmapContextCreateImage(ctxt);
-    }
-    
-    CGContextRestoreGState(ctxt);
-    [FVBitmapContextCache disposeOfBitmapContext:ctxt];
-}
-
-- (void)_loadHTML:(NSMutableDictionary *)HTMLDict {
-    NSDictionary *documentAttributes = nil;
-    NSAttributedString *attrString = [[NSAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
-    if (attrString)
-        [HTMLDict setObject:attrString forKey:@"attributedString"];
-    if (documentAttributes)
-        [HTMLDict setObject:documentAttributes forKey:@"documentAttributes"];
-    [attrString release];
+    [self lock];
+    CGImageRelease(_fullImage);
+    _fullImage = NULL;
+    CGImageRelease(_thumbnail);
+    _thumbnail = NULL;
+    [self unlock];
 }
 
 - (void)renderOffscreen
 {
     // hold the lock to let needsRenderForSize: know that this icon doesn't need rendering
-    pthread_mutex_lock(&_mutex);
+    [self lock];
     
     // !!! two early returns here after a cache check
 
-    if (NULL != _fullImageRef) {
-        // note that _fullImageRef may be non-NULL if we were added to the FVIconQueue multiple times before renderOffscreen was called
-        pthread_mutex_unlock(&_mutex);
+    if (NULL != _fullImage) {
+        // note that _fullImage may be non-NULL if we were added to the FVOperationQueue multiple times before renderOffscreen was called
+        [self unlock];
         return;
     } 
-    else if ((_fullImageRef = [FVIconCache newImageNamed:_diskCacheName]) != NULL) {
+    else {
         
-        // in case this was cached by another instance
-        if (NULL == _thumbnailRef)
-            [self _createThumbnailFromFullImage];
-        pthread_mutex_unlock(&_mutex);
-        return;
+        if (NULL == _thumbnail) {
+            _thumbnail = [FVIconCache newThumbnailNamed:_diskCacheName];
+            _thumbnailSize = FVCGImageSize(_thumbnail);
+        }
+        
+        if (_thumbnail && FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize)) {
+            _fullImage = [FVIconCache newImageNamed:_diskCacheName];
+            if (NULL != _fullImage) {
+                [self unlock];
+                return;
+            }
+        }
+        
+        if (NULL != _thumbnail) {
+            [self unlock];
+            return;
+        }
     }
 
-    NSParameterAssert(NULL == _fullImageRef);
-    NSParameterAssert(NULL == _thumbnailRef);
+    NSParameterAssert(NULL == _fullImage);
+    NSParameterAssert(NULL == _thumbnail);
     
     // definitely use the context cache for this, since these bitmaps are pretty huge
-    CGContextRef ctxt = [FVBitmapContextCache newBitmapContextOfWidth:__paperSize.width height:__paperSize.height];
+    CGContextRef ctxt = [FVBitmapContextCache newBitmapContextOfWidth:_paperSize.width height:_paperSize.height];
     
-    NSTextStorage *textStorage = [FVTextIcon textStorageForCurrentThread];
+    NSTextStorage *textStorage = [FVTextIcon popTextStorage];
     
     // originally kept the attributed string as an ivar, but it's not worth it in most cases
     
     // no need to lock for -fileURL since it's invariant
     NSDictionary *documentAttributes = nil;
-    NSMutableAttributedString *attrString = nil;
+    NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
     
-    // NSAttributedString uses WebKit for HTML, and is not thread safe on Tiger
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && _iconType == FVHTMLType) {
-        NSMutableDictionary *HTMLDict = [NSMutableDictionary dictionary];
-        [self performSelectorOnMainThread:@selector(_loadHTML:) withObject:HTMLDict waitUntilDone:YES];
-        attrString = [[HTMLDict objectForKey:@"attributedString"] mutableCopy];
-        documentAttributes = [HTMLDict objectForKey:@"documentAttributes"];
-    } else {
-        attrString = [[NSMutableAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
-    }
-    
-    CGAffineTransform pageTransform = __paperTransform;
-    NSSize containerSize = __containerSize;
-    NSSize paperSize = __paperSize;
+    CGAffineTransform pageTransform = _paperTransform;
+    NSSize containerSize = _containerSize;
+    NSSize paperSize = _paperSize;
     
     // use a monospaced font for plain text
     if (nil != attrString) {
@@ -412,28 +423,40 @@ static inline void limitSize(NSSize *size)
     
     // no point in keeping this around in memory
     [textStorage deleteCharactersInRange:NSMakeRange(0, [textStorage length])];
+    [FVTextIcon pushTextStorage:textStorage];
+    textStorage = nil;
     
     // restore the previous context
     [NSGraphicsContext restoreGraphicsState];
     
-    CGImageRelease(_fullImageRef);
-    _fullImageRef = CGBitmapContextCreateImage(ctxt);
-    [FVIconCache cacheImage:_fullImageRef withName:_diskCacheName];
+    CGImageRelease(_fullImage);
+    _fullImage = CGBitmapContextCreateImage(ctxt);
+    if (NULL != _fullImage)
+        [FVIconCache cacheImage:_fullImage withName:_diskCacheName];
     
-    // reset size while we have the lock, since it may be different now that we've read the string
-    _fullSize = paperSize;
-    _thumbnailSize = NSMakeSize(_fullSize.width / 2, _fullSize.height / 2);
-    limitSize(&_thumbnailSize);
-        
     // now restore our cached bitmap context and push it back into the cache
     CGContextRestoreGState(ctxt);
     [FVBitmapContextCache disposeOfBitmapContext:ctxt];
     
     // repeat for the thumbnail image as needed, but this time just draw our bitmap again
-    if (NULL == _thumbnailRef)
-        [self _createThumbnailFromFullImage];
+    if (NULL == _thumbnail)
+        _thumbnail = FVCreateResampledThumbnail(_fullImage, true);
 
-    pthread_mutex_unlock(&_mutex);
+    // reset size while we have the lock, since it may be different now that we've read the string
+    _fullSize = paperSize;
+    
+    if (NULL != _thumbnail) {
+        _thumbnailSize = FVCGImageSize(_thumbnail);
+        [FVIconCache cacheThumbnail:_thumbnail withName:_diskCacheName];
+    }
+    
+    // get rid of this to save memory if we aren't drawing it right away
+    if (FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize) == NO) {
+        CGImageRelease(_fullImage);
+        _fullImage = NULL;
+    }
+
+    [self unlock];
 }    
 
 @end

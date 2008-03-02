@@ -1230,9 +1230,9 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
                     iconRect = [self centerScanRect:iconRect];
                                     
                     if (useFastDrawingPath)
-                        [image fastDrawInRect:iconRect inCGContext:cgContext];
+                        [image fastDrawInRect:iconRect ofContext:cgContext];
                     else
-                        [image drawInRect:iconRect inCGContext:cgContext];
+                        [image drawInRect:iconRect ofContext:cgContext];
 
                     CGContextRestoreGState(cgContext);
                     CGContextSaveGState(cgContext);

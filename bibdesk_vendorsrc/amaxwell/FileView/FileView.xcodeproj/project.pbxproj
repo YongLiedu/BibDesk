@@ -37,6 +37,13 @@
 		CE05D3D10D7B27FC0034C2A8 /* FVProgressIndicatorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */; };
 		CE05D43A0D7B31A80034C2A8 /* FVCGImageHeader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE05D4380D7B31A80034C2A8 /* FVCGImageHeader.cpp */; };
 		CE05D43B0D7B31A80034C2A8 /* FVCGImageHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D4390D7B31A80034C2A8 /* FVCGImageHeader.h */; };
+		CE05D4700D7B36DD0034C2A8 /* FVIcon_Private.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D4690D7B36DD0034C2A8 /* FVIcon_Private.m */; };
+		CE05D4710D7B36DD0034C2A8 /* FVMIMEIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D46A0D7B36DD0034C2A8 /* FVMIMEIcon.h */; };
+		CE05D4720D7B36DD0034C2A8 /* FVMIMEIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D46B0D7B36DD0034C2A8 /* FVMIMEIcon.m */; };
+		CE05D4730D7B36DD0034C2A8 /* FVMovieIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D46C0D7B36DD0034C2A8 /* FVMovieIcon.h */; };
+		CE05D4740D7B36DD0034C2A8 /* FVMovieIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D46D0D7B36DD0034C2A8 /* FVMovieIcon.m */; };
+		CE05D4750D7B36DD0034C2A8 /* FVPlaceholderImage.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D46E0D7B36DD0034C2A8 /* FVPlaceholderImage.h */; };
+		CE05D4760D7B36DD0034C2A8 /* FVPlaceholderImage.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D46F0D7B36DD0034C2A8 /* FVPlaceholderImage.m */; };
 		F92C7BC70D280D0E004409D8 /* FVWebViewIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */; };
 		F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */; };
 		F92C7C4F0D282503004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
@@ -191,6 +198,13 @@
 		CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVProgressIndicatorCell.m; sourceTree = "<group>"; };
 		CE05D4380D7B31A80034C2A8 /* FVCGImageHeader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FVCGImageHeader.cpp; sourceTree = "<group>"; };
 		CE05D4390D7B31A80034C2A8 /* FVCGImageHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVCGImageHeader.h; sourceTree = "<group>"; };
+		CE05D4690D7B36DD0034C2A8 /* FVIcon_Private.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVIcon_Private.m; sourceTree = "<group>"; };
+		CE05D46A0D7B36DD0034C2A8 /* FVMIMEIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVMIMEIcon.h; sourceTree = "<group>"; };
+		CE05D46B0D7B36DD0034C2A8 /* FVMIMEIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVMIMEIcon.m; sourceTree = "<group>"; };
+		CE05D46C0D7B36DD0034C2A8 /* FVMovieIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVMovieIcon.h; sourceTree = "<group>"; };
+		CE05D46D0D7B36DD0034C2A8 /* FVMovieIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVMovieIcon.m; sourceTree = "<group>"; };
+		CE05D46E0D7B36DD0034C2A8 /* FVPlaceholderImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVPlaceholderImage.h; sourceTree = "<group>"; };
+		CE05D46F0D7B36DD0034C2A8 /* FVPlaceholderImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVPlaceholderImage.m; sourceTree = "<group>"; };
 		F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVWebViewIcon.h; sourceTree = "<group>"; };
 		F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVWebViewIcon.m; sourceTree = "<group>"; };
 		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
@@ -375,45 +389,15 @@
 		08FB77AEFE84172EC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				F9A2D3FE0CCBE321002F517B /* FVIcon_Private.h */,
-				F946944E0CA59AF100AC2772 /* FVScaledImageView.h */,
-				F946944F0CA59AF100AC2772 /* FVScaledImageView.m */,
-				F946921C0CA5700800AC2772 /* FVQuickLookIcon.m */,
-				F9A2D4270CCBE6BA002F517B /* FVQuickLookIcon.h */,
-				F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */,
-				F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */,
-				F94691F70CA56EC500AC2772 /* FileView.h */,
-				F94691F80CA56EC500AC2772 /* FileView.m */,
-				F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */,
-				F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */,
-				CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */,
-				CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */,
+				CE05D4840D7B37A80034C2A8 /* Icons */,
+				CE05D48A0D7B388C0034C2A8 /* Views */,
+				CE05D48B0D7B38B20034C2A8 /* Caching */,
 				CE05D3C40D7B272A0034C2A8 /* FVDownload.h */,
 				CE05D3C50D7B272A0034C2A8 /* FVDownload.m */,
-				F94691FB0CA56EC500AC2772 /* FVIcon.h */,
-				F94691FC0CA56EC500AC2772 /* FVIcon.m */,
-				F94691FD0CA56EC500AC2772 /* FVIconQueue.h */,
-				F94691FE0CA56EC500AC2772 /* FVIconQueue.m */,
-				F94691FF0CA56EC500AC2772 /* FVPreviewer.h */,
-				F94692000CA56EC500AC2772 /* FVPreviewer.m */,
-				CE05D4380D7B31A80034C2A8 /* FVCGImageHeader.cpp */,
-				CE05D4390D7B31A80034C2A8 /* FVCGImageHeader.h */,
-				F9A2D39B0CCBB3B5002F517B /* FVIconCache.h */,
-				F9A2D39C0CCBB3B5002F517B /* FVIconCache.mm */,
-				F9A2D3D80CCBDDDF002F517B /* FVBitmapContextCache.h */,
-				F9A2D3D90CCBDDDF002F517B /* FVBitmapContextCache.m */,
-				F9A2D3E60CCBE12B002F517B /* FVImageIcon.h */,
-				F9A2D3E70CCBE12B002F517B /* FVImageIcon.m */,
-				F9A2D3EA0CCBE13F002F517B /* FVFinderIcon.h */,
-				F9A2D3EB0CCBE13F002F517B /* FVFinderIcon.m */,
-				F9A2D3EE0CCBE14E002F517B /* FVPDFIcon.h */,
-				F9A2D3EF0CCBE14E002F517B /* FVPDFIcon.m */,
-				F9A2D3F20CCBE15C002F517B /* FVTextIcon.h */,
-				F9A2D3F30CCBE15C002F517B /* FVTextIcon.m */,
-				CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */,
-				CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */,
 				F93C3AE90D39473C006EB558 /* FVFinderLabel.h */,
 				F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */,
+				F94691FD0CA56EC500AC2772 /* FVIconQueue.h */,
+				F94691FE0CA56EC500AC2772 /* FVIconQueue.m */,
 				CE05D3240D7AFC830034C2A8 /* FVUtilities.h */,
 				CE05D3250D7AFC830034C2A8 /* FVUtilities.m */,
 			);
@@ -443,6 +427,67 @@
 				32DBCF5E0370ADEE00C91783 /* FileView_Prefix.pch */,
 			);
 			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		CE05D4840D7B37A80034C2A8 /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+				F9A2D3EA0CCBE13F002F517B /* FVFinderIcon.h */,
+				F9A2D3EB0CCBE13F002F517B /* FVFinderIcon.m */,
+				F94691FB0CA56EC500AC2772 /* FVIcon.h */,
+				F94691FC0CA56EC500AC2772 /* FVIcon.m */,
+				F9A2D3FE0CCBE321002F517B /* FVIcon_Private.h */,
+				CE05D4690D7B36DD0034C2A8 /* FVIcon_Private.m */,
+				F9A2D3E60CCBE12B002F517B /* FVImageIcon.h */,
+				F9A2D3E70CCBE12B002F517B /* FVImageIcon.m */,
+				CE05D46A0D7B36DD0034C2A8 /* FVMIMEIcon.h */,
+				CE05D46B0D7B36DD0034C2A8 /* FVMIMEIcon.m */,
+				CE05D46C0D7B36DD0034C2A8 /* FVMovieIcon.h */,
+				CE05D46D0D7B36DD0034C2A8 /* FVMovieIcon.m */,
+				F9A2D3EE0CCBE14E002F517B /* FVPDFIcon.h */,
+				F9A2D3EF0CCBE14E002F517B /* FVPDFIcon.m */,
+				CE05D46E0D7B36DD0034C2A8 /* FVPlaceholderImage.h */,
+				CE05D46F0D7B36DD0034C2A8 /* FVPlaceholderImage.m */,
+				F946921C0CA5700800AC2772 /* FVQuickLookIcon.m */,
+				F9A2D4270CCBE6BA002F517B /* FVQuickLookIcon.h */,
+				F9A2D3F20CCBE15C002F517B /* FVTextIcon.h */,
+				F9A2D3F30CCBE15C002F517B /* FVTextIcon.m */,
+				F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */,
+				F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */,
+			);
+			name = Icons;
+			sourceTree = "<group>";
+		};
+		CE05D48A0D7B388C0034C2A8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F94691F70CA56EC500AC2772 /* FileView.h */,
+				F94691F80CA56EC500AC2772 /* FileView.m */,
+				F94691F90CA56EC500AC2772 /* FVArrowButtonCell.h */,
+				F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */,
+				CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */,
+				CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */,
+				F94691FF0CA56EC500AC2772 /* FVPreviewer.h */,
+				F94692000CA56EC500AC2772 /* FVPreviewer.m */,
+				CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */,
+				CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */,
+				F946944E0CA59AF100AC2772 /* FVScaledImageView.h */,
+				F946944F0CA59AF100AC2772 /* FVScaledImageView.m */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		CE05D48B0D7B38B20034C2A8 /* Caching */ = {
+			isa = PBXGroup;
+			children = (
+				F9A2D3D80CCBDDDF002F517B /* FVBitmapContextCache.h */,
+				F9A2D3D90CCBDDDF002F517B /* FVBitmapContextCache.m */,
+				CE05D4380D7B31A80034C2A8 /* FVCGImageHeader.cpp */,
+				CE05D4390D7B31A80034C2A8 /* FVCGImageHeader.h */,
+				F9A2D39B0CCBB3B5002F517B /* FVIconCache.h */,
+				F9A2D39C0CCBB3B5002F517B /* FVIconCache.mm */,
+			);
+			name = Caching;
 			sourceTree = "<group>";
 		};
 		F946927B0CA5777300AC2772 /* FileView Program */ = {
@@ -553,6 +598,9 @@
 				CE05D3C60D7B272A0034C2A8 /* FVDownload.h in Headers */,
 				CE05D3D00D7B27FC0034C2A8 /* FVProgressIndicatorCell.h in Headers */,
 				CE05D43B0D7B31A80034C2A8 /* FVCGImageHeader.h in Headers */,
+				CE05D4710D7B36DD0034C2A8 /* FVMIMEIcon.h in Headers */,
+				CE05D4730D7B36DD0034C2A8 /* FVMovieIcon.h in Headers */,
+				CE05D4750D7B36DD0034C2A8 /* FVPlaceholderImage.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -723,6 +771,10 @@
 				CE05D3C70D7B272A0034C2A8 /* FVDownload.m in Sources */,
 				CE05D3D10D7B27FC0034C2A8 /* FVProgressIndicatorCell.m in Sources */,
 				CE05D43A0D7B31A80034C2A8 /* FVCGImageHeader.cpp in Sources */,
+				CE05D4700D7B36DD0034C2A8 /* FVIcon_Private.m in Sources */,
+				CE05D4720D7B36DD0034C2A8 /* FVMIMEIcon.m in Sources */,
+				CE05D4740D7B36DD0034C2A8 /* FVMovieIcon.m in Sources */,
+				CE05D4760D7B36DD0034C2A8 /* FVPlaceholderImage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
