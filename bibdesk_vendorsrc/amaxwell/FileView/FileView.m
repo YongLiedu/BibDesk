@@ -44,10 +44,7 @@
 #import <FileView/FVPreviewer.h>
 #import "FVArrowButtonCell.h"
 #import <FileView/FVFinderLabel.h>
-
-// functions for dealing with multiple URLs and weblocs on the pasteboard
-static NSArray *URLsFromPasteboard(NSPasteboard *pboard);
-static BOOL writeURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard);
+#import "FVUtilities.h"
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
@@ -62,7 +59,6 @@ static const NSUInteger RELEASE_CACHE_THRESHOLD = 25;
 
 // check the icon cache every five minutes and get rid of stale icons
 static const CFTimeInterval ZOMBIE_TIMER_INTERVAL = 300.0;
-static void zombieTimerFired(CFRunLoopTimerRef timer, void *context);
 
 static NSDictionary *_titleAttributes = nil;
 static NSDictionary *_labeledAttributes = nil;
@@ -173,10 +169,6 @@ static CGFloat _subtitleHeight = 0.0;
 - (CGFloat)_columnWidth { return _iconSize.width + _padding.width; }
 - (CGFloat)_rowHeight { return _iconSize.height + _padding.height; }
 
-static Boolean intEqual(const void *v1, const void *v2) { return v1 == v2; }
-static CFStringRef intDesc(const void *value) { return (CFStringRef)[[NSString alloc] initWithFormat:@"%ld", (long)value]; }
-static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
-
 - (void)_commonInit {
     _iconCache = [[NSMutableDictionary alloc] init];
     _iconSize = DEFAULT_ICON_SIZE;
@@ -193,23 +185,19 @@ static CFHashCode intHash(const void *value) { return (CFHashCode)value; }
     _isEditable = NO;
     [self setBackgroundColor:[[self class] defaultBackgroundColor]];
         
-    // pass NULL for retain/release/description callbacks, so the timer does not retain the target and create a retain cycle
-    CFRunLoopTimerContext timerContext = {  0, self, NULL, NULL, NULL };
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     
     // I'm not removing the timer in viewWillMoveToSuperview:nil because we may need to free up that memory, and the frequency is so low that it's insignificant overhead
     CFAbsoluteTime fireTime = CFAbsoluteTimeGetCurrent() + ZOMBIE_TIMER_INTERVAL;
     // runloop will retain this timer, but we'll retain it too and release in -dealloc
-    _zombieTimer = CFRunLoopTimerCreate(alloc, fireTime, ZOMBIE_TIMER_INTERVAL, 0, 0, zombieTimerFired, &timerContext);
-    CFRunLoopAddTimer([[NSRunLoop currentRunLoop] getCFRunLoop], _zombieTimer, kCFRunLoopDefaultMode);
+    _zombieTimer = FVCreateWeakTimerWithTimeInterval(ZOMBIE_TIMER_INTERVAL, fireTime, self, @selector(_zombieTimerFired:));
+    CFRunLoopAddTimer(CFRunLoopGetCurrent(), _zombieTimer, kCFRunLoopDefaultMode);
     
     _lastOrigin = NSZeroPoint;
     _timeOfLastOrigin = CFAbsoluteTimeGetCurrent();
-    const CFDictionaryKeyCallBacks integerKeyCallBacks = { 0, NULL, NULL, intDesc, intEqual, intHash };
-    const CFDictionaryValueCallBacks integerValueCallBacks = { 0, NULL, NULL, intDesc, intEqual };
-    _trackingRectMap = CFDictionaryCreateMutable(alloc, 0, &integerKeyCallBacks, &integerValueCallBacks);
+    _trackingRectMap = CFDictionaryCreateMutable(alloc, 0, &FVIntegerKeyDictionaryCallBacks, &FVIntegerValueDictionaryCallBacks);
     
-    _iconIndexMap = CFDictionaryCreateMutable(alloc, 0, &integerKeyCallBacks, NULL);
+    _iconIndexMap = CFDictionaryCreateMutable(alloc, 0, &FVIntegerKeyDictionaryCallBacks, NULL);
     
     _leftArrow = [[FVArrowButtonCell alloc] initWithArrowDirection:FVArrowLeft];
     [_leftArrow setTarget:self];
@@ -814,6 +802,31 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 #pragma mark Cache thread
 
+// drawRect: uses -releaseResources on icons that aren't visible but present in the datasource, so we just need a way to cull icons that are cached but not currently in the datasource
+- (void)_zombieTimerFired:(CFRunLoopTimerRef)timer
+{
+    NSUInteger i, iMax = [self numberOfIcons];
+    
+    // don't do anything unless there's a meaningful discrepancy between the number of items reported by the datasource and our cache
+    if ((iMax + ZOMBIE_CACHE_THRESHOLD) < [_iconCache count]) {
+        
+        NSMutableSet *iconURLsToKeep = [NSMutableSet set];        
+        for (i = 0; i < iMax; i++) {
+            NSURL *aURL = [self iconURLAtIndex:i];
+            if (aURL) [iconURLsToKeep addObject:aURL];
+        }
+        
+        NSMutableSet *toRemove = [NSMutableSet setWithArray:[_iconCache allKeys]];
+        [toRemove minusSet:iconURLsToKeep];
+        
+        // anything remaining in toRemove is not present in the dataSource, so remove it from the cache
+        NSEnumerator *keyEnum = [toRemove objectEnumerator];
+        NSURL *aURL;
+        while ((aURL = [keyEnum nextObject]))
+            [_iconCache removeObjectForKey:aURL];
+    }
+}
+
 - (void)_handleWebIconNotification:(NSNotification *)aNote
 {
     [self iconQueueUpdated:[NSArray arrayWithObject:[aNote object]]];
@@ -869,43 +882,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     [updatedIconSet release];
 }
 
-// drawRect: uses -releaseResources on icons that aren't visible but present in the datasource, so we just need a way to cull icons that are cached but not currently in the datasource
-- (void)_handleZombieTimerCallback
-{
-    NSUInteger i, iMax = [self numberOfIcons];
-    
-    // don't do anything unless there's a meaningful discrepancy between the number of items reported by the datasource and our cache
-    if ((iMax + ZOMBIE_CACHE_THRESHOLD) < [_iconCache count]) {
-        
-        NSMutableSet *iconURLsToKeep = [NSMutableSet set];
-        
-        if ([self iconURLs] != nil) {
-            [iconURLsToKeep addObjectsFromArray:[self iconURLs]];
-        }
-        else {
-            for (i = 0; i < iMax; i++) {
-                NSURL *aURL = [self iconURLAtIndex:i];
-                if (aURL) [iconURLsToKeep addObject:aURL];
-            }
-        }
-        
-        NSMutableSet *toRemove = [NSMutableSet setWithArray:[_iconCache allKeys]];
-        [toRemove minusSet:iconURLsToKeep];
-        
-        // anything remaining in toRemove is not present in the dataSource, so remove it from the cache
-        NSEnumerator *keyEnum = [toRemove objectEnumerator];
-        NSURL *aURL;
-        while (aURL = [keyEnum nextObject])
-            [_iconCache removeObjectForKey:aURL];
-    }
-}
-
-static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
-{
-    FileView *fv = (id)context;
-    [fv _handleZombieTimerCallback];
-}
-
 #pragma mark Drawing
 
 // no save/restore needed because of when these are called in -drawRect: (this is why they're private)
@@ -952,7 +928,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
         
         if (_dropOperation == FVDropOn) {
             // it's either a drop on the whole table or on top of a cell
-            p = [NSBezierPath bezierPathWithRoundRect:NSInsetRect(aRect, 0.5 * lineWidth, 0.5 * lineWidth) xRadius:7 yRadius:7];
+            p = [NSBezierPath fv_bezierPathWithRoundRect:NSInsetRect(aRect, 0.5 * lineWidth, 0.5 * lineWidth) xRadius:7 yRadius:7];
             [p fill];
         }
         else {
@@ -980,7 +956,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
     }
     [strokeColor setStroke];
     [fillColor setFill];
-    NSBezierPath *p = [NSBezierPath bezierPathWithRoundRect:aRect xRadius:5 yRadius:5];
+    NSBezierPath *p = [NSBezierPath fv_bezierPathWithRoundRect:aRect xRadius:5 yRadius:5];
     [p setLineWidth:2.0f];
     [p fill];
     [p stroke];
@@ -1000,7 +976,7 @@ static void zombieTimerFired(CFRunLoopTimerRef timer, void *context)
 - (void)_drawDropMessage;
 {
     NSRect aRect = [self centerScanRect:NSInsetRect([self visibleRect], 20, 20)];
-    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRect:aRect xRadius:10 yRadius:10];
+    NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:aRect xRadius:10 yRadius:10];
     CGFloat pattern[2] = { 12.0, 6.0 };
     
     // This sets all future paths to have a dash pattern, and it's not affected by save/restore gstate on Tiger.  Lame.
@@ -1832,7 +1808,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
             // add all URLs (file and other schemes)
             // Finder will create weblocs for us unless schemes are mixed (gives a stupid file busy error message)
             
-            if (writeURLsToPasteboard(selectedURLs, pboard)) {
+            if (FVWriteURLsToPasteboard(selectedURLs, pboard)) {
                 // OK to pass nil for the image, since we totally ignore it anyway
                 [self dragImage:nil at:p offset:NSZeroSize event:event pasteboard:pboard source:self slideBack:YES];
             }
@@ -1876,7 +1852,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
     NSUInteger insertIndex, firstIndex, endIndex;
     
-    NSArray *draggedURLs = URLsFromPasteboard([sender draggingPasteboard]);
+    NSArray *draggedURLs = FVURLsFromPasteboard([sender draggingPasteboard]);
     
     // First determine the drop location, check whether the index is not NSNotFound, because the grid cell can be empty
     if ([self _getGridRow:&r column:&c atPoint:p] && NSNotFound != (_dropIndex = [self _indexForGridRow:r column:c])) {
@@ -1969,7 +1945,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         
         // _dropIndex should never be NSNotFound at this point, but check for it anyway
         if (NSNotFound != _dropIndex) {
-            NSArray *allURLs = URLsFromPasteboard([sender draggingPasteboard]);
+            NSArray *allURLs = FVURLsFromPasteboard([sender draggingPasteboard]);
             NSUInteger insertIndex = FVDropAfter == _dropOperation ? _dropIndex + 1 : _dropIndex;
             
             if ([self _isLocalDraggingInfo:sender]) {
@@ -1994,7 +1970,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     else if (NSNotFound == _dropIndex) {
            
         // drop on the whole view
-        NSArray *allURLs = URLsFromPasteboard(pboard);
+        NSArray *allURLs = FVURLsFromPasteboard(pboard);
         NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [allURLs count])];
         [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender dropOperation:_dropOperation];
         didPerform = YES;
@@ -2003,7 +1979,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     else {
         // we're targeting a particular cell, make sure that cell is a legal replace operation
         
-        NSURL *aURL = [URLsFromPasteboard(pboard) lastObject];
+        NSURL *aURL = [FVURLsFromPasteboard(pboard) lastObject];
         
         // only drop a single file on a given cell!
         
@@ -2219,7 +2195,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 
 - (IBAction)copy:(id)sender;
 {
-    if (NO == writeURLsToPasteboard([self _selectedURLs], [NSPasteboard generalPasteboard]))
+    if (NO == FVWriteURLsToPasteboard([self _selectedURLs], [NSPasteboard generalPasteboard]))
         NSBeep();
 }
 
@@ -2232,7 +2208,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
 - (IBAction)paste:(id)sender;
 {
     if ([self isEditable]) {
-        NSArray *URLs = URLsFromPasteboard([NSPasteboard generalPasteboard]);
+        NSArray *URLs = FVURLsFromPasteboard([NSPasteboard generalPasteboard]);
         if ([URLs count])
             [[self dataSource] fileView:self insertURLs:URLs atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [URLs count])] forDrop:nil dropOperation:FVDropOn];
         else
@@ -2374,7 +2350,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         NSInteger i = 0;
         NSRect iconRect = NSZeroRect;
         iconRect.size = NSMakeSize(12, 12);
-        NSBezierPath *clipPath = [NSBezierPath bezierPathWithRoundRect:iconRect xRadius:3.0 yRadius:3.0];
+        NSBezierPath *clipPath = [NSBezierPath fv_bezierPathWithRoundRect:iconRect xRadius:3.0 yRadius:3.0];
         
         for (i = 0; i < 8; i++) {
             anItem = [submenu addItemWithTitle:[FVFinderLabel localizedNameForLabel:i] action:@selector(changeFinderLabel:) keyEquivalent:@""];
@@ -2456,190 +2432,4 @@ void CLog(NSString *format, ...)
     va_start(list, format);
     CLogv(format, list);
     va_end(list);
-}
-
-#pragma mark Pasteboard URL functions
-
-// NSPasteboard only lets us read a single webloc or NSURL instance from the pasteboard, which isn't very considerate of it.  Fortunately, we can create a Carbon pasteboard that isn't as fundamentally crippled (except in its moderately annoying API).  
-static NSArray *URLsFromPasteboard(NSPasteboard *pboard)
-{
-    OSStatus err;
-    
-    PasteboardRef carbonPboard;
-    err = PasteboardCreate((CFStringRef)[pboard name], &carbonPboard);
-    
-    PasteboardSyncFlags syncFlags;
-#pragma unused(syncFlags)
-    if (noErr == err)
-        syncFlags = PasteboardSynchronize(carbonPboard);
-    
-    ItemCount itemCount, itemIndex;
-    if (noErr == err)
-        err = PasteboardGetItemCount(carbonPboard, &itemCount);
-    else
-        itemCount = 0;
-    
-    NSMutableArray *toReturn = [NSMutableArray arrayWithCapacity:itemCount];
-    
-    // this is to avoid duplication in the last call to NSPasteboard
-    NSMutableSet *allURLsReadFromPasteboard = [NSMutableSet setWithCapacity:itemCount];
-    
-    // Pasteboard has 1-based indexing!
-            
-    for (itemIndex = 1; itemIndex <= itemCount; itemIndex++) {
-        
-        PasteboardItemID itemID;
-        CFArrayRef flavors = NULL;
-        CFIndex flavorIndex, flavorCount = 0;
-        
-        err = PasteboardGetItemIdentifier(carbonPboard, itemIndex, &itemID);
-        if (noErr == err)
-            err = PasteboardCopyItemFlavors(carbonPboard, itemID, &flavors);
-        
-        if (noErr == err)
-            flavorCount = CFArrayGetCount(flavors);
-                    
-        // webloc has file and non-file URL, and we may only have a string type
-        CFURLRef destURL = NULL;
-        CFURLRef fileURL = NULL;
-        CFURLRef textURL = NULL;
-        
-        // flavorCount will be zero in case of an error...
-        for (flavorIndex = 0; flavorIndex < flavorCount; flavorIndex++) {
-            
-            CFStringRef flavor;
-            CFDataRef data;
-            
-            flavor = CFArrayGetValueAtIndex(flavors, flavorIndex);
-            
-            // !!! I'm assuming that the URL bytes are UTF-8, but that should be checked...
-            
-            // UTIs determined with PasteboardPeeker
-            
-            if (UTTypeConformsTo(flavor, kUTTypeFileURL)) {
-                
-                err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
-                if (noErr == err && NULL != data) {
-                    fileURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
-                    CFRelease(data);
-                }
-                
-            } else if (UTTypeConformsTo(flavor, kUTTypeURL)) {
-                
-                err = PasteboardCopyItemFlavorData(carbonPboard, itemID, flavor, &data);
-                if (noErr == err && NULL != data) {
-                    destURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
-                    CFRelease(data);
-                }
-                
-            } else if (UTTypeConformsTo(flavor, kUTTypeUTF8PlainText)) {
-                
-                // this is a string that may be a URL; FireFox and other apps don't use any of the standard URL pasteboard types
-                err = PasteboardCopyItemFlavorData(carbonPboard, itemID, kUTTypeUTF8PlainText, &data);
-                if (noErr == err && NULL != data) {
-                    textURL = CFURLCreateWithBytes(NULL, CFDataGetBytePtr(data), CFDataGetLength(data), kCFStringEncodingUTF8, NULL);
-                    CFRelease(data);
-                    
-                    // CFURLCreateWithBytes will create a URL from any arbitrary string
-                    if (NULL != textURL && nil == [(NSURL *)textURL scheme]) {
-                        CFRelease(textURL);
-                        textURL = NULL;
-                    }
-                }
-                
-            }
-            
-            // ignore any other type; we don't care
-            
-        }
-        
-        // only add the textURL if the destURL or fileURL were not found
-        if (NULL != textURL) {
-            if (NULL == destURL && NULL == fileURL)
-                [toReturn addObject:(id)textURL];
-            
-            [allURLsReadFromPasteboard addObject:(id)textURL];
-            CFRelease(textURL);
-        }
-        // only add the fileURL if the destURL (target of a remote URL or webloc) was not found
-        if (NULL != fileURL) {
-            if (NULL == destURL) 
-                [toReturn addObject:(id)fileURL];
-            
-            [allURLsReadFromPasteboard addObject:(id)fileURL];
-            CFRelease(fileURL);
-        }
-        // always add this if it exists
-        if (NULL != destURL) {
-            [toReturn addObject:(id)destURL];
-            [allURLsReadFromPasteboard addObject:(id)destURL];
-            CFRelease(destURL);
-        }
-    
-        if (NULL != flavors)
-            CFRelease(flavors);
-    }
-                                
-    if (carbonPboard) CFRelease(carbonPboard);
-
-    // NSPasteboard only allows a single NSURL for some idiotic reason, and NSURLPboardType isn't automagically coerced to a Carbon URL pboard type.  This step handles a program like BibDesk which presently adds a webloc promise + NSURLPboardType, where we want the NSURLPboardType data and ignore the HFS promise.  However, Finder puts all of these on the pboard, so don't add duplicate items to the array...since we may have already added the content (remote URL) if this is a webloc file.
-    if ([[pboard types] containsObject:NSURLPboardType]) {
-        NSURL *nsURL = [NSURL URLFromPasteboard:pboard];
-        if (nsURL && [allURLsReadFromPasteboard containsObject:nsURL] == NO)
-            [toReturn addObject:nsURL];
-    }
-    
-    // ??? On 10.5, NSStringPboardType and kUTTypeUTF8PlainText point to the same data, according to pasteboard peeker; if that's the case on 10.4, we can remove this and the registration for NSStringPboardType.
-    if ([[pboard types] containsObject:NSStringPboardType]) {
-        NSURL *nsURL = [NSURL URLWithString:[pboard stringForType:NSStringPboardType]];
-        if ([nsURL scheme] != nil && [allURLsReadFromPasteboard containsObject:nsURL] == NO)
-            [toReturn addObject:nsURL];
-    }
-
-    return toReturn;
-}
-
-// Once we treat the NSPasteboard as a Carbon pboard, bad things seem to happen on Tiger (-types doesn't work), so return the PasteboardRef by reference to allow the caller to add more types to it or whatever.
-static BOOL writeURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard)
-{
-    OSStatus err;
-    
-    PasteboardRef carbonPboard;
-    err = PasteboardCreate((CFStringRef)[pboard name], &carbonPboard);
-    
-    if (noErr == err)
-        err = PasteboardClear(carbonPboard);
-    
-    PasteboardSyncFlags syncFlags;
-#pragma unused(syncFlags)
-    if (noErr == err)
-        syncFlags = PasteboardSynchronize(carbonPboard);
-    
-    NSUInteger i, iMax = [URLs count];
-    
-    for (i = 0; i < iMax && noErr == err; i++) {
-        
-        NSURL *theURL = [URLs objectAtIndex:i];
-        CFDataRef utf8Data = CFURLCreateData(nil, (CFURLRef)theURL, kCFStringEncodingUTF8, true);
-        
-        // any pointer type; private to the creating application
-        PasteboardItemID itemID = (void *)theURL;
-        
-        // Finder adds a file URL and destination URL for weblocs, but only a file URL for regular files
-        // could also put a string representation of the URL, but Finder doesn't do that
-        
-        if (NULL != utf8Data) {
-            if ([theURL isFileURL]) {
-                err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeFileURL, utf8Data, kPasteboardFlavorNoFlags);
-            } else {
-                err = PasteboardPutItemFlavor(carbonPboard, itemID, kUTTypeURL, utf8Data, kPasteboardFlavorNoFlags);
-            }
-            CFRelease(utf8Data);
-        }
-    }
-    
-    if (carbonPboard) 
-        CFRelease(carbonPboard);
-    
-    return noErr == err;
 }

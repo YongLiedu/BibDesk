@@ -89,9 +89,3 @@
 - (void)showPreviousPage;
 
 @end
-
-
-@interface NSBezierPath (RoundRect)
-+ (NSBezierPath*)bezierPathWithRoundRect:(NSRect)rect xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius;
-@end
-

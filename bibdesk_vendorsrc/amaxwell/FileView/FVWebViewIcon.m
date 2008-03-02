@@ -39,6 +39,7 @@
 #import "FVWebViewIcon.h"
 #import "FVFinderIcon.h"
 #import "FVTextIcon.h"
+#import "FVUtilities.h"
 #import <WebKit/WebKit.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 
@@ -292,7 +293,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         [nsContext saveGraphicsState];
         [[NSColor whiteColor] setFill];
         NSRect rect = NSMakeRect(0, 0, size.width, size.height);
-        [[NSBezierPath bezierPathWithRoundRect:rect xRadius:5 yRadius:5] fill];
+        [[NSBezierPath fv_bezierPathWithRoundRect:rect xRadius:5 yRadius:5] fill];
         [nsContext restoreGraphicsState];
 
         [_webView setFrame:NSInsetRect(rect, 10, 10)];

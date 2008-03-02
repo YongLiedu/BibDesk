@@ -25,6 +25,9 @@
 /* Begin PBXBuildFile section */
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
+		CE05D3260D7AFC830034C2A8 /* FVUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3250D7AFC830034C2A8 /* FVUtilities.m */; };
+		CE05D35B0D7B0D4A0034C2A8 /* FVUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3250D7AFC830034C2A8 /* FVUtilities.m */; };
+		CE05D35E0D7B0D750034C2A8 /* FVUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3240D7AFC830034C2A8 /* FVUtilities.h */; };
 		F92C7BC70D280D0E004409D8 /* FVWebViewIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */; };
 		F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */; };
 		F92C7C4F0D282503004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
@@ -167,6 +170,8 @@
 		32DBCF5E0370ADEE00C91783 /* FileView_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileView_Prefix.pch; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Info.plist; sourceTree = "<group>"; };
 		8DC2EF5B0486A6940098B216 /* FileView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FileView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE05D3240D7AFC830034C2A8 /* FVUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVUtilities.h; sourceTree = "<group>"; };
+		CE05D3250D7AFC830034C2A8 /* FVUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVUtilities.m; sourceTree = "<group>"; };
 		F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVWebViewIcon.h; sourceTree = "<group>"; };
 		F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVWebViewIcon.m; sourceTree = "<group>"; };
 		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
@@ -381,6 +386,8 @@
 				F9A2D3F30CCBE15C002F517B /* FVTextIcon.m */,
 				F93C3AE90D39473C006EB558 /* FVFinderLabel.h */,
 				F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */,
+				CE05D3240D7AFC830034C2A8 /* FVUtilities.h */,
+				CE05D3250D7AFC830034C2A8 /* FVUtilities.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -513,6 +520,7 @@
 				F9A2D4280CCBE6BA002F517B /* FVQLIcon.h in Headers */,
 				F92C7BC70D280D0E004409D8 /* FVWebViewIcon.h in Headers */,
 				F93C3AEB0D39473C006EB558 /* FVFinderLabel.h in Headers */,
+				CE05D35E0D7B0D750034C2A8 /* FVUtilities.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -677,6 +685,7 @@
 				F9A2D3F50CCBE15C002F517B /* FVTextIcon.m in Sources */,
 				F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */,
 				F93C3AEC0D39473C006EB558 /* FVFinderLabel.m in Sources */,
+				CE05D35B0D7B0D4A0034C2A8 /* FVUtilities.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -694,6 +703,7 @@
 			files = (
 				F94692830CA5777300AC2772 /* Controller.m in Sources */,
 				F946928F0CA5784700AC2772 /* main.m in Sources */,
+				CE05D3260D7AFC830034C2A8 /* FVUtilities.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
