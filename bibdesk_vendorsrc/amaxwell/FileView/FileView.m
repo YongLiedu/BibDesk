@@ -99,7 +99,8 @@ static CGColorRef _shadowColor = NULL;
 
 @implementation FileView
 
-+ (void)initialize {
++ (void)initialize 
+{
     FVINITIALIZE(FileView);
     
     NSMutableDictionary *ta = [NSMutableDictionary dictionary];
@@ -331,6 +332,9 @@ static CGColorRef _shadowColor = NULL;
     // convenient time to do this, although the timer would also handle it
     [_iconCache removeAllObjects];
     CFDictionaryRemoveAllValues(_iconIndexMap);
+    
+    // make sure these get cleaned up; if the datasource is now nil, we're probably going to deallocate soon
+    [self _cancelActiveDownloads];
     
     _padding = [self _paddingForScale:[self iconScale]];
     
@@ -584,6 +588,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 {
     [_iconURLs autorelease];
     _iconURLs = [anArray copy];
+    [self _cancelActiveDownloads];
     // datasource methods all trigger a redisplay, so we have to do the same here
     [self reloadIcons];
 }
@@ -2611,38 +2616,3 @@ static void cancelDownload(const void *key, const void *value, void *context)
 }
 
 @end
-
-#pragma mark -
-#pragma mark Logging
-
-void CLogv(NSString *format, va_list argList)
-{
-    NSString *logString = [[NSString alloc] initWithFormat:format arguments:argList];
-    
-    char *buf = NULL;
-    char stackBuf[1024];
-    
-    // add 1 for the NULL terminator (length arg to getCString:maxLength:encoding: needs to include space for this)
-    NSUInteger requiredLength = ([logString maximumLengthOfBytesUsingEncoding:NSUTF8StringEncoding] + 1);
-    
-    if (requiredLength <= sizeof(stackBuf) && [logString getCString:stackBuf maxLength:sizeof(stackBuf) encoding:NSUTF8StringEncoding]) {
-        buf = stackBuf;
-    } else if (NULL != (buf = NSZoneMalloc(NULL, requiredLength * sizeof(char))) ){
-        [logString getCString:buf maxLength:requiredLength encoding:NSUTF8StringEncoding];
-    } else {
-        fprintf(stderr, "unable to allocate log buffer\n");
-    }
-    [logString release];
-    
-    fprintf(stderr, "%s\n", buf);
-    
-    if (buf != stackBuf) NSZoneFree(NULL, buf);
-}
-
-void CLog(NSString *format, ...)
-{
-    va_list list;
-    va_start(list, format);
-    CLogv(format, list);
-    va_end(list);
-}
