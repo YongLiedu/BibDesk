@@ -356,7 +356,7 @@ static inline void limitSize(NSSize *size)
         CGImageRelease(_thumbnailRef);
         _thumbnailRef = CGBitmapContextCreateImage(ctxt);
         if (1 == _currentPage && NO == _inDiskCache && NULL != _thumbnailRef) {
-            [FVIconCache cacheCGImage:_thumbnailRef withName:_diskCacheName];
+            [FVIconCache cacheImage:_thumbnailRef withName:_diskCacheName];
             _inDiskCache = YES;
         }
         

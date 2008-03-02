@@ -40,11 +40,12 @@
 #import "DTDataFile.h"
 #import "DTCharArray.h"
 #import "FVUtilities.h"
+#import "FVCGImageHeader.h"
 #import <sys/stat.h>
 #import <asl.h>
 
-static CGImageRef FVCreateCGImageWithCharArray(DTCharArray array);
-static DTCharArray FVCharArrayWithCGImage(CGImageRef image);
+static CGImageRef FVCreateCGImageWithCharArray(DTCharArray array, BOOL decompress);
+static DTCharArray FVCharArrayWithCGImage(CGImageRef image, BOOL compress);
 
 @interface _FVIconCacheEventRecord : NSObject
 {
@@ -67,25 +68,40 @@ static DTCharArray FVCharArrayWithCGImage(CGImageRef image);
 - (BOOL)isEqual:(id)other { return CFStringCompare(_identifier, ((_FVIconCacheEventRecord *)other)->_identifier, 0) == kCFCompareEqualTo; }
 @end
 
+struct FVDataStorage {
+    FVDataStorage(string fn) { name = fn; dataFile = new DTDataFile(name); }
+    ~FVDataStorage() { dataFile->Flush(); delete dataFile; }
+    
+    DTDataFile *dataFile;
+    string name;
+};
+
 @implementation FVIconCache
 
-static DTDataFile *__dataFile = NULL;
-static char *__tempName = NULL;        /* only a file static for debugging */
-static pthread_mutex_t __dataFileLock = PTHREAD_MUTEX_INITIALIZER;
-static NSMutableDictionary *__eventTable = nil;
 static NSInteger FVCacheLogLevel = 0;
+static FVIconCache *_bigImageCache = nil;
+static FVIconCache *_smallImageCache = nil;
 
 + (void)initialize
 {
-    static BOOL didInit = NO;
-    if (NO == didInit) {
-        
-        // Pass in args on command line: -FVCacheLogLevel 0
-        // 0 - disabled
-        // 1 - only print final stats
-        // 2 - print URL each as it's added
-        FVCacheLogLevel = [[NSUserDefaults standardUserDefaults] integerForKey:@"FVCacheLogLevel"];
-                
+    FVINITIALIZE(FVIconCache);
+
+    // Pass in args on command line: -FVCacheLogLevel 0
+    // 0 - disabled
+    // 1 - only print final stats
+    // 2 - print URL each as it's added
+    FVCacheLogLevel = [[NSUserDefaults standardUserDefaults] integerForKey:@"FVCacheLogLevel"];
+    _bigImageCache = [FVIconCache new];
+    [_bigImageCache setName:@"full size images"];
+    _smallImageCache = [FVIconCache new];
+    [_smallImageCache setName:@"thumbnail images"];
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+                    
         // docs say this returns nil in case of failure...so we'll check for it just in case
         NSString *tempDir = NSTemporaryDirectory();
         if (nil == tempDir)
@@ -95,83 +111,103 @@ static NSInteger FVCacheLogLevel = 0;
         tmpPath = [[tempDir stringByAppendingPathComponent:@"FileViewCache.XXXXXX"] fileSystemRepresentation];
         
         // mkstemp needs a writable string
-        __tempName = strdup(tmpPath);
+        char *tempName = strdup(tmpPath);
         
         // use mkstemp to avoid race conditions; we can't share the cache for writing between processes anyway
-        if ((mkstemp(__tempName)) == -1) {
+        if ((mkstemp(tempName)) == -1) {
             // if this call fails the OS will probably crap out soon, so there's no point in dying gracefully
-            string errMsg = string("mkstemp failed \"") + __tempName + "\"";
+            string errMsg = string("mkstemp failed \"") + tempName + "\"";
             perror(errMsg.c_str());
             exit(1);
         }
 
         // opens the file we just created as read/write; use new and a pointer so we guarantee the life cycle
-        __dataFile = new DTDataFile(__tempName);
-        
+        _dataStorage = new FVDataStorage(tempName);
+        free(tempName);
+
         // unlink the file immediately; since DTDataFile calls fopen() in its constructor, this is safe, and means we don't leave turds when the program crashes.  For debug builds, the file is unlinked when the app terminates, since otherwise the call to stat() fails with a file not found error (presumably since the link count is zero).
         
-        if (FVCacheLogLevel > 0)
-            __eventTable = [NSMutableDictionary new];
-        else
-            unlink(__tempName);
-
-        [[NSNotificationCenter defaultCenter] addObserver:self 
-                                                 selector:@selector(handleAppTerminate:) 
-                                                     name:NSApplicationWillTerminateNotification 
-                                                   object:nil];
-        didInit = YES;
+        if (FVCacheLogLevel > 0) {
+            _dataFileLock = [NSLock new];
+            _eventTable = [NSMutableDictionary new];
+            [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                     selector:@selector(handleAppTerminate:) 
+                                                         name:NSApplicationWillTerminateNotification 
+                                                       object:nil];        
+        }
+        else {
+            unlink(tempName);
+        }
     }
+    return self;
 }
 
-+ (void)handleAppTerminate:(NSNotification *)notification
+- (void)dealloc
+{
+    NSLog(@"*** error *** attempt to deallocate FVIconCache");
+    if (0) [super dealloc];
+}
+
+- (void)setName:(NSString *)name
+{
+    [_cacheName autorelease];
+    _cacheName = [name copy];
+}
+
+- (void)handleAppTerminate:(NSNotification *)notification
 {    
     // The only reason for this lock is to avoid a NULL pointer dereference in case a file is being cached while the app terminates.  DTDataFile itself is safe for reading/writing from multiple threads, but we get handleAppTerminate: on the main thread and are generally reading/writing from another thread.
-    pthread_mutex_lock(&__dataFileLock);
-    
-    // deleting the __dataFile will cause DTDataFile to close the FILE* pointer
-    __dataFile->Flush();
-    delete __dataFile;    
-    __dataFile = NULL;
-        
+    [_dataFileLock lock];
+            
     if (FVCacheLogLevel > 0) {
+
+        string name = _dataStorage->name;
+        
+        // deleting the _dataFile will cause DTDataFile to close the FILE* pointer
+        _dataStorage->dataFile->Flush();
+        delete _dataStorage;    
+        _dataStorage = NULL;
+        
+        const char *path = name.c_str();
+        
         // print the file size, just because I'm curious about it (before unlinking the file, though!)
         struct stat sb;
-        if (0 == stat(__tempName, &sb)) {
+        if (0 == stat(path, &sb)) {
             off_t fsize = sb.st_size;
             double mbSize = double(fsize) / 1024 / 1024;
             
             aslclient client = asl_open("FileViewCache", NULL, ASL_OPT_NO_DELAY);
             aslmsg m = asl_new(ASL_TYPE_MSG);
             asl_set(m, ASL_KEY_SENDER, "FileViewCache");
-            asl_log(client, m, ASL_LEVEL_ERR, "removing %s with cache size = %.2f MB\n", __tempName, mbSize);
-            asl_log(client, m, ASL_LEVEL_ERR, "final cache content (compressed): %s\n", [[__eventTable description] UTF8String]);
+            const char *cacheName = [_cacheName UTF8String];
+            asl_log(client, m, ASL_LEVEL_ERR, "%s: removing %s with cache size = %.2f MB\n", cacheName, path, mbSize);
+            asl_log(client, m, ASL_LEVEL_ERR, "%s: final cache content (compressed): %s\n", cacheName, [[_eventTable description] UTF8String]);
             asl_free(m);
             asl_close(client);        
         }
         else {
-            string errMsg = string("stat failed \"") + __tempName + "\"";
+            string errMsg = string("stat failed \"") + path + "\"";
             perror(errMsg.c_str());
         }
-        unlink(__tempName);
+        unlink(path);
     }
     
     // hold the lock for the event table as well
-    pthread_mutex_unlock(&__dataFileLock);
+    [_dataFileLock unlock];
 }
 
-+ (CGImageRef)newImageNamed:(const char *)name;
+- (CGImageRef)newImageNamed:(const char *)name decompress:(BOOL)decompress;
 {
     CGImageRef toReturn = NULL;
+    [_dataFileLock lock];
     
-    pthread_mutex_lock(&__dataFileLock);
-    
-    if (__dataFile) {
+    if (_dataStorage->dataFile) {
         // David suggested a periodic flush, though it doesn't seem to be needed
-        __dataFile->Flush();
+        _dataStorage->dataFile->Flush();
         
-        if (__dataFile->Contains(name)) {
-            DTCharArray array = __dataFile->ReadCharArray(name);
-            toReturn = FVCreateCGImageWithCharArray(array);
+        if (_dataStorage->dataFile->Contains(name)) {
+            DTCharArray array = _dataStorage->dataFile->ReadCharArray(name);
+            toReturn = FVCreateCGImageWithCharArray(array, decompress);
             if (FVCacheLogLevel > 0 && NULL == toReturn)
                 NSLog(@"failed reading %s from cache", name);
         }
@@ -179,11 +215,11 @@ static NSInteger FVCacheLogLevel = 0;
     else if (FVCacheLogLevel > 0) {
         NSLog(@"must be quitting; the cache file is already gone");
     }
-    pthread_mutex_unlock(&__dataFileLock);
+    [_dataFileLock unlock];
     return toReturn;
 }
 
-+ (void)_recordCacheEventWithName:(const char *)name size:(double)kbytes
+- (void)_recordCacheEventWithName:(const char *)name size:(double)kbytes
 {
     const UInt8 *url_bytes = (const UInt8 *)name;
     CFURLRef theURL = CFURLCreateWithBytes(NULL, url_bytes, strlen(name), kCFStringEncodingUTF8, NULL);
@@ -205,7 +241,7 @@ static NSInteger FVCacheLogLevel = 0;
         identifier = (CFStringRef)CFRetain(CFSTR("anonymous"));
     }
     
-    _FVIconCacheEventRecord *rec = [__eventTable objectForKey:(id)identifier];
+    _FVIconCacheEventRecord *rec = [_eventTable objectForKey:(id)identifier];
     if (nil != rec) {
         rec->_kbytes += kbytes;
         rec->_count += 1;
@@ -215,7 +251,7 @@ static NSInteger FVCacheLogLevel = 0;
         rec->_kbytes = kbytes;
         rec->_count = 1;
         rec->_identifier = (CFStringRef)CFRetain(identifier);
-        [__eventTable setObject:rec forKey:(id)identifier];
+        [_eventTable setObject:rec forKey:(id)identifier];
         [rec release];
     }
     
@@ -233,22 +269,42 @@ static NSInteger FVCacheLogLevel = 0;
     }
 }
 
-+ (void)cacheCGImage:(CGImageRef)image withName:(const char *)name;
+- (void)cacheImage:(CGImageRef)image withName:(const char *)name compress:(BOOL)compress;
 {
-    DTCharArray array = FVCharArrayWithCGImage(image);
-    pthread_mutex_lock(&__dataFileLock);
+    DTCharArray array = FVCharArrayWithCGImage(image, compress);
+    [_dataFileLock lock];
     if (FVCacheLogLevel > 0)
         [self _recordCacheEventWithName:name size:double(array.Length()) / 1024];
-    if (__dataFile) __dataFile->Save(array, name);
-    pthread_mutex_unlock(&__dataFileLock);
+    if (_dataStorage->dataFile) _dataStorage->dataFile->Save(array, name);
+    [_dataFileLock unlock];
 }
 
-static char * FVCreateCStringWithInode(ino_t n)
+static inline char * FVCreateCStringWithInode(ino_t n)
 {
-    // LONG_MAX on x86_64 is 9223372036854775807, so 40 chars should be sufficient
-    char temp[40];
-    sprintf(temp,"%ld", (long)n);
-    return strdup(temp);   
+    char *temp;
+    asprintf(&temp,"%ld", (long)n);
+    return temp;   
+}
+
+// tried avoiding the compression step for thumbnails, but file sizes quickly grow >100 MB and performance is worse
++ (CGImageRef)newThumbnailNamed:(const char *)name;
+{
+    return [_smallImageCache newImageNamed:name decompress:YES];
+}
+
++ (void)cacheThumbnail:(CGImageRef)image withName:(const char *)name;
+{
+    [_smallImageCache cacheImage:image withName:name compress:YES];
+}
+
++ (CGImageRef)newImageNamed:(const char *)name;
+{
+    return [_bigImageCache newImageNamed:name decompress:YES];
+}
+
++ (void)cacheImage:(CGImageRef)image withName:(const char *)name;
+{
+    [_bigImageCache cacheImage:image withName:name compress:YES];
 }
 
 // changed from function to class method so +initialize gets called first and sets FVCacheLogLevel
@@ -271,101 +327,18 @@ static char * FVCreateCStringWithInode(ino_t n)
 
 @end
 
-typedef struct _FVCGImageHeaderInfo {
-    size_t                 w;
-    size_t                 h;
-    size_t                 bpc;
-    size_t                 bpp;
-    size_t                 bpr;
-    bool                   isGray;
-    CGBitmapInfo           bitmapInfo;
-    CGColorRenderingIntent renderingIntent;
-    bool                   shouldInterpolate;
-} FVCGImageHeaderInfo;
-
-// This class isn't really necessary, but I found it amusing to write a C++ class for a change.  Serializing the class directly seems to work, but I'd rather serialize a struct instead, since I'm not sure what the compiler adds to C++ objects.
-class FVCGImageHeader {
-    
-public:
-    FVCGImageHeader() { info = new FVCGImageHeaderInfo; }
-    FVCGImageHeader(CGImageRef image);
-    FVCGImageHeader(FVCGImageHeaderInfo hInfo);
-    
-    FVCGImageHeader(const FVCGImageHeader &);
-    ~FVCGImageHeader();
-    
-    size_t Width() const { return info->w; }
-    size_t Height() const { return info->h; }
-    size_t BitsPerComponent() const { return info->bpc; }
-    size_t BitsPerPixel() const { return info->bpp; }
-    size_t BytesPerRow() const { return info->bpr; }
-    bool IsGray() const { return info->isGray; }
-    CGBitmapInfo BitmapInfo() const { return info->bitmapInfo; }
-    CGColorRenderingIntent ColorRenderingIntent() const { return info->renderingIntent; }
-    bool ShouldInterpolate() const { return info->shouldInterpolate; }
-    
-    const FVCGImageHeaderInfo *HeaderInfo() const { return info; }
-    
-    // for debugging, as in DTSource
-    void pinfo(void) const;
-    
-private:
-    FVCGImageHeaderInfo *info;
-};
-
-FVCGImageHeader::FVCGImageHeader(const FVCGImageHeader &H)
-{
-    info = new FVCGImageHeaderInfo;
-    memcpy(info, H.info, sizeof(FVCGImageHeaderInfo));
-}
-
-FVCGImageHeader::~FVCGImageHeader()
-{
-    delete info;
-    info = NULL;
-}
-
-FVCGImageHeader::FVCGImageHeader(FVCGImageHeaderInfo hInfo)
-{
-    info = new FVCGImageHeaderInfo;
-    memcpy(info, &hInfo, sizeof(FVCGImageHeaderInfo));
-}
-
-FVCGImageHeader::FVCGImageHeader(CGImageRef image)
-{
-    info = new FVCGImageHeaderInfo;
-    info->w = CGImageGetWidth(image);
-    info->h = CGImageGetHeight(image);
-    info->bpc = CGImageGetBitsPerComponent(image);
-    info->bpp = CGImageGetBitsPerPixel(image);
-    info->bpr = CGImageGetBytesPerRow(image);
-    
-    // I only support device-specific RGB (3) and Gray (1) colorspaces in bitmap context caching, so just check the number of components since there's no way to get the colorspace name.  I think this is because Apple wants developers to use generic colorspaces, but I want to avoid the conversions for performance reasons.
-    info->isGray = CGColorSpaceGetNumberOfComponents(CGImageGetColorSpace(image)) == 1;
-    info->bitmapInfo = CGImageGetBitmapInfo(image);
-    info->renderingIntent = CGImageGetRenderingIntent(image);
-    info->shouldInterpolate = CGImageGetShouldInterpolate(image); 
-}
-
-void FVCGImageHeader::pinfo(void) const
-{
-    fprintf(stderr, "FVCGImageHeader <%p>: width=%d, height=%d, bitsPerComponent=%d, bitsPerPixel=%d, bytesPerRow=%d, %s, bitmapInfo=%d, renderingIntent=%d, %s\n", this, info->w, info->h, info->bpc, info->bpp, info->bpr, (info->isGray ? "grayscale" : "rgb"), info->bitmapInfo, info->renderingIntent, (info->shouldInterpolate ? "interpolates" : "does not interpolate"));
-    fflush(stderr);
-}
+#pragma mark -
 
 #ifdef USE_IMAGEIO
 #undef USE_IMAGEIO
 #endif
 
 #define USE_IMAGEIO 0
-#ifndef MAC_OS_X_VERSION_10_5
-#warning Using private CG API
-#endif
 
 // PNG and JPEG2000 are too slow when drawing, and TIFF is too big (although we could compress it)
 #define IMAGEIO_TYPE kUTTypeTIFF
     
-static CGImageRef FVCreateCGImageWithCharArray(DTCharArray array)
+static CGImageRef FVCreateCGImageWithCharArray(DTCharArray array, BOOL decompress)
 {
     CGImageRef toReturn = NULL;
 
@@ -393,7 +366,7 @@ static CGImageRef FVCreateCGImageWithCharArray(DTCharArray array)
     [data release];
 #else
     
-    NSData *decompressedData = [data _fv_zlibDecompress];
+    NSData *decompressedData = decompress ? [data _fv_zlibDecompress] : [[data retain] autorelease];
     [data release];
     
     FVCGImageHeaderInfo headerInfo;
@@ -417,75 +390,67 @@ static CGImageRef FVCreateCGImageWithCharArray(DTCharArray array)
     if (bitmapPtr)
         bitmapData = CFDataCreate(CFAllocatorGetDefault(), bitmapPtr, [decompressedData length] - hdrSize);    
     
-    CGColorSpaceRef cspace = header.IsGray() ? CGColorSpaceCreateDeviceGray() : CGColorSpaceCreateDeviceRGB();
-    CGDataProviderRef provider = NULL;
-    
     if (bitmapData) {
-        provider = CGDataProviderCreateWithCFData(bitmapData);
+        toReturn = header.CreateCGImageWithData(bitmapData);
         CFRelease(bitmapData);
     }
-    
-    if (provider)
-        toReturn = CGImageCreate(header.Width(), header.Height(), 
-                                 header.BitsPerComponent(), header.BitsPerPixel(), header.BytesPerRow(), 
-                                 cspace, header.BitmapInfo(), provider, NULL, 
-                                 header.ShouldInterpolate(), header.ColorRenderingIntent());
-    
-    CGColorSpaceRelease(cspace);
-    CGDataProviderRelease(provider);
 #endif
     return toReturn;
 }
 
-#if !defined(MAC_OS_X_VERSION_10_5) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5)
-// public on Leopard, private on 10.4
-FV_EXTERN CFDataRef CGDataProviderCopyData(CGDataProviderRef provider);
-#endif
 // private on all versions of OS X
 FV_EXTERN void * CGDataProviderGetBytePtr(CGDataProviderRef provider);
 FV_EXTERN size_t CGDataProviderGetSize(CGDataProviderRef provider);
 
-static DTCharArray FVCharArrayWithCGImage(CGImageRef image)
+static DTCharArray FVCharArrayWithCGImage(CGImageRef image, BOOL compress)
 {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 #if USE_IMAGEIO
-    NSMutableData *data = [[NSMutableData alloc] init];
-    CGImageDestinationRef dest = CGImageDestinationCreateWithData((CFMutableDataRef)data, IMAGEIO_TYPE, 1, NULL);
+    CFMutableDataRef data = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
+    CGImageDestinationRef dest = CGImageDestinationCreateWithData(data, IMAGEIO_TYPE, 1, NULL);
     CGImageDestinationAddImage(dest, image, NULL);
     CGImageDestinationFinalize(dest);
     if (dest) CFRelease(dest);
 #else
-    NSData *data = nil;
+    CFDataRef data = nil;
     FVCGImageHeader header = FVCGImageHeader(image);
     const FVCGImageHeaderInfo *headerInfo = header.HeaderInfo();
     
-    NSMutableData *mdata = [[NSMutableData alloc] initWithCapacity:[data length]];
-    [mdata appendBytes:headerInfo length:sizeof(FVCGImageHeaderInfo)];
+    // CFMutableData craps out if you specify a length and then try to increase it afterwards
+    CFMutableDataRef mdata = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
+
+    CFDataAppendBytes(mdata, (const UInt8 *)headerInfo, sizeof(FVCGImageHeaderInfo));
     CGDataProviderRef provider = CGImageGetDataProvider(image);
     void *bytePtr = NULL;
     
-    if (NULL != &CGDataProviderGetBytePtr && NULL != &CGDataProviderGetSize && 
+    if (NULL != CGDataProviderGetBytePtr && NULL != CGDataProviderGetSize && 
         NULL != (bytePtr = CGDataProviderGetBytePtr(provider)) ) {
-        [mdata appendBytes:bytePtr length:CGDataProviderGetSize(provider)];
+        CFDataAppendBytes(mdata, (const UInt8 *)bytePtr, CGDataProviderGetSize(provider));
     }
     else {
-        data = (NSData *)CGDataProviderCopyData(provider);
+        data = CGDataProviderCopyData(provider);
         // CGDataProviderCopyData returns NULL if a copy can't fit in memory, but we put it there originally
-        if (nil != data)
-            [mdata appendData:data];
-        [data release];
+        if (NULL != data) {
+            CFDataAppendBytes(mdata, CFDataGetBytePtr(data), CFDataGetLength(data));
+            CFRelease(data);
+        }
     }
 
-    data = [mdata _fv_zlibCompress];
-    [mdata release];
+    if (compress)
+        data = (CFDataRef)[(id)mdata _fv_zlibCompress];
+    else
+        data = (CFDataRef)[[(id)mdata retain] autorelease];
+    if (mdata) CFRelease(mdata);
 #endif
-    DTMutableCharArray array = DTMutableCharArray([data length]);
-    memcpy(array.Pointer(), [data bytes], [data length]);
+    CFIndex len = CFDataGetLength(data);
+    DTMutableCharArray array = DTMutableCharArray(len);
+    memcpy(array.Pointer(), CFDataGetBytePtr(data), len);
     
 #if USE_IMAGEIO
-    [data release];
+    if (data) CFRelease(data);
 #endif
     [pool release];
     
     return array;
 }
+

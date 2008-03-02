@@ -313,7 +313,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         // full image is large, so cache it to disk in case we get a -releaseResources or another view needs it
         CGImageRelease(_fullImageRef);
         _fullImageRef = [self _createResampledImageOfSize:[self size] fromCGImage:largeImage];
-        [FVIconCache cacheCGImage:_fullImageRef withName:_diskCacheName];
+        [FVIconCache cacheImage:_fullImageRef withName:_diskCacheName];
         
         // resample to a thumbnail size that will draw quickly
         CGImageRelease(_thumbnailRef);

@@ -38,17 +38,34 @@
 
 #import <Cocoa/Cocoa.h>
 
+struct FVDataStorage;
 
 @interface FVIconCache : NSObject
+{
+@private;
+    struct FVDataStorage *_dataStorage;
+    NSLock               *_dataFileLock;
+    NSMutableDictionary  *_eventTable;
+    NSString             *_cacheName;
+}
+
++ (CGImageRef)newThumbnailNamed:(const char *)name;
++ (void)cacheThumbnail:(CGImageRef)image withName:(const char *)name;
+
++ (CGImageRef)newImageNamed:(const char *)name;
++ (void)cacheImage:(CGImageRef)image withName:(const char *)name;
+
 
 // C-strings are used as names for compatibility with DTDataFile's use of std::string, and because it won't change.   Default is to use inode, and use the URL string as name for debug logging.  I was originally using -[[[NSURL path] lastPathComponent] fileSystemRepresentation] as the name when calling these methods, but it was creating a bunch of autoreleased objects and doing encoding conversions.
 
 + (char *)createDiskCacheNameWithURL:(NSURL *)aURL;
 
 // This always returns a new instance with a retain count of one, based on the data stored on disk.  It will return NULL if an error occurred in deserializing the image data or if the image could not be found in the cache.
-+ (CGImageRef)newImageNamed:(const char *)name;
+- (CGImageRef)newImageNamed:(const char *)name decompress:(BOOL)decompress;
 
-// Note: it's likely best to use +cacheCGImage:withName: only with images created from our bitmap context factory, for colorspace compatibility.  I haven't tested that hypothesis.
-+ (void)cacheCGImage:(CGImageRef)image withName:(const char *)name;
+// Note: it's likely best to use +cacheImage:withName: only with images created from our bitmap context factory, for colorspace compatibility.  I haven't tested that hypothesis.
+- (void)cacheImage:(CGImageRef)image withName:(const char *)name compress:(BOOL)compress;
+
+- (void)setName:(NSString *)name;
 
 @end

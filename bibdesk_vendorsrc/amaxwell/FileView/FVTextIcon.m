@@ -418,7 +418,7 @@ static inline void limitSize(NSSize *size)
     
     CGImageRelease(_fullImageRef);
     _fullImageRef = CGBitmapContextCreateImage(ctxt);
-    [FVIconCache cacheCGImage:_fullImageRef withName:_diskCacheName];
+    [FVIconCache cacheImage:_fullImageRef withName:_diskCacheName];
     
     // reset size while we have the lock, since it may be different now that we've read the string
     _fullSize = paperSize;

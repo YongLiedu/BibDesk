@@ -232,7 +232,7 @@ static inline BOOL isBigImage(CGImageRef image)
                 // If it's huge, store in the disk cache since ImageIO can be slow for e.g. 10K by 10K pixel images.
                 // Otherwise, we'll count on ImageIO being just as fast at reading (which is probably optimistic).
                 if (CGImageGetWidth(_fullImageRef) >= FVICONCACHE_THRESHOLD || CGImageGetHeight(_fullImageRef) >= FVICONCACHE_THRESHOLD) {
-                    [FVIconCache cacheCGImage:_fullImageRef withName:_diskCacheName];
+                    [FVIconCache cacheImage:_fullImageRef withName:_diskCacheName];
                     _inDiskCache = YES;
                 }
             }
