@@ -2507,8 +2507,12 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
         fullPath = [NSTemporaryDirectory() stringByAppendingPathComponent:filename];
     
     [download setDestination:fullPath allowOverwrite:NO];
+}
+
+- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path
+{
     FVDownload *fvDownload = (id)CFDictionaryGetValue(_activeDownloads, download);
-    [fvDownload setFileURL:[NSURL fileURLWithPath:fullPath]];
+    [fvDownload setFileURL:[NSURL fileURLWithPath:path]];
 }
 
 - (void)_invalidateProgressTimer
@@ -2558,10 +2562,19 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
     if (fvDownload) {
         NSUInteger idx = [fvDownload indexInView];
         NSURL *currentURL = [self iconURLAtIndex:idx];
+        NSURL *downloadURL = [fvDownload downloadURL];
         NSURL *dest = [fvDownload fileURL];
         // things could have been rearranged since the download was started, so don't replace the wrong one
-        if (nil != dest && [currentURL isEqual:[fvDownload downloadURL]]) {
-            if ([[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:idx] withURLs:[NSArray arrayWithObject:dest] forDrop:nil dropOperation:FVDropOn]) {
+        if (nil != dest) {
+            if (NO == [currentURL isEqual:downloadURL]) {
+                idx = [self numberOfIcons];
+                while (idx-- > 0) {
+                    currentURL = [self iconURLAtIndex:idx];
+                    if ([currentURL isEqual:downloadURL])
+                        break;
+                }
+            }
+            if ([currentURL isEqual:downloadURL] && [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:idx] withURLs:[NSArray arrayWithObject:dest] forDrop:nil dropOperation:FVDropOn]) {
                 NSUInteger r, c;
                 if ([self _getGridRow:&r column:&c ofIndex:idx])
                     [self _setNeedsDisplayForIconInRow:r column:c];
