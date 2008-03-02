@@ -31,6 +31,10 @@
 		CE05D3AD0D7B21DC0034C2A8 /* FVColorMenuView.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE05D3AC0D7B21DC0034C2A8 /* FVColorMenuView.nib */; };
 		CE05D3B10D7B22170034C2A8 /* FVColorMenuView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */; };
 		CE05D3B20D7B22170034C2A8 /* FVColorMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */; };
+		CE05D3C60D7B272A0034C2A8 /* FVDownload.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3C40D7B272A0034C2A8 /* FVDownload.h */; };
+		CE05D3C70D7B272A0034C2A8 /* FVDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3C50D7B272A0034C2A8 /* FVDownload.m */; };
+		CE05D3D00D7B27FC0034C2A8 /* FVProgressIndicatorCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */; };
+		CE05D3D10D7B27FC0034C2A8 /* FVProgressIndicatorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */; };
 		F92C7BC70D280D0E004409D8 /* FVWebViewIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */; };
 		F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */; };
 		F92C7C4F0D282503004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
@@ -179,6 +183,10 @@
 		CE05D3AE0D7B21EF0034C2A8 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/FVColorMenuView.nib; sourceTree = "<group>"; };
 		CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVColorMenuView.h; sourceTree = "<group>"; };
 		CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVColorMenuView.m; sourceTree = "<group>"; };
+		CE05D3C40D7B272A0034C2A8 /* FVDownload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVDownload.h; sourceTree = "<group>"; };
+		CE05D3C50D7B272A0034C2A8 /* FVDownload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVDownload.m; sourceTree = "<group>"; };
+		CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVProgressIndicatorCell.h; sourceTree = "<group>"; };
+		CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVProgressIndicatorCell.m; sourceTree = "<group>"; };
 		F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVWebViewIcon.h; sourceTree = "<group>"; };
 		F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVWebViewIcon.m; sourceTree = "<group>"; };
 		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
@@ -376,6 +384,8 @@
 				F94691FA0CA56EC500AC2772 /* FVArrowButtonCell.m */,
 				CE05D3AF0D7B22170034C2A8 /* FVColorMenuView.h */,
 				CE05D3B00D7B22170034C2A8 /* FVColorMenuView.m */,
+				CE05D3C40D7B272A0034C2A8 /* FVDownload.h */,
+				CE05D3C50D7B272A0034C2A8 /* FVDownload.m */,
 				F94691FB0CA56EC500AC2772 /* FVIcon.h */,
 				F94691FC0CA56EC500AC2772 /* FVIcon.m */,
 				F94691FD0CA56EC500AC2772 /* FVIconQueue.h */,
@@ -394,6 +404,8 @@
 				F9A2D3EF0CCBE14E002F517B /* FVPDFIcon.m */,
 				F9A2D3F20CCBE15C002F517B /* FVTextIcon.h */,
 				F9A2D3F30CCBE15C002F517B /* FVTextIcon.m */,
+				CE05D3CE0D7B27FC0034C2A8 /* FVProgressIndicatorCell.h */,
+				CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */,
 				F93C3AE90D39473C006EB558 /* FVFinderLabel.h */,
 				F93C3AEA0D39473C006EB558 /* FVFinderLabel.m */,
 				CE05D3240D7AFC830034C2A8 /* FVUtilities.h */,
@@ -532,6 +544,8 @@
 				F93C3AEB0D39473C006EB558 /* FVFinderLabel.h in Headers */,
 				CE05D35E0D7B0D750034C2A8 /* FVUtilities.h in Headers */,
 				CE05D3B10D7B22170034C2A8 /* FVColorMenuView.h in Headers */,
+				CE05D3C60D7B272A0034C2A8 /* FVDownload.h in Headers */,
+				CE05D3D00D7B27FC0034C2A8 /* FVProgressIndicatorCell.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -699,6 +713,8 @@
 				F93C3AEC0D39473C006EB558 /* FVFinderLabel.m in Sources */,
 				CE05D35B0D7B0D4A0034C2A8 /* FVUtilities.m in Sources */,
 				CE05D3B20D7B22170034C2A8 /* FVColorMenuView.m in Sources */,
+				CE05D3C70D7B272A0034C2A8 /* FVDownload.m in Sources */,
+				CE05D3D10D7B27FC0034C2A8 /* FVProgressIndicatorCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

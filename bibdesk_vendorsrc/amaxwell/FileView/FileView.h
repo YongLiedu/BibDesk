@@ -69,7 +69,8 @@ enum {
     FVOpenMenuItemTag = 1004,
     FVRevealMenuItemTag = 1005,
     FVChangeLabelMenuItemTag = 1006,
-    FVRemoveMenuItemTag = 1007
+    FVDownloadMenuItemTag    = 1007,
+    FVRemoveMenuItemTag = 1008
 };
 
 typedef enum _FVDropOperation {
@@ -108,6 +109,8 @@ typedef enum _FVDropOperation {
     NSRect                  _leftArrowFrame;
     NSRect                  _rightArrowFrame;
     
+    CFMutableDictionaryRef  _activeDownloads;
+    CFRunLoopTimerRef       _progressTimer;
     NSArray                *_iconURLs;
 }
 
@@ -192,6 +195,9 @@ typedef enum _FVDropOperation {
 
 // If unimplemented or returns YES, fileview will open the URL using NSWorkspace
 - (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL;
+
+// If unimplemented or returns nil, fileview will use a system temporary directory.  Used with FVDownloadMenuItemTag menu item.
+- (NSURL *)fileView:(FileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename;
 
 // If unimplemented, uses the proposedDragOperation
 - (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation;

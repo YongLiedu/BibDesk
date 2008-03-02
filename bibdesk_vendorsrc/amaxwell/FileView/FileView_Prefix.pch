@@ -4,7 +4,12 @@
 
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
-#endif
+
+// docs say not to send [super initialize]
+#if !defined(FVINITIALIZE)
+#define FVINITIALIZE(aClass) \
+do { if ([aClass self] != self) return; } while(0)
+#endif /* FVINITIALIZE */
 
 // From NSObjCRuntime.h
 #ifndef NSINTEGER_DEFINED
@@ -50,6 +55,8 @@ _FVAPIAssertBody((condition), (desc), (arg1), 0)
 
 #define FVAPIAssert2(condition, desc, arg1, arg2) \
 _FVAPIAssertBody((condition), (desc), (arg1), (arg2))
+
+#endif /* __OBJC__ */
 
 // copied from AppKit
 #if defined(__MACH__)

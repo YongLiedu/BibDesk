@@ -41,12 +41,14 @@
 #import <FileView/FVPreviewer.h>
 
 #import <QTKit/QTKit.h>
+#import <WebKit/WebKit.h>
 
 #import "FVIcon.h"
 #import "FVIcon_Private.h"
 #import "FVIconQueue.h"
 #import "FVArrowButtonCell.h"
 #import "FVUtilities.h"
+#import "FVDownload.h"
 #import "FVColorMenuView.h"
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
@@ -62,6 +64,9 @@ static const NSUInteger RELEASE_CACHE_THRESHOLD = 25;
 
 // check the icon cache every five minutes and get rid of stale icons
 static const CFTimeInterval ZOMBIE_TIMER_INTERVAL = 300.0;
+
+// time interval for indeterminate download progress indicator updates
+static const CFTimeInterval PROGRESS_TIMER_INTERVAL = 0.1;
 
 static NSDictionary *_titleAttributes = nil;
 static NSDictionary *_labeledAttributes = nil;
@@ -86,6 +91,7 @@ static CGColorRef _shadowColor = NULL;
 - (void)_showArrowsForIconAtIndex:(NSUInteger)anIndex;
 - (void)_hideArrows;
 - (BOOL)_hasArrows;
+- (void)_cancelActiveDownloads;
 
 @end
 
@@ -94,6 +100,8 @@ static CGColorRef _shadowColor = NULL;
 @implementation FileView
 
 + (void)initialize {
+    FVINITIALIZE(FileView);
+    
     NSMutableDictionary *ta = [NSMutableDictionary dictionary];
     [ta setObject:[NSFont systemFontOfSize:12.0] forKey:NSFontAttributeName];
     [ta setObject:[NSColor darkGrayColor] forKey:NSForegroundColorAttributeName];
@@ -186,7 +194,9 @@ static CGColorRef _shadowColor = NULL;
     
     _leftArrowFrame = NSZeroRect;
     _rightArrowFrame = NSZeroRect;
-    
+
+    _activeDownloads = CFDictionaryCreateMutable(alloc, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    _progressTimer = NULL;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -228,6 +238,9 @@ static CGColorRef _shadowColor = NULL;
     // this variable is accessed in super's dealloc, so set it to NULL
     CFRelease(_trackingRectMap);
     _trackingRectMap = NULL;
+    // takes care of the timer as well
+    [self _cancelActiveDownloads];
+    CFRelease(_activeDownloads);
     CGLayerRelease(_selectionOverlay);
     [super dealloc];
 }
@@ -1282,6 +1295,38 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         [self _scheduleIconsInRange:NSMakeRange(iMin, iMax - iMin)];
 }
 
+- (NSRect)_rectOfProgressIndicatorForIconAtIndex:(NSUInteger)anIndex;
+{
+    NSUInteger r, c;
+    NSRect frame = NSZeroRect;
+    if ([self _getGridRow:&r column:&c ofIndex:anIndex]) {    
+        frame = [self _rectOfIconInRow:r column:c];
+        NSPoint center = NSMakePoint(NSMidX(frame), NSMidY(frame));
+        
+        CGFloat size = NSHeight(frame) / 2;
+        frame.size.height = size;
+        frame.size.width = size;
+        frame.origin.x = center.x - NSWidth(frame) / 2;
+        frame.origin.y = center.y - NSHeight(frame) / 2;
+    }
+    return frame;
+}
+
+static void _drawProgressIndicatorForDownload(const void *key, const void *value, void *view)
+{
+    FileView *self = view;
+    FVDownload *fvDownload = (id)value;
+    
+    NSUInteger anIndex = [fvDownload indexInView];
+    
+    // we only draw a if there's an active download for this URL/index pair
+    if (anIndex < [self numberOfIcons] && [[self iconURLAtIndex:anIndex] isEqual:[fvDownload downloadURL]]) {
+        
+        NSRect frame = [self _rectOfProgressIndicatorForIconAtIndex:anIndex];
+        [[fvDownload progressIndicator] drawWithFrame:frame inView:self];
+    }
+}
+
 - (void)drawRect:(NSRect)rect;
 {
     NSRect visRect = [self visibleRect];
@@ -1336,6 +1381,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     else if (NSIsEmptyRect(_rubberBandRect) == NO) {
         [self _drawRubberbandRect];
     }
+    
+    CFDictionaryApplyFunction(_activeDownloads, _drawProgressIndicatorForDownload, self);
 }
 
 #pragma mark Drag source
@@ -2216,6 +2263,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     
     // generally only check this for actions that are dependent on single selection
     BOOL isMissing = [aURL isEqual:[FVIcon missingFileURL]];
+    BOOL isEditable = [self isEditable];
     BOOL selectionCount = [_selectedIndexes count];
     
     if (action == @selector(zoomOut:) || action == @selector(zoomIn:))
@@ -2225,7 +2273,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     else if (action == @selector(openSelectedURLs:))
         return selectionCount > 0;
     else if (action == @selector(delete:) || action == @selector(copy:) || action == @selector(cut:))
-        return [self isEditable] && selectionCount > 0;
+        return isEditable && selectionCount > 0;
     else if (action == @selector(selectAll:))
         return ([self numberOfIcons] > 0);
     else if (action == @selector(previewAction:))
@@ -2270,6 +2318,13 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         [anItem setState:state];
         return enabled;
     }
+    else if (action == @selector(downloadSelectedLink:)) {
+        FVDownload *download = aURL ? [[[FVDownload alloc] initWithDownloadURL:aURL indexInView:[_selectedIndexes firstIndex]] autorelease] : nil;
+        Boolean alreadyDownloading = CFDictionaryContainsValue(_activeDownloads, download);
+        // don't check reachability; just handle the error if it fails
+        return NO == isMissing && isEditable && selectionCount == 1 && [aURL isFileURL] == NO && FALSE == alreadyDownloading;
+    }
+    
     // need to handle print: and other actions
     return (action && [self respondsToSelector:action]);
 }
@@ -2433,6 +2488,126 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 
     }
     return sharedMenu;
+}
+
+#pragma mark Download support
+
+- (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename;
+{
+    NSString *fullPath = nil;
+    if ([[self delegate] respondsToSelector:@selector(fileView:downloadDestinationWithSuggestedFilename:)])
+        fullPath = [[[self delegate] fileView:self downloadDestinationWithSuggestedFilename:filename] path];
+    
+    if (nil == fullPath);
+        fullPath = [NSTemporaryDirectory() stringByAppendingPathComponent:filename];
+    
+    [download setDestination:fullPath allowOverwrite:NO];
+    FVDownload *fvDownload = (id)CFDictionaryGetValue(_activeDownloads, download);
+    [fvDownload setFileURL:[NSURL fileURLWithPath:fullPath]];
+}
+
+- (void)_invalidateProgressTimer
+{
+    if (_progressTimer) {
+        CFRunLoopTimerInvalidate(_progressTimer);
+        CFRelease(_progressTimer);
+        _progressTimer = NULL;
+    }
+}
+
+- (void)_progressTimerFired:(CFRunLoopTimerRef)timer
+{
+    [self setNeedsDisplay:YES];
+}
+
+- (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)response;
+{
+    FVDownload *fvDownload = (id)CFDictionaryGetValue(_activeDownloads, download);
+    long long expectedLength = [response expectedContentLength];
+    [fvDownload setExpectedLength:expectedLength];
+    if (NSURLResponseUnknownLength == expectedLength && NULL == _progressTimer) {
+        // runloop will retain this timer, but we'll retain it too and release in -dealloc
+        _progressTimer = FVCreateWeakTimerWithTimeInterval(PROGRESS_TIMER_INTERVAL, CFAbsoluteTimeGetCurrent() + PROGRESS_TIMER_INTERVAL, self, @selector(_progressTimerFired:));
+        CFRunLoopAddTimer(CFRunLoopGetCurrent(), _progressTimer, kCFRunLoopDefaultMode);
+    }
+}
+
+- (void)download:(NSURLDownload *)download didReceiveDataOfLength:(NSUInteger)length;
+{
+    FVDownload *fvDownload = (id)CFDictionaryGetValue(_activeDownloads, download);
+    [fvDownload incrementReceivedLengthBy:length];
+    NSURL *currentURL = [self iconURLAtIndex:[fvDownload indexInView]];
+    NSURL *dest = [fvDownload fileURL];
+    // things could have been rearranged since the download was started
+    if (nil != dest && [currentURL isEqual:[fvDownload downloadURL]]) {
+        NSUInteger r, c;
+        [self _getGridRow:&r column:&c ofIndex:[fvDownload indexInView]];
+        [self _setNeedsDisplayForIconInRow:r column:c];
+    }
+}
+
+- (void)downloadDidFinish:(NSURLDownload *)download;
+{
+    FVDownload *fvDownload = (id)CFDictionaryGetValue(_activeDownloads, download);
+    [self _invalidateProgressTimer];
+    if (fvDownload) {
+        NSUInteger idx = [fvDownload indexInView];
+        NSURL *currentURL = [self iconURLAtIndex:idx];
+        NSURL *dest = [fvDownload fileURL];
+        // things could have been rearranged since the download was started, so don't replace the wrong one
+        if (nil != dest && [currentURL isEqual:[fvDownload downloadURL]]) {
+            if ([[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:idx] withURLs:[NSArray arrayWithObject:dest] forDrop:nil dropOperation:FVDropOn]) {
+                NSUInteger r, c;
+                if ([self _getGridRow:&r column:&c ofIndex:idx])
+                    [self _setNeedsDisplayForIconInRow:r column:c];
+            }
+        }
+    }
+    CFDictionaryRemoveValue(_activeDownloads, download);
+}
+
+- (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error;
+{
+    // could badge with a failure icon here, but that would be a pain to keep track of
+    FVDownload *fvDownload = (id)CFDictionaryGetValue(_activeDownloads, download);
+    [self _invalidateProgressTimer];
+    if (fvDownload) {
+        CFDictionaryRemoveValue(_activeDownloads, download);
+        [self setNeedsDisplay:YES];
+    }
+}
+
+- (NSWindow *)downloadWindowForAuthenticationSheet:(WebDownload *)download
+{
+    return [self window];
+}
+
+static void cancelDownload(const void *key, const void *value, void *context)
+{
+    [(NSURLDownload *)key cancel];
+}
+
+- (void)_cancelActiveDownloads;
+{
+    CFDictionaryApplyFunction(_activeDownloads, cancelDownload, NULL);
+    CFDictionaryRemoveAllValues(_activeDownloads);
+    [self _invalidateProgressTimer];
+    [self setNeedsDisplay:YES];
+}
+
+- (void)downloadSelectedLink:(id)sender
+{
+    // validation ensures that we have a single selection, and that there is no current download with this URL
+    NSUInteger selIndex = [_selectedIndexes firstIndex];
+    if (NSNotFound != selIndex) {
+        NSURL *theURL = [self iconURLAtIndex:selIndex];
+        FVDownload *fvDownload = [[FVDownload alloc] initWithDownloadURL:theURL indexInView:selIndex];         
+        WebDownload *download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:theURL] delegate:self];
+        CFDictionarySetValue(_activeDownloads, download, fvDownload);
+        [download release];
+        [fvDownload release];
+        [self setNeedsDisplay:YES];
+    }
 }
 
 @end
