@@ -204,10 +204,10 @@ static NSURL *missingFileURL = nil;
         anIcon = [[FVPDFIcon allocWithZone:[self zone]] initWithPDFDAtURL:representedURL];
     }
     else if (UTTypeConformsTo(theUTI, kUTTypeImage)) {
-        anIcon = [[FVCGImageIcon allocWithZone:[self zone]] initWithImageAtURL:representedURL];
+        anIcon = [[FVImageIcon allocWithZone:[self zone]] initWithImageAtURL:representedURL];
     }
     else if (UTTypeConformsTo(theUTI, kUTTypeMovie)) {
-        anIcon = [[FVCGImageIcon allocWithZone:[self zone]] initWithQTMovieAtURL:representedURL];
+        anIcon = [[FVImageIcon allocWithZone:[self zone]] initWithQTMovieAtURL:representedURL];
     }
     else if (UTTypeConformsTo(theUTI, kUTTypeHTML)) {
         anIcon = [[FVWebViewIcon allocWithZone:[self zone]] initWithURL:representedURL];

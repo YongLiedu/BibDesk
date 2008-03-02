@@ -40,7 +40,7 @@
 #import "FVIcon.h"
 #import "FVIcon_Private.h"
 
-@interface FVCGImageIcon : FVIcon
+@interface FVImageIcon : FVIcon
 {
 @private
     NSURL          *_fileURL;

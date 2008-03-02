@@ -39,7 +39,7 @@
 #import "FVCGImageIcon.h"
 #import <QTKit/QTKit.h>
 
-@implementation FVCGImageIcon
+@implementation FVImageIcon
 
 static CFDictionaryRef __imsrcOptions = NULL;
 
