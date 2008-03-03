@@ -73,7 +73,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     WebView *nextView = nil;
     if ([_availableWebViews count]) {
-        nextView = [_availableWebViews lastObject];
+        nextView = [[_availableWebViews lastObject] retain];
         [_availableWebViews removeLastObject];
     }
     else if (_numberOfWebViews <= _maxWebViews) {
@@ -88,6 +88,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     NSParameterAssert(nil != aView);
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     [_availableWebViews insertObject:aView atIndex:0];
+    [aView release];
     [[NSNotificationCenter defaultCenter] postNotificationName:FVWebIconWebViewAvailableNotificationName object:self];
 }
 
