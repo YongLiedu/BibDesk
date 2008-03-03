@@ -263,6 +263,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self updateCiteKeyDuplicateWarning];
     
     [fileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFileViewIconScaleKey]];
+    [fileView setAutoScales:YES];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
     [fileView setEditable:isEditable];
 }

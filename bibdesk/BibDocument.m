@@ -489,7 +489,9 @@ enum {
     [fileGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
     [fileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKMainFileViewIconScaleKey]];
+    [fileView setAutoScales:YES];
     [fileViewSlider bind:@"value" toObject:fileView withKeyPath:@"iconScale" options:nil];
+    [fileViewSlider bind:@"hidden" toObject:fileView withKeyPath:@"autoScales" options:nil];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
     
 	// ImagePopUpButtons setup
@@ -600,6 +602,8 @@ enum {
     pboardHelper = nil;
     
     [fileView removeObserver:self forKeyPath:@"iconScale"];
+    [fileViewSlider unbind:@"value"];
+    [fileViewSlider unbind:@"hidden"];
     [fileView setDataSource:nil];
     [fileView setDelegate:nil];
     
