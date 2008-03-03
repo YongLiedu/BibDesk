@@ -456,10 +456,10 @@ static CGColorRef _shadowColor = NULL;
 {
     NSRect r = [self visibleRect];
     CGFloat l = floor(NSWidth(r) / 3);
-    r.size.width = NSWidth(r) - 2 * l;
-    r.size.height = 15;
-    r.origin.x = l;
+    r.origin.x += l;
     r.origin.y += 1;
+    r.size.width -= 2 * l;
+    r.size.height = 15;
     return r;
 }
 
@@ -467,10 +467,10 @@ static CGColorRef _shadowColor = NULL;
 {
     NSRect r = [self visibleRect];
     CGFloat l = floor(NSWidth(r) / 3);
-    r.size.width = NSWidth(r) - 2 * l;
-    r.size.height = 15;
-    r.origin.x = l;
+    r.origin.x += l;
     r.origin.y += NSHeight(r) - 19;
+    r.size.width -= 2 * l;
+    r.size.height = 15;
     return r;
 }
 
