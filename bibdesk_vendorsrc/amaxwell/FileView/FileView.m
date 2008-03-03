@@ -212,7 +212,7 @@ static CGColorRef _shadowColor = NULL;
     _activeDownloads = CFDictionaryCreateMutable(alloc, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     _progressTimer = NULL;
     
-    _operationQueue = [FVOperationQueue new];
+    //_operationQueue = [FVOperationQueue new];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -258,8 +258,8 @@ static CGColorRef _shadowColor = NULL;
     // takes care of the timer as well
     [self _cancelActiveDownloads];
     CFRelease(_activeDownloads);
-    [_operationQueue terminate];
-    [_operationQueue release];
+    //[_operationQueue terminate];
+    //[_operationQueue release];
     CGLayerRelease(_selectionOverlay);
     [super dealloc];
 }

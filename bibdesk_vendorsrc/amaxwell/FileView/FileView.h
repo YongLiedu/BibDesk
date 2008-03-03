@@ -114,7 +114,7 @@ typedef enum _FVDropOperation {
     FVSliderWindow         *_sliderWindow;
     NSTrackingRectTag       _topSliderTag;
     NSTrackingRectTag       _bottomSliderTag;
-    FVOperationQueue       *_operationQueue;
+    //FVOperationQueue       *_operationQueue;
     
     CFMutableDictionaryRef  _activeDownloads;
     CFRunLoopTimerRef       _progressTimer;
