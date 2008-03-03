@@ -340,6 +340,7 @@ static CGColorRef _shadowColor = NULL;
 - (void)setAutoScales:(BOOL)flag {
     if (_autoScales != flag) {
         _autoScales = flag;
+        _padding = [self _paddingForScale:[self iconScale]];
         [self setNeedsDisplay:YES];
         [self resetCursorRects];
     }
@@ -397,8 +398,8 @@ static CGColorRef _shadowColor = NULL;
 - (id)delegate { return _delegate; }
 
 // overall borders around the view
-- (CGFloat)_leftMargin { return _padding.width / 2 + 10.0; }
-- (CGFloat)_rightMargin { return _padding.width / 2 + 10.0; }
+- (CGFloat)_leftMargin { return _padding.width / 2 + 4.0; }
+- (CGFloat)_rightMargin { return _padding.width / 2 + 4.0; }
 - (CGFloat)_topMargin { return _titleHeight; }
 - (CGFloat)_bottomMargin { return 0.0; }
 
@@ -1459,20 +1460,13 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
 - (void)drawRect:(NSRect)rect;
 {
     if (_autoScales) {
-        CGFloat size;
-        // _paddingForScale: is dependent on scale, but we need padding to calculate the icon size here
-        NSSize padding = [self _paddingForScale:0];
-        
-        // Things get screwy when the scrollview is on the border of having a vertical scroller and is set to autohide scrollers.  The scrollview starts flickering really fast as it adds/removes scrollers, so we'll check for that here and make sure the icon size compensates for it.
         NSView *view = [self enclosingScrollView];
-        CGFloat scroller = 0;
-        if (nil == view) {
+        if (nil == view)
             view = self;
-        }
-        else if ([(NSScrollView *)view hasVerticalScroller]) {
-            scroller = NSWidth([[(NSScrollView *)view verticalScroller] frame]);
-        }
-        size = NSWidth([view bounds]) - 2 * padding.width - scroller;
+        // make sure the padding is correct, as we use it in the margin calculation, this does not depend on the scale when we're auto scaling
+        _padding = [self _paddingForScale:0];
+        // substract 2 for the border, otherwise we may get a scroller
+        CGFloat size = NSWidth([view bounds]) - [self _leftMargin] - [self _rightMargin] - 2.0;
         _iconSize = NSMakeSize(size, size);
     }
     
