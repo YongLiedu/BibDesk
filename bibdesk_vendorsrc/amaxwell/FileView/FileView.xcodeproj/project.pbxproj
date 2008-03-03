@@ -25,7 +25,6 @@
 /* Begin PBXBuildFile section */
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
-		CE05D3260D7AFC830034C2A8 /* FVUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3250D7AFC830034C2A8 /* FVUtilities.m */; };
 		CE05D35B0D7B0D4A0034C2A8 /* FVUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D3250D7AFC830034C2A8 /* FVUtilities.m */; };
 		CE05D35E0D7B0D750034C2A8 /* FVUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D3240D7AFC830034C2A8 /* FVUtilities.h */; };
 		CE05D3AD0D7B21DC0034C2A8 /* FVColorMenuView.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE05D3AC0D7B21DC0034C2A8 /* FVColorMenuView.nib */; };
@@ -872,7 +871,6 @@
 			files = (
 				F94692830CA5777300AC2772 /* Controller.m in Sources */,
 				F946928F0CA5784700AC2772 /* main.m in Sources */,
-				CE05D3260D7AFC830034C2A8 /* FVUtilities.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
