@@ -368,7 +368,7 @@ static CGColorRef _shadowColor = NULL;
     
     // make sure these get cleaned up; if the datasource is now nil, we're probably going to deallocate soon
     [self _cancelActiveDownloads];
-    [_operationQueue cancel];
+    //[_operationQueue cancel];
     
     _padding = [self _paddingForScale:[self iconScale]];
     
@@ -656,7 +656,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     if (nil == newSuperview) {
         [self removeObserver:self forKeyPath:@"selectionIndexes"];
         [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconUpdatedNotificationName object:nil];
-        [_operationQueue cancel];
+        //[_operationQueue cancel];
         
         // break a retain cycle; binding is retaining this view
         [[_sliderWindow slider] unbind:@"value"];

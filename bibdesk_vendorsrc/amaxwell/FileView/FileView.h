@@ -80,7 +80,7 @@ typedef enum _FVDropOperation {
     FVDropAfter
 } FVDropOperation;
 
-@class FVSliderWindow, FVOperationQueue;
+@class FVSliderWindow;
 
 @interface FileView : NSView 
 {
