@@ -1103,12 +1103,13 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
-            
+            /*
             item = [menu insertItemWithTitle:[NSLocalizedString(@"Download URL", @"Menu item title") stringByAppendingEllipsis]
                                       action:@selector(downloadRemoteURL:)
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
+            */
         }
     }
     
@@ -1439,12 +1440,12 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
-    if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
-        [self downloadURLs:[[publication valueForKeyPath:@"files.URL"] objectsAtIndexes:aSet]];
-    } else {
+    //if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
+    //    [self downloadURLs:[[publication valueForKeyPath:@"files.URL"] objectsAtIndexes:aSet]];
+    //} else {
         OBASSERT(anIndex != NSNotFound);
         [publication moveFilesAtIndexes:aSet toIndex:anIndex];
-    }
+    //}
     return YES;
 }
 
@@ -1454,7 +1455,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSEnumerator *enumerator = [newURLs objectEnumerator];
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex];
-    BOOL isCopy = [info draggingSourceOperationMask] == NSDragOperationCopy;
+    BOOL isCopy = NO;//[info draggingSourceOperationMask] == NSDragOperationCopy;
     while (NSNotFound != idx) {
         if ((aURL = [enumerator nextObject]) && 
             (isCopy || (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication]))) {
@@ -1479,11 +1480,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
-    if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
-        
-        [self downloadURLs:absoluteURLs];
-        
-    } else {
+    //if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
+    //    
+    //    [self downloadURLs:absoluteURLs];
+    //    
+    //} else {
         
         BDSKLinkedFile *aFile;
         NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
@@ -1503,7 +1504,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             }
             idx = [aSet indexGreaterThanIndex:idx];
         }
-    }
+    //}
 }
 
 - (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
@@ -1521,6 +1522,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
+    return dragOperation;
+    
     // leave invalid drags and local moves unaltered, we want to link remote drags
     NSDragOperation dragOp = dragOperation;
     if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
@@ -1547,6 +1550,24 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         dragOp = NSDragOperationLink;
     }
     return dragOp;
+}
+
+- (NSURL *)fileView:(FileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename {
+	NSString *extension = [filename pathExtension];
+   
+	NSSavePanel *sPanel = [NSSavePanel savePanel];
+    if (NO == [extension isEqualToString:@""]) 
+		[sPanel setRequiredFileType:extension];
+    [sPanel setAllowsOtherFileTypes:YES];
+    [sPanel setCanSelectHiddenExtension:YES];
+	
+    // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
+    int returnCode = [sPanel runModalForDirectory:nil file:filename];
+    if (returnCode == NSOKButton) {
+        return [sPanel URL];
+    } else {
+        return nil;
+    }
 }
 
 - (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
