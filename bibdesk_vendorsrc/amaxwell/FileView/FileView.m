@@ -1471,8 +1471,12 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
         // make sure the padding is correct, as we use it in the margin calculation, this does not depend on the scale when we're auto scaling
         _padding = [self _paddingForScale:0];
         // substract 2 for the border
-        CGFloat size = NSWidth([view bounds]) - [self _leftMargin] - [self _rightMargin] - scrollerWidth - 2;
+        CGFloat size = NSWidth([view bounds]) - [self _leftMargin] - [self _rightMargin] - 2;
         _iconSize = NSMakeSize(size, size);
+        if ([self enclosingScrollView] && [self _rowHeight] * [self numberOfIcons] + [self _topMargin] + [self _bottomMargin] > NSHeight([view bounds]) - scrollerWidth - 2) {
+            size -= scrollerWidth;
+            _iconSize = NSMakeSize(size, size);
+        }
     }
     
     NSRect visRect = [self visibleRect];
