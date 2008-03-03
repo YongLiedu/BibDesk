@@ -37,6 +37,7 @@
  */
 
 #import "FVColorMenuView.h"
+#import "FVUtilities.h"
 #import <FileView/FVFinderLabel.h>
 
 static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotification";
@@ -265,27 +266,29 @@ static NSRect __FVSquareRectCenteredInRect(const NSRect iconRect)
 {
     NSRect boxRect = [self cellFrameAtRow:r column:c];
     boxRect = __FVSquareRectCenteredInRect(boxRect);
-    return [self centerScanRect:boxRect];
+    return NSInsetRect([self centerScanRect:boxRect], 1.0, 1.0);
 }
-
-#define BOX_WIDTH 1.5
 
 - (void)drawRect:(NSRect)aRect
 {
     [super drawRect:aRect];
         
     // draw a box around the moused-over cell (unless it's selected)
-    if (NO_BOX != _boxedRow && NO_BOX != _boxedColumn && ([self selectedRow] != _boxedRow || [self selectedColumn] != _boxedColumn)) {
-        [[NSColor grayColor] setFill];
-        NSFrameRectWithWidth([self boxRectForCellAtRow:_boxedRow column:_boxedColumn], BOX_WIDTH);
-        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.3] setFill];
-        NSRectFillUsingOperation([self boxRectForCellAtRow:_boxedRow column:_boxedColumn], NSCompositeSourceOver);
+    if (NO_BOX != _boxedRow && NO_BOX != _boxedColumn && ([self selectedRow] != _boxedRow || [self selectedColumn] != _boxedColumn || ([self selectedRow] == 0 && [self selectedColumn] == 0))) {
+        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] setStroke];
+        NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:[self boxRectForCellAtRow:_boxedRow column:_boxedColumn] xRadius:1.5 yRadius:1.5];
+        [path setLineWidth:1.0];
+        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.2] setFill];
+        [path fill];
+        [path stroke];
     }
     
     // the X doesn't show as selected
     if ([self selectedRow] != 0 || [self selectedColumn] != 0) {
-        [[NSColor grayColor] setFill];
-        NSFrameRectWithWidth([self boxRectForCellAtRow:[self selectedRow] column:[self selectedColumn]], BOX_WIDTH);
+        [[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] setStroke];
+        NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:[self boxRectForCellAtRow:[self selectedRow] column:[self selectedColumn]] xRadius:1.5 yRadius:1.5];
+        [path setLineWidth:1.0];
+        [path stroke];
     }
 }
 
