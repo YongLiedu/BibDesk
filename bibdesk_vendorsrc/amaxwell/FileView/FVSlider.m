@@ -52,19 +52,21 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
 {
     [NSGraphicsContext saveGraphicsState];
     
+    Class gradientClass = NSClassFromString(@"NSGradient");
+    
     [[NSColor clearColor] setFill];
     NSRectFill(aRect);
     
     // draw a dark background
-    [[NSColor colorWithCalibratedWhite:0.0 alpha:0.5] setFill];
     CGFloat radius = NSHeight(aRect) / 2;
     NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:aRect xRadius:radius yRadius:radius];
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
-        [path fill];
-    } else {
-        id gradient = [[[NSClassFromString(@"NSGradient") alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] endingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.6]] autorelease];
+    if (gradientClass) {
+        id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] endingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.6]] autorelease];
         [path addClip];
         [gradient drawInBezierPath:path angle:flipped ? 90 : -90];
+    } else {
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.5] setFill];
+        [path fill];
     }
     // border highlight
     [[NSColor darkGrayColor] setStroke];
@@ -73,11 +75,12 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
     
     // draw a white outline for the track
     [[NSColor whiteColor] setStroke];
-    NSRect track = NSInsetRect(aRect, NSHeight(aRect)/3, NSHeight(aRect)/3);
-    path = [NSBezierPath fv_bezierPathWithRoundRect:track xRadius:3 yRadius:3];
+    NSRect track = NSInsetRect(aRect, 4.0, 4.0);
+    path = [NSBezierPath fv_bezierPathWithRoundRect:track xRadius:NSHeight(track) / 2 yRadius:NSHeight(track) / 2];
     [path addClip];
     [path setLineWidth:1.5];
     [path stroke];
+    [path setLineWidth:1.0];
     
     // if we don't save/restore, the knob gets clipped
     [NSGraphicsContext restoreGraphicsState];
@@ -85,22 +88,29 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
 
 - (void)drawKnob:(NSRect)knobRect
 {
-    CGFloat inset = MAX(NSWidth(knobRect) / 6, NSHeight(knobRect) / 6);
-    knobRect = NSInsetRect(knobRect, inset, inset);
-    if ([[self controlView] lockFocusIfCanDraw]) {
+    knobRect = NSInsetRect(knobRect, 2.0, 2.0);
+    
+    Class gradientClass = NSClassFromString(@"NSGradient");
+    NSBezierPath *path = [NSBezierPath bezierPathWithOvalInRect:knobRect];
+    NSShadow *aShadow = [[[NSShadow alloc] init] autorelease];
+    
+    [aShadow setShadowBlurRadius:2.0];
+    [aShadow setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.4]];
+    
+    [NSGraphicsContext saveGraphicsState];
+    [aShadow set];
+    [[NSColor whiteColor] setFill];
+    [path fill];
+    [NSGraphicsContext restoreGraphicsState];
+    
+    if (gradientClass) {
         [NSGraphicsContext saveGraphicsState];
-        NSBezierPath *path = [NSBezierPath bezierPathWithOvalInRect:knobRect];
-        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4) {
-            [[NSColor whiteColor] setFill];
-            [path fill];
-        } else {
-            id gradient = [[[NSClassFromString(@"NSGradient") alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] endingColor:[NSColor colorWithCalibratedWhite:0.8 alpha:1.0]] autorelease];
-            [path addClip];
-            [gradient drawFromCenter:NSMakePoint(NSMidX(knobRect), NSMidY(knobRect) - inset) radius:0 toCenter:NSMakePoint(NSMidX(knobRect), NSMidY(knobRect)) radius:NSWidth(knobRect) / 2 options:0];
-        }
+        id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.0] endingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.2]] autorelease];
+        [path addClip];
+        [gradient drawFromCenter:NSMakePoint(NSMidX(knobRect), NSMidY(knobRect) - 2.0) radius:0 toCenter:NSMakePoint(NSMidX(knobRect), NSMidY(knobRect)) radius:NSWidth(knobRect) / 2 options:0];
         [NSGraphicsContext restoreGraphicsState];
-        [[self controlView] unlockFocus];
     }
+    
 }
 
 - (id)init
@@ -144,13 +154,13 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
 
 - (id)init
 {
-    self = [super initWithContentRect:NSMakeRect(0,0,10,10) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES];
+    self = [super initWithContentRect:NSMakeRect(0,0,50,10) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES];
     if (self) {
         [self setReleasedWhenClosed:NO];
         [self setBackgroundColor:[NSColor clearColor]];
         [self setOpaque:NO];
         [self setHasShadow:YES];
-        _slider = [[FVSlider alloc] initWithFrame:NSMakeRect(0,0,10,10)];
+        _slider = [[FVSlider alloc] initWithFrame:NSMakeRect(0,0,50,10)];
         [_slider setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
         [[self contentView] addSubview:_slider];
         [_slider release];
