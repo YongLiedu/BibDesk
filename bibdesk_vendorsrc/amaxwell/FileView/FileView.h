@@ -80,6 +80,8 @@ typedef enum _FVDropOperation {
     FVDropAfter
 } FVDropOperation;
 
+@class FVSliderWindow;
+
 @interface FileView : NSView 
 {
 @private
@@ -109,6 +111,9 @@ typedef enum _FVDropOperation {
     NSButtonCell           *_rightArrow;
     NSRect                  _leftArrowFrame;
     NSRect                  _rightArrowFrame;
+    FVSliderWindow         *_sliderWindow;
+    NSTrackingRectTag       _topSliderTag;
+    NSTrackingRectTag       _bottomSliderTag;
     
     CFMutableDictionaryRef  _activeDownloads;
     CFRunLoopTimerRef       _progressTimer;

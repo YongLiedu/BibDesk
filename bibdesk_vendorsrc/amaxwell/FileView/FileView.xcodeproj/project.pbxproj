@@ -44,6 +44,8 @@
 		CE05D4740D7B36DD0034C2A8 /* FVMovieIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D46D0D7B36DD0034C2A8 /* FVMovieIcon.m */; };
 		CE05D4750D7B36DD0034C2A8 /* FVPlaceholderImage.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D46E0D7B36DD0034C2A8 /* FVPlaceholderImage.h */; };
 		CE05D4760D7B36DD0034C2A8 /* FVPlaceholderImage.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D46F0D7B36DD0034C2A8 /* FVPlaceholderImage.m */; };
+		CE05D5A20D7C10FD0034C2A8 /* FVSlider.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D5A00D7C10FD0034C2A8 /* FVSlider.h */; };
+		CE05D5A30D7C10FD0034C2A8 /* FVSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5A10D7C10FD0034C2A8 /* FVSlider.m */; };
 		F92C7BC70D280D0E004409D8 /* FVWebViewIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */; };
 		F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */; };
 		F92C7C4F0D282503004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
@@ -205,6 +207,8 @@
 		CE05D46D0D7B36DD0034C2A8 /* FVMovieIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVMovieIcon.m; sourceTree = "<group>"; };
 		CE05D46E0D7B36DD0034C2A8 /* FVPlaceholderImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVPlaceholderImage.h; sourceTree = "<group>"; };
 		CE05D46F0D7B36DD0034C2A8 /* FVPlaceholderImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVPlaceholderImage.m; sourceTree = "<group>"; };
+		CE05D5A00D7C10FD0034C2A8 /* FVSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVSlider.h; sourceTree = "<group>"; };
+		CE05D5A10D7C10FD0034C2A8 /* FVSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVSlider.m; sourceTree = "<group>"; };
 		F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVWebViewIcon.h; sourceTree = "<group>"; };
 		F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVWebViewIcon.m; sourceTree = "<group>"; };
 		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
@@ -473,6 +477,8 @@
 				CE05D3CF0D7B27FC0034C2A8 /* FVProgressIndicatorCell.m */,
 				F946944E0CA59AF100AC2772 /* FVScaledImageView.h */,
 				F946944F0CA59AF100AC2772 /* FVScaledImageView.m */,
+				CE05D5A00D7C10FD0034C2A8 /* FVSlider.h */,
+				CE05D5A10D7C10FD0034C2A8 /* FVSlider.m */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -601,6 +607,7 @@
 				CE05D4710D7B36DD0034C2A8 /* FVMIMEIcon.h in Headers */,
 				CE05D4730D7B36DD0034C2A8 /* FVMovieIcon.h in Headers */,
 				CE05D4750D7B36DD0034C2A8 /* FVPlaceholderImage.h in Headers */,
+				CE05D5A20D7C10FD0034C2A8 /* FVSlider.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -775,6 +782,7 @@
 				CE05D4720D7B36DD0034C2A8 /* FVMIMEIcon.m in Sources */,
 				CE05D4740D7B36DD0034C2A8 /* FVMovieIcon.m in Sources */,
 				CE05D4760D7B36DD0034C2A8 /* FVPlaceholderImage.m in Sources */,
+				CE05D5A30D7C10FD0034C2A8 /* FVSlider.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -49,7 +49,9 @@
 #import "FVArrowButtonCell.h"
 #import "FVUtilities.h"
 #import "FVDownload.h"
+#import "FVSlider.h"
 #import "FVColorMenuView.h"
+#import "FVBitmapContextCache.h"
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
@@ -199,6 +201,12 @@ static CGColorRef _shadowColor = NULL;
     
     _leftArrowFrame = NSZeroRect;
     _rightArrowFrame = NSZeroRect;
+    
+    // this is created lazily when needed
+    _sliderWindow = nil;
+    // always initialize this to -1
+    _topSliderTag = -1;
+    _bottomSliderTag = -1;
 
     _activeDownloads = CFDictionaryCreateMutable(alloc, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     _progressTimer = NULL;
@@ -240,6 +248,7 @@ static CGColorRef _shadowColor = NULL;
     [_iconCache release];
     [_selectedIndexes release];
     [_backgroundColor release];
+    [_sliderWindow release];
     // this variable is accessed in super's dealloc, so set it to NULL
     CFRelease(_trackingRectMap);
     _trackingRectMap = NULL;
@@ -328,6 +337,7 @@ static CGColorRef _shadowColor = NULL;
     if (_autoScales != flag) {
         _autoScales = flag;
         [self setNeedsDisplay:YES];
+        [self resetCursorRects];
     }
 }
 
@@ -428,6 +438,42 @@ static CGColorRef _shadowColor = NULL;
     return size;
 }
 
+- (FVSliderWindow *)_sliderWindow {
+    if (_sliderWindow == nil) {
+        _sliderWindow = [[FVSliderWindow alloc] init];
+        FVSlider *slider = [_sliderWindow slider];
+        // binding & unbinding is handled in viewWillMoveToSuperview:
+        [slider setMaxValue:15];
+        [slider setMinValue:1.0];
+        if ([self superview])
+            [[_sliderWindow slider] bind:@"value" toObject:self withKeyPath:@"iconScale" options:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSliderMouseExited:) name:FVSliderMouseExitedNotificationName object:slider];
+    }
+    return _sliderWindow;
+}
+
+- (NSRect)_topSliderRect
+{
+    NSRect r = [self visibleRect];
+    CGFloat l = floor(NSWidth(r) / 3);
+    r.size.width = NSWidth(r) - 2 * l;
+    r.size.height = 15;
+    r.origin.x = l;
+    r.origin.y += 1;
+    return r;
+}
+
+- (NSRect)_bottomSliderRect
+{
+    NSRect r = [self visibleRect];
+    CGFloat l = floor(NSWidth(r) / 3);
+    r.size.width = NSWidth(r) - 2 * l;
+    r.size.height = 15;
+    r.origin.x = l;
+    r.origin.y += NSHeight(r) - 19;
+    return r;
+}
+
 // This is the square rect the icon is drawn in.  It doesn't include padding, so rects aren't contiguous.
 // Caller is responsible for any centering before drawing.
 - (NSRect)_rectOfIconInRow:(NSUInteger)row column:(NSUInteger)column;
@@ -462,6 +508,10 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         CFDictionaryApplyFunction(_trackingRectMap, _removeTrackingRectTagFromView, self);
         CFDictionaryRemoveAllValues(_trackingRectMap);
     }
+    if (-1 != _topSliderTag)
+        [self removeTrackingRect:_topSliderTag];
+    if (-1 != _bottomSliderTag)
+        [self removeTrackingRect:_bottomSliderTag];
 }
 
 // We assume that all existing tracking rects and tooltips have been removed prior to invoking this method, so don't call it directly.  Use -[NSWindow invalidateCursorRectsForView:] instead.
@@ -503,6 +553,13 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
             [self _showArrowsForIconAtIndex:mouseIndex];
         else
             [self _hideArrows];
+        
+        if (_autoScales == NO) {
+            NSRect sliderRect = [self _topSliderRect];
+            _topSliderTag = [self addTrackingRect:sliderRect owner:self userData:[self _sliderWindow] assumeInside:NSPointInRect(mouseLoc, sliderRect)];  
+            sliderRect = [self _bottomSliderRect];
+            _bottomSliderTag = [self addTrackingRect:sliderRect owner:self userData:[self _sliderWindow] assumeInside:NSPointInRect(mouseLoc, sliderRect)];  
+        }
     }
 }
 
@@ -592,9 +649,15 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     if (nil == newSuperview) {
         [self removeObserver:self forKeyPath:@"selectionIndexes"];
         [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconUpdatedNotificationName object:nil];
+        
+        // break a retain cycle; binding is retaining this view
+        [[_sliderWindow slider] unbind:@"value"];
     }
     else {
         [self addObserver:self forKeyPath:@"selectionIndexes" options:0 context:NULL];
+        
+        // bind here (noop if we don't have a slider)
+        [[_sliderWindow slider] bind:@"value" toObject:self withKeyPath:@"iconScale" options:nil];
         
         // special case; see FVWebViewIcon for posting and comments
         [[NSNotificationCenter defaultCenter] addObserver:self 
@@ -1606,11 +1669,37 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
     NSUInteger anIndex;
     
     // Finder doesn't show buttons unless it's the front app.  If Finder is the front app, it shows them for any window, regardless of main/key state, so we'll do the same.
-    if ([NSApp isActive] && CFDictionaryGetValueIfPresent(_trackingRectMap, (const void *)tag, (const void **)&anIndex))
-        [self _showArrowsForIconAtIndex:anIndex];
+    if ([NSApp isActive]) {
+        if (CFDictionaryGetValueIfPresent(_trackingRectMap, (const void *)tag, (const void **)&anIndex)) {
+            [self _showArrowsForIconAtIndex:anIndex];
+        } else if (_autoScales == NO && _sliderWindow && [event userData] == _sliderWindow) {
+            
+            if ([[[self window] childWindows] containsObject:_sliderWindow] == NO) {
+                NSRect sliderRect = tag == _bottomSliderTag ? [self _bottomSliderRect] : [self _topSliderRect];
+                sliderRect = [self convertRect:sliderRect toView:nil];
+                sliderRect.origin = [[self window] convertBaseToScreen:sliderRect.origin];
+                // looks cool to use -animator here, but makes it hard to hit...
+                if (NSEqualRects([_sliderWindow frame], sliderRect) == NO)
+                    [_sliderWindow setFrame:sliderRect display:NO];
+                
+                [[self window] addChildWindow:_sliderWindow ordered:NSWindowAbove];
+                [[_sliderWindow animator] setAlphaValue:1.0];
+            }
+        }
+    }
+    
     
     // !!! calling this before adding buttons seems to disable the tooltip on 10.4; what does it do on 10.5?
     [super mouseEntered:event];
+}
+
+// we can't do this in mouseExited: since it's received as soon as the mouse enters the slider's window (and checking the mouse location just postpones the problems)
+- (void)handleSliderMouseExited:(NSNotification *)aNote
+{
+    if ([[[self window] childWindows] containsObject:_sliderWindow]) {
+        [[self window] removeChildWindow:_sliderWindow];
+        [[_sliderWindow animator] setAlphaValue:0.0];
+    }
 }
 
 - (void)mouseExited:(NSEvent *)event;
