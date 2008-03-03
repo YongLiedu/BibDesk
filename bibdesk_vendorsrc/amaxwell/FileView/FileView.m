@@ -1461,12 +1461,17 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
 {
     if (_autoScales) {
         NSView *view = [self enclosingScrollView];
+        
+        // Things get screwy when the scrollview is on the border of having a vertical scroller and is set to autohide scrollers.  The scrollview starts flickering really fast as it adds/removes scrollers, so we'll check for that here and make sure the icon size compensates for it.
+        CGFloat scrollerWidth = 0;
         if (nil == view)
             view = self;
+        else if ([(NSScrollView *)view hasVerticalScroller])
+            scrollerWidth = [NSScroller scrollerWidth];
         // make sure the padding is correct, as we use it in the margin calculation, this does not depend on the scale when we're auto scaling
         _padding = [self _paddingForScale:0];
-        // substract 2 for the border, otherwise we may get a scroller
-        CGFloat size = NSWidth([view bounds]) - [self _leftMargin] - [self _rightMargin] - 2.0;
+        // substract 2 for the border
+        CGFloat size = NSWidth([view bounds]) - [self _leftMargin] - [self _rightMargin] - scrollerWidth - 2;
         _iconSize = NSMakeSize(size, size);
     }
     
