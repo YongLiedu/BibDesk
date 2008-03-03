@@ -1,10 +1,10 @@
 //
-//  FVIconQueue.h
-//  FileViewTest
+//  FVInvocationOperation.h
+//  FileView
 //
-//  Created by Adam Maxwell on 09/21/07.
+//  Created by Adam Maxwell on 2/23/08.
 /*
- This software is Copyright (c) 2007-2008,2008
+ This software is Copyright (c) 2008
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -37,29 +37,23 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "FVConcreteOperation.h"
+#import <libkern/OSAtomic.h>
 
-@interface NSObject (FVIconQueueCallBack)
-- (void)iconQueueUpdated:(NSArray *)updatedIcons;
-@end
-
-@interface FVIconQueue : NSObject
+@interface FVInvocationOperation : FVConcreteOperation
 {
-@private
-    NSConditionLock        *_setupLock;
-    NSLock                 *_taskLock;
-    CFMutableDictionaryRef  _tasks;
-    NSMutableSet           *_iconsToRelease;
-    NSMachPort             *_threadPort;
+@private;
+    NSInvocation *_invocation;
+    id            _exception;
+    void         *_retdata;
+    OSSpinLock    _lock;
 }
 
-// these methods may be called from any thread, but the callback will be sent on the main thread
-// icon objects respond to -renderOffscreen and -releaseResources; this isn't a general purpose queue
+// designated initializer
+- (id)initWithInvocation:(NSInvocation *)inv;
+// convenience cover; still creates an invocation, though, so there's no performance win
+- (id)initWithTarget:(id)target selector:(SEL)sel object:(id)arg;
+- (NSInvocation *)invocation;
+- (id)result;
 
-// for main thread only; create another instance per-thread if you need to (but it will leak)
-+ (FVIconQueue *)sharedQueue;
-
-// sends -renderOffscreen to icons, invokes iconQueueUpdated at intervals
-- (void)enqueueRenderIcons:(NSArray *)icons forObject:(id)anObject;
-// sends -releaseResources on icons
-- (void)enqueueReleaseResourcesForIcons:(NSArray *)icons;
 @end
