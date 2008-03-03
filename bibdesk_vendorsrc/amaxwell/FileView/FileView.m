@@ -428,16 +428,16 @@ static CGColorRef _shadowColor = NULL;
 {
     // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
     NSSize size = NSZeroSize;
-    if (_autoScales) {
-        size.width = MAX(NSWidth([self bounds]) / 10, DEFAULT_PADDING);
-    } else {
+    if (_autoScales)
 #if __LP64__
-        CGFloat extraMargin = round(4.0 * scale);
+        size.width = fmax(round(NSWidth([self bounds]) / 16.0), 16.0);
+    else
+        size.width = 10.0 + round(4.0 * scale);
 #else
-        CGFloat extraMargin = roundf(4.0 * scale);
+        size.width = fmaxf(roundf(NSWidth([self bounds]) / 16.0), 16.0);
+    else
+        size.width = 10.0 + roundf(4.0 * scale);
 #endif
-        size.width = 10.0 + extraMargin;
-    }
     size.height = size.width - 6.0 + _titleHeight;
     if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
         size.height += _subtitleHeight;
@@ -449,8 +449,8 @@ static CGColorRef _shadowColor = NULL;
         _sliderWindow = [[FVSliderWindow alloc] init];
         FVSlider *slider = [_sliderWindow slider];
         // binding & unbinding is handled in viewWillMoveToSuperview:
-        [slider setMaxValue:15];
-        [slider setMinValue:1.0];
+        [slider setMaxValue:16.0];
+        [slider setMinValue:0.5];
         if ([self superview])
             [[_sliderWindow slider] bind:@"value" toObject:self withKeyPath:@"iconScale" options:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSliderMouseExited:) name:FVSliderMouseExitedNotificationName object:slider];
@@ -492,7 +492,7 @@ static CGColorRef _shadowColor = NULL;
 
 - (NSRect)_rectOfTextForIconRect:(NSRect)iconRect;
 {
-    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect), NSWidth(iconRect), _padding.height - round(4.0 * [self iconScale]));
+    NSRect textRect = NSMakeRect(NSMinX(iconRect), NSMaxY(iconRect), NSWidth(iconRect), _padding.height);
     // allow the text rect to extend outside the grid cell
     return NSInsetRect(textRect, -_padding.width / 3.0, 2.0);
 }
