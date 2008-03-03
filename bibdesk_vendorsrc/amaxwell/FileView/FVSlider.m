@@ -64,7 +64,7 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
     } else {
         id gradient = [[[NSClassFromString(@"NSGradient") alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] endingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.6]] autorelease];
         [path addClip];
-        [gradient drawInBezierPath:path angle:90];
+        [gradient drawInBezierPath:path angle:flipped ? 90 : -90];
     }
     // border highlight
     [[NSColor darkGrayColor] setStroke];
