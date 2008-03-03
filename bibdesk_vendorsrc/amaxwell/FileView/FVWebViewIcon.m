@@ -37,12 +37,15 @@
  */
 
 #import "FVWebViewIcon.h"
+#import "FVTextIcon.h"
 #import "FVFinderIcon.h"
 #import "FVMIMEIcon.h"
 #import <WebKit/WebKit.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 
 @implementation FVWebViewIcon
+
+static BOOL FVWebIconDisabled = NO;
 
 // webview pool variables to keep memory usage down; pool size is tunable
 static NSInteger _maxWebViews = 5;
@@ -60,6 +63,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 {
     FVINITIALIZE(FVWebViewIcon);
 
+    FVWebIconDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"FVWebIconDisabled"];
     NSInteger maxViews = [[NSUserDefaults standardUserDefaults] integerForKey:@"FVWebIconMaximumNumberOfWebViews"];
     if (maxViews > 0)
         _maxWebViews = maxViews;
@@ -97,10 +101,13 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     NSParameterAssert(nil != [aURL scheme]);
     
     // if this is not an http or file URL, return a finder icon instead
-    if (NO == [[aURL scheme] isEqualToString:@"http"] && NO == [aURL isFileURL]) {
+    if (FVWebIconDisabled || (NO == [[aURL scheme] isEqualToString:@"http"] && NO == [aURL isFileURL])) {
         NSZone *zone = [self zone];
         [self release];
-        self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:aURL];
+        if ([aURL isFileURL]) 	 
+            self = [[FVTextIcon allocWithZone:zone] initWithURL:aURL]; 	 
+        else
+            self = [[FVFinderIcon allocWithZone:zone] initWithFinderIconOfURL:aURL];
     }
     else if ((self = [super init])) {
         _httpURL = [aURL copy];
