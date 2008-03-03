@@ -60,6 +60,7 @@
 
 // Possibly releases cached resources for icons that won't be displayed.  The only way to guarantee a decrease in memory usage is to release all references to the object, though, as this call may be a noop for some subclasses.
 - (void)releaseResources;
+- (BOOL)canReleaseResources;
 
 // Returns NO if the icon already has a cached version for this size; if it returns YES, this method sets the desired size in the case of Finder icons, and the caller should then send -renderOffscreen from the render thread.
 - (BOOL)needsRenderForSize:(NSSize)size;
@@ -77,10 +78,14 @@
  - don't bother calling -renderOffscreen if -needsRenderForSize: returns NO
  - a placeholder icon will be drawn if -renderOffscreen has not been called or finished working
  */
-- (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
+- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 
-// fastDrawInRect: draws a lower quality version if available, using the same semantics as drawInRect:inCGContext:
-- (void)fastDrawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
+// fastDrawInRect: draws a lower quality version if available, using the same semantics as drawInRect:ofContext:
+- (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
+
+@end
+
+@interface FVIcon (Pages)
 
 // The -currentPageIndex return value is 1-based, as in CGPDFDocumentGetPageCount; only useful for multi-page formats such as PDF and PS.  Multi-page TIFFs and text documents are not supported, and calling the showNextPage/showPreviousPage methods will have no effect.
 - (NSUInteger)pageCount;
@@ -89,3 +94,7 @@
 - (void)showPreviousPage;
 
 @end
+
+// Notification posted when a web icon updates; clients who expect to use non-file: URLs should register for this
+FV_PRIVATE_EXTERN NSString * const FVWebIconUpdatedNotificationName;
+

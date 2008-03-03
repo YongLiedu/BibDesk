@@ -43,7 +43,7 @@
 @interface FVFinderIcon : FVIcon
 {
 @protected
-    IconRef         _iconRef;
+    IconRef         _icon;
     BOOL            _drawsLinkBadge;
 }
 - (id)initWithFinderIconOfURL:(NSURL *)theURL;

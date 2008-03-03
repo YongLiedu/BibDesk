@@ -43,8 +43,8 @@
 #import "FVTextIcon.h"
 #import "FVQuickLookIcon.h"
 #import "FVWebViewIcon.h"
-#import "FVUtilities.h"
-#import <sys/stat.h>
+#import "FVMovieIcon.h"
+#import "FVIcon_Private.h"
 
 #pragma mark -
 #pragma mark FVIcon abstract class
@@ -52,28 +52,35 @@
 // FVIcon abstract class stuff
 static FVIcon *defaultPlaceholderIcon = nil;
 static Class FVIconClass = Nil;
-static Class FVQuickLookIconClass = Nil;
+static Class FVQLIconClass = Nil;
 static NSURL *missingFileURL = nil;
 
 @implementation FVIcon
 
 + (void)initialize
 {
-    if ([FVIcon class] == self) {
-        FVIconClass = self;
-        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-            NSBundle *frameworkBundle = [NSBundle bundleForClass:FVIconClass];
-            [[NSBundle bundleWithPath:[frameworkBundle pathForResource:@"FileView-Leopard" ofType:@"bundle"]] load];
-            FVQuickLookIconClass = NSClassFromString(@"FVQuickLookIcon");
-        }
-        defaultPlaceholderIcon = (FVIcon *)NSAllocateObject(FVIconClass, 0, [self zone]);
-        missingFileURL = [[NSURL alloc] initWithScheme:@"x-fileview" host:@"localhost" path:@"/missing"];
+    FVINITIALIZE(FVIcon);
+    
+    FVIconClass = self;
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        NSBundle *frameworkBundle = [NSBundle bundleForClass:FVIconClass];
+        [[NSBundle bundleWithPath:[frameworkBundle pathForResource:@"FileView-Leopard" ofType:@"bundle"]] load];
+        FVQLIconClass = NSClassFromString(@"FVQuickLookIcon");
     }
+    defaultPlaceholderIcon = (FVIcon *)NSAllocateObject(FVIconClass, 0, [self zone]);
+    missingFileURL = [[NSURL alloc] initWithScheme:@"x-fileview" host:@"localhost" path:@"/missing"];
+    [self _initializeCategory];
 }
 
 + (id)allocWithZone:(NSZone *)aZone
 {
     return FVIconClass == self ? defaultPlaceholderIcon : NSAllocateObject(self, 0, aZone);
+}
+
+// ensure that alloc always calls through to allocWithZone:
++ (id)alloc
+{
+    return [self allocWithZone:NULL];
 }
 
 - (void)dealloc
@@ -92,7 +99,7 @@ static NSURL *missingFileURL = nil;
     CGContextRef ctxt = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
     CGContextSetShouldAntialias(ctxt, true);
     CGContextSetInterpolationQuality(ctxt, kCGInterpolationHigh);
-    [anIcon drawInRect:NSMakeRect(0, 0, iconSize.width, iconSize.height) inCGContext:ctxt];
+    [anIcon drawInRect:NSMakeRect(0, 0, iconSize.width, iconSize.height) ofContext:ctxt];
     [nsImage unlockFocus];
     return nsImage;
 }
@@ -111,37 +118,6 @@ static NSURL *missingFileURL = nil;
     return [self iconWithURL:representedURL size:iconSize];
 }
 
-+ (BOOL)_shouldDrawBadgeForURL:(NSURL **)aURL
-{
-    NSParameterAssert([*aURL isFileURL]);
-    
-    const UInt8 *fsPath = (void *)[[*aURL path] UTF8String];
-    OSStatus err;
-    FSRef fileRef;
-    err = FSPathMakeRefWithOptions(fsPath, kFSPathMakeRefDoNotFollowLeafSymlink, &fileRef, NULL);   
-    
-    // kLSItemContentType returns a CFStringRef, according to the header
-    CFStringRef theUTI = NULL;
-    if (noErr == err)
-        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
-    
-    BOOL drawBadge = (NULL != theUTI && UTTypeConformsTo(theUTI, kUTTypeResolvable));
-    
-    if (theUTI) CFRelease(theUTI);
-    
-    if (drawBadge) {
-        // replace the URL with the resolved URL in case it was an alias
-        Boolean isFolder, wasAliased;
-        err = FSResolveAliasFileWithMountFlags(&fileRef, TRUE, &isFolder, &wasAliased, kARMNoUI);
-        
-        // wasAliased is false for symlinks, but use the resolved alias anyway
-        if (noErr == err)
-            *aURL = [(id)CFURLCreateFromFSRef(NULL, &fileRef) autorelease];
-    }
-    
-    return drawBadge;
-}
-    
 + (id)iconWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
 {
     // CFURLGetFSRef won't like a nil URL
@@ -173,7 +149,7 @@ static NSURL *missingFileURL = nil;
     CFStringRef theUTI = NULL;
     if (noErr == err)
         err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, (CFTypeRef *)&theUTI);
-            
+    
     // For a link/alias, get the target's UTI in order to determine which concrete subclass to create.  Subclasses that are file-based need to check the URL to see if it should be badged using _shouldDrawBadgeForURL, and then call _resolvedURLWithURL in order to actually load the file's content.
     
     // aliases and symlinks are kUTTypeResolvable, so the alias manager should handle either of them
@@ -188,10 +164,23 @@ static NSURL *missingFileURL = nil;
         }
     }
     
+    
+    // limit FVTextIcon to < 20 MB files; layout is really slow with large files
+    const UInt64 maximumTextDataSize = 20 * 1024 * 1024;
+    
+    // limit FVImageIcon to < 50 MB files; ImageIO memory usage (or resampling?) drives our memory footprint up
+    const UInt64 maximumImageDataSize = 50 * 1024 * 1024;
+    
+    FSCatalogInfo catInfo;
+    UInt64 dataPhysicalSize = 0;
+    err = FSGetCatalogInfo(&fileRef, kFSCatInfoNodeFlags | kFSCatInfoDataSizes, &catInfo, NULL, NULL, NULL);
+    if (noErr == err && (catInfo.nodeFlags & kFSNodeIsDirectoryMask) == 0)
+        dataPhysicalSize = catInfo.dataPhysicalSize;
+    
     FVIcon *anIcon = nil;
-        
+    
     // Problems here.  TextMate claims a lot of plain text types but doesn't declare a UTI for any of them, so I end up with a dynamic UTI, and Spotlight ignores the files.  That's broken behavior on TextMate's part, and it sucks for my purposes.
-    if ((NULL == theUTI) && [FVTextIcon canInitWithURL:representedURL]) {
+    if ((NULL == theUTI) && dataPhysicalSize < maximumTextDataSize && [FVTextIcon canInitWithURL:representedURL]) {
         anIcon = [[FVTextIcon allocWithZone:[self zone]] initWithTextAtURL:representedURL];
     }
     else if (UTTypeConformsTo(theUTI, kUTTypePDF)) {
@@ -203,30 +192,30 @@ static NSURL *missingFileURL = nil;
     else if (UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd"))) {
         anIcon = [[FVPDFIcon allocWithZone:[self zone]] initWithPDFDAtURL:representedURL];
     }
-    else if (UTTypeConformsTo(theUTI, kUTTypeImage)) {
-        anIcon = [[FVImageIcon allocWithZone:[self zone]] initWithImageAtURL:representedURL];
+    else if (UTTypeConformsTo(theUTI, kUTTypeImage) && dataPhysicalSize < maximumImageDataSize) {
+        anIcon = [[FVImageIcon allocWithZone:[self zone]] initWithURL:representedURL];
     }
-    else if (UTTypeConformsTo(theUTI, kUTTypeMovie)) {
-        anIcon = [[FVImageIcon allocWithZone:[self zone]] initWithQTMovieAtURL:representedURL];
+    else if (UTTypeConformsTo(theUTI, kUTTypeMovie) && [FVMovieIcon canInitWithURL:representedURL]) {
+        anIcon = [[FVMovieIcon allocWithZone:[self zone]] initWithURL:representedURL];
     }
     else if (UTTypeConformsTo(theUTI, kUTTypeHTML)) {
         anIcon = [[FVWebViewIcon allocWithZone:[self zone]] initWithURL:representedURL];
     }
-    else if ([FVTextIcon canInitWithUTI:(NSString *)theUTI]) {
+    else if (dataPhysicalSize < maximumTextDataSize && [FVTextIcon canInitWithUTI:(NSString *)theUTI]) {
         anIcon = [[FVTextIcon allocWithZone:[self zone]] initWithTextAtURL:representedURL];
     }
-    else if (Nil != FVQuickLookIconClass) {
-        anIcon = [[FVQuickLookIconClass allocWithZone:[self zone]] initWithURL:representedURL];
+    else if (Nil != FVQLIconClass) {
+        anIcon = [[FVQLIconClass allocWithZone:[self zone]] initWithURL:representedURL];
     }
     
     // In case some subclass returns nil, fall back to Quick Look.  If disabled, it returns nil.
-    if (nil == anIcon && Nil != FVQuickLookIconClass)
-        anIcon = [[FVQuickLookIconClass allocWithZone:[self zone]] initWithURL:representedURL];
+    if (nil == anIcon && Nil != FVQLIconClass)
+        anIcon = [[FVQLIconClass allocWithZone:[self zone]] initWithURL:representedURL];
     
     // In case all subclasses failed, fall back to a Finder icon.
     if (nil == anIcon)
         anIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:representedURL];
-        
+    
     [(id)theUTI release];
     
     return [anIcon autorelease];    
@@ -235,99 +224,40 @@ static NSURL *missingFileURL = nil;
 // we only want to encode the public superclass
 - (Class)classForCoder { return FVIconClass; }
 
-// we want NSPortCoder to default to bycopy
+// we don't implement NSCoding, so always return a distant object (unused)
 - (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
 {
-    return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
-}
-
-- (void)subclassResponsibility:(SEL)selector
-{
-    [NSException raise:@"FVAbstractClassException" format:[NSString stringWithFormat:@"Abstract class %@ does not implement %@", [self class], NSStringFromSelector(selector)]];
+    return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
 }
 
 // these methods are all required
-- (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context { [self subclassResponsibility:_cmd]; }
-// size should only be used for computing an aspect ratio; don't rely on it as a pixel size
-- (NSSize)size { [self subclassResponsibility:_cmd]; return NSZeroSize; }
-- (void)renderOffscreen { [self subclassResponsibility:_cmd]; }
+- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context { [self doesNotRecognizeSelector:_cmd]; }
+- (void)renderOffscreen { [self doesNotRecognizeSelector:_cmd]; }
 
 // trivial description
 - (NSString *)description
 {
     NSMutableString *desc = [[super description] mutableCopy];
-    [desc appendFormat:@" \"%@\"", NSStringFromSize([self size])];
+    if ([self tryLock]) {
+        [desc appendFormat:@" \"%@\"", NSStringFromSize([self size])];
+        [self unlock];
+    }
     return [desc autorelease];
 }
+
+// not all subclasses can release resources, and others may not be fully initialized
+- (BOOL)canReleaseResources { return NO; }
 
 // implement trivially so these are safe to call on the abstract class
 - (void)releaseResources { /* do nothing */ }
 - (BOOL)needsRenderForSize:(NSSize)size { return NO; }
 
 // this method is optional; some subclasses may not have a fast path
-- (void)fastDrawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context { [self drawInRect:dstRect inCGContext:context]; }
+- (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context { [self drawInRect:dstRect ofContext:context]; }
 
-- (void)_drawBadgeInContext:(CGContextRef)context forIconInRect:(NSRect)dstRect
-{
-    IconRef linkBadge;
-    OSStatus err;
-    err = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kAliasBadgeIcon, &linkBadge);
-    
-    // rect needs to be a square, or else the aspect ratio of the arrow is wrong
-    // rect needs to be the same size as the full icon, or the scale of the arrow is wrong
-    
-    // We don't know the size of the actual link arrow (and it changes with the size of dstRect), so fine-tuning the drawing isn't really possible as far as I can see.
-    if (noErr == err) {
-        PlotIconRefInContext(context, (CGRect *)&dstRect, kAlignBottomLeft, kTransformNone, NULL, kPlotIconRefNormalFlags, linkBadge);
-        ReleaseIconRef(linkBadge);
-    }
-}
+@end
 
-// handles centering and aspect ratio, since most of our icons have weird sizes, but they'll be drawn in a square box
-- (CGRect)_drawingRectWithRect:(NSRect)iconRect;
-{
-    NSSize s = [self size];
-    
-    CGFloat ratio = MIN(NSWidth(iconRect) / s.width, NSHeight(iconRect) / s.height);
-    CGRect dstRect = *(CGRect *)&iconRect;
-    dstRect.size.width = ratio * s.width;
-    dstRect.size.height = ratio * s.height;
-    
-    CGFloat dx = (iconRect.size.width - dstRect.size.width) / 2;
-    CGFloat dy = (iconRect.size.height - dstRect.size.height) / 2;
-    dstRect.origin.x += dx;
-    dstRect.origin.y += dy;
-    
-    // don't make the rect integral; the view uses centerScanRect: which handles scaling correctly for resolution independence
-    return dstRect;
-}
-
-- (void)_drawPlaceholderInRect:(NSRect)dstRect inCGContext:(CGContextRef)context
-{
-    NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:YES];
-    [NSGraphicsContext saveGraphicsState];
-    [NSGraphicsContext setCurrentContext:nsContext];
-    [nsContext saveGraphicsState];
-    
-    // get rid of any existing shadow, since the dashed line looks goofy with a shadow
-    NSShadow *aShadow = [[NSShadow alloc] init];
-    [aShadow set];
-    
-    CGFloat radius = MIN(NSWidth(dstRect) / 4.0, 10.0);
-    NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:dstRect xRadius:radius yRadius:radius];
-    CGFloat pattern[2] = { 12.0, 6.0 };
-    
-    [path setLineWidth:2.0];
-    [path setLineDash:pattern count:2 phase:0.0];
-    [[NSColor lightGrayColor] setStroke];
-    [path stroke];
-    [path setLineWidth:1.0];
-    [path setLineDash:NULL count:0 phase:0.0];
-    [nsContext restoreGraphicsState];
-    [aShadow release];
-    
-    [NSGraphicsContext restoreGraphicsState];
-}
+@implementation FVIcon (Pages)
 
 - (NSUInteger)pageCount { return 1; }
 - (NSUInteger)currentPageIndex { return 1; }

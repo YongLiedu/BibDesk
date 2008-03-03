@@ -92,6 +92,8 @@ static CGColorRef _shadowColor = NULL;
 - (void)_hideArrows;
 - (BOOL)_hasArrows;
 - (void)_cancelActiveDownloads;
+- (void)_addDownload:(FVDownload *)fvDownload;
+- (void)_invalidateProgressTimer;
 
 @end
 
@@ -136,6 +138,7 @@ static CGColorRef _shadowColor = NULL;
     
     // binding an NSSlider in IB 3 results in a crash on 10.4
     [self exposeBinding:@"iconScale"];
+    [self exposeBinding:@"autoScales"];
     [self exposeBinding:@"iconURLs"];
     [self exposeBinding:@"selectionIndexes"];
 }
@@ -156,6 +159,7 @@ static CGColorRef _shadowColor = NULL;
 - (void)_commonInit {
     _iconCache = [[NSMutableDictionary alloc] init];
     _iconSize = DEFAULT_ICON_SIZE;
+    _autoScales = NO;
     _padding = [self _paddingForScale:1.0];
     _lastMouseDownLocInView = NSZeroPoint;
     // the next two are set to an illegal combination to indicate that no drop is in progress
@@ -266,26 +270,28 @@ static CGColorRef _shadowColor = NULL;
 
 - (void)setIconScale:(CGFloat)scale;
 {
-    FVAPIAssert(scale > 0, @"scale must be greater than zero");
-    _iconSize.width = DEFAULT_ICON_SIZE.width * scale;
-    _iconSize.height = DEFAULT_ICON_SIZE.height * scale;
-    _padding = [self _paddingForScale:scale];
-    
-    // arrows out of place now, they will be added again when required when resetting the tracking rects
-    [self _hideArrows];
-    
-    CGLayerRelease(_selectionOverlay);
-    _selectionOverlay = NULL;
-    
-    // the full view will likely need repainting
-    [self reloadIcons];
-    
-    // Schedule a reload so we always have the correct quality icons, but don't do it while scaling in response to a slider.
-    // This will also scroll to the first selected icon; maintaining scroll position while scaling is too jerky.
-    if (NO == _isRescaling) {
-        _isRescaling = YES;
-        // this is only sent in the default runloop mode, so it's not sent during event tracking
-        [self performSelector:@selector(_rescaleComplete) withObject:nil afterDelay:0.0];
+    if (_autoScales == NO) {
+        FVAPIAssert(scale > 0, @"scale must be greater than zero");
+        _iconSize.width = DEFAULT_ICON_SIZE.width * scale;
+        _iconSize.height = DEFAULT_ICON_SIZE.height * scale;
+        _padding = [self _paddingForScale:scale];
+        
+        // arrows out of place now, they will be added again when required when resetting the tracking rects
+        [self _hideArrows];
+        
+        CGLayerRelease(_selectionOverlay);
+        _selectionOverlay = NULL;
+        
+        // the full view will likely need repainting
+        [self reloadIcons];
+        
+        // Schedule a reload so we always have the correct quality icons, but don't do it while scaling in response to a slider.
+        // This will also scroll to the first selected icon; maintaining scroll position while scaling is too jerky.
+        if (NO == _isRescaling) {
+            _isRescaling = YES;
+            // this is only sent in the default runloop mode, so it's not sent during event tracking
+            [self performSelector:@selector(_rescaleComplete) withObject:nil afterDelay:0.0];
+        }
     }
 }
 
@@ -311,6 +317,17 @@ static CGColorRef _shadowColor = NULL;
         [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, FVWeblocFilePboardType, (NSString *)kUTTypeURL, (NSString *)kUTTypeUTF8PlainText, NSStringPboardType, nil]];
     } else {
         [self registerForDraggedTypes:nil];
+    }
+}
+
+- (BOOL)autoScales {
+    return _autoScales;
+}
+
+- (void)setAutoScales:(BOOL)flag {
+    if (_autoScales != flag) {
+        _autoScales = flag;
+        [self setNeedsDisplay:YES];
     }
 }
 
@@ -380,24 +397,32 @@ static CGColorRef _shadowColor = NULL;
 
 - (NSUInteger)numberOfColumns;
 {
-    // compute width ignoring the width of the vertical scroller (if any), so we can get more symmetric empty space on either side
-    NSView *view = [self enclosingScrollView];
-    if (nil == view)
-        view = self;
-    return MAX(1, trunc((NSWidth([view frame]) - 2.0 - [self _leftMargin] - [self _rightMargin] + _padding.width) / [self _columnWidth]));
+    if (_autoScales) {
+        return 1;
+    } else {
+        // compute width ignoring the width of the vertical scroller (if any), so we can get more symmetric empty space on either side
+        NSView *view = [self enclosingScrollView];
+        if (nil == view)
+            view = self;
+        return MAX(1, trunc((NSWidth([view frame]) - 2.0 - [self _leftMargin] - [self _rightMargin] + _padding.width) / [self _columnWidth]));
+    }
 }
 
 - (NSSize)_paddingForScale:(CGFloat)scale;
 {
     // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
     NSSize size = NSZeroSize;
+    if (_autoScales) {
+        size.width = MAX(NSWidth([self bounds]) / 10, DEFAULT_PADDING);
+    } else {
 #if __LP64__
-    CGFloat extraMargin = round(4.0 * scale);
+        CGFloat extraMargin = round(4.0 * scale);
 #else
-    CGFloat extraMargin = roundf(4.0 * scale);
+        CGFloat extraMargin = roundf(4.0 * scale);
 #endif
-    size.width = 10.0 + extraMargin;
-    size.height = _titleHeight + 4.0 + extraMargin;
+        size.width = 10.0 + extraMargin;
+    }
+    size.height = size.width - 6.0 + _titleHeight;
     if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
         size.height += _subtitleHeight;
     return size;
@@ -1334,6 +1359,24 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
 
 - (void)drawRect:(NSRect)rect;
 {
+    if (_autoScales) {
+        CGFloat size;
+        // _paddingForScale: is dependent on scale, but we need padding to calculate the icon size here
+        NSSize padding = [self _paddingForScale:0];
+        
+        // Things get screwy when the scrollview is on the border of having a vertical scroller and is set to autohide scrollers.  The scrollview starts flickering really fast as it adds/removes scrollers, so we'll check for that here and make sure the icon size compensates for it.
+        NSView *view = [self enclosingScrollView];
+        CGFloat scroller = 0;
+        if (nil == view) {
+            view = self;
+        }
+        else if ([(NSScrollView *)view hasVerticalScroller]) {
+            scroller = NSWidth([[(NSScrollView *)view verticalScroller] frame]);
+        }
+        size = NSWidth([view bounds]) - 2 * padding.width - scroller;
+        _iconSize = NSMakeSize(size, size);
+    }
+    
     NSRect visRect = [self visibleRect];
     [self _recalculateGridSize];
     
@@ -1892,6 +1935,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSPoint p = dragLoc;
     NSUInteger r, c;
     NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
+    BOOL isCopy = dragOp == NSDragOperationCopy;
     NSUInteger insertIndex, firstIndex, endIndex;
     
     NSArray *draggedURLs = FVURLsFromPasteboard([sender draggingPasteboard]);
@@ -1923,7 +1967,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         // We have to make sure the pasteboard really has a URL here, since most NSStrings aren't valid URLs, but the delegate may accept other types
         dragOp = NSDragOperationNone;
     }
-    else if ([self _isLocalDraggingInfo:sender]) {
+    else if ([self _isLocalDraggingInfo:sender] && isCopy == NO) {
         // invalidate some local drags, otherwise make sure we use a Move operation
         if (FVDropOn == _dropOperation) {
             // drop on the whole view (add operation) or an icon (replace operation) makes no sense for a local drag, but the delegate may override
@@ -1941,6 +1985,9 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
                 dragOp = NSDragOperationMove;
             }
         }
+    }
+    else if (isCopy == NO) {
+        dragOp = NSDragOperationLink;
     }
     
     // we could allow the delegate to change the _dropIndex and _dropOperation as NSTableView does, but we don't use that at present
@@ -1978,42 +2025,78 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     [self reloadIcons];
 }
 
+static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *path = [fileURL path];
+    NSString *basePath = [path stringByDeletingPathExtension];
+    NSString *ext = [path pathExtension];
+    NSUInteger i = 0;
+    NSString *newPath = nil;
+    
+    do {
+        newPath = [[NSString stringWithFormat:@"%@-%i", basePath, ++i] stringByAppendingPathExtension:ext];
+    } while ([fm fileExistsAtPath:newPath]);
+    
+    if ([fm copyPath:path toPath:newPath handler:nil]) {
+        return [NSURL fileURLWithPath:newPath];
+    } else {
+        return nil;
+    }
+}
+
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
+    NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
+    BOOL isCopy = dragOp == NSDragOperationCopy;
+    BOOL isMove = [self _isLocalDraggingInfo:sender] && isCopy == NO;
     BOOL didPerform = NO;
+    NSArray *draggedURLs = isMove ? nil : FVURLsFromPasteboard(pboard);
+    NSArray *allURLs = draggedURLs;
+    NSMutableArray *downloads = nil;
+    NSUInteger insertIndex = 0;
     
-    if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation) {
+    if (FVDropBefore == _dropOperation) {
+        insertIndex = _dropIndex;
+    } else if (FVDropAfter == _dropOperation) {
+        insertIndex = _dropIndex + 1;
+    } else if (_dropIndex == NSNotFound) {
+        insertIndex = [self numberOfIcons];
+    } else {
+        insertIndex = _dropIndex;
+        if ([allURLs count] > 1)
+            allURLs = [NSArray arrayWithObject:[allURLs objectAtIndex:0]];
+    }
+    
+    if (isCopy) {
+        NSMutableArray *copiedURLs = [NSMutableArray array];
+        NSEnumerator *urlEnum = [allURLs objectEnumerator];
+        NSURL *aURL;
+        NSUInteger i = insertIndex;
         
-        // _dropIndex should never be NSNotFound at this point, but check for it anyway
-        if (NSNotFound != _dropIndex) {
-            NSArray *allURLs = FVURLsFromPasteboard([sender draggingPasteboard]);
-            NSUInteger insertIndex = FVDropAfter == _dropOperation ? _dropIndex + 1 : _dropIndex;
-            
-            if ([self _isLocalDraggingInfo:sender]) {
-                
-                didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:insertIndex forDrop:sender dropOperation:_dropOperation];
-                
-            } else {
-                
-                NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertIndex, [allURLs count])];
-                [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender dropOperation:_dropOperation];
-                didPerform = YES;
+        downloads = [NSMutableArray array];
+        
+        while (aURL = [urlEnum nextObject]) {
+            if ([aURL isFileURL])
+                aURL = makeCopyOfFileAtURL(aURL);
+            else
+                [downloads addObject:[[[FVDownload alloc] initWithDownloadURL:aURL indexInView:i] autorelease]];
+            if (aURL) {
+                [copiedURLs addObject:aURL];
+                i++;
             }
         }
+        allURLs = copiedURLs;
     }
-    else if ([self _isLocalDraggingInfo:sender]) {
-        
-        // @@ we don't make a difference between local drag on and before an icon, should we use replaceURLsAtIndexes instead?
+    
+    if (isMove) {
         
         didPerform = [[self dataSource] fileView:self moveURLsAtIndexes:[self selectionIndexes] toIndex:_dropIndex forDrop:sender dropOperation:_dropOperation];
         
-    }
-    else if (NSNotFound == _dropIndex) {
+    } else if (FVDropBefore == _dropOperation || FVDropAfter == _dropOperation || NSNotFound == _dropIndex) {
            
         // drop on the whole view
-        NSArray *allURLs = FVURLsFromPasteboard(pboard);
-        NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self numberOfIcons], [allURLs count])];
+        NSIndexSet *insertSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertIndex, [allURLs count])];
         [[self dataSource] fileView:self insertURLs:allURLs atIndexes:insertSet forDrop:sender dropOperation:_dropOperation];
         didPerform = YES;
 
@@ -2021,7 +2104,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     else {
         // we're targeting a particular cell, make sure that cell is a legal replace operation
         
-        NSURL *aURL = [FVURLsFromPasteboard(pboard) lastObject];
+        NSURL *aURL = [allURLs lastObject];
         
         // only drop a single file on a given cell!
         
@@ -2030,6 +2113,16 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
         }
         if (aURL)
             didPerform = [[self dataSource] fileView:self replaceURLsAtIndexes:[NSIndexSet indexSetWithIndex:_dropIndex] withURLs:[NSArray arrayWithObject:aURL] forDrop:sender dropOperation:_dropOperation];
+    }
+    
+    if ([downloads count]) {
+        NSUInteger i = 0, count = [downloads count];
+        for (i = 0; i < count; i++) {
+            FVDownload *download = [downloads objectAtIndex:i];
+            if (i + insertIndex < [self numberOfIcons] && [[download downloadURL] isEqual:[self iconURLAtIndex:i + insertIndex]]) {
+                [self _addDownload:download];
+            }
+        }
     }
     
     // if we return NO, concludeDragOperation doesn't get called
@@ -2205,6 +2298,11 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     [self setIconScale:([self iconScale] / 2)];
 }
 
+- (IBAction)toggleAutoScales:(id)sender;
+{
+    [self setAutoScales:[self autoScales] == NO];
+}
+
 - (IBAction)previewAction:(id)sender;
 {
     if ([_selectedIndexes count] == 1) {
@@ -2272,8 +2370,11 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     BOOL selectionCount = [_selectedIndexes count];
     
     if (action == @selector(zoomOut:) || action == @selector(zoomIn:))
+        return _autoScales == NO;
+    else if (action == @selector(toggleAutoScales:)) {
+        [anItem setState:_autoScales ? NSOnState : NSOffState];
         return YES;
-    else if (action == @selector(revealInFinder:))
+    } else if (action == @selector(revealInFinder:))
         return [aURL isFileURL] && [_selectedIndexes count] == 1 && NO == isMissing;
     else if (action == @selector(openSelectedURLs:))
         return selectionCount > 0;
@@ -2484,12 +2585,17 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
             addFinderLabelsToSubmenu(submenu);
         }
         
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Download and Replace", @"FileView", bundle, @"context menu title") action:@selector(downloadSelectedLink:) keyEquivalent:@""];
+        [anItem setTag:FVDownloadMenuItemTag];
+        
         [sharedMenu addItem:[NSMenuItem separatorItem]];
         
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Zoom In", @"FileView", bundle, @"context menu title") action:@selector(zoomIn:) keyEquivalent:@""];
         [anItem setTag:FVZoomInMenuItemTag];
         anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Zoom Out", @"FileView", bundle, @"context menu title") action:@selector(zoomOut:) keyEquivalent:@""];
         [anItem setTag:FVZoomOutMenuItemTag];
+        anItem = [sharedMenu addItemWithTitle:NSLocalizedStringFromTableInBundle(@"Single Column", @"FileView", bundle, @"context menu title") action:@selector(toggleAutoScales:) keyEquivalent:@""];
+        [anItem setTag:FVAutoScalesMenuItemTag];
 
     }
     return sharedMenu;
@@ -2502,11 +2608,20 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
     NSString *fullPath = nil;
     if ([[self delegate] respondsToSelector:@selector(fileView:downloadDestinationWithSuggestedFilename:)])
         fullPath = [[[self delegate] fileView:self downloadDestinationWithSuggestedFilename:filename] path];
-    
-    if (nil == fullPath);
+    else
         fullPath = [NSTemporaryDirectory() stringByAppendingPathComponent:filename];
     
-    [download setDestination:fullPath allowOverwrite:NO];
+    if (nil == fullPath) {
+        FVDownload *fvDownload = (id)CFDictionaryGetValue(_activeDownloads, download);
+        [download cancel];
+        [self _invalidateProgressTimer];
+        if (fvDownload) {
+            CFDictionaryRemoveValue(_activeDownloads, download);
+            [self setNeedsDisplay:YES];
+        }
+    } else {
+        [download setDestination:fullPath allowOverwrite:NO];
+    }
 }
 
 - (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path
@@ -2613,18 +2728,24 @@ static void cancelDownload(const void *key, const void *value, void *context)
     [self setNeedsDisplay:YES];
 }
 
+- (void)_addDownload:(FVDownload *)fvDownload
+{
+    NSURL *theURL = [fvDownload downloadURL];
+    WebDownload *download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:theURL] delegate:self];
+    CFDictionarySetValue(_activeDownloads, download, fvDownload);
+    [download release];
+    [self setNeedsDisplay:YES];
+}
+
 - (void)downloadSelectedLink:(id)sender
 {
     // validation ensures that we have a single selection, and that there is no current download with this URL
     NSUInteger selIndex = [_selectedIndexes firstIndex];
     if (NSNotFound != selIndex) {
         NSURL *theURL = [self iconURLAtIndex:selIndex];
-        FVDownload *fvDownload = [[FVDownload alloc] initWithDownloadURL:theURL indexInView:selIndex];         
-        WebDownload *download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:theURL] delegate:self];
-        CFDictionarySetValue(_activeDownloads, download, fvDownload);
-        [download release];
+        FVDownload *fvDownload = [[FVDownload alloc] initWithDownloadURL:theURL indexInView:selIndex];       
+        [self _addDownload:fvDownload];  
         [fvDownload release];
-        [self setNeedsDisplay:YES];
     }
 }
 

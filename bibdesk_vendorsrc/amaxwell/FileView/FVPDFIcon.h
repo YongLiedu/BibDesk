@@ -47,7 +47,7 @@
     CGPDFDocumentRef  _pdfDoc;
     CGPDFPageRef      _pdfPage;
     NSSize            _fullSize;
-    CGImageRef        _thumbnailRef;
+    CGImageRef        _thumbnail;
     NSSize            _thumbnailSize;
     NSSize            _desiredSize;
     FVIconType        _iconType;

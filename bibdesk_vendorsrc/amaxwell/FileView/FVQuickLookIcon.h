@@ -44,8 +44,8 @@
 {
 @private
     NSURL          *_fileURL;
-    CGImageRef      _fullImageRef;
-    CGImageRef      _thumbnailRef;
+    CGImageRef      _fullImage;
+    CGImageRef      _thumbnail;
     NSSize          _thumbnailSize;
     NSSize          _desiredSize;
     FVIcon         *_fallbackIcon;

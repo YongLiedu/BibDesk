@@ -45,9 +45,11 @@
 
 @interface FVWebViewIcon : FVIcon
 {
-    CGImageRef       _fullImageRef;
-    CGImageRef       _thumbnailRef;
-    FVFinderIcon    *_fallbackIcon;
+    CGImageRef       _fullImage;
+    NSSize           _fullImageSize;
+    CGImageRef       _thumbnail;
+    NSSize           _thumbnailSize;
+    FVIcon          *_fallbackIcon;
     NSURL           *_httpURL;
     BOOL             _webviewFailed;
     NSSize           _desiredSize;

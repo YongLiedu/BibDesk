@@ -40,8 +40,6 @@
 #import "FVFinderIcon.h"
 #import <QuickLook/QLThumbnailImage.h>
 
-static const NSUInteger THUMBNAIL_MAX = 128;
-
 // see http://www.cocoabuilder.com/archive/message/cocoa/2005/6/15/138943 for linking; need to use bundle_loader flag to allow the linker to resolve our superclass
 
 @implementation FVQuickLookIcon
@@ -50,6 +48,7 @@ static BOOL FVQLIconDisabled = NO;
 
 + (void)initialize
 {
+    FVINITIALIZE(FVQuickLookIcon);
     FVQLIconDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"FVQLIconDisabled"];
 }
 
@@ -62,11 +61,8 @@ static BOOL FVQLIconDisabled = NO;
     else if ((self = [super init])) {
         // QL seems to fail a large percentage of the time on my system, and it's also pretty slow.  Since FVFinderIcon is now fast and relatively low overhead, preallocate the fallback icon to avoid waiting for QL to return NULL.
         _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:theURL];
-        
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&theURL];
-        
-        _fileURL = [theURL copy];
-        _fullImageRef = NULL;
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:theURL copyTargetURL:&_fileURL];                
+        _fullImage = NULL;
         _thumbnailSize = NSZeroSize;
         _desiredSize = NSZeroSize;
         _quickLookFailed = NO;
@@ -81,70 +77,74 @@ static BOOL FVQLIconDisabled = NO;
 {
     pthread_mutex_destroy(&_mutex);
     [_fileURL release];
-    CGImageRelease(_fullImageRef);
-    CGImageRelease(_thumbnailRef);
+    CGImageRelease(_fullImage);
+    CGImageRelease(_thumbnail);
     [_fallbackIcon release];
     [super dealloc];
 }
 
+- (BOOL)tryLock { return pthread_mutex_trylock(&_mutex) == 0; }
+- (void)lock { pthread_mutex_lock(&_mutex); }
+- (void)unlock { pthread_mutex_unlock(&_mutex); }
+
+- (BOOL)canReleaseResources;
+{
+    return (NULL != _fullImage);
+}
+
 - (void)releaseResources
 {
-    pthread_mutex_lock(&_mutex);
-    CGImageRelease(_fullImageRef);
-    _fullImageRef = NULL;
+    [self lock];
+    CGImageRelease(_fullImage);
+    _fullImage = NULL;
     [_fallbackIcon releaseResources];
-    pthread_mutex_unlock(&_mutex);
+    [self unlock];
 }
 
 - (NSSize)size { return _thumbnailSize; }
 
-static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbnailSize)
-{
-    return (desiredSize.height > 1.2 * thumbnailSize.height || desiredSize.width > 1.2 * thumbnailSize.width);
-}
-
 - (BOOL)needsRenderForSize:(NSSize)size
 {
     BOOL needsRender = NO;
-    if (pthread_mutex_trylock(&_mutex) == 0) {
+    if ([self tryLock]) {
         if (NO == _quickLookFailed) {
             // The _fullSize is zero or whatever quicklook returned last time, which may be something odd like 78x46.  Since we ask QL for a size but it constrains the size it actually returns based on the icon's aspect ratio, we have to check height and width.  Just checking height in this was causing an endless loop asking for a size it won't return.
-            if (shouldDrawFullImageWithSize(size, _thumbnailSize))
-                needsRender = (NULL == _fullImageRef);
+            if (FVShouldDrawFullImageWithThumbnailSize(size, _thumbnailSize))
+                needsRender = (NULL == _fullImage);
             else
-                needsRender = (NULL == _thumbnailRef);
+                needsRender = (NULL == _thumbnail);
         }
         else {
             needsRender = [_fallbackIcon needsRenderForSize:size];
         }
         _desiredSize = size;
-        pthread_mutex_unlock(&_mutex);
+        [self unlock];
     }
     return needsRender;
 }
 
 - (void)renderOffscreen
 {        
-    pthread_mutex_lock(&_mutex);
+    [self lock];
     
     if (NO == _quickLookFailed) {
         
-        CGSize requestedSize = (CGSize) { THUMBNAIL_MAX, THUMBNAIL_MAX };
+        CGSize requestedSize = (CGSize) { FVMaxThumbnailDimension, FVMaxThumbnailDimension };
         
-        if (NULL == _thumbnailRef)
-            _thumbnailRef = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, requestedSize, NULL);
+        if (NULL == _thumbnail)
+            _thumbnail = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, requestedSize, NULL);
         
-        if (NULL == _thumbnailRef)
+        if (NULL == _thumbnail)
             _quickLookFailed = YES;
         
         // always initialize sizes
-        _thumbnailSize = _thumbnailRef ? NSMakeSize(CGImageGetWidth(_thumbnailRef), CGImageGetHeight(_thumbnailRef)) : NSZeroSize;
+        _thumbnailSize = _thumbnail ? FVCGImageSize(_thumbnail) : NSZeroSize;
 
-        if (shouldDrawFullImageWithSize(_desiredSize, _thumbnailSize)) {
+        if (FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize)) {
             
-            if (NULL != _fullImageRef) {
+            if (NULL != _fullImage) {
                 
-                NSSize currentSize = NSMakeSize(CGImageGetWidth(_fullImageRef), CGImageGetHeight(_fullImageRef));
+                NSSize currentSize = FVCGImageSize(_fullImage);
                 
                 NSSize targetSize;
 #if __LP64__
@@ -155,18 +155,18 @@ static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbn
                 targetSize.height = truncf(_desiredSize.height);
 #endif
                 if (NSEqualSizes(currentSize, targetSize) == NO) {
-                    CGImageRelease(_fullImageRef);
-                    _fullImageRef = NULL;
+                    CGImageRelease(_fullImage);
+                    _fullImage = NULL;
                 }
 
             }
             
-            if (NULL == _fullImageRef) {
+            if (NULL == _fullImage) {
                 requestedSize = *(CGSize *)&_desiredSize;
-                _fullImageRef = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, requestedSize, NULL);
+                _fullImage = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, requestedSize, NULL);
             }
             
-            if (NULL == _fullImageRef)
+            if (NULL == _fullImage)
                 _quickLookFailed = YES;
         }
     }
@@ -177,22 +177,22 @@ static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbn
             [_fallbackIcon renderOffscreen];
     }
     
-    pthread_mutex_unlock(&_mutex);
+    [self unlock];
 }    
 
-- (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
+- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {
-    BOOL didLock = (pthread_mutex_trylock(&_mutex) == 0);
-    if (didLock && (NULL != _thumbnailRef || NULL != _fullImageRef)) {
+    BOOL didLock = ([self tryLock]);
+    if (didLock && (NULL != _thumbnail || NULL != _fullImage)) {
         
         CGRect drawRect = [self _drawingRectWithRect:dstRect];
             
         CGImageRef image;
         // always fall back on the thumbnail
-        if (shouldDrawFullImageWithSize(((NSRect *)&drawRect)->size, _thumbnailSize) && _fullImageRef)
-            image = _fullImageRef;
+        if (FVShouldDrawFullImageWithThumbnailSize(dstRect.size, _thumbnailSize) && _fullImage)
+            image = _fullImage;
         else
-            image = _thumbnailRef;
+            image = _thumbnail;
         
         // Apple's QL plugins for multiple page types (.pages, .plist, .xls etc) draw text right up to the margin of the icon, so we'll add a small whitespace margin.  The decoration option will do this for us, but it also draws with a dog-ear, and I don't want that because it's inconsistent with our other thumbnail classes.
         CGContextSaveGState(context);
@@ -206,17 +206,17 @@ static inline BOOL shouldDrawFullImageWithSize(NSSize desiredSize, NSSize thumbn
         CGContextRestoreGState(context);
         
         if (_drawsLinkBadge)
-            [self _drawBadgeInContext:context forIconInRect:dstRect];
+            [self _badgeIconInRect:dstRect ofContext:context];
         
-        pthread_mutex_unlock(&_mutex);
+        [self unlock];
     }
     else if (_quickLookFailed && nil != _fallbackIcon) {
-        [_fallbackIcon drawInRect:dstRect inCGContext:context];
+        [_fallbackIcon drawInRect:dstRect ofContext:context];
     }
     else {
-        [self _drawPlaceholderInRect:dstRect inCGContext:context];
+        [self _drawPlaceholderInRect:dstRect ofContext:context];
     }
-    if (didLock) pthread_mutex_unlock(&_mutex);
+    if (didLock) [self unlock];
 }
 
 @end

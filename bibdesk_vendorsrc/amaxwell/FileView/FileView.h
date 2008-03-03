@@ -65,12 +65,13 @@ typedef float CGFloat;
 enum {
     FVZoomInMenuItemTag = 1001,
     FVZoomOutMenuItemTag = 1002,
-    FVQuickLookMenuItemTag = 1003,
-    FVOpenMenuItemTag = 1004,
-    FVRevealMenuItemTag = 1005,
-    FVChangeLabelMenuItemTag = 1006,
-    FVDownloadMenuItemTag    = 1007,
-    FVRemoveMenuItemTag = 1008
+    FVAutoScalesMenuItemTag = 1003,
+    FVQuickLookMenuItemTag = 1004,
+    FVOpenMenuItemTag = 1005,
+    FVRevealMenuItemTag = 1006,
+    FVChangeLabelMenuItemTag = 1007,
+    FVDownloadMenuItemTag    = 1008,
+    FVRemoveMenuItemTag = 1009
 };
 
 typedef enum _FVDropOperation {
@@ -112,6 +113,8 @@ typedef enum _FVDropOperation {
     CFMutableDictionaryRef  _activeDownloads;
     CFRunLoopTimerRef       _progressTimer;
     NSArray                *_iconURLs;
+    
+    BOOL                    _autoScales;
 }
 
 // bindings compatibility, although this can be set directly
@@ -125,6 +128,9 @@ typedef enum _FVDropOperation {
 // bind a slider or other control to this
 - (CGFloat)iconScale;
 - (void)setIconScale:(CGFloat)scale;
+
+- (BOOL)autoScales;
+- (void)setAutoScales:(BOOL)flag;
 
 - (NSUInteger)numberOfRows;
 - (NSUInteger)numberOfColumns;
@@ -196,7 +202,7 @@ typedef enum _FVDropOperation {
 // If unimplemented or returns YES, fileview will open the URL using NSWorkspace
 - (BOOL)fileView:(FileView *)aFileView shouldOpenURL:(NSURL *)aURL;
 
-// If unimplemented or returns nil, fileview will use a system temporary directory.  Used with FVDownloadMenuItemTag menu item.
+// If unimplemented, fileview will use a system temporary directory; if returns nil, cancels download.  Used with FVDownloadMenuItemTag menu item.
 - (NSURL *)fileView:(FileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename;
 
 // If unimplemented, uses the proposedDragOperation

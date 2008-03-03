@@ -43,18 +43,20 @@
 @interface FVTextIcon : FVIcon
 {
 @private
-    CGImageRef      _fullImageRef;
+    CGImageRef      _fullImage;
     NSSize          _fullSize;
-    CGImageRef      _thumbnailRef;
+    CGImageRef      _thumbnail;
     NSSize          _thumbnailSize;
+    NSSize          _desiredSize;
     NSURL          *_fileURL;
     char           *_diskCacheName;
     FVIconType      _iconType;
     BOOL            _drawsLinkBadge;
     pthread_mutex_t _mutex;
 }
+
 + (BOOL)canInitWithUTI:(NSString *)aUTI;
 + (BOOL)canInitWithURL:(NSURL *)aURL;
 - (id)initWithTextAtURL:(NSURL *)aURL;
-- (id)initWithHTMLAtURL:(NSURL *)aURL;
+
 @end

@@ -42,18 +42,15 @@
 
 @interface FVImageIcon : FVIcon
 {
-@private
+@protected
     NSURL          *_fileURL;
-    CGImageRef      _thumbnailRef;
+    CGImageRef      _thumbnail;
     NSSize          _thumbnailSize;
-    CGImageRef      _fullImageRef;
+    CGImageRef      _fullImage;
     NSSize          _desiredSize;
-    FVIconType      _iconType;
-    BOOL            _inDiskCache;
-    char           *_diskCacheName;
     BOOL            _drawsLinkBadge;
+    char           *_diskCacheName;
     pthread_mutex_t _mutex;
 }
-- (id)initWithImageAtURL:(NSURL *)aURL;
-- (id)initWithQTMovieAtURL:(NSURL *)aURL;
+- (id)initWithURL:(NSURL *)aURL;
 @end

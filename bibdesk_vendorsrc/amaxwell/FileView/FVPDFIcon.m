@@ -37,20 +37,16 @@
  */
 
 #import "FVPDFIcon.h"
-#import "FVFinderIcon.h"
 
 // cache these so we avoid hitting NSPrintInfo; we only care to have something that approximates a page size, anyway
-static NSSize __paperSize;
+static NSSize _paperSize;
 
 @implementation FVPDFIcon
 
 + (void)initialize
 {
-    static BOOL didInit = NO;
-    if (NO == didInit) {
-        __paperSize = [[NSPrintInfo sharedPrintInfo] paperSize];
-        didInit = YES;
-    }
+    FVINITIALIZE(FVPDFIcon);
+    _paperSize = [[NSPrintInfo sharedPrintInfo] paperSize];
 }
 
 static CGPDFDocumentRef createCGPDFDocumentWithPostScriptURL(NSURL *fileURL)
@@ -106,7 +102,8 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
 - (id)initWithPostscriptAtURL:(NSURL *)aURL;
 {
     NSParameterAssert([aURL isFileURL]);
-    if (self = [self initWithPDFAtURL:aURL]) {
+    self = [self initWithPDFAtURL:aURL];
+    if (self) {
         _iconType = FVPostscriptType;
     }
     return self;
@@ -116,7 +113,8 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
 - (id)initWithPDFDAtURL:(NSURL *)aURL;
 {
     NSParameterAssert([aURL isFileURL]);
-    if (self = [self initWithPDFAtURL:aURL]) {
+    self = [self initWithPDFAtURL:aURL];
+    if (self) {
         NSURL *fileURL = createPDFURLForPDFBundleURL(_fileURL);
         if (fileURL) {
             [_fileURL release];
@@ -135,19 +133,18 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
     self = [super init];
     if (self) {
         
-        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:&aURL];
+        _drawsLinkBadge = [[self class] _shouldDrawBadgeForURL:aURL copyTargetURL:&_fileURL];        
 
         // PDF sucks because we have to read the file and parse it to find out the page size, even if we're not going to draw it.  Since that's not very efficient, don't even open the file until we have to draw it.
         
         // Set default sizes so we can draw a blank page on the first pass; this will use a common aspect ratio.
-        _fullSize = __paperSize;
+        _fullSize = _paperSize;
         _thumbnailSize = _fullSize;
-        _fileURL = [aURL copy];        
         _diskCacheName = [FVIconCache createDiskCacheNameWithURL:aURL];
         _iconType = FVPDFType;
         _pdfDoc = NULL;
         _pdfPage = NULL;
-        _thumbnailRef = NULL;
+        _thumbnail = NULL;
         _desiredSize = NSZeroSize;
         _inDiskCache = NO;
         
@@ -167,64 +164,40 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
 {
     pthread_mutex_destroy(&_mutex);
     [_fileURL release];
-    CGImageRelease(_thumbnailRef);
+    CGImageRelease(_thumbnail);
     CGPDFDocumentRelease(_pdfDoc);
     free(_diskCacheName);
     [super dealloc];
 }
 
+- (BOOL)tryLock { return pthread_mutex_trylock(&_mutex) == 0; }
+- (void)lock { pthread_mutex_lock(&_mutex); }
+- (void)unlock { pthread_mutex_unlock(&_mutex); }
+
 - (NSSize)size { return _fullSize; }
+
+- (BOOL)canReleaseResources;
+{
+    if (FVPostscriptType != _iconType)
+        return (NULL != _pdfDoc || NULL != _thumbnail);
+    else
+        return (NULL != _thumbnail);
+}
 
 - (void)releaseResources 
 {
-    if (pthread_mutex_trylock(&_mutex) == 0) {
+    if ([self tryLock]) {
         // Too expensive to create from PostScript on the fly, and PS is not that common; however, a CGPDFDocument data provider is the same size as the file on disk, so we want to get rid of them unless we're drawing full resolution.
         if (FVPostscriptType != _iconType) {
             CGPDFDocumentRelease(_pdfDoc);
             _pdfDoc = NULL;
             _pdfPage = NULL;
         }
-        CGImageRelease(_thumbnailRef);
-        _thumbnailRef = NULL;
-        pthread_mutex_unlock(&_mutex);
+        CGImageRelease(_thumbnail);
+        _thumbnail = NULL;
+        [self unlock];
     }
 }
-
-+ (CGContextRef)getPDFBitmapContextForCurrentThread
-{
-    NSMutableDictionary *threadDictionary = [[NSThread currentThread] threadDictionary];
-    NSString *key = @"FVPDFBitmapContext";
-    CGContextRef ctxt = (CGContextRef)[threadDictionary objectForKey:key];
-    return ctxt;
-}
-
-+ (void)setPDFBitmapContextForCurrentThread:(CGContextRef)ctxt
-{
-    NSMutableDictionary *threadDictionary = [[NSThread currentThread] threadDictionary];
-    NSString *key = @"FVPDFBitmapContext";
-    CGContextRef oldContext = (CGContextRef)[threadDictionary objectForKey:key];
-    if (oldContext) {
-        [threadDictionary removeObjectForKey:key];
-        FVIconBitmapContextDispose(oldContext);
-    }
-    [threadDictionary setObject:(id)ctxt forKey:key];
-}
-
-static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
-{
-    return (CGBitmapContextGetWidth(ctxt) >= requiredSize.width && CGBitmapContextGetHeight(ctxt) >= requiredSize.height);
-}
-
-/*
- unused because scaling and cropping are screwy
- 
- CGContextRef ctxt = [FVPDFIcon getPDFBitmapContextForCurrentThread];
- if (NULL == ctxt || isContextLargeEnough(ctxt, _thumbnailSize) == NO) {
- ctxt = FVIconBitmapContextCreateWithSize(_thumbnailSize.width, _thumbnailSize.height);
- // this will dispose of the previous context (if any)
- [FVPDFIcon setPDFBitmapContextForCurrentThread:ctxt];
- }
- */
 
 - (NSUInteger)pageCount { return _pageCount; }
 
@@ -232,73 +205,63 @@ static inline BOOL isContextLargeEnough(CGContextRef ctxt, NSSize requiredSize)
 
 - (void)showNextPage;
 {
-    pthread_mutex_lock(&_mutex);
+    [self lock];
     _currentPage = MIN(_currentPage + 1, _pageCount);
     _pdfPage = NULL;
-    CGImageRelease(_thumbnailRef);
-    _thumbnailRef = NULL;
-    pthread_mutex_unlock(&_mutex);
+    CGImageRelease(_thumbnail);
+    _thumbnail = NULL;
+    [self unlock];
 }
 
 - (void)showPreviousPage;
 {
-    pthread_mutex_lock(&_mutex);
+    [self lock];
     _currentPage = _currentPage > 1 ? _currentPage - 1 : 1;
     _pdfPage = NULL;
-    CGImageRelease(_thumbnailRef);
-    _thumbnailRef = NULL;
-    pthread_mutex_unlock(&_mutex);
-}
-
-// used to constrain thumbnail size for huge pages
-static inline void limitSize(NSSize *size)
-{
-    while (MIN(size->width, size->height) > 200) {
-        size->width *= 0.9;
-        size->height *= 0.9;
-    }
+    CGImageRelease(_thumbnail);
+    _thumbnail = NULL;
+    [self unlock];
 }
 
 - (void)renderOffscreen
 {  
     // hold the lock while initializing these variables, so we don't waste time trying to render again, since we may be returning YES from needsRender
-    pthread_mutex_lock(&_mutex);
+    [self lock];
     
     // only the first page is cached to disk; ignore this branch if we should be drawing a later page or if the size has changed
     
     // handle the case where multiple render tasks were pushed into the queue before renderOffscreen was called
-    if ((NULL != _thumbnailRef || NULL != _pdfDoc) && 1 == _currentPage) {
+    if ((NULL != _thumbnail || NULL != _pdfDoc) && 1 == _currentPage) {
         
         BOOL exitEarly;
-        // if _thumbnailRef is non-NULL, we're guaranteed that _thumbnailSize has been initialized correctly
+        // if _thumbnail is non-NULL, we're guaranteed that _thumbnailSize has been initialized correctly
         
-        if (_desiredSize.height <= _thumbnailSize.height * 1.2)
-            exitEarly = (NULL != _thumbnailRef);
-        else
+        if (FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize))
             exitEarly = (NULL != _pdfDoc && NULL != _pdfPage);
-        
+        else
+            exitEarly = (NULL != _thumbnail);
+
         if (exitEarly) {
-            pthread_mutex_unlock(&_mutex);
+            [self unlock];
             return;
         }
     }
     
-    if (NULL == _thumbnailRef && 1 == _currentPage) {
+    if (NULL == _thumbnail && 1 == _currentPage) {
         
-        _thumbnailRef = [FVIconCache newImageNamed:_diskCacheName];
+        _thumbnail = [FVIconCache newImageNamed:_diskCacheName];
         BOOL exitEarly = NO;
         
         // This is an optimization to avoid loading the PDF document unless absolutely necessary.  If the icon was cached by a different FVPDFIcon instance, _pageCount won't be correct and we have to continue on and load the PDF document.  In that case, our sizes will be overwritten, but the thumbnail won't be recreated.  If we need to render something that's larger than the thumbnail by 20%, we have to continue on and make sure the PDF doc is loaded as well.
         
-        if (NULL != _thumbnailRef) {
-            _thumbnailSize.width = CGImageGetWidth(_thumbnailRef);
-            _thumbnailSize.height = CGImageGetHeight(_thumbnailRef);
-            exitEarly = _desiredSize.height <= _thumbnailSize.height * 1.2 && _pageCount > 0;
+        if (NULL != _thumbnail) {
+            _thumbnailSize = FVCGImageSize(_thumbnail);
+            exitEarly = FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize) && _pageCount > 0;
         }
                 
         // !!! early return
         if (exitEarly) {
-            pthread_mutex_unlock(&_mutex);    
+            [self unlock];    
             return;
         }
     }    
@@ -328,14 +291,14 @@ static inline void limitSize(NSSize *size)
         _thumbnailSize.height = _fullSize.height / 2;
         
         // really huge PDFs (e.g. maps) will create really huge bitmaps and run us out of memory
-        limitSize(&_thumbnailSize);
+        FVIconLimitThumbnailSize(&_thumbnailSize);
     }
                 
     // Bitmap contexts for PDF files tend to be in the 2-5 MB range, and even a one point size difference in height or width (typical, even for the same page size) results in us creating a new context for each one if we use the context cache.  That sucks, so we'll just create and destroy them as needed, since drawing into a large cached context and then cropping doesn't work.
     
     // don't bother redrawing this if it already exists, since that's a big waste of time, and our thumbnail size is a fixed percentage of the document size so there's never a need to re-render it
 
-    if (NULL == _thumbnailRef) {
+    if (NULL == _thumbnail) {
         
         CGContextRef ctxt = FVIconBitmapContextCreateWithSize(_thumbnailSize.width, _thumbnailSize.height);
         
@@ -353,29 +316,29 @@ static inline void limitSize(NSSize *size)
             CGContextDrawPDFPage(ctxt, _pdfPage);
         }
         
-        CGImageRelease(_thumbnailRef);
-        _thumbnailRef = CGBitmapContextCreateImage(ctxt);
-        if (1 == _currentPage && NO == _inDiskCache && NULL != _thumbnailRef) {
-            [FVIconCache cacheImage:_thumbnailRef withName:_diskCacheName];
+        CGImageRelease(_thumbnail);
+        _thumbnail = CGBitmapContextCreateImage(ctxt);
+        if (1 == _currentPage && NO == _inDiskCache && NULL != _thumbnail) {
+            [FVIconCache cacheImage:_thumbnail withName:_diskCacheName];
             _inDiskCache = YES;
         }
         
         FVIconBitmapContextDispose(ctxt);
     }
-    pthread_mutex_unlock(&_mutex);
+    [self unlock];
 }
 
 - (BOOL)needsRenderForSize:(NSSize)size 
 {
     BOOL needsRender = NO;
-    if (pthread_mutex_trylock(&_mutex) == 0) {
+    if ([self tryLock]) {
         // tells the render method if work is needed
         _desiredSize = size;
-        if (size.height <= _thumbnailSize.height * 1.2)
-            needsRender = (NULL == _thumbnailRef);
-        else 
+        if (FVShouldDrawFullImageWithThumbnailSize(size, _thumbnailSize))
             needsRender = (NULL == _pdfPage);
-        pthread_mutex_unlock(&_mutex);
+        else
+            needsRender = (NULL == _thumbnail);
+        [self unlock];
     }
     return needsRender;
 }
@@ -384,51 +347,51 @@ static inline void limitSize(NSSize *size)
  For PDF/PS icons, we always use trylock and draw a blank page if that fails.  Otherwise the drawing thread will wait for rendering to relinquish the lock (which can be really slow for PDF).  This is a major problem when scrolling.
  */
 
-- (void)fastDrawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context
+- (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context
 {    
     // draw thumbnail if present, regardless of the size requested
-    if (pthread_mutex_trylock(&_mutex) != 0) {
+    if (NO == [self tryLock]) {
         // no lock, so just draw the blank page and bail out
-        [self _drawPlaceholderInRect:dstRect inCGContext:context];
+        [self _drawPlaceholderInRect:dstRect ofContext:context];
     }
-    else if (NULL == _thumbnailRef) {
-        pthread_mutex_unlock(&_mutex);
-        [self _drawPlaceholderInRect:dstRect inCGContext:context];
+    else if (NULL == _thumbnail) {
+        [self unlock];
+        [self _drawPlaceholderInRect:dstRect ofContext:context];
     }
-    else if (_thumbnailRef) {
-        CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnailRef);
-        pthread_mutex_unlock(&_mutex);
+    else if (_thumbnail) {
+        CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnail);
+        [self unlock];
         if (_drawsLinkBadge)
-            [self _drawBadgeInContext:context forIconInRect:dstRect];
+            [self _badgeIconInRect:dstRect ofContext:context];
     }
     else {
-        pthread_mutex_unlock(&_mutex);
+        [self unlock];
         // let drawInRect: handle the rect conversion
-        [self drawInRect:dstRect inCGContext:context];
+        [self drawInRect:dstRect ofContext:context];
     }
 }
 
-- (void)drawInRect:(NSRect)dstRect inCGContext:(CGContextRef)context;
+- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {    
-    if (pthread_mutex_trylock(&_mutex) != 0) {
-        [self _drawPlaceholderInRect:dstRect inCGContext:context];
+    if (NO == [self tryLock]) {
+        [self _drawPlaceholderInRect:dstRect ofContext:context];
     }
     else {
         
         CGRect drawRect = [self _drawingRectWithRect:dstRect];
         
         // draw the thumbnail if the rect is small or we have no PDF document (yet)...if we have neither, draw a blank page
-        if (CGRectGetHeight(drawRect) <= _thumbnailSize.height * 1.2 || NULL == _pdfDoc) {
+        if (false == FVShouldDrawFullImageWithThumbnailSize(dstRect.size, _thumbnailSize) || NULL == _pdfDoc) {
             
-            if (NULL != _thumbnailRef) {
-                CGContextDrawImage(context, drawRect, _thumbnailRef);
+            if (NULL != _thumbnail) {
+                CGContextDrawImage(context, drawRect, _thumbnail);
                 if (_drawsLinkBadge)
-                    [self _drawBadgeInContext:context forIconInRect:dstRect];
+                    [self _badgeIconInRect:dstRect ofContext:context];
             }
             else {
                 // draw a blank page as a placeholder, and the real icon will get picked up next time around
                 // this path is hit fairly often, but is seldom actually drawn because of the callback rate
-                [self _drawPlaceholderInRect:dstRect inCGContext:context];
+                [self _drawPlaceholderInRect:dstRect ofContext:context];
             }
             
         }
@@ -473,10 +436,10 @@ static inline void limitSize(NSSize *size)
             CGContextRestoreGState(context);
             
             if (_drawsLinkBadge)
-                [self _drawBadgeInContext:context forIconInRect:dstRect];
+                [self _badgeIconInRect:dstRect ofContext:context];
 
         }
-        pthread_mutex_unlock(&_mutex);
+        [self unlock];
     }
 }
 
