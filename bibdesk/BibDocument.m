@@ -434,6 +434,7 @@ enum {
     templatePreviewMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [templatePreviewMenu setDelegate:self];
     [previewButton setMenu:templatePreviewMenu forSegment:0];
+    [previewButton setEnabled:[pw boolForKey:BDSKUsesTeXKey] forSegment:BDSKPreviewDisplayTeX];
     
     sideTemplatePreviewMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [sideTemplatePreviewMenu setDelegate:self];
@@ -573,7 +574,7 @@ enum {
     [self updateCategoryGroupsPreservingSelection:NO];
     
     [saveTextEncodingPopupButton setEncoding:0];
-
+    
 }
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
@@ -2712,7 +2713,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [OFPreference addObserver:self
                          selector:@selector(handleTeXPreviewNeedsUpdateNotification:)
                     forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
-}
+		[OFPreference addObserver:self
+                         selector:@selector(handleUsesTeXChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKUsesTeXKey]];
+}           
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
     return;
@@ -2738,6 +2742,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
             [self isMainDocument])
         [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
+}
+
+- (void)handleUsesTeXChangedNotification:(NSNotification *)notification{
+    [previewButton setEnabled:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] forSegment:BDSKPreviewDisplayTeX];
 }
 
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{

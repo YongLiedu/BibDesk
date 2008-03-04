@@ -539,7 +539,7 @@
             state = NSOnState;
     }
     [menuItem setState:state];
-    return YES;
+    return tag != BDSKPreviewDisplayTeX || [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey];
 }
 
 - (BOOL)validateChangeSidePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
@@ -552,7 +552,7 @@
             state = NSOnState;
     }
     [menuItem setState:state];
-    return YES;
+    return tag != BDSKPreviewDisplayTeX || [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey];
 }
 
 - (BOOL)validateChangeIntersectGroupsMenuItem:(NSMenuItem *)menuItem {

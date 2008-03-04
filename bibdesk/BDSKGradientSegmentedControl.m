@@ -182,11 +182,12 @@
     NSImage *image = [self imageForSegment:segment];
     NSRect rect = BDSKCenterRect(frame, [image size], [controlView isFlipped]);
     NSRect fromRect = NSZeroRect;
+    CGFloat f = [self isEnabledForSegment:segment] ? 1.0 : 0.5;
     fromRect.size = [image size];
     if ([controlView isFlipped])
-        [image drawFlippedInRect:rect fromRect:fromRect operation:NSCompositeSourceOver fraction:1.0];
+        [image drawFlippedInRect:rect fromRect:fromRect operation:NSCompositeSourceOver fraction:f];
     else
-        [image drawInRect:rect fromRect:fromRect operation:NSCompositeSourceOver fraction:1.0];
+        [image drawInRect:rect fromRect:fromRect operation:NSCompositeSourceOver fraction:f];
     
     if ([self menuForSegment:segment]) {
         CGFloat x = NSMaxX(frame) - 2.0;
@@ -206,7 +207,7 @@
         [arrowPath closePath];
         
         [NSGraphicsContext saveGraphicsState];
-        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.8] setFill];
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.8 * f] setFill];
         [arrowPath fill];
         [NSGraphicsContext restoreGraphicsState];
     }
