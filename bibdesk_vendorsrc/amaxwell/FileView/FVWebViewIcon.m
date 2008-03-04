@@ -155,8 +155,10 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
     
     pthread_mutex_destroy(&_mutex);
-    CGImageRelease(_fullImage);
-    CGImageRelease(_thumbnail);
+    if (_fullImage != NULL)
+        CGImageRelease(_fullImage);
+    if (_thumbnail != NULL)
+        CGImageRelease(_thumbnail);
     [_httpURL release];
     [_fallbackIcon release];
     NSZoneFree([self zone], _diskCacheName);
@@ -176,9 +178,11 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     [self lock];
     _isRendering = NO;
     
-    CGImageRelease(_fullImage);
+    if (_fullImage != NULL)
+        CGImageRelease(_fullImage);
     _fullImage = NULL;
-    CGImageRelease(_thumbnail);
+    if (_thumbnail != NULL)
+        CGImageRelease(_thumbnail);
     _thumbnail = NULL;
     
     // currently a noop
