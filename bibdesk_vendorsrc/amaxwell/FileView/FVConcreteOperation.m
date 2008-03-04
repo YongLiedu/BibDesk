@@ -92,9 +92,9 @@ struct FVOpFlags {
     } while (false == didSwap);
 }
 
-- (void)main;
+- (void)start;
 {
-    // [super main] performs some validation; we'd have to set _executing bit after that call for async, but before for sync, which is not possible.  Hence, reimplement the whole thing here.
+    // [super start] performs some validation; we'd have to set _executing bit after that call for async, but before for sync, which is not possible.  Hence, reimplement the whole thing here.
     if ([self isCancelled])
         [NSException raise:NSInternalInconsistencyException format:@"attempt to execute a cancelled operation"];
     if ([self isExecuting] || [self isFinished])
