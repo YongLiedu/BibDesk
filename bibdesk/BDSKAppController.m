@@ -629,7 +629,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [item setTag:BDSKTemplateDragCopyType + i];
         }
         
-    } else if ([menu isEqual:previewDisplayMenu]) {
+    } else if ([menu isEqual:previewDisplayMenu] || [menu isEqual:sidePreviewDisplayMenu]) {
     
         NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFileType:@"rtf"]];
         [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"rtfd"]];
@@ -637,15 +637,16 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"html"]];
         
         int i = [menu numberOfItems];
-        while (i-- && [[menu itemAtIndex:i] tag] == 3)
+        while (i-- && [[menu itemAtIndex:i] isSeparatorItem] == NO)
             [menu removeItemAtIndex:i];
         
         NSMenuItem *item;
         NSEnumerator *styleEnum = [styles objectEnumerator];
         NSString *style;
+        SEL action = [menu isEqual:previewDisplayMenu] ? @selector(changePreviewDisplay:) : @selector(changeSidePreviewDisplay:);
         while (style = [styleEnum nextObject]) {
-            item = [menu addItemWithTitle:style action:@selector(changePreviewDisplay:) keyEquivalent:@""];
-            [item setTag:BDSKTemplatePreviewDisplay];
+            item = [menu addItemWithTitle:style action:action keyEquivalent:@""];
+            [item setTag:BDSKPreviewDisplayTemplate];
             [item setRepresentedObject:style];
         }
         

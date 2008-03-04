@@ -257,6 +257,8 @@
 		CE8962CB0CBEC10700EA2D98 /* TemplateOptions.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE8962CA0CBEC10700EA2D98 /* TemplateOptions.plist */; };
 		CE8C731F0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */; };
 		CE8F83490AFB989C009EE6F9 /* BDSKThreadSafeMutableArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8F83470AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.m */; };
+		CE92CE5D0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CE92CE5B0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h */; };
+		CE92CE5E0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */; };
 		CE95A57C0A88883300334DFA /* BDSKReadMeController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE95A57A0A88883300334DFA /* BDSKReadMeController.m */; };
 		CE95AF180ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = CE95AF160ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m */; };
 		CE9666460B46B70C003BAB9A /* BDSKServerInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = CE9666440B46B70C003BAB9A /* BDSKServerInfo.m */; };
@@ -1167,6 +1169,8 @@
 		CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSObject_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE8F83460AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKThreadSafeMutableArray.h; sourceTree = "<group>"; };
 		CE8F83470AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKThreadSafeMutableArray.m; sourceTree = "<group>"; };
+		CE92CE5B0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGradientSegmentedControl.h; sourceTree = "<group>"; };
+		CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGradientSegmentedControl.m; sourceTree = "<group>"; };
 		CE95A5790A88883300334DFA /* BDSKReadMeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKReadMeController.h; sourceTree = "<group>"; };
 		CE95A57A0A88883300334DFA /* BDSKReadMeController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKReadMeController.m; sourceTree = "<group>"; };
 		CE95AF150ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTemplateObjectProxy.h; sourceTree = "<group>"; };
@@ -2058,6 +2062,8 @@
 				F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */,
 				CE27D95A0AF92BFD00419879 /* BDSKZoomableTextView.m */,
 				F9A6772C07D2D57F00782ACD /* MultiplePageView.m */,
+				CE92CE5B0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h */,
+				CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -2902,6 +2908,7 @@
 				CE6DCA220D6A0237003A072F /* BDSKCondition+Scripting.h in Headers */,
 				CE117D230D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.h in Headers */,
 				CE05CF5D0D7743940034C2A8 /* WebURLsWithTitles.h in Headers */,
+				CE92CE5D0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3864,6 +3871,7 @@
 				CE3011BA0D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m in Sources */,
 				CE6DCA230D6A0237003A072F /* BDSKCondition+Scripting.m in Sources */,
 				CE117D240D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.m in Sources */,
+				CE92CE5E0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

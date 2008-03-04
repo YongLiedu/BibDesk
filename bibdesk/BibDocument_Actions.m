@@ -1081,7 +1081,7 @@
     if (firstResponder != groupTableView)
         [documentWindow makeFirstResponder:groupTableView];
 }
-
+/*
 - (IBAction)changePreviewDisplay:(id)sender{
     int tag = [sender tag];
     NSString *style = [sender representedObject];
@@ -1098,6 +1098,48 @@
     }
     if (didChange)
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+}
+*/
+- (IBAction)changePreviewDisplay:(id)sender{
+    int tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
+    NSString *style = [sender respondsToSelector:@selector(representedObject)] ? [sender representedObject] : nil;
+    BOOL changed = NO;
+    
+    if (previewDisplay != tag) {
+        previewDisplay = tag;
+        changed = YES;
+    }
+    if (tag == BDSKPreviewDisplayTemplate && style && NO == [style isEqualToString:previewDisplayTemplate]) {
+        [previewDisplayTemplate release];
+        previewDisplayTemplate = [style retain];
+        changed = YES;
+    }
+    if (changed) {
+        [self updatePreviewPane];
+        if ([sender isEqual:previewButton] == NO)
+            [previewButton selectSegmentWithTag:previewDisplay];
+    }
+}
+
+- (IBAction)changeSidePreviewDisplay:(id)sender{
+    int tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
+    NSString *style = [sender respondsToSelector:@selector(representedObject)] ? [sender representedObject] : nil;
+    BOOL changed = NO;
+    
+    if (sidePreviewDisplay != tag) {
+        sidePreviewDisplay = tag;
+        changed = YES;
+    }
+    if (tag == BDSKPreviewDisplayTemplate && style && NO == [style isEqualToString:sidePreviewDisplayTemplate]) {
+        [sidePreviewDisplayTemplate release];
+        sidePreviewDisplayTemplate = [style retain];
+        changed = YES;
+    }
+    if (changed) {
+        [self updateSidePreviewPane];
+        if ([sender isEqual:sidePreviewButton] == NO)
+            [sidePreviewButton selectSegmentWithTag:sidePreviewDisplay];
+    }
 }
 
 - (void)pageDownInPreview:(id)sender{

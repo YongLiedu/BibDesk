@@ -43,6 +43,59 @@
 
 @implementation NSImage (BDSKExtensions)
 
++ (void)makePreviewDisplayImages {
+    static NSImage *previewTemplateDisplayImage = nil;
+    static NSImage *previewIconDisplayImage = nil;
+    static NSImage *previewTeXDisplayImage = nil;
+    
+    if (previewTemplateDisplayImage == nil) {
+        NSBezierPath *path;
+        
+        previewTemplateDisplayImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
+        [previewTemplateDisplayImage lockFocus];
+        path = [NSBezierPath bezierPath];
+        [path moveToPoint:NSMakePoint(0.0, 0.5)];
+        [path lineToPoint:NSMakePoint(11.0, 0.5)];
+        [path moveToPoint:NSMakePoint(0.0, 3.5)];
+        [path lineToPoint:NSMakePoint(11.0, 3.5)];
+        [path moveToPoint:NSMakePoint(0.0, 6.5)];
+        [path lineToPoint:NSMakePoint(11.0, 6.5)];
+        [path moveToPoint:NSMakePoint(0.0, 9.5)];
+        [path lineToPoint:NSMakePoint(11.0, 9.5)];
+        [path stroke];
+        [previewTemplateDisplayImage unlockFocus];
+        [previewTemplateDisplayImage setName:@"BDSKPreviewTemplateDisplay"];
+        
+        previewIconDisplayImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
+        [previewIconDisplayImage lockFocus];
+        path = [NSBezierPath bezierPath];
+        [path appendBezierPathWithRect:NSMakeRect(0.5, 0.5, 3.0, 3.0)];
+        [path appendBezierPathWithRect:NSMakeRect(7.5, 0.5, 3.0, 3.0)];
+        [path appendBezierPathWithRect:NSMakeRect(0.5, 6.5, 3.0, 3.0)];
+        [path appendBezierPathWithRect:NSMakeRect(7.5, 6.5, 3.0, 3.0)];
+        [path stroke];
+        [previewIconDisplayImage unlockFocus];
+        [previewIconDisplayImage setName:@"BDSKPreviewIconDisplay"];
+        
+        previewTeXDisplayImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
+        [previewTeXDisplayImage lockFocus];
+        path = [NSBezierPath bezierPath];
+        [path appendBezierPathWithOvalInRect:NSMakeRect(1.5, 1.5, 3.0, 3.0)];
+        [path appendBezierPathWithOvalInRect:NSMakeRect(6.5, 1.5, 3.0, 3.0)];
+        [path moveToPoint:NSMakePoint(6.5, 3.0)];
+        [path appendBezierPathWithArcWithCenter:NSMakePoint(5.5, 3.0) radius:1.0 startAngle:0.0 endAngle:180.0];
+        [path moveToPoint:NSMakePoint(1.5, 3.0)];
+        [path lineToPoint:NSMakePoint(0.5, 3.0)];
+        [path appendBezierPathWithArcFromPoint:NSMakePoint(2.5, 10.0) toPoint:NSMakePoint(4.5, 8.0) radius:1.0];
+        [path moveToPoint:NSMakePoint(9.5, 3.0)];
+        [path lineToPoint:NSMakePoint(10.5, 3.0)];
+        [path appendBezierPathWithArcFromPoint:NSMakePoint(8.5, 10.0) toPoint:NSMakePoint(6.5, 8.0) radius:1.0];
+        [path stroke];
+        [previewTeXDisplayImage unlockFocus];
+        [previewTeXDisplayImage setName:@"BDSKPreviewTeXDisplay"];
+    }
+}
+
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code {
 	int width = iconSize.width;
 	int height = iconSize.height;

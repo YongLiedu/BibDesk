@@ -1,11 +1,11 @@
 //
-//  NSImage_BDSKExtensions.h
-//  BibDesk
+//  BDSKGradientSegmentedControl.h
+//  Bibdesk
 //
-//  Created by Sven-S. Porst on Thu Jul 29 2004.
+//  Created by Christiaan Hofman on 3/4/08.
 /*
- This software is Copyright (c) 2004-2008
- Sven-S. Porst. All rights reserved.
+ This software is Copyright (c) 2008
+ Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -19,7 +19,7 @@
     the documentation and/or other materials provided with the
     distribution.
 
- - Neither the name of Sven-S. Porst nor the names of any
+ - Neither the name of Christiaan Hofman nor the names of any
     contributors may be used to endorse or promote products derived
     from this software without specific prior written permission.
 
@@ -37,28 +37,13 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <ApplicationServices/ApplicationServices.h>
-#import <OmniAppKit/NSImage-OAExtensions.h>
 
-@interface NSImage (BDSKExtensions)
 
-+ (void)makePreviewDisplayImages;
+@interface BDSKGradientSegmentedControl : NSSegmentedControl
+@end
 
-+ (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code;
-+ (NSImage *)imageWithLargeIconForToolboxCode:(OSType) code;
-+ (NSImage *)missingFileImage;
-
-+ (NSImage *)imageForURL:(NSURL *)aURL;
-+ (NSImage *)imageForFile:(NSString *)path;
-+ (NSImage *)paperclipImage;
-+ (NSImage *)redPaperclipImage;
-
-+ (NSImage *)arrowImage;
-
-- (NSImage *)imageFlippedHorizontally;
-- (NSImage *)highlightedImage;
-- (NSImage *)dragImageWithCount:(int)count;
-- (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
-- (NSBitmapImageRep *)bestImageRepForSize:(NSSize)preferredSize device:(NSDictionary *)deviceDescription;
-
+@interface BDSKGradientSegmentedCell : NSSegmentedCell {
+    CGLayerRef layer;
+    CGLayerRef selectedLayer;
+}
 @end

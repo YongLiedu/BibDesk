@@ -82,6 +82,12 @@ enum {
     BDSKLinkedFilePreviewDisplay = 6
 };
 
+enum {
+    BDSKPreviewDisplayTemplate = 0,
+    BDSKPreviewDisplayFiles = 1,
+    BDSKPreviewDisplayTeX = 2
+};
+
 // our main document types
 extern NSString *BDSKBibTeXDocumentType;
 extern NSString *BDSKRISDocumentType;
@@ -136,11 +142,18 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 #pragma mark File pane variables
 
     IBOutlet FileView *fileView;
-    IBOutlet NSSlider *fileViewSlider;
+    NSTextView *sidePreviewTextView;
+    NSView *currentSidePreviewView;
     IBOutlet BDSKCollapsibleView *fileCollapsibleView;
     IBOutlet BDSKGradientView *fileGradientView;
     
     BDSKFileMigrationController *migrationController;
+    
+    int sidePreviewDisplay;
+    NSString *sidePreviewDisplayTemplate;
+    
+    IBOutlet NSSegmentedControl *sidePreviewButton;
+    NSMenu *sideTemplatePreviewMenu;
     
 #pragma mark Preview variables
 
@@ -150,7 +163,14 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     BDSKEdgeView *previewerBox;
     BDSKZoomablePDFView *previewPdfView;
     BDSKEdgeView *previewBox;
+    FileView *bottomFileView;
+    
+    int previewDisplay;
+    NSString *previewDisplayTemplate;
 	
+    IBOutlet NSSegmentedControl *previewButton;
+    NSMenu *templatePreviewMenu;
+    
 #pragma mark Toolbar variables
     
     NSMutableDictionary *toolbarItems;
@@ -310,6 +330,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 */
 - (void)updatePreviewPane;
+- (void)updateSidePreviewPane;
 
 /*!
 	@method bibTeXStringForPublications

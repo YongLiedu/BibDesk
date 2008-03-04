@@ -530,12 +530,27 @@
 }
 
 - (BOOL)validateChangePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     int tag = [menuItem tag], state = NSOffState;
     NSString *style = [menuItem representedObject];
-    if (tag == [pw integerForKey:BDSKPreviewDisplayKey] &&
-        (tag != BDSKTemplatePreviewDisplay || [style isEqualToString:[pw stringForKey:BDSKPreviewTemplateStyleKey]]))
+    if (tag == previewDisplay && tag != BDSKPreviewDisplayTemplate) {
         state = NSOnState;
+    } else if (tag == BDSKPreviewDisplayTemplate && [style isEqualToString:previewDisplayTemplate]) {
+        if (tag == previewDisplay || [menuItem menu] == templatePreviewMenu)
+            state = NSOnState;
+    }
+    [menuItem setState:state];
+    return YES;
+}
+
+- (BOOL)validateChangeSidePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
+    int tag = [menuItem tag], state = NSOffState;
+    NSString *style = [menuItem representedObject];
+    if (tag == sidePreviewDisplay && tag != BDSKPreviewDisplayTemplate) {
+        state = NSOnState;
+    } else if (tag == BDSKPreviewDisplayTemplate && [style isEqualToString:sidePreviewDisplayTemplate]) {
+        if (tag == sidePreviewDisplay || [menuItem menu] == sideTemplatePreviewMenu)
+            state = NSOnState;
+    }
     [menuItem setState:state];
     return YES;
 }
@@ -816,6 +831,9 @@
     }
     else if (act == @selector(changePreviewDisplay:)){
         return [self validateChangePreviewDisplayMenuItem:menuItem];
+    }
+    else if (act == @selector(changeSidePreviewDisplay:)){
+        return [self validateChangeSidePreviewDisplayMenuItem:menuItem];
     }
     else if (act == @selector(changeIntersectGroupsAction:)){
         return [self validateChangeIntersectGroupsMenuItem:menuItem];
