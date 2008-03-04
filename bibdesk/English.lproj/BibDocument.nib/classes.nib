@@ -24,6 +24,11 @@
             SUPERCLASS = NSPopUpButton;
         },
                 {
+            CLASS = BDSKGradientSegmentedControl;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSSegmentedControl;
+        },
+                {
             CLASS = BDSKGradientView;
             LANGUAGE = ObjC;
             SUPERCLASS = NSView;
@@ -93,6 +98,7 @@
                 changeMainTableFont = id;
                 changePreviewDisplay = id;
                 changeSearchType = id;
+                changeSidePreviewDisplay = id;
                 consolidateLinkedFiles = id;
                 copyAsAction = id;
                 copyGroupURLAction = id;
@@ -176,7 +182,6 @@
                 fileCollapsibleView = BDSKCollapsibleView;
                 fileGradientView = BDSKGradientView;
                 fileView = FileView;
-                fileViewSlider = NSSlider;
                 groupActionButton = BDSKImagePopUpButton;
                 groupActionMenuButton = BDSKImagePopUpButton;
                 groupAddButton = NSButton;
@@ -187,6 +192,7 @@
                 groupTableView = BDSKGroupTableView;
                 mainBox = BDSKColoredBox;
                 mainView = NSView;
+                previewButton = NSSegmentedControl;
                 previewTextView = NSTextView;
                 saveAccessoryView = NSView;
                 saveTextEncodingPopupButton = BDSKEncodingPopUpButton;
@@ -194,6 +200,7 @@
                 searchBookmarkPopUp = NSPopUpButton;
                 searchBookmarkSheet = NSWindow;
                 searchField = NSSearchField;
+                sidePreviewButton = NSSegmentedControl;
                 splitView = BDSKSplitView;
                 statusBar = BDSKStatusBar;
                 tableView = BDSKMainTableView;
@@ -249,6 +256,11 @@
             CLASS = NSScrollView;
             LANGUAGE = ObjC;
             SUPERCLASS = NSView;
+        },
+                {
+            CLASS = NSSegmentedControl;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSControl;
         },
                 {
             CLASS = NSTableHeaderView;

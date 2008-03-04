@@ -25,6 +25,7 @@
                 groupSortMenu = NSMenu;
                 previewDisplayMenu = NSMenu;
                 searchBookmarksMenu = NSMenu;
+                sidePreviewDisplayMenu = NSMenu;
             };
             SUPERCLASS = NSObject;
         },
@@ -63,6 +64,7 @@
                 alternateCut = id;
                 alternateDelete = id;
                 changePreviewDisplay = id;
+                changeSidePreviewDisplay = id;
                 columnsMenuAddTableColumn = id;
                 consolidateLinkedFiles = id;
                 copyAsAction = id;
