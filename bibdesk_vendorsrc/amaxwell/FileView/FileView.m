@@ -1771,10 +1771,8 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
                 if (NSEqualRects([_sliderWindow frame], sliderRect) == NO)
                     [_sliderWindow setFrame:sliderRect display:NO];
                 
-                [_sliderWindow setAlphaValue:0.0];
-                [_sliderWindow orderFrontRegardless];
+                [_sliderWindow orderFront:self];
                 [[self window] addChildWindow:_sliderWindow ordered:NSWindowAbove];
-                [[_sliderWindow animator] setAlphaValue:1.0];
             }
         }
     }
@@ -1788,7 +1786,6 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
 - (void)handleSliderMouseExited:(NSNotification *)aNote
 {
     if ([[[self window] childWindows] containsObject:_sliderWindow]) {
-        [[_sliderWindow animator] setAlphaValue:0.0];
         [[self window] removeChildWindow:_sliderWindow];
         [_sliderWindow orderOut:self];
     }

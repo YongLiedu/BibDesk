@@ -56,7 +56,4 @@ NSString * const FVSliderMouseExitedNotificationName;
 - (id)init;
 - (FVSlider *)slider;
 
-// cover for -animator on 10.5, returns self on 10.4
-- (id)animator;
-
 @end

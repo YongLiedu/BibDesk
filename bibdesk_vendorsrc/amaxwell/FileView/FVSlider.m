@@ -38,6 +38,7 @@
 
 #import "FVSlider.h"
 #import "FVUtilities.h"
+#import <QuartzCore/QuartzCore.h>
 
 NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNotificationName";
 
@@ -164,15 +165,38 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
         [_slider setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
         [[self contentView] addSubview:_slider];
         [_slider release];
+        
+        id animation = [NSClassFromString(@"CABasicAnimation") animation];
+        if (animation) {
+            [animation setDelegate:self];
+            [self setAnimations:[NSDictionary dictionaryWithObject:animation forKey:@"alphaValue"]];
+        }
+
     }
     return self;
 }
 
 - (FVSlider *)slider { return _slider; }
 
-- (id)animator
-{
-    return [[FVSliderWindow superclass] instancesRespondToSelector:_cmd] ? [super animator] : self;
+- (void)orderFront:(id)sender {
+    if ([self isVisible] == NO && [self respondsToSelector:@selector(animator)]) {
+        [self setAlphaValue:0.0];
+        [[self animator] setAlphaValue:1.0];
+    }
+    [super orderFront:sender];
+}
+
+- (void)orderOut:(id)sender {
+    if ([self isVisible] && [self respondsToSelector:@selector(animator)]) {
+        [[self animator] setAlphaValue:0.0];
+    } else {
+        [super orderOut:sender];
+    }
+}
+
+- (void)animationDidStop:(id)animation finished:(BOOL)flag  {
+    if ([self alphaValue] < 0.0001 && [self isVisible])
+        [super orderOut:self];
 }
 
 @end
