@@ -1087,19 +1087,19 @@
     NSString *style = [sender respondsToSelector:@selector(representedObject)] ? [sender representedObject] : nil;
     BOOL changed = NO;
     
-    if (previewDisplay != tag) {
-        previewDisplay = tag;
+    if (bottomPreviewDisplay != tag) {
+        bottomPreviewDisplay = tag;
         changed = YES;
     }
-    if (tag == BDSKPreviewDisplayText && style && NO == [style isEqualToString:previewDisplayTemplate]) {
-        [previewDisplayTemplate release];
-        previewDisplayTemplate = [style retain];
+    if (tag == BDSKPreviewDisplayText && style && NO == [style isEqualToString:bottomPreviewDisplayTemplate]) {
+        [bottomPreviewDisplayTemplate release];
+        bottomPreviewDisplayTemplate = [style retain];
         changed = YES;
     }
     if (changed) {
         [self updatePreviewPane];
-        if ([sender isEqual:previewButton] == NO)
-            [previewButton selectSegmentWithTag:previewDisplay];
+        if ([sender isEqual:bottomPreviewButton] == NO)
+            [bottomPreviewButton selectSegmentWithTag:bottomPreviewDisplay];
     }
 }
 
@@ -1127,12 +1127,12 @@
 - (void)pageDownInPreview:(id)sender{
     NSScrollView *scrollView = nil;
     
-    if([currentPreviewView isEqual:previewerBox])
+    if (bottomPreviewDisplay == BDSKPreviewDisplayText)
+        scrollView = [bottomPreviewTextView enclosingScrollView];
+    else if (bottomPreviewDisplay == BDSKPreviewDisplayFiles)
+        scrollView = [bottomFileView scrollView];
+    else if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
         scrollView = [(BDSKZoomablePDFView *)[previewer pdfView] scrollView];
-    else if([currentPreviewView isEqual:previewBox])
-        scrollView = [previewPdfView scrollView];
-    else
-        scrollView = (NSScrollView *)currentPreviewView;
     
     NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
     
@@ -1152,12 +1152,12 @@
 - (void)pageUpInPreview:(id)sender{
     NSScrollView *scrollView = nil;
     
-    if([currentPreviewView isEqual:previewerBox])
+    if (bottomPreviewDisplay == BDSKPreviewDisplayText)
+        scrollView = [bottomPreviewTextView enclosingScrollView];
+    else if (bottomPreviewDisplay == BDSKPreviewDisplayFiles)
+        scrollView = [bottomFileView scrollView];
+    else if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
         scrollView = [(BDSKZoomablePDFView *)[previewer pdfView] scrollView];
-    else if([currentPreviewView isEqual:previewBox])
-        scrollView = [previewPdfView scrollView];
-    else
-        scrollView = (NSScrollView *)currentPreviewView;
     
     NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
     

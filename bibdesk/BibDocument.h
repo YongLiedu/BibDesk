@@ -139,9 +139,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet BDSKGradientView *groupGradientView;
 	NSString *currentGroupField;
     
-#pragma mark File pane variables
+#pragma mark Side preview variables
 
-    IBOutlet FileView *fileView;
+    IBOutlet FileView *sideFileView;
     NSTextView *sidePreviewTextView;
     NSView *currentSidePreviewView;
     IBOutlet BDSKCollapsibleView *fileCollapsibleView;
@@ -155,21 +155,21 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSSegmentedControl *sidePreviewButton;
     NSMenu *sideTemplatePreviewMenu;
     
-#pragma mark Preview variables
+#pragma mark Bottom preview variables
 
-    IBOutlet NSTextView *previewTextView;
-    IBOutlet NSView *currentPreviewView;
+    IBOutlet NSTextView *bottomPreviewTextView;
+    IBOutlet NSView *currentBottomPreviewView;
     BDSKPreviewer *previewer;
     BDSKEdgeView *previewerBox;
     BDSKZoomablePDFView *previewPdfView;
     BDSKEdgeView *previewBox;
     FileView *bottomFileView;
     
-    int previewDisplay;
-    NSString *previewDisplayTemplate;
+    int bottomPreviewDisplay;
+    NSString *bottomPreviewDisplayTemplate;
 	
-    IBOutlet NSSegmentedControl *previewButton;
-    NSMenu *templatePreviewMenu;
+    IBOutlet NSSegmentedControl *bottomPreviewButton;
+    NSMenu *bottomTemplatePreviewMenu;
     
 #pragma mark Toolbar variables
     
