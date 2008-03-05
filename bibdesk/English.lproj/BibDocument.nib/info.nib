@@ -3,25 +3,45 @@
 <plist version="1.0">
 <dict>
 	<key>IBDocumentLocation</key>
-	<string>69 68 356 240 0 0 1440 938 </string>
+	<string>58 186 356 240 0 0 1440 938 </string>
 	<key>IBEditorPositions</key>
 	<dict>
+		<key>101206</key>
+		<string>610 536 220 242 0 0 1440 938 </string>
+		<key>101223</key>
+		<string>610 536 220 242 0 0 1440 938 </string>
 		<key>433</key>
 		<string>69 313 241 503 0 0 1440 938 </string>
+		<key>661</key>
+		<string>532 634 376 112 0 0 1440 938 </string>
+		<key>702</key>
+		<string>552 637 336 108 0 0 1440 938 </string>
 		<key>819</key>
 		<string>69 313 281 412 0 0 1440 938 </string>
+		<key>923</key>
+		<string>532 611 376 142 0 0 1440 938 </string>
 	</dict>
 	<key>IBFramework Version</key>
 	<string>489.0</string>
 	<key>IBLastKnownRelativeProjectPath</key>
 	<string>../../Bibdesk.xcodeproj</string>
+	<key>IBLockedTabItems</key>
+	<array>
+		<integer>101208</integer>
+		<integer>101231</integer>
+	</array>
 	<key>IBOldestOS</key>
 	<integer>5</integer>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>433</integer>
+		<integer>923</integer>
 		<integer>5</integer>
+		<integer>661</integer>
+		<integer>433</integer>
+		<integer>702</integer>
+		<integer>101206</integer>
 		<integer>819</integer>
+		<integer>101223</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>9C31</string>

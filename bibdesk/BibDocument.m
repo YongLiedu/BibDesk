@@ -305,13 +305,7 @@ enum {
     [toolbarItems release];
 	[statusBar release];
     [[tableView enclosingScrollView] release];
-    [[bottomPreviewTextView enclosingScrollView] release];
-    [[bottomFileView enclosingScrollView] release];
-    [[sideFileView enclosingScrollView] release];
-    [[sidePreviewTextView enclosingScrollView] release];
     [previewer release];
-    [previewerBox release];
-    [previewBox release];
     [bottomPreviewDisplayTemplate release];
     [sidePreviewDisplayTemplate release];
     [macroWC release];
@@ -401,6 +395,12 @@ enum {
     }
 }
 
+static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInteger i) {
+    NSView *placeholderView = [[splitView subviews] objectAtIndex:i];
+    [view setFrame:[placeholderView frame]];
+    [splitView replaceSubview:placeholderView with:view];
+}
+
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
     [super windowControllerDidLoadNib:aController];
@@ -418,6 +418,9 @@ enum {
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     
     [self setupToolbar];
+    
+    replaceSplitViewSubview(bottomPreviewTabView, splitView, 1);
+    replaceSplitViewSubview([sidePreviewTabView superview], groupSplitView, 2);
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
 	[statusBar retain]; // we need to retain, as we might remove it from the window
@@ -489,8 +492,6 @@ enum {
     [[tableView enclosingScrollView] retain];
     [[tableView enclosingScrollView] setFrame:[mainView bounds]];
     
-    [[bottomPreviewTextView enclosingScrollView] retain];
-    
     // TableView setup
     [tableView removeAllTableColumns];
     
@@ -521,9 +522,6 @@ enum {
     [sideFileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKMainFileViewIconScaleKey]];
     [sideFileView setAutoScales:YES];
     [sideFileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
-    
-    currentSidePreviewView = [sideFileView enclosingScrollView];
-    [currentSidePreviewView retain];
     
 	// ImagePopUpButtons setup
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
@@ -697,9 +695,9 @@ enum {
             [dictionary setFloatValue:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
             [dictionary setFloatValue:[previewer RTFScaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
         }
-        if(previewPdfView){
-            [dictionary setFloatValue:[previewPdfView autoScales] ? 0.0 : [previewPdfView scaleFactor] forKey:BDSKPreviewLinkedFileScaleFactorKey];
-        }
+        //if(previewPdfView){
+        //    [dictionary setFloatValue:[previewPdfView autoScales] ? 0.0 : [previewPdfView scaleFactor] forKey:BDSKPreviewLinkedFileScaleFactorKey];
+        //}
         
         if(fileSearchController){
             [dictionary setObject:[fileSearchController sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
@@ -3049,24 +3047,23 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
         [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
         [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
-        previewerBox = [[BDSKEdgeView alloc] init];
+        BDSKEdgeView *previewerBox = [[[BDSKEdgeView alloc] init] autorelease];
         [previewerBox setEdges:BDSKEveryEdgeMask];
         [previewerBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
         [previewerBox setContentView:[previewer pdfView]];
+        [[bottomPreviewTabView tabViewItemAtIndex:BDSKPreviewDisplayTeX] setView:previewerBox];
     }
     
-    // may be the pdflatex or latex2rtf generated preview
-    NSView *view = (NSView *)previewerBox;
-    if(currentBottomPreviewView != view){
-        [view setFrame:[currentBottomPreviewView frame]];
-        [[currentBottomPreviewView superview] replaceSubview:currentBottomPreviewView with:view];
-        currentBottomPreviewView = view;
-        [[previewer progressOverlay] overlayView:currentBottomPreviewView];
+    int tabIndex = [bottomPreviewTabView indexOfTabViewItem:[bottomPreviewTabView selectedTabViewItem]];
+    if (bottomPreviewDisplay != tabIndex) {
+        [bottomPreviewTabView selectTabViewItemAtIndex:bottomPreviewDisplay];
+        [[previewer progressOverlay] overlayView:bottomPreviewTabView];
     }
+    
     [self updatePreviewer:previewer];
-    
 }
 
+/*
 - (void)displayErrorMessageInPreviewTextView:(NSString *)errorMessage{
     NSParameterAssert(errorMessage != nil);
     // make sure we have the correct view in place (NSTextView)
@@ -3189,55 +3186,21 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [self displayErrorMessageInPreviewTextView:errString];
     }
 }    
-
+*/
 - (void)displayFileViewInPreviewPane{
-    // set up the view hierarchy
-    if (bottomFileView == nil) {
-        bottomFileView = [[FileView alloc] init];
-        [bottomFileView setBackgroundColor:[NSColor controlBackgroundColor]];
-        [bottomFileView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-        
-        NSScrollView *scrollView = [[NSScrollView alloc] init];
-        [scrollView setHasHorizontalScroller:YES];
-        [scrollView setHasVerticalScroller:YES];
-        [scrollView setAutohidesScrollers:YES];
-        [scrollView setBorderType:NSBezelBorder];
-        [scrollView setDrawsBackground:YES];
-        [scrollView setBackgroundColor:[NSColor controlBackgroundColor]];
-        [scrollView setDocumentView:bottomFileView];
-        [scrollView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-        [bottomFileView release];
-        
-        [bottomFileView setDataSource:self];
-        [bottomFileView setDelegate:self];
+    int tabIndex = [bottomPreviewTabView indexOfTabViewItem:[bottomPreviewTabView selectedTabViewItem]];
+    if (bottomPreviewDisplay != tabIndex) {
+        if (tabIndex == BDSKPreviewDisplayTeX) {
+            [[previewer progressOverlay] remove];
+            [previewer updateWithBibTeXString:nil];
+        }
+        [bottomPreviewTabView selectTabViewItemAtIndex:bottomPreviewDisplay];
     }
-    
-    NSView *view = [bottomFileView enclosingScrollView];
-    if(currentBottomPreviewView != view){
-        [[previewer progressOverlay] remove];
-        [previewer updateWithBibTeXString:nil];
-        [view setFrame:[currentBottomPreviewView frame]];
-        [[currentBottomPreviewView superview] replaceSubview:currentBottomPreviewView with:view];
-        currentBottomPreviewView = view;
-    }
-    
 }    
 
-- (void)displayAttributedTextPreviewInPreviewPane{
+- (void)displayTemplatedPreview:(NSString *)templateStyle inTextView:(NSTextView *)textView{
     
-    //int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
-
-    NSView *view = [bottomPreviewTextView enclosingScrollView];
-
-    if(currentBottomPreviewView != view){
-        [[previewer progressOverlay] remove];
-        [previewer updateWithBibTeXString:nil];
-        [view setFrame:[currentBottomPreviewView frame]];
-        [[currentBottomPreviewView superview] replaceSubview:currentBottomPreviewView with:view];
-        currentBottomPreviewView = view;
-    }
-    
-    if(NSIsEmptyRect([bottomPreviewTextView visibleRect]))
+    if([textView isHidden] || NSIsEmptyRect([textView visibleRect]))
         return;
     
     /*
@@ -3260,13 +3223,13 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     if (maxItems > 0 && [items count] > maxItems)
         items = [items subarrayWithRange:NSMakeRange(0, maxItems)];
     
-    NSTextStorage *textStorage = [bottomPreviewTextView textStorage];
+    NSTextStorage *textStorage = [textView textStorage];
     
     // do this _before_ messing with the text storage; otherwise you can have a leftover selection that ends up being out of range
     NSRange zeroRange = NSMakeRange(0, 0);
     static NSArray *zeroRanges = nil;
     if(!zeroRanges) zeroRanges = [[NSArray alloc] initWithObjects:[NSValue valueWithRange:zeroRange], nil];
-    [bottomPreviewTextView setSelectedRanges:zeroRanges];
+    [textView setSelectedRanges:zeroRanges];
     
     NSLayoutManager *layoutManager = [[textStorage layoutManagers] lastObject];
     [layoutManager retain];
@@ -3324,7 +3287,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         case BDSKTemplatePreviewDisplay:
 */
             {
-                BDSKTemplate *template = [BDSKTemplate templateForStyle:bottomPreviewDisplayTemplate];
+                BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
                 if (template == nil)
                     template = [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
                 NSAttributedString *templateString;
@@ -3352,117 +3315,58 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [layoutManager release];
     
     if([NSString isEmptyString:[searchField stringValue]] == NO)
-        [bottomPreviewTextView highlightComponentsOfSearchString:[searchField stringValue]];    
+        [textView highlightComponentsOfSearchString:[searchField stringValue]];    
+}
+
+- (void)prepareForTeXPreview {
+    if(previewer == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]){
+        previewer = [[BDSKPreviewer alloc] init];
+        NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+        [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
+        [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
+        BDSKEdgeView *previewerBox = [[[BDSKEdgeView alloc] init] autorelease];
+        [previewerBox setEdges:BDSKEveryEdgeMask];
+        [previewerBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+        [previewerBox setContentView:[previewer pdfView]];
+        [[bottomPreviewTabView tabViewItemAtIndex:BDSKPreviewDisplayTeX] setView:previewerBox];
+    }
+    
+    [[previewer progressOverlay] overlayView:bottomPreviewTabView];
+}
+
+- (void)cleanupAfterTeXPreview {
+    [[previewer progressOverlay] remove];
+    [previewer updateWithBibTeXString:nil];
 }
 
 - (void)updatePreviewPane{
-    if(bottomPreviewDisplay == BDSKPreviewDisplayTeX){
-        [self displayTeXPreviewInPreviewPane];
-    }else if(bottomPreviewDisplay == BDSKPreviewDisplayFiles){
-        [self displayFileViewInPreviewPane];
-    }else{
-        [self displayAttributedTextPreviewInPreviewPane];
-    }
-}
-
-- (void)displayFileViewInSidePreviewPane{
-    NSView *view = [sideFileView enclosingScrollView];
-    if(currentSidePreviewView != view){
-        [view setFrame:[currentSidePreviewView frame]];
-        [[currentSidePreviewView superview] replaceSubview:currentSidePreviewView with:view];
-        currentSidePreviewView = view;
-    }
-}    
-
-- (void)displayAttributedTextPreviewInSidePreviewPane{
-    
-    if (sidePreviewTextView == nil) {
-        sidePreviewTextView = [[BDSKPreviewTextView alloc] init];
-        [sidePreviewTextView setBackgroundColor:[NSColor controlBackgroundColor]];
-        [sidePreviewTextView setEditable:NO];
-        [sidePreviewTextView setSelectable:YES];
-        [sidePreviewTextView setRichText:YES];
-        [sidePreviewTextView setUsesFontPanel:YES];
-        [sidePreviewTextView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-        
-        NSScrollView *scrollView = [[NSScrollView alloc] init];
-        [scrollView setHasHorizontalScroller:YES];
-        [scrollView setHasVerticalScroller:YES];
-        [scrollView setAutohidesScrollers:YES];
-        [scrollView setBorderType:NSBezelBorder];
-        [scrollView setDrawsBackground:YES];
-        [scrollView setBackgroundColor:[NSColor controlBackgroundColor]];
-        [scrollView setDocumentView:sidePreviewTextView];
-        [scrollView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-        [sidePreviewTextView release];
-        
-        [sidePreviewTextView setDelegate:self];
-    }
-
-    NSView *view = [sidePreviewTextView enclosingScrollView];
-
-    if(currentSidePreviewView != view){
-        [view setFrame:[currentSidePreviewView frame]];
-        [[currentSidePreviewView superview] replaceSubview:currentSidePreviewView with:view];
-        currentSidePreviewView = view;
+    int tabIndex = [bottomPreviewTabView indexOfTabViewItem:[bottomPreviewTabView selectedTabViewItem]];
+    if (bottomPreviewDisplay != tabIndex) {
+        if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
+            [self prepareForTeXPreview];
+        else if (tabIndex == BDSKPreviewDisplayTeX)
+            [self cleanupAfterTeXPreview];
+        [bottomPreviewTabView selectTabViewItemAtIndex:bottomPreviewDisplay];
     }
     
-    if(NSIsEmptyRect([sidePreviewTextView visibleRect]))
-        return;
-    
-    NSArray *items = [self selectedPublications];
-    unsigned int maxItems = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewMaxNumberKey];
-    
-    if (maxItems > 0 && [items count] > maxItems)
-        items = [items subarrayWithRange:NSMakeRange(0, maxItems)];
-    
-    NSTextStorage *textStorage = [sidePreviewTextView textStorage];
-    
-    // do this _before_ messing with the text storage; otherwise you can have a leftover selection that ends up being out of range
-    NSRange zeroRange = NSMakeRange(0, 0);
-    static NSArray *zeroRanges = nil;
-    if(!zeroRanges) zeroRanges = [[NSArray alloc] initWithObjects:[NSValue valueWithRange:zeroRange], nil];
-    [sidePreviewTextView setSelectedRanges:zeroRanges];
-    
-    NSLayoutManager *layoutManager = [[textStorage layoutManagers] lastObject];
-    [layoutManager retain];
-    [textStorage removeLayoutManager:layoutManager]; // optimization: make sure the layout manager doesn't do any work while we're loading
-    
-    [textStorage beginEditing];
-    [[textStorage mutableString] setString:@""];
-    
-    BDSKTemplate *template = [BDSKTemplate templateForStyle:sidePreviewDisplayTemplate];
-    if (template == nil)
-        template = [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
-    NSAttributedString *templateString;
-    
-    // make sure this is really one of the attributed string types...
-    if([template templateFormat] & BDSKRichTextTemplateFormat){
-        templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
-        [textStorage appendAttributedString:templateString];
-    } else if([template templateFormat] & BDSKTextTemplateFormat){
-        // parse as plain text, so the HTML is interpreted properly by NSAttributedString
-        NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
-        // we generally assume UTF-8 encoding for all template-related files
-        templateString = [[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
-        [textStorage appendAttributedString:templateString];
-        [templateString release];
-    }
-    
-    [textStorage endEditing];
-    [textStorage addLayoutManager:layoutManager];
-    [layoutManager release];
-    
-    if([NSString isEmptyString:[searchField stringValue]] == NO)
-        [sidePreviewTextView highlightComponentsOfSearchString:[searchField stringValue]];    
+    if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
+        [self updatePreviewer:previewer];
+    else if (bottomPreviewDisplay == BDSKPreviewDisplayFiles)
+        [bottomFileView reloadIcons];
+    else
+        [self displayTemplatedPreview:bottomPreviewDisplayTemplate inTextView:bottomPreviewTextView];
 }
 
 - (void)updateSidePreviewPane{
-    if(sidePreviewDisplay == BDSKPreviewDisplayFiles){
-        [self displayFileViewInSidePreviewPane];
-    }else{
-        [self displayAttributedTextPreviewInSidePreviewPane];
+    int tabIndex = [sidePreviewTabView indexOfTabViewItem:[sidePreviewTabView selectedTabViewItem]];
+    if (sidePreviewDisplay != tabIndex) {
+        [sidePreviewTabView selectTabViewItemAtIndex:sidePreviewDisplay];
     }
+    
+    if (sidePreviewDisplay == BDSKPreviewDisplayFiles)
+        [sideFileView reloadIcons];
+    else
+        [self displayTemplatedPreview:sidePreviewDisplayTemplate inTextView:sidePreviewTextView];
 }
 
 #pragma mark FileView

@@ -141,35 +141,31 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 #pragma mark Side preview variables
 
+    IBOutlet NSTabView *sidePreviewTabView;
+    IBOutlet NSTextView *sidePreviewTextView;
     IBOutlet FileView *sideFileView;
-    NSTextView *sidePreviewTextView;
-    NSView *currentSidePreviewView;
+    
     IBOutlet BDSKCollapsibleView *fileCollapsibleView;
     IBOutlet BDSKGradientView *fileGradientView;
-    
-    BDSKFileMigrationController *migrationController;
-    
-    int sidePreviewDisplay;
-    NSString *sidePreviewDisplayTemplate;
     
     IBOutlet NSSegmentedControl *sidePreviewButton;
     NSMenu *sideTemplatePreviewMenu;
     
+    int sidePreviewDisplay;
+    NSString *sidePreviewDisplayTemplate;
+    
 #pragma mark Bottom preview variables
 
+    IBOutlet NSTabView *bottomPreviewTabView;
     IBOutlet NSTextView *bottomPreviewTextView;
-    IBOutlet NSView *currentBottomPreviewView;
+    IBOutlet FileView *bottomFileView;
     BDSKPreviewer *previewer;
-    BDSKEdgeView *previewerBox;
-    BDSKZoomablePDFView *previewPdfView;
-    BDSKEdgeView *previewBox;
-    FileView *bottomFileView;
-    
-    int bottomPreviewDisplay;
-    NSString *bottomPreviewDisplayTemplate;
 	
     IBOutlet NSSegmentedControl *bottomPreviewButton;
     NSMenu *bottomTemplatePreviewMenu;
+    
+    int bottomPreviewDisplay;
+    NSString *bottomPreviewDisplayTemplate;
     
 #pragma mark Toolbar variables
     
@@ -256,6 +252,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     BDSKItemSearchIndexes *searchIndexes;
     BDSKSearchButtonController *searchButtonController;
     BDSKDocumentSearch *documentSearch;
+    
+    BDSKFileMigrationController *migrationController;
     
 }
 

@@ -175,9 +175,10 @@
             OUTLETS =             {
                 actionMenu = NSMenu;
                 actionMenuButton = BDSKImagePopUpButton;
+                bottomFileView = FileView;
                 bottomPreviewButton = NSSegmentedControl;
+                bottomPreviewTabView = NSTabView;
                 bottomPreviewTextView = NSTextView;
-                currentBottomPreviewView = NSView;
                 documentWindow = NSWindow;
                 exportAccessoryView = NSView;
                 exportSelectionCheckButton = NSButton;
@@ -201,6 +202,8 @@
                 searchField = NSSearchField;
                 sideFileView = FileView;
                 sidePreviewButton = NSSegmentedControl;
+                sidePreviewTabView = NSTabView;
+                sidePreviewTextView = NSTextView;
                 splitView = BDSKSplitView;
                 statusBar = BDSKStatusBar;
                 tableView = BDSKMainTableView;
@@ -218,7 +221,6 @@
             OUTLETS =             {
                 dataSource = id;
                 delegate = id;
-                dragDataSource = id;
             };
             SUPERCLASS = NSView;
         },
