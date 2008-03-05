@@ -646,7 +646,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         SEL action = [menu isEqual:previewDisplayMenu] ? @selector(changePreviewDisplay:) : @selector(changeSidePreviewDisplay:);
         while (style = [styleEnum nextObject]) {
             item = [menu addItemWithTitle:style action:action keyEquivalent:@""];
-            [item setTag:BDSKPreviewDisplayTemplate];
+            [item setTag:BDSKPreviewDisplayText];
             [item setRepresentedObject:style];
         }
         

@@ -225,7 +225,7 @@ enum {
         pboardHelper = [[BDSKItemPasteboardHelper alloc] init];
         [pboardHelper setDelegate:self];
         
-        previewDisplay = BDSKPreviewDisplayTemplate;
+        previewDisplay = BDSKPreviewDisplayText;
         previewDisplayTemplate = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPreviewTemplateStyleKey] retain];
         sidePreviewDisplay = BDSKPreviewDisplayFiles;
         sidePreviewDisplayTemplate = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPreviewTemplateStyleKey] retain];
@@ -3803,7 +3803,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         while (style = [styleEnum nextObject]) {
             item = [menu addItemWithTitle:style action:action keyEquivalent:@""];
             [item setTarget:self];
-            [item setTag:BDSKPreviewDisplayTemplate];
+            [item setTag:BDSKPreviewDisplayText];
             [item setRepresentedObject:style];
         }
     }
@@ -3826,10 +3826,10 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     if(previewDisplay == BDSKPreviewDisplayTeX){
         // we don't reach this, we let the pdfView do the printing
         printableView = [previewer pdfView]; 
-    }else if(previewDisplay == BDSKPreviewDisplayTemplate || sidePreviewDisplay == BDSKPreviewDisplayTemplate){
+    }else if(previewDisplay == BDSKPreviewDisplayText || sidePreviewDisplay == BDSKPreviewDisplayText){
         printableView = [[[BDSKPrintableView alloc] initForScreenDisplay:NO] autorelease];
         NSTextStorage *ts = nil;
-        if (previewDisplay == BDSKPreviewDisplayTemplate)
+        if (previewDisplay == BDSKPreviewDisplayText)
             ts = [previewTextView textStorage];
         else
             ts = [sidePreviewTextView textStorage];

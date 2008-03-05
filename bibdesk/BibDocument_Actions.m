@@ -1091,7 +1091,7 @@
         previewDisplay = tag;
         changed = YES;
     }
-    if (tag == BDSKPreviewDisplayTemplate && style && NO == [style isEqualToString:previewDisplayTemplate]) {
+    if (tag == BDSKPreviewDisplayText && style && NO == [style isEqualToString:previewDisplayTemplate]) {
         [previewDisplayTemplate release];
         previewDisplayTemplate = [style retain];
         changed = YES;
@@ -1112,7 +1112,7 @@
         sidePreviewDisplay = tag;
         changed = YES;
     }
-    if (tag == BDSKPreviewDisplayTemplate && style && NO == [style isEqualToString:sidePreviewDisplayTemplate]) {
+    if (tag == BDSKPreviewDisplayText && style && NO == [style isEqualToString:sidePreviewDisplayTemplate]) {
         [sidePreviewDisplayTemplate release];
         sidePreviewDisplayTemplate = [style retain];
         changed = YES;

@@ -44,15 +44,15 @@
 @implementation NSImage (BDSKExtensions)
 
 + (void)makePreviewDisplayImages {
-    static NSImage *previewTemplateDisplayImage = nil;
-    static NSImage *previewIconDisplayImage = nil;
-    static NSImage *previewTeXDisplayImage = nil;
+    static NSImage *previewDisplayTextImage = nil;
+    static NSImage *previewDisplayFilesImage = nil;
+    static NSImage *previewDisplayTeXImage = nil;
     
-    if (previewTemplateDisplayImage == nil) {
+    if (previewDisplayTextImage == nil) {
         NSBezierPath *path;
         
-        previewTemplateDisplayImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
-        [previewTemplateDisplayImage lockFocus];
+        previewDisplayTextImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
+        [previewDisplayTextImage lockFocus];
         path = [NSBezierPath bezierPath];
         [path moveToPoint:NSMakePoint(0.0, 0.5)];
         [path lineToPoint:NSMakePoint(11.0, 0.5)];
@@ -63,22 +63,22 @@
         [path moveToPoint:NSMakePoint(0.0, 9.5)];
         [path lineToPoint:NSMakePoint(11.0, 9.5)];
         [path stroke];
-        [previewTemplateDisplayImage unlockFocus];
-        [previewTemplateDisplayImage setName:@"BDSKPreviewTemplateDisplay"];
+        [previewDisplayTextImage unlockFocus];
+        [previewDisplayTextImage setName:@"BDSKPreviewDisplayText"];
         
-        previewIconDisplayImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
-        [previewIconDisplayImage lockFocus];
+        previewDisplayFilesImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
+        [previewDisplayFilesImage lockFocus];
         path = [NSBezierPath bezierPath];
         [path appendBezierPathWithRect:NSMakeRect(0.5, 0.5, 3.0, 3.0)];
         [path appendBezierPathWithRect:NSMakeRect(7.5, 0.5, 3.0, 3.0)];
         [path appendBezierPathWithRect:NSMakeRect(0.5, 6.5, 3.0, 3.0)];
         [path appendBezierPathWithRect:NSMakeRect(7.5, 6.5, 3.0, 3.0)];
         [path stroke];
-        [previewIconDisplayImage unlockFocus];
-        [previewIconDisplayImage setName:@"BDSKPreviewIconDisplay"];
+        [previewDisplayFilesImage unlockFocus];
+        [previewDisplayFilesImage setName:@"BDSKPreviewDisplayFiles"];
         
-        previewTeXDisplayImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
-        [previewTeXDisplayImage lockFocus];
+        previewDisplayTeXImage = [[NSImage alloc] initWithSize:NSMakeSize(11.0, 10.0)];
+        [previewDisplayTeXImage lockFocus];
         path = [NSBezierPath bezierPath];
         [path appendBezierPathWithOvalInRect:NSMakeRect(1.5, 1.5, 3.0, 3.0)];
         [path appendBezierPathWithOvalInRect:NSMakeRect(6.5, 1.5, 3.0, 3.0)];
@@ -91,8 +91,8 @@
         [path lineToPoint:NSMakePoint(10.5, 3.0)];
         [path appendBezierPathWithArcFromPoint:NSMakePoint(8.5, 10.0) toPoint:NSMakePoint(6.5, 8.0) radius:1.0];
         [path stroke];
-        [previewTeXDisplayImage unlockFocus];
-        [previewTeXDisplayImage setName:@"BDSKPreviewTeXDisplay"];
+        [previewDisplayTeXImage unlockFocus];
+        [previewDisplayTeXImage setName:@"BDSKPreviewDisplayTeX"];
     }
 }
 

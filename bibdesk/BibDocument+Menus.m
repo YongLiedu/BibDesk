@@ -532,9 +532,9 @@
 - (BOOL)validateChangePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
     int tag = [menuItem tag], state = NSOffState;
     NSString *style = [menuItem representedObject];
-    if (tag == previewDisplay && tag != BDSKPreviewDisplayTemplate) {
+    if (tag == previewDisplay && tag != BDSKPreviewDisplayText) {
         state = NSOnState;
-    } else if (tag == BDSKPreviewDisplayTemplate && [style isEqualToString:previewDisplayTemplate]) {
+    } else if (tag == BDSKPreviewDisplayText && [style isEqualToString:previewDisplayTemplate]) {
         if (tag == previewDisplay || [menuItem menu] == templatePreviewMenu)
             state = NSOnState;
     }
@@ -545,9 +545,9 @@
 - (BOOL)validateChangeSidePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
     int tag = [menuItem tag], state = NSOffState;
     NSString *style = [menuItem representedObject];
-    if (tag == sidePreviewDisplay && tag != BDSKPreviewDisplayTemplate) {
+    if (tag == sidePreviewDisplay && tag != BDSKPreviewDisplayText) {
         state = NSOnState;
-    } else if (tag == BDSKPreviewDisplayTemplate && [style isEqualToString:sidePreviewDisplayTemplate]) {
+    } else if (tag == BDSKPreviewDisplayText && [style isEqualToString:sidePreviewDisplayTemplate]) {
         if (tag == sidePreviewDisplay || [menuItem menu] == sideTemplatePreviewMenu)
             state = NSOnState;
     }

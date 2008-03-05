@@ -83,7 +83,7 @@ enum {
 };
 
 enum {
-    BDSKPreviewDisplayTemplate = 0,
+    BDSKPreviewDisplayText = 0,
     BDSKPreviewDisplayFiles = 1,
     BDSKPreviewDisplayTeX = 2
 };
