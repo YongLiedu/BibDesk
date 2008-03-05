@@ -280,14 +280,12 @@
         return NO;
     // even if there is a selection, we may have an error condition with nothing to print
     // see comments on exception in -printableView, which is the main motivation for this validation
-    else if([currentPreviewView isEqual:previewerBox])
+    else if(bottomPreviewDisplay == BDSKPreviewDisplayTeX)
         return [[previewer pdfView] document] != nil;
-    else if ([currentPreviewView isEqual:previewBox])
-        return [previewPdfView document] != nil;
-    else if ([[previewer textView] isEqual:previewBox])
-        return [[previewer textView] textStorage] != nil;
+    else if (bottomPreviewDisplay == BDSKPreviewDisplayText)
+        return [bottomPreviewTextView textStorage] != nil;
     else
-        return [previewTextView textStorage] != nil;
+        return NO;
 }
 
 - (BOOL) validateToggleToggleCustomCiteDrawerMenuItem:(NSMenuItem*) menuItem {
@@ -532,10 +530,10 @@
 - (BOOL)validateChangePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
     int tag = [menuItem tag], state = NSOffState;
     NSString *style = [menuItem representedObject];
-    if (tag == previewDisplay && tag != BDSKPreviewDisplayText) {
+    if (tag == bottomPreviewDisplay && tag != BDSKPreviewDisplayText) {
         state = NSOnState;
-    } else if (tag == BDSKPreviewDisplayText && [style isEqualToString:previewDisplayTemplate]) {
-        if (tag == previewDisplay || [menuItem menu] == templatePreviewMenu)
+    } else if (tag == BDSKPreviewDisplayText && [style isEqualToString:bottomPreviewDisplayTemplate]) {
+        if (tag == bottomPreviewDisplay || [menuItem menu] == bottomTemplatePreviewDisplayMenu)
             state = NSOnState;
     }
     [menuItem setState:state];
