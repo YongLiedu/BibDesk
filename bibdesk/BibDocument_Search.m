@@ -359,11 +359,14 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 
 - (NSString *)selectedStringForFind;
 {
-    // @@ should check hidden?
-    if (bottomPreviewDisplay == BDSKPreviewDisplayTeX) {
+    if([currentPreviewView isHidden])
+        return nil;
+    if([currentPreviewView isEqual:previewerBox]){
         return [[[previewer pdfView] currentSelection] string];
-    } else if(bottomPreviewDisplay == BDSKPreviewDisplayText || sidePreviewDisplay == BDSKPreviewDisplayText) {
-        NSTextView *textView = bottomPreviewDisplay == BDSKPreviewDisplayText ? bottomPreviewTextView : sidePreviewTextView;
+    }else if([currentPreviewView isEqual:previewBox]){
+        return [[previewPdfView currentSelection] string];
+    }else{
+        NSTextView *textView = (NSTextView *)[(NSScrollView *)currentPreviewView documentView];
         NSRange selRange = [textView selectedRange];
         if (selRange.location == NSNotFound)
             return nil;
@@ -375,11 +378,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 // OAFindControllerAware informal protocol
 - (id <OAFindControllerTarget>)omniFindControllerTarget;
 {
-    // @@ should check hidden?
-    if (bottomPreviewDisplay == BDSKPreviewDisplayText)
-        return bottomPreviewTextView;
-    else if (sidePreviewDisplay == BDSKPreviewDisplayText)
-        return sidePreviewTextView;
+    if([currentPreviewView isKindOfClass:[NSScrollView class]] && [currentPreviewView isHidden] == NO)
+        return [(NSScrollView *)currentPreviewView documentView];
     else
         return nil;
 }
@@ -391,10 +391,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         case NSFindPanelActionShowFindPanel:
         case NSFindPanelActionNext:
         case NSFindPanelActionPrevious:
-            if(bottomPreviewDisplay == BDSKPreviewDisplayText)
-               [bottomPreviewTextView performFindPanelAction:sender];
-            else if(sidePreviewDisplay == BDSKPreviewDisplayText)
-               [sidePreviewTextView performFindPanelAction:sender];
+            if([currentPreviewView isKindOfClass:[NSScrollView class]] && [currentPreviewView isHidden] == NO)
+                [(NSTextView *)[(NSScrollView *)currentPreviewView documentView] performFindPanelAction:sender];
             else
                 NSBeep();
             break;
@@ -408,10 +406,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
                 [searchField selectText:nil];
             } else {
                 [[BDSKFindController sharedFindController] setFindString:selString];
-                if(bottomPreviewDisplay == BDSKPreviewDisplayText)
-                   [bottomPreviewTextView performFindPanelAction:sender];
-                else if(sidePreviewDisplay == BDSKPreviewDisplayText)
-                   [sidePreviewTextView performFindPanelAction:sender];
+                [previewTextView performFindPanelAction:sender];
             }
             break;
         default:

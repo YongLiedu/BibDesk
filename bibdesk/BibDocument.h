@@ -139,14 +139,15 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet BDSKGradientView *groupGradientView;
 	NSString *currentGroupField;
     
-#pragma mark Side preview variables
+#pragma mark File pane variables
 
-    IBOutlet NSTabView *sidePreviewTabView;
-    IBOutlet NSView *sidePreviewView;
-    IBOutlet NSTextView *sidePreviewTextView;
-    IBOutlet FileView *sideFileView;
+    IBOutlet FileView *fileView;
+    NSTextView *sidePreviewTextView;
+    NSView *currentSidePreviewView;
     IBOutlet BDSKCollapsibleView *fileCollapsibleView;
     IBOutlet BDSKGradientView *fileGradientView;
+    
+    BDSKFileMigrationController *migrationController;
     
     int sidePreviewDisplay;
     NSString *sidePreviewDisplayTemplate;
@@ -154,19 +155,21 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSSegmentedControl *sidePreviewButton;
     NSMenu *sideTemplatePreviewMenu;
     
-#pragma mark Bottom preview variables
+#pragma mark Preview variables
 
-    IBOutlet NSTabView *bottomPreviewTabView;
-    IBOutlet NSView *bottomPreviewView;
-    IBOutlet NSTextView *bottomPreviewTextView;
-    IBOutlet FileView *bottomFileView;
+    IBOutlet NSTextView *previewTextView;
+    IBOutlet NSView *currentPreviewView;
     BDSKPreviewer *previewer;
+    BDSKEdgeView *previewerBox;
+    BDSKZoomablePDFView *previewPdfView;
+    BDSKEdgeView *previewBox;
+    FileView *bottomFileView;
     
-    int bottomPreviewDisplay;
-    NSString *bottomPreviewDisplayTemplate;
+    int previewDisplay;
+    NSString *previewDisplayTemplate;
 	
-    IBOutlet NSSegmentedControl *bottomPreviewButton;
-    NSMenu *bottomTemplatePreviewDisplayMenu;
+    IBOutlet NSSegmentedControl *previewButton;
+    NSMenu *templatePreviewMenu;
     
 #pragma mark Toolbar variables
     
@@ -254,8 +257,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     BDSKSearchButtonController *searchButtonController;
     BDSKDocumentSearch *documentSearch;
     
-    BDSKFileMigrationController *migrationController;
-    
 }
 
 
@@ -323,12 +324,12 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)updatePreviewer:(BDSKPreviewer *)aPreviewer;
 
 /*!
-    @method updateBottomPreviewPane
+    @method updatePreviewPane
     @abstract Handles writing the preview pane. (Not the PDF Preview)
     @discussion -
     
 */
-- (void)updateBottomPreviewPane;
+- (void)updatePreviewPane;
 - (void)updateSidePreviewPane;
 
 /*!

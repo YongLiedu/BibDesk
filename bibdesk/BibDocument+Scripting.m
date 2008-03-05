@@ -138,14 +138,15 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 }
 
 - (id)handlePrintScriptCommand:(NSScriptCommand *)command {
-    if (bottomPreviewDisplay == BDSKPreviewDisplayTeX) {
+    if([currentPreviewView isEqual:previewerBox] || [currentPreviewView isEqual:previewBox]) {
+        // we let the PDFView handle printing
         
         NSDictionary *args = [command evaluatedArguments];
         id settings = [args objectForKey:@"PrintSettings"];
         // PDFView does not allow printing without showing the dialog, so we just ignore that setting
         
         NSPrintInfo *printInfo = [self printInfo];
-        PDFView *pdfView = [previewer pdfView];
+        PDFView *pdfView = (PDFView *)[(NSBox *)currentPreviewView contentView];
         
         if ([settings isKindOfClass:[NSDictionary class]]) {
             settings = [[settings mutableCopy] autorelease];
