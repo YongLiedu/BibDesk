@@ -143,6 +143,7 @@ typedef enum _FVDropOperation {
 - (void)reloadIcons;
 
 // default is Mail's source list color
+- (NSColor *)backgroundColor;
 - (void)setBackgroundColor:(NSColor *)aColor;
 
 // actions that NSResponder doesn't declare
