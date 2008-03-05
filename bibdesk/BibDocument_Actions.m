@@ -1081,25 +1081,7 @@
     if (firstResponder != groupTableView)
         [documentWindow makeFirstResponder:groupTableView];
 }
-/*
-- (IBAction)changePreviewDisplay:(id)sender{
-    int tag = [sender tag];
-    NSString *style = [sender representedObject];
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    BOOL didChange = NO;
-    
-    if(tag != [pw integerForKey:BDSKPreviewDisplayKey]){
-        [pw setInteger:tag forKey:BDSKPreviewDisplayKey];
-        didChange = YES;
-    }
-    if(BDSKTemplatePreviewDisplay == tag && NO == [style isEqualToString:[pw stringForKey:BDSKPreviewTemplateStyleKey]]){
-        [pw setObject:style forKey:BDSKPreviewTemplateStyleKey];
-        didChange = YES;
-    }
-    if (didChange)
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-}
-*/
+
 - (IBAction)changePreviewDisplay:(id)sender{
     int tag = [sender respondsToSelector:@selector(selectedSegment)] ? [[sender cell] tagForSegment:[sender selectedSegment]] : [sender tag];
     NSString *style = [sender respondsToSelector:@selector(representedObject)] ? [sender representedObject] : nil;

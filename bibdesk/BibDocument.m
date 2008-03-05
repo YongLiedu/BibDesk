@@ -435,10 +435,12 @@ enum {
     [templatePreviewMenu setDelegate:self];
     [previewButton setMenu:templatePreviewMenu forSegment:0];
     [previewButton setEnabled:[pw boolForKey:BDSKUsesTeXKey] forSegment:BDSKPreviewDisplayTeX];
+    [previewButton selectSegmentWithTag:previewDisplay];
     
     sideTemplatePreviewMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [sideTemplatePreviewMenu setDelegate:self];
     [sidePreviewButton setMenu:sideTemplatePreviewMenu forSegment:0];
+    [sidePreviewButton selectSegmentWithTag:sidePreviewDisplay];
     
     // This must also be done before we resize the window and the splitViews
     [groupCollapsibleView setCollapseEdges:BDSKMinXEdgeMask];
@@ -2719,9 +2721,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }           
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
-    return;
     // note: this is only supposed to handle the pretty-printed preview, /not/ the TeX preview
     // don't update if the note was posted by editors that don't belong to us
+    /*
     if ([notification object] == self || [notification object] == nil) {
         [self updatePreviewPane];
         [self updateSidePreviewPane];
@@ -2733,6 +2735,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             tag = BDSKPDFPreviewDisplay;
         [previewButton selectSegmentWithTag:tag];
     }
+    */
 }
 
 - (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification{
@@ -3819,29 +3822,24 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 }
 
 - (NSView *)printableView{
-    int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
-    if(displayType == BDSKPDFPreviewDisplay || displayType == BDSKLinkedFilePreviewDisplay){
+    id printableView = nil;
+    if(previewDisplay == BDSKPreviewDisplayTeX){
         // we don't reach this, we let the pdfView do the printing
-        return currentPreviewView; 
-    }else if(displayType == BDSKRTFPreviewDisplay){
-        // user reported an NSBigMutableString nil replacement exception when printing; it's not immediately clear which view he was printing, or under what conditions it returns nil, so we'll check for this and print an error
-        BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
-        NSTextStorage *ts = [[previewer textView] textStorage];
-        if (ts)
-            [printableView setAttributedString:ts];
+        printableView = [previewer pdfView]; 
+    }else if(previewDisplay == BDSKPreviewDisplayTemplate || sidePreviewDisplay == BDSKPreviewDisplayTemplate){
+        printableView = [[[BDSKPrintableView alloc] initForScreenDisplay:NO] autorelease];
+        NSTextStorage *ts = nil;
+        if (previewDisplay == BDSKPreviewDisplayTemplate)
+            ts = [previewTextView textStorage];
         else
-            [printableView setString:NSLocalizedString(@"Error: nothing to print from latex2rtf preview", @"printing error")];
-        return [printableView autorelease];
-    }else{
-        BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
-        NSTextStorage *ts = [previewTextView textStorage];
+            ts = [sidePreviewTextView textStorage];
         if (ts)
             [printableView setAttributedString:ts];
         else
             [printableView setString:NSLocalizedString(@"Error: nothing to print from document preview", @"printing error")];
         [printableView setAttributedString:[previewTextView textStorage]];    
-        return [printableView autorelease];
     }
+    return printableView;
 }
 
 - (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
