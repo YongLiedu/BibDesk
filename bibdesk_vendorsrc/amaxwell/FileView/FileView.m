@@ -471,20 +471,20 @@ static CGColorRef _shadowColor = NULL;
 #define MIN_SLIDER_WIDTH 50.0
 #define MAX_SLIDER_WIDTH 200.0
 #define SLIDER_HEIGHT 15.0
+#define TOP_SLIDER_OFFSET 1.0
+#define BOTTOM_SLIDER_OFFSET 19.0
 
 - (NSRect)_topSliderRect
 {
     NSRect r = [self visibleRect];
 #if __LP64__
-    CGFloat w = fmax( MAX_SLIDER_WIDTH, fmin( MIN_SLIDER_WIDTH, NSWidth(r) / 3.0 ) );
-    CGFloat l = fmax( 0.0, floor( ( NSWidth(r) - w ) / 2.0 ) );
+    CGFloat l = floor( NSMidX(r) - fmax( MIN_SLIDER_WIDTH / 2, fmin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
 #else
-    CGFloat w = fmaxf( MAX_SLIDER_WIDTH, fminf( MIN_SLIDER_WIDTH, NSWidth(r) / 3.0 ) );
-    CGFloat l = fmaxf( 0.0, floorf( ( NSWidth(r) - w ) / 2.0 ) );
+    CGFloat l = floorf( NSMidX(r) - fmaxf( MIN_SLIDER_WIDTH / 2, fminf( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
 #endif
     r.origin.x += l;
-    r.origin.y += 1.0;
-    r.size.width -= 2.0 * l;
+    r.origin.y += TOP_SLIDER_OFFSET;
+    r.size.width -= 2 * l;
     r.size.height = SLIDER_HEIGHT;
     return r;
 }
@@ -492,11 +492,15 @@ static CGColorRef _shadowColor = NULL;
 - (NSRect)_bottomSliderRect
 {
     NSRect r = [self visibleRect];
-    CGFloat l = floor(NSWidth(r) / 3);
+#if __LP64__
+    CGFloat l = floor( NSMidX(r) - fmax( MIN_SLIDER_WIDTH / 2, fmin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
+#else
+    CGFloat l = floorf( NSMidX(r) - fmaxf( MIN_SLIDER_WIDTH / 2, fminf( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
+#endif
     r.origin.x += l;
-    r.origin.y += NSHeight(r) - 19;
+    r.origin.y += NSHeight(r) - BOTTOM_SLIDER_OFFSET;
     r.size.width -= 2 * l;
-    r.size.height = 15;
+    r.size.height = SLIDER_HEIGHT;
     return r;
 }
 
@@ -581,9 +585,9 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
             [self _hideArrows];
         
         if (_autoScales == NO) {
-            NSRect sliderRect = [self _topSliderRect];
+            NSRect sliderRect = NSIntersectionRect([self _topSliderRect], visibleRect);
             _topSliderTag = [self addTrackingRect:sliderRect owner:self userData:[self _sliderWindow] assumeInside:NSPointInRect(mouseLoc, sliderRect)];  
-            sliderRect = [self _bottomSliderRect];
+            sliderRect = NSIntersectionRect([self _bottomSliderRect], visibleRect);
             _bottomSliderTag = [self addTrackingRect:sliderRect owner:self userData:[self _sliderWindow] assumeInside:NSPointInRect(mouseLoc, sliderRect)];  
         }
     }
