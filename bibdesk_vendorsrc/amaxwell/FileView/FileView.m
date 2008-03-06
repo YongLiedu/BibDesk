@@ -973,6 +973,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 #ifdef USE_ICON_QUEUE
 - (void)iconQueueUpdated:(NSArray *)updatedIcons;
+{
     // Only iterate icons in the visible range, since we know the overall geometry
     NSRange rowRange, columnRange;
     [self _getRangeOfRows:&rowRange columns:&columnRange inRect:[self visibleRect]];
