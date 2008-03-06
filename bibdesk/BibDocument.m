@@ -420,6 +420,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [self setupToolbar];
     
     replaceSplitViewSubview(bottomPreviewTabView, splitView, 1);
+    replaceSplitViewSubview([[groupTableView enclosingScrollView] superview], groupSplitView, 0);
     replaceSplitViewSubview([mainBox superview], groupSplitView, 1);
     replaceSplitViewSubview([sidePreviewTabView superview], groupSplitView, 2);
     
