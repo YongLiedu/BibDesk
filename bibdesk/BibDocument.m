@@ -420,6 +420,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [self setupToolbar];
     
     replaceSplitViewSubview(bottomPreviewTabView, splitView, 1);
+    replaceSplitViewSubview([mainBox superview], groupSplitView, 1);
     replaceSplitViewSubview([sidePreviewTabView superview], groupSplitView, 2);
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
