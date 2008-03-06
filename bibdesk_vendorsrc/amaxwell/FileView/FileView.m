@@ -926,49 +926,56 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)_enqueueReleaseOperationForIcons:(NSArray *)icons;
 {    
-#ifdef USE_ICON_QUEUE
-    [[FVIconQueue sharedQueue] enqueueReleaseResourcesForIcons:icons];
-#else
     NSUInteger i, iMax = [icons count];
     NSMutableArray *operations = [[NSMutableArray alloc] initWithCapacity:iMax];
     FVIcon *icon;
     for (i = 0; i < iMax; i++) {
         icon = [icons objectAtIndex:i];
         if ([icon canReleaseResources]) {
+#ifdef USE_ICON_QUEUE
+            [operations addObject:icon];
+#else
             FVReleaseOperation *op = [[FVReleaseOperation alloc] initWithIcon:icon view:nil];
             [op setQueuePriority:FVOperationQueuePriorityLow];
             [operations addObject:op];
             [op release];
+#endif
         }
     }
     if ([operations count])
+#ifdef USE_ICON_QUEUE
+        [[FVIconQueue sharedQueue] enqueueReleaseResourcesForIcons:operations];
+#else
         [_operationQueue addOperations:operations];
-    [operations release];
 #endif
+    [operations release];
 }
 
 - (void)_enqueueRenderOperationForIcons:(NSArray *)icons withPriority:(FVOperationQueuePriority)priority;
 {    
-#ifdef USE_ICON_QUEUE
-    if ([icons count])
-        [[FVIconQueue sharedQueue] enqueueRenderIcons:icons forObject:self];
-#else
     NSUInteger i, iMax = [icons count];
     NSMutableArray *operations = [[NSMutableArray alloc] initWithCapacity:iMax];
     FVIcon *icon;
     for (i = 0; i < iMax; i++) {
         icon = [icons objectAtIndex:i];
         if ([icon needsRenderForSize:_iconSize]) {
+#ifdef USE_ICON_QUEUE
+            [operations addObject:icon];
+#else
             FVRenderOperation *op = [[FVRenderOperation alloc] initWithIcon:icon view:self];
             [op setQueuePriority:priority];
             [operations addObject:op];
             [op release];
+#endif
         }
     }
     if ([operations count])
+#ifdef USE_ICON_QUEUE
+        [[FVIconQueue sharedQueue] enqueueRenderIcons:operations forObject:self];
+#else
         [_operationQueue addOperations:operations];
-    [operations release];
 #endif
+    [operations release];
 }
 
 #ifdef USE_ICON_QUEUE
