@@ -468,14 +468,24 @@ static CGColorRef _shadowColor = NULL;
     return _sliderWindow;
 }
 
+#define MIN_SLIDER_WIDTH 50.0
+#define MAX_SLIDER_WIDTH 200.0
+#define SLIDER_HEIGHT 15.0
+
 - (NSRect)_topSliderRect
 {
     NSRect r = [self visibleRect];
-    CGFloat l = floor(NSWidth(r) / 3);
+#if __LP64__
+    CGFloat w = fmax( MAX_SLIDER_WIDTH, fmin( MIN_SLIDER_WIDTH, NSWidth(r) / 3.0 ) );
+    CGFloat l = fmax( 0.0, floor( ( NSWidth(r) - w ) / 2.0 ) );
+#else
+    CGFloat w = fmaxf( MAX_SLIDER_WIDTH, fminf( MIN_SLIDER_WIDTH, NSWidth(r) / 3.0 ) );
+    CGFloat l = fmaxf( 0.0, floorf( ( NSWidth(r) - w ) / 2.0 ) );
+#endif
     r.origin.x += l;
-    r.origin.y += 1;
-    r.size.width -= 2 * l;
-    r.size.height = 15;
+    r.origin.y += 1.0;
+    r.size.width -= 2.0 * l;
+    r.size.height = SLIDER_HEIGHT;
     return r;
 }
 
