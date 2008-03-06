@@ -63,6 +63,7 @@ static void __FVProcessQueueEntries(CFRunLoopObserverRef observer, CFRunLoopActi
         [nc addObserver:self selector:@selector(handleAppTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
         
         // this lock protects all of the collection ivars
+        // @@ CMH: is this necessary, as we're only active on the main thread?
         _queueLock = OS_SPINLOCK_INIT;
         
         // pending operations
@@ -143,25 +144,22 @@ static void __FVProcessQueueEntries(CFRunLoopObserverRef observer, CFRunLoopActi
 {
     NSCAssert(pthread_main_np() != 0, @"incorrect thread for main queue");
     FVMainThreadOperationQueue *queue = info;
+    NSMutableArray *operations = [[NSMutableArray alloc] init];
     
     OSSpinLockLock(&(queue->_queueLock));
     while ([queue->_pendingOperations count]) {
         
         FVOperation *op = [queue->_pendingOperations pop];
-        BOOL shouldLock = NO;
         
         if (NO == [op isCancelled] && NO == [queue->_activeOperations containsObject:op]) {
             [queue->_activeOperations addObject:op];
-            // avoid deadlock: next call will (probably) trigger finishedOperation: on this thread
-            OSSpinLockUnlock(&(queue->_queueLock));
-            shouldLock = YES;
-            [op start];
+            [operations addObject:op];
         }
-                
-        if (shouldLock)
-            OSSpinLockLock(&(queue->_queueLock));
     }
     OSSpinLockUnlock(&(queue->_queueLock));
+    
+    [operations makeObjectsPerformSelector:@selector(start)];
+    [operations release];
 }
 
 - (void)setThreadPriority:(double)p;
