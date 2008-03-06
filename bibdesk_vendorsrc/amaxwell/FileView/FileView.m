@@ -973,9 +973,34 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 #ifdef USE_ICON_QUEUE
 - (void)iconQueueUpdated:(NSArray *)updatedIcons;
+    // Only iterate icons in the visible range, since we know the overall geometry
+    NSRange rowRange, columnRange;
+    [self _getRangeOfRows:&rowRange columns:&columnRange inRect:[self visibleRect]];
+    
+    NSUInteger iMin, iMax = [self numberOfIcons];
+    
+    // _indexForGridRow:column: returns NSNotFound if we're in a short row (empty column)
+    iMin = [self _indexForGridRow:rowRange.location column:columnRange.location];
+    if (NSNotFound == iMin)
+        iMin = [self numberOfIcons];
+    else
+        iMax = MIN([self numberOfIcons], iMin + rowRange.length * [self numberOfColumns]);
+
+    NSUInteger i;
+    
+    // If an icon isn't visible, there's no need to redisplay anything.  Similarly, if 20 icons are displayed and only 5 updated, there's no need to redraw all 20.  Geometry calculations are much faster than redrawing, in general.
+    for (i = iMin; i < iMax; i++) {
+        
+        FVIcon *anIcon = (id)CFDictionaryGetValue(_iconIndexMap, (const void *)i);
+        if ([updatedIcons containsObject:anIcon]) {
+            NSUInteger r, c;
+            if ([self _getGridRow:&r column:&c ofIndex:i])
+                [self _setNeedsDisplayForIconInRow:r column:c];
+        }
+    }
+}
 #else
 - (void)iconUpdated:(FVIcon *)updatedIcon;
-#endif
 {
     // Only iterate icons in the visible range, since we know the overall geometry
     NSRange rowRange, columnRange;
@@ -996,18 +1021,14 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     for (i = iMin; i < iMax; i++) {
         
         FVIcon *anIcon = (id)CFDictionaryGetValue(_iconIndexMap, (const void *)i);
-#ifdef USE_ICON_QUEUE
-        if ([updatedIcons containsObject:anIcon]) {
-#else
         if (anIcon == updatedIcon) {
-#endif
             NSUInteger r, c;
             if ([self _getGridRow:&r column:&c ofIndex:i])
                 [self _setNeedsDisplayForIconInRow:r column:c];
         }
     }
 }
-
+#endif
 // drawRect: uses -releaseResources on icons that aren't visible but present in the datasource, so we just need a way to cull icons that are cached but not currently in the datasource
 - (void)_zombieTimerFired:(CFRunLoopTimerRef)timer
 {
@@ -2390,6 +2411,58 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 - (void)deleteBackward:(id)sender;
 {
     [self delete:self];
+}
+
+- (void)scrollToBeginningOfDocument:(id)sender {
+    NSRect bounds = [self bounds];
+    [self scrollRectToVisible:NSMakeRect(NSMinX(bounds), NSMinY(bounds), 1.0, 1.0)];
+}
+
+- (void)scrollToEndOfDocument:(id)sender {
+    NSRect bounds = [self bounds];
+    [self scrollRectToVisible:NSMakeRect(NSMaxX(bounds) - 1.0, NSMaxY(bounds) - 1.0, 1.0, 1.0)];
+}
+
+- (void)scrollPageUp:(id)sender {
+    [[self enclosingScrollView] pageUp:sender];
+}
+
+- (void)scrollPageDown:(id)sender {
+    [[self enclosingScrollView] pageDown:sender];
+}
+
+- (void)_selectFirstVisibleIcon {
+    NSRect rect = [self visibleRect];
+    NSRange rowRange, columnRange;
+    
+    [self _getRangeOfRows:&rowRange columns:&columnRange inRect:[self visibleRect]];
+    
+    NSUInteger r, rMax = NSMaxRange(rowRange);
+    NSUInteger c, cMax = NSMaxRange(columnRange);
+    NSUInteger idx;
+    
+    // now iterate each row/column to see if it intersects the rect
+    for (r = rowRange.location; r < rMax; r++)  {
+        for (c = columnRange.location; c < cMax; c++) {    
+            if (NSIntersectsRect([self _rectOfIconInRow:r column:c], rect)) {
+                idx = [self _indexForGridRow:r column:c];
+                if (NSNotFound != idx) {
+                    [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:idx]];
+                    return;
+                }
+            }
+        }
+    }
+}
+
+- (void)pageUp:(id)sender {
+    [[self enclosingScrollView] pageUp:sender];
+    [self _selectFirstVisibleIcon];
+}
+
+- (void)pageDown:(id)sender {
+    [[self enclosingScrollView] pageDown:sender];
+    [self _selectFirstVisibleIcon];
 }
 
 // scrollRectToVisible doesn't scroll the entire rect to visible
