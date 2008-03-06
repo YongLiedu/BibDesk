@@ -1790,7 +1790,7 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
             [self _showArrowsForIconAtIndex:anIndex];
         } else if (_autoScales == NO && _sliderWindow && [event userData] == _sliderWindow) {
             
-            if ([[[self window] childWindows] containsObject:_sliderWindow] == NO) {
+            if ([_sliderWindow parentWindow] == nil) {
                 NSRect sliderRect = tag == _bottomSliderTag ? [self _bottomSliderRect] : [self _topSliderRect];
                 sliderRect = [self convertRect:sliderRect toView:nil];
                 sliderRect.origin = [[self window] convertBaseToScreen:sliderRect.origin];
@@ -1812,7 +1812,7 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
 // we can't do this in mouseExited: since it's received as soon as the mouse enters the slider's window (and checking the mouse location just postpones the problems)
 - (void)handleSliderMouseExited:(NSNotification *)aNote
 {
-    if ([[[self window] childWindows] containsObject:_sliderWindow]) {
+    if ([[_sliderWindow parentWindow] isEqual:[self window]]) {
         [[self window] removeChildWindow:_sliderWindow];
         [_sliderWindow orderOut:self];
     }
