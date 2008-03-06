@@ -53,35 +53,50 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
 {
     [NSGraphicsContext saveGraphicsState];
     
-    Class gradientClass = NSClassFromString(@"NSGradient");
-    
     [[NSColor clearColor] setFill];
     NSRectFill(aRect);
     
-    // draw a dark background
     CGFloat radius = NSHeight(aRect) / 2;
-    NSBezierPath *path = [NSBezierPath fv_bezierPathWithRoundRect:aRect xRadius:radius yRadius:radius];
-    if (gradientClass) {
-        id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] endingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.6]] autorelease];
-        [path addClip];
-        [gradient drawInBezierPath:path angle:flipped ? 90 : -90];
-    } else {
-        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.5] setFill];
-        [path fill];
-    }
+    NSBezierPath *innerPath, *outerPath = [NSBezierPath fv_bezierPathWithRoundRect:aRect xRadius:radius yRadius:radius];
+    NSRect track = NSInsetRect(aRect, 4.0, 4.0);
+    CGFloat angle = flipped ? 90 : -90;
+    Class gradientClass = NSClassFromString(@"NSGradient");
+    
+    [outerPath addClip];
+    
     // border highlight
-    [[NSColor darkGrayColor] setStroke];
-    [path setLineWidth:1.5];
-    [path stroke];
+    [[NSColor colorWithCalibratedWhite:0.4 alpha:0.8] setStroke];
+    [outerPath setLineWidth:1.5];
+    [outerPath stroke];
+    
+    // draw a dark background
+    radius = NSHeight(track) / 2;
+    innerPath = [NSBezierPath fv_bezierPathWithRoundRect:track xRadius:radius yRadius:radius];
+    [outerPath appendBezierPath:innerPath];
+    [outerPath setWindingRule:NSEvenOddWindingRule];
+    if (gradientClass) {
+        id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.4 alpha:0.6] endingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.6]] autorelease];
+        [gradient drawInBezierPath:outerPath angle:angle];
+    } else {
+        [[NSColor colorWithCalibratedWhite:0.1 alpha:0.5] setFill];
+        [outerPath fill];
+    }
+    
+    // draw the track
+    [innerPath addClip];
+    if (gradientClass) {
+        id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.7] endingColor:[NSColor colorWithCalibratedWhite:0.3 alpha:0.7]] autorelease];
+        [gradient drawInBezierPath:innerPath angle:angle];
+    } else {
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.7] setFill];
+        [innerPath fill];
+    }
     
     // draw a white outline for the track
     [[NSColor whiteColor] setStroke];
-    NSRect track = NSInsetRect(aRect, 4.0, 4.0);
-    path = [NSBezierPath fv_bezierPathWithRoundRect:track xRadius:NSHeight(track) / 2 yRadius:NSHeight(track) / 2];
-    [path addClip];
-    [path setLineWidth:1.5];
-    [path stroke];
-    [path setLineWidth:1.0];
+    [innerPath setLineWidth:1.5];
+    [innerPath stroke];
+    [innerPath setLineWidth:1.0];
     
     // if we don't save/restore, the knob gets clipped
     [NSGraphicsContext restoreGraphicsState];
