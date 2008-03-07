@@ -57,8 +57,12 @@ typedef enum {
 	BDSKCountEqual = 0,
 	BDSKCountNotEqual,
 	BDSKCountLarger,
-	BDSKCountSmaller
-} BDSKCountComparison;
+	BDSKCountSmaller,
+	BDSKAttachmentContain,
+	BDSKAttachmentNotContain,
+	BDSKAttachmentStartWith,
+	BDSKAttachmentEndWith
+} BDSKAttachmentComparison;
 
 // this should correspond to the tags of the items in the popup
 typedef enum {
@@ -90,7 +94,7 @@ enum {
 @interface BDSKCondition : NSObject <NSCopying, NSCoding> {
 	NSString *key;
 	BDSKStringComparison stringComparison;
-	BDSKCountComparison countComparison;
+	BDSKAttachmentComparison attachmentComparison;
 	BDSKDateComparison dateComparison;
 	NSString *stringValue;
     int countValue;
@@ -128,8 +132,8 @@ enum {
 - (void)setStringValue:(NSString *)newValue;
 
 // Count accessors
-- (BDSKCountComparison)countComparison;
-- (void)setCountComparison:(BDSKCountComparison)newComparison;
+- (BDSKAttachmentComparison)attachmentComparison;
+- (void)setAttachmentComparison:(BDSKAttachmentComparison)newComparison;
 - (int)countValue;
 - (void)setCountValue:(int)newValue;
 
@@ -151,7 +155,7 @@ enum {
 - (void)setDefaultValue;
 
 - (BOOL)isDateCondition;
-- (BOOL)isCountCondition;
+- (BOOL)isAttachmentCondition;
 
 - (BDSKSmartGroup *)group;
 - (void)setGroup:(BDSKSmartGroup *)newGroup;

@@ -129,13 +129,17 @@ enum {
             case BDSKInDateRange:   return BDSKInDateRange;
             default:                return BDSKASToday;
         }
-    } else if ([self isCountCondition]) {
-        switch ([self countComparison]) {
-            case BDSKCountEqual:    return BDSKASCountEqual;
-            case BDSKCountNotEqual: return BDSKASCountNotEqual;
-            case BDSKCountLarger:   return BDSKASCountLarger;
-            case BDSKCountSmaller:  return BDSKASCountSmaller;
-            default:                return BDSKASCountEqual;
+    } else if ([self isAttachmentCondition]) {
+        switch ([self attachmentComparison]) {
+            case BDSKCountEqual:            return BDSKASCountEqual;
+            case BDSKCountNotEqual:         return BDSKASCountNotEqual;
+            case BDSKCountLarger:           return BDSKASCountLarger;
+            case BDSKCountSmaller:          return BDSKASCountSmaller;
+            case BDSKAttachmentContain:     return BDSKASContain;
+            case BDSKAttachmentNotContain:  return BDSKASNotContain;
+            case BDSKAttachmentStartWith:   return BDSKASStartWith;
+            case BDSKAttachmentEndWith:     return BDSKASEndWith;
+            default:                        return BDSKASCountEqual;
         }
     } else {
         switch ([self stringComparison]) {
@@ -179,12 +183,16 @@ enum {
                     [cmd setScriptErrorString:NSLocalizedString(@"Invalid condition for smart condition.",@"Error description")];
                     break;
             }
-        } else if ([self isCountCondition]) {
+        } else if ([self isAttachmentCondition]) {
             switch (newComparison) {
-                case BDSKASCountEqual:      [self setCountComparison:BDSKCountEqual];       break;
-                case BDSKASCountNotEqual:   [self setCountComparison:BDSKCountNotEqual];    break;
-                case BDSKASCountLarger:     [self setCountComparison:BDSKCountLarger];      break;
-                case BDSKASCountSmaller:    [self setCountComparison:BDSKCountSmaller];     break;
+                case BDSKASCountEqual:      [self setAttachmentComparison:BDSKCountEqual];           break;
+                case BDSKASCountNotEqual:   [self setAttachmentComparison:BDSKCountNotEqual];        break;
+                case BDSKASCountLarger:     [self setAttachmentComparison:BDSKCountLarger];          break;
+                case BDSKASCountSmaller:    [self setAttachmentComparison:BDSKCountSmaller];         break;
+                case BDSKASContain:         [self setAttachmentComparison:BDSKAttachmentContain];    break;
+                case BDSKASNotContain:      [self setAttachmentComparison:BDSKAttachmentNotContain]; break;
+                case BDSKASStartWith:       [self setAttachmentComparison:BDSKAttachmentStartWith];  break;
+                case BDSKASEndWith:         [self setAttachmentComparison:BDSKAttachmentEndWith];    break;
                 default:
                     [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
                     [cmd setScriptErrorString:NSLocalizedString(@"Invalid condition for smart condition.",@"Error description")];
@@ -236,8 +244,20 @@ enum {
             default:
                 return [NSNull null];
         }
-    } else if ([self isCountCondition]) {
-        return [NSNumber numberWithInt:countValue];
+    } else if ([self isAttachmentCondition]) {
+        switch ([self attachmentComparison]) {
+            case BDSKCountEqual:
+            case BDSKCountNotEqual:
+            case BDSKCountLarger:
+            case BDSKCountSmaller:
+                return [NSNumber numberWithInt:countValue];
+            case BDSKAttachmentContain:
+            case BDSKAttachmentNotContain:
+            case BDSKAttachmentStartWith:
+            case BDSKAttachmentEndWith:
+            default:
+                return [self stringValue];
+        }
     } else {
         return [self stringValue];
     }
@@ -274,9 +294,23 @@ enum {
             [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
             [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];
         }
-    } else if ([self isCountCondition]) {
+    } else if ([self isAttachmentCondition]) {
         if ([newValue isKindOfClass:[NSNumber class]] || [newValue isKindOfClass:[NSString class]]) {
-            [self setCountValue:[newValue intValue]];
+            switch ([self attachmentComparison]) {
+                case BDSKCountEqual:
+                case BDSKCountNotEqual:
+                case BDSKCountLarger:
+                case BDSKCountSmaller:
+                    [self setCountValue:[newValue intValue]];
+                    break;
+                case BDSKAttachmentContain:
+                case BDSKAttachmentNotContain:
+                case BDSKAttachmentStartWith:
+                case BDSKAttachmentEndWith:
+                default:
+                    [self setStringValue:newValue];
+                    break;
+            }
         } else {
             [cmd setScriptErrorNumber:NSArgumentsWrongScriptError];
             [cmd setScriptErrorString:NSLocalizedString(@"Invalid value for smart condition.",@"Error description")];

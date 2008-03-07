@@ -61,7 +61,7 @@
 @implementation BDSKCondition
 
 + (void)initialize {
-    [self setKeys:[NSArray arrayWithObjects:@"stringComparison", @"countComparison", @"dateComparison", nil] triggerChangeNotificationsForDependentKey:@"comparison"];
+    [self setKeys:[NSArray arrayWithObjects:@"stringComparison", @"attachmentComparison", @"dateComparison", nil] triggerChangeNotificationsForDependentKey:@"comparison"];
     [self setKeys:[NSArray arrayWithObjects:@"stringValue", @"countValue", @"numberValue", @"andNumberValue", @"periodValue", @"dateValue", @"toDateValue", nil] triggerChangeNotificationsForDependentKey:@"value"];
 }
 
@@ -71,15 +71,10 @@
 
 - (id)init {
     if (self = [super init]) {
-        // when called from scripting we need to set the key first, so scripting setters know what type of field it is
-        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
-        if ([cmd isKindOfClass:[NSCreateCommand class]] && [[[(NSCreateCommand *)cmd createClassDescription] className] isEqualToString:@"condition"])
-            key = [[[(NSCreateCommand *)cmd resolvedKeyDictionary] objectForKey:@"scriptingKey"] retain];
-        if (key == nil)
-            key = [@"" retain];
+        key = [@"" retain];
         stringValue = [@"" retain];
         stringComparison = BDSKContain;
-        countComparison = BDSKCountNotEqual;
+        attachmentComparison = BDSKCountNotEqual;
         countValue = 0;
         dateComparison = BDSKToday;
         numberValue = 0;
@@ -91,6 +86,16 @@
         cachedStartDate = nil;
         cachedEndDate = nil;
 		cacheTimer = nil;
+        
+        // when called from scripting we need to set the key and comparison first, so scripting setters know what type of field it is
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        if ([cmd isKindOfClass:[NSCreateCommand class]] && [[[(NSCreateCommand *)cmd createClassDescription] className] isEqualToString:@"condition"]) {
+            [self setKey:[[(NSCreateCommand *)cmd resolvedKeyDictionary] objectForKey:@"scriptingKey"]];
+            NSNumber *comparisonNumber = [[(NSCreateCommand *)cmd resolvedKeyDictionary] objectForKey:@"scriptingComparison"];
+            if (comparisonNumber)
+                [self setScriptingComparison:[comparisonNumber intValue]];
+        }
+        
         [self startObserving];
     }
     return self;
@@ -203,7 +208,7 @@
         return ((cachedStartDate == nil || [date compare:cachedStartDate] == NSOrderedDescending) &&
                 (cachedEndDate == nil || [date compare:cachedEndDate] == NSOrderedAscending));
         
-    } else if ([self isCountCondition]) {
+    } else if ([self isAttachmentCondition]) {
         
         int count = 0;
         if ([key isEqualToString:BDSKLocalFileString])
@@ -211,7 +216,7 @@
         else if ([key isEqualToString:BDSKRemoteURLString])
             count = [[item remoteURLs] count];
         
-        switch (countComparison) {
+        switch (attachmentComparison) {
             case BDSKCountEqual:
                 return count == countValue;
             case BDSKCountNotEqual:
@@ -221,6 +226,28 @@
             case BDSKCountSmaller:
                 return count < countValue;
         }
+        
+        NSArray *itemValues = nil;
+        if ([key isEqualToString:BDSKLocalFileString])
+            itemValues = [[item existingLocalFiles] valueForKey:@"path"];
+        else if ([key isEqualToString:BDSKRemoteURLString])
+            itemValues = [[item remoteURLs] valueForKey:@"absoluteString"];
+        NSEnumerator *itemEnum  = [itemValues objectEnumerator];
+        NSString *itemValue;
+        
+        CFOptionFlags options = kCFCompareCaseInsensitive;
+        if (attachmentComparison == BDSKAttachmentEndWith)
+            options |= kCFCompareBackwards | kCFCompareAnchored;
+        else if (attachmentComparison == BDSKAttachmentStartWith)
+            options |= kCFCompareAnchored;
+        BOOL matchReturnValue = (stringComparison != BDSKAttachmentNotContain);
+        CFRange range;
+        
+        while (itemValue = [itemEnum nextObject]) {
+            if (CFStringFindWithOptions((CFStringRef)itemValue, (CFStringRef)stringValue, CFRangeMake(0, [itemValue length]), options, &range))
+                return matchReturnValue;
+        }
+        return NO == matchReturnValue;
         
     } else {
         
@@ -246,20 +273,20 @@
         
         // minor optimization: Shark showed -[NSString rangeOfString:options:] as a bottleneck, calling through to CFStringFindWithOptions
         CFOptionFlags options = kCFCompareCaseInsensitive;
-        if (stringComparison == BDSKEndWith)
-            options = options | kCFCompareBackwards;
+        if (attachmentComparison == BDSKEndWith)
+            options |= kCFCompareBackwards | kCFCompareAnchored;
+        else if (attachmentComparison == BDSKStartWith)
+            options |= kCFCompareAnchored;
         CFRange range;
         CFIndex itemLength = CFStringGetLength((CFStringRef)itemValue);
         Boolean foundString = CFStringFindWithOptions((CFStringRef)itemValue, (CFStringRef)stringValue, CFRangeMake(0, itemLength), options, &range);
         switch (stringComparison) {
             case BDSKContain:
+            case BDSKStartWith:
+            case BDSKEndWith:
                 return foundString;
             case BDSKNotContain:
                 return foundString == FALSE;
-            case BDSKStartWith:
-                return foundString && range.location == 0;
-            case BDSKEndWith:
-                return foundString && (range.location + range.length) == itemLength;
             default:
                 break; // other enum types are handled before the switch, but the compiler doesn't know that
         }
@@ -294,14 +321,14 @@
 }
 
 - (int)comparison {
-    return [self isDateCondition] ? dateComparison : [self isCountCondition] ? countComparison : stringComparison;
+    return [self isDateCondition] ? dateComparison : [self isAttachmentCondition] ? attachmentComparison : stringComparison;
 }
 
 - (void)setComparison:(int)newComparison {
     if ([self isDateCondition])
         [self setDateComparison:(BDSKDateComparison)newComparison];
-    if ([self isCountCondition])
-        [self setCountComparison:(BDSKCountComparison)newComparison];
+    if ([self isAttachmentCondition])
+        [self setAttachmentComparison:(BDSKAttachmentComparison)newComparison];
     else
         [self setStringComparison:(BDSKStringComparison)newComparison];
 }
@@ -324,8 +351,20 @@
             default:
                 return @"";
         }
-    } else if ([self isCountCondition]) {
-        return [NSString stringWithFormat:@"%i", countValue];
+    } else if ([self isAttachmentCondition]) {
+        switch (dateComparison) {
+            case BDSKCountEqual: 
+            case BDSKCountNotEqual: 
+            case BDSKCountLarger: 
+            case BDSKCountSmaller: 
+                return [NSString stringWithFormat:@"%i", countValue];
+            case BDSKAttachmentContain: 
+            case BDSKAttachmentNotContain: 
+            case BDSKAttachmentStartWith: 
+            case BDSKAttachmentEndWith: 
+            default:
+                return [self stringValue];
+        }
     } else {
         return [self stringValue];
     }
@@ -366,8 +405,23 @@
             default:
                 break;
         }
-    } else if ([self isCountCondition]) {
-        [self setCountValue:[newValue intValue]];
+    } else if ([self isAttachmentCondition]) {
+        switch (dateComparison) {
+            case BDSKCountEqual: 
+            case BDSKCountNotEqual: 
+            case BDSKCountLarger: 
+            case BDSKCountSmaller: 
+                [self setCountValue:[newValue intValue]];
+                break;
+            case BDSKAttachmentContain: 
+            case BDSKAttachmentNotContain: 
+            case BDSKAttachmentStartWith: 
+            case BDSKAttachmentEndWith: 
+                [self setStringValue:newValue];
+                break;
+            default:
+                break;
+        }
     } else {
         [self setStringValue:newValue];
     }
@@ -398,12 +452,12 @@
 
 #pragma mark | count (linked files/URLs)
 
-- (BDSKCountComparison)countComparison {
-    return countComparison;
+- (BDSKAttachmentComparison)attachmentComparison {
+    return attachmentComparison;
 }
 
-- (void)setCountComparison:(BDSKCountComparison)newComparison {
-    countComparison = newComparison;
+- (void)setAttachmentComparison:(BDSKAttachmentComparison)newComparison {
+    attachmentComparison = newComparison;
 }
 
 - (int)countValue {
@@ -476,7 +530,7 @@
     return [key fieldType] == BDSKDateField;
 }
 
-- (BOOL)isCountCondition {
+- (BOOL)isAttachmentCondition {
     return [key fieldType] == BDSKLinkedField;
 }
 
@@ -487,7 +541,7 @@
             [self setDateComparison:BDSKToday];
             break;
         case BDSKLinkedField:
-            [self setCountComparison:BDSKCountNotEqual];
+            [self setAttachmentComparison:BDSKCountNotEqual];
             break;
         case BDSKStringField:
             [self setStringComparison:BDSKContain];
@@ -513,6 +567,7 @@
         }
         case BDSKLinkedField:
             [self setCountValue:0];
+            [self setStringValue:@""];
             break;
         case BDSKBooleanField:
             [self setStringValue:[NSString stringWithBool:NO]];

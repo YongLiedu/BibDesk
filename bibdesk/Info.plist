@@ -732,16 +732,14 @@
 					<string>LucidaGrande</string>
 					<key>BDSKPersonTableViewFontSizeKey</key>
 					<real>0.0</real>
-					<key>BDSKPreviewTemplateStyleKey</key>
-					<string>Default RSS template</string>
 					<key>BDSKBottomPreviewDisplayKey</key>
 					<integer>0</integer>
 					<key>BDSKBottomPreviewDisplayTemplateKey</key>
-					<string>Default RSS template</string>
+					<string>Default RTF template</string>
 					<key>BDSKSidePreviewDisplayKey</key>
 					<integer>1</integer>
 					<key>BDSKSidePreviewDisplayTemplateKey</key>
-					<string>Default RSS template</string>
+					<string>Default RTF template</string>
 					<key>BDSKSortGroupsDescendingKey</key>
 					<false/>
 					<key>BDSKSortGroupsKey</key>

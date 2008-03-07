@@ -79,7 +79,7 @@
 	//NSLog(@"dealloc conditionController");
     [condition removeObserver:self forKeyPath:@"key"];
     [condition removeObserver:self forKeyPath:@"dateComparison"];
-    [condition removeObserver:self forKeyPath:@"countComparison"];
+    [condition removeObserver:self forKeyPath:@"attachmentComparison"];
     [condition removeObserver:self forKeyPath:@"stringComparison"];
     [condition removeObserver:self forKeyPath:@"stringValue"];
     [condition removeObserver:self forKeyPath:@"countValue"];
@@ -96,7 +96,7 @@
     [view release];
     view  = nil;
     [[dateComparisonPopUp superview] release];
-    [[countComparisonPopUp superview] release];
+    [[attachmentComparisonPopUp superview] release];
     [[comparisonPopUp superview] release];
     [[valueTextField superview] release];
     [[countTextField superview] release];
@@ -120,7 +120,7 @@
     // we add/remove these controls, so we need to retain them
     [view retain];
     [[dateComparisonPopUp superview] retain];
-    [[countComparisonPopUp superview] retain];
+    [[attachmentComparisonPopUp superview] retain];
     [[comparisonPopUp superview] retain];
     [[valueTextField superview] retain];
     [[countTextField superview] retain];
@@ -149,7 +149,7 @@
     
     [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"dateComparison" options: NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"countComparison" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"attachmentComparison" options:NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"stringComparison" options:NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"stringValue" options:NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"countValue" options:NSKeyValueObservingOptionOld  context:NULL];
@@ -235,6 +235,24 @@
                     break;
             }
         break;
+        case BDSKLinkedField:
+            switch ([condition attachmentComparison]) {
+                case BDSKCountEqual: 
+                case BDSKCountNotEqual: 
+                case BDSKCountLarger: 
+                case BDSKCountSmaller: 
+                    controls = [NSArray arrayWithObjects:countTextField, nil];
+                    break;
+                case BDSKAttachmentContain: 
+                case BDSKAttachmentNotContain: 
+                case BDSKAttachmentStartWith: 
+                case BDSKAttachmentEndWith: 
+                    controls = [NSArray arrayWithObjects:valueTextField, nil];
+                    break;
+                default:
+                    break;
+            }
+        break;
         case BDSKBooleanField:
             controls = [NSArray arrayWithObjects:booleanButton, nil];
         break;
@@ -243,9 +261,6 @@
         break;
         case BDSKRatingField:
             controls = [NSArray arrayWithObjects:ratingButton, nil];
-        break;
-        case BDSKLinkedField:
-            controls = [NSArray arrayWithObjects:countTextField, nil];
         break;
         default:
             controls = [NSArray arrayWithObjects:valueTextField, nil];
@@ -272,9 +287,9 @@
     if ([condition isDateCondition]) {
         [[dateComparisonPopUp superview] setFrameOrigin:NSZeroPoint];
         [comparisonBox addSubview:[dateComparisonPopUp superview]];
-    } else if ([condition isCountCondition]) {
-        [[countComparisonPopUp superview] setFrameOrigin:NSZeroPoint];
-        [comparisonBox addSubview:[countComparisonPopUp superview]];
+    } else if ([condition isAttachmentCondition]) {
+        [[attachmentComparisonPopUp superview] setFrameOrigin:NSZeroPoint];
+        [comparisonBox addSubview:[attachmentComparisonPopUp superview]];
     } else {
         [[comparisonPopUp superview] setFrameOrigin:NSZeroPoint];
         [comparisonBox addSubview:[comparisonPopUp superview]];
@@ -309,8 +324,9 @@
         } else if ([keyPath isEqualToString:@"dateComparison"]) {
             [self layoutValueControls];
             [[undoManager prepareWithInvocationTarget:condition] setDateComparison:[oldValue intValue]];
-        } else if ([keyPath isEqualToString:@"countComparison"]) {
-            [[undoManager prepareWithInvocationTarget:condition] setCountComparison:[oldValue intValue]];
+        } else if ([keyPath isEqualToString:@"attachmentComparison"]) {
+            [self layoutValueControls];
+            [[undoManager prepareWithInvocationTarget:condition] setAttachmentComparison:[oldValue intValue]];
         } else if ([keyPath isEqualToString:@"stringComparison"]) {
             [[undoManager prepareWithInvocationTarget:condition] setStringComparison:[oldValue intValue]];
         } else if ([keyPath isEqualToString:@"stringValue"]) {
