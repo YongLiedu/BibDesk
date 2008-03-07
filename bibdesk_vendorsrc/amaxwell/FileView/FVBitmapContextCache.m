@@ -75,9 +75,9 @@ static NSMutableDictionary *__contextCache = nil;
 
 FV_PRIVATE_EXTERN CGContextRef FVIconBitmapContextCreateWithSize(size_t width, size_t height)
 {
-    size_t bitsPerComponent = 8;
+    size_t bitsPerComponent = 8; // = 1 byte
     size_t nComponents = 4;
-    size_t bytesPerRow = bitsPerComponent * nComponents * width;
+    size_t bytesPerRow = nComponents * width; // as we use 1 byte per component
     
     //Widen bytesPerRow out to a integer multiple of 16 bytes
     bytesPerRow = (bytesPerRow + 15) & ~15;
