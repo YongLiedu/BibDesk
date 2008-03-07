@@ -46,32 +46,15 @@
 - (void)awakeFromNib{
     [super awakeFromNib];
     
-    [OFPreference addObserver:self 
-                     selector:@selector(handleTemplatePrefsChangedNotification:) 
-                forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
-    [OFPreference addObserver:self 
-                     selector:@selector(handlePreviewDisplayChangedNotification:) 
-                forPreference:[OFPreference preferenceForKey:BDSKPreviewDisplayKey]];
-    [OFPreference addObserver:self 
-                     selector:@selector(handlePreviewDisplayChangedNotification:) 
-                forPreference:[OFPreference preferenceForKey:BDSKPreviewTemplateStyleKey]];
-    
-    [self handleTemplatePrefsChangedNotification:nil];
-    
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
 }
 
 - (void)updatePreviewDisplayUI{
-    [displayPrefRadioMatrix selectCellWithTag:[defaults integerForKey:BDSKPreviewDisplayKey]];
-	
     int maxNumber = [defaults integerForKey:BDSKPreviewMaxNumberKey];
 	if (maxNumber == 0)
 		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"Display all items in preview")];
 	else 
 		[previewMaxNumberComboBox setIntValue:maxNumber];
-    
-    [previewTemplatePopup setEnabled:[defaults integerForKey:BDSKPreviewDisplayKey] == 3];
-    [previewTemplatePopup selectItemWithTitle:[defaults stringForKey:BDSKPreviewTemplateStyleKey]];
 }
 
 - (void)updateUI{
@@ -90,38 +73,6 @@
     }
 }    
 
-- (void)handleTemplatePrefsChangedNotification:(NSNotification *)notification{
-    NSString *currentStyle = [defaults stringForKey:BDSKPreviewTemplateStyleKey];
-    NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFileType:@"rtf"]];
-    [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"rtfd"]];
-    [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"doc"]];
-    [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"html"]];
-    [previewTemplatePopup removeAllItems];
-    [previewTemplatePopup addItemsWithTitles:styles];
-    if ([styles containsObject:currentStyle]) {
-        [previewTemplatePopup selectItemWithTitle:currentStyle];
-    } else if ([styles count]) {
-        [previewTemplatePopup selectItemAtIndex:0];
-        [defaults setObject:[styles objectAtIndex:0] forKey:BDSKPreviewTemplateStyleKey];
-        [defaults autoSynchronize];
-        if ([defaults integerForKey:BDSKPreviewDisplayKey] == 3)
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-    }
-}
-
-- (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
-    [self updatePreviewDisplayUI];
-}
-
-- (IBAction)changePreviewDisplay:(id)sender{
-    int tag = [[sender selectedCell] tag];
-    if(tag != [defaults integerForKey:BDSKPreviewDisplayKey]){
-        [defaults setInteger:tag forKey:BDSKPreviewDisplayKey];
-        [defaults autoSynchronize];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-    }
-}
-
 - (IBAction)changePreviewMaxNumber:(id)sender{
     int maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
     if(maxNumber != [defaults integerForKey:BDSKPreviewMaxNumberKey]){
@@ -129,15 +80,6 @@
         [defaults autoSynchronize];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
 	}
-}
-
-- (IBAction)changePreviewTemplate:(id)sender{
-    NSString *style = [sender title];
-    if ([style isEqualToString:[defaults stringForKey:BDSKPreviewTemplateStyleKey]] == NO) {
-        [defaults setObject:style forKey:BDSKPreviewTemplateStyleKey];
-        [defaults autoSynchronize];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-    }
 }
 
 //
