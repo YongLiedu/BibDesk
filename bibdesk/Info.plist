@@ -760,8 +760,10 @@
 					<integer>0</integer>
 					<key>Terms ignored when sorting</key>
 					<array/>
-                    <key>BDSKMainFileViewIconScaleKey</key>
-                    <real>2.0</real>
+                    <key>BDSKBottomFileViewIconScaleKey</key>
+                    <real>1.0</real>
+                    <key>BDSKSideFileViewIconScaleKey</key>
+                    <real>0.0</real>
                     <key>BDSKEditorFileViewIconScaleKey</key>
                     <real>1.0</real>
 				</dict>
