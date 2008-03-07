@@ -104,7 +104,7 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
     NSParameterAssert([aURL isFileURL]);
     self = [self initWithPDFAtURL:aURL];
     if (self) {
-        _iconType = FVPostscriptType;
+        _isPostscript = YES;
     }
     return self;
 }
@@ -141,7 +141,7 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
         _fullSize = _paperSize;
         _thumbnailSize = _fullSize;
         _diskCacheName = [FVIconCache createDiskCacheNameWithURL:aURL];
-        _iconType = FVPDFType;
+        _isPostscript = NO;
         _pdfDoc = NULL;
         _pdfPage = NULL;
         _thumbnail = NULL;
@@ -178,17 +178,14 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
 
 - (BOOL)canReleaseResources;
 {
-    if (FVPostscriptType != _iconType)
-        return (NULL != _pdfDoc || NULL != _thumbnail);
-    else
-        return (NULL != _thumbnail);
+    return _isPostscript ? (NULL != _thumbnail) : (NULL != _pdfDoc || NULL != _thumbnail);
 }
 
 - (void)releaseResources 
 {
     if ([self tryLock]) {
         // Too expensive to create from PostScript on the fly, and PS is not that common; however, a CGPDFDocument data provider is the same size as the file on disk, so we want to get rid of them unless we're drawing full resolution.
-        if (FVPostscriptType != _iconType) {
+        if (_isPostscript != NO) {
             CGPDFDocumentRelease(_pdfDoc);
             _pdfDoc = NULL;
             _pdfPage = NULL;
@@ -269,10 +266,7 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
     if (NULL == _pdfPage) {
         
         if (NULL == _pdfDoc) {
-            if (FVPostscriptType == _iconType)
-                _pdfDoc = createCGPDFDocumentWithPostScriptURL(_fileURL);
-            else
-                _pdfDoc = CGPDFDocumentCreateWithURL((CFURLRef)_fileURL);
+            _pdfDoc = _isPostscript ? createCGPDFDocumentWithPostScriptURL(_fileURL) : CGPDFDocumentCreateWithURL((CFURLRef)_fileURL);
             
             _pageCount = CGPDFDocumentGetNumberOfPages(_pdfDoc);
         }

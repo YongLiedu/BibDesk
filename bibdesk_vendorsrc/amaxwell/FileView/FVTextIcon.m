@@ -187,10 +187,20 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
         _fullImage = NULL;
         _thumbnail = NULL;
         _diskCacheName = [FVIconCache createDiskCacheNameWithURL:_fileURL];
-        
+        _isHTML = NO;
+                
         NSInteger rc = pthread_mutex_init(&_mutex, NULL);
         if (rc)
             perror("pthread_mutex_init");
+    }
+    return self;
+}
+
+// return the same thing as text; just a container for the URL, until actually asked to render the text file
+- (id)initWithHTMLAtURL:(NSURL *)aURL;
+{
+    if (self = [self initWithTextAtURL:aURL]) {
+        _isHTML = YES;
     }
     return self;
 }
@@ -291,6 +301,16 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     [self unlock];
 }
 
+- (void)_loadHTML:(NSMutableDictionary *)HTMLDict {
+    NSDictionary *documentAttributes = nil;
+    NSAttributedString *attrString = [[NSAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
+    if (attrString)
+        [HTMLDict setObject:attrString forKey:@"attributedString"];
+    if (documentAttributes)
+        [HTMLDict setObject:documentAttributes forKey:@"documentAttributes"];
+    [attrString release];
+}
+
 - (void)renderOffscreen
 {
     // hold the lock to let needsRenderForSize: know that this icon doesn't need rendering
@@ -336,7 +356,16 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     
     // no need to lock for -fileURL since it's invariant
     NSDictionary *documentAttributes = nil;
-    NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
+    NSMutableAttributedString *attrString = nil;
+    
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && _isHTML) {
+        NSMutableDictionary *HTMLDict = [NSMutableDictionary dictionary];
+        [self performSelectorOnMainThread:@selector(_loadHTML:) withObject:HTMLDict waitUntilDone:YES];
+        attrString = [[HTMLDict objectForKey:@"attributedString"] mutableCopy];
+        documentAttributes = [HTMLDict objectForKey:@"documentAttributes"];
+    } else {
+        attrString = [[NSMutableAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
+    }
     
     CGAffineTransform pageTransform = _paperTransform;
     NSSize containerSize = _containerSize;

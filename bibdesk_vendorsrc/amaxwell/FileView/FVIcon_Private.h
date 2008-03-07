@@ -46,13 +46,6 @@
 #import <libkern/OSAtomic.h>
 #import "FVUtilities.h"
 
-// For subclasses that handle multiple types with minor variation.  This is deprecated; it used have half-a-dozen types, but most of it is now handled by members of the class cluster, so the enum may eventually go away entirely.
-enum {
-    FVPDFType,
-    FVPostscriptType
-};
-typedef NSUInteger FVIconType;
-
 // Desired size: should be the same size passed to -[FVIcon needsRenderForSize:] and -[FVIcon _drawingRectWithRect:], not the return value of _drawingRectWithRect:.  Thumbnail size: current size of the instance's thumbnail image, if it has one (and if not, it shouldn't be calling this).
 static inline bool FVShouldDrawFullImageWithThumbnailSize(const NSSize desiredSize, const NSSize thumbnailSize)
 {

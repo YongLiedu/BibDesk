@@ -50,7 +50,7 @@
     CGImageRef        _thumbnail;
     NSSize            _thumbnailSize;
     NSSize            _desiredSize;
-    FVIconType        _iconType;
+    BOOL              _isPostscript;
     BOOL              _inDiskCache;
     char             *_diskCacheName;
     pthread_mutex_t   _mutex;
