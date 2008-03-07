@@ -1097,7 +1097,7 @@
         changed = YES;
     }
     if (changed) {
-        [self updatePreviewPane];
+        [self updateBottomPreviewPane];
         if ([sender isEqual:bottomPreviewButton] == NO)
             [bottomPreviewButton selectSegmentWithTag:bottomPreviewDisplay];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];

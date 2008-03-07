@@ -321,13 +321,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)updatePreviewer:(BDSKPreviewer *)aPreviewer;
 
-/*!
-    @method updatePreviewPane
-    @abstract Handles writing the preview pane. (Not the PDF Preview)
-    @discussion -
-    
-*/
-- (void)updatePreviewPane;
+- (void)updateBottomPreviewPane;
 - (void)updateSidePreviewPane;
 
 /*!
@@ -444,13 +438,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (void)registerForNotifications;
 
-/*!
-    @method     handlePreviewDisplayChangedNotification:
-    @abstract   only supposed to handle the pretty-printed preview, /not/ the TeX preview
-    @discussion (comprehensive description)
-    @param      notification (description)
-*/
-- (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification;
 - (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification;
 - (void)handleUsesTeXChangedNotification:(NSNotification *)notification;
 - (void)handleIgnoredSortTermsChangedNotification:(NSNotification *)notification;
@@ -508,7 +495,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSArray *)selectedFileURLs;
 
 - (NSArray *)shownFiles;
-- (void)updateFileView;
+- (void)updateFileViews;
 
 - (void)setStatus:(NSString *)status;
 - (void)setStatus:(NSString *)status immediate:(BOOL)now;
