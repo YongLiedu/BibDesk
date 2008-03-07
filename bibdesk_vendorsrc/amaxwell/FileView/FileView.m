@@ -57,8 +57,9 @@
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
-static const NSSize DEFAULT_ICON_SIZE = { 64, 64 };
-static const CGFloat DEFAULT_PADDING = 32;          // 16 per side
+static const NSSize DEFAULT_ICON_SIZE = { 64.0, 64.0 };
+static const NSSize DEFAULT_PADDING = { 10.0, 4.0 };
+static const CGFloat DEFAULT_MARGIN = 4.0;
 
 // don't bother removing icons from the cache if there are fewer than this value
 static const NSUInteger ZOMBIE_CACHE_THRESHOLD = 100;
@@ -320,7 +321,12 @@ static CGColorRef _shadowColor = NULL;
 {
     return _iconSize.width / DEFAULT_ICON_SIZE.width;
 }
-    
+
+- (CGFloat)_autoScaleIconScale;
+{
+    return _iconSize.width / DEFAULT_ICON_SIZE.width;
+}
+
 - (void)_registerForDraggedTypes
 {
     if (_isEditable && _dataSource) {
@@ -408,8 +414,8 @@ static CGColorRef _shadowColor = NULL;
 - (id)delegate { return _delegate; }
 
 // overall borders around the view
-- (CGFloat)_leftMargin { return _padding.width / 2 + 4.0; }
-- (CGFloat)_rightMargin { return _padding.width / 2 + 4.0; }
+- (CGFloat)_leftMargin { return _padding.width / 2 + DEFAULT_MARGIN; }
+- (CGFloat)_rightMargin { return _padding.width / 2 + DEFAULT_MARGIN; }
 - (CGFloat)_topMargin { return _titleHeight; }
 - (CGFloat)_bottomMargin { return 0.0; }
 
@@ -438,17 +444,16 @@ static CGColorRef _shadowColor = NULL;
 {
     // ??? magic number here... using a fixed padding looked funny at some sizes, so this is now adjustable
     NSSize size = NSZeroSize;
-    if (_autoScales)
+    
+    // if we autoscale, we should always derive the scale from the current bounds,  but rather the current bounds. This calculation basically inverts the calculation in _recalculateGridSize
+    if (_autoScales) 
+        scale = MAX( 0.1, ( NSWidth([self bounds]) - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
 #if __LP64__
-        size.width = fmax(round(NSWidth([self bounds]) / 16.0), 16.0);
-    else
-        size.width = 10.0 + round(4.0 * scale);
+    size.width = DEFAULT_PADDING.width + round(4.0 * scale);
 #else
-        size.width = fmaxf(roundf(NSWidth([self bounds]) / 16.0), 16.0);
-    else
-        size.width = 10.0 + roundf(4.0 * scale);
+    size.width = DEFAULT_PADDING.width + roundf(4.0 * scale);
 #endif
-    size.height = size.width - 6.0 + _titleHeight;
+    size.height = size.width + DEFAULT_PADDING.height - DEFAULT_PADDING.width + _titleHeight;
     if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
         size.height += _subtitleHeight;
     return size;
@@ -1546,12 +1551,12 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
         else if ([(NSScrollView *)view hasVerticalScroller])
             scrollerWidth = [NSScroller scrollerWidth];
         // make sure the padding is correct, as we use it in the margin calculation, this does not depend on the scale when we're auto scaling
-        _padding = [self _paddingForScale:0];
+        _padding = [self _paddingForScale:[self iconScale]];
         // substract 2 for the border
-        CGFloat size = NSWidth([view bounds]) - [self _leftMargin] - [self _rightMargin] - 2;
+        CGFloat size = MAX(4.0, NSWidth([view bounds]) - [self _leftMargin] - [self _rightMargin] - 2.0);
         _iconSize = NSMakeSize(size, size);
         if ([self enclosingScrollView] && [self _rowHeight] * [self numberOfIcons] + [self _topMargin] + [self _bottomMargin] > NSHeight([view bounds]) - scrollerWidth - 2) {
-            size -= scrollerWidth;
+            size = MAX(4.0, size - scrollerWidth);
             _iconSize = NSMakeSize(size, size);
         }
     }
