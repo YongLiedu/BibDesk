@@ -209,6 +209,8 @@ enum {
 
 - (id)init{
     if(self = [super init]){
+        OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+        
         publications = [[BDSKPublicationsArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         groupedPublications = [[NSMutableArray alloc] initWithCapacity:1];
@@ -225,17 +227,16 @@ enum {
         pboardHelper = [[BDSKItemPasteboardHelper alloc] init];
         [pboardHelper setDelegate:self];
         
-        bottomPreviewDisplay = BDSKPreviewDisplayText;
-        bottomPreviewDisplayTemplate = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPreviewTemplateStyleKey] retain];
-        sidePreviewDisplay = BDSKPreviewDisplayFiles;
-        sidePreviewDisplayTemplate = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPreviewTemplateStyleKey] retain];
-        
         docState.isDocumentClosed = NO;
         
         // need to set this for new documents
         [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
         
         // these are set in windowControllerDidLoadNib: from the xattr defaults if available
+        bottomPreviewDisplay = BDSKPreviewDisplayText;
+        bottomPreviewDisplayTemplate = nil;
+        sidePreviewDisplay = BDSKPreviewDisplayFiles;
+        sidePreviewDisplayTemplate = nil;
         tableColumnWidths = nil;
         sortKey = nil;
         previousSortKey = nil;
@@ -436,6 +437,11 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
     [statusBar setTextOffset:NSMaxX([bottomPreviewButton frame]) - 2.0];
     
+    bottomPreviewDisplay = [xattrDefaults intForKey:BDSKBottomPreviewDisplayKey defaultValue:[pw integerForKey:BDSKBottomPreviewDisplayKey]];
+    bottomPreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKBottomPreviewDisplayTemplateKey defaultObject:[pw stringForKey:BDSKBottomPreviewDisplayTemplateKey]] retain];
+    sidePreviewDisplay = [xattrDefaults intForKey:BDSKSidePreviewDisplayKey defaultValue:[pw integerForKey:BDSKSidePreviewDisplayKey]];
+    sidePreviewDisplayTemplate = [[xattrDefaults objectForKey:BDSKSidePreviewDisplayTemplateKey defaultObject:[pw stringForKey:BDSKSidePreviewDisplayTemplateKey]] retain];
+        
     bottomTemplatePreviewMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
     [bottomTemplatePreviewMenu setDelegate:self];
     [bottomPreviewButton setMenu:bottomTemplatePreviewMenu forSegment:0];
@@ -522,9 +528,23 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [fileGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     [fileGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
-    [sideFileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKMainFileViewIconScaleKey]];
+    float iconScale = [xattrDefaults floatForKey:BDSKSideFileViewIconScaleKey defaultValue:[pw floatForKey:BDSKSideFileViewIconScaleKey]];
+    if (iconScale < 0.00001) {
+        [sideFileView setAutoScales:YES];
+    } else {
+        [sideFileView setAutoScales:NO];
+        [sideFileView setIconScale:iconScale];
+    }
     [sideFileView setAutoScales:YES];
     [sideFileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
+
+    iconScale = [xattrDefaults floatForKey:BDSKBottomFileViewIconScaleKey defaultValue:[pw floatForKey:BDSKBottomFileViewIconScaleKey]];
+    if (iconScale < 0.00001) {
+        [bottomFileView setAutoScales:YES];
+    } else {
+        [bottomFileView setAutoScales:NO];
+        [bottomFileView setIconScale:iconScale];
+    }
     
 	// ImagePopUpButtons setup
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
@@ -693,6 +713,14 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
             selectedKeys = [NSArray array];
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
         [dictionary setPointValue:[[tableView enclosingScrollView] scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
+        
+        [dictionary setIntValue:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
+        [dictionary setObject:bottomPreviewDisplayTemplate forKey:BDSKBottomPreviewDisplayTemplateKey];
+        [dictionary setIntValue:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
+        [dictionary setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
+        
+        [dictionary setFloatValue:[bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale] forKey:BDSKBottomFileViewIconScaleKey];
+        [dictionary setFloatValue:[sideFileView autoScales] ? 0.0 : [sideFileView iconScale] forKey:BDSKSideFileViewIconScaleKey];
         
         if(previewer){
             [dictionary setFloatValue:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
@@ -3001,7 +3029,11 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (object == sideFileView && [keyPath isEqualToString:@"iconScale"]) {
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[sideFileView iconScale] forKey:BDSKMainFileViewIconScaleKey];
+        float iconScale = [sideFileView autoScales] ? 0.0 : [sideFileView iconScale];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:iconScale forKey:BDSKSideFileViewIconScaleKey];
+    } else if (object == bottomFileView && [keyPath isEqualToString:@"iconScale"]) {
+        float iconScale = [bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:iconScale forKey:BDSKBottomFileViewIconScaleKey];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }

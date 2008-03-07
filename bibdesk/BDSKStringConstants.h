@@ -98,6 +98,10 @@ extern NSString *BDSKOrphanedFilesTableViewFontSizeKey;
 extern NSString *BDSKPreviewDisplayKey;
 extern NSString *BDSKPreviewMaxNumberKey;
 extern NSString *BDSKPreviewTemplateStyleKey;
+extern NSString *BDSKBottomPreviewDisplayKey;
+extern NSString *BDSKBottomPreviewDisplayTemplateKey;
+extern NSString *BDSKSidePreviewDisplayKey;
+extern NSString *BDSKSidePreviewDisplayTemplateKey;
 extern NSString *BDSKPreviewPDFScaleFactorKey;
 extern NSString *BDSKPreviewRTFScaleFactorKey;
 extern NSString *BDSKPreviewLinkedFileScaleFactorKey;
@@ -198,7 +202,8 @@ extern NSString *BDSKSpotlightVersionInfo;
 extern NSString *BDSKShouldShowWebGroupPrefKey;
 extern NSString *BDSKDefaultArrayJoinStringKey;
 
-extern NSString *BDSKMainFileViewIconScaleKey;
+extern NSString *BDSKBottomFileViewIconScaleKey;
+extern NSString *BDSKSideFileViewIconScaleKey;
 extern NSString *BDSKEditorFileViewIconScaleKey;
 
 #pragma mark Field name strings

@@ -1100,6 +1100,8 @@
         [self updatePreviewPane];
         if ([sender isEqual:bottomPreviewButton] == NO)
             [bottomPreviewButton selectSegmentWithTag:bottomPreviewDisplay];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:bottomPreviewDisplayTemplate forKey:BDSKBottomPreviewDisplayTemplateKey];
     }
 }
 
@@ -1121,6 +1123,8 @@
         [self updateSidePreviewPane];
         if ([sender isEqual:sidePreviewButton] == NO)
             [sidePreviewButton selectSegmentWithTag:sidePreviewDisplay];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
     }
 }
 

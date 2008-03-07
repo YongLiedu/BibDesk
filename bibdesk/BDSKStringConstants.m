@@ -123,12 +123,17 @@ NSString *BDSKOrphanedFilesTableViewFontSizeKey = @"BDSKOrphanedFilesTableViewFo
 NSString *BDSKPreviewDisplayKey = @"Preview Pane Displays What?";
 NSString *BDSKPreviewMaxNumberKey = @"Maximum Number of Items in Preview Pane";
 NSString *BDSKPreviewTemplateStyleKey = @"BDSKPreviewTemplateStyleKey";
+NSString *BDSKBottomPreviewDisplayKey = @"BDSKBottomPreviewDisplayKey";
+NSString *BDSKBottomPreviewDisplayTemplateKey = @"BDSKBottomPreviewDisplayTemplateKey";
+NSString *BDSKSidePreviewDisplayKey = @"BDSKSidePreviewDisplayKey";
+NSString *BDSKSidePreviewDisplayTemplateKey = @"BDSKSidePreviewDisplayTemplateKey";
 
 NSString *BDSKPreviewPDFScaleFactorKey = @"Preview PDF Scale Factor";
 NSString *BDSKPreviewRTFScaleFactorKey = @"Preview RTF Scale Factor";
 NSString *BDSKPreviewLinkedFileScaleFactorKey = @"Preview Linked File Scale Factor";
 
-NSString *BDSKMainFileViewIconScaleKey = @"BDSKMainFileViewIconScaleKey";
+NSString *BDSKBottomFileViewIconScaleKey = @"BDSKBottomFileViewIconScaleKey";
+NSString *BDSKSideFileViewIconScaleKey = @"BDSKSideFileViewIconScaleKey";
 NSString *BDSKEditorFileViewIconScaleKey = @"BDSKEditorFileViewIconScaleKey";
 
 NSString *BDSKDefaultFieldsKey = @"Default Fields";
