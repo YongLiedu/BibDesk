@@ -81,7 +81,7 @@ static int32_t _activeCPUs __attribute__ ((aligned (32))) = 0;
 // Allow a maximum of 10 operations per active CPU core and a minimum of 2 per core; untuned.  Main idea here is to keep from killing performance by creating too many threads or operations, but memory/disk are also big factors that are unaccounted for here.
 + (NSUInteger)_availableOperationCount
 {
-    int32_t maxConcurrentOperations = _activeCPUs * 4;
+    int32_t maxConcurrentOperations = _activeCPUs * 10;
     int32_t minConcurrentOperations = 2;    
     return MAX((maxConcurrentOperations - ((_activeQueueCount - 1) * minConcurrentOperations)), minConcurrentOperations);
 }
