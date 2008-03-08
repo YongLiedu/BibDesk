@@ -253,7 +253,7 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
         
         if (NULL != _thumbnail) {
             _thumbnailSize = FVCGImageSize(_thumbnail);
-            exitEarly = FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize) && _pageCount > 0;
+            exitEarly = NO == FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize) && _pageCount > 0;
         }
                 
         // !!! early return

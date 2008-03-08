@@ -124,6 +124,7 @@ static FVIconCache *_smallImageCache = nil;
         // opens the file we just created as read/write; use new and a pointer so we guarantee the life cycle
         _dataStorage = new FVDataStorage(tempName);
         free(tempName);
+        tempName = NULL;
 
         // unlink the file immediately; since DTDataFile calls fopen() in its constructor, this is safe, and means we don't leave turds when the program crashes.  For debug builds, the file is unlinked when the app terminates, since otherwise the call to stat() fails with a file not found error (presumably since the link count is zero).
         
@@ -136,7 +137,7 @@ static FVIconCache *_smallImageCache = nil;
                                                        object:nil];        
         }
         else {
-            unlink(tempName);
+            unlink(_dataStorage->name.c_str());
         }
     }
     return self;
