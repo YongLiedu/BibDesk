@@ -503,16 +503,14 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
-					<key>BDSKDragCopyTemplatesKey</key>
-					<array>
-						<string></string>
-						<string></string>
-					</array>
-					<key>BDSKDragCopyTypesKey</key>
-					<array>
-						<integer>1</integer>
-						<integer>0</integer>
-					</array>
+					<key>BDSKDefaultDragCopyTypeKey</key>
+                    <integer>1</integer>
+					<key>BDSKAlternateDragCopyTypeKey</key>
+                    <integer>0</integer>
+					<key>BDSKDefaultDragCopyTemplateKey</key>
+                    <string></string>
+					<key>BDSKAlternateDragCopyTemplateKey</key>
+                    <string></string>
 					<key>Citation End Bracket</key>
 					<string>}</string>
 					<key>Citation Start Bracket</key>
