@@ -692,9 +692,9 @@
 				<key>ordering</key>
 				<string>6</string>
 				<key>shortTitle</key>
-				<string>Defaults [SHORT]</string>
+				<string>Fields [SHORT]</string>
 				<key>title</key>
-				<string>Defaults [LONG]</string>
+				<string>Default Fields [LONG]</string>
 			</dict>
 			<key>BibPref_Display</key>
 			<dict>
