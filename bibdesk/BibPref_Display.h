@@ -50,7 +50,9 @@
     IBOutlet NSButton *removeButton;
     IBOutlet NSTableView *tableView;
     
-    IBOutlet NSMatrix *authorNameMatrix;
+    IBOutlet NSButton *authorFirstNameButton;
+    IBOutlet NSButton *authorAbbreviateButton;
+    IBOutlet NSButton *authorLastNameFirstButton;
 }
 
 - (IBAction)changePreviewMaxNumber:(id)sender;

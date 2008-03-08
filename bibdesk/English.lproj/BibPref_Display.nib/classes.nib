@@ -21,7 +21,9 @@
             LANGUAGE = ObjC;
             OUTLETS =             {
                 addButton = NSButton;
-                authorNameMatrix = NSMatrix;
+                authorAbbreviateButton = NSButton;
+                authorFirstNameButton = NSButton;
+                authorLastNameFirstButton = NSButton;
                 fontButton = NSButton;
                 fontElementPopup = NSPopUpButton;
                 previewMaxNumberComboBox = NSComboBox;

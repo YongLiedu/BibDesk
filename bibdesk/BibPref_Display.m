@@ -57,20 +57,19 @@
 		[previewMaxNumberComboBox setIntValue:maxNumber];
 }
 
-- (void)updateUI{
-    [self updatePreviewDisplayUI];
-    
+- (void)updateAuthorNameDisplayUI{
     int tag, tagMax = 2;
     int mask = [defaults integerForKey:BDSKAuthorNameDisplayKey];
-    OBPRECONDITION([authorNameMatrix numberOfColumns] == 1);
-    OBPRECONDITION([authorNameMatrix numberOfRows] == tagMax + 1);
-    for(tag = 0; tag <= tagMax; tag++){
-        NSButtonCell *cell = [authorNameMatrix cellWithTag:tag];
-        OBPOSTCONDITION(cell);
-        [cell setState:(mask & (1 << tag) ? NSOnState : NSOffState)];
-        if(1 << tag != BDSKAuthorDisplayFirstNameMask)
-            [cell setEnabled:mask & BDSKAuthorDisplayFirstNameMask];
-    }
+    [authorFirstNameButton setState:(mask & BDSKAuthorDisplayFirstNameMask) ? NSOnState : NSOffState];
+    [authorAbbreviateButton setState:(mask & BDSKAuthorAbbreviateFirstNameMask) ? NSOnState : NSOffState];
+    [authorLastNameFirstButton setState:(mask & BDSKAuthorLastNameFirstMask) ? NSOnState : NSOffState];
+    [authorAbbreviateButton setEnabled:mask & BDSKAuthorDisplayFirstNameMask];
+    [authorLastNameFirstButton setEnabled:mask & BDSKAuthorDisplayFirstNameMask];
+}
+
+- (void)updateUI{
+    [self updatePreviewDisplayUI];
+    [self updateAuthorNameDisplayUI];
 }    
 
 - (IBAction)changePreviewMaxNumber:(id)sender{
@@ -144,16 +143,15 @@
 
 - (IBAction)changeAuthorDisplay:(id)sender;
 {
-    OBPRECONDITION(sender == authorNameMatrix);
-    NSButtonCell *clickedCell = [sender selectedCell];
-    int cellMask = 1 << [clickedCell tag];
+    int itemMask = 1 << [sender tag];
     int prefMask = [defaults integerForKey:BDSKAuthorNameDisplayKey];
-    if([clickedCell state] == NSOnState)
-        prefMask |= cellMask;
+    if([sender state] == NSOnState)
+        prefMask |= itemMask;
     else
-        prefMask &= ~cellMask;
+        prefMask &= ~itemMask;
     [defaults setInteger:prefMask forKey:BDSKAuthorNameDisplayKey];
     [defaults autoSynchronize];
+    [self updateAuthorNameDisplayUI];
 }
 
 
