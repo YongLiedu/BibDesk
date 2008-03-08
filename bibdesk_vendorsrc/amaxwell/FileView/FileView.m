@@ -2710,7 +2710,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             FVDownload *download = aURL ? [[[FVDownload alloc] initWithDownloadURL:aURL indexInView:[_selectedIndexes firstIndex]] autorelease] : nil;
             Boolean alreadyDownloading = CFDictionaryContainsValue(_activeDownloads, download);
             // don't check reachability; just handle the error if it fails
-            return isMissing && isEditable && selectionCount == 1 && [aURL isFileURL] == NO && FALSE == alreadyDownloading;
+            return isMissing == NO && isEditable && selectionCount == 1 && [aURL isFileURL] == NO && FALSE == alreadyDownloading;
         } else return NO;
     }
     
