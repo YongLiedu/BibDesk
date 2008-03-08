@@ -213,4 +213,8 @@
     }
 }
 
+- (NSRect)_boundsForCellFrame:(NSRect)frame {
+    return frame;
+}
+
 @end
