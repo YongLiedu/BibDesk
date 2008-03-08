@@ -101,16 +101,7 @@
     NSMutableArray *fields;
     
     NSMutableSet *addedFields;
-// ----------------------------------------------------------------------------------------
-// URL downlaod stuff
-// ----------------------------------------------------------------------------------------
-	WebDownload *download;
-	BOOL isDownloading;
-	NSString *downloadFileName;
-    int receivedContentLength;
-    int expectedContentLength;
     
-    NSMutableArray *downloadQueue;
 // ----------------------------------------------------------------------------------------
 // status bar stuff
 // ----------------------------------------------------------------------------------------
@@ -262,8 +253,6 @@
 */
 - (void)addRemoteURLFromMenuItem:(NSMenuItem *)sender;
 
-- (IBAction)downloadRemoteURL:(NSMenuItem *)sender;
-
 - (IBAction)trashLinkedFiles:(id)sender;
 
 /*!
@@ -347,13 +336,6 @@
     
 - (BOOL)editSelectedCellAsMacro;
 - (void)macrosDidChange:(NSNotification *)aNotification;
-
-#pragma mark URL downloading
-
-- (void)downloadURLs:(NSArray *)linkURLs;
-- (void)downloadNextURL;
-- (void)setDownloading:(BOOL)downloading;
-- (void)cancelDownload;
 
 @end
 

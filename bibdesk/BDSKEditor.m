@@ -266,6 +266,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [fileView setAutoScales:YES];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
     [fileView setEditable:isEditable];
+    [fileView setAllowsDownloading:isEditable];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
@@ -300,8 +301,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [tableCellFormatter release];
     [crossrefFormatter release];
     [citationFormatter release];
-    [downloadFileName release];
-    [downloadQueue release];
     [super dealloc];
 }
 
@@ -610,15 +609,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSURL *aURL = [sender representedObject];
     [publication addFileForURL:aURL autoFile:YES runScriptHook:YES];
     [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-}
-
-- (IBAction)downloadRemoteURL:(NSMenuItem *)sender{
-    NSNumber *indexNumber = [sender representedObject];
-    OBASSERT(indexNumber);
-    unsigned int anIndex = [indexNumber unsignedIntValue];
-    NSURL *theURL = [[publication objectInFilesAtIndex:anIndex] URL];
-    OBASSERT(theURL != nil && [theURL isFileURL] == NO);
-    [self downloadURLs:[NSArray arrayWithObjects:theURL, nil]];
 }
 
 - (IBAction)trashLinkedFiles:(id)sender{
@@ -1104,13 +1094,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
                                keyEquivalent:@""
                                      atIndex:++i];
             [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
-            /*
-            item = [menu insertItemWithTitle:[NSLocalizedString(@"Download URL", @"Menu item title") stringByAppendingEllipsis]
-                                      action:@selector(downloadRemoteURL:)
-                               keyEquivalent:@""
-                                     atIndex:++i];
-            [item setRepresentedObject:[NSNumber numberWithUnsignedInt:anIndex]];
-            */
         }
     }
     
@@ -1421,7 +1404,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
              theAction == @selector(raiseChangeFieldName:) || 
              theAction == @selector(chooseLocalFile:) || 
              theAction == @selector(chooseRemoteURL:) || 
-             theAction == @selector(downloadRemoteURL:) || 
              theAction == @selector(addLinkedFileFromMenuItem:) || 
              theAction == @selector(addRemoteURLFromMenuItem:)) {
         return isEditable;
@@ -1441,12 +1423,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
-    //if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
-    //    [self downloadURLs:[[publication valueForKeyPath:@"files.URL"] objectsAtIndexes:aSet]];
-    //} else {
-        OBASSERT(anIndex != NSNotFound);
-        [publication moveFilesAtIndexes:aSet toIndex:anIndex];
-    //}
+    OBASSERT(anIndex != NSNotFound);
+    [publication moveFilesAtIndexes:aSet toIndex:anIndex];
     return YES;
 }
 
@@ -1456,56 +1434,44 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSEnumerator *enumerator = [newURLs objectEnumerator];
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex];
-    BOOL isCopy = NO;//[info draggingSourceOperationMask] == NSDragOperationCopy;
     while (NSNotFound != idx) {
         if ((aURL = [enumerator nextObject]) && 
-            (isCopy || (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication]))) {
+            (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
             NSURL *oldURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
             [publication removeObjectFromFilesAtIndex:idx];
             if (oldURL)
                 [[self document] userRemovedURL:oldURL forPublication:publication];
             [oldURL release];
-            if (isCopy == NO) {
-                [publication insertObject:aFile inFilesAtIndex:idx];
-                [[self document] userAddedURL:aURL forPublication:publication];
-                [publication autoFileLinkedFile:aFile];
-                [aFile release];
-            }
+            [publication insertObject:aFile inFilesAtIndex:idx];
+            [[self document] userAddedURL:aURL forPublication:publication];
+            [publication autoFileLinkedFile:aFile];
+            [aFile release];
         }
         idx = [aSet indexGreaterThanIndex:idx];
     }
-    if (isCopy)
-        [self downloadURLs:newURLs];
     return YES;
 }
 
 - (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
-    //if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
-    //    
-    //    [self downloadURLs:absoluteURLs];
-    //    
-    //} else {
-        
-        BDSKLinkedFile *aFile;
-        NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
-        NSURL *aURL;
-        NSUInteger idx = [aSet firstIndex], offset = 0;
-        
-        while (NSNotFound != idx) {
-            if ((aURL = [enumerator nextObject]) && 
-                (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
-                [publication insertObject:aFile inFilesAtIndex:idx - offset];
-                [[self document] userAddedURL:aURL forPublication:publication];
-                [publication autoFileLinkedFile:aFile];
-                [aFile release];
-            } else {
-                // the indexes in aSet assume that we inserted the file
-                offset++;
-            }
-            idx = [aSet indexGreaterThanIndex:idx];
+    BDSKLinkedFile *aFile;
+    NSEnumerator *enumerator = [absoluteURLs objectEnumerator];
+    NSURL *aURL;
+    NSUInteger idx = [aSet firstIndex], offset = 0;
+    
+    while (NSNotFound != idx) {
+        if ((aURL = [enumerator nextObject]) && 
+            (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
+            [publication insertObject:aFile inFilesAtIndex:idx - offset];
+            [[self document] userAddedURL:aURL forPublication:publication];
+            [publication autoFileLinkedFile:aFile];
+            [aFile release];
+        } else {
+            // the indexes in aSet assume that we inserted the file
+            offset++;
         }
-    //}
+        idx = [aSet indexGreaterThanIndex:idx];
+    }
 }
 
 - (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
@@ -1523,16 +1489,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {
-    return dragOperation;
-    
-    // leave invalid drags and local moves unaltered, we want to link remote drags
     NSDragOperation dragOp = dragOperation;
-    if ([info draggingSourceOperationMask] == NSDragOperationCopy) {
-        // we copy, which means download, both for local and remote drags
-        dragOp = NSDragOperationCopy;
-        // download does not care about insertion point, so we drop on the whole view
-        [fileView setDropIndex:NSNotFound dropOperation:FVDropOn];
-    } else if ([[info draggingSource] isEqual:fileView] && dropOperation == FVDropOn) {
+    if ([[info draggingSource] isEqual:fileView] && dropOperation == FVDropOn && dragOperation != NSDragOperationCopy) {
         // redirect local drop on icon and drop on view
         NSIndexSet *dragIndexes = [fileView selectionIndexes];
         NSUInteger firstIndex = [dragIndexes firstIndex], endIndex = [dragIndexes lastIndex] + 1, count = [publication countOfFiles];
@@ -1546,9 +1504,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             else
                 [fileView setDropIndex:anIndex dropOperation:FVDropBefore];
         }
-    } else if (dragOperation != NSDragOperationMove && dragOperation != NSDragOperationNone) {
-        // any other remote drag is interpreted as a link
-        dragOp = NSDragOperationLink;
     }
     return dragOp;
 }
@@ -2672,11 +2627,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    // cancel download for local file
-    [downloadQueue release];
-    downloadQueue = nil;
-    [self cancelDownload];
-    
     // close so it's not hanging around by itself; this works if the doc window closes, also
     [complexStringEditor close];
     
@@ -2694,157 +2644,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     
     // @@ problem here:  BDSKEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
     [[self retain] autorelease];
-}
-#pragma mark URL downloading
-
-- (void)downloadURLs:(NSArray *)linkURLs{
-    if (downloadQueue == nil)
-        downloadQueue = [[NSMutableArray alloc] init];
-    [downloadQueue addObjectsFromArray:linkURLs];
-    [self downloadNextURL];
-}
-
-- (void)downloadAlertDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    [self downloadNextURL];
-}
-
-- (void)downloadNextURL{
-    if (isDownloading || [downloadQueue count] == 0)
-        return;
-    
-    NSURL *linkURL = [[[downloadQueue lastObject] retain] autorelease];
-    [downloadQueue removeLastObject];
-    if (linkURL && [linkURL isEqual:[NSNull null]] == NO) {
-		download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self];
-	}
-	if (nil == download) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid or Unsupported URL", @"Message in alert dialog when unable to download file for Local-Url")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog")];
-        [alert beginSheetModalForWindow:[self window]
-                          modalDelegate:self
-                         didEndSelector:@selector(downloadAlertDidEnd:returnCode:contextInfo:)
-                            contextInfo:NULL];
-	}
-}
-
-- (void)setDownloading:(BOOL)downloading{
-    if (isDownloading != downloading) {
-        isDownloading = downloading;
-        if (isDownloading) {
-			NSString *message = nil;
-            if ([[[download request] URL] isFileURL])
-                message = [NSString stringWithFormat:NSLocalizedString(@"Copying file. Received %i%%", @"Status message"), 0];
-            else
-                message = [NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Status message"), 0];
-            [statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
-            [statusBar startAnimation:self];
-			[self setStatus:[message stringByAppendingEllipsis]];
-            [downloadFileName release];
-			downloadFileName = nil;
-        } else {
-            [statusBar stopAnimation:self];
-			[self setStatus:@""];
-            [download release];
-            download = nil;
-            receivedContentLength = 0;
-        }
-    }
-}
-
-- (void)cancelDownload{
-    if (isDownloading) {
-        [download cancel];
-        [self setDownloading:NO];
-        [self downloadNextURL];
-    }
-}
-
-#pragma mark NSURLDownloadDelegate methods
-
-- (void)downloadDidBegin:(NSURLDownload *)download{
-    [self setDownloading:YES];
-}
-
-- (NSWindow *)downloadWindowForAuthenticationSheet:(WebDownload *)download{
-    return [self window];
-}
-
-- (void)download:(NSURLDownload *)theDownload didReceiveResponse:(NSURLResponse *)response{
-    expectedContentLength = [response expectedContentLength];
-}
-
-- (void)download:(NSURLDownload *)theDownload decideDestinationWithSuggestedFilename:(NSString *)filename{
-	NSString *extension = [filename pathExtension];
-   
-	NSSavePanel *sPanel = [NSSavePanel savePanel];
-    if (NO == [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
-    [sPanel setAllowsOtherFileTypes:YES];
-    [sPanel setCanSelectHiddenExtension:YES];
-	
-    // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-    int returnCode = [sPanel runModalForDirectory:nil file:filename];
-    if (returnCode == NSOKButton) {
-        [download setDestination:[sPanel filename] allowOverwrite:YES];
-    } else {
-        [self cancelDownload];
-    }
-}
-
-- (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned)length{
-    if (expectedContentLength > 0) {
-        receivedContentLength += length;
-        int percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
-		NSString *message = nil;
-        if ([[[theDownload request] URL] isFileURL])
-            message = [NSString stringWithFormat:NSLocalizedString(@"Copying file. Received %i%%", @"Status message"), percent];
-        else
-            message = [NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Status message"), percent];
-		[self setStatus:[message stringByAppendingEllipsis]];
-    }
-}
-
-- (BOOL)download:(NSURLDownload *)download shouldDecodeSourceDataOfMIMEType:(NSString *)encodingType;{
-    return YES;
-}
-
-- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path{
-    [downloadFileName release];
-	downloadFileName = [path copy];
-}
-
-- (void)downloadDidFinish:(NSURLDownload *)theDownload{
-    [self setDownloading:NO];
-    
-    NSURL *aURL = [NSURL fileURLWithPath:downloadFileName];
-    
-    [publication addFileForURL:aURL autoFile:YES runScriptHook:YES];
-    
-    [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    
-    [self downloadNextURL];
-}
-
-- (void)download:(NSURLDownload *)theDownload didFailWithError:(NSError *)error
-{
-    [self setDownloading:NO];
-        
-    NSString *errorDescription = [error localizedDescription];
-    if (nil == errorDescription) {
-        errorDescription = NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
-    }
-    
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed")
-                                     defaultButton:nil
-                                   alternateButton:nil
-                                       otherButton:nil
-                         informativeTextWithFormat:errorDescription];
-    [alert runModal];
-    
-    [self downloadNextURL];
 }
 
 #pragma mark undo manager
