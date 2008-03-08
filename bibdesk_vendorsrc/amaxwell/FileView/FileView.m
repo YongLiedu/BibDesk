@@ -1632,7 +1632,8 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
         [self _drawRubberbandRect];
     }
     
-    CFDictionaryApplyFunction(_activeDownloads, _drawProgressIndicatorForDownload, self);
+    if ([self allowsDownloading])
+        CFDictionaryApplyFunction(_activeDownloads, _drawProgressIndicatorForDownload, self);
 }
 
 #pragma mark Drag source
@@ -2705,10 +2706,12 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         return enabled;
     }
     else if (action == @selector(downloadSelectedLink:)) {
-        FVDownload *download = aURL ? [[[FVDownload alloc] initWithDownloadURL:aURL indexInView:[_selectedIndexes firstIndex]] autorelease] : nil;
-        Boolean alreadyDownloading = CFDictionaryContainsValue(_activeDownloads, download);
-        // don't check reachability; just handle the error if it fails
-        return NO == [self allowsDownloading] && isMissing && isEditable && selectionCount == 1 && [aURL isFileURL] == NO && FALSE == alreadyDownloading;
+        if ([self allowsDownloading]) {
+            FVDownload *download = aURL ? [[[FVDownload alloc] initWithDownloadURL:aURL indexInView:[_selectedIndexes firstIndex]] autorelease] : nil;
+            Boolean alreadyDownloading = CFDictionaryContainsValue(_activeDownloads, download);
+            // don't check reachability; just handle the error if it fails
+            return isMissing && isEditable && selectionCount == 1 && [aURL isFileURL] == NO && FALSE == alreadyDownloading;
+        } else return NO;
     }
     
     // need to handle print: and other actions
@@ -3002,10 +3005,12 @@ static void cancelDownload(const void *key, const void *value, void *context)
 
 - (void)_cancelActiveDownloads;
 {
-    CFDictionaryApplyFunction(_activeDownloads, cancelDownload, NULL);
-    CFDictionaryRemoveAllValues(_activeDownloads);
-    [self _invalidateProgressTimer];
-    [self setNeedsDisplay:YES];
+    if ([self allowsDownloading]) {
+        CFDictionaryApplyFunction(_activeDownloads, cancelDownload, NULL);
+        CFDictionaryRemoveAllValues(_activeDownloads);
+        [self _invalidateProgressTimer];
+        [self setNeedsDisplay:YES];
+    }
 }
 
 - (void)_addDownload:(FVDownload *)fvDownload
