@@ -93,6 +93,7 @@
     // for optional datasource method
     [_fileView setDataSource:self];
     [_fileView setEditable:YES];
+    [_fileView setAllowsDownloading:YES];
 }
 
 - (void)dealloc

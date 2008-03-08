@@ -211,7 +211,7 @@ static CGColorRef _shadowColor = NULL;
     _topSliderTag = -1;
     _bottomSliderTag = -1;
 
-    _activeDownloads = CFDictionaryCreateMutable(alloc, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    _activeDownloads = NULL;
     _progressTimer = NULL;
     
 #ifdef USE_ICON_QUEUE
@@ -261,8 +261,10 @@ static CGColorRef _shadowColor = NULL;
     CFRelease(_trackingRectMap);
     _trackingRectMap = NULL;
     // takes care of the timer as well
-    [self _cancelActiveDownloads];
-    CFRelease(_activeDownloads);
+    if (_activeDownloads != NULL) {
+        [self _cancelActiveDownloads];
+        CFRelease(_activeDownloads);
+    }
 #ifdef USE_ICON_QUEUE
 #else
     [_operationQueue terminate];
@@ -403,6 +405,22 @@ static CGColorRef _shadowColor = NULL;
         _isEditable = flag;
         
         [self _registerForDraggedTypes];
+    }
+}
+
+- (BOOL)allowsDownloading 
+{
+    return _activeDownloads != NULL;
+}
+
+- (void)setAllowsDownloading:(BOOL)flag
+{
+    if (flag && _activeDownloads == NULL) {
+        _activeDownloads = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    } else if (flag == NO && _activeDownloads != NULL) {
+        [self _cancelActiveDownloads];
+        CFRelease(_activeDownloads);
+        _activeDownloads = NULL;
     }
 }
 
@@ -2145,7 +2163,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSPoint p = dragLoc;
     NSUInteger r, c;
     NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
-    BOOL isCopy = dragOp == NSDragOperationCopy;
+    BOOL isCopy = [self allowsDownloading] && dragOp == NSDragOperationCopy;
     NSUInteger insertIndex, firstIndex, endIndex;
     
     NSArray *draggedURLs = FVURLsFromPasteboard([sender draggingPasteboard]);
@@ -2258,7 +2276,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
     NSDragOperation dragOp = [sender draggingSourceOperationMask] & ~NSDragOperationMove;
-    BOOL isCopy = dragOp == NSDragOperationCopy;
+    BOOL isCopy = [self allowsDownloading] && dragOp == NSDragOperationCopy;
     BOOL isMove = [self _isLocalDraggingInfo:sender] && isCopy == NO;
     BOOL didPerform = NO;
     NSArray *draggedURLs = isMove ? nil : FVURLsFromPasteboard(pboard);
@@ -2690,7 +2708,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         FVDownload *download = aURL ? [[[FVDownload alloc] initWithDownloadURL:aURL indexInView:[_selectedIndexes firstIndex]] autorelease] : nil;
         Boolean alreadyDownloading = CFDictionaryContainsValue(_activeDownloads, download);
         // don't check reachability; just handle the error if it fails
-        return NO == isMissing && isEditable && selectionCount == 1 && [aURL isFileURL] == NO && FALSE == alreadyDownloading;
+        return NO == [self allowsDownloading] && isMissing && isEditable && selectionCount == 1 && [aURL isFileURL] == NO && FALSE == alreadyDownloading;
     }
     
     // need to handle print: and other actions
@@ -2992,22 +3010,26 @@ static void cancelDownload(const void *key, const void *value, void *context)
 
 - (void)_addDownload:(FVDownload *)fvDownload
 {
-    NSURL *theURL = [fvDownload downloadURL];
-    WebDownload *download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:theURL] delegate:self];
-    CFDictionarySetValue(_activeDownloads, download, fvDownload);
-    [download release];
-    [self setNeedsDisplay:YES];
+    if ([self allowsDownloading]) {
+        NSURL *theURL = [fvDownload downloadURL];
+        WebDownload *download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:theURL] delegate:self];
+        CFDictionarySetValue(_activeDownloads, download, fvDownload);
+        [download release];
+        [self setNeedsDisplay:YES];
+    }
 }
 
 - (void)downloadSelectedLink:(id)sender
 {
-    // validation ensures that we have a single selection, and that there is no current download with this URL
-    NSUInteger selIndex = [_selectedIndexes firstIndex];
-    if (NSNotFound != selIndex) {
-        NSURL *theURL = [self iconURLAtIndex:selIndex];
-        FVDownload *fvDownload = [[FVDownload alloc] initWithDownloadURL:theURL indexInView:selIndex];       
-        [self _addDownload:fvDownload];  
-        [fvDownload release];
+    if ([self allowsDownloading]) {
+        // validation ensures that we have a single selection, and that there is no current download with this URL
+        NSUInteger selIndex = [_selectedIndexes firstIndex];
+        if (NSNotFound != selIndex) {
+            NSURL *theURL = [self iconURLAtIndex:selIndex];
+            FVDownload *fvDownload = [[FVDownload alloc] initWithDownloadURL:theURL indexInView:selIndex];       
+            [self _addDownload:fvDownload];  
+            [fvDownload release];
+        }
     }
 }
 

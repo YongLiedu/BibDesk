@@ -167,6 +167,9 @@ typedef enum _FVDropOperation {
 - (void)setDelegate:(id)obj;
 - (id)delegate;
 
+- (BOOL)allowsDownloading;
+- (void)setAllowsDownloading:(BOOL)flag;
+
 @end
 
 
