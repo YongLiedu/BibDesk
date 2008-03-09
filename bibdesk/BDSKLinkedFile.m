@@ -322,6 +322,8 @@ static Class BDSKLinkedObjectClass = Nil;
         data = [[NSData alloc] initWithBase64String:base64String];
     }
     @catch(id exception) {
+        [data release];
+        data = nil;
         NSLog(@"Ignoring exception %@ while getting data from base 64 string.", exception);
     }
     NSDictionary *dictionary = data ? [NSKeyedUnarchiver unarchiveObjectWithData:data] : nil;
