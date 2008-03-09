@@ -62,9 +62,14 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 + (void)initialize
 {
     FVINITIALIZE(FVWebViewIcon);
-
-    FVWebIconDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"FVWebIconDisabled"];
-    NSInteger maxViews = [[NSUserDefaults standardUserDefaults] integerForKey:@"FVWebIconMaximumNumberOfWebViews"];
+    
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+        [sud registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], @"FVWebIconDisabled", nil]];
+    
+    FVWebIconDisabled = [sud boolForKey:@"FVWebIconDisabled"];
+    NSInteger maxViews = [sud integerForKey:@"FVWebIconMaximumNumberOfWebViews"];
     if (maxViews > 0)
         _maxWebViews = maxViews;
     
