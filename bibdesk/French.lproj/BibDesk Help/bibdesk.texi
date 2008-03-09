@@ -96,7 +96,7 @@ Control-Cmd-\key\
 
 @macro prefitem {text}
 @prefindex \text\
-@emph{\text\:}
+@b{\text\:}
 @end macro
 
 @c A macro for search-result abstracts
@@ -2421,7 +2421,7 @@ You can also control the overall appearance of the main window.
 Clicking the @buttontitle{Open this bibliography} radio button prompts you to
 choose a default bib file to open. 
 
-@prefitem{Check for updates automatically} Selecting this makes BibDesk check for updates 
+@prefitem{Check for updates} Select how often BibDesk checks for updates 
 automatically at startup. 
 
 @prefitem{Importing Bibliography Information} This option lets you decide whether to always immediately
@@ -2433,7 +2433,8 @@ used to generate an emailed representation. You can either choose the default fo
 a cleaned BibTeX string, or a custom text template.
 
 @prefitem{Warnings} These options allow you to activate or deactivate warnings before 
-deleting items, removing items from a group, renaming groups, or generating cite keys. 
+deleting items, removing items from a group, renaming groups, generating cite keys, 
+or whether to move removed linked files to the trash. 
 These warnings can also be deactivated from the warning dialog. 
 
 @c --------------------------------------------------------------------------------------
@@ -2452,13 +2453,11 @@ This preference pane lets you control the overall appearance of the main window.
 
 @image{gfx/displayPrefs}
 
+@prefitem{Name Display} You can change the way names are displayed in the 'Author' column and in
+the lower preview pane of the main browser window (in Details view).
+
 @prefitem{Words to ignore for sorting} In the table, you can add a custom set of words, such as 'the' and 'a', 
 that will be ignored when sorting the table.
-
-@prefitem{Preview Pane Display} Select what you want the lower preview pane of the main browser window to show. 
-You can limit the maximal number of items to be shown in the lower pane. Note that generating the 
-preview can be slow when many items are chosen. For PDF and Text you need to enable TeX previewing in the 
-@ref{Preview Preferences,Preview Preferences}.
 
 @prefitem{Fonts} Choose the interface element for which you want to change the font. 
 Pressing the font button to the right will call the system's font panel, from which you can 
@@ -2466,8 +2465,9 @@ change the font for the selected element. You can also change the fonts directly
 interface elements themselves. Call the font panel using @menutitle{View > Show Fonts} 
 in the main menu, or from the contextual menu of the interface element. 
 
-@prefitem{Name Display} You can change the way names are displayed in the 'Author' column and in
-the lower preview pane of the main browser window (in Details view).
+@prefitem{Preview} You can limit the maximal number of items to be shown in 
+text previews in the bottom and side preview pane. 
+Generating the preview can be slow when many items are chosen. 
 
 @c --------------------------------------------------------------------------------------
 
@@ -2553,9 +2553,8 @@ modify the template and TeX command appropriately.
 @cindex Bonjour, firewall
 
 Using the Sharing preference pane you can make Bibdesk share your bibliographies with others 
-via Bonjour or look for bibliographies other people share on your network.  Mac OS X 10.4 (Tiger) or later
-is required for this feature, and it likely will not work if you have enabled the system's
-built-in firewall.
+via Bonjour or look for bibliographies other people share on your network.  If you have enabled 
+the system's built-in firewall, you may have to configure it to allow sharing by BibDesk.
 
 @image{gfx/sharingPrefs}
 
@@ -2631,15 +2630,13 @@ BibTeX files by double-clicking on them in the Finder.
 
 @anchor{encoding-notes}
 Specific notes and warnings:
-
-* Files will be run through the @ref{Character Conversion} process when 
+@itemize
+@item Files may be run through the @ref{Character Conversion} process when 
 opened so that accented characters display properly.
-
-* This is the default behavior in BibDesk 0.97.2 and earlier versions.
-
-* Files opened with a given encoding will be saved with that encoding.  
+@item Files opened with a given encoding will be saved with that encoding.  
  To save with an alternate encoding, choose the
-@menutitle{File > Export > Export BibTeX With Encoding@dots{}} menu option and select a particular encoding.  
+@menutitle{File > Save As@dots{}} menu option and select a particular encoding.  
+@end itemize
 
 @prefitem{Unicode to TeX Conversion} Characters will only be converted to TeX when this 
 checkbox for character conversion is marked. Otherwise, they are written out as displayed in BibDesk.
@@ -2665,10 +2662,9 @@ You can view and edit the template file by clicking the @buttontitle{Edit@dots{}
 You can reset the template file to the default by clicking the @buttontitle{Reset@dots{}} button. 
 Be careful though, as you can not undo this action. 
 
-@prefitem{Automatically save RSS feeds} The RSS publishing preferences control the RSS export features. 
-If you check this option, everytime you save a .bib file, a correspondingly named 
-.rss file will be saved in the same directory. To find out more about RSS, follow the link 
-@uref{http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html}.
+@prefitem{Automatically save a backup document} Checking this option lets BibDesk automatically save 
+a backup of the open bibtex databases, so you won't loose your changes.  
+You can choose how often BibDesk saves a backup.
 
 @prefitem{Display warnings when opening a file} If you check this option, the warnings and errors 
 will be shown automatically when you open a file that contains errors. Note that you can always check the 
@@ -2791,15 +2787,28 @@ You can also edit BibDesk's global macro definitions for all files.
 @image{gfx/defaultsPrefs}
 
 @prefitem{Custom BibTeX Fields} You can set several special custom fields types here. 
-Choose @samp{Local File} if the field should hold the URL for a file on your local file system. 
-Choose @samp{Remote URL} if it should hold the URL of a remote location on the web. 
-Those fields will behave much like the Local-Url or the Url field. 
-Choose @samp{Boolean} if it should hold a boolean switch, like a Read field that reminds 
-you if you have read the cited paper. Choose @samp{Rating} if it should hold a rating value 
-(a number between 0 and 5). 
-Select the check box in the last column if you would like to add the field by default to 
+@itemize
+@item @b{Textual:} Generic textual field.
+@item @b{Local File:} Fields linking to a local file (deprecated).
+@item @b{Remote URL:} Fields linking to a remote URL (deprecated).
+@item @b{Boolean:} A boolean switch, like a Read field that reminds you if you have read the cited paper.
+@item @b{Three-value:} A switch with three values (like Yes, No, and Mixed).
+@item @b{Rating:} A rating value (a number between 0 and 5).
+@item @b{Citation:} A field holding links to other publications through the cite key.
+@item @b{Person:} A field containing persons, behaves like the Author field.
+@end itemize
+Select the @samp{Is Default} check box if you would like to add the field by default to 
 every entry when a file is opened or a new publication is made. Select this to avoid adding 
 them every time by hand. This setting is not relevant for boolean and rating fields.
+
+@prefitem{Converting File and URL Fields} BibDesk can automatically convert old style local file 
+and remote URL to the new style linked files and URLs.  BibDesk only automatically converts in 
+new items that do not yet have linked files or URLs.  Here you can choose whether BibDesk should 
+automatically convert and whether to remove the old fields after conversion has succeeded.  
+See @ref{Convert Files} for more information. 
+
+@prefitem{Local File Viewer} Here you can choose a custom viewer to use for opening linked PDF files.  
+Choose @samp{Default} to use the system default viewer.
 
 @prefitem{Custom BibTeX Types and Fields} Clicking the button allows you to add new types and add new fields 
 to existing fields. 
@@ -3069,6 +3078,10 @@ See @ref{AutoFile} for more information about the Auto File feature.
 @prefitem{Local File Format} You can choose from several default cite key
 formats. Choosing @menutitle{Custom} allows you to set the cite key
 format string to any valid format.
+
+@prefitem{Warn before moving a folder} If you want to be warned before the auto file 
+feature moves a folder, for example if you have accidentally linked your Home folder, 
+rcheck this option.
 
 For a more detailed control over the cite key generation, choose the 
 @buttontitle{Advanced} button. This will reveal a editing sheet with 
