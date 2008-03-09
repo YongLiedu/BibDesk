@@ -89,7 +89,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         nextView = [[WebView alloc] initWithFrame:NSMakeRect(0, 0, _webViewSize.width, _webViewSize.height)];
         _numberOfWebViews++;
     }
-    return nextView;
+    return [nextView autorelease];
 }
 
 + (void)pushWebView:(WebView *)aView
@@ -97,7 +97,6 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     NSParameterAssert(nil != aView);
     NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     [_availableWebViews insertObject:aView atIndex:0];
-    [aView release];
     [[NSNotificationCenter defaultCenter] postNotificationName:FVWebIconWebViewAvailableNotificationName object:self];
 }
 
@@ -150,6 +149,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         [_webView setFrameLoadDelegate:nil];
         [_webView stopLoading:nil];
         [[self class] pushWebView:_webView];
+        [_webView release];
         _webView = nil;
     }
 }
@@ -390,7 +390,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     // NSAssert(nil == _webView, @"*** Render error *** renderOffscreenOnMainThread called when _webView already exists");
     
     if (nil == _webView)
-        _webView = [[self class] popWebView];
+        _webView = [[[self class] popWebView] retain];
 
     if (nil == _webView) {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleWebViewAvailableNotification:) name:FVWebIconWebViewAvailableNotificationName object:[self class]];
