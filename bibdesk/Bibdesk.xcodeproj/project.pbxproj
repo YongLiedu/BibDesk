@@ -121,8 +121,6 @@
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		CE023F5D0CC50F87003F52E5 /* Add_Small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */; };
-		CE05CF5D0D7743940034C2A8 /* WebURLsWithTitles.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05CF5C0D7743940034C2A8 /* WebURLsWithTitles.h */; };
-		CE117D230D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE117D210D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.h */; };
 		CE117D240D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE117D220D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.m */; };
 		CE11A2B40AE662EB008C47AC /* BDSKTextViewCompletionController.m in Sources */ = {isa = PBXBuildFile; fileRef = F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */; };
 		CE11A6350AE6BB77008C47AC /* urlFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */; };
@@ -155,13 +153,9 @@
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
 		CE2C18920A0A43BE006F0A73 /* importFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */; };
-		CE2E78CC0D40F6BB00340B39 /* BDSKMultiValueDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = CE2E78CA0D40F6BB00340B39 /* BDSKMultiValueDictionary.h */; };
 		CE2E78CD0D40F6BB00340B39 /* BDSKMultiValueDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2E78CB0D40F6BB00340B39 /* BDSKMultiValueDictionary.m */; };
-		CE3011A20D5CC41D00C0B7FA /* BDSKAddCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3011A00D5CC41C00C0B7FA /* BDSKAddCommand.h */; };
 		CE3011A30D5CC41D00C0B7FA /* BDSKAddCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011A10D5CC41D00C0B7FA /* BDSKAddCommand.m */; };
-		CE3011AC0D5CC46F00C0B7FA /* BDSKRemoveCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3011AA0D5CC46F00C0B7FA /* BDSKRemoveCommand.h */; };
 		CE3011AD0D5CC46F00C0B7FA /* BDSKRemoveCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011AB0D5CC46F00C0B7FA /* BDSKRemoveCommand.m */; };
-		CE3011B90D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3011B70D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h */; };
 		CE3011BA0D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011B80D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.m */; };
 		CE30FAD80919713100CB1A19 /* BDSKStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */; };
 		CE31E4100A07928C00F5BD47 /* staticFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */; };
@@ -178,7 +172,6 @@
 		CE38FB91091D94A100BCB69D /* BDSKFilterController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE38FB8D091D94A100BCB69D /* BDSKFilterController.m */; };
 		CE38FB94091D953900BCB69D /* BDSKFilter.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE38FB92091D953900BCB69D /* BDSKFilter.nib */; };
 		CE38FB97091D954E00BCB69D /* BDSKCondition.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE38FB95091D954E00BCB69D /* BDSKCondition.nib */; };
-		CE38FEFE0D4E7EC700D0A886 /* BDSKVersionNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = CE38FEFC0D4E7EC700D0A886 /* BDSKVersionNumber.h */; };
 		CE38FEFF0D4E7EC700D0A886 /* BDSKVersionNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = CE38FEFD0D4E7EC700D0A886 /* BDSKVersionNumber.m */; };
 		CE392ED508D034E4001CEAC8 /* BDSKRatingButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE392ED308D034E4001CEAC8 /* BDSKRatingButtonCell.m */; };
 		CE392F5E08D04083001CEAC8 /* BDSKRatingButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */; };
@@ -223,7 +216,6 @@
 		CE6C0CB90BEE4974007BF0B5 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE6C0CB80BEE4974007BF0B5 /* MainMenu.nib */; };
 		CE6C962C0CD9014A0022D69F /* NSScrollView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6C962A0CD9014A0022D69F /* NSScrollView_BDSKExtensions.m */; };
 		CE6DACC50A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */; };
-		CE6DCA220D6A0237003A072F /* BDSKCondition+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6DCA200D6A0237003A072F /* BDSKCondition+Scripting.h */; };
 		CE6DCA230D6A0237003A072F /* BDSKCondition+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6DCA210D6A0237003A072F /* BDSKCondition+Scripting.m */; };
 		CE6FB32309DFFCB5005E3E14 /* BDSKSharingBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */; };
 		CE7596000ADDB0E1009C1329 /* BDSKContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7595FE0ADDB0E0009C1329 /* BDSKContainerView.m */; };
@@ -242,11 +234,8 @@
 		CE7F5E480B3F5F1800A919D0 /* searchFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7F5E470B3F5F1800A919D0 /* searchFolderIcon.tiff */; };
 		CE7F64C40B41694A00A919D0 /* BDSKSearchGroupView.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE7F64C20B41694A00A919D0 /* BDSKSearchGroupView.nib */; };
 		CE820EC90C8AE2F60020E6B0 /* BDSKPersonWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE820EC20C8AE2F60020E6B0 /* BDSKPersonWindow.nib */; };
-		CE82B2D10D57AE0B00A2E8C5 /* BDSKSharingClient.h in Headers */ = {isa = PBXBuildFile; fileRef = CE82B2CF0D57AE0B00A2E8C5 /* BDSKSharingClient.h */; };
 		CE82B2D20D57AE0B00A2E8C5 /* BDSKSharingClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82B2D00D57AE0B00A2E8C5 /* BDSKSharingClient.m */; };
-		CE82B4730D57EECF00A2E8C5 /* BDSKGroup+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = CE82B4710D57EECF00A2E8C5 /* BDSKGroup+Scripting.h */; };
 		CE82B4740D57EECF00A2E8C5 /* BDSKGroup+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82B4720D57EECF00A2E8C5 /* BDSKGroup+Scripting.m */; };
-		CE82BE8C0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = CE82BE8A0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h */; };
 		CE82BE8D0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82BE8B0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.m */; };
 		CE83E3A60D294EE300BB7AD8 /* BDSKSortCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE83E3A40D294EE300BB7AD8 /* BDSKSortCommand.m */; };
 		CE89618A0CBEB59800EA2D98 /* BDSKToken.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8961860CBEB59800EA2D98 /* BDSKToken.m */; };
@@ -2897,17 +2886,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE2E78CC0D40F6BB00340B39 /* BDSKMultiValueDictionary.h in Headers */,
-				CE38FEFE0D4E7EC700D0A886 /* BDSKVersionNumber.h in Headers */,
-				CE82B2D10D57AE0B00A2E8C5 /* BDSKSharingClient.h in Headers */,
-				CE82B4730D57EECF00A2E8C5 /* BDSKGroup+Scripting.h in Headers */,
-				CE82BE8C0D58C12A00A2E8C5 /* BDSKMacroResolver+Scripting.h in Headers */,
-				CE3011A20D5CC41D00C0B7FA /* BDSKAddCommand.h in Headers */,
-				CE3011AC0D5CC46F00C0B7FA /* BDSKRemoveCommand.h in Headers */,
-				CE3011B90D5CC4D100C0B7FA /* NSAppleEventDescriptor_BDSKExtensions.h in Headers */,
-				CE6DCA220D6A0237003A072F /* BDSKCondition+Scripting.h in Headers */,
-				CE117D230D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.h in Headers */,
-				CE05CF5D0D7743940034C2A8 /* WebURLsWithTitles.h in Headers */,
 				CE92CE5D0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
