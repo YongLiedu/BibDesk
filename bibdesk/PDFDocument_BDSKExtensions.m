@@ -37,8 +37,35 @@
  */
 
 #import "PDFDocument_BDSKExtensions.h"
+#import <OmniBase/OBUtilities.h>
+
+
+@interface PDFDocument (BDSKPrivateDeclarations)
+- (NSPrintOperation *)getPrintOperationForPrintInfo:(NSPrintInfo *)printInfo autoRotate:(BOOL)autoRotate;
+@end
+
 
 @implementation PDFDocument (BDSKExtensions)
+
+static IMP originalGetPrintOperationForPrintInfo = NULL;
+static IMP originalCleanupAfterPrintOperation = NULL;
+
++ (void)load {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    if ([self instancesRespondToSelector:@selector(getPrintOperationForPrintInfo:autoRotate:)])
+        originalGetPrintOperationForPrintInfo = OBReplaceMethodImplementationWithSelector(self, @selector(getPrintOperationForPrintInfo:autoRotate:), @selector(replacementGetPrintOperationForPrintInfo:autoRotate:));
+    if ([self instancesRespondToSelector:@selector(cleanupAfterPrintOperation:)])
+        originalCleanupAfterPrintOperation = OBReplaceMethodImplementationWithSelector(self, @selector(cleanupAfterPrintOperation:), @selector(replacementCleanupAfterPrintOperation:));
+    [pool release];
+}
+
+- (NSPrintOperation *)replacementGetPrintOperationForPrintInfo:(NSPrintInfo *)printInfo autoRotate:(BOOL)autoRotate {
+    NSPrintOperation *printOperation = originalGetPrintOperationForPrintInfo(self, _cmd, printInfo, autoRotate);
+    NSPrintPanel *printPanel = [printOperation printPanel];
+    if ([printPanel respondsToSelector:@selector(setOptions:)])
+        [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
+    return printOperation;
+}
 
 + (NSData *)PDFDataWithPostScriptData:(NSData *)psData;
 {

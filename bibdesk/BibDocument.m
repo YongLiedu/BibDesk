@@ -3513,24 +3513,32 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         printableView = [previewer pdfView]; 
     } else if(bottomPreviewDisplay == BDSKPreviewDisplayText || sidePreviewDisplay == BDSKPreviewDisplayText) {
         printableView = [[[BDSKPrintableView alloc] initForScreenDisplay:NO] autorelease];
-        NSTextStorage *ts = nil;
-        if (bottomPreviewDisplay == BDSKPreviewDisplayText)
-            ts = [bottomPreviewTextView textStorage];
-        else
-            ts = [sidePreviewTextView textStorage];
-        if (ts)
-            [printableView setAttributedString:ts];
+        NSAttributedString *attrString = nil;
+        if (bottomPreviewDisplay == BDSKPreviewDisplayText) {
+            attrString = [bottomPreviewTextView textStorage];
+        } else if (sidePreviewDisplay == BDSKPreviewDisplayText) {
+            attrString = [sidePreviewTextView textStorage];
+        } else {
+            NSString *bibtexString = [self bibTeXStringForPublications:[self selectedPublications]];
+            attrString = [[[NSAttributedString alloc] initWithString:bibtexString attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:11.0]] autorelease];
+        }
+        if (attrString)
+            [printableView setAttributedString:attrString];
         else
             [printableView setString:NSLocalizedString(@"Error: nothing to print from document preview", @"printing error")];
-        [printableView setAttributedString:[bottomPreviewTextView textStorage]];    
     }
     return printableView;
 }
 
 - (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
-    NSPrintInfo *info = [self printInfo];
+    NSPrintInfo *info = [[self printInfo] copy];
     [[info dictionary] addEntriesFromDictionary:printSettings];
-    return [NSPrintOperation printOperationWithView:[self printableView] printInfo:info];
+    NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:[self printableView] printInfo:info];
+    [info release];
+    NSPrintPanel *printPanel = [printOperation printPanel];
+    if ([printPanel respondsToSelector:@selector(setOptions:)])
+        [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
+    return printOperation;
 }
 
 #pragma mark SplitView delegate
