@@ -179,7 +179,9 @@ static CGColorRef _shadowColor = NULL;
     _isEditable = NO;
     [self setBackgroundColor:[[self class] defaultBackgroundColor]];
     _selectionOverlay = NULL;
-        
+    _numberOfColumns = 1;
+    _numberOfRows = 1;
+    
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     
     // I'm not removing the timer in viewWillMoveToSuperview:nil because we may need to free up that memory, and the frequency is so low that it's insignificant overhead
@@ -218,6 +220,9 @@ static CGColorRef _shadowColor = NULL;
 #else
     _operationQueue = [FVOperationQueue new];
 #endif
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewFrameDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewBoundsDidChangeNotification object:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -298,7 +303,6 @@ static CGColorRef _shadowColor = NULL;
         FVAPIAssert(scale > 0, @"scale must be greater than zero");
         _iconSize.width = DEFAULT_ICON_SIZE.width * scale;
         _iconSize.height = DEFAULT_ICON_SIZE.height * scale;
-        _padding = [self _paddingForScale:scale];
         
         // arrows out of place now, they will be added again when required when resetting the tracking rects
         [self _hideArrows];
@@ -306,7 +310,7 @@ static CGColorRef _shadowColor = NULL;
         CGLayerRelease(_selectionOverlay);
         _selectionOverlay = NULL;
         
-        // the full view will likely need repainting
+        // the full view will likely need repainting, this also recalculates the grid
         [self reloadIcons];
         
         // Schedule a reload so we always have the correct quality icons, but don't do it while scaling in response to a slider.
@@ -356,9 +360,12 @@ static CGColorRef _shadowColor = NULL;
 - (void)setAutoScales:(BOOL)flag {
     if (_autoScales != flag) {
         _autoScales = flag;
-        _padding = [self _paddingForScale:[self iconScale]];
-        [self setNeedsDisplay:YES];
-        [self resetCursorRects];
+        
+        // arrows out of place now, they will be added again when required when resetting the tracking rects
+        [self _hideArrows];
+        
+        // the full view will likely need repainting, this also recalculates the grid
+        [self reloadIcons];
     }
 }
 
@@ -439,23 +446,12 @@ static CGColorRef _shadowColor = NULL;
 
 - (NSUInteger)numberOfRows;
 {
-    NSUInteger nc = [self numberOfColumns];
-    NSUInteger ni = [self numberOfIcons];
-    NSUInteger r = ni % nc > 0 ? 1 : 0;
-    return (ni/nc + r);
+    return _numberOfRows;
 }
 
 - (NSUInteger)numberOfColumns;
 {
-    if (_autoScales) {
-        return 1;
-    } else {
-        // compute width ignoring the width of the vertical scroller (if any), so we can get more symmetric empty space on either side
-        NSView *view = [self enclosingScrollView];
-        if (nil == view)
-            view = self;
-        return MAX(1, trunc((NSWidth([view frame]) - 2.0 - [self _leftMargin] - [self _rightMargin] + _padding.width) / [self _columnWidth]));
-    }
+    return _numberOfColumns;
 }
 
 - (NSSize)_paddingForScale:(CGFloat)scale;
@@ -464,13 +460,7 @@ static CGColorRef _shadowColor = NULL;
     NSSize size = NSZeroSize;
     
     // if we autoscale, we should always derive the scale from the current bounds,  but rather the current bounds. This calculation basically inverts the calculation in _recalculateGridSize
-    if (_autoScales) 
-        scale = MAX( 0.1, ( NSWidth([self bounds]) - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
-#if __LP64__
-    size.width = DEFAULT_PADDING.width + round(4.0 * scale);
-#else
-    size.width = DEFAULT_PADDING.width + roundf(4.0 * scale);
-#endif
+    size.width = DEFAULT_PADDING.width + FVRound(4.0 * scale);
     size.height = size.width + DEFAULT_PADDING.height - DEFAULT_PADDING.width + _titleHeight;
     if ([_dataSource respondsToSelector:@selector(fileView:subtitleAtIndex:)])
         size.height += _subtitleHeight;
@@ -500,11 +490,7 @@ static CGColorRef _shadowColor = NULL;
 - (NSRect)_topSliderRect
 {
     NSRect r = [self visibleRect];
-#if __LP64__
-    CGFloat l = floor( NSMidX(r) - fmax( MIN_SLIDER_WIDTH / 2, fmin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
-#else
-    CGFloat l = floorf( NSMidX(r) - fmaxf( MIN_SLIDER_WIDTH / 2, fminf( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
-#endif
+    CGFloat l = FVFloor( NSMidX(r) - FVMax( MIN_SLIDER_WIDTH / 2, FVMin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
     r.origin.x += l;
     r.origin.y += TOP_SLIDER_OFFSET;
     r.size.width -= 2 * l;
@@ -515,11 +501,7 @@ static CGColorRef _shadowColor = NULL;
 - (NSRect)_bottomSliderRect
 {
     NSRect r = [self visibleRect];
-#if __LP64__
-    CGFloat l = floor( NSMidX(r) - fmax( MIN_SLIDER_WIDTH / 2, fmin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
-#else
-    CGFloat l = floorf( NSMidX(r) - fmaxf( MIN_SLIDER_WIDTH / 2, fminf( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
-#endif
+    CGFloat l = FVFloor( NSMidX(r) - FVMax( MIN_SLIDER_WIDTH / 2, FVMin( MAX_SLIDER_WIDTH / 2, NSWidth(r) / 5 ) ) );
     r.origin.x += l;
     r.origin.y += NSHeight(r) - BOTTOM_SLIDER_OFFSET;
     r.size.width -= 2 * l;
@@ -691,7 +673,14 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (void)bind:(NSString *)binding toObject:(id)observable withKeyPath:(NSString *)keyPath options:(NSDictionary *)options;
 {
     [super bind:binding toObject:observable withKeyPath:keyPath options:options];
-    [self reloadIcons];
+    if ([binding isEqualToString:@"iconScale"] || [binding isEqualToString:@"autoScales"] || [binding isEqualToString:@"iconURLs"]) {
+        [self reloadIcons];
+    }
+}
+
+
+- (void)_handleSuperviewDidResize:(NSNotification *)notification {
+    [self _recalculateGridSize];
 }
 
 - (void)viewWillMoveToSuperview:(NSView *)newSuperview
@@ -721,12 +710,28 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
                                                  selector:@selector(_handleWebIconNotification:) 
                                                      name:FVWebIconUpdatedNotificationName object:nil];        
     }
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewFrameDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewBoundsDidChangeNotification object:nil];
+}
+
+- (void)viewDidMoveToSuperview {
+    NSView *observedView = [self enclosingScrollView] ? [self superview] : self;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleSuperviewDidResize:) name:NSViewFrameDidChangeNotification object:observedView];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleSuperviewDidResize:) name:NSViewBoundsDidChangeNotification object:observedView];
+    
+    [self _recalculateGridSize];
+    [[self window] invalidateCursorRectsForView:self];
+    if ([[self window] isKeyWindow] == NO)
+        [self resetCursorRects];
 }
 
 - (void)unbind:(NSString *)binding
 {
     [super unbind:binding];
-    [self reloadIcons];
+    if ([binding isEqualToString:@"iconScale"] || [binding isEqualToString:@"autoScales"] || [binding isEqualToString:@"iconURLs"]) {
+        [self reloadIcons];
+    }
 }
 
 - (void)setIconURLs:(NSArray *)anArray;
@@ -837,19 +842,42 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 #pragma mark Drawing layout
 
-// this method is called from -drawRect:, so it /must not/ mark rects as needing display
 - (void)_recalculateGridSize
 {
-    NSClipView *cv = [[self enclosingScrollView] contentView];
-    NSRect minFrame = cv ? [cv frame] : NSZeroRect;
-    NSRect frame = NSZeroRect;
-    frame.size.width = MAX([self _columnWidth] * [self numberOfColumns] - _padding.width + [self _leftMargin] + [self _rightMargin], NSWidth(minFrame));
-    frame.size.height = MAX([self _rowHeight] * [self numberOfRows] + [self _topMargin] + [self _bottomMargin], NSHeight(minFrame));
-    
-    if (NSEqualRects(frame, [self frame]) == NO)
-        [self setFrame:frame];
-    
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSSize contentSize = scrollView ? [scrollView contentSize] : [self bounds].size;
     NSUInteger numIcons = [self numberOfIcons];
+    
+    if (_autoScales) {
+        
+        CGFloat iconScale = FVMax( 0.1, ( contentSize.width - DEFAULT_PADDING.width - 2 * DEFAULT_MARGIN ) / DEFAULT_ICON_SIZE.width );
+        _padding = [self _paddingForScale:iconScale];
+        
+        _numberOfColumns = 1;
+        _numberOfRows = numIcons;
+        
+        iconScale = FVMax( 0.1, ( contentSize.width - [self _leftMargin] - [self _rightMargin] ) / DEFAULT_ICON_SIZE.width );
+        _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
+        
+    } else {
+        
+        _padding = [self _paddingForScale:[self iconScale]];
+        
+        _numberOfColumns = MAX( 1,  (NSInteger)FVFloor( ( contentSize.width - [self _leftMargin] - [self _rightMargin] + _padding.width ) / [self _columnWidth] ) );
+        _numberOfRows = ( [self numberOfIcons]  + _numberOfColumns - 1 ) / _numberOfColumns;
+    }
+    
+    if (scrollView) {
+        NSRect frame = { NSZeroPoint, contentSize };
+        frame.size.width = FVMax([self _columnWidth] * _numberOfColumns - _padding.width + [self _leftMargin] + [self _rightMargin], contentSize.width );
+        frame.size.height = FVMax([self _rowHeight] * _numberOfRows + [self _topMargin] + [self _bottomMargin], contentSize.height );
+        if (NSEqualRects([self frame], frame) == NO) {
+            [super setFrame:frame];
+            if (_autoScales && [scrollView autohidesScrollers] && fabsf(NSHeight(frame) - contentSize.height) <= [NSScroller scrollerWidth])
+                [scrollView tile];
+        }
+    }
+    
     NSUInteger lastSelIndex = [_selectedIndexes lastIndex];
     if (lastSelIndex != NSNotFound && lastSelIndex >= numIcons) {
         NSMutableIndexSet *tmpIndexes = [_selectedIndexes mutableCopy];
@@ -1559,28 +1587,7 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
 
 - (void)drawRect:(NSRect)rect;
 {
-    if (_autoScales) {
-        NSView *view = [self enclosingScrollView];
-        
-        // Things get screwy when the scrollview is on the border of having a vertical scroller and is set to autohide scrollers.  The scrollview starts flickering really fast as it adds/removes scrollers, so we'll check for that here and make sure the icon size compensates for it.
-        CGFloat scrollerWidth = 0;
-        if (nil == view)
-            view = self;
-        else if ([(NSScrollView *)view hasVerticalScroller])
-            scrollerWidth = [NSScroller scrollerWidth];
-        // make sure the padding is correct, as we use it in the margin calculation, this does not depend on the scale when we're auto scaling
-        _padding = [self _paddingForScale:[self iconScale]];
-        // substract 2 for the border
-        CGFloat size = MAX(4.0, NSWidth([view bounds]) - [self _leftMargin] - [self _rightMargin] - 2.0);
-        _iconSize = NSMakeSize(size, size);
-        if ([self enclosingScrollView] && [self _rowHeight] * [self numberOfIcons] + [self _topMargin] + [self _bottomMargin] > NSHeight([view bounds]) - scrollerWidth - 2) {
-            size = MAX(4.0, size - scrollerWidth);
-            _iconSize = NSMakeSize(size, size);
-        }
-    }
-    
     NSRect visRect = [self visibleRect];
-    [self _recalculateGridSize];
     
     // downscaling changes the view origin, so enlarge the rect if needed after _recalculateGridSize
     if (_isRescaling) {
@@ -1772,11 +1779,7 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
             
             // determine a min/max size for the arrow buttons
             CGFloat side;
-#if __LP64__
-            side = round(NSHeight(iconRect) / 5);
-#else
-            side = roundf(NSHeight(iconRect) / 5);
-#endif
+            side = FVRound(NSHeight(iconRect) / 5);
             side = MIN(side, 32);
             side = MAX(side, 10);
             // 2 pixels between arrows horizontally, and 4 pixels between bottom of arrow and bottom of iconRect
@@ -2020,13 +2023,8 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     NSRect rect;
     rect.origin.x = MIN(aPoint.x, bPoint.x);
     rect.origin.y = MIN(aPoint.y, bPoint.y);
-#if __LP64__
-    rect.size.width = fmax(3.0, fmax(aPoint.x, bPoint.x) - NSMinX(rect));
-    rect.size.height = fmax(3.0, fmax(aPoint.y, bPoint.y) - NSMinY(rect));
-#else
-    rect.size.width = fmaxf(3.0, fmaxf(aPoint.x, bPoint.x) - NSMinX(rect));
-    rect.size.height = fmaxf(3.0, fmaxf(aPoint.y, bPoint.y) - NSMinY(rect));
-#endif
+    rect.size.width = FVMax(3.0, FVMax(aPoint.x, bPoint.x) - NSMinX(rect));
+    rect.size.height = FVMax(3.0, FVMax(aPoint.y, bPoint.y) - NSMinY(rect));
     return rect;
 }
 

@@ -38,6 +38,7 @@
 
 #import "FVQuickLookIcon.h"
 #import "FVFinderIcon.h"
+#import "FVUtilities.h"
 #import <QuickLook/QLThumbnailImage.h>
 
 // see http://www.cocoabuilder.com/archive/message/cocoa/2005/6/15/138943 for linking; need to use bundle_loader flag to allow the linker to resolve our superclass
@@ -147,13 +148,8 @@ static BOOL FVQLIconDisabled = NO;
                 NSSize currentSize = FVCGImageSize(_fullImage);
                 
                 NSSize targetSize;
-#if __LP64__
-                targetSize.width = trunc(_desiredSize.width);
-                targetSize.height = trunc(_desiredSize.height);
-#else
-                targetSize.width = truncf(_desiredSize.width);
-                targetSize.height = truncf(_desiredSize.height);
-#endif
+                targetSize.width = FVTrunc(_desiredSize.width);
+                targetSize.height = FVTrunc(_desiredSize.height);
                 if (NSEqualSizes(currentSize, targetSize) == NO) {
                     CGImageRelease(_fullImage);
                     _fullImage = NULL;

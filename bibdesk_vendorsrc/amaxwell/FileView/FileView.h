@@ -89,6 +89,8 @@ typedef enum _FVDropOperation {
     id                      _dataSource;
     NSMutableDictionary    *_iconCache;
     CFMutableDictionaryRef  _iconIndexMap;
+    NSUInteger              _numberOfColumns;
+    NSUInteger              _numberOfRows;
     NSColor                *_backgroundColor;
     CFRunLoopTimerRef       _zombieTimer;
     NSMutableIndexSet      *_selectedIndexes;
