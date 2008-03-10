@@ -42,6 +42,15 @@
 #include <algorithm>
 #include <exception>
 
+@interface FVPriorityQueueEnumerator : NSEnumerator
+{
+    NSUInteger       _currentIndex;
+    NSUInteger       _count;
+    FVPriorityQueue *_queue;
+}
+- (id)initWithQueue:(FVPriorityQueue *)queue;
+@end
+
 static inline bool compare(id value1, id value2)
 {
     /*
@@ -56,6 +65,13 @@ static inline bool compare(id value1, id value2)
      */
     return (NSOrderedAscending == [value1 compare:value2]);
 }
+
+// for sorting the heap in priority order (highest priority first)
+static inline bool enumeration_compare(id value1, id value2)
+{
+    return (NSOrderedDescending == [value1 compare:value2]);
+}
+
 
 @implementation FVPriorityQueue
 
@@ -119,6 +135,8 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
         __FVPriorityQueueSetCount(self, 0);
         __FVPriorityQueueSetCapacity(self, capacity);
         _madeHeap = NO;
+        _sorted = NO;
+        _mutations = 0;
         
         if (NULL == _values || NULL == _set) {
             [self release];
@@ -152,6 +170,9 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
         _values[count - 1] = object;
         if (_madeHeap)
             std::push_heap(__FVPriorityQueueHeapStart(self), __FVPriorityQueueHeapEnd(self), compare);
+        
+        _mutations++;
+        _sorted = NO;
     }
     NSAssert(self->_count == (NSUInteger)CFSetGetCount(self->_set), @"set and queue must have the same count");
 }
@@ -160,6 +181,8 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
 {
     std::make_heap(__FVPriorityQueueHeapStart(self), __FVPriorityQueueHeapEnd(self), compare);
     _madeHeap = YES;
+    _sorted = NO;
+    _mutations++;
 }
 
 - (void)pushMultiple:(NSArray *)objects;
@@ -198,6 +221,8 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
         memcpy(dest, buffer, numberAdded * sizeof(id));
         __FVPriorityQueueSetCount(self, count + numberAdded);
         [self _makeHeap];
+        
+        _mutations++;
     }
     delete buffer;
     NSAssert(self->_count == (NSUInteger)CFSetGetCount(self->_set), @"set and queue must have the same count");
@@ -210,6 +235,7 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
 
     if (count > 0) {   
         
+        // marks as unsorted
         if (NO == _madeHeap)
             [self _makeHeap];
 
@@ -219,11 +245,13 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
         toReturn = *(__FVPriorityQueueHeapEnd(self));
         
         // make sure we don't remove the last reference to this object
-        [[toReturn retain] autorelease];
+        toReturn = [[toReturn retain] autorelease];
         CFSetRemoveValue(_set, toReturn);
         
         if (0 == count)
             _madeHeap = 0;
+        
+        _mutations++;
     }
     NSAssert(self->_count == (NSUInteger)CFSetGetCount(self->_set), @"set and queue must have the same count");
     return toReturn;
@@ -234,16 +262,30 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
     CFSetRemoveAllValues(_set);
     __FVPriorityQueueSetCount(self, 0);
     _madeHeap = NO;
+    _mutations++;
 }
 
 - (NSEnumerator *)objectEnumerator
 {
-    return [(NSSet *)_set objectEnumerator];
+    return [[[FVPriorityQueueEnumerator allocWithZone:[self zone]] initWithQueue:self] autorelease];
+}
+
+- (void)_sortQueueForEnumeration
+{
+    // have to call make_heap before sorting
+    std::make_heap(__FVPriorityQueueHeapStart(self), __FVPriorityQueueHeapEnd(self), enumeration_compare);
+    std::sort_heap(__FVPriorityQueueHeapStart(self), __FVPriorityQueueHeapEnd(self), enumeration_compare);
+    
+    // sorting the heap loses its heap properties
+    _madeHeap = NO;
+    _sorted = YES;
+    _mutations++;
 }
 
 - (void)makeObjectsPerformSelector:(SEL)selector
 {
     NSUInteger i, count = __FVPriorityQueueCount(self);    
+    [self _sortQueueForEnumeration];
     for (i = 0; i < count; i++)
         [_values[i] performSelector:selector];
 }
@@ -251,7 +293,20 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
 - (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id *)stackbuf count:(NSUInteger)len;
 {
-    return [(NSSet *)_set countByEnumeratingWithState:state objects:stackbuf count:len];
+    // We keep track of whether the heap is sorted in order to make this method reentrant.
+    if (NO == _sorted)
+        [self _sortQueueForEnumeration];
+        
+    // this was taken from CFArray.c
+    if (__FVPriorityQueueCount(self) == 0) return 0;
+    enum { ATSTART = 0, ATEND = 1 };
+    if (ATSTART == state->state) { // first time
+        state->state = ATEND;
+        state->mutationsPtr = &_mutations;
+        state->itemsPtr = __FVPriorityQueueHeapStart(self);
+        return __FVPriorityQueueCount(self);
+    }
+    return 0;
 }
 #endif
 
@@ -261,9 +316,50 @@ static inline id *__FVPriorityQueueHeapEnd(FVPriorityQueue *self)
     return __FVPriorityQueueCount(self);
 }
 
-void FVPriorityQueueApplyFunction(FVPriorityQueue *theSet, FVPriorityQueueApplierFunction applier, void *context)
+void FVPriorityQueueApplyFunction(FVPriorityQueue *queue, FVPriorityQueueApplierFunction applier, void *context)
 {
-    CFSetApplyFunction(theSet->_set, applier, context);
+    const void **values = (const void **)__FVPriorityQueueHeapStart(queue);
+    CFArrayRef array = CFArrayCreate(CFAllocatorGetDefault(), values, __FVPriorityQueueCount(queue), NULL);
+    [queue _sortQueueForEnumeration];
+    CFArrayApplyFunction(array, CFRangeMake(0, CFArrayGetCount(array)), applier, context);
+    CFRelease(array);
+}
+
+@end
+
+#pragma mark -
+#pragma mark FVPriorityQueueEnumerator
+
+@implementation FVPriorityQueueEnumerator
+
+- (id)initWithQueue:(FVPriorityQueue *)queue
+{
+    self = [super init];
+    if (self) {
+        _currentIndex = 0;
+        _queue = [queue retain];
+        _count = [queue count];
+        [_queue _sortQueueForEnumeration];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [_queue release];
+    [super dealloc];
+}
+
+- (id)nextObject
+{
+    id obj = nil;
+    if (_currentIndex < _count) {
+        obj = *(__FVPriorityQueueHeapStart(_queue) + _currentIndex);
+        _currentIndex++;
+        if (_count == _currentIndex)
+            obj = [[obj retain] autorelease];
+    }
+    return obj;
 }
 
 @end

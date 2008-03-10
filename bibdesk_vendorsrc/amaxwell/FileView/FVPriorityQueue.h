@@ -44,11 +44,11 @@
  if ([value1 compare:value2] == NSOrderedDescending), value1 has higher priority
  if ([value1 compare:value2] == NSOrderedAscending), value2 has higher priority
   
- A twist on usual queue behavior is that duplicate objects (as determined by -[NSObject isEqual:]) are not added to the queue in push:, but are silently ignored.  This allows easy maintenance of a unique set of objects in the priority queue.
+ A twist on usual queue behavior is that duplicate objects (as determined by -[NSObject isEqual:]) are not added to the queue in push:, but are silently ignored.  This allows easy maintenance of a unique set of objects in the priority queue.  Note that -hash must be implemented correctly for any objects that override -isEqual:, and the value of -hash for a given object must not change while the object is in the queue.
  
  */
 
-#if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
 @interface FVPriorityQueue : NSObject <NSFastEnumeration>
 #else
 @interface FVPriorityQueue : NSObject
@@ -59,7 +59,9 @@
     id              *_values;
     NSUInteger       _count;
     NSUInteger       _capacity;
+    long unsigned    _mutations;
     BOOL             _madeHeap;
+    BOOL             _sorted;
 }
 
 - (id)init;
@@ -68,10 +70,13 @@
 - (id)pop;
 - (void)push:(id)object;
 
-// semantically equivalent to foreach(object in objects) [queue push:object]
+// semantically equivalent to for(object in objects){ [queue push:object]; }
 - (void)pushMultiple:(NSArray *)objects;
 
+// returned in descending priority (high priority objects returned first)
 - (NSEnumerator *)objectEnumerator;
+
+// performed in order of descending priority
 - (void)makeObjectsPerformSelector:(SEL)selector;
 
 // manipulate the elements directly
