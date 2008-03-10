@@ -115,12 +115,14 @@
 - (NSWindow *)animator
 {
     NSWindow *theWindow = [self window];
-    return [theWindow respondsToSelector:@selector(animator)] ? [theWindow performSelector:@selector(animator)] : theWindow;
+    return [theWindow respondsToSelector:@selector(animator)] ? [theWindow animator] : theWindow;
 }
 
 - (BOOL)windowShouldClose:(id)sender
 {
     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        // make sure it doesn't respond to keystrokes while fading out
+        [[self window] makeFirstResponder:nil];
         [[self animator] setAlphaValue:0.0];
         [[self window] performSelector:@selector(close) withObject:nil afterDelay:0.5];
         return NO;
@@ -171,7 +173,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
         
         // wth? why doesn't WebView accept an NSURL?
         if ([webView respondsToSelector:@selector(setMainFrameURL:)]) {
-            [webView performSelector:@selector(setMainFrameURL:) withObject:[representedURL absoluteString]];
+            [webView setMainFrameURL:[representedURL absoluteString]];
         }
         else {
             [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:representedURL]];
@@ -274,7 +276,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame
 {
-    const CGFloat spinnerSideLength = 50.0f;
+    const CGFloat spinnerSideLength = 32;
     WebFrame *mainFrame = [webView mainFrame];
     if (nil == spinner) {
         spinner = [[NSProgressIndicator alloc] initWithFrame:NSMakeRect(0, 0, spinnerSideLength, spinnerSideLength)];
@@ -305,7 +307,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
         NSMutableArray *items = [NSMutableArray array];
         NSEnumerator *itemEnum = [defaultMenuItems objectEnumerator];
         NSMenuItem *item;
-        while (item = [itemEnum nextObject]) {
+        while ((item = [itemEnum nextObject])) {
             NSInteger tag = [item tag];
             if (tag == WebMenuItemTagCopyLinkToClipboard || tag == WebMenuItemTagCopyImageToClipboard || tag == WebMenuItemTagCopy || tag == WebMenuItemTagGoBack || tag == WebMenuItemTagGoForward || tag == WebMenuItemTagStop || tag == WebMenuItemTagReload || tag == WebMenuItemTagOther)
                 [items addObject:item];
@@ -434,6 +436,7 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 - (IBAction)previewAction:(id)sender {
     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
         [[self animator] setAlphaValue:0.0];
+        [[self window] makeFirstResponder:nil];
         [[self window] performSelector:@selector(close) withObject:nil afterDelay:0.5];
     }
     else {

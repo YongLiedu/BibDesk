@@ -149,6 +149,8 @@ static int32_t _activeCPUs __attribute__ ((aligned (32))) = 0;
 
 - (void)dealloc
 {
+    OSMemoryBarrier();
+    FVAPIAssert1(1 == _terminate, @"*** ERROR *** attempt to deallocate %@ without calling -terminate", self);
     [_threadLock release];
     [_pendingOperations release];
     [_activeOperations release];
@@ -237,23 +239,15 @@ static uint32_t __FVSendTrivialMachMessage(mach_port_t port, uint32_t msg_id, CF
 {
     OSSpinLockLock(&_queueLock);
     while ([_pendingOperations count] && ([_activeOperations count] < [[self class] _availableOperationCount])) {
-        
-        NSAutoreleasePool *pool = [NSAutoreleasePool new];
         FVOperation *op = [_pendingOperations pop];
-        
-        // Loss of generality here.  Coalescing based on _activeOperations here is questionable, since it's still possible that the data (icon) passed to the operation in _activeOperations is stale.  However, we can easily have overlapping -releaseResources calls for the same icon, in particular, and this avoids some redundancies.
-        BOOL shouldLock = NO;
-        if (NO == [op isCancelled] && NO == [_activeOperations containsObject:op]) {
+        // Coalescing based on _activeOperations here is questionable, since it's possible that the active operation is stale.
+        if (NO == [op isCancelled] && NO == [_activeOperations containsObject:op]) {            
             [_activeOperations addObject:op];
-            // avoid a deadlock for a non-threaded operation; -start will eventually trigger -finishedOperation
+            // avoid a deadlock for a non-threaded operation; -start can trigger -finishedOperation immediately on this thread
             OSSpinLockUnlock(&_queueLock);
-            shouldLock = YES;
             [op start];
-        }
-        
-        [pool release];
-        if (shouldLock)
             OSSpinLockLock(&_queueLock);
+        }        
     }
     OSSpinLockUnlock(&_queueLock);
 }
