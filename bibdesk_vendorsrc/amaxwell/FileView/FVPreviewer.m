@@ -105,6 +105,12 @@
     // forgot to set this in the nib; needed for viewing icons
     [[self window] setMinSize:[[self window] frame].size];
     [[self window] setDelegate:self];
+    
+    id animation = [NSClassFromString(@"CABasicAnimation") animation];
+    if (animation) {
+        [animation setDelegate:self];
+        [[self window] setAnimations:[NSDictionary dictionaryWithObject:animation forKey:@"alphaValue"]];
+    }
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -124,10 +130,14 @@
         // make sure it doesn't respond to keystrokes while fading out
         [[self window] makeFirstResponder:nil];
         [[self animator] setAlphaValue:0.0];
-        [[self window] performSelector:@selector(close) withObject:nil afterDelay:0.5];
         return NO;
     }
     return YES;
+}
+
+- (void)animationDidStop:(id)animation finished:(BOOL)flag  {
+    if ([[self window] alphaValue] < 0.0001 && [[self window] isVisible])
+        [self close];
 }
 
 - (void)stopPreview:(NSNotification *)note
@@ -417,7 +427,8 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             }
 
             if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-                [[self animator] makeKeyAndOrderFront:nil];
+                [[self window] setAlphaValue:0.0];
+                [[self window] makeKeyAndOrderFront:nil];
                 [[self animator] setAlphaValue:1.0];
             }
             else {
@@ -434,14 +445,8 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
 }
 
 - (IBAction)previewAction:(id)sender {
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        [[self animator] setAlphaValue:0.0];
-        [[self window] makeFirstResponder:nil];
-        [[self window] performSelector:@selector(close) withObject:nil afterDelay:0.5];
-    }
-    else {
-        [[self window] performClose:self];
-    }
+    // make this action toggle the previewer
+    [[self window] performClose:self];
 }
 
 @end
