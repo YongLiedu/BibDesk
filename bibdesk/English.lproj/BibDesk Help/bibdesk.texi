@@ -1299,11 +1299,11 @@ when the one or more URLs are attached to the pubblication. The column then also
 Double-clicking a cell in the Remote URL column will open the first linked remote URL 
 in your default browser application.   
 
-@subheading Date
-@cindex Date
+@subheading Publication Date
+@cindex Publication Date
 
-The Date column displays the date of the item, which is constructed from the Year and Month 
-fields of the item. However if a Date field is set, that is used instead. 
+The Publication Date column displays the date of the item, which is constructed from the Year and Month 
+fields of the item.
 
 @subheading Item Number 
 @cindex Item Number
