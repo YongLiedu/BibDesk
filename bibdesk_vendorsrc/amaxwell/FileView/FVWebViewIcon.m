@@ -41,7 +41,6 @@
 #import "FVFinderIcon.h"
 #import "FVMIMEIcon.h"
 #import <WebKit/WebKit.h>
-#import <SystemConfiguration/SystemConfiguration.h>
 
 @implementation FVWebViewIcon
 
@@ -50,8 +49,10 @@ static BOOL FVWebIconDisabled = NO;
 // webview pool variables to keep memory usage down; pool size is tunable
 static NSInteger _maxWebViews = 5;
 static NSMutableArray *_availableWebViews = nil;
+static NSArray *_commonModes = nil;
 static NSInteger _numberOfWebViews = 0;
 static NSString * const FVWebIconWebViewAvailableNotificationName = @"FVWebIconWebViewAvailableNotificationName";
+static NSSet *_webViewSchemes = nil;
 
 // size of the view frame; large enough to fit a reasonably sized page
 static const NSSize _webViewSize = (NSSize){ 1000, 900 };
@@ -74,6 +75,8 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
         _maxWebViews = maxViews;
     
     _availableWebViews = [[NSMutableArray alloc] initWithCapacity:_maxWebViews];
+    _commonModes = [[NSArray alloc] initWithObjects:(id)kCFRunLoopCommonModes, nil];
+    _webViewSchemes = [[NSSet alloc] initWithObjects:@"http", @"https", @"ftp", nil];
 }
 
 // return nil if _maxWebViews is exceeded
@@ -105,7 +108,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     NSParameterAssert(nil != [aURL scheme]);
     
     // if this is not an http or file URL, return a finder icon instead
-    if (FVWebIconDisabled || (NO == [[aURL scheme] isEqualToString:@"http"] && NO == [aURL isFileURL])) {
+    if (FVWebIconDisabled || (NO == [_webViewSchemes containsObject:[aURL scheme]] && NO == [aURL isFileURL])) {
         NSZone *zone = [self zone];
         [self release];
         if ([aURL isFileURL]) 	 
@@ -157,12 +160,10 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 - (void)dealloc
 {
     // it's very unlikely that we'll see this on a non-main thread, but just in case...
-    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
+    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:_commonModes];
     
     pthread_mutex_destroy(&_mutex);
-    if (_fullImage != NULL)
         CGImageRelease(_fullImage);
-    if (_thumbnail != NULL)
         CGImageRelease(_thumbnail);
     [_httpURL release];
     [_fallbackIcon release];
@@ -178,15 +179,13 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 - (void)releaseResources
 {     
     // Cancel any pending loads; set _isRendering to NO or -renderOffscreenOnMainThread will never complete if it gets called again
-    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
+    [self performSelectorOnMainThread:@selector(_releaseWebView) withObject:nil waitUntilDone:YES modes:_commonModes];
 
     [self lock];
     _isRendering = NO;
     
-    if (_fullImage != NULL)
         CGImageRelease(_fullImage);
     _fullImage = NULL;
-    if (_thumbnail != NULL)
         CGImageRelease(_thumbnail);
     _thumbnail = NULL;
     
@@ -233,6 +232,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
 
 - (void)_postIconFinishedNotification
 {
+    NSAssert2(pthread_main_np() != 0, @"*** threading violation *** -[%@ %@] requires main thread", [self class], NSStringFromSelector(_cmd));
     // All of the other FVIcon subclasses render synchronously in the FVOperationQueue, which then calls back to the view when each batch is finished.  FVWebViewIcon loads asynchronously via WebKit, which runs its own threading; this worked better than the original attempt at a synchronous load, which blocked for too long.  The problem is that if we return YES from needsRenderForSize: while the webview is trying to load, the view keeps sending the web icons to the queue for rendering, and ultimately ends up drawing the placeholders at a fairly high rate until needsRenderForSize: finally returns NO.  This private notification is about the cleanest thing I can think of.
     [[NSNotificationCenter defaultCenter] postNotificationName:FVWebIconUpdatedNotificationName object:self];
 }
@@ -453,7 +453,7 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     if (NULL == _thumbnail && NULL == _fullImage && NO == _webviewFailed && NO == _isRendering) {
         // make sure needsRenderForSize: knows that we're actively rendering, so renderOffscreen doesn't get called again
         _isRendering = YES;
-        [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:YES modes:[NSArray arrayWithObject:(id)kCFRunLoopCommonModes]];
+        [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:YES modes:_commonModes];
     }
     else if (YES == _webviewFailed && nil == _fallbackIcon) {
         _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_httpURL];
