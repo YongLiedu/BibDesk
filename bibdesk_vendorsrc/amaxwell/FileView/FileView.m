@@ -252,6 +252,7 @@ static CGColorRef _shadowColor = NULL;
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_leftArrow release];
     [_rightArrow release];
     [_iconURLs release];
