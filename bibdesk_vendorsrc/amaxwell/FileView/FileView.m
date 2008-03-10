@@ -860,6 +860,9 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         iconScale = FVMax( 0.1, ( contentSize.width - [self _leftMargin] - [self _rightMargin] ) / DEFAULT_ICON_SIZE.width );
         _iconSize = NSMakeSize(iconScale * DEFAULT_ICON_SIZE.width, iconScale * DEFAULT_ICON_SIZE.height);
         
+        CGLayerRelease(_selectionOverlay);
+        _selectionOverlay = NULL;
+        
     } else {
         
         _padding = [self _paddingForScale:[self iconScale]];
@@ -874,7 +877,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         frame.size.height = FVMax([self _rowHeight] * _numberOfRows + [self _topMargin] + [self _bottomMargin], contentSize.height );
         if (NSEqualRects([self frame], frame) == NO) {
             [super setFrame:frame];
-            if (_autoScales && [scrollView autohidesScrollers] && fabsf(NSHeight(frame) - contentSize.height) <= [NSScroller scrollerWidth])
+            if (_autoScales && [scrollView autohidesScrollers] && FVAbs(NSHeight(frame) - contentSize.height) <= [NSScroller scrollerWidth])
                 [scrollView tile];
         }
     }

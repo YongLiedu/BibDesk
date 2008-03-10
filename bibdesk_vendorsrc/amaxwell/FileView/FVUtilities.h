@@ -57,17 +57,19 @@ FV_PRIVATE_EXTERN NSArray *FVURLsFromPasteboard(NSPasteboard *pboard);
 FV_PRIVATE_EXTERN BOOL FVWriteURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard);
 
 #if __LP64__
-#define FVRound(f)  round(f)
-#define FVFloor(f)  floor(f)
-#define FVCeil(f)   ceil(f)
-#define FVTrunc(f)  trunc(f)
+#define FVRound(f)      round(f)
+#define FVFloor(f)      floor(f)
+#define FVCeil(f)       ceil(f)
+#define FVTrunc(f)      trunc(f)
+#define FVAbs(f)        fabs(f)
 #define FVMin(f1, f2)   fmin(f1, f2)
 #define FVMax(f1, f2)   fmax(f1, f2)
 #else
-#define FVRound(f)  roundf(f)
-#define FVFloor(f)  floorf(f)
-#define FVCeil(f)   ceilf(f)
-#define FVTrunc(f)  truncf(f)
+#define FVRound(f)      roundf(f)
+#define FVFloor(f)      floorf(f)
+#define FVCeil(f)       ceilf(f)
+#define FVTrunc(f)      truncf(f)
+#define FVAbs(f)        fabsf(f)
 #define FVMin(f1, f2)   fminf(f1, f2)
 #define FVMax(f1, f2)   fmaxf(f1, f2)
 #endif
