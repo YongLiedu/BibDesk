@@ -82,7 +82,7 @@
         [lm setDelegate:self];
         [self addPage];
         [self setTextColor:[NSColor blackColor]];
-        [self setFont:[NSFont systemFontOfSize:[NSFont systemFontSize]]];
+        [self setFont:[NSFont userFontOfSize:0.0]];
     }
     return self;
 }

@@ -3516,26 +3516,23 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 }
 
 - (NSView *)printableView{
-    id printableView = nil;
-    if (bottomPreviewDisplay == BDSKPreviewDisplayTeX) {
-        // we don't reach this, we let the pdfView do the printing
-        printableView = [previewer pdfView]; 
-    } else if(bottomPreviewDisplay == BDSKPreviewDisplayText || sidePreviewDisplay == BDSKPreviewDisplayText) {
-        printableView = [[[BDSKPrintableView alloc] initForScreenDisplay:NO] autorelease];
-        NSAttributedString *attrString = nil;
-        if (bottomPreviewDisplay == BDSKPreviewDisplayText) {
-            attrString = [bottomPreviewTextView textStorage];
-        } else if (sidePreviewDisplay == BDSKPreviewDisplayText) {
-            attrString = [sidePreviewTextView textStorage];
-        } else {
-            NSString *bibtexString = [self bibTeXStringForPublications:[self selectedPublications]];
-            attrString = [[[NSAttributedString alloc] initWithString:bibtexString attributeName:NSFontAttributeName attributeValue:[NSFont userFontOfSize:11.0]] autorelease];
-        }
-        if (attrString)
-            [printableView setAttributedString:attrString];
-        else
-            [printableView setString:NSLocalizedString(@"Error: nothing to print from document preview", @"printing error")];
+    BDSKPrintableView *printableView = [[[BDSKPrintableView alloc] initForScreenDisplay:NO] autorelease];
+    NSAttributedString *attrString = nil;
+    NSString *string = nil;
+    if (bottomPreviewDisplay == BDSKPreviewDisplayText) {
+        attrString = [bottomPreviewTextView textStorage];
+    } else if (sidePreviewDisplay == BDSKPreviewDisplayText) {
+        attrString = [sidePreviewTextView textStorage];
+    } else {
+        // this occurs only when both FileViews are displayed, probably never happens
+        string = [self bibTeXStringForPublications:[self selectedPublications]];
     }
+    if (attrString)
+        [printableView setAttributedString:attrString];
+    else if (string)
+        [printableView setString:string];
+    else
+        [printableView setString:NSLocalizedString(@"Error: nothing to print from document preview", @"printing error")];
     return printableView;
 }
 
