@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
@@ -17,10 +17,8 @@
 			<string>BibDesk Item</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>net.sourceforge.bibdesk.bdskcache</string>
-			</array>
+			<key>NSDocumentClass</key>
+			<string>BibDocument</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -33,10 +31,8 @@
 			<string>BibDesk Search Group</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>net.sourceforge.bibdesk.bdsksearch</string>
-			</array>
+			<key>NSDocumentClass</key>
+			<string>BibDocument</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -277,31 +273,31 @@
 	<string>BDSK</string>
 	<key>CFBundleURLTypes</key>
 	<array>
-        <dict>
-			<key>CFBundleURLName</key>
-			<string>BibDesk publication URL</string>
+		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>BibDesk publication URL</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>x-bdsk</string>
 			</array>
 			<key>LSIsAppleDefaultForScheme</key>
-            <true/>
+			<true/>
 		</dict>
-        <dict>
-			<key>CFBundleURLName</key>
-			<string>Search group server URL</string>
+		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>Search group server URL</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>x-bdsk-search</string>
 			</array>
 			<key>LSIsAppleDefaultForScheme</key>
-            <true/>
+			<true/>
 		</dict>
-    </array>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>v${CURRENT_PROJECT_VERSION}</string>
 	<key>LSMinimumSystemVersion</key>
@@ -465,10 +461,6 @@
 				<dict>
 					<key>AutoFile uses relative path</key>
 					<false/>
-					<key>BDSKWarnOnMoveFolderKey</key>
-					<true/>
-					<key>File papers into the papers folder automatically</key>
-					<false/>
 					<key>BDSKLocalFileCleanOptionKey</key>
 					<integer>2</integer>
 					<key>BDSKLocalFileFormatKey</key>
@@ -476,6 +468,10 @@
 					<key>BDSKLocalFileFormatPresetKey</key>
 					<integer>1</integer>
 					<key>BDSKLocalFileLowercaseKey</key>
+					<false/>
+					<key>BDSKWarnOnMoveFolderKey</key>
+					<true/>
+					<key>File papers into the papers folder automatically</key>
 					<false/>
 					<key>Path to the papers folder</key>
 					<string>~/Documents/Papers</string>
@@ -503,14 +499,14 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
-					<key>BDSKDefaultDragCopyTypeKey</key>
-                    <integer>1</integer>
-					<key>BDSKAlternateDragCopyTypeKey</key>
-                    <integer>0</integer>
-					<key>BDSKDefaultDragCopyTemplateKey</key>
-                    <string></string>
 					<key>BDSKAlternateDragCopyTemplateKey</key>
-                    <string></string>
+					<string></string>
+					<key>BDSKAlternateDragCopyTypeKey</key>
+					<integer>0</integer>
+					<key>BDSKDefaultDragCopyTemplateKey</key>
+					<string></string>
+					<key>BDSKDefaultDragCopyTypeKey</key>
+					<integer>1</integer>
 					<key>Citation End Bracket</key>
 					<string>}</string>
 					<key>Citation Start Bracket</key>
@@ -630,16 +626,16 @@
 				<dict>
 					<key>BDSKAutomaticallyConvertURLFieldsKey</key>
 					<true/>
-					<key>BDSKRemoveConvertedLocalFileFieldsKey</key>
-					<false/>
-					<key>BDSKRemoveConvertedRemoteURLFieldsKey</key>
-					<false/>
 					<key>BDSKDefaultViewersKey</key>
 					<dict/>
 					<key>BDSKGlobalMacroDefinitionsKey</key>
 					<dict/>
 					<key>BDSKGlobalMacroFilesKey</key>
 					<array/>
+					<key>BDSKRemoveConvertedLocalFileFieldsKey</key>
+					<false/>
+					<key>BDSKRemoveConvertedRemoteURLFieldsKey</key>
+					<false/>
 					<key>BDSKTableHeaderImages</key>
 					<dict/>
 					<key>BDSKTableHeaderTitles</key>
@@ -706,6 +702,14 @@
 				<dict>
 					<key>BDSKAuthorNameDisplayKey</key>
 					<integer>3</integer>
+					<key>BDSKBottomFileViewIconScaleKey</key>
+					<real>1</real>
+					<key>BDSKBottomPreviewDisplayKey</key>
+					<integer>0</integer>
+					<key>BDSKBottomPreviewDisplayTemplateKey</key>
+					<string>Default RTF template</string>
+					<key>BDSKEditorFileViewIconScaleKey</key>
+					<real>1</real>
 					<key>BDSKEditorFontNameKey</key>
 					<string>Helvetica</string>
 					<key>BDSKEditorFontSizeKey</key>
@@ -730,10 +734,8 @@
 					<string>LucidaGrande</string>
 					<key>BDSKPersonTableViewFontSizeKey</key>
 					<real>0.0</real>
-					<key>BDSKBottomPreviewDisplayKey</key>
-					<integer>0</integer>
-					<key>BDSKBottomPreviewDisplayTemplateKey</key>
-					<string>Default RTF template</string>
+					<key>BDSKSideFileViewIconScaleKey</key>
+					<real>0.0</real>
 					<key>BDSKSidePreviewDisplayKey</key>
 					<integer>1</integer>
 					<key>BDSKSidePreviewDisplayTemplateKey</key>
@@ -756,12 +758,6 @@
 					<integer>0</integer>
 					<key>Terms ignored when sorting</key>
 					<array/>
-                    <key>BDSKBottomFileViewIconScaleKey</key>
-                    <real>1.0</real>
-                    <key>BDSKSideFileViewIconScaleKey</key>
-                    <real>0.0</real>
-                    <key>BDSKEditorFileViewIconScaleKey</key>
-                    <real>1.0</real>
 				</dict>
 				<key>helpURL</key>
 				<string>DisplayPreferences</string>
@@ -866,6 +862,8 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>BDSKAskToTrashFile</key>
+					<true/>
 					<key>BDSKAskToTrashFilesKey</key>
 					<true/>
 					<key>BDSKCiteseerHostKey</key>
@@ -960,8 +958,6 @@
 					<true/>
 					<key>BDSKWarnOnRenameGroup</key>
 					<true/>
-					<key>BDSKAskToTrashFile</key>
-					<true/>
 					<key>BibEditor window autosave name</key>
 					<string></string>
 					<key>Check spelling continuously while editing</key>
@@ -990,18 +986,18 @@
 						<real>33</real>
 						<key>Keywords</key>
 						<real>50</real>
+						<key>Local File</key>
+						<real>70</real>
 						<key>Local-Url</key>
 						<real>18</real>
-                        <key>Local File</key>
-                        <real>70</real>
 						<key>Publication Date</key>
 						<real>40</real>
 						<key>Rating</key>
 						<real>70</real>
 						<key>Read</key>
 						<real>30</real>
-                        <key>Remote URL</key>
-                        <real>70</real>
+						<key>Remote URL</key>
+						<real>70</real>
 						<key>Title</key>
 						<real>300</real>
 						<key>Url</key>
@@ -1045,7 +1041,7 @@
 						<string>1st Author</string>
 						<string>2nd Author</string>
 						<string>3rd Author</string>
-                        <string>Local File</string>
+						<string>Local File</string>
 					</array>
 					<key>Snoop Drawer Content</key>
 					<integer>0</integer>
@@ -1086,6 +1082,8 @@
 				<string>inputmanager.tiff</string>
 				<key>identifier</key>
 				<string>edu.ucsd.cs.mmccrack.bibdesk.prefpane.inputmanager</string>
+				<key>maximumOSVersion</key>
+				<string>10.4.15</string>
 				<key>nib</key>
 				<string>BibPref_InputManager</string>
 				<key>ordering</key>
@@ -1094,8 +1092,6 @@
 				<string>Completion [SHORT]</string>
 				<key>title</key>
 				<string>Completion [LONG]</string>
-                <key>maximumOSVersion</key>
-                <string>10.4.15</string>
 			</dict>
 			<key>BibPref_ScriptHooks</key>
 			<dict>
@@ -1234,7 +1230,7 @@
 			</dict>
 		</dict>
 	</array>
-    <key>UTImportedTypeDeclarations</key>
+	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>
 			<key>UTTypeConformsTo</key>
