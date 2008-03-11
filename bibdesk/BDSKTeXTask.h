@@ -48,10 +48,10 @@ enum {
 };
 
 typedef struct _BDSKTeXTaskFlags {
-    volatile int32_t hasLTB __attribute__ ((aligned (4)));
-    volatile int32_t hasLaTeX __attribute__ ((aligned (4)));
-    volatile int32_t hasPDFData __attribute__ ((aligned (4)));
-    volatile int32_t hasRTFData __attribute__ ((aligned (4)));
+    volatile int32_t hasLTB __attribute__ ((aligned (32)));
+    volatile int32_t hasLaTeX __attribute__ ((aligned (32)));
+    volatile int32_t hasPDFData __attribute__ ((aligned (32)));
+    volatile int32_t hasRTFData __attribute__ ((aligned (32)));
 } BDSKTeXTaskFlags;
 
 @class BDSKTeXPath;

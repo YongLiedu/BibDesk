@@ -39,9 +39,9 @@
 #import "BDSKAsynchronousDOServer.h"
 
 struct BDSKDOServerFlags {
-    volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
-    volatile int32_t serverDidSetup __attribute__ ((aligned (4)));
-    volatile int32_t serverDidStart __attribute__ ((aligned (4)));
+    volatile int32_t shouldKeepRunning __attribute__ ((aligned (32)));
+    volatile int32_t serverDidSetup __attribute__ ((aligned (32)));
+    volatile int32_t serverDidStart __attribute__ ((aligned (32)));
 };
 
 // protocols for the server thread proxies, must be included in protocols used by subclasses

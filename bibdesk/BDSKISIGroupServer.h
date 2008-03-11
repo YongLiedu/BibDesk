@@ -41,8 +41,8 @@
 #import "BDSKAsynchronousDOServer.h"
 
 typedef struct _BDSKISIGroupFlags {
-    volatile int32_t isRetrieving   __attribute__ ((aligned (4)));
-    volatile int32_t failedDownload __attribute__ ((aligned (4)));
+    volatile int32_t isRetrieving   __attribute__ ((aligned (32)));
+    volatile int32_t failedDownload __attribute__ ((aligned (32)));
 } BDSKISIGroupFlags;
 
 @interface BDSKISIGroupServer : BDSKAsynchronousDOServer <BDSKSearchGroupServer> 

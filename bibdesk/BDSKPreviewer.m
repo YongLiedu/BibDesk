@@ -69,8 +69,8 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     NSString *bibString;
     NSRecursiveLock *queueLock;
     NSMutableArray *queue;
-    volatile int32_t isProcessing __attribute__ ((aligned (4)));
-    volatile int32_t notifyWhenDone __attribute__ ((aligned (4)));
+    volatile int32_t isProcessing __attribute__ ((aligned (32)));
+    volatile int32_t notifyWhenDone __attribute__ ((aligned (32)));
 }
 
 - (id)delegate;
