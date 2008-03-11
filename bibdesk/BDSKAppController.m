@@ -182,7 +182,13 @@ static void fixLegacyTableColumnIdentifiers()
     if([BDSKScriptMenu disabled] == NO){
         [BDSKScriptMenu addScriptsToMainMenu];
     }
-
+    
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        NSMenu *fileMenu = [[[NSApp mainMenu] itemAtIndex:1] submenu];
+        unsigned int idx = [fileMenu indexOfItemWithTarget:nil andAction:@selector(runPageLayout:)];
+        if (idx != NSNotFound)
+            [fileMenu removeItemAtIndex:idx];
+    }
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
