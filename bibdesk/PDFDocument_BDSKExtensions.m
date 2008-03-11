@@ -48,14 +48,11 @@
 @implementation PDFDocument (BDSKExtensions)
 
 static IMP originalGetPrintOperationForPrintInfo = NULL;
-static IMP originalCleanupAfterPrintOperation = NULL;
 
 + (void)load {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     if ([self instancesRespondToSelector:@selector(getPrintOperationForPrintInfo:autoRotate:)])
         originalGetPrintOperationForPrintInfo = OBReplaceMethodImplementationWithSelector(self, @selector(getPrintOperationForPrintInfo:autoRotate:), @selector(replacementGetPrintOperationForPrintInfo:autoRotate:));
-    if ([self instancesRespondToSelector:@selector(cleanupAfterPrintOperation:)])
-        originalCleanupAfterPrintOperation = OBReplaceMethodImplementationWithSelector(self, @selector(cleanupAfterPrintOperation:), @selector(replacementCleanupAfterPrintOperation:));
     [pool release];
 }
 
