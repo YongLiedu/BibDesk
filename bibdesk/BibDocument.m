@@ -931,8 +931,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     // this will never be called on 10.4, so we can safely call super
     NSString *fileExtension = [super fileNameExtensionForType:typeName saveOperation:saveOperation];
     if(fileExtension == nil)
-    	fileExtension = [[BDSKTemplate templateForStyle:documentTypeName] fileExtension];
-	return fileExtensions;
+    	fileExtension = [[BDSKTemplate templateForStyle:typeName] fileExtension];
+	return fileExtension;
 }
 
 #define SAVE_ENCODING_VIEW_OFFSET 30.0
