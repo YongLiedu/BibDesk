@@ -877,8 +877,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     
     if (scrollView) {
         NSRect frame = { NSZeroPoint, contentSize };
-        frame.size.width = FVMax([self _columnWidth] * _numberOfColumns - _padding.width + [self _leftMargin] + [self _rightMargin], contentSize.width );
-        frame.size.height = FVMax([self _rowHeight] * _numberOfRows + [self _topMargin] + [self _bottomMargin], contentSize.height );
+        frame.size.width = FVMax( FVCeil( [self _columnWidth] * _numberOfColumns - _padding.width + [self _leftMargin] + [self _rightMargin] ), contentSize.width );
+        frame.size.height = FVMax( FVCeil( [self _rowHeight] * _numberOfRows + [self _topMargin] + [self _bottomMargin] ), contentSize.height );
         if (NSEqualRects([self frame], frame) == NO) {
             [super setFrame:frame];
             if (_autoScales && [scrollView autohidesScrollers] && FVAbs(NSHeight(frame) - contentSize.height) <= [NSScroller scrollerWidth])
