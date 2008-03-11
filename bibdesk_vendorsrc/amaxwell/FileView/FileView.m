@@ -220,9 +220,6 @@ static CGColorRef _shadowColor = NULL;
 #else
     _operationQueue = [FVOperationQueue new];
 #endif
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewFrameDidChangeNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewBoundsDidChangeNotification object:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -681,7 +678,9 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 
 - (void)_handleSuperviewDidResize:(NSNotification *)notification {
-    [self _recalculateGridSize];
+    NSScrollView *scrollView = [self enclosingScrollView];
+    if ((scrollView && [[notification object] isEqual:[self superview]]) || (scrollView == nil && [[notification object] isEqual:self]))
+        [self _recalculateGridSize];
 }
 
 - (void)viewWillMoveToSuperview:(NSView *)newSuperview
@@ -717,14 +716,19 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 }
 
 - (void)viewDidMoveToSuperview {
-    NSView *observedView = [self enclosingScrollView] ? [self superview] : self;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleSuperviewDidResize:) name:NSViewFrameDidChangeNotification object:observedView];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleSuperviewDidResize:) name:NSViewBoundsDidChangeNotification object:observedView];
+    NSView *superview = [self superview];
+    NSView *observedView = [self enclosingScrollView] ? superview : self;
     
-    [self _recalculateGridSize];
-    [[self window] invalidateCursorRectsForView:self];
-    if ([[self window] isKeyWindow] == NO)
-        [self resetCursorRects];
+    // this can be send in a dealloc when the view hierarchy is decomposed
+    if (superview) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleSuperviewDidResize:) name:NSViewFrameDidChangeNotification object:observedView];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleSuperviewDidResize:) name:NSViewBoundsDidChangeNotification object:observedView];
+        
+        [self _recalculateGridSize];
+        [[self window] invalidateCursorRectsForView:self];
+        if ([self window] && [[self window] isKeyWindow] == NO)
+            [self resetCursorRects];
+    }
 }
 
 - (void)unbind:(NSString *)binding
