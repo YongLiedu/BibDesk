@@ -926,6 +926,15 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     return writableTypes;
 }
 
+- (NSString *)fileNameExtensionForType:(NSString *)typeName saveOperation:(NSSaveOperationType)saveOperation
+{
+    // this will never be called on 10.4, so we can safely call super
+    NSString *fileExtension = [super fileNameExtensionForType:typeName saveOperation:saveOperation];
+    if(fileExtension == nil)
+    	fileExtension = [[BDSKTemplate templateForStyle:documentTypeName] fileExtension];
+	return fileExtensions;
+}
+
 #define SAVE_ENCODING_VIEW_OFFSET 30.0
 #define SAVE_FORMAT_POPUP_OFFSET 31.0
 
@@ -1102,7 +1111,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
         items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
     
-    if ([docType isEqualToString:BDSKArchiveDocumentType]) {
+    if ([docType isEqualToString:BDSKArchiveDocumentType] || [docType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"tgz"]]) {
         success = [self writeArchiveToURL:fileURL forPublications:items error:outError];
     } else {
         NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
@@ -1345,7 +1354,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             if (outError) 
                 *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
         }
-    }else if ([aType isEqualToString:BDSKArchiveDocumentType]){
+    }else if ([aType isEqualToString:BDSKArchiveDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"tgz"]]){
         OBASSERT_NOT_REACHED("Should not save a fileWrapper for archive");
     }else{
         NSError *error = nil;
@@ -1386,7 +1395,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         data = [self RISDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKMinimalBibTeXDocumentType]){
         data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES relativeToPath:[[saveTargetURL path] stringByDeletingLastPathComponent] error:&error];
-    }else if ([aType isEqualToString:BDSKLTBDocumentType]){
+    }else if ([aType isEqualToString:BDSKLTBDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ltb"]]){
         data = [self LTBDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKEndNoteDocumentType]){
         data = [self endNoteDataForPublications:items];
