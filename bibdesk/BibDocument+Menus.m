@@ -284,8 +284,10 @@
         return [[previewer pdfView] document] != nil;
     else if (bottomPreviewDisplay == BDSKPreviewDisplayText)
         return [bottomPreviewTextView textStorage] != nil;
+    else if (sidePreviewDisplay == BDSKPreviewDisplayText)
+        return [sidePreviewTextView textStorage] != nil;
     else
-        return NO;
+        return YES;
 }
 
 - (BOOL) validateToggleToggleCustomCiteDrawerMenuItem:(NSMenuItem*) menuItem {
