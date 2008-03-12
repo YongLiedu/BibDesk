@@ -47,8 +47,6 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
 
 @implementation FVSliderCell
 
-- (BOOL)_usesCustomTrackImage { return YES; }
-
 - (void)drawBarInside:(NSRect)aRect flipped:(BOOL)flipped
 {
     [NSGraphicsContext saveGraphicsState];
@@ -57,8 +55,7 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
     NSRectFill(aRect);
     
     CGFloat radius = NSHeight(aRect) / 2;
-    NSBezierPath *innerPath, *outerPath = [NSBezierPath fv_bezierPathWithRoundRect:aRect xRadius:radius yRadius:radius];
-    NSRect track = NSInsetRect(aRect, 4.0, 4.0);
+    NSBezierPath *outerPath = [NSBezierPath fv_bezierPathWithRoundRect:aRect xRadius:radius yRadius:radius];
     CGFloat angle = flipped ? 90 : -90;
     Class gradientClass = NSClassFromString(@"NSGradient");
     
@@ -70,10 +67,6 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
     [outerPath stroke];
     
     // draw a dark background
-    radius = NSHeight(track) / 2;
-    innerPath = [NSBezierPath fv_bezierPathWithRoundRect:track xRadius:radius yRadius:radius];
-    [outerPath appendBezierPath:innerPath];
-    [outerPath setWindingRule:NSEvenOddWindingRule];
     if (gradientClass) {
         id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.4 alpha:0.6] endingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.6]] autorelease];
         [gradient drawInBezierPath:outerPath angle:angle];
@@ -83,50 +76,26 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
     }
     
     // draw the track
+    NSRect track = NSInsetRect(aRect, 4.0, 4.0);
+    radius = NSHeight(track) / 2;
+    NSBezierPath *innerPath = [NSBezierPath fv_bezierPathWithRoundRect:track xRadius:radius yRadius:radius];
     [innerPath addClip];
     if (gradientClass) {
-        id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.7] endingColor:[NSColor colorWithCalibratedWhite:0.3 alpha:0.7]] autorelease];
+        id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.3] endingColor:[NSColor colorWithCalibratedWhite:0.3 alpha:0.3]] autorelease];
         [gradient drawInBezierPath:innerPath angle:angle];
     } else {
-        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.7] setFill];
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.2] setFill];
         [innerPath fill];
     }
     
-    // draw a white outline for the track
-    [[NSColor whiteColor] setStroke];
+    // draw a dark outline for the track
+    [[NSColor colorWithCalibratedWhite:0.0 alpha:0.2] setStroke];
     [innerPath setLineWidth:1.5];
     [innerPath stroke];
     [innerPath setLineWidth:1.0];
     
     // if we don't save/restore, the knob gets clipped
     [NSGraphicsContext restoreGraphicsState];
-}
-
-- (void)drawKnob:(NSRect)knobRect
-{
-    knobRect = NSInsetRect(knobRect, 2.0, 2.0);
-    
-    Class gradientClass = NSClassFromString(@"NSGradient");
-    NSBezierPath *path = [NSBezierPath bezierPathWithOvalInRect:knobRect];
-    NSShadow *aShadow = [[[NSShadow alloc] init] autorelease];
-    
-    [aShadow setShadowBlurRadius:2.0];
-    [aShadow setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.4]];
-    
-    [NSGraphicsContext saveGraphicsState];
-    [aShadow set];
-    [[NSColor whiteColor] setFill];
-    [path fill];
-    [NSGraphicsContext restoreGraphicsState];
-    
-    if (gradientClass) {
-        [NSGraphicsContext saveGraphicsState];
-        id gradient = [[[gradientClass alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.0] endingColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.2]] autorelease];
-        [path addClip];
-        [gradient drawFromCenter:NSMakePoint(NSMidX(knobRect), NSMidY(knobRect) - 2.0) radius:0 toCenter:NSMakePoint(NSMidX(knobRect), NSMidY(knobRect)) radius:NSWidth(knobRect) / 2 options:0];
-        [NSGraphicsContext restoreGraphicsState];
-    }
-    
 }
 
 - (id)init
