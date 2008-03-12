@@ -1521,6 +1521,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             else
                 [fileView setDropIndex:anIndex dropOperation:FVDropBefore];
         }
+    } else if (dragOperation == NSDragOperationLink && ([NSApp currentModifierFlags] & NSCommandKeyMask) == 0) {
+        dragOp = NSDragOperationGeneric;
     }
     return dragOp;
 }
