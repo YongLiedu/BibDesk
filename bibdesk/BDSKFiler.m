@@ -476,6 +476,7 @@
     NSString *fix = nil;
     int statusFlag = BDSKNoError;
     BOOL ignoreMove = NO;
+    BOOL isDir;
     
     // filemanager needs aliases resolved for moving and existence checks
     // ...however we want to move aliases, not their targets
@@ -496,7 +497,7 @@
     
     if(statusFlag == BDSKNoError){
         if([self fileExistsAtPath:resolvedNewPath]){
-            if([self fileExistsAtPath:resolvedPath]){
+            if([self fileExistsAtPath:resolvedPath isDirectory:&isDir]){
                 if(force){
                     NSString *backupPath = [[self desktopDirectory] stringByAppendingPathComponent:[resolvedNewPath lastPathComponent]];
                     backupPath = [self uniqueFilePathWithName:[resolvedNewPath lastPathComponent] atPath:[self desktopDirectory]];
@@ -541,7 +542,7 @@
         if(statusFlag == BDSKNoError && ignoreMove == NO){
             // get the Finder comment (spotlight comment)
             comment = [self commentForURL:[NSURL fileURLWithPath:resolvedPath]];
-            NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
+            NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] fileType];
  
             // create parent directories if necessary (OmniFoundation)
             if (NO == [self createPathToFile:resolvedNewPath attributes:nil error:NULL]) {
@@ -549,7 +550,7 @@
                 statusFlag = BDSKCannotCreateParentErrorMask;
             }
             if(statusFlag == BDSKNoError){
-                if([fileType isEqualToString:NSFileTypeDirectory] && force == NO && 
+                if([fileType isEqualToString:NSFileTypeDirectory] && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:resolvedPath] == NO && force == NO && 
                    [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnMoveFolderKey]){
                     BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")
                                                          defaultButton:NSLocalizedString(@"Move", @"Button title")
