@@ -566,43 +566,52 @@
                     status = NSLocalizedString(@"Shouldn't move folder.", @"AutoFile error message");
                     fix = NSLocalizedString(@"Move anyway.", @"AutoFile fix");
                     statusFlag = BDSKCannotMoveFileErrorMask;
-                }else{
+                }else if([fileType isEqualToString:NSFileTypeSymbolicLink]){
                     // unfortunately NSFileManager cannot reliably move symlinks...
-                    if([fileType isEqualToString:NSFileTypeSymbolicLink]){
-                        NSString *pathContent = [self pathContentOfSymbolicLinkAtPath:resolvedPath];
-                        if([pathContent isAbsolutePath] == NO){// it links to a relative path
-                            pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
-                        }
-                        if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
-                            status = NSLocalizedString(@"Unable to move symbolic link.", @"AutoFile error message");
-                            statusFlag = BDSKCannotMoveFileErrorMask;
-                        }else{
-                            if(![self removeFileAtPath:resolvedPath handler:self]){
-                                if (force == NO){
-                                    status = NSLocalizedString(@"Unable to remove original.", @"AutoFile error message");
-                                    fix = NSLocalizedString(@"Copy original file.", @"AutoFile fix");
-                                    statusFlag = BDSKCannotRemoveFileErrorMask;
-                                    //cleanup: remove new file
-                                    [self removeFileAtPath:resolvedNewPath handler:nil];
-                                }
-                            }
-                        }
-                    }else if(![self movePath:resolvedPath toPath:resolvedNewPath handler:self]){
-                        if([self fileExistsAtPath:resolvedNewPath]){ // error remove original file
-                            if(force == NO){
-                                status = NSLocalizedString(@"Unable to remove original file.", @"AutoFile error message");
+                    NSString *pathContent = [self pathContentOfSymbolicLinkAtPath:resolvedPath];
+                    if([pathContent isAbsolutePath] == NO){// it links to a relative path
+                        pathContent = [[[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent] stringByStandardizingPath];
+                        pathContent = [[resolvedNewPath stringByDeletingLastPathComponent] relativePathToFilename:pathContent];
+                    }
+                    if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
+                        status = NSLocalizedString(@"Unable to move symbolic link.", @"AutoFile error message");
+                        statusFlag = BDSKCannotMoveFileErrorMask;
+                    }else{
+                        if(![self removeFileAtPath:resolvedPath handler:nil]){
+                            if (force == NO){
+                                status = NSLocalizedString(@"Unable to remove original.", @"AutoFile error message");
                                 fix = NSLocalizedString(@"Copy original file.", @"AutoFile fix");
                                 statusFlag = BDSKCannotRemoveFileErrorMask;
-                                // cleanup: move back
-                                if(![self movePath:resolvedNewPath toPath:resolvedPath handler:nil] && [self fileExistsAtPath:resolvedPath]){
-                                    [self removeFileAtPath:resolvedNewPath handler:nil];
-                                }
+                                //cleanup: remove new file
+                                [self removeFileAtPath:resolvedNewPath handler:nil];
                             }
-                        }else{ // other error while moving file
-                            status = NSLocalizedString(@"Unable to move file.", @"AutoFile error message");
-                            statusFlag = BDSKCannotMoveFileErrorMask;
                         }
                     }
+                }else if([self movePath:resolvedPath toPath:resolvedNewPath handler:nil]){
+                    if([NSString isEmptyString:comment] == NO){
+                        // set the Finder comment (spotlight comment)
+                        [self setComment:comment forURL:[NSURL fileURLWithPath:resolvedNewPath]];
+                    }
+                    if([[resolvedPath pathExtension] caseInsensitiveCompare:@"pdf"] == NSOrderedSame){
+                        NSString *notesPath = [[resolvedPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"skim"];
+                        NSString *newNotesPath = [[resolvedNewPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"skim"];
+                        if([self fileExistsAtPath:notesPath] && [self fileExistsAtPath:newNotesPath] == NO){
+                            [self movePath:notesPath toPath:newNotesPath handler:nil];
+                        }
+                    }
+                }else if([self fileExistsAtPath:resolvedNewPath]){ // error remove original file
+                    if(force == NO){
+                        status = NSLocalizedString(@"Unable to remove original file.", @"AutoFile error message");
+                        fix = NSLocalizedString(@"Copy original file.", @"AutoFile fix");
+                        statusFlag = BDSKCannotRemoveFileErrorMask;
+                        // cleanup: move back
+                        if(![self movePath:resolvedNewPath toPath:resolvedPath handler:nil] && [self fileExistsAtPath:resolvedPath]){
+                            [self removeFileAtPath:resolvedNewPath handler:nil];
+                        }
+                    }
+                }else{ // other error while moving file
+                    status = NSLocalizedString(@"Unable to move file.", @"AutoFile error message");
+                    statusFlag = BDSKCannotMoveFileErrorMask;
                 }
             }
         }
@@ -617,9 +626,6 @@
             //NSLog(@"error \"%@\" occurred; suggested fix is \"%@\"", *error, fix);
         }
         return NO;
-    }else if([NSString isEmptyString:comment] == NO){
-        // set the Finder comment (spotlight comment)
-        [self setComment:comment forURL:[NSURL fileURLWithPath:resolvedNewPath]];
     }
     return YES;
 }
