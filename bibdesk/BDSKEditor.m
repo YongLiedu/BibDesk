@@ -1434,6 +1434,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSEnumerator *enumerator = [newURLs objectEnumerator];
     NSURL *aURL;
     NSUInteger idx = [aSet firstIndex];
+    
     while (NSNotFound != idx) {
         if ((aURL = [enumerator nextObject]) && 
             (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
@@ -1444,7 +1445,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [oldURL release];
             [publication insertObject:aFile inFilesAtIndex:idx];
             [[self document] userAddedURL:aURL forPublication:publication];
-            [publication autoFileLinkedFile:aFile];
+            if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
+                [publication autoFileLinkedFile:aFile];
             [aFile release];
         }
         idx = [aSet indexGreaterThanIndex:idx];
@@ -1464,7 +1466,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
             [publication insertObject:aFile inFilesAtIndex:idx - offset];
             [[self document] userAddedURL:aURL forPublication:publication];
-            [publication autoFileLinkedFile:aFile];
+            if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
+                [publication autoFileLinkedFile:aFile];
             [aFile release];
         } else {
             // the indexes in aSet assume that we inserted the file
