@@ -87,6 +87,9 @@
     // NSCell's highlight drawing does not look correct against a dark background, so override it completely
     NSColor *bgColor = nil;
     NSColor *arrowColor = nil;
+    NSColor *strokeColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
+    NSRect rect = NSInsetRect(frame, 1.0, 1.0);
+    
     if ([self isEnabled] == NO) {
         bgColor = [NSColor colorWithCalibratedWhite:0.3 alpha:0.5];
         arrowColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
@@ -98,15 +101,20 @@
         arrowColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.9];
     }
     
+    [NSGraphicsContext saveGraphicsState];
+    
     [bgColor setFill];
-    [[NSBezierPath bezierPathWithOvalInRect:frame] fill];
+    [strokeColor setStroke];
+    [[NSBezierPath bezierPathWithOvalInRect:rect] fill];
+    [[NSBezierPath bezierPathWithOvalInRect:NSInsetRect(frame, 0.5, 0.5)] stroke];
     
     CGContextRef ctxt = [[NSGraphicsContext currentContext] graphicsPort];
-    CGContextSaveGState(ctxt);
-    CGContextTranslateCTM(ctxt, NSMinX(frame), NSMinY(frame));
+    CGContextTranslateCTM(ctxt, NSMinX(rect), NSMinY(rect));
+    
     [arrowColor setFill];
-    [[self arrowBezierPathWithSize:frame.size] fill];
-    CGContextRestoreGState(ctxt);
+    [[self arrowBezierPathWithSize:rect.size] fill];
+    
+    [NSGraphicsContext restoreGraphicsState];
 }
 
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)untilMouseUp {
