@@ -130,6 +130,8 @@
 	NSTextView *dragFieldEditor;
     
     IBOutlet FileView *fileView;
+    
+    NSButton *disableAutoFileButton;
 }
 
 /*!

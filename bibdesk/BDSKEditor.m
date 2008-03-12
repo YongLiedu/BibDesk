@@ -301,6 +301,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [tableCellFormatter release];
     [crossrefFormatter release];
     [citationFormatter release];
+    [disableAutoFileButton release];
     [super dealloc];
 }
 
@@ -513,7 +514,19 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
-	
+    
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]) {
+        if (disableAutoFileButton == nil) {
+            disableAutoFileButton = [[NSButton alloc] init];
+            [disableAutoFileButton setBezelStyle:NSRoundedBezelStyle];
+            [disableAutoFileButton setButtonType:NSSwitchButton];
+            [disableAutoFileButton setTitle:NSLocalizedString(@"Disable Auto File", @"Choose local file button title")];
+            [disableAutoFileButton sizeToFit];
+        }
+        [disableAutoFileButton setState:NSOffState];
+        [oPanel setAccessoryView:disableAutoFileButton];
+	}
+    
     [oPanel beginSheetForDirectory:[path stringByDeletingLastPathComponent] 
                               file:[path lastPathComponent] 
                     modalForWindow:[self window] 
@@ -539,7 +552,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [oldURL release];
             [publication insertObject:aFile inFilesAtIndex:anIndex];
             [[self document] userAddedURL:aURL forPublication:publication];
-            [publication autoFileLinkedFile:aFile];
+            if ([disableAutoFileButton state] == NSOffState)
+                [publication autoFileLinkedFile:aFile];
         } else {
             [publication addFileForURL:aURL autoFile:YES runScriptHook:YES];
         }
