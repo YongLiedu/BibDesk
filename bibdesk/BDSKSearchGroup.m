@@ -448,7 +448,7 @@ NSString *BDSKSearchGroupISI = @"isi";
         while (key = [keyEnum nextObject]) {
             NSString *value = [[serverInfo options] objectForKey:key];
             if ([key isEqualToString:@"removeDiacritics"])
-                value = [serverInfo removeDiacritics] ? @"y" : @"n";
+                value = [serverInfo removeDiacritics] ? @"1" : @"0";
             else if (username && ([key isEqualToString:@"username"] || [key isEqualToString:@"password"]))
                 continue;
             [string appendFormat:@"&%@=%@", key, [value stringByAddingPercentEscapesIncludingReserved]];
