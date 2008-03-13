@@ -1021,9 +1021,12 @@
 				break;
 			}
 			string = [self stringBySanitizingString:string forField:BDSKCiteKeyString inFileType:type]; // cite-key sanitization is strict, so we use that for fieldnames
-			string = [string fieldName]; // we need to have BibTeX field names capitalized
-			if ([string isEqualToString:@"Cite-Key"] || [string isEqualToString:@"Citekey"])
+			if ([string caseInsensitiveCompare:BDSKCiteKeyString] == NSOrderedSame || [string caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame || [string caseInsensitiveCompare:@"Citekey"] == NSOrderedSame)
 				string = BDSKCiteKeyString;
+			else if ([string caseInsensitiveCompare:BDSKPubTypeString] == NSOrderedSame)
+				string = BDSKPubTypeString;
+            else
+                string = [string fieldName]; // we need to have BibTeX field names capitalized
 			AppendStringToFormatStrings(@"{", specAttr);
 			AppendStringToFormatStrings(string, argAttr);
 			AppendStringToFormatStrings(@"}", specAttr);
