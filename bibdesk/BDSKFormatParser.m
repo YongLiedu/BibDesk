@@ -92,6 +92,7 @@
 	NSScanner *scanner = [NSScanner scannerWithString:format];
     unsigned int uniqueNumber;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
+    NSString *uniqueSeparator = nil;
 	NSCharacterSet *slashCharSet = [NSCharacterSet characterSetWithCharactersInString:@"/"];
 	BOOL isLocalFile = [fieldName isLocalFileField] || [fieldName isEqualToString:BDSKLocalFileString];
 	
@@ -654,6 +655,10 @@
 						uniqueSpecifier = specifier;
 						prefixStr = parsedStr;
 						parsedStr = [NSMutableString string];
+                        if ([scanner scanString:@"[" intoString:NULL]) {
+                            [scanner scanUpToString:@"]" intoString:&uniqueSeparator];
+                            [scanner scanString:@"]" intoString:NULL];
+                        }
 						if (NO == [scanner scanUnsignedInt:&uniqueNumber]) uniqueNumber = 1;
 					}
 					else {
@@ -675,6 +680,12 @@
         if (suggestion && ((uniqueNumber == 0 && suggestionLength >= 0) || suggestionLength == uniqueNumber) &&
             (prefixLength == 0 || [suggestion hasPrefix:prefixStr]) && (suffixLength == 0 || [suggestion hasSuffix:parsedStr])) {
             suggestedUnique = [suggestion substringWithRange:NSMakeRange(prefixLength, suggestionLength)];
+            if ([uniqueSeparator length] && suggestionLength) {
+                if (suggestionLength > [uniqueSeparator length] && [suggestedUnique hasPrefix:uniqueSeparator])
+                    suggestedUnique = [suggestedUnique substringFromIndex:[uniqueSeparator length]];
+                else
+                    suggestedUnique = nil;
+            }
         }
 		switch (uniqueSpecifier) {
 			case 'u':
@@ -684,6 +695,7 @@
                 } else {
                     [parsedStr setString:[self uniqueString:prefixStr 
                                                      suffix:parsedStr
+                                                  separator:uniqueSeparator
                                                    forField:fieldName
                                                      ofItem:pub
                                               numberOfChars:uniqueNumber 
@@ -698,6 +710,7 @@
                 } else {
                     [parsedStr setString:[self uniqueString:prefixStr 
                                                      suffix:parsedStr
+                                                  separator:uniqueSeparator
                                                    forField:fieldName
                                                      ofItem:pub
                                               numberOfChars:uniqueNumber 
@@ -712,6 +725,7 @@
                 } else {
                     [parsedStr setString:[self uniqueString:prefixStr 
                                                      suffix:parsedStr
+                                                  separator:uniqueSeparator
                                                    forField:fieldName
                                                      ofItem:pub
                                               numberOfChars:uniqueNumber 
@@ -737,6 +751,7 @@
 // returns a 'valid' string rather than a 'unique' one
 + (NSString *)uniqueString:(NSString *)baseStr
 					suffix:(NSString *)suffix
+                 separator:(NSString *)separator
 				  forField:(NSString *)fieldName 
 					ofItem:(id <BDSKParseableItem>)pub
 			 numberOfChars:(unsigned int)number 
@@ -745,13 +760,14 @@
 					 force:(BOOL)force {
 	
 	NSString *uniqueStr = nil;
+    NSString *fullBaseStr = baseStr;
 	char c;
 	
 	if (number > 0) {
 		for (c = fromChar; c <= toChar; c++) {
 			// try with the first added char set to c
-			uniqueStr = [baseStr stringByAppendingFormat:@"%C", c];
-			uniqueStr = [self uniqueString:uniqueStr suffix:suffix forField:fieldName ofItem:pub numberOfChars:number - 1 from:fromChar to:toChar force:NO];
+			uniqueStr = [baseStr stringByAppendingFormat:@"%@%C", separator ? separator : @"", c];
+			uniqueStr = [self uniqueString:uniqueStr suffix:suffix separator:nil forField:fieldName ofItem:pub numberOfChars:number - 1 from:fromChar to:toChar force:NO];
 			if ([self stringIsValid:uniqueStr forField:fieldName ofItem:pub])
 				return uniqueStr;
 		}
@@ -762,7 +778,7 @@
 	
 	if (force && NO == [self stringIsValid:uniqueStr forField:fieldName ofItem:pub]) {
 		// not unique yet, so try with 1 more char
-		return [self uniqueString:baseStr suffix:suffix forField:fieldName ofItem:pub numberOfChars:number + 1 from:fromChar to:toChar force:YES];
+		return [self uniqueString:baseStr suffix:suffix separator:separator forField:fieldName ofItem:pub numberOfChars:number + 1 from:fromChar to:toChar force:YES];
 	}
 	
 	return uniqueStr;
@@ -927,7 +943,7 @@
 		validLocalFileSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"lLe"] retain];
 		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
 		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fcsi"] retain];
-		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfs"] retain];
+		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfsuUn"] retain];
 		validAuthorSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApP"] retain];
         
 		NSFont *font = [NSFont systemFontOfSize:0];

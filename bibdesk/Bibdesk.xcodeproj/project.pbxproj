@@ -895,7 +895,7 @@
 		27D4FB5807DE7A97001CAB00 /* HackingBibDesk.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = HackingBibDesk.rtf; sourceTree = "<group>"; };
 		27E89E220805E9F500E4DA08 /* applehelp.init */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = applehelp.init; path = "BibDesk Help/applehelp.init"; sourceTree = "<group>"; };
 		27E89E230805E9F500E4DA08 /* version.texi */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = version.texi; path = "English.lproj/BibDesk Help/version.texi"; sourceTree = "<group>"; };
-		27E89E240805E9F500E4DA08 /* bibdesk.texi */ = {isa = PBXFileReference; fileEncoding = 4; languageSpecificationIdentifier = man; lastKnownFileType = text; name = bibdesk.texi; path = "English.lproj/BibDesk Help/bibdesk.texi"; sourceTree = "<group>"; };
+		27E89E240805E9F500E4DA08 /* bibdesk.texi */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = bibdesk.texi; path = "English.lproj/BibDesk Help/bibdesk.texi"; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97319FDCFA39411CA2CEA /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/MainMenu.nib; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };

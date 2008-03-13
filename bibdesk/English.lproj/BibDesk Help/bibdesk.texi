@@ -3699,18 +3699,12 @@ Possible format specifiers are given in the table below.
 @tab Arbitrary field switch, with (optional) values for Yes, No and Mixed, or empty and non-empty for generic fields, and maximal length
 @item @specargparam{%i, Key, 0 }
 @tab Arbitrary document info key, with (optional) maximal length
-@item @specparam{%r, 1}
-@tab Random lowercase letter, with (optional) number of characters (deprecated, use %u)
-@item @specparam{%R, 1}
-@tab Random uppercase letter, with (optional) number of characters (deprecated, use %U)
-@item @specparam{%d, 1}
-@tab Random number, with (optional) number of digits (deprecated, use %n)
-@item @specparam{%u, 1}
-@tab Unique lowercase letter, with (optional) minimum number of characters (use only once)
-@item @specparam{%U, 1}
-@tab Unique uppercase letter, with (optional) minimum number of characters (use only once)
-@item @specparam{%n, 1}
-@tab Unique number, with (optional) minimum number of characters (use only once)
+@item @specparam{%u, []1}
+@tab Unique lowercase letter, with (optional) separator and minimum number of characters (use only once)
+@item @specparam{%U, []1}
+@tab Unique uppercase letter, with (optional) separator and minimum number of characters (use only once)
+@item @specparam{%n, []1}
+@tab Unique number, with (optional) separator and minimum number of characters (use only once)
 @item @spec{%0}
 @tab Escaped digit (0-9)
 @item @spec{%%}
@@ -3742,6 +3736,10 @@ and the second one is the separator between the last name and the first initial.
 The optional parameter delimited by square brackets after a title specifier @spec{%T} 
 denotes the maximum length of words to be dropped. If this arguments is missing, 
 words with length up to 3 are not counted, but they are included. 
+
+The optional parameter delimited by square brackets after one of the @samp{unique} specifiers 
+@spec{%u}, @spec{%U} and @spec{%n} is a separator inserted before the added unique characters. 
+This character is not inserted when no unique characters are added.
 
 In the local file format the slash-character (/) has a special meaning, as it is used 
 to build the (UNIX style) folder hierarchy. This is usually not what you want generated 

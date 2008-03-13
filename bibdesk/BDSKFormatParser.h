@@ -92,6 +92,7 @@
 */
 + (NSString *)uniqueString:(NSString *)baseString 
 					suffix:(NSString *)suffix
+                 separator:(NSString *)separator
 				  forField:(NSString *)fieldName 
 					ofItem:(id <BDSKParseableItem>)pub
 			 numberOfChars:(unsigned int)number 
