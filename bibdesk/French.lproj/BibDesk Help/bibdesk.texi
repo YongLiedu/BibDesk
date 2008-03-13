@@ -3699,7 +3699,7 @@ Possible format specifiers are given in the table below.
 @item @spec{%b}
 @tab Bibliography document file name, without extension
 @item @specargparam{%f, Field, [/]0 }
-@tab Arbitrary field
+@tab Arbitrary field, also @samp{Cite Key} or @samp{BibTeX Type}
 @tab slash replacement, max length
 @item @specargparam{%c, Field, 3}
 @tab Arbitrary field as initials (acronym)
