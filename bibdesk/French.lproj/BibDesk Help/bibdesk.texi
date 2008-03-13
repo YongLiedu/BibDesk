@@ -3661,20 +3661,26 @@ Possible format specifiers are given in the table below.
 
 @c End of macro definitions
 
-@multitable {@b{%s\{}\i{Field}\b{[][][]\}0}} {Arbitrary field as initials, e.g. @samp{JCIS} for @samp{J. of Colloid and Interface Science}, with (optional) length of words to ignore}
-@headitem Specifier @tab Replaced content description
+@multitable {@b{%s\{}\i{Field}\b{[][][]\}0}} {Bibliography document file name, without extension} {name separator, initial separator, et al., max number of editors}
+@headitem Specifier @tab Replaced content description @tab Optional parameters
 @item @specparam{%a, [][]00}
-@tab Author last names, with (optional) maximal number of authors and number of characters
+@tab Author last names
+@tab name separator, et al., max number of names, max name length
 @item @specparam{%A, [;][.][]0}
-@tab Author last names with initials, with (optional) maximal number of authors
+@tab Author last names with initials
+@tab name separator, initial separator, et al., max number of names
 @item @specparam{%p, [][]00}
-@tab Author or editor last names, with (optional) maximal number of authors and number of characters
+@tab Author or editor last names
+@tab name separator, et al., max number of names, max name length
 @item @specparam{%P, [;][.][]0}
-@tab Author or editor last names with initials, with (optional) maximal number of authors
+@tab Author or editor last names with initials
+@tab name separator, initial separator, et al., max number of names
 @item @specparam{%t, 0 }
-@tab Title, with (optional) maximal length
+@tab Title
+@tab max length
 @item @specparam{%T, []0 }
-@tab Title, with (optional) maximal number of words
+@tab Title
+@tab max number of words
 @item @spec{%y}
 @tab Year without century
 @item @spec{%Y}
@@ -3682,29 +3688,37 @@ Possible format specifiers are given in the table below.
 @item @spec{%m}
 @tab Month as decimal number
 @item @specparam{%k, [/]0 }
-@tab Keywords concatenated together, with (optional) maximal number of keywords. 
+@tab Keywords concatenated together
+@tab slash replacement, max number of keywords
 @item @spec{%l}
 @tab File name of the linked file, without extension
 @item @spec{%L}
 @tab File name of the linked file, with extension
 @item @spec{%e}
-@tab File extension of the linked file (including the period)
+@tab File extension of the linked file, including dot
 @item @spec{%b}
 @tab Bibliography document file name, without extension
 @item @specargparam{%f, Field, [/]0 }
-@tab Arbitrary field, with (optional) maximal length
+@tab Arbitrary field
+@tab slash replacement, max length
 @item @specargparam{%c, Field, 3}
-@tab Arbitrary field as initials, e.g. @samp{JCIS} for @samp{J. of Colloid and Interface Science}, with (optional) length of words to ignore
+@tab Arbitrary field as initials (acronym)
+@tab max length of words to ignore
 @item @specargparam{%s, Field, [][][]0 }
-@tab Arbitrary field switch, with (optional) values for Yes, No and Mixed, or empty and non-empty for generic fields, and maximal length
+@tab Arbitrary field switch
+@tab @samp{Yes}/non-empty, @samp{No}/empty, @samp{Mixed}, max length
 @item @specargparam{%i, Key, 0 }
-@tab Arbitrary document info key, with (optional) maximal length
+@tab Arbitrary document info key
+@tab max length
 @item @specparam{%u, []1}
-@tab Unique lowercase letter, with (optional) separator and minimum number of characters (use only once)
+@tab Unique lowercase letter (use only once)
+@tab separator, min number of characters
 @item @specparam{%U, []1}
-@tab Unique uppercase letter, with (optional) separator and minimum number of characters (use only once)
+@tab Unique uppercase letter (use only once)
+@tab separator, min number of characters
 @item @specparam{%n, []1}
-@tab Unique number, with (optional) separator and minimum number of characters (use only once)
+@tab Unique number (use only once)
+@tab separator, min number of characters
 @item @spec{%0}
 @tab Escaped digit (0-9)
 @item @spec{%%}
@@ -3733,8 +3747,8 @@ can be used to control the separator between author names and an optional @samp{
 For @spec{%A}, the first one is the separator between two author names, 
 and the second one is the separator between the last name and the first initial. 
 
-The optional parameter delimited by square brackets after a title specifier @spec{%T} 
-denotes the maximum length of words to be dropped. If this arguments is missing, 
+The optional parameter delimited by square brackets after a title specifier @spec{%T} denotes 
+the maximum length of words to be dropped. If this arguments is missing, 
 words with length up to 3 are not counted, but they are included. 
 
 The optional parameter delimited by square brackets after one of the @samp{unique} specifiers 
