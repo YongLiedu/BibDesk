@@ -3475,7 +3475,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ -d \"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app\" ]; then\nif [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\necho \"*** Indexing Tiger Help ***\"\nfor LOC_DIR in \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"/*.lproj; do \\\n\"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app/Contents/MacOS/Help Indexer\" \\\n\"${LOC_DIR}/BibDesk Help\" \\\n-Tokenizer 1 \\\n-ShowProgress NO \\\n-LogStyle 2 \\\n-IndexAnchors YES \\\n-TigerIndexing YES \\\n-GenerateSummaries YES \\\n-Stopwords en \\\n-MinTermLength 3 >&2;\\\ndone\nfi\nexit 0";
+			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\necho \"*** Indexing Help ***\"\nfor LOC_DIR in \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"/*.lproj; do \\\n\"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app/Contents/MacOS/Help Indexer\" \\\n\"${LOC_DIR}/BibDesk Help\" \\\n-Tokenizer 1 \\\n-ShowProgress NO \\\n-LogStyle 2 \\\n-IndexAnchors YES \\\n-TigerIndexing YES \\\n-GenerateSummaries YES \\\n-Stopwords en \\\n-MinTermLength 3 >&2;\\\ndone\nexit 0";
 		};
 		F95C5E850D10E52400C81970 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
