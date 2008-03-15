@@ -41,11 +41,6 @@
 #import "FVIcon_Private.h"
 
 @interface FVMovieIcon : FVImageIcon
-{
-@private
-    BOOL            _movieFailed;
-    FVIcon         *_fallbackIcon;
-}
 
 + (BOOL)canInitWithURL:(NSURL *)url;
 

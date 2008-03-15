@@ -50,6 +50,8 @@
     NSSize          _desiredSize;
     BOOL            _drawsLinkBadge;
     char           *_diskCacheName;
+    BOOL            _loadFailed;
+    FVIcon         *_fallbackIcon;
     pthread_mutex_t _mutex;
 }
 - (id)initWithURL:(NSURL *)aURL;

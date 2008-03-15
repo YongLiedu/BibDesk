@@ -106,21 +106,8 @@ static NSInvocation *_movieInvocation = nil;
     return [QTMovie canInitWithURL:url];
 }
 
-- (id)initWithURL:(NSURL *)aURL
-{
-    self = [super initWithURL:aURL];
-    if (self) {
-        
-        // We need a failure bit and fallback icon because some movies have external resources that can't be found
-        _movieFailed = NO;
-        _fallbackIcon = nil;          
-    }
-    return self;
-}
-
 - (void)dealloc
 {
-    [_fallbackIcon release];
     [super dealloc];
 }
 
@@ -129,84 +116,13 @@ static NSInvocation *_movieInvocation = nil;
     return NULL != _fullImage;
 }
 
-- (void)releaseResources
-{
-    [super releaseResources];
-    [self lock];
-    [_fallbackIcon releaseResources];
-    [self unlock];
-}
-
-- (BOOL)needsRenderForSize:(NSSize)size
-{
-    BOOL needsRender = NO;
-    if ([self tryLock]) {
-        
-        if (YES == _movieFailed) {
-            needsRender = [_fallbackIcon needsRenderForSize:size];
-            [self unlock];
-        }
-        else {
-            [self unlock];
-            needsRender = [super needsRenderForSize:size];
-        }
-
-    }
-    return needsRender;
-}
-
 // object is locked while this is called, so we can manipulate ivars
 - (CFDataRef)_copyDataForImageSourceWhileLocked
 {
     NSAssert2([self tryLock] == NO, @"*** threading violation *** -[%@ %@] requires caller to lock self", [self class], NSStringFromSelector(_cmd));
     
-    // !!! cache the resulting images to disk unconditionally, in order to avoid hitting the main thread again
-    CFDataRef imageData = [[self class] _copyTIFFDataFromMovieOnMainThreadWithURL:_fileURL];
-    if (NULL == imageData) {
-        _movieFailed = YES;
-        if (nil == _fallbackIcon)
-            _fallbackIcon = [[FVFinderIcon alloc] initWithFinderIconOfURL:_fileURL];
-    }
-    return imageData;
-}
-
-- (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
-{
-    if ([self tryLock]) {
-        if (YES == _movieFailed && nil != _fallbackIcon) {
-            // let drawInRect: handle the rect conversion
-            [_fallbackIcon fastDrawInRect:dstRect ofContext:context];
-            
-            if (_drawsLinkBadge)
-                [self _badgeIconInRect:dstRect ofContext:context];
-            [self unlock];
-        }
-        else {
-            [self unlock];
-            [super fastDrawInRect:dstRect ofContext:context];
-        }
-    }
-    else {
-        [self _drawPlaceholderInRect:dstRect ofContext:context];
-    }
-}
-
-- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
-{
-    // locking immediately blocks the main thread if we have a huge image that's loading via ImageIO
-    BOOL didLock = ([self tryLock]);
-    if (didLock && (YES == _movieFailed && nil != _fallbackIcon)) {
-        [_fallbackIcon drawInRect:dstRect ofContext:context];
-        
-        if (_drawsLinkBadge)
-            [self _badgeIconInRect:dstRect ofContext:context];
-        
-        [self unlock];
-    }
-    else {
-        if (didLock) [self unlock];
-        [super drawInRect:dstRect ofContext:context];
-    }
+    // superclass will cache the resulting images to disk unconditionally, in order to avoid hitting the main thread again
+    return [[self class] _copyTIFFDataFromMovieOnMainThreadWithURL:_fileURL];
 }
 
 @end

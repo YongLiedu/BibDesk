@@ -37,6 +37,7 @@
  */
 
 #import "FVImageIcon.h"
+#import "FVFinderIcon.h"
 
 @implementation FVImageIcon
 
@@ -65,6 +66,10 @@ static const NSUInteger FVICONCACHE_THRESHOLD = 1024;
         _diskCacheName = [FVIconCache createDiskCacheNameWithURL:_fileURL];
         _thumbnailSize = NSZeroSize;
         
+        // QTMovie fails regularly, and I've also seen a few images that ImageIO won't load; this avoids looping trying to render them
+        _fallbackIcon = nil;
+        _loadFailed = NO;
+        
         if (pthread_mutex_init(&_mutex, NULL) != 0)
             perror("pthread_mutex_init");             
     }
@@ -78,6 +83,7 @@ static const NSUInteger FVICONCACHE_THRESHOLD = 1024;
     CGImageRelease(_thumbnail);
     CGImageRelease(_fullImage);
     free(_diskCacheName);
+    [_fallbackIcon release];
     [super dealloc];
 }
 
@@ -87,7 +93,7 @@ static const NSUInteger FVICONCACHE_THRESHOLD = 1024;
 
 - (BOOL)canReleaseResources;
 {
-    return NULL != _fullImage || NULL != _thumbnail;
+    return NULL != _fullImage || NULL != _thumbnail || [_fallbackIcon canReleaseResources];
 }
 
 - (void)releaseResources
@@ -97,6 +103,7 @@ static const NSUInteger FVICONCACHE_THRESHOLD = 1024;
     _fullImage = NULL;
     CGImageRelease(_thumbnail);
     _thumbnail = NULL;
+    [_fallbackIcon releaseResources];
     [self unlock];
 }
 
@@ -109,7 +116,9 @@ static const NSUInteger FVICONCACHE_THRESHOLD = 1024;
     // trylock needed for scrolling, though
     BOOL needsRender = NO;
     if ([self tryLock]) {
-        if (FVShouldDrawFullImageWithThumbnailSize(size, _thumbnailSize))
+        if (YES == _loadFailed)
+            needsRender = [_fallbackIcon needsRenderForSize:size];
+        else if (FVShouldDrawFullImageWithThumbnailSize(size, _thumbnailSize))
             needsRender = (NULL == _fullImage);
         else
             needsRender = (NULL == _thumbnail);
@@ -129,6 +138,8 @@ static const NSUInteger FVICONCACHE_THRESHOLD = 1024;
 {      
     
     [self lock];
+    
+    [_fallbackIcon renderOffscreen];
     
     // !!! early returns here after a cache check
     if (NULL != _fullImage && NULL != _thumbnail) {
@@ -204,12 +215,25 @@ static const NSUInteger FVICONCACHE_THRESHOLD = 1024;
         CFRelease(src);
     } 
     
+    if (NULL == _thumbnail && NULL == _fullImage) {
+        _loadFailed = YES;
+        if (nil == _fallbackIcon)
+            _fallbackIcon = [[FVFinderIcon alloc] initWithFinderIconOfURL:_fileURL];
+    }        
+    
     [self unlock];
 }    
 
 - (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
 {
     if ([self tryLock]) {
+        
+        if (YES == _loadFailed && nil != _fallbackIcon) {
+            [_fallbackIcon fastDrawInRect:dstRect ofContext:context];
+            if (_drawsLinkBadge)
+                [self _badgeIconInRect:dstRect ofContext:context];
+        }
+        
         if (_thumbnail) {
             CGContextDrawImage(context, [self _drawingRectWithRect:dstRect], _thumbnail);
             [self unlock];
@@ -231,20 +255,30 @@ static const NSUInteger FVICONCACHE_THRESHOLD = 1024;
 {
     // locking immediately blocks the main thread if we have a huge image that's loading via ImageIO
     BOOL didLock = ([self tryLock]);
-    if (didLock && (NULL != _thumbnail || NULL != _fullImage)) {
+    if (didLock) {
         
-        CGRect drawRect = [self _drawingRectWithRect:dstRect];
-        CGImageRef image;
+        if (NULL != _thumbnail || NULL != _fullImage) {
+            CGRect drawRect = [self _drawingRectWithRect:dstRect];
+            CGImageRef image;
 
-        // compare against dstRect, since that's what needsRenderForSize: uses
-        if (FVShouldDrawFullImageWithThumbnailSize(dstRect.size, _thumbnailSize) && _fullImage)
-            image = _fullImage;
-        else 
-            image = _thumbnail;
+            // compare against dstRect, since that's what needsRenderForSize: uses
+            if (FVShouldDrawFullImageWithThumbnailSize(dstRect.size, _thumbnailSize) && _fullImage)
+                image = _fullImage;
+            else 
+                image = _thumbnail;
+            
+            CGContextDrawImage(context, drawRect, image);
+        } 
+        else if (YES == _loadFailed && nil != _fallbackIcon) {
+            [_fallbackIcon drawInRect:dstRect ofContext:context];
+        }
+        else {
+            [self _drawPlaceholderInRect:dstRect ofContext:context];
+        }
         
-        CGContextDrawImage(context, drawRect, image);
         if (_drawsLinkBadge)
             [self _badgeIconInRect:dstRect ofContext:context];
+        
     }
     else {
         [self _drawPlaceholderInRect:dstRect ofContext:context];
