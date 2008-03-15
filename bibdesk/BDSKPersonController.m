@@ -587,7 +587,7 @@
         [sender adjustSubviews];
         // fix for NSSplitView bug, which doesn't send this in adjustSubviews
         [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:sender];
-        
+        [[sender window] invalidateCursorRectsForView:sender];
     }
 }
 

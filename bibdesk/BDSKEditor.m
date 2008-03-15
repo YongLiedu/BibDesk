@@ -2883,6 +2883,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [mainSplitView adjustSubviews];
         // fix for NSSplitView bug, which doesn't send this in adjustSubviews
         [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:mainSplitView];
+        [[sender window] invalidateCursorRectsForView:sender];
     } else if ([sender isEqual:fileSplitView]) {
         NSView *files = [[fileSplitView subviews] objectAtIndex:0]; // files
         NSView *authors = [[fileSplitView subviews] objectAtIndex:1]; // authors
@@ -2909,6 +2910,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         [fileSplitView adjustSubviews];
         // fix for NSSplitView bug, which doesn't send this in adjustSubviews
         [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:fileSplitView];
+        [[sender window] invalidateCursorRectsForView:sender];
     }
 }
 

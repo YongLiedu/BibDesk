@@ -3669,6 +3669,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 	[firstView setFrame:firstFrame];
 	[secondView setFrame:secondFrame];
     [sender adjustSubviews];
+    [[sender window] invalidateCursorRectsForView:sender];
 }
 
 #pragma mark -
