@@ -2698,7 +2698,7 @@ static void addFilesToArray(const void *value, void *context)
             value = [value substringWithRange:NSMakeRange(6, loc - 6)];
     }
 
-    return [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
+    return [[NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL] absoluteURL];
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field{
