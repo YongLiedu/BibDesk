@@ -1886,7 +1886,7 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
     if ([theURL isFileURL] && noErr == LSCopyDisplayNameForURL((CFURLRef)theURL, (CFStringRef *)&name))
         name = [name autorelease];
     else
-        name = [theURL absoluteString];
+        name = [[theURL absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     return name;
 }
 
