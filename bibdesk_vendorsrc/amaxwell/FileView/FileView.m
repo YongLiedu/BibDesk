@@ -1521,7 +1521,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
                         else
                             name = [[aURL path] lastPathComponent];
                     } else {
-                        name = [aURL absoluteString];
+                        name = [[aURL absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
                     }
                     
                     NSUInteger label = [FVFinderLabel finderLabelForURL:aURL];
@@ -1883,10 +1883,14 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
 {
     NSURL *theURL = [self _URLAtPoint:point];
     NSString *name;
-    if ([theURL isFileURL] && noErr == LSCopyDisplayNameForURL((CFURLRef)theURL, (CFStringRef *)&name))
-        name = [name autorelease];
-    else
+    if ([theURL isFileURL]) {
+        if (noErr == LSCopyDisplayNameForURL((CFURLRef)theURL, (CFStringRef *)&name))
+            name = [name autorelease];
+        else
+            name = [[theURL path] lastPathComponent];
+    } else {
         name = [[theURL absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    }
     return name;
 }
 
