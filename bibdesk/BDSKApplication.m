@@ -112,7 +112,7 @@
                 [item release];
             }
             if (idx > 0 && [[windowsMenu itemAtIndex:idx - 1] isSeparatorItem] == NO && [[[[windowsMenu itemAtIndex:idx - 1] target] windowController] document] != nil)
-                [windowsMenu insertItem:[NSMenuItem separatorItem] atIndex:anIndex];
+                [windowsMenu insertItem:[NSMenuItem separatorItem] atIndex:idx];
         } else if ([windowController isEqual:mainWindowController]) {
             NSMutableArray *subitems = [NSMutableArray array];
             NSMenuItem *anItem;
