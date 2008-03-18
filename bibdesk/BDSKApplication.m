@@ -104,14 +104,15 @@
                     if ([[[windowsMenu itemAtIndex:idx] title] caseInsensitiveCompare:title] == NSOrderedAscending)
                         break;
             }
-            if (itemIndex != idx + 1) {
+            ++idx;
+            if (itemIndex != idx) {
                 [item retain];
                 [windowsMenu removeItem:item];
-                [windowsMenu insertItem:item atIndex:itemIndex <= idx ? idx : ++idx];
+                [windowsMenu insertItem:item atIndex:itemIndex < --idx ? idx : idx];
                 [item release];
-                if (idx > 0 && [[windowsMenu itemAtIndex:idx - 1] isSeparatorItem] == NO)
-                    [windowsMenu insertItem:[NSMenuItem separatorItem] atIndex:idx];
             }
+            if (idx > 0 && [[windowsMenu itemAtIndex:idx - 1] isSeparatorItem] == NO && [[[[windowsMenu itemAtIndex:idx - 1] target] windowController] document] != nil)
+                [windowsMenu insertItem:[NSMenuItem separatorItem] atIndex:anIndex];
         } else if ([windowController isEqual:mainWindowController]) {
             NSMutableArray *subitems = [NSMutableArray array];
             NSMenuItem *anItem;
