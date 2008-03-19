@@ -87,6 +87,8 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, int length);
         return @"usmarc";
     case UKMARC:
         return @"ukmarc";
+    case UNIMARC:
+        return @"unimarc";
     default:
         return @"unknown";
     }
@@ -109,6 +111,8 @@ static NSData *copyMARC8BytesToUTF8(const char *buf, int length);
         return USMARC;
     else if (!yaz_matchstr(syn, "UKmarc"))
         return UKMARC;
+    else if (!yaz_matchstr(syn, "Unimarc"))
+        return UNIMARC;
     else if (!yaz_matchstr(syn, "XML") ||
              !yaz_matchstr(syn, "text-XML") ||
              !yaz_matchstr(syn, "application-XML"))

@@ -50,7 +50,8 @@ enum {
     SUTRS   =  1,
     USMARC  =  2,
     UKMARC  =  3,
-    XML     =  4
+    UNIMARC =  4,
+    XML     =  5
 };
 typedef int ZOOMSyntaxType;
 

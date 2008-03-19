@@ -69,7 +69,7 @@
     [_searchField setFormatter:[[[ZOOMCCLQueryFormatter alloc] init] autorelease]];
     
     [_syntaxPopup removeAllItems];
-    [_syntaxPopup addItemsWithTitles:[NSArray arrayWithObjects:@"USMARC", @"GRS-1", @"SUTRS", @"XML", @"UKMARC", nil]];
+    [_syntaxPopup addItemsWithTitles:[NSArray arrayWithObjects:@"USMARC", @"GRS-1", @"SUTRS", @"XML", @"UKMARC", @"UNIMARC", nil]];
     [_syntaxPopup selectItemAtIndex:0];
     
     _connectionNeedsReset = YES;
