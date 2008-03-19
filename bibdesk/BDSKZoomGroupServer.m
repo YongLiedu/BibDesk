@@ -46,10 +46,10 @@
 #define MAX_RESULTS 100
 
 static NSString *BDSKUSMARCString = @"US MARC";
+static NSString *BDSKUNIMARCString = @"UNIMARC";
 static NSString *BDSKMARCXMLString = @"MARC XML";
 static NSString *BDSKDCXMLString = @"DC XML";
 static NSString *BDSKMODSString = @"MODS";
-static NSString *BDSKUNIMARCString = @"UNIMARC";
 
 
 static NSString *BDSKHTTPProxySetting();
@@ -64,7 +64,7 @@ static NSString *BDSKHTTPProxySetting();
 }
 
 + (NSArray *)supportedRecordSyntaxes {
-    return [NSArray arrayWithObjects:BDSKUSMARCString, BDSKMARCXMLString, BDSKDCXMLString, BDSKMODSString, BDSKUNIMARCString, nil];
+    return [NSArray arrayWithObjects:BDSKUSMARCString, BDSKUNIMARCString, BDSKMARCXMLString, BDSKDCXMLString, BDSKMODSString, nil];
 }
 
 + (ZOOMSyntaxType)zoomRecordSyntaxForRecordSyntaxString:(NSString *)syntax{
