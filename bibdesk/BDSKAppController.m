@@ -85,6 +85,8 @@
 #import "BDSKSearchGroup.h"
 #import "BDSKServerInfo.h"
 #import "BDSKGroupsArray.h"
+#import "BDSKWebGroup.h"
+#import "BDSKWebGroupViewController.h"
 
 @implementation BDSKAppController
 
@@ -1081,10 +1083,26 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             error = [NSError mutableLocalErrorWithCode:kBDSKURLOperationFailed localizedDescription:NSLocalizedString(@"Unable to get search group from bdsksearch:// URL.", @"error when opening bdsksearch URL")];
         }
         
+    } else if (([[theURL scheme] isEqualToString:@"http"] || [[theURL scheme] isEqualToString:@"https"]) &&
+               [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShowWebGroupPrefKey]) {
+        
+        // try the main document first
+        document = [[NSDocumentController sharedDocumentController] mainDocument];
+        if (nil == document) {
+            document = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:&error];
+            [document showWindows];
+        }
+        [document selectGroup:[[document groups] webGroup]];
+        [[document webGroupViewController] setURLString:[theURL absoluteString]];
+        
+        if (document == nil && error)
+            [NSApp presentError:error];
+        
+    } else {
+        
+        [[NSWorkspace sharedWorkspace] openURL:theURL];
+        
     }
-    
-    if (document == nil && error)
-        [NSApp presentError:error];
 }
 
 #pragma mark Service code
