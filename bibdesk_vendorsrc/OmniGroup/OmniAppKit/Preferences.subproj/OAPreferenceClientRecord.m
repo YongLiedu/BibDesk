@@ -57,7 +57,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
         return iconImage;
 
     bundle = [OFBundledClass bundleForClassNamed:className];
-    iconImage = [NSImage imageNamed:iconName inBundle:bundle];
+    iconImage = [[NSImage imageNamed:iconName inBundle:bundle] retain];
 
 #ifdef DEBUG
     if (iconImage == nil)
