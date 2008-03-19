@@ -336,6 +336,8 @@ static NSArray *flagsChangedRunLoopModes;
     if (currentRunExceptionPanel) {
         // Already handling an exception!
         NSLog(@"Ignoring exception raised while displaying previous exception: %@", anException);
+        if ([anException respondsToSelector:@selector(callStackReturnAddresses)])
+            NSLog(@"%@", [anException callStackReturnAddresses]);
         return;
     }
 
@@ -345,7 +347,9 @@ static NSArray *flagsChangedRunLoopModes;
             [delegate handleRunException:anException];
         } else {
             NSLog(@"%@", [anException reason]);
-
+            if ([anException respondsToSelector:@selector(callStackReturnAddresses)])
+                NSLog(@"%@", [anException callStackReturnAddresses]);
+            
             // Do NOT use NSRunAlertPanel.  If another exception happens while NSRunAlertPanel is going, the alert will be removed from the screen and the user will not be able to report the original exception!
             // NSGetAlertPanel will not have a default button if we pass nil.
             NSString *okString = NSLocalizedStringFromTableInBundle(@"OK", @"OmniAppKit", [OAApplication bundle], "unhandled exception panel button");
