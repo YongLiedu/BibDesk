@@ -48,6 +48,7 @@
 
 @interface NSString (BDSKMARCParserExtensions)
 - (BOOL)isMARCString;
+- (BOOL)isUNIMARCString;
 - (BOOL)isFormattedMARCString;
 - (BOOL)isMARCXMLString;
 - (NSString *)stringByFixingFormattedMARCStart;
@@ -56,8 +57,8 @@
 
 
 @interface BDSKMARCParser (Private)
-static void addStringToDictionary(NSString *value, NSMutableDictionary *dict, NSString *tag, NSString *subFieldIndicator);
-static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag);
+static void addStringToDictionary(NSString *value, NSMutableDictionary *dict, NSString *tag, NSString *subFieldIndicator, BOOL isUNIMARC);
+static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag, BOOL isUNIMARC);
 @end
 
 @interface BDSKMARCXMLParser : NSXMLParser {
@@ -74,7 +75,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 @implementation BDSKMARCParser
 
 + (BOOL)canParseString:(NSString *)string{
-	return [string isMARCString] || [string isFormattedMARCString] || [string isMARCXMLString];
+	return [string isMARCString] || [string isUNIMARCString] || [string isFormattedMARCString] || [string isMARCXMLString];
 }
 
 + (NSArray *)itemsFromFormattedMARCString:(NSString *)itemString error:(NSError **)outError{
@@ -132,7 +133,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
             
             // add the last key/value pair
             if(tag && [mutableValue length])
-                addStringToDictionary(mutableValue, pubDict, tag, subFieldIndicator);
+                addStringToDictionary(mutableValue, pubDict, tag, subFieldIndicator, NO);
             
             if([pubDict count] > 0){
                 [pubDict setObject:itemString forKey:BDSKAnnoteString];
@@ -156,7 +157,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 			// first save the last key/value pair if necessary
             
             if(tag && [mutableValue length])
-                addStringToDictionary(mutableValue, pubDict, tag, subFieldIndicator);
+                addStringToDictionary(mutableValue, pubDict, tag, subFieldIndicator, NO);
             
             tag = tmpTag;
             value = [[sourceLine substringFromIndex:fieldStartIndex] stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
@@ -168,7 +169,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     
     // add the last key/value pair
     if(tag && [mutableValue length])
-        addStringToDictionary(mutableValue, pubDict, tag, subFieldIndicator);
+        addStringToDictionary(mutableValue, pubDict, tag, subFieldIndicator, NO);
 	
 	// add the last item
 	if([pubDict count] > 0){
@@ -186,7 +187,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     return returnArray;
 }
 
-+ (NSArray *)itemsFromMARCString:(NSString *)itemString error:(NSError **)outError{
++ (NSArray *)itemsFromMARCString:(NSString *)itemString isUNIMARC:(BOOL)isUNIMARC error:(NSError **)outError{
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
 	
@@ -242,7 +243,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
             // the first 2 characters are indicators
             value = [field substringFromIndex:isControlField ? 0 : 2];
             
-            addStringToDictionary(value, pubDict, tag, subFieldIndicator);
+            addStringToDictionary(value, pubDict, tag, subFieldIndicator, isUNIMARC);
             
             [formattedString appendStrings:tag, @" ", isControlField ? @"  " : [field substringToIndex:2], @" ", nil];
             [formattedString appendStrings:[value stringByReplacingAllOccurrencesOfString:subFieldIndicator withString:@"$"], @"\n", nil];
@@ -286,8 +287,9 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 }
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
-    if([itemString isMARCString]){
-        return [self itemsFromMARCString:itemString error:outError];
+    BOOL isUNIMARC = NO;
+    if([itemString isMARCString] || (isUNIMARC = [itemString isUNIMARCString])){
+        return [self itemsFromMARCString:itemString isUNIMARC:isUNIMARC error:outError];
     }else if([itemString isFormattedMARCString]){
         return [self itemsFromFormattedMARCString:itemString error:outError];
     }else if([itemString isMARCXMLString]){
@@ -304,7 +306,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 
 @implementation BDSKMARCParser (Private)
 
-static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict, NSString *tag, NSString *subFieldIndicator){
+static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict, NSString *tag, NSString *subFieldIndicator, BOOL isUNIMARC){
 	NSString *subTag = nil;
     NSString *subValue = nil;
 	
@@ -318,22 +320,27 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict,
         
         if([scanner scanUpToString:subFieldIndicator intoString:&subValue]){
             subValue = [subValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            addSubstringToDictionary(subValue, pubDict, tag, subTag);
+            addSubstringToDictionary(subValue, pubDict, tag, subTag, isUNIMARC);
         }
     }
     
     [scanner release];
 }
 
-static NSString *titleTag = @"245";
-static NSString *subtitleSubTag = @"b";
-static NSString *personTag = @"700";
-static NSString *nameSubTag = @"a";
-static NSString *relatorSubTag = @"e";
+static NSString *MARCTitleTag = @"245";
+static NSString *MARCSubtitleSubTag = @"b";
+static NSString *MARCPersonTag = @"700";
+static NSString *MARCNameSubTag = @"a";
+static NSString *MARCRelatorSubTag = @"e";
 
-static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag){
+static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag, BOOL isUNIMARC){
     NSString *key = [[[BDSKTypeManager sharedManager] fieldNamesForMARCTag:tag] objectForKey:subTag];
     NSString *tmpValue = nil;
+    
+    if (isUNIMARC)
+        key = [[[BDSKTypeManager sharedManager] fieldNamesForUNIMARCTag:tag] objectForKey:subTag];
+    else
+        key = [[[BDSKTypeManager sharedManager] fieldNamesForMARCTag:tag] objectForKey:subTag];
     
     if(key == nil)
         return;
@@ -341,17 +348,17 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     subValue = [subValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     tmpValue = [pubDict objectForKey:key];
     
-    if([tag isEqualToString:titleTag]){
-        if([subTag isEqualToString:subtitleSubTag] && tmpValue){
+    if(isUNIMARC == NO && [tag isEqualToString:MARCTitleTag]){
+        if([subTag isEqualToString:MARCSubtitleSubTag] && tmpValue){
             // this is the subtitle, append it to the title if present
             
             subValue = [NSString stringWithFormat:@"%@: %@", tmpValue, subValue];
             tmpValue = nil;
         }
-    }else if([tag isEqualToString:personTag]){
-        if([subTag isEqualToString:nameSubTag] && tmpValue){
+    }else if(isUNIMARC == NO && [tag isEqualToString:MARCPersonTag]){
+        if([subTag isEqualToString:MARCNameSubTag] && tmpValue){
             subValue = [NSString stringWithFormat:@"%@ and %@", tmpValue, subValue];
-        }else if([subTag isEqualToString:relatorSubTag]){
+        }else if([subTag isEqualToString:MARCRelatorSubTag]){
             // this is the person role, see if it is an editor
             if([subValue caseInsensitiveCompare:@"editor"] != NSOrderedSame || tmpValue == nil)
                 return;
@@ -368,6 +375,8 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
             }
         }
         tmpValue = nil;
+    }else if([key isEqualToString:BDSKAuthorString] && tmpValue){
+        subValue = [NSString stringWithFormat:@"%@ and %@", tmpValue, subValue];
     }else if([key isEqualToString:BDSKAnnoteString] && tmpValue){
         subValue = [NSString stringWithFormat:@"%@. %@", tmpValue, subValue];
         tmpValue = nil;
@@ -401,6 +410,14 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     AGRegex *MABRegex = [AGRegex regexWithPattern:pattern];
     
     return nil != [MARCRegex findInString:self] || nil != [MABRegex findInString:self];
+}
+
+- (BOOL)isUNIMARCString{
+    unsigned fieldTerminator = 0x1E;
+    NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[a-z]{3}[ 012][ a0-9]22[0-9]{5}[ 1-8uz][ a-z][ r]45[ 0A-Z] ([0-9]{12})+%C", fieldTerminator];
+    AGRegex *UNIMARCRegex = [AGRegex regexWithPattern:pattern];
+    
+    return nil != [UNIMARCRegex findInString:self] ;
 }
 
 - (BOOL)isFormattedMARCString{
@@ -535,7 +552,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
         [formattedString appendString:@"\n"];
     }else if([elementName isEqualToString:@"subfield"] || [elementName isEqualToString:@"marc:subfield"]){
         if(tag && subTag && [currentValue length])
-            addSubstringToDictionary(currentValue, pubDict, tag, subTag);
+            addSubstringToDictionary(currentValue, pubDict, tag, subTag, NO);
         [formattedString appendString:currentValue];
     }
 }

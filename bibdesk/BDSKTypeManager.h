@@ -50,6 +50,7 @@
 #define BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY     @"BibTeXFieldNamesForPubMedTags"
 #define BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY     @"BibTeXTypesForPubMedTypes"
 #define BIBTEX_FIELDS_FOR_MARC_TAGS_KEY       @"BibTeXFieldNamesForMARCTags"
+#define BIBTEX_FIELDS_FOR_UNIMARC_TAGS_KEY    @"BibTeXFieldNamesForUNIMARCTags"
 #define BIBTEX_FIELDS_FOR_JSTOR_TAGS_KEY      @"BibTeXFieldNamesForJSTORTags"
 #define FIELD_DESCRIPTIONS_FOR_JSTOR_TAGS_KEY @"FieldDescriptionsForJSTORTags"
 #define BIBTEX_FIELDS_FOR_WOS_TAGS_KEY        @"BibTeXFieldNamesForWebOfScienceTags"
@@ -58,9 +59,9 @@
 #define MODS_GENRES_FOR_BIBTEX_TYPES_KEY      @"MODSGenresForBibTeXType"
 #define BIBTEX_TYPES_FOR_DC_TYPES_KEY         @"BibTeXTypesForDublinCoreTypes"
 #define BIBTEX_FIELDS_FOR_DC_TERMS_KEY        @"BibTeXFieldNamesForDublinCoreTerms"
-#define BIBTEX_FIELDS_FOR_REFER_TAGS_KEY     @"BibTeXFieldNamesForReferTags"
-#define BIBTEX_TYPES_FOR_REFER_TYPES_KEY     @"BibTeXTypesForReferTypes"
-#define BIBTEX_TYPES_FOR_HCITE_TYPES_KEY     @"BibTeXTypesForHCiteTypes"
+#define BIBTEX_FIELDS_FOR_REFER_TAGS_KEY      @"BibTeXFieldNamesForReferTags"
+#define BIBTEX_TYPES_FOR_REFER_TYPES_KEY      @"BibTeXTypesForReferTypes"
+#define BIBTEX_TYPES_FOR_HCITE_TYPES_KEY      @"BibTeXTypesForHCiteTypes"
 
 @class OFCharacterSet;
 
@@ -71,6 +72,7 @@
 	NSDictionary *fieldNameForPubMedTagDict;
 	NSDictionary *bibtexTypeForPubMedTypeDict;
 	NSDictionary *fieldNamesForMARCTagDict;
+	NSDictionary *fieldNamesForUNIMARCTagDict;
 	NSDictionary *fieldNameForJSTORTagDict;
 	NSDictionary *fieldDescriptionForJSTORTagDict;
     NSDictionary *fieldNameForWebOfScienceTagDict;
@@ -121,6 +123,7 @@
 - (void)setBibtexTypeForPubMedTypeDict:(NSDictionary *)newNames;
 - (void)setFieldNameForPubMedTagDict:(NSDictionary *)newNames;
 - (void)setFieldNamesForMARCTagDict:(NSDictionary *)newNames;
+- (void)setFieldNamesForUNIMARCTagDict:(NSDictionary *)newNames;
 - (void)setFileTypesDict:(NSDictionary *)newTypes;
 - (void)setFieldsForTypesDict:(NSDictionary *)newFields;
 - (void)setTypesForFileTypeDict:(NSDictionary *)newTypes;
@@ -211,6 +214,7 @@
 - (NSString *)RISTypeForBibTeXType:(NSString *)type;
 
 - (NSDictionary *)fieldNamesForMARCTag:(NSString *)name;
+- (NSDictionary *)fieldNamesForUNIMARCTag:(NSString *)name;
 
 - (NSString *)fieldNameForJSTORTag:(NSString *)tag;
 

@@ -44,6 +44,20 @@
         700 = {a = Author; e = Editor; }; 
         856 = {u = Url; }; 
     }; 
+    BibTeXFieldNamesForUNIMARCTags = {
+        010 = {a = Isbn; }; 
+        200 = {a = Title; }; 
+        205 = {a = Edition; }; 
+        210 = {a = Address; c = Publisher; d = Year; }; 
+        440 = {v = Volume; }; 
+        225 = {a = Series; v = Volume; }; 
+        300 = {a = Annote; }; 
+        301 = {a = Annote; }; 
+        330 = {a = Abstract; }; 
+        700 = {a = Author; }; 
+        701 = {a = Author; }; 
+        702 = {a = Author; }; 
+    }; 
     BibTeXFieldNamesForPubMedTags = {
         AB = Abstract; 
         AD = Address; 

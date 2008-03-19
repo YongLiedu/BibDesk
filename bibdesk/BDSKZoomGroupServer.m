@@ -49,6 +49,7 @@ static NSString *BDSKUSMARCString = @"US MARC";
 static NSString *BDSKMARCXMLString = @"MARC XML";
 static NSString *BDSKDCXMLString = @"DC XML";
 static NSString *BDSKMODSString = @"MODS";
+static NSString *BDSKUNIMARCString = @"UNIMARC";
 
 
 static NSString *BDSKHTTPProxySetting();
@@ -63,12 +64,14 @@ static NSString *BDSKHTTPProxySetting();
 }
 
 + (NSArray *)supportedRecordSyntaxes {
-    return [NSArray arrayWithObjects:BDSKUSMARCString, BDSKMARCXMLString, BDSKDCXMLString, BDSKMODSString, nil];
+    return [NSArray arrayWithObjects:BDSKUSMARCString, BDSKMARCXMLString, BDSKDCXMLString, BDSKMODSString, BDSKUNIMARCString, nil];
 }
 
 + (ZOOMSyntaxType)zoomRecordSyntaxForRecordSyntaxString:(NSString *)syntax{
     if ([syntax isEqualToString:BDSKUSMARCString]) 
         return USMARC;
+    else if ([syntax isEqualToString:BDSKUNIMARCString]) 
+        return UNIMARC;
     else if ([syntax isEqualToString:BDSKMARCXMLString] || [syntax isEqualToString:BDSKDCXMLString] || [syntax isEqualToString:BDSKMODSString]) 
         return XML;
     else
@@ -236,7 +239,7 @@ static NSString *BDSKHTTPProxySetting();
 {
     NSString *recordSyntax = [serverInfo recordSyntax];
     int stringType = BDSKUnknownStringType;
-    if([recordSyntax isEqualToString:BDSKUSMARCString]) {
+    if([recordSyntax isEqualToString:BDSKUSMARCString] || [recordSyntax isEqualToString:BDSKUNIMARCString]) {
         stringType = BDSKMARCStringType;
     } else if([recordSyntax isEqualToString:BDSKMARCXMLString]) {
         stringType = BDSKMARCStringType;
