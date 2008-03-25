@@ -80,6 +80,7 @@
 #import "BDSKFileMatcher.h"
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKBookmarkController.h"
+#import "BDSKBookmark.h"
 #import "BDSKVersionNumber.h"
 #import "BDSKURLGroup.h"
 #import "BDSKSearchGroup.h"

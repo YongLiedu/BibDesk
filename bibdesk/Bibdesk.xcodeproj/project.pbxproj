@@ -244,6 +244,8 @@
 		CE89622A0CBEBAAC00EA2D98 /* TemplateDocument.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE8962240CBEBAAC00EA2D98 /* TemplateDocument.nib */; };
 		CE8962C60CBEC0C500EA2D98 /* TemplateOptions.strings in Resources */ = {isa = PBXBuildFile; fileRef = CE8962C40CBEC0C500EA2D98 /* TemplateOptions.strings */; };
 		CE8962CB0CBEC10700EA2D98 /* TemplateOptions.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE8962CA0CBEC10700EA2D98 /* TemplateOptions.plist */; };
+		CE8BE5470D99A10700E314A4 /* BDSKBookmark.h in Headers */ = {isa = PBXBuildFile; fileRef = CE8BE5450D99A10700E314A4 /* BDSKBookmark.h */; };
+		CE8BE5480D99A10700E314A4 /* BDSKBookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8BE5460D99A10700E314A4 /* BDSKBookmark.m */; };
 		CE8C731F0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */; };
 		CE8F83490AFB989C009EE6F9 /* BDSKThreadSafeMutableArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8F83470AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.m */; };
 		CE92CE5D0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CE92CE5B0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h */; };
@@ -1154,6 +1156,8 @@
 		CE8962C50CBEC0C500EA2D98 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/TemplateOptions.strings; sourceTree = "<group>"; };
 		CE8962C90CBEC0D600EA2D98 /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/TemplateOptions.strings; sourceTree = "<group>"; };
 		CE8962CA0CBEC10700EA2D98 /* TemplateOptions.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = TemplateOptions.plist; sourceTree = "<group>"; };
+		CE8BE5450D99A10700E314A4 /* BDSKBookmark.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBookmark.h; sourceTree = "<group>"; };
+		CE8BE5460D99A10700E314A4 /* BDSKBookmark.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBookmark.m; sourceTree = "<group>"; };
 		CE8C731C0B0CA6C500E31E5A /* NSObject_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSObject_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSObject_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE8F83460AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKThreadSafeMutableArray.h; sourceTree = "<group>"; };
@@ -2163,6 +2167,7 @@
 		CE38FA81091D242E00BCB69D /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				CE8BE5460D99A10700E314A4 /* BDSKBookmark.m */,
 				CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */,
 				2730077807CF20B500F2E485 /* BDSKComplexString.m */,
 				CE38FB83091D946900BCB69D /* BDSKCondition.m */,
@@ -2446,6 +2451,7 @@
 				3D824AA607D099C300FB2F67 /* BDSKBackgroundView.h */,
 				CE9DBEDD093CF2640008648B /* BDSKBibliographyCommand.h */,
 				F9022C950758038000C3F701 /* BDSKBibTeXParser.h */,
+				CE8BE5450D99A10700E314A4 /* BDSKBookmark.h */,
 				CEF83F350C77911F00A3AD51 /* BDSKBookmarkController.h */,
 				CE416B730CE5E25B00AAB04C /* BDSKBookmarkOutlineView.h */,
 				CEEA4C690B57B0D400434059 /* BDSKBooleanValueTransformer.h */,
@@ -2887,6 +2893,7 @@
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
 				CE92CE5D0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h in Headers */,
+				CE8BE5470D99A10700E314A4 /* BDSKBookmark.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3850,6 +3857,7 @@
 				CE6DCA230D6A0237003A072F /* BDSKCondition+Scripting.m in Sources */,
 				CE117D240D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.m in Sources */,
 				CE92CE5E0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m in Sources */,
+				CE8BE5480D99A10700E314A4 /* BDSKBookmark.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

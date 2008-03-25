@@ -1,0 +1,388 @@
+//
+//  BDSKBookmark.m
+//  Bibdesk
+//
+//  Created by Christiaan Hofman on 3/25/08.
+/*
+ This software is Copyright (c) 2008
+ Christiaan Hofman. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Christiaan Hofman nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#import "BDSKBookmark.h"
+#import "BDSKBookmarkController.h"
+
+#define CHILDREN_KEY    @"Children"
+#define TITLE_KEY       @"Title"
+#define URL_KEY         @"URLString"
+#define TYPE_KEY        @"Type"
+
+NSString *BDSKBookmarkChangedNotification = @"BDSKBookmarkChangedNotification";
+NSString *BDSKBookmarkWillBeRemovedNotification = @"BDSKBookmarkWillBeRemovedNotification";
+
+static NSString *BDSKBookmarkTypeBookmarkString = @"bookmark";
+static NSString *BDSKBookmarkTypeFolderString = @"folder";
+static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
+
+@interface BDSKURLBookmark : BDSKBookmark {
+    NSString *urlString;
+}
+@end
+
+@interface BDSKFolderBookmark : BDSKBookmark {
+    NSMutableArray *children;
+}
+@end
+
+@interface BDSKSeparatorBookmark : BDSKBookmark
+@end
+
+#pragma mark -
+
+@implementation BDSKBookmark
+
+static BDSKBookmark *defaultPlaceholderBookmark = nil;
+static Class BDSKBookmarkClass = Nil;
+
++ (void)initialize {
+    OBINITIALIZE;
+    if (self == [BDSKBookmark class]) {
+        BDSKBookmarkClass = self;
+        defaultPlaceholderBookmark = (BDSKBookmark *)NSAllocateObject(BDSKBookmarkClass, 0, NSDefaultMallocZone());
+    }
+}
+
++ (id)allocWithZone:(NSZone *)aZone {
+    return BDSKBookmarkClass == self ? defaultPlaceholderBookmark : NSAllocateObject(self, 0, aZone);
+}
+
+- (id)init {
+    if (self == defaultPlaceholderBookmark)
+        self = [self initWithUrlString:@"http://" name:[[BDSKBookmarkController sharedBookmarkController] uniqueName]];
+    else
+        self = [super init];
+    return self;
+}
+
+- (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
+    if (self != defaultPlaceholderBookmark)
+        [self release];
+    return [[BDSKURLBookmark alloc] initWithUrlString:aUrlString name:aName];
+}
+
+- (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
+    if (self != defaultPlaceholderBookmark)
+        [self release];
+    return [[BDSKURLBookmark alloc] initFolderWithChildren:aChildren name:aName];
+}
+
+- (id)initFolderWithName:(NSString *)aName {
+    return [self initFolderWithChildren:[NSArray array] name:aName];
+}
+
+- (id)initSeparator {
+    if (self != defaultPlaceholderBookmark)
+        [self release];
+    return [[BDSKSeparatorBookmark alloc] init];
+}
+
+- (id)initWithDictionary:(NSDictionary *)dictionary {
+    if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeFolderString]) {
+        NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
+        NSDictionary *dict;
+        NSMutableArray *newChildren = [NSMutableArray array];
+        while (dict = [dictEnum nextObject])
+            [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
+        return [self initFolderWithChildren:newChildren name:[dictionary objectForKey:TITLE_KEY]];
+    } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeSeparatorString]) {
+        return [self initSeparator];
+    } else {
+        return [self initWithUrlString:[dictionary objectForKey:URL_KEY] name:[dictionary objectForKey:TITLE_KEY]];
+    }
+}
+
+- (id)copyWithZone:(NSZone *)aZone {
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+- (void)dealloc {
+    if (self != defaultPlaceholderBookmark) {
+        [[[BDSKBookmarkController sharedBookmarkController] undoManager] removeAllActionsWithTarget:self];
+        [name release];
+        [super dealloc];
+    }
+}
+
+- (NSDictionary *)dictionaryValue { return nil; }
+
+- (int)bookmarkType { return 0; }
+
+- (NSImage *)icon { return nil; }
+
+- (NSURL *)URL { return nil; }
+- (NSString *)urlString { return nil; }
+- (void)setUrlString:(NSString *)newUrlString {}
+
+- (NSString *)name {
+    return [[name retain] autorelease];
+}
+
+- (void)setName:(NSString *)newName {
+    if (name != newName) {
+        NSUndoManager *undoManager = [[BDSKBookmarkController sharedBookmarkController] undoManager];
+        [(BDSKBookmark *)[undoManager prepareWithInvocationTarget:self] setName:name];
+        [name release];
+        name = [newName retain];
+    }
+}
+
+- (BOOL)validateName:(id *)value error:(NSError **)error {
+    NSArray *names = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"name"];
+    NSString *string = *value;
+    if ([NSString isEmptyString:string] || ([name isEqualToString:string] == NO && [names containsObject:string])) {
+        if (error) {
+            NSString *description = NSLocalizedString(@"Invalid name.", @"Error description");
+            NSString *reason = [NSString stringWithFormat:NSLocalizedString(@"The bookmark \"%@\" already exists or is empty.", @"Error reason"), string];
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
+            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
+        }
+        return NO;
+    }
+    return YES;
+}
+
+- (NSArray *)children { return nil; }
+- (void)insertChild:(BDSKBookmark *)child atIndex:(unsigned int)idx {}
+- (void)addChild:(BDSKBookmark *)child {}
+- (void)removeChild:(BDSKBookmark *)child {}
+
+- (BDSKBookmark *)parent {
+    return parent;
+}
+
+- (void)setParent:(BDSKBookmark *)newParent {
+    parent = newParent;
+}
+
+- (BOOL)isDescendantOf:(BDSKBookmark *)bookmark {
+    if (self == bookmark)
+        return YES;
+    NSEnumerator *childEnum = [[bookmark children] objectEnumerator];
+    BDSKBookmark *child;
+    while (child = [childEnum nextObject]) {
+        if ([self isDescendantOf:child])
+            return YES;
+    }
+    return NO;
+}
+
+- (BOOL)isDescendantOfArray:(NSArray *)bookmarks {
+    NSEnumerator *bmEnum = [bookmarks objectEnumerator];
+    BDSKBookmark *bm = nil;
+    while (bm = [bmEnum nextObject]) {
+        if ([self isDescendantOf:bm]) return YES;
+    }
+    return NO;
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKURLBookmark
+
+- (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
+    if (self = [super init]) {
+        urlString = [aUrlString copy];
+        [self setName:aName];
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone *)aZone {
+    return [[[self class] allocWithZone:aZone] initWithUrlString:urlString name:name];
+}
+
+- (void)dealloc {
+    [urlString release];
+    [super dealloc];
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: name=%@, URL=%@>", [self class], name, urlString];
+}
+
+- (NSDictionary *)dictionaryValue {
+    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeBookmarkString, TYPE_KEY, urlString, URL_KEY, name, TITLE_KEY, nil];
+}
+
+- (int)bookmarkType {
+    return BDSKBookmarkTypeBookmark;
+}
+
+- (NSURL *)URL {
+    return [NSURL URLWithString:[self urlString]];
+}
+
+- (NSString *)urlString {
+    return [[urlString retain] autorelease];
+}
+
+- (void)setUrlString:(NSString *)newUrlString {
+    if (urlString != newUrlString) {
+        NSUndoManager *undoManager = [[BDSKBookmarkController sharedBookmarkController] undoManager];
+        [[undoManager prepareWithInvocationTarget:self] setUrlString:urlString];
+        [urlString release];
+        urlString = [newUrlString retain];
+    }
+}
+
+- (BOOL)validateUrlString:(id *)value error:(NSError **)error {
+    NSString *string = *value;
+    if (string == nil || [NSURL URLWithString:string] == nil) {
+        if (error) {
+            NSString *description = NSLocalizedString(@"Invalid URL.", @"Error description");
+            NSString *reason = [NSString stringWithFormat:NSLocalizedString(@"\"%@\" is not a valid URL.", @"Error reason"), string];
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
+            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
+        }
+        return NO;
+    }
+    return YES;
+}
+
+- (NSImage *)icon {
+    return [NSImage imageNamed:@"SmallBookmark"];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKFolderBookmark
+
+- (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
+    if (self = [super init]) {
+        [self setName:aName];
+        children = [aChildren mutableCopy];
+        [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone *)aZone {
+    return [[[self class] allocWithZone:aZone] initFolderWithChildren:[[[NSArray alloc] initWithArray:children copyItems:YES] autorelease] name:name];
+}
+
+- (void)dealloc {
+    [children release];
+    [super dealloc];
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: name=%@, children=%@>", [self class], name, children];
+}
+
+- (NSDictionary *)dictionaryValue {
+    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeFolderString, TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, name, TITLE_KEY, nil];
+}
+
+- (int)bookmarkType {
+    return BDSKBookmarkTypeFolder;
+}
+
+- (BOOL)validateName:(id *)value error:(NSError **)error {
+    NSArray *names = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"name"];
+    NSString *string = *value;
+    if ([NSString isEmptyString:string] || ([name isEqualToString:string] == NO && [names containsObject:string])) {
+        if (error) {
+            NSString *description = NSLocalizedString(@"Invalid name.", @"Error description");
+            NSString *reason = [NSString stringWithFormat:NSLocalizedString(@"The bookmark \"%@\" already exists or is empty.", @"Error reason"), string];
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
+            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
+        }
+        return NO;
+    }
+    return YES;
+}
+
+- (NSImage *)icon {
+    return [NSImage imageNamed:@"SmallFolder"];
+}
+
+- (NSArray *)children {
+    return children;
+}
+
+- (void)insertChild:(BDSKBookmark *)child atIndex:(unsigned int)idx {
+    NSUndoManager *undoManager = [[BDSKBookmarkController sharedBookmarkController] undoManager];
+    [(BDSKBookmark *)[undoManager prepareWithInvocationTarget:self] removeChild:child];
+    [children insertObject:child atIndex:idx];
+    [child setParent:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBookmarkChangedNotification object:self];
+}
+
+- (void)addChild:(BDSKBookmark *)child {
+    [self insertChild:child atIndex:[children count]];
+}
+
+- (void)removeChild:(BDSKBookmark *)child {
+    NSUndoManager *undoManager = [[BDSKBookmarkController sharedBookmarkController] undoManager];
+    [(BDSKBookmark *)[undoManager prepareWithInvocationTarget:self] insertChild:child atIndex:[[self children] indexOfObject:child]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBookmarkWillBeRemovedNotification object:self];
+    [child setParent:nil];
+    [children removeObject:child];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBookmarkChangedNotification object:self];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKSeparatorBookmark
+
+- (id)copyWithZone:(NSZone *)aZone {
+    return [[[self class] allocWithZone:aZone] init];
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: separator>", [self class]];
+}
+
+- (NSDictionary *)dictionaryValue {
+    return [NSDictionary dictionaryWithObjectsAndKeys:BDSKBookmarkTypeSeparatorString, TYPE_KEY, nil];
+}
+
+- (int)bookmarkType {
+    return BDSKBookmarkTypeSeparator;
+}
+
+@end

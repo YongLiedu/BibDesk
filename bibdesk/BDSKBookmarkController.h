@@ -40,12 +40,6 @@
 #import <WebKit/WebKit.h>
 
 
-enum {
-    BDSKBookmarkTypeBookmark,
-    BDSKBookmarkTypeFolder,
-    BDSKBookmarkTypeSeparator
-};
-
 @class BDSKBookmark;
 
 @interface BDSKBookmarkController : NSWindowController {
@@ -88,46 +82,6 @@ enum {
 - (NSUndoManager *)undoManager;
 
 - (void)setupToolbar;
-
-@end
-
-
-@interface BDSKBookmark : NSObject <NSCopying> {
-    NSString *urlString;
-    NSString *name;
-    NSMutableArray *children;
-    BDSKBookmark *parent;
-    int bookmarkType;
-}
-
-- (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName;
-- (id)initFolderWithName:(NSString *)aName;
-- (id)initSeparator;
-- (id)initWithDictionary:(NSDictionary *)dictionary;
-
-- (NSDictionary *)dictionaryValue;
-
-- (int)bookmarkType;
-
-- (NSURL *)URL;
-
-- (NSString *)urlString;
-- (void)setUrlString:(NSString *)newUrlString;
-
-- (NSString *)name;
-- (void)setName:(NSString *)newName;
-
-- (NSImage *)icon;
-
-- (BDSKBookmark *)parent;
-- (void)setParent:(BDSKBookmark *)newParent;
-- (NSArray *)children;
-- (void)insertChild:(BDSKBookmark *)child atIndex:(unsigned int)index;
-- (void)addChild:(BDSKBookmark *)child;
-- (void)removeChild:(BDSKBookmark *)child;
-
-- (BOOL)isDescendantOf:(BDSKBookmark *)bookmark;
-- (BOOL)isDescendantOfArray:(NSArray *)bookmarks;
 
 @end
 
