@@ -37,26 +37,17 @@
  */
 
 #import "BDSKSearchBookmarkController.h"
+#import "BDSKSearchBookmark.h"
 #import "BDSKStringConstants.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKBookmarkOutlineView.h"
 
 static NSString *BDSKSearchBookmarkRowsPboardType = @"BDSKSearchBookmarkRowsPboardType";
-static NSString *BDSKSearchBookmarkChangedNotification = @"BDSKSearchBookmarkChangedNotification";
-static NSString *BDSKSearchBookmarkWillBeRemovedNotification = @"BDSKSearchBookmarkWillBeRemovedNotification";
 
 static NSString *BDSKSearchBookmarksToolbarIdentifier = @"BDSKSearchBookmarksToolbarIdentifier";
 static NSString *BDSKSearchBookmarksNewFolderToolbarItemIdentifier = @"BDSKSearchBookmarksNewFolderToolbarItemIdentifier";
 static NSString *BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier = @"BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier";
 static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBookmarksDeleteToolbarItemIdentifier";
-
-static NSString *BDSKSearchBookmarkTypeBookmarkString = @"bookmark";
-static NSString *BDSKSearchBookmarkTypeFolderString = @"folder";
-static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
-
-#define CHILDREN_KEY        @"children"
-#define LABEL_KEY           @"label"
-#define BOOKMARK_TYPE_KEY   @"bookmarkType"
 
 @implementation BDSKSearchBookmarkController
 
@@ -488,207 +479,6 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
     } else {
         return YES;
     }
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKSearchBookmark
-
-+ (NSImage *)smallSearchBookmarkIcon {
-    static NSImage *smallSearchBookmarkIcon = nil;
-    if (smallSearchBookmarkIcon == nil) {
-        NSImage *image = [NSImage imageNamed:@"searchFolderIcon"];
-        NSRect rect = {NSZeroPoint, [image size]};
-        smallSearchBookmarkIcon = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-        [smallSearchBookmarkIcon lockFocus];
-        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-        [image drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:rect operation:NSCompositeCopy fraction:1.0];
-        [smallSearchBookmarkIcon unlockFocus];
-    }
-    return smallSearchBookmarkIcon;
-}
-
-- (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel {
-    if (self = [super init]) {
-        bookmarkType = BDSKSearchBookmarkTypeFolder;
-        info = nil;
-        label = [aLabel copy];
-        children = [aChildren mutableCopy];
-        [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
-    }
-    return self;
-}
-
-- (id)initFolderWithLabel:(NSString *)aLabel {
-    return [self initFolderWithChildren:[NSArray array] label:aLabel];
-}
-
-- (id)initSeparator {
-    if (self = [super init]) {
-        bookmarkType = BDSKSearchBookmarkTypeSeparator;
-        info = nil;
-        label = nil;
-        children = nil;
-    }
-    return self;
-}
-
-- (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel {
-    if (self = [super init]) {
-        bookmarkType = BDSKSearchBookmarkTypeBookmark;
-        info = [aDictionary copy];
-        label = [aLabel copy];
-    }
-    return self;
-}
-
-- (id)init {
-    [[super init] release];
-    return nil;
-}
-
-- (id)initWithDictionary:(NSDictionary *)dictionary {
-    if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeFolderString]) {
-        NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
-        NSDictionary *dict;
-        NSMutableArray *newChildren = [NSMutableArray array];
-        while (dict = [dictEnum nextObject])
-            [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
-        return [self initFolderWithChildren:newChildren label:[dictionary objectForKey:LABEL_KEY]];
-    } else if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeSeparatorString]) {
-        return [self initSeparator];
-    } else {
-    NSMutableDictionary *dict = [[dictionary mutableCopy] autorelease];
-        [dict removeObjectForKey:BOOKMARK_TYPE_KEY];
-        [dict removeObjectForKey:LABEL_KEY];
-        return [self initWithInfo:dict label:[dictionary objectForKey:LABEL_KEY]];
-    }
-}
-
-- (id)copyWithZone:(NSZone *)aZone {
-    if (bookmarkType == BDSKSearchBookmarkTypeFolder)
-        return [[[self class] allocWithZone:aZone] initFolderWithChildren:[[[NSArray alloc] initWithArray:children copyItems:YES] autorelease] label:label];
-    else if (bookmarkType == BDSKSearchBookmarkTypeSeparator)
-        return [[[self class] allocWithZone:aZone] initSeparator];
-    else
-    return [[[self class] allocWithZone:aZone] initWithInfo:info label:label];
-}
-
-- (void)dealloc {
-    [[[BDSKSearchBookmarkController sharedBookmarkController] undoManager] removeAllActionsWithTarget:self];
-    [info release];
-    [label release];
-    [children release];
-    [super dealloc];
-}
-
-- (NSString *)description {
-    if (bookmarkType == BDSKSearchBookmarkTypeFolder)
-        return [NSString stringWithFormat:@"<%@: label=%@, children=%@>", [self class], label, children];
-    else if (bookmarkType == BDSKSearchBookmarkTypeSeparator)
-        return [NSString stringWithFormat:@"<%@: separator>", [self class]];
-    else
-        return [NSString stringWithFormat:@"<%@: label=%@, info=%@>", [self class], label, info];
-}
-
-- (NSDictionary *)dictionaryValue {
-    NSMutableDictionary *dictionary = nil;
-    if (bookmarkType == BDSKSearchBookmarkTypeFolder) {
-        dictionary = [NSDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeFolderString, BOOKMARK_TYPE_KEY, [children valueForKey:@"dictionaryValue"], CHILDREN_KEY, label, LABEL_KEY, nil];
-    } else if (bookmarkType == BDSKSearchBookmarkTypeSeparator) {
-        dictionary = [NSDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeSeparatorString, BOOKMARK_TYPE_KEY, nil];
-    } else {
-        dictionary = [NSMutableDictionary dictionaryWithObjectsAndKeys:BDSKSearchBookmarkTypeBookmarkString, BOOKMARK_TYPE_KEY, label, LABEL_KEY, nil];
-        [(NSMutableDictionary *)dictionary addEntriesFromDictionary:info];
-    }
-    return dictionary;
-}
-
-- (int)bookmarkType {
-    return bookmarkType;
-}
-
-- (NSDictionary *)info {
-    return info;
-}
-
-- (NSString *)label {
-    return label;
-}
-
-- (void)setLabel:(NSString *)newLabel {
-    if (label != newLabel) {
-        NSUndoManager *undoManager = [[BDSKSearchBookmarkController sharedBookmarkController] undoManager];
-        [(BDSKSearchBookmark *)[undoManager prepareWithInvocationTarget:self] setLabel:label];
-        [label release];
-        label = [newLabel retain];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchBookmarkChangedNotification object:self];
-    }
-}
-
-- (NSImage *)icon {
-    if ([self bookmarkType] == BDSKSearchBookmarkTypeFolder)
-        return [NSImage imageNamed:@"SmallFolder"];
-    else if (bookmarkType == BDSKSearchBookmarkTypeSeparator)
-        return nil;
-    else
-        return [[self class] smallSearchBookmarkIcon];
-}
-
-- (BDSKSearchBookmark *)parent {
-    return parent;
-}
-
-- (void)setParent:(BDSKSearchBookmark *)newParent {
-    parent = newParent;
-}
-
-- (NSArray *)children {
-    return children;
-}
-
-- (void)insertChild:(BDSKSearchBookmark *)child atIndex:(unsigned int)idx {
-    NSUndoManager *undoManager = [[BDSKSearchBookmarkController sharedBookmarkController] undoManager];
-    [(BDSKSearchBookmark *)[undoManager prepareWithInvocationTarget:self] removeChild:child];
-    [children insertObject:child atIndex:idx];
-    [child setParent:self];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchBookmarkChangedNotification object:self];
-}
-
-- (void)addChild:(BDSKSearchBookmark *)child {
-    [self insertChild:child atIndex:[children count]];
-}
-
-- (void)removeChild:(BDSKSearchBookmark *)child {
-    NSUndoManager *undoManager = [[BDSKSearchBookmarkController sharedBookmarkController] undoManager];
-    [(BDSKSearchBookmark *)[undoManager prepareWithInvocationTarget:self] insertChild:child atIndex:[[self children] indexOfObject:child]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchBookmarkWillBeRemovedNotification object:self];
-    [child setParent:nil];
-    [children removeObject:child];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchBookmarkChangedNotification object:self];
-}
-
-- (BOOL)isDescendantOf:(BDSKSearchBookmark *)bookmark {
-    if (self == bookmark)
-        return YES;
-    NSEnumerator *childEnum = [[bookmark children] objectEnumerator];
-    BDSKSearchBookmark *child;
-    while (child = [childEnum nextObject]) {
-        if ([self isDescendantOf:child])
-            return YES;
-    }
-    return NO;
-}
-
-- (BOOL)isDescendantOfArray:(NSArray *)bookmarks {
-    NSEnumerator *bmEnum = [bookmarks objectEnumerator];
-    BDSKSearchBookmark *bm = nil;
-    while (bm = [bmEnum nextObject]) {
-        if ([self isDescendantOf:bm]) return YES;
-    }
-    return NO;
 }
 
 @end

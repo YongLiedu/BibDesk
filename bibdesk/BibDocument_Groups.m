@@ -78,6 +78,7 @@
 #import "BDSKServerInfo.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKSearchBookmarkController.h"
+#import "BDSKSearchBookmark.h"
 #import "BDSKSearchButtonController.h"
 #import "BDSKSharingClient.h"
 #import "WebURLsWithTitles.h"

@@ -79,6 +79,7 @@
 #import <libkern/OSAtomic.h>
 #import "BDSKFileMatcher.h"
 #import "BDSKSearchBookmarkController.h"
+#import "BDSKSearchBookmark.h"
 #import "BDSKBookmarkController.h"
 #import "BDSKBookmark.h"
 #import "BDSKVersionNumber.h"

@@ -1,10 +1,10 @@
 //
-//  BDSKSearchBookmarkController.h
+//  BDSKSearchBookmark.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 3/26/07.
+//  Created by Christiaan Hofman on 3/25/08.
 /*
- This software is Copyright (c) 2007-2008
+ This software is Copyright (c) 2008
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,38 +38,44 @@
 
 #import <Cocoa/Cocoa.h>
 
+extern NSString *BDSKSearchBookmarkChangedNotification;
+extern NSString *BDSKSearchBookmarkWillBeRemovedNotification;
 
-@class BDSKSearchBookmark;
+enum {
+    BDSKSearchBookmarkTypeBookmark,
+    BDSKSearchBookmarkTypeFolder,
+    BDSKSearchBookmarkTypeSeparator
+};
 
-@interface BDSKSearchBookmarkController : NSWindowController {
-    IBOutlet NSOutlineView *outlineView;
-    NSMutableArray *bookmarks;
-    NSArray *draggedBookmarks;
-    NSMutableDictionary *toolbarItems;
-    NSUndoManager *undoManager;
+@interface BDSKSearchBookmark : NSObject <NSCopying> {
+    BDSKSearchBookmark *parent;
 }
 
-+ (id)sharedBookmarkController;
+- (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel;
+- (id)initFolderWithLabel:(NSString *)aLabel;
+- (id)initSeparator;
+- (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel;
+- (id)initWithDictionary:(NSDictionary *)dictionary;
 
-- (NSArray *)bookmarks;
-- (void)setBookmarks:(NSArray *)newBookmarks;
-- (unsigned)countOfBookmarks;
-- (id)objectInBookmarksAtIndex:(unsigned)index;
-- (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)index;
-- (void)removeObjectFromBookmarksAtIndex:(unsigned)index;
+- (NSDictionary *)dictionaryValue;
 
-- (void)addBookmarkWithInfo:(NSDictionary *)info label:(NSString *)label toFolder:(BDSKSearchBookmark *)folder;
+- (int)bookmarkType;
 
-- (IBAction)insertBookmarkFolder:(id)sender;
-- (IBAction)insertBookmarkSeparator:(id)sender;
-- (IBAction)deleteBookmark:(id)sender;
+- (NSDictionary *)info;
 
-- (void)saveBookmarks;
-- (void)handleSearchBookmarkChangedNotification:(NSNotification *)notification;
-- (void)handleSearchBookmarkWillBeRemovedNotification:(NSNotification *)notification;
+- (NSString *)label;
+- (void)setLabel:(NSString *)newLabel;
 
-- (NSUndoManager *)undoManager;
+- (NSImage *)icon;
 
-- (void)setupToolbar;
+- (BDSKSearchBookmark *)parent;
+- (void)setParent:(BDSKSearchBookmark *)newParent;
+- (NSArray *)children;
+- (void)insertChild:(BDSKSearchBookmark *)child atIndex:(unsigned int)index;
+- (void)addChild:(BDSKSearchBookmark *)child;
+- (void)removeChild:(BDSKSearchBookmark *)child;
+
+- (BOOL)isDescendantOf:(BDSKSearchBookmark *)bookmark;
+- (BOOL)isDescendantOfArray:(NSArray *)bookmarks;
 
 @end
