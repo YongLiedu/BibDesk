@@ -48,7 +48,6 @@ enum {
 };
 
 @interface BDSKBookmark : NSObject <NSCopying> {
-    NSString *name;
     BDSKBookmark *parent;
 }
 
