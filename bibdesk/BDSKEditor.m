@@ -2734,7 +2734,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 [self recordChangingField:field toValue:object];
         }
         // tableView:shouldEditTableColumn:row: may not be called when the user continues editing
-        ignoreEdit = NO
+        ignoreEdit = NO;
     }
 }
 
