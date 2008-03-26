@@ -1384,7 +1384,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     // this isn't obvious from the method name; it all takes place in a single op to avoid locking twice
     
     // enqueue visible icons with high priority
-    [self _enqueueRenderOperationForIcons:[self iconsAtIndexes:visibleIndexes] withPriority:FVOperationQueuePriorityHigh];
+    NSArray *iconsToRender = [self iconsAtIndexes:visibleIndexes];
+    [self _enqueueRenderOperationForIcons:iconsToRender withPriority:FVOperationQueuePriorityHigh];
     
     // Call this only for icons that we're not going to display "soon."  The problem with this approach is that if you only have a single icon displayed at a time (say in a master-detail view), FVIcon cache resources will continue to be used up since each one is cached and then never touched again (if it doesn't show up in this loop, that is).  We handle this by using a timer that culls icons which are no longer present in the datasource.  I suppose this is only a symptom of the larger problem of a view maintaining a cache of model objects...but expecting a client to be aware of our caching strategy and icon management is a bit much.  
     
@@ -1411,7 +1412,18 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         }
 
         if ([unusedIndexes count]) {
-            [self _enqueueReleaseOperationForIcons:[self iconsAtIndexes:unusedIndexes]];
+            // Since the same FVIcon instance is returned for duplicate URLs, the same icon instance may receive -renderOffscreen and -releaseResources in the same pass if it represents a visible icon and a hidden icon.
+            NSSet *renderSet = [[NSSet alloc] initWithArray:iconsToRender];
+            NSMutableArray *unusedIcons = [[self iconsAtIndexes:unusedIndexes] mutableCopy];
+            NSUInteger i = [unusedIcons count];
+            while (i--) {
+                FVIcon *anIcon = [unusedIcons objectAtIndex:i];
+                if ([renderSet containsObject:anIcon])
+                    [unusedIcons removeObject:anIcon];
+            }
+            [self _enqueueReleaseOperationForIcons:unusedIcons];
+            [renderSet release];
+            [unusedIcons release];
         }
         
     }
