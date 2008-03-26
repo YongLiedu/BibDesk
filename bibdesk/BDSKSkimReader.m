@@ -43,7 +43,7 @@
 
 - (bycopy NSData *)SkimNotesAtPath:(in bycopy NSString *)aFile;
 - (bycopy NSData *)RTFNotesAtPath:(in bycopy NSString *)aFile;
-- (bycopy NSString *)textNotesAtPath:(in bycopy NSString *)aFile;
+- (bycopy NSData *)textNotesAtPath:(in bycopy NSString *)aFile encoding:(NSStringEncoding)encoding;
 
 @end
 
@@ -63,6 +63,7 @@
 
 - (void)destroyConnection;
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSConnectionDidDieNotification object:connection];
     [agent release];
     agent = nil;
     
@@ -136,12 +137,12 @@
     
     // okay to launch multiple instances, since the new one will just die, but we generally shouldn't do that
     OBPRECONDITION(nil == connection);
-
+    
     // no point in trying to connect if the task didn't launch
     if ([self launchedTask]) {
         int maxTries = 5;
         connection = [[NSConnection connectionWithRegisteredName:AGENT_IDENTIFIER host:nil] retain];
-
+        
         // if we try to read data before the server is fully set up, connection will still be nil
         while (nil == connection && maxTries--) { 
             [NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
@@ -152,7 +153,7 @@
             
             // keep an eye on the connection from our end, so we can retain the proxy object
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleConnectionDied:) name:NSConnectionDidDieNotification object:connection];
-        
+            
             // if we don't set these explicitly, timeout never seems to take place
             [connection setRequestTimeout:AGENT_TIMEOUT];
             [connection setReplyTimeout:AGENT_TIMEOUT];
@@ -163,7 +164,7 @@
                 agent = [server retain];
             }
             @catch(id exception) {
-                NSLog(@"Discarding exception %@ caught when contacting SkimNotesAgent", exception);
+                NSLog(@"Error: exception \"%@\" caught when contacting SkimNotesAgent", exception);
                 [self destroyConnection];
             }
         }
@@ -182,7 +183,7 @@
     if (UTTypeConformsTo(type, kUTTypePDF) || UTTypeConformsTo(type, CFSTR("com.adobe.postscript")) ||
         UTTypeConformsTo(type, CFSTR("net.sourceforge.skim-app.pdfd")) || UTTypeConformsTo(type, CFSTR("net.sourceforge.skim-app.skimnotes")))
         return YES;
-
+    
     return NO;
 }
 
@@ -220,18 +221,18 @@
 
 - (NSString *)textNotesAtURL:(NSURL *)fileURL;
 {   
-    NSString *string = nil;
+    NSData *textData = nil;
     if ([self connectAndCheckTypeOfFile:fileURL]) {
         @try{
-            string = [agent textNotesAtPath:[fileURL path]];
+            textData = [agent textNotesAtPath:[fileURL path] encoding:NSUnicodeStringEncoding];
         }
         @catch(id exception){
-            string = nil;
+            textData = nil;
             NSLog(@"-[BDSKSkimReader textNotesAtURL:] caught %@ while contacting skim agent; please report this", exception);
             [self destroyConnection];
         }
     }
-    return string;
+    return textData ? [[[NSString alloc] initWithData:textData encoding:NSUnicodeStringEncoding] autorelease] : nil;
 }
 
 
