@@ -2721,16 +2721,20 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
-	if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"] && ignoreEdit == NO) {
-        NSString *field = [fields objectAtIndex:row];
-        NSString *oldValue = [publication valueOfField:field];
-        if (oldValue == nil)
-            oldValue = @"";
-        if (object == nil)
-            object = @"";
-        
-        if (NO == [object isEqualAsComplexString:oldValue])
-            [self recordChangingField:field toValue:object];
+    if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"]) {
+        if (ignoreEdit == NO) {
+            NSString *field = [fields objectAtIndex:row];
+            NSString *oldValue = [publication valueOfField:field];
+            if (oldValue == nil)
+                oldValue = @"";
+            if (object == nil)
+                object = @"";
+            
+            if (NO == [object isEqualAsComplexString:oldValue])
+                [self recordChangingField:field toValue:object];
+        }
+        // tableView:shouldEditTableColumn:row: may not be called when the user continues editing
+        ignoreEdit = NO
     }
 }
 
@@ -2818,12 +2822,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 #pragma mark TableView delegate methods
 
 - (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-	if ([tv isEqual:tableView]) {
-        
+	if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"]) {
         ignoreEdit = NO;
         // we always want to "edit" even when we are not editable, so we can always select, and the cell will prevent editing when isEditable == NO
-        if ([[tableColumn identifier] isEqualToString:@"value"])
-            return YES;
+        return YES;
     }
     return NO;
 }
