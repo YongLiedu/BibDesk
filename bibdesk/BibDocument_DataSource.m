@@ -70,6 +70,7 @@
 #import "BDSKItemPasteboardHelper.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
+#import "BDSKCategoryGroup.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKURLGroup.h"
 #import "BDSKLinkedFile.h"
@@ -147,6 +148,8 @@
 			return;
 		if([group isCategory]){
 			NSArray *pubs = [groupedPublications copy];
+            // change the name of the group first, so we can preserve the selection
+            [(BDSKCategoryGroup *)group setName:[BibAuthor authorWithName:newName andPub:[[group name] publication]]];
 			[self movePublications:pubs fromGroup:group toGroupNamed:newName];
 			[pubs release];
 		}else if([group hasEditableName]){

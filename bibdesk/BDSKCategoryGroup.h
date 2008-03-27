@@ -69,4 +69,12 @@
 */
 - (NSString *)key;
 
+/*!
+	@method setName:
+	@param newName The new name for the group.
+	@abstract Returns the key of the group.
+	@discussion This is only used to preserve the selection after an edit
+*/
+- (void)setName:(id)newName;
+
 @end
