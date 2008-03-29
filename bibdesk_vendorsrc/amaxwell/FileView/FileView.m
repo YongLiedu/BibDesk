@@ -2777,7 +2777,7 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         }
     }
     // remove a separator at index 0
-    if ([[menu itemAtIndex:0] isSeparatorItem])
+    if ([menu numberOfItems] > 0 && [[menu itemAtIndex:0] isSeparatorItem])
         [menu removeItemAtIndex:0];
         
     if ([[self delegate] respondsToSelector:@selector(fileView:willPopUpMenu:onIconAtIndex:)])
