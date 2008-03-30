@@ -305,7 +305,7 @@ enum {
         type = BDSKColumnTypeCrossref;
     else if ([colName isEqualToString:BDSKImportOrderString])
         type = BDSKColumnTypeImportOrder;
-    else if ([colName isEqualToString:BDSKImportOrderString])
+    else if ([colName isEqualToString:BDSKRelevanceString])
         type = BDSKColumnTypeRelevance;
     else
         type = BDSKColumnTypeText;
