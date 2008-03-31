@@ -124,6 +124,8 @@
     NSAssert1([self tryLock] == NO, @"%@ failed to acquire lock before calling -size", [self class]);
     NSSize s = [self size];
     
+    NSParameterAssert(s.width > 0);
+    NSParameterAssert(s.height > 0);
     CGFloat ratio = MIN(NSWidth(iconRect) / s.width, NSHeight(iconRect) / s.height);
     CGRect dstRect = *(CGRect *)&iconRect;
     dstRect.size.width = ratio * s.width;

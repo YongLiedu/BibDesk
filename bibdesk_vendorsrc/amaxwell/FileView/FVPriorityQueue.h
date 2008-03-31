@@ -46,6 +46,9 @@
   
  A twist on usual queue behavior is that duplicate objects (as determined by -[NSObject isEqual:]) are not added to the queue in push:, but are silently ignored.  This allows easy maintenance of a unique set of objects in the priority queue.  Note that -hash must be implemented correctly for any objects that override -isEqual:, and the value of -hash for a given object must not change while the object is in the queue.
  
+ Thanks to Mike Ash for demonstrating how to use std::make_heap.
+ http://www.mikeash.com/?page=pyblog/using-evil-for-good.html
+ 
  */
 
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)

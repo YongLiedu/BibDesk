@@ -44,6 +44,8 @@
 static NSDictionary *__textAttributes = nil;
 
 + (void)initialize {
+    FVINITIALIZE(FVScaledImageView);
+
     NSMutableDictionary *ta = [NSMutableDictionary dictionary];
     [ta setObject:[NSFont systemFontOfSize:[NSFont systemFontSize]] forKey:NSFontAttributeName];
     [ta setObject:[NSColor darkGrayColor] forKey:NSForegroundColorAttributeName];

@@ -78,6 +78,9 @@
 
 @implementation FVReleaseOperation
 
+// avoid running a new thread for each release
+- (BOOL)isConcurrent { return NO; }
+
 - (void)main;
 {
     if (NO == [self isCancelled]) {

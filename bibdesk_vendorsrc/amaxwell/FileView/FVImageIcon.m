@@ -139,39 +139,49 @@ static const NSUInteger FVICONCACHE_THRESHOLD = 1024;
     
     [self lock];
     
+    if ([NSThread instancesRespondToSelector:@selector(setName:)] && pthread_main_np() == 0)
+        [[NSThread currentThread] setName:[_fileURL path]];
+
     [_fallbackIcon renderOffscreen];
     
     // !!! early returns here after a cache check
     if (NULL != _fullImage && NULL != _thumbnail) {
-        // note that _fullImage may be non-NULL if we were added to the FVOperationQueue multiple times before renderOffscreen was called
-        NSParameterAssert(NULL != _thumbnail);
+        // may be non-NULL if we were added to the FVOperationQueue multiple times before renderOffscreen was actually called
         [self unlock];
         return;
     }
     else {
                 
         // initialize size since it could have been cached by some other instance
+        // always load the thumbnail for the fast drawing path
         if (NULL == _thumbnail) {
             _thumbnail = [FVIconCache newThumbnailNamed:_diskCacheName];
             _thumbnailSize = FVCGImageSize(_thumbnail);
         }
         
-        if (FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize) && NULL == _fullImage) {
-            _fullImage = [FVIconCache newImageNamed:_diskCacheName];
-            if (NULL != _fullImage) {
-                [self unlock];
-                return;
-            }
-        }
-        else if (NULL != _thumbnail) {
-            [self unlock];
-            return;
-        }
+        // if thumbnail was non-NULL, full image should also be non-NULL
+        if (NULL != _thumbnail) {
+            
+            NSParameterAssert(NSEqualSizes(_thumbnailSize, NSZeroSize) == NO);
+            
+        	if (FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize) && NULL == _fullImage) {
+                _fullImage = [FVIconCache newImageNamed:_diskCacheName];
+                if (_fullImage) {
+                	[self unlock];
+                	return;
+            	}
+        	}
+        	else {
+             	// have full image or don't need to draw it
+            	[self unlock];
+            	return;
+        	}
+    	}
     }
     
-    // at this point, neither icon should be present, unless ImageIO failed previously
-    NSParameterAssert(NULL == _fullImage);
-    NSParameterAssert(NULL == _thumbnail);
+    // at this point, neither icon should be present, unless ImageIO failed previously or caching failed
+    NSAssert1(NULL == _fullImage, @"unexpected full image for %@", [_fileURL path]);
+    NSAssert1(NULL == _thumbnail, @"unexpected _thumbnail for %@", [_fileURL path]);
         
     CGImageSourceRef src = NULL;
     CFDataRef imageData = [self _copyDataForImageSourceWhileLocked];

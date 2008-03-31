@@ -89,7 +89,7 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
     if ([files containsObject:fileName]) {
         pdfFile = fileName;
     } else {
-        unsigned int idx = [[files valueForKeyPath:@"pathExtension.lowercaseString"] indexOfObject:@"pdf"];
+        NSUInteger idx = [[files valueForKeyPath:@"pathExtension.lowercaseString"] indexOfObject:@"pdf"];
         if (idx != NSNotFound)
             pdfFile = [files objectAtIndex:idx];
     }
@@ -224,6 +224,9 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
 {  
     // hold the lock while initializing these variables, so we don't waste time trying to render again, since we may be returning YES from needsRender
     [self lock];
+    
+    if ([NSThread instancesRespondToSelector:@selector(setName:)] && pthread_main_np() == 0)
+        [[NSThread currentThread] setName:[_fileURL path]];
     
     // only the first page is cached to disk; ignore this branch if we should be drawing a later page or if the size has changed
     

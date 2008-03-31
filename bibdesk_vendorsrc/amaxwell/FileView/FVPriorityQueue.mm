@@ -77,7 +77,7 @@ static inline bool enumeration_compare(id value1, id value2)
 
 static inline NSUInteger __FVPriorityQueueRoundUpCapacity(NSUInteger capacity) {
     if (capacity < 4) return 4;
-    return (1 << (int(log2(capacity)) + 1));
+    return (1 << flsl(capacity));
 }
 
 static inline void __FVPriorityQueueSetCount(FVPriorityQueue *self, NSUInteger count)

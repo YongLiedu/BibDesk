@@ -337,11 +337,7 @@ BOOL FVWriteURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard)
         return [self bezierPathWithRect:rect];
     
     NSRect innerRect = NSInsetRect(rect, radius, radius); // Make rect with corners being centers of the corner circles.
-	static NSBezierPath *path = nil;
-    if(path == nil)
-        path = [[self bezierPath] retain];
-    
-    [path removeAllPoints];    
+    NSBezierPath *path = [self bezierPath]; 
     
     // Now draw our rectangle:
     [path moveToPoint: NSMakePoint(NSMinX(innerRect) - radius, NSMinY(innerRect))];
