@@ -1378,7 +1378,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                 }
             } else return nil;
         } else return nil;
-    } else if ([emptyTemplate count] == 0 && [nonemptyTemplate count] < 3) {
+    } else if ([emptyTemplate count] == 0 && [nonemptyTemplate count] < 4) {
         int i = 0;
         BDSKTag *subtag = [nonemptyTemplate objectAtIndex:i];
         NSString *prefix = nil, *suffix = nil;
