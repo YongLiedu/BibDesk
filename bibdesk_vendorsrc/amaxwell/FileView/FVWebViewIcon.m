@@ -449,11 +449,11 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     
     // note that _fullImage may be non-NULL if we were added to the FVOperationQueue multiple times before renderOffscreen was called
     if (NULL == _fullImage && FVShouldDrawFullImageWithThumbnailSize(_desiredSize, [self _thumbnailSize]))
-        _fullImage = [FVIconCache newImageForKey:_cacheKey];
+        _fullImage = [FVIconCache newImageNamed:_diskCacheName];
     
     // always load for the fast drawing path
     if (NULL == _thumbnail)
-        _thumbnail = [FVIconCache newThumbnailForKey:_cacheKey];
+        _thumbnail = [FVIconCache newThumbnailNamed:_diskCacheName];
 
     if (NULL == _thumbnail && NULL == _fullImage && NO == _webviewFailed && NO == _isRendering) {
         // make sure needsRenderForSize: knows that we're actively rendering, so renderOffscreen doesn't get called again
