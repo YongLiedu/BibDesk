@@ -1352,18 +1352,18 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="exportUsingTemplate" class="BDSKExportUsingTemplateCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
-            <parameter name="using template" code="uset"
+            <parameter name="using template" code="uset" optional="yes"
                 description="The name or file of the template to use. Either this, 'using text', or 'using rich text' should be used.">
                 <type type="text"/>
                 <type type="file"/>
                 <cocoa key="using"/>
             </parameter>
             <parameter name="using text" code="usTx" type="text" optional="yes"
-                description="The template text to use. Either this, 'using', or 'using rich text' should be used.">
+                description="The template text to use. Either this, 'using template', or 'using rich text' should be used.">
                 <cocoa key="usingText"/>
             </parameter>
             <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
-                description="The template rich text to use. Either this, 'using', or 'using text' should be used.">
+                description="The template rich text to use. Either this, 'using template', or 'using text' should be used.">
                 <cocoa key="usingRichText"/>
             </parameter>
             <parameter name="to" code="to  "
