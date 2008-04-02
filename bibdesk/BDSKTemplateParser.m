@@ -1096,8 +1096,6 @@ inline static NSString *romanNumeralForDigit(unsigned digit, NSString *i, NSStri
             return @"";
         case 1:
             return [self objectAtIndex:0];
-        case 2:
-            return [NSString stringWithFormat:@"%@ & %@", [self objectAtIndex:0], [self objectAtIndex:1]];
         default:
             return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[self lastObject]];
     }
