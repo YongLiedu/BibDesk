@@ -1804,7 +1804,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // also import a possible crossref parent if that wasn't already present
     BibItem *parent = [pub crossrefParent];
     if ([parent isImported])
-        parent == nil;
+        parent = nil;
     
     NSMutableData *data = [NSMutableData data];
     NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
