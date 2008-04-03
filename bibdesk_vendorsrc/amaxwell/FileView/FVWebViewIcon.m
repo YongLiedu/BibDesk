@@ -455,16 +455,23 @@ NSString * const FVWebIconUpdatedNotificationName = @"FVWebIconUpdatedNotificati
     if (NULL == _thumbnail)
         _thumbnail = [FVIconCache newThumbnailNamed:_diskCacheName];
 
+    // unlock before calling performSelectorOnMainThread:... since it could cause a callout that tries to acquire the lock (one of the delegate methods)
+    
     if (NULL == _thumbnail && NULL == _fullImage && NO == _webviewFailed && NO == _isRendering) {
         // make sure needsRenderForSize: knows that we're actively rendering, so renderOffscreen doesn't get called again
         _isRendering = YES;
+        [self unlock];
         [self performSelectorOnMainThread:@selector(renderOffscreenOnMainThread) withObject:nil waitUntilDone:YES modes:_commonModes];
     }
     else if (YES == _webviewFailed && nil == _fallbackIcon) {
         _fallbackIcon = [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:_httpURL];
+        [self unlock];
     }
-    [_fallbackIcon renderOffscreen];
-    [self unlock];
+    else {
+        // no condition on this branch; we always unlock
+        [_fallbackIcon renderOffscreen];
+        [self unlock];
+    }
 }
 
 - (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context;
