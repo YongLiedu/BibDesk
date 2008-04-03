@@ -1801,13 +1801,17 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)tableView:(NSTableView *)aTableView importItemAtRow:(int)rowIndex{
     BibItem *pub = [shownPublications objectAtIndex:rowIndex];
+    // also import a possible crossref parent if that wasn't already present
+    BibItem *parent = [pub crossrefParent];
+    if ([parent isImported])
+        parent == nil;
     
     NSMutableData *data = [NSMutableData data];
     NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
     NSArray *newPubs;
     NSMutableArray *importedItems = [NSMutableArray array];
     
-    [archiver encodeObject:[NSArray arrayWithObjects:pub, nil] forKey:@"publications"];
+    [archiver encodeObject:[NSArray arrayWithObjects:pub, parent, nil] forKey:@"publications"];
     [archiver finishEncoding];
     [archiver release];
     
