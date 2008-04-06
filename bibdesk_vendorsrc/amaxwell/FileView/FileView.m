@@ -2165,6 +2165,13 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     }
 }
 
+- (void)mouseEntered:(NSEvent *)event;
+{
+    float dz = [theEvent deltaZ];
+    dz = dz > 0 ? FVMin(0.2, dz) : FVMax(-0.2, dz);
+    [self setIconScale:FVMax(0.1, [self iconScale] + 0.5 * dz)];
+}
+
 #pragma mark Drop target
 
 - (void)setDropIndex:(NSUInteger)anIndex dropOperation:(FVDropOperation)anOperation
