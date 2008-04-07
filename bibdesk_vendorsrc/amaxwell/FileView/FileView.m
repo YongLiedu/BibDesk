@@ -2165,7 +2165,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     }
 }
 
-- (void)mouseEntered:(NSEvent *)event;
+- (void)magnifyWithEvent:(NSEvent *)event;
 {
     float dz = [theEvent deltaZ];
     dz = dz > 0 ? FVMin(0.2, dz) : FVMax(-0.2, dz);
