@@ -316,13 +316,18 @@
     NSPredicate *predicate = nil;
     if ([NSString isEmptyString:string] == NO)
         predicate = [NSPredicate predicateWithFormat:@"(name CONTAINS[cd] %@) OR (value CONTAINS[cd] %@)", string, string];
+    
+    isEditable = showAll == NO && predicate == nil && (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isDocument]);
+    
+    [self updateButtons];
+    
     [arrayController setFilterPredicate:predicate];
     [tableView reloadData];
 }
 
 - (IBAction)changeShowAll:(id)sender{
     showAll = [sender state] == NSOnState;
-    isEditable = showAll == NO && (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isDocument]);
+    isEditable = showAll == NO && [arrayController filterPredicate] == nil && (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isDocument]);
     
     [self updateButtons];
     [self reloadMacros];
