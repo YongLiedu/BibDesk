@@ -88,9 +88,10 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 @implementation BDSKPreviewer
 
-+ (BDSKPreviewer *)sharedPreviewer{
-    static BDSKPreviewer *sharedPreviewer = nil;
+static BDSKPreviewer *sharedPreviewer = nil;
 
++ (BDSKPreviewer *)sharedPreviewer{
+    
     if (sharedPreviewer == nil) {
         sharedPreviewer = [[self alloc] init];
     }
@@ -112,7 +113,8 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     return self;
 }
 
-- (BOOL)isSharedPreviewer { return [self isEqual:[[self class] sharedPreviewer]]; }
+// Using isEqual:[BDSKSharedPreviewer sharedPreviewer] will lead to a leak if awakeFromNib is called while +sharedPreviewer is on the stack for the first time, since it calls isSharedPreviewer.  This is readily seen from the backtrace in http://sourceforge.net/tracker/index.php?func=detail&aid=1936951&group_id=61487&atid=497423 although it doesn't fix that problem.
+- (BOOL)isSharedPreviewer { return [self isEqual:sharedPreviewer]; }
 
 #pragma mark UI setup and display
 
