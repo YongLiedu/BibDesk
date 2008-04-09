@@ -886,11 +886,13 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         }
     }
     
+    // ??? move to -reloadIcons
     NSUInteger lastSelIndex = [_selectedIndexes lastIndex];
     if (lastSelIndex != NSNotFound && lastSelIndex >= numIcons) {
         NSMutableIndexSet *tmpIndexes = [_selectedIndexes mutableCopy];
         [tmpIndexes removeIndexesInRange:NSMakeRange(numIcons, lastSelIndex + 1 - numIcons)];
         [self setSelectionIndexes:tmpIndexes];
+        [tmpIndexes release];
     }
 }    
 
