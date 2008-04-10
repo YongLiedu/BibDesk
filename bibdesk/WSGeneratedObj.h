@@ -18,21 +18,7 @@
 @interface WSGeneratedObj : NSObject {
 	WSMethodInvocationRef fRef;
 	NSDictionary* fResult;
-
-	id fAsyncTarget;
-	SEL fAsyncSelector;
 };
-
-// For Asynchronous processing, you can specify a callback
-// and schedule this invocation on a runloop.
-// Note that making any call other than isComplete
-// after the invocation in scheduled will block until the invocation completes and
-// the callback will not be called.
-// The selector signature is "invocationResponse:" and is passed a reference
-// to this object.
-- (void) setCallBack:(id) target selector:(SEL) selector;
-- (void) scheduleOnRunLoop:(NSRunLoop*) runloop mode:(NSString*) mode;
-- (void) unscheduleFromRunLoop:(NSRunLoop*) runloop mode:(NSString*) mode;
 
 	// Check if the invocation is complete - that is,
 	// if the result has been obtained.

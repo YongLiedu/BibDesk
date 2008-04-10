@@ -18,8 +18,6 @@
 	if ((self = [super init]) != NULL) {
 		fRef = NULL;
 		fResult = NULL;
-		fAsyncTarget = NULL;
-		fAsyncSelector = NULL;
 	}
 	return self;
 }
@@ -35,33 +33,6 @@
 	[super dealloc];
 }
 
-- (void) gotResults:(CFDictionaryRef) outRef
-{
-	if (fResult == NULL)
-		fResult = [(NSDictionary*) outRef retain];
-
-	id target = fAsyncTarget;
-	SEL sel = fAsyncSelector;
-
-	fAsyncTarget = NULL;
-	fAsyncSelector = NULL;
-	
-	if (target != NULL) {
-		[target performSelector:sel withObject: self];
-	}
-}
-
-
-static void __async_callback(WSMethodInvocationRef invocation, void* info, CFDictionaryRef outRef)
-{
-	WSGeneratedObj* obj = info;
-	if (obj) {
-		[obj gotResults: outRef];
-		CFRelease(outRef);
-	}
-}
-
-
 	// Return (possibly creating) the WSMethodInvocationRef
 - (WSMethodInvocationRef) getRef
 {
@@ -74,28 +45,12 @@ static void __async_callback(WSMethodInvocationRef invocation, void* info, CFDic
 	// been fetched yet, this will asynchronously block
 - (NSDictionary*) getResultDictionary
 {
-	if (fResult == NULL) {
-		if (fAsyncTarget != NULL) {
-			fAsyncTarget = NULL;
-			fAsyncSelector = NULL;
-		}
-
-		if (fResult == NULL) {
-			WSMethodInvocationRef invocation = [self getRef];
-			CFStringRef wsGeneratedMode = CFSTR("NS-WSSYNC");
-
-			WSMethodInvocationScheduleWithRunLoop(invocation, CFRunLoopGetCurrent(), wsGeneratedMode);
-
-			while (fResult == NULL)
-				CFRunLoopRunInMode(wsGeneratedMode, -1.0, true);
-
-			WSMethodInvocationUnscheduleFromRunLoop(invocation, CFRunLoopGetCurrent(), wsGeneratedMode);
-		}
-		
-		if (fResult == NULL) {
-			[self handleError:@"WSMethodInvocationInvoke failed in getResultDictionary" errorString:NULL errorDomain:kCFStreamErrorDomainMacOSStatus errorNumber:paramErr];
-		}
-	}
+    if (fResult == NULL)
+        fResult = (NSDictionary *)WSMethodInvocationInvoke([self getRef]);
+    
+    if (fResult == NULL) {
+        [self handleError:@"WSMethodInvocationInvoke failed in getResultDictionary" errorString:NULL errorDomain:kCFStreamErrorDomainMacOSStatus errorNumber:paramErr];
+    }
 	return fResult;
 }
 
@@ -176,14 +131,6 @@ static void __async_callback(WSMethodInvocationRef invocation, void* info, CFDic
 			[headers release];
 
 			WSMethodInvocationSetProperty(ref, kWSSOAPMethodNamespaceURI, methodNamespace);
-
-			WSClientContext context = { 0, 
-										(void*) self, 
-										(WSClientContextRetainCallBackProcPtr) CFRetain,
-										(WSClientContextReleaseCallBackProcPtr) CFRelease, 
-										(WSClientContextCopyDescriptionCallBackProcPtr) CFCopyDescription
-			};
-			WSMethodInvocationSetCallBack(ref, __async_callback, &context);
 		}
 	}
 	
@@ -194,22 +141,6 @@ static void __async_callback(WSMethodInvocationRef invocation, void* info, CFDic
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
 	return NULL;
-}
-
-- (void) setCallBack:(id) target selector:(SEL) selector
-{
-	fAsyncTarget = [target retain];
-	fAsyncSelector = selector;
-}
-
-- (void) scheduleOnRunLoop:(NSRunLoop*) runloop mode:(NSString*) mode
-{
-	WSMethodInvocationScheduleWithRunLoop([self getRef], (CFRunLoopRef) runloop, (CFStringRef) mode);
-}
-
-- (void) unscheduleFromRunLoop:(NSRunLoop*) runloop mode:(NSString*) mode
-{
-	WSMethodInvocationUnscheduleFromRunLoop([self getRef], (CFRunLoopRef) runloop, (CFStringRef) mode);
 }
 
 @end
