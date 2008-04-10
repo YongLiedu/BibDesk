@@ -88,7 +88,7 @@
     [arrayController insertObject:[NSURL URLWithString:@"http://bibdesk.sourceforge.tld/"] atArrangedObjectIndex:insertIndex++];
     
     [_fileView bind:@"iconURLs" toObject:arrayController withKeyPath:@"arrangedObjects" options:nil];
-    [arrayController bind:@"selectionIndexes" toObject:_fileView withKeyPath:@"selectionIndexes" options:nil];
+    [_fileView bind:@"selectionIndexes" toObject:arrayController withKeyPath:@"selectionIndexes" options:nil];
     
     // for optional datasource method
     [_fileView setDataSource:self];
