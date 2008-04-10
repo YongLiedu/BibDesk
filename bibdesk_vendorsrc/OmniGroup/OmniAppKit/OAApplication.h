@@ -63,8 +63,8 @@
 
 // Application Support directory
 - (NSArray *)supportDirectoriesInDomain:(NSSearchPathDomainMask)domains;
-- (NSArray *)readableSupportDirectoriesInDomain:(NSSearchPathDomainMask)domains withComponents:(NSString *)subdir, ...;
-- (NSString *)writableSupportDirectoryInDomain:(NSSearchPathDomainMask)domains withComponents:(NSString *)subdir, ...;
+- (NSArray *)readableSupportDirectoriesInDomain:(NSSearchPathDomainMask)domains withComponents:(NSString *)subdir, ...  NS_REQUIRES_NIL_TERMINATION;
+- (NSString *)writableSupportDirectoryInDomain:(NSSearchPathDomainMask)domains withComponents:(NSString *)subdir, ...  NS_REQUIRES_NIL_TERMINATION;
 
 @end
 

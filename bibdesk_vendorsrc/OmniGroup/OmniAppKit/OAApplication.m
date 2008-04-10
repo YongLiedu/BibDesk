@@ -337,7 +337,7 @@ static NSArray *flagsChangedRunLoopModes;
         // Already handling an exception!
         NSLog(@"Ignoring exception raised while displaying previous exception: %@", anException);
         if ([anException respondsToSelector:@selector(callStackReturnAddresses)])
-            NSLog(@"%@", [anException callStackReturnAddresses]);
+            NSLog(@"%@", [[[OFController sharedController] copySymbolicBacktraceForNumericBacktrace:[[anException callStackReturnAddresses] componentsJoinedByString:@"  "]] autorelease]);
         return;
     }
 
@@ -348,7 +348,7 @@ static NSArray *flagsChangedRunLoopModes;
         } else {
             NSLog(@"%@", [anException reason]);
             if ([anException respondsToSelector:@selector(callStackReturnAddresses)])
-                NSLog(@"%@", [anException callStackReturnAddresses]);
+                NSLog(@"%@", [[[OFController sharedController] copySymbolicBacktraceForNumericBacktrace:[[anException callStackReturnAddresses] componentsJoinedByString:@"  "]] autorelease]);
             
             // Do NOT use NSRunAlertPanel.  If another exception happens while NSRunAlertPanel is going, the alert will be removed from the screen and the user will not be able to report the original exception!
             // NSGetAlertPanel will not have a default button if we pass nil.
