@@ -2620,10 +2620,10 @@ static void addFilesToArray(const void *value, void *context)
     [toMove release];
 }
 
-- (void)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile runScriptHook:(BOOL)runScriptHook {
+- (BOOL)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile runScriptHook:(BOOL)runScriptHook {
     BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:self] autorelease];
     if (aFile == nil)
-        return;
+        return NO;
     unsigned idx = [files count];
     if ([aFile isFile]) {
         NSArray *localFiles = [self localFiles];
@@ -2635,6 +2635,7 @@ static void addFilesToArray(const void *value, void *context)
         [(BibDocument *)[self owner] userAddedURL:aURL forPublication:self];
     if (shouldAutoFile && [aFile isFile])
         [self autoFileLinkedFile:aFile];
+    return YES;
 }
 
 - (void)noteFilesChanged:(BOOL)isFile {

@@ -94,7 +94,7 @@ enum {
 - (void)removeObjectFromFilesAtIndex:(NSUInteger)idx;
 - (void)moveFilesAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)idx;
 
-- (void)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile runScriptHook:(BOOL)runScriptHook;
+- (BOOL)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile runScriptHook:(BOOL)runScriptHook;
 
 - (void)noteFilesChanged:(BOOL)isFile;
 
