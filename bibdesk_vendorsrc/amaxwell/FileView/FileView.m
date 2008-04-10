@@ -46,7 +46,6 @@
 #import "FVIcon.h"
 #import "FVArrowButtonCell.h"
 #import "FVUtilities.h"
-#import "FVIconQueue.h"
 #import "FVOperationQueue.h"
 #import "FVIconOperation.h"
 #import "FVDownload.h"
@@ -216,10 +215,6 @@ static CGColorRef _shadowColor = NULL;
     _activeDownloads = NULL;
     _progressTimer = NULL;
     
-#ifdef USE_ICON_QUEUE
-#else
-    _operationQueue = [FVOperationQueue new];
-#endif
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -268,11 +263,8 @@ static CGColorRef _shadowColor = NULL;
         [self _cancelActiveDownloads];
         CFRelease(_activeDownloads);
     }
-#ifdef USE_ICON_QUEUE
-#else
     [_operationQueue terminate];
     [_operationQueue release];
-#endif
     CGLayerRelease(_selectionOverlay);
     [super dealloc];
 }
@@ -388,10 +380,7 @@ static CGColorRef _shadowColor = NULL;
     
     // make sure these get cleaned up; if the datasource is now nil, we're probably going to deallocate soon
     [self _cancelActiveDownloads];
-#ifdef USE_ICON_QUEUE
-#else
     [_operationQueue cancel];
-#endif
     _padding = [self _paddingForScale:[self iconScale]];
     
     [self _registerForDraggedTypes];
@@ -691,10 +680,6 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     if (nil == newSuperview) {
         [self removeObserver:self forKeyPath:@"selectionIndexes"];
         [[NSNotificationCenter defaultCenter] removeObserver:self name:FVWebIconUpdatedNotificationName object:nil];
-#ifdef USE_ICON_QUEUE
-#else
-        [_operationQueue cancel];
-#endif
         
         // break a retain cycle; binding is retaining this view
         [[_sliderWindow slider] unbind:@"value"];
@@ -1007,22 +992,14 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     for (i = 0; i < iMax; i++) {
         icon = [icons objectAtIndex:i];
         if ([icon canReleaseResources]) {
-#ifdef USE_ICON_QUEUE
-            [operations addObject:icon];
-#else
             FVReleaseOperation *op = [[FVReleaseOperation alloc] initWithIcon:icon view:nil];
             [op setQueuePriority:FVOperationQueuePriorityLow];
             [operations addObject:op];
             [op release];
-#endif
         }
     }
     if ([operations count])
-#ifdef USE_ICON_QUEUE
-        [[FVIconQueue sharedQueue] enqueueReleaseResourcesForIcons:operations];
-#else
         [_operationQueue addOperations:operations];
-#endif
     [operations release];
 }
 
@@ -1034,55 +1011,17 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     for (i = 0; i < iMax; i++) {
         icon = [icons objectAtIndex:i];
         if ([icon needsRenderForSize:_iconSize]) {
-#ifdef USE_ICON_QUEUE
-            [operations addObject:icon];
-#else
             FVRenderOperation *op = [[FVRenderOperation alloc] initWithIcon:icon view:self];
             [op setQueuePriority:priority];
             [operations addObject:op];
             [op release];
-#endif
         }
     }
     if ([operations count])
-#ifdef USE_ICON_QUEUE
-        [[FVIconQueue sharedQueue] enqueueRenderIcons:operations forObject:self];
-#else
         [_operationQueue addOperations:operations];
-#endif
     [operations release];
 }
 
-#ifdef USE_ICON_QUEUE
-- (void)iconQueueUpdated:(NSArray *)updatedIcons;
-{
-    // Only iterate icons in the visible range, since we know the overall geometry
-    NSRange rowRange, columnRange;
-    [self _getRangeOfRows:&rowRange columns:&columnRange inRect:[self visibleRect]];
-    
-    NSUInteger iMin, iMax = [self numberOfIcons];
-    
-    // _indexForGridRow:column: returns NSNotFound if we're in a short row (empty column)
-    iMin = [self _indexForGridRow:rowRange.location column:columnRange.location];
-    if (NSNotFound == iMin)
-        iMin = [self numberOfIcons];
-    else
-        iMax = MIN([self numberOfIcons], iMin + rowRange.length * [self numberOfColumns]);
-
-    NSUInteger i;
-    
-    // If an icon isn't visible, there's no need to redisplay anything.  Similarly, if 20 icons are displayed and only 5 updated, there's no need to redraw all 20.  Geometry calculations are much faster than redrawing, in general.
-    for (i = iMin; i < iMax; i++) {
-        
-        FVIcon *anIcon = (id)CFDictionaryGetValue(_iconIndexMap, (const void *)i);
-        if ([updatedIcons containsObject:anIcon]) {
-            NSUInteger r, c;
-            if ([self _getGridRow:&r column:&c ofIndex:i])
-                [self _setNeedsDisplayForIconInRow:r column:c];
-        }
-    }
-}
-#else
 - (void)iconUpdated:(FVIcon *)updatedIcon;
 {
     // Only iterate icons in the visible range, since we know the overall geometry
@@ -1111,7 +1050,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         }
     }
 }
-#endif
+
 // drawRect: uses -releaseResources on icons that aren't visible but present in the datasource, so we just need a way to cull icons that are cached but not currently in the datasource
 - (void)_zombieTimerFired:(CFRunLoopTimerRef)timer
 {
@@ -1139,11 +1078,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 
 - (void)_handleWebIconNotification:(NSNotification *)aNote
 {
-#ifdef USE_ICON_QUEUE
-    [self iconQueueUpdated:[NSArray arrayWithObject:[aNote object]]];
-#else
     [self iconUpdated:[aNote object]];
-#endif
 }
 
 #pragma mark Drawing
