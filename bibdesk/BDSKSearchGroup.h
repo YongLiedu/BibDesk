@@ -43,6 +43,7 @@
 extern NSString *BDSKSearchGroupEntrez;
 extern NSString *BDSKSearchGroupZoom;
 extern NSString *BDSKSearchGroupISI;
+extern NSString *BDSKSearchGroupDBLP;
 
 @class BDSKSearchGroup, BDSKServerInfo, BDSKItemSearchIndexes;
 

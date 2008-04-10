@@ -72,6 +72,7 @@
 - (BOOL)isEntrez;
 - (BOOL)isZoom;
 - (BOOL)isISI;
+- (BOOL)isDBLP;
 
 @end
 

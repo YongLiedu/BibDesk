@@ -204,4 +204,14 @@
             database = "CCR";
         }
     );
+    dblp = (
+        {
+            name = "DBLP++ Authors";
+            database = "Authors";
+        },
+        {
+            name = "DBLP++ Keywords";
+            database = "Keywords";
+        }
+    );
 }

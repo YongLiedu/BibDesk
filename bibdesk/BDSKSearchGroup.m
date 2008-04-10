@@ -46,10 +46,12 @@
 #import <OmniFoundation/NSArray-OFExtensions.h>
 #import "BDSKItemSearchIndexes.h"
 #import "BDSKISIGroupServer.h"
+#import "BDSKDBLPGroupServer.h"
 
 NSString *BDSKSearchGroupEntrez = @"entrez";
 NSString *BDSKSearchGroupZoom = @"zoom";
 NSString *BDSKSearchGroupISI = @"isi";
+NSString *BDSKSearchGroupDBLP = @"dblp";
 
 @implementation BDSKSearchGroup
 
@@ -339,6 +341,8 @@ NSString *BDSKSearchGroupISI = @"isi";
         server = [[BDSKZoomGroupServer alloc] initWithGroup:self serverInfo:info];
     else if ([type isEqualToString:BDSKSearchGroupISI])
         server = [[BDSKISIGroupServer alloc] initWithGroup:self serverInfo:info];
+    else if ([type isEqualToString:BDSKSearchGroupDBLP])
+        server = [[BDSKDBLPGroupServer alloc] initWithGroup:self serverInfo:info];
     else
         OBASSERT_NOT_REACHED("unknown search group type");
 }

@@ -64,13 +64,14 @@ static BOOL isSearchFileAtPath(NSString *path)
     [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"entrez"];
     [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"zoom"];
     [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"isi"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"dblp"];
     
     NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
     NSString *path = [[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"];
     
     NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:path];
     NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:3];
-    NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, nil] objectEnumerator];
+    NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, BDSKSearchGroupDBLP, nil] objectEnumerator];
     NSString *type;
     
     while (type = [typeEnum nextObject]) {
@@ -88,7 +89,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     
     [searchGroupServerFiles release];
     searchGroupServerFiles = [[NSDictionary alloc] initWithObjectsAndKeys:
-        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, [NSMutableDictionary dictionary], BDSKSearchGroupISI, nil];
+        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, [NSMutableDictionary dictionary], BDSKSearchGroupISI, [NSMutableDictionary dictionary], BDSKSearchGroupDBLP, nil];
     
     NSString *serversPath = [applicationSupportPath stringByAppendingPathComponent:SERVERS_DIRNAME];
     BOOL isDir = NO;
@@ -124,7 +125,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 {
     NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"]];
     NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:[serverDicts count]];
-    NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, nil] objectEnumerator];
+    NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, BDSKSearchGroupDBLP, nil] objectEnumerator];
     NSString *type;
     
     while (type = [typeEnum nextObject]) {
@@ -160,7 +161,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     
     [searchGroupServerFiles release];
     searchGroupServerFiles = [[NSDictionary alloc] initWithObjectsAndKeys:
-        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, [NSMutableDictionary dictionary], BDSKSearchGroupISI, nil];
+        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, [NSMutableDictionary dictionary], BDSKSearchGroupISI, [NSMutableDictionary dictionary], BDSKSearchGroupDBLP, nil];
 }
 
 + (void)saveServer:(BDSKServerInfo *)serverInfo;
@@ -348,6 +349,9 @@ static BOOL isSearchFileAtPath(NSString *path)
         case 2:
             [self setType:BDSKSearchGroupISI];
             break;
+        case 3:
+            [self setType:BDSKSearchGroupDBLP];
+            break;
         default:
             NSAssert1(0, @"Unknown tag %d", t);
     }
@@ -522,6 +526,8 @@ static BOOL isSearchFileAtPath(NSString *path)
 - (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
 
 - (BOOL)isISI { return [[self type] isEqualToString:BDSKSearchGroupISI]; }
+
+- (BOOL)isDBLP { return [[self type] isEqualToString:BDSKSearchGroupDBLP]; }
 
 - (BDSKSearchGroup *)group { return group; }
 

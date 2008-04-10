@@ -469,6 +469,10 @@
 		F96E21690794FE3400120AB3 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8D1107310486CEB800E47090 /* Info.plist */; };
 		F96F11970AAF4FD100815D06 /* NSData_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F96F11950AAF4FD100815D06 /* NSData_BDSKExtensions.m */; };
 		F97073B00911592000526FC8 /* NSWorkspace_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F97073AE0911592000526FC8 /* NSWorkspace_BDSKExtensions.m */; };
+		F97198C30DADD32F00CA57AA /* BDSKDBLPGroupServer.h in Headers */ = {isa = PBXBuildFile; fileRef = F97198BF0DADD32F00CA57AA /* BDSKDBLPGroupServer.h */; };
+		F97198C40DADD32F00CA57AA /* BDSKDBLPGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F97198C00DADD32F00CA57AA /* BDSKDBLPGroupServer.m */; };
+		F97198C50DADD32F00CA57AA /* BDSKDBLPWebServices.h in Headers */ = {isa = PBXBuildFile; fileRef = F97198C10DADD32F00CA57AA /* BDSKDBLPWebServices.h */; };
+		F97198C60DADD32F00CA57AA /* BDSKDBLPWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97198C20DADD32F00CA57AA /* BDSKDBLPWebServices.m */; };
 		F97965E40869098200050427 /* BDSKFindPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = F97965E20869098200050427 /* BDSKFindPanel.nib */; };
 		F97965F2086909EA00050427 /* BDSKFindController.m in Sources */ = {isa = PBXBuildFile; fileRef = F97965F0086909EA00050427 /* BDSKFindController.m */; };
 		F97AF8F009575E8B00D1F1B0 /* NSURL_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F97AF8EE09575E8B00D1F1B0 /* NSURL_BDSKExtensions.m */; };
@@ -1521,6 +1525,10 @@
 		F9706DE409102DF500526FC8 /* BDSKGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGradientView.m; sourceTree = "<group>"; };
 		F97073AD0911592000526FC8 /* NSWorkspace_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSWorkspace_BDSKExtensions.h; sourceTree = "<group>"; };
 		F97073AE0911592000526FC8 /* NSWorkspace_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSWorkspace_BDSKExtensions.m; sourceTree = "<group>"; };
+		F97198BF0DADD32F00CA57AA /* BDSKDBLPGroupServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDBLPGroupServer.h; sourceTree = "<group>"; };
+		F97198C00DADD32F00CA57AA /* BDSKDBLPGroupServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDBLPGroupServer.m; sourceTree = "<group>"; };
+		F97198C10DADD32F00CA57AA /* BDSKDBLPWebServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDBLPWebServices.h; sourceTree = "<group>"; };
+		F97198C20DADD32F00CA57AA /* BDSKDBLPWebServices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDBLPWebServices.m; sourceTree = "<group>"; };
 		F97965E30869098200050427 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKFindPanel.nib; sourceTree = "<group>"; };
 		F97965EF086909EA00050427 /* BDSKFindController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFindController.h; sourceTree = "<group>"; };
 		F97965F0086909EA00050427 /* BDSKFindController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFindController.m; sourceTree = "<group>"; };
@@ -2176,6 +2184,8 @@
 				2730077807CF20B500F2E485 /* BDSKComplexString.m */,
 				CE38FB83091D946900BCB69D /* BDSKCondition.m */,
 				F96769FF0916B63900B42F6A /* BDSKCountedSet.m */,
+				F97198C00DADD32F00CA57AA /* BDSKDBLPGroupServer.m */,
+				F97198C20DADD32F00CA57AA /* BDSKDBLPWebServices.m */,
 				CE129A160B44088900416D19 /* BDSKEntrezGroupServer.m */,
 				F9E5F6D80A96ABF1004A6D79 /* BDSKFile.m */,
 				F925332208FC9FB80045D563 /* BDSKFileSearchIndex.m */,
@@ -2483,6 +2493,8 @@
 				F96769FE0916B63900B42F6A /* BDSKCountedSet.h */,
 				CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */,
 				CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */,
+				F97198BF0DADD32F00CA57AA /* BDSKDBLPGroupServer.h */,
+				F97198C10DADD32F00CA57AA /* BDSKDBLPWebServices.h */,
 				CE56D67B0A2DAB66003CE000 /* BDSKDocumentController.h */,
 				CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */,
 				CE966C6E0B47CF25003BAB9A /* BDSKDublinCoreXMLParser.h */,
@@ -2901,6 +2913,8 @@
 				CE92CE5D0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h in Headers */,
 				CE8BE5470D99A10700E314A4 /* BDSKBookmark.h in Headers */,
 				CE8BE5BE0D99AF5000E314A4 /* BDSKSearchBookmark.h in Headers */,
+				F97198C30DADD32F00CA57AA /* BDSKDBLPGroupServer.h in Headers */,
+				F97198C50DADD32F00CA57AA /* BDSKDBLPWebServices.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3866,6 +3880,8 @@
 				CE92CE5E0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m in Sources */,
 				CE8BE5480D99A10700E314A4 /* BDSKBookmark.m in Sources */,
 				CE8BE5BF0D99AF5000E314A4 /* BDSKSearchBookmark.m in Sources */,
+				F97198C40DADD32F00CA57AA /* BDSKDBLPGroupServer.m in Sources */,
+				F97198C60DADD32F00CA57AA /* BDSKDBLPWebServices.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

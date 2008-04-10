@@ -48,10 +48,11 @@
     BOOL isEntrez = [aType isEqualToString:BDSKSearchGroupEntrez];
     BOOL isZoom = [aType isEqualToString:BDSKSearchGroupZoom];
     BOOL isISI = [aType isEqualToString:BDSKSearchGroupISI];
+    BOOL isDBLP = [aType isEqualToString:BDSKSearchGroupDBLP];
     
     return [[[[self class] alloc] initWithType:aType 
                                           name:NSLocalizedString(@"New Server", @"")
-                                          host:(isEntrez || isISI) ? nil : @"host.domain.com"
+                                          host:(isEntrez || isISI || isDBLP) ? nil : @"host.domain.com"
                                           port:isZoom ? @"0" : nil 
                                       database:@"database" 
                                        options:isZoom ? [NSDictionary dictionary] : nil] autorelease];
@@ -62,7 +63,7 @@
     if (self = [super init]) {
         type = [aType copy];
         name = [aName copy];
-        if ([self isEntrez] || [self isISI]) {
+        if ([self isEntrez] || [self isISI] || [self isDBLP]) {
             host = nil;
             port = nil;
             database = [aDbase copy];
@@ -179,6 +180,7 @@
 - (BOOL)isEntrez { return [[self type] isEqualToString:BDSKSearchGroupEntrez]; }
 - (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
 - (BOOL)isISI { return [[self type] isEqualToString:BDSKSearchGroupISI]; }
+- (BOOL)isDBLP { return [[self type] isEqualToString:BDSKSearchGroupDBLP]; }
 
 @end
 
