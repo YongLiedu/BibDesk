@@ -225,6 +225,8 @@
                 return count > countValue;
             case BDSKCountSmaller:
                 return count < countValue;
+            default:
+                break; // other enum values are handled below, but the compiler doesn't know that
         }
         
         NSArray *itemValues = nil;

@@ -209,7 +209,6 @@ enum {
 
 - (id)init{
     if(self = [super init]){
-        OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
         
         publications = [[BDSKPublicationsArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];

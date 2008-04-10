@@ -474,7 +474,6 @@
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-    int idx = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
     NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
 	int dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
