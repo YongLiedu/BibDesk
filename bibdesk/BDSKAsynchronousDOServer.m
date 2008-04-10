@@ -148,8 +148,12 @@ struct BDSKDOServerFlags {
     // It would be really nice if we could just wait on a condition lock here, but
     // then this thread's runloop can't pick up the -setLocalServer message since
     // it's blocking (the runloop can't service the ports).
+
     do {
-        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+        SInt32 result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, TRUE);
+        if (kCFRunLoopRunFinished == result || kCFRunLoopRunStopped == result)
+            OSAtomicCompareAndSwap32Barrier(0, 1, &serverFlags->shouldKeepRunning);
+        else
         OSMemoryBarrier();
     } while (serverFlags->serverDidSetup == 0 && serverFlags->shouldKeepRunning == 1);    
 }
