@@ -1605,7 +1605,7 @@ static void _drawProgressIndicatorForDownload(const void *key, const void *value
 - (void)draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation;
 {
     // only called if we originated the drag, so the row/column must be valid
-    if ((operation & NSDragOperationDelete) != 0 && [self isEditable]) {
+    if ((operation & NSDragOperationDelete) != 0 && operation != NSDragOperationEvery && [self isEditable]) {
         [[self dataSource] fileView:self deleteURLsAtIndexes:_selectedIndexes];
         [self setSelectionIndexes:[NSIndexSet indexSet]];
         [self reloadIcons];
