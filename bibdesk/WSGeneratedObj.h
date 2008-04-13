@@ -18,7 +18,10 @@
 @interface WSGeneratedObj : NSObject {
 	WSMethodInvocationRef fRef;
 	NSDictionary* fResult;
+    int32_t cancelled __attribute__ ((aligned (32)));
 };
+
+- (void) cancel;
 
 	// Check if the invocation is complete - that is,
 	// if the result has been obtained.

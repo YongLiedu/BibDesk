@@ -10,6 +10,7 @@
  */
 
 #include "WSGeneratedObj.h"
+#import <libkern/OSAtomic.h>
 
 @implementation WSGeneratedObj
 
@@ -18,6 +19,7 @@
 	if ((self = [super init]) != NULL) {
 		fRef = NULL;
 		fResult = NULL;
+        cancelled = NO;
 	}
 	return self;
 }
@@ -41,27 +43,47 @@
 	return fRef;
 }
 
+- (void) cancel;
+{
+    OSAtomicCompareAndSwap32Barrier(0, 1, &cancelled);
+}
+
 	// Return the Result object.  If it hasn't
 	// been fetched yet, this will asynchronously block
 - (NSDictionary*) getResultDictionary
 {
-    if (fResult == NULL)
-        fResult = (NSDictionary *)WSMethodInvocationInvoke([self getRef]);
+    if (NULL == fResult) {
+        
+        CFRunLoopRef rl = CFRunLoopGetCurrent();
+        
+        // Apple's generated code uses a private runloop for the async callback and blocks until it returns.  Not clear if WSMethodInvocation requires its own runloop mode, so we'll do something similar.
+        CFStringRef mode = (CFStringRef)[NSString stringWithFormat:@"%p", self];
+        
+        WSMethodInvocationRef invocation = [self getRef];
+        WSMethodInvocationScheduleWithRunLoop(invocation, rl, mode);
+        
+        do {
+            
+            SInt32 res = CFRunLoopRunInMode(mode, 0.1, TRUE);
+            if (kCFRunLoopRunStopped == res || kCFRunLoopRunFinished == res)
+                break;
+            
+            // run the default runloop briefly so DO connections get serviced
+            res = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, TRUE);
+            if (kCFRunLoopRunStopped == res || kCFRunLoopRunFinished == res)
+                break;
+            
+            OSMemoryBarrier();
+            
+        } while (0 == cancelled && NULL == fResult);
     
-    if (fResult == NULL) {
+        WSMethodInvocationUnscheduleFromRunLoop(fRef, rl, mode);
+    }
+    
+    if (fResult == NULL && 0 == cancelled) {
         [self handleError:@"WSMethodInvocationInvoke failed in getResultDictionary" errorString:NULL errorDomain:kCFStreamErrorDomainMacOSStatus errorNumber:paramErr];
     }
 	return fResult;
-}
-
-	// Reset the invocation.  The next attempt to get the
-	// value will re-issue the request
-- (void) reset
-{
-	if (fResult) {
-		[fResult autorelease];
-		fResult = NULL;
-	}
 }
 
 	// Returns true if the Result is a fault
@@ -105,6 +127,13 @@
 	return [[NSDictionary dictionaryWithObjects:extraVals forKeys: extraKeys count: count] retain];
 }
 
+static void invocationFinished(WSMethodInvocationRef invocation, void *info, CFDictionaryRef outRef)
+{
+    WSGeneratedObj *service = info;
+    NSCParameterAssert(NULL == service->fResult);
+    service->fResult = (NSDictionary *)outRef;
+}
+
 	// Utility function called by the generated code to create the invocation
 - (WSMethodInvocationRef) createInvocationRef:(NSString*) endpoint
 								   methodName:(NSString*) methodName
@@ -131,6 +160,13 @@
 			[headers release];
 
 			WSMethodInvocationSetProperty(ref, kWSSOAPMethodNamespaceURI, methodNamespace);
+            
+            WSClientContext ctxt = { 0, 
+                                    (void *)self, 
+                                    (WSClientContextRetainCallBackProcPtr)CFRetain, 
+                                    (WSClientContextReleaseCallBackProcPtr)CFRelease, 
+                                    (WSClientContextCopyDescriptionCallBackProcPtr)CFCopyDescription };
+            WSMethodInvocationSetCallBack(ref, invocationFinished, &ctxt);
 		}
 	}
 	
