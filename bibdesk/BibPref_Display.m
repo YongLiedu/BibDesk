@@ -58,7 +58,6 @@
 }
 
 - (void)updateAuthorNameDisplayUI{
-    int tag, tagMax = 2;
     int mask = [defaults integerForKey:BDSKAuthorNameDisplayKey];
     [authorFirstNameButton setState:(mask & BDSKAuthorDisplayFirstNameMask) ? NSOnState : NSOffState];
     [authorAbbreviateButton setState:(mask & BDSKAuthorAbbreviateFirstNameMask) ? NSOnState : NSOffState];

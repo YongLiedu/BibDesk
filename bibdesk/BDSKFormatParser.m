@@ -760,7 +760,6 @@
 					 force:(BOOL)force {
 	
 	NSString *uniqueStr = nil;
-    NSString *fullBaseStr = baseStr;
 	char c;
 	
 	if (number > 0) {
