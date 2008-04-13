@@ -42,7 +42,6 @@
 
 @interface PDFDocument (BDSKPrivateDeclarations)
 - (NSPrintOperation *)getPrintOperationForPrintInfo:(NSPrintInfo *)printInfo autoRotate:(BOOL)autoRotate;
-- (NSPrintOperation *)replacementGetPrintOperationForPrintInfo:(NSPrintInfo *)printInfo autoRotate:(BOOL)autoRotate;
 @end
 
 
@@ -50,19 +49,19 @@
 
 static IMP originalGetPrintOperationForPrintInfo = NULL;
 
-+ (void)load {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    if ([self instancesRespondToSelector:@selector(getPrintOperationForPrintInfo:autoRotate:)])
-        originalGetPrintOperationForPrintInfo = OBReplaceMethodImplementationWithSelector(self, @selector(getPrintOperationForPrintInfo:autoRotate:), @selector(replacementGetPrintOperationForPrintInfo:autoRotate:));
-    [pool release];
-}
-
 - (NSPrintOperation *)replacementGetPrintOperationForPrintInfo:(NSPrintInfo *)printInfo autoRotate:(BOOL)autoRotate {
     NSPrintOperation *printOperation = originalGetPrintOperationForPrintInfo(self, _cmd, printInfo, autoRotate);
     NSPrintPanel *printPanel = [printOperation printPanel];
     if ([printPanel respondsToSelector:@selector(setOptions:)])
         [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
     return printOperation;
+}
+
++ (void)load {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    if ([self instancesRespondToSelector:@selector(getPrintOperationForPrintInfo:autoRotate:)])
+        originalGetPrintOperationForPrintInfo = OBReplaceMethodImplementationWithSelector(self, @selector(getPrintOperationForPrintInfo:autoRotate:), @selector(replacementGetPrintOperationForPrintInfo:autoRotate:));
+    [pool release];
 }
 
 + (NSData *)PDFDataWithPostScriptData:(NSData *)psData;
