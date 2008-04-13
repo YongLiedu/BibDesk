@@ -215,6 +215,7 @@ static CGColorRef _shadowColor = NULL;
     _activeDownloads = NULL;
     _progressTimer = NULL;
     
+    _operationQueue = [FVOperationQueue new];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
