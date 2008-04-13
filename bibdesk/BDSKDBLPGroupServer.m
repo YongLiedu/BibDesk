@@ -101,6 +101,7 @@
     pthread_rwlock_destroy(&infolock);
     [serverInfo release];
     serverInfo = nil;
+    [scheduledService release];
     [super dealloc];
 }
 
@@ -116,6 +117,7 @@
 
 - (void)stop
 {
+    [scheduledService cancel];
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
 }
 
@@ -124,6 +126,8 @@
     if ([[self class] canConnect]) {
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
         
+        // stop the current service (if any); -cancel is thread safe, and so is calling it multiple times
+        [scheduledService cancel];
         OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
         [[self serverOnServerThread] downloadWithSearchTerm:[group searchTerm]];
         
@@ -218,16 +222,21 @@
     NSArray *searchResults = nil;
     if ([[info database] caseInsensitiveCompare:@"authors"] == NSOrderedSame) {
         BibAuthor *author = [BibAuthor authorWithName:searchTerm andPub:nil];
-        searchResults = [DBLPPlusPlusService all_publications_author_year:([author firstName] ? [author firstName] : @"")
+        BDSKDBLPAllPublicationsAuthorYear *invocation = [[BDSKDBLPAllPublicationsAuthorYear alloc] init];    
+        [invocation setParameters:([author firstName] ? [author firstName] : @"")
                                                             in_familyName:([author lastName] ? [author lastName] : @"")
-                                                             in_startYear:startYear
-                                                               in_endYear:endYear];
+                     in_startYear:startYear in_endYear:endYear];    
+        [scheduledService autorelease];
+        scheduledService = invocation;
+        searchResults = [[[invocation resultValue] retain] autorelease];
     }
     else {
-        searchResults = [DBLPPlusPlusService all_publications_keywords_year:searchTerm
-                                                               in_startYear:startYear 
-                                                                 in_endYear:endYear
-                                                                   in_limit:[NSNumber numberWithInt:100]];
+        BDSKDBLPAllPublicationsKeywordsYear *invocation = [[BDSKDBLPAllPublicationsKeywordsYear alloc] init];    
+        [invocation setParameters:searchTerm
+                     in_startYear:startYear in_endYear:endYear in_limit:[NSNumber numberWithInt:100]];    
+        [scheduledService autorelease];
+        scheduledService = invocation;
+        searchResults = [[[invocation resultValue] retain] autorelease];
     }
     return searchResults;
 }
@@ -255,6 +264,7 @@ static void fixEEURL(BibItem *pub)
 - (oneway void)downloadWithSearchTerm:(NSString *)searchTerm;
 {    
     NSArray *pubs = nil;
+    
     if (NO == [NSString isEmptyString:searchTerm]){
         
         NSArray *dblpKeys = [[self resultsWithSearchTerm:searchTerm] valueForKeyPath:@"dblp_key"];
@@ -277,9 +287,10 @@ static void fixEEURL(BibItem *pub)
             
             [doc release];
             
-            NSDictionary *pubData = [[DBLPPlusPlusService publication_data:aKey] lastObject];
+            NSDictionary *pubData = [[DBLPPlusPlusService BDSKDBLPPublicationData:aKey] lastObject];
             if ([pubData objectForKey:@"abstract"])
                 [abstracts setObject:[pubData objectForKey:@"abstract"] forKey:aKey];
+            OSMemoryBarrier();
         }
         
         NSString *btString = [[btEntries allObjects] componentsJoinedByString:@"\n"];
@@ -294,7 +305,12 @@ static void fixEEURL(BibItem *pub)
                 [pub setValue:value forKey:BDSKAbstractString];
             
             fixEEURL(pub);
+            OSMemoryBarrier();
         }
+        
+        // cancelled case
+        if (flags.isRetrieving == 0)
+            pubs = [NSArray array];
         
         [self setAvailableResults:[pubs count]];
         [self setFetchedResults:[pubs count]];

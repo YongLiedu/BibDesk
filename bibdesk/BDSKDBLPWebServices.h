@@ -17,11 +17,11 @@
  * Documentation:  <not documented>
  */
 /*-
- *   Method Name:  all_journal_titles_year
+ *   Method Name:  BDSKDBLPAllJournalTitlesYear
  * Documentation:  <no documentation>
  */
 
-@interface all_journal_titles_year : WSGeneratedObj
+@interface BDSKDBLPAllJournalTitlesYear : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_year;
@@ -29,15 +29,15 @@
 // result returns an id from the reply dictionary as specified by the WSDL.
 - (id) resultValue;
 
-@end; /* all_journal_titles_year */
+@end; /* BDSKDBLPAllJournalTitlesYear */
 
 
 /*-
- *   Method Name:  all_publications_keywords_year
+ *   Method Name:  BDSKDBLPAllPublicationsKeywordsYear
  * Documentation:  <no documentation>
  */
 
-@interface all_publications_keywords_year : WSGeneratedObj
+@interface BDSKDBLPAllPublicationsKeywordsYear : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_searchTerm in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear in_limit:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_limit;
@@ -45,15 +45,15 @@
 // result returns an id from the reply dictionary as specified by the WSDL.
 - (id) resultValue;
 
-@end; /* all_publications_keywords_year */
+@end; /* BDSKDBLPAllPublicationsKeywordsYear */
 
 
 /*-
- *   Method Name:  all_publications_author_year
+ *   Method Name:  BDSKDBLPAllPublicationsAuthorYear
  * Documentation:  <no documentation>
  */
 
-@interface all_publications_author_year : WSGeneratedObj
+@interface BDSKDBLPAllPublicationsAuthorYear : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_firstName in_familyName:(NSString*) in_familyName in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear;
@@ -61,30 +61,30 @@
 // result returns an id from the reply dictionary as specified by the WSDL.
 - (id) resultValue;
 
-@end; /* all_publications_author_year */
+@end; /* BDSKDBLPAllPublicationsAuthorYear */
 
 
 /*-
- *   Method Name:  all_journal_titles
+ *   Method Name:  BDSKDBLPAllJournalTitles
  * Documentation:  <no documentation>
  */
 
-@interface all_journal_titles : WSGeneratedObj
+@interface BDSKDBLPAllJournalTitles : WSGeneratedObj
 
 // No parameters for this method
 
 // result returns an id from the reply dictionary as specified by the WSDL.
 - (id) resultValue;
 
-@end; /* all_journal_titles */
+@end; /* BDSKDBLPAllJournalTitles */
 
 
 /*-
- *   Method Name:  publication_data
+ *   Method Name:  BDSKDBLPPublicationData
  * Documentation:  <no documentation>
  */
 
-@interface publication_data : WSGeneratedObj
+@interface BDSKDBLPPublicationData : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_dblp_key;
@@ -92,15 +92,15 @@
 // result returns an id from the reply dictionary as specified by the WSDL.
 - (id) resultValue;
 
-@end; /* publication_data */
+@end; /* BDSKDBLPPublicationData */
 
 
 /*-
- *   Method Name:  venue_title
+ *   Method Name:  BDSKDBLPVenueTitle
  * Documentation:  <no documentation>
  */
 
-@interface venue_title : WSGeneratedObj
+@interface BDSKDBLPVenueTitle : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_dblp_key;
@@ -108,30 +108,30 @@
 // result returns an id from the reply dictionary as specified by the WSDL.
 - (id) resultValue;
 
-@end; /* venue_title */
+@end; /* BDSKDBLPVenueTitle */
 
 
 /*-
- *   Method Name:  all_proceeding_titles
+ *   Method Name:  BDSKDBLPAllProceedingTitles
  * Documentation:  <no documentation>
  */
 
-@interface all_proceeding_titles : WSGeneratedObj
+@interface BDSKDBLPAllProceedingTitles : WSGeneratedObj
 
 // No parameters for this method
 
 // result returns an id from the reply dictionary as specified by the WSDL.
 - (id) resultValue;
 
-@end; /* all_proceeding_titles */
+@end; /* BDSKDBLPAllProceedingTitles */
 
 
 /*-
- *   Method Name:  publication_authors
+ *   Method Name:  BDSKDBLPPublicationAuthors
  * Documentation:  <no documentation>
  */
 
-@interface publication_authors : WSGeneratedObj
+@interface BDSKDBLPPublicationAuthors : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_dblp_key;
@@ -139,15 +139,15 @@
 // result returns an id from the reply dictionary as specified by the WSDL.
 - (id) resultValue;
 
-@end; /* publication_authors */
+@end; /* BDSKDBLPPublicationAuthors */
 
 
 /*-
- *   Method Name:  all_publications_venue_year
+ *   Method Name:  BDSKDBLPAllPublicationsVenueYear
  * Documentation:  <no documentation>
  */
 
-@interface all_publications_venue_year : WSGeneratedObj
+@interface BDSKDBLPAllPublicationsVenueYear : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_dblp_key_frag in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear;
@@ -155,7 +155,7 @@
 // result returns an id from the reply dictionary as specified by the WSDL.
 - (id) resultValue;
 
-@end; /* all_publications_venue_year */
+@end; /* BDSKDBLPAllPublicationsVenueYear */
 
 
 /*-
@@ -163,15 +163,15 @@
  */
 @interface DBLPPlusPlusService : NSObject 
 
-+ (id) all_journal_titles_year:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_year;
-+ (id) all_publications_keywords_year:(NSString*) in_searchTerm in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear in_limit:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_limit;
-+ (id) all_publications_author_year:(NSString*) in_firstName in_familyName:(NSString*) in_familyName in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear;
-+ (id) all_journal_titles;
-+ (id) publication_data:(NSString*) in_dblp_key;
-+ (id) venue_title:(NSString*) in_dblp_key;
-+ (id) all_proceeding_titles;
-+ (id) publication_authors:(NSString*) in_dblp_key;
-+ (id) all_publications_venue_year:(NSString*) in_dblp_key_frag in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear;
++ (id) BDSKDBLPAllJournalTitlesYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_year;
++ (id) BDSKDBLPAllPublicationsKeywordsYear:(NSString*) in_searchTerm in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear in_limit:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_limit;
++ (id) BDSKDBLPAllPublicationsAuthorYear:(NSString*) in_firstName in_familyName:(NSString*) in_familyName in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear;
++ (id) BDSKDBLPAllJournalTitles;
++ (id) BDSKDBLPPublicationData:(NSString*) in_dblp_key;
++ (id) BDSKDBLPVenueTitle:(NSString*) in_dblp_key;
++ (id) BDSKDBLPAllProceedingTitles;
++ (id) BDSKDBLPPublicationAuthors:(NSString*) in_dblp_key;
++ (id) BDSKDBLPAllPublicationsVenueYear:(NSString*) in_dblp_key_frag in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear;
 
 @end;
 

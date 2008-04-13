@@ -8,10 +8,10 @@
 #import "BDSKDBLPWebServices.h"
 
 /*-
- *   Method Name:  all_journal_titles_year
+ *   Method Name:  BDSKDBLPAllJournalTitlesYear
  * Documentation:  <no documentation>
  */
-@implementation all_journal_titles_year
+@implementation BDSKDBLPAllJournalTitlesYear
 - (void) setParameters:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_year
 {
     CFTypeRef _paramValues[] = {    
@@ -30,6 +30,7 @@
 
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
+    [NSException raise:BDSKUnimplementedException format:[NSString stringWithFormat:@"%@ is not currently implemented by the DBLP service", [self class]]];
     return [self createInvocationRef    
                /*endpoint*/: @"http://dblp.l3s.de/WS/dblp.php"            
                  methodName: @"all_journal_titles_year"            
@@ -40,14 +41,14 @@
         ];        
 }
 
-@end; /* all_journal_titles_year */
+@end; /* BDSKDBLPAllJournalTitlesYear */
 
 
 /*-
- *   Method Name:  all_publications_keywords_year
+ *   Method Name:  BDSKDBLPAllPublicationsKeywordsYear
  * Documentation:  <no documentation>
  */
-@implementation all_publications_keywords_year
+@implementation BDSKDBLPAllPublicationsKeywordsYear
 - (void) setParameters:(NSString*) in_searchTerm in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear in_limit:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_limit
 {
     CFTypeRef _paramValues[] = {    
@@ -82,14 +83,14 @@
         ];        
 }
 
-@end; /* all_publications_keywords_year */
+@end; /* BDSKDBLPAllPublicationsKeywordsYear */
 
 
 /*-
- *   Method Name:  all_publications_author_year
+ *   Method Name:  BDSKDBLPAllPublicationsAuthorYear
  * Documentation:  <no documentation>
  */
-@implementation all_publications_author_year
+@implementation BDSKDBLPAllPublicationsAuthorYear
 - (void) setParameters:(NSString*) in_firstName in_familyName:(NSString*) in_familyName in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear
 {
     CFTypeRef _paramValues[] = {    
@@ -124,14 +125,14 @@
         ];        
 }
 
-@end; /* all_publications_author_year */
+@end; /* BDSKDBLPAllPublicationsAuthorYear */
 
 
 /*-
- *   Method Name:  all_journal_titles
+ *   Method Name:  BDSKDBLPAllJournalTitles
  * Documentation:  <no documentation>
  */
-@implementation all_journal_titles
+@implementation BDSKDBLPAllJournalTitles
 - (id) resultValue
 {
     return [[super getResultDictionary] objectForKey: @"return"];    
@@ -139,6 +140,7 @@
 
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
+    [NSException raise:BDSKUnimplementedException format:[NSString stringWithFormat:@"%@ is not currently implemented by the DBLP service", [self class]]];
     return [self createInvocationRef    
                /*endpoint*/: @"http://dblp.l3s.de/WS/dblp.php"            
                  methodName: @"all_journal_titles"            
@@ -149,14 +151,14 @@
         ];        
 }
 
-@end; /* all_journal_titles */
+@end; /* BDSKDBLPAllJournalTitles */
 
 
 /*-
- *   Method Name:  publication_data
+ *   Method Name:  BDSKDBLPPublicationData
  * Documentation:  <no documentation>
  */
-@implementation publication_data
+@implementation BDSKDBLPPublicationData
 - (void) setParameters:(NSString*) in_dblp_key
 {
     id _paramValues[] = {    
@@ -185,14 +187,14 @@
         ];        
 }
 
-@end; /* publication_data */
+@end; /* BDSKDBLPPublicationData */
 
 
 /*-
- *   Method Name:  venue_title
+ *   Method Name:  BDSKDBLPVenueTitle
  * Documentation:  <no documentation>
  */
-@implementation venue_title
+@implementation BDSKDBLPVenueTitle
 - (void) setParameters:(NSString*) in_dblp_key
 {
     id _paramValues[] = {    
@@ -221,14 +223,14 @@
         ];        
 }
 
-@end; /* venue_title */
+@end; /* BDSKDBLPVenueTitle */
 
 
 /*-
- *   Method Name:  all_proceeding_titles
+ *   Method Name:  BDSKDBLPAllProceedingTitles
  * Documentation:  <no documentation>
  */
-@implementation all_proceeding_titles
+@implementation BDSKDBLPAllProceedingTitles
 - (id) resultValue
 {
     return [[super getResultDictionary] objectForKey: @"return"];    
@@ -236,6 +238,7 @@
 
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
+    [NSException raise:BDSKUnimplementedException format:[NSString stringWithFormat:@"%@ is not currently implemented by the DBLP service", [self class]]];
     return [self createInvocationRef    
                /*endpoint*/: @"http://dblp.l3s.de/WS/dblp.php"            
                  methodName: @"all_proceeding_titles"            
@@ -246,14 +249,14 @@
         ];        
 }
 
-@end; /* all_proceeding_titles */
+@end; /* BDSKDBLPAllProceedingTitles */
 
 
 /*-
- *   Method Name:  publication_authors
+ *   Method Name:  BDSKDBLPPublicationAuthors
  * Documentation:  <no documentation>
  */
-@implementation publication_authors
+@implementation BDSKDBLPPublicationAuthors
 - (void) setParameters:(NSString*) in_dblp_key
 {
     id _paramValues[] = {    
@@ -282,14 +285,14 @@
         ];        
 }
 
-@end; /* publication_authors */
+@end; /* BDSKDBLPPublicationAuthors */
 
 
 /*-
- *   Method Name:  all_publications_venue_year
+ *   Method Name:  BDSKDBLPAllPublicationsVenueYear
  * Documentation:  <no documentation>
  */
-@implementation all_publications_venue_year
+@implementation BDSKDBLPAllPublicationsVenueYear
 - (void) setParameters:(NSString*) in_dblp_key_frag in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear
 {
     CFTypeRef _paramValues[] = {    
@@ -322,16 +325,16 @@
         ];        
 }
 
-@end; /* all_publications_venue_year */
+@end; /* BDSKDBLPAllPublicationsVenueYear */
 
 
 
 @implementation DBLPPlusPlusService
 
-+ (id) all_journal_titles_year:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_year
++ (id) BDSKDBLPAllJournalTitlesYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_year
 {
     id result = NULL;    
-    all_journal_titles_year* _invocation = [[all_journal_titles_year alloc] init];    
+    BDSKDBLPAllJournalTitlesYear* _invocation = [[BDSKDBLPAllJournalTitlesYear alloc] init];    
     [_invocation setParameters: in_year];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -339,10 +342,10 @@
 }
 
 
-+ (id) all_publications_keywords_year:(NSString*) in_searchTerm in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear in_limit:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_limit
++ (id) BDSKDBLPAllPublicationsKeywordsYear:(NSString*) in_searchTerm in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear in_limit:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_limit
 {
     id result = NULL;    
-    all_publications_keywords_year* _invocation = [[all_publications_keywords_year alloc] init];    
+    BDSKDBLPAllPublicationsKeywordsYear* _invocation = [[BDSKDBLPAllPublicationsKeywordsYear alloc] init];    
     [_invocation setParameters: in_searchTerm in_startYear:in_startYear in_endYear:in_endYear in_limit:in_limit];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -350,10 +353,10 @@
 }
 
 
-+ (id) all_publications_author_year:(NSString*) in_firstName in_familyName:(NSString*) in_familyName in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear
++ (id) BDSKDBLPAllPublicationsAuthorYear:(NSString*) in_firstName in_familyName:(NSString*) in_familyName in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear
 {
     id result = NULL;    
-    all_publications_author_year* _invocation = [[all_publications_author_year alloc] init];    
+    BDSKDBLPAllPublicationsAuthorYear* _invocation = [[BDSKDBLPAllPublicationsAuthorYear alloc] init];    
     [_invocation setParameters: in_firstName in_familyName:in_familyName in_startYear:in_startYear in_endYear:in_endYear];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -361,20 +364,20 @@
 }
 
 
-+ (id) all_journal_titles
++ (id) BDSKDBLPAllJournalTitles
 {
     id result = NULL;    
-    all_journal_titles* _invocation = [[all_journal_titles alloc] init];    
+    BDSKDBLPAllJournalTitles* _invocation = [[BDSKDBLPAllJournalTitles alloc] init];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
     return result;    
 }
 
 
-+ (id) publication_data:(NSString*) in_dblp_key
++ (id) BDSKDBLPPublicationData:(NSString*) in_dblp_key
 {
     id result = NULL;    
-    publication_data* _invocation = [[publication_data alloc] init];    
+    BDSKDBLPPublicationData* _invocation = [[BDSKDBLPPublicationData alloc] init];    
     [_invocation setParameters: in_dblp_key];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -382,10 +385,10 @@
 }
 
 
-+ (id) venue_title:(NSString*) in_dblp_key
++ (id) BDSKDBLPVenueTitle:(NSString*) in_dblp_key
 {
     id result = NULL;    
-    venue_title* _invocation = [[venue_title alloc] init];    
+    BDSKDBLPVenueTitle* _invocation = [[BDSKDBLPVenueTitle alloc] init];    
     [_invocation setParameters: in_dblp_key];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -393,20 +396,20 @@
 }
 
 
-+ (id) all_proceeding_titles
++ (id) BDSKDBLPAllProceedingTitles
 {
     id result = NULL;    
-    all_proceeding_titles* _invocation = [[all_proceeding_titles alloc] init];    
+    BDSKDBLPAllProceedingTitles* _invocation = [[BDSKDBLPAllProceedingTitles alloc] init];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
     return result;    
 }
 
 
-+ (id) publication_authors:(NSString*) in_dblp_key
++ (id) BDSKDBLPPublicationAuthors:(NSString*) in_dblp_key
 {
     id result = NULL;    
-    publication_authors* _invocation = [[publication_authors alloc] init];    
+    BDSKDBLPPublicationAuthors* _invocation = [[BDSKDBLPPublicationAuthors alloc] init];    
     [_invocation setParameters: in_dblp_key];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -414,10 +417,10 @@
 }
 
 
-+ (id) all_publications_venue_year:(NSString*) in_dblp_key_frag in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear
++ (id) BDSKDBLPAllPublicationsVenueYear:(NSString*) in_dblp_key_frag in_startYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_startYear in_endYear:(CFTypeRef /* Complex type http://www.w3.org/2001/XMLSchema|integer */) in_endYear
 {
     id result = NULL;    
-    all_publications_venue_year* _invocation = [[all_publications_venue_year alloc] init];    
+    BDSKDBLPAllPublicationsVenueYear* _invocation = [[BDSKDBLPAllPublicationsVenueYear alloc] init];    
     [_invocation setParameters: in_dblp_key_frag in_startYear:in_startYear in_endYear:in_endYear];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    

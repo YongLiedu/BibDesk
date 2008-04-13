@@ -45,6 +45,8 @@ typedef struct _BDSKDBLPGroupFlags {
     volatile int32_t failedDownload __attribute__ ((aligned (32)));
 } BDSKDBLPGroupFlags;
 
+@class WSGeneratedObj;
+
 @interface BDSKDBLPGroupServer :  BDSKAsynchronousDOServer <BDSKSearchGroupServer> 
 {
     BDSKSearchGroup *group;
@@ -53,6 +55,8 @@ typedef struct _BDSKDBLPGroupFlags {
     int fetchedResults;
     BDSKDBLPGroupFlags flags;
     pthread_rwlock_t infolock;
+    
+    WSGeneratedObj *scheduledService;
 }
 
 @end
