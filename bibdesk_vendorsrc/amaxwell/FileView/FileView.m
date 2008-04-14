@@ -2864,11 +2864,13 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
     if (nil == fullPath) {
         FVDownload *fvDownload = (id)CFDictionaryGetValue(_activeDownloads, download);
         [download cancel];
-        [self _invalidateProgressTimer];
         if (fvDownload) {
             CFDictionaryRemoveValue(_activeDownloads, download);
             [self setNeedsDisplay:YES];
         }
+        if (CFDictionaryGetCount(_activeDownloads) == 0)
+            [self _invalidateProgressTimer];
+
     } else {
         [download setDestination:fullPath allowOverwrite:NO];
     }
@@ -2923,7 +2925,6 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
 - (void)downloadDidFinish:(NSURLDownload *)download;
 {
     FVDownload *fvDownload = (id)CFDictionaryGetValue(_activeDownloads, download);
-    [self _invalidateProgressTimer];
     if (fvDownload) {
         NSUInteger idx = [fvDownload indexInView];
         NSURL *currentURL = [self iconURLAtIndex:idx];
@@ -2945,19 +2946,22 @@ static void addFinderLabelsToSubmenu(NSMenu *submenu)
                     [self _setNeedsDisplayForIconInRow:r column:c];
             }
         }
+        CFDictionaryRemoveValue(_activeDownloads, download);
     }
-    CFDictionaryRemoveValue(_activeDownloads, download);
+    if (CFDictionaryGetCount(_activeDownloads) == 0)
+        [self _invalidateProgressTimer];
 }
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error;
 {
     // could badge with a failure icon here, but that would be a pain to keep track of
     FVDownload *fvDownload = (id)CFDictionaryGetValue(_activeDownloads, download);
-    [self _invalidateProgressTimer];
     if (fvDownload) {
         CFDictionaryRemoveValue(_activeDownloads, download);
         [self setNeedsDisplay:YES];
     }
+    if (CFDictionaryGetCount(_activeDownloads) == 0)
+        [self _invalidateProgressTimer];
 }
 
 - (NSWindow *)downloadWindowForAuthenticationSheet:(WebDownload *)download
