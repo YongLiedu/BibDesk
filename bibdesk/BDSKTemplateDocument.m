@@ -1005,7 +1005,8 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                     if (token && [token isKindOfClass:[BDSKToken class]] == NO)
                         token = nil;
                 }
-            }
+            } else if (NSEqualRanges(range, NSMakeRange(0,0))) // this happens when you hover over a token on Leopard, very stupid
+                return;
         }
         [self setSelectedToken:token];
     }
