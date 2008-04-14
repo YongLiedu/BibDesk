@@ -56,8 +56,8 @@
         
         CFRunLoopRef rl = CFRunLoopGetCurrent();
         
-        // Apple's generated code uses a private runloop for the async callback and blocks until it returns.  Not clear if WSMethodInvocation requires its own runloop mode, so we'll do something similar.
-        CFStringRef mode = (CFStringRef)[NSString stringWithFormat:@"%p", self];
+        // Use a private runloop mode for the async callback and block until it returns or we are cancelled; this allows class methods to block for compatibility, but instances can be cancelled.
+        CFStringRef mode = CFSTR("WSGeneratedObj-sync");
         
         WSMethodInvocationRef invocation = [self getRef];
         WSMethodInvocationScheduleWithRunLoop(invocation, rl, mode);
@@ -68,15 +68,10 @@
             if (kCFRunLoopRunStopped == res || kCFRunLoopRunFinished == res)
                 break;
             
-            // run the default runloop briefly so DO connections get serviced
-            res = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, TRUE);
-            if (kCFRunLoopRunStopped == res || kCFRunLoopRunFinished == res)
-                break;
-            
             OSMemoryBarrier();
             
         } while (0 == cancelled && NULL == fResult);
-    
+        
         WSMethodInvocationUnscheduleFromRunLoop(fRef, rl, mode);
     }
     
