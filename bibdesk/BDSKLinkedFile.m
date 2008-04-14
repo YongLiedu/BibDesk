@@ -582,6 +582,26 @@ static Class BDSKLinkedObjectClass = Nil;
             }
         }
     }
+    if (aPath && [[self path] isEqualToString:aPath] == NO) {
+        FSRef baseRef;
+        if (basePath && BDSKPathToFSRef((CFStringRef)basePath, &baseRef)) {
+            [self updateWithPath:aPath basePath:basePath baseRef:&baseRef];
+        } else {
+            AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
+            if (anAlias != NULL) {
+                AliasHandle saveAlias = alias;
+                alias = anAlias;
+                [self fileRef];
+                if (fileRef == NULL) {
+                    alias = saveAlias;
+                    [self fileRef];
+                } else {
+                    BDSKDisposeAliasHandle(saveAlias);
+                }
+                
+            }
+        }
+    }
 }
 
 - (void)updateWithPath:(NSString *)path basePath:(NSString *)basePath baseRef:(const FSRef *)baseRef {
