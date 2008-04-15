@@ -3719,7 +3719,13 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 }
 
 - (void)userAddedURL:(NSURL *)aURL forPublication:(BibItem *)pub {
-	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKAddFileScriptHookName];
+	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
+    if ([aURL isFileURL] == NO && [NSString isEmptyString:[pub valueOfField:BDSKUrlString]] && [[pub remoteURLs] count] == 1 && 
+        ([[typeMan requiredFieldsForType:[pub pubType]] containsObject:BDSKUrlString] || [[typeMan optionalFieldsForType:[pub pubType]] containsObject:BDSKUrlString])) {
+        [pub setField:BDSKUrlString toValue:[aURL absoluteString]];
+    }
+    
+    BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKAddFileScriptHookName];
 	if (scriptHook) {
 		[scriptHook setField:[aURL isFileURL] ? BDSKLocalFileString : BDSKRemoteURLString];
 		[scriptHook setOldValues:[NSArray array]];
