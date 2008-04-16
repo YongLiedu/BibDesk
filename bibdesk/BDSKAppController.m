@@ -1051,9 +1051,15 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent{
     NSString *theURLString = [[event descriptorForKeyword:keyDirectObject] stringValue];
-    NSURL *theURL = theURLString ? [NSURL URLWithString:theURLString] : nil;
+    NSURL *theURL = nil;
     BibDocument *document = nil;
     NSError *error = nil;
+    
+    if (theURLString) {
+        theURL = [NSURL URLWithString:theURLString];
+        if (theURL == nil)
+            theURL = [NSURL URLWithStringByNormalizingPercentEscapes:theURLString];
+    }
     
     if ([[theURL scheme] isEqualToString:@"x-bdsk"]) {
         
