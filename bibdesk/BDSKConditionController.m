@@ -363,6 +363,7 @@
         [condition removeObserver:self forKeyPath:@"periodValue"];
         [condition removeObserver:self forKeyPath:@"dateValue"];
         [condition removeObserver:self forKeyPath:@"toDateValue"];
+        isObserving = NO;
     }
 }
 
