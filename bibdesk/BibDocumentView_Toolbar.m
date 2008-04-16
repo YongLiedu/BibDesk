@@ -123,9 +123,9 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     
     // Preview (nil targeted -> app delegate)
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarPreviewItemIdentifier];
-    [item setLabel:NSLocalizedString(@"Preview", @"Toolbar item label")];
-    [item setPaletteLabel:NSLocalizedString(@"Show/Hide Preview", @"Toolbar item label")];
-    [item setToolTip:NSLocalizedString(@"Show/Hide preview panel", @"Tool tip message")];
+    [item setLabel:NSLocalizedString(@"TeX Preview", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Show/Hide TeX Preview", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Show/Hide TeX preview panel", @"Tool tip message")];
     [item setTarget:nil];
     [item setImage:[NSImage imageNamed: @"preview"]];
     [item setAction:@selector(toggleShowingPreviewPanel:)];
