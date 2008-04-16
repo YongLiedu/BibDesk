@@ -1056,6 +1056,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     NSError *error = nil;
     
     if (theURLString) {
+        if ([theURLString hasPrefix:@"<"] && [theURLString hasSuffix:@">"])
+            theURLString = [theURLString substringWithRange:NSMakeRange(0, [theURLString length] - 2)];
+        if ([theURLString hasPrefix:@"URL:"])
+            theURLString = [theURLString substringFromIndex:4];
         theURL = [NSURL URLWithString:theURLString];
         if (theURL == nil)
             theURL = [NSURL URLWithStringByNormalizingPercentEscapes:theURLString];
