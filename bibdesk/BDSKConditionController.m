@@ -44,6 +44,13 @@
 #import "BDSKRatingButton.h"
 #import <OmniBase/assertions.h>
 
+@interface BDSKConditionController (BDSKPrivate)
+- (void)startObserving;
+- (void)stopObserving;
+- (void)layoutValueControls;
+- (void)layoutComparisonControls;
+@end
+
 @implementation BDSKConditionController
 
 + (void)initialize
@@ -77,17 +84,7 @@
 - (void)dealloc
 {
 	//NSLog(@"dealloc conditionController");
-    [condition removeObserver:self forKeyPath:@"key"];
-    [condition removeObserver:self forKeyPath:@"dateComparison"];
-    [condition removeObserver:self forKeyPath:@"attachmentComparison"];
-    [condition removeObserver:self forKeyPath:@"stringComparison"];
-    [condition removeObserver:self forKeyPath:@"stringValue"];
-    [condition removeObserver:self forKeyPath:@"countValue"];
-    [condition removeObserver:self forKeyPath:@"numberValue"];
-    [condition removeObserver:self forKeyPath:@"andNumberValue"];
-    [condition removeObserver:self forKeyPath:@"periodValue"];
-    [condition removeObserver:self forKeyPath:@"dateValue"];
-    [condition removeObserver:self forKeyPath:@"toDateValue"];
+    [self stopObserving];
     filterController = nil;
 	[condition release];
     condition = nil;
@@ -147,17 +144,7 @@
     [self layoutComparisonControls];
     [self layoutValueControls];
     
-    [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"dateComparison" options: NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"attachmentComparison" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"stringComparison" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"stringValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"countValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"numberValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"andNumberValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"periodValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"dateValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"toDateValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [self startObserving];
 }
 
 - (NSView *)view {
@@ -170,10 +157,10 @@
 }
 
 - (IBAction)removeThisCondition:(id)sender {
-	if (![self canRemove]) return;
-    [condition removeObserver:self forKeyPath:@"key"];
-    [condition removeObserver:self forKeyPath:@"dateComparison"];
-	[filterController removeConditionController:self];
+	if ([self canRemove]) {
+        [self stopObserving];
+        [filterController removeConditionController:self];
+    }
 }
 
 - (IBAction)selectKeyText:(id)sender {
@@ -347,5 +334,36 @@
         }
     }
 }
-    
+
+- (void)startObserving {
+    [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"dateComparison" options: NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"attachmentComparison" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"stringComparison" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"stringValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"countValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"numberValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"andNumberValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"periodValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"dateValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"toDateValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    isObserving = YES;
+}
+
+- (void)stopObserving {
+    if (isObserving) {
+        [condition removeObserver:self forKeyPath:@"key"];
+        [condition removeObserver:self forKeyPath:@"dateComparison"];
+        [condition removeObserver:self forKeyPath:@"attachmentComparison"];
+        [condition removeObserver:self forKeyPath:@"stringComparison"];
+        [condition removeObserver:self forKeyPath:@"stringValue"];
+        [condition removeObserver:self forKeyPath:@"countValue"];
+        [condition removeObserver:self forKeyPath:@"numberValue"];
+        [condition removeObserver:self forKeyPath:@"andNumberValue"];
+        [condition removeObserver:self forKeyPath:@"periodValue"];
+        [condition removeObserver:self forKeyPath:@"dateValue"];
+        [condition removeObserver:self forKeyPath:@"toDateValue"];
+    }
+}
+
 @end

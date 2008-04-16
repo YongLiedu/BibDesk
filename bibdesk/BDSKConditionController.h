@@ -67,21 +67,25 @@
 	BDSKCondition *condition;
 	NSMutableArray *keys;
 	BOOL canRemove;
+    BOOL isObserving;
 }
 
 - (id)initWithFilterController:(BDSKFilterController *)aFilterController;
 - (id)initWithFilterController:(BDSKFilterController *)aFilterController condition:(BDSKCondition *)aCondition;
+
 - (NSView *)view;
+
 - (IBAction)addNewCondition:(id)sender;
 - (IBAction)removeThisCondition:(id)sender;
 - (IBAction)changeRating:(id)sender;
 - (IBAction)selectKeyText:(id)sender;
+
 - (BDSKCondition *)condition;
+
 - (BOOL)canRemove;
 - (void)setCanRemove:(BOOL)flag;
+
 - (NSArray *)keys;
 - (void)setKeys:(NSArray *)newKeys;
-- (void)layoutValueControls;
-- (void)layoutComparisonControls;
 
 @end
