@@ -24,6 +24,11 @@
             SUPERCLASS = NSPopUpButton;
         },
                 {
+            CLASS = BDSKGradientSegmentedControl;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSSegmentedControl;
+        },
+                {
             CLASS = BDSKGradientView;
             LANGUAGE = ObjC;
             SUPERCLASS = NSView;
@@ -93,8 +98,10 @@
                 changeMainTableFont = id;
                 changePreviewDisplay = id;
                 changeSearchType = id;
+                changeSidePreviewDisplay = id;
                 consolidateLinkedFiles = id;
                 copyAsAction = id;
+                copyGroupURLAction = id;
                 copyNotesForLinkedFile = id;
                 copyNotesForLocalURL = id;
                 createNewPubUsingCrossrefAction = id;
@@ -168,14 +175,15 @@
             OUTLETS =             {
                 actionMenu = NSMenu;
                 actionMenuButton = BDSKImagePopUpButton;
-                currentPreviewView = NSView;
+                bottomFileView = FileView;
+                bottomPreviewButton = NSSegmentedControl;
+                bottomPreviewTabView = NSTabView;
+                bottomPreviewTextView = NSTextView;
                 documentWindow = NSWindow;
                 exportAccessoryView = NSView;
                 exportSelectionCheckButton = NSButton;
                 fileCollapsibleView = BDSKCollapsibleView;
                 fileGradientView = BDSKGradientView;
-                fileView = FileView;
-                fileViewSlider = NSSlider;
                 groupActionButton = BDSKImagePopUpButton;
                 groupActionMenuButton = BDSKImagePopUpButton;
                 groupAddButton = NSButton;
@@ -186,13 +194,16 @@
                 groupTableView = BDSKGroupTableView;
                 mainBox = BDSKColoredBox;
                 mainView = NSView;
-                previewTextView = NSTextView;
                 saveAccessoryView = NSView;
                 saveTextEncodingPopupButton = BDSKEncodingPopUpButton;
                 searchBookmarkField = NSTextField;
                 searchBookmarkPopUp = NSPopUpButton;
                 searchBookmarkSheet = NSWindow;
                 searchField = NSSearchField;
+                sideFileView = FileView;
+                sidePreviewButton = NSSegmentedControl;
+                sidePreviewTabView = NSTabView;
+                sidePreviewTextView = NSTextView;
                 splitView = BDSKSplitView;
                 statusBar = BDSKStatusBar;
                 tableView = BDSKMainTableView;
@@ -210,7 +221,6 @@
             OUTLETS =             {
                 dataSource = id;
                 delegate = id;
-                dragDataSource = id;
             };
             SUPERCLASS = NSView;
         },
@@ -248,6 +258,11 @@
             CLASS = NSScrollView;
             LANGUAGE = ObjC;
             SUPERCLASS = NSView;
+        },
+                {
+            CLASS = NSSegmentedControl;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSControl;
         },
                 {
             CLASS = NSTableHeaderView;

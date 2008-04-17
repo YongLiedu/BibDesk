@@ -6,7 +6,11 @@
                 changeAppending = id;
                 changeCasing = id;
                 changeCleaning = id;
+                changeCounterCasing = id;
+                changeCounterStyle = id;
                 changeJoinStyle = id;
+                changeLinkedFileFormat = id;
+                changeLinkedFileJoinStyle = id;
                 changeNameStyle = id;
                 changeUrlFormat = id;
             };
@@ -15,6 +19,7 @@
             OUTLETS =             {
                 addFieldButton = NSButton;
                 altTextField = NSTextField;
+                appendingOptionsView = NSView;
                 appendingPopUp = NSPopUpButton;
                 boldCheckButton = NSButton;
                 capitalizationPopUp = NSPopUpButton;
@@ -39,6 +44,10 @@
                 italicCheckButton = NSButton;
                 itemTemplateTokenField = NSTokenField;
                 joinStylePopUp = NSPopUpButton;
+                linkedFileFormatStylePopUp = NSPopUpButton;
+                linkedFileJoinStylePopUp = NSPopUpButton;
+                linkedFileOptionsMenu = NSMenu;
+                linkedFileOptionsView = NSView;
                 nameStylePopUp = NSPopUpButton;
                 numberOptionsMenu = NSMenu;
                 numberOptionsView = NSView;
