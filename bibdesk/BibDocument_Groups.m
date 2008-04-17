@@ -774,6 +774,8 @@ The groupedPublications array is a subset of the publications array, developed b
     [indexes addIndexesInRange:[groups rangeOfScriptGroups]];
     [indexes addIndexesInRange:[groups rangeOfSearchGroups]];
     [indexes addIndex:0];
+    if ([groups webGroup])
+        [indexes addIndex:1];
     return indexes;
 }
 
