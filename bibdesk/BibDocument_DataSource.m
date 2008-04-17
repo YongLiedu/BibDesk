@@ -149,7 +149,8 @@
 		if([group isCategory]){
 			NSArray *pubs = [groupedPublications copy];
             // change the name of the group first, so we can preserve the selection
-            [(BDSKCategoryGroup *)group setName:[BibAuthor authorWithName:newName andPub:[[group name] publication]]];
+            id name = [[self currentGroupField] isPersonField] ? [BibAuthor authorWithName:name andPub:[[group name] publication]] : newName;
+            [(BDSKCategoryGroup *)group setName:name];
 			[self movePublications:pubs fromGroup:group toGroupNamed:newName];
 			[pubs release];
 		}else if([group hasEditableName]){
