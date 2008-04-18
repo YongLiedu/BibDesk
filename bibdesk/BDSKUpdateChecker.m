@@ -280,6 +280,24 @@
     return localVersionNumber;
 }
 
+- (void)_loadHTML:(NSMutableDictionary *)HTMLDict {
+    NSDictionary *documentAttributes = nil;
+    NSAttributedString *attrString = [[NSAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
+    if (attrString)
+        [HTMLDict setObject:attrString forKey:@"attributedString"];
+    if (documentAttributes)
+        [HTMLDict setObject:documentAttributes forKey:@"documentAttributes"];
+    [attrString release];
+}
+
+- (void)logIfHTML:(NSData *)data
+{
+    NSAttributedString *attrString = [[NSAttributedString alloc] initWithHTML:data documentAttributes:NULL];
+    if ([NSString isEmptyString:[attrString string]] == NO)
+        NSLog(@"retrieved HTML data instead of property list: \n\"%@\"", [attrString string]);
+    [attrString release];
+}
+
 - (BOOL)downloadPropertyListFromServer:(NSError **)error;
 {
     NSError *downloadError = nil;
@@ -309,10 +327,7 @@
             [err release];
             
             // see if we have a web server error page and log it to the console; NSUnderlyingErrorKey has \n literals when logged
-            NSAttributedString *attrString = [[NSAttributedString alloc] initWithHTML:theData documentAttributes:NULL];
-            if ([NSString isEmptyString:[attrString string]] == NO)
-                NSLog(@"retrieved HTML data instead of property list: \n\"%@\"", [attrString string]);
-            [attrString release];
+            [self performSelectorOnMainThread:@selector(logIfHTML:) withObject:theData waitUntilDone:NO];
             success = NO;
         } else {
             success = YES;
