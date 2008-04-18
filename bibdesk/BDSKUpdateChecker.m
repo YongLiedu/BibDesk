@@ -280,16 +280,6 @@
     return localVersionNumber;
 }
 
-- (void)_loadHTML:(NSMutableDictionary *)HTMLDict {
-    NSDictionary *documentAttributes = nil;
-    NSAttributedString *attrString = [[NSAttributedString alloc] initWithURL:_fileURL documentAttributes:&documentAttributes];
-    if (attrString)
-        [HTMLDict setObject:attrString forKey:@"attributedString"];
-    if (documentAttributes)
-        [HTMLDict setObject:documentAttributes forKey:@"documentAttributes"];
-    [attrString release];
-}
-
 - (void)logIfHTML:(NSData *)data
 {
     NSAttributedString *attrString = [[NSAttributedString alloc] initWithHTML:data documentAttributes:NULL];
