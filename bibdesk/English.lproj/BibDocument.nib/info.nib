@@ -39,17 +39,19 @@
 	<key>IBOpenObjects</key>
 	<array>
 		<integer>702</integer>
-		<integer>101260</integer>
-		<integer>101282</integer>
-		<integer>661</integer>
-		<integer>101223</integer>
-		<integer>101206</integer>
-		<integer>433</integer>
 		<integer>923</integer>
+		<integer>101260</integer>
+		<integer>101206</integer>
+		<integer>1112</integer>
+		<integer>101223</integer>
+		<integer>5</integer>
 		<integer>819</integer>
+		<integer>661</integer>
+		<integer>101282</integer>
+		<integer>433</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>9C31</string>
+	<string>9C7010</string>
 	<key>targetFramework</key>
 	<string>IBCocoaFramework</string>
 </dict>

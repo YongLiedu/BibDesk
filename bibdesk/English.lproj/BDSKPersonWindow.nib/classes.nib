@@ -1,38 +1,62 @@
 {
-    IBClasses = (
-        {
-            CLASS = BDSKCollapsibleView; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = BDSKContainerView; 
-        }, 
-        {CLASS = BDSKContainerView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {CLASS = BDSKDragImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
-        {
-            ACTIONS = {dismissEditSheet = id; edit = id; openSelectedPub = id; }; 
-            CLASS = BDSKPersonController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                collapsibleView = BDSKCollapsibleView; 
-                editButton = NSButton; 
-                editField = NSTextField; 
-                editMessageField = NSTextField; 
-                editSheet = NSWindow; 
-                fieldArrayController = NSArrayController; 
-                fieldNameSplitView = OASplitView; 
-                fieldTableView = NSTableView; 
-                imageView = BDSKDragImageView; 
-                nameArrayController = NSArrayController; 
-                nameTableView = NSTableView; 
-                nameTextField = NSTextField; 
-                publicationArrayController = NSArrayController; 
-                publicationTableView = NSTableView; 
-                splitView = OASplitView; 
-            }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = MyObject; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }
-    ); 
-    IBVersion = 1; 
+    IBClasses =     (
+                {
+            CLASS = BDSKCollapsibleView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = BDSKContainerView;
+        },
+                {
+            CLASS = BDSKContainerView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSView;
+        },
+                {
+            CLASS = BDSKDragImageView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSImageView;
+        },
+                {
+            ACTIONS =             {
+                dismissEditSheet = id;
+                edit = id;
+                openSelectedPub = id;
+            };
+            CLASS = BDSKPersonController;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                collapsibleView = BDSKCollapsibleView;
+                editButton = NSButton;
+                editField = NSTextField;
+                editMessageField = NSTextField;
+                editSheet = NSWindow;
+                fieldArrayController = NSArrayController;
+                fieldNameSplitView = OASplitView;
+                fieldTableView = NSTableView;
+                imageView = BDSKDragImageView;
+                nameArrayController = NSArrayController;
+                nameTableView = NSTableView;
+                nameTextField = NSTextField;
+                publicationArrayController = NSArrayController;
+                publicationTableView = NSTableView;
+                splitView = OASplitView;
+            };
+            SUPERCLASS = NSWindowController;
+        },
+                {
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = MyObject;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = OASplitView;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSSplitView;
+        }
+    );
+    IBVersion = 1;
 }

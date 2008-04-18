@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>IBDocumentLocation</key>
-	<string>80 137 356 240 0 0 1600 1178 </string>
+	<string>70 102 356 240 0 0 1440 938 </string>
 	<key>IBEditorPositions</key>
 	<dict>
 		<key>726</key>
 		<string>70 347 256 237 0 0 1440 938 </string>
 		<key>805</key>
-		<string>540 582 520 422 0 0 1600 1178 </string>
+		<string>460 401 520 422 0 0 1440 938 </string>
 	</dict>
 	<key>IBFramework Version</key>
 	<string>489.0</string>
@@ -17,8 +17,13 @@
 	<string>../../Bibdesk.xcodeproj</string>
 	<key>IBOldestOS</key>
 	<integer>5</integer>
+	<key>IBOpenObjects</key>
+	<array>
+		<integer>805</integer>
+		<integer>74</integer>
+	</array>
 	<key>IBSystem Version</key>
-	<string>9C23</string>
+	<string>9C7010</string>
 	<key>targetFramework</key>
 	<string>IBCocoaFramework</string>
 </dict>

@@ -1,87 +1,102 @@
 {
-    IBClasses = (
-        {
-            ACTIONS = {
-                addField = id; 
-                changeAppending = id; 
-                changeCasing = id; 
-                changeCleaning = id; 
-                changeCounterCasing = id; 
-                changeCounterStyle = id; 
-                changeJoinStyle = id; 
-                changeLinkedFileFormat = id; 
-                changeLinkedFileJoinStyle = id; 
-                changeNameStyle = id; 
-                changeUrlFormat = id; 
-            }; 
-            CLASS = BDSKTemplateDocument; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                addFieldButton = NSButton; 
-                altTextField = NSTextField; 
-                appendingOptionsView = NSView; 
-                appendingPopUp = NSPopUpButton; 
-                boldCheckButton = NSButton; 
-                capitalizationPopUp = NSPopUpButton; 
-                cleaningPopUp = NSPopUpButton; 
-                counterCapitalizationPopUp = NSPopUpButton; 
-                counterStylePopUp = NSPopUpButton; 
-                dateOptionsMenu = NSMenu; 
-                dateOptionsView = NSView; 
-                datePopUp = NSPopUpButton; 
-                defaultTokenField = NSTokenField; 
-                defaultTypePopUp = NSPopUpButton; 
-                fieldBoldCheckButton = NSButton; 
-                fieldField = NSTextField; 
-                fieldFontNamePopUp = NSPopUpButton; 
-                fieldFontSizeComboBox = NSComboBox; 
-                fieldItalicCheckButton = NSButton; 
-                fieldOptionsMenu = NSMenu; 
-                fieldOptionsView = NSView; 
-                fontNamePopUp = NSPopUpButton; 
-                fontOptionsView = NSView; 
-                fontSizeComboBox = NSComboBox; 
-                italicCheckButton = NSButton; 
-                itemTemplateTokenField = NSTokenField; 
-                joinStylePopUp = NSPopUpButton; 
-                linkedFileFormatStylePopUp = NSPopUpButton; 
-                linkedFileJoinStylePopUp = NSPopUpButton; 
-                linkedFileOptionsMenu = NSMenu; 
-                linkedFileOptionsView = NSView; 
-                nameStylePopUp = NSPopUpButton; 
-                numberOptionsMenu = NSMenu; 
-                numberOptionsView = NSView; 
-                optionalTokenField = NSTokenField; 
-                ownerController = NSObjectController; 
-                personOptionsMenu = NSMenu; 
-                personOptionsView = NSView; 
-                prefixField = NSTextField; 
-                prefixTemplateTextView = NSTextView; 
-                previewTextView = NSTextView; 
-                requiredTokenField = NSTokenField; 
-                richTextCheckButton = NSButton; 
-                separatorTemplateTextView = NSTextView; 
-                specialTokenField = NSTokenField; 
-                suffixField = NSTextField; 
-                suffixTemplateTextView = NSTextView; 
-                tableView = NSTableView; 
-                tableViewSplitView = NSSplitView; 
-                templateArrayController = NSArrayController; 
-                textField = NSTextField; 
-                textOptionsView = NSView; 
-                textViewSplitView = NSSplitView; 
-                tokenObjectController = NSObjectController; 
-                tokenOptionsBox = NSBox; 
-                urlOptionsMenu = NSMenu; 
-                urlOptionsView = NSView; 
-                urlPopUp = NSPopUpButton; 
-            }; 
-            SUPERCLASS = NSDocument; 
-        }, 
-        {CLASS = BDSKTokenField; LANGUAGE = ObjC; SUPERCLASS = NSTokenField; }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSObject; LANGUAGE = ObjC; }, 
-        {CLASS = NSSegmentedControl; LANGUAGE = ObjC; SUPERCLASS = NSControl; }
-    ); 
-    IBVersion = 1; 
+    IBClasses =     (
+                {
+            ACTIONS =             {
+                addField = id;
+                changeAppending = id;
+                changeCasing = id;
+                changeCleaning = id;
+                changeCounterCasing = id;
+                changeCounterStyle = id;
+                changeJoinStyle = id;
+                changeLinkedFileFormat = id;
+                changeLinkedFileJoinStyle = id;
+                changeNameStyle = id;
+                changeUrlFormat = id;
+            };
+            CLASS = BDSKTemplateDocument;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                addFieldButton = NSButton;
+                altTextField = NSTextField;
+                appendingOptionsView = NSView;
+                appendingPopUp = NSPopUpButton;
+                boldCheckButton = NSButton;
+                capitalizationPopUp = NSPopUpButton;
+                cleaningPopUp = NSPopUpButton;
+                counterCapitalizationPopUp = NSPopUpButton;
+                counterStylePopUp = NSPopUpButton;
+                dateOptionsMenu = NSMenu;
+                dateOptionsView = NSView;
+                datePopUp = NSPopUpButton;
+                defaultTokenField = NSTokenField;
+                defaultTypePopUp = NSPopUpButton;
+                fieldBoldCheckButton = NSButton;
+                fieldField = NSTextField;
+                fieldFontNamePopUp = NSPopUpButton;
+                fieldFontSizeComboBox = NSComboBox;
+                fieldItalicCheckButton = NSButton;
+                fieldOptionsMenu = NSMenu;
+                fieldOptionsView = NSView;
+                fontNamePopUp = NSPopUpButton;
+                fontOptionsView = NSView;
+                fontSizeComboBox = NSComboBox;
+                italicCheckButton = NSButton;
+                itemTemplateTokenField = NSTokenField;
+                joinStylePopUp = NSPopUpButton;
+                linkedFileFormatStylePopUp = NSPopUpButton;
+                linkedFileJoinStylePopUp = NSPopUpButton;
+                linkedFileOptionsMenu = NSMenu;
+                linkedFileOptionsView = NSView;
+                nameStylePopUp = NSPopUpButton;
+                numberOptionsMenu = NSMenu;
+                numberOptionsView = NSView;
+                optionalTokenField = NSTokenField;
+                ownerController = NSObjectController;
+                personOptionsMenu = NSMenu;
+                personOptionsView = NSView;
+                prefixField = NSTextField;
+                prefixTemplateTextView = NSTextView;
+                previewTextView = NSTextView;
+                requiredTokenField = NSTokenField;
+                richTextCheckButton = NSButton;
+                separatorTemplateTextView = NSTextView;
+                specialTokenField = NSTokenField;
+                suffixField = NSTextField;
+                suffixTemplateTextView = NSTextView;
+                tableView = NSTableView;
+                tableViewSplitView = NSSplitView;
+                templateArrayController = NSArrayController;
+                textField = NSTextField;
+                textOptionsView = NSView;
+                textViewSplitView = NSSplitView;
+                tokenObjectController = NSObjectController;
+                tokenOptionsBox = NSBox;
+                urlOptionsMenu = NSMenu;
+                urlOptionsView = NSView;
+                urlPopUp = NSPopUpButton;
+            };
+            SUPERCLASS = NSDocument;
+        },
+                {
+            CLASS = BDSKTokenField;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSTokenField;
+        },
+                {
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = NSObject;
+            LANGUAGE = ObjC;
+        },
+                {
+            CLASS = NSSegmentedControl;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSControl;
+        }
+    );
+    IBVersion = 1;
 }

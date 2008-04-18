@@ -15,27 +15,27 @@
 		<key>1419</key>
 		<string>37 406 138 106 0 0 1440 938 </string>
 		<key>1425</key>
-		<string>632 845 335 72 0 0 1600 1178 </string>
+		<string>552 664 335 72 0 0 1440 938 </string>
 		<key>144</key>
-		<string>479 845 642 72 0 0 1600 1178 </string>
+		<string>399 664 642 72 0 0 1440 938 </string>
 		<key>1719</key>
-		<string>479 845 642 72 0 0 1600 1178 </string>
+		<string>399 664 642 72 0 0 1440 938 </string>
 		<key>1728</key>
 		<string>127 481 157 76 0 0 1600 1178 </string>
 		<key>1759</key>
-		<string>479 845 642 72 0 0 1600 1178 </string>
+		<string>399 664 642 72 0 0 1440 938 </string>
 		<key>1780</key>
 		<string>37 406 138 87 0 0 1440 938 </string>
 		<key>1814</key>
-		<string>479 845 642 72 0 0 1600 1178 </string>
+		<string>399 664 642 72 0 0 1440 938 </string>
 		<key>358</key>
-		<string>632 845 335 72 0 0 1600 1178 </string>
+		<string>552 664 335 72 0 0 1440 938 </string>
 		<key>589</key>
-		<string>500 845 600 72 0 0 1600 1178 </string>
+		<string>420 664 600 72 0 0 1440 938 </string>
 		<key>804</key>
-		<string>479 819 642 106 0 0 1600 1178 </string>
+		<string>399 638 642 106 0 0 1440 938 </string>
 		<key>88</key>
-		<string>479 845 642 72 0 0 1600 1178 </string>
+		<string>399 664 642 72 0 0 1440 938 </string>
 	</dict>
 	<key>IBFramework Version</key>
 	<string>489.0</string>
@@ -43,7 +43,20 @@
 	<array>
 		<integer>885</integer>
 	</array>
+	<key>IBOpenObjects</key>
+	<array>
+		<integer>1425</integer>
+		<integer>5</integer>
+		<integer>1814</integer>
+		<integer>88</integer>
+		<integer>1759</integer>
+		<integer>804</integer>
+		<integer>1719</integer>
+		<integer>589</integer>
+		<integer>358</integer>
+		<integer>144</integer>
+	</array>
 	<key>IBSystem Version</key>
-	<string>9D20</string>
+	<string>9C7010</string>
 </dict>
 </plist>
