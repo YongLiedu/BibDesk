@@ -674,7 +674,7 @@
     }
     
     if (dragCopyType == BDSKTemplateDragCopyType) {
-        NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKDefaultDragCopyTemplateKey : BDSKAlternateDragCopyTemplateKey;
+        NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
         NSString *template = [sud stringForKey:dragCopyTemplateKey];
         unsigned templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
