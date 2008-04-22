@@ -2624,9 +2624,9 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         return YES;
     } else if (action == @selector(revealInFinder:))
         return [aURL isFileURL] && [_selectedIndexes count] == 1 && NO == isMissing;
-    else if (action == @selector(openSelectedURLs:))
+    else if (action == @selector(openSelectedURLs:) || action == @selector(copy:))
         return selectionCount > 0;
-    else if (action == @selector(delete:) || action == @selector(copy:) || action == @selector(cut:))
+    else if (action == @selector(delete:) || action == @selector(cut:))
         return isEditable && selectionCount > 0;
     else if (action == @selector(selectAll:))
         return ([self numberOfIcons] > 0);
