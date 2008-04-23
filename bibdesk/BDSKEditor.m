@@ -1949,6 +1949,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
     NSString *oldValue = [[[publication valueOfField:fieldName] copy] autorelease];
     
+    [[fieldName retain] autorelease];
+    
     [publication setField:fieldName toValue:value];
     
     [self userChangedField:fieldName from:oldValue to:value];
