@@ -131,6 +131,10 @@
 	[self orderOut:nil];
 }
 
+- (BOOL)accessiblityIsIgnored {
+    return YES;
+}
+
 @end
 
 //
@@ -229,5 +233,10 @@
 	
 	[self orderOut:nil];
 }
+
+- (BOOL)accessiblityIsIgnored {
+    return YES;
+}
+
 @end
 
