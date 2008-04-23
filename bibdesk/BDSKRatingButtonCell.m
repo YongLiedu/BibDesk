@@ -366,4 +366,95 @@
 	}
 }
 
+- (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView {
+    return NSCellHitContentArea | NSCellHitTrackableArea;
+}
+
+#pragma mark Accessibility
+
+- (NSArray *)accessibilityAttributeNames {
+    static NSArray *attributes = nil;
+    if (attributes == nil) {
+        attributes = [[NSArray alloc] initWithObjects:
+            NSAccessibilityRoleAttribute,
+            NSAccessibilityRoleDescriptionAttribute,
+            NSAccessibilityValueAttribute,
+            NSAccessibilityMinValueAttribute,
+            NSAccessibilityMaxValueAttribute,
+            NSAccessibilityAllowedValuesAttribute,
+            NSAccessibilityParentAttribute,
+            NSAccessibilityChildrenAttribute,
+            NSAccessibilityWindowAttribute,
+            NSAccessibilityTopLevelUIElementAttribute,
+            NSAccessibilityFocusedAttribute,
+            NSAccessibilityPositionAttribute,
+            NSAccessibilitySizeAttribute,
+            nil];
+    }
+    return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString *)attribute {
+    if ([attribute isEqualToString:NSAccessibilityRoleAttribute]) {
+        return NSAccessibilitySliderRole;
+    } else if ([attribute isEqualToString:NSAccessibilityRoleDescriptionAttribute]) {
+        return NSAccessibilityRoleDescriptionForUIElement(self);
+    } else if ([attribute isEqualToString:NSAccessibilityValueAttribute]) {
+        return [NSNumber numberWithUnsignedInt:rating];
+    } else if ([attribute isEqualToString:NSAccessibilityMinValueAttribute]) {
+        return [NSNumber numberWithUnsignedInt:0];
+    } else if ([attribute isEqualToString:NSAccessibilityMaxValueAttribute]) {
+        return [NSNumber numberWithUnsignedInt:maxRating];
+    } else if ([attribute isEqualToString:NSAccessibilityAllowedValuesAttribute]) {
+        NSMutableArray *values = [NSMutableArray array];
+        unsigned i;
+        for (i = 0; i <= maxRating; i++)
+            [values addObject:[NSNumber numberWithUnsignedInt:i]];
+        return values;
+    } else if ([attribute isEqualToString:NSAccessibilityChildrenAttribute]) {
+        return [NSArray array];
+    } else {
+        return [super accessibilityAttributeValue:attribute];
+    }
+}
+
+- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute {
+    if ([attribute isEqualToString:NSAccessibilityValueAttribute])
+        return YES;
+    else
+        return [super accessibilityIsAttributeSettable:attribute];
+}
+
+- (void)accessibilitySetValue:(id)value forAttribute:(NSString *)attribute {
+    if ([attribute isEqualToString:NSAccessibilityValueAttribute]) {
+        [self setRating:MIN([value unsignedIntValue], maxRating)];
+        [(NSControl *)[self controlView] updateCellInside:self];
+        [(NSControl *)[self controlView] sendAction:[self action] to:[self target]];
+    } else
+        [super accessibilitySetValue:value forAttribute:attribute];
+}
+
+- (NSArray *)accessibilityActionNames {
+    static NSArray *actions = nil;
+    if (actions == nil) {
+        actions = [[NSArray alloc] initWithObjects:
+            NSAccessibilityIncrementAction,
+            NSAccessibilityDecrementAction,
+            nil];
+    }
+    return actions;
+}
+
+- (void)accessibilityPerformAction:(NSString *)anAction {
+    if ([anAction isEqualToString:NSAccessibilityIncrementAction] && rating < maxRating) {
+        [self setRating:rating + 1];
+        [(NSControl *)[self controlView] updateCellInside:self];
+        [(NSControl *)[self controlView] sendAction:[self action] to:[self target]];
+    } else if ([anAction isEqualToString:NSAccessibilityDecrementAction] && rating > 0) {
+        [self setRating:rating - 1];
+        [(NSControl *)[self controlView] updateCellInside:self];
+        [(NSControl *)[self controlView] sendAction:[self action] to:[self target]];
+    }
+}
+
 @end
