@@ -3078,16 +3078,15 @@ static void cancelDownload(const void *key, const void *value, void *context)
 }
 
 - (void)setSelected:(BOOL)selected forIconElement:(id)element {
-    NSMutableIndexSet *indexes = [[self selectionIndexes] mutableCopy];
     NSUInteger i = [element index];
-    if (selected && [indexes containsIndex:i] == NO) {
-        [indexes addIndex:i];
-        [self setSelectionIndexes:indexes];
+    if (selected) {
+        [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:i];
     } else if (selected == NO && [indexes containsIndex:i]) {
+        NSMutableIndexSet *indexes = [[self selectionIndexes] mutableCopy];
         [indexes removeIndex:i];
         [self setSelectionIndexes:indexes];
+        [indexes release];
     }
-    [indexes release];
 }
 
 - (void)openIconElement:(id)element {
