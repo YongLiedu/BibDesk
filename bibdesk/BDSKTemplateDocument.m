@@ -171,22 +171,16 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         [tmpFonts insertObject:[NSDictionary dictionaryWithObjectsAndKeys:@"<None>", @"fontName", NSLocalizedString(@"Same as body", @"Inerited font message in popup"), @"displayName", nil] atIndex:0];
         tokenFonts = [tmpFonts copy];
         
-        NSEnumerator *fieldEnum = [[[BDSKTypeManager sharedManager] userDefaultFieldsForType:nil] objectEnumerator];
+        NSEnumerator *fieldEnum;
         NSString *field;
         
+        fieldEnum = [[[BDSKTypeManager sharedManager] userDefaultFieldsForType:nil] objectEnumerator];
         while (field = [fieldEnum nextObject])
             [defaultTokens addObject:[self tokenForField:field]];
         
-        [specialTokens addObject:[self tokenForField:BDSKPubTypeString]];
-        [specialTokens addObject:[self tokenForField:BDSKCiteKeyString]];
-        [specialTokens addObject:[self tokenForField:BDSKLocalFileString]];
-        [specialTokens addObject:[self tokenForField:BDSKRemoteURLString]];
-        [specialTokens addObject:[self tokenForField:BDSKCiteKeyString]];
-        [specialTokens addObject:[self tokenForField:BDSKItemNumberString]];
-        [specialTokens addObject:[self tokenForField:@"Rich Text"]];
-        [specialTokens addObject:[self tokenForField:BDSKDateAddedString]];
-        [specialTokens addObject:[self tokenForField:BDSKDateModifiedString]];
-        [specialTokens addObject:[self tokenForField:BDSKPubDateString]];
+        fieldEnum = [[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKLocalFileString, BDSKRemoteURLString, BDSKCiteKeyString, BDSKItemNumberString, @"Rich Text", BDSKDateAddedString, BDSKDateModifiedString, BDSKPubDateString, nil] objectEnumerator];
+        while (field = [fieldEnum nextObject])
+            [specialTokens addObject:[self tokenForField:field]];
     }
     return self;
 }
@@ -731,70 +725,54 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [addFieldController release];
 }
 
-- (IBAction)changeAppending:(id)sender {
+- (void)changeValue:(id)sender forKey:(NSString *)key {
     NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
     NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"appendingKey"];
+    [menuToken setValue:newValue forKey:key];
+}
+
+- (IBAction)changeAppending:(id)sender {
+    [self changeValue:sender forKey:@"appendingKey"];
 }
 
 - (IBAction)changeCasing:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"casingKey"];
+    [self changeValue:sender forKey:@"casingKey"];
 }
 
 - (IBAction)changeCleaning:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"cleaningKey"];
+    [self changeValue:sender forKey:@"cleaningKey"];
 }
 
 - (IBAction)changeNameStyle:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"nameStyleKey"];
+    [self changeValue:sender forKey:@"nameStyleKey"];
 }
 
 - (IBAction)changeJoinStyle:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"joinmStyleKey"];
+    [self changeValue:sender forKey:@"joinmStyleKey"];
 }
 
 - (IBAction)changeLinkedFileFormat:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"linkedFileFormatKey"];
+    [self changeValue:sender forKey:@"linkedFileFormatKey"];
 }
 
 - (IBAction)changeLinkedFileJoinStyle:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"linkedFileJoinStyleKey"];
+    [self changeValue:sender forKey:@"linkedFileJoinStyleKey"];
 }
 
 - (IBAction)changeUrlFormat:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"urlFormatKey"];
+    [self changeValue:sender forKey:@"urlFormatKey"];
 }
 
 - (IBAction)changeDateFormat:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"dateFormatKey"];
+    [self changeValue:sender forKey:@"dateFormatKey"];
 }
 
 - (IBAction)changeCounterStyle:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"counterStyleKey"];
+    [self changeValue:sender forKey:@"counterStyleKey"];
 }
 
 - (IBAction)changeCounterCasing:(id)sender {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:@"counterCasingKey"];
+    [self changeValue:sender forKey:@"counterCasingKey"];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
