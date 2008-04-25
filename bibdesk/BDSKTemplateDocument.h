@@ -184,17 +184,6 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 
 - (IBAction)addField:(id)sender;
 
-- (IBAction)changeAppending:(id)sender;
-- (IBAction)changeCasing:(id)sender;
-- (IBAction)changeCleaning:(id)sender;
-- (IBAction)changeNameStyle:(id)sender;
-- (IBAction)changeJoinStyle:(id)sender;
-- (IBAction)changeLinkedFileFormat:(id)sender;
-- (IBAction)changeLinkedFileJoinStyle:(id)sender;
-- (IBAction)changeUrlFormat:(id)sender;
-- (IBAction)changeCounterStyle:(id)sender;
-- (IBAction)changeCounterCasing:(id)sender;
-
 - (BOOL)commitEditing;
 
 @end

@@ -725,85 +725,18 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [addFieldController release];
 }
 
-- (void)changeValue:(id)sender forKey:(NSString *)key {
+- (void)changeValueFromMenu:(id)sender {
+    NSDictionary *dict = [sender representedObject];
     NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
     NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
-    [menuToken setValue:newValue forKey:key];
-}
-
-- (IBAction)changeAppending:(id)sender {
-    [self changeValue:sender forKey:@"appendingKey"];
-}
-
-- (IBAction)changeCasing:(id)sender {
-    [self changeValue:sender forKey:@"casingKey"];
-}
-
-- (IBAction)changeCleaning:(id)sender {
-    [self changeValue:sender forKey:@"cleaningKey"];
-}
-
-- (IBAction)changeNameStyle:(id)sender {
-    [self changeValue:sender forKey:@"nameStyleKey"];
-}
-
-- (IBAction)changeJoinStyle:(id)sender {
-    [self changeValue:sender forKey:@"joinStyleKey"];
-}
-
-- (IBAction)changeLinkedFileFormat:(id)sender {
-    [self changeValue:sender forKey:@"linkedFileFormatKey"];
-}
-
-- (IBAction)changeLinkedFileJoinStyle:(id)sender {
-    [self changeValue:sender forKey:@"linkedFileJoinStyleKey"];
-}
-
-- (IBAction)changeUrlFormat:(id)sender {
-    [self changeValue:sender forKey:@"urlFormatKey"];
-}
-
-- (IBAction)changeDateFormat:(id)sender {
-    [self changeValue:sender forKey:@"dateFormatKey"];
-}
-
-- (IBAction)changeCounterStyle:(id)sender {
-    [self changeValue:sender forKey:@"counterStyleKey"];
-}
-
-- (IBAction)changeCounterCasing:(id)sender {
-    [self changeValue:sender forKey:@"counterCasingKey"];
+    [menuToken setValue:newValue forKey:[[sender menu] title]];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     SEL action = [menuItem action];
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
-    if (action == @selector(changeAppending:)) {
-        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"appendingKey"]] isEqualToString:[menuItem representedObject]]];
-        return YES;
-    } else if (action == @selector(changeCasing:)) {
-        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"casingKey"]] isEqualToString:[menuItem representedObject]]];
-        return YES;
-    } else if (action == @selector(changeCleaning:)) {
-        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"cleaningKey"]] isEqualToString:[menuItem representedObject]]];
-        return YES;
-    } else if (action == @selector(changeNameStyle:)) {
-        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"nameStyleKey"]] isEqualToString:[menuItem representedObject]]];
-        return YES;
-    } else if (action == @selector(changeJoinStyle:)) {
-        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"joinStyleKey"]] isEqualToString:[menuItem representedObject]]];
-        return YES;
-    } else if (action == @selector(changeUrlFormat:)) {
-        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"urlFormatKey"]] isEqualToString:[menuItem representedObject]]];
-        return YES;
-    } else if (action == @selector(changeDateFormat:)) {
-        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"dateFormatKey"]] isEqualToString:[menuItem representedObject]]];
-        return YES;
-    } else if (action == @selector(changeCounterStyle:)) {
-        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"counterStyleKey"]] isEqualToString:[menuItem representedObject]]];
-        return YES;
-    } else if (action == @selector(changeCounterCasing:)) {
-        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:@"counterCasingKey"]] isEqualToString:[menuItem representedObject]]];
+    if (action == @selector(changeValueFromMenu:)) {
+        NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
+        [menuItem setState:[[transformer transformedValue:[menuToken valueForKey:[[menuItem menu] title]]] isEqualToString:[menuItem representedObject]]];
         return YES;
     } else if ([[BDSKTemplateDocument superclass] instancesRespondToSelector:_cmd]) {
         return [super validateMenuItem:menuItem];
@@ -814,44 +747,35 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 #pragma mark Setup and Update
 
-#define SETUP_SUBMENU(parentMenu, index, key, selector) { \
-    menu = [[parentMenu itemAtIndex:index] submenu]; \
-    dictEnum = [[templateOptions valueForKey:key] objectEnumerator]; \
-    while (dict = [dictEnum nextObject]) { \
-        item = [menu addItemWithTitle:NSLocalizedStringFromTable([dict objectForKey:@"displayName"], @"TemplateOptions", @"") \
-                               action:selector keyEquivalent:@""]; \
-        [item setTarget:self]; \
-        [item setRepresentedObject:[dict objectForKey:@"key"]]; \
-    } \
+- (void)setupOptionsMenu:(NSMenu *)parentMenu forKeys:(NSString *)firstKey, ... {
+    va_list keyList;
+    NSString *key = firstKey;
+    unsigned int i = 0;
+    va_start(keyList, firstKey);
+    while (key) {
+        NSMenu *menu = [[parentMenu itemAtIndex:i] submenu];
+        [menu setTitle:[key stringByAppendingString:@"Key"]];
+        NSEnumerator *dictEnum = [[templateOptions valueForKey:key] objectEnumerator];
+        NSDictionary *dict;
+        while (dict = [dictEnum nextObject]) {
+            NSMenuItem *item = [menu addItemWithTitle:NSLocalizedStringFromTable([dict objectForKey:@"displayName"], @"TemplateOptions", @"")
+                                               action:@selector(changeValueFromMenu:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setRepresentedObject:[dict objectForKey:@"key"]];
+        }
+        key = va_arg(keyList, NSString *);
+        i++;
+    }
+    va_end(keyList);
 }
 
 - (void)setupOptionsMenus {
-    NSMenu *menu;
-    NSMenuItem *item;
-    NSEnumerator *dictEnum;
-    NSDictionary *dict;
-    
-    SETUP_SUBMENU(fieldOptionsMenu, 0, @"casing", @selector(changeCasing:));
-    SETUP_SUBMENU(fieldOptionsMenu, 1, @"cleaning", @selector(changeCleaning:));
-    SETUP_SUBMENU(fieldOptionsMenu, 2, @"appending", @selector(changeAppending:));
-    SETUP_SUBMENU(urlOptionsMenu, 0, @"urlFormat", @selector(changeUrlFormat:));
-    SETUP_SUBMENU(urlOptionsMenu, 1, @"casing", @selector(changeCasing:));
-    SETUP_SUBMENU(urlOptionsMenu, 2, @"cleaning", @selector(changeCleaning:));
-    SETUP_SUBMENU(urlOptionsMenu, 3, @"appending", @selector(changeAppending:));
-    SETUP_SUBMENU(personOptionsMenu, 0, @"nameStyle", @selector(changeNameStyle:));
-    SETUP_SUBMENU(personOptionsMenu, 1, @"joinStyle", @selector(changeJoinStyle:));
-    SETUP_SUBMENU(personOptionsMenu, 2, @"casing", @selector(changeCasing:));
-    SETUP_SUBMENU(personOptionsMenu, 3, @"cleaning", @selector(changeCleaning:));
-    SETUP_SUBMENU(personOptionsMenu, 4, @"appending", @selector(changeAppending:));
-    SETUP_SUBMENU(linkedFileOptionsMenu, 0, @"linkedFileFormat", @selector(changeLinkedFileFormat:));
-    SETUP_SUBMENU(linkedFileOptionsMenu, 1, @"linkedFileJoinStyle", @selector(changeLinkedFileJoinStyle:));
-    SETUP_SUBMENU(linkedFileOptionsMenu, 2, @"appending", @selector(changeAppending:));
-    SETUP_SUBMENU(dateOptionsMenu, 0, @"dateFormat", @selector(changeDateFormat:));
-    SETUP_SUBMENU(dateOptionsMenu, 1, @"casing", @selector(changeCasing:));
-    SETUP_SUBMENU(dateOptionsMenu, 2, @"cleaning", @selector(changeCleaning:));
-    SETUP_SUBMENU(dateOptionsMenu, 3, @"appending", @selector(changeAppending:));
-    SETUP_SUBMENU(numberOptionsMenu, 0, @"counterStyle", @selector(changeCounterStyle:));
-    SETUP_SUBMENU(numberOptionsMenu, 1, @"counterCasing", @selector(changeCounterCasing:));
+    [self setupOptionsMenu:fieldOptionsMenu forKeys:@"casing", @"cleaning", @"appending", nil];
+    [self setupOptionsMenu:urlOptionsMenu forKeys:@"urlFormat", @"casing", @"cleaning", @"appending", nil];
+    [self setupOptionsMenu:personOptionsMenu forKeys:@"nameStyle", @"joinStyle", @"casing", @"cleaning", @"appending", nil];
+    [self setupOptionsMenu:linkedFileOptionsMenu forKeys:@"linkedFileFormat", @"linkedFileJoinStyle", @"appending", nil];
+    [self setupOptionsMenu:dateOptionsMenu forKeys:@"dateFormat", @"casing", @"cleaning", @"appending", nil];
+    [self setupOptionsMenu:numberOptionsMenu forKeys:@"counterStyle", @"counterCasing", nil];
 }
 
 - (void)updateTextViews {
