@@ -183,7 +183,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         [specialTokens addObject:[self tokenForField:BDSKRemoteURLString]];
         [specialTokens addObject:[self tokenForField:BDSKCiteKeyString]];
         [specialTokens addObject:[self tokenForField:BDSKItemNumberString]];
-        [specialTokens addObject:[self tokenForField:NSLocalizedString(@"Rich Text", @"Name for template token")]];
+        [specialTokens addObject:[self tokenForField:@"Rich Text"]];
         [specialTokens addObject:[self tokenForField:BDSKDateAddedString]];
         [specialTokens addObject:[self tokenForField:BDSKDateModifiedString]];
         [specialTokens addObject:[self tokenForField:BDSKPubDateString]];

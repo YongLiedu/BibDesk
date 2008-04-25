@@ -64,7 +64,7 @@ NSString *BDSKTokenDidChangeNotification = @"BDSKTokenDidChangeNotification";
     } else if ([field isURLField]) {
         tag = [[BDSKURLTagToken alloc] initWithTitle:field];
     } else if ([field isEqualToString:@"Rich Text"]) {
-        tag = [[BDSKTextToken alloc] initWithTitle:field];
+        tag = [[BDSKTextToken alloc] initWithTitle:NSLocalizedString(@"Rich Text", @"Name for template token")];
     } else if ([field isEqualToString:BDSKDateAddedString] || [field isEqualToString:BDSKDateModifiedString] || [field isEqualToString:BDSKPubDateString]) {
         tag = [[BDSKDateTagToken alloc] initWithTitle:field];
         if ([field isEqualToString:BDSKDateAddedString])
