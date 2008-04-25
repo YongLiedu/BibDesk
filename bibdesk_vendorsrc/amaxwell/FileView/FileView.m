@@ -3080,8 +3080,8 @@ static void cancelDownload(const void *key, const void *value, void *context)
 - (void)setSelected:(BOOL)selected forIconElement:(id)element {
     NSUInteger i = [element index];
     if (selected) {
-        [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:i];
-    } else if (selected == NO && [indexes containsIndex:i]) {
+        [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:i]];
+    } else if ([[self selectionIndexes] containsIndex:i]) {
         NSMutableIndexSet *indexes = [[self selectionIndexes] mutableCopy];
         [indexes removeIndex:i];
         [self setSelectionIndexes:indexes];
