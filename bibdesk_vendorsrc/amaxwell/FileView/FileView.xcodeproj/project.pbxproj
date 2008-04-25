@@ -61,6 +61,8 @@
 		CE89233D0D7CBB18006D514C /* FVInvocationOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5E70D7C22550034C2A8 /* FVInvocationOperation.m */; };
 		CE89233E0D7CBB19006D514C /* FVOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = CE05D5E80D7C22550034C2A8 /* FVOperation.h */; };
 		CE89233F0D7CBB1A006D514C /* FVOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CE05D5E90D7C22550034C2A8 /* FVOperation.m */; };
+		CEA831140DC1FAB500B551D1 /* FVAccessibilityIconElement.h in Headers */ = {isa = PBXBuildFile; fileRef = CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */; };
+		CEA831150DC1FAB500B551D1 /* FVAccessibilityIconElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */; };
 		F92C7BC70D280D0E004409D8 /* FVWebViewIcon.h in Headers */ = {isa = PBXBuildFile; fileRef = F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */; };
 		F92C7BC80D280D0F004409D8 /* FVWebViewIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */; };
 		F92C7C4F0D282503004409D8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */; };
@@ -238,6 +240,8 @@
 		CE05D5E70D7C22550034C2A8 /* FVInvocationOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVInvocationOperation.m; sourceTree = "<group>"; };
 		CE05D5E80D7C22550034C2A8 /* FVOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVOperation.h; sourceTree = "<group>"; };
 		CE05D5E90D7C22550034C2A8 /* FVOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVOperation.m; sourceTree = "<group>"; };
+		CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVAccessibilityIconElement.h; sourceTree = "<group>"; };
+		CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVAccessibilityIconElement.m; sourceTree = "<group>"; };
 		F92C7BAA0D280626004409D8 /* FVWebViewIcon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FVWebViewIcon.h; sourceTree = "<group>"; };
 		F92C7BAB0D280626004409D8 /* FVWebViewIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FVWebViewIcon.m; sourceTree = "<group>"; };
 		F92C7C4E0D282503004409D8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
@@ -425,6 +429,8 @@
 				CE05D5CC0D7C21E30034C2A8 /* Queueing */,
 				CE05D5CD0D7C22070034C2A8 /* Operations */,
 				CE05D48B0D7B38B20034C2A8 /* Caching */,
+				CEA831120DC1FAB500B551D1 /* FVAccessibilityIconElement.h */,
+				CEA831130DC1FAB500B551D1 /* FVAccessibilityIconElement.m */,
 				CE05D3C40D7B272A0034C2A8 /* FVDownload.h */,
 				CE05D3C50D7B272A0034C2A8 /* FVDownload.m */,
 				F93C3AE90D39473C006EB558 /* FVFinderLabel.h */,
@@ -672,6 +678,7 @@
 				CE89233A0D7CBB16006D514C /* FVIconOperation.h in Headers */,
 				CE89233C0D7CBB17006D514C /* FVInvocationOperation.h in Headers */,
 				CE89233E0D7CBB19006D514C /* FVOperation.h in Headers */,
+				CEA831140DC1FAB500B551D1 /* FVAccessibilityIconElement.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -854,6 +861,7 @@
 				CE89233B0D7CBB17006D514C /* FVIconOperation.m in Sources */,
 				CE89233D0D7CBB18006D514C /* FVInvocationOperation.m in Sources */,
 				CE89233F0D7CBB1A006D514C /* FVOperation.m in Sources */,
+				CEA831150DC1FAB500B551D1 /* FVAccessibilityIconElement.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

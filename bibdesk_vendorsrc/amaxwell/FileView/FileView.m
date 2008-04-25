@@ -52,6 +52,7 @@
 #import "FVSlider.h"
 #import "FVColorMenuView.h"
 #import "FVBitmapContextCache.h"
+#import "FVAccessibilityIconElement.h"
 
 
 static NSString *FVWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
@@ -3007,6 +3008,90 @@ static void cancelDownload(const void *key, const void *value, void *context)
             [fvDownload release];
         }
     }
+}
+
+#pragma mark Accessibility
+
+- (NSArray *)accessibilityAttributeNames {
+    static NSArray *attributes = nil;
+    if (attributes == nil)
+        attributes = [[[super accessibilityAttributeNames] arrayByAddingObject:NSAccessibilityChildrenAttribute] retain];
+    return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString *)attribute {
+    if ([attribute isEqualToString:NSAccessibilityRoleAttribute]) {
+        return NSAccessibilityGroupRole;
+    } else if ([attribute isEqualToString:NSAccessibilityRoleDescriptionAttribute]) {
+        return NSAccessibilityRoleDescription(NSAccessibilityGroupRole, nil);
+    } else if ([attribute isEqualToString:NSAccessibilityChildrenAttribute]) {
+        NSMutableArray *children = [NSMutableArray array];
+        NSUInteger i, count = [self numberOfIcons];
+        for (i = 0; i < count; i++)
+            [children addObject:[FVAccessibilityIconElement elementWithIndex:i parent:self]];
+        return NSAccessibilityUnignoredChildren(children);
+    } else {
+        return [super accessibilityAttributeValue:attribute];
+    }
+}
+
+- (BOOL)accessibilityIsIgnored {
+    return NO;
+}
+
+- (id)accessibilityHitTest:(NSPoint)point {
+    NSUInteger i, r, c;
+    NSPoint localPoint = [self convertPoint:[[self window] convertScreenToBase:point] fromView:nil];
+    if ([self _getGridRow:&r column:&c atPoint:localPoint]) {
+        i = [self _indexForGridRow:r column:c];
+        if (i != NSNotFound)
+            return [[FVAccessibilityIconElement elementWithIndex:i parent:self] accessibilityHitTest:point];
+    }
+    return NSAccessibilityUnignoredAncestor(self);
+}
+
+- (id)accessibilityFocusedUIElement {
+    NSUInteger i = [_selectedIndexes firstIndex];
+    if (i != NSNotFound)
+        return [[FVAccessibilityIconElement elementWithIndex:i parent:self] accessibilityFocusedUIElement];
+    else
+        return NSAccessibilityUnignoredAncestor(self);
+}
+
+- (NSURL *)URLForIconElement:(id)element {
+    return [self iconURLAtIndex:[element index]];
+}
+
+- (NSRect)screenRectForIconElement:(id)element {
+    NSRect rect = NSZeroRect;
+    NSUInteger r, c;
+    if ([self _getGridRow:&r column:&c ofIndex:[element index]]) {
+        rect = [self _rectOfIconInRow:r column:c];
+        rect = [self convertRect:rect toView:nil];
+        rect.origin = [[self window] convertBaseToScreen:rect.origin];
+    }
+    return rect;
+}
+
+- (BOOL)isIconElementSelected:(id)element {
+    return [[self selectionIndexes] containsIndex:[element index]];
+}
+
+- (void)setSelected:(BOOL)selected forIconElement:(id)element {
+    NSMutableIndexSet *indexes = [[self selectionIndexes] mutableCopy];
+    NSUInteger i = [element index];
+    if (selected && [indexes containsIndex:i] == NO) {
+        [indexes addIndex:i];
+        [self setSelectionIndexes:indexes];
+    } else if (selected == NO && [indexes containsIndex:i]) {
+        [indexes removeIndex:i];
+        [self setSelectionIndexes:indexes];
+    }
+    [indexes release];
+}
+
+- (void)openIconElement:(id)element {
+    [self _openURLs:[NSArray arrayWithObjects:[self iconURLAtIndex:[element index]], nil]];
 }
 
 @end
