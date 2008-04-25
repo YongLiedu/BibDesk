@@ -748,7 +748,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 }
 
 - (IBAction)changeJoinStyle:(id)sender {
-    [self changeValue:sender forKey:@"joinmStyleKey"];
+    [self changeValue:sender forKey:@"joinStyleKey"];
 }
 
 - (IBAction)changeLinkedFileFormat:(id)sender {
