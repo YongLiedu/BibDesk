@@ -745,6 +745,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     FVAPIAssert(nil != indexSet, @"index set must not be nil");
     [_selectedIndexes autorelease];
     _selectedIndexes = [indexSet mutableCopy];
+    NSAccessibilityPostNotification(NSAccessibilityUnignoredAncestor(self), NSAccessibilityFocusedUIElementChangedNotification);
 }
 
 - (NSIndexSet *)selectionIndexes;
