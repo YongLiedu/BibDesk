@@ -3015,7 +3015,7 @@ static void cancelDownload(const void *key, const void *value, void *context)
 - (NSArray *)accessibilityAttributeNames {
     static NSArray *attributes = nil;
     if (attributes == nil)
-        attributes = [[[super accessibilityAttributeNames] arrayByAddingObject:NSAccessibilityChildrenAttribute] retain];
+        attributes = [[[super accessibilityAttributeNames] arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:NSAccessibilityChildrenAttribute, NSAccessibilitySelectedChildrenAttribute, nil]] retain];
     return attributes;
 }
 
@@ -3029,6 +3029,14 @@ static void cancelDownload(const void *key, const void *value, void *context)
         NSUInteger i, count = [self numberOfIcons];
         for (i = 0; i < count; i++)
             [children addObject:[FVAccessibilityIconElement elementWithIndex:i parent:self]];
+        return NSAccessibilityUnignoredChildren(children);
+    } else if ([attribute isEqualToString:NSAccessibilitySelectedChildrenAttribute]) {
+        NSMutableArray *children = [NSMutableArray array];
+        NSUInteger i = [_selectedIndexes firstIndex];
+        while (i != NSNotFound) {
+            [children addObject:[FVAccessibilityIconElement elementWithIndex:i parent:self]];
+            i = [_selectedIndexes indexGreaterThanIndex:i];
+        }
         return NSAccessibilityUnignoredChildren(children);
     } else {
         return [super accessibilityAttributeValue:attribute];
