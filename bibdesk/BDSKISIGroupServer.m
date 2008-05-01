@@ -268,7 +268,7 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString);
                                                               in_sort:@""
                                                           in_firstRec:[self fetchedResults]
                                                            in_numRecs:numResults
-                                                            in_fields:@"doctype authors bib_vol pub_url source_title item_title bib_issue bib_pages keywords abstract source_series article_nos bib_date publisher pub_address issue_ed"];
+                                                            in_fields:@"doctype authors bib_vol pub_url source_title item_title bib_issue bib_pages keywords abstract source_series article_nos bib_date publisher pub_address issue_ed times_cited get_parent"];
             
             // now increment this so we don't get the same set next time; BDSKSearchGroup resets it when the searcn term changes
             [self setFetchedResults:[self fetchedResults] + numResults];
