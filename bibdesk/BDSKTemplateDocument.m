@@ -726,7 +726,6 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 }
 
 - (void)changeValueFromMenu:(id)sender {
-    NSDictionary *dict = [sender representedObject];
     NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:BDSKValueOrNoneTransformerName];
     NSString *newValue = [transformer reverseTransformedValue:[sender representedObject]];
     [menuToken setValue:newValue forKey:[[sender menu] title]];
