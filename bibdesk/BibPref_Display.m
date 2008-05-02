@@ -171,10 +171,6 @@
             fontSizeKey = BDSKPersonTableViewFontSizeKey;
             break;
         case 3:
-            fontNameKey = BDSKPreviewPaneFontFamilyKey;
-            fontSizeKey = BDSKPreviewBaseFontSizeKey;
-            break;
-        case 4:
             fontNameKey = BDSKEditorFontNameKey;
             fontSizeKey = BDSKEditorFontSizeKey;
             break;
@@ -201,13 +197,6 @@
             fontSizeKey = BDSKPersonTableViewFontSizeKey;
             break;
         case 3:
-            // set the family last as that is observed
-            [defaults setFloat:[font pointSize] forKey:BDSKPreviewBaseFontSizeKey];
-            [defaults setObject:[font familyName] forKey:BDSKPreviewPaneFontFamilyKey];
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-            [defaults autoSynchronize];
-            return;
-        case 4:
             fontNameKey = BDSKEditorFontNameKey;
             fontSizeKey = BDSKEditorFontSizeKey;
             break;

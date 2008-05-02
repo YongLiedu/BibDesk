@@ -11,7 +11,7 @@
 		<key>101206</key>
 		<string>610 536 220 242 0 0 1440 938 </string>
 		<key>101223</key>
-		<string>690 717 220 242 0 0 1600 1178 </string>
+		<string>610 536 220 242 0 0 1440 938 </string>
 		<key>101260</key>
 		<string>590 567 420 442 0 0 1600 1178 </string>
 		<key>101282</key>
@@ -40,12 +40,13 @@
 	<integer>5</integer>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>923</integer>
-		<integer>101282</integer>
 		<integer>661</integer>
-		<integer>101206</integer>
-		<integer>1112</integer>
 		<integer>702</integer>
+		<integer>1112</integer>
+		<integer>101206</integer>
+		<integer>923</integer>
+		<integer>101223</integer>
+		<integer>101282</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>9C7010</string>
