@@ -299,7 +299,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>v${CURRENT_PROJECT_VERSION}</string>
+	<string>${CURRENT_PROJECT_VERSION}</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.4.0</string>
 	<key>NSAppleScriptEnabled</key>
