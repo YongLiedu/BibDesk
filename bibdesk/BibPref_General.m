@@ -195,7 +195,7 @@
 
 - (void)handleTemplatePrefsChanged:(NSNotification *)notification {
     NSString *currentStyle = [defaults stringForKey:BDSKEmailTemplateKey];
-    NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat]];
+    NSArray *styles = [BDSKTemplate allStyleNames];
     [emailTemplatePopup removeAllItems];
     [emailTemplatePopup addItemWithTitle:NSLocalizedString(@"Default BibTeX Format", @"Popup menu title for email format")];
     [emailTemplatePopup addItemsWithTitles:styles];

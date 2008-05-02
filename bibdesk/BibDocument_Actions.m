@@ -482,8 +482,11 @@
             [files addObject:path];
     }
     
-    if (template != nil && ([template templateFormat] & BDSKTextTemplateFormat)) {
-        [body setString:[BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items]];
+    if (template != nil) {
+        if ([template templateFormat] & BDSKRichTextTemplateFormat)
+            [body setString:[[BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL] string]];
+        else
+            [body setString:[BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items]];
     } else {
         e = [items objectEnumerator];
         while (pub = [e nextObject]) {
