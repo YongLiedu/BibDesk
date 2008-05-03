@@ -119,7 +119,7 @@
     if([fileManager fileExistsAtPath:templateFilePath])
         [fileManager removeFileAtPath:templateFilePath handler:nil];
     // copy template.txt file from the bundle
-    [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"template" ofType:@"txt"]
+    [fileManager copyPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"template.txt"]
                    toPath:templateFilePath handler:nil];
 }
 

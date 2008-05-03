@@ -229,7 +229,7 @@ static NSSet *standardStyles = nil;
     if([fileManager fileExistsAtPath:previewTemplatePath])
         [fileManager removeFileAtPath:previewTemplatePath handler:nil];
     // copy previewtemplate.tex file from the bundle
-    [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"previewtemplate" ofType:@"tex"]
+    [fileManager copyPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"previewtemplate.tex"]
                    toPath:previewTemplatePath handler:nil];
 }
 
