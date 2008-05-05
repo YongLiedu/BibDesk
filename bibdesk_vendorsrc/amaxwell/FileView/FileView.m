@@ -2136,6 +2136,7 @@ static NSRect _rectWithCorners(NSPoint aPoint, NSPoint bPoint) {
     BOOL isCopy = [self allowsDownloading] && dragOp == NSDragOperationCopy;
     NSUInteger insertIndex, firstIndex, endIndex;
     
+    // !!! this is quite expensive to call repeatedly in -draggingUpdated
     NSArray *draggedURLs = FVURLsFromPasteboard([sender draggingPasteboard]);
     
     // First determine the drop location, check whether the index is not NSNotFound, because the grid cell can be empty

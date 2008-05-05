@@ -264,7 +264,9 @@ NSArray *FVURLsFromPasteboard(NSPasteboard *pboard)
     
     // ??? On 10.5, NSStringPboardType and kUTTypeUTF8PlainText point to the same data, according to pasteboard peeker; if that's the case on 10.4, we can remove this and the registration for NSStringPboardType.
     if ([[pboard types] containsObject:NSStringPboardType]) {
-        NSURL *nsURL = [NSURL URLWithString:[pboard stringForType:NSStringPboardType]];
+        // this can (and does) return nil under some conditions, so avoid an exception
+        NSString *stringURL = [pboard stringForType:NSStringPboardType];
+        NSURL *nsURL = stringURL ? [NSURL URLWithString:stringURL] : nil;
         if ([nsURL scheme] != nil && [allURLsReadFromPasteboard containsObject:nsURL] == NO)
             [toReturn addObject:nsURL];
     }
