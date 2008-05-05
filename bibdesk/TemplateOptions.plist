@@ -223,6 +223,10 @@
             key = "@componentsJoinedByAnd";
         },
         {
+            displayName = "A; B; C";
+            key = "@componentsJoinedBySemicolon";
+        },
+        {
             displayName = "A/B/C";
             key = "@componentsJoinedByForwardSlash";
         },

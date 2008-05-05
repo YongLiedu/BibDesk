@@ -1083,6 +1083,11 @@ inline static NSString *romanNumeralForDigit(unsigned digit, NSString *i, NSStri
     return [self componentsJoinedByString:@"/"];
 }
 
+- (NSString *)componentsJoinedByForwardSemicolon
+{
+    return [self componentsJoinedByString:@"; "];
+}
+
 - (NSString *)componentsJoinedByDefaultJoinString
 {
     return [self componentsJoinedByString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultArrayJoinStringKey]];
