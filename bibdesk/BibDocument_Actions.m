@@ -1137,7 +1137,7 @@
     if (bottomPreviewDisplay == BDSKPreviewDisplayText)
         scrollView = [bottomPreviewTextView enclosingScrollView];
     else if (bottomPreviewDisplay == BDSKPreviewDisplayFiles)
-        scrollView = [bottomFileView scrollView];
+        scrollView = [bottomFileView enclosingScrollView];
     else if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
         scrollView = [(BDSKZoomablePDFView *)[previewer pdfView] scrollView];
     
@@ -1162,7 +1162,7 @@
     if (bottomPreviewDisplay == BDSKPreviewDisplayText)
         scrollView = [bottomPreviewTextView enclosingScrollView];
     else if (bottomPreviewDisplay == BDSKPreviewDisplayFiles)
-        scrollView = [bottomFileView scrollView];
+        scrollView = [bottomFileView enclosingScrollView];
     else if (bottomPreviewDisplay == BDSKPreviewDisplayTeX)
         scrollView = [(BDSKZoomablePDFView *)[previewer pdfView] scrollView];
     
