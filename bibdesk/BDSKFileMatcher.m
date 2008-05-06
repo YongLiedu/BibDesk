@@ -54,6 +54,7 @@
 #import "BDSKLevelIndicatorCell.h"
 #import "BDSKLinkedFile.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
+#import "NSInvocation_BDSKExtensions.h"
 
 #define MAX_SEARCHKIT_RESULTS 10
 static float LEAF_ROW_HEIGHT = 20.0;
@@ -447,10 +448,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
 {
     // get the root nodes array on the main thread, since it uses BibItem methods
     NSArray *treeNodes = nil;
-    NSMethodSignature *ms = [self methodSignatureForSelector:@selector(copyTreeNodesWithCurrentPublications)];
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:ms];
-    [invocation setTarget:self];
-    [invocation setSelector:@selector(copyTreeNodesWithCurrentPublications)];
+    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(copyTreeNodesWithCurrentPublications)];
     [invocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
     [invocation getReturnValue:&treeNodes];
     [treeNodes autorelease];
@@ -605,11 +603,8 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     }
 
     // disable the stop button
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[abortButton methodSignatureForSelector:@selector(setEnabled:)]];
-    [invocation setTarget:abortButton];
-    [invocation setSelector:@selector(setEnabled:)];
     BOOL state = NO;
-    [invocation setArgument:&state atIndex:2];
+    NSInvocation *invocation = [NSInvocation invocationWithTarget:abortButton selector:@selector(setEnabled:) argument:&state];
     [invocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
     
     [indexingLock unlock];

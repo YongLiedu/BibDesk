@@ -46,6 +46,7 @@
 #import "BDSKShellCommandFormatter.h"
 #import <libkern/OSAtomic.h>
 #import "NSSet_BDSKExtensions.h"
+#import "NSInvocation_BDSKExtensions.h"
 
 @interface BDSKTeXPath : NSObject
 {
@@ -210,10 +211,7 @@ static double runLoopTimeout = 30;
     taskShouldStartInvocation = nil;
     
     if ([delegate respondsToSelector:theSelector]) {
-        taskShouldStartInvocation = [[NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:theSelector]] retain];
-        [taskShouldStartInvocation setTarget:delegate];
-        [taskShouldStartInvocation setSelector:theSelector];
-        [taskShouldStartInvocation setArgument:&self atIndex:2];
+        taskShouldStartInvocation = [[NSInvocation invocationWithTarget:delegate selector:theSelector argument:&self] retain];
     }
     
     [taskFinishedInvocation autorelease];
@@ -221,10 +219,7 @@ static double runLoopTimeout = 30;
     theSelector = @selector(texTask:finishedWithResult:);
 
     if ([delegate respondsToSelector:theSelector]) {
-        taskFinishedInvocation = [[NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:theSelector]] retain];
-        [taskFinishedInvocation setTarget:delegate];
-        [taskFinishedInvocation setSelector:theSelector];
-        [taskFinishedInvocation setArgument:&self atIndex:2];
+        taskFinishedInvocation = [[NSInvocation invocationWithTarget:delegate selector:theSelector argument:&self] retain];
     }        
 }
 
