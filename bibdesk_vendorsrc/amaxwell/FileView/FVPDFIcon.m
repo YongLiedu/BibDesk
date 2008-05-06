@@ -274,21 +274,26 @@ static NSURL *createPDFURLForPDFBundleURL(NSURL *aURL)
             _pageCount = CGPDFDocumentGetNumberOfPages(_pdfDoc);
         }
         
-        // 1-based indexing
-        _pdfPage = _pageCount ? CGPDFDocumentGetPage(_pdfDoc, _currentPage) : NULL;
-        CGRect pageRect = CGPDFPageGetBoxRect(_pdfPage, kCGPDFCropBox);
+        // The file had to exist when the icon was created, but loading the document can fail if the underlying file was moved out from under us afterwards (e.g. by BibDesk's autofile).  NB: CGPDFDocument uses 1-based indexing.
+        if (_pdfDoc)
+            _pdfPage = _pageCount ? CGPDFDocumentGetPage(_pdfDoc, _currentPage) : NULL;
         
-        // these may have been bogus before
-        int rotation = CGPDFPageGetRotationAngle(_pdfPage);
-        if (0 == rotation || 180 == rotation)
-            _fullSize = ((NSRect *)&pageRect)->size;
-        else
-            _fullSize = NSMakeSize(pageRect.size.height, pageRect.size.width);
-        _thumbnailSize.width = _fullSize.width / 2;
-        _thumbnailSize.height = _fullSize.height / 2;
+        if (_pdfPage) {
+            CGRect pageRect = CGPDFPageGetBoxRect(_pdfPage, kCGPDFCropBox);
+            
+            // these may have been bogus before
+            int rotation = CGPDFPageGetRotationAngle(_pdfPage);
+            if (0 == rotation || 180 == rotation)
+                _fullSize = ((NSRect *)&pageRect)->size;
+            else
+                _fullSize = NSMakeSize(pageRect.size.height, pageRect.size.width);
+            
+            // scale appropriately; small PDF images, for instance, don't need scaling
+            _thumbnailSize = _fullSize;   
         
-        // really huge PDFs (e.g. maps) will create really huge bitmaps and run us out of memory
-        FVIconLimitThumbnailSize(&_thumbnailSize);
+            // really huge PDFs (e.g. maps) will create really huge bitmaps and run us out of memory
+            FVIconLimitThumbnailSize(&_thumbnailSize);
+        }
     }
                 
     // Bitmap contexts for PDF files tend to be in the 2-5 MB range, and even a one point size difference in height or width (typical, even for the same page size) results in us creating a new context for each one if we use the context cache.  That sucks, so we'll just create and destroy them as needed, since drawing into a large cached context and then cropping doesn't work.
