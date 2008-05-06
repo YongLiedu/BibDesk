@@ -69,7 +69,7 @@
 		<string>Polices</string>
 		<string>Affichage des noms d'auteurs et d'éditeurs</string>
 		<string>Affichage</string>
-		<string>Annoté, résumé, détails, modèles, PDF, texte</string>
+		<string>Modèles, fichiers, TeX</string>
 	</array>
 	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.files</key>
 	<array>

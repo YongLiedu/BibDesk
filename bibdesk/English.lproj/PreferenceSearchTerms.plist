@@ -69,7 +69,7 @@
 		<string>Fonts</string>
 		<string>Author and editor name display</string>
 		<string>Preview</string>
-		<string>Annote, abstract, details, template, PDF, text</string>
+		<string>Template, files, TeX</string>
 	</array>
 	<key>edu.ucsd.cs.mmccrack.bibdesk.prefpane.files</key>
 	<array>
