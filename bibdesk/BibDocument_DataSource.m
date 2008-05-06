@@ -737,7 +737,7 @@
                 NSString *style = [[BDSKTemplate allStyleNames] objectAtIndex:dragCopyType - BDSKTemplateDragCopyType];
                 BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
                 BDSKTemplateFormat format = [template templateFormat];
-                if (format & BDSKTextTemplateFormat) {
+                if (format & BDSKPlainTextTemplateFormat) {
                     mainType = NSStringPboardType;
                     string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:pubs];
                 } else if (format & BDSKRichTextTemplateFormat) {

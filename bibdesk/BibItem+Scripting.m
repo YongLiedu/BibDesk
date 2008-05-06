@@ -43,6 +43,8 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKLinkedFile.h"
 #import "NSURL_BDSKExtensions.h"
+#import "BDSKTemplate.h"
+#import "BDSKTemplateObjectProxy.h"
 
 /* ssp
 A Category on BibItem with a few additional methods to enable and enhance its scriptability beyond what comes for free with key value coding.
@@ -431,7 +433,25 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (NSTextStorage *)styledTextValue {
-	return [[[NSTextStorage alloc] initWithAttributedString:[self attributedStringValue]] autorelease];
+    NSString *templateStyle = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKBottomPreviewDisplayTemplateKey];
+    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
+    if (template == nil)
+        template = [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
+    
+    NSAttributedString *attrString = nil;
+    if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+        attrString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:[self owner] publications:[NSArray arrayWithObject:self] documentAttributes:NULL];
+    } else if ([template templateFormat] & BDSKPlainTextTemplateFormat) {
+        NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:[self owner] publications:[NSArray arrayWithObject:self]];
+        // we generally assume UTF-8 encoding for all template-related files
+        if ([template templateFormat] == BDSKPlainHTMLTemplateFormat)
+            attrString = [[[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL] autorelease];
+        else
+            attrString = [[[NSAttributedString alloc] initWithString:str attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSFont systemFontOfSize:0.0], NSFontAttributeName, nil]] autorelease];
+    } else {
+        attrString = [[[NSAttributedString alloc] initWithString:@""] autorelease];
+    }
+	return [[[NSTextStorage alloc] initWithAttributedString:attrString] autorelease];
 }
 
 - (NSString *)keywords{

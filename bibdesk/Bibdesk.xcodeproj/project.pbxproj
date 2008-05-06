@@ -206,7 +206,6 @@
 		CE565BC00AEF848B002F0A24 /* BDSKPublicationsArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CE565BBE0AEF848B002F0A24 /* BDSKPublicationsArray.m */; };
 		CE56D6510A2DAB55003CE000 /* BDSKDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE56D6500A2DAB55003CE000 /* BDSKDocumentController.m */; };
 		CE573D2709F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE573D2509F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m */; };
-		CE59A38209BC80A100AF3935 /* BDSKPreviewTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */; };
 		CE5C29CE0AE14FEC00C3E6B5 /* BibDocument_Actions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE5C29CC0AE14FEC00C3E6B5 /* BibDocument_Actions.m */; };
 		CE6003290AF3E465000B5680 /* BDSKColoredBox.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6003270AF3E465000B5680 /* BDSKColoredBox.m */; };
 		CE600E300AF405D6000B5680 /* BDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE600E2E0AF405D6000B5680 /* BDSKRISParser.m */; };
@@ -503,7 +502,6 @@
 		F9A2245D0AE02C8E0046CA3D /* BDSKFileSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A2245B0AE02C8E0046CA3D /* BDSKFileSearch.m */; };
 		F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */; };
 		F9A5B10C0B8CEA9600C52257 /* BDSKCenterScaledImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A5B10A0B8CEA9600C52257 /* BDSKCenterScaledImageCell.m */; };
-		F9A6742B07D04E8000782ACD /* BDSKFontManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A6742907D04E8000782ACD /* BDSKFontManager.m */; };
 		F9A6772E07D2D57F00782ACD /* MultiplePageView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A6772C07D2D57F00782ACD /* MultiplePageView.m */; };
 		F9ABEC9F086E11B500741FC5 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
 		F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
@@ -1097,8 +1095,6 @@
 		CE56D67B0A2DAB66003CE000 /* BDSKDocumentController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKDocumentController.h; sourceTree = "<group>"; };
 		CE573D2409F6A0300020EC16 /* NSIndexSet_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSIndexSet_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE573D2509F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSIndexSet_BDSKExtensions.m; sourceTree = "<group>"; };
-		CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreviewTextView.h; sourceTree = "<group>"; };
-		CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewTextView.m; sourceTree = "<group>"; };
 		CE5C29CB0AE14FEC00C3E6B5 /* BibDocument_Actions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibDocument_Actions.h; sourceTree = "<group>"; };
 		CE5C29CC0AE14FEC00C3E6B5 /* BibDocument_Actions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibDocument_Actions.m; sourceTree = "<group>"; };
 		CE6003260AF3E465000B5680 /* BDSKColoredBox.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKColoredBox.h; sourceTree = "<group>"; };
@@ -1574,8 +1570,6 @@
 		F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSpotlightView.m; sourceTree = "<group>"; };
 		F9A5B1090B8CEA9600C52257 /* BDSKCenterScaledImageCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCenterScaledImageCell.h; sourceTree = "<group>"; };
 		F9A5B10A0B8CEA9600C52257 /* BDSKCenterScaledImageCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCenterScaledImageCell.m; sourceTree = "<group>"; };
-		F9A6742807D04E8000782ACD /* BDSKFontManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFontManager.h; sourceTree = "<group>"; };
-		F9A6742907D04E8000782ACD /* BDSKFontManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFontManager.m; sourceTree = "<group>"; };
 		F9A6772B07D2D57F00782ACD /* MultiplePageView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MultiplePageView.h; sourceTree = "<group>"; };
 		F9A6772C07D2D57F00782ACD /* MultiplePageView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = MultiplePageView.m; sourceTree = "<group>"; };
 		F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OmniBase.xcodeproj; path = vendorsrc/OmniGroup/OmniBase/OmniBase.xcodeproj; sourceTree = "<group>"; };
@@ -2056,7 +2050,6 @@
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
 				F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */,
 				F941B7E908AA574200F04ECD /* BDSKOverlay.m */,
-				CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */,
 				F961FA9508C9429700332460 /* BDSKPrintableView.m */,
 				CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */,
 				CE392ED308D034E4001CEAC8 /* BDSKRatingButtonCell.m */,
@@ -2262,7 +2255,6 @@
 				F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */,
 				F990C58A0D42D58D00B5425E /* BDSKDocumentSearch.m */,
 				F9A2245B0AE02C8E0046CA3D /* BDSKFileSearch.m */,
-				F9A6742907D04E8000782ACD /* BDSKFontManager.m */,
 				CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */,
 				CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */,
 				F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */,
@@ -2534,7 +2526,6 @@
 				CE38FB8C091D94A100BCB69D /* BDSKFilterController.h */,
 				F97965EF086909EA00050427 /* BDSKFindController.h */,
 				CE51921E09E5755600E97C3A /* BDSKFindFieldEditor.h */,
-				F9A6742807D04E8000782ACD /* BDSKFontManager.h */,
 				3D44F5600812A91D003C67F0 /* BDSKFormatParser.h */,
 				45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */,
 				F9706DE309102DF500526FC8 /* BDSKGradientView.h */,
@@ -2579,7 +2570,6 @@
 				F9DAC7A00A0A95BC0099117E /* BDSKPreferenceController.h */,
 				F9022C57075802E300C3F701 /* BDSKPreviewer.h */,
 				CE3448010A11302F0026A92A /* BDSKPreviewItem.h */,
-				CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */,
 				F961FA9408C9429700332460 /* BDSKPrintableView.h */,
 				CE565BBD0AEF848B002F0A24 /* BDSKPublicationsArray.h */,
 				F9022CA60758038000C3F701 /* BDSKPubMedParser.h */,
@@ -3667,7 +3657,6 @@
 				2730077F07CF20B500F2E485 /* BDSKComplexString.m in Sources */,
 				2730078107CF20B500F2E485 /* BDSKComplexStringEditor.m in Sources */,
 				2730078307CF20B500F2E485 /* BDSKMacroWindowController.m in Sources */,
-				F9A6742B07D04E8000782ACD /* BDSKFontManager.m in Sources */,
 				3D824AA907D099C300FB2F67 /* BDSKBackgroundView.m in Sources */,
 				F9A6772E07D2D57F00782ACD /* MultiplePageView.m in Sources */,
 				F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */,
@@ -3739,7 +3728,6 @@
 				F9E069B70981A03B00AEFBE7 /* BDSKWebOfScienceParser.m in Sources */,
 				F91F286A09A6684900419960 /* PDFMetadata.m in Sources */,
 				F941135509B549BF00EE8463 /* BDSKEditorTextView.m in Sources */,
-				CE59A38209BC80A100AF3935 /* BDSKPreviewTextView.m in Sources */,
 				F94DE74C09CB46FF00B5FD51 /* BDSKPersistentSearch.m in Sources */,
 				CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */,
 				CE3B5E7D09CEDE470017D339 /* BDSKMacroResolver.m in Sources */,

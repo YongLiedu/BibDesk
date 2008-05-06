@@ -54,7 +54,6 @@
 #import "BDSKPrintableView.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "BDSKFontManager.h"
 #import "BDSKStringEncodingManager.h"
 #import "BDSKHeaderPopUpButtonCell.h"
 #import "BDSKGroupCell.h"
@@ -1410,7 +1409,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             // @@ shouldn't reach here, should have already redirected to fileWrapperOfType:forPublications:error:
         } else if ([selectedTemplate scriptPath] != nil) {
             data = [self dataForPublications:items usingTemplate:selectedTemplate];
-        } else if (templateFormat & BDSKTextTemplateFormat) {
+        } else if (templateFormat & BDSKPlainTextTemplateFormat) {
             data = [self stringDataForPublications:items usingTemplate:selectedTemplate];
         } else {
             data = [self attributedStringDataForPublications:items usingTemplate:selectedTemplate];
@@ -1669,7 +1668,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSData *)stringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
+    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
     
     NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
     return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
@@ -3089,11 +3088,15 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     if([template templateFormat] & BDSKRichTextTemplateFormat){
         NSAttributedString *templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
         [textStorage setAttributedString:templateString];
-    } else if([template templateFormat] & BDSKTextTemplateFormat){
+    } else if([template templateFormat] & BDSKPlainTextTemplateFormat){
         // parse as plain text, so the HTML is interpreted properly by NSAttributedString
         NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
         // we generally assume UTF-8 encoding for all template-related files
-        NSAttributedString *templateString = [[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
+        NSAttributedString *templateString = nil;
+        if ([template templateFormat] == BDSKPlainHTMLTemplateFormat)
+            templateString = [[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
+        else
+            templateString = [[NSAttributedString alloc] initWithString:str attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSFont systemFontOfSize:0.0], NSFontAttributeName, nil]];
         [textStorage setAttributedString:templateString];
         [templateString release];
     } else {

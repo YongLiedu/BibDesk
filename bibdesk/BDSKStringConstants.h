@@ -113,7 +113,6 @@ extern NSString *BDSKCiteEndBracketKey;
 extern NSString *BDSKShouldUseTemplateFile;
 extern NSString *BDSKShowingPreviewKey;
 extern NSString *BDSKSnoopDrawerContentKey;
-extern NSString *BDSKPreviewPaneFontFamilyKey;
 extern NSString *BDSKFilterFieldHistoryKey;
 extern NSString *BDSKEditorShouldCheckSpellingContinuouslyKey;
 extern NSString *BDSKIgnoredSortTermsKey;
@@ -170,7 +169,6 @@ extern NSString *BDSKGlobalMacroDefinitionsKey;
 extern NSString *BDSKGlobalMacroFilesKey;
 
 extern NSString *BDSKFindControllerLastFindAndReplaceFieldKey;
-extern NSString *BDSKPreviewBaseFontSizeKey;
 extern NSString *BDSKShouldAutosaveDocumentKey;
 extern NSString *BDSKAutosaveTimeIntervalKey;
 extern NSString *BDSKFileContentSearchSortDescriptorKey;

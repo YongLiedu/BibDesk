@@ -1172,7 +1172,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     NSArray *types;
     NSSet *items;
     BDSKTemplate *template = [BDSKTemplate templateForCiteService];
-    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
+    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
     
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
@@ -1215,7 +1215,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     NSArray *types;
     NSSet *items;
     BDSKTemplate *template = [BDSKTemplate templateForTextService];
-    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
+    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
     
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {

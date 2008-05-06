@@ -369,7 +369,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         else if ([htmlString rangeOfString:@"<$"].location == NSNotFound && [htmlString rangeOfString:@"&lt;$"].location != NSNotFound)
             format = BDSKRichHTMLTemplateFormat;
         else
-            format = BDSKTextTemplateFormat;
+            format = BDSKPlainHTMLTemplateFormat;
     } else {
         format = BDSKTextTemplateFormat;
     }

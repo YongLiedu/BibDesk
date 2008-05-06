@@ -57,7 +57,6 @@ NSString *BDSKEmailTemplateKey = @"BDSKEmailTemplateKey";
 NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
 NSString *BDSKShowingPreviewKey = @"Showing Preview";
 NSString *BDSKSnoopDrawerContentKey = @"Snoop Drawer Content";
-NSString *BDSKPreviewPaneFontFamilyKey = @"Font family to use for RTF preview display";
 NSString *BDSKFilterFieldHistoryKey = @"Open using filter command history";
 NSString *BDSKEditorShouldCheckSpellingContinuouslyKey = @"Check spelling continuously while editing";
 NSString *BDSKIgnoredSortTermsKey = @"Terms ignored when sorting";
@@ -186,7 +185,6 @@ NSString *BDSKGlobalMacroFilesKey = @"BDSKGlobalMacroFilesKey";
 
 NSString *BDSKFindControllerLastFindAndReplaceFieldKey = @"Last field for find and replace";
 
-NSString *BDSKPreviewBaseFontSizeKey = @"Font size for preview pane in document view";
 NSString *BDSKShouldAutosaveDocumentKey = @"BDSKShouldAutosaveDocumentKey";
 NSString *BDSKAutosaveTimeIntervalKey = @"BDSKAutosaveTimeIntervalKey";
 NSString *BDSKFileContentSearchSortDescriptorKey = @"BDSKFileContentSearchSortDescriptorKey";

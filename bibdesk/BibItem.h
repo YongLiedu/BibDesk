@@ -717,14 +717,6 @@ enum {
 */
 - (NSString *)RISStringValue;
 
-/*!
-    @method     attributedStringValue
-    @abstract   Returns an attributed string representation of the receiver, suitable for display purposes
-    @discussion Uses the default font family set in the preferences. It follows the Crossref parent for unset fields. 
-    @result     (description)
-*/
-- (NSAttributedString *)attributedStringValue;
-
 - (NSString *)MODSString;
 - (NSString *)endNoteString;
 

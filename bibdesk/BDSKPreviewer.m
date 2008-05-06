@@ -43,7 +43,6 @@
 #import "BDSKZoomablePDFView.h"
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import "BibDocument.h"
-#import "BDSKFontManager.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPrintableView.h"
@@ -312,7 +311,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 - (NSData *)PDFDataWithString:(NSString *)string color:(NSColor *)color{
 	NSData *data;
 	BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:YES];
-	[printableView setFont:[NSFontManager bodyFontForFamily:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey]]];
+	[printableView setFont:[NSFont userFontOfSize:0.0]];
 	[printableView setTextColor:color];
 	data = [printableView PDFDataWithString:string];
 	[printableView release];

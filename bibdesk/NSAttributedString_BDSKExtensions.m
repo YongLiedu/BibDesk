@@ -40,7 +40,6 @@
 #import "BDSKComplexString.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
-#import "BDSKFontManager.h"
 
 static NSString *BDSKRangeKey = @"__BDSKRange";
 
@@ -82,7 +81,17 @@ static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDi
         searchRange = NSMakeRange(startLoc, NSMaxRange(range) - startLoc);
         
         // see if this is a font command
-        NSFontTraitMask newTrait = [fontManager fontTraitMaskForTeXStyle:texStyle];
+        NSFontTraitMask newTrait = 0;
+        if([texStyle isEqualToString:@"\\textit"])
+            newTrait = NSItalicFontMask;
+        else if([texStyle isEqualToString:@"\\textbf"])
+            newTrait = NSBoldFontMask;
+        else if([texStyle isEqualToString:@"\\textsc"])
+            newTrait = NSSmallCapsFontMask;
+        else if([texStyle isEqualToString:@"\\emph"])
+            newTrait = NSItalicFontMask;
+        else if([texStyle isEqualToString:@"\\textup"])
+            newTrait = NSUnitalicFontMask;
         [texStyle release];
         
         if (0 != newTrait) {

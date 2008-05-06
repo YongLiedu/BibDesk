@@ -123,7 +123,7 @@
     NSMutableDictionary *parsedTemplates = [NSMutableDictionary dictionary];
     NSArray *parsedTemplate;
     
-    if (format & BDSKTextTemplateFormat) {
+    if (format & BDSKPlainTextTemplateFormat) {
         
         returnString = [NSMutableString stringWithString:@""];        
         while(pub = [e nextObject]){
