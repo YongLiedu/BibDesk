@@ -1359,7 +1359,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
             while (i--) {
                 FVIcon *anIcon = [unusedIcons objectAtIndex:i];
                 if ([renderSet containsObject:anIcon])
-                    [unusedIcons removeObject:anIcon];
+                    [unusedIcons removeObjectAtIndex:i];
             }
             [self _enqueueReleaseOperationForIcons:unusedIcons];
             [renderSet release];
