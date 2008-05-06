@@ -1799,11 +1799,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 #pragma mark Other text representations
 
-- (NSData *)RTFValue{
-    NSAttributedString *aStr = [self attributedStringValue];
-    return [aStr RTFFromRange:NSMakeRange(0,[aStr length]) documentAttributes:nil];
-}
-
 - (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key {
     return [[[self owner] publications] itemForCiteKey:key] != nil;
 }

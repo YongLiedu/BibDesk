@@ -754,11 +754,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The publication's RSS description as seen in the RSS Description tab.">
                 <cocoa key="rssDescription"/>
             </property>  
-            <property name="RSS string" code="RSSv" type="text" access="r"
+            <property name="RSS string" code="RSSv" type="text" access="r" hidden="yes"
                 description="RSS entry for the publication.">
                 <cocoa key="rssString"/>
             </property>  
-            <property name="styled text" code="Stxt" type="rich text" access="r"
+            <property name="styled text" code="Stxt" type="rich text" access="r" hidden="yes"
                 description="Styled text containing bibliography entry for the publication.">
                 <cocoa key="styledTextValue"/>
             </property>                      

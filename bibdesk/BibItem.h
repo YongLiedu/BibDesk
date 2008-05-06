@@ -718,13 +718,6 @@ enum {
 - (NSString *)RISStringValue;
 
 /*!
-    @method RTFValue
-    @abstract  returns a pretty RTF display for this bib item.    
-*/
-- (NSData *)RTFValue;
-
-
-/*!
     @method     attributedStringValue
     @abstract   Returns an attributed string representation of the receiver, suitable for display purposes
     @discussion Uses the default font family set in the preferences. It follows the Crossref parent for unset fields. 

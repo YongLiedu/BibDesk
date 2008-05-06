@@ -39,7 +39,6 @@
 #import "BibItem.h"
 #import "BDSKField.h"
 
-#define BibItemBasicObjects @"citeKey", @"pubDate", @"title", @"type", @"date", @"pubFields", @"bibTeXStrings", @"RTFValue", @"RSSValue"
 
 @interface BibItem (Scripting) 
 
