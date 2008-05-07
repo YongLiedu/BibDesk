@@ -1817,12 +1817,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     // get the type, which may exist in pubFields if this was originally an RIS import; we must have only _one_ TY field,
     // since they mark the beginning of each entry
-    NSString *risType = nil;
-    if(risType = [self valueOfField:@"TY" inherit:NO])
+    NSString *risType = [self valueOfField:@"TY" inherit:NO];
+    if([NSString isEmptyString:risType] == NO) {
         [keys removeObject:@"TY"];
-    else if(risType = [self valueOfField:@"PT" inherit:NO]) // Medline RIS
-        [keys removeObject:@"PT"];
-    else
+    } else {
+        risType = [self valueOfField:@"PT" inherit:NO]; // Medline RIS
+        if ([NSString isEmptyString:risType] == NO)
+            [keys removeObject:@"PT"];
+    }
+
+    if ([NSString isEmptyString:risType])    
         risType = [btm RISTypeForBibTeXType:[self pubType]];
     
     // enumerate the remaining keys

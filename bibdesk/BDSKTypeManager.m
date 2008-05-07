@@ -535,11 +535,19 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 - (NSString *)RISTypeForBibTeXType:(NSString *)type{
+    
     NSArray *types = [bibtexTypeForPubMedTypeDict allKeysForObject:type];
-    if([types count])
-        return [types objectAtIndex:0];
-    else
-        return [[type stringByPaddingToLength:4 withString:@"?" startingAtIndex:0] uppercaseString]; // manufacture a guess
+    NSString *newType = nil;
+        
+    if([types count]) {
+        newType = [types objectAtIndex:0];
+    } else {
+        newType = [[type stringByPaddingToLength:4 withString:@"?" startingAtIndex:0] uppercaseString]; // manufacture a guess
+    }
+    // for some reason, the the type dictionary has "journal article" as well as "JOUR"
+    if ([newType isEqualToString:@"Journal Article"])
+        newType = @"JOUR";
+    return newType;
 }
 
 - (NSString *)fieldNameForJSTORTag:(NSString *)tag{
