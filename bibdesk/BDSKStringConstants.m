@@ -130,6 +130,8 @@ NSString *BDSKPreviewPDFScaleFactorKey = @"Preview PDF Scale Factor";
 NSString *BDSKPreviewRTFScaleFactorKey = @"Preview RTF Scale Factor";
 NSString *BDSKPreviewLinkedFileScaleFactorKey = @"Preview Linked File Scale Factor";
 
+NSString *BDSKBottomPreviewScaleFactorKey = @"BDSKBottomPreviewScaleFactorKey";
+NSString *BDSKSidePreviewScaleFactorKey = @"BDSKSidePreviewScaleFactorKey";
 NSString *BDSKBottomFileViewIconScaleKey = @"BDSKBottomFileViewIconScaleKey";
 NSString *BDSKSideFileViewIconScaleKey = @"BDSKSideFileViewIconScaleKey";
 NSString *BDSKEditorFileViewIconScaleKey = @"BDSKEditorFileViewIconScaleKey";

@@ -543,6 +543,9 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [bottomFileView setIconScale:iconScale];
     }
     
+    [(BDSKZoomableScrollView *)[sidePreviewTextView enclosingScrollView] setScaleFactor:[xattrDefaults floatForKey:BDSKSidePreviewScaleFactorKey defaultValue:1.0]];
+    [(BDSKZoomableScrollView *)[bottomPreviewTextView enclosingScrollView] setScaleFactor:[xattrDefaults floatForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
+    
 	// ImagePopUpButtons setup
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
@@ -719,13 +722,13 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [dictionary setFloatValue:[bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale] forKey:BDSKBottomFileViewIconScaleKey];
         [dictionary setFloatValue:[sideFileView autoScales] ? 0.0 : [sideFileView iconScale] forKey:BDSKSideFileViewIconScaleKey];
         
+        [dictionary setFloatValue:[(BDSKZoomableScrollView *)[bottomPreviewTextView enclosingScrollView] scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
+        [dictionary setFloatValue:[(BDSKZoomableScrollView *)[sidePreviewTextView enclosingScrollView] scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
+        
         if(previewer){
             [dictionary setFloatValue:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
             [dictionary setFloatValue:[previewer RTFScaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
         }
-        //if(previewPdfView){
-        //    [dictionary setFloatValue:[previewPdfView autoScales] ? 0.0 : [previewPdfView scaleFactor] forKey:BDSKPreviewLinkedFileScaleFactorKey];
-        //}
         
         if(fileSearchController){
             [dictionary setObject:[fileSearchController sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
