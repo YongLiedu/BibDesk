@@ -68,6 +68,7 @@
         CY = Address; 
         DP = Year; 
         ED = Editor; 
+        IS = Number; 
         JA = Journal; 
         JF = Journal; 
         JO = Journal; 
@@ -82,7 +83,7 @@
         RP = Status; 
         SN = Isbn; 
         T1 = Title; 
-        T2 = Title; 
+        T2 = Booktitle; 
         T3 = Title; 
         TA = Journal; 
         TI = Title; 
@@ -91,6 +92,7 @@
         VI = Volume; 
         VL = Volume; 
         Y1 = Year; 
+        Y2 = Month; 
     }; 
     BibTeXFieldNamesForWebOfScienceTags = {
         AB = Abstract; 
@@ -423,7 +425,7 @@
         Address = AD; 
         Annote = N1; 
         Author = AU;
-        Booktitle = BT;
+        Booktitle = T2;
         Editor = ED; 
         Isbn = SN; 
         Journal = JO; 
@@ -431,13 +433,15 @@
         Language = LA; 
         "Local-Url" = L1; 
         Medlineref = UI; 
+        Month = Y2; 
+        Number = IS; 
         Pages = PG; 
-        Title = TI; 
+        Title = T1; 
         Publisher = PB; 
         Status = PS; 
         Url = UR; 
         Volume = VL; 
-        Year = PY; 
+        Year = Y1; 
     }; 
     RequiredTypesForFileType = {
         BibTeX = (
