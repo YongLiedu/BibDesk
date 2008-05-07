@@ -147,6 +147,7 @@ static BDSKTypeManager *sharedInstance = nil;
 	[fieldsForTypesDict release];
 	[typesForFileTypeDict release];
 	[fieldNameForPubMedTagDict release];
+	[pubMedTagForFieldNameDict release];
 	[bibtexTypeForPubMedTypeDict release];
 	[fieldNamesForMARCTagDict release];
 	[fieldNamesForUNIMARCTagDict release];
@@ -205,6 +206,7 @@ static BDSKTypeManager *sharedInstance = nil;
 
     [self setFileTypesDict:[typeInfoDict objectForKey:FILE_TYPES_KEY]];
     [self setFieldNameForPubMedTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY]];
+    [self setPubMedTagForFieldNameDict:[typeInfoDict objectForKey:PUBMED_TAGS_FOR_BIBTEX_FIELDS_KEY]];
     [self setBibtexTypeForPubMedTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY]];
     [self setFieldNamesForMARCTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_MARC_TAGS_KEY]];
     [self setFieldNamesForUNIMARCTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_UNIMARC_TAGS_KEY]];
@@ -334,6 +336,13 @@ static BDSKTypeManager *sharedInstance = nil;
     if(fieldNameForPubMedTagDict != newNames){
         [fieldNameForPubMedTagDict release];
         fieldNameForPubMedTagDict = [newNames copy];
+    }
+}
+
+- (void)setPubMedTagForFieldNameDict:(NSDictionary *)newNames{
+    if(pubMedTagForFieldNameDict != newNames){
+        [pubMedTagForFieldNameDict release];
+        pubMedTagForFieldNameDict = [newNames copy];
     }
 }
 
@@ -527,9 +536,9 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 - (NSString *)RISTagForBibTeXFieldName:(NSString *)name{
-    NSArray *types = [fieldNameForPubMedTagDict allKeysForObject:name];
-    if([types count])
-        return [types objectAtIndex:0];
+    NSString *tag = [pubMedTagForFieldNameDict objectForKey:name];
+    if(tag)
+        return tag;
     else
         return [[name stringByPaddingToLength:2 withString:@"1" startingAtIndex:0] uppercaseString]; // manufacture a guess
 }

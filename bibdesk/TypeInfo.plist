@@ -62,7 +62,7 @@
         AB = Abstract; 
         AD = Address; 
         AU = Author;
-        BT = Title; 
+        BT = Booktitle; 
         CP = Address; 
         CT = Title; 
         CY = Address; 
@@ -417,6 +417,27 @@
         techreport = {self = (report); }; 
         unpublished = {self = (unpublished); }; 
         url = {self = ("web site"); }; 
+    }; 
+    PubMedTagsForBibTeXFieldNames = {
+        Abstract = AB; 
+        Address = AD; 
+        Annote = N1; 
+        Author = AU;
+        Booktitle = BT;
+        Editor = ED; 
+        Isbn = SN; 
+        Journal = JO; 
+        Keywords = KW; 
+        Language = LA; 
+        "Local-Url" = L1; 
+        Medlineref = UI; 
+        Pages = PG; 
+        Title = TI; 
+        Publisher = PB; 
+        Status = PS; 
+        Url = UR; 
+        Volume = VL; 
+        Year = PY; 
     }; 
     RequiredTypesForFileType = {
         BibTeX = (

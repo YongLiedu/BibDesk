@@ -48,6 +48,7 @@
 #define REQUIRED_TYPES_FOR_FILE_TYPE_KEY      @"RequiredTypesForFileType"
 #define FILE_TYPES_KEY                        @"FileTypes"
 #define BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY     @"BibTeXFieldNamesForPubMedTags"
+#define PUBMED_TAGS_FOR_BIBTEX_FIELDS_KEY     @"PubMedTagsForBibTeXFieldNames"
 #define BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY     @"BibTeXTypesForPubMedTypes"
 #define BIBTEX_FIELDS_FOR_MARC_TAGS_KEY       @"BibTeXFieldNamesForMARCTags"
 #define BIBTEX_FIELDS_FOR_UNIMARC_TAGS_KEY    @"BibTeXFieldNamesForUNIMARCTags"
@@ -70,6 +71,7 @@
 	NSDictionary *fieldsForTypesDict;
 	NSDictionary *typesForFileTypeDict;
 	NSDictionary *fieldNameForPubMedTagDict;
+	NSDictionary *pubMedTagForFieldNameDict;
 	NSDictionary *bibtexTypeForPubMedTypeDict;
 	NSDictionary *fieldNamesForMARCTagDict;
 	NSDictionary *fieldNamesForUNIMARCTagDict;
@@ -122,6 +124,7 @@
 - (void)setMODSGenresForBibTeXTypeDict:(NSDictionary *)newNames;
 - (void)setBibtexTypeForPubMedTypeDict:(NSDictionary *)newNames;
 - (void)setFieldNameForPubMedTagDict:(NSDictionary *)newNames;
+- (void)setPubMedTagForFieldNameDict:(NSDictionary *)newNames;
 - (void)setFieldNamesForMARCTagDict:(NSDictionary *)newNames;
 - (void)setFieldNamesForUNIMARCTagDict:(NSDictionary *)newNames;
 - (void)setFileTypesDict:(NSDictionary *)newTypes;
