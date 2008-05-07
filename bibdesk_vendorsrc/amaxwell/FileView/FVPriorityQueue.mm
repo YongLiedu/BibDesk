@@ -77,7 +77,7 @@ static inline bool enumeration_compare(id value1, id value2)
 
 static inline NSUInteger __FVPriorityQueueRoundUpCapacity(NSUInteger capacity) {
     if (capacity < 4) return 4;
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
+#if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     return (1 << flsl(capacity));
 #else
     return (1 << (int(log2(capacity)) + 1));
