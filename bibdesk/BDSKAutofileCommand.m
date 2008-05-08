@@ -46,7 +46,7 @@
 #import "BDSKAppController.h"
 
 
-@implementation BibDeskAutoFileCommand
+@implementation BDSKAutoFileCommand
 
 - (id)performDefaultImplementation {
     BibItem *pub = [self evaluatedReceivers];

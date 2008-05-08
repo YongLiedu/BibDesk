@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BibDeskAutoFileCommand : NSScriptCommand {
+@interface BDSKAutoFileCommand : NSScriptCommand {
 
 }
 
