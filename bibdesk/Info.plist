@@ -922,6 +922,16 @@
 							<key>type</key>
 							<string>isi</string>
 						</dict>
+                        <dict>
+                            <key>database</key>
+                            <string>Keywords</string>
+                            <key>name</key>
+                            <string>DBLP++ Keywords</string>
+                            <key>label</key>
+                            <string>DBLP++ Keywords</string>
+                            <key>type</key>
+                            <string>dblp</string>
+                        </dict>
 					</array>
 					<key>BDSKSearchMenuTagKey</key>
 					<integer>0</integer>
