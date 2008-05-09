@@ -248,7 +248,6 @@
 		CE8BE5BF0D99AF5000E314A4 /* BDSKSearchBookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8BE5BD0D99AF5000E314A4 /* BDSKSearchBookmark.m */; };
 		CE8C731F0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */; };
 		CE8F83490AFB989C009EE6F9 /* BDSKThreadSafeMutableArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8F83470AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.m */; };
-		CE92CE5D0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CE92CE5B0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h */; };
 		CE92CE5E0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */; };
 		CE95A57C0A88883300334DFA /* BDSKReadMeController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE95A57A0A88883300334DFA /* BDSKReadMeController.m */; };
 		CE95AF180ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = CE95AF160ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m */; };
@@ -2036,6 +2035,7 @@
 				CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */,
 				CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */,
 				F9706DE409102DF500526FC8 /* BDSKGradientView.m */,
+				CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */,
 				CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */,
 				F97BE8F00907321F0063504B /* BDSKGroupTableView.m */,
 				CE1A7EDE090BDF1C00ACC864 /* BDSKHeaderPopUpButton.m */,
@@ -2059,8 +2059,6 @@
 				F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */,
 				CE27D95A0AF92BFD00419879 /* BDSKZoomableTextView.m */,
 				F9A6772C07D2D57F00782ACD /* MultiplePageView.m */,
-				CE92CE5B0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h */,
-				CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -2524,6 +2522,7 @@
 				3D44F5600812A91D003C67F0 /* BDSKFormatParser.h */,
 				45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */,
 				F9706DE309102DF500526FC8 /* BDSKGradientView.h */,
+				CE92CE5B0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h */,
 				CE21D10809208B9D0075E607 /* BDSKGroup.h */,
 				CE82B4710D57EECF00A2E8C5 /* BDSKGroup+Scripting.h */,
 				CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */,
@@ -2901,7 +2900,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE92CE5D0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
