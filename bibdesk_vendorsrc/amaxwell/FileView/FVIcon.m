@@ -198,7 +198,7 @@ static NSURL *missingFileURL = nil;
     else if (UTTypeConformsTo(theUTI, kUTTypeMovie) && [FVMovieIcon canInitWithURL:representedURL]) {
         anIcon = [[FVMovieIcon allocWithZone:[self zone]] initWithURL:representedURL];
     }
-    else if (UTTypeConformsTo(theUTI, kUTTypeHTML)) {
+    else if (UTTypeConformsTo(theUTI, kUTTypeHTML) || UTTypeConformsTo(theUTI, kUTTypeWebArchive)) {
         anIcon = [[FVWebViewIcon allocWithZone:[self zone]] initWithURL:representedURL];
     }
     else if (dataPhysicalSize < maximumTextDataSize && [FVTextIcon canInitWithUTI:(NSString *)theUTI]) {
