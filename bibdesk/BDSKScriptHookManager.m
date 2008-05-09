@@ -133,6 +133,7 @@ static NSArray *scriptHookNames = nil;
 	
 	BDSKScriptHook *scriptHook = [[BDSKScriptHook alloc] initWithName:name script:script];
 	[scriptHooks setObject:scriptHook forKey:[scriptHook uniqueID]];
+	[script release];
 	[scriptHook release];
 	
 	return scriptHook;
