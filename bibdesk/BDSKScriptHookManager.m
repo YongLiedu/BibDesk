@@ -125,7 +125,7 @@ static NSArray *scriptHookNames = nil;
 	} else {
 		NSDictionary *errorInfo = nil;
 		script = [[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path] error:&errorInfo];
-		if (errorInfo) {
+		if (script == nil) {
 			NSLog(@"Error creating AppleScript: %@", [errorInfo objectForKey:NSAppleScriptErrorMessage]);
 			return nil;
 		}
