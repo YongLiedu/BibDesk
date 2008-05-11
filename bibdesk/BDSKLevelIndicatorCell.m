@@ -139,6 +139,13 @@
     
     r = [controlView centerScanRect:r];
     
+    // Could happen if the search scores have issues?  See bug #1932040.
+    double ratio = [self doubleValue] / [self maxValue];
+    if (ratio > 1) {
+        NSLog(@"BDSKLevelIndicatorCell: doubleValue / maxValue = %.2f, clipping to 1.0", ratio);
+        ratio = 1.0;
+    }
+    
     unsigned i, iMax = floor([self doubleValue] / [self maxValue] * (NSWidth(r) / 2));
     CGLayerRef toDraw;
     
