@@ -3447,8 +3447,6 @@
 				"$(SRCROOT)/BibDesk Help/postprocess-nontitle.py",
 				"$(SRCROOT)/English.lproj/BibDesk Help/bibdesk.texi",
 				"$(SRCROOT)/English.lproj/BibDesk Help/version.texi",
-				"$(SRCROOT)/English.lproj/BibDesk Help/bibdesk.texi",
-				"$(SRCROOT)/English.lproj/BibDesk Help/version.texi",
 				"$(SRCROOT)/French.lproj/BibDesk Help/bibdesk.texi",
 				"$(SRCROOT)/French.lproj/BibDesk Help/version.texi",
 			);
