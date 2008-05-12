@@ -3447,16 +3447,13 @@
 				"$(SRCROOT)/BibDesk Help/postprocess-nontitle.py",
 				"$(SRCROOT)/English.lproj/BibDesk Help/bibdesk.texi",
 				"$(SRCROOT)/English.lproj/BibDesk Help/version.texi",
-				"$(SRCROOT)/French.lproj/BibDesk Help/bibdesk.texi",
-				"$(SRCROOT)/French.lproj/BibDesk Help/version.texi",
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.html",
-				"$(DERIVED_FILE_DIR)/BibDesk Help/French.lproj/BibDesk Help/BibDesk Help.html",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "HELP_NAME=\"BibDesk Help\"\n\nINPUT=\"${HELP_NAME}/bibdesk.texi\"\nTOOLS=\"${HELP_NAME}\"\nDEST=\"${HELP_NAME}\"\nPREFIX=\"${HELP_NAME}\";\n\nTARGET=\"${DERIVED_FILE_DIR}/${HELP_NAME}\"\n\ncd \"${SOURCE_ROOT}\"\n\n[ -d \"${TARGET}\" ] || /bin/mkdir -p \"${TARGET}\";\n\nfor LOC_DIR in *.lproj; do\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\";\n\t[ -d \"${LOC_TARGET}\" ] && /bin/rm -rf \"${LOC_TARGET}\"/* || /bin/mkdir -p \"${LOC_TARGET}\";\n\techo \"*** Creating help files in ${LOC_TARGET} ***\";\n\t\"${TOOLS}/texi2html\" \"${LOC_DIR}/${INPUT}\" --init-file=\"${TOOLS}/applehelp.init\" --prefix=\"${PREFIX}\" --output=\"${LOC_TARGET}\" --split=node --nonumber && \\\n\tpython \"${TOOLS}/postprocess-nontitle.py\" \"${LOC_TARGET}/${PREFIX}_\"*.html;\ndone;\n";
+			shellScript = "HELP_NAME=\"BibDesk Help\"\n\nINPUT=\"${HELP_NAME}/bibdesk.texi\"\nTOOLS=\"${HELP_NAME}\"\nDEST=\"${HELP_NAME}\"\nPREFIX=\"${HELP_NAME}\";\n\nTARGET=\"${DERIVED_FILE_DIR}/${HELP_NAME}\"\n\ncd \"${SOURCE_ROOT}\"\n\n[ -d \"${TARGET}\" ] || /bin/mkdir -p \"${TARGET}\";\n\nfor LOC_DIR in English.lproj; do\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\";\n\t[ -d \"${LOC_TARGET}\" ] && /bin/rm -rf \"${LOC_TARGET}\"/* || /bin/mkdir -p \"${LOC_TARGET}\";\n\techo \"*** Creating help files in ${LOC_TARGET} ***\";\n\t\"${TOOLS}/texi2html\" \"${LOC_DIR}/${INPUT}\" --init-file=\"${TOOLS}/applehelp.init\" --prefix=\"${PREFIX}\" --output=\"${LOC_TARGET}\" --split=node --nonumber && \\\n\tpython \"${TOOLS}/postprocess-nontitle.py\" \"${LOC_TARGET}/${PREFIX}_\"*.html;\ndone;\n";
 		};
 		CEF834480C7750F000A3AD51 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3465,15 +3462,14 @@
 			);
 			inputPaths = (
 				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.html",
-				"$(DERIVED_FILE_DIR)/BibDesk Help/French.lproj/BibDesk Help/BibDesk Help.html",
 			);
 			outputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/English.lproj/BibDesk Help/BibDesk Help.html",
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/French.lproj/BibDesk Help/BibDesk Help.html",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/French.lproj/BibDesk Help",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "HELP_NAME=\"BibDesk Help\"\n\nSOURCE=\"${DERIVED_FILE_DIR}/${HELP_NAME}\";\nTARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\";\nDEST=\"${HELP_NAME}\";\n\ncd \"${SOURCE}\";\n\nfor LOC_DIR in *.lproj; do\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\";\n\techo \"*** Copying help files from ${SOURCE}/${LOC_DIR}/${DEST} to ${LOC_TARGET} ***\";\n\t/bin/rm -rf \"${LOC_TARGET}/\"*.html;\n\t/bin/cp -Rf \"${LOC_DIR}/${DEST}/\"*.html \"${LOC_TARGET}\";\ndone;\n";
+			shellScript = "HELP_NAME=\"BibDesk Help\"\n\nSOURCE=\"${DERIVED_FILE_DIR}/${HELP_NAME}\";\nTARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\";\nDEST=\"${HELP_NAME}\";\n\ncd \"${SOURCE}\";\n\nfor LOC_DIR in English.lproj; do\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\";\n\techo \"*** Copying help files from ${SOURCE}/${LOC_DIR}/${DEST} to ${LOC_TARGET} ***\";\n\t/bin/rm -rf \"${LOC_TARGET}/\"*.html;\n\t/bin/cp -Rf \"${LOC_DIR}/${DEST}/\"*.html \"${LOC_TARGET}\";\ndone;\n\ncd \"${TARGET}\"\n\nfor LOC_DIR in French.lproj; do\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}\";\n\techo \"*** Linking help files from ${LOC_TARGET}/${DEST} to ${TARGET}/English.lproj/${DEST} ***\";\n\tcd \"${LOC_TARGET}\";\n\t/bin/rm -rf \"${DEST}\";\n\t/bin/ln -s ../English.lproj/\"${DEST}\";\ndone;\n";
 		};
 		F91E54660853576600208CDF /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3482,15 +3478,13 @@
 			);
 			inputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/English.lproj/BibDesk Help/BibDesk Help.html",
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/French.lproj/BibDesk Help/BibDesk Help.html",
 			);
 			outputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/English.lproj/BibDesk Help/BibDesk Help.helpindex",
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/French.lproj/BibDesk Help/BibDesk Help.helpindex",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\necho \"*** Indexing Help ***\"\ncd \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nfor LOC_DIR in *.lproj; do\n\tif [ \"${LOC_DIR}\" = \"French.lproj\" ]; then LANG=\"fr\";\n\telif [ \"${LOC_DIR}\" = \"German.lproj\" ]; then LANG=\"de\";\n\telif [ \"${LOC_DIR}\" = \"Hungarian.lproj\" ]; then LANG=\"hu\";\n\telif [ \"${LOC_DIR}\" = \"Italian.lproj\" ]; then LANG=\"it\";\n\telif [ \"${LOC_DIR}\" = \"Spanish.lproj\" ]; then LANG=\"es\";\n\telif [ \"${LOC_DIR}\" = \"Swedish.lproj\" ]; then LANG=\"sv\";\n\telse LANG=\"en\";\n\tfi;\n\t\"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app/Contents/MacOS/Help Indexer\" \\\n\t\t\"${LOC_DIR}/BibDesk Help\" \\\n\t\t-Tokenizer 1 \\\n\t\t-ShowProgress NO \\\n\t\t-LogStyle 2 \\\n\t\t-IndexAnchors YES \\\n\t\t-TigerIndexing YES \\\n\t\t-GenerateSummaries YES \\\n\t\t-Stopwords \"${LANG}\" \\\n\t\t-MinTermLength 3 >&2;\ndone;\n";
+			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\necho \"*** Indexing Help ***\"\ncd \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nfor LOC_DIR in *.lproj; do\n\tLOC_TARGET=\"${LOC_DIR}/BibDesk Help\";\n\tif [ -h \"${LOC_TARGET}\" -o ! -d \"${LOC_TARGET}\" ]; then continue; fi;\n\tif [ \"${LOC_DIR}\" = \"French.lproj\" ]; then LANG=\"fr\";\n\telif [ \"${LOC_DIR}\" = \"German.lproj\" ]; then LANG=\"de\";\n\telif [ \"${LOC_DIR}\" = \"Hungarian.lproj\" ]; then LANG=\"hu\";\n\telif [ \"${LOC_DIR}\" = \"Italian.lproj\" ]; then LANG=\"it\";\n\telif [ \"${LOC_DIR}\" = \"Spanish.lproj\" ]; then LANG=\"es\";\n\telif [ \"${LOC_DIR}\" = \"Swedish.lproj\" ]; then LANG=\"sv\";\n\telse LANG=\"en\";\n\tfi;\n\t\"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app/Contents/MacOS/Help Indexer\" \\\n\t\t\"${LOC_TARGET}\" \\\n\t\t-Tokenizer 1 \\\n\t\t-ShowProgress NO \\\n\t\t-LogStyle 2 \\\n\t\t-IndexAnchors YES \\\n\t\t-TigerIndexing YES \\\n\t\t-GenerateSummaries YES \\\n\t\t-Stopwords \"${LANG}\" \\\n\t\t-MinTermLength 3 >&2;\ndone;\n";
 		};
 		F95C5E850D10E52400C81970 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
