@@ -2288,6 +2288,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return [[self persons] valueForKey:BDSKEditorString];
 }
 
+- (id)authorsOrEditors{
+    return [[self persons] valueForKey:[self numberOfAuthors] ? BDSKAuthorString : BDSKEditorString];
+}
+
 - (void)setItemIndex:(int)idx{ currentIndex = idx; }
 
 - (int)itemIndex{ return currentIndex; }

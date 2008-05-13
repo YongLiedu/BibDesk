@@ -747,6 +747,7 @@ enum {
 - (BDSKFieldCollection *)persons;
 - (id)authors;
 - (id)editors;
+- (id)authorsOrEditors;
 - (int)itemIndex;
 - (void)setItemIndex:(int)index;
 - (NSCalendarDate *)currentDate;
