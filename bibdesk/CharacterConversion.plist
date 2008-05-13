@@ -167,6 +167,8 @@
 		<string>{\=I}</string>
 		<key>ī</key>
 		<string>{\=\i}</string>
+		<key>Ł</key>
+		<string>{\L}</string>
 		<key>ł</key>
 		<string>{\l}</string>
 		<key>ő</key>
@@ -389,6 +391,8 @@
 		<string>ẓ</string>
 		<key>{\ldots}</key>
 		<string>…</string>
+		<key>{\L}</key>
+		<string>Ł</string>
 		<key>{\l}</key>
 		<string>ł</string>
 		<key>{\oe}</key>
