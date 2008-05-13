@@ -107,7 +107,7 @@
     [[self window] setDelegate:self];
     
     id animation = [NSClassFromString(@"CABasicAnimation") animation];
-    if (animation) {
+    if (animation && [[self window] respondsToSelector:@selector(setAnimations:)]) {
         [animation setDelegate:self];
         [[self window] setAnimations:[NSDictionary dictionaryWithObject:animation forKey:@"alphaValue"]];
     }

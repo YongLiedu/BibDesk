@@ -151,7 +151,7 @@ NSString * const FVSliderMouseExitedNotificationName = @"FVSliderMouseExitedNoti
         [_slider release];
         
         id animation = [NSClassFromString(@"CABasicAnimation") animation];
-        if (animation) {
+        if (animation && [self respondsToSelector:@selector(setAnimations:)]) {
             [animation setDelegate:self];
             [self setAnimations:[NSDictionary dictionaryWithObject:animation forKey:@"alphaValue"]];
         }
