@@ -1075,7 +1075,8 @@
                                 (items = [publications allItemsForCiteKey:key]))
                                 [selItems addObjectsFromArray:items];
                             [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
-                            [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
+                            if ([scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL] == NO)
+                                break;
                         } while ([scanner isAtEnd] == NO);
                         
                         if ([selItems count])
