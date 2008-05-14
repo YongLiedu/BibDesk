@@ -1067,15 +1067,15 @@
                         
                         command = [command stringByAppendingString:@"{"];
                         
+                        [scanner setScanLocation:[scanner scanLocation] - [command length]];
+                        
                         do {
-                            if ([scanner scanUpToString:@"}" intoString:&key] == NO)
-                                break;
-                            if (items = [publications allItemsForCiteKey:key])
+                            if ([scanner scanString:command intoString:NULL] &&
+                                [scanner scanUpToString:@"}" intoString:&key] &&
+                                (items = [publications allItemsForCiteKey:key]))
                                 [selItems addObjectsFromArray:items];
-                            if ([scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL] == NO ||
-                                [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL] == NO ||
-                                [scanner scanString:command intoString:NULL] == NO)
-                                break;
+                            [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
+                            [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
                         } while ([scanner isAtEnd] == NO);
                         
                         if ([selItems count])
