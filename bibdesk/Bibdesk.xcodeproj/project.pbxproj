@@ -1624,7 +1624,6 @@
 		F9C7D4040BE9282000D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = French; path = French.lproj/PreferenceSearchTerms.plist; sourceTree = "<group>"; };
 		F9C7D4090BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/Credits.rtf; sourceTree = SOURCE_ROOT; };
 		F9C7D40A0BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/ReadMe.rtf; sourceTree = "<group>"; };
-		F9C7D4310BE93D7D00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = folder; name = French; path = "French.lproj/BibDesk Help"; sourceTree = "<group>"; };
 		F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ArrowImage.tiff; path = Images/ArrowImage.tiff; sourceTree = "<group>"; };
 		F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOrphanedFileServer.h; sourceTree = "<group>"; };
 		F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKOrphanedFileServer.m; sourceTree = "<group>"; };
@@ -3957,7 +3956,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				3D8A54F7082D1F86008E818C /* English */,
-				F9C7D4310BE93D7D00D65C7F /* French */,
 			);
 			name = "BibDesk Help";
 			sourceTree = "<group>";
