@@ -982,7 +982,7 @@
                 return NSDragOperationNone;
         } else if([type isEqualToString:BDSKBibItemPboardType]){
             return NSDragOperationCopy; // @@ can't drag row indexes from another document; should use NSArchiver instead
-        } else if ([[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]){
+        } else if (row == -1 && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]){
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             return NSDragOperationLink;
         } else {
@@ -1108,7 +1108,7 @@
             // we already have these publications, so we just want to add them to the group, not the document
             
 			pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
-        } else if ([[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]){
+        } else if (row == -1 && [[NSSet setWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil] containsObject:type]){
             NSArray *urls = nil;
             
             if ([type isEqualToString:BDSKWeblocFilePboardType]) {
