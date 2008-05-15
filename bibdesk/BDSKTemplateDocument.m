@@ -383,15 +383,32 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     
     if (parsedTemplate && (templateDict = [self convertPubTemplate:parsedTemplate defaultFont:font])) {
         NSArray *itemTemplate = [templateDict objectForKey:@""];
-        NSEnumerator *typeEnum = [typeTemplates objectEnumerator];
+        NSMutableSet *includedTypes = [[[NSMutableSet alloc] initWithArray:[templateDict allKeys]] autorelease];
+        NSEnumerator *templateEnum = [typeTemplates objectEnumerator];
         BDSKTypeTemplate *template;
+        NSEnumerator *typeEnum;
+        NSString *type;
         
-        if (itemTemplate)
+        if (itemTemplate) {
             [[typeTemplates objectAtIndex:defaultTypeIndex] setItemTemplate:itemTemplate];
+            [includedTypes removeObject:@""];
+        }
         
-        while (template = [typeEnum nextObject]) {
-            if (itemTemplate = [templateDict objectForKey:[template pubType]])
+        while (template = [templateEnum nextObject]) {
+            if (itemTemplate = [templateDict objectForKey:[template pubType]]) {
                 [template setItemTemplate:itemTemplate];
+                [template setIncluded:YES];
+                [includedTypes removeObject:template];
+            }
+        }
+        
+        typeEnum = [includedTypes objectEnumerator];
+        while (type = [typeEnum nextObject]) {
+            itemTemplate = [templateDict objectForKey:type];
+            template = [[[BDSKTypeTemplate alloc] initWithPubType:type forDocument:self] autorelease];
+            [template setItemTemplate:itemTemplate];
+            [template setIncluded:YES];
+            [[self mutableArrayValueForKey:@"typeTemplates"] addObject:template];
         }
         
         [[self undoManager] removeAllActions];
