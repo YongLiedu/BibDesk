@@ -50,6 +50,8 @@ enum {
 
 extern NSString *BDSKTokenDidChangeNotification;
 
+extern NSString *BDSKRichTextString;
+
 @class BDSKTemplateDocument;
 
 @interface BDSKToken : NSObject <NSCopying, NSCoding> {

@@ -178,7 +178,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         while (field = [fieldEnum nextObject])
             [defaultTokens addObject:[self tokenForField:field]];
         
-        fieldEnum = [[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKLocalFileString, BDSKRemoteURLString, BDSKCiteKeyString, BDSKItemNumberString, @"Rich Text", BDSKDateAddedString, BDSKDateModifiedString, BDSKPubDateString, nil] objectEnumerator];
+        fieldEnum = [[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKLocalFileString, BDSKRemoteURLString, BDSKItemNumberString, BDSKRichTextString, BDSKDateAddedString, BDSKDateModifiedString, BDSKPubDateString, nil] objectEnumerator];
         while (field = [fieldEnum nextObject])
             [specialTokens addObject:[self tokenForField:field]];
     }
