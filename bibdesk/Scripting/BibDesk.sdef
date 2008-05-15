@@ -524,6 +524,21 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				<type type="text" list="yes"/>
 				<cocoa key="allFieldNames"/>
 			</property>
+			<property name="template names" code="TNam" access="r"
+				description="All the known template names">
+				<type type="text" list="yes"/>
+				<cocoa key="templateNames"/>
+			</property>
+			<property name="plain text template names" code="TTNm" access="r"
+				description="All the known template names">
+				<type type="text" list="yes"/>
+				<cocoa key="plainTextTemplateNames"/>
+			</property>
+			<property name="rich text template names" code="RTNm" access="r"
+				description="All the known template names">
+				<type type="text" list="yes"/>
+				<cocoa key="richTextTemplateNames"/>
+			</property>
 			<property name="clipboard" code="pcli" type="specifier" access="r"
 				description="The clipboard">
 				<cocoa key="clipboard"/>

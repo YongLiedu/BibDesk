@@ -59,6 +59,8 @@
 - (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
 - (NSArray *)macros;
 
+- (NSArray *)templateNames;
+
 - (BOOL)application:(NSApplication *)sender delegateHandlesKey:(NSString *)key;
 
 

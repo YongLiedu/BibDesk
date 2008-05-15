@@ -269,7 +269,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     while(aNode = [nodeE nextObject]){
         if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
             name = [aNode valueForKey:BDSKTemplateNameString];
-            if(name != nil && [aNode templateFormat] & format)
+            if(name != nil && ([aNode templateFormat] & format))
                 [names addObject:name];
         }
     }

@@ -43,6 +43,7 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKMacroResolver+Scripting.h"
 #import "BDSKMacro.h"
+#import "BDSKTemplate.h"
 
 
 /* ssp
@@ -94,6 +95,18 @@ Category on BDSKAppController making the papers folder readable for scripting
     return [[BDSKMacroResolver defaultMacroResolver] macros];
 }
 
+- (NSArray *)templateNames {
+    return [BDSKTemplate allStyleNames];
+}
+
+- (NSArray *)plainTextTemplateNames {
+    return [BDSKTemplate allStyleNamesForFormat:BDSKPlainTextTemplateFormat];
+}
+
+- (NSArray *)richTextTemplateNames {
+    return [BDSKTemplate allStyleNamesForFormat:BDSKRichTextTemplateFormat];
+}
+
 - (BOOL)application:(NSApplication *)sender delegateHandlesKey:(NSString *)key {
 	if ([key isEqualToString:@"papersFolder"] ||
         [key isEqualToString:@"localUrlFormat"] ||
@@ -102,6 +115,9 @@ Category on BDSKAppController making the papers folder readable for scripting
 		[key isEqualToString:@"allFieldNames"] ||
 		[key isEqualToString:@"macros"] ||
 		[key isEqualToString:@"scriptHooks"] ||
+		[key isEqualToString:@"templateNames"] ||
+		[key isEqualToString:@"plainTextTemplateNames"] ||
+		[key isEqualToString:@"richTextTemplateNames"] ||
 		[key isEqualToString:@"clipboard"]) 
 		return YES;
 	return NO;
