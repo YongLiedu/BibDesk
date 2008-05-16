@@ -255,6 +255,10 @@
             key = "@componentsJoinedByCommaAndAndWithEtAlAfterThree";
         },
         {
+            displayName = "A & B; A, et al.";
+            key = "@componentsJoinedByAmpersandWithSingleEtAlAfterTwo";
+        },
+        {
             displayName = "A, B, C, D, & E; A, et al.";
             key = "@componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive";
         },

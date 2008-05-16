@@ -1131,6 +1131,11 @@ inline static NSString *romanNumeralForDigit(unsigned digit, NSString *i, NSStri
     return [self count] > 3 ? [[[self firstThreeObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByCommaAndAnd];
 }
 
+- (NSString *)componentsJoinedByAmpersandWithSingleEtAlAfterTwo
+{
+    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByString:@"&"];
+}
+
 - (NSString *)componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive
 {
     return [self count] > 5 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByCommaAndAmpersand];
