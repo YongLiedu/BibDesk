@@ -495,7 +495,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	NSScriptCommand * cmd = [NSScriptCommand currentCommand];
 
 	// we do not allow setting the bibtex string after an edit, only at initialization
-    if ([[self owner] isDocument] == NO) {
+    if ([self owner] && [[self owner] isDocument] == NO) {
         [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
 	} else if([self hasBeenEdited]){
