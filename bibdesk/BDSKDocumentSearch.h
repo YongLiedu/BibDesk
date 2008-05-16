@@ -44,11 +44,12 @@
     NSInvocation *callback;                   // encapsulates document target for callback messages
     float maxScore;                           // maximum score encountered
     NSMutableDictionary *originalScores;      // non-normalized scores, identifier URLs as keys
-    volatile int32_t isSearching __attribute__ ((aligned (32)));
+    volatile int32_t isSearching;
+    NSString *currentSearchString;            // avoids duplicate searches
+    NSLock *searchLock;                       // for currentSearchString and invocation
 
     // main thread access only
     SKIndexRef currentIndex;                  // nonretained
-    NSString *currentSearchString;            // avoids duplicate searches
     NSArray *previouslySelectedPublications;  // convenience for the document
 }
 

@@ -63,6 +63,7 @@ static OFMessageQueue *searchQueue = nil;
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
         [invocation setTarget:doc];
         [invocation setSelector:cb];
+        searchLock = [NSLock new];
         
         callback = [invocation retain];
         originalScores = [NSMutableDictionary new];
@@ -78,6 +79,7 @@ static OFMessageQueue *searchQueue = nil;
     [originalScores release];
     [callback release];
     [previouslySelectedPublications release];
+    [searchLock release];
     [super dealloc];
 }
 
@@ -100,9 +102,11 @@ static OFMessageQueue *searchQueue = nil;
 - (void)terminate;
 {
     [self cancelSearch];
+    [searchLock lock];
     NSInvocation *cb = callback;
     callback = nil;
     [cb release];
+    [searchLock unlock];
 }
 
 - (BOOL)isSearching;
@@ -117,7 +121,9 @@ static OFMessageQueue *searchQueue = nil;
     NSEnumerator *keyEnum = [originalScores keyEnumerator];
     id aKey;
     while (aKey = [keyEnum nextObject]) {
-        float score = [[originalScores objectForKey:aKey] floatValue];
+        NSNumber *nsScore = [originalScores objectForKey:aKey];
+        NSParameterAssert(nil != nsScore);
+        float score = [nsScore floatValue];
         [scores setObject:[NSNumber numberWithFloat:(score/maxScore)] forKey:aKey];
     }
     return scores;
@@ -138,11 +144,10 @@ static OFMessageQueue *searchQueue = nil;
     CFIndex i, foundCount;
     NSMutableSet *foundURLSet = [NSMutableSet set];
     
-    Boolean more;
+    Boolean more, keepGoing;
     maxScore = 0.0f;
     
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isSearching);
-    NSDictionary *normalizedScores = nil;
     [originalScores removeAllObjects];
     
     do {
@@ -161,9 +166,15 @@ static OFMessageQueue *searchQueue = nil;
             }
         }
         
-        // check in case the doc is closing while a search is in progress
-        if (nil != callback) {
-            normalizedScores = [self normalizedScores];
+        // check currentSearchString to see if a new search is queued; if so, exit this loop
+        // check callback in case the doc is closing while a search is in progress
+
+        [searchLock lock];
+        keepGoing = (nil != callback && [searchString isEqualToString:currentSearchString]);
+        [searchLock unlock];
+
+        if (keepGoing) {
+            NSDictionary *normalizedScores = [self normalizedScores];
             [callback setArgument:&foundURLSet atIndex:2];
             [callback setArgument:&normalizedScores atIndex:3];
             [callback performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
@@ -171,16 +182,13 @@ static OFMessageQueue *searchQueue = nil;
         
         [foundURLSet removeAllObjects];
         
-    } while (NULL != search && foundCount && more);
+        [searchLock lock];
+        keepGoing = (nil != callback && [searchString isEqualToString:currentSearchString]);
+        [searchLock unlock];
         
-    if (nil != callback) {
-        normalizedScores = [self normalizedScores];
-        [callback setArgument:&foundURLSet atIndex:2];
-        [callback setArgument:&normalizedScores atIndex:3];
-        [callback performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
-    }
-    [self cancelSearch];  
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&isSearching);
+    } while (keepGoing && NULL != search && more);
+    
+    [self _cancelSearch];  
 }
 
 - (NSArray *)previouslySelectedPublications { return previouslySelectedPublications; }
@@ -197,12 +205,16 @@ static OFMessageQueue *searchQueue = nil;
     
     // searchfield seems to send its action multiple times with the same search string; avoid duplicate searches
     if (NO == [self isSearching] || (NO == [currentSearchString isEqualToString:searchString] && skIndex != currentIndex)) {
+        
+        [searchLock lock];
         [currentSearchString autorelease];
         currentSearchString = [searchString copy];
-        
+        [searchLock unlock];
+
         if ([self isSearching])
             [self cancelSearch];
         
+        [[callback target] handleSearchCallbackWithIdentifiers:nil normalizedScores:nil];
         [searchQueue queueSelector:@selector(backgroundSearchForString:indexArray:) forObject:self withObject:searchString withObject:[NSArray arrayWithObject:(id)skIndex]];
     }
 }
