@@ -81,6 +81,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKEditorTableView.h"
 #import "BDSKEditorTextFieldCell.h"
+#import "BDSKCompletionManager.h"
 #import <FileView/FVPreviewer.h>
 
 static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
@@ -2279,10 +2280,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if (control != tableView) {
 		return charRange;
 	} else if ([complexStringEditor isEditing]) {
-		return [[NSApp delegate] rangeForUserCompletion:charRange 
+		return [[BDSKCompletionManager sharedManager] rangeForUserCompletion:charRange 
 								  forBibTeXString:[textView string]];
 	} else {
-		return [[NSApp delegate] entry:[fields objectAtIndex:[tableView editedRow]] 
+		return [[BDSKCompletionManager sharedManager] entry:[fields objectAtIndex:[tableView editedRow]] 
 				rangeForUserCompletion:charRange 
 							  ofString:[textView string]];
 
@@ -2299,12 +2300,12 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if (control != tableView) {
 		return words;
 	} else if ([complexStringEditor isEditing]) {
-		return [[NSApp delegate] possibleMatches:[[[publication owner] macroResolver] allMacroDefinitions] 
+		return [[BDSKCompletionManager sharedManager] possibleMatches:[[[publication owner] macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:idx];
 	} else {
-		return [[NSApp delegate] entry:[fields objectAtIndex:[tableView editedRow]] 
+		return [[BDSKCompletionManager sharedManager] entry:[fields objectAtIndex:[tableView editedRow]] 
 						   completions:words 
 				   forPartialWordRange:charRange 
 							  ofString:[textView string] 

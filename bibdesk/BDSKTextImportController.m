@@ -66,6 +66,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKBookmarkController.h"
 #import "BDSKLinkedFile.h"
+#import "BDSKCompletionManager.h"
 
 @interface BDSKTextImportController (Private)
 
@@ -1322,10 +1323,10 @@
     if (control != itemTableView) {
 		return charRange;
 	} else if ([complexStringEditor isEditing]) {
-		return [[NSApp delegate] rangeForUserCompletion:charRange 
+		return [[BDSKCompletionManager sharedManager] rangeForUserCompletion:charRange 
 								  forBibTeXString:[textView string]];
 	} else {
-		return [[NSApp delegate] entry:[fields objectAtIndex:[itemTableView selectedRow]] 
+		return [[BDSKCompletionManager sharedManager] entry:[fields objectAtIndex:[itemTableView selectedRow]] 
 				rangeForUserCompletion:charRange 
 							  ofString:[textView string]];
 
@@ -1336,12 +1337,12 @@
     if (control != itemTableView) {
 		return words;
 	} else if ([complexStringEditor isEditing]) {
-		return [[NSApp delegate] possibleMatches:[[document macroResolver] allMacroDefinitions] 
+		return [[BDSKCompletionManager sharedManager] possibleMatches:[[document macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:idx];
 	} else {
-		return [[NSApp delegate] entry:[fields objectAtIndex:[itemTableView selectedRow]] 
+		return [[BDSKCompletionManager sharedManager] entry:[fields objectAtIndex:[itemTableView selectedRow]] 
 						   completions:words 
 				   forPartialWordRange:charRange 
 							  ofString:[textView string] 

@@ -57,6 +57,7 @@
 #import "BDSKStringEncodingManager.h"
 #import "NSScanner_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
+#import "BDSKCompletionManager.h"
 
 static NSLock *parserLock = nil;
 
@@ -275,7 +276,7 @@ error:(NSError **)outError{
                     NSString *citeKey = copyCheckedString(bt_entry_key(entry), entry->line, filePath, parserEncoding);
                     
                     if(citeKey) {
-                        [[NSApp delegate] addString:citeKey forCompletionEntry:BDSKCrossrefString];
+                        [[BDSKCompletionManager sharedManager] addString:citeKey forCompletionEntry:BDSKCrossrefString];
                         
                         newBI = [[BibItem alloc] initWithType:entryType
                                                      fileType:BDSKBibtexString
@@ -624,7 +625,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         [authors addObject:anAuthor];
         [anAuthor release];
     }
-    [[NSApp delegate] addNamesForCompletion:(NSArray *)names];
+    [[BDSKCompletionManager sharedManager] addNamesForCompletion:(NSArray *)names];
 	CFRelease(names);
 	return authors;
 }
@@ -988,7 +989,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
         if (fieldName && fieldValue) {
             // add the expanded values to the autocomplete dictionary; authors are handled elsewhere
             if ([fieldName isPersonField] == NO)
-                [[NSApp delegate] addString:fieldValue forCompletionEntry:fieldName];
+                [[BDSKCompletionManager sharedManager] addString:fieldValue forCompletionEntry:fieldName];
             
             [dictionary setObject:fieldValue forKey:fieldName];
         } else {

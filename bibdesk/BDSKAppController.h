@@ -50,9 +50,6 @@
 
 @interface BDSKAppController : NSObject {
 	
-    // global auto-completion dictionary:
-    NSMutableDictionary *autoCompletionDict;
-	
 	// auto generation format
 	NSArray *requiredFieldsForCiteKey;
     NSArray *requiredFieldsForLocalFile;
@@ -81,34 +78,6 @@
 - (void)setRequiredFieldsForLocalFile:(NSArray *)newFields;
 
 - (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner;
-
-- (void)addNamesForCompletion:(NSArray *)name;
-/*!
-@method addString:forCompletionEntry:
-    @abstract 
-    @discussion 
-    
-*/
-- (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry;
-
-/*!
-    @method stringsForCompletionEntry
-    @abstract returns all strings registered for a particular entry.    
-*/
-- (NSSet *)stringsForCompletionEntry:(NSString *)entry;
-
-- (NSRange)entry:(NSString *)entry rangeForUserCompletion:(NSRange)charRange ofString:(NSString *)fullString;
-
-/*!
-    @method     entry:completions:forPartialWordRange:ofString:indexOfSelectedItem:
-    @abstract   Returns an array of possible completions for the substring in charRange of fullString.
-    @discussion Used in control:textView:completions:forPartialWordRange:indexOfSelectedItem: delegate methods
-    @result     
-*/
-- (NSArray *)entry:(NSString *)entry completions:(NSArray *)words forPartialWordRange:(NSRange)charRange ofString:(NSString *)fullString indexOfSelectedItem:(int *)index;
-
-- (NSRange)rangeForUserCompletion:(NSRange)charRange forBibTeXString:(NSString *)fullString;
-- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index;
 
 - (IBAction)visitWebSite:(id)sender;
 - (IBAction)visitWiki:(id)sender;

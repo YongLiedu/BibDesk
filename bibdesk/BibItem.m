@@ -74,6 +74,7 @@
 #import "BDSKScriptHook.h"
 #import "BDSKScriptHookManager.h"
 #import "NSIndexSet_BDSKExtensions.h"
+#import "BDSKCompletionManager.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -1056,7 +1057,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if(newCiteKey != citeKey){
         [citeKey autorelease];
         citeKey = [newCiteKey copy];
-        [[NSApp delegate] addString:newCiteKey forCompletionEntry:BDSKCrossrefString];
+        [[BDSKCompletionManager sharedManager] addString:newCiteKey forCompletionEntry:BDSKCrossrefString];
     }
 }
 
@@ -1196,7 +1197,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     [pubFields setValue:value forKey:key];
     // to allow autocomplete:
     if (value)
-		[[NSApp delegate] addString:value forCompletionEntry:key];
+		[[BDSKCompletionManager sharedManager] addString:value forCompletionEntry:key];
     [pubFields setValue:[date description] forKey:BDSKDateModifiedString];
 	[self updateMetadataForKey:key];
 	
