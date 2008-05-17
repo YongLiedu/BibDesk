@@ -102,7 +102,7 @@ static Class BDSKBookmarkClass = Nil;
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
     if (self != defaultPlaceholderBookmark)
         [self release];
-    return [[BDSKURLBookmark alloc] initFolderWithChildren:aChildren name:aName];
+    return [[BDSKFolderBookmark alloc] initFolderWithChildren:aChildren name:aName];
 }
 
 - (id)initFolderWithName:(NSString *)aName {
