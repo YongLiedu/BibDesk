@@ -249,6 +249,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [self updateStatus];
     
     [self selectPublications:[documentSearch previouslySelectedPublications]];
+    if ([self numberOfSelectedPubs] == 0)
+        [tableView setScrollPositionAsPercentage:[documentSearch previousScrollPositionAsPercentage]];
 }
         
 - (void)displayPublicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field {
@@ -265,7 +267,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [self sortPubsByKey:nil];
     [self updateStatus];
     
-    [documentSearch searchForString:searchString index:skIndex selectedPublications:selPubs];
+    [documentSearch searchForString:searchString index:skIndex selectedPublications:selPubs scrollPositionAsPercentage:[tableView scrollPositionAsPercentage]];
     [selPubs release];
 
 }

@@ -199,9 +199,18 @@ static OFMessageQueue *searchQueue = nil;
     previouslySelectedPublications = [[NSArray alloc] initWithArray:selPubs copyItems:NO];
 }
 
-- (void)searchForString:(NSString *)searchString index:(SKIndexRef)skIndex selectedPublications:(NSArray *)selPubs;
+- (NSPoint)previousScrollPositionAsPercentage {
+    return previousScrollPositionAsPercentage;
+}
+
+- (void)setPreviousScrollPositionAsPercentage:(NSPoint)scrollPoint {
+    previousScrollPositionAsPercentage = scrollPoint;
+}
+
+- (void)searchForString:(NSString *)searchString index:(SKIndexRef)skIndex selectedPublications:(NSArray *)selPubs scrollPositionAsPercentage:(NSPoint)scrollPoint;
 {
     [self setPreviouslySelectedPublications:selPubs];
+    [self setPreviousScrollPositionAsPercentage:scrollPoint];
     
     // searchfield seems to send its action multiple times with the same search string; avoid duplicate searches
     if (NO == [self isSearching] || (NO == [currentSearchString isEqualToString:searchString] && skIndex != currentIndex)) {

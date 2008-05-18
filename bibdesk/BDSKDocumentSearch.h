@@ -51,12 +51,14 @@
     // main thread access only
     SKIndexRef currentIndex;                  // nonretained
     NSArray *previouslySelectedPublications;  // convenience for the document
+    NSPoint previousScrollPositionAsPercentage;
 }
 
 // following are all thread safe; document is only used as target for the callback
 - (id)initWithDocument:(id)doc;
-- (void)searchForString:(NSString *)searchString index:(SKIndexRef)index selectedPublications:(NSArray *)selPubs;
+- (void)searchForString:(NSString *)searchString index:(SKIndexRef)index selectedPublications:(NSArray *)selPubs scrollPositionAsPercentage:(NSPoint)scrollPoint;
 - (NSArray *)previouslySelectedPublications;
+- (NSPoint)previousScrollPositionAsPercentage;
 
 // call when closing the document window; kills the search and prevents further callbacks
 - (void)terminate;
