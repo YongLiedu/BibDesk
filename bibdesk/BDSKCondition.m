@@ -275,9 +275,9 @@
         
         // minor optimization: Shark showed -[NSString rangeOfString:options:] as a bottleneck, calling through to CFStringFindWithOptions
         CFOptionFlags options = kCFCompareCaseInsensitive;
-        if (attachmentComparison == BDSKEndWith)
+        if (stringComparison == BDSKEndWith)
             options |= kCFCompareBackwards | kCFCompareAnchored;
-        else if (attachmentComparison == BDSKStartWith)
+        else if (stringComparison == BDSKStartWith)
             options |= kCFCompareAnchored;
         CFRange range;
         CFIndex itemLength = CFStringGetLength((CFStringRef)itemValue);
