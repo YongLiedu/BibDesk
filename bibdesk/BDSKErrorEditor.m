@@ -61,6 +61,7 @@
     if(self = [super init]){
         manager = nil;
         fileName = [aFileName retain];
+        displayName = [[fileName lastPathComponent] retain];
         data = [aData copy];
         isPasteDrag = NO;
         enableSyntaxHighlighting = YES;
@@ -88,6 +89,7 @@
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [fileName release];
+    [displayName release];
     [data release];
     [super dealloc];
 }
@@ -154,6 +156,7 @@
         if(manager)
             [manager removeObserver:self forKeyPath:@"displayName"];
         manager = newManager;
+        [self updateDisplayName];
         if(manager)
             [manager addObserver:self forKeyPath:@"displayName" options:0 context:NULL];
     }
@@ -174,14 +177,24 @@
 
 - (NSString *)displayName;
 {
-    NSString *displayName = [manager displayName];
-    return (isPasteDrag) ? [NSString stringWithFormat:@"[%@]", displayName] : displayName;
+    return displayName;
+}
+
+- (void)updateDisplayName {
+    [self willChangeValueForKey:@"displayName"];
+    NSString *newDisplayName = [manager displayName];
+    if (isPasteDrag)
+        newDisplayName = [NSString stringWithFormat:@"[%@]", newDisplayName];
+    if (displayName != newDisplayName) {
+        [displayName release];
+        displayName = [newDisplayName retain];
+    }
+    [self didChangeValueForKey:@"displayName"];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
     if(object == manager && [keyPath isEqualToString:@"displayName"]){
-        [self willChangeValueForKey:@"displayName"];
-        [self didChangeValueForKey:@"displayName"];
+        [self updateDisplayName];
         
         NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
         [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];

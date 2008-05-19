@@ -48,6 +48,7 @@
     IBOutlet NSTextField *lineNumberField;
     BDSKErrorManager *manager;
     NSString *fileName;
+    NSString *displayName;
     NSData *data;
     int changeCount;
     unsigned int invalidSyntaxHighlightMark;
@@ -70,6 +71,8 @@
 - (NSString *)displayName;
 - (NSData *)pasteDragData;
 - (BOOL)isPasteDrag;
+
+- (void)updateDisplayName;
 
 - (IBAction)loadFile:(id)sender;
 - (IBAction)reopenDocument:(id)sender;
