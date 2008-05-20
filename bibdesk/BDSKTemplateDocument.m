@@ -355,9 +355,8 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                     [self setSuffixTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(endRange), length)]];
                 if (NSMaxRange(sepRange) < endRange.location)
                     [self setSeparatorTemplate:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)]];
-                if (sepRange.location != NSNotFound)
                 
-                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(startRange), sepRange.location == NSNotFound ? endRange.location : sepRange.location)]];
+                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
                 
                 font = [attrString attribute:NSFontAttributeName atIndex:startLoc effectiveRange:NULL];
                 if (font == nil)
