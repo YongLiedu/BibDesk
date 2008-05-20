@@ -149,6 +149,8 @@ static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey
 static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
 static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
+static NSString *BDSKDocumentObservationContext = @"BDSKDocumentObservationContext";
+
 enum {
     BDSKItemChangedGroupFieldMask = 1,
     BDSKItemChangedSearchKeyMask = 2,
@@ -533,7 +535,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [sideFileView setIconScale:iconScale];
     }
     [sideFileView setAutoScales:YES];
-    [sideFileView addObserver:self forKeyPath:@"iconScale" options:0 context:NULL];
+    [sideFileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKDocumentObservationContext];
 
     iconScale = [xattrDefaults floatForKey:BDSKBottomFileViewIconScaleKey defaultValue:[pw floatForKey:BDSKBottomFileViewIconScaleKey]];
     if (iconScale < 0.00001) {
@@ -542,6 +544,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [bottomFileView setAutoScales:NO];
         [bottomFileView setIconScale:iconScale];
     }
+    [bottomFileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKDocumentObservationContext];
     
     [(BDSKZoomableScrollView *)[sidePreviewTextView enclosingScrollView] setScaleFactor:[xattrDefaults floatForKey:BDSKSidePreviewScaleFactorKey defaultValue:1.0]];
     [(BDSKZoomableScrollView *)[bottomPreviewTextView enclosingScrollView] setScaleFactor:[xattrDefaults floatForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
@@ -3014,12 +3017,14 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (object == sideFileView && [keyPath isEqualToString:@"iconScale"]) {
-        float iconScale = [sideFileView autoScales] ? 0.0 : [sideFileView iconScale];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:iconScale forKey:BDSKSideFileViewIconScaleKey];
-    } else if (object == bottomFileView && [keyPath isEqualToString:@"iconScale"]) {
-        float iconScale = [bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:iconScale forKey:BDSKBottomFileViewIconScaleKey];
+    if (context == BDSKDocumentObservationContext) {
+        if (object == sideFileView) {
+            float iconScale = [sideFileView autoScales] ? 0.0 : [sideFileView iconScale];
+            [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:iconScale forKey:BDSKSideFileViewIconScaleKey];
+        } else if (object == bottomFileView) {
+            float iconScale = [bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale];
+            [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:iconScale forKey:BDSKBottomFileViewIconScaleKey];
+        }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }

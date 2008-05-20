@@ -44,6 +44,8 @@
 #import "BDSKRatingButton.h"
 #import <OmniBase/assertions.h>
 
+static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionControllerObservationContext";
+
 @interface BDSKConditionController (BDSKPrivate)
 - (void)startObserving;
 - (void)stopObserving;
@@ -293,60 +295,64 @@
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    OBASSERT(object == condition);
-    if(object == condition) {
-        NSUndoManager *undoManager = [filterController undoManager];
-        id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
-        if (oldValue == [NSNull null])
-            oldValue = nil;
-        if ([keyPath isEqualToString:@"key"]){
-            NSString *newValue = [change objectForKey:NSKeyValueChangeNewKey];
-            int oldFieldType = [oldValue fieldType];
-            int newFieldType = [newValue fieldType];
-            if(MIN(oldFieldType, BDSKStringField) != MIN(newFieldType, BDSKStringField))
-                [self layoutComparisonControls];
-            if(oldFieldType != newFieldType)
+    if (context == BDSKConditionControllerObservationContext) {
+        OBASSERT(object == condition);
+        if(object == condition) {
+            NSUndoManager *undoManager = [filterController undoManager];
+            id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
+            if (oldValue == [NSNull null])
+                oldValue = nil;
+            if ([keyPath isEqualToString:@"key"]){
+                NSString *newValue = [change objectForKey:NSKeyValueChangeNewKey];
+                int oldFieldType = [oldValue fieldType];
+                int newFieldType = [newValue fieldType];
+                if(MIN(oldFieldType, BDSKStringField) != MIN(newFieldType, BDSKStringField))
+                    [self layoutComparisonControls];
+                if(oldFieldType != newFieldType)
+                    [self layoutValueControls];
+                [[undoManager prepareWithInvocationTarget:condition] setKey:oldValue];
+            } else if ([keyPath isEqualToString:@"dateComparison"]) {
                 [self layoutValueControls];
-            [[undoManager prepareWithInvocationTarget:condition] setKey:oldValue];
-        } else if ([keyPath isEqualToString:@"dateComparison"]) {
-            [self layoutValueControls];
-            [[undoManager prepareWithInvocationTarget:condition] setDateComparison:[oldValue intValue]];
-        } else if ([keyPath isEqualToString:@"attachmentComparison"]) {
-            [self layoutValueControls];
-            [[undoManager prepareWithInvocationTarget:condition] setAttachmentComparison:[oldValue intValue]];
-        } else if ([keyPath isEqualToString:@"stringComparison"]) {
-            [[undoManager prepareWithInvocationTarget:condition] setStringComparison:[oldValue intValue]];
-        } else if ([keyPath isEqualToString:@"stringValue"]) {
-            [[undoManager prepareWithInvocationTarget:condition] setStringValue:oldValue];
-            [ratingButton setRating:[[condition stringValue] unsignedIntValue]];
-        } else if ([keyPath isEqualToString:@"countValue"]) {
-            [[undoManager prepareWithInvocationTarget:condition] setCountValue:[oldValue intValue]];
-        } else if ([keyPath isEqualToString:@"numberValue"]) {
-            [[undoManager prepareWithInvocationTarget:condition] setNumberValue:[oldValue intValue]];
-        } else if ([keyPath isEqualToString:@"andNumberValue"]) {
-            [[undoManager prepareWithInvocationTarget:condition] setAndNumberValue:[oldValue intValue]];
-        } else if ([keyPath isEqualToString:@"periodValue"]) {
-            [[undoManager prepareWithInvocationTarget:condition] setPeriodValue:[oldValue intValue]];
-        } else if ([keyPath isEqualToString:@"dateValue"]) {
-            [[undoManager prepareWithInvocationTarget:condition] setDateValue:oldValue];
-        } else if ([keyPath isEqualToString:@"toDateValue"]) {
-            [[undoManager prepareWithInvocationTarget:condition] setToDateValue:oldValue];
+                [[undoManager prepareWithInvocationTarget:condition] setDateComparison:[oldValue intValue]];
+            } else if ([keyPath isEqualToString:@"attachmentComparison"]) {
+                [self layoutValueControls];
+                [[undoManager prepareWithInvocationTarget:condition] setAttachmentComparison:[oldValue intValue]];
+            } else if ([keyPath isEqualToString:@"stringComparison"]) {
+                [[undoManager prepareWithInvocationTarget:condition] setStringComparison:[oldValue intValue]];
+            } else if ([keyPath isEqualToString:@"stringValue"]) {
+                [[undoManager prepareWithInvocationTarget:condition] setStringValue:oldValue];
+                [ratingButton setRating:[[condition stringValue] unsignedIntValue]];
+            } else if ([keyPath isEqualToString:@"countValue"]) {
+                [[undoManager prepareWithInvocationTarget:condition] setCountValue:[oldValue intValue]];
+            } else if ([keyPath isEqualToString:@"numberValue"]) {
+                [[undoManager prepareWithInvocationTarget:condition] setNumberValue:[oldValue intValue]];
+            } else if ([keyPath isEqualToString:@"andNumberValue"]) {
+                [[undoManager prepareWithInvocationTarget:condition] setAndNumberValue:[oldValue intValue]];
+            } else if ([keyPath isEqualToString:@"periodValue"]) {
+                [[undoManager prepareWithInvocationTarget:condition] setPeriodValue:[oldValue intValue]];
+            } else if ([keyPath isEqualToString:@"dateValue"]) {
+                [[undoManager prepareWithInvocationTarget:condition] setDateValue:oldValue];
+            } else if ([keyPath isEqualToString:@"toDateValue"]) {
+                [[undoManager prepareWithInvocationTarget:condition] setToDateValue:oldValue];
+            }
         }
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 
 - (void)startObserving {
-    [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"dateComparison" options: NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"attachmentComparison" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"stringComparison" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"stringValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"countValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"numberValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"andNumberValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"periodValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"dateValue" options:NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"toDateValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"dateComparison" options: NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"attachmentComparison" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"stringComparison" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"stringValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"countValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"numberValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"andNumberValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"periodValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"dateValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
+    [condition addObserver:self forKeyPath:@"toDateValue" options:NSKeyValueObservingOptionOld  context:BDSKConditionControllerObservationContext];
     isObserving = YES;
 }
 

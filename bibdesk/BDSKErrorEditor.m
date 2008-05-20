@@ -48,6 +48,8 @@
 #import "BDSKStringEncodingManager.h"
 #import "NSWindowController_BDSKExtensions.h"
 
+static NSString *BDSKErrorEditorObservationContext = @"BDSKErrorEditorObservationContext";
+
 @implementation BDSKErrorEditor
 
 + (void)initialize;
@@ -158,7 +160,7 @@
         manager = newManager;
         [self updateDisplayName];
         if(manager)
-            [manager addObserver:self forKeyPath:@"displayName" options:0 context:NULL];
+            [manager addObserver:self forKeyPath:@"displayName" options:0 context:BDSKErrorEditorObservationContext];
     }
 }
 
@@ -193,11 +195,15 @@
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if(object == manager && [keyPath isEqualToString:@"displayName"]){
-        [self updateDisplayName];
-        
-        NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
-        [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
+    if (context == BDSKErrorEditorObservationContext) {
+        if(object == manager && [keyPath isEqualToString:@"displayName"]){
+            [self updateDisplayName];
+            
+            NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
+            [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
+        }
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 

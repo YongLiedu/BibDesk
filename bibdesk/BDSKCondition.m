@@ -45,6 +45,8 @@
 #import "BDSKSmartGroup.h"
 #import "BDSKCondition+Scripting.h"
 
+static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationContext";
+
 @interface BDSKCondition (Private)
 - (NSDate *)cachedEndDate;
 - (void)setCachedEndDate:(NSDate *)newCachedDate;
@@ -730,9 +732,9 @@
 #pragma mark KVO
 
 - (void)startObserving {
-    [self addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
-    [self addObserver:self forKeyPath:@"comparison" options:0  context:NULL];
-    [self addObserver:self forKeyPath:@"value" options:0  context:NULL];
+    [self addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:BDSKConditionObservationContext];
+    [self addObserver:self forKeyPath:@"comparison" options:0  context:BDSKConditionObservationContext];
+    [self addObserver:self forKeyPath:@"value" options:0  context:BDSKConditionObservationContext];
 }
 
 - (void)endObserving {
@@ -742,19 +744,23 @@
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if ([keyPath isEqualToString:@"key"]) {
-        NSString *oldKey = [change objectForKey:NSKeyValueChangeOldKey];
-        NSString *newKey = [change objectForKey:NSKeyValueChangeNewKey];
-        int oldFieldType = [oldKey fieldType];
-        int newFieldType = [newKey fieldType];
-        if(oldFieldType != newFieldType){
-            if (oldFieldType == BDSKDateField)
-                [self updateCachedDates]; // remove the cached date and stop the timer
-            [self setDefaultComparison];
-            [self setDefaultValue];
+    if (context == BDSKConditionObservationContext) {
+        if ([keyPath isEqualToString:@"key"]) {
+            NSString *oldKey = [change objectForKey:NSKeyValueChangeOldKey];
+            NSString *newKey = [change objectForKey:NSKeyValueChangeNewKey];
+            int oldFieldType = [oldKey fieldType];
+            int newFieldType = [newKey fieldType];
+            if(oldFieldType != newFieldType){
+                if (oldFieldType == BDSKDateField)
+                    [self updateCachedDates]; // remove the cached date and stop the timer
+                [self setDefaultComparison];
+                [self setDefaultValue];
+            }
+        } else if (([keyPath isEqualToString:@"comparison"] || [keyPath isEqualToString:@"value"]) && [self isDateCondition]) {
+            [self updateCachedDates];
         }
-    } else if (([keyPath isEqualToString:@"comparison"] || [keyPath isEqualToString:@"value"]) && [self isDateCondition]) {
-        [self updateCachedDates];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 
