@@ -172,7 +172,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if (context == (BDSKErrorManagerObservationContext) {
+    if (context == BDSKErrorManagerObservationContext) {
         if(object == document && [keyPath isEqualToString:@"displayName"])
             [self updateDisplayName];
         else if(object == document && document && [keyPath isEqualToString:@"documentStringEncoding"])
