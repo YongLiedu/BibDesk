@@ -1076,9 +1076,11 @@ The groupedPublications array is a subset of the publications array, developed b
     BDSKSearchGroup *group = (BDSKSearchGroup *)[[self selectedGroups] lastObject];
 	[searchBookmarkField setStringValue:[NSString stringWithFormat:@"%@: %@", [[group serverInfo] name], [group name]]];
     [searchBookmarkPopUp removeAllItems];
-    NSArray *bookmarks = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarks];
+    BDSKSearchBookmark *bookmark = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarkRoot];
+    NSArray *bookmarks = [bookmark children];
     NSMenuItem *item = [[searchBookmarkPopUp menu] addItemWithTitle:NSLocalizedString(@"Bookmarks Menu", @"Menu item title") action:NULL keyEquivalent:@""];
     [item setImage:[NSImage imageNamed:@"SmallMenu"]];
+    [item setRepresentedObject:bookmark];
     [self addMenuItemsForBookmarks:bookmarks level:1 toMenu:[searchBookmarkPopUp menu]];
     [searchBookmarkPopUp selectItemAtIndex:0];
     

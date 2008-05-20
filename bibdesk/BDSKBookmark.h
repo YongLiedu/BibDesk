@@ -49,9 +49,11 @@ enum {
 
 @interface BDSKBookmark : NSObject <NSCopying> {
     BDSKBookmark *parent;
+    NSUndoManager *undoManager;
 }
 
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName;
+- (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName;
 - (id)initFolderWithName:(NSString *)aName;
 - (id)initSeparator;
 - (id)initWithDictionary:(NSDictionary *)dictionary;
@@ -76,6 +78,9 @@ enum {
 - (void)insertChild:(BDSKBookmark *)child atIndex:(unsigned int)index;
 - (void)addChild:(BDSKBookmark *)child;
 - (void)removeChild:(BDSKBookmark *)child;
+
+- (NSUndoManager *)undoManager;
+- (void)setUndoManager:(NSUndoManager *)newUndoManager;
 
 - (BOOL)isDescendantOf:(BDSKBookmark *)bookmark;
 - (BOOL)isDescendantOfArray:(NSArray *)bookmarks;

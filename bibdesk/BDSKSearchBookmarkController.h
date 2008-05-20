@@ -43,7 +43,7 @@
 
 @interface BDSKSearchBookmarkController : NSWindowController {
     IBOutlet NSOutlineView *outlineView;
-    NSMutableArray *bookmarks;
+    BDSKSearchBookmark *bookmarkRoot;
     NSArray *draggedBookmarks;
     NSMutableDictionary *toolbarItems;
     NSUndoManager *undoManager;
@@ -51,12 +51,7 @@
 
 + (id)sharedBookmarkController;
 
-- (NSArray *)bookmarks;
-- (void)setBookmarks:(NSArray *)newBookmarks;
-- (unsigned)countOfBookmarks;
-- (id)objectInBookmarksAtIndex:(unsigned)index;
-- (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)index;
-- (void)removeObjectFromBookmarksAtIndex:(unsigned)index;
+- (BDSKSearchBookmark *)bookmarkRoot;
 
 - (void)addBookmarkWithInfo:(NSDictionary *)info label:(NSString *)label toFolder:(BDSKSearchBookmark *)folder;
 

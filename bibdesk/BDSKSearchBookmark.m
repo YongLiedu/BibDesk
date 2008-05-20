@@ -37,7 +37,6 @@
  */
 
 #import "BDSKSearchBookmark.h"
-#import "BDSKSearchBookmarkController.h"
 
 NSString *BDSKSearchBookmarkChangedNotification = @"BDSKSearchBookmarkChangedNotification";
 NSString *BDSKSearchBookmarkWillBeRemovedNotification = @"BDSKSearchBookmarkWillBeRemovedNotification";
@@ -134,8 +133,10 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (void)dealloc {
-    if (self != defaultPlaceholderSearchBookmark)
+    if (self != defaultPlaceholderSearchBookmark) {
+        [undoManager release];
         [super dealloc];
+    }
 }
 
 - (NSDictionary *)dictionaryValue { return nil; }
@@ -160,6 +161,17 @@ static Class BDSKSearchBookmarkClass = Nil;
 
 - (void)setParent:(BDSKSearchBookmark *)newParent {
     parent = newParent;
+}
+
+- (NSUndoManager *)undoManager {
+    return undoManager ? undoManager : [parent undoManager];
+}
+
+- (void)setUndoManager:(NSUndoManager *)newUndoManager {
+    if (undoManager != newUndoManager) {
+        [undoManager release];
+        undoManager = [newUndoManager retain];
+    }
 }
 
 - (BOOL)isDescendantOf:(BDSKSearchBookmark *)bookmark {
@@ -202,7 +214,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (void)dealloc {
-    [[[BDSKSearchBookmarkController sharedBookmarkController] undoManager] removeAllActionsWithTarget:self];
+    [[self undoManager] removeAllActionsWithTarget:self];
     [info release];
     [label release];
     [super dealloc];
@@ -232,8 +244,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 
 - (void)setLabel:(NSString *)newLabel {
     if (label != newLabel) {
-        NSUndoManager *undoManager = [[BDSKSearchBookmarkController sharedBookmarkController] undoManager];
-        [(BDSKSearchBookmark *)[undoManager prepareWithInvocationTarget:self] setLabel:label];
+        [(BDSKSearchBookmark *)[[self undoManager] prepareWithInvocationTarget:self] setLabel:label];
         [label release];
         label = [newLabel retain];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchBookmarkChangedNotification object:self];
@@ -274,7 +285,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (void)dealloc {
-    [[[BDSKSearchBookmarkController sharedBookmarkController] undoManager] removeAllActionsWithTarget:self];
+    [[self undoManager] removeAllActionsWithTarget:self];
     [label release];
     [children release];
     [super dealloc];
@@ -298,8 +309,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 
 - (void)setLabel:(NSString *)newLabel {
     if (label != newLabel) {
-        NSUndoManager *undoManager = [[BDSKSearchBookmarkController sharedBookmarkController] undoManager];
-        [(BDSKSearchBookmark *)[undoManager prepareWithInvocationTarget:self] setLabel:label];
+        [(BDSKSearchBookmark *)[[self undoManager] prepareWithInvocationTarget:self] setLabel:label];
         [label release];
         label = [newLabel retain];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchBookmarkChangedNotification object:self];
@@ -315,8 +325,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (void)insertChild:(BDSKSearchBookmark *)child atIndex:(unsigned int)idx {
-    NSUndoManager *undoManager = [[BDSKSearchBookmarkController sharedBookmarkController] undoManager];
-    [(BDSKSearchBookmark *)[undoManager prepareWithInvocationTarget:self] removeChild:child];
+    [(BDSKSearchBookmark *)[[self undoManager] prepareWithInvocationTarget:self] removeChild:child];
     [children insertObject:child atIndex:idx];
     [child setParent:self];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchBookmarkChangedNotification object:self];
@@ -327,8 +336,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (void)removeChild:(BDSKSearchBookmark *)child {
-    NSUndoManager *undoManager = [[BDSKSearchBookmarkController sharedBookmarkController] undoManager];
-    [(BDSKSearchBookmark *)[undoManager prepareWithInvocationTarget:self] insertChild:child atIndex:[[self children] indexOfObject:child]];
+    [(BDSKSearchBookmark *)[[self undoManager] prepareWithInvocationTarget:self] insertChild:child atIndex:[[self children] indexOfObject:child]];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchBookmarkWillBeRemovedNotification object:self];
     [child setParent:nil];
     [children removeObject:child];

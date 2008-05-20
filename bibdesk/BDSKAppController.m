@@ -660,7 +660,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
     } else if ([menu isEqual:searchBookmarksMenu]) {
         
-        NSArray *bookmarks = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarks];
+        NSArray *bookmarks = [[[BDSKSearchBookmarkController sharedBookmarkController] bookmarkRoot] children];
         int i = [menu numberOfItems];
         while (--i > 2)
             [menu removeItemAtIndex:i];
@@ -670,7 +670,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
     } else if ([menu isEqual:bookmarksMenu]) {
         
-        NSArray *bookmarks = [[BDSKBookmarkController sharedBookmarkController] bookmarks];
+        NSArray *bookmarks = [[[BDSKBookmarkController sharedBookmarkController] bookmarkRoot] children];
         int i = [menu numberOfItems];
         while (--i > 1)
             [menu removeItemAtIndex:i];

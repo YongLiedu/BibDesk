@@ -47,7 +47,7 @@
     IBOutlet NSWindow *addBookmarkSheet;
     IBOutlet NSTextField *bookmarkField;
     IBOutlet NSPopUpButton *folderPopUp;
-    NSMutableArray *bookmarks;
+    BDSKBookmark *bookmarkRoot;
     NSUndoManager *undoManager;
     NSArray *draggedBookmarks;
     NSMutableDictionary *toolbarItems;
@@ -55,12 +55,7 @@
 
 + (id)sharedBookmarkController;
 
-- (NSArray *)bookmarks;
-- (void)setBookmarks:(NSArray *)newBookmarks;
-- (unsigned)countOfBookmarks;
-- (id)objectInBookmarksAtIndex:(unsigned)index;
-- (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)index;
-- (void)removeObjectFromBookmarksAtIndex:(unsigned)index;
+- (BDSKBookmark *)bookmarkRoot;
 
 - (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name;
 - (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name toFolder:(BDSKBookmark *)folder;
@@ -76,8 +71,6 @@
 - (IBAction)deleteBookmark:(id)sender;
 
 - (IBAction)dismissAddBookmarkSheet:(id)sender;
-
-- (NSString *)uniqueName;
 
 - (NSUndoManager *)undoManager;
 
