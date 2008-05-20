@@ -1003,6 +1003,10 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     return @"";
 }
 
+- (NSString *)tokenField:(NSTokenField *)tokenField editingStringForRepresentedObject:(id)representedObject {
+    return nil;
+}
+
 - (NSTokenStyle)tokenField:(NSTokenField *)tokenField styleForRepresentedObject:(id)representedObject {
     if ([representedObject isKindOfClass:[BDSKToken class]])
         return NSRoundedTokenStyle;
