@@ -79,7 +79,9 @@
     int editedRow = [self editedRow];
     int editedColumn = [self editedColumn];
     
+    endEditing = YES;
     [super textDidEndEditing:aNotification];
+    endEditing = NO;
     
     // on Leopard, we have to manually handle tab/return movements to avoid losing focus
     // http://www.cocoabuilder.com/archive/message/cocoa/2007/10/31/191866
@@ -116,7 +118,7 @@
 
 - (BOOL)becomeFirstResponder {
     if ([super becomeFirstResponder]) {
-        if ([self editedRow] == -1) {
+        if ([self editedRow] == -1 && endEditing == NO) {
             int row = -1, column, numRows = [self numberOfRows], numCols = [self numberOfColumns];
             switch ([[self window] keyViewSelectionDirection]) {
                 case NSSelectingNext:
