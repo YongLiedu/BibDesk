@@ -117,7 +117,7 @@
 	return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:key name:[self normalizedName]] autorelease];
 }
 
-- (NSArray *)publications {
+- (NSArray *)scriptingPublications {
     // only publications belonging to a BibDocument are scriptable
 	BibDocument * myDoc = (BibDocument *)[[self publication] owner];
 	if (myDoc) {
