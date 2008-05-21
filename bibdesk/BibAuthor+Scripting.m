@@ -36,7 +36,6 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import "BibAuthor+Scripting.h"
-#import "BibDocument.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKOwnerProtocol.h"
 #import "NSObject_BDSKExtensions.h"
@@ -108,23 +107,20 @@
 }
 
 - (NSScriptObjectSpecifier *) objectSpecifier {
-	// NSLog(@"BibAuthor objectSpecifier");
-    // only publications belonging to a BibDocument are scriptable
-	BibDocument * myDoc = (BibDocument *)[[self publication] owner];
-	NSScriptObjectSpecifier *containerRef = [myDoc objectSpecifier];
+	id owner = [[self publication] owner];
+	NSScriptObjectSpecifier *containerRef = [owner objectSpecifier];
     NSString *key = [field isEqualToString:BDSKEditorString] ? @"editors" : @"authors";
 		
 	return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:key name:[self normalizedName]] autorelease];
 }
 
 - (NSArray *)scriptingPublications {
-    // only publications belonging to a BibDocument are scriptable
-	BibDocument * myDoc = (BibDocument *)[[self publication] owner];
-	if (myDoc) {
+	id owner = [[self publication] owner];
+	if (owner) {
         if ([field isEqualToString:BDSKEditorString])
-            return [[myDoc publications] itemsForEditor:self];
+            return [[owner publications] itemsForEditor:self];
         else
-            return [[myDoc publications] itemsForAuthor:self];
+            return [[owner publications] itemsForAuthor:self];
 	}
     return [NSArray array];
 }
