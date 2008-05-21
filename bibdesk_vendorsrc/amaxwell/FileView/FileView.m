@@ -2335,6 +2335,34 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 #pragma mark User interaction
 
+// override to select the first or last item when (back)tabbing into the file view
+- (BOOL)becomeFirstResponder {
+    if ([super becomeFirstResponder]) {
+        if (YES) {
+            NSUInteger idx = NSNotFound, numIcons = [self numberOfIcons];
+            if (numIcons > 0) {
+                switch ([[self window] keyViewSelectionDirection]) {
+                    case NSSelectingNext:
+                        idx = 0;
+                        break;
+                    case NSSelectingPrevious:
+                        idx = numIcons - 1;
+                        break;
+                    default:
+                        break;
+                }
+                if (idx != NSNotFound) {
+                    [self scrollItemAtIndexToVisible:idx];
+                    [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:idx]];
+                }
+            }
+        }
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
 - (void)scrollItemAtIndexToVisible:(NSUInteger)anIndex
 {
     NSUInteger r = 0, c = 0;
@@ -2383,12 +2411,22 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (void)insertTab:(id)sender;
 {
-    [self selectNextIcon:self];
+    NSUInteger curIdx = [_selectedIndexes lastIndex];
+    
+    if ([self numberOfIcons] > 0 && curIdx != numIcons - 1)
+        [self selectNextIcon:self];
+    else
+        [[self window] selectNextKeyView:self]; 
 }
 
 - (void)insertBacktab:(id)sender;
 {
-    [self selectPreviousIcon:self];
+    NSUInteger curIdx = [_selectedIndexes firstIndex];
+    
+    if ([self numberOfIcons] > 0 && curIdx != 0)
+        [self selectPreviousIcon:self];
+    else
+        [[self window] selectPreviousKeyView:self]; 
 }
 
 - (void)moveToBeginningOfLine:(id)sender;
@@ -2503,16 +2541,14 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 - (IBAction)selectPreviousIcon:(id)sender;
 {
     NSUInteger curIdx = [_selectedIndexes firstIndex];
-    NSUInteger previous = NSNotFound;
+    NSUInteger previous = NSNotFound, numIcons = [self numberOfIcons];
     
-    if (NSNotFound == curIdx)
-        previous = 0;
-    else if (0 == curIdx && [self numberOfIcons] > 0) 
-        previous = ([self numberOfIcons] - 1);
-    else if ([self numberOfIcons] > 0)
-        previous = curIdx - 1;
-    
-    if (NSNotFound != previous) {
+    if (numIcons > 0) {
+        if (NSNotFound != curIdx && curIdx > 0)
+            previous = curIdx - 1;
+        else
+            previous = numIcons - 1;
+        
         [self scrollItemAtIndexToVisible:previous];
         [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:previous]];
     }
@@ -2520,13 +2556,18 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (IBAction)selectNextIcon:(id)sender;
 {
-    NSUInteger curIdx = [_selectedIndexes firstIndex];
-    NSUInteger next = NSNotFound == curIdx ? 0 : curIdx + 1;
-    if (next >= [self numberOfIcons])
-        next = 0;
-
-    [self scrollItemAtIndexToVisible:next];
-    [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:next]];
+    NSUInteger curIdx = [_selectedIndexes lastIndex];
+    NSUInteger next = NSNotFound, numIcons = [self numberOfIcons];
+    
+    if (numIcons > 0) {
+        if (NSNotFound != curIdx && curIdx + 1 < numIcons) 
+            next = curIdx + 1;
+        else
+            next = 0;
+        
+        [self scrollItemAtIndexToVisible:next];
+        [self setSelectionIndexes:[NSIndexSet indexSetWithIndex:next]];
+    }
 }
 
 - (IBAction)revealInFinder:(id)sender
