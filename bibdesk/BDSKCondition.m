@@ -108,7 +108,7 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
         NSString *aKey = [dictionary objectForKey:@"key"];
         
         // Backwards compatibility check.  Old versions of BibDesk used BDSKAllFieldsString = NSLocalizedString(@"Any Field", @"").  Before the first localization was introduced, the definition was changed to @"AllFields", which is locale-independent and more clearly related to the constant string; unfortunately, I didn't realize the definition was being saved to disk in smart groups.  Rather than change the definition back again and break groups added in the meantime, we'll just check for "Any Field" here (must be unlocalized) and use the new constant string.
-        if ([aKey isEqualToString:@"Any Field"])
+        if ([aKey isEqualToString:@"Any Field"] || [aKey isEqualToString:@"AllFields"])
             aKey = BDSKAllFieldsString;
         
 		NSString *aValue = [[dictionary objectForKey:@"value"] stringByUnescapingGroupPlistEntities];

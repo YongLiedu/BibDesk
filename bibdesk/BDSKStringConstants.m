@@ -218,9 +218,6 @@ NSString *BDSKShouldShowWebGroupPrefKey = @"BDSKShouldShowWebGroup";
 
 #pragma mark Field name strings
 
-NSString *BDSKCiteKeyString = @"Cite Key";
-NSString *BDSKLocalFileString = @"Local File";
-NSString *BDSKRemoteURLString = @"Remote URL";
 NSString *BDSKAnnoteString = @"Annote";
 NSString *BDSKAbstractString = @"Abstract";
 NSString *BDSKRssDescriptionString = @"Rss-Description";
@@ -249,6 +246,13 @@ NSString *BDSKPubDateString = @"Publication Date";
 NSString *BDSKCrossrefString = @"Crossref";
 NSString *BDSKRatingString = @"Rating";
 NSString *BDSKReadString = @"Read";
+NSString *BDSKTypeString = @"Type";
+NSString *BDSKAddressString = @"Address";
+NSString *BDSKDoiString = @"Doi";
+NSString *BDSKCiteseerUrlString = @"Citeseerurl";
+NSString *BDSKInstitutionString = @"Institution";
+NSString *BDSKSchoolString = @"School";
+
 NSString *BDSKBibtexString = @"BibTeX";
 NSString *BDSKFirstAuthorString = @"1st Author";
 NSString *BDSKSecondAuthorString = @"2nd Author";
@@ -261,13 +265,16 @@ NSString *BDSKAuthorEditorString = @"Author or Editor";
 NSString *BDSKLastAuthorEditorString = @"Last Author or Editor";
 NSString *BDSKItemNumberString = @"Item Number";
 NSString *BDSKImportOrderString = @"Import Order";
-NSString *BDSKTypeString = @"Type";
-NSString *BDSKAddressString = @"Address";
-NSString *BDSKDoiString = @"Doi";
-NSString *BDSKCiteseerUrlString = @"Citeseerurl";
-NSString *BDSKInstitutionString = @"Institution";
-NSString *BDSKSchoolString = @"School";
+NSString *BDSKRelevanceString = @"Search Relevance";
 NSString *BDSKPubTypeString = @"BibTeX Type"; // this is used for -[BibItem setPubType:], not equivalent to @"Type"
+NSString *BDSKCiteKeyString = @"Cite Key";
+NSString *BDSKLocalFileString = @"Local File";
+NSString *BDSKRemoteURLString = @"Remote URL";
+NSString *BDSKAllFieldsString = @"All Fields";
+NSString *BDSKFileContentSearchString = @"File Content";
+NSString *BDSKPersonString = @"Any Person";
+NSString *BDSKSkimNotesString = @"Skim Notes";
+
 NSString *BDSKArticleString = @"article";
 NSString *BDSKBookString = @"book";
 NSString *BDSKInbookString = @"inbook";
@@ -283,6 +290,8 @@ NSString *BDSKMiscString = @"misc";
 NSString *BDSKUnpublishedString = @"unpublished";
 NSString *BDSKMastersThesisString = @"mastersthesis";
 NSString *BDSKPhDThesisString = @"phdthesis";
+
+NSString *BDSKParserPasteDragString = @"Paste/Drag";
 
 #pragma mark ||  Notification name strings
 NSString *BDSKFinalizeChangesNotification = @"Finalize Changes Notification";
@@ -328,13 +337,6 @@ NSString *BDSKTemporaryFileMigrationNotification = @"BDSKTemporaryFileMigrationN
 
 NSString *BDSKComplexStringException = @"BDSKComplexStringException";
 NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
-
-NSString *BDSKParserPasteDragString = @"Paste/Drag";
-NSString *BDSKAllFieldsString = @"AllFields";
-NSString *BDSKFileContentSearchString = @"FileContent";
-NSString *BDSKRelevanceString = @"Relevance";
-NSString *BDSKPersonString = @"Person";
-NSString *BDSKSkimNotesString = @"SkimNotes";
 
 /*
  

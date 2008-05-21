@@ -77,7 +77,7 @@ static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionCont
 		canRemove = [filterController canRemoveCondition];
 		
         BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-        keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateAddedString, BDSKDateModifiedString, BDSKPubTypeString, BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, BDSKLocalFileString, BDSKRemoteURLString, nil]
+        keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateAddedString, BDSKDateModifiedString, BDSKAllFieldsString, BDSKPubTypeString, BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, BDSKLocalFileString, BDSKRemoteURLString, nil]
                                       excluding:nil] mutableCopy];
     }
     return self;
