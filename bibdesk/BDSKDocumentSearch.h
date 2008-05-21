@@ -67,5 +67,6 @@
 
 // This will be sent on the main thread.  Each set only contains newly returned items (since the last time it was sent), but scores include properly normalized values for all previously returned items as well.
 @interface NSObject (BDSKDocumentSearchCallback)
+- (void)searchFinished:(BDSKDocumentSearch *)aSearch;
 - (void)handleSearchCallbackWithIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
 @end

@@ -267,6 +267,7 @@ enum {
         
         searchIndexes = [[BDSKItemSearchIndexes alloc] init];   
         documentSearch = [[BDSKDocumentSearch alloc] initWithDocument:(id)self];
+        rowToSelectAfterDelete = -1;
     }
     return self;
 }

@@ -218,6 +218,25 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     return searchFieldString;
 }
 
+- (void)searchFinished:(BDSKDocumentSearch *)aSearch;
+{
+    if(rowToSelectAfterDelete >= [tableView numberOfRows])
+        rowToSelectAfterDelete = [tableView numberOfRows] - 1;
+    if(rowToSelectAfterDelete != -1) {
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:rowToSelectAfterDelete] byExtendingSelection:NO];
+        [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollLocationAfterDelete];
+    } 
+    
+    if ([self numberOfSelectedPubs] == 0) {
+        [tableView setScrollPositionAsPercentage:[documentSearch previousScrollPositionAsPercentage]];
+    }
+
+    rowToSelectAfterDelete = -1;
+    scrollLocationAfterDelete = NSZeroPoint;
+
+    [self updateStatus];
+}
+
 - (void)handleSearchCallbackWithIdentifiers:(NSSet *)identifierURLs normalizedScores:(NSDictionary *)scores;
 {
     id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;    
@@ -246,11 +265,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     }
     
     [self sortPubsByKey:nil];
+    [self selectPublications:[documentSearch previouslySelectedPublications]];    
     [self updateStatus];
-    
-    [self selectPublications:[documentSearch previouslySelectedPublications]];
-    if ([self numberOfSelectedPubs] == 0)
-        [tableView setScrollPositionAsPercentage:[documentSearch previousScrollPositionAsPercentage]];
 }
         
 - (void)displayPublicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field {

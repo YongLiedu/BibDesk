@@ -231,26 +231,29 @@
     
     // deletion changes the scroll position
     NSTableView *tv = [self isDisplayingFileContentSearch] ? [fileSearchController tableView] : tableView;
-    NSPoint scrollLocation = [[tv enclosingScrollView] scrollPositionAsPercentage];
-    int lastIndex = [[tv selectedRowIndexes] lastIndex];
-	[self removePublications:[self selectedPublications]];
-    [[tv enclosingScrollView] setScrollPositionAsPercentage:scrollLocation];
-    
-    // should select the publication following the last deleted publication (if any)
-	if(lastIndex >= [tv numberOfRows])
-        lastIndex = [tv numberOfRows] - 1;
-    if(lastIndex != -1)
-        [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:lastIndex] byExtendingSelection:NO];
-    
 	int numSelectedPubs = [self numberOfSelectedPubs];
+    
+    // This is preserved as an ivar; since removePublications: triggers an async search as a UI update, restoring the selection/scroll position here will no longer work if a search is active.  Storing a row is safe since sort order should be stable.
+    rowToSelectAfterDelete = [[tv selectedRowIndexes] lastIndex];
+    scrollLocationAfterDelete = [[tv enclosingScrollView] scrollPositionAsPercentage];
+	[self removePublications:[self selectedPublications]];
+    
+    if([NSString isEmptyString:[self searchString]]) {
+        if(rowToSelectAfterDelete >= [tv numberOfRows])
+            rowToSelectAfterDelete = [tv numberOfRows] - 1;
+        if(rowToSelectAfterDelete != -1)
+            [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:rowToSelectAfterDelete] byExtendingSelection:NO];
+        rowToSelectAfterDelete = -1;
+        [[tv enclosingScrollView] setScrollPositionAsPercentage:scrollLocationAfterDelete];
+        scrollLocationAfterDelete = NSZeroPoint;
+    }
+    
 	NSString * pubSingularPlural;
 	if (numSelectedPubs == 1) {
 		pubSingularPlural = NSLocalizedString(@"publication", @"publication, in status message");
 	} else {
 		pubSingularPlural = NSLocalizedString(@"publications", @"publications, in status message");
 	}
-	
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Deleted %i %@",@"Deleted %i %@ [i-> number, @-> publication(s)]"),numSelectedPubs, pubSingularPlural] immediate:NO];
 	
 	[[self undoManager] setActionName:[NSString stringWithFormat:NSLocalizedString(@"Delete %@", @"Undo action name: Delete Publication(s)"),pubSingularPlural]];
 }

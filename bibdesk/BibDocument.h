@@ -252,6 +252,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     BDSKItemSearchIndexes *searchIndexes;
     BDSKSearchButtonController *searchButtonController;
     BDSKDocumentSearch *documentSearch;
+    int rowToSelectAfterDelete;
+    NSPoint scrollLocationAfterDelete;
     
     BDSKFileMigrationController *migrationController;
     

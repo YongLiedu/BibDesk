@@ -129,6 +129,11 @@ static OFMessageQueue *searchQueue = nil;
     return scores;
 }
 
+- (void)invokeFinishedCallback
+{
+    [[callback target] searchFinished:self];
+}
+
 #define SEARCH_BUFFER_MAX 1024
 
 // array argument is so OFInvocation doesn't barf when it tries to retain the SKIndexRef
@@ -187,7 +192,7 @@ static OFMessageQueue *searchQueue = nil;
         [searchLock unlock];
         
     } while (keepGoing && NULL != search && more);
-    
+    [self performSelectorOnMainThread:@selector(invokeFinishedCallback) withObject:nil waitUntilDone:YES];
     [self _cancelSearch];  
 }
 
