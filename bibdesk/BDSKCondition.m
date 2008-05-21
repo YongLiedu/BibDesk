@@ -257,10 +257,23 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
         
         OBASSERT(stringValue != nil);
         
-        if (stringComparison == BDSKGroupContain) 
-            return ([item isContainedInGroupNamed:stringValue forField:key] == YES);
-        if (stringComparison == BDSKGroupNotContain) 
-            return ([item isContainedInGroupNamed:stringValue forField:key] == NO);
+        if (stringComparison == BDSKGroupContain || stringComparison == BDSKGroupNotContain) {
+            if ([key isEqualToString:BDSKAllFieldsString]) {
+                NSEnumerator *fieldEnum = [[item allFieldNames] objectEnumerator];
+                NSString *field;
+                BOOL isContain = stringComparison == BDSKGroupContain;
+                while (field = [fieldEnum nextObject]) {
+                    if ([field isInvalidGroupField] == NO && [item isContainedInGroupNamed:stringValue forField:field])
+                        return isContain;
+                }
+                return NO == isContain;
+            } else {
+                if (stringComparison == BDSKGroupContain) 
+                    return ([item isContainedInGroupNamed:stringValue forField:key] == YES);
+                if (stringComparison == BDSKGroupNotContain) 
+                    return ([item isContainedInGroupNamed:stringValue forField:key] == NO);
+            }
+        }
         
         // use local values, as we may change them to support "Any Field"
         int comparison = stringComparison;
