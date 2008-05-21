@@ -660,6 +660,10 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [sideFileView setDataSource:nil];
     [sideFileView setDelegate:nil];
     
+    [bottomFileView removeObserver:self forKeyPath:@"iconScale"];
+    [bottomFileView setDataSource:nil];
+    [bottomFileView setDelegate:nil];
+    
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
