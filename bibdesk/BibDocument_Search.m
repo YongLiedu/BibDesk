@@ -220,20 +220,24 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 
 - (void)searchFinished:(BDSKDocumentSearch *)aSearch;
 {
-    if(rowToSelectAfterDelete >= [tableView numberOfRows])
-        rowToSelectAfterDelete = [tableView numberOfRows] - 1;
-    if(rowToSelectAfterDelete != -1) {
-        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:rowToSelectAfterDelete] byExtendingSelection:NO];
-        [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollLocationAfterDelete];
-    } 
-    
+    // maintain scroll position, select next item if the user didn't select something else during the search
     if ([self numberOfSelectedPubs] == 0) {
-        [tableView setScrollPositionAsPercentage:[documentSearch previousScrollPositionAsPercentage]];
+        
+        // rowToSelectAfterDelete == -1 for non-delete operations
+        if(rowToSelectAfterDelete >= [tableView numberOfRows])
+            rowToSelectAfterDelete = [tableView numberOfRows] - 1;
+        if(rowToSelectAfterDelete != -1) {
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:rowToSelectAfterDelete] byExtendingSelection:NO];
+            [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollLocationAfterDelete];
+        } else {
+            // no prior selection
+            [tableView setScrollPositionAsPercentage:[documentSearch previousScrollPositionAsPercentage]];
+        }
     }
-
+    
     rowToSelectAfterDelete = -1;
     scrollLocationAfterDelete = NSZeroPoint;
-
+    
     [self updateStatus];
 }
 
