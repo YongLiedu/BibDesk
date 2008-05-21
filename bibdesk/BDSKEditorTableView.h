@@ -39,7 +39,9 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKEditorTableView : NSTableView
+@interface BDSKEditorTableView : NSTableView {
+    BOOL endEditing;
+}
 @end
 
 @interface NSObject (BDSKEditorTableViewDelegate)
