@@ -826,7 +826,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The author's name. This name is normalized as 'von Last, Jr, First'.">
                 <cocoa key="normalizedName"/>
             </property>
-            <property name="full name" type="text" code="aunm"
+            <property name="full name" type="text" code="aunm" access="r"
                 description="The author's full name, as 'First von Last, Jr'.">
                 <cocoa key="name"/>
             </property>
