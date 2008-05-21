@@ -203,17 +203,17 @@ There could be other extensions, like matching for every word with conjunction o
             name = [auth name];
         if (nil != name) {
             [string appendString:name];
-            [string appendString:@"|"];
+            [string appendFormat:@"%C", 0x1E];
         }
 	}
     
     // these are all guaranteed to be non-nil
     [string appendString:[self citeKey]];
-    [string appendString:@"|"];
+    [string appendFormat:@"%C", 0x1E];
     [string appendString:[self displayTitle]];
-    [string appendString:@"|"];
+    [string appendFormat:@"%C", 0x1E];
     [string appendString:[self keywords]];
-    [string appendString:@"|"];
+    [string appendFormat:@"%C", 0x1E];
 
 	Boolean result = CFStringFindWithOptions((CFStringRef)string,(CFStringRef)searchterm, CFRangeMake(0, [string length]), kCFCompareCaseInsensitive, NULL);
     [string release];

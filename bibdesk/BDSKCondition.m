@@ -262,6 +262,9 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
         if (stringComparison == BDSKGroupNotContain) 
             return ([item isContainedInGroupNamed:stringValue forField:key] == NO);
         
+        // use local values, as we may change them to support "Any Field"
+        int comparison = stringComparison;
+        NSString *value = stringValue;
         NSString *itemValue = [item stringValueOfField:key];
         // unset values are considered empty strings
         if (itemValue == nil)
@@ -270,21 +273,49 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
         if ([itemValue isComplex] || [itemValue isInherited])
             itemValue = [NSString stringWithString:itemValue];
         
-        if (stringComparison == BDSKEqual) 
-            return ([stringValue caseInsensitiveCompare:itemValue] == NSOrderedSame);
-        if (stringComparison == BDSKNotEqual) 
-            return ([stringValue caseInsensitiveCompare:itemValue] != NSOrderedSame);
+        if (comparison == BDSKEqual || comparison == BDSKNotEqual) {
+            if ([key isEqualToString:BDSKAllFieldsString]) {
+                comparison = comparison == BDSKEqual ? BDSKContain : BDSKNotContain;
+                itemValue = [NSString stringWithFormat:@"%C%@%C", 0x1E, itemValue, 0x1E];
+                value = [NSString stringWithFormat:@"%C%@%C", 0x1E, stringValue, 0x1E];
+            } else {
+                if (comparison == BDSKEqual) 
+                    return ([value caseInsensitiveCompare:itemValue] == NSOrderedSame);
+                else if (comparison == BDSKNotEqual) 
+                    return ([value caseInsensitiveCompare:itemValue] != NSOrderedSame);
+            }
+        } 
+        
+        if (comparison == BDSKSmaller || comparison == BDSKLarger) {
+            NSComparisonResult result = [value localizedCaseInsensitiveNumericCompare:itemValue];
+            if (comparison == BDSKSmaller) 
+                return (result == NSOrderedDescending);
+            if (comparison == BDSKLarger) 
+                return (result == NSOrderedAscending);
+        }
         
         // minor optimization: Shark showed -[NSString rangeOfString:options:] as a bottleneck, calling through to CFStringFindWithOptions
         CFOptionFlags options = kCFCompareCaseInsensitive;
-        if (stringComparison == BDSKEndWith)
-            options |= kCFCompareBackwards | kCFCompareAnchored;
-        else if (stringComparison == BDSKStartWith)
-            options |= kCFCompareAnchored;
+        if (comparison == BDSKEndWith || comparison == BDSKStartWith) {
+            if ([key isEqualToString:BDSKAllFieldsString]) {
+                if (comparison == BDSKEndWith) {
+                    itemValue = [NSString stringWithFormat:@"%@%C", itemValue, 0x1E];
+                    value = [NSString stringWithFormat:@"%@%C", stringValue, 0x1E];
+                } else if (comparison == BDSKStartWith) {
+                    itemValue = [NSString stringWithFormat:@"%C%@", 0x1E, itemValue];
+                    value = [NSString stringWithFormat:@"%C%@", 0x1E, stringValue];
+                }
+            } else {
+                if (comparison == BDSKEndWith)
+                    options |= kCFCompareBackwards | kCFCompareAnchored;
+                else if (comparison == BDSKStartWith)
+                    options |= kCFCompareAnchored;
+            }
+        }
         CFRange range;
         CFIndex itemLength = CFStringGetLength((CFStringRef)itemValue);
-        Boolean foundString = CFStringFindWithOptions((CFStringRef)itemValue, (CFStringRef)stringValue, CFRangeMake(0, itemLength), options, &range);
-        switch (stringComparison) {
+        Boolean foundString = CFStringFindWithOptions((CFStringRef)itemValue, (CFStringRef)value, CFRangeMake(0, itemLength), options, &range);
+        switch (comparison) {
             case BDSKContain:
             case BDSKStartWith:
             case BDSKEndWith:
@@ -294,12 +325,6 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
             default:
                 break; // other enum types are handled before the switch, but the compiler doesn't know that
         }
-        
-        NSComparisonResult result = [stringValue localizedCaseInsensitiveNumericCompare:itemValue];
-        if (stringComparison == BDSKSmaller) 
-            return (result == NSOrderedDescending);
-        if (stringComparison == BDSKLarger) 
-            return (result == NSOrderedAscending);
         
     }
     
