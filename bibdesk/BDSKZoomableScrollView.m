@@ -134,23 +134,17 @@ static float BDSKScaleMenuFontSize = 11.0;
     }
 	
 	if (fabsf(scaleFactor - newScaleFactor) > 0.01) {
-		NSSize curDocFrameSize, newDocBoundsSize;
 		NSView *documentView = [self documentView];
-		NSView *clipView = [documentView superview];
         NSPoint scrollPoint = [documentView scrollPositionAsPercentage];
 		
 		scaleFactor = newScaleFactor;
 		
-		// Get the frame.  The frame must stay the same.
-		curDocFrameSize = [clipView frame].size;
-		
-		// The new bounds will be frame divided by scale factor
-		newDocBoundsSize.width = curDocFrameSize.width / scaleFactor;
-		newDocBoundsSize.height = curDocFrameSize.height / scaleFactor;
-		
-		[clipView setBoundsSize:newDocBoundsSize];
-		
+        [documentView scaleUnitSquareToSize:[documentView convertSize:NSMakeSize(1.0, 1.0) fromView:nil]];
+        [documentView scaleUnitSquareToSize:NSMakeSize(scaleFactor, scaleFactor)];
+        if ([documentView respondsToSelector:@selector(sizeToFit)])
+            [(NSText *)documentView sizeToFit];
 		[documentView setScrollPositionAsPercentage:scrollPoint]; // maintain approximate scroll position
+        [[documentView superview] setNeedsDisplay:YES];
     }
 }
 
