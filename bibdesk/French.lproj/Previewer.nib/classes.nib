@@ -47,17 +47,6 @@
             SUPERCLASS = PDFView;
         },
                 {
-            ACTIONS =             {
-                scalePopUpAction = id;
-                zoomIn = id;
-                zoomOut = id;
-                zoomToActualSize = id;
-            };
-            CLASS = BDSKZoomableScrollView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSScrollView;
-        },
-                {
             CLASS = BDSKZoomableTextView;
             LANGUAGE = ObjC;
             SUPERCLASS = NSTextView;

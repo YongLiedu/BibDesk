@@ -117,7 +117,6 @@
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		CE023F5D0CC50F87003F52E5 /* Add_Small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */; };
-		CE09CEA60DDEF65E00F3F2FE /* BDSKCompletionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CE09CEA40DDEF65E00F3F2FE /* BDSKCompletionManager.h */; };
 		CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */; };
 		CE0EB4440DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */; };
 		CE117D240D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE117D220D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.m */; };
@@ -337,7 +336,6 @@
 		F9022CAA0758038000C3F701 /* BDSKStringConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C940758038000C3F701 /* BDSKStringConstants.m */; };
 		F9022CAB0758038000C3F701 /* BDSKBibTeXParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C960758038000C3F701 /* BDSKBibTeXParser.m */; };
 		F9022CAC0758038000C3F701 /* BDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C980758038000C3F701 /* BDSKTypeManager.m */; };
-		F9022CAD0758038000C3F701 /* BDSKZoomableScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */; };
 		F9022CAE0758038000C3F701 /* NSImage_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C9D0758038000C3F701 /* NSImage_BDSKExtensions.m */; };
 		F9022CAF0758038000C3F701 /* NSString_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C9F0758038000C3F701 /* NSString_BDSKExtensions.m */; };
 		F9022CB00758038000C3F701 /* NSTextView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022CA10758038000C3F701 /* NSTextView_BDSKExtensions.m */; };
@@ -1311,8 +1309,6 @@
 		F9022C960758038000C3F701 /* BDSKBibTeXParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKBibTeXParser.m; sourceTree = "<group>"; };
 		F9022C970758038000C3F701 /* BDSKTypeManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTypeManager.h; sourceTree = "<group>"; };
 		F9022C980758038000C3F701 /* BDSKTypeManager.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTypeManager.m; sourceTree = "<group>"; };
-		F9022C990758038000C3F701 /* BDSKZoomableScrollView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKZoomableScrollView.h; sourceTree = "<group>"; };
-		F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKZoomableScrollView.m; sourceTree = "<group>"; };
 		F9022C9B0758038000C3F701 /* html2tex.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = html2tex.h; sourceTree = "<group>"; };
 		F9022C9C0758038000C3F701 /* NSImage_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSImage_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9022C9D0758038000C3F701 /* NSImage_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSImage_BDSKExtensions.m; sourceTree = "<group>"; };
@@ -2043,7 +2039,6 @@
 				CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */,
 				F9DCEA4E094B7D1100AEE662 /* BDSKTextWithIconCell.m */,
 				F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */,
-				F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */,
 				CE27D95A0AF92BFD00419879 /* BDSKZoomableTextView.m */,
 				F9A6772C07D2D57F00782ACD /* MultiplePageView.m */,
 			);
@@ -2622,7 +2617,6 @@
 				F9E069B40981A03B00AEFBE7 /* BDSKWebOfScienceParser.h */,
 				CE3A254D0B75FF09006B64D3 /* BDSKWebParser.h */,
 				F98F33C80892D4B700C1427D /* BDSKZoomablePDFView.h */,
-				F9022C990758038000C3F701 /* BDSKZoomableScrollView.h */,
 				CE27D9590AF92BFD00419879 /* BDSKZoomableTextView.h */,
 				F9B8019C0B41E91F00A5A615 /* BDSKZoomGroupServer.h */,
 				F9B800920B41DFAF00A5A615 /* BDSKSearchGroupSheetController.h */,
@@ -2881,7 +2875,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE09CEA60DDEF65E00F3F2FE /* BDSKCompletionManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3588,7 +3581,6 @@
 				F9022CAA0758038000C3F701 /* BDSKStringConstants.m in Sources */,
 				F9022CAB0758038000C3F701 /* BDSKBibTeXParser.m in Sources */,
 				F9022CAC0758038000C3F701 /* BDSKTypeManager.m in Sources */,
-				F9022CAD0758038000C3F701 /* BDSKZoomableScrollView.m in Sources */,
 				F9022CAE0758038000C3F701 /* NSImage_BDSKExtensions.m in Sources */,
 				F9022CAF0758038000C3F701 /* NSString_BDSKExtensions.m in Sources */,
 				F9022CB00758038000C3F701 /* NSTextView_BDSKExtensions.m in Sources */,

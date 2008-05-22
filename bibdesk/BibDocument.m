@@ -81,7 +81,7 @@
 #import "BDSKSplitView.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKZoomablePDFView.h"
-#import "BDSKZoomableScrollView.h"
+#import "BDSKZoomableTextView.h"
 
 #import "BDSKMacroResolver.h"
 #import "BDSKErrorObjectController.h"
@@ -547,8 +547,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     }
     [bottomFileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKDocumentObservationContext];
     
-    [(BDSKZoomableScrollView *)[sidePreviewTextView enclosingScrollView] setScaleFactor:[xattrDefaults floatForKey:BDSKSidePreviewScaleFactorKey defaultValue:1.0]];
-    [(BDSKZoomableScrollView *)[bottomPreviewTextView enclosingScrollView] setScaleFactor:[xattrDefaults floatForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
+    [(BDSKZoomableTextView *)sidePreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKSidePreviewScaleFactorKey defaultValue:1.0]];
+    [(BDSKZoomableTextView *)bottomPreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
     
 	// ImagePopUpButtons setup
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
@@ -730,8 +730,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [dictionary setFloatValue:[bottomFileView autoScales] ? 0.0 : [bottomFileView iconScale] forKey:BDSKBottomFileViewIconScaleKey];
         [dictionary setFloatValue:[sideFileView autoScales] ? 0.0 : [sideFileView iconScale] forKey:BDSKSideFileViewIconScaleKey];
         
-        [dictionary setFloatValue:[(BDSKZoomableScrollView *)[bottomPreviewTextView enclosingScrollView] scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
-        [dictionary setFloatValue:[(BDSKZoomableScrollView *)[sidePreviewTextView enclosingScrollView] scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
+        [dictionary setFloatValue:[(BDSKZoomableTextView *)bottomPreviewTextView scaleFactor] forKey:BDSKBottomPreviewScaleFactorKey];
+        [dictionary setFloatValue:[(BDSKZoomableTextView *)sidePreviewTextView scaleFactor] forKey:BDSKSidePreviewScaleFactorKey];
         
         if(previewer){
             [dictionary setFloatValue:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];

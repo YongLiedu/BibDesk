@@ -40,6 +40,22 @@
 
 
 @interface BDSKZoomableTextView : NSTextView {
+    NSPopUpButton *scalePopUpButton;
+    float scaleFactor;
 }
+
+- (void)scalePopUpAction:(id)sender;
+- (float)scaleFactor;
+- (void)setScaleFactor:(float)factor;
+- (void)setScaleFactor:(float)factor adjustPopup:(BOOL)flag;
+
+- (IBAction)zoomToActualSize:(id)sender;
+- (IBAction)zoomIn:(id)sender;
+- (IBAction)zoomOut:(id)sender;
+- (BOOL)canZoomToActualSize;
+- (BOOL)canZoomIn;
+- (BOOL)canZoomOut;
+
+- (void)makeScalePopUpButton;
 
 @end

@@ -39,7 +39,7 @@
 #import "BDSKTeXTask.h"
 #import "BDSKOverlay.h"
 #import "BDSKAppController.h"
-#import "BDSKZoomableScrollView.h"
+#import "BDSKZoomableTextView.h"
 #import "BDSKZoomablePDFView.h"
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import "BibDocument.h"
@@ -171,7 +171,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
     
     // don't reset the scale factor until there's a document loaded, or else we get a huge gray border
     [pdfView setScaleFactor:pdfScaleFactor];
-	[(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] setScaleFactor:rtfScaleFactor];
+	[(BDSKZoomableTextView *)rtfPreviewView setScaleFactor:rtfScaleFactor];
     
     [self displayPreviewsForState:BDSKEmptyPreviewState success:YES];
     
@@ -244,13 +244,13 @@ static BDSKPreviewer *sharedPreviewer = nil;
 - (float)RTFScaleFactor;
 {
     [self window];
-    return [(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] scaleFactor];
+    return [(BDSKZoomableTextView *)rtfPreviewView scaleFactor];
 }
 
 - (void)setRTFScaleFactor:(float)scaleFactor;
 {
     [self window];
-    [(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] setScaleFactor:scaleFactor];
+    [(BDSKZoomableTextView *)rtfPreviewView setScaleFactor:scaleFactor];
 }
 
 - (BOOL)isVisible{
@@ -495,7 +495,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 	if (fabsf(scaleFactor - [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey]) > 0.01)
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
-	scaleFactor = [(BDSKZoomableScrollView*)[rtfPreviewView enclosingScrollView] scaleFactor];
+	scaleFactor = [(BDSKZoomableTextView *)rtfPreviewView scaleFactor];
 	if (fabsf(scaleFactor - [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey]) > 0.01)
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
     
