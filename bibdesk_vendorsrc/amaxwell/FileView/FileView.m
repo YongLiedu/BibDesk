@@ -2335,6 +2335,13 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 #pragma mark User interaction
 
+- (void)scrollItemAtIndexToVisible:(NSUInteger)anIndex
+{
+    NSUInteger r = 0, c = 0;
+    if ([self _getGridRow:&r column:&c ofIndex:anIndex])
+        [self scrollRectToVisible:[self _rectOfIconInRow:r column:c]];
+}
+
 // override to select the first or last item when (back)tabbing into the file view
 - (BOOL)becomeFirstResponder {
     if ([super becomeFirstResponder]) {
@@ -2361,13 +2368,6 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
     } else {
         return NO;
     }
-}
-
-- (void)scrollItemAtIndexToVisible:(NSUInteger)anIndex
-{
-    NSUInteger r = 0, c = 0;
-    if ([self _getGridRow:&r column:&c ofIndex:anIndex])
-        [self scrollRectToVisible:[self _rectOfIconInRow:r column:c]];
 }
 
 - (void)moveUp:(id)sender;
@@ -2411,9 +2411,9 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 
 - (void)insertTab:(id)sender;
 {
-    NSUInteger curIdx = [_selectedIndexes lastIndex];
+    NSUInteger curIdx = [_selectedIndexes lastIndex], numIcons = [self numberOfIcons];
     
-    if ([self numberOfIcons] > 0 && curIdx != numIcons - 1)
+    if (numIcons > 0 && curIdx != numIcons - 1)
         [self selectNextIcon:self];
     else
         [[self window] selectNextKeyView:self]; 
