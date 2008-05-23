@@ -254,7 +254,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 }
 
 - (BOOL)isVisible{
-    return [[pdfView window] isVisible] || [[rtfPreviewView window] isVisible];
+    return [[self window] isVisible];
 }
 
 #pragma mark Actions
