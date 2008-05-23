@@ -1083,7 +1083,7 @@ inline static NSString *romanNumeralForDigit(unsigned digit, NSString *i, NSStri
     return [self componentsJoinedByString:@"/"];
 }
 
-- (NSString *)componentsJoinedByForwardSemicolon
+- (NSString *)componentsJoinedBySemicolon
 {
     return [self componentsJoinedByString:@"; "];
 }

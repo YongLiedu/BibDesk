@@ -4491,7 +4491,7 @@ Below are lists of collection keys that could be used in BibDesk export template
 
 @subheading General
 
-@multitable {@@componentsJoinedByCommaAndAndWithEtAlAfterThree} {}
+@multitable {@@componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive} {}
 @headitem Key @tab Description
 @item @@firstObject
 @tab 
@@ -4522,8 +4522,12 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item @@componentsJoinedByCommaAndAnd
 @tab 
 @item @@componentsJoinedByForwardSlash
+@tab 
+@item @@componentsJoinedBySemicolon
 @tab
 @item @@componentsJoinedByDefaultJoinString
+@tab 
+@item @@componentsJoinedByCommaAndAmpersand
 @tab
 @item @@componentsWithEtAlAfterOne
 @tab 
@@ -4532,6 +4536,16 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item @@componentsJoinedByAndWithEtAlAfterTwo
 @tab 
 @item @@componentsJoinedByCommaAndAndWithEtAlAfterThree
+@tab 
+@item @@componentsJoinedByAndWithEtAlAfterTwo
+@tab 
+@item @@componentsJoinedByCommaAndAndWithEtAlAfterThree
+@tab 
+@item @@componentsJoinedByAmpersandWithSingleEtAlAfterTwo
+@tab 
+@item @@componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive
+@tab 
+@item @@componentsJoinedByCommaAndAmpersandWithEtAlAfterSix
 @tab 
 @item @@arraySortedByAuthor
 @tab 
