@@ -43,6 +43,7 @@
 #import "BDSKACMDLParser.h"
 #import "BDSKHubmedParser.h"
 #import "BDSKGoogleScholarParser.h"
+#import "BDSKSpiresParser.h"
 #import "NSError_BDSKExtensions.h"
 
 @implementation BDSKWebParser
@@ -60,6 +61,8 @@ static Class webParserClassForType(int stringType)
             return [BDSKHubmedParser class];
 		case BDSKHCiteWebType: 
             return [BDSKHCiteParser class];
+		case BDSKSpiresWebType: 
+            return [BDSKSpiresParser class];
         default:
             return nil;
     }    
@@ -76,6 +79,8 @@ static Class webParserClassForType(int stringType)
         return BDSKACMDLWebType;
     if([BDSKHCiteParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
 		return BDSKHCiteWebType;
+    if([BDSKSpiresParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
+		return BDSKSpiresWebType;
     return BDSKUnknownWebType;
 }
 
