@@ -107,8 +107,7 @@
 }
 
 - (NSScriptObjectSpecifier *) objectSpecifier {
-	id owner = [[self publication] owner];
-	NSScriptObjectSpecifier *containerRef = [owner objectSpecifier];
+	NSScriptObjectSpecifier *containerRef = [[self publication] objectSpecifier];
     NSString *key = [field isEqualToString:BDSKEditorString] ? @"editors" : @"authors";
 		
 	return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:key name:[self normalizedName]] autorelease];
