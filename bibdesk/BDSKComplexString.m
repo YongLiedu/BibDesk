@@ -159,6 +159,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
             complex = YES;
             expandedString = nil;
             modification = 0;
+            defaultModification = 0;
         }
 	}		
     return self;
@@ -175,6 +176,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
         complex = [aValue isComplex];
 		inherited = YES;
         modification = 0;
+        defaultModification = 0;
         expandedString = nil;
 		if (complex) {
 			macroResolver = [(BDSKComplexString *)aValue macroResolver];
@@ -227,6 +229,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
             macroResolver = [BDSKComplexString macroResolverForUnarchiving];
             expandedString = nil;
             modification = 0;
+            defaultModification = 0;
         }
     } else {
         [[super init] release];
@@ -252,12 +255,14 @@ Rather than relying on the same call sequence to be used, I think we should igno
 }
 
 - (NSString *)expandedString {
-    BDSKMacroResolver *resolver = [self macroResolver];
-    if (expandedString == nil || (resolver != nil && modification != [resolver modification])) {
+    if (expandedString == nil ||
+        (macroResolver != nil && modification != [macroResolver modification]) ||
+        (complex && defaultModification != [[BDSKMacroResolver defaultMacroResolver] modification])) {
         [expandedString release];
         expandedString = (NSString *)__BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
-        if (resolver)
-            modification = [resolver modification];
+        if (macroResolver)
+            modification = [macroResolver modification];
+        defaultModification != [[BDSKMacroResolver defaultMacroResolver] modification]
     }
     return expandedString;
 }
