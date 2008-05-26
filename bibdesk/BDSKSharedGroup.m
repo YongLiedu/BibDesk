@@ -251,7 +251,7 @@ static NSImage *unlockedIcon = nil;
             [BDSKComplexString setMacroResolverForUnarchiving:nil];
         }
         [self setPublications:pubs];
-    } else if ([key isEqualToString:@"archivedPublications"]) {
+    } else if ([key isEqualToString:@"archivedMacros"]) {
         NSData *archive = [client archivedMacros];
         NSDictionary *macros = nil;
         if (archive) {
