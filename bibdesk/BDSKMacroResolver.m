@@ -89,6 +89,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     if (self = [super init]) {
         macroDefinitions = nil;
         owner = anOwner;
+        modification = 0;
     }
     return self;
 }
@@ -105,6 +106,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 
 - (NSUndoManager *)undoManager{
     return [owner undoManager];
+}
+
+- (unsigned long long)modification {
+    return modification;
 }
 
 - (NSString *)bibTeXString{
@@ -195,6 +200,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     [macroDefinitions removeObjectForKey:oldKey];
     [macroDefinitions setObject:val forKey:newKey];
 	
+    modification++;
     [self synchronize];
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Change key", @"type", oldKey, @"oldKey", newKey, @"newKey", nil];
@@ -212,6 +218,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 
     [macroDefinitions setObject:macroString forKey:macroKey];
 	
+    modification++;
     [self synchronize];
 	
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add macro", @"type", macroKey, @"macroKey", nil];
@@ -233,6 +240,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
             setMacroDefinition:oldDef forMacro:macroKey];
     [macroDefinitions setObject:newDefinition forKey:macroKey];
 	
+    modification++;
     [self synchronize];
 
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Change macro", @"type", macroKey, @"macroKey", nil];
@@ -254,6 +262,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     }
     [macroDefinitions removeObjectForKey:macroKey];
 	
+    modification++;
     [self synchronize];
 	
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Remove macro", @"type", macroKey, @"macroKey", nil];
@@ -288,6 +297,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
     // is used to create a dictionary with case-insensitive keys.
     macroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
+    modification++;
 }
 
 - (void)synchronize{}
@@ -365,6 +375,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         [pw removeObjectForKey:BDSKBibStyleMacroDefinitionsKey];
         [self synchronize];
     }
+    modification++;
 }
 
 - (void)loadMacrosFromFiles{
@@ -397,6 +408,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
             }
         }
     }
+    modification++;
 }
 
 - (void)synchronize{
@@ -412,6 +424,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 - (void)handleMacroFilesChanged:(NSNotification *)notification{
     [fileMacroDefinitions release];
     fileMacroDefinitions = nil;
+    modification++;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
 }
 

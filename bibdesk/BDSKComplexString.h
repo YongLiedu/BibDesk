@@ -57,6 +57,9 @@
   
   BOOL complex;
   BOOL inherited;
+  
+  NSString *expandedString;
+  unsigned long long modification;
 }
 
 + (BDSKMacroResolver *)macroResolverForUnarchiving;

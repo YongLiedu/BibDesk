@@ -44,6 +44,7 @@
 @interface BDSKMacroResolver : NSObject {
     NSMutableDictionary *macroDefinitions;
     id<BDSKOwner>owner;
+    unsigned long long modification;
 }
 
 + (id)defaultMacroResolver;
@@ -66,5 +67,7 @@
 - (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey;
 - (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey;
 - (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey;
+
+- (unsigned long long)modification;
 
 @end

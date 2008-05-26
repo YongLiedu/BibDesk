@@ -157,6 +157,8 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
             // we don't retain, as the macroResolver might retain us as a macro value
             macroResolver = (theMacroResolver == [BDSKMacroResolver defaultMacroResolver]) ? nil : theMacroResolver;
             complex = YES;
+            expandedString = nil;
+            modification = 0;
         }
 	}		
     return self;
@@ -172,17 +174,20 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
         nodes = [[aValue nodes] retain];
         complex = [aValue isComplex];
 		inherited = YES;
+        modification = 0;
+        expandedString = nil;
 		if (complex) {
 			macroResolver = [(BDSKComplexString *)aValue macroResolver];
             if (macroResolver == [BDSKMacroResolver defaultMacroResolver]) 
                 macroResolver = nil;
-		}
+        }
 	}
 	return self;
 }
 
 - (void)dealloc{
 	[nodes release];
+	[expandedString release];
     [super dealloc];
 }
 
@@ -220,6 +225,8 @@ Rather than relying on the same call sequence to be used, I think we should igno
             complex = [coder decodeBoolForKey:@"complex"];
             inherited = [coder decodeBoolForKey:@"inherited"];
             macroResolver = [BDSKComplexString macroResolverForUnarchiving];
+            expandedString = nil;
+            modification = 0;
         }
     } else {
         [[super init] release];
@@ -244,38 +251,37 @@ Rather than relying on the same call sequence to be used, I think we should igno
     return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
 
+- (NSString *)expandedString {
+    BDSKMacroResolver *resolver = [self macroResolver];
+    if (expandedString == nil || (resolver != nil && modification != [resolver modification])) {
+        [expandedString release];
+        expandedString = (NSString *)__BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
+        if (resolver)
+            modification = [resolver modification];
+    }
+    return expandedString;
+}
+
 #pragma mark overridden NSString Methods
 
 /* A bunch of methods that have to be overridden in a concrete subclass of NSString */
 
 - (unsigned int)length{
-    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
-    unsigned len = CFStringGetLength(expVal);
-    if(expVal != NULL) CFRelease(expVal);
-    return len;
+    return [[self expandedString] length];
 }
 
 - (unichar)characterAtIndex:(unsigned)idx{
-    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
-    unichar ch = CFStringGetCharacterAtIndex(expVal, idx);
-    if(expVal != NULL) CFRelease(expVal);
-    return ch;
+    return [[self expandedString] characterAtIndex:idx];
 }
 
 /* Overridden NSString performance methods */
 
 - (void)getCharacters:(unichar *)buffer{
-    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
-    CFRange fullRange = CFRangeMake(0, CFStringGetLength(expVal));
-    CFStringGetCharacters(expVal, fullRange, buffer);
-    if(expVal != NULL) CFRelease(expVal);
+    return [[self expandedString] getCharacters:buffer];
 }
 
 - (void)getCharacters:(unichar *)buffer range:(NSRange)aRange{
-    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
-    CFRange range = CFRangeMake(aRange.location, aRange.length);
-    CFStringGetCharacters(expVal, range, buffer);
-    if(expVal != NULL) CFRelease(expVal);
+    return [[self expandedString] getCharacters:buffer range:aRange];
 }
 
 /* do not override super's implementation of -isEqual:
@@ -360,17 +366,16 @@ Rather than relying on the same call sequence to be used, I think we should igno
 }
 
 - (NSString *)stringAsExpandedBibTeXString{
-    NSString *expValue = (NSString *)__BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
+    NSString *expValue = [self expandedString];
     if(expValue == nil)
         return @"";
     
-    NSMutableString *expandedString = [NSMutableString stringWithCapacity:([expValue length] + 2)];
-    [expandedString appendCharacter:'{'];
-    [expandedString appendString:expValue];
-    [expValue release];
-    [expandedString appendCharacter:'}'];
+    NSMutableString *bibtexString = [NSMutableString stringWithCapacity:([expValue length] + 2)];
+    [bibtexString appendCharacter:'{'];
+    [bibtexString appendString:expValue];
+    [bibtexString appendCharacter:'}'];
     
-    return expandedString;
+    return bibtexString;
 }
 
 - (BOOL)hasSubstring:(NSString *)target options:(unsigned)opts{
