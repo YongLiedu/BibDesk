@@ -60,6 +60,7 @@
   
   NSString *expandedString;
   unsigned long long modification;
+  unsigned long long defaultModification;
 }
 
 + (BDSKMacroResolver *)macroResolverForUnarchiving;
