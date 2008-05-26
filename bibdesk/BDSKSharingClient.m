@@ -149,8 +149,8 @@ typedef struct _BDSKSharingClientFlags {
     if (archivedMacros != newArchivedMacros) {
         [archivedMacros release];
         archivedMacros = [newArchivedMacros retain];
-        //NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"archivedMacros", @"key", nil];
-        //[[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientUpdatedNotification object:self userInfo:userInfo];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"archivedMacros", @"key", nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientUpdatedNotification object:self userInfo:userInfo];
     }
 }
 
