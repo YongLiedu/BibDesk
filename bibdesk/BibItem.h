@@ -58,6 +58,7 @@ enum {
 enum {
     BDSKBibTeXOptionTeXifyMask = 1,
     BDSKBibTeXOptionDropLinkedURLsMask = 2,
+    BDSKBibTeXOptionDropNonStandardMask = 4,
     BDSKBibTeXOptionDropInternalMask = 6
 };
 

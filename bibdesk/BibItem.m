@@ -1668,7 +1668,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     BOOL isOK = YES;
     BOOL shouldTeXify = (options & BDSKBibTeXOptionTeXifyMask) != 0;
     BOOL dropLinkedURLs = (options & BDSKBibTeXOptionDropLinkedURLsMask) != 0;
-    BOOL dropInternal = (options & BDSKBibTeXOptionDropInternalMask) != 0;
+    BOOL dropInternal = (options & BDSKBibTeXOptionDropNonStandardMask) != 0;
     
     BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     NSString *type = [self pubType];
