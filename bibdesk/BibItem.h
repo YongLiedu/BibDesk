@@ -55,6 +55,12 @@ enum {
     BDSKRemoveRemoteURLFieldsMask = 1 << 1,
 };
 
+enum {
+    BDSKBibTeXOptionTeXifyMask = 1,
+    BDSKBibTeXOptionDropLinkedURLsMask = 2,
+    BDSKBibTeXOptionDropInternalMask = 6
+};
+
 @class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver, BDSKLinkedFile;
 @protocol BDSKParseableItem, BDSKOwner;
 
@@ -688,35 +694,11 @@ enum {
 */
 - (NSString *)bibTeXString;
 
-/*!
-    @method     bibTeXStringDroppingInternal:
-    @abstract   Returns the BibTeX value of this bib item.  It is TeXified based on default prefs for the application.
-    @param      drop Boolean determines whether internal fields are dropped. 
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop;
+- (NSString *)bibTeXStringWithOptions:(int)options;
 
-/*!
-    @method     bibTeXStringDroppingInternal:texify:
-    @abstract   Returns a BibTeX value optionally without internal fields, optionally teXified (converted to TeX)
-    @discussion (comprehensive description)
-    @param      drop Boolean determines whether internal fields are dropped. 
-    @param      shouldTeXify Boolean determines whether accented characters are converted to TeX.
-    @result     (description)
-*/
-- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify;
+- (NSData *)bibTeXDataWithOptions:(int)options relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError;
-
-/*!
-    @method     RISStringValue
-    @abstract   Returns the value of the BibItem in Reference Manager (RIS) format.  BibTeX tags are converted to RIS by the type manager.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
 - (NSString *)RISStringValue;
-
 - (NSString *)MODSString;
 - (NSString *)endNoteString;
 

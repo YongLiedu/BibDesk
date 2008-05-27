@@ -835,7 +835,7 @@
             switch (dragCopyType) {
                 case BDSKBibTeXDragCopyType:
                 case BDSKMinimalBibTeXDragCopyType:
-                    [s appendString:[firstItem bibTeXStringDroppingInternal:YES]];
+                    [s appendString:[firstItem bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask]];
                     if (count > 1) {
                         [s appendString:@"\n"];
                         [s appendString:[NSString horizontalEllipsisString]];

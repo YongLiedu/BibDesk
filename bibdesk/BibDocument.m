@@ -1529,9 +1529,14 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
     BOOL shouldAppendFrontMatter = YES;
     NSString *encodingName = [NSString localizedNameOfStringEncoding:encoding];
-    
     NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
-
+    
+    int options = 0;
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
+        options |= BDSKBibTeXOptionTeXifyMask;
+    if (drop)
+        options |= BDSKBibTeXOptionDropInternalMask;
+    
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
         NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath] usedEncoding:NULL error:NULL];
         
@@ -1589,7 +1594,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
     while(isOK && (pub = [e nextObject])){
-        pubData = [pub bibTeXDataDroppingInternal:drop relativeToPath:basePath encoding:encoding error:&error];
+        pubData = [pub bibTeXDataWithOptions:options relativeToPath:basePath encoding:encoding error:&error];
         if(isOK = pubData != nil){
             [outputData appendData:doubleNewlineData];
             [outputData appendData:pubData];
@@ -1984,9 +1989,15 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSMutableString *s = [NSMutableString string];
 	NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub;
-	
+	int options = 0;
+    
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
+        options |= BDSKBibTeXOptionTeXifyMask;
+    if (drop)
+        options |= BDSKBibTeXOptionDropInternalMask;
+    
     while(pub = [e nextObject])
-            [s appendStrings:@"\n", [pub bibTeXStringDroppingInternal:drop], @"\n", nil];
+            [s appendStrings:@"\n", [pub bibTeXStringWithOptions:options], @"\n", nil];
 	
 	return s;
 }
@@ -1997,7 +2008,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 	unsigned numberOfPubs = [items count];
 	NSMutableString *bibString = [[NSMutableString alloc] initWithCapacity:(numberOfPubs * 100)];
-
+    
+    int options = BDSKBibTeXOptionDropLinkedURLsMask;
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
+        options |= BDSKBibTeXOptionTeXifyMask;
+    
 	// in case there are @preambles in it
 	[bibString appendString:frontMatter];
 	[bibString appendString:@"\n"];
@@ -2025,18 +2040,18 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 			[parentItems removeObject:aPub];
 			[selParentItems addObject:aPub];
 		}else{
-            [bibString appendString:[aPub bibTeXString]];
+            [bibString appendString:[aPub bibTeXStringWithOptions:options]];
 		}
 	}
 	
 	e = [selParentItems objectEnumerator];
 	while(aPub = [e nextObject]){
-        [bibString appendString:[aPub bibTeXString]];
+        [bibString appendString:[aPub bibTeXStringWithOptions:options]];
 	}
 	
 	e = [parentItems objectEnumerator];        
 	while(aPub = [e nextObject]){
-        [bibString appendString:[aPub bibTeXString]];
+        [bibString appendString:[aPub bibTeXStringWithOptions:options]];
 	}
 					
 	[selItems release];

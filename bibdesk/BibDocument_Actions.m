@@ -495,7 +495,7 @@
         while (pub = [e nextObject]) {
             // use the detexified version without internal fields, since TeXification introduces things that 
             // AppleScript can't deal with (OAInternetConfig may end up using AS)
-            [body appendString:[pub bibTeXStringDroppingInternal:YES texify:NO]];
+            [body appendString:[pub bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask]];
             [body appendString:@"\n\n"];
         }
     }

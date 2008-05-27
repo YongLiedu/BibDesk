@@ -1654,7 +1654,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return string;
 }
 
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
+- (NSData *)bibTeXDataWithOptions:(int)options relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     BOOL shouldNormalizeAuthors = [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey];
     
@@ -1666,6 +1666,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	NSEnumerator *e;
     NSError *error = nil;
     BOOL isOK = YES;
+    BOOL shouldTeXify = (options & BDSKBibTeXOptionTeXifyMask) != 0;
+    BOOL dropLinkedURLs = (options & BDSKBibTeXOptionDropLinkedURLsMask) != 0;
+    BOOL dropInternal = (options & BDSKBibTeXOptionDropInternalMask) != 0;
     
     BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     NSString *type = [self pubType];
@@ -1694,7 +1697,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [noteKeys release];
 	}
     
-	if (drop) {
+	if (dropInternal) {
         knownKeys = [[NSMutableSet alloc] initWithCapacity:14];
 		[knownKeys addObjectsFromArray:[btm requiredFieldsForType:type]];
 		[knownKeys addObjectsFromArray:[btm optionalFieldsForType:type]];
@@ -1723,7 +1726,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     while (isOK && (field = [e nextObject])) {
         
-        if (NO == drop || [knownKeys containsObject:field]) {
+        if (NO == dropInternal || [knownKeys containsObject:field]) {
             
             value = [pubFields objectForKey:field];
             
@@ -1761,7 +1764,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [knownKeys release];
     
     // serialize BDSKLinkedFiles; make sure to add these at the end to avoid problems with BibTeX's buffers
-    if(isOK && NO == drop) {
+    if(isOK && NO == dropLinkedURLs) {
         value = [self filesAsBibTeXFragmentRelativeToPath:basePath];
         // assumes encoding is ascii-compatible, but btparse does as well
         if (value) [data appendDataFromString:value encoding:encoding error:&error];
@@ -1775,26 +1778,19 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return isOK ? data : nil;
 }
 
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop relativeToPath:(NSString *)basePath encoding:(NSStringEncoding)encoding error:(NSError **)outError{
-    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
-    return [self bibTeXDataDroppingInternal:drop texify:shouldTeXify relativeToPath:basePath encoding:encoding error:outError];
-}
-
-- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
-    NSData *data = [self bibTeXDataDroppingInternal:drop texify:shouldTeXify relativeToPath:[self basePath] encoding:NSUTF8StringEncoding error:NULL];
+- (NSString *)bibTeXStringWithOptions:(int)options{
+    NSData *data = [self bibTeXDataWithOptions:options relativeToPath:[self basePath] encoding:NSUTF8StringEncoding error:NULL];
     NSString *btString = nil;
     if (nil != data)
         btString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
     return btString;
 }
 
-- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop{
-    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
-    return [self bibTeXStringDroppingInternal:drop texify:shouldTeXify];
-}
-
 - (NSString *)bibTeXString{
-	return [self bibTeXStringDroppingInternal:NO];
+    int options = 0;
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey])
+        options |= BDSKBibTeXOptionTeXifyMask;
+	return [self bibTeXStringWithOptions:options];
 }
 
 #pragma mark Other text representations
