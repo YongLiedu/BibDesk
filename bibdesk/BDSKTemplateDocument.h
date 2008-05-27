@@ -129,6 +129,9 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     BDSKToken *menuToken;
     unsigned int defaultTypeIndex;
     
+    NSString *string;
+    NSAttributedString *attributedString;
+    
     CFArrayRef editors;
 }
 

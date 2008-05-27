@@ -47,6 +47,7 @@
 #import "BDSKTemplateParser.h"
 #import "BDSKTag.h"
 #import "NSString_BDSKExtensions.h"
+#import <OmniBase/OBUtilities.h>
 
 static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
@@ -72,7 +73,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 @interface BDSKTemplateDocument (BDSKPrivate)
 - (void)updateTextViews;
 - (void)updateTokenFields;
-- (void)updatePreview;
+- (void)updateStrings;
 - (void)updateOptionView;
 - (void)setupOptionsMenus;
 - (void)handleDidChangeSelectionNotification:(NSNotification *)notification;
@@ -91,6 +92,10 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 @implementation BDSKTemplateDocument
 
 + (void)initialize {
+    [self setKeys:[NSArray arrayWithObject:@"attributedString"] triggerChangeNotificationsForDependentKey:@"previewAttributedString"];
+    
+    OBINITIALIZE;
+    
 	[NSValueTransformer setValueTransformer:[[[BDSKValueOrNoneTransformer alloc] init] autorelease]
 									forName:BDSKValueOrNoneTransformerName];
 }
@@ -199,6 +204,8 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [templateOptions release];
     [fonts release];
     [tokenFonts release];
+    [string release];
+    [attributedString release];
     CFRelease(editors);
     [super dealloc];
 }
@@ -297,7 +304,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     NSDictionary *templateDict = nil;
     NSFont *font = nil;
     NSAttributedString *attrString = nil;
-    NSString *string = nil;
+    NSString *str = nil;
     NSRange startRange, endRange = { NSNotFound, 0 }, sepRange = { NSNotFound, 0 }, wsRange;
     unsigned int length, startLoc = NSNotFound;
     
@@ -305,42 +312,42 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     
     if ([self isRichText]) {
         attrString = [[[NSAttributedString alloc] initWithData:data options:nil documentAttributes:NULL error:NULL] autorelease];
-        string = [attrString string];
+        str = [attrString string];
     } else {
-        string = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+        str = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
     }
     
-    if (string) {
-        length = [string length];
+    if (str) {
+        length = [str length];
         
-        startRange = [string rangeOfString:@"<$publications>"];
+        startRange = [str rangeOfString:@"<$publications>"];
         
         if (startRange.location != NSNotFound) {
             startLoc = startRange.location;
             
-            wsRange = [string rangeOfTrailingEmptyLineRequiringNewline:NO range:MAKE_RANGE(0, startRange.location)];
+            wsRange = [str rangeOfTrailingEmptyLineRequiringNewline:NO range:MAKE_RANGE(0, startRange.location)];
             if (wsRange.location != NSNotFound)
                 startRange = MAKE_RANGE(wsRange.location, NSMaxRange(startRange));
-            wsRange = [string rangeOfLeadingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), length)];
+            wsRange = [str rangeOfLeadingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), length)];
             if (wsRange.location != NSNotFound)
                 startRange = MAKE_RANGE(startRange.location, NSMaxRange(wsRange));
             
-            endRange = [string rangeOfString:@"</$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), length)];
+            endRange = [str rangeOfString:@"</$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), length)];
             
             if (endRange.location != NSNotFound) {
-                wsRange = [string rangeOfTrailingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
+                wsRange = [str rangeOfTrailingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
                 if (wsRange.location != NSNotFound)
                     endRange = MAKE_RANGE(wsRange.location, NSMaxRange(endRange));
-                wsRange = [string rangeOfLeadingEmptyLineRequiringNewline:NO range:MAKE_RANGE(NSMaxRange(endRange), length)];
+                wsRange = [str rangeOfLeadingEmptyLineRequiringNewline:NO range:MAKE_RANGE(NSMaxRange(endRange), length)];
                 if (wsRange.location != NSNotFound)
                     endRange = MAKE_RANGE(endRange.location, NSMaxRange(wsRange));
                 
-                sepRange = [string rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
+                sepRange = [str rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
                 if (sepRange.location != NSNotFound) {
-                    wsRange = [string rangeOfTrailingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), sepRange.location)];
+                    wsRange = [str rangeOfTrailingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), sepRange.location)];
                     if (wsRange.location != NSNotFound)
                         sepRange = MAKE_RANGE(wsRange.location, NSMaxRange(sepRange));
-                    wsRange = [string rangeOfLeadingEmptyLineInRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)];
+                    wsRange = [str rangeOfLeadingEmptyLineInRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)];
                     if (wsRange.location != NSNotFound)
                         sepRange = MAKE_RANGE(sepRange.location, NSMaxRange(wsRange));
                 }
@@ -369,13 +376,13 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
             } else {
                 NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil];
                 if (startRange.location > 0)
-                    [self setPrefixTemplate:[[[NSAttributedString alloc] initWithString:[string substringWithRange:MAKE_RANGE(0, startRange.location)] attributes:attrs] autorelease]];
+                    [self setPrefixTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:MAKE_RANGE(0, startRange.location)] attributes:attrs] autorelease]];
                 if (NSMaxRange(endRange) < length)
-                    [self setSuffixTemplate:[[[NSAttributedString alloc] initWithString:[string substringWithRange:MAKE_RANGE(NSMaxRange(endRange), length)] attributes:attrs] autorelease]];
+                    [self setSuffixTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:MAKE_RANGE(NSMaxRange(endRange), length)] attributes:attrs] autorelease]];
                 if (NSMaxRange(sepRange) < endRange.location)
-                    [self setSeparatorTemplate:[[[NSAttributedString alloc] initWithString:[string substringWithRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)] attributes:attrs] autorelease]];
+                    [self setSeparatorTemplate:[[[NSAttributedString alloc] initWithString:[str substringWithRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)] attributes:attrs] autorelease]];
                 
-                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[string substringWithRange:MAKE_RANGE(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
+                parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[str substringWithRange:MAKE_RANGE(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
             }
         }
     }
@@ -527,7 +534,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         [[[self undoManager] prepareWithInvocationTarget:self] setRichText:richText];
         richText = newRichText;
         
-        [self updatePreview];
+        [self updateStrings];
         [self updateOptionView];
         [self updateTextViews];
         [self setFileURL:nil];
@@ -544,7 +551,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         [[[self undoManager] prepareWithInvocationTarget:self] setFontName:fontName];
         [fontName release];
         fontName = [newFontName retain];
-        [self updatePreview];
+        [self updateStrings];
         [self updateTextViews];
     }
 }
@@ -557,7 +564,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     if (fabsf(fontSize - newFontSize) > 0.0) {
         [[[self undoManager] prepareWithInvocationTarget:self] setFontSize:fontSize];
         fontSize = newFontSize;
-        [self updatePreview];
+        [self updateStrings];
         [self updateTextViews];
     }
 }
@@ -570,7 +577,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     if (bold != newBold) {
         [(BDSKTemplateDocument *)[[self undoManager] prepareWithInvocationTarget:self] setBold:bold];
         bold = newBold;
-        [self updatePreview];
+        [self updateStrings];
         [self updateTextViews];
     }
 }
@@ -583,7 +590,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     if (italic != newItalic) {
         [(BDSKTemplateDocument *)[[self undoManager] prepareWithInvocationTarget:self] setItalic:italic];
         italic = newItalic;
-        [self updatePreview];
+        [self updateStrings];
         [self updateTextViews];
     }
 }
@@ -613,54 +620,13 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         defaultTypeIndex = newDefaultTypeIndex;
         [[typeTemplates objectAtIndex:oldDefaultTypeIndex] didChangeValueForKey:@"default"];
         [[typeTemplates objectAtIndex:newDefaultTypeIndex] didChangeValueForKey:@"default"];
-        [self updatePreview];
+        [self updateStrings];
     }
 }
 
 - (NSString *)string {
-    NSMutableString *string = [NSMutableString string];
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"included = 1"];
-    NSArray *includedTemplates = [typeTemplates filteredArrayUsingPredicate:predicate];
-    NSEnumerator *tmplEnum = [includedTemplates objectEnumerator];
-    BDSKTypeTemplate *template;
-    NSString *altPrefix = @"";
-    BOOL isSimple = [includedTemplates count] == 0 ||
-        ([includedTemplates count] == 1 && [typeTemplates objectAtIndex:defaultTypeIndex] == [includedTemplates lastObject]);
-    
-    if ([prefixTemplate length]) {
-        [string appendString:[prefixTemplate string]];
-    }
-    [string appendString:@"<$publications>\n"];
-    if (isSimple) {
-        [string appendString:[[typeTemplates objectAtIndex:defaultTypeIndex] string]];
-    } else {
-        while (template = [tmplEnum nextObject]) {
-            if ([template isIncluded]) {
-                [string appendFormat:@"<%@$pubType=%@?>\n", altPrefix, [template pubType]];
-                [string appendString:[template string]];
-                altPrefix = @"?";
-            }
-        }
-        [string appendString:@"<?$pubType?>\n"];
-        [string appendString:[[typeTemplates objectAtIndex:defaultTypeIndex] string]];
-        [string appendString:@"</$pubType?>\n"];
-    }
-    if ([separatorTemplate length]) {
-        [string appendString:@"<?$publications>\n"];
-        [string appendString:[separatorTemplate string]];
-    }
-    [string appendString:@"</$publications>\n"];
-    if ([suffixTemplate length]) {
-        [string appendString:[suffixTemplate string]];
-    }
-    
-    return string;
-}
-
-- (NSAttributedString *)attributedString {
-    NSMutableAttributedString *attrString = nil;
-    
-    if (richText) {
+    if (string == nil) {
+        NSMutableString *mutString = [NSMutableString string];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"included = 1"];
         NSArray *includedTemplates = [typeTemplates filteredArrayUsingPredicate:predicate];
         NSEnumerator *tmplEnum = [includedTemplates objectEnumerator];
@@ -668,50 +634,97 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         NSString *altPrefix = @"";
         BOOL isSimple = [includedTemplates count] == 0 ||
             ([includedTemplates count] == 1 && [typeTemplates objectAtIndex:defaultTypeIndex] == [includedTemplates lastObject]);
-        NSFont *font = [NSFont fontWithName:fontName size:fontSize];
-        NSDictionary *attrs;
-        
-        attrString = [[[NSMutableAttributedString alloc] init] autorelease];
-        
-        if (bold)
-            font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
-        if (italic)
-            font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSItalicFontMask];
-        attrs = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
         
         if ([prefixTemplate length]) {
-            [attrString appendAttributedString:prefixTemplate];
+            [mutString appendString:[prefixTemplate string]];
         }
-        [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"<$publications>\n" attributes:attrs] autorelease]];
+        [mutString appendString:@"<$publications>\n"];
         if (isSimple) {
-            [attrString appendAttributedString:[[typeTemplates objectAtIndex:defaultTypeIndex] attributedStringWithDefaultAttributes:attrs]];
+            [mutString appendString:[[typeTemplates objectAtIndex:defaultTypeIndex] string]];
         } else {
             while (template = [tmplEnum nextObject]) {
                 if ([template isIncluded]) {
-                    NSString *s = [NSString stringWithFormat:@"<%@$pubType=%@?>\n", altPrefix, [template pubType]];
-                    [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:s attributes:attrs] autorelease]];
-                    [attrString appendAttributedString:[template attributedStringWithDefaultAttributes:attrs]];
+                    [mutString appendFormat:@"<%@$pubType=%@?>\n", altPrefix, [template pubType]];
+                    [mutString appendString:[template string]];
                     altPrefix = @"?";
                 }
             }
-            [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"<?$pubType?>\n" attributes:attrs] autorelease]];
-            [attrString appendAttributedString:[[typeTemplates objectAtIndex:defaultTypeIndex] attributedStringWithDefaultAttributes:attrs]];
-            [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"</$pubType?>\n" attributes:attrs] autorelease]];
+            [mutString appendString:@"<?$pubType?>\n"];
+            [mutString appendString:[[typeTemplates objectAtIndex:defaultTypeIndex] string]];
+            [mutString appendString:@"</$pubType?>\n"];
         }
         if ([separatorTemplate length]) {
-            [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"<?$publications>\n" attributes:attrs] autorelease]];
-            [attrString appendAttributedString:separatorTemplate];
+            [mutString appendString:@"<?$publications>\n"];
+            [mutString appendString:[separatorTemplate string]];
         }
-        [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"</$publications>\n" attributes:attrs] autorelease]];
+        [mutString appendString:@"</$publications>\n"];
         if ([suffixTemplate length]) {
-            [attrString appendAttributedString:suffixTemplate];
+            [mutString appendString:[suffixTemplate string]];
         }
-        [attrString fixAttributesInRange:NSMakeRange(0, [attrString length])];
-    } else {
-        NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil];
-        attrString = [[[NSMutableAttributedString alloc] initWithString:[self string] attributes:attrs] autorelease];
+        string = [mutString copy];
     }
-    return attrString;
+    return string;
+}
+
+- (NSAttributedString *)attributedString {
+    if (attributedString == nil) {
+        NSMutableAttributedString *attrString = nil;
+        
+        if (richText) {
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"included = 1"];
+            NSArray *includedTemplates = [typeTemplates filteredArrayUsingPredicate:predicate];
+            NSEnumerator *tmplEnum = [includedTemplates objectEnumerator];
+            BDSKTypeTemplate *template;
+            NSString *altPrefix = @"";
+            BOOL isSimple = [includedTemplates count] == 0 ||
+                ([includedTemplates count] == 1 && [typeTemplates objectAtIndex:defaultTypeIndex] == [includedTemplates lastObject]);
+            NSFont *font = [NSFont fontWithName:fontName size:fontSize];
+            NSDictionary *attrs;
+            
+            attrString = [[[NSMutableAttributedString alloc] init] autorelease];
+            
+            if (bold)
+                font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
+            if (italic)
+                font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSItalicFontMask];
+            attrs = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
+            
+            if ([prefixTemplate length]) {
+                [attrString appendAttributedString:prefixTemplate];
+            }
+            [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"<$publications>\n" attributes:attrs] autorelease]];
+            if (isSimple) {
+                [attrString appendAttributedString:[[typeTemplates objectAtIndex:defaultTypeIndex] attributedStringWithDefaultAttributes:attrs]];
+            } else {
+                while (template = [tmplEnum nextObject]) {
+                    if ([template isIncluded]) {
+                        NSString *s = [NSString stringWithFormat:@"<%@$pubType=%@?>\n", altPrefix, [template pubType]];
+                        [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:s attributes:attrs] autorelease]];
+                        [attrString appendAttributedString:[template attributedStringWithDefaultAttributes:attrs]];
+                        altPrefix = @"?";
+                    }
+                }
+                [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"<?$pubType?>\n" attributes:attrs] autorelease]];
+                [attrString appendAttributedString:[[typeTemplates objectAtIndex:defaultTypeIndex] attributedStringWithDefaultAttributes:attrs]];
+                [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"</$pubType?>\n" attributes:attrs] autorelease]];
+            }
+            if ([separatorTemplate length]) {
+                [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"<?$publications>\n" attributes:attrs] autorelease]];
+                [attrString appendAttributedString:separatorTemplate];
+            }
+            [attrString appendAttributedString:[[[NSAttributedString alloc] initWithString:@"</$publications>\n" attributes:attrs] autorelease]];
+            if ([suffixTemplate length]) {
+                [attrString appendAttributedString:suffixTemplate];
+            }
+            [attrString fixAttributesInRange:NSMakeRange(0, [attrString length])];
+        } else {
+            NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil];
+            attrString = [[[NSMutableAttributedString alloc] initWithString:[self string] attributes:attrs] autorelease];
+        }
+        
+        attributedString = [attrString copy];
+    }
+    return attributedString;
 }
 
 - (NSAttributedString *)previewAttributedString {
@@ -838,9 +851,15 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [scrollView setNeedsDisplay:YES];
 }
 
-- (void)updatePreview {
-    [self willChangeValueForKey:@"previewAttributedString"];
-    [self didChangeValueForKey:@"previewAttributedString"];
+- (void)updateStrings {
+    [self willChangeValueForKey:@"string"];
+    [string release];
+    string = nil;
+    [self didChangeValueForKey:@"string"];
+    [self willChangeValueForKey:@"attributedString"];
+    [attributedString release];
+    attributedString = nil;
+    [self didChangeValueForKey:@"attributedString"];
 }
 
 - (void)updateOptionView {
@@ -935,7 +954,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (void)handleTokenDidChangeNotification:(NSNotification *)notification {
     BDSKToken *token = [notification object];
     if ([[typeTemplates valueForKeyPath:@"@unionOfArrays.itemTemplate"] indexOfObjectIdenticalTo:token] != NSNotFound) {
-        [self updatePreview];
+        [self updateStrings];
         if ([token type] == BDSKTextTokenType) {
             NSArray *currentItemTemplate = [itemTemplateTokenField objectValue];
             if ([currentItemTemplate indexOfObjectIdenticalTo:token] != NSNotFound)
@@ -947,7 +966,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (void)handleTemplateDidChangeNotification:(NSNotification *)notification {
     BDSKTypeTemplate *template = [notification object];
     if ([typeTemplates indexOfObjectIdenticalTo:template] != NSNotFound) {
-        [self updatePreview];
+        [self updateStrings];
         // KVO in NSTokenField binding does not work
         if (template == [typeTemplates objectAtIndex:[tableView selectedRow]])
             [itemTemplateTokenField setObjectValue:[template itemTemplate]];
@@ -957,7 +976,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (void)textDidEndEditing:(NSNotification *)notification {
     NSText *textView = [notification object];
     if (textView == separatorTemplateTextView || textView == prefixTemplateTextView || textView == suffixTemplateTextView)
-        [self updatePreview];
+        [self updateStrings];
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
@@ -968,17 +987,17 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 // implement pasteboard delegate methods as a workaround for not doing the string->token transformation of tokenField:representedObjectForEditingString: (apparently needed for drag-and-drop on post-10.4 systems)
 - (BOOL)tokenField:(NSTokenField *)tokenField writeRepresentedObjects:(NSArray *)objects toPasteboard:(NSPasteboard *)pboard {
-    NSMutableString *string = [NSMutableString string];
+    NSMutableString *str = [NSMutableString string];
     NSEnumerator *objectEnum = [objects objectEnumerator];
     id object;
     
     while (object = [objectEnum nextObject])
-        [string appendString:[self tokenField:tokenField displayStringForRepresentedObject:object]];
+        [str appendString:[self tokenField:tokenField displayStringForRepresentedObject:object]];
     
     [pboard declareTypes:[NSArray arrayWithObjects:BDSKTemplateTokensPboardType, NSStringPboardType, nil] owner:nil];
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:objects];
     [pboard setData:data forType:BDSKTemplateTokensPboardType];
-    [pboard setString:string forType:NSStringPboardType];
+    [pboard setString:str forType:NSStringPboardType];
     return nil != data;
 }
 
