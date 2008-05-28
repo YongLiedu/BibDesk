@@ -48,9 +48,12 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if ([[url host] isEqualToString:@"www.slac.stanford.edu"] == NO || [[url path] hasPrefix:@"/spires"] == NO){
+    static NSArray *spiresHosts = nil;
+    if (spiresHosts == nil)
+        spiresHosts = [[NSArray alloc] initWithObjects:@"www.slac.stanford.edu", @"www-library.desy.de", @"www-spires.fnal.gov", @"usparc.ihep.su", @"www-spires.dur.ac.uk", @"www.yukawa.kyoto-u.ac.jp", @"www.spires.lipi.go.id", nil];
+    
+    if ([spiresHosts containsObject:[url host]] == NO || [[url path] hasPrefix:@"/spires"] == NO)
         return NO;
-    }
     
     NSString *containsBibTexLinkNode = @"//a[contains(text(),'BibTeX')]"; 
     
