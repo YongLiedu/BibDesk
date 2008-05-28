@@ -41,13 +41,7 @@
 
 @interface NSScrollView (BDSKExtensions)
 
-- (NSArray *)subcontrols;
-- (void)setSubcontrols:(NSArray *)newSubcontrols;
-
-// new API allows ignoring PDFView's attempts to remove the horizontal scroller
-- (void)setAlwaysHasHorizontalScroller:(BOOL)flag;
-- (void)setNeverHasHorizontalScroller:(BOOL)flag;
-- (void)setAlwaysHasVerticalScroller:(BOOL)flag;
-- (void)setNeverHasVerticalScroller:(BOOL)flag;
+- (NSArray *)placards;
+- (void)setPlacards:(NSArray *)newPlacards;
 
 @end

@@ -41,151 +41,45 @@
 #import "BDSKEdgeView.h"
 
 
-@interface NSScrollView (BDSKPrivateExtensions)
-- (void)replacementDealloc;
-- (BOOL)replacementHasHorizontalScroller;
-- (BOOL)replacementHasVerticalScroller;
-- (void)replacementSetHasHorizontalScroller:(BOOL)flag;
-- (void)replacementSetHasVerticalScroller:(BOOL)flag;
-- (void)replacementTile;
-@end
-
-
 @implementation NSScrollView (BDSKExtensions)
 
 static IMP originalSetHasHorizontalScroller = NULL;
-static IMP originalSetHasVerticalScroller = NULL;
-static BOOL (*originalHasHorizontalScroller)(id, SEL) = NULL;
-static BOOL (*originalHasVerticalScroller)(id, SEL) = NULL;
+static IMP originalSetAutoHidesScrollers = NULL;
 static IMP originalDealloc = NULL;
 static IMP originalTile = NULL;
 
-static CFMutableSetRef scrollViewsWithHorizontalScrollers = NULL;
-static CFMutableSetRef scrollViewsWithoutHorizontalScrollers = NULL;
-static CFMutableSetRef scrollViewsWithVerticalScrollers = NULL;
-static CFMutableSetRef scrollViewsWithoutVerticalScrollers = NULL;
-static CFMutableDictionaryRef scrollViewSubcontrols = NULL;
-
-+ (void)load{
-    originalSetHasHorizontalScroller = OBReplaceMethodImplementationWithSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
-    originalSetHasVerticalScroller = OBReplaceMethodImplementationWithSelector(self, @selector(setHasVerticalScroller:), @selector(replacementSetHasVerticalScroller:));
-    originalHasHorizontalScroller = (typeof(originalHasHorizontalScroller))OBReplaceMethodImplementationWithSelector(self, @selector(hasHorizontalScroller), @selector(replacementHasHorizontalScroller));
-    originalHasVerticalScroller = (typeof(originalHasVerticalScroller))OBReplaceMethodImplementationWithSelector(self, @selector(hasVerticalScroller), @selector(replacementHasVerticalScroller));
-    originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
-    originalTile = OBReplaceMethodImplementationWithSelector(self, @selector(tile), @selector(replacementTile));
-    
-    // set doesn't retain, so no retain cycles; pointer equality used to compare views
-    scrollViewsWithHorizontalScrollers = CFSetCreateMutable(CFAllocatorGetDefault(), 0, NULL);
-    scrollViewsWithoutHorizontalScrollers = CFSetCreateMutable(CFAllocatorGetDefault(), 0, NULL);
-    scrollViewsWithVerticalScrollers = CFSetCreateMutable(CFAllocatorGetDefault(), 0, NULL);
-    scrollViewsWithoutVerticalScrollers = CFSetCreateMutable(CFAllocatorGetDefault(), 0, NULL);
-    scrollViewSubcontrols = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);
-}
+static CFMutableDictionaryRef scrollViewPlacards = NULL;
 
 - (void)replacementDealloc;
 {
-    CFSetRemoveValue(scrollViewsWithHorizontalScrollers, self);
-    CFSetRemoveValue(scrollViewsWithoutHorizontalScrollers, self);
-    CFSetRemoveValue(scrollViewsWithVerticalScrollers, self);
-    CFSetRemoveValue(scrollViewsWithoutVerticalScrollers, self);
-    CFDictionaryRemoveValue(scrollViewSubcontrols, self);
+    CFDictionaryRemoveValue(scrollViewPlacards, self);
     originalDealloc(self, _cmd);
-}
-
-- (void)setAlwaysHasHorizontalScroller:(BOOL)flag;
-{
-    if (flag) {
-        CFSetAddValue(scrollViewsWithHorizontalScrollers, self);
-        [self setHasHorizontalScroller:YES];
-    } else {
-        CFSetRemoveValue(scrollViewsWithHorizontalScrollers, self);
-    }
-}
-
-- (void)setNeverHasHorizontalScroller:(BOOL)flag;
-{
-    if (flag) {
-        CFSetAddValue(scrollViewsWithoutHorizontalScrollers, self);
-        [self setHasHorizontalScroller:NO];
-    } else {
-        CFSetRemoveValue(scrollViewsWithoutHorizontalScrollers, self);
-    }
-}
-
-- (void)setAlwaysHasVerticalScroller:(BOOL)flag;
-{
-    if (flag) {
-        CFSetAddValue(scrollViewsWithVerticalScrollers, self);
-        [self setHasVerticalScroller:YES];
-    } else {
-        CFSetRemoveValue(scrollViewsWithVerticalScrollers, self);
-    }
-}
-
-- (void)setNeverHasVerticalScroller:(BOOL)flag;
-{
-    if (flag) {
-        CFSetAddValue(scrollViewsWithoutVerticalScrollers, self);
-        [self setHasVerticalScroller:NO];
-    } else {
-        CFSetRemoveValue(scrollViewsWithoutVerticalScrollers, self);
-    }
 }
 
 - (void)replacementSetHasHorizontalScroller:(BOOL)flag;
 {
-    if (CFSetContainsValue(scrollViewsWithHorizontalScrollers, self))
-        flag = YES;
-    else if (CFSetContainsValue(scrollViewsWithoutHorizontalScrollers, self))
-        flag = NO;
-    originalSetHasHorizontalScroller(self, _cmd, flag);
+    if ([[self placards] count] != 0)
+        originalSetHasHorizontalScroller(self, _cmd, flag);
 }
 
-- (void)replacementSetHasVerticalScroller:(BOOL)flag;
+- (void)replacementSetAutoHidesScrollers:(BOOL)flag;
 {
-    if (CFSetContainsValue(scrollViewsWithVerticalScrollers, self))
-        flag = YES;
-    else if (CFSetContainsValue(scrollViewsWithoutVerticalScrollers, self))
-        flag = NO;
-    originalSetHasVerticalScroller(self, _cmd, flag);
-}
-
-- (BOOL)replacementHasHorizontalScroller;
-{
-    BOOL flag;
-    if (CFSetContainsValue(scrollViewsWithHorizontalScrollers, self))
-        flag = YES;
-    else if (CFSetContainsValue(scrollViewsWithoutHorizontalScrollers, self))
-        flag = NO;
-    else
-        flag = originalHasHorizontalScroller(self, _cmd);
-    return flag;
-}
-
-- (BOOL)replacementHasVerticalScroller;
-{
-    BOOL flag;
-    if (CFSetContainsValue(scrollViewsWithVerticalScrollers, self))
-        flag = YES;
-    else if (CFSetContainsValue(scrollViewsWithoutVerticalScrollers, self))
-        flag = NO;
-    else
-        flag = originalHasVerticalScroller(self, _cmd);
-    return flag;
+    if ([[self placards] count] != 0)
+        originalSetAutoHidesScrollers(self, _cmd, flag);
 }
 
 - (void)replacementTile {
     originalTile(self, _cmd);
     
-    NSArray *subcontrols = [self subcontrols];
+    NSArray *placards = [self placards];
     
-    if ([subcontrols count]) {
-        NSEnumerator *viewEnum = [subcontrols objectEnumerator];
+    if ([placards count]) {
+        NSEnumerator *viewEnum = [placards objectEnumerator];
         NSView *view;
         NSScroller *horizScroller = [self horizontalScroller];
         NSRect viewFrame, horizScrollerFrame = [horizScroller frame];
         float height = NSHeight(horizScrollerFrame) - 1.0, totalWidth = 0.0;
-        BDSKEdgeView *edgeView = (BDSKEdgeView *)[[[subcontrols lastObject] superview] superview];
+        BDSKEdgeView *edgeView = (BDSKEdgeView *)[[[placards lastObject] superview] superview];
         
         if ([edgeView isDescendantOf:self] == NO) {
             edgeView = [[[BDSKEdgeView alloc] init] autorelease];
@@ -208,27 +102,39 @@ static CFMutableDictionaryRef scrollViewSubcontrols = NULL;
     }
 }
 
-
-- (NSArray *)subcontrols {
-    return (NSArray *)CFDictionaryGetValue(scrollViewSubcontrols, self);
++ (void)load{
+    originalSetHasHorizontalScroller = OBReplaceMethodImplementationWithSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
+    originalSetAutoHidesScrollers = OBReplaceMethodImplementationWithSelector(self, @selector(setAutoHidesScrollers:), @selector(replacementSetAutoHidesScrollers:));
+    originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
+    originalTile = OBReplaceMethodImplementationWithSelector(self, @selector(tile), @selector(replacementTile));
+    
+    // dictionary doesn't retain keys, so no retain cycles; pointer equality used to compare views
+    scrollViewPlacards = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);
 }
 
-- (void)setSubcontrols:(NSArray *)newSubControls {
-    NSMutableArray *subcontrols = (NSMutableArray *)CFDictionaryGetValue(scrollViewSubcontrols, self);
-    if (subcontrols == nil && [newSubControls count]) {
-        subcontrols = [NSMutableArray array];
-        CFDictionarySetValue(scrollViewSubcontrols, self, subcontrols);
+- (NSArray *)placards {
+    return (NSArray *)CFDictionaryGetValue(scrollViewPlacards, self);
+}
+
+- (void)setPlacards:(NSArray *)newPlacards {
+    NSMutableArray *placards = (NSMutableArray *)CFDictionaryGetValue(scrollViewPlacards, self);
+    if (placards == nil && [newPlacards count]) {
+        placards = [NSMutableArray array];
+        CFDictionarySetValue(scrollViewPlacards, self, placards);
     }
     
-    [[[[subcontrols lastObject] superview] superview] removeFromSuperview];
-    [subcontrols setArray:newSubControls];
+    [[[[placards lastObject] superview] superview] removeFromSuperview];
+    [placards setArray:newPlacards];
     
-    if ([subcontrols count] == 0 && subcontrols) {
-        CFDictionaryRemoveValue(scrollViewSubcontrols, self);
-        subcontrols = nil;
+    if ([placards count] == 0 && placards) {
+        CFDictionaryRemoveValue(scrollViewPlacards, self);
+        placards = nil;
     }
     
-    [self setAlwaysHasHorizontalScroller:[subcontrols count] != 0];
+    if ([placards count] != 0) {
+        originalSetHasHorizontalScroller(self, _cmd, YES);
+        originalSetAutoHidesScrollers(self, _cmd, NO);
+    }
     
     [self tile];
 }
