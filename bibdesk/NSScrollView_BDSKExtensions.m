@@ -44,7 +44,7 @@
 @implementation NSScrollView (BDSKExtensions)
 
 static IMP originalSetHasHorizontalScroller = NULL;
-static IMP originalSetAutoHidesScrollers = NULL;
+static IMP originalSetAutohidesScrollers = NULL;
 static IMP originalDealloc = NULL;
 static IMP originalTile = NULL;
 
@@ -62,10 +62,10 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
         originalSetHasHorizontalScroller(self, _cmd, flag);
 }
 
-- (void)replacementSetAutoHidesScrollers:(BOOL)flag;
+- (void)replacementSetAutohidesScrollers:(BOOL)flag;
 {
     if ([[self placards] count] != 0)
-        originalSetAutoHidesScrollers(self, _cmd, flag);
+        originalSetAutohidesScrollers(self, _cmd, flag);
 }
 
 - (void)replacementTile {
@@ -104,7 +104,7 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
 
 + (void)load{
     originalSetHasHorizontalScroller = OBReplaceMethodImplementationWithSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
-    originalSetAutoHidesScrollers = OBReplaceMethodImplementationWithSelector(self, @selector(setAutoHidesScrollers:), @selector(replacementSetAutoHidesScrollers:));
+    originalSetAutohidesScrollers = OBReplaceMethodImplementationWithSelector(self, @selector(setAutohidesScrollers:), @selector(replacementSetAutohidesScrollers:));
     originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
     originalTile = OBReplaceMethodImplementationWithSelector(self, @selector(tile), @selector(replacementTile));
     
@@ -133,7 +133,7 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
     
     if ([placards count] != 0) {
         originalSetHasHorizontalScroller(self, _cmd, YES);
-        originalSetAutoHidesScrollers(self, _cmd, NO);
+        originalSetAutohidesScrollers(self, _cmd, NO);
     }
     
     [self tile];
