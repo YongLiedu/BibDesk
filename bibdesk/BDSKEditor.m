@@ -1530,21 +1530,24 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (NSURL *)fileView:(FileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename {
-	NSString *extension = [filename pathExtension];
-   
-	NSSavePanel *sPanel = [NSSavePanel savePanel];
-    if (NO == [extension isEqualToString:@""]) 
-		[sPanel setRequiredFileType:extension];
-    [sPanel setAllowsOtherFileTypes:YES];
-    [sPanel setCanSelectHiddenExtension:YES];
-	
-    // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
-    int returnCode = [sPanel runModalForDirectory:nil file:filename];
-    if (returnCode == NSOKButton) {
-        return [sPanel URL];
+    NSURL *fileURL = nil;
+    NSString *extension = [filename pathExtension];
+    
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [NSString isEmptyString:extension] == NO) {
+        NSString *downloadsPath = NSSearchPathForDirectoriesInDomains(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 ? NSDownloadsDirectory : NSDesktopDirectory, NSUserDomainMask);
+        fileURL = [NSURL fileURLWithPath:[downloadsPath stringByAppendingPathComponent:filename]];
     } else {
-        return nil;
+        NSSavePanel *sPanel = [NSSavePanel savePanel];
+        if (NO == [extension isEqualToString:@""]) 
+            [sPanel setRequiredFileType:extension];
+        [sPanel setAllowsOtherFileTypes:YES];
+        [sPanel setCanSelectHiddenExtension:YES];
+        
+        // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
+        if (NSOKButton == [sPanel runModalForDirectory:nil file:filename])
+            fileURL = [sPanel URL];
     }
+    return fileURL;
 }
 
 - (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
