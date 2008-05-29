@@ -1135,12 +1135,13 @@
                 break;
 			case 'f':
 			case 'c':
-			case 's':
 				[arr addObject:[[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:2]];
                 break;
 			case 'i':
 				[arr addObject:[NSString stringWithFormat:@"Document: ", [[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:2]]];
 				break;
+            default:
+                break;
 		}
 	}
 	return arr;
