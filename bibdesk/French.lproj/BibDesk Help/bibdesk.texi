@@ -3579,13 +3579,14 @@ Note: for BibTeX, it is also necessary to enclose the accent sequence in braces
 @heading Syntax of the format
 
 The format is used for autogeneration of certain values, such as the cite key 
-and the local file. The format is a string containing special format specifiers, 
+and linked file names. The format is a string containing special format specifiers, 
 which are replaced by strings determined by the bibliography data. 
 Most format specifiers have the form of a %-character followed by a single character. 
-It can be followed by optional digits, which serve as parameters for the format specifier. 
-Possible format specifiers are given in the table below.
+It can be followed by optional digits, and extra optional parameters enclosed in square brackets, 
+which serve as parameters for the format specifier. Possible format specifiers are given in the table below. 
+The specifiers are displayed in blue, the optional parameters in green. 
 
-@c Some macro defintions used in the table
+@c Some macro definitions used in the table
 
 @macro spec {text}
 @html
@@ -3667,20 +3668,20 @@ Possible format specifiers are given in the table below.
 @tab Author last names
 @tab name separator, et al., max number of names, max name length
 @item @specparam{%A, [;][.][]0}
-@tab Author last names with initials
+@tab Author names with initials
 @tab name separator, initial separator, et al., max number of names
 @item @specparam{%p, [][]00}
 @tab Author or editor last names
 @tab name separator, et al., max number of names, max name length
 @item @specparam{%P, [;][.][]0}
-@tab Author or editor last names with initials
+@tab Author or editor names with initials
 @tab name separator, initial separator, et al., max number of names
 @item @specparam{%t, 0 }
 @tab Title
 @tab max length
 @item @specparam{%T, []0 }
 @tab Title
-@tab max number of words
+@tab max length of words to ignore, max number of words
 @item @spec{%y}
 @tab Year without century
 @item @spec{%Y}
@@ -3726,7 +3727,7 @@ Possible format specifiers are given in the table below.
 @item @spec{%[}
 @tab Escaped square bracket (if allowed)
 @item @spec{%]}
-@tab Escaped square bracket character (if allowed)
+@tab Escaped square bracket (if allowed)
 @end multitable
 @noindent
 In the table above, @value{paramdescr} characters after the specifiers 
