@@ -1092,17 +1092,14 @@
 
 + (NSArray *)requiredFieldsForFormat:(NSString *)formatString
 {
-	NSMutableArray *arr = [NSMutableArray arrayWithCapacity:1];
-	NSEnumerator *cEnum = [[formatString componentsSeparatedByString:@"%"] objectEnumerator];
+	NSMutableArray *arr = [NSMutableArray arrayWithCapacity:3];
 	NSString *string;
-	
-	[cEnum nextObject];
-	while (string = [cEnum nextObject]) {
-		if ([string length] == 0) {
-			string = [cEnum nextObject];
-			continue;
-		}
-		switch ([string characterAtIndex:0]) {
+    unsigned int i = 0, l = [formatString length];
+    
+	while (i < l) {
+		i = NSMaxRange([formatString rangeOfString:@"%" options:0 range:NSMakeRange(i, l - i)]);
+        if (i >= l) break;
+        switch ([formatString characterAtIndex:i++]) {
 			case 'a':
 			case 'A':
 				[arr addObject:BDSKAuthorString];
