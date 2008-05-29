@@ -1532,10 +1532,14 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (NSURL *)fileView:(FileView *)aFileView downloadDestinationWithSuggestedFilename:(NSString *)filename {
     NSURL *fileURL = nil;
     NSString *extension = [filename pathExtension];
+    NSString *downloadsDirectory = [[[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKDownloadsDirectory"] stringByExpandingTildeInPath];
+    BOOL isDir;
     
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [NSString isEmptyString:extension] == NO) {
-        NSString *downloadsPath = NSSearchPathForDirectoriesInDomains(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 ? NSDownloadsDirectory : NSDesktopDirectory, NSUserDomainMask);
-        fileURL = [NSURL fileURLWithPath:[downloadsPath stringByAppendingPathComponent:filename]];
+    if (downloadsDirectory == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [NSString isEmptyString:extension] == NO)
+        downloadsDirectory = [NSSearchPathForDirectoriesInDomains(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 ? NSDownloadsDirectory : NSDesktopDirectory, NSUserDomainMask, YES) firstObject];
+    
+    if ([NSString isEmptyString:extension] == NO && [[NSFileManager defaultManager] fileExistsAtPath:downloadsDirectory isDirectory:&isDir] && isDir) {
+        fileURL = [NSURL fileURLWithPath:[downloadsDirectory stringByAppendingPathComponent:filename]];
     } else {
         NSSavePanel *sPanel = [NSSavePanel savePanel];
         if (NO == [extension isEqualToString:@""]) 
