@@ -3794,7 +3794,7 @@ Source Forge, 1:96, 11 2004.
 
 @table @asis
 @item Format string:
-@specparam{%a, 1}@bold{:}@spec{%Y}@specparam{%r,2}
+@specparam{%a, 1}@bold{:}@spec{%Y}@specparam{%u,2}
 @item Resulting value:
 McCracken:2004yc
 @end table
