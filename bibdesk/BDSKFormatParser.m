@@ -1093,12 +1093,11 @@
 + (NSArray *)requiredFieldsForFormat:(NSString *)formatString
 {
 	NSMutableArray *arr = [NSMutableArray arrayWithCapacity:3];
-	NSString *string;
-    unsigned int i = 0, l = [formatString length];
+    unsigned int i = 0, j, l = [formatString length];
     
-	while (i < l) {
+	while (i != NSNotFound && i < l) {
 		i = NSMaxRange([formatString rangeOfString:@"%" options:0 range:NSMakeRange(i, l - i)]);
-        if (i >= l) break;
+        if (i == NSNotFound || i >= l) break;
         switch ([formatString characterAtIndex:i++]) {
 			case 'a':
 			case 'A':
@@ -1132,10 +1131,14 @@
                 break;
 			case 'f':
 			case 'c':
-				[arr addObject:[[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:2]];
+                j = NSMaxRange([formatString rangeOfString:@"}" options:0 range:NSMakeRange(i, l - i)]);
+                if (j != NSNotFound && j > i + 1)
+                    [arr addObject:[formatString substringWithRange:NSMakeRange(i + 1, j - i - 1)]];
                 break;
 			case 'i':
-				[arr addObject:[NSString stringWithFormat:@"Document: ", [[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:2]]];
+                j = NSMaxRange([formatString rangeOfString:@"}" options:0 range:NSMakeRange(i, l - i)]);
+                if (j != NSNotFound && j > i + 1)
+                    [arr addObject:[@"Document: " stringByAppendingString:[formatString substringWithRange:NSMakeRange(i + 1, j - i - 1)]]];
 				break;
             default:
                 break;
