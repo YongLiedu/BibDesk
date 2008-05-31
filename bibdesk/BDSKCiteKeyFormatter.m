@@ -51,6 +51,12 @@
         if(error) *error = NSLocalizedString(@"Empty cite keys are not allowed.", @"Error description");
         return NO;
     }
+    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
+    NSRange r = [string rangeOfCharacterFromSet:invalidSet];
+    if (r.length) {
+        if(error) *error = [NSString stringWithFormat:NSLocalizedString(@"The character \"%@\" is not allowed in a BibTeX cite key.", @"Error description"), [string substringWithRange:r]];
+        return NO;
+    }
     *obj = string;
     return YES;
 }
