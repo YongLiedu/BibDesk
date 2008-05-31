@@ -68,7 +68,7 @@
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if ( r.location != NSNotFound) {
         NSMutableString *new = [[partialString mutableCopy] autorelease];
-        [new replaceCharactersInRange:r withString:@""];
+        [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
         *newString = new;
         if(error) *error = [NSString stringWithFormat:NSLocalizedString(@"The character \"%@\" is not allowed in a BibTeX cite key.", @"Error description"), [partialString substringWithRange:r]];
         return NO;
