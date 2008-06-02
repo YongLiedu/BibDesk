@@ -544,7 +544,11 @@ static Class BDSKLinkedObjectClass = Nil;
     NSString *path = [self path];
     path = path && newBasePath ? [newBasePath relativePathToFilename:path] : relativePath;
     NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil];
-    return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
+    NSMutableString *string = [[[[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String] mutableCopy] autorelease];
+    unsigned int i;
+    for (i = 75; i < [string length]; i += 76)
+        [string insertString:@"\n" atIndex:i];
+    return string;
 }
 
 // this could be called when the document fileURL changes
