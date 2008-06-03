@@ -406,6 +406,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification;
 
 /* Paste related methods */
+- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit;
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select verbose:(BOOL)verbose error:(NSError **)error;
 - (BOOL)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError;
 - (NSArray *)newPublicationsFromArchivedData:(NSData *)data;

@@ -2103,7 +2103,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 #pragma mark New publications from pasteboard
 
-- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect{
+- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit {
     NSEnumerator *pubEnum;
     BibItem *pub;
     
@@ -2135,15 +2135,21 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSCalendarDate *importDate = [NSCalendarDate date];
     [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
 	
-	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
+	if(shouldEdit) {
 		[self editPublications:newPubs]; // this will ask the user when there are many pubs
 	}
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
     
+    NSMutableArray *importedItems = [NSMutableArray array];
+    if (shouldSelect == NO && docState.didImport)
+        [importedItems addObjectsFromArray:[[groups lastImportGroup] publications]];
+    docState.didImport = (shouldSelect == NO);
+    [importedItems addObjectsFromArray:newPubs];
+    
     // set up the smart group that shows the latest import
     // @@ do this for items added via the editor?  doesn't seem as useful
-    [groups setLastImportedPublications:newPubs];
+    [groups setLastImportedPublications:importedItems];
 
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKImportPublicationsScriptHookName forPublications:newPubs document:self];
     
@@ -2158,6 +2164,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSArray *newFilePubs = nil;
 	NSError *error = nil;
     NSString *temporaryCiteKey = nil;
+    BOOL shouldEdit = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey];
     
     if([type isEqualToString:BDSKBibItemPboardType]){
         NSData *pbData = [pb dataForType:BDSKBibItemPboardType];
@@ -2207,7 +2214,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if(outError) *outError = error;
 		return NO;
     }else if ([newPubs count] > 0) 
-		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect];
+		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect edit:shouldEdit];
     
     return YES;
 }
@@ -2216,6 +2223,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSError *error = nil;
     NSString *temporaryCiteKey = nil;
     NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:nil verbose:verbose error:&error];
+    BOOL shouldEdit = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey];
     
     if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
         error = nil; // accept temporary cite keys, but show a warning later
@@ -2225,7 +2233,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return NO;
     }
     
-    [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:temporaryCiteKey selectLibrary:YES];
+    [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:temporaryCiteKey selectLibrary:YES edit:shouldEdit];
     
     return YES;
 }
