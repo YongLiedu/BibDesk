@@ -389,6 +389,7 @@
 
 - (void)setScriptURL:(NSURL *)newScriptURL {
     [self setScriptPath:[newScriptURL path]];
+    [self setScriptType:BDSKIsAppleScriptAtPath([newScriptURL path]) ? BDSKAppleScriptType : BDSKShellScriptType];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
@@ -439,6 +440,8 @@
         serverType = 'Zoom';
     else if ([serverInfo isISI])
         serverType = 'ISI ';
+    else if ([serverInfo isDBLP])
+        serverType = 'DBLP';
     else
         return nil;
     
@@ -459,7 +462,7 @@
 }
 
 - (void)setScriptingServerInfo:(NSDictionary *)info {
-    NSString *serverType = nil;
+    NSString *serverType = type;
      
     switch ([[info objectForKey:@"type"] intValue]) {
         case 'Entr':
@@ -471,17 +474,20 @@
         case 'ISI ':
             serverType = BDSKSearchGroupISI;
             break;
+        case 'DBLP':
+            serverType = BDSKSearchGroupDBLP;
+            break;
         default:
-            serverType = [[self serverInfo] type];
+            break;
     }
     
-    BDSKMutableServerInfo *serverInfo = [[self serverInfo] mutableCopy];
+    BDSKMutableServerInfo *serverInfo = nil;
     NSString *serverName = [info valueForKey:@"name"];
     NSString *database = [info valueForKey:@"database"];
     NSString *host = [info valueForKey:@"host"];
     NSString *port = [info valueForKey:@"port"];
     
-    if ([[serverInfo type] isEqualToString:type]) {
+    if ([serverType isEqualToString:type]) {
         serverInfo = [[self serverInfo] mutableCopy];
         
         NSString *value;

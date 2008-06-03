@@ -256,12 +256,16 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
         return;
     } else if ([group isSmart] == YES) {
         [groups addSmartGroup:(BDSKSmartGroup *)group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isStatic] == YES && [group isKindOfClass:[BDSKLastImportGroup class]] == NO) {
         [groups addStaticGroup:(BDSKStaticGroup *)group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isURL] == YES) {
         [groups addURLGroup:(BDSKURLGroup *)group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isScript] == YES) {
         [groups addScriptGroup:(BDSKScriptGroup *)group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isSearch] == YES) {
         [groups addSearchGroup:(BDSKSearchGroup *)group];
     } else {
@@ -270,7 +274,6 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
         return;
     }
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (void)insertObject:(BDSKGroup *)group inGroupsAtIndex:(unsigned int)idx {
@@ -281,12 +284,16 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     BDSKGroup *group = [[groups staticGroups] objectAtIndex:idx];
     if ([group isSmart] == YES) {
         [groups removeSmartGroup:(BDSKSmartGroup *)group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isStatic] == YES && [group isEqual:[groups lastImportGroup]] == NO) {
         [groups removeStaticGroup:(BDSKStaticGroup *)group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isURL] == YES) {
         [groups removeURLGroup:(BDSKURLGroup *)group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isScript] == YES) {
         [groups removeScriptGroup:(BDSKScriptGroup *)group];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else if ([group isSearch] == YES) {
         [groups removeSearchGroup:(BDSKSearchGroup *)group];
     } else {
@@ -295,7 +302,6 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot remove group.",@"Error description")];
         return;
     }
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     [self displaySelectedGroups];
 }
 

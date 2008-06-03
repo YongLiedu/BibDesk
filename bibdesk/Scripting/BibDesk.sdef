@@ -1267,6 +1267,8 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Z3950 search server."/>
             <enumerator name="ISI" code="ISI "
                 description="ISI Web of Sciences search server."/>
+            <enumerator name="DBLP" code="DBLP"
+                description="DBLP search server."/>
         </enumeration>
         
         <command name="add" code="BDSKAdd "

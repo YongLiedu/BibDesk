@@ -55,16 +55,28 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 @implementation BDSKSearchGroup
 
-- (id)initWithType:(NSString *)typeName name:(NSString *)aName;
+// old designated initializer
+- (id)initWithName:(NSString *)aName count:(int)aCount;
 {
-    return [self initWithType:typeName serverInfo:[NSDictionary dictionaryWithObject:aName forKey:@"database"] searchTerm:nil];
+    // ignore the name, because if this is called it's a dummy name anyway
+    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+    NSString *aType = BDSKSearchGroupEntrez;
+    if ([cmd isKindOfClass:[NSCreateCommand class]]) {
+        NSDictionary *info = [[(NSCreateCommand *)cmd resolvedKeyDictionary] objectForKey:@"scriptingServerInfo"];
+        if ([info objectForKey:@"type"]) {
+            switch ([[info objectForKey:@"type"] intValue]) {
+                case 'Entr': aType = BDSKSearchGroupEntrez; break;
+                case 'Zoom': aType = BDSKSearchGroupZoom; break;
+                case 'ISI ': aType = BDSKSearchGroupISI; break;
+                case 'DBLP': aType = BDSKSearchGroupDBLP; break;
+                default: break;
+            }
+        }
+    }
+    return [self initWithType:aType serverInfo:[BDSKServerInfo defaultServerInfoWithType:aType] searchTerm:nil];
 }
 
-- (id)initWithName:(NSString *)aName;
-{
-    return [self initWithType:BDSKSearchGroupEntrez serverInfo:[NSDictionary dictionaryWithObject:aName forKey:@"database"] searchTerm:nil];
-}
-
+// designated initializer
 - (id)initWithType:(NSString *)aType serverInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
 {
     NSString *aName = [info name];
@@ -127,6 +139,8 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
             aType = BDSKSearchGroupEntrez;
         else if ([aType caseInsensitiveCompare:BDSKSearchGroupISI])
             aType = BDSKSearchGroupISI;
+        else if ([aType caseInsensitiveCompare:BDSKSearchGroupDBLP])
+            aType = BDSKSearchGroupDBLP;
     }
     
     while (query = [queryEnum nextObject]) {
@@ -198,14 +212,19 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-    [publications release]; 
     [server terminate];
     [server release];
+    server = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
+    [publications release];
+    publications = nil;
     [type release];
+    type = nil;
     [searchTerm release];
+    searchTerm = nil;
     [searchIndexes release];
+    searchIndexes = nil;
     [super dealloc];
 }
 
@@ -322,7 +341,8 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     return macroResolver;
 }
 
-- (NSUndoManager *)undoManager { return [super undoManager]; }
+// search groups are not saved, so we don't register undo with the document's undo manager
+- (NSUndoManager *)undoManager { return nil; }
 
 - (NSURL *)fileURL { return nil; }
 

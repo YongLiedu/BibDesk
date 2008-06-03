@@ -54,12 +54,33 @@
 
 @implementation BDSKURLGroup
 
+// old designated initializer
+- (id)initWithName:(NSString *)aName count:(int)aCount;
+{
+    // ignore the name, because if this is called it's a dummy name anyway
+    NSURL *theURL = [NSURL URLWithString:@"http://"];
+    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+    if ([cmd isKindOfClass:[NSCreateCommand class]]) {
+        NSDictionary *properties = [(NSCreateCommand *)cmd resolvedKeyDictionary];
+        if ([properties objectForKey:@"fileURL"]) {
+            theURL = [properties objectForKey:@"fileURL"];
+        } else if ([properties objectForKey:@"URLString"]) {
+            theURL = [NSURL URLWithString:[properties objectForKey:@"URLString"]];
+        } else {
+            [cmd setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+            [cmd setScriptErrorString:NSLocalizedString(@"New external file groups need a file or a URL.", @"Error description")];
+        }
+    }
+    return [self initWithURL:theURL];
+}
+
 - (id)initWithURL:(NSURL *)aURL;
 {
     self = [self initWithName:nil URL:aURL];
     return self;
 }
 
+// designated initializer
 - (id)initWithName:(NSString *)aName URL:(NSURL *)aURL;
 {
     NSParameterAssert(aURL != nil);
@@ -238,7 +259,7 @@
     if (URL != newURL) {
 		[[[self undoManager] prepareWithInvocationTarget:self] setURL:URL];
         
-        if ([name isEqualToString:[URL lastPathComponent]])
+        if (name == nil || [name isEqualToString:[URL lastPathComponent]])
             [self setName:[newURL lastPathComponent]];
         
         [URL release];

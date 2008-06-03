@@ -54,8 +54,25 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKItemSearchIndexes.h"
+#import "NSWorkspace_BDSKExtensions.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
+
+BOOL BDSKIsAppleScriptAtPath(NSString *path)
+{
+    path = [path stringByStandardizingPath];
+    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
+                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text"))) : NO;
+}
+
+BOOL BDSKIsExecutableFileAtPath(NSString *path)
+{
+    path = [path stringByStandardizingPath];
+    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
+                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text"))) : NO;
+}
 
 static OFMessageQueue *messageQueue = nil;
 
@@ -71,12 +88,40 @@ static OFMessageQueue *messageQueue = nil;
     }
 }
 
+// old designated initializer
+- (id)initWithName:(NSString *)aName count:(int)aCount;
+{
+    // ignore the name, because if this is called it's a dummy name anyway
+    NSString *path = nil;
+    NSString *arguments = nil;
+    NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+    if ([cmd isKindOfClass:[NSCreateCommand class]]) {
+        NSDictionary *properties = [(NSCreateCommand *)cmd resolvedKeyDictionary];
+        if ([properties objectForKey:@"scriptURL"]) {
+            path = [[properties objectForKey:@"scriptURL"] path];
+        } else {
+            [cmd setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+            [cmd setScriptErrorString:NSLocalizedString(@"New script groups need a script file.", @"Error description")];
+        }
+        if ([properties objectForKey:@"scriptingScriptArguments"])
+            arguments = [properties objectForKey:@"scriptingScriptArguments"];
+    }
+    if (path == nil) {
+        [self release];
+        self = nil;
+    } else {
+        self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:BDSKIsAppleScriptAtPath(path) ? BDSKAppleScriptType : BDSKShellScriptType];
+    }
+    return self;
+}
+
 - (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
 {
     self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:type];
     return self;
 }
 
+// designated initialzer
 - (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
 {
     NSParameterAssert(path != nil);

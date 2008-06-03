@@ -43,29 +43,11 @@
 #import "BDSKFieldEditor.h"
 #import "BDSKDragTextField.h"
 
-static BOOL isAppleScriptAtPath(NSString *path)
-{
-    path = [path stringByStandardizingPath];
-    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
-    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
-                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text"))) : NO;
-}
-
 static BOOL isFolderAtPath(NSString *path)
 {
     path = [path stringByStandardizingPath];
     NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
     return theUTI ? UTTypeEqual((CFStringRef)theUTI, kUTTypeFolder) : NO;
-}
-
-static BOOL isExecutableFileAtPath(NSString *path)
-{
-    path = [path stringByStandardizingPath];
-    BOOL isExecutable = [[NSFileManager defaultManager] isExecutableFileAtPath:path];
-    // exclude packages and directories, which are not executable data
-    BOOL isDir;
-    [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir];
-    return (isExecutable && NO == isDir);
 }
 
 @implementation BDSKScriptGroupSheetController
@@ -121,7 +103,7 @@ static BOOL isExecutableFileAtPath(NSString *path)
         // directories aren't scripts
         isValid = NO;
         *message = NSLocalizedString(@"The specified file is a directory, not a script file.", @"Error description");
-    } else if (isExecutableFileAtPath(thePath) == NO && isAppleScriptAtPath(thePath) == NO) {
+    } else if (BDSKIsExecutableFileAtPath(thePath) == NO && BDSKIsAppleScriptAtPath(thePath) == NO) {
         // it's not executable
         isValid = NO;
         *message = NSLocalizedString(@"The file does not have execute permission set.", @"Error description");
@@ -138,7 +120,7 @@ static BOOL isExecutableFileAtPath(NSString *path)
         if ([self commitEditing] == NO)
             return;
         
-        if (isAppleScriptAtPath([path stringByStandardizingPath]))
+        if (BDSKIsAppleScriptAtPath([path stringByStandardizingPath]))
             type = BDSKAppleScriptType;
         else
             type = BDSKShellScriptType;
@@ -165,7 +147,7 @@ static BOOL isExecutableFileAtPath(NSString *path)
 
 // open panel delegate method
 - (BOOL)panel:(id)sender shouldShowFilename:(NSString *)filename {
-    return (isAppleScriptAtPath(filename) || isExecutableFileAtPath(filename) || isFolderAtPath(filename));        
+    return (BDSKIsAppleScriptAtPath(filename) || BDSKIsExecutableFileAtPath(filename) || isFolderAtPath(filename));        
 }
 
 - (IBAction)chooseScriptPath:(id)sender {

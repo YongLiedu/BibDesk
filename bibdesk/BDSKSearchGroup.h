@@ -73,7 +73,6 @@ extern NSString *BDSKSearchGroupDBLP;
     BDSKItemSearchIndexes *searchIndexes;
 }
 
-- (id)initWithName:(NSString *)aName;
 - (id)initWithType:(NSString *)aType serverInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
 - (id)initWithURL:(NSURL *)bdsksearchURL;
 

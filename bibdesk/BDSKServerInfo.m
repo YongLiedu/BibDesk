@@ -128,7 +128,7 @@
     // we don't compare the name, as that is just a label
     if ([self isMemberOfClass:[other class]] == NO || [[self type] isEqualToString:[(BDSKServerInfo *)other type]] == NO)
         isEqual = NO;
-    else if ([self isEntrez] || [self isISI])
+    else if ([self isEntrez] || [self isISI] || [self isDBLP])
         isEqual = OFISEQUAL([self database], [other database]);
     else if ([self isZoom])
         isEqual = OFISEQUAL([self host], [other host]) && 
