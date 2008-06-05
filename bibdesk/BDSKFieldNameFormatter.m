@@ -68,7 +68,7 @@
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
     // first check the delegate for known field names, which may include special names containing spaces such as Cite Key, this is called on Leopard when auto-completing an item from the combobox
-    if ([[delegate fieldNameFormatterKnownFieldNames:self] containsObject:partialString]) {
+    if ([[delegate fieldNameFormatterKnownFieldNames:self] containsObject:string]) {
         *obj = string;
         return YES;
     }
