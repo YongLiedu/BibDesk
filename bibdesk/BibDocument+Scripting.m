@@ -470,7 +470,6 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
         [cmd setScriptErrorString:NSLocalizedString(@"Cannot add group.",@"Error description")];
     } else {
         [groups addSearchGroup:group];
-        [[self undoManager] setActionName:NSLocalizedString(@"AppleSearch",@"Undo action name for AppleSearch")];
     }
 }
 
@@ -480,7 +479,6 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 
 - (void)removeObjectFromSearchGroupsAtIndex:(unsigned int)idx {
 	[groups removeSearchGroup:[[groups searchGroups] objectAtIndex:idx]];
-	[[self undoManager] setActionName:NSLocalizedString(@"AppleSearch",@"Undo action name for AppleSearch")];
 }
 
 #pragma mark -
