@@ -58,13 +58,7 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    NSRange r = [string rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
-    if ( r.location != NSNotFound || 
-        ([string length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[string characterAtIndex:0]]) ) {
-        if (error) *error = NSLocalizedString(@"The field name contains an invalid character", @"field name warning");
-		return NO; // BibTeX chokes if the first character of a field name is a digit
-    }
-	string = [string fieldName];
+    // we don't check for invalid characters like in partial string checking, as the user may have chosen a field name containing spaces from the combo box menu
     if ([string hasPrefix:@"Bdsk-File"]) {
         if (error) *error = NSLocalizedString(@"\"Bdsk-File\" fields are reserved for BibDesk's internal usage", @"field name warning");
         return NO;
