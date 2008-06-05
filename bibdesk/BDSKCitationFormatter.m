@@ -44,14 +44,20 @@
 @implementation BDSKCitationFormatter
 
 static NSCharacterSet *invalidSet = nil;
+static NSCharacterSet *keySepCharSet = nil;
+static NSCharacterSet *keyCharSet = nil;
 
 + (void)initialize {
     OBINITIALIZE;
     
-    // comma is used, possibly with a space, to separate the cite keys
+    // comma and space are used to separate the keys
+    
+    keySepCharSet = [[NSCharacterSet characterSetWithCharactersInString:@", "] retain];
+    
+    keyCharSet = [[keySepCharSet invertedSet] retain];
     
     NSMutableCharacterSet *tmpSet = [[[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] mutableCopy];
-    [tmpSet removeCharactersInString:@", "];
+    [tmpSet formIntersectionWithCharacterSet:keyCharSet];
     invalidSet = [tmpSet copy];
     [tmpSet release];
 }
@@ -71,16 +77,12 @@ static NSCharacterSet *invalidSet = nil;
     return obj;
 }
 
+// Display valid keys as underlined links
+// This is used when the text field cell is not edited, the links are not really active, as there's no responder mechanism for links
+// When it's edited BDSKFieldEditor will use essentially the same code to display these links
+// When the user tries to use these dummy links, the field editor will be automatically inserted, magically making the links work, as NSTextView has the proper responder code for links
 - (NSAttributedString *)attributedStringForObjectValue:(id)obj withDefaultAttributes:(NSDictionary *)attrs{
     NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString:[self stringForObjectValue:obj] attributes:attrs];
-    
-    static NSCharacterSet *keySepCharSet = nil;
-    static NSCharacterSet *keyCharSet = nil;
-    
-    if (keySepCharSet == nil) {
-        keySepCharSet = [[NSCharacterSet characterSetWithCharactersInString:@", "] retain];
-        keyCharSet = [[keySepCharSet invertedSet] retain];
-    }
     
     NSString *string = [attrString string];
     
@@ -91,10 +93,12 @@ static NSCharacterSet *invalidSet = nil;
     [attrString removeAttribute:NSLinkAttributeName range:NSMakeRange(0, length)];
     
     do {
+        // find the start of a key
         start = NSMaxRange(range);
         range = [string rangeOfCharacterFromSet:keyCharSet options:0 range:NSMakeRange(start, length - start)];
         
         if (range.length) {
+            // find the end of a key, by searching a separator character or the end of the string 
             start = range.location;
             range = [string rangeOfCharacterFromSet:keySepCharSet options:0 range:NSMakeRange(start, length - start)];
             if (range.length == 0)
@@ -103,17 +107,16 @@ static NSCharacterSet *invalidSet = nil;
                 range = NSMakeRange(start, range.location - start);
                 keyString = [string substringWithRange:range];
                 if ([[self delegate] citationFormatter:self isValidKey:keyString]) {
+                    // we found a valid key, so now underline it and make it blue
                     [attrString addAttribute:NSForegroundColorAttributeName value:[NSColor blueColor] range:range];
                     [attrString addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSUnderlineStyleSingle] range:range];
-                    [attrString addAttribute:NSLinkAttributeName value:keyString range:range];
+                    [attrString addAttribute:NSLinkAttributeName value:keyString range:range]; // this won't work, but who cares
                 }
             }
         }
     } while (range.length);
     
-    NSAttributedString *returnString = [[attrString copy] autorelease];
-    [attrString release];
-    return returnString;
+    return [attrString autorelease];
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
