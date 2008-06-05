@@ -138,7 +138,7 @@
 
 - (void)awakeFromNib{
     BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
-	[(NSTextField *)fieldsControl setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
+	[(NSTextField *)fieldsControl setFormatter:formatter];
     [formatter setDelegate:self];
 }
 
