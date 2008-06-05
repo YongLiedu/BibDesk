@@ -73,12 +73,12 @@
         return YES;
     }
     NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString];
-    NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
+    NSRange r = [string rangeOfCharacterFromSet:invalidSet];
     if (r.location != NSNotFound) {
         if (error) *error = NSLocalizedString(@"The field name contains an invalid character", @"field name warning");
 		return NO;
     }
-    if ([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) {
+    if ([string length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[string characterAtIndex:0]]) {
         if (error) *error = NSLocalizedString(@"The first character must not be a digit", @"field name warning");
 		return NO; // BibTeX chokes if the first character of a field name is a digit
     }
