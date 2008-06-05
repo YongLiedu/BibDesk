@@ -235,9 +235,8 @@
                 searchResult = [[BDSKFileSearchResult alloc] initWithURL:theURL identifierURL:idURL title:title score:score];            
                 [searchResults addObject:searchResult];            
                 [searchResult release];
-                [theURL release];
             }
-            
+            [theURL release];            
             CFRelease(skDocument);
         }      
         
