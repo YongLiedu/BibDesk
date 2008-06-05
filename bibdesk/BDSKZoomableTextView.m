@@ -173,7 +173,6 @@ static float BDSKScaleMenuFontSize = 11.0;
     }
 	
 	if (fabsf(scaleFactor - newScaleFactor) > 0.01) {
-		NSView *documentView = self;
         NSPoint scrollPoint = [self scrollPositionAsPercentage];
 		
 		scaleFactor = newScaleFactor;
