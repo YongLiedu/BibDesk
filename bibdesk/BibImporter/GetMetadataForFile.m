@@ -47,8 +47,6 @@ Boolean GetMetadataForFile(void* thisInterface,
     Boolean success = FALSE;
     
     CFStringRef cacheUTI = CFSTR("net.sourceforge.bibdesk.bdskcache");
-    CFStringRef bibtexUTI = CFSTR("org.tug.tex.bibtex");
-    CFStringRef risUTI = CFSTR("net.sourceforge.bibdesk.ris");
     CFStringRef searchUTI = CFSTR("net.sourceforge.bibdesk.bdsksearch");
     
     if(UTTypeEqual(contentTypeUTI, cacheUTI)){
@@ -61,38 +59,6 @@ Boolean GetMetadataForFile(void* thisInterface,
         // don't index this, since it's not useful to mds
         [(NSMutableDictionary *)attributes removeObjectForKey:@"FileAlias"]; 
         [dictionary release];
-        
-    } else if(UTTypeEqual(contentTypeUTI, bibtexUTI) || UTTypeEqual(contentTypeUTI, risUTI)){
-        
-        NSStringEncoding encoding;
-        NSError *error = nil;
-        
-        // try to interpret as Unicode, then default C encoding (likely MacOSRoman)
-        NSString *fileString = [[NSString alloc] initWithContentsOfFile:(NSString *)pathToFile usedEncoding:&encoding error:&error];
-        
-        if(fileString == nil || error != nil){
-            // read file as data instead
-            NSData *data = [[NSData alloc] initWithContentsOfFile:(NSString *)pathToFile];
-            
-            if (nil != data) {
-                
-                // try UTF-8 next (covers ASCII as well)
-                fileString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                
-                // last-ditch effort: ISO-8859-1
-                if(fileString == nil)
-                    fileString = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
-                
-                // done with this, whether we succeeded or not
-                [data release];
-            }
-        }
-        
-        if (nil != fileString) {
-            [(NSMutableDictionary *)attributes setObject:fileString forKey:(NSString *)kMDItemTextContent];
-            [fileString release];
-            success = TRUE;
-        }
         
     } else if (UTTypeEqual(contentTypeUTI, searchUTI)) {
         
@@ -122,9 +88,45 @@ Boolean GetMetadataForFile(void* thisInterface,
         // rest of the information (port, type, options) doesn't seem as useful        
         [dictionary release];
         
-    } else {
-        NSLog(@"Importer asked to handle unknown UTI %@ at path", contentTypeUTI, pathToFile);
+    } 
+    
+    // add the entire file as kMDItemTextContent for plain text file types
+    if(UTTypeConformsTo(contentTypeUTI, kUTTypePlainText)){
+        
+        NSStringEncoding encoding;
+        NSError *error = nil;
+        
+        // try to interpret as Unicode (uses xattrs on 10.5 also)
+        NSString *fileString = [[NSString alloc] initWithContentsOfFile:(NSString *)pathToFile usedEncoding:&encoding error:&error];
+        
+        if(fileString == nil){
+            // read file as data instead
+            NSData *data = [[NSData alloc] initWithContentsOfFile:(NSString *)pathToFile];
+            
+            if (nil != data) {
+                
+                // try UTF-8 next (covers ASCII as well)
+                fileString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                
+                // last-ditch effort: MacRoman will always succeed
+                if(fileString == nil)
+                    fileString = [[NSString alloc] initWithData:data encoding:NSMacOSRomanStringEncoding];
+                
+                // done with this, whether we succeeded or not
+                [data release];
+            }
+        }
+        
+        if (nil != fileString) {
+            [(NSMutableDictionary *)attributes setObject:fileString forKey:(NSString *)kMDItemTextContent];
+            [fileString release];
+            success = TRUE;
+        }
+        
     }
+    
+    if (success == FALSE)
+        NSLog(@"Importer failed to import file with UTI %@ at %@", contentTypeUTI, pathToFile);
     
     [pool release];
     return success;
