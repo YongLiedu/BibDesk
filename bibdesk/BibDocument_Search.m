@@ -158,21 +158,34 @@ Ensure that views are always ordered vertically from top to bottom as
     NSView *searchButtonView = [searchButtonController view];
     
     if ([self isDisplayingSearchButtons] == NO) {
-        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
         [self insertControlView:searchButtonView atTop:YES];
         if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil)
             [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
         
+        // note: if selectedIdentifier was previously selected, AMButtonBar won't post the selection change notification, but we need to avoid posting it twice
+        if ([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString]) {
+            [self buttonBarSelectionDidChange:nil];
+        } else if (nil == [searchButtonController selectedItemIdentifier]) {
+            [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+            [self buttonBarSelectionDidChange:nil];
+        } else {
+            // should never reach this
+            [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
     }
+        
+    } else {
+        // update existing search
+        [self buttonBarSelectionDidChange:nil];
+}
 }
 
 - (void)hideSearchButtonView
 {
-    NSView *searchButtonView = [searchButtonController view];
     if ([self isDisplayingSearchButtons]) {
         [tableView removeTableColumnWithIdentifier:BDSKRelevanceString];
-        [self removeControlView:searchButtonView];
+        [self removeControlView:[searchButtonController view]];
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+        [searchButtonController setDelegate:nil];
         
         if ([previousSortKey isEqualToString:BDSKRelevanceString]) {
             [previousSortKey release];
@@ -183,16 +196,18 @@ Ensure that views are always ordered vertically from top to bottom as
             docState.sortDescending = NO;
             [self sortPubsByKey:newSortKey];
         }
+        
+    } else {
+        // handle UI updates when search: action is called without the search view in place
+        [self buttonBarSelectionDidChange:nil];
     }
-    [searchButtonController setDelegate:nil];
 }
 
 - (IBAction)search:(id)sender{
     if ([[sender stringValue] isEqualToString:@""])
         [self hideSearchButtonView];
-    else [self showSearchButtonView];
-    
-    [self buttonBarSelectionDidChange:nil];
+    else 
+        [self showSearchButtonView];    
 }
 
 #pragma mark -
@@ -218,7 +233,15 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     return searchFieldString;
 }
 
-- (void)searchFinished:(BDSKDocumentSearch *)aSearch;
+- (void)searchDidStart:(BDSKDocumentSearch *)aSearch;
+{
+    [shownPublications removeAllObjects];
+    [tableView deselectAll:nil];
+    [self sortPubsByKey:nil];
+    [self updateStatus];    
+}
+
+- (void)searchDidStop:(BDSKDocumentSearch *)aSearch;
 {
     // maintain scroll position, select next item if the user didn't select something else during the search
     if ([self numberOfSelectedPubs] == 0) {
@@ -280,16 +303,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
     SKIndexRef skIndex = [[owner searchIndexes] indexForField:field];
     
-    NSArray *selPubs = [[self selectedPublications] retain];
-    
-    [shownPublications removeAllObjects];
-    [tableView deselectAll:nil];
-    [self sortPubsByKey:nil];
-    [self updateStatus];
-    
-    [documentSearch searchForString:searchString index:skIndex selectedPublications:selPubs scrollPositionAsPercentage:[tableView scrollPositionAsPercentage]];
-    [selPubs release];
-
+    [documentSearch searchForString:searchString index:skIndex selectedPublications:[self selectedPublications] scrollPositionAsPercentage:[tableView scrollPositionAsPercentage]];
 }
 
 #pragma mark File Content Search

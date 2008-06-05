@@ -131,14 +131,22 @@ static OFMessageQueue *searchQueue = nil;
 
 - (void)invokeFinishedCallback
 {
-    [[callback target] searchFinished:self];
+    [[callback target] searchDidStop:self];
 }
+
+- (void)invokeStartedCallback
+{
+    [[callback target] searchDidStart:self];
+} 
 
 #define SEARCH_BUFFER_MAX 1024
 
 // array argument is so OFInvocation doesn't barf when it tries to retain the SKIndexRef
 - (void)backgroundSearchForString:(NSString *)searchString indexArray:(NSArray *)skIndexArray
 {
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isSearching);
+    [self performSelectorOnMainThread:@selector(invokeStartedCallback) withObject:nil waitUntilDone:YES];
+
     // note that the add/remove methods flush the index, so we don't have to do it again
     SKIndexRef skIndex = (void *)[skIndexArray objectAtIndex:0];
     NSParameterAssert(NULL == search);
@@ -152,7 +160,6 @@ static OFMessageQueue *searchQueue = nil;
     Boolean more, keepGoing;
     maxScore = 0.0f;
     
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isSearching);
     [originalScores removeAllObjects];
     
     do {
@@ -217,9 +224,6 @@ static OFMessageQueue *searchQueue = nil;
     [self setPreviouslySelectedPublications:selPubs];
     [self setPreviousScrollPositionAsPercentage:scrollPoint];
     
-    // searchfield seems to send its action multiple times with the same search string; avoid duplicate searches
-    if (NO == [self isSearching] || (NO == [currentSearchString isEqualToString:searchString] && skIndex != currentIndex)) {
-        
         [searchLock lock];
         [currentSearchString autorelease];
         currentSearchString = [searchString copy];
@@ -228,9 +232,8 @@ static OFMessageQueue *searchQueue = nil;
         if ([self isSearching])
             [self cancelSearch];
         
-        [[callback target] handleSearchCallbackWithIdentifiers:nil normalizedScores:nil];
+    // always queue a search, since the index content may be changing (in case of a search group)
         [searchQueue queueSelector:@selector(backgroundSearchForString:indexArray:) forObject:self withObject:searchString withObject:[NSArray arrayWithObject:(id)skIndex]];
     }
-}
 
 @end
