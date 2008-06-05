@@ -42,7 +42,15 @@
 
 
 @interface BDSKFieldNameFormatter : NSFormatter {
-
+    id delegate;
 }
 
+- (id)delegate;
+- (void)setDelegate:(id)newDelegate;
+
+@end
+
+
+@interface NSObject (BDSKFieldNameFormatterDelegate)
+- (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter;
 @end

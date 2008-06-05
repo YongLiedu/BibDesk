@@ -132,6 +132,7 @@ enum {
     // make sure we enter valid field names
     BDSKFieldNameFormatter *formatter = [[BDSKFieldNameFormatter alloc] init];
     [fieldToSearchComboBox setFormatter:formatter];
+    [formatter setDelegate:self];
     [formatter release];
 	
 	[statusBar retain]; // we need to retain, as we might remove it from the window
@@ -601,6 +602,13 @@ enum {
 		}
 	}
 	return YES;
+}
+
+- (NSArray *)fieldNameFormatter:(BDSKFieldNameFormatter *)formatter isKnownFieldName:(NSString *)string {
+    if (formatter == [fieldToSearchComboBox formatter])
+        return [fieldToSearchComboBox objectValues] ;
+    else
+        return nil;
 }
 
 #pragma mark NSEditorRegistration

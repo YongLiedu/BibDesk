@@ -141,12 +141,21 @@ static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionCont
     [dateTextField setFormatter:formatter];
     [toDateTextField setFormatter:formatter];
 	
-	[keyComboBox setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
+    BDSKFieldNameFormatter *fieldFormatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
+	[keyComboBox setFormatter:fieldFormatter];
+	[fieldFormatter setDelegate:self];
     
     [self layoutComparisonControls];
     [self layoutValueControls];
     
     [self startObserving];
+}
+
+- (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
+    if (formatter == [keyComboBox formatter])
+        return keys;
+    else
+        return nil;
 }
 
 - (NSView *)view {

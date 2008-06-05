@@ -49,6 +49,15 @@
 
 @implementation BDSKFieldNameFormatter
 
+- (id)delegate {
+    return delegate;
+}
+
+- (void)setDelegate:(id)newDelegate {
+    OBPRECONDITION(newDelegate == nil || [newDelegate respondsToSelector:@selector(fieldNameFormatterKnownFieldNames:)]);
+    delegate = newDelegate;
+}
+
 - (NSString *)stringForObjectValue:(id)obj{
     return obj;
 }
@@ -73,20 +82,21 @@
     }
 }
 
-// This is currently the same deal as what we check for in cite-keys, but in a different class
-// because that may change.
-
 - (BOOL)isPartialStringValid:(NSString *)partialString
             newEditingString:(NSString **)newString
             errorDescription:(NSString **)error{
+    // first check the delegate for known field names, which may include special names containing spaces such as Cite Key, this is called on Leopard when auto-completing an item from the combobox
+    if ([[delegate fieldNameFormatterKnownFieldNames:self] containsObject:partialString]) {
+        return YES;
+    }
     NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString];
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if (r.location != NSNotFound) {
+        if (error) *error = NSLocalizedString(@"The field name contains an invalid character", @"field name warning");
         NSMutableString *new = [[partialString mutableCopy] autorelease];
         [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
         *newString = new;
-        if (error) *error = NSLocalizedString(@"The field name contains an invalid character", @"field name warning");
-		return NO; // BibTeX chokes if the first character of a field name is a digit
+		return NO;
     } else if ([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) {
         *newString = nil;
         if (error) *error = NSLocalizedString(@"The first character must not be a digit", @"field name warning");

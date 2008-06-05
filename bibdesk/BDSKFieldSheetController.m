@@ -137,11 +137,20 @@
 @implementation BDSKAddFieldSheetController
 
 - (void)awakeFromNib{
+    BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
 	[(NSTextField *)fieldsControl setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
+    [formatter setDelegate:self];
 }
 
 - (NSString *)windowNibName{
     return @"AddFieldSheet";
+}
+
+- (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
+    if (formatter == [(NSTextField *)fieldsControl formatter])
+        return [self fieldsArray];
+    else
+        return nil;
 }
 
 @end
@@ -186,7 +195,9 @@
 }
 
 - (void)awakeFromNib{
-	[newFieldsComboBox setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
+    BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
+	[newFieldsComboBox setFormatter:formatter];
+    [formatter setDelegate:self];
 }
 
 - (NSString *)windowNibName{
@@ -253,6 +264,13 @@
     newFieldsFrame.origin.x += dw;
     [fieldsControl setFrame:fieldsFrame];
     [newFieldsComboBox setFrame:newFieldsFrame];
+}
+
+- (NSArray *)fieldNameFormatter:(BDSKFieldNameFormatter *)formatter isKnownFieldName:(NSString *)string {
+    if (formatter == [(NSTextField *)newFieldsComboBox formatter])
+        return [self newFieldsArray];
+    else
+        return nil;
 }
 
 @end
