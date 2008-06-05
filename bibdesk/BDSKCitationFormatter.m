@@ -38,9 +38,23 @@
 
 #import "BDSKCitationFormatter.h"
 #import "BDSKTypeManager.h"
+#import <OmniBase/OBUtilities.h>
 
 
 @implementation BDSKCitationFormatter
+
+static NSCharacterSet *invalidSet = nil;
+
++ (void)initialize {
+    OBINITIALIZE;
+    
+    // comma is used, possibly with a space, to separate the cite keys
+    
+    NSMutableCharacterSet *tmpSet = [[[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] mutableCopy];
+    [tmpSet removeCharactersInString:@", "];
+    invalidSet = [tmpSet copy];
+    [tmpSet release];
+}
 
 - (id)initWithDelegate:(id)aDelegate {
     if (self = [super init]) {
@@ -103,6 +117,11 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+    NSRange r = [string rangeOfCharacterFromSet:invalidSet];
+    if (r.location != NSNotFound) {
+        if(error) *error = [NSString stringWithFormat:NSLocalizedString(@"The character \"%@\" is not allowed in a BibTeX cite key.", @"Error description"), [string substringWithRange:r]];
+        return NO;
+   }
     *obj = string;
     return YES;
 }
@@ -110,17 +129,10 @@
 - (BOOL)isPartialStringValid:(NSString *)partialString
             newEditingString:(NSString **)newString
             errorDescription:(NSString **)error{
-	static NSCharacterSet *invalidSet = nil;
-    if (invalidSet == nil) {
-        NSMutableCharacterSet *tmpSet = [[[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] mutableCopy];
-        [tmpSet removeCharactersInString:@", "];
-        invalidSet = [tmpSet copy];
-        [tmpSet release];
-    }
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if (r.location != NSNotFound) {
         NSMutableString *new = [[partialString mutableCopy] autorelease];
-        [new replaceCharactersInRange:r withString:@""];
+        [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
         *newString = new;
         if(error) *error = [NSString stringWithFormat:NSLocalizedString(@"The character \"%@\" is not allowed in a BibTeX cite key.", @"Error description"), [partialString substringWithRange:r]];
         return NO;

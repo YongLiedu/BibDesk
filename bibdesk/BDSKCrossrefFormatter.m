@@ -48,6 +48,12 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+	NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
+    NSRange r = [string rangeOfCharacterFromSet:invalidSet];
+    if ( r.location != NSNotFound) {
+        if(error) *error = [NSString stringWithFormat:NSLocalizedString(@"The character \"%@\" is not allowed in a BibTeX cite key.", @"Error description"), [string substringWithRange:r]];
+        return NO;
+    }
     *obj = string;
     return YES;
 }

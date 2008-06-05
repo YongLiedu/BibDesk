@@ -58,7 +58,12 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    *obj = string; // ? retain?
+    NSRange r = [string rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
+    if ( r.location != NSNotFound) {
+        if (error) *error = NSLocalizedString(@"The type name contains an invalid character", @"field name warning");
+        return NO;
+    }
+    *obj = [string entryType];
     return YES;
 }
 
@@ -68,10 +73,13 @@
 - (BOOL)isPartialStringValid:(NSString *)partialString
             newEditingString:(NSString **)newString
             errorDescription:(NSString **)error{
-    NSRange r = [partialString rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
+    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString];
+    NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if ( r.location != NSNotFound) {
-        // formatter will delete the last character entered
-        *newString = nil;
+        NSMutableString *new = [[partialString mutableCopy] autorelease];
+        [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
+        *newString = new;
+        if (error) *error = NSLocalizedString(@"The type name contains an invalid character", @"field name warning");
         return NO;
     }
     r = [partialString rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]];

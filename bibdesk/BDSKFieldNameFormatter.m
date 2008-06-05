@@ -58,6 +58,13 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+    NSRange r = [string rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
+    if ( r.location != NSNotFound || 
+        ([string length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[string characterAtIndex:0]]) ) {
+        if (error) *error = NSLocalizedString(@"The field name contains an invalid character", @"field name warning");
+		return NO; // BibTeX chokes if the first character of a field name is a digit
+    }
+	string = [string fieldName];
     if ([string hasPrefix:@"Bdsk-File"]) {
         if (error) *error = NSLocalizedString(@"\"Bdsk-File\" fields are reserved for BibDesk's internal usage", @"field name warning");
         return NO;
@@ -78,9 +85,15 @@
 - (BOOL)isPartialStringValid:(NSString *)partialString
             newEditingString:(NSString **)newString
             errorDescription:(NSString **)error{
-    NSRange r = [partialString rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
-    if ( r.location != NSNotFound || 
-        ([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) ) {
+    NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString];
+    NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
+    if (r.location != NSNotFound) {
+        NSMutableString *new = [[partialString mutableCopy] autorelease];
+        [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
+        *newString = new;
+        if (error) *error = NSLocalizedString(@"The field name contains an invalid character", @"field name warning");
+		return NO; // BibTeX chokes if the first character of a field name is a digit
+    } else if ([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) {
         *newString = nil;
         if (error) *error = NSLocalizedString(@"The first character must not be a digit", @"field name warning");
 		return NO; // BibTeX chokes if the first character of a field name is a digit
