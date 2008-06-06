@@ -266,7 +266,7 @@
     [newFieldsComboBox setFrame:newFieldsFrame];
 }
 
-- (NSArray *)fieldNameFormatter:(BDSKFieldNameFormatter *)formatter isKnownFieldName:(NSString *)string {
+- (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
     if (formatter == [(NSTextField *)newFieldsComboBox formatter])
         return [self newFieldsArray];
     else

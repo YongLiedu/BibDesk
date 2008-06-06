@@ -604,7 +604,7 @@ enum {
 	return YES;
 }
 
-- (NSArray *)fieldNameFormatter:(BDSKFieldNameFormatter *)formatter isKnownFieldName:(NSString *)string {
+- (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
     if (formatter == [fieldToSearchComboBox formatter])
         return [fieldToSearchComboBox objectValues] ;
     else
