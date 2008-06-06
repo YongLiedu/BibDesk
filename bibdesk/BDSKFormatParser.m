@@ -1098,7 +1098,7 @@
 	while (i != NSNotFound && i < l) {
 		i = NSMaxRange([formatString rangeOfString:@"%" options:0 range:NSMakeRange(i, l - i)]);
         if (i == NSNotFound || i >= l) break;
-        switch ([formatString characterAtIndex:i++]) {
+        switch ([formatString characterAtIndex:i]) {
 			case 'a':
 			case 'A':
 				[arr addObject:BDSKAuthorString];
@@ -1131,18 +1131,19 @@
                 break;
 			case 'f':
 			case 'c':
-                j = NSMaxRange([formatString rangeOfString:@"}" options:0 range:NSMakeRange(i, l - i)]);
+                j = [formatString rangeOfString:@"}" options:0 range:NSMakeRange(i, l - i)].location;
                 if (j != NSNotFound && j > i + 1)
                     [arr addObject:[formatString substringWithRange:NSMakeRange(i + 1, j - i - 1)]];
                 break;
 			case 'i':
-                j = NSMaxRange([formatString rangeOfString:@"}" options:0 range:NSMakeRange(i, l - i)]);
+                j = [formatString rangeOfString:@"}" options:0 range:NSMakeRange(i, l - i)].location;
                 if (j != NSNotFound && j > i + 1)
                     [arr addObject:[@"Document: " stringByAppendingString:[formatString substringWithRange:NSMakeRange(i + 1, j - i - 1)]]];
 				break;
             default:
                 break;
 		}
+        i++;
 	}
 	return arr;
 }
