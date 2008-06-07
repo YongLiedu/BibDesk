@@ -50,7 +50,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKStringEncodingManager.h"
 #import "BDSKTypeManager.h"
-#import "NSFileManager_ExtendedAttributes.h"
+#import "NSFileManager_BDSKExtendedAttributes.h"
 
 static NSString *yesString = nil;
 static NSString *noString = nil;

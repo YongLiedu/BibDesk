@@ -55,7 +55,7 @@
 #import "BDSKAlert.h"
 #import "BDSKTypeManager.h"
 #import "NSURL_BDSKExtensions.h"
-#import "NSFileManager_ExtendedAttributes.h"
+#import "NSFileManager_BDSKExtendedAttributes.h"
 #import "NSSet_BDSKExtensions.h"
 #import "BDSKEditor.h"
 #import "NSGeometry_BDSKExtensions.h"

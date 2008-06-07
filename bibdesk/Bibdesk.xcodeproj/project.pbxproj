@@ -484,7 +484,7 @@
 		F9937E290AD826AA001D1DFB /* BDSKSpotlightView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */; };
 		F9937E2A0AD826AB001D1DFB /* CIImage_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */; };
 		F9937E2B0AD826AE001D1DFB /* NSBezierPath_CoreImageExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */; };
-		F9937E2C0AD826AF001D1DFB /* NSFileManager_ExtendedAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */; };
+		F9937E2C0AD826AF001D1DFB /* NSFileManager_BDSKExtendedAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E6C936099A8FEF00A8B97D /* NSFileManager_BDSKExtendedAttributes.m */; };
 		F9937E4E0AD826EB001D1DFB /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9B9E17E089479FC00C21B17 /* Quartz.framework */; };
 		F9937E6C0AD82700001D1DFB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9706DB909102DA800526FC8 /* QuartzCore.framework */; };
 		F99BC25F095A5C7000E018C3 /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */; };
@@ -1661,8 +1661,8 @@
 		F9E5F6D80A96ABF1004A6D79 /* BDSKFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFile.m; sourceTree = "<group>"; };
 		F9E5F6DC0A96AC01004A6D79 /* BDSKFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFile.h; sourceTree = "<group>"; };
 		F9E6C5970999323D00A8B97D /* BDSKStringParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringParser.h; sourceTree = "<group>"; };
-		F9E6C935099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSFileManager_ExtendedAttributes.h; sourceTree = "<group>"; };
-		F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSFileManager_ExtendedAttributes.m; sourceTree = "<group>"; };
+		F9E6C935099A8FEF00A8B97D /* NSFileManager_BDSKExtendedAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSFileManager_BDSKExtendedAttributes.h; sourceTree = "<group>"; };
+		F9E6C936099A8FEF00A8B97D /* NSFileManager_BDSKExtendedAttributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSFileManager_BDSKExtendedAttributes.m; sourceTree = "<group>"; };
 		F9EA8FC80ADE01F9005EFBE4 /* BDSKUpdateChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKUpdateChecker.h; sourceTree = "<group>"; };
 		F9EA8FC90ADE01F9005EFBE4 /* BDSKUpdateChecker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKUpdateChecker.m; sourceTree = "<group>"; };
 		F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextField.h; sourceTree = "<group>"; };
@@ -2091,7 +2091,7 @@
 				CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */,
 				F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */,
 				F95CC0C1087F5378002C5694 /* NSFileManager_BDSKExtensions.m */,
-				F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */,
+				F9E6C936099A8FEF00A8B97D /* NSFileManager_BDSKExtendedAttributes.m */,
 				CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */,
 				CE573D2509F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m */,
 				CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */,
@@ -2672,7 +2672,7 @@
 				CE6775140A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h */,
 				F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */,
 				F95CC0C0087F5378002C5694 /* NSFileManager_BDSKExtensions.h */,
-				F9E6C935099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h */,
+				F9E6C935099A8FEF00A8B97D /* NSFileManager_BDSKExtendedAttributes.h */,
 				CE3255FD0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h */,
 				F9022C9C0758038000C3F701 /* NSImage_BDSKExtensions.h */,
 				CE573D2409F6A0300020EC16 /* NSIndexSet_BDSKExtensions.h */,
@@ -3734,7 +3734,7 @@
 				F9937E290AD826AA001D1DFB /* BDSKSpotlightView.m in Sources */,
 				F9937E2A0AD826AB001D1DFB /* CIImage_BDSKExtensions.m in Sources */,
 				F9937E2B0AD826AE001D1DFB /* NSBezierPath_CoreImageExtensions.m in Sources */,
-				F9937E2C0AD826AF001D1DFB /* NSFileManager_ExtendedAttributes.m in Sources */,
+				F9937E2C0AD826AF001D1DFB /* NSFileManager_BDSKExtendedAttributes.m in Sources */,
 				CE95AF180ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m in Sources */,
 				CE7596000ADDB0E1009C1329 /* BDSKContainerView.m in Sources */,
 				F9EA8FCB0ADE01F9005EFBE4 /* BDSKUpdateChecker.m in Sources */,

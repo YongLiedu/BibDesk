@@ -1,5 +1,5 @@
 //
-//  NSFileManager_ExtendedAttributes.h
+//  NSFileManager_BDSKExtendedAttributes.h
 //
 //  Created by Adam R. Maxwell on 05/12/05.
 //  Copyright 2005-2008 Adam R. Maxwell. All rights reserved.
@@ -31,11 +31,11 @@
 #import <Cocoa/Cocoa.h>
 
 /*!
-    @category    NSFileManager (ExtendedAttributes)
+    @category    NSFileManager (BDSKExtendedAttributes)
     @abstract    Provides an Objective-C wrapper for the low-level BSD functions dealing with file attributes.
     @discussion  (comprehensive description)
 */
-@interface NSFileManager (ExtendedAttributes)
+@interface NSFileManager (BDSKExtendedAttributes)
 
 /*!
     @method     extendedAttributeNamesAtPath:traverseLink:

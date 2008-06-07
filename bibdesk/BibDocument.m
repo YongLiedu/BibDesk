@@ -94,7 +94,7 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
-#import "NSFileManager_ExtendedAttributes.h"
+#import "NSFileManager_BDSKExtendedAttributes.h"
 #import "PDFMetadata.h"
 #import "BDSKSharingServer.h"
 #import "BDSKSharingBrowser.h"
