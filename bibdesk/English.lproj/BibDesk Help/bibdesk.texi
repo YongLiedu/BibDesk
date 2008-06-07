@@ -677,13 +677,16 @@ not replace it.  For instance, the Find and Replace panel will not match cross-r
 "All Fields" is not possible at this time, since it doesn't make sense in the context of
 the Find and Replace operation.
 
-@heading Batch-Adding a Field
+@heading Batch-Adding or Overwriting a Field
 
 This panel also allows you to set the value of a field for all (selected) items at once.
-The field will be added if necessary.  Check the "Overwrite or Add this field" button 
-to the right of the field name, and enter the value to set in the "Replace with" field.
-Then hit the @buttontitle{Replace All} button to set this field in all the currently 
-selected or displayed items (depending on your settings).
+The field will be added if necessary.  Check @menutitle{Overwrite or Add Field} from the 
+@buttontitle{Operation} popup, and enter the value to set in the "Replace with" field.
+Check @buttontitle{Set empty fields} to set this value for empty fields, uncheck this 
+to only overwrite non-empty fields.  Then hit the @buttontitle{Replace All} button to set 
+this field in all the currently selected or displayed items (depending on your settings).
+You can similarly add a prefix or a suffix to all (selected) fields, when you choose the 
+appropriate item from the @buttontitle{Operation} popup.
 
 @heading Regular Expressions
 
