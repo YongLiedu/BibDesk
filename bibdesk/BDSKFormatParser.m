@@ -1132,13 +1132,13 @@
 			case 'f':
 			case 'c':
                 j = [formatString rangeOfString:@"}" options:0 range:NSMakeRange(i, l - i)].location;
-                if (j != NSNotFound && j > i + 1)
-                    [arr addObject:[formatString substringWithRange:NSMakeRange(i + 1, j - i - 1)]];
+                if (j != NSNotFound && j > i + 2)
+                    [arr addObject:[formatString substringWithRange:NSMakeRange(i + 2, j - i - 2)]];
                 break;
 			case 'i':
                 j = [formatString rangeOfString:@"}" options:0 range:NSMakeRange(i, l - i)].location;
-                if (j != NSNotFound && j > i + 1)
-                    [arr addObject:[@"Document: " stringByAppendingString:[formatString substringWithRange:NSMakeRange(i + 1, j - i - 1)]]];
+                if (j != NSNotFound && j > i + 2)
+                    [arr addObject:[@"Document: " stringByAppendingString:[formatString substringWithRange:NSMakeRange(i + 2, j - i - 2)]]];
 				break;
             default:
                 break;
