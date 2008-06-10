@@ -127,9 +127,12 @@ enum {
     [typeSelectHelper setDataSource:nil];
     [typeSelectHelper release];
     [alternatingRowBackgroundColors release];
-    if (trackingRects != NULL)
-        CFRelease(trackingRects);
     [super dealloc];
+}
+
+- (void)reloadData{
+    [super reloadData];
+    [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeSelectSearchCache)]; // if we resorted or searched, the cache is stale
 }
 
 - (BDSKTypeSelectHelper *)typeSelectHelper{
@@ -201,90 +204,6 @@ enum {
 // override this private method
 - (NSArray *)_alternatingRowBackgroundColors{
     return [self alternatingRowBackgroundColors];
-}
-
-#pragma mark Tracking rects
-
-- (void)reloadData{
-    [super reloadData];
-    [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeSelectSearchCache)]; // if we resorted or searched, the cache is stale
-	[self rebuildTrackingRects];
-}
-
-- (void)resetCursorRects {
-	[super resetCursorRects];
-    [self rebuildTrackingRects];
-}
-
-- (void)setDataSource:(id)anObject {
-	[super setDataSource:anObject];
-	[self rebuildTrackingRects];
-}
-
-- (void)noteNumberOfRowsChanged {
-	[super noteNumberOfRowsChanged];
-	[self rebuildTrackingRects];
-}
-
-- (void)rebuildTrackingRects {
-    if ([[self delegate] respondsToSelector:@selector(tableView:shouldTrackTableColumn:row:)] == NO)
-        return;
-    
-    if(trackingRects == NULL){
-       trackingRects = CFArrayCreateMutable(kCFAllocatorDefault, 0, &OFIntegerArrayCallbacks);
-    }else{
-        CFIndex idx = CFArrayGetCount(trackingRects);
-        while (idx--)
-            [self removeTrackingRect:(NSTrackingRectTag)CFArrayGetValueAtIndex(trackingRects, idx)];
-        CFArrayRemoveAllValues(trackingRects);
-    }
-    
-    if ([self window]) {
-        NSRange rowRange = [self rowsInRect:[self visibleRect]];
-        NSRange columnRange = [self columnsInRect:[self visibleRect]];
-        unsigned int rowIndex, columnIndex;
-        NSTableColumn *tableColumn;
-        int userData;
-        NSTrackingRectTag tag;
-        BOOL assumeInside = [[self delegate] respondsToSelector:@selector(tableView:mouseEnteredTableColumn:row:)];
-        
-        for (columnIndex = columnRange.location; columnIndex < NSMaxRange(columnRange); columnIndex++) {
-            tableColumn = [[self tableColumns] objectAtIndex:columnIndex];
-            for (rowIndex = rowRange.location; rowIndex < NSMaxRange(rowRange); rowIndex++) {
-                if ([[self delegate] tableView:self shouldTrackTableColumn:tableColumn row:rowIndex]) {
-                    userData = rowIndex * [self numberOfColumns] + columnIndex;
-                    tag = [self addTrackingRect:[self frameOfCellAtColumn:columnIndex row:rowIndex] owner:self userData:(void *)userData assumeInside:assumeInside];
-                    CFArrayAppendValue(trackingRects, (void *)tag);
-                }
-            }
-        }
-    }
-}
-
-- (void)mouseEntered:(NSEvent *)theEvent{
-    if ([[self delegate] respondsToSelector:@selector(tableView:mouseEnteredTableColumn:row:)]) {
-        int userData = (int)[theEvent userData];
-        int numCols = [self numberOfColumns];
-		int column = userData % numCols;
-		int row = userData / numCols;
-        if (column != -1 && row != -1) {
-            NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
-            [[self delegate] tableView:self mouseEnteredTableColumn:tableColumn row:row];
-        }
-	}
-}
-
-- (void)mouseExited:(NSEvent *)theEvent{
-    if ([[self delegate] respondsToSelector:@selector(tableView:mouseExitedTableColumn:row:)]) {
-        int userData = (int)[theEvent userData];
-        int numCols = [self numberOfColumns];
-		int column = userData % numCols;
-		int row = userData / numCols;
-        if (column != -1 && row != -1) {
-            NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
-            [[self delegate] tableView:self mouseExitedTableColumn:tableColumn row:row];
-        }
-	}
 }
 
 #pragma mark TableColumn setup

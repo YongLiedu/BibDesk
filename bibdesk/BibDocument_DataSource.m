@@ -161,10 +161,21 @@
 	}
 }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)aTableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
     if (tv == tableView) {
-        if ([[aTableColumn identifier] isEqualToString:BDSKImportOrderString] && [[shownPublications objectAtIndex:row] isImported] == NO)
-            return NSLocalizedString(@"Click to import this item", @"Tool tip message");
+        NSString *tcID = [tableColumn identifier];
+        if ([tcID isEqualToString:BDSKImportOrderString]) {
+            if ([[shownPublications objectAtIndex:row] isImported] == NO)
+                return NSLocalizedString(@"Click to import this item", @"Tool tip message");
+        } else if ([tcID isURLField]) {
+            NSURL *url = [[shownPublications objectAtIndex:row] URLForField:tcID];
+            if (url)
+                return [url isFileURL] ? [[url path] stringByAbbreviatingWithTildeInPath] : [url absoluteString];
+        } else if ([tcID isEqualToString:BDSKLocalFileString]) {
+            return [[[shownPublications objectAtIndex:row] existingLocalFiles] valueForKeyPath:@"path.stringByAbbreviatingWithTildeInPath.@componentsJoinedByComma"];
+        } else if ([tcID isEqualToString:BDSKRemoteURLString]) {
+            return [[[shownPublications objectAtIndex:row] remoteURLs] valueForKeyPath:@"URL.absoluteString.@componentsJoinedByComma"];
+        }
     } else if (tv == groupTableView) {
         return [[groups objectAtIndex:row] toolTip];
     }
@@ -1448,45 +1459,6 @@
         return;
     [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
     [tv scrollRowToVisible:itemIndex];
-}
-
-#pragma mark -
-#pragma mark Tracking rects
-
-- (BOOL)tableView:(NSTableView *)tv shouldTrackTableColumn:(NSTableColumn *)tableColumn row:(int)row;
-{
-    // this can happen when we revert
-    if (row == -1 || row >= [self numberOfRowsInTableView:tv])
-        return NO;
-    
-    NSString *tcID = [tableColumn identifier];
-    return ([tcID isURLField] && [[shownPublications objectAtIndex:row] URLForField:tcID]) ||
-           ([tcID isEqualToString:BDSKLocalFileString] && [[[shownPublications objectAtIndex:row] localFiles] count]) ||
-           ([tcID isEqualToString:BDSKRemoteURLString] && [[[shownPublications objectAtIndex:row] remoteURLs] count]);
-}
-
-- (void)tableView:(NSTableView *)tv mouseEnteredTableColumn:(NSTableColumn *)tableColumn row:(int)row;
-{
-    if (row == -1 || row >= [self numberOfRowsInTableView:tv])
-        return;
-    
-    NSString *tcID = [tableColumn identifier];
-    BibItem *pub = [shownPublications objectAtIndex:row];
-    
-    if ([tcID isURLField]) {
-        NSURL *url = [pub URLForField:[tableColumn identifier]];
-        if (url)
-            [self setStatus:[url isFileURL] ? [[url path] stringByAbbreviatingWithTildeInPath] : [url absoluteString]];
-    } else if ([tcID isEqualToString:BDSKLocalFileString]) {
-        [self setStatus:[[pub existingLocalFiles] valueForKeyPath:@"path.stringByAbbreviatingWithTildeInPath.@componentsJoinedByComma"]];
-    } else if ([tcID isEqualToString:BDSKRemoteURLString]) {
-        [self setStatus:[[pub remoteURLs] valueForKeyPath:@"URL.absoluteString.@componentsJoinedByComma"]];
-    }
-}
-
-- (void)tableView:(NSTableView *)tv mouseExitedTableColumn:(NSTableColumn *)tableColumn row:(int)row;
-{
-    [self updateStatus];
 }
 
 @end

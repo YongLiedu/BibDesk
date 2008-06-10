@@ -46,7 +46,6 @@
     // for supporting type-ahead in the tableview:
     // datasource methods to support this are over in BibDocument_DataSource
     BDSKTypeSelectHelper *typeSelectHelper;
-    CFMutableArrayRef trackingRects;
     NSArray *alternatingRowBackgroundColors;
 }
 
@@ -54,7 +53,6 @@
 - (NSArray *)alternatingRowBackgroundColors;
 
 - (BDSKTypeSelectHelper *)typeSelectHelper;
-- (void)rebuildTrackingRects;
 
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
 - (NSMenu *)columnsMenu;
@@ -65,9 +63,6 @@
 
 
 @interface NSObject (BDSKMainTableViewDelegate)
-- (BOOL)tableView:(NSTableView *)aTableView shouldTrackTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
-- (void)tableView:(NSTableView *)aTableView mouseEnteredTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
-- (void)tableView:(NSTableView *)aTableView mouseExitedTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView;
 - (void)tableView:(NSTableView *)aTableView importItemAtRow:(int)rowIndex;
 - (void)tableView:(NSTableView *)aTableView openParentForItemAtRow:(int)rowIndex;
