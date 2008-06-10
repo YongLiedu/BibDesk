@@ -40,5 +40,4 @@
 
 
 @interface NSTableHeaderView (BDSKExtensions)
-- (void)replacementMouseDown:(NSEvent *)theEvent;
 @end

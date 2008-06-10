@@ -44,30 +44,12 @@
 #import <OmniAppKit/OAApplication.h>
 #import <OmniFoundation/OFPreference.h>
 
-@interface NSTableView (BDSKExtensionsPrivate)
-- (BOOL)replacementBecomeFirstResponder;
-- (void)replacementDealloc;
-- (void)replacementDraggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation;
-- (NSImage *)replacementDragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset;
--(void)_drawDropHighlightOnRow:(int)rowIndex;
-@end
-
-#pragma mark -
-
 @implementation NSTableView (BDSKExtensions)
 
 static BOOL (*originalBecomeFirstResponder)(id self, SEL _cmd);
 static IMP originalDealloc;
 static IMP originalDraggedImageEndedAtOperation;
 static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
-
-+ (void)didLoad;
-{
-    originalBecomeFirstResponder = (typeof(originalBecomeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(becomeFirstResponder), @selector(replacementBecomeFirstResponder));
-    originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
-    originalDraggedImageEndedAtOperation = OBReplaceMethodImplementationWithSelector(self, @selector(draggedImage:endedAt:operation:), @selector(replacementDraggedImage:endedAt:operation:));
-    originalDragImageForRowsWithIndexesTableColumnsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRowsWithIndexes:tableColumns:event:offset:), @selector(replacementDragImageForRowsWithIndexes:tableColumns:event:offset:));
-}
 
 - (BOOL)validateDelegatedMenuItem:(NSMenuItem *)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
 	SEL action = [menuItem action];
@@ -312,6 +294,16 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     } else {
         return nil;
     }
+}
+
+#pragma mark Method swizzling
+
++ (void)didLoad;
+{
+    originalBecomeFirstResponder = (typeof(originalBecomeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(becomeFirstResponder), @selector(replacementBecomeFirstResponder));
+    originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
+    originalDraggedImageEndedAtOperation = OBReplaceMethodImplementationWithSelector(self, @selector(draggedImage:endedAt:operation:), @selector(replacementDraggedImage:endedAt:operation:));
+    originalDragImageForRowsWithIndexesTableColumnsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRowsWithIndexes:tableColumns:event:offset:), @selector(replacementDragImageForRowsWithIndexes:tableColumns:event:offset:));
 }
 
 #pragma mark Drop highlight

@@ -44,10 +44,6 @@
 
 static IMP originalMouseDown;
 
-+ (void)didLoad {
-    originalMouseDown = OBReplaceMethodImplementationWithSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
-}
-
 - (void)replacementMouseDown:(NSEvent *)theEvent{
     // mouseDown in the table header has peculiar behavior for a double-click if you use -[NSTableView setDoubleAction:] on the
     // tableview itself.  The header sends a double-click action to the tableview row/cell that's selected.  
@@ -63,6 +59,10 @@ static IMP originalMouseDown;
                                     clickCount:1
                                       pressure:[theEvent pressure]];
 	originalMouseDown(self, _cmd, theEvent);
+}
+
++ (void)didLoad {
+    originalMouseDown = OBReplaceMethodImplementationWithSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
 }
 
 @end
