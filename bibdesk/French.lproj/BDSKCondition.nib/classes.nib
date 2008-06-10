@@ -12,10 +12,10 @@
                 addButton = NSButton;
                 agoText = NSTextField;
                 andNumberTextField = NSTextField;
+                attachmentComparisonPopUp = NSPopUpButton;
                 booleanButton = NSButton;
                 comparisonBox = NSBox;
                 comparisonPopUp = NSPopUpButton;
-                countComparisonPopUp = NSPopUpButton;
                 countTextField = NSTextField;
                 dateComparisonPopUp = NSPopUpButton;
                 dateTextField = NSTextField;

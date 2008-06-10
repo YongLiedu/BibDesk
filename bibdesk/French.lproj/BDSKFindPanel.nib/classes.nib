@@ -23,14 +23,10 @@
                 searchTypePopUpButton = NSPopUpButton;
                 setOptionsBox = NSBox;
                 shouldSetCheckbox = NSButton;
+                shouldSetWhenEmptyCheckbox = NSButton;
                 statusBar = BDSKStatusBar;
             };
             SUPERCLASS = NSWindowController;
-        },
-                {
-            CLASS = BDSKFindFieldEditor;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSTextView;
         },
                 {
             CLASS = BDSKGradientView;
@@ -38,8 +34,16 @@
             SUPERCLASS = NSView;
         },
                 {
+            ACTIONS =             {
+                startAnimation = id;
+                stopAnimation = id;
+            };
             CLASS = BDSKStatusBar;
             LANGUAGE = ObjC;
+            OUTLETS =             {
+                delegate = id;
+                textCell = id;
+            };
             SUPERCLASS = BDSKGradientView;
         },
                 {
@@ -49,6 +53,39 @@
             CLASS = FirstResponder;
             LANGUAGE = ObjC;
             SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = NSControl;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSView;
+        },
+                {
+            CLASS = NSMenu;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = NSMenuItem;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = NSObject;
+            LANGUAGE = ObjC;
+        },
+                {
+            CLASS = NSWindow;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSResponder;
+        },
+                {
+            ACTIONS =             {
+                hideWindow = id;
+                toggleShowingWindow = id;
+            };
+            CLASS = NSWindowController;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSResponder;
         }
     );
     IBVersion = 1;
