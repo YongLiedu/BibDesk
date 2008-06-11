@@ -365,6 +365,10 @@ static void fixLegacyTableColumnIdentifiers()
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"template.txt" overwrite:NO];   
     [fileManager copyFileFromSharedSupportToApplicationSupport:@"Bookmarks.plist" overwrite:NO];   
+
+    NSString *scriptsPath = [[fileManager currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"Scripts"];
+    if ([fileManager fileExistsAtPath:scriptsPath] == NO)
+        [fileManager createDirectoryAtPath:scriptsPath attributes:nil];
     
     [self doSpotlightImportIfNeeded];
     
