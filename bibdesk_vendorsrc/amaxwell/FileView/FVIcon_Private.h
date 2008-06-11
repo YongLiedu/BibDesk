@@ -61,8 +61,8 @@ static inline NSSize FVCGImageSize(CGImageRef image)
 }
 
 // best not to use these at all...
-extern const NSUInteger FVMaxThumbnailDimension;
-extern const NSUInteger FVMaxImageDimension;
+extern const size_t FVMaxThumbnailDimension;
+extern const size_t FVMaxImageDimension;
 
 // returns true if the size pointer was modified; these are used by the resampling functions below
 FV_PRIVATE_EXTERN bool FVIconLimitFullImageSize(NSSize *size);

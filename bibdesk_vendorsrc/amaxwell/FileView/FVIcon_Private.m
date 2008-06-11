@@ -126,6 +126,10 @@
     
     NSParameterAssert(s.width > 0);
     NSParameterAssert(s.height > 0);
+    
+    // for release builds with assertions disabled, use a 1:1 aspect
+    if (s.width <= 0 || s.height <= 0) s = (NSSize) { 1, 1 };
+    
     CGFloat ratio = MIN(NSWidth(iconRect) / s.width, NSHeight(iconRect) / s.height);
     CGRect dstRect = *(CGRect *)&iconRect;
     dstRect.size.width = ratio * s.width;
@@ -144,26 +148,23 @@
 {
     CGContextSaveGState(context);
     CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
-    CGContextDrawLayerInRect(context, *(CGRect *)&dstRect, [FVPlaceholderImage placeholderForRect:dstRect]);
+    CGContextDrawLayerInRect(context, *(CGRect *)&dstRect, [FVPlaceholderImage placeholderWithSize:dstRect.size]);
     CGContextRestoreGState(context);
 }
 
 @end
 
-#define FV_MAX_THUMBNAIL_DIMENSION 200
-#define FV_MAX_IMAGE_DIMENSION     512
-
-const NSUInteger FVMaxThumbnailDimension = FV_MAX_THUMBNAIL_DIMENSION;
-const NSUInteger FVMaxImageDimension = FV_MAX_IMAGE_DIMENSION;
+const size_t FVMaxThumbnailDimension = 200;
+const size_t FVMaxImageDimension = 512;
 
 // used to constrain thumbnail size for huge pages
 bool FVIconLimitThumbnailSize(NSSize *size)
 {
     CGFloat dimension = MIN(size->width, size->height);
-    if (dimension < FV_MAX_THUMBNAIL_DIMENSION)
+    if (dimension <= FVMaxThumbnailDimension)
         return false;
     
-    while (dimension > FV_MAX_THUMBNAIL_DIMENSION) {
+    while (dimension > FVMaxThumbnailDimension) {
         size->width *= 0.9;
         size->height *= 0.9;
         dimension = MIN(size->width, size->height);
@@ -174,10 +175,10 @@ bool FVIconLimitThumbnailSize(NSSize *size)
 bool FVIconLimitFullImageSize(NSSize *size)
 {
     CGFloat dimension = MIN(size->width, size->height);
-    if (dimension < FV_MAX_IMAGE_DIMENSION)
+    if (dimension <= FVMaxImageDimension)
         return false;
     
-    while (dimension > FV_MAX_IMAGE_DIMENSION) {
+    while (dimension > FVMaxImageDimension) {
         size->width *= 0.9;
         size->height *= 0.9;
         dimension = MIN(size->width, size->height);
