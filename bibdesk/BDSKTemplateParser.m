@@ -1019,7 +1019,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 - (BOOL)isNotEmpty
 {
-    return [self isEqualToNumber:[NSNumber numberWithBool:NO]] == NO;
+    return [self isEqualToNumber:[NSNumber numberWithBool:NO]] == NO && [self isEqualToNumber:[NSNumber numberWithInt:0]] == NO;
 }
 
 inline static NSString *romanNumeralForDigit(unsigned digit, NSString *i, NSString *v, NSString *x){
