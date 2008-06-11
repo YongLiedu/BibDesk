@@ -201,7 +201,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [documentWindow setToolbar: toolbar];
 }
 
-- (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier (NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)willBeInserted {
+- (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)willBeInserted {
     OAToolbarItem *item = [toolbarItems objectForKey:itemIdent];
     if (willBeInserted == NO)
         item = [[item copy] autorelease];
