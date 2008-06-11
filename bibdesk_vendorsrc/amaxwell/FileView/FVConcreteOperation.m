@@ -41,11 +41,11 @@
 #import <libkern/OSAtomic.h>
 
 struct FVOpFlags {
-    int32_t _cancelled  __attribute__ ((aligned (32)));
-    int32_t _priority   __attribute__ ((aligned (32)));
-    int32_t _executing  __attribute__ ((aligned (32)));
-    int32_t _finished   __attribute__ ((aligned (32)));
-    int32_t _concurrent __attribute__ ((aligned (32)));
+    volatile int32_t _cancelled;
+    volatile int32_t _priority;
+    volatile int32_t _executing;
+    volatile int32_t _finished;
+    volatile int32_t _concurrent;
 };
 
 @implementation FVConcreteOperation
@@ -72,7 +72,7 @@ struct FVOpFlags {
 
 - (void)setQueue:(FVOperationQueue *)queue
 {
-    NSAssert(nil == _queue, @"setQueue: may only be called once");
+    FVAPIAssert(nil == _queue, @"setQueue: may only be called once");
     _queue = [queue retain];
 }
 

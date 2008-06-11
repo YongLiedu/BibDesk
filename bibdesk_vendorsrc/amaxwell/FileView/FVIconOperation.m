@@ -102,14 +102,11 @@
 
 @implementation FVIconUpdateOperation
 
-- (void)start
+- (BOOL)isConcurrent { return NO; }
+
+- (void)main
 {
     NSAssert(pthread_main_np() != 0, @"incorrect thread for FVIconUpdateOperation");
-    if ([self isCancelled])
-        [NSException raise:NSInternalInconsistencyException format:@"attempt to execute a cancelled operation"];
-    if ([self isExecuting] || [self isFinished])
-        [NSException raise:NSInternalInconsistencyException format:@"attempt to start a previously executed operation"];
-        
     [_view iconUpdated:_icon];
     [self finished];
 }
