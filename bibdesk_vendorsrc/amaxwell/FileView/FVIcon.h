@@ -46,17 +46,11 @@
  This class is thread safe, at least within reason.
  */
 
-// Will determine the file type based on the absolute path and returns an instance of a concrete subclass, using the iconSize parameter as a size hint.
-+ (id)iconWithPath:(NSString *)absolutePath size:(NSSize)iconSize;
-
 // Returns a URL that is appropriate for a missing file.  Don't rely on the scheme or path for anything.
 + (NSURL *)missingFileURL;
 
 // Will accept any URL type and return a file thumbnail, file icon, or appropriate icon for the given URL scheme.
 + (id)iconWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
-
-// Convenience for creating an NSImage at arbitrary size; not necessarily efficient
-+ (NSImage *)imageWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
 
 // Possibly releases cached resources for icons that won't be displayed.  The only way to guarantee a decrease in memory usage is to release all references to the object, though, as this call may be a noop for some subclasses.
 - (void)releaseResources;

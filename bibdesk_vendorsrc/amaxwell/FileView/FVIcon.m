@@ -46,7 +46,6 @@
 #import "FVMovieIcon.h"
 #import "FVIcon_Private.h"
 
-#pragma mark -
 #pragma mark FVIcon abstract class
 
 // FVIcon abstract class stuff
@@ -89,33 +88,9 @@ static NSURL *missingFileURL = nil;
         [super dealloc];
 }
 
-+ (NSImage *)imageWithURL:(NSURL *)representedURL size:(NSSize)iconSize
-{
-    FVIcon *anIcon = [FVIcon iconWithURL:representedURL size:iconSize];
-    if ([anIcon needsRenderForSize:iconSize])
-        [anIcon renderOffscreen];
-    NSImage *nsImage = [[[NSImage alloc] initWithSize:iconSize] autorelease];
-    [nsImage lockFocus];
-    CGContextRef ctxt = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
-    CGContextSetShouldAntialias(ctxt, true);
-    CGContextSetInterpolationQuality(ctxt, kCGInterpolationHigh);
-    [anIcon drawInRect:NSMakeRect(0, 0, iconSize.width, iconSize.height) ofContext:ctxt];
-    [nsImage unlockFocus];
-    return nsImage;
-}
-
 + (NSURL *)missingFileURL;
 {
     return missingFileURL;
-}
-
-+ (id)iconWithPath:(NSString *)absolutePath size:(NSSize)iconSize;
-{
-    // guaranteed to be a filesystem path or NSNull, so we can use fileURLWithPath:
-    NSURL *representedURL = nil;
-    if (absolutePath && NO == [absolutePath isEqual:(id)[NSNull null]])
-        representedURL = [NSURL fileURLWithPath:absolutePath];
-    return [self iconWithURL:representedURL size:iconSize];
 }
 
 + (id)iconWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
