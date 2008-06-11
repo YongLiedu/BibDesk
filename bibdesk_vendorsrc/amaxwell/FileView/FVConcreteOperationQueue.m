@@ -75,8 +75,8 @@ enum {
 
 // Threading parameters.  20 seems high, but I tried using NSOperationQueue and ended up spawning 70+ threads with no problems.  Most of them just block while waiting for ATS font data (at least in the PDF case), but we could end up with some disk thrash while reading (need to check this).  A recommendation by Chris Kane http://www.cocoabuilder.com/archive/message/cocoa/2008/2/1/197773 indicates that dumping all the operations in the queue and letting the kernel sort out resource allocation is a reasonable approach, since we don't know a prioi which operations will be fast or slow.
 
-static int32_t _activeQueueCount __attribute__ ((aligned (32))) = 0;
-static int32_t _activeCPUs __attribute__ ((aligned (32))) = 0;
+static volatile int32_t _activeQueueCount = 0;
+static volatile int32_t _activeCPUs = 0;
 
 // Allow a maximum of 10 operations per active CPU core and a minimum of 2 per core; untuned.  Main idea here is to keep from killing performance by creating too many threads or operations, but memory/disk are also big factors that are unaccounted for here.
 + (NSUInteger)_availableOperationCount

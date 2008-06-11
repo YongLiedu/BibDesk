@@ -51,7 +51,7 @@
     OSSpinLock        _queueLock;
     FVPriorityQueue  *_pendingOperations;
     NSMutableSet     *_activeOperations;    
-    int32_t           _terminate __attribute__ ((aligned (32)));    
+    volatile int32_t  _terminate;    
 }
 
 @end

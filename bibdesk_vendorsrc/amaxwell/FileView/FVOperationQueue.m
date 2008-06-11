@@ -40,6 +40,8 @@
 #import "FVConcreteOperationQueue.h"
 #import "FVMainThreadOperationQueue.h"
 
+NSString * const FVMainQueueRunLoopMode = @"FVMainQueueRunLoopMode";
+
 @implementation FVOperationQueue
 
 static id _mainThreadQueue = nil;

@@ -40,6 +40,9 @@
 
 @class FVOperation;
 
+// Can use this to run main queue operations in a blocking mode.
+FV_PRIVATE_EXTERN NSString * const FVMainQueueRunLoopMode;
+
 @interface FVOperationQueue : NSObject
 
 // Queue that executes -start on the main thread.  Adding operations to this queue is roughly equivalent to using +[NSObject cancelPreviousPerformRequestsWithTarget:selector:object:]/-[NSObject performSelector:withObject:afterDelay:inModes:] with kCFRunLoopCommonModes, but you can add operations from any thread.
