@@ -104,6 +104,13 @@ static BOOL FVQLIconDisabled = NO;
 
 - (NSSize)size { return _thumbnailSize; }
 
+static inline bool __FVQLShouldDrawFullImageWithSize(NSSize desiredSize, NSSize currentSize)
+{
+    NSUInteger targetMax = MAX(desiredSize.width, desiredSize.height);
+    NSUInteger currentMax = MAX(currentSize.height, currentSize.width);
+    return (ABS(targetMax - currentMax) > 0.2 * targetMax);
+}
+
 - (BOOL)needsRenderForSize:(NSSize)size
 {
     BOOL needsRender = NO;
@@ -111,7 +118,7 @@ static BOOL FVQLIconDisabled = NO;
         if (NO == _quickLookFailed) {
             // The _fullSize is zero or whatever quicklook returned last time, which may be something odd like 78x46.  Since we ask QL for a size but it constrains the size it actually returns based on the icon's aspect ratio, we have to check height and width.  Just checking height in this was causing an endless loop asking for a size it won't return.
             if (FVShouldDrawFullImageWithThumbnailSize(size, _thumbnailSize))
-                needsRender = (NULL == _fullImage);
+                needsRender = (NULL == _fullImage || __FVQLShouldDrawFullImageWithSize(size, FVCGImageSize(_fullImage)));
             else
                 needsRender = (NULL == _thumbnail);
         }
@@ -128,6 +135,9 @@ static BOOL FVQLIconDisabled = NO;
 {        
     [self lock];
     
+    if ([NSThread instancesRespondToSelector:@selector(setName:)] && pthread_main_np() == 0)
+        [[NSThread currentThread] setName:[_fileURL path]];
+
     if (NO == _quickLookFailed) {
         
         CGSize requestedSize = (CGSize) { FVMaxThumbnailDimension, FVMaxThumbnailDimension };
@@ -141,22 +151,13 @@ static BOOL FVQLIconDisabled = NO;
         // always initialize sizes
         _thumbnailSize = _thumbnail ? FVCGImageSize(_thumbnail) : NSZeroSize;
 
-        if (FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize)) {
+        if (NSEqualSizes(NSZeroSize, _thumbnailSize) == NO && FVShouldDrawFullImageWithThumbnailSize(_desiredSize, _thumbnailSize)) {
             
-            if (NULL != _fullImage) {
-                
-                NSSize currentSize = FVCGImageSize(_fullImage);
-                
-                NSSize targetSize;
-                targetSize.width = FVTrunc(_desiredSize.width);
-                targetSize.height = FVTrunc(_desiredSize.height);
-                if (NSEqualSizes(currentSize, targetSize) == NO) {
+            if (NULL != _fullImage && __FVQLShouldDrawFullImageWithSize(_desiredSize, FVCGImageSize(_fullImage))) {                
                     CGImageRelease(_fullImage);
                     _fullImage = NULL;
                 }
 
-            }
-            
             if (NULL == _fullImage) {
                 requestedSize = *(CGSize *)&_desiredSize;
                 _fullImage = QLThumbnailImageCreate(NULL, (CFURLRef)_fileURL, requestedSize, NULL);
