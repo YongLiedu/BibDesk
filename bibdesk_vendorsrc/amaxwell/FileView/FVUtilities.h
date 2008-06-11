@@ -56,6 +56,12 @@ FV_PRIVATE_EXTERN void FVLog(NSString *format, ...);
 FV_PRIVATE_EXTERN NSArray *FVURLsFromPasteboard(NSPasteboard *pboard);
 FV_PRIVATE_EXTERN BOOL FVWriteURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard);
 
+// use this in +initialize when +[NSGraphicsContext currentContext] may be nil
+FV_PRIVATE_EXTERN NSGraphicsContext *FVWindowGraphicsContextWithSize(NSSize size);
+
+// returns true if it's safe to mmap() the file
+FV_PRIVATE_EXTERN bool FVCanMapFileAtURL(NSURL *fileURL);
+
 #if __LP64__
 #define FVRound(f)      round(f)
 #define FVFloor(f)      floor(f)

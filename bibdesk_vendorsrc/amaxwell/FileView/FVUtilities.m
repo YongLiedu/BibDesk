@@ -319,6 +319,95 @@ BOOL FVWriteURLsToPasteboard(NSArray *URLs, NSPasteboard *pboard)
     return noErr == err;
 }
 
+#pragma mark -
+
+NSGraphicsContext *FVWindowGraphicsContextWithSize(NSSize size)
+{
+    NSRect rect = NSZeroRect;
+    rect.size = size;
+    NSWindow *window = [[NSWindow alloc] initWithContentRect:rect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
+    [window autorelease];
+    return [NSGraphicsContext graphicsContextWithWindow:window];
+}
+
+#pragma mark -
+
+static OSStatus __FVGetVolumeRefNumForURL(NSURL *fileURL, FSVolumeRefNum *volume)
+{
+    NSCParameterAssert([fileURL isFileURL]);
+    OSStatus err = noErr;
+    FSRef fileRef;
+    
+    if (nil == fileURL || FALSE == CFURLGetFSRef((CFURLRef)fileURL, &fileRef))
+        err = fnfErr;
+    
+    FSCatalogInfo catInfo;
+    if (noErr == err)
+        err = FSGetCatalogInfo(&fileRef, kFSCatInfoVolume, &catInfo, NULL, NULL, NULL);
+    
+    if (volume) *volume = catInfo.volume;
+    return err;
+}
+
+// Checking bIsEjectable or bIsRemovable seems more sensible, but FireWire and iDisk volumes return 0 for both properties; iDisk returns 0 for bIsOnExternalBus also, so we have to check to see if it's internal.  Disk images return 0 fr bIsOnInternalBus.  An internal volume can be unmounted  via disk utility, but there should be a warning about open files.  More importantly, it won't happen because someone accidentally pulled a cable (network/USB/FireWire).
+static bool __FVURLIsOnInternalVolume(NSURL *fileURL)
+{
+    NSCParameterAssert([fileURL isFileURL]);
+    
+    FSVolumeRefNum volume;
+    OSStatus err = __FVGetVolumeRefNumForURL(fileURL, &volume);
+    
+    GetVolParmsInfoBuffer infoBuffer;
+    memset(&infoBuffer, 0, sizeof(GetVolParmsInfoBuffer));
+    
+#if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+    if (noErr == err)
+        err = FSGetVolumeParms(volume, &infoBuffer, sizeof(GetVolParmsInfoBuffer));
+#else
+    HIOParam paramBlock;
+    memset(&paramBlock, 0, sizeof(HIOParam));
+    
+    paramBlock.ioNamePtr = NULL;
+    paramBlock.ioVRefNum = volume;
+    paramBlock.ioBuffer = (void *)&infoBuffer;
+    paramBlock.ioReqCount = sizeof(GetVolParmsInfoBuffer);
+    
+    if (noErr == err)
+        err = PBHGetVolParmsSync((HParmBlkPtr)&paramBlock);    
+#endif
+    return (noErr == err && (infoBuffer.vMExtendedAttributes & (1L << bIsOnInternalBus)) != 0);
+}
+
+// Secondary check.  See if the boot volume is on this volume; in that case, it's safe to use mmap() even if you're booted from a FireWire disk, since the entire system will die if the volume goes away.
+static bool __FVURLIsOnBootVolume(NSURL *fileURL)
+{
+    FSVolumeRefNum volume, rootVolume;
+    OSStatus err = __FVGetVolumeRefNumForURL(fileURL, &volume);
+    if (noErr == err)
+        err = __FVGetVolumeRefNumForURL([NSURL fileURLWithPath:NSOpenStepRootDirectory()], &rootVolume);
+    return (noErr == err && volume == rootVolume);
+}
+
+// Tertiary check.  Same reasoning as __FVURLIsOnBootVolume; if the application's volume goes away, the app will die anyway. 
+static bool __FVURLIsOnApplicationVolume(NSURL *fileURL)
+{
+    CFURLRef bundleURL = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    FSVolumeRefNum bundleVolume, fileVolume;
+    bool sameVolume;
+    if (noErr == __FVGetVolumeRefNumForURL((NSURL *)bundleURL, &bundleVolume) && noErr == __FVGetVolumeRefNumForURL(fileURL, &fileVolume))
+        sameVolume = (bundleVolume == fileVolume);
+    else
+        sameVolume = false;
+    if (bundleURL) CFRelease(bundleURL);
+    return sameVolume;
+}
+
+bool FVCanMapFileAtURL(NSURL *fileURL)
+{
+    // see http://www.cocoabuilder.com/archive/message/cocoa/2008/5/13/206506
+    return (__FVURLIsOnInternalVolume(fileURL) || __FVURLIsOnBootVolume(fileURL)) || __FVURLIsOnApplicationVolume(fileURL);
+}
+
 @interface NSBezierPath (Leopard)
 + (NSBezierPath*)bezierPathWithRoundedRect:(NSRect)rect xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius;
 @end

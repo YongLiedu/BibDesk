@@ -42,6 +42,6 @@
 @interface FVPlaceholderImage : NSObject
 
 // returns a cached image suitable for drawing as a placeholder image (transparent with gray dashed round-rect path)
-+ (CGLayerRef)placeholderForRect:(NSRect)aRect;
++ (CGLayerRef)placeholderWithSize:(NSSize)size;
 
 @end

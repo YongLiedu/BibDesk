@@ -37,7 +37,7 @@
  */
 
 #import "FVPlaceholderImage.h"
-#import "FVIcon_Private.h"
+#import "FVUtilities.h"
 
 // Instruments showed a fair number of paths being created in drawing placeholders, and drawing an image is faster and less memory intensive than drawing a path each time.  Most of the path drawing overhead is in fonts, so there's not much we can do about that.
 static CFMutableDictionaryRef _placeholders = NULL;
@@ -55,10 +55,16 @@ static const NSUInteger _sizes[] = { 32, 64, 128, 256, 512 };
     for (i = 0; i < iMax; i++) {
         
         NSRect dstRect = NSMakeRect(0, 0, _sizes[i], _sizes[i]);
-        CGLayerRef layer = CGLayerCreateWithContext([[NSGraphicsContext currentContext] graphicsPort], ((CGRect *)&dstRect)->size, NULL);
+        
+        NSGraphicsContext *windowContext = FVWindowGraphicsContextWithSize(dstRect.size);
+        NSParameterAssert(nil != windowContext);
+
+        CGLayerRef layer = CGLayerCreateWithContext([windowContext graphicsPort], ((CGRect *)&dstRect)->size, NULL);
         CGContextRef context = CGLayerGetContext(layer);
         
-        CGContextClearRect(context, *(CGRect *)&dstRect);
+        // don't use CGContextClearRect with non-window/bitmap contexts
+        CGContextSetRGBFillColor(context, 0, 0, 0, 0);
+        CGContextFillRect(context, *(CGRect *)&dstRect);
         
         NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:YES];
         [NSGraphicsContext saveGraphicsState];
@@ -87,14 +93,14 @@ static const NSUInteger _sizes[] = { 32, 64, 128, 256, 512 };
     }
 }
 
-+ (CGLayerRef)placeholderForRect:(NSRect)aRect;
++ (CGLayerRef)placeholderWithSize:(NSSize)size;
 {
     NSUInteger i, iMax = sizeof(_sizes) / sizeof(NSUInteger);
     for (i = 0; i < iMax; i++) {
         
-        NSUInteger size = _sizes[i];        
-        if (size > NSHeight(aRect))
-            return (CGLayerRef)CFDictionaryGetValue(_placeholders, (void *)size);
+        NSUInteger height = _sizes[i];        
+        if (height > size.height)
+            return (CGLayerRef)CFDictionaryGetValue(_placeholders, (void *)height);
     }
     return (CGLayerRef)CFDictionaryGetValue(_placeholders, (void *)_sizes[iMax - 1]);
 }
