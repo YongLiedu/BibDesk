@@ -83,7 +83,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [image lockFocus];
     NSImage *srcImage = [NSImage imageNamed:@"newdoc"];
     [srcImage drawInRect:NSMakeRect(0, 0, 32, 32) fromRect:NSMakeRect(0, 0, [srcImage size].width, [srcImage size].height) operation:NSCompositeSourceOver fraction:1.0]; 
-    [[NSImage imageWithLargeIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
+    [[NSImage imageWithSmallIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
     [image unlockFocus];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarNewItemIdentifier];
     [item setLabel:NSLocalizedString(@"New", @"Toolbar item label")];
@@ -105,7 +105,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [item setPaletteLabel:NSLocalizedString(@"Delete Publication", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Delete selected publication(s)", @"Tool tip message")];
     [item setTarget:self];
-    [item setImage:[NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon]];
+    [item setImage:[NSImage imageWithSmallIconForToolboxCode:kToolbarDeleteIcon]];
     [item setAction:@selector(deleteSelectedPubs:)];
     [toolbarItems setObject:item forKey:BibDocumentToolbarDeleteItemIdentifier];
     [item release];

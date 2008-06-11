@@ -122,7 +122,7 @@
 	return image;
 }
 
-+ (NSImage *)imageWithLargeIconForToolboxCode:(OSType) code {
++ (NSImage *)imageWithSmallIconForToolboxCode:(OSType) code {
     /* ssp: 30-07-2004 
     
 	A category on NSImage that creates an NSImage containing an icon from the system specified by an OSType.
@@ -134,7 +134,7 @@
     return [self iconWithSize:NSMakeSize(32,32) forToolboxCode:code];
 }
 
-+ (NSImage *)missingFileImage {
++ (NSImage *)smallMissingFileImage {
     static NSImage *image = nil;
     if(image == nil){
         image = [[NSImage alloc] initWithSize:NSMakeSize(32, 32)];

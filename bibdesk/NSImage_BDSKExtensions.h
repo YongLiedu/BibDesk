@@ -45,8 +45,8 @@
 + (void)makePreviewDisplayImages;
 
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code;
-+ (NSImage *)imageWithLargeIconForToolboxCode:(OSType) code;
-+ (NSImage *)missingFileImage;
++ (NSImage *)imageWithSmallIconForToolboxCode:(OSType) code;
++ (NSImage *)smallMissingFileImage;
 
 + (NSImage *)imageForURL:(NSURL *)aURL;
 + (NSImage *)imageForFile:(NSString *)path;

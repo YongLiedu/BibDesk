@@ -2468,7 +2468,7 @@ static void addFilesToArray(const void *value, void *context)
         return nil;
     
     if([field isLocalFileField] && (url = [url fileURLByResolvingAliases]) == nil)
-        return [NSImage missingFileImage];
+        return [NSImage smallMissingFileImage];
     
     return [NSImage imageForURL:url];
 }

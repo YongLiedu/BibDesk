@@ -393,7 +393,7 @@ static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBo
     [item setLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Delete Selected Items", @"Tool tip message")];
-    [item setImage:[NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon]];
+    [item setImage:[NSImage imageWithSmallIconForToolboxCode:kToolbarDeleteIcon]];
     [item setTarget:self];
     [item setAction:@selector(deleteBookmark:)];
     [toolbarItems setObject:item forKey:BDSKSearchBookmarksDeleteToolbarItemIdentifier];
