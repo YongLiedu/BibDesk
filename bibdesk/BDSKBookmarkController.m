@@ -557,11 +557,11 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
     [[self window] setToolbar:toolbar];
 }
 
-- (NSToolbarItem *) toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL) willBeInserted {
-
+- (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)willBeInserted {
     NSToolbarItem *item = [toolbarItems objectForKey:itemIdent];
-    NSToolbarItem *newItem = [[item copy] autorelease];
-    return newItem;
+    if (willBeInserted == NO)
+        item = [[item copy] autorelease];
+    return item;
 }
 
 - (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar *)toolbar {

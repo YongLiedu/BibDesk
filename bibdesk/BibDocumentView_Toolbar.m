@@ -201,15 +201,11 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [documentWindow setToolbar: toolbar];
 }
 
-- (NSToolbarItem *) toolbar: (NSToolbar *)toolbar
-      itemForItemIdentifier: (NSString *)itemIdent
-  willBeInsertedIntoToolbar:(BOOL) willBeInserted {
-
+- (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier (NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)willBeInserted {
     OAToolbarItem *item = [toolbarItems objectForKey:itemIdent];
-    OAToolbarItem *newItem = [[item copy] autorelease];
-    // the view should not be copied
-    if ([item view] && willBeInserted) [newItem setView:[item view]];
-    return newItem;
+    if (willBeInserted == NO)
+        item = [[item copy] autorelease];
+    return item;
 }
 
 
