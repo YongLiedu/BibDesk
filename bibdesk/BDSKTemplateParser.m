@@ -770,15 +770,8 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             
             if (type == BDSKValueTagType) {
                 
-                if (keyValue) {
-                    if ([keyValue isKindOfClass:[NSAttributedString class]]) {
-                        tmpAttrStr = [[NSAttributedString alloc] initWithAttributedString:keyValue attributes:[(BDSKRichValueTag *)tag attributes]];
-                    } else {
-                        tmpAttrStr = [[NSAttributedString alloc] initWithString:[keyValue templateStringValue] attributes:[(BDSKRichValueTag *)tag attributes]];
-                    }
-                    [result appendAttributedString:tmpAttrStr];
-                    [tmpAttrStr release];
-                }
+                if (keyValue)
+                    [result appendAttributedString:[keyValue templateAttributedStringValueWithAttributes:[(BDSKRichValueTag *)tag attributes]]];
                 
             } else if (type == BDSKCollectionTagType) {
                 

@@ -195,26 +195,6 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     return self;
 }
 
-- (id)initWithAttributedString:(NSAttributedString *)attributedString attributes:(NSDictionary *)attributes {
-    [[self init] release];
-    NSMutableAttributedString *tmpStr = [attributedString mutableCopy];
-    unsigned idx = 0, length = [attributedString length];
-    NSRange range = NSMakeRange(0, length);
-    NSDictionary *attrs;
-    [tmpStr addAttributes:attributes range:range];
-    while (idx < length) {
-        attrs = [attributedString attributesAtIndex:idx effectiveRange:&range];
-        if (range.length > 0) {
-            [tmpStr addAttributes:attrs range:range];
-            idx = NSMaxRange(range);
-        } else idx++;
-    }
-    [tmpStr fixAttributesInRange:NSMakeRange(0, length)];
-    self = [tmpStr copy];
-    [tmpStr release];
-    return self;
-}
-
 - (NSRect)boundingRectForDrawingInViewWithSize:(NSSize)size{
     NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:self];
     NSTextContainer *textContainer = [[NSTextContainer alloc] initWithContainerSize:size];

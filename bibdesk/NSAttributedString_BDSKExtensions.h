@@ -41,8 +41,6 @@
 
 @interface NSAttributedString (BDSKExtensions)
 
-- (id)initWithAttributedString:(NSAttributedString *)attributedString attributes:(NSDictionary *)attributes;
-
 - (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse;
 
 - (NSRect)boundingRectForDrawingInViewWithSize:(NSSize)size;
