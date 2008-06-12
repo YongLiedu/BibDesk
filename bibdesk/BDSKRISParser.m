@@ -104,9 +104,6 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
     
     NSSet *tagsNotToConvert = [NSSet setWithObjects:@"UR", @"L1", @"L2", @"L3", @"L4", nil];
     
-    // This is used for stripping extraneous characters from BibTeX year fields
-    AGRegex *findYearString = [AGRegex regexWithPattern:@"(.*)(\\d{4})(.*)"];
-    
     while(sourceLine = [sourceLineE nextObject]){
 
         if(([sourceLine length] > 5 && [[sourceLine substringWithRange:NSMakeRange(4,2)] isEqualToString:@"- "]) ||
@@ -151,11 +148,6 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
 			if(![tagsNotToConvert containsObject:tag])
 				value = [value stringByConvertingHTMLToTeX];
 		
-			// Scopus returns a PY with //// after it.  Others may return a full date, where BibTeX wants a year.  
-			// Use a regex to find a substring with four consecutive digits and use that instead.  Not sure how robust this is.
-			if([[typeManager fieldNameForPubMedTag:tag] isEqualToString:BDSKYearString])
-				value = [findYearString replaceWithString:@"$2" inString:value];
-			
 			[mutableValue setString:value];                
 			
 		} else {
@@ -263,6 +255,19 @@ static NSString *RISEndPageString = @"Ep";
        [pubDict removeObjectForKey:RISStartPageString];
        [pubDict removeObjectForKey:RISEndPageString];
 	}
+    
+    // the year should have the format YYYY/MM/DD/part, but may only contain the year
+    NSString *year = [pubDict objectForKey:BDSKYearString];
+    
+    if(year){
+        unsigned first = [year rangeOfString:@"/"].location;
+        if (first != NSNotFound) {
+            unsigned second = [year rangeOfString:@"/" options:0 range:NSMakeRange(first, [year length] - first)].location;
+            if ([pubDict objectForKey:BDSKMonthString] == nil && second != NSNotFound && second > first + 1)
+                [pubDict setObject:[year substringWithRange:NSMakeRange(first, second - first)] forKey:BDSKMonthString];
+            [pubDict setObject:[year substringToIndex:first] forKey:BDSKYearString];
+        }
+    }
 }
 
 + (NSString *)stringByFixingInputString:(NSString *)inputString;
