@@ -58,6 +58,7 @@
 - (NSArray *)firstFourObjects;
 - (NSArray *)firstFiveObjects;
 - (NSArray *)firstSixObjects;
+- (NSArray *)lastOneObjects;
 - (NSArray *)arrayDroppingFirstObject;
 - (NSArray *)arrayDroppingLastObject;
 

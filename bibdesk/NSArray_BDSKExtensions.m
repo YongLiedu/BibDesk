@@ -122,6 +122,11 @@
     return [self count] > 6 ? [self subarrayWithRange:NSMakeRange(0, 6)] : self;
 }
 
+- (NSArray *)lastOneObjects;
+{
+    return [self count] > 1 ? [self subarrayWithRange:NSMakeRange([self count] - 1, 1)] : self;
+}
+
 - (NSArray *)arrayDroppingFirstObject;
 {
     return [self count] ? [self subarrayWithRange:NSMakeRange(1, [self count] - 1)] : self;
