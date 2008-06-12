@@ -119,7 +119,6 @@
 		CE023F5D0CC50F87003F52E5 /* Add_Small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */; };
 		CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */; };
 		CE0EB4440DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */; };
-		CE0ECDAA0DE78619006EEDDB /* BDSKSpiresParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CE0ECDA80DE78619006EEDDB /* BDSKSpiresParser.h */; };
 		CE0ECDAB0DE78619006EEDDB /* BDSKSpiresParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0ECDA90DE78619006EEDDB /* BDSKSpiresParser.m */; };
 		CE117D240D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE117D220D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.m */; };
 		CE11A2B40AE662EB008C47AC /* BDSKTextViewCompletionController.m in Sources */ = {isa = PBXBuildFile; fileRef = F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */; };
@@ -2890,7 +2889,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE0ECDAA0DE78619006EEDDB /* BDSKSpiresParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
