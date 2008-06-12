@@ -147,6 +147,79 @@
     return [self sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKTitleString ascending:YES], nil]];
 }
 
+- (NSString *)componentsJoinedByAnd
+{
+    return [self componentsJoinedByString:@" and "];
+}
+
+- (NSString *)componentsJoinedByForwardSlash
+{
+    return [self componentsJoinedByString:@"/"];
+}
+
+- (NSString *)componentsJoinedBySemicolon
+{
+    return [self componentsJoinedByString:@"; "];
+}
+
+- (NSString *)componentsJoinedByDefaultJoinString
+{
+    return [self componentsJoinedByString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultArrayJoinStringKey]];
+}
+
+- (NSString *)componentsJoinedByCommaAndAmpersand
+{
+    unsigned count = [self count];
+    switch (count) {
+        case 0:
+            return @"";
+        case 1:
+            return [self objectAtIndex:0];
+        default:
+            return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[self lastObject]];
+    }
+}
+
+- (NSString *)componentsWithEtAlAfterOne
+{
+    return [self count] > 1 ? [[self firstObject] stringByAppendingString:@" et al."] : [self firstObject];
+}
+
+- (NSString *)componentsJoinedByAndWithSingleEtAlAfterTwo
+{
+    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByAnd];
+}
+
+- (NSString *)componentsJoinedByCommaAndAndWithSingleEtAlAfterThree
+{
+    return [self count] > 3 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByCommaAndAnd];
+}
+
+- (NSString *)componentsJoinedByAndWithEtAlAfterTwo
+{
+    return [self count] > 2 ? [[[self firstTwoObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByAnd];
+}
+
+- (NSString *)componentsJoinedByCommaAndAndWithEtAlAfterThree
+{
+    return [self count] > 3 ? [[[self firstThreeObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByCommaAndAnd];
+}
+
+- (NSString *)componentsJoinedByAmpersandWithSingleEtAlAfterTwo
+{
+    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByString:@"&"];
+}
+
+- (NSString *)componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive
+{
+    return [self count] > 5 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByCommaAndAmpersand];
+}
+
+- (NSString *)componentsJoinedByCommaAndAmpersandWithEtAlAfterSix
+{
+    return [self count] > 6 ? [[[self firstSixObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByCommaAndAmpersand];
+}
+
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
 {
     NSMutableArray *array = [NSMutableArray array];

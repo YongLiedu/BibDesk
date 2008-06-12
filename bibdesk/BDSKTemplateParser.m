@@ -436,15 +436,15 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             if ([keyPath hasPrefix:@"#"]) {
                 keyValue = [NSNumber numberWithInt:anIndex];
                 if ([keyPath hasPrefix:@"#."] && [keyPath length] > 2)
-                    keyValue = [keyValue safeValueForKeyPath:[keyPath substringFromIndex:2]];
+                    keyValue = [keyValue templateValueForKeyPath:[keyPath substringFromIndex:2]];
             } else {
-                keyValue = [object safeValueForKeyPath:keyPath];
+                keyValue = [object templateValueForKeyPath:keyPath];
             }
             
             if (type == BDSKValueTagType) {
                 
                 if (keyValue)
-                    [result appendString:[keyValue stringDescription]];
+                    [result appendString:[keyValue templateStringValue]];
                 
             } else if (type == BDSKCollectionTagType) {
                 
@@ -477,22 +477,22 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                 for (i = 0; i < count; i++) {
                     matchString = [matchStrings objectAtIndex:i];
                     if ([matchString hasPrefix:@"$"]) {
-                        matchString = [[object safeValueForKeyPath:[matchString substringFromIndex:1]] stringDescription];
+                        matchString = [[object templateValueForKeyPath:[matchString substringFromIndex:1]] templateStringValue];
                         if (matchString == nil)
                             matchString = @"";
                     }
                     switch ([tag matchType]) {
                         case BDSKConditionTagMatchEqual:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] caseInsensitiveCompare:matchString] == NSOrderedSame;
                             break;
                         case BDSKConditionTagMatchContain:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
                             break;
                         case BDSKConditionTagMatchSmaller:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
                             break;
                         case BDSKConditionTagMatchSmallerOrEqual:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
                             break;
                         default:
                             isMatch = [keyValue isNotEmpty];
@@ -763,9 +763,9 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             if ([keyPath hasPrefix:@"#"]) {
                 keyValue = [NSNumber numberWithInt:anIndex];
                 if ([keyPath hasPrefix:@"#."] && [keyPath length] > 2)
-                    keyValue = [keyValue safeValueForKeyPath:[keyPath substringFromIndex:2]];
+                    keyValue = [keyValue templateValueForKeyPath:[keyPath substringFromIndex:2]];
             } else {
-                keyValue = [object safeValueForKeyPath:keyPath];
+                keyValue = [object templateValueForKeyPath:keyPath];
             }
             
             if (type == BDSKValueTagType) {
@@ -774,7 +774,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                     if ([keyValue isKindOfClass:[NSAttributedString class]]) {
                         tmpAttrStr = [[NSAttributedString alloc] initWithAttributedString:keyValue attributes:[(BDSKRichValueTag *)tag attributes]];
                     } else {
-                        tmpAttrStr = [[NSAttributedString alloc] initWithString:[keyValue stringDescription] attributes:[(BDSKRichValueTag *)tag attributes]];
+                        tmpAttrStr = [[NSAttributedString alloc] initWithString:[keyValue templateStringValue] attributes:[(BDSKRichValueTag *)tag attributes]];
                     }
                     [result appendAttributedString:tmpAttrStr];
                     [tmpAttrStr release];
@@ -813,22 +813,22 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                 for (i = 0; i < count; i++) {
                     matchString = [matchStrings objectAtIndex:i];
                     if ([matchString hasPrefix:@"$"]) {
-                        matchString = [[object safeValueForKeyPath:[matchString substringFromIndex:1]] stringDescription];
+                        matchString = [[object templateValueForKeyPath:[matchString substringFromIndex:1]] templateStringValue];
                         if (matchString == nil)
                             matchString = @"";
                     }
                     switch ([tag matchType]) {
                         case BDSKConditionTagMatchEqual:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] caseInsensitiveCompare:matchString] == NSOrderedSame;
                             break;
                         case BDSKConditionTagMatchContain:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
                             break;
                         case BDSKConditionTagMatchSmaller:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
                             break;
                         case BDSKConditionTagMatchSmallerOrEqual:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue stringDescription] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
                             break;
                         default:
                             isMatch = [keyValue isNotEmpty];
@@ -859,29 +859,26 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 @end
 
+#pragma mark -
 
 @implementation NSObject (BDSKTemplateParser)
 
-- (NSString *)stringDescription {
-    NSString *description = nil;
-    if ([self respondsToSelector:@selector(stringValue)])
-        description = [self performSelector:@selector(stringValue)];
-    return description ? description : [self description];
-}
-
 - (BOOL)isNotEmpty {
+    if ([self respondsToSelector:@selector(count)])
+        return [(id)self count] > 0;
+    if ([self respondsToSelector:@selector(length)])
+        return [(id)self length] > 0;
     return YES;
 }
 
-- (id)valueForKeyPathOrNil:(NSString *)keyPath {
+- (id)safeValueForKeyPath:(NSString *)keyPath {
     id value = nil;
-    OBPRECONDITION([keyPath isKindOfClass:[NSString class]]);
     @try{ value = [self valueForKeyPath:keyPath]; }
     @catch (id exception) { value = nil; }
     return value;
 }
 
-- (id)safeValueForKeyPath:(NSString *)keyPath {
+- (id)templateValueForKeyPath:(NSString *)keyPath {
     unsigned int atIndex = [keyPath rangeOfString:@"@"].location;
     if (atIndex != NSNotFound) {
         unsigned int dotIndex = [keyPath rangeOfString:@"." options:0 range:NSMakeRange(atIndex + 1, [keyPath length] - atIndex - 1)].location;
@@ -890,14 +887,28 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             if (arrayOperators == nil)
                 arrayOperators = [[NSSet alloc] initWithObjects:@"@avg", @"@max", @"@min", @"@sum", @"@distinctUnionOfArrays", @"@distinctUnionOfObjects", @"@distinctUnionOfSets", @"@unionOfArrays", @"@unionOfObjects", @"@unionOfSets", nil];
             if ([arrayOperators containsObject:[keyPath substringWithRange:NSMakeRange(atIndex, dotIndex - atIndex)]] == NO)
-                return [[self valueForKeyPathOrNil:[keyPath substringToIndex:dotIndex]] safeValueForKeyPath:[keyPath substringFromIndex:dotIndex + 1]];
+                return [[self safeValueForKeyPath:[keyPath substringToIndex:dotIndex]] templateValueForKeyPath:[keyPath substringFromIndex:dotIndex + 1]];
         }
     }
-    return [self valueForKeyPathOrNil:keyPath];
+    return [self safeValueForKeyPath:keyPath];
+}
+
+- (NSString *)templateStringValue {
+    NSString *description = nil;
+    if ([self respondsToSelector:@selector(stringValue)])
+        description = [self performSelector:@selector(stringValue)];
+    if ([self respondsToSelector:@selector(string)])
+        description = [self performSelector:@selector(string)];
+    return description ? description : [self description];
+}
+
+- (NSAttributedString *)templateAttributedStringValueWithAttributes:(NSDictionary *)attributes {
+    return [[[NSAttributedString alloc] initWithString:[self templateStringValue] attributes:attributes] autorelease];
 }
 
 @end
 
+#pragma mark -
 
 @implementation NSScanner (BDSKTemplateParser)
 
@@ -926,72 +937,13 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 @end
 
+#pragma mark -
 
 @implementation NSString (BDSKTemplateParser)
 
-- (NSString *)stringDescription
+- (NSString *)templateStringValue
 {
     return self;
-}
-
-- (NSString *)stringBySurroundingWithSpacesIfNotEmpty 
-{ 
-    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@" %@ ", self];
-}
-
-- (NSString *)stringByAppendingSpaceIfNotEmpty
-{
-    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@" "];
-}
-
-- (NSString *)stringByAppendingDoubleSpaceIfNotEmpty
-{
-    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@"  "];
-}
-
-- (NSString *)stringByPrependingSpaceIfNotEmpty
-{
-    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@" %@", self];
-}
-
-- (NSString *)stringByAppendingCommaIfNotEmpty
-{
-    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@","];
-}
-
-- (NSString *)stringByAppendingFullStopIfNotEmpty
-{
-    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@"."];
-}
-
-- (NSString *)stringByAppendingCommaAndSpaceIfNotEmpty
-{
-    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@", "];
-}
-
-- (NSString *)stringByAppendingFullStopAndSpaceIfNotEmpty
-{
-    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@". "];
-}
-
-- (NSString *)stringByPrependingCommaAndSpaceIfNotEmpty
-{
-    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@", %@", self];
-}
-
-- (NSString *)stringByPrependingFullStopAndSpaceIfNotEmpty
-{
-    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@". %@", self];
-}
-
-- (NSString *)quotedStringIfNotEmpty 
-{ 
-    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@"\"%@\"", self];
-}
-
-- (NSString *)parenthesizedStringIfNotEmpty
-{
-    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@"(%@)", self];
 }
 
 - (BOOL)isNotEmpty
@@ -1001,193 +953,40 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 @end
 
+#pragma mark -
+
+@interface NSAttributedString (BDSKTemplateParser)
+@end
 
 @implementation NSAttributedString (BDSKTemplateParser)
 
-- (NSString *)stringDescription {
-    return [self string];
-}
-
-- (BOOL)isNotEmpty
-{
-    return [self length] > 0;
+- (NSAttributedString *)templateAttributedStringValueWithAttributes:(NSDictionary *)attributes {
+    NSMutableAttributedString *attributedString = [self mutableCopy];
+    unsigned idx = 0, length = [self length];
+    NSRange range = NSMakeRange(0, length);
+    NSDictionary *attrs;
+    [attributedString addAttributes:attributes range:range];
+    while (idx < length) {
+        attrs = [self attributesAtIndex:idx effectiveRange:&range];
+        if (range.length > 0) {
+            [attributedString addAttributes:attrs range:range];
+            idx = NSMaxRange(range);
+        } else idx++;
+    }
+    [attributedString fixAttributesInRange:NSMakeRange(0, length)];
+    return [attributedString autorelease];
 }
 
 @end
 
-@implementation NSNumber (BDSKTemplateParser)
+#pragma mark -
 
-- (BOOL)isNotEmpty
-{
-    return [self isEqualToNumber:[NSNumber numberWithBool:NO]] == NO && [self isEqualToNumber:[NSNumber numberWithInt:0]] == NO;
-}
-
-inline static NSString *romanNumeralForDigit(unsigned digit, NSString *i, NSString *v, NSString *x){
-    switch (digit) {
-        case 1: return i;
-        case 2: return [NSString stringWithFormat:@"%@%@", i, i];
-        case 3: return [NSString stringWithFormat:@"%@%@%@", i, i, i];
-        case 4: return [NSString stringWithFormat:@"%@%@", i, v];
-        case 5: return v;
-        case 6: return [NSString stringWithFormat:@"%@%@", v, i];
-        case 7: return [NSString stringWithFormat:@"%@%@%@", v, i, i];
-        case 8: return [NSString stringWithFormat:@"%@%@%@%@", v, i, i, i];
-        case 9: return [NSString stringWithFormat:@"%@%@", i, x];
-        default: return @"";
-    }
-}
-
-- (NSString *)romanNumeralValue{
-    static NSString *symbols[9] = {@"i", @"v", @"x", @"l", @"c", @"d", @"m", @"mmm", @""};
-    
-    NSMutableString *string = [NSMutableString string];
-    unsigned digit, offset, number = [self unsignedIntValue];
-    
-    if (number >= 5000)
-        [NSException raise:@"Roman Numeral Exception" format:@"The number %i is too big to represent as a roman numeral.", number];
-    
-    for (offset = 0; number > 0 && offset < 7; offset += 2) {
-        digit = number % 10;
-        number /= 10;
-        [string insertString:romanNumeralForDigit(digit, symbols[offset], symbols[offset + 1], symbols[offset + 2]) atIndex:0];
-    }
-    return string;
-}
-
-- (NSString *)alphaCounterValue{
-    NSMutableString *string = [NSMutableString string];
-    unsigned letter, number = [self unsignedIntValue];
-    
-    while (number > 0) {
-        letter = number % 26;
-        number /= 26;
-        [string insertString:[NSString stringWithFormat:@"%C", 'a' + letter - 1] atIndex:0];
-    }
-    return string;
-}
-
-- (NSString *)greekCounterValue{
-    NSMutableString *string = [NSMutableString string];
-    unsigned letter, number = [self unsignedIntValue];
-    
-    while (number > 0) {
-        letter = number % 24;
-        number /= 24;
-        [string insertString:[NSString stringWithFormat:@"%C", 0x03b1 + letter - 1] atIndex:0];
-    }
-    return string;
-}
-
+@interface BibAuthor (BDSKTemplateParser)
 @end
-
-
-@implementation NSArray (BDSKTemplateParser)
-
-- (BOOL)isNotEmpty
-{
-    return [self count] > 0;
-}
-
-- (NSString *)componentsJoinedByAnd
-{
-    return [self componentsJoinedByString:@" and "];
-}
-
-- (NSString *)componentsJoinedByForwardSlash
-{
-    return [self componentsJoinedByString:@"/"];
-}
-
-- (NSString *)componentsJoinedBySemicolon
-{
-    return [self componentsJoinedByString:@"; "];
-}
-
-- (NSString *)componentsJoinedByDefaultJoinString
-{
-    return [self componentsJoinedByString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultArrayJoinStringKey]];
-}
-
-- (NSString *)componentsJoinedByCommaAndAmpersand
-{
-    unsigned count = [self count];
-    switch (count) {
-        case 0:
-            return @"";
-        case 1:
-            return [self objectAtIndex:0];
-        default:
-            return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[self lastObject]];
-    }
-}
-
-- (NSString *)componentsWithEtAlAfterOne
-{
-    return [self count] > 1 ? [[self firstObject] stringByAppendingString:@" et al."] : [self firstObject];
-}
-
-- (NSString *)componentsJoinedByAndWithSingleEtAlAfterTwo
-{
-    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByAnd];
-}
-
-- (NSString *)componentsJoinedByCommaAndAndWithSingleEtAlAfterThree
-{
-    return [self count] > 3 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByCommaAndAnd];
-}
-
-- (NSString *)componentsJoinedByAndWithEtAlAfterTwo
-{
-    return [self count] > 2 ? [[[self firstTwoObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByAnd];
-}
-
-- (NSString *)componentsJoinedByCommaAndAndWithEtAlAfterThree
-{
-    return [self count] > 3 ? [[[self firstThreeObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByCommaAndAnd];
-}
-
-- (NSString *)componentsJoinedByAmpersandWithSingleEtAlAfterTwo
-{
-    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByString:@"&"];
-}
-
-- (NSString *)componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive
-{
-    return [self count] > 5 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByCommaAndAmpersand];
-}
-
-- (NSString *)componentsJoinedByCommaAndAmpersandWithEtAlAfterSix
-{
-    return [self count] > 6 ? [[[self firstSixObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByCommaAndAmpersand];
-}
-
-@end
-
-
-@implementation NSDictionary (BDSKTemplateParser)
-
-- (BOOL)isNotEmpty
-{
-    return [self count] > 0;
-}
-
-@end
-
-
-@implementation NSSet (BDSKTemplateParser)
-
-- (BOOL)isNotEmpty
-{
-    return [self count] > 0;
-}
-
-@end
-
 
 @implementation BibAuthor (BDSKTemplateParser)
 
-- (BOOL)isNotEmpty
-{
+- (BOOL)isNotEmpty {
     return [BibAuthor emptyAuthor] != self;
 }
 

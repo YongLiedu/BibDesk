@@ -1102,6 +1102,66 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [self stringByAppendingString:[NSString horizontalEllipsisString]];
 }
 
+- (NSString *)stringBySurroundingWithSpacesIfNotEmpty 
+{ 
+    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@" %@ ", self];
+}
+
+- (NSString *)stringByAppendingSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@" "];
+}
+
+- (NSString *)stringByAppendingDoubleSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@"  "];
+}
+
+- (NSString *)stringByPrependingSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@" %@", self];
+}
+
+- (NSString *)stringByAppendingCommaIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@","];
+}
+
+- (NSString *)stringByAppendingFullStopIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@"."];
+}
+
+- (NSString *)stringByAppendingCommaAndSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@", "];
+}
+
+- (NSString *)stringByAppendingFullStopAndSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@". "];
+}
+
+- (NSString *)stringByPrependingCommaAndSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@", %@", self];
+}
+
+- (NSString *)stringByPrependingFullStopAndSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@". %@", self];
+}
+
+- (NSString *)quotedStringIfNotEmpty 
+{ 
+    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@"\"%@\"", self];
+}
+
+- (NSString *)parenthesizedStringIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@"(%@)", self];
+}
+
 - (NSString *)titlecaseString;
 {
     CFAllocatorRef alloc = CFGetAllocator((CFStringRef)self);

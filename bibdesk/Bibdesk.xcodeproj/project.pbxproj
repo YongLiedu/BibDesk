@@ -161,6 +161,7 @@
 		CE31E4100A07928C00F5BD47 /* staticFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */; };
 		CE3256000A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */; };
 		CE325FCE0A1A74E9002D6E4C /* BDSKTemplateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE325FCC0A1A74E9002D6E4C /* BDSKTemplateParser.m */; };
+		CE3402750E014B3800A7FFE6 /* NSNumber_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3402730E014B3800A7FFE6 /* NSNumber_BDSKExtensions.m */; };
 		CE3448020A11302F0026A92A /* BDSKPreviewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3448000A11302F0026A92A /* BDSKPreviewItem.m */; };
 		CE34A5740B249E0B00755730 /* BDSKMARCParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE34A5720B249E0B00755730 /* BDSKMARCParser.m */; };
 		CE34E97A0A03C16B00222942 /* BDSKConditionsView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE34E9780A03C16B00222942 /* BDSKConditionsView.m */; };
@@ -1014,6 +1015,8 @@
 		CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSGeometry_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE325FCB0A1A74E9002D6E4C /* BDSKTemplateParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTemplateParser.h; sourceTree = "<group>"; };
 		CE325FCC0A1A74E9002D6E4C /* BDSKTemplateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplateParser.m; sourceTree = "<group>"; };
+		CE3402720E014B3800A7FFE6 /* NSNumber_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSNumber_BDSKExtensions.h; sourceTree = "<group>"; };
+		CE3402730E014B3800A7FFE6 /* NSNumber_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSNumber_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE3448000A11302F0026A92A /* BDSKPreviewItem.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewItem.m; sourceTree = "<group>"; };
 		CE3448010A11302F0026A92A /* BDSKPreviewItem.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPreviewItem.h; sourceTree = "<group>"; };
 		CE34A5710B249E0B00755730 /* BDSKMARCParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMARCParser.h; sourceTree = "<group>"; };
@@ -2095,6 +2098,7 @@
 				CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */,
 				CE573D2509F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m */,
 				CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */,
+				CE3402730E014B3800A7FFE6 /* NSNumber_BDSKExtensions.m */,
 				CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */,
 				CE564D240AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m */,
 				CE117D220D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.m */,
@@ -2679,6 +2683,7 @@
 				CE0EB4410DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.h */,
 				CE6C047E0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h */,
 				F9FD63DA0A61B87800F9871B /* NSMenu_BDSKExtensions.h */,
+				CE3402720E014B3800A7FFE6 /* NSNumber_BDSKExtensions.h */,
 				CE8C731C0B0CA6C500E31E5A /* NSObject_BDSKExtensions.h */,
 				CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */,
 				CE564D230AECBA5B002F0A24 /* NSScanner_BDSKExtensions.h */,
@@ -3842,6 +3847,7 @@
 				CE0EB4440DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m in Sources */,
 				CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */,
 				CE0ECDAB0DE78619006EEDDB /* BDSKSpiresParser.m in Sources */,
+				CE3402750E014B3800A7FFE6 /* NSNumber_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

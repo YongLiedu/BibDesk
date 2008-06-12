@@ -407,7 +407,7 @@ static Class BDSKLinkedObjectClass = Nil;
 
 // Should we implement -isEqual: and -hash?
 
-- (NSString *)stringDescription {
+- (NSString *)stringValue {
     return [self path];
 }
 
@@ -692,7 +692,7 @@ static Class BDSKLinkedObjectClass = Nil;
     [super dealloc];
 }
 
-- (NSString *)stringDescription {
+- (NSString *)stringValue {
     return [[self URL] absoluteString];
 }
 

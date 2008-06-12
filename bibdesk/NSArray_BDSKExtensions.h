@@ -51,6 +51,7 @@
 - (id)eighthObject;
 - (id)ninthObject;
 - (id)tenthObject;
+
 - (NSArray *)firstOneObjects;
 - (NSArray *)firstTwoObjects;
 - (NSArray *)firstThreeObjects;
@@ -59,9 +60,25 @@
 - (NSArray *)firstSixObjects;
 - (NSArray *)arrayDroppingFirstObject;
 - (NSArray *)arrayDroppingLastObject;
+
 - (NSArray *)arraySortedByAuthor;
 - (NSArray *)arraySortedByAuthorOrEditor;
 - (NSArray *)arraySortedByTitle;
+
+- (NSString *)componentsJoinedByAnd;
+- (NSString *)componentsJoinedByForwardSlash;
+- (NSString *)componentsJoinedBySemicolon;
+- (NSString *)componentsJoinedByDefaultJoinString;
+- (NSString *)componentsJoinedByCommaAndAmpersand;
+- (NSString *)componentsWithEtAlAfterOne;
+- (NSString *)componentsJoinedByAndWithSingleEtAlAfterTwo;
+- (NSString *)componentsJoinedByCommaAndAndWithSingleEtAlAfterThree;
+- (NSString *)componentsJoinedByAndWithEtAlAfterTwo;
+- (NSString *)componentsJoinedByCommaAndAndWithEtAlAfterThree;
+- (NSString *)componentsJoinedByAmpersandWithSingleEtAlAfterTwo;
+- (NSString *)componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive;
+- (NSString *)componentsJoinedByCommaAndAmpersandWithEtAlAfterSix;
+
 - (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
