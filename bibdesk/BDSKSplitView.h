@@ -48,6 +48,8 @@ enum {
 @interface BDSKSplitView : OASplitView {
     int blendStyle;
     CGLayerRef dividerLayer;
+    CGLayerRef minBlendLayer;
+    CGLayerRef maxBlendLayer;
 }
 
 - (int)blendStyle;
