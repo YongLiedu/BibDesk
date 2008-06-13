@@ -429,6 +429,10 @@
     [self setSearchTerm:newSerachTerm];
 }
 
+- (void)setScriptingSearchTerm:(NSString *)newSerachTerm {
+    [self setSearchTerm:newSerachTerm];
+}
+
 - (NSDictionary *)scriptingServerInfo {
     BDSKServerInfo *serverInfo = [self serverInfo];
     NSMutableDictionary *info = [NSMutableDictionary dictionary];
@@ -552,6 +556,10 @@
         [cmd setScriptErrorString:NSLocalizedString(@"Invalid server info.",@"Error description")];
     }
     [serverInfo release];
+}
+
+- (NSString *)scriptingServerName {
+    return [[self serverInfo] name];
 }
 
 @end

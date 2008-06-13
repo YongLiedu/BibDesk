@@ -157,6 +157,8 @@
 - (NSDictionary *)scriptingServerInfo;
 - (void)setScriptingServerInfo:(NSDictionary *)info;
 
+- (NSString *)scriptingServerName;
+
 @end
 
 #pragma mark -
