@@ -1217,7 +1217,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="A period in years."/>
         </enumeration>
         
-        <record-type name="search server info" code="SrvI">
+        <record-type name="search server info" code="SRVI">
             <property name="name" code="pnam" type="text"
                 description="The name of the server.">
                 <cocoa key="name"/>
