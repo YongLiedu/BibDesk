@@ -41,8 +41,8 @@
 #import "BDSKAsynchronousDOServer.h"
 
 typedef struct _BDSKISIGroupFlags {
-    volatile int32_t isRetrieving   __attribute__ ((aligned (32)));
-    volatile int32_t failedDownload __attribute__ ((aligned (32)));
+    volatile int32_t isRetrieving;
+    volatile int32_t failedDownload;
 } BDSKISIGroupFlags;
 
 @interface BDSKISIGroupServer : BDSKAsynchronousDOServer <BDSKSearchGroupServer> 
@@ -53,6 +53,7 @@ typedef struct _BDSKISIGroupFlags {
     int fetchedResults;
     BDSKISIGroupFlags flags;
     pthread_rwlock_t infolock;
+    NSLock *resultCounterLock;
 }
 
 @end
