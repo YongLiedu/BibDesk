@@ -985,6 +985,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Whether the group is external.">
                 <cocoa key="isExternal"/>
             </property>  
+            <property name="retrieving" code="Retr" type="boolean" access="r"
+                description="Whether the group is busy retrieving publications">
+                <cocoa key="isRetrieving"/>
+            </property>  
         </class>
         
         <class name="library group" plural="library groups" code="Libr" inherits="group"
