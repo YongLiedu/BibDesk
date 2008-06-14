@@ -371,6 +371,8 @@ NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
  BDSKShouldWritePDFMetadata                      bool    false   // writes standard PDF info
  BDSKAddISIXMLStringToAnnote                     bool    false
  BDSKDisableISITitleCasing                       bool    false
+ BDSKISISourceXMLTagPriority                     array   nil
+ BDSKISIURLFieldName                             string  nil     // assign ISI URL to specified field
  BDSKDefaultArrayJoinString                      string  "/"
  BDSKShouldUsePubMedMetadata                     bool    true    // treat filename as PMID
 
