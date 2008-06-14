@@ -555,6 +555,19 @@
     [serverInfo release];
 }
 
+- (int)scriptingServerType {
+    if ([type isEqualToString:BDSKSearchGroupEntrez])
+        return 'Entr';
+    else if ([type isEqualToString:BDSKSearchGroupZoom])
+        return 'Zoom';
+    else if ([type isEqualToString:BDSKSearchGroupISI])
+        return 'ISI ';
+    else if ([type isEqualToString:BDSKSearchGroupDBLP])
+        return 'DBLP';
+    else
+        return 0;
+}
+
 - (NSString *)scriptingServerName {
     return [[self serverInfo] name];
 }

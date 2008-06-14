@@ -1061,8 +1061,12 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The server information for the search group">
                 <cocoa key="scriptingServerInfo"/>
             </property>  
+            <property name="server type" code="STyp" type="search server type" access="r"
+                description="The server type of the search group">
+                <cocoa key="scriptingServerType"/>
+            </property>  
             <property name="server name" code="SrvN" type="text" access="r"
-                description="The server name for the search group">
+                description="The server name of the search group">
                 <cocoa key="scriptingServerName"/>
             </property>  
         </class>

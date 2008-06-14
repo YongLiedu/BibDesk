@@ -157,6 +157,8 @@
 - (NSDictionary *)scriptingServerInfo;
 - (void)setScriptingServerInfo:(NSDictionary *)info;
 
+- (int)scriptingServerType;
+
 - (NSString *)scriptingServerName;
 
 @end
