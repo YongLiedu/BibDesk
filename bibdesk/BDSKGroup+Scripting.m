@@ -425,13 +425,10 @@
     return [self searchTerm];
 }
 
-- (void)setScriptingSearchTerm:(NSString *)newSerachTerm {
-    [self setSearchTerm:newSerachTerm];
+- (void)setScriptingSearchTerm:(NSString *)newSearchTerm {
+    [self setSearchTerm:newSearchTerm];
 }
 
-- (void)setScriptingSearchTerm:(NSString *)newSerachTerm {
-    [self setSearchTerm:newSerachTerm];
-}
 
 - (NSDictionary *)scriptingServerInfo {
     BDSKServerInfo *serverInfo = [self serverInfo];
