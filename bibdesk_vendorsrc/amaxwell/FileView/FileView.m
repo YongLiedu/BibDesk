@@ -1239,8 +1239,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
      */
     NSUInteger wordCount = [[message componentsSeparatedByString:@" "] count];
     
-    // reduce font size until we have no more than wordCount lines
-    while (NSHeight(r) > wordCount * singleLineHeight) {
+    // reduce font size until we have no more than wordCount lines, but don't reduce the font size too much, as that can lead to a hang
+    while (NSHeight(r) > wordCount * singleLineHeight && fontSize > 8.0) {
         fontSize -= 1.0;
         [attrString addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:fontSize] range:NSMakeRange(0, [attrString length])];
         singleLineHeight = NSHeight([attrString boundingRectWithSize:aRect.size options:0]);
