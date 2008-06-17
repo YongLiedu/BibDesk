@@ -1073,12 +1073,16 @@
                             [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL] == NO ||
                             [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL] == NO ||
                             [scanner scanUpToString:@"{" intoString:&command] == NO ||
-                            [scanner scanString:@"{" intoString:NULL] == NO)
-                            return NO;
-                        
-                        command = [command stringByAppendingString:@"{"];
-                        
-                        [scanner setScanLocation:[scanner scanLocation] - [command length]];
+                            [scanner scanString:@"{" intoString:NULL] == NO) {
+                            
+                            command = @"\\bibcite{";
+                            [scanner setScanLocation:0];
+                            if ([scanner scanUpToString:command intoString:NULL] == NO)
+                                return NO;
+                        } else {
+                            command = [command stringByAppendingString:@"{"];
+                            [scanner setScanLocation:[scanner scanLocation] - [command length]];
+                        }
                         
                         do {
                             if ([scanner scanString:command intoString:NULL] &&
