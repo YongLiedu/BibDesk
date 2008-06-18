@@ -223,6 +223,7 @@
 		CE7A31400B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */; };
 		CE7A4A8F0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */; };
 		CE7A4AA50B0B480100D1B333 /* BDSKCustomCiteDrawer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE7A4AA40B0B480100D1B333 /* BDSKCustomCiteDrawer.nib */; };
+		CE7DC8DF0E09533E00D6D76D /* skimnotes in Resources */ = {isa = PBXBuildFile; fileRef = CE7DC8DC0E0952BB00D6D76D /* skimnotes */; };
 		CE7E1BB50A0B8EE7009D04C3 /* GroupAction.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1BB30A0B8EE7009D04C3 /* GroupAction.tiff */; };
 		CE7E1BB60A0B8EE7009D04C3 /* GroupAdd.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1BB40A0B8EE7009D04C3 /* GroupAdd.tiff */; };
 		CE7E1C3A0A0B9E94009D04C3 /* GroupAction_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1C380A0B9E94009D04C3 /* GroupAction_Pressed.tiff */; };
@@ -426,7 +427,6 @@
 		F925352A08FDFAE40045D563 /* BDSKFileSearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = F925352808FDFAE40045D563 /* BDSKFileSearchResult.m */; };
 		F92B91C00BC6B51B008D5BC3 /* SearchButtonView.nib in Resources */ = {isa = PBXBuildFile; fileRef = F92B91BF0BC6B51B008D5BC3 /* SearchButtonView.nib */; };
 		F92BACCF0BCBFEE0008D5BC3 /* BDSKSkimReader.m in Sources */ = {isa = PBXBuildFile; fileRef = F92BACCD0BCBFEE0008D5BC3 /* BDSKSkimReader.m */; };
-		F92BACF50BCC0140008D5BC3 /* SkimNotesAgent in Resources */ = {isa = PBXBuildFile; fileRef = F92BACF20BCC00D2008D5BC3 /* SkimNotesAgent */; };
 		F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92ECB6B09DEF86500A244D0 /* Security.framework */; };
 		F92ECBF109DF09C200A244D0 /* BDSKPasswordController.nib in Resources */ = {isa = PBXBuildFile; fileRef = F92ECBEF09DF09C200A244D0 /* BDSKPasswordController.nib */; };
 		F92ECBF509DF09DA00A244D0 /* BDSKPasswordController.m in Sources */ = {isa = PBXBuildFile; fileRef = F92ECBF309DF09DA00A244D0 /* BDSKPasswordController.m */; };
@@ -534,6 +534,27 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CE7DC8D90E0952BB00D6D76D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216 /* SkimNotes.framework */;
+			remoteInfo = SkimNotes;
+		};
+		CE7DC8DB0E0952BB00D6D76D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CEBA2B550E0566B00000B2E6 /* skimnotes */;
+			remoteInfo = skimnotes;
+		};
+		CE7DC8DD0E0952E000D6D76D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = CEBA2B540E0566B00000B2E6 /* skimnotes */;
+			remoteInfo = skimnotes;
+		};
 		CEEBA83E0D749CC9000204B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */;
@@ -582,20 +603,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = F94692510CA575F000AC2772;
 			remoteInfo = "FileView Program";
-		};
-		F92BACF10BCC00D2008D5BC3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8DD76FA10486AA7600D96B5E;
-			remoteInfo = SkimNotesAgent;
-		};
-		F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DD76F960486AA7600D96B5E;
-			remoteInfo = SkimNotesAgent;
 		};
 		F95CC112087F54BF002C5694 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1120,6 +1127,7 @@
 		CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCustomCiteDrawerController.h; sourceTree = "<group>"; };
 		CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCustomCiteDrawerController.m; sourceTree = "<group>"; };
 		CE7A4A900B0B476400D1B333 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKCustomCiteDrawer.nib; sourceTree = "<group>"; };
+		CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SkimNotes.xcodeproj; path = SkimNotes/SkimNotes.xcodeproj; sourceTree = "<group>"; };
 		CE7E1BB30A0B8EE7009D04C3 /* GroupAction.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAction.tiff; path = Images/GroupAction.tiff; sourceTree = "<group>"; };
 		CE7E1BB40A0B8EE7009D04C3 /* GroupAdd.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAdd.tiff; path = Images/GroupAdd.tiff; sourceTree = "<group>"; };
 		CE7E1C380A0B9E94009D04C3 /* GroupAction_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAction_Pressed.tiff; path = Images/GroupAction_Pressed.tiff; sourceTree = "<group>"; };
@@ -1448,7 +1456,6 @@
 		F925352808FDFAE40045D563 /* BDSKFileSearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileSearchResult.m; sourceTree = "<group>"; };
 		F92BACCC0BCBFEE0008D5BC3 /* BDSKSkimReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSkimReader.h; sourceTree = "<group>"; };
 		F92BACCD0BCBFEE0008D5BC3 /* BDSKSkimReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSkimReader.m; sourceTree = "<group>"; };
-		F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SkimNotesAgent.xcodeproj; path = SkimNotesAgent/SkimNotesAgent.xcodeproj; sourceTree = "<group>"; };
 		F92ECB6B09DEF86500A244D0 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		F92ECBF009DF09C200A244D0 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPasswordController.nib; sourceTree = "<group>"; };
 		F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPasswordController.h; sourceTree = "<group>"; };
@@ -2192,7 +2199,6 @@
 				F94DB0F70B3E2FA1006F37A2 /* BDSKSearchGroup.m */,
 				CE9666440B46B70C003BAB9A /* BDSKServerInfo.m */,
 				F92EF32109E6242100A244D0 /* BDSKSharedGroup.m */,
-				F92BACCD0BCBFEE0008D5BC3 /* BDSKSkimReader.m */,
 				CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */,
 				CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */,
 				F9025DAA0969AB69008A551C /* BDSKStringNode.m */,
@@ -2249,6 +2255,7 @@
 				CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */,
 				CE82B2D00D57AE0B00A2E8C5 /* BDSKSharingClient.m */,
 				F92ED7CB09E0A93400A244D0 /* BDSKSharingServer.m */,
+				F92BACCD0BCBFEE0008D5BC3 /* BDSKSkimReader.m */,
 				F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */,
 				F9022C980758038000C3F701 /* BDSKTypeManager.m */,
 				F9022CA30758038000C3F701 /* BDSKTypeSelectHelper.m */,
@@ -2301,6 +2308,15 @@
 				F9022C8C0758034000C3F701 /* BibDocumentView_Toolbar.m */,
 			);
 			name = Document;
+			sourceTree = "<group>";
+		};
+		CE7DC8D00E0952BA00D6D76D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */,
+				CE7DC8DC0E0952BB00D6D76D /* skimnotes */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		CEE23BAE0BFBA5FE002B746B /* Shared Support */ = {
@@ -2722,14 +2738,6 @@
 			name = AMButtonBar;
 			sourceTree = "<group>";
 		};
-		F92BACEB0BCC00D2008D5BC3 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F92BACF20BCC00D2008D5BC3 /* SkimNotesAgent */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		F95CC10F087F54BF002C5694 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -2770,10 +2778,10 @@
 		F98F307A088E0F2800C1427D /* Subprojects */ = {
 			isa = PBXGroup;
 			children = (
+				CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */,
 				F911D6A80CFE8E420009C77B /* FileView.xcodeproj */,
 				F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */,
 				F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */,
-				F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */,
 				F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */,
 				F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */,
 				F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */,
@@ -2968,7 +2976,7 @@
 				F9AF56340BEA4160009B16D5 /* PBXTargetDependency */,
 				F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */,
 				CEEBA83F0D749CC9000204B8 /* PBXTargetDependency */,
-				F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */,
+				CE7DC8DE0E0952E000D6D76D /* PBXTargetDependency */,
 			);
 			name = BibDesk;
 			productInstallPath = "$(HOME)/Applications";
@@ -3028,8 +3036,8 @@
 					ProjectRef = F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */;
 				},
 				{
-					ProductGroup = F92BACEB0BCC00D2008D5BC3 /* Products */;
-					ProjectRef = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
+					ProductGroup = CE7DC8D00E0952BA00D6D76D /* Products */;
+					ProjectRef = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
 				},
 				{
 					ProductGroup = F9C7E5900BEA3C9400D65C7F /* Products */;
@@ -3048,6 +3056,20 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SkimNotes.framework;
+			remoteRef = CE7DC8D90E0952BB00D6D76D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CE7DC8DC0E0952BB00D6D76D /* skimnotes */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = skimnotes;
+			remoteRef = CE7DC8DB0E0952BB00D6D76D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		F90B13010C298FC900144F1B /* latex2rtf */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -3074,13 +3096,6 @@
 			fileType = wrapper.application;
 			path = "FileView Program.app";
 			remoteRef = F911D6B70CFE8E420009C77B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F92BACF20BCC00D2008D5BC3 /* SkimNotesAgent */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = SkimNotesAgent;
-			remoteRef = F92BACF10BCC00D2008D5BC3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F95CC113087F54BF002C5694 /* BibImporter.mdimporter */ = {
@@ -3300,7 +3315,7 @@
 				CE12A1700B44AED200416D19 /* SearchGroupServers.plist in Resources */,
 				F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */,
 				CEEC72F7093BDCA200A64F54 /* BibDesk.sdef in Resources */,
-				F92BACF50BCC0140008D5BC3 /* SkimNotesAgent in Resources */,
+				CE7DC8DF0E09533E00D6D76D /* skimnotes in Resources */,
 				F90B13030C298FE900144F1B /* latex2rtf in Resources */,
 				F9022DBD0758088000C3F701 /* Action_Pressed.tiff in Resources */,
 				F9022DBE0758088000C3F701 /* Action.tiff in Resources */,
@@ -3852,6 +3867,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		CE7DC8DE0E0952E000D6D76D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = skimnotes;
+			targetProxy = CE7DC8DD0E0952E000D6D76D /* PBXContainerItemProxy */;
+		};
 		CEEBA83F0D749CC9000204B8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = BibDesk;
@@ -3866,11 +3886,6 @@
 			isa = PBXTargetDependency;
 			name = latex2rtf;
 			targetProxy = F90B13040C29900200144F1B /* PBXContainerItemProxy */;
-		};
-		F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = SkimNotesAgent;
-			targetProxy = F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */;
 		};
 		F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

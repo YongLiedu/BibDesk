@@ -39,7 +39,7 @@
 #import "BDSKSkimReader.h"
 #import "NSWorkspace_BDSKExtensions.h"
 
-@protocol SKAgentListenerProtocol
+@protocol SKNAgentListenerProtocol
 
 - (bycopy NSData *)SkimNotesAtPath:(in bycopy NSString *)aFile;
 - (bycopy NSData *)RTFNotesAtPath:(in bycopy NSString *)aFile;
@@ -47,7 +47,7 @@
 
 @end
 
-// Argument passed; this will be unique to the client app, so multiple processes can run a SkimNotesAgent.  Alternately, we could run it via launchd or as a login item and allow any app to talk to it.  This is easier for the present.
+// Argument passed; this will be unique to the client app, so multiple processes can run a skimnotes agent.  Alternately, we could run it via launchd or as a login item and allow any app to talk to it.  This is easier for the present.
 #define AGENT_IDENTIFIER @"net_sourceforge_bibdesk_skimnotesagent"
 #define AGENT_TIMEOUT 1.0f
 
@@ -91,8 +91,8 @@
 - (BOOL)launchedTask;
 {
     NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath:[[NSBundle mainBundle] pathForResource:@"SkimNotesAgent" ofType:nil]];
-    [task setArguments:[NSArray arrayWithObject:AGENT_IDENTIFIER]];
+    [task setLaunchPath:[[NSBundle mainBundle] pathForResource:@"skimnotes" ofType:nil]];
+    [task setArguments:[NSArray arrayWithObjects:@"agent", AGENT_IDENTIFIER, nil]];
     BOOL taskLaunched = NO;
     
 #if OMNI_FORCE_ASSERTIONS
@@ -102,7 +102,7 @@
     @try {
         [task launch];
         NSData *data = [[aPipe fileHandleForReading] readDataToEndOfFile];
-        NSLog(@"SkimNotesAgent started with identifier \"%@\"", [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
+        NSLog(@"skimnotes agent started with identifier \"%@\"", [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
         taskLaunched = [task isRunning];
     }
 #else
@@ -116,7 +116,7 @@
 #endif
     
     @catch(id exception){
-        NSLog(@"failed to launch SkimNotesAgent: %@", exception);
+        NSLog(@"failed to launch skimnotes agent: %@", exception);
         taskLaunched = NO;
     }
     [task release];
@@ -160,11 +160,11 @@
             
             @try {
                 id server = [connection rootProxy];
-                [server setProtocolForProxy:@protocol(SKAgentListenerProtocol)];
+                [server setProtocolForProxy:@protocol(SKNAgentListenerProtocol)];
                 agent = [server retain];
             }
             @catch(id exception) {
-                NSLog(@"Error: exception \"%@\" caught when contacting SkimNotesAgent", exception);
+                NSLog(@"Error: exception \"%@\" caught when contacting skimnotes agent", exception);
                 [self destroyConnection];
             }
         }
