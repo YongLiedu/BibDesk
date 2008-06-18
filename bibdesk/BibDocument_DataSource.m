@@ -1057,32 +1057,17 @@
                     NSString *file = [filenames lastObject];
                     if([[file pathExtension] caseInsensitiveCompare:@"aux"] == NSOrderedSame){
                         NSString *auxString = [NSString stringWithContentsOfFile:file encoding:[self documentStringEncoding] guessEncoding:YES];
+                        NSString *command = @"\\bibcite{"; // we used to get the command by looking at the line after \bibdata, but that's unreliable as there can be other stuff in between the \bibcite commands
                         
-                        if (auxString == nil)
+                        if (auxString == nil || [auxString rangeOfString:command].length == 0)
                             return NO;
                         
                         NSScanner *scanner = [NSScanner scannerWithString:auxString];
                         NSString *key = nil;
-                        NSString *command = nil;
                         NSArray *items = nil;
                         NSMutableArray *selItems = [NSMutableArray array];
                         
                         [scanner setCharactersToBeSkipped:nil];
-                        
-                        if ([scanner scanUpToString:@"\\bibdata{" intoString:NULL] == NO ||
-                            [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL] == NO ||
-                            [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL] == NO ||
-                            [scanner scanUpToString:@"{" intoString:&command] == NO ||
-                            [scanner scanString:@"{" intoString:NULL] == NO) {
-                            
-                            command = @"\\bibcite{";
-                            [scanner setScanLocation:0];
-                            if ([scanner scanUpToString:command intoString:NULL] == NO)
-                                return NO;
-                        } else {
-                            command = [command stringByAppendingString:@"{"];
-                            [scanner setScanLocation:[scanner scanLocation] - [command length]];
-                        }
                         
                         do {
                             if ([scanner scanString:command intoString:NULL] &&
@@ -1090,8 +1075,7 @@
                                 (items = [publications allItemsForCiteKey:key]))
                                 [selItems addObjectsFromArray:items];
                             [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
-                            if ([scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL] == NO)
-                                break;
+                            [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
                         } while ([scanner isAtEnd] == NO);
                         
                         if ([selItems count])
