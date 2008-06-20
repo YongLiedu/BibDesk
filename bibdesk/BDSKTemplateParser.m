@@ -236,7 +236,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                 
         if ([scanner scanUpToString:START_TAG_OPEN_DELIM intoString:&beforeText]) {
             if (currentTag && [(BDSKTag *)currentTag type] == BDSKTextTagType) {
-                [currentTag setText:[[currentTag text] stringByAppendingString:beforeText]];
+                [(BDSKTextTag *)currentTag setText:[[(BDSKTextTag *)currentTag text] stringByAppendingString:beforeText]];
             } else {
                 currentTag = [[BDSKTextTag alloc] initWithText:beforeText];
                 [result addObject:currentTag];
@@ -268,13 +268,13 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                 // collection template tag
                 // ignore whitespace before the tag. Should we also remove a newline?
                 if (currentTag && [(BDSKTag *)currentTag type] == BDSKTextTagType) {
-                    wsRange = [[currentTag text] rangeOfTrailingEmptyLineRequiringNewline:[result count] != 1];
+                    wsRange = [[(BDSKTextTag *)currentTag text] rangeOfTrailingEmptyLineRequiringNewline:[result count] != 1];
                     if (wsRange.location != NSNotFound) {
-                        if (wsRange.length == [[currentTag text] length]) {
+                        if (wsRange.length == [[(BDSKTextTag *)currentTag text] length]) {
                             [result removeLastObject];
                             currentTag = [result lastObject];
                         } else {
-                            [currentTag setText:[[currentTag text] substringToIndex:wsRange.location]];
+                            [(BDSKTextTag *)currentTag setText:[[(BDSKTextTag *)currentTag text] substringToIndex:wsRange.location]];
                         }
                     }
                 }
@@ -338,13 +338,13 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                     // condition template tag
                     // ignore whitespace before the tag. Should we also remove a newline?
                     if (currentTag && [(BDSKTag *)currentTag type] == BDSKTextTagType) {
-                        wsRange = [[currentTag text] rangeOfTrailingEmptyLineRequiringNewline:[result count] != 1];
+                        wsRange = [[(BDSKTextTag *)currentTag text] rangeOfTrailingEmptyLineRequiringNewline:[result count] != 1];
                         if (wsRange.location != NSNotFound) {
-                            if (wsRange.length == [[currentTag text] length]) {
+                            if (wsRange.length == [[(BDSKTextTag *)currentTag text] length]) {
                                 [result removeLastObject];
                                 currentTag = [result lastObject];
                             } else {
-                                [currentTag setText:[[currentTag text] substringToIndex:wsRange.location]];
+                                [(BDSKTextTag *)currentTag setText:[[(BDSKTextTag *)currentTag text] substringToIndex:wsRange.location]];
                             }
                         }
                     }
@@ -396,7 +396,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                     
                     // an open delimiter without a close delimiter, so no template tag. Rewind
                     if (currentTag && [(BDSKTag *)currentTag type] == BDSKTextTagType) {
-                        [currentTag setText:[[currentTag text] stringByAppendingString:START_TAG_OPEN_DELIM]];
+                        [(BDSKTextTag *)currentTag setText:[[(BDSKTextTag *)currentTag text] stringByAppendingString:START_TAG_OPEN_DELIM]];
                     } else {
                         currentTag = [[BDSKTextTag alloc] initWithText:START_TAG_OPEN_DELIM];
                         [result addObject:currentTag];
@@ -426,7 +426,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
         
         if (type == BDSKTextTagType) {
             
-            [result appendString:[tag text]];
+            [result appendString:[(BDSKTextTag *)tag text]];
             
         } else {
             
@@ -548,10 +548,10 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                 
         if ([scanner scanUpToString:START_TAG_OPEN_DELIM intoString:&beforeText]) {
             if (currentTag && [(BDSKTag *)currentTag type] == BDSKTextTagType) {
-                tmpAttrStr = [[currentTag attributedText] mutableCopy];
+                tmpAttrStr = [[(BDSKRichTextTag *)currentTag attributedText] mutableCopy];
                 [tmpAttrStr appendAttributedString:[template attributedSubstringFromRange:NSMakeRange(start, [beforeText length])]];
                 [tmpAttrStr fixAttributesInRange:NSMakeRange(0, [tmpAttrStr length])];
-                [currentTag setAttributedText:tmpAttrStr];
+                [(BDSKRichTextTag *)currentTag setAttributedText:tmpAttrStr];
                 [tmpAttrStr release];
             } else {
                 currentTag = [[BDSKRichTextTag alloc] initWithAttributedText:[template attributedSubstringFromRange:NSMakeRange(start, [beforeText length])]];
@@ -586,13 +586,13 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                 // collection template tag
                 // ignore whitespace before the tag. Should we also remove a newline?
                 if (currentTag && [(BDSKTag *)currentTag type] == BDSKTextTagType) {
-                    wsRange = [[[currentTag attributedText] string] rangeOfTrailingEmptyLineRequiringNewline:[result count] != 1];
+                    wsRange = [[[(BDSKRichTextTag *)currentTag attributedText] string] rangeOfTrailingEmptyLineRequiringNewline:[result count] != 1];
                     if (wsRange.location != NSNotFound) {
-                        if (wsRange.length == [[currentTag attributedText] length]) {
+                        if (wsRange.length == [[(BDSKRichTextTag *)currentTag attributedText] length]) {
                             [result removeLastObject];
                             currentTag = [result lastObject];
                         } else {
-                            [currentTag setAttributedText:[[currentTag attributedText] attributedSubstringFromRange:NSMakeRange(0, wsRange.location)]];
+                            [(BDSKRichTextTag *)currentTag setAttributedText:[[currentTag attributedText] attributedSubstringFromRange:NSMakeRange(0, wsRange.location)]];
                         }
                     }
                 }
@@ -657,13 +657,13 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                     // condition template tag
                     // ignore whitespace before the tag. Should we also remove a newline?
                     if (currentTag && [(BDSKTag *)currentTag type] == BDSKTextTagType) {
-                        wsRange = [[[currentTag attributedText] string] rangeOfTrailingEmptyLineRequiringNewline:[result count] != 1];
+                        wsRange = [[[(BDSKRichTextTag *)currentTag attributedText] string] rangeOfTrailingEmptyLineRequiringNewline:[result count] != 1];
                         if (wsRange.location != NSNotFound) {
-                            if (wsRange.length == [[currentTag attributedText] length]) {
+                            if (wsRange.length == [[(BDSKRichTextTag *)currentTag attributedText] length]) {
                                 [result removeLastObject];
                                 currentTag = [result lastObject];
                             } else {
-                                [currentTag setAttributedText:[[currentTag attributedText] attributedSubstringFromRange:NSMakeRange(0, wsRange.location)]];
+                                [(BDSKRichTextTag *)currentTag setAttributedText:[[(BDSKRichTextTag *)currentTag attributedText] attributedSubstringFromRange:NSMakeRange(0, wsRange.location)]];
                             }
                         }
                     }
@@ -716,10 +716,10 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                     
                     // a START_TAG_OPEN_DELIM without COLLECTION_TAG_CLOSE_DELIM, so no template tag. Rewind
                     if (currentTag && [(BDSKTag *)currentTag type] == BDSKTextTagType) {
-                        tmpAttrStr = [[currentTag attributedText] mutableCopy];
+                        tmpAttrStr = [[(BDSKRichTextTag *)currentTag attributedText] mutableCopy];
                         [tmpAttrStr appendAttributedString:[template attributedSubstringFromRange:NSMakeRange(start - [START_TAG_OPEN_DELIM length], [START_TAG_OPEN_DELIM length])]];
                         [tmpAttrStr fixAttributesInRange:NSMakeRange(0, [tmpAttrStr length])];
-                        [currentTag setAttributedText:tmpAttrStr];
+                        [(BDSKRichTextTag *)currentTag setAttributedText:tmpAttrStr];
                         [tmpAttrStr release];
                     } else {
                         currentTag = [[BDSKRichTextTag alloc] initWithAttributedText:[template attributedSubstringFromRange:NSMakeRange(start - [START_TAG_OPEN_DELIM length], [START_TAG_OPEN_DELIM length])]];
@@ -753,7 +753,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
         
         if (type == BDSKTextTagType) {
             
-            [result appendAttributedString:[tag attributedText]];
+            [result appendAttributedString:[(BDSKRichTextTag *)tag attributedText]];
             
         } else {
             
