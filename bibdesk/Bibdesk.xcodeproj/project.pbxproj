@@ -150,6 +150,9 @@
 		CE2A1B6A0CE4D13600A0499B /* NewBookmark.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2A1B680CE4D13600A0499B /* NewBookmark.tiff */; };
 		CE2A1B6B0CE4D13700A0499B /* SmallBookmark.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2A1B690CE4D13600A0499B /* SmallBookmark.tiff */; };
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
+		CE2BB5900E0BE0EA0090E848 /* PDFKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE2BB58F0E0BE0EA0090E848 /* PDFKit.framework */; };
+		CE2BB5930E0BE1370090E848 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE2BB5920E0BE1370090E848 /* FileView.framework */; };
+		CE2BB6630E0BE2210090E848 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE2BB5920E0BE1370090E848 /* FileView.framework */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
 		CE2C18920A0A43BE006F0A73 /* importFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */; };
 		CE2E78CD0D40F6BB00340B39 /* BDSKMultiValueDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2E78CB0D40F6BB00340B39 /* BDSKMultiValueDictionary.m */; };
@@ -408,8 +411,6 @@
 		F90B13030C298FE900144F1B /* latex2rtf in Resources */ = {isa = PBXBuildFile; fileRef = F90B13010C298FC900144F1B /* latex2rtf */; };
 		F90C4ACE0C7395FC0035DD50 /* BDSKSciFinderParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C4ACC0C7395FB0035DD50 /* BDSKSciFinderParser.m */; };
 		F90C64070AC62B7B008B2DDA /* BDSKShellCommandFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */; };
-		F911D6BC0CFE8E690009C77B /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
-		F911D6BD0CFE8E7D0009C77B /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
 		F911D7120CFE90050009C77B /* BDSKLinkedFile.m in Sources */ = {isa = PBXBuildFile; fileRef = F911D7110CFE90050009C77B /* BDSKLinkedFile.m */; };
 		F916E69607A9F9AB009EF011 /* BDSKThreadSafeMutableDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = F916E68F07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.m */; };
 		F91B7F28092BEB5A00976F6F /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F91B7F27092BEB5A00976F6F /* AddressBook.framework */; };
@@ -824,7 +825,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				F911D6BD0CFE8E7D0009C77B /* FileView.framework in CopyFiles */,
+				CE2BB6630E0BE2210090E848 /* FileView.framework in CopyFiles */,
 				F9B801930B41E8D600A5A615 /* yaz.framework in CopyFiles */,
 				F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */,
 				F9022FB107580A9600C3F701 /* AGRegex.framework in CopyFiles */,
@@ -1004,6 +1005,8 @@
 		CE2A1B690CE4D13600A0499B /* SmallBookmark.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = SmallBookmark.tiff; path = Images/SmallBookmark.tiff; sourceTree = "<group>"; };
 		CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGroupCell.h; sourceTree = "<group>"; };
 		CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupCell.m; sourceTree = "<group>"; };
+		CE2BB58F0E0BE0EA0090E848 /* PDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PDFKit.framework; path = /System/Library/Frameworks/Quartz.framework/Frameworks/PDFKit.framework; sourceTree = "<absolute>"; };
+		CE2BB5920E0BE1370090E848 /* FileView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FileView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE2C16F80A0A149E006F0A73 /* gear2.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = gear2.tiff; path = Images/gear2.tiff; sourceTree = "<group>"; };
 		CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = importFolderIcon.tiff; path = Images/importFolderIcon.tiff; sourceTree = "<group>"; };
 		CE2E78CA0D40F6BB00340B39 /* BDSKMultiValueDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMultiValueDictionary.h; sourceTree = "<group>"; };
@@ -1724,7 +1727,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F98AACDE0D43DB5A00D3CD64 /* libssl.dylib in Frameworks */,
-				F911D6BC0CFE8E690009C77B /* FileView.framework in Frameworks */,
 				F9B801840B41E89500A5A615 /* yaz.framework in Frameworks */,
 				F9937E6C0AD82700001D1DFB /* QuartzCore.framework in Frameworks */,
 				F9937E4E0AD826EB001D1DFB /* Quartz.framework in Frameworks */,
@@ -1742,6 +1744,8 @@
 				F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */,
 				F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */,
 				F98AACF50D43E13C00D3CD64 /* libcrypto.dylib in Frameworks */,
+				CE2BB5900E0BE0EA0090E848 /* PDFKit.framework in Frameworks */,
+				CE2BB5930E0BE1370090E848 /* FileView.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1770,8 +1774,23 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F9022DEB0758099D00C3F701 /* ApplicationServices.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+				F9022DEC0758099D00C3F701 /* Carbon.framework */,
+				F9022DEB0758099D00C3F701 /* ApplicationServices.framework */,
+				F95ED6910B07BA4E00000BBF /* ExceptionHandling.framework */,
+				F92ECB6B09DEF86500A244D0 /* Security.framework */,
+				F9DF3BC109B7605E00342ADE /* SystemConfiguration.framework */,
+				F91B7F27092BEB5A00976F6F /* AddressBook.framework */,
+				F9706DB909102DA800526FC8 /* QuartzCore.framework */,
+				F9B9E17E089479FC00C21B17 /* Quartz.framework */,
+				3D9EC25207C66B1E00DE459D /* WebKit.framework */,
+				F9022DE50758095000C3F701 /* OmniBase.framework */,
+				F9022DE60758095000C3F701 /* OmniFoundation.framework */,
+				F9022DE40758095000C3F701 /* OmniAppKit.framework */,
+				F9B801830B41E89500A5A615 /* yaz.framework */,
+				F9022DE30758095000C3F701 /* AGRegex.framework */,
+				F9ABEC9E086E11B500741FC5 /* BTParse.framework */,
+				CE2BB5920E0BE1370090E848 /* FileView.framework */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -1781,6 +1800,7 @@
 			children = (
 				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
 				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
+				CE2BB58F0E0BE0EA0090E848 /* PDFKit.framework */,
 			);
 			name = "Other Frameworks";
 			sourceTree = "<group>";
@@ -1948,20 +1968,6 @@
 			children = (
 				F98AACF40D43E13C00D3CD64 /* libcrypto.dylib */,
 				F98AACDD0D43DB5A00D3CD64 /* libssl.dylib */,
-				F9B801830B41E89500A5A615 /* yaz.framework */,
-				F95ED6910B07BA4E00000BBF /* ExceptionHandling.framework */,
-				F92ECB6B09DEF86500A244D0 /* Security.framework */,
-				F9DF3BC109B7605E00342ADE /* SystemConfiguration.framework */,
-				F91B7F27092BEB5A00976F6F /* AddressBook.framework */,
-				F9706DB909102DA800526FC8 /* QuartzCore.framework */,
-				F9B9E17E089479FC00C21B17 /* Quartz.framework */,
-				F9ABEC9E086E11B500741FC5 /* BTParse.framework */,
-				F9022DEC0758099D00C3F701 /* Carbon.framework */,
-				3D9EC25207C66B1E00DE459D /* WebKit.framework */,
-				F9022DE30758095000C3F701 /* AGRegex.framework */,
-				F9022DE40758095000C3F701 /* OmniAppKit.framework */,
-				F9022DE50758095000C3F701 /* OmniBase.framework */,
-				F9022DE60758095000C3F701 /* OmniFoundation.framework */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
@@ -4521,6 +4527,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1162;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/Quartz.framework/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../../../BuildProducts/Debug\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -4555,7 +4568,13 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 1162;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_2)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/Quartz.framework/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../../../BuildProducts/Debug\"";
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -4610,7 +4629,13 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1162;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_2)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/Quartz.framework/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../../../BuildProducts/Debug\"";
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
