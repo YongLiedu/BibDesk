@@ -150,9 +150,20 @@
 		CE2A1B6A0CE4D13600A0499B /* NewBookmark.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2A1B680CE4D13600A0499B /* NewBookmark.tiff */; };
 		CE2A1B6B0CE4D13700A0499B /* SmallBookmark.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2A1B690CE4D13600A0499B /* SmallBookmark.tiff */; };
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
-		CE2BB5900E0BE0EA0090E848 /* PDFKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE2BB58F0E0BE0EA0090E848 /* PDFKit.framework */; };
-		CE2BB5930E0BE1370090E848 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE2BB5920E0BE1370090E848 /* FileView.framework */; };
-		CE2BB6630E0BE2210090E848 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE2BB5920E0BE1370090E848 /* FileView.framework */; };
+		CE2BB7E80E0DB0C70090E848 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
+		CE2BB7E90E0DB0D00090E848 /* yaz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
+		CE2BB7EA0E0DB0D40090E848 /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */; };
+		CE2BB7EB0E0DB0D70090E848 /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
+		CE2BB7EC0E0DB0DA0090E848 /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
+		CE2BB7EE0E0DB0F40090E848 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
+		CE2BB8030E0DB2980090E848 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
+		CE2BB8040E0DB3820090E848 /* OmniBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
+		CE2BB8050E0DB3820090E848 /* OmniFoundation.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
+		CE2BB8060E0DB3820090E848 /* OmniAppKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */; };
+		CE2BB8070E0DB3820090E848 /* yaz.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
+		CE2BB8080E0DB3820090E848 /* AGRegex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
+		CE2BB8090E0DB3A20090E848 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
+		CE2BB80A0E0DB3A20090E848 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
 		CE2C18920A0A43BE006F0A73 /* importFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */; };
 		CE2E78CD0D40F6BB00340B39 /* BDSKMultiValueDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2E78CB0D40F6BB00340B39 /* BDSKMultiValueDictionary.m */; };
@@ -388,16 +399,8 @@
 		F9022DD50758088000C3F701 /* startup.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DBA0758088000C3F701 /* startup.tiff */; };
 		F9022DD60758088000C3F701 /* TinyFile.gif in Resources */ = {isa = PBXBuildFile; fileRef = F9022DBB0758088000C3F701 /* TinyFile.gif */; };
 		F9022DDE075808EB00C3F701 /* BibPref_Cite.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022DDC075808EB00C3F701 /* BibPref_Cite.m */; };
-		F9022DE70758095000C3F701 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
-		F9022DE80758095000C3F701 /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
-		F9022DE90758095000C3F701 /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
-		F9022DEA0758095000C3F701 /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
 		F9022DEE0758099D00C3F701 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DEB0758099D00C3F701 /* ApplicationServices.framework */; };
 		F9022DEF0758099D00C3F701 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DEC0758099D00C3F701 /* Carbon.framework */; };
-		F9022FB107580A9600C3F701 /* AGRegex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
-		F9022FB207580A9600C3F701 /* OmniAppKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
-		F9022FB307580A9600C3F701 /* OmniBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
-		F9022FB407580A9600C3F701 /* OmniFoundation.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
 		F9022FCB07580B9400C3F701 /* BDSKAppController+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022FBC07580B9400C3F701 /* BDSKAppController+Scripting.m */; };
 		F9022FCD07580B9400C3F701 /* BibAuthor+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022FBE07580B9400C3F701 /* BibAuthor+Scripting.m */; };
 		F9022FD007580B9400C3F701 /* BDSKSearchForCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022FC107580B9400C3F701 /* BDSKSearchForCommand.m */; };
@@ -493,12 +496,8 @@
 		F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */; };
 		F9A5B10C0B8CEA9600C52257 /* BDSKCenterScaledImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A5B10A0B8CEA9600C52257 /* BDSKCenterScaledImageCell.m */; };
 		F9A6772E07D2D57F00782ACD /* MultiplePageView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A6772C07D2D57F00782ACD /* MultiplePageView.m */; };
-		F9ABEC9F086E11B500741FC5 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
-		F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
 		F9B3405E0BBC16720072C2B0 /* BibItem_PubMedLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */; };
 		F9B800950B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B800930B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m */; };
-		F9B801840B41E89500A5A615 /* yaz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9B801830B41E89500A5A615 /* yaz.framework */; };
-		F9B801930B41E8D600A5A615 /* yaz.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9B801830B41E89500A5A615 /* yaz.framework */; };
 		F9B8019F0B41E91F00A5A615 /* BDSKZoomGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B8019D0B41E91F00A5A615 /* BDSKZoomGroupServer.m */; };
 		F9B88C080B7CF61000D5D42C /* FileMatcher.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9B88C060B7CF60F00D5D42C /* FileMatcher.nib */; };
 		F9B88D990B7D14B700D5D42C /* BDSKFileMatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B88D970B7D14B700D5D42C /* BDSKFileMatcher.m */; };
@@ -825,13 +824,13 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				CE2BB6630E0BE2210090E848 /* FileView.framework in CopyFiles */,
-				F9B801930B41E8D600A5A615 /* yaz.framework in CopyFiles */,
-				F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */,
-				F9022FB107580A9600C3F701 /* AGRegex.framework in CopyFiles */,
-				F9022FB207580A9600C3F701 /* OmniAppKit.framework in CopyFiles */,
-				F9022FB307580A9600C3F701 /* OmniBase.framework in CopyFiles */,
-				F9022FB407580A9600C3F701 /* OmniFoundation.framework in CopyFiles */,
+				CE2BB8040E0DB3820090E848 /* OmniBase.framework in CopyFiles */,
+				CE2BB8050E0DB3820090E848 /* OmniFoundation.framework in CopyFiles */,
+				CE2BB8060E0DB3820090E848 /* OmniAppKit.framework in CopyFiles */,
+				CE2BB8070E0DB3820090E848 /* yaz.framework in CopyFiles */,
+				CE2BB8080E0DB3820090E848 /* AGRegex.framework in CopyFiles */,
+				CE2BB8090E0DB3A20090E848 /* FileView.framework in CopyFiles */,
+				CE2BB80A0E0DB3A20090E848 /* BTParse.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1726,26 +1725,25 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F98AACDE0D43DB5A00D3CD64 /* libssl.dylib in Frameworks */,
-				F9B801840B41E89500A5A615 /* yaz.framework in Frameworks */,
+				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+				F9022DEF0758099D00C3F701 /* Carbon.framework in Frameworks */,
 				F9937E6C0AD82700001D1DFB /* QuartzCore.framework in Frameworks */,
 				F9937E4E0AD826EB001D1DFB /* Quartz.framework in Frameworks */,
-				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
-				F9022DE70758095000C3F701 /* AGRegex.framework in Frameworks */,
-				F9022DE80758095000C3F701 /* OmniAppKit.framework in Frameworks */,
-				F9022DE90758095000C3F701 /* OmniBase.framework in Frameworks */,
-				F9022DEA0758095000C3F701 /* OmniFoundation.framework in Frameworks */,
 				F9022DEE0758099D00C3F701 /* ApplicationServices.framework in Frameworks */,
-				F9022DEF0758099D00C3F701 /* Carbon.framework in Frameworks */,
 				3D9EC25307C66B1E00DE459D /* WebKit.framework in Frameworks */,
-				F9ABEC9F086E11B500741FC5 /* BTParse.framework in Frameworks */,
 				F91B7F28092BEB5A00976F6F /* AddressBook.framework in Frameworks */,
 				F9DF3BC209B7605E00342ADE /* SystemConfiguration.framework in Frameworks */,
 				F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */,
 				F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */,
+				F98AACDE0D43DB5A00D3CD64 /* libssl.dylib in Frameworks */,
 				F98AACF50D43E13C00D3CD64 /* libcrypto.dylib in Frameworks */,
-				CE2BB5900E0BE0EA0090E848 /* PDFKit.framework in Frameworks */,
-				CE2BB5930E0BE1370090E848 /* FileView.framework in Frameworks */,
+				CE2BB7EA0E0DB0D40090E848 /* OmniAppKit.framework in Frameworks */,
+				CE2BB7EB0E0DB0D70090E848 /* OmniFoundation.framework in Frameworks */,
+				CE2BB7EC0E0DB0DA0090E848 /* OmniBase.framework in Frameworks */,
+				CE2BB8030E0DB2980090E848 /* AGRegex.framework in Frameworks */,
+				CE2BB7E90E0DB0D00090E848 /* yaz.framework in Frameworks */,
+				CE2BB7E80E0DB0C70090E848 /* FileView.framework in Frameworks */,
+				CE2BB7EE0E0DB0F40090E848 /* BTParse.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1784,13 +1782,6 @@
 				F9706DB909102DA800526FC8 /* QuartzCore.framework */,
 				F9B9E17E089479FC00C21B17 /* Quartz.framework */,
 				3D9EC25207C66B1E00DE459D /* WebKit.framework */,
-				F9022DE50758095000C3F701 /* OmniBase.framework */,
-				F9022DE60758095000C3F701 /* OmniFoundation.framework */,
-				F9022DE40758095000C3F701 /* OmniAppKit.framework */,
-				F9B801830B41E89500A5A615 /* yaz.framework */,
-				F9022DE30758095000C3F701 /* AGRegex.framework */,
-				F9ABEC9E086E11B500741FC5 /* BTParse.framework */,
-				CE2BB5920E0BE1370090E848 /* FileView.framework */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -1966,9 +1957,9 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F98AACF40D43E13C00D3CD64 /* libcrypto.dylib */,
-				F98AACDD0D43DB5A00D3CD64 /* libssl.dylib */,
+				CE2BB8140E0DB4510090E848 /* Linked Libraries */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				CE2BB8110E0DB41B0090E848 /* Embedded Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -2017,6 +2008,29 @@
 				F924FC140BC4000B00672839 /* AMButtonBar */,
 			);
 			name = "Third Party Sources";
+			sourceTree = "<group>";
+		};
+		CE2BB8110E0DB41B0090E848 /* Embedded Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F9022DE50758095000C3F701 /* OmniBase.framework */,
+				F9022DE60758095000C3F701 /* OmniFoundation.framework */,
+				F9022DE40758095000C3F701 /* OmniAppKit.framework */,
+				F9B801830B41E89500A5A615 /* yaz.framework */,
+				F9022DE30758095000C3F701 /* AGRegex.framework */,
+				F9ABEC9E086E11B500741FC5 /* BTParse.framework */,
+				CE2BB5920E0BE1370090E848 /* FileView.framework */,
+			);
+			name = "Embedded Frameworks";
+			sourceTree = "<group>";
+		};
+		CE2BB8140E0DB4510090E848 /* Linked Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				F98AACF40D43E13C00D3CD64 /* libcrypto.dylib */,
+				F98AACDD0D43DB5A00D3CD64 /* libssl.dylib */,
+			);
+			name = "Linked Libraries";
 			sourceTree = "<group>";
 		};
 		CE38FA7C091D20FB00BCB69D /* Views */ = {
@@ -2784,17 +2798,17 @@
 		F98F307A088E0F2800C1427D /* Subprojects */ = {
 			isa = PBXGroup;
 			children = (
-				CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */,
-				F911D6A80CFE8E420009C77B /* FileView.xcodeproj */,
-				F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */,
-				F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */,
-				F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */,
-				F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */,
-				F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */,
 				F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */,
+				F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */,
+				F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */,
+				F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */,
 				F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */,
-				F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */,
+				F911D6A80CFE8E420009C77B /* FileView.xcodeproj */,
 				F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */,
+				CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */,
+				F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */,
+				F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */,
+				F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */,
 				F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */,
 			);
 			name = Subprojects;
