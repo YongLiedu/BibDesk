@@ -99,7 +99,6 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
     NSString *tag = nil;
     NSString *value = nil;
     NSMutableString *mutableValue = [NSMutableString string];
-    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
     
     NSSet *tagsNotToConvert = [NSSet setWithObjects:@"UR", @"L1", @"L2", @"L3", @"L4", nil];
