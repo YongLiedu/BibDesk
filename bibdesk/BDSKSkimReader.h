@@ -45,7 +45,7 @@
 }
 
 + (id)sharedReader;
-- (NSData *)SkimNotesAtURL:(NSURL *)fileURL;
+- (NSArray *)SkimNotesAtURL:(NSURL *)fileURL;
 - (NSData *)RTFNotesAtURL:(NSURL *)fileURL;
 - (NSString *)textNotesAtURL:(NSURL *)fileURL;
 

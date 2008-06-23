@@ -77,9 +77,7 @@
 #pragma mark Actions
 
 - (IBAction)refresh:(id)sender {
-    NSData *data = url ? [[BDSKSkimReader sharedReader] SkimNotesAtURL:url] : nil;
-    NSArray *array = data ? [NSKeyedUnarchiver unarchiveObjectWithData:data] : nil;
-    NSEnumerator *dictEnum = [array objectEnumerator];
+    NSEnumerator *dictEnum = [[[BDSKSkimReader sharedReader] SkimNotesAtURL:url] objectEnumerator];
     NSDictionary *dict;
     
     [notes removeAllObjects];

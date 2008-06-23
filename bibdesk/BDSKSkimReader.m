@@ -187,9 +187,10 @@
     return NO;
 }
 
-- (NSData *)SkimNotesAtURL:(NSURL *)fileURL;
+- (NSArray *)SkimNotesAtURL:(NSURL *)fileURL;
 {   
     NSData *data = nil;
+    NSArray *array = nil;
     if ([self connectAndCheckTypeOfFile:fileURL]) {
         @try{
             data = [agent SkimNotesAtPath:[fileURL path]];
@@ -200,7 +201,7 @@
             [self destroyConnection];
         }
     }
-    return data;
+    return data ? [NSKeyedUnarchiver unarchiveObjectWithData:data] : nil;
 }
 
 - (NSData *)RTFNotesAtURL:(NSURL *)fileURL;
