@@ -108,7 +108,7 @@
 
 - (NSScriptObjectSpecifier *) objectSpecifier {
 	NSScriptObjectSpecifier *containerRef = [[self publication] objectSpecifier];
-    NSString *key = [field isEqualToString:BDSKEditorString] ? @"editors" : @"authors";
+    NSString *key = [field isEqualToString:BDSKEditorString] ? @"scriptingEditors" : @"scriptingAuthors";
 		
 	return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:key name:[self normalizedName]] autorelease];
 }
