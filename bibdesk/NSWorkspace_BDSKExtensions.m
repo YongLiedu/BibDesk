@@ -41,6 +41,8 @@
 #import <Carbon/Carbon.h>
 #import "NSURL_BDSKExtensions.h"
 
+static NSString *BDSKDefaultBrowserKey = @"BDSKDefaultBrowserKey";
+
 @implementation NSWorkspace (BDSKExtensions)
 
 static OSErr
@@ -269,10 +271,15 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
 
 - (BOOL)openLinkedURL:(NSURL *)aURL {
     BOOL rv = NO;
-    if ([aURL isFileURL])
+    if ([aURL isFileURL]) {
         rv = [self openLinkedFile:[aURL path]];
-    else
-        rv = [self openURL:aURL];
+    } else {
+        NSString *appID = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultBrowserKey];
+        if (appID)
+            rv = [self openURLs:[NSArray arrayWithObjects:aURL, nil] withAppBundleIdentifier:appID options:NSWorkspaceLaunchDefault additionalEventParamDescriptor:nil launchIdentifiers:NULL];
+        if (rv == NO)
+            rv = [self openURL:aURL];
+    }
     return rv;
 }
 
