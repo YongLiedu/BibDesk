@@ -188,7 +188,7 @@
         [alert beginSheetModalForWindow:[tableView window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     } else if(isDir){
         // just open it with the Finder; we shouldn't have folders in our index, though
-        [[NSWorkspace sharedWorkspace] openURL:fileURL];
+        [[NSWorkspace sharedWorkspace] openLinkedURL:fileURL];
     } else if(![[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:[searchField stringValue]]){
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Open File", @"Message in alert dialog when unable to open file")
                                          defaultButton:nil

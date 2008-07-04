@@ -45,6 +45,7 @@
 #import "BDSKCollapsibleView.h"
 #import "BDSKEdgeView.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "NSWorkspace_BDSKExtensions.h"
 #import "BibDocument.h"
 #import "BDSKBookmarkController.h"
 
@@ -244,7 +245,7 @@
     NSDictionary *element = (NSDictionary *)[sender representedObject];
 	NSURL *theURL = [element objectForKey:WebElementLinkURLKey];
     if (theURL)
-        [[NSWorkspace sharedWorkspace] openURL:theURL];
+        [[NSWorkspace sharedWorkspace] openLinkedURL:theURL];
 }
 
 - (void)setRetrieving:(BOOL)retrieving {

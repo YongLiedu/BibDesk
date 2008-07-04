@@ -411,7 +411,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     while (remoteURL = [urlEnum nextObject]) {
         if ([remoteURL isEqual:[NSNull null]] == NO) {
-			[[NSWorkspace sharedWorkspace] openURL:remoteURL];
+			[[NSWorkspace sharedWorkspace] openLinkedURL:remoteURL];
         }
     }
 }
@@ -1504,7 +1504,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if ([aURL isFileURL])
         return [[NSWorkspace sharedWorkspace] openLinkedFile:[aURL path]] == NO;
     else
-        return YES;
+        return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL] == NO;
 }
 
 - (NSDragOperation)fileView:(FileView *)aFileView validateDrop:(id <NSDraggingInfo>)info draggedURLs:(NSArray *)draggedURLs proposedIndex:(NSUInteger)anIndex proposedDropOperation:(FVDropOperation)dropOperation proposedDragOperation:(NSDragOperation)dragOperation {

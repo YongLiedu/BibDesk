@@ -704,7 +704,7 @@
         BibItem *pub;
         
 		while (pub = [e nextObject]) {
-			[[NSWorkspace sharedWorkspace] openURL:[pub remoteURLForField:field]];
+			[[NSWorkspace sharedWorkspace] openLinkedURL:[pub remoteURLForField:field]];
 		}
 	}
     [field release];
@@ -916,7 +916,7 @@
         
         while (remoteURL = [urlEnum nextObject]) {
             if ([remoteURL isEqual:[NSNull null]] == NO) {
-                [[NSWorkspace sharedWorkspace] openURL:remoteURL];
+                [[NSWorkspace sharedWorkspace] openLinkedURL:remoteURL];
             }
 		}
 	}

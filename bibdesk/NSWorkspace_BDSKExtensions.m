@@ -267,6 +267,15 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     return rv;
 }
 
+- (BOOL)openLinkedURL:(NSURL *)aURL {
+    BOOL rv = NO;
+    if ([aURL isFileURL])
+        rv = [self openLinkedFile:[aURL path]];
+    else
+        rv = [self openURL:aURL];
+    return rv;
+}
+
 - (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
 {
     return [self UTIForURL:fileURL resolveAliases:YES error:error];

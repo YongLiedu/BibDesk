@@ -3269,7 +3269,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             searchString = [searchField stringValue];
         return [[NSWorkspace sharedWorkspace] openURL:aURL withSearchString:searchString] == NO;
     } else {
-        return YES;
+        return [[NSWorkspace sharedWorkspace] openLinkedURL:aURL] == NO;
     }
 }
 
