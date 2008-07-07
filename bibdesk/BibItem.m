@@ -1883,7 +1883,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return s;
 }
 
-#define AddXMLField(t,f) value = [self valueOfField:f]; if ([NSString isEmptyString:value] == NO) [s appendFormat:@"<%@>%@</%@>", t, [value stringByEscapingBasicXMLEntitiesUsingUTF8], t]
+#define AddXMLField(t,f) value = [self valueOfField:f]; if ([NSString isEmptyString:value] == NO) [s appendFormat:@"<%@>%@</%@>", t, [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], t]
 
 - (NSString *)MODSString{
     NSDictionary *genreForTypeDict = [[BDSKTypeManager sharedManager] MODSGenresForBibTeXType:[self pubType]];
@@ -2027,21 +2027,30 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     authorE = [[self peopleArrayForField:authorField] objectEnumerator];
     [s appendString:@"<authors>"];
     while (author = [authorE nextObject]){
-        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
+        value = [author normalizedName];
+        if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
+            value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
+        [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
     }
     [s appendString:@"</authors>"];
     
     authorE = [[self peopleArrayForField:editorField] objectEnumerator];
     [s appendString:@"<secondary-authors>"];
     while (author = [authorE nextObject]){
-        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
+        value = [author normalizedName];
+        if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
+            value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
+        [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
     }
     [s appendString:@"</secondary-authors>"];
     
     authorE = [[self peopleArrayForField:organizationField] objectEnumerator];
     [s appendString:@"<tertiary-authors>"];
     while (author = [authorE nextObject]){
-        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
+        value = [author normalizedName];
+        if ([value length] && [value characterAtIndex:0] == '{' && [value characterAtIndex:[value length] - 1] == '}')
+            value = [[value substringWithRange:NSMakeRange(1, [value length] - 2)] stringByAppendingString:@","];
+        [s appendStrings:@"<author>", [[value stringByRemovingCurlyBraces] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
     }
     [s appendString:@"</tertiary-authors>"];
     
