@@ -190,7 +190,6 @@
 - (NSArray *)SkimNotesAtURL:(NSURL *)fileURL;
 {   
     NSData *data = nil;
-    NSArray *array = nil;
     if ([self connectAndCheckTypeOfFile:fileURL]) {
         @try{
             data = [agent SkimNotesAtPath:[fileURL path]];
