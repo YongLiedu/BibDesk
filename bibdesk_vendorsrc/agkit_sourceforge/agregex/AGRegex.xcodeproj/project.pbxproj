@@ -65,9 +65,9 @@
 		24ADE677050886DD00DAF17A /* study.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = study.c; sourceTree = "<group>"; };
 		24B2073605085EE8001AE9D8 /* MainMenu.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = MainMenu.nib; sourceTree = "<group>"; };
 		F9302D8B0429B15D01FE1BD3 /* AGRegex.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = AGRegex.m; sourceTree = "<group>"; };
-		F93566730912D56F002B6957 /* Info-AGRegex.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Info-AGRegex.plist"; sourceTree = "<group>"; };
+		F93566730912D56F002B6957 /* Info-AGRegex.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-AGRegex.plist"; sourceTree = "<group>"; };
 		F93566740912D56F002B6957 /* AGRegex.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AGRegex.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F935668D0912D56F002B6957 /* Info-RegexTest.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Info-RegexTest.plist"; sourceTree = "<group>"; };
+		F935668D0912D56F002B6957 /* Info-RegexTest.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-RegexTest.plist"; sourceTree = "<group>"; };
 		F935668E0912D570002B6957 /* RegexTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RegexTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F986DBD403876F3201A58F65 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		F98CF71E0387044501DE5C57 /* AGRegex.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AGRegex.h; sourceTree = "<group>"; };

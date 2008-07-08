@@ -945,7 +945,7 @@
 		B58A47670662B2E30097A154 /* OFXMLIdentifierRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OFXMLIdentifierRegistry.h; sourceTree = "<group>"; };
 		B58A47680662B2E30097A154 /* OFXMLIdentifierRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFXMLIdentifierRegistry.m; sourceTree = "<group>"; };
 		B5C3E7A806B06FB40097A118 /* OFMainThreadLockTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFMainThreadLockTest.m; sourceTree = "<group>"; };
-		BF0E642806309CBE0097A147 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Info.plist; sourceTree = "<group>"; };
+		BF0E642806309CBE0097A147 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E264C0900AEFDE7C004948CB /* OFScannerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFScannerTests.m; sourceTree = "<group>"; };
 		E2FCCB3C062205A40097A11C /* OFAlias.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OFAlias.h; path = FileManagement.subproj/OFAlias.h; sourceTree = SOURCE_ROOT; };
 		E2FCCB3D062205A40097A11C /* OFAlias.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OFAlias.m; path = FileManagement.subproj/OFAlias.m; sourceTree = SOURCE_ROOT; };
@@ -2610,10 +2610,9 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 2;
 				HEADER_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = "";
-				OPTIMIZATION_CFLAGS = "-O2";
 				OTHER_CFLAGS = (
 					"-DDEBUG",
 					"-DDEBUG_$(USER)",
@@ -2662,6 +2661,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "$(value) -O0";
