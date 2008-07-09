@@ -224,10 +224,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUGGING_SYMBOLS = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/MDImporters";
 				LIBRARY_STYLE = Bundle;
+				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = BibImporter;
 				WRAPPER_EXTENSION = mdimporter;
@@ -237,7 +237,6 @@
 		F95CC103087F54B2002C5694 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/MDImporters";
 				LIBRARY_STYLE = Bundle;
