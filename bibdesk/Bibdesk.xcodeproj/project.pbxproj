@@ -4546,6 +4546,7 @@
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1181;
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
@@ -4554,6 +4555,7 @@
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1181;
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
 		};
@@ -4563,6 +4565,7 @@
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1181;
 				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Test;
 		};
