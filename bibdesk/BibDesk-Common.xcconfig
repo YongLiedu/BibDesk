@@ -7,7 +7,6 @@ STRIP_STYLE = all
 PREBINDING = NO
 ZERO_LINK = NO
 VERSION_INFO_FILE = $(PRODUCT_NAME)_vers.c
-VERSIONING_SYSTEM = apple-generic
 VERSION_INFO_BUILDER = $(USER)
 
 // this is for 10.5 code signing, which is necessary to use the firewall
