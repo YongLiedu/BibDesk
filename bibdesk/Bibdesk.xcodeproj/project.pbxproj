@@ -3518,7 +3518,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ -f /usr/bin/codesign ]; then\n/usr/bin/codesign -f -s \"BibDesk Signing Certificate\" -v ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\nfi";
+			shellScript = "if [ -f /usr/bin/codesign ]; then\n\tif ! /usr/bin/codesign -f -s \"BibDesk Signing Certificate\" -v ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\n\tthen\n         # lie about exit status so developers aren't forced to have a cert\n\t\techo \"warning: codesign failed\" >&2\n\t\techo \"warning: you need a certificate named \\\"BibDesk Signing Certificate\\\"\" >&2\n\t\texit 0\n\tfi\nfi";
 		};
 		F98870CD07580E5F001D4D49 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
