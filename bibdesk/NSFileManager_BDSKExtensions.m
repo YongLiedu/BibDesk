@@ -102,46 +102,44 @@ static NSString *temporaryBaseDirectory = nil;
 __attribute__((constructor))
 static void createTemporaryDirectory()
 {    
-    // chewable items are automatically cleaned up at restart, and it's hidden from the user
-    FSRef chewableRef;
-    OSErr err = FSFindFolder(kUserDomain, kChewableItemsFolderType, TRUE, &chewableRef);
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    // Getting the chewable items folder failed for some users; use code from FVCacheFile.mm instead
+    // docs say this returns nil in case of failure...so we'll check for it just in case
+    NSString *tempDir = NSTemporaryDirectory();
+    if (nil == tempDir) {
+        fprintf(stderr, "NSTemporaryDirectory() returned nil in createTemporaryDirectory()\n");
+        tempDir = @"/tmp";
+    }
+
+    // mkdtemp needs a writable string
+    char *template = strdup([[tempDir stringByAppendingPathComponent:@"bibdesk.XXXXXX"] fileSystemRepresentation]);
+
+    // use mkdtemp to avoid race conditions
+    const char *tempPath = mkdtemp(template);
     
-    CFAllocatorRef alloc = CFAllocatorGetDefault();
-    CFURLRef chewableURL = NULL;
-    if (noErr == err)
-        chewableURL = CFURLCreateFromFSRef(alloc, &chewableRef);
-    
-    CFStringRef baseName = CFStringCreateWithFileSystemRepresentation(alloc, "bibdesk");
-    CFURLRef newURL = CFURLCreateCopyAppendingPathComponent(alloc, chewableURL, baseName, TRUE);
-    FSRef newRef;
-    unsigned i = 1;
-    
-    // loop until CFURLGetFSRef fails, indicating we don't have a file yet
-    while (CFURLGetFSRef(newURL, &newRef)) {
-        CFRelease(baseName);
-        CFRelease(newURL);
-        baseName = CFStringCreateWithFormat(alloc, NULL, CFSTR("bibdesk-%i"), i++);
-        newURL = CFURLCreateCopyAppendingPathComponent(alloc, chewableURL, baseName, TRUE);
+    if (NULL == tempPath) {
+        // if this call fails the OS will probably crap out soon, so there's no point in dying gracefully
+        perror("mkdtemp failed");
+        exit(1);
     }
     
-    if (chewableURL) CFRelease(chewableURL);
-    
-    assert(NULL != newURL);
-    
-    int nameLength = CFStringGetLength(baseName);
-    UniChar *nameBuf = CFAllocatorAllocate(alloc, nameLength * sizeof(UniChar), 0);
-    CFStringGetCharacters(baseName, CFRangeMake(0, nameLength), nameBuf);
-    
-    err = FSCreateDirectoryUnicode(&chewableRef, nameLength, nameBuf, kFSCatInfoNone, NULL, NULL, NULL, NULL);
-    CFAllocatorDeallocate(alloc, nameBuf);
-    
-    if (noErr == err)
-        temporaryBaseDirectory = (NSString *)CFURLCopyFileSystemPath(newURL, kCFURLPOSIXPathStyle);
-    
-    if (newURL) CFRelease(newURL);
-    if (baseName) CFRelease(baseName);
-    
+    temporaryBaseDirectory = (NSString *)CFStringCreateWithFileSystemRepresentation(NULL, tempPath);
+    free(template);
+        
     assert(NULL != temporaryBaseDirectory);
+    [pool release];
+}
+
+__attribute__((destructor))
+static void destroyTemporaryDirectory()
+{
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    // clean up at exit; should never be used after this, but set to nil anyway
+    if (NO == [[NSFileManager defaultManager] removeFileAtPath:temporaryBaseDirectory handler:nil]) {
+        NSLog(@"Unable to remove temp directory %@", temporaryBaseDirectory);
+        temporaryBaseDirectory = nil;
+    }
+    [pool release];
 }
 
 - (NSString *)currentApplicationSupportPathForCurrentUser{
