@@ -84,10 +84,16 @@ static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertion
 
     // log so it's easy to spot in the console
     NSLog(@"%@", [NSString stringWithFormat:@"**** Exception:\n%@\n\n **** Stack Trace:\n%@\n ****", exception, [exception stackTrace]]);
-    // don't show the viewer when debugging
+    /*
+     
+     arm: I no longer want to deal with the exceptions mailing list; should convert the exception viewer to point to the bug report page.
+     
+     // don't show the viewer when debugging
 #if !OMNI_FORCE_ASSERTIONS
     [[BDSKExceptionViewer sharedViewer] performSelectorOnMainThread:@selector(displayString:) withObject:[NSString stringWithFormat:@"Exception:\n%@\n\nStack Trace:\n%@\n\nStandard Error:\n%@", exception, [exception stackTrace], BDSKStandardErrorString()] waitUntilDone:YES];
 #endif
+     
+     */
     handlingException = NO;
     
     return NO; // we already did
