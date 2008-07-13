@@ -1275,10 +1275,31 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         [alias release];
     }
     
-    // now get all of the recent items from Preview.app; this does not include items opened since Preview's last launch, unfortunately, regardless of the call to CFPreferencesSynchronize
-	NSArray *historyArray = (NSArray *) CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("com.apple.Preview"));
+    // now get all of the recent items from the default PDF viewer, Preview.app and Skim.app; this does not include items opened since Preview's last launch, unfortunately, regardless of the call to CFPreferencesSynchronize
+    NSMutableArray *historyArray = [[NSMutableArray alloc] initWithCapacity:10];
     NSMutableSet *previewRecentPaths = [[NSMutableSet alloc] initWithCapacity:10];
-	
+	CFArrayRef tmpArray;
+    
+    CFURLRef appURL;
+    NSString *appIdentifier = nil;
+    if (noErr == LSGetApplicationForInfo('PDF ', kLSUnknownCreator, CFSTR("pdf"), kLSRolesEditor | kLSRolesViewer, NULL, &appURL)) {
+        if (appIdentifier = [[NSBundle bundleWithPath:[(NSURL *)appURL path]] bundleIdentifier]) {
+            tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("com.apple.Preview"));
+            [historyArray addObjectsFromArray:(NSArray *)tmpArray];
+            if(tmpArray) CFRelease(tmpArray);
+        }
+    }
+    if (appIdentifier && [appIdentifier caseInsensitiveCompare:@"com.apple.Preview"] != NSOrderedSame) {
+        tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("com.apple.Preview"));
+        [historyArray addObjectsFromArray:(NSArray *)tmpArray];
+        if(tmpArray) CFRelease(tmpArray);
+	}
+    if (appIdentifier && [appIdentifier caseInsensitiveCompare:@"net.sourceforge.skim-app.Skim"] != NSOrderedSame) {
+        tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("net.sourceforge.skim-app.Skim"));
+        [historyArray addObjectsFromArray:(NSArray *)tmpArray];
+        if(tmpArray) CFRelease(tmpArray);
+    }
+    
 	unsigned int i = 0;
 	unsigned numberOfItems = [(NSArray *)historyArray count];
 	for (i = 0; i < numberOfItems; i ++){
@@ -1291,8 +1312,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [previewRecentPaths addObject:filePath];
         [alias release];
 	}
-	
-	if(historyArray) CFRelease(historyArray);
+    
+    [historyArray release];
     
     NSString *fileName;
     NSMenuItem *item;
