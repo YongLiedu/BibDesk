@@ -41,7 +41,9 @@
 struct BDSKDOServerFlags {
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (32)));
     volatile int32_t serverDidSetup __attribute__ ((aligned (32)));
+#if OMNI_FORCE_ASSERTIONS
     volatile int32_t serverDidStart __attribute__ ((aligned (32)));
+#endif
 };
 
 // protocols for the server thread proxies, must be included in protocols used by subclasses
@@ -62,11 +64,13 @@ struct BDSKDOServerFlags {
 
 @implementation BDSKAsynchronousDOServer
 
+#if OMNI_FORCE_ASSERTIONS
 - (void)checkStartup:(NSTimer *)ignored
 {
     if (0 == serverFlags->serverDidStart)
         NSLog(@"*** Warning *** %@ has not been started after 1 second", self);
 }
+#endif
 
 - (id)init
 {
@@ -75,9 +79,9 @@ struct BDSKDOServerFlags {
         serverFlags = NSZoneCalloc(NSDefaultMallocZone(), 1, sizeof(struct BDSKDOServerFlags));
         serverFlags->shouldKeepRunning = 1;
         serverFlags->serverDidSetup = 0;
+#if OMNI_FORCE_ASSERTIONS
         serverFlags->serverDidStart = 0;
 
-#if OMNI_FORCE_ASSERTIONS
         // check for absentminded developers; there's no actual requirement that startDOServer be called immediately
         [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(checkStartup:) userInfo:nil repeats:NO];
 #endif    
@@ -251,7 +255,9 @@ struct BDSKDOServerFlags {
     OBASSERT([NSThread inMainThread]);   
     // no need for memory barrier functions here since there's no thread yet
     serverFlags->serverDidSetup = 0;
+#if OMNI_FORCE_ASSERTIONS
     serverFlags->serverDidStart = 1;
+#endif
     [self startDOServer];
 }
 
@@ -261,7 +267,9 @@ struct BDSKDOServerFlags {
     // no need for memory barrier functions here since there's no thread yet
     // set serverDidSetup to 1 so we don't wait in startDOServer
     serverFlags->serverDidSetup = 1;
+#if OMNI_FORCE_ASSERTIONS
     serverFlags->serverDidStart = 1;
+#endif
     [self startDOServer];
 }
 
