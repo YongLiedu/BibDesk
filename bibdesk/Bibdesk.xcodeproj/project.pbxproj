@@ -463,7 +463,6 @@
 		F963E45B0A1D828100695DDC /* BDSKTreeNode.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E42B0A1D7ADD00695DDC /* BDSKTreeNode.m */; };
 		F963E45D0A1D828200695DDC /* BibPref_Export.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E4360A1D7B3600695DDC /* BibPref_Export.m */; };
 		F9676A010916B63900B42F6A /* BDSKCountedSet.m in Sources */ = {isa = PBXBuildFile; fileRef = F96769FF0916B63900B42F6A /* BDSKCountedSet.m */; };
-		F96E21690794FE3400120AB3 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8D1107310486CEB800E47090 /* Info.plist */; };
 		F96F11970AAF4FD100815D06 /* NSData_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F96F11950AAF4FD100815D06 /* NSData_BDSKExtensions.m */; };
 		F97073B00911592000526FC8 /* NSWorkspace_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F97073AE0911592000526FC8 /* NSWorkspace_BDSKExtensions.m */; };
 		F97198C40DADD32F00CA57AA /* BDSKDBLPGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F97198C00DADD32F00CA57AA /* BDSKDBLPGroupServer.m */; };
@@ -3326,7 +3325,6 @@
 				F92B91C00BC6B51B008D5BC3 /* SearchButtonView.nib in Resources */,
 				3D0D76AF084898AA00A495A5 /* BibPref_Crossref.nib in Resources */,
 				3D8A5520082D1F86008E818C /* BibDesk Help in Resources */,
-				F96E21690794FE3400120AB3 /* Info.plist in Resources */,
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				F9022CEE0758050E00C3F701 /* Credits.rtf in Resources */,
 				CE2941050A7F8F2900A46D05 /* ReadMe.rtf in Resources */,
