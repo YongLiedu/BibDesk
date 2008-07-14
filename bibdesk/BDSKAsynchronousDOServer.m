@@ -48,8 +48,7 @@ struct BDSKDOServerFlags {
 
 // protocols for the server thread proxies, must be included in protocols used by subclasses
 @protocol BDSKAsyncDOServerThread
-// override for custom cleanup on the server thread; call super afterwards
-- (oneway void)cleanup; 
+- (oneway void)stopRunning; 
 @end
 
 @protocol BDSKAsyncDOServerMainThread
@@ -135,6 +134,9 @@ struct BDSKDOServerFlags {
 
 - (void)startDOServer;
 {
+#if OMNI_FORCE_ASSERTIONS
+    serverFlags->serverDidStart = 1;
+#endif
     // set up a connection to communicate with the local background thread
     NSPort *port1 = [NSPort port];
     NSPort *port2 = [NSPort port];
@@ -164,22 +166,10 @@ struct BDSKDOServerFlags {
 
 #pragma mark Server Thread
 
-- (oneway void)cleanup;
-{   
+- (oneway void)stopRunning {
     OBASSERT([[NSThread currentThread] isEqual:serverThread]);
-    // clean up the connection in the server thread
-    [localThreadConnection setRootObject:nil];
-    
-    // this frees up the CFMachPorts created in -init
-    [[localThreadConnection receivePort] invalidate];
-    [[localThreadConnection sendPort] invalidate];
-    [localThreadConnection invalidate];
-    [localThreadConnection release];
-    localThreadConnection = nil;
-    
-    [serverOnMainThread release];
-    serverOnMainThread = nil;  
-    serverThread = nil;
+    // not really necessary as the main thread should've done it already
+    OSAtomicCompareAndSwap32Barrier(1, 0, &serverFlags->shouldKeepRunning);
 }
 
 - (void)runDOServerForPorts:(NSArray *)ports;
@@ -241,11 +231,29 @@ struct BDSKDOServerFlags {
     }
     
     @finally {
+        // allow subclasses to do some custom cleanup
+        [self serverDidFinish];
+        
+        // clean up the connection in the server thread
+        [localThreadConnection setRootObject:nil];
+        
+        // this frees up the CFMachPorts created in -init
+        [[localThreadConnection receivePort] invalidate];
+        [[localThreadConnection sendPort] invalidate];
+        [localThreadConnection invalidate];
+        [localThreadConnection release];
+        localThreadConnection = nil;
+        
+        [serverOnMainThread release];
+        serverOnMainThread = nil;  
+        serverThread = nil;
+        
         [pool release];
     }
 }
 
 - (void)serverDidSetup{}
+- (void)serverDidFinish{}
 
 #pragma mark API
 #pragma mark Main Thread
@@ -255,9 +263,6 @@ struct BDSKDOServerFlags {
     OBASSERT([NSThread inMainThread]);   
     // no need for memory barrier functions here since there's no thread yet
     serverFlags->serverDidSetup = 0;
-#if OMNI_FORCE_ASSERTIONS
-    serverFlags->serverDidStart = 1;
-#endif
     [self startDOServer];
 }
 
@@ -267,19 +272,16 @@ struct BDSKDOServerFlags {
     // no need for memory barrier functions here since there's no thread yet
     // set serverDidSetup to 1 so we don't wait in startDOServer
     serverFlags->serverDidSetup = 1;
-#if OMNI_FORCE_ASSERTIONS
-    serverFlags->serverDidStart = 1;
-#endif
     [self startDOServer];
 }
 
 - (void)stopDOServer;
 {
     OBASSERT([NSThread inMainThread]);
-    // this cleans up the connections, ports and proxies on both sides
-    [serverOnServerThread cleanup];
-    // we're in the main thread, so set the stop flag
+    // set the stop flag, so any long process (possibly with loops) knows it can return
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags->shouldKeepRunning);
+    // this is mainly to tickle the runloop on the server thread so it will finish
+    [serverOnServerThread stopRunning];
     
     // clean up the connection in the main thread; don't invalidate the ports, since they're still in use
     [mainThreadConnection setRootObject:nil];

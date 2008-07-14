@@ -548,11 +548,10 @@ static BDSKPreviewer *sharedPreviewer = nil;
     [super dealloc];
 }
 
-- (oneway void)cleanup{
+- (void)serverDidFinish{
     [bibString release];
     bibString = nil;
     [texTask terminate];
-    [super cleanup];
 }
 
 // superclass overrides

@@ -452,7 +452,7 @@ typedef struct _BDSKSharingClientFlags {
     }
 }
 
-- (oneway void)cleanup;
+- (void)serverDidFinish;
 {
     // clean up our remote end
     if (uniqueIdentifier != nil){
@@ -472,8 +472,6 @@ typedef struct _BDSKSharingClientFlags {
         [remoteServer release];
         remoteServer = nil;
     }
-    
-    [super cleanup];
 }
 
 - (oneway void)invalidate

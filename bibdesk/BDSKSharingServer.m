@@ -478,7 +478,7 @@ NSString *BDSKComputerName() {
     }
 }
 
-- (oneway void)cleanup
+- (void)serverDidFinish
 {
     NSEnumerator *e = [remoteClients keyEnumerator];
     id proxyObject;
@@ -505,8 +505,6 @@ NSString *BDSKComputerName() {
     [connection invalidate];
     [connection release];
     connection = nil;
-    
-    [super cleanup];
 }
 
 #pragma mark | NSConnection delegate

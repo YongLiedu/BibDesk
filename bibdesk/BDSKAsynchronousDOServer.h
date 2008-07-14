@@ -68,8 +68,8 @@
 // override for custom setup after the server has been setup; called on the server thread; default does nothing
 - (void)serverDidSetup;
 
-// override for custom cleanup on the server thread; call super afterwards
-- (void)cleanup;
+// override for custom cleanup on the server thread; default does nothing
+- (void)serverDidFinish;
 
 // run loop flag; thread safe
 - (BOOL)shouldKeepRunning;

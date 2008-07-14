@@ -324,9 +324,8 @@ static NSString *BDSKHTTPProxySetting();
     [[self serverOnMainThread] addPublicationsToGroup:pubs];
 }
 
-- (oneway void)cleanup{
+- (void)serverDidFinish{
     [self terminateConnection];
-    [super cleanup];
 }
 
 - (void)setAvailableResults:(int)value;
