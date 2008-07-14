@@ -1288,6 +1288,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [historyArray addObjectsFromArray:(NSArray *)tmpArray];
             if(tmpArray) CFRelease(tmpArray);
         }
+        if (appURL) CFRelease(appURL);
     }
     if (appIdentifier && [appIdentifier caseInsensitiveCompare:@"com.apple.Preview"] != NSOrderedSame) {
         tmpArray = CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("com.apple.Preview"));
