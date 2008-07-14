@@ -51,8 +51,8 @@
 
 typedef struct _BDSKSearchIndexFlags
 {
-    volatile int32_t shouldKeepRunning __attribute__ ((aligned (32)));
-    volatile int32_t finishedInitialIndexing __attribute__ ((aligned (32)));  
+    volatile int32_t shouldKeepRunning;
+    volatile int32_t finishedInitialIndexing;
 } BDSKSearchIndexFlags;
 
 @interface BDSKFileSearchIndex : NSObject {

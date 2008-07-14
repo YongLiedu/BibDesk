@@ -59,8 +59,8 @@
     NSMutableArray *foundFiles;     // cache of file URLs from UKDirectoryEnumerator minus knownFiles
     NSSet *knownFiles;              // file paths from BibItem
     NSURL *baseURL;                 // root URL to start enumerating
-    int32_t keepEnumerating __attribute__ ((aligned (32)));
-    int32_t allFilesEnumerated __attribute__ ((aligned (32)));
+    int32_t keepEnumerating;
+    int32_t allFilesEnumerated;
     id delegate;
 }
 

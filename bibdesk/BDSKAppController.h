@@ -63,7 +63,7 @@
 	IBOutlet NSMenu *bookmarksMenu;
 
     NSLock *metadataCacheLock;
-    int32_t canWriteMetadata __attribute__ ((aligned (32)));
+    int32_t canWriteMetadata;
     OFMessageQueue *metadataMessageQueue;
     NSConnection *completionConnection;
 }

@@ -18,7 +18,7 @@
 @interface WSGeneratedObj : NSObject {
 	WSMethodInvocationRef fRef;
 	NSDictionary* fResult;
-    int32_t cancelled __attribute__ ((aligned (32)));
+    int32_t cancelled;
 };
 
 - (void) cancel;

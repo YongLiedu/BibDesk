@@ -39,10 +39,10 @@
 #import "BDSKAsynchronousDOServer.h"
 
 struct BDSKDOServerFlags {
-    volatile int32_t shouldKeepRunning __attribute__ ((aligned (32)));
-    volatile int32_t serverDidSetup __attribute__ ((aligned (32)));
+    volatile int32_t shouldKeepRunning;
+    volatile int32_t serverDidSetup;
 #if OMNI_FORCE_ASSERTIONS
-    volatile int32_t serverDidStart __attribute__ ((aligned (32)));
+    volatile int32_t serverDidStart;
 #endif
 };
 
@@ -158,9 +158,9 @@ struct BDSKDOServerFlags {
     do {
         SInt32 result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, TRUE);
         if (kCFRunLoopRunFinished == result || kCFRunLoopRunStopped == result)
-            OSAtomicCompareAndSwap32Barrier(0, 1, &serverFlags->shouldKeepRunning);
+            OSAtomicCompareAndSwap32Barrier(1, 0, &serverFlags->shouldKeepRunning);
         else
-        OSMemoryBarrier();
+            OSMemoryBarrier();
     } while (serverFlags->serverDidSetup == 0 && serverFlags->shouldKeepRunning == 1);    
 }
 

@@ -56,9 +56,9 @@
 @end
 
 typedef struct _BDSKZoomGroupFlags {
-    volatile int32_t isRetrieving   __attribute__ ((aligned (32)));
-    volatile int32_t failedDownload __attribute__ ((aligned (32)));
-    volatile int32_t needsReset     __attribute__ ((aligned (32)));
+    volatile int32_t isRetrieving;
+    volatile int32_t failedDownload;
+    volatile int32_t needsReset;
 } BDSKZoomGroupFlags;    
 
 

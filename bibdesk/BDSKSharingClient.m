@@ -42,11 +42,11 @@
 #import "BDSKPasswordController.h"
 
 typedef struct _BDSKSharingClientFlags {
-    volatile int32_t isRetrieving __attribute__ ((aligned (32)));
-    volatile int32_t authenticationFailed __attribute__ ((aligned (32)));
-    volatile int32_t canceledAuthentication __attribute__ ((aligned (32)));
-    volatile int32_t needsAuthentication __attribute__ ((aligned (32)));
-    volatile int32_t failedDownload __attribute__ ((aligned (32)));
+    volatile int32_t isRetrieving;
+    volatile int32_t authenticationFailed;
+    volatile int32_t canceledAuthentication;
+    volatile int32_t needsAuthentication;
+    volatile int32_t failedDownload;
 } BDSKSharingClientFlags;    
 
 // private protocols for inter-thread messaging

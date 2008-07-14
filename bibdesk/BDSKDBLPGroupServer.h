@@ -41,8 +41,8 @@
 #import "BDSKAsynchronousDOServer.h"
 
 typedef struct _BDSKDBLPGroupFlags {
-    volatile int32_t isRetrieving   __attribute__ ((aligned (32)));
-    volatile int32_t failedDownload __attribute__ ((aligned (32)));
+    volatile int32_t isRetrieving;
+    volatile int32_t failedDownload;
 } BDSKDBLPGroupFlags;
 
 @class WSGeneratedObj;
