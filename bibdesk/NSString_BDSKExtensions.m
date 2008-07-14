@@ -1171,6 +1171,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     CFRelease(locale);
     
     CFArrayRef comp = BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(alloc, mutableString, CFCharacterSetGetPredefined(kCFCharacterSetWhitespace), TRUE);
+    CFRelease(mutableString);
     NSMutableArray *words = nil;
     
     if (comp) {

@@ -123,7 +123,6 @@
             NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=medline&retmode=text&retstart=0&retmax=1&db=pubmed&query_key=%@&WebEnv=%@&tool=bibdesk", queryKey, webEnv];
             theURL = [NSURL URLWithString:efetch];
             OBPOSTCONDITION(theURL);
-            [document release];
             
             request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
             NSData *efetchResult = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
@@ -145,6 +144,7 @@
                 [toReturn autorelease];
             }
         }
+        [document release];
     }
     
     return toReturn;

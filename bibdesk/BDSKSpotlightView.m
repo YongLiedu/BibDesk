@@ -149,6 +149,7 @@ static CIFilter *cropFilter = nil;
     
     // see NSCIImageRep.h for this and other useful methods that aren't documented
     CIImage *ciImage = [[CIImage alloc] initWithBitmapImageRep:imageRep];
+    [imageRep release];
     
     // sys prefs uses fuzzier circles for more matches; filter range 0 -- 100, values 0 -- 10 are reasonable?
     radius = MIN([highlightCircles count], maximumBlur);

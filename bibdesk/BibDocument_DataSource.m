@@ -319,6 +319,8 @@
 }
 
 - (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column {
+    
+    // autorelease when creating an instance, since there are multiple exit points from this method
 	NSMenu *menu = nil;
     NSMenuItem *item = nil;
     
@@ -332,7 +334,7 @@
         NSURL *theURL;
         
 		if([tcId isURLField] || [tcId isEqualToString:BDSKLocalFileString] || [tcId isEqualToString:BDSKRemoteURLString]){
-            menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+            menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
             if([tcId isURLField]){
                 if([tcId isLocalFileField]){
                     item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"Menu item title") action:@selector(openLocalURL:) keyEquivalent:@""];
@@ -383,7 +385,7 @@
                 linkedURLs = [[self selectedPublications] valueForKeyPath:@"@unionOfArrays.remoteURLs.URL"];
                 
                 if([linkedURLs count]){
-                    menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+                    menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
                     if([linkedURLs count] == 1){
                         item = [menu addItemWithTitle:NSLocalizedString(@"Quick Look", @"Menu item title") action:@selector(previewAction:) keyEquivalent:@""];
                         [item setTarget:self];
@@ -407,7 +409,7 @@
             [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
             [item setAlternate:YES];
 		}else{
-			menu = [actionMenu copyWithZone:[NSMenu menuZone]];
+			menu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
             
             NSMenu *submenu = nil;
             int i, count = [menu numberOfItems];
@@ -428,7 +430,7 @@
 		}
 		
 	}else if (tv == groupTableView){
-		menu = [groupMenu copyWithZone:[NSMenu menuZone]];
+		menu = [[groupMenu copyWithZone:[NSMenu menuZone]] autorelease];
 	}else{
 		return nil;
 	}
@@ -450,7 +452,7 @@
 	if([menu numberOfItems] == 0)
 		return nil;
 	
-	return [menu autorelease];
+	return menu;
 }
 
 - (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv{

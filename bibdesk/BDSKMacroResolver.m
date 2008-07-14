@@ -419,6 +419,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         [macros setObject:[[[self macroDefinitions] objectForKey:key] stringAsBibTeXString] forKey:key];
     }
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
+    [macros release];
 }
 
 - (void)handleMacroFilesChanged:(NSNotification *)notification{
