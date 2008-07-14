@@ -397,7 +397,7 @@
 		F9022DD20758088000C3F701 /* Remove.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB70758088000C3F701 /* Remove.tiff */; };
 		F9022DD30758088000C3F701 /* risDocIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB80758088000C3F701 /* risDocIcon.icns */; };
 		F9022DD50758088000C3F701 /* startup.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DBA0758088000C3F701 /* startup.tiff */; };
-		F9022DD60758088000C3F701 /* TinyFile.gif in Resources */ = {isa = PBXBuildFile; fileRef = F9022DBB0758088000C3F701 /* TinyFile.gif */; };
+		F9022DD60758088000C3F701 /* TinyFile.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DBB0758088000C3F701 /* TinyFile.tiff */; };
 		F9022DDE075808EB00C3F701 /* BibPref_Cite.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022DDC075808EB00C3F701 /* BibPref_Cite.m */; };
 		F9022DEE0758099D00C3F701 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DEB0758099D00C3F701 /* ApplicationServices.framework */; };
 		F9022DEF0758099D00C3F701 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DEC0758099D00C3F701 /* Carbon.framework */; };
@@ -1390,7 +1390,7 @@
 		F9022DB70758088000C3F701 /* Remove.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Remove.tiff; path = Images/Remove.tiff; sourceTree = "<group>"; };
 		F9022DB80758088000C3F701 /* risDocIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = risDocIcon.icns; path = Images/risDocIcon.icns; sourceTree = "<group>"; };
 		F9022DBA0758088000C3F701 /* startup.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = startup.tiff; path = Images/startup.tiff; sourceTree = "<group>"; };
-		F9022DBB0758088000C3F701 /* TinyFile.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = TinyFile.gif; path = Images/TinyFile.gif; sourceTree = "<group>"; };
+		F9022DBB0758088000C3F701 /* TinyFile.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = TinyFile.tiff; path = Images/TinyFile.tiff; sourceTree = "<group>"; };
 		F9022DDB075808EB00C3F701 /* BibPref_Cite.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPref_Cite.h; sourceTree = "<group>"; };
 		F9022DDC075808EB00C3F701 /* BibPref_Cite.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPref_Cite.m; sourceTree = "<group>"; };
 		F9022DE30758095000C3F701 /* AGRegex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AGRegex.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2443,7 +2443,7 @@
 				3DBB79BF081538CA0050C0CD /* stop_small.tiff */,
 				F9022DBA0758088000C3F701 /* startup.tiff */,
 				CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */,
-				F9022DBB0758088000C3F701 /* TinyFile.gif */,
+				F9022DBB0758088000C3F701 /* TinyFile.tiff */,
 				CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */,
 				CE3A24190B750424006B64D3 /* webFolderIcon.tiff */,
 			);
@@ -3361,7 +3361,7 @@
 				F9022DD20758088000C3F701 /* Remove.tiff in Resources */,
 				F9022DD30758088000C3F701 /* risDocIcon.icns in Resources */,
 				F9022DD50758088000C3F701 /* startup.tiff in Resources */,
-				F9022DD60758088000C3F701 /* TinyFile.gif in Resources */,
+				F9022DD60758088000C3F701 /* TinyFile.tiff in Resources */,
 				3D5D34390770C8C3006AF48A /* cornerColumns.tiff in Resources */,
 				3D8EA3E40788B9E300AAD253 /* cornerColumns_Pressed.tiff in Resources */,
 				F92F4E470788DEDD001B8F82 /* genericBibDocIcon.tiff in Resources */,
