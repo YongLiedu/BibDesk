@@ -146,7 +146,7 @@
         ratio = 1.0;
     }
     
-    unsigned i, iMax = floor([self doubleValue] / [self maxValue] * (NSWidth(r) / 2));
+    unsigned i, iMax = floor(ratio * (NSWidth(r) / 2));
     CGLayerRef toDraw;
     
     if ([self respondsToSelector:@selector(backgroundStyle)]) {
