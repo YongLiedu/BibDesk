@@ -60,7 +60,7 @@ static NSString *xattrError(int err, const char *path);
      */
     
     if (nil != eaData)
-        encodingString = [[NSString alloc] initWithData:eaData encoding:NSUTF8StringEncoding];
+        encodingString = [[[NSString alloc] initWithData:eaData encoding:NSUTF8StringEncoding] autorelease];
     
     // this is not a valid NSStringEncoding
     NSStringEncoding nsEncoding = 0;

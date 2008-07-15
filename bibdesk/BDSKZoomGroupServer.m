@@ -311,6 +311,7 @@ static NSString *BDSKHTTPProxySetting();
                                                    citeKey:nil
                                                  pubFields:[NSDictionary dictionaryWithObjectsAndKeys:record, BDSKAnnoteString, nil]
                                                      isNew:YES];
+                    [anItem autorelease];
                 }
                 [pubs addObject:anItem];
             }
