@@ -54,10 +54,7 @@
 
         image = [[NSImage imageForURL:aURL] retain];
         
-        string = [aTitle copy];
-        if (string == nil)
-            aTitle = [[aURL path] copy];
-        
+        string = aTitle ? [aTitle copy] : [[aURL path] copy];
         identifierURL = [anIdentifierURL copy];
         
         score = aScore;

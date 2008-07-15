@@ -133,6 +133,9 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
         OBASSERT(appCreator != 0); 
         OBASSERT(appCreator != invalidCreator); 
     } 
+    else {
+        appCreator = invalidCreator;
+    }
     
     // if the app has an invalid creator, our AppleEvent stuff won't work
     if (appCreator == invalidCreator)

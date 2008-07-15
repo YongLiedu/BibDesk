@@ -1229,7 +1229,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 err = FSGetCatalogInfo(&originalRef, kFSCatInfoVolume, &catalogInfo, NULL, NULL, NULL);
             
             GetVolParmsInfoBuffer infoBuffer;
-            err = FSGetVolumeParms(catalogInfo.volume, &infoBuffer, sizeof(GetVolParmsInfoBuffer));
+            if (noErr == err)
+                err = FSGetVolumeParms(catalogInfo.volume, &infoBuffer, sizeof(GetVolParmsInfoBuffer));
             
             if (noErr == err) {
                 
@@ -1884,12 +1885,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [self setDocumentStringEncoding:encoding];
     
     if(parserEncoding != encoding){
-        NSString *string = [[NSString alloc] initWithData:data encoding:encoding];
+        NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
         if([string canBeConvertedToEncoding:NSUTF8StringEncoding]){
             data = [string dataUsingEncoding:NSUTF8StringEncoding];
             filePath = [[NSFileManager defaultManager] temporaryFileWithBasename:[filePath lastPathComponent]];
             [data writeToFile:filePath atomically:YES];
-            [string release];
         }else{
             parserEncoding = encoding;
             NSLog(@"Unable to convert data from encoding %@ to UTF-8", [NSString localizedNameOfStringEncoding:encoding]);
