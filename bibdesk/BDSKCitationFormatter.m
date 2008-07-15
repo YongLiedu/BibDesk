@@ -129,14 +129,20 @@ static NSCharacterSet *keyCharSet = nil;
     return YES;
 }
 
-- (BOOL)isPartialStringValid:(NSString *)partialString
-            newEditingString:(NSString **)newString
-            errorDescription:(NSString **)error{
+- (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error {
+    NSString *partialString = *partialStringPtr;
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if (r.location != NSNotFound) {
         NSMutableString *new = [[partialString mutableCopy] autorelease];
         [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
-        *newString = new;
+        if ([new length]) {
+            *partialStringPtr = new;
+            if (NSMaxRange(*proposedSelRangePtr) > [new length])
+                *proposedSelRangePtr = NSMakeRange(r.location, 0);
+        } else {
+            *partialStringPtr = origString;
+            *proposedSelRangePtr = origSelRange;
+        }
         if(error) *error = [NSString stringWithFormat:NSLocalizedString(@"The character \"%@\" is not allowed in a BibTeX cite key.", @"Error description"), [partialString substringWithRange:r]];
         return NO;
     }else

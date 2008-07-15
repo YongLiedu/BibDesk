@@ -96,9 +96,8 @@
     }
 }
 
-- (BOOL)isPartialStringValid:(NSString *)partialString
-            newEditingString:(NSString **)newString
-            errorDescription:(NSString **)error{
+- (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error {
+    NSString *partialString = *partialStringPtr;
     // first check the delegate for known field names, which may include special names containing spaces such as Cite Key, this is called on Leopard when auto-completing an item from the combobox
     if ([[delegate fieldNameFormatterKnownFieldNames:self] containsObject:partialString]) {
         return YES;
@@ -109,17 +108,24 @@
         if (error) *error = NSLocalizedString(@"The field name contains an invalid character", @"field name warning");
         NSMutableString *new = [[partialString mutableCopy] autorelease];
         [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
-        *newString = new;
+        if ([new length]) {
+            *partialStringPtr = new;
+            if (NSMaxRange(*proposedSelRangePtr) > [new length])
+                *proposedSelRangePtr = NSMakeRange(r.location, 0);
+        } else {
+            *partialStringPtr = origString;
+            *proposedSelRangePtr = origSelRange;
+        }
 		return NO;
     } else if ([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) {
-        *newString = nil;
+        *partialStringPtr = nil;
         if (error) *error = NSLocalizedString(@"The first character must not be a digit", @"field name warning");
 		return NO; // BibTeX chokes if the first character of a field name is a digit
     }
 	NSString *capitalizedString = [partialString fieldName];
     if (![capitalizedString isEqualToString:partialString]) {
 		// This is a BibDesk requirement, since we expect field names to be capitalized; BibTeX is case-insensitive of itself.  This will convert "FieldName" to "Fieldname" and "Field-name" to "Field-Name".
-		*newString = capitalizedString;
+		*partialStringPtr = capitalizedString;
         if (error) *error = NSLocalizedString(@"Field names must be capitalized in BibDesk", @"field name warning");
 		return NO;
 	} else return YES;

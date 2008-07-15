@@ -70,22 +70,28 @@
 // This is currently the same deal as what we check for in cite-keys, but in a different class
 // because that may change.
 
-- (BOOL)isPartialStringValid:(NSString *)partialString
-            newEditingString:(NSString **)newString
-            errorDescription:(NSString **)error{
+- (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error {
+    NSString *partialString = *partialStringPtr;
     NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString];
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if ( r.location != NSNotFound) {
         NSMutableString *new = [[partialString mutableCopy] autorelease];
         [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
-        *newString = new;
+        if ([new length]) {
+            *partialStringPtr = new;
+            if (NSMaxRange(*proposedSelRangePtr) > [new length])
+                *proposedSelRangePtr = NSMakeRange(r.location, 0);
+        } else {
+            *partialStringPtr = origString;
+            *proposedSelRangePtr = origSelRange;
+        }
         if (error) *error = NSLocalizedString(@"The type name contains an invalid character", @"field name warning");
         return NO;
     }
     r = [partialString rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]];
     if ( r.location != NSNotFound) {
         // this is a BibDesk requirement, since we expect type names to be lowercase
-        *newString = [partialString entryType];
+        *partialStringPtr = [partialString entryType];
         return NO;
     }
     else return YES;
