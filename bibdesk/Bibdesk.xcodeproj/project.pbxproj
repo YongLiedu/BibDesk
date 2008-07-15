@@ -534,6 +534,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CE52E69C0E2D2B87007B6C62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CEA5F53D0E2CED0E00F65088;
+			remoteInfo = SkimNotesBase;
+		};
 		CE7DC8D90E0952BB00D6D76D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
@@ -2335,6 +2342,7 @@
 			isa = PBXGroup;
 			children = (
 				CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */,
+				CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */,
 				CE7DC8DC0E0952BB00D6D76D /* skimnotes */,
 			);
 			name = Products;
@@ -3077,6 +3085,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SkimNotesBase.framework;
+			remoteRef = CE52E69C0E2D2B87007B6C62 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
