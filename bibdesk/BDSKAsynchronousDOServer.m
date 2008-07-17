@@ -278,10 +278,10 @@ struct BDSKDOServerFlags {
 - (void)stopDOServer;
 {
     OBASSERT([NSThread inMainThread]);
-    // set the stop flag, so any long process (possibly with loops) knows it can return
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags->shouldKeepRunning);
     // this is mainly to tickle the runloop on the server thread so it will finish
     [serverOnServerThread stopRunning];
+    // set the stop flag, so any long process (possibly with loops) knows it can return
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags->shouldKeepRunning);
     
     // clean up the connection in the main thread; don't invalidate the ports, since they're still in use
     [mainThreadConnection setRootObject:nil];
