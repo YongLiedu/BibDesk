@@ -89,6 +89,7 @@ struct BDSKDOServerFlags {
         localThreadConnection = nil;
         serverOnMainThread = nil;
         serverOnServerThread = nil;
+        stopRunning = NO;
     }
     return self;
 }
@@ -168,8 +169,8 @@ struct BDSKDOServerFlags {
 
 - (oneway void)stopRunning {
     OBASSERT([[NSThread currentThread] isEqual:serverThread]);
-    // not really necessary as the main thread should've done it already
-    OSAtomicCompareAndSwap32Barrier(1, 0, &serverFlags->shouldKeepRunning);
+    // signal to stop running the run loop
+    stopRunning = YES;
 }
 
 - (void)runDOServerForPorts:(NSArray *)ports;
@@ -214,8 +215,7 @@ struct BDSKDOServerFlags {
             [pool release];
             pool = [NSAutoreleasePool new];
             didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:distantFuture];
-            OSMemoryBarrier();
-        } while (serverFlags->shouldKeepRunning == 1 && didRun);
+        } while (stopRunning == NO && didRun);
         
         [distantFuture release];
     }
@@ -278,10 +278,10 @@ struct BDSKDOServerFlags {
 - (void)stopDOServer;
 {
     OBASSERT([NSThread inMainThread]);
-    // this is mainly to tickle the runloop on the server thread so it will finish
-    [serverOnServerThread stopRunning];
     // set the stop flag, so any long process (possibly with loops) knows it can return
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags->shouldKeepRunning);
+    // this is mainly to tickle the runloop on the server thread so it will finish
+    [serverOnServerThread stopRunning];
     
     // clean up the connection in the main thread; don't invalidate the ports, since they're still in use
     [mainThreadConnection setRootObject:nil];
