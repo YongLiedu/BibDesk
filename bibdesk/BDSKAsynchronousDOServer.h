@@ -49,6 +49,7 @@
     NSConnection *mainThreadConnection;     // so the local server thread can talk to the main thread
     NSConnection *localThreadConnection;    // so the main thread can talk to the local server thread
     NSThread *serverThread;                 // mainly for debugging
+    BOOL stopRunning;                       // set to signal to stop running the run loop for the local server thread
     struct BDSKDOServerFlags *serverFlags;  // state variables
 }
 
