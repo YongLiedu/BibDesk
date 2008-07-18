@@ -181,8 +181,6 @@ struct BDSKDOServerFlags {
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->shouldKeepRunning);
-    
     @try {
         
         // this thread retains the server object
@@ -221,11 +219,6 @@ struct BDSKDOServerFlags {
     }
     @catch(id exception) {
         NSLog(@"Exception \"%@\" raised in object %@", exception, self);
-        
-        // arm: I'm don't recall why shouldKeepRunning is reset; the thread will exit
-        // reset the flag so we can start over; shouldn't be necessary
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->shouldKeepRunning);
-        
         // allow the main thread to continue, anyway
         OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->serverDidSetup);
     }
