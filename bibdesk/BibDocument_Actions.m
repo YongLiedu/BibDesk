@@ -73,7 +73,7 @@
 #import "BDSKMainTableView.h"
 #import "BDSKGroupTableView.h"
 #import "BDSKSplitView.h"
-#import "BDSKShellTask.h"
+#import "NSTask_BDSKExtensions.h"
 #import "BDSKColoredBox.h"
 #import "BDSKStringParser.h"
 #import "BDSKZoomablePDFView.h"
@@ -545,7 +545,7 @@
     
     NSString *lyxCmd = [NSString stringWithFormat:@"echo LYXCMD:BibDesk:citation-insert:%@ > \"%@\"", cites, lyxPipePath];
     
-    [BDSKShellTask runShellCommand:lyxCmd withInputString:nil];
+    [NSTask runShellCommand:lyxCmd withInputString:nil];
 }
 - (IBAction)postItemToWeblog:(id)sender{
 

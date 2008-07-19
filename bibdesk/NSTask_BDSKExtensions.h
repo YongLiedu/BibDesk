@@ -1,5 +1,5 @@
 //
-//  BDSKShellTask.h
+//  NSTask_BDSKExtensions.h
 //  BibDesk
 //
 //  Created by Michael McCracken on Sat Dec 14 2002.
@@ -37,12 +37,8 @@
  */
 
 #import <Foundation/Foundation.h>
-#import <sys/stat.h>
 
-@interface BDSKShellTask : NSObject {
-    // data used to store stdOut from the filter
-    NSMutableData *stdoutData;
-}
+@interface NSTask (BDSKExtensions)
 + (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input;
 + (NSData *)runRawShellCommand:(NSString *)cmd withInputString:(NSString *)input;
 + (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;

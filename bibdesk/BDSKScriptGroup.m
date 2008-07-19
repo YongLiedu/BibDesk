@@ -38,7 +38,6 @@
 
 #import "BDSKScriptGroup.h"
 #import "BDSKOwnerProtocol.h"
-#import "BDSKShellTask.h"
 #import "KFAppleScriptHandlerAdditionsCore.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "BDSKBibTeXParser.h"

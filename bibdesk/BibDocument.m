@@ -107,7 +107,6 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import "BDSKShellTask.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKColoredBox.h"
 #import "BDSKCustomCiteDrawerController.h"

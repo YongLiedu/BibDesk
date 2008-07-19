@@ -39,7 +39,7 @@
 #import "BDSKController.h"
 #import <ExceptionHandling/NSExceptionHandler.h>
 #import "BDSKReadMeController.h"
-#import "BDSKShellTask.h"
+#import "NSTask_BDSKExtensions.h"
 #import "BDSKLogUtilities.h"
 #import <unistd.h>
 
@@ -120,7 +120,7 @@ static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertion
         // Note: function addresses are separated by double spaces, not a single space.
         
         @try {
-            stack = [BDSKShellTask executeBinary:@"/usr/bin/atos" inDirectory:nil withArguments:args environment:nil inputString:nil];
+            stack = [NSTask executeBinary:@"/usr/bin/atos" inDirectory:nil withArguments:args environment:nil inputString:nil];
         }
         @catch (id exception) {
             NSLog(@"caught %@ while getting stack trace from %@", exception, self);

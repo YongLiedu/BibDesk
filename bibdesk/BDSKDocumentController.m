@@ -43,7 +43,7 @@
 #import "BibDocument.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
-#import "BDSKShellTask.h"
+#import "NSTask_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDAlias.h"
 #import "NSWorkspace_BDSKExtensions.h"
@@ -357,7 +357,7 @@
     if (nil == fileInputString){
         [self presentError:error];
     } else {
-        NSString *filterOutput = [BDSKShellTask runShellCommand:shellCommand withInputString:fileInputString];
+        NSString *filterOutput = [NSTask runShellCommand:shellCommand withInputString:fileInputString];
         
         if ([NSString isEmptyString:filterOutput]){
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable To Open With Filter", @"Message in alert dialog when unable to open a document with filter")

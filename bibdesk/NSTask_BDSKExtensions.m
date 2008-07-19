@@ -36,75 +36,82 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKShellTask.h"
+#import "NSTask_BDSKExtensions.h"
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import <sys/stat.h>
 
 volatile int caughtSignal = 0;
 
-@interface BDSKShellTask (Private)
+@interface BDSKShellTask : NSObject {
+    NSTask *task;
+    // data used to store stdOut from the filter
+    NSMutableData *stdoutData;
+}
 // Note: the returned data is not autoreleased
-- (NSData *)privateRunShellCommand:(NSString *)cmd withInputString:(NSString *)input;
-- (NSData *)privateExecuteBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;
+- (NSData *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input;
+- (NSData *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;
 - (void)stdoutNowAvailable:(NSNotification *)notification;
 @end
 
 
-@implementation BDSKShellTask
+@implementation NSTask (BDSKExtensions)
 
 + (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[self alloc] init];
+    BDSKShellTask *shellTask = [[BDSKShellTask alloc] init];
     NSString *output = nil;
-    NSData *outputData = [shellTask privateRunShellCommand:cmd withInputString:input];
+    NSData *outputData = [shellTask runShellCommand:cmd withInputString:input];
     if(outputData){
-        output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:NSUTF8StringEncoding];
+        output = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
         if(!output)
-            output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:NSASCIIStringEncoding];
+            output = [[NSString alloc] initWithData:outputData encoding:NSASCIIStringEncoding];
         if(!output)
-            output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:[NSString defaultCStringEncoding]];
+            output = [[NSString alloc] initWithData:outputData encoding:[NSString defaultCStringEncoding]];
     }
     [shellTask release];
     return [output autorelease];
 }
 
 + (NSData *)runRawShellCommand:(NSString *)cmd withInputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[self alloc] init];
-    NSData *output = [[shellTask privateRunShellCommand:cmd withInputString:input] retain];
+    BDSKShellTask *shellTask = [[BDSKShellTask alloc] init];
+    NSData *output = [[shellTask runShellCommand:cmd withInputString:input] retain];
     [shellTask release];
     return [output autorelease];
 }
 
 + (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[self alloc] init];
+    BDSKShellTask *shellTask = [[BDSKShellTask alloc] init];
     NSString *output = nil;
-    NSData *outputData = [shellTask privateExecuteBinary:executablePath inDirectory:currentDirPath withArguments:args environment:env inputString:input];
+    NSData *outputData = [shellTask executeBinary:executablePath inDirectory:currentDirPath withArguments:args environment:env inputString:input];
     if(outputData){
-        output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:NSUTF8StringEncoding];
+        output = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
         if(!output)
-            output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:NSASCIIStringEncoding];
+            output = [[NSString alloc] initWithData:outputData encoding:NSASCIIStringEncoding];
         if(!output)
-            output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:[NSString defaultCStringEncoding]];
+            output = [[NSString alloc] initWithData:outputData encoding:[NSString defaultCStringEncoding]];
     }
     [shellTask release];
     return [output autorelease];
 }
 
+@end
+
+
+@implementation BDSKShellTask
+
 - (id)init{
-    self = [super init];
-    if(self)
+    if (self = [super init]) {
+        task = [[NSTask alloc] init];
         stdoutData = [[NSMutableData alloc] init];
+    }
     return self;
 }
 
 - (void)dealloc{
+    [task release];
     [stdoutData release];
     [super dealloc];
 }
-
-@end
-
-
-@implementation BDSKShellTask (Private)
 
 //
 // The following three methods are borrowed from Mike Ferris' TextExtras.
@@ -112,7 +119,7 @@ volatile int caughtSignal = 0;
 // - mmcc
 
 // was runWithInputString in TextExtras' TEPipeCommand class.
-- (NSData *)privateRunShellCommand:(NSString *)cmd withInputString:(NSString *)input{
+- (NSData *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input{
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *shellPath = @"/bin/sh";
     NSString *shellScriptPath = [[NSFileManager defaultManager] temporaryFileWithBasename:@"shellscript"];
@@ -153,7 +160,7 @@ volatile int caughtSignal = 0;
     // ---------- Execute the script ----------
 
     // MF:!!! The current working dir isn't too appropriate
-    output = [self privateExecuteBinary:shellScriptPath inDirectory:[shellScriptPath stringByDeletingLastPathComponent] withArguments:nil environment:nil inputString:input];
+    output = [self executeBinary:shellScriptPath inDirectory:[shellScriptPath stringByDeletingLastPathComponent] withArguments:nil environment:nil inputString:input];
 
     // ---------- Remove the script file ----------
     if (![fm removeFileAtPath:shellScriptPath handler:nil]) {
@@ -164,14 +171,12 @@ volatile int caughtSignal = 0;
 }
 
 // This method and the little notification method following implement synchronously running a task with input piped in from a string and output piped back out and returned as a string.   They require only a stdoutData instance variable to function.
-- (NSData *)privateExecuteBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input {
-    NSTask *task;
+- (NSData *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input {
     NSPipe *inputPipe;
     NSPipe *outputPipe;
     NSFileHandle *inputFileHandle;
     NSFileHandle *outputFileHandle;
 
-    task = [[NSTask allocWithZone:[self zone]] init];    
     [task setLaunchPath:executablePath];
     if (currentDirPath) {
         [task setCurrentDirectoryPath:currentDirPath];
@@ -227,7 +232,6 @@ volatile int caughtSignal = 0;
     
     // reset signal handling to default behavior
     signal(SIGPIPE, SIG_DFL);
-    [task release];
 
     return [stdoutData length] ? stdoutData : nil;
 }

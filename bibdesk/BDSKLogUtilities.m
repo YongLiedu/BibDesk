@@ -37,7 +37,7 @@
  */
 
 #import "BDSKLogUtilities.h"
-#import "BDSKShellTask.h"
+#import "NSTask_BDSKExtensions.h"
 #import <unistd.h>
 #import <asl.h>
 #import <libkern/OSAtomic.h>
@@ -65,7 +65,7 @@ static NSString *tigerASLHackaround(void)
     
     NSString *logString = nil;
     @try{
-        logString = [BDSKShellTask executeBinary:@"/usr/bin/syslog" inDirectory:nil withArguments:args environment:nil inputString:nil];
+        logString = [NSTask executeBinary:@"/usr/bin/syslog" inDirectory:nil withArguments:args environment:nil inputString:nil];
     }
     @catch(id exception){
         logString = [NSString stringWithFormat:@"Caught exception \"%@\" when attempting to run /usr/bin/syslog.", exception];
