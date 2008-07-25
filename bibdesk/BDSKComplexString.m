@@ -498,10 +498,10 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 @implementation NSString (ComplexStringExtensions)
 
-static IMP originalStringByAppendingString;
+static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
 
 + (void)didLoad{
-    originalStringByAppendingString = OBReplaceMethodImplementationWithSelector(self, @selector(stringByAppendingString:), @selector(replacementStringByAppendingString:));
+    originalStringByAppendingString = (id (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(stringByAppendingString:), @selector(replacementStringByAppendingString:));
 }
 
 - (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{

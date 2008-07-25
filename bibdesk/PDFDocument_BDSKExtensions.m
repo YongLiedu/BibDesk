@@ -47,10 +47,10 @@
 
 @implementation PDFDocument (BDSKExtensions)
 
-static IMP originalGetPrintOperationForPrintInfo = NULL;
+static id (*originalGetPrintOperationForPrintInfo)(id, SEL, id, BOOL) = NULL;
 
 - (NSPrintOperation *)replacementGetPrintOperationForPrintInfo:(NSPrintInfo *)printInfo autoRotate:(BOOL)autoRotate {
-    NSPrintOperation *printOperation = originalGetPrintOperationForPrintInfo(self, _cmd, printInfo, autoRotate);
+    NSPrintOperation *printOperation = (id (*)(id, SEL, id, BOOL))originalGetPrintOperationForPrintInfo(self, _cmd, printInfo, autoRotate);
     NSPrintPanel *printPanel = [printOperation printPanel];
     if ([printPanel respondsToSelector:@selector(setOptions:)])
         [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];

@@ -95,7 +95,7 @@
 
 @implementation NSWindow (BDSKExtensions)
 
-static IMP originalSetRepresentedFilename;
+static void (*originalSetRepresentedFilename)(id, SEL, id) = NULL;
 
 // see bug #1471488; overriding representedFilename is not sufficient; apparently the window doesn't use its accessor
 - (void)replacementSetRepresentedFilename:(NSString *)path;
@@ -112,7 +112,7 @@ static IMP originalSetRepresentedFilename;
 
 + (void)didLoad;
 {
-    originalSetRepresentedFilename = OBReplaceMethodImplementationWithSelector(self, @selector(setRepresentedFilename:), @selector(replacementSetRepresentedFilename:));
+    originalSetRepresentedFilename = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(setRepresentedFilename:), @selector(replacementSetRepresentedFilename:));
 }
 
 @end

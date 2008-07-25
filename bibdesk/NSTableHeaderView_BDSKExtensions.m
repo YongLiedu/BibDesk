@@ -42,7 +42,7 @@
 
 @implementation NSTableHeaderView (BDSKExtensions)
 
-static IMP originalMouseDown;
+static void (*originalMouseDown)(id, SEL, id) = NULL;
 
 - (void)replacementMouseDown:(NSEvent *)theEvent{
     // mouseDown in the table header has peculiar behavior for a double-click if you use -[NSTableView setDoubleAction:] on the
@@ -62,7 +62,7 @@ static IMP originalMouseDown;
 }
 
 + (void)didLoad {
-    originalMouseDown = OBReplaceMethodImplementationWithSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
+    originalMouseDown = (id (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
 }
 
 @end

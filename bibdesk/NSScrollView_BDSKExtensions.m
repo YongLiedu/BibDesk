@@ -43,10 +43,10 @@
 
 @implementation NSScrollView (BDSKExtensions)
 
-static IMP originalSetHasHorizontalScroller = NULL;
-static IMP originalSetAutohidesScrollers = NULL;
-static IMP originalDealloc = NULL;
-static IMP originalTile = NULL;
+static void (*originalSetHasHorizontalScroller)(id, SEL, BOOL) = NULL;
+static void (*originalSetAutohidesScrollers)(id, SEL, BOOL) = NULL;
+static void (*originalDealloc)(id, SEL) = NULL;
+static void (*originalTile)(id, SEL) = NULL;
 
 static CFMutableDictionaryRef scrollViewPlacards = NULL;
 
@@ -103,10 +103,10 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
 }
 
 + (void)load{
-    originalSetHasHorizontalScroller = OBReplaceMethodImplementationWithSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
-    originalSetAutohidesScrollers = OBReplaceMethodImplementationWithSelector(self, @selector(setAutohidesScrollers:), @selector(replacementSetAutohidesScrollers:));
-    originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
-    originalTile = OBReplaceMethodImplementationWithSelector(self, @selector(tile), @selector(replacementTile));
+    originalSetHasHorizontalScroller = (void (*)(id, SEL, BOOL))OBReplaceMethodImplementationWithSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
+    originalSetAutohidesScrollers = (void (*)(id, SEL, BOOL))OBReplaceMethodImplementationWithSelector(self, @selector(setAutohidesScrollers:), @selector(replacementSetAutohidesScrollers:));
+    originalDealloc = (void (*)(id, SEL))OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
+    originalTile = (void (*)(id, SEL))OBReplaceMethodImplementationWithSelector(self, @selector(tile), @selector(replacementTile));
     
     // dictionary doesn't retain keys, so no retain cycles; pointer equality used to compare views
     scrollViewPlacards = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);
