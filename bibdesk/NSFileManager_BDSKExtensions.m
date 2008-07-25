@@ -43,6 +43,8 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKVersionNumber.h"
+#import "NSError_BDSKExtensions.h"
+#import <SkimNotesBase/SKNExtendedAttributeManager.h>
 
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
@@ -790,6 +792,56 @@ static OSType finderSignatureBytes = 'MACS';
 
 - (void)createWeblocFilesInBackgroundThread:(NSDictionary *)fullPathDict{
     [NSThread detachNewThreadSelector:@selector(createWeblocFiles:) toTarget:self withObject:fullPathDict];
+}
+
+#pragma mark Apple String Encoding
+
+- (BOOL)setAppleStringEncoding:(NSStringEncoding)nsEncoding atPath:(NSString *)path error:(NSError **)error;
+{
+    NSParameterAssert(0 != nsEncoding);
+    CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(nsEncoding);
+    CFStringRef name = CFStringConvertEncodingToIANACharSetName(cfEncoding);
+    NSString *encodingString = [NSString stringWithFormat:@"%@;%d", name, cfEncoding];
+    return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:@"com.apple.TextEncoding" toValue:[encodingString dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:error];
+}
+
+- (NSStringEncoding)appleStringEncodingAtPath:(NSString *)path error:(NSError **)error;
+{
+    NSData *eaData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:@"com.apple.TextEncoding" atPath:path traverseLink:YES error:error];
+    NSString *encodingString = nil;
+    
+    // IANA charset names should be ASCII, but utf-8 is compatible
+    /*
+     MACINTOSH;0
+     UTF-8;134217984
+     UTF-8;
+     ;3071
+     */
+    
+    if (nil != eaData)
+        encodingString = [[[NSString alloc] initWithData:eaData encoding:NSUTF8StringEncoding] autorelease];
+    
+    // this is not a valid NSStringEncoding
+    NSStringEncoding nsEncoding = 0;
+    NSArray *array = nil;
+    if (encodingString)
+        array = [encodingString componentsSeparatedByString:@";"];
+    
+    // currently only two elements, but may become arbitrarily long in future
+    if ([array count] >= 2) {
+        CFStringEncoding cfEncoding = [[array objectAtIndex:1] unsignedIntValue];
+        nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
+    }
+    else if ([array count] > 0) {
+        CFStringRef name = (CFStringRef)[array objectAtIndex:0];
+        CFStringEncoding cfEncoding = CFStringConvertIANACharSetNameToEncoding(name);
+        nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
+    }
+    else if (NULL != error && nil != encodingString /* we read something from EA, but couldn't understand it */) {
+        *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Unable to interpret com.apple.TextEncoding", @"")];
+    }
+    
+    return nsEncoding;
 }
 
 @end

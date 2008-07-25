@@ -55,6 +55,7 @@
 #import "BDSKNotesWindowController.h"
 
 #import "NSString_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
@@ -81,7 +82,6 @@
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPreviewer.h"
-#import "BDSKSkimReader.h"
 #import "BDSKFileMigrationController.h"
 
 #import <FileView/FVPreviewer.h>
@@ -792,7 +792,7 @@
     while (pub = [e nextObject]) {  
         fileURL = [pub URLForField:field];
         if(fileURL == nil) continue;
-        string = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
+        string = [fileURL textSkimNotes];
         if ([NSString isEmptyString:string]) continue;
         if ([notes length])
             [notes appendString:@"\n\n"];
@@ -1005,7 +1005,7 @@
     
     while (fileURL = [urlEnum nextObject]) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
-            string = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
+            string = [fileURL textSkimNotes];
             if ([NSString isEmptyString:string] == NO) {
                 if ([notes length])
                     [notes appendString:@"\n\n"];

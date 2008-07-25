@@ -75,7 +75,7 @@
 #import "BDSKBibTeXParser.h"
 #import "BDSKStringParser.h"
 
-#import "ApplicationServices/ApplicationServices.h"
+#import <ApplicationServices/ApplicationServices.h>
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
 #import "BDSKSplitView.h"
@@ -94,7 +94,6 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
-#import "NSFileManager_BDSKExtendedAttributes.h"
 #import "PDFMetadata.h"
 #import "BDSKSharingServer.h"
 #import "BDSKSharingBrowser.h"
@@ -123,6 +122,7 @@
 #import "NSViewAnimation_BDSKExtensions.h"
 #import "BDSKDocumentSearch.h"
 #import "NSImage_BDSKExtensions.h"
+#import <SkimNotesBase/SKNExtendedAttributeManager.h>
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -410,7 +410,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     // hidden default to remove xattrs; this presently occurs before we use them, but it may need to be earlier at some point
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKRemoveExtendedAttributesFromDocuments"] && [self fileURL]) {
-        [[NSFileManager defaultManager] removeAllExtendedAttributesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
+        [[SKNExtendedAttributeManager sharedNoSplitManager] removeAllExtendedAttributesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
     }
     
     // get document-specific attributes (returns empty dictionary if there are none, so defaultValue works correctly)
@@ -672,7 +672,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes {
     NSDictionary *dict = nil;
     if ([self fileURL]) {
-        dict = [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey atPath:[[self fileURL] path] traverseLink:YES error:NULL];
+        dict = [[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey atPath:[[self fileURL] path] traverseLink:YES error:NULL];
     }
     if (nil == dict)
         dict = [NSDictionary dictionary];
@@ -743,9 +743,9 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         
         NSError *error;
         
-        if ([[NSFileManager defaultManager] setExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey 
+        if ([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey 
                                                   toPropertyListValue:dictionary
-                                                               atPath:path options:nil error:&error] == NO) {
+                                                               atPath:path options:0 error:&error] == NO) {
             NSLog(@"%@: %@", self, error);
         }
         
@@ -2415,7 +2415,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             
             // most reliable metadata should be our private EA
             if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKReadExtendedAttributesKey]){
-                NSData *btData = [[NSFileManager defaultManager] extendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
+                NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
                 if(btData){
                     NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
                     BOOL isPartialData;

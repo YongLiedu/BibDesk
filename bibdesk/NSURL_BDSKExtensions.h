@@ -55,17 +55,15 @@
 - (NSString *)precomposedPath;
 - (NSString *)pathExtension;
 
-@end
-
-@interface NSURL (Templating)
+- (NSArray *)SkimNotes;
+- (NSString *)textSkimNotes;
+- (NSAttributedString *)richTextSkimNotes;
 
 - (NSAttributedString *)linkedText;
 - (NSAttributedString *)icon;
 - (NSAttributedString *)smallIcon;
 - (NSAttributedString *)linkedIcon;
 - (NSAttributedString *)linkedSmallIcon;
-- (NSString *)textSkimNotes;
-- (NSAttributedString *)richTextSkimNotes;
 
 @end
 

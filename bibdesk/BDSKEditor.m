@@ -74,7 +74,6 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKCitationFormatter.h"
 #import "BDSKNotesWindowController.h"
-#import "BDSKSkimReader.h"
 #import "BDSKSplitView.h"
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
@@ -447,7 +446,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     while (fileURL = [urlEnum nextObject]) {
         if ([fileURL isEqual:[NSNull null]] == NO) {
-            NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
+            NSString *notes = [fileURL textSkimNotes];
             
             if ([notes length]) {
                 if ([string length])

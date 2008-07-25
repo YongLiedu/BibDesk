@@ -68,7 +68,6 @@
 #import "BDSKTemplateParser.h"
 #import "BDSKPublicationsArray.h"
 #import "NSData_BDSKExtensions.h"
-#import "BDSKSkimReader.h"
 #import "BDSKCitationFormatter.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKScriptHook.h"
@@ -1438,7 +1437,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     
     while (file = [fileEnum nextObject]) {
         if (fileURL = [file URL]) {
-            NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
+            NSString *notes = [fileURL textSkimNotes];
             if ([notes length] == 0)
                 continue;
             if ([string length])

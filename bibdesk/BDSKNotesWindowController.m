@@ -38,7 +38,7 @@
 
 #import "BDSKNotesWindowController.h"
 #import "BDSKAppController.h"
-#import "BDSKSkimReader.h"
+#import "NSURL_BDSKExtensions.h"
 
 
 @implementation BDSKNotesWindowController
@@ -77,7 +77,7 @@
 #pragma mark Actions
 
 - (IBAction)refresh:(id)sender {
-    NSEnumerator *dictEnum = [[[BDSKSkimReader sharedReader] SkimNotesAtURL:url] objectEnumerator];
+    NSEnumerator *dictEnum = [[url SkimNotes] objectEnumerator];
     NSDictionary *dict;
     
     [notes removeAllObjects];

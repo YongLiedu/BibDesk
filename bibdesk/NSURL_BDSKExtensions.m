@@ -39,10 +39,11 @@
 #import "NSURL_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
-#import "BDSKSkimReader.h"
 #import "NSAppleEventDescriptor_BDSKExtensions.h"
 #import <FileView/FVFinderLabel.h>
 #import "KFASHandlerAdditions-TypeTranslation.h"
+#import "NSWorkspace_BDSKExtensions.h"
+#import <SkimNotesBase/SkimNotesBase.h>
 
 @implementation NSURL (BDSKExtensions)
 
@@ -258,9 +259,50 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return [(id)CFURLCopyPathExtension((CFURLRef)self) autorelease];
 }
 
-@end
+#pragma mark Skim Notes
 
-@implementation NSURL (Templating)
+- (NSArray *)SkimNotes {
+    NSArray *array = nil;
+    if ([self isFileURL]) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:self];
+        if (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("net.sourceforge.skim-app.pdfd")))
+            array = [fm readSkimNotesFromPDFBundleAtURL:self error:NULL];
+        else if (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("net.sourceforge.skim-app.skimnotes")))
+            array = [fm readSkimNotesFromSkimFileAtURL:self error:NULL];
+        else
+            array = [fm readSkimNotesFromExtendedAttributesAtURL:self error:NULL];
+    }
+    return array;
+}
+
+- (NSString *)textSkimNotes {
+    NSString *string = nil;
+    if ([self isFileURL]) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:self];
+        if (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("net.sourceforge.skim-app.pdfd")))
+            string = [fm readSkimTextNotesFromPDFBundleAtURL:self error:NULL];
+        else
+            string = [fm readSkimTextNotesFromExtendedAttributesAtURL:self error:NULL];
+    }
+    return string;
+}
+
+- (NSAttributedString *)richTextSkimNotes {
+    NSData *data = nil;
+    if ([self isFileURL]) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:self];
+        if (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("net.sourceforge.skim-app.pdfd")))
+            data = [fm readSkimRTFNotesFromPDFBundleAtURL:self error:NULL];
+        else
+            data = [fm readSkimRTFNotesFromExtendedAttributesAtURL:self error:NULL];
+    }
+    return data ? [[[NSAttributedString alloc] initWithRTF:data documentAttributes:NULL] autorelease] : nil;
+}
+
+#pragma mark Templating
 
 - (NSAttributedString *)linkedText {
     return [[[NSAttributedString alloc] initWithString:[self absoluteString] attributeName:NSLinkAttributeName attributeValue:self] autorelease];
@@ -336,15 +378,6 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     [attrString addAttribute:NSLinkAttributeName value:self range:NSMakeRange(0, [attrString length])];
     
     return [attrString autorelease];
-}
-
-- (NSString *)textSkimNotes {
-    return [self isFileURL] ? [[BDSKSkimReader sharedReader] textNotesAtURL:self] : nil;
-}
-
-- (NSAttributedString *)richTextSkimNotes {
-    NSData *data = [self isFileURL] ? [[BDSKSkimReader sharedReader] RTFNotesAtURL:self] : nil;
-    return data ? [[[NSAttributedString alloc] initWithRTF:data documentAttributes:NULL] autorelease] : nil;
 }
 
 - (NSTextStorage *)styledTextSkimNotes {

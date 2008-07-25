@@ -35,6 +35,7 @@
  */
 
 #import "BibDocument_DataSource.h"
+#import <SkimNotesBase/SKNExtendedAttributeManager.h>
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BibItem.h"
@@ -51,11 +52,10 @@
 #import "BDSKTeXTask.h"
 #import "BDSKMainTableView.h"
 #import "BDSKGroupTableView.h"
-#import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAlert.h"
 #import "BDSKTypeManager.h"
 #import "NSURL_BDSKExtensions.h"
-#import "NSFileManager_BDSKExtendedAttributes.h"
+#import "NSFileManager_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
 #import "BDSKEditor.h"
 #import "NSGeometry_BDSKExtensions.h"
@@ -575,7 +575,7 @@
                             [filePaths addObject:path];
                             NSError *xerror = nil;
                             // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
-                            if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
+                            if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
                                 NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
                             // writing the standard PDF metadata alters the original file, so we'll make it a separate preference; this is also really slow
                             if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldWritePDFMetadata])
@@ -637,7 +637,7 @@
                                 [filePaths addObject:path];
                                 NSError *xerror = nil;
                                 // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
-                                if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
+                                if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
                                     NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
                             }
                         }
