@@ -117,8 +117,15 @@
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		CE023F5D0CC50F87003F52E5 /* Add_Small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */; };
+		CE0901520E39F36000BDF413 /* OmniBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
+		CE0901530E39F36000BDF413 /* OmniFoundation.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
+		CE0901540E39F36000BDF413 /* OmniAppKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */; };
+		CE0901550E39F38300BDF413 /* yaz.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
+		CE0901560E39F38300BDF413 /* AGRegex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
+		CE0901570E39F38300BDF413 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
+		CE0901580E39F38300BDF413 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
+		CE0901590E39F38300BDF413 /* SkimNotesBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */; };
 		CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */; };
-		CE09FF890E39DEB800BDF413 /* SkimNotesBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE09FF7F0E39DE4E00BDF413 /* SkimNotesBase.framework */; };
 		CE09FF8A0E39DEE200BDF413 /* SkimNotesBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */; };
 		CE0EB4440DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */; };
 		CE0ECDAB0DE78619006EEDDB /* BDSKSpiresParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0ECDA90DE78619006EEDDB /* BDSKSpiresParser.m */; };
@@ -160,13 +167,6 @@
 		CE2BB7EC0E0DB0DA0090E848 /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
 		CE2BB7EE0E0DB0F40090E848 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
 		CE2BB8030E0DB2980090E848 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
-		CE2BB8DC0E0EEB480090E848 /* OmniBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
-		CE2BB8DD0E0EEB480090E848 /* OmniFoundation.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
-		CE2BB8DE0E0EEB480090E848 /* OmniAppKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
-		CE2BB8DF0E0EEB480090E848 /* yaz.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9B801830B41E89500A5A615 /* yaz.framework */; };
-		CE2BB8E00E0EEB480090E848 /* AGRegex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
-		CE2BB8E10E0EEB480090E848 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
-		CE2BB8E20E0EEB480090E848 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE2BB5920E0BE1370090E848 /* FileView.framework */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
 		CE2C18920A0A43BE006F0A73 /* importFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */; };
 		CE2E78CD0D40F6BB00340B39 /* BDSKMultiValueDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2E78CB0D40F6BB00340B39 /* BDSKMultiValueDictionary.m */; };
@@ -837,14 +837,14 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				CE2BB8DC0E0EEB480090E848 /* OmniBase.framework in CopyFiles */,
-				CE2BB8DD0E0EEB480090E848 /* OmniFoundation.framework in CopyFiles */,
-				CE2BB8DE0E0EEB480090E848 /* OmniAppKit.framework in CopyFiles */,
-				CE2BB8DF0E0EEB480090E848 /* yaz.framework in CopyFiles */,
-				CE2BB8E00E0EEB480090E848 /* AGRegex.framework in CopyFiles */,
-				CE2BB8E10E0EEB480090E848 /* BTParse.framework in CopyFiles */,
-				CE2BB8E20E0EEB480090E848 /* FileView.framework in CopyFiles */,
-				CE09FF890E39DEB800BDF413 /* SkimNotesBase.framework in CopyFiles */,
+				CE0901520E39F36000BDF413 /* OmniBase.framework in CopyFiles */,
+				CE0901530E39F36000BDF413 /* OmniFoundation.framework in CopyFiles */,
+				CE0901540E39F36000BDF413 /* OmniAppKit.framework in CopyFiles */,
+				CE0901550E39F38300BDF413 /* yaz.framework in CopyFiles */,
+				CE0901560E39F38300BDF413 /* AGRegex.framework in CopyFiles */,
+				CE0901570E39F38300BDF413 /* FileView.framework in CopyFiles */,
+				CE0901580E39F38300BDF413 /* BTParse.framework in CopyFiles */,
+				CE0901590E39F38300BDF413 /* SkimNotesBase.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
