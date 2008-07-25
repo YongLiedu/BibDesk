@@ -62,7 +62,7 @@ static void (*originalMouseDown)(id, SEL, id) = NULL;
 }
 
 + (void)didLoad {
-    originalMouseDown = (id (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
+    originalMouseDown = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
 }
 
 @end
