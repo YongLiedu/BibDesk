@@ -537,7 +537,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = CEA5F53C0E2CED0E00F65088 /* SkimNotesBase */;
+			remoteGlobalIDString = CEA5F53C0E2CED0E00F65088;
 			remoteInfo = SkimNotesBase;
 		};
 		CE52E69C0E2D2B87007B6C62 /* PBXContainerItemProxy */ = {
