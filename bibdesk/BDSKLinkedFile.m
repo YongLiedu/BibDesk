@@ -317,7 +317,7 @@ static Class BDSKLinkedObjectClass = Nil;
 {
     OBASSERT(nil != base64String);
     
-    if ([base64String rangeOfCharacterFromSetInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location != NSNotFound || ([base64String length] % 4) != 0) {
+    if ([base64String rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location != NSNotFound || ([base64String length] % 4) != 0) {
         // make a valid base64 string: remove newline and white space characters, and add padding "=" if necessary
         NSMutableString *tmpString = [[base64String mutableCopy] autorelease];
         [tmpString replaceAllOccurrencesOfCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] withString:@""];
