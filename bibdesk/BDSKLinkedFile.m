@@ -557,8 +557,6 @@ static Class BDSKLinkedObjectClass = Nil;
     
     // clean the string a bit to get cleaner bibtex: add newlines to avoid long lines and remove padding "=" at the end (to avoid btparse warnings)
     unsigned int i;
-    while ([string length] && [string characterAtIndex:[string length] - 1] == '=')
-        [string deleteCharactersInRange:NSMakeRange([string length] - 1, 1)];
     for (i = 76; i < [string length]; i += 77)
         [string insertString:@"\n" atIndex:i];
     return string;
