@@ -553,13 +553,7 @@ static Class BDSKLinkedObjectClass = Nil;
     NSString *path = [self path];
     path = path && newBasePath ? [newBasePath relativePathToFilename:path] : relativePath;
     NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil];
-    NSMutableString *string = [[[[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String] mutableCopy] autorelease];
-    
-    // clean the string a bit to get cleaner bibtex: add newlines to avoid long lines and remove padding "=" at the end (to avoid btparse warnings)
-    unsigned int i;
-    for (i = 76; i < [string length]; i += 77)
-        [string insertString:@"\n" atIndex:i];
-    return string;
+    return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
 }
 
 // this could be called when the document fileURL changes
