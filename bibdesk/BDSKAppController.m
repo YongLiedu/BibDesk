@@ -456,6 +456,11 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     }
 }
 
+// we don't want to reopen last open files when re-activating the app
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
+    return NO;
+}
+
 - (void)openRecentItemFromDock:(id)sender{
     OBASSERT([sender isKindOfClass:[NSMenuItem class]]);
     NSURL *url = [sender representedObject];
