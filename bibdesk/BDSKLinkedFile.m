@@ -317,6 +317,12 @@ static Class BDSKLinkedObjectClass = Nil;
 {
     OBASSERT(nil != base64String);
     
+    // make a valid base64 string: remove newline and white space characters, and add padding "=" if necessary
+    NSMutableString *string = [[base64String mutableCopy] autorelease];
+    [string replaceAllOccurrencesOfCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] withString:@""];
+    while (([string length] % 4) != 0)
+        [string appendString:@"="];
+    
     NSData *data = nil;
     NSDictionary *dictionary = nil;
     @try {
@@ -545,8 +551,12 @@ static Class BDSKLinkedObjectClass = Nil;
     path = path && newBasePath ? [newBasePath relativePathToFilename:path] : relativePath;
     NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil];
     NSMutableString *string = [[[[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String] mutableCopy] autorelease];
+    
+    // clean the string a bit to get cleaner bibtex: add newlines to avoid long lines and remove padding "=" at the end (to avoid btparse warnings)
     unsigned int i;
-    for (i = 75; i < [string length]; i += 76)
+    while ([string length] && [string characterAtIndex:[string length] - 1] == '=')
+        [string deleteCharactersInRange:NSMakeRange([string length] - 1, 1)];
+    for (i = 76; i < [string length]; i += 77)
         [string insertString:@"\n" atIndex:i];
     return string;
 }
