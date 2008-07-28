@@ -317,11 +317,14 @@ static Class BDSKLinkedObjectClass = Nil;
 {
     OBASSERT(nil != base64String);
     
-    // make a valid base64 string: remove newline and white space characters, and add padding "=" if necessary
-    NSMutableString *string = [[base64String mutableCopy] autorelease];
-    [string replaceAllOccurrencesOfCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] withString:@""];
-    while (([string length] % 4) != 0)
-        [string appendString:@"="];
+    if ([base64String rangeOfCharacterFromSetInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location != NSNotFound || ([base64String length] % 4) != 0) {
+        // make a valid base64 string: remove newline and white space characters, and add padding "=" if necessary
+        NSMutableString *tmpString = [[base64String mutableCopy] autorelease];
+        [tmpString replaceAllOccurrencesOfCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] withString:@""];
+        while (([tmpString length] % 4) != 0)
+            [tmpString appendString:@"="];
+        base64String = tmpString;
+    }
     
     NSData *data = nil;
     NSDictionary *dictionary = nil;
