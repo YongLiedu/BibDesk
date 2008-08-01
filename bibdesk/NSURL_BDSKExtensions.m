@@ -285,6 +285,11 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             string = [fm readSkimTextNotesFromPDFBundleAtURL:self error:NULL];
         else
             string = [fm readSkimTextNotesFromExtendedAttributesAtURL:self error:NULL];
+        if (string == nil) {
+            NSArray *notes = [self SkimNotes];
+            if (notes)
+                string = SKNSkimTextNotes(notes);
+        }
     }
     return string;
 }
@@ -298,6 +303,11 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             data = [fm readSkimRTFNotesFromPDFBundleAtURL:self error:NULL];
         else
             data = [fm readSkimRTFNotesFromExtendedAttributesAtURL:self error:NULL];
+        if (data == nil) {
+            NSArray *notes = [self SkimNotes];
+            if (notes)
+                data = SKNSkimRTFNotes(notes);
+        }
     }
     return data ? [[[NSAttributedString alloc] initWithRTF:data documentAttributes:NULL] autorelease] : nil;
 }
