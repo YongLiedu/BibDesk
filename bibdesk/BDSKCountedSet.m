@@ -55,7 +55,7 @@ Boolean BDSKCaseInsensitiveStringIsEqual(const void *value1, const void *value2)
 
 const CFDictionaryKeyCallBacks BDSKCaseInsensitiveStringKeyDictionaryCallBacks = {
     0,
-    BDSKStringCopy,
+    OFNSObjectRetain,
     OFCFTypeRelease,
     OFCFTypeCopyDescription,
     BDSKCaseInsensitiveStringIsEqual,
