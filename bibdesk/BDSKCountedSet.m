@@ -64,7 +64,7 @@ const CFDictionaryKeyCallBacks BDSKCaseInsensitiveStringKeyDictionaryCallBacks =
 
 const CFSetCallBacks BDSKCaseInsensitiveStringSetCallBacks = {
     0,
-    OFNSObjectRetain,
+    BDSKStringCopy,
     OFCFTypeRelease,
     OFCFTypeCopyDescription,
     BDSKCaseInsensitiveStringIsEqual,
