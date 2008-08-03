@@ -40,8 +40,8 @@
 
 
 @interface BDSKMultiValueDictionary : NSObject {
-    NSMutableDictionary *dictionary;
-    NSMutableDictionary *inverseDictionary;
+    CFMutableDictionaryRef dictionary;
+    CFMutableDictionaryRef inverseDictionary;
 }
 
 - (unsigned int)keyCount;

@@ -43,40 +43,40 @@
 
 - (id)init {
     if (self = [super init]) {
-        dictionary = [[NSMutableDictionary alloc] init];
-        inverseDictionary = [[NSMutableDictionary alloc] init];
+        dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        inverseDictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     }
     return self;
 }
 
 - (void)dealloc {
-    [dictionary release];
-    [inverseDictionary release];
+    CFRelease(dictionary);
+    CFRelease(inverseDictionary);
     [super dealloc];
 }
 
 - (NSString *)description {
-    return [dictionary description];
+    return [(id)dictionary description];
 }
 
 - (NSMutableSet *)_setForValue:(id)aValue inverse:(BOOL)inverse create:(BOOL)create {
-    NSMutableDictionary *dict = inverse ? inverseDictionary : dictionary;
-    NSMutableSet *value = [dict objectForKey:aValue];
+    CFMutableDictionaryRef dict = inverse ? inverseDictionary : dictionary;
+    NSMutableSet *value = (NSMutableSet *)CFDictionaryGetValue(dict, aValue);
 
     if (create && value == nil) {
         value = [[NSMutableSet alloc] init];
-        [dict setObject:value forKey:aValue];
+        CFDictionaryAddValue(dict, aValue, value);
         [value release];
     }
     return value;
 }
 
 - (unsigned int)keyCount {
-    return [dictionary count];
+    return CFDictionaryGetCount(dictionary);
 }
 
 - (unsigned int)objectCount {
-    return [inverseDictionary count];
+    return CFDictionaryGetCount(inverseDictionary);
 }
 
 - (unsigned int)countForKey:(id)aKey {
@@ -147,18 +147,18 @@ static void addValueFunction(const void *value, void *context) {
     if (objectSet) {
         [objectSet removeObject:anObject];
         if ([objectSet count] == 0)
-            [dictionary removeObjectForKey:aKey];
+            CFDictionaryRemoveValue(dictionary, aKey);
     }
     if (keySet) {
         [keySet removeObject:anObject];
         if ([keySet count] == 0)
-            [inverseDictionary removeObjectForKey:anObject];
+            CFDictionaryRemoveValue(inverseDictionary, anObject);
     }
 }
 
 - (void)removeAllObjects {
-    [dictionary removeAllObjects];
-    [inverseDictionary removeAllObjects];
+    CFDictionaryRemoveAllValues(dictionary);
+    CFDictionaryRemoveAllValues(inverseDictionary);
 }
 
 static void addEntryFunction(const void *key, const void *value, void *context) {
@@ -171,9 +171,9 @@ static void addEntryFunction(const void *key, const void *value, void *context) 
     ctxt.dict = self;
     ctxt.value = nil;
     ctxt.inverse = NO;
-    CFDictionaryApplyFunction((CFDictionaryRef)(otherDictionary->dictionary), addEntryFunction, &ctxt);
+    CFDictionaryApplyFunction(otherDictionary->dictionary, addEntryFunction, &ctxt);
     ctxt.inverse = YES;
-    CFDictionaryApplyFunction((CFDictionaryRef)(otherDictionary->inverseDictionary), addEntryFunction, &ctxt);
+    CFDictionaryApplyFunction(otherDictionary->inverseDictionary, addEntryFunction, &ctxt);
 }
 
 @end
