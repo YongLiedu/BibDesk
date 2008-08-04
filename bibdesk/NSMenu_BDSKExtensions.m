@@ -162,9 +162,9 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
         for (i = 0; i < count; i++) {
             NSURL *appURL = [appURLs objectAtIndex:i];
             NSDictionary *appInfo = [[NSBundle bundleWithPath:[appURL path]] infoDictionary];
-            NSString *versionString = [appInfo objectForKey:@"CFBundleShortVersionString"];
+            NSString *versionString = [appInfo objectForKey:@"CFBundleVersion"];
             if (versionString == nil)
-                versionString = [appInfo objectForKey:@"CFBundleVersion"];
+                versionString = [appInfo objectForKey:@"CFBundleShortVersionString"];
             // we always include the default app and any version in Applications or System
             BOOL isPreferred = [defaultAppURL isEqual:appURL] || fileIsInApplicationsOrSystem(appURL);
             if (isPreferred) {
