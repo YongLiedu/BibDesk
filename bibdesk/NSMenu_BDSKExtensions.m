@@ -163,8 +163,11 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
             NSURL *appURL = [appURLs objectAtIndex:i];
             NSDictionary *appInfo = [[NSBundle bundleWithPath:[appURL path]] infoDictionary];
             NSString *versionString = [appInfo objectForKey:@"CFBundleVersion"];
+            NSString *shortVersionString = [appInfo objectForKey:@"CFBundleShortVersionString"];
             if (versionString == nil)
-                versionString = [appInfo objectForKey:@"CFBundleShortVersionString"];
+                versionString = shortVersionString;
+            if (shortVersionString == nil)
+                shortVersionString = versionString;
             // we always include the default app and any version in Applications or System
             BOOL isPreferred = [defaultAppURL isEqual:appURL] || fileIsInApplicationsOrSystem(appURL);
             if (isPreferred) {
@@ -178,7 +181,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
             }
             if ([versionStrings containsObject:versionString] == NO || isPreferred) {
                 BDSKVersionNumber *versionNumber = versionString ? [[BDSKVersionNumber alloc] initWithVersionString:versionString] : nil;
-                NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", versionString, @"versionString", versionNumber, @"versionNumber", nil];
+                NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", versionString, @"versionString", shortVersionString, @"shortVersionString", versionNumber, @"versionNumber", nil];
                 if (versionString)
                     [versionStrings addObject:versionString];
                 [versionNumber release];
@@ -238,7 +241,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
             menuTitle = appName;
             if ([appURL isEqual:defaultAppURL])
                 menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Menu item title, Need a single leading space")];
-            if (subCount > 1 && (version = [dict objectForKey:@"versionString"]))
+            if (subCount > 1 && (version = [dict objectForKey:@"shortVersionString"]))
                 menuTitle = [menuTitle stringByAppendingFormat:@" (%@)", version];
             item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];        
             [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
