@@ -39,14 +39,6 @@
 #import <Cocoa/Cocoa.h>
 
 
-enum {
-    BDSKConditionTagMatchNotEmpty,
-    BDSKConditionTagMatchEqual,
-    BDSKConditionTagMatchContain,
-    BDSKConditionTagMatchSmaller,
-    BDSKConditionTagMatchSmallerOrEqual,
-};
-
 @protocol BDSKTemplateParserDelegate
 
 - (void)templateParserWillParseTemplate:(id)template usingObject:(id)object isAttributed:(BOOL)flag;

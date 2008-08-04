@@ -1,5 +1,5 @@
 //
-//  BDSKTag.m
+//  BDSKTemplateTag.m
 //  BibDesk
 //
 //  Created by Christiaan Hofman on 10/12/07.
@@ -36,17 +36,17 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKTag.h"
+#import "BDSKTemplateTag.h"
 #import "BDSKTemplateParser.h"
 
 
-@implementation BDSKTag
-- (int)type { return -1; }
+@implementation BDSKTemplateTag
+- (BDSKTemplateTagType)type { return -1; }
 @end
 
 #pragma mark -
 
-@implementation BDSKValueTag
+@implementation BDSKValueTemplateTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath {
     if (self = [super init])
@@ -59,7 +59,7 @@
     [super dealloc];
 }
 
-- (int)type { return BDSKValueTagType; }
+- (BDSKTemplateTagType)type { return BDSKValueTemplateTagType; }
 
 - (NSString *)keyPath {
     return keyPath;
@@ -69,7 +69,7 @@
 
 #pragma mark -
 
-@implementation BDSKRichValueTag
+@implementation BDSKRichValueTemplateTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath attributes:(NSDictionary *)anAttributes {
     if (self = [super initWithKeyPath:aKeyPath]) {
@@ -91,7 +91,7 @@
 
 #pragma mark -
 
-@implementation BDSKCollectionTag
+@implementation BDSKCollectionTemplateTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath itemTemplateString:(NSString *)anItemTemplateString separatorTemplateString:(NSString *)aSeparatorTemplateString {
     if (self = [super initWithKeyPath:aKeyPath]) {
@@ -111,7 +111,7 @@
     [super dealloc];
 }
 
-- (int)type { return BDSKCollectionTagType; }
+- (BDSKTemplateTagType)type { return BDSKCollectionTemplateTagType; }
 
 - (NSArray *)itemTemplate {
     if (itemTemplate == nil && itemTemplateString)
@@ -129,7 +129,7 @@
 
 #pragma mark -
 
-@implementation BDSKRichCollectionTag
+@implementation BDSKRichCollectionTemplateTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath itemTemplateAttributedString:(NSAttributedString *)anItemTemplateString separatorTemplateAttributedString:(NSAttributedString *)aSeparatorTemplateString {
     if (self = [super initWithKeyPath:aKeyPath]) {
@@ -149,7 +149,7 @@
     [super dealloc];
 }
 
-- (int)type { return BDSKCollectionTagType; }
+- (BDSKTemplateTagType)type { return BDSKCollectionTemplateTagType; }
 
 - (NSArray *)itemTemplate {
     if (itemTemplate == nil && itemTemplateAttributedString)
@@ -167,9 +167,9 @@
 
 #pragma mark -
 
-@implementation BDSKConditionTag
+@implementation BDSKConditionTemplateTag
 
-- (id)initWithKeyPath:(NSString *)aKeyPath matchType:(int)aMatchType matchStrings:(NSArray *)aMatchStrings subtemplates:(NSArray *)aSubtemplates {
+- (id)initWithKeyPath:(NSString *)aKeyPath matchType:(BDSKTemplateTagMatchType)aMatchType matchStrings:(NSArray *)aMatchStrings subtemplates:(NSArray *)aSubtemplates {
     if (self = [super initWithKeyPath:aKeyPath]) {
         matchType = aMatchType;
         matchStrings = [aMatchStrings copy];
@@ -184,9 +184,9 @@
     [super dealloc];
 }
 
-- (int)type { return BDSKConditionTagType; }
+- (BDSKTemplateTagType)type { return BDSKConditionTemplateTagType; }
 
-- (int)matchType {
+- (BDSKTemplateTagMatchType)matchType {
     return matchType;
 }
 
@@ -211,7 +211,7 @@
 
 #pragma mark -
 
-@implementation BDSKRichConditionTag
+@implementation BDSKRichConditionTemplateTag
 
 - (NSArray *)subtemplateAtIndex:(unsigned)idx {
     id subtemplate = [subtemplates objectAtIndex:idx];
@@ -226,7 +226,7 @@
 
 #pragma mark -
 
-@implementation BDSKTextTag
+@implementation BDSKTextTemplateTag
 
 - (id)initWithText:(NSString *)aText {
     if (self = [super init]) {
@@ -240,7 +240,7 @@
     [super dealloc];
 }
 
-- (int)type { return BDSKTextTagType; }
+- (BDSKTemplateTagType)type { return BDSKTextTemplateTagType; }
 
 - (NSString *)text {
     return text;
@@ -257,7 +257,7 @@
 
 #pragma mark -
 
-@implementation BDSKRichTextTag
+@implementation BDSKRichTextTemplateTag
 
 - (id)initWithAttributedText:(NSAttributedString *)anAttributedText {
     if (self = [super init]) {
@@ -271,7 +271,7 @@
     [super dealloc];
 }
 
-- (int)type { return BDSKTextTagType; }
+- (BDSKTemplateTagType)type { return BDSKTextTemplateTagType; }
 
 - (NSAttributedString *)attributedText {
     return attributedText;

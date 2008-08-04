@@ -1,5 +1,5 @@
 //
-//  BDSKTag.h
+//  BDSKTemplateTag.h
 //  BibDesk
 //
 //  Created by Christiaan Hofman on 10/12/07.
@@ -39,20 +39,31 @@
 #import <Cocoa/Cocoa.h>
 
 enum {
-    BDSKValueTagType,
-    BDSKCollectionTagType,
-    BDSKConditionTagType,
-    BDSKTextTagType
+    BDSKValueTemplateTagType,
+    BDSKCollectionTemplateTagType,
+    BDSKConditionTemplateTagType,
+    BDSKTextTemplateTagType
 };
+typedef NSInteger BDSKTemplateTagType;
 
-@interface BDSKTag : NSObject {
+enum {
+    BDSKTemplateTagMatchOther,
+    BDSKTemplateTagMatchEqual,
+    BDSKTemplateTagMatchContain,
+    BDSKTemplateTagMatchSmaller,
+    BDSKTemplateTagMatchSmallerOrEqual,
+};
+typedef NSInteger BDSKTemplateTagMatchType;
+
+
+@interface BDSKTemplateTag : NSObject {
 }
-- (int)type;
+- (BDSKTemplateTagType)type;
 @end
 
 #pragma mark -
 
-@interface BDSKValueTag : BDSKTag {
+@interface BDSKValueTemplateTag : BDSKTemplateTag {
     NSString *keyPath;
 }
 
@@ -64,7 +75,7 @@ enum {
 
 #pragma mark -
 
-@interface BDSKRichValueTag : BDSKValueTag {
+@interface BDSKRichValueTemplateTag : BDSKValueTemplateTag {
     NSDictionary *attributes;
 }
 
@@ -76,7 +87,7 @@ enum {
 
 #pragma mark -
 
-@interface BDSKCollectionTag : BDSKValueTag {
+@interface BDSKCollectionTemplateTag : BDSKValueTemplateTag {
     NSString *itemTemplateString;
     NSString *separatorTemplateString;
     NSMutableArray *itemTemplate;
@@ -92,7 +103,7 @@ enum {
 
 #pragma mark -
 
-@interface BDSKRichCollectionTag : BDSKValueTag {
+@interface BDSKRichCollectionTemplateTag : BDSKValueTemplateTag {
     NSAttributedString *itemTemplateAttributedString;
     NSAttributedString *separatorTemplateAttributedString;
     NSMutableArray *itemTemplate;
@@ -108,15 +119,15 @@ enum {
 
 #pragma mark -
 
-@interface BDSKConditionTag : BDSKValueTag {
-    int matchType;
+@interface BDSKConditionTemplateTag : BDSKValueTemplateTag {
+    BDSKTemplateTagMatchType matchType;
     NSMutableArray *subtemplates;
     NSArray *matchStrings;
 }
 
-- (id)initWithKeyPath:(NSString *)aKeyPath matchType:(int)aMatchType matchStrings:(NSArray *)aMatchStrings subtemplates:(NSArray *)aSubtemplates;
+- (id)initWithKeyPath:(NSString *)aKeyPath matchType:(BDSKTemplateTagMatchType)aMatchType matchStrings:(NSArray *)aMatchStrings subtemplates:(NSArray *)aSubtemplates;
 
-- (int)matchType;
+- (BDSKTemplateTagMatchType)matchType;
 - (NSArray *)matchStrings;
 - (NSArray *)subtemplates;
 - (NSArray *)subtemplateAtIndex:(unsigned)idx;
@@ -125,12 +136,12 @@ enum {
 
 #pragma mark -
 
-@interface BDSKRichConditionTag : BDSKConditionTag
+@interface BDSKRichConditionTemplateTag : BDSKConditionTemplateTag
 @end
 
 #pragma mark -
 
-@interface BDSKTextTag : BDSKTag {
+@interface BDSKTextTemplateTag : BDSKTemplateTag {
     NSString *text;
 }
 
@@ -143,7 +154,7 @@ enum {
 
 #pragma mark -
 
-@interface BDSKRichTextTag : BDSKTag {
+@interface BDSKRichTextTemplateTag : BDSKTemplateTag {
     NSAttributedString *attributedText;
 }
 

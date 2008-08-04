@@ -45,7 +45,7 @@
 #import "BDSKFieldSheetController.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKTemplateParser.h"
-#import "BDSKTag.h"
+#import "BDSKTemplateTag.h"
 #import "NSString_BDSKExtensions.h"
 #import <OmniBase/OBUtilities.h>
 
@@ -82,9 +82,9 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (void)handleTemplateDidChangeNotification:(NSNotification *)notification;
 - (NSDictionary *)convertPubTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont;
 - (NSArray *)convertItemTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont;
-- (NSArray *)tokensForTextTag:(BDSKTag *)tag allowText:(BOOL)allowText defaultFont:(NSFont *)defaultFont;
-- (id)tokenForConditionTag:(BDSKConditionTag *)tag defaultFont:(NSFont *)defaultFont;
-- (id)tokenForValueTag:(BDSKValueTag *)tag defaultFont:(NSFont *)defaultFont;
+- (NSArray *)tokensForTextTag:(BDSKTemplateTag *)tag allowText:(BOOL)allowText defaultFont:(NSFont *)defaultFont;
+- (id)tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:(NSFont *)defaultFont;
+- (id)tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:(NSFont *)defaultFont;
 - (NSString *)propertyForKey:(NSString *)key tokenType:(int)type;
 - (void)setFont:(NSFont *)font ofToken:(BDSKToken *)token defaultFont:(NSFont *)defaultFont;
 @end
@@ -1213,17 +1213,17 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (NSDictionary *)convertPubTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont {
     NSMutableDictionary *result = [NSMutableDictionary dictionary];
     NSArray *itemTemplate;
-    BDSKTag *tag = [templateArray count] ? [templateArray objectAtIndex:0] : nil;
+    BDSKTemplateTag *tag = [templateArray count] ? [templateArray objectAtIndex:0] : nil;
     
-    if ([tag type] == BDSKConditionTagType && [[(BDSKConditionTag *)tag keyPath] isEqualToString:@"pubType"]) {
-        if ([(BDSKConditionTag *)tag matchType] != BDSKConditionTagMatchEqual)
+    if ([tag type] == BDSKConditionTemplateTagType && [[(BDSKConditionTemplateTag *)tag keyPath] isEqualToString:@"pubType"]) {
+        if ([(BDSKConditionTemplateTag *)tag matchType] != BDSKTemplateTagMatchEqual)
             return nil;
         
-        NSArray *matchStrings = [(BDSKConditionTag *)tag matchStrings];
-        unsigned int i = 0, keyCount = [matchStrings count], count = [[(BDSKConditionTag *)tag subtemplates] count];
+        NSArray *matchStrings = [(BDSKConditionTemplateTag *)tag matchStrings];
+        unsigned int i = 0, keyCount = [matchStrings count], count = [[(BDSKConditionTemplateTag *)tag subtemplates] count];
         
         for (i = 0; i < count; i++) {
-            if (itemTemplate = [self convertItemTemplate:[(BDSKConditionTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont])
+            if (itemTemplate = [self convertItemTemplate:[(BDSKConditionTemplateTag *)tag subtemplateAtIndex:i] defaultFont:defaultFont])
                 [result setObject:itemTemplate forKey:i < keyCount ? [matchStrings objectAtIndex:i] : @""];
             else return nil;
         }
@@ -1239,23 +1239,23 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (NSArray *)convertItemTemplate:(NSArray *)templateArray defaultFont:(NSFont *)defaultFont {
     NSMutableArray *result = [NSMutableArray array];
     NSEnumerator *tagEnum = [templateArray objectEnumerator];
-    BDSKTag *tag;
+    BDSKTemplateTag *tag;
     id token;
     
     while (tag = [tagEnum nextObject]) {
-        switch ([(BDSKTag *)tag type]) {
-            case BDSKTextTagType:
+        switch ([(BDSKTemplateTag *)tag type]) {
+            case BDSKTextTemplateTagType:
                 if (token = [self tokensForTextTag:tag allowText:YES defaultFont:defaultFont])
                     [result addObjectsFromArray:token];
                 else return nil;
                 break;
-            case BDSKValueTagType:
-                if (token = [self tokenForValueTag:(BDSKValueTag *)tag defaultFont:defaultFont])
+            case BDSKValueTemplateTagType:
+                if (token = [self tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:defaultFont])
                     [result addObject:token];
                 else return nil;
                 break;
-            case BDSKConditionTagType:
-                if (token = [self tokenForConditionTag:(BDSKConditionTag *)tag defaultFont:defaultFont])
+            case BDSKConditionTemplateTagType:
+                if (token = [self tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:defaultFont])
                     [result addObject:token];
                 else return nil;
                 break;
@@ -1267,10 +1267,10 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     return result;
 }
 
-- (NSArray *)tokensForTextTag:(BDSKTag *)tag allowText:(BOOL)allowText defaultFont:(NSFont *)defaultFont {
+- (NSArray *)tokensForTextTag:(BDSKTemplateTag *)tag allowText:(BOOL)allowText defaultFont:(NSFont *)defaultFont {
     NSMutableArray *tokens = [NSMutableArray array];
     if (defaultFont) {
-        NSAttributedString *text = [(BDSKRichTextTag *)tag attributedText];
+        NSAttributedString *text = [(BDSKRichTextTemplateTag *)tag attributedText];
         unsigned int length = [text length];
         NSRange range = NSMakeRange(0, 0);
         
@@ -1278,7 +1278,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
             id token;
             NSFont *font = [text attribute:NSFontAttributeName atIndex:range.location longestEffectiveRange:&range inRange:NSMakeRange(range.location, length - range.location)];
             if (allowText && [font isEqual:defaultFont]) {
-                token = [[(BDSKRichTextTag *)tag attributedText] string];
+                token = [[(BDSKRichTextTemplateTag *)tag attributedText] string];
             } else {
                 token = [[[BDSKTextToken alloc] initWithTitle:[text string]] autorelease];
                 [self setFont:font ofToken:token defaultFont:defaultFont];
@@ -1286,23 +1286,23 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
             [tokens addObject:token];
         }
     } else if (allowText) {
-        [tokens addObject:[(BDSKTextTag *)tag text]];
+        [tokens addObject:[(BDSKTextTemplateTag *)tag text]];
     } else {
-        [tokens addObject:[[[BDSKTextToken alloc] initWithTitle:[(BDSKTextTag *)tag text]] autorelease]];
+        [tokens addObject:[[[BDSKTextToken alloc] initWithTitle:[(BDSKTextTemplateTag *)tag text]] autorelease]];
     }
     return tokens;
 }
 
-- (id)tokenForConditionTag:(BDSKConditionTag *)tag defaultFont:(NSFont *)defaultFont {
+- (id)tokenForConditionTag:(BDSKConditionTemplateTag *)tag defaultFont:(NSFont *)defaultFont {
     int count = [[tag subtemplates] count];
-    if ([(BDSKConditionTag *)tag matchType] != BDSKConditionTagMatchNotEmpty || count > 2)
+    if ([(BDSKConditionTemplateTag *)tag matchType] != BDSKTemplateTagMatchOther || count > 2)
         return nil;
     
     NSArray *nonemptyTemplate = [tag subtemplateAtIndex:0];
     NSArray *emptyTemplate = count > 1 ? [tag subtemplateAtIndex:1] : nil;
     id token = nil;
     
-    if ([nonemptyTemplate count] == 1 && [(BDSKTag *)[nonemptyTemplate lastObject] type] == BDSKTextTagType) {
+    if ([nonemptyTemplate count] == 1 && [(BDSKTemplateTag *)[nonemptyTemplate lastObject] type] == BDSKTextTemplateTagType) {
         NSArray *keys = [[tag keyPath] componentsSeparatedByString:@"."];
         NSArray *tokens;
         if ([keys count] != 2 || [[keys objectAtIndex:0] isEqualToString:@"fields"] == NO)
@@ -1313,29 +1313,29 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                 [token setField:[keys lastObject]];
                 if ([emptyTemplate count]) {
                     id textTag = [emptyTemplate lastObject];
-                    if ([(BDSKTag *)textTag type] != BDSKTextTagType)
+                    if ([(BDSKTemplateTag *)textTag type] != BDSKTextTemplateTagType)
                         return nil;
-                    [token setAltText:defaultFont ? [[(BDSKRichTextTag *)textTag attributedText] string] : [(BDSKTextTag *)textTag text]];
+                    [token setAltText:defaultFont ? [[(BDSKRichTextTemplateTag *)textTag attributedText] string] : [(BDSKTextTemplateTag *)textTag text]];
                 }
             } else return nil;
         } else return nil;
     } else if ([emptyTemplate count] == 0 && [nonemptyTemplate count] < 4) {
         int i = 0;
-        BDSKTag *subtag = [nonemptyTemplate objectAtIndex:i];
+        BDSKTemplateTag *subtag = [nonemptyTemplate objectAtIndex:i];
         NSString *prefix = nil, *suffix = nil;
         count = [nonemptyTemplate count];
         
-        if ([subtag type] == BDSKTextTagType) {
-            prefix = defaultFont ? [[(BDSKRichTextTag *)subtag attributedText] string] : [(BDSKTextTag *)subtag text];
+        if ([subtag type] == BDSKTextTemplateTagType) {
+            prefix = defaultFont ? [[(BDSKRichTextTemplateTag *)subtag attributedText] string] : [(BDSKTextTemplateTag *)subtag text];
             subtag = ++i < count ? [nonemptyTemplate objectAtIndex:i] : nil;
         }
-        if ([subtag type] == BDSKValueTagType && [[(BDSKValueTag *)subtag keyPath] isEqualToString:[tag keyPath]]) {
-            token = [self tokenForValueTag:(BDSKValueTag *)subtag defaultFont:defaultFont];
+        if ([subtag type] == BDSKValueTemplateTagType && [[(BDSKValueTemplateTag *)subtag keyPath] isEqualToString:[tag keyPath]]) {
+            token = [self tokenForValueTag:(BDSKValueTemplateTag *)subtag defaultFont:defaultFont];
             subtag = ++i < count ? [nonemptyTemplate objectAtIndex:i] : nil;
         } else return nil;
         if (subtag) {
-            if ([subtag type] == BDSKTextTagType) {
-                suffix = defaultFont ? [[(BDSKRichTextTag *)subtag attributedText] string] : [(BDSKTextTag *)subtag text];
+            if ([subtag type] == BDSKTextTemplateTagType) {
+                suffix = defaultFont ? [[(BDSKRichTextTemplateTag *)subtag attributedText] string] : [(BDSKTextTemplateTag *)subtag text];
             } else return nil;
         }
         if (prefix)
@@ -1347,7 +1347,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     return token;
 }
 
-- (id)tokenForValueTag:(BDSKValueTag *)tag defaultFont:(NSFont *)defaultFont {
+- (id)tokenForValueTag:(BDSKValueTemplateTag *)tag defaultFont:(NSFont *)defaultFont {
     NSArray *keys = [[tag keyPath] componentsSeparatedByString:@"."];
     NSString *key = [keys count] ? [keys objectAtIndex:0] : nil;
     BDSKToken *token = nil;
@@ -1392,7 +1392,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     }
     
     if (defaultFont) {
-        NSFont *font = [[(BDSKRichValueTag *)tag attributes] objectForKey:NSFontAttributeName];
+        NSFont *font = [[(BDSKRichValueTemplateTag *)tag attributes] objectForKey:NSFontAttributeName];
         [self setFont:font ofToken:token defaultFont:defaultFont];
     }
     
