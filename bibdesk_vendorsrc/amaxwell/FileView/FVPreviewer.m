@@ -42,6 +42,10 @@
 #import <QTKit/QTKit.h>
 #import <WebKit/WebKit.h>
 
+@interface PDFDocument (FVSkimNotesExtensions)
+- (id)initWithURL:(NSURL *)url readSkimNotes:(NSArray **)notes;
+@end
+
 @implementation FVPreviewer
 
 + (id)sharedInstance;
@@ -226,9 +230,9 @@ static NSData *PDFDataWithPostScriptDataAtURL(NSURL *aURL)
             theView = nil;
         [string release]; 
     }
-    else if (UTTypeConformsTo(theUTI, kUTTypePDF)) {
+    else if (UTTypeConformsTo(theUTI, kUTTypePDF) || UTTypeConformsTo(theUTI, CFSTR("net.sourceforge.skim-app.pdfd"))) {
         theView = pdfView;
-        PDFDocument *pdfDoc = [[PDFDocument alloc] initWithURL:representedURL];
+        PDFDocument *pdfDoc = [PDFDocument instancesRespondToSelector:@selector(initWithURL:readSkimNotes:)] ? [[PDFDocument alloc] initWithURL:representedURL readSkimNotes:NULL] : [[PDFDocument alloc] initWithURL:representedURL];
         [pdfView setDocument:pdfDoc];
         [pdfDoc release];
     }
