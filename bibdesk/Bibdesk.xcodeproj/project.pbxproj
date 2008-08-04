@@ -124,9 +124,7 @@
 		CE0901560E39F38300BDF413 /* AGRegex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
 		CE0901570E39F38300BDF413 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
 		CE0901580E39F38300BDF413 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
-		CE0901590E39F38300BDF413 /* SkimNotesBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */; };
 		CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */; };
-		CE09FF8A0E39DEE200BDF413 /* SkimNotesBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE52E69D0E2D2B87007B6C62 /* SkimNotesBase.framework */; };
 		CE0EB4440DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */; };
 		CE0ECDAB0DE78619006EEDDB /* BDSKSpiresParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0ECDA90DE78619006EEDDB /* BDSKSpiresParser.m */; };
 		CE117D240D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE117D220D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.m */; };
@@ -272,6 +270,8 @@
 		CE966C710B47CF25003BAB9A /* BDSKDublinCoreXMLParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE966C6F0B47CF25003BAB9A /* BDSKDublinCoreXMLParser.m */; };
 		CE969E340931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE969E320931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m */; };
 		CE9F85410956A2C50073FCAD /* BDSKFieldEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */; };
+		CEA4513E0E47C86200D161AD /* SkimNotes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
+		CEA4516F0E47C93000D161AD /* SkimNotes.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
 		CEAB9F5A0B4FF20800673AC2 /* BDSKCitationFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAB9F580B4FF20800673AC2 /* BDSKCitationFormatter.m */; };
 		CEAC48510A96589A00B8DF43 /* BDSKTemplatedTextCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAC484F0A96589A00B8DF43 /* BDSKTemplatedTextCommand.m */; };
 		CEAC51570A97730800B8DF43 /* BDSKExportUsingTemplateCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAC51550A97730800B8DF43 /* BDSKExportUsingTemplateCommand.m */; };
@@ -533,13 +533,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		CE09FF870E39DE7400BDF413 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = CEA5F53C0E2CED0E00F65088;
-			remoteInfo = SkimNotesBase;
-		};
 		CE52E69C0E2D2B87007B6C62 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
@@ -560,6 +553,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = CEBA2B550E0566B00000B2E6;
 			remoteInfo = skimnotes;
+		};
+		CEA451690E47C8C000D161AD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* SkimNotes */;
+			remoteInfo = SkimNotes;
 		};
 		CEDB9BC70E2F405F0057FD09 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -844,7 +844,7 @@
 				CE0901560E39F38300BDF413 /* AGRegex.framework in CopyFiles */,
 				CE0901570E39F38300BDF413 /* FileView.framework in CopyFiles */,
 				CE0901580E39F38300BDF413 /* BTParse.framework in CopyFiles */,
-				CE0901590E39F38300BDF413 /* SkimNotesBase.framework in CopyFiles */,
+				CEA4516F0E47C93000D161AD /* SkimNotes.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -972,7 +972,6 @@
 		CE05CF5C0D7743940034C2A8 /* WebURLsWithTitles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebURLsWithTitles.h; sourceTree = "<group>"; };
 		CE09CEA40DDEF65E00F3F2FE /* BDSKCompletionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCompletionManager.h; sourceTree = "<group>"; };
 		CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCompletionManager.m; sourceTree = "<group>"; };
-		CE09FF7F0E39DE4E00BDF413 /* SkimNotesBase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SkimNotesBase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE0EB4410DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSInvocation_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSInvocation_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE0ECDA80DE78619006EEDDB /* BDSKSpiresParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSpiresParser.h; sourceTree = "<group>"; };
@@ -1206,6 +1205,7 @@
 		CE9DBEDE093CF2640008648B /* BDSKBibliographyCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBibliographyCommand.m; sourceTree = "<group>"; };
 		CE9F853E0956A2C50073FCAD /* BDSKFieldEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFieldEditor.h; sourceTree = "<group>"; };
 		CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFieldEditor.m; sourceTree = "<group>"; };
+		CEA451600E47C88E00D161AD /* SkimNotes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SkimNotes.framework; path = ../../../BuildProducts/Debug/SkimNotes.framework; sourceTree = SOURCE_ROOT; };
 		CEAB9F570B4FF20800673AC2 /* BDSKCitationFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCitationFormatter.h; sourceTree = "<group>"; };
 		CEAB9F580B4FF20800673AC2 /* BDSKCitationFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCitationFormatter.m; sourceTree = "<group>"; };
 		CEAC484E0A96589A00B8DF43 /* BDSKTemplatedTextCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTemplatedTextCommand.h; sourceTree = "<group>"; };
@@ -1756,7 +1756,7 @@
 				CE2BB7E90E0DB0D00090E848 /* yaz.framework in Frameworks */,
 				CE2BB7E80E0DB0C70090E848 /* FileView.framework in Frameworks */,
 				CE2BB7EE0E0DB0F40090E848 /* BTParse.framework in Frameworks */,
-				CE09FF8A0E39DEE200BDF413 /* SkimNotesBase.framework in Frameworks */,
+				CEA4513E0E47C86200D161AD /* SkimNotes.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2033,7 +2033,7 @@
 				F9022DE30758095000C3F701 /* AGRegex.framework */,
 				F9ABEC9E086E11B500741FC5 /* BTParse.framework */,
 				CE2BB5920E0BE1370090E848 /* FileView.framework */,
-				CE09FF7F0E39DE4E00BDF413 /* SkimNotesBase.framework */,
+				CEA451600E47C88E00D161AD /* SkimNotes.framework */,
 			);
 			name = "Embedded Frameworks";
 			sourceTree = "<group>";
@@ -3003,7 +3003,7 @@
 				F9AF56360BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56380BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */,
-				CE09FF880E39DE7400BDF413 /* PBXTargetDependency */,
+				CEA4516A0E47C8C000D161AD /* PBXTargetDependency */,
 				F90B13050C29900200144F1B /* PBXTargetDependency */,
 				CEEBA84A0D749DB7000204B8 /* PBXTargetDependency */,
 				F9AF56340BEA4160009B16D5 /* PBXTargetDependency */,
@@ -3896,10 +3896,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		CE09FF880E39DE7400BDF413 /* PBXTargetDependency */ = {
+		CEA4516A0E47C8C000D161AD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = SkimNotesBase;
-			targetProxy = CE09FF870E39DE7400BDF413 /* PBXContainerItemProxy */;
+			name = SkimNotes;
+			targetProxy = CEA451690E47C8C000D161AD /* PBXContainerItemProxy */;
 		};
 		CEEBA83F0D749CC9000204B8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

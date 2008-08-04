@@ -43,7 +43,7 @@
 #import <FileView/FVFinderLabel.h>
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "NSWorkspace_BDSKExtensions.h"
-#import <SkimNotesBase/SkimNotesBase.h>
+#import <SkimNotes/SkimNotes.h>
 
 @implementation NSURL (BDSKExtensions)
 

@@ -35,7 +35,7 @@
  */
 
 #import "BibDocument_DataSource.h"
-#import <SkimNotesBase/SKNExtendedAttributeManager.h>
+#import <SkimNotes/SKNExtendedAttributeManager.h>
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BibItem.h"
