@@ -51,6 +51,21 @@ static NSString *BDSKBookmarksNewFolderToolbarItemIdentifier = @"BDSKBookmarksNe
 static NSString *BDSKBookmarksNewSeparatorToolbarItemIdentifier = @"BDSKBookmarksNewSeparatorToolbarItemIdentifier";
 static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDeleteToolbarItemIdentifier";
 
+static NSString *BDSKBookmarkChildrenKey = @"children";
+static NSString *BDSKBookmarkNameKey = @"name";
+static NSString *BDSKBookmarkUrlStringKey = @"urlString";
+
+static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkPropertiesObservationContext";
+
+
+@interface BDSKBookmarkController (BDSKPrivate)
+- (void)setupToolbar;
+- (void)handleApplicationWillTerminateNotification:(NSNotification *)notification;
+- (void)endEditing;
+- (void)startObservingBookmarks:(NSArray *)newBookmarks;
+- (void)stopObservingBookmarks:(NSArray *)oldBookmarks;
+@end
+
 @implementation BDSKBookmarkController
 
 + (id)sharedBookmarkController {
@@ -80,16 +95,15 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
 		}
         
         bookmarkRoot = [[BDSKBookmark alloc] initFolderWithChildren:bookmarks name:nil];
-        [bookmarkRoot setUndoManager:[self undoManager]];
+        [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBookmarkChangedNotification:) name:BDSKBookmarkChangedNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBookmarkWillBeRemovedNotification:) name:BDSKBookmarkWillBeRemovedNotification object:nil];
     }
     return self;
 }
 
 - (void)dealloc {
+    [self stopObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
     [bookmarkRoot release];
     [undoManager release];
     [super dealloc];
@@ -141,7 +155,8 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
 - (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name toFolder:(BDSKBookmark *)folder {
     BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithUrlString:urlString name:name];
     if (bookmark) {
-        [(folder ? folder : bookmarkRoot) addChild:bookmark];
+        if (folder == nil) folder = bookmarkRoot;
+        [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
         [bookmark release];
     }
 }
@@ -209,7 +224,7 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
             idx = [[item children] indexOfObject:selectedItem] + 1;
         }
     }
-    [item insertChild:bookmark atIndex:idx];
+    [item insertObject:bookmark inChildrenAtIndex:idx];
     
     int row = [outlineView rowForItem:bookmark];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -232,7 +247,7 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
             idx = [[item children] indexOfObject:selectedItem] + 1;
         }
     }
-    [item insertChild:folder atIndex:idx];
+    [item insertObject:folder inChildrenAtIndex:idx];
     
     int row = [outlineView rowForItem:folder];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -255,7 +270,7 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
             idx = [[item children] indexOfObject:selectedItem] + 1;
         }
     }
-    [item insertChild:separator atIndex:idx];
+    [item insertObject:separator inChildrenAtIndex:idx];
     
     int row = [outlineView rowForItem:separator];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -283,13 +298,9 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
 	[data writeToFile:bookmarksPath atomically:YES];
 }
 
-- (void)handleBookmarkWillBeRemovedNotification:(NSNotification *)notification  {
+- (void)endEditing {
     if ([outlineView editedRow] && [[self window] makeFirstResponder:outlineView] == NO)
         [[self window] endEditingFor:nil];
-}
-
-- (void)handleBookmarkChangedNotification:(NSNotification *)notification {
-    [outlineView reloadData];
 }
 
 #pragma mark Undo support
@@ -302,6 +313,100 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
 
 - (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender {
     return [self undoManager];
+}
+
+- (void)startObservingBookmarks:(NSArray *)newBookmarks {
+    NSEnumerator *bmEnum = [newBookmarks objectEnumerator];
+    BDSKBookmark *bm;
+    while (bm = [bmEnum nextObject]) {
+        if ([bm bookmarkType] != BDSKBookmarkTypeSeparator) {
+            [bm addObserver:self forKeyPath:BDSKBookmarkNameKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKBookmarkPropertiesObservationContext];
+            [bm addObserver:self forKeyPath:BDSKBookmarkUrlStringKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKBookmarkPropertiesObservationContext];
+            if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
+                [bm addObserver:self forKeyPath:BDSKBookmarkChildrenKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKBookmarkPropertiesObservationContext];
+                [self startObservingBookmarks:[bm children]];
+            }
+        }
+    }
+}
+
+- (void)stopObservingBookmarks:(NSArray *)oldBookmarks {
+    NSEnumerator *bmEnum = [oldBookmarks objectEnumerator];
+    BDSKBookmark *bm;
+    while (bm = [bmEnum nextObject]) {
+        if ([bm bookmarkType] != BDSKBookmarkTypeSeparator) {
+            [bm removeObserver:self forKeyPath:BDSKBookmarkNameKey];
+            [bm removeObserver:self forKeyPath:BDSKBookmarkUrlStringKey];
+            if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
+                [bm removeObserver:self forKeyPath:BDSKBookmarkChildrenKey];
+                [self stopObservingBookmarks:[bm children]];
+            }
+        }
+    }
+}
+
+- (void)insertObjects:(NSArray *)newChildren inChildrenOfBookmark:(BDSKBookmark *)bookmark atIndexes:(NSIndexSet *)indexes {
+    [[bookmark mutableArrayValueForKey:BDSKBookmarkChildrenKey] insertObjects:newChildren atIndexes:indexes];
+}
+
+- (void)removeObjectsFromChildrenOfBookmark:(BDSKBookmark *)bookmark atIndexes:(NSIndexSet *)indexes {
+    [[bookmark mutableArrayValueForKey:BDSKBookmarkChildrenKey] removeObjectsAtIndexes:indexes];
+}
+
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == BDSKBookmarkPropertiesObservationContext) {
+        BDSKBookmark *bookmark = (BDSKBookmark *)object;
+        id newValue = [change objectForKey:NSKeyValueChangeNewKey];
+        id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
+        NSIndexSet *indexes = [change objectForKey:NSKeyValueChangeIndexesKey];
+        
+        if ([newValue isEqual:[NSNull null]]) newValue = nil;
+        if ([oldValue isEqual:[NSNull null]]) oldValue = nil;
+        
+        switch ([[change objectForKey:NSKeyValueChangeKindKey] unsignedIntValue]) {
+            case NSKeyValueChangeSetting:
+                if ([keyPath isEqualToString:BDSKBookmarkChildrenKey]) {
+                    NSMutableArray *old = [NSMutableArray arrayWithArray:oldValue];
+                    NSMutableArray *new = [NSMutableArray arrayWithArray:newValue];
+                    [old removeObjectsInArray:newValue];
+                    [new removeObjectsInArray:oldValue];
+                    [self stopObservingBookmarks:old];
+                    [self startObservingBookmarks:new];
+                    [[[self undoManager] prepareWithInvocationTarget:bookmark] setChildren:oldValue];
+                } else if ([keyPath isEqualToString:BDSKBookmarkNameKey]) {
+                    [(BDSKBookmark *)[[self undoManager] prepareWithInvocationTarget:bookmark] setName:oldValue];
+                } else if ([keyPath isEqualToString:BDSKBookmarkUrlStringKey]) {
+                    [[[self undoManager] prepareWithInvocationTarget:bookmark] setUrlString:oldValue];
+                }
+                break;
+            case NSKeyValueChangeInsertion:
+                if ([keyPath isEqualToString:BDSKBookmarkChildrenKey]) {
+                    [self startObservingBookmarks:newValue];
+                    [[[self undoManager] prepareWithInvocationTarget:self] removeObjectsFromChildrenOfBookmark:bookmark atIndexes:indexes];
+                }
+                break;
+            case NSKeyValueChangeRemoval:
+                if ([keyPath isEqualToString:BDSKBookmarkChildrenKey]) {
+                    [self stopObservingBookmarks:oldValue];
+                    [[[self undoManager] prepareWithInvocationTarget:self] insertObjects:oldValue inChildrenOfBookmark:bookmark atIndexes:indexes];
+                }
+                break;
+            case NSKeyValueChangeReplacement:
+                if ([keyPath isEqualToString:BDSKBookmarkChildrenKey]) {
+                    [self stopObservingBookmarks:oldValue];
+                    [self startObservingBookmarks:newValue];
+                    [[[self undoManager] prepareWithInvocationTarget:self] removeObjectsFromChildrenOfBookmark:bookmark atIndexes:indexes];
+                    [[[self undoManager] prepareWithInvocationTarget:self] insertObjects:oldValue inChildrenOfBookmark:bookmark atIndexes:indexes];
+                }
+                break;
+        }
+        
+        [outlineView reloadData];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 #pragma mark NSOutlineView datasource methods
@@ -407,16 +512,19 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
         NSEnumerator *bmEnum = [[self draggedBookmarks] objectEnumerator];
         BDSKBookmark *bookmark;
 				
+        [self endEditing];
+        
 		while (bookmark = [bmEnum nextObject]) {
-            int bookmarkIndex = [[[bookmark parent] children] indexOfObject:bookmark];
-            if (item == [bookmark parent]) {
+            BDSKBookmark *parent = [bookmark parent];
+            int bookmarkIndex = [[parent children] indexOfObject:bookmark];
+            if (item == parent) {
                 if (idx > bookmarkIndex)
                     idx--;
                 if (idx == bookmarkIndex)
                     continue;
             }
-            [[bookmark parent] removeChild:bookmark];
-            [(BDSKBookmark *)item insertChild:bookmark atIndex:idx++];
+            [parent removeObjectFromChildrenAtIndex:bookmarkIndex];
+            [(BDSKBookmark *)item insertObject:bookmark inChildrenAtIndex:idx++];
 		}
         return YES;
     } else if (type) {
@@ -433,7 +541,7 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
             BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithUrlString:urlString name:nil];
             if (idx == NSOutlineViewDropOnItemIndex)
                 idx = [[item children] count];
-            [(BDSKBookmark *)item insertChild:bookmark atIndex:idx];
+            [(BDSKBookmark *)item insertObject:bookmark inChildrenAtIndex:idx];
             [bookmark release];
         }
         return YES;
@@ -486,8 +594,14 @@ static NSString *BDSKBookmarksDeleteToolbarItemIdentifier = @"BDSKBookmarksDelet
     NSEnumerator *itemEnum = [[self minimumCoverForBookmarks:items] reverseObjectEnumerator];
     BDSKBookmark *item;
     
-    while (item = [itemEnum  nextObject])
-        [[item parent] removeChild:item];
+    [self endEditing];
+    
+    while (item = [itemEnum  nextObject]) {
+        BDSKBookmark *parent = [item parent];
+        unsigned int itemIndex = [[parent children] indexOfObject:item];
+        if (itemIndex != NSNotFound)
+            [parent removeObjectFromChildrenAtIndex:itemIndex];
+    }
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov drawSeparatorRowForItem:(id)item {

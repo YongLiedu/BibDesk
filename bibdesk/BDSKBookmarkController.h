@@ -61,10 +61,6 @@
 - (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name toFolder:(BDSKBookmark *)folder;
 - (void)addBookmarkWithUrlString:(NSString *)urlString proposedName:(NSString *)name modalForWindow:(NSWindow *)window;
 
-- (void)handleApplicationWillTerminateNotification:(NSNotification *)notification;
-- (void)handleBookmarkWillBeRemovedNotification:(NSNotification *)notification;
-- (void)handleBookmarkChangedNotification:(NSNotification *)notification;
-
 - (IBAction)insertBookmark:(id)sender;
 - (IBAction)insertBookmarkFolder:(id)sender;
 - (IBAction)insertBookmarkSeparator:(id)sender;
@@ -73,8 +69,6 @@
 - (IBAction)dismissAddBookmarkSheet:(id)sender;
 
 - (NSUndoManager *)undoManager;
-
-- (void)setupToolbar;
 
 @end
 

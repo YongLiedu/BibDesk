@@ -49,6 +49,19 @@ static NSString *BDSKSearchBookmarksNewFolderToolbarItemIdentifier = @"BDSKSearc
 static NSString *BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier = @"BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier";
 static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBookmarksDeleteToolbarItemIdentifier";
 
+static NSString *BDSKSearchBookmarkChildrenKey = @"children";
+static NSString *BDSKSearchBookmarkLabelKey = @"label";
+
+static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBookmarkPropertiesObservationContext";
+
+
+@interface BDSKSearchBookmarkController (BDSKPrivate)
+- (void)setupToolbar;
+- (void)endEditing;
+- (void)startObservingBookmarks:(NSArray *)newBookmarks;
+- (void)stopObservingBookmarks:(NSArray *)oldBookmarks;
+@end
+
 @implementation BDSKSearchBookmarkController
 
 + (id)sharedBookmarkController {
@@ -71,21 +84,13 @@ static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBo
         }
         
         bookmarkRoot = [[BDSKSearchBookmark alloc] initFolderWithChildren:bookmarks label:nil];
-        [bookmarkRoot setUndoManager:[self undoManager]];
-        
-		[[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleSearchBookmarkChangedNotification:)
-                                                     name:BDSKSearchBookmarkChangedNotification
-                                                   object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleSearchBookmarkWillBeRemovedNotification:)
-                                                     name:BDSKSearchBookmarkWillBeRemovedNotification
-                                                   object:nil];
+        [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
     }
     return self;
 }
 
 - (void)dealloc {
+    [self stopObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [bookmarkRoot release];
     [super dealloc];
@@ -122,7 +127,8 @@ static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBo
 - (void)addBookmarkWithInfo:(NSDictionary *)info label:(NSString *)label toFolder:(BDSKSearchBookmark *)folder {
     BDSKSearchBookmark *bookmark = [[BDSKSearchBookmark alloc] initWithInfo:info label:label];
     if (bookmark) {
-        [folder ? folder : bookmarkRoot addChild:bookmark];
+        if (folder == nil) folder = bookmarkRoot;
+        [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
         [bookmark release];
     }
 }
@@ -160,7 +166,7 @@ static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBo
             idx = [[item children] indexOfObject:selectedItem] + 1;
         }
     }
-    [item insertChild:folder atIndex:idx];
+    [item insertObject:folder inChildrenAtIndex:idx];
     
     int row = [outlineView rowForItem:folder];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -183,7 +189,7 @@ static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBo
             idx = [[item children] indexOfObject:selectedItem] + 1;
         }
     }
-    [item insertChild:separator atIndex:idx];
+    [item insertObject:separator inChildrenAtIndex:idx];
     
     int row = [outlineView rowForItem:separator];
     [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -193,16 +199,9 @@ static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBo
     [outlineView delete:sender];
 }
 
-#pragma mark Notification handlers
-
-- (void)handleSearchBookmarkWillBeRemovedNotification:(NSNotification *)notification  {
+- (void)endEditing {
     if ([outlineView editedRow] && [[self window] makeFirstResponder:outlineView] == NO)
         [[self window] endEditingFor:nil];
-}
-
-- (void)handleSearchBookmarkChangedNotification:(NSNotification *)notification {
-    [self saveBookmarks];
-    [outlineView reloadData];
 }
 
 #pragma mark Undo support
@@ -215,6 +214,97 @@ static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBo
 
 - (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender {
     return [self undoManager];
+}
+
+- (void)startObservingBookmarks:(NSArray *)newBookmarks {
+    NSEnumerator *bmEnum = [newBookmarks objectEnumerator];
+    BDSKSearchBookmark *bm;
+    while (bm = [bmEnum nextObject]) {
+        if ([bm bookmarkType] != BDSKSearchBookmarkTypeSeparator) {
+            [bm addObserver:self forKeyPath:BDSKSearchBookmarkLabelKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKSearchBookmarkPropertiesObservationContext];
+            if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
+                [bm addObserver:self forKeyPath:BDSKSearchBookmarkChildrenKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:BDSKSearchBookmarkPropertiesObservationContext];
+                [self startObservingBookmarks:[bm children]];
+            }
+        }
+    }
+}
+
+- (void)stopObservingBookmarks:(NSArray *)oldBookmarks {
+    NSEnumerator *bmEnum = [oldBookmarks objectEnumerator];
+    BDSKSearchBookmark *bm;
+    while (bm = [bmEnum nextObject]) {
+        if ([bm bookmarkType] != BDSKSearchBookmarkTypeSeparator) {
+            [bm removeObserver:self forKeyPath:BDSKSearchBookmarkLabelKey];
+            if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
+                [bm removeObserver:self forKeyPath:BDSKSearchBookmarkChildrenKey];
+                [self stopObservingBookmarks:[bm children]];
+            }
+        }
+    }
+}
+
+- (void)insertObjects:(NSArray *)newChildren inChildrenOfBookmark:(BDSKSearchBookmark *)bookmark atIndexes:(NSIndexSet *)indexes {
+    [[bookmark mutableArrayValueForKey:BDSKSearchBookmarkChildrenKey] insertObjects:newChildren atIndexes:indexes];
+}
+
+- (void)removeObjectsFromChildrenOfBookmark:(BDSKSearchBookmark *)bookmark atIndexes:(NSIndexSet *)indexes {
+    [[bookmark mutableArrayValueForKey:BDSKSearchBookmarkChildrenKey] removeObjectsAtIndexes:indexes];
+}
+
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == BDSKSearchBookmarkPropertiesObservationContext) {
+        BDSKSearchBookmark *bookmark = (BDSKSearchBookmark *)object;
+        id newValue = [change objectForKey:NSKeyValueChangeNewKey];
+        id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
+        NSIndexSet *indexes = [change objectForKey:NSKeyValueChangeIndexesKey];
+        
+        if ([newValue isEqual:[NSNull null]]) newValue = nil;
+        if ([oldValue isEqual:[NSNull null]]) oldValue = nil;
+        
+        switch ([[change objectForKey:NSKeyValueChangeKindKey] unsignedIntValue]) {
+            case NSKeyValueChangeSetting:
+                if ([keyPath isEqualToString:BDSKSearchBookmarkChildrenKey]) {
+                    NSMutableArray *old = [NSMutableArray arrayWithArray:oldValue];
+                    NSMutableArray *new = [NSMutableArray arrayWithArray:newValue];
+                    [old removeObjectsInArray:newValue];
+                    [new removeObjectsInArray:oldValue];
+                    [self stopObservingBookmarks:old];
+                    [self startObservingBookmarks:new];
+                    [[[self undoManager] prepareWithInvocationTarget:bookmark] setChildren:oldValue];
+                } else if ([keyPath isEqualToString:BDSKSearchBookmarkLabelKey]) {
+                    [[[self undoManager] prepareWithInvocationTarget:bookmark] setLabel:oldValue];
+                }
+                break;
+            case NSKeyValueChangeInsertion:
+                if ([keyPath isEqualToString:BDSKSearchBookmarkChildrenKey]) {
+                    [self startObservingBookmarks:newValue];
+                    [[[self undoManager] prepareWithInvocationTarget:self] removeObjectsFromChildrenOfBookmark:bookmark atIndexes:indexes];
+                }
+                break;
+            case NSKeyValueChangeRemoval:
+                if ([keyPath isEqualToString:BDSKSearchBookmarkChildrenKey]) {
+                    [self stopObservingBookmarks:oldValue];
+                    [[[self undoManager] prepareWithInvocationTarget:self] insertObjects:oldValue inChildrenOfBookmark:bookmark atIndexes:indexes];
+                }
+                break;
+            case NSKeyValueChangeReplacement:
+                if ([keyPath isEqualToString:BDSKSearchBookmarkChildrenKey]) {
+                    [self stopObservingBookmarks:oldValue];
+                    [self startObservingBookmarks:newValue];
+                    [[[self undoManager] prepareWithInvocationTarget:self] removeObjectsFromChildrenOfBookmark:bookmark atIndexes:indexes];
+                    [[[self undoManager] prepareWithInvocationTarget:self] insertObjects:oldValue inChildrenOfBookmark:bookmark atIndexes:indexes];
+                }
+                break;
+        }
+        
+        [outlineView reloadData];
+        [self saveBookmarks];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 #pragma mark NSOutlineView datasource methods
@@ -295,17 +385,20 @@ static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBo
         BDSKSearchBookmark *bookmark;
         
         if (item == nil) item = bookmarkRoot;
-				
+        
+        [self endEditing];
+        
 		while (bookmark = [bmEnum nextObject]) {
-            int bookmarkIndex = [[[bookmark parent] children] indexOfObject:bookmark];
-            if (item == [bookmark parent]) {
+            BDSKSearchBookmark *parent = [bookmark parent];
+            int bookmarkIndex = [[parent children] indexOfObject:bookmark];
+            if (item == parent) {
                 if (idx > bookmarkIndex)
                     idx--;
                 if (idx == bookmarkIndex)
                     continue;
             }
-            [[bookmark parent] removeChild:bookmark];
-            [(BDSKSearchBookmark *)item insertChild:bookmark atIndex:idx++];
+            [parent removeObjectFromChildrenAtIndex:bookmarkIndex];
+            [(BDSKSearchBookmark *)item insertObject:bookmark inChildrenAtIndex:idx++];
 		}
         return YES;
     }
@@ -342,8 +435,14 @@ static NSString *BDSKSearchBookmarksDeleteToolbarItemIdentifier = @"BDSKSearchBo
     NSEnumerator *itemEnum = [[self minimumCoverForBookmarks:items] reverseObjectEnumerator];
     BDSKSearchBookmark *item;
     
-    while (item = [itemEnum  nextObject])
-        [[item parent] removeChild:item];
+    [self endEditing];
+    
+    while (item = [itemEnum  nextObject]) {
+        BDSKSearchBookmark *parent = [item parent];
+        unsigned int itemIndex = [[parent children] indexOfObject:item];
+        if (itemIndex != NSNotFound)
+            [parent removeObjectFromChildrenAtIndex:itemIndex];
+    }
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov drawSeparatorRowForItem:(id)item {

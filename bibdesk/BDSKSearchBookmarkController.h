@@ -60,11 +60,7 @@
 - (IBAction)deleteBookmark:(id)sender;
 
 - (void)saveBookmarks;
-- (void)handleSearchBookmarkChangedNotification:(NSNotification *)notification;
-- (void)handleSearchBookmarkWillBeRemovedNotification:(NSNotification *)notification;
 
 - (NSUndoManager *)undoManager;
-
-- (void)setupToolbar;
 
 @end

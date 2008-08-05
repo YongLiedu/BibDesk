@@ -38,9 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern NSString *BDSKBookmarkChangedNotification;
-extern NSString *BDSKBookmarkWillBeRemovedNotification;
-
 enum {
     BDSKBookmarkTypeBookmark,
     BDSKBookmarkTypeFolder,
@@ -49,7 +46,6 @@ enum {
 
 @interface BDSKBookmark : NSObject <NSCopying> {
     BDSKBookmark *parent;
-    NSUndoManager *undoManager;
 }
 
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName;
@@ -75,12 +71,10 @@ enum {
 - (BDSKBookmark *)parent;
 - (void)setParent:(BDSKBookmark *)newParent;
 - (NSArray *)children;
-- (void)insertChild:(BDSKBookmark *)child atIndex:(unsigned int)index;
-- (void)addChild:(BDSKBookmark *)child;
-- (void)removeChild:(BDSKBookmark *)child;
-
-- (NSUndoManager *)undoManager;
-- (void)setUndoManager:(NSUndoManager *)newUndoManager;
+- (unsigned int)countOfChildren;
+- (BDSKBookmark *)objectInChildrenAtIndex:(unsigned int)idx;
+- (void)insertObject:(BDSKBookmark *)child inChildrenAtIndex:(unsigned int)idx;
+- (void)removeObjectFromChildrenAtIndex:(unsigned int)idx;
 
 - (BOOL)isDescendantOf:(BDSKBookmark *)bookmark;
 - (BOOL)isDescendantOfArray:(NSArray *)bookmarks;
