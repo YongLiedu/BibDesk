@@ -40,8 +40,6 @@
 
 extern NSString *BDSKNetServiceDomain;
 
-extern NSString *BDSKComputerName();
-
 @interface BDSKSharingBrowser : NSObject {
     NSMutableSet *sharingClients;
     NSNetServiceBrowser *browser;

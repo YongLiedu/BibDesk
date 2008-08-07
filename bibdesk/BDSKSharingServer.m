@@ -48,6 +48,8 @@
 #import "BDSKSharedGroup.h"
 #import "BDSKAsynchronousDOServer.h"
 #import "BDSKThreadSafeMutableDictionary.h"
+#import <OmniBase/OBUtilities.h>
+#import <OmniBase/assertions.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -86,11 +88,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [pool release];
 }
 
-// This is the computer name as set in sys prefs (sharing)
-NSString *BDSKComputerName() {
-    return [(id)SCDynamicStoreCopyComputerName(dynamicStore, NULL) autorelease];
-}
-
 #pragma mark -
 
 // private protocol for inter-thread messaging
@@ -120,12 +117,11 @@ NSString *BDSKComputerName() {
 
 @implementation BDSKSharingServer
 
-// +load so this gets sets up regardless of whether we instantiate the server
-+ (void)load;
++ (void)initialize;
 {
-    /* Ensure that computer name changes are propagated as future clients connect to a document.  Also, note that the OS will change the computer name to avoid conflicts by appending "(2)" or similar to the previous name, which is likely the most common scenario.
-    */
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    OBINITIALIZE;
+    
+    // Ensure that computer name changes are propagated as future clients connect to a document.  Also, note that the OS will change the computer name to avoid conflicts by appending "(2)" or similar to the previous name, which is likely the most common scenario.
     if(dynamicStore == NULL){
         CFAllocatorRef alloc = CFAllocatorGetDefault();
         CFRetain(alloc); // make sure this is maintained for the life of the program
@@ -143,30 +139,29 @@ NSString *BDSKComputerName() {
         else {
             CFStringRef bundleID = CFBundleGetIdentifier(mainBundle);
             dynamicStore = SCDynamicStoreCreate(alloc, bundleID, &SCDynamicStoreChanged, &SCNSObjectContext);
-        CFRunLoopSourceRef rlSource = SCDynamicStoreCreateRunLoopSource(alloc, dynamicStore, 0);
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), rlSource, kCFRunLoopCommonModes);
-        CFRelease(rlSource);
-        
-        CFMutableArrayRef keys = CFArrayCreateMutable(alloc, 0, &kCFTypeArrayCallBacks);
-        
-        // use SCDynamicStore keys as NSNotification names; don't release them
-        CFStringRef key = SCDynamicStoreKeyCreateComputerName(alloc);
-        CFArrayAppendValue(keys, key);
-        BDSKComputerNameChangedNotification = (NSString *)key;
-        
-        key = SCDynamicStoreKeyCreateHostNames(alloc);
-        CFArrayAppendValue(keys, key);
-        BDSKHostNameChangedNotification = (NSString *)key;
-        
-        OBASSERT(BDSKComputerNameChangedNotification);
-        OBASSERT(BDSKHostNameChangedNotification);
+            CFRunLoopSourceRef rlSource = SCDynamicStoreCreateRunLoopSource(alloc, dynamicStore, 0);
+            CFRunLoopAddSource(CFRunLoopGetCurrent(), rlSource, kCFRunLoopCommonModes);
+            CFRelease(rlSource);
             
-        if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
-            fprintf(stderr, "unable to register for dynamic store notifications.\n");
-        CFRelease(keys);
+            CFMutableArrayRef keys = CFArrayCreateMutable(alloc, 0, &kCFTypeArrayCallBacks);
+            
+            // use SCDynamicStore keys as NSNotification names; don't release them
+            CFStringRef key = SCDynamicStoreKeyCreateComputerName(alloc);
+            CFArrayAppendValue(keys, key);
+            BDSKComputerNameChangedNotification = (NSString *)key;
+            
+            key = SCDynamicStoreKeyCreateHostNames(alloc);
+            CFArrayAppendValue(keys, key);
+            BDSKHostNameChangedNotification = (NSString *)key;
+            
+            OBASSERT(BDSKComputerNameChangedNotification);
+            OBASSERT(BDSKHostNameChangedNotification);
+                
+            if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
+                fprintf(stderr, "unable to register for dynamic store notifications.\n");
+            CFRelease(keys);
+        }
     }
-    }
-    [pool release];
 }
 
 // base name for sharing (also used for storing remote host names in keychain)
@@ -174,8 +169,11 @@ NSString *BDSKComputerName() {
 {
     // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
     NSString *sharingName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey];
+    OBASSERT(dynamicStore);
+    // default to the computer name as set in sys prefs (sharing)
     if([NSString isEmptyString:sharingName])
-        sharingName = BDSKComputerName();
+        sharingName = [(id)SCDynamicStoreCopyComputerName(dynamicStore, NULL) autorelease];
+    OBPOSTCONDITION(sharingName);
     return sharingName;
 }
 
@@ -279,6 +277,8 @@ NSString *BDSKComputerName() {
     
     // register for notifications
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    
+    OBASSERT(BDSKComputerNameChangedNotification);
     
     [nc addObserver:self
            selector:@selector(handleComputerNameChangedNotification:)
