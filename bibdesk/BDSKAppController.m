@@ -89,6 +89,7 @@
 #import "BDSKGroupsArray.h"
 #import "BDSKWebGroup.h"
 #import "BDSKWebGroupViewController.h"
+#import "KFASHandlerAdditions-TypeTranslation.h"
 
 @implementation BDSKAppController
 
@@ -154,6 +155,11 @@ static void fixLegacyTableColumnIdentifiers()
     static NSImage *nsCautionIcon = nil;
     nsCautionIcon = [[NSImage iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kAlertCautionIcon] retain];
     [nsCautionIcon setName:@"BDSKSmallCautionIcon"];
+    
+    // register NSURL as conversion handler for file types
+    [NSAppleEventDescriptor registerConversionHandler:[NSURL class]
+                                             selector:@selector(fileURLWithAEDesc:)
+                                   forDescriptorTypes:typeFileURL, typeFSS, typeAlias, typeFSRef, nil];
 }
 
 - (id)init

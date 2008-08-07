@@ -41,19 +41,10 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSAppleEventDescriptor_BDSKExtensions.h"
 #import <FileView/FVFinderLabel.h>
-#import "KFASHandlerAdditions-TypeTranslation.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import <SkimNotes/SkimNotes.h>
 
 @implementation NSURL (BDSKExtensions)
-
-+ (void)load {
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    [NSAppleEventDescriptor registerConversionHandler:self
-                                             selector:@selector(fileURLWithAEDesc:)
-                                   forDescriptorTypes:typeFileURL, typeFSS, typeAlias, typeFSRef, nil];
-    [pool release];
-}
 
 + (NSURL *)fileURLWithAEDesc:(NSAppleEventDescriptor *)desc {
     return [desc fileURLValue];
