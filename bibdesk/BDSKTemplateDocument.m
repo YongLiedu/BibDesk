@@ -1482,9 +1482,9 @@ static void (*originalTextViewDidChangeSelection)(id, SEL, id) = NULL;
 }
 
 + (void)load {
-    if (NULL != class_getInstanceMethod(self, @selector(textViewDidChangeSelection:)))
-        originalTextViewDidChangeSelection = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(textViewDidChangeSelection:), @selector(replacementTextViewDidChangeSelection:));
-    else
+    originalTextViewDidChangeSelection = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(textViewDidChangeSelection:), @selector(replacementTextViewDidChangeSelection:));
+    // if it was returning NULL nothing was replaced, so we just register the method because we want to use it
+    if (originalTextViewDidChangeSelection == NULL)
         OBRegisterInstanceMethodWithSelector(self, @selector(replacementTextViewDidChangeSelection:), @selector(textViewDidChangeSelection:));
 }
 

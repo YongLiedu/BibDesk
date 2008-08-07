@@ -58,10 +58,7 @@ static id (*originalGetPrintOperationForPrintInfo)(id, SEL, id, BOOL) = NULL;
 }
 
 + (void)load {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    if ([self instancesRespondToSelector:@selector(getPrintOperationForPrintInfo:autoRotate:)])
-        originalGetPrintOperationForPrintInfo = (id (*)(id, SEL, id, BOOL))OBReplaceMethodImplementationWithSelector(self, @selector(getPrintOperationForPrintInfo:autoRotate:), @selector(replacementGetPrintOperationForPrintInfo:autoRotate:));
-    [pool release];
+    originalGetPrintOperationForPrintInfo = (id (*)(id, SEL, id, BOOL))OBReplaceMethodImplementationWithSelector(self, @selector(getPrintOperationForPrintInfo:autoRotate:), @selector(replacementGetPrintOperationForPrintInfo:autoRotate:));
 }
 
 + (NSData *)PDFDataWithPostScriptData:(NSData *)psData;
