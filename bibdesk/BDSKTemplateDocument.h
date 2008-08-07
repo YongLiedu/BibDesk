@@ -193,7 +193,7 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 
 #pragma mark -
 
-@interface BDSKTokenField : NSTokenField
+@interface NSTokenField (BDSKExtensions)
 @end
 
 @interface NSObject (BDSKTokenFieldDelegate)

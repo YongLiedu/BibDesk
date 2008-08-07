@@ -56,6 +56,7 @@
 #import "BDSKGroupsArray.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplateDocument.h"
+#import <OmniBase/OBUtilities.h>
 
 @implementation BDSKDocumentController
 
@@ -553,21 +554,18 @@
 
 #pragma mark -
 
-@interface NSSavePanel (AppleBugPrivate)
+@interface NSSavePanel (BDSKAppleBugPrivate)
 - (BOOL)_canShowGoto;
 @end
 
-@interface BDSKPosingSavePanel : NSSavePanel @end
+@interface NSSavePanel (BDSKAppleBugFixes) @end
 
-@implementation BDSKPosingSavePanel
+@implementation NSSavePanel (BDSKAppleBugFixes)
 
-+ (void)load
-{
-    [self poseAsClass:NSClassFromString(@"NSSavePanel")];
-}
+static BOOL (*originalCanShowGoTo)(id, SEL) = NULL;
 
 // hack around an acknowledged Apple bug (http://www.cocoabuilder.com/archive/message/cocoa/2006/4/14/161080) that causes the goto panel to be displayed when trying to enter a leading / in "Open Using Filter" accessory view (our bug #1480815)
-- (BOOL)_canShowGoto;
+- (BOOL)replacementCanShowGoto;
 {
     id firstResponder = [self firstResponder];
     // this is likely a field editor, but we have to make sure
@@ -577,7 +575,12 @@
         if (accessoryView != nil && [accessoryView ancestorSharedWithView:[firstResponder delegate]] == accessoryView)
             return NO;
     }
-    return [super _canShowGoto];
+    return originalCanShowGoTo(self, _cmd);
+}
+
++ (void)load
+{
+     originalCanShowGoTo = (BOOL (*)(id, SEL))OBReplaceMethodImplementationWithSelector(self, @selector(_canShowGoto), @selector(replacementCanShowGoto));
 }
 
 @end
