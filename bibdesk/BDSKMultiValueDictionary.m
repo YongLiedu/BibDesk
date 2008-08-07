@@ -59,8 +59,12 @@
     return [(id)dictionary description];
 }
 
+- (CFMutableDictionaryRef)_dictionary:(BOOL)inverse {
+    return inverse ? inverseDictionary : dictionary;
+}
+
 - (NSMutableSet *)_setForValue:(id)aValue inverse:(BOOL)inverse create:(BOOL)create {
-    CFMutableDictionaryRef dict = inverse ? inverseDictionary : dictionary;
+    CFMutableDictionaryRef dict = [self _dictionary:inverse];
     NSMutableSet *value = (NSMutableSet *)CFDictionaryGetValue(dict, aValue);
 
     if (create && value == nil) {
@@ -171,9 +175,9 @@ static void addEntryFunction(const void *key, const void *value, void *context) 
     ctxt.dict = self;
     ctxt.value = nil;
     ctxt.inverse = NO;
-    CFDictionaryApplyFunction(otherDictionary->dictionary, addEntryFunction, &ctxt);
+    CFDictionaryApplyFunction([otherDictionary _dictionary:NO], addEntryFunction, &ctxt);
     ctxt.inverse = YES;
-    CFDictionaryApplyFunction(otherDictionary->inverseDictionary, addEntryFunction, &ctxt);
+    CFDictionaryApplyFunction([otherDictionary _dictionary:YES], addEntryFunction, &ctxt);
 }
 
 @end
