@@ -59,7 +59,6 @@
 		filter = [aFilter retain];
 		conditionControllers = [[NSMutableArray alloc] initWithCapacity:[[filter conditions] count]];
 		conjunction = [filter conjunction];
-        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
         undoManager = nil;
     }
     return self;
@@ -74,7 +73,6 @@
     conditionControllers = nil;
     [undoManager release];
     undoManager = nil;
-    CFRelease(editors);
     editors = nil;
     [super dealloc];
 }

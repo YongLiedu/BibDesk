@@ -51,7 +51,6 @@
 	NSMutableArray *conditionControllers;
 	BDSKFilter *filter;
 	BDSKConjunction conjunction;
-    CFArrayRef editors;
     NSUndoManager *undoManager;
 }
 
