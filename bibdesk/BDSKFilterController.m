@@ -191,27 +191,21 @@
 	conjunction = newConjunction;
 }
 
-#pragma mark NSEditorRegistration
-
-- (void)objectDidBeginEditing:(id)editor {
-    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
-		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (idx != -1)
-		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, idx);		
-}
+#pragma mark NSEditor
 
 - (BOOL)commitEditing {
-    CFIndex idx = CFArrayGetCount(editors);
+	NSEnumerator *cEnum = [conditionControllers objectEnumerator];
+	BDSKConditionController *controller;
     
-	while (idx--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
-			return NO;
-    
+    while (controller = [cEnum nextObject]) {
+        if (NO == [controller commitEditing])
+            return NO;
+    }
     return YES;
+}
+
+- (void)discardEditing {
+	[conditionControllers makeObjectsPerformSelector:@selector(discardEditing)];
 }
 
 #pragma mark Undo support

@@ -68,6 +68,7 @@
 - (void)setConjunction:(BDSKConjunction)newConjunction;
 
 - (BOOL)commitEditing;
+- (void)discardEditing;
 
 - (NSUndoManager *)undoManager;
 

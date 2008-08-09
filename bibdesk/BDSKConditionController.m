@@ -382,4 +382,12 @@ static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionCont
     }
 }
 
+- (BOOL)commitEditing {
+    return [objectController commitEditing];
+}
+
+- (void)discardEditing {
+    [objectController discardEditing];
+}
+
 @end

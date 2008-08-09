@@ -43,6 +43,7 @@
 
 
 @interface BDSKConditionController : NSWindowController {
+    IBOutlet NSObjectController *objectController;
 	IBOutlet NSComboBox *keyComboBox;
 	IBOutlet NSPopUpButton *comparisonPopUp;
 	IBOutlet NSPopUpButton *attachmentComparisonPopUp;
@@ -87,5 +88,8 @@
 
 - (NSArray *)keys;
 - (void)setKeys:(NSArray *)newKeys;
+
+- (BOOL)commitEditing;
+- (void)discardEditing;
 
 @end
