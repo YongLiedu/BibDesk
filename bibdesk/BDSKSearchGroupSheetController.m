@@ -240,7 +240,6 @@ static BOOL isSearchFileAtPath(NSString *path)
 {
     if (self = [super init]) {
         group = [aGroup retain];
-        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
         undoManager = nil;
         
         type = group ? [[group type] copy] : [BDSKSearchGroupEntrez copy];
@@ -259,7 +258,6 @@ static BOOL isSearchFileAtPath(NSString *path)
     [undoManager release];
     [serverInfo release];
     [serverView release];
-    CFRelease(editors);    
     [super dealloc];
 }
 
@@ -551,24 +549,10 @@ static BOOL isSearchFileAtPath(NSString *path)
 
 - (NSString *)type { return type; }
   
-#pragma mark NSEditorRegistration
-
-- (void)objectDidBeginEditing:(id)editor {
-    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
-		CFArrayAppendValue(editors, editor);		
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (idx != -1)
-		CFArrayRemoveValueAtIndex(editors, idx);		
-}
+#pragma mark NSEditor
 
 - (BOOL)commitEditing {
-    CFIndex idx = CFArrayGetCount(editors);
-    
-	while (idx--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
+    if ([objectController commitEditing] == NO)
         return NO;
     
     NSString *message = nil;

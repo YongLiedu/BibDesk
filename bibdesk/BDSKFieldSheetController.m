@@ -47,7 +47,6 @@
         field = nil;
         [self setPrompt:promptString];
         [self setFieldsArray:fields];
-        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
     }
     return self;
 }
@@ -56,7 +55,6 @@
     [prompt release];
     [fieldsArray release];
     [field release];
-    CFRelease(editors);
     [super dealloc];
 }
 
@@ -106,29 +104,10 @@
 }
 
 - (IBAction)dismiss:(id)sender{
-    if ([sender tag] == NSCancelButton || [self commitEditing])
+    if ([sender tag] == NSCancelButton || [objectController commitEditing]) {
+        [objectController setContent:nil];
         [super dismiss:sender];
-}
-
-- (void)objectDidBeginEditing:(id)editor {
-    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
-		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (idx != -1)
-		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, idx);		
-}
-
-- (BOOL)commitEditing {
-    CFIndex idx = CFArrayGetCount(editors);
-    
-	while (idx--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
-			return NO;
-    
-    return YES;
+    }
 }
 
 @end

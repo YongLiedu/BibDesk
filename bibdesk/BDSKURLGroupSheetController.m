@@ -55,7 +55,6 @@
     if (self = [super init]) {
         group = [aGroup retain];
         urlString = [[[group URL] absoluteString] retain];
-        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
         undoManager = nil;
         dragFieldEditor = nil;
     }
@@ -67,7 +66,6 @@
     [group release];
     [undoManager release];
     [dragFieldEditor release];
-    CFRelease(editors);
     [super dealloc];
 }
 
@@ -103,6 +101,8 @@
             [[group undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Undo action name")];
         }
     }
+    
+    [objectController setContent:nil];
     
     [super dismiss:sender];
 }
@@ -145,24 +145,10 @@
     }
 }
 
-#pragma mark NSEditorRegistration
-
-- (void)objectDidBeginEditing:(id)editor {
-    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
-		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (idx != -1)
-		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, idx);		
-}
+#pragma mark NSEditor
 
 - (BOOL)commitEditing {
-    CFIndex idx = CFArrayGetCount(editors);
-    
-	while (idx--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
+    if ([objectController commitEditing] == NO)
 			return NO;
     
     if ([NSString isEmptyString:urlString]) {

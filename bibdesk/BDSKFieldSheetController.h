@@ -41,6 +41,7 @@
 
 @interface BDSKFieldSheetController : BDSKSheetController
 {
+    IBOutlet NSObjectController *objectController;
     IBOutlet NSControl *fieldsControl;
     IBOutlet NSButton *okButton;
     IBOutlet NSButton *cancelButton;
@@ -48,7 +49,6 @@
     NSString *prompt;
     NSArray *fieldsArray;
     NSString *field;
-    CFArrayRef editors;
 }
 
 - (id)initWithPrompt:(NSString *)prompt fieldsArray:(NSArray *)fields;
@@ -59,8 +59,6 @@
 - (void)setFieldsArray:(NSArray *)array;
 - (NSString *)prompt;
 - (void)setPrompt:(NSString *)promptString;
-
-- (BOOL)commitEditing;
 
 @end
 

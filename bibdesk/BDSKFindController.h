@@ -60,7 +60,7 @@
     IBOutlet NSBox *findOptionsBox;
     IBOutlet NSBox *setOptionsBox;
     IBOutlet BDSKStatusBar *statusBar;
-
+    IBOutlet NSObjectController *objectController;
 	
 	NSTextView *findFieldEditor;
 	NSMutableArray *findHistory;
@@ -78,7 +78,6 @@
     int operation;
 	NSString *replaceLabel;
 	NSString *replaceAllTooltip;
-    CFArrayRef editors;
 }
 
 /*!
@@ -96,8 +95,6 @@
     @discussion (comprehensive description)
 */
 - (void)updateUI;
-
-- (BOOL)commitEditing;
 
 /*!
     @method     regexIsValid:

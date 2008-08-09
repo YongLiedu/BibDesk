@@ -44,13 +44,13 @@
 @interface BDSKScriptGroupSheetController : BDSKSheetController
 {
     IBOutlet BDSKDragTextField *pathField;
+    IBOutlet NSObjectController *objectController;
     BDSKScriptGroup *group;
     NSString *path;
     NSString *arguments;
     int type;
     NSUndoManager *undoManager;
     BDSKFieldEditor *dragFieldEditor;
-    CFArrayRef editors;
 }
 
 - (id)initWithGroup:(BDSKScriptGroup *)aGroup;

@@ -44,7 +44,6 @@
 @interface BDSKSearchGroupSheetController : BDSKSheetController {
     BDSKSearchGroup *group;
     NSUndoManager *undoManager;
-    CFMutableArrayRef editors;
     BDSKMutableServerInfo *serverInfo;
     NSString *type;
     
@@ -69,6 +68,8 @@
     
     IBOutlet BDSKCollapsibleView *serverView;
     IBOutlet NSButton *revealButton;
+    
+    IBOutlet NSObjectController *objectController;
 }
 
 + (void)resetServers;

@@ -65,7 +65,6 @@ static BOOL isFolderAtPath(NSString *path)
         type = [group scriptType];
         undoManager = nil;
         dragFieldEditor = nil;
-        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
     }
     return self;
 }
@@ -76,7 +75,6 @@ static BOOL isFolderAtPath(NSString *path)
     [group release];
     [undoManager release];
     [dragFieldEditor release];
-    CFRelease(editors);
     [super dealloc];
 }
 
@@ -135,6 +133,9 @@ static BOOL isFolderAtPath(NSString *path)
         }
         
     }
+    
+    [objectController setContent:nil];
+    
     [super dismiss:sender];
 }
 
@@ -194,24 +195,10 @@ static BOOL isFolderAtPath(NSString *path)
     }
 }
 
-#pragma mark NSEditorRegistration
-
-- (void)objectDidBeginEditing:(id)editor {
-    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
-		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (idx != -1)
-		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, idx);		
-}
+#pragma mark NSEditor
 
 - (BOOL)commitEditing {
-    CFIndex idx = CFArrayGetCount(editors);
-    
-	while (idx--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
+    if ([objectController commitEditing] == NO)
 			return NO;
     
     NSString *errorMessage;

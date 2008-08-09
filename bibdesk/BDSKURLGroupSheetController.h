@@ -44,6 +44,7 @@
 @interface BDSKURLGroupSheetController : BDSKSheetController
 {
     IBOutlet BDSKDragTextField *urlField;
+    IBOutlet NSObjectController *objectController;
     BDSKURLGroup *group;
     NSString *urlString;
     NSUndoManager *undoManager;
