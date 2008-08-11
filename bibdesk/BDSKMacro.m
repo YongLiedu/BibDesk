@@ -115,10 +115,7 @@
 }
 
 - (id)value {
-    NSString *value = [macroResolver valueOfMacro:name];
-    OBASSERT(value);
-	if (value == nil) return [NSNull null]; // returns "missing value" in AppleScript
-	return value;
+	return (id)[macroResolver valueOfMacro:name] ?: (id)[NSNull null];
 }
 
 - (void)setValue:(NSString *)newValue {
@@ -133,10 +130,7 @@
 }
 
 - (id)bibTeXString {
-    NSString *value = [macroResolver valueOfMacro:name];
-    OBASSERT(value);
-	if (value == nil) return [NSNull null]; // returns "missing value" in AppleScript
-	return [value stringAsBibTeXString];
+	return (id)[[macroResolver valueOfMacro:name] stringAsBibTeXString] ?: (id)[NSNull null];
 }
 
 - (void)setBibTeXString:(NSString *)newValue {

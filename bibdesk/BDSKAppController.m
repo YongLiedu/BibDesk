@@ -449,9 +449,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
                 NSDictionary *dict;
                 NSURL *fileURL;
                 while (dict = [fileEnum nextObject]){ 
-                    fileURL = [[BDAlias aliasWithData:[dict objectForKey:@"_BDAlias"]] fileURL];
-                    if(fileURL == nil)
-                        fileURL = [NSURL fileURLWithPath:[dict objectForKey:@"fileName"]];
+                    fileURL = [[BDAlias aliasWithData:[dict objectForKey:@"_BDAlias"]] fileURL] ?: [NSURL fileURLWithPath:[dict objectForKey:@"fileName"]];
                     if(fileURL)
                         [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:NULL];
                 }
@@ -888,9 +886,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             theURLString = [theURLString substringWithRange:NSMakeRange(0, [theURLString length] - 2)];
         if ([theURLString hasPrefix:@"URL:"])
             theURLString = [theURLString substringFromIndex:4];
-        theURL = [NSURL URLWithString:theURLString];
-        if (theURL == nil)
-            theURL = [NSURL URLWithStringByNormalizingPercentEscapes:theURLString];
+        theURL = [NSURL URLWithString:theURLString] ?: [NSURL URLWithStringByNormalizingPercentEscapes:theURLString];
     }
     
     if ([[theURL scheme] isEqualToString:@"x-bdsk"]) {

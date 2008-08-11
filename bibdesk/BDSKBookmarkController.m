@@ -412,8 +412,7 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
 #pragma mark NSOutlineView datasource methods
 
 - (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
-    if (item == nil) item = bookmarkRoot;
-    return [[item children] count];
+    return [[(item ?: bookmarkRoot) children] count];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov isItemExpandable:(id)item {
@@ -421,8 +420,7 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
 }
 
 - (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item {
-    if (item == nil) item = bookmarkRoot;
-    return [[item children]  objectAtIndex:idx];
+    return [[(item ?: bookmarkRoot) children]  objectAtIndex:idx];
 }
 
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
@@ -716,8 +714,7 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
 - (IBAction)addBookmark:(id)sender {
 	WebDataSource *datasource = [[self mainFrame] dataSource];
 	NSString *URLString = [[[datasource request] URL] absoluteString];
-	NSString *name = [datasource pageTitle];
-	if(name == nil) name = [URLString lastPathComponent];
+	NSString *name = [datasource pageTitle] ?: [URLString lastPathComponent];
     
     if (URLString)
         [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:name modalForWindow:[self window]];

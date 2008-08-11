@@ -443,12 +443,9 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 }
 
 - (NSString *)valueOfMacro:(NSString *)macroString{
-    NSString *value = [[self macroDefinitions] objectForKey:macroString];
-    if(value == nil)
-        value = [[self fileMacroDefinitions] objectForKey:macroString];
-    if(value == nil)
-        value = [standardMacroDefinitions objectForKey:macroString];
-    return value;
+    return ([[self macroDefinitions] objectForKey:macroString] ?:
+            [[self fileMacroDefinitions] objectForKey:macroString]) ?:
+            [standardMacroDefinitions objectForKey:macroString];
 }
 
 @end

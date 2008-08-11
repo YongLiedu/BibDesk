@@ -357,9 +357,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 		else
 			message = NSLocalizedString(@"***** ERROR:  unable to create preview *****", @"Preview message");
 		
-        logString = [[server texTask] logFileString];
-        if (nil == logString)
-            logString = NSLocalizedString(@"Unable to read log file from TeX run.", @"Preview message");
+        logString = [[server texTask] logFileString] ?: NSLocalizedString(@"Unable to read log file from TeX run.", @"Preview message");
         
 		pdfData = [self PDFData];
         if(success == NO || pdfData == nil){

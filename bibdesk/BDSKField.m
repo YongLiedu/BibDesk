@@ -85,9 +85,7 @@ A wrapper object around the fields to access them in AppleScript.
 }
 
 - (NSString *)value {
-    NSString *value = [bibItem valueOfField:name inherit:[name isIntegerField] == NO && [name isNoteField] == NO];
-	if (value == nil) return @"";
-	return value;
+    return [bibItem valueOfField:name inherit:[name isIntegerField] == NO && [name isNoteField] == NO] ?: @"";
 }
 
 - (void)setValue:(NSString *)newValue {
@@ -106,9 +104,7 @@ A wrapper object around the fields to access them in AppleScript.
 }
 
 - (NSString *)bibTeXString {
-    NSString *value = [bibItem valueOfField:name inherit:[name isIntegerField] == NO && [name isNoteField] == NO];
-	if (value == nil) return @"";
-	return [value stringAsBibTeXString];
+    return [([bibItem valueOfField:name inherit:[name isIntegerField] == NO && [name isNoteField] == NO] ?: @"") stringAsBibTeXString];
 }
 
 - (void)setBibTeXString:(NSString *)newValue {

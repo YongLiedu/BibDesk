@@ -54,9 +54,7 @@ static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDi
     NSFontManager *fontManager = [NSFontManager sharedFontManager];
     NSString *texStyle = nil;    
     NSMutableDictionary *attrs;
-    NSFont *font = [attributes objectForKey:NSFontAttributeName];
-    if (font == nil)
-        font = [NSFont systemFontOfSize:0];
+    NSFont *font = [attributes objectForKey:NSFontAttributeName] ?: [NSFont systemFontOfSize:0];
     
     NSRange range = *rangePtr;
     NSRange searchRange = range;

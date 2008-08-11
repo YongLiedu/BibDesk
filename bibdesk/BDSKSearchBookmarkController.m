@@ -310,8 +310,7 @@ static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBo
 #pragma mark NSOutlineView datasource methods
 
 - (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item {
-    if (item == nil) item = bookmarkRoot;
-    return [[item children] count];
+    return [[(item ?: bookmarkRoot) children] count];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov isItemExpandable:(id)item {
@@ -319,8 +318,7 @@ static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBo
 }
 
 - (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item {
-    if (item == nil) item = bookmarkRoot;
-    return [[item children] objectAtIndex:idx];
+    return [[(item ?: bookmarkRoot) children] objectAtIndex:idx];
 }
 
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {

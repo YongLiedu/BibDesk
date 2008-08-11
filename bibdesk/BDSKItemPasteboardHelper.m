@@ -144,9 +144,7 @@
     if ([URLs count] == 0)
         return NO;
     
-    NSArray *titles = [[self promisedItemsForPasteboard:pboard] valueForKey:@"citeKey"];
-    if (titles == nil)
-        titles = [URLs valueForKey:@"absoluteString"];
+    NSArray *titles = [[self promisedItemsForPasteboard:pboard] valueForKey:@"citeKey"] ?: [URLs valueForKey:@"absoluteString"];
     
     NSURL *firstURL = [URLs objectAtIndex:0];
     NSString *firstTitle = [titles objectAtIndex:0];

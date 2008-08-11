@@ -382,11 +382,7 @@
 // returns UTC date of next update check
 - (NSDate *)nextUpdateCheckDate;
 {
-    NSDate *lastCheck = [NSDate dateWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKUpdateCheckLastDateKey]];    
-    
-    // if nil, return a date in the past
-    if (nil == lastCheck)
-        lastCheck = [NSDate distantPast];
+    NSDate *lastCheck = [NSDate dateWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKUpdateCheckLastDateKey]] ?: [NSDate distantPast];
     
     CFAbsoluteTime lastCheckTime = CFDateGetAbsoluteTime((CFDateRef)lastCheck);
     

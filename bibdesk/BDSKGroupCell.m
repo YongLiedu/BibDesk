@@ -327,10 +327,8 @@ static NSString *stringWithInteger(int count)
 @implementation BDSKGroupCell (Private)
 
 - (void)recacheCountAttributes {
-	NSFont *countFont = [NSFont fontWithName:@"Helvetica-Bold" size:([[self font] pointSize] - 1)];
+	NSFont *countFont = [NSFont fontWithName:@"Helvetica-Bold" size:([[self font] pointSize] - 1)] ?: [NSFont boldSystemFontOfSize:([[self font] pointSize] - 1)];
 	OBPRECONDITION(countFont);     
-    if (nil == countFont)
-        countFont = [NSFont boldSystemFontOfSize:([[self font] pointSize] - 1)];
 
 	[countAttributes removeAllObjects];
     [countAttributes setObject:[NSColor alternateSelectedControlTextColor] forKey:NSForegroundColorAttributeName];

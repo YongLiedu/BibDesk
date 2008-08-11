@@ -115,9 +115,7 @@
 - (void)registerForNotifications {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 	NSWindow *tableViewWindow = [tableView window];
-	NSView *contentView = [[tableView enclosingScrollView] contentView];
-	if (contentView == nil)
-		contentView = tableView;
+	NSView *contentView = (NSView *)[[tableView enclosingScrollView] contentView] ?: (NSView *)tableView;
 	
     [nc addObserver:self
 		   selector:@selector(controlTextDidChange:)
@@ -159,9 +157,7 @@
 - (void)unregisterForNotifications {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 	NSWindow *tableViewWindow = [tableView window];
-	NSView *contentView = [[tableView enclosingScrollView] contentView];
-	if (contentView == nil)
-		contentView = tableView;
+	NSView *contentView = (NSView *)[[tableView enclosingScrollView] contentView] ?: (NSView *)tableView;
 	
 	[nc removeObserver:self name:NSControlTextDidChangeNotification object:tableView];
 	[nc removeObserver:self name:NSControlTextDidEndEditingNotification object:tableView];
@@ -228,9 +224,7 @@
 	NSRect winFrame = [[self window] frame];
 	float margin = 4.0; // for the shadow and focus ring
 	float minWidth = 16.0; // minimal width of the window without margins, so subviews won't get shifted
-	NSView *contentView = [[tableView enclosingScrollView] contentView];
-	if (contentView == nil)
-		contentView = tableView;
+	NSView *contentView = (NSView *)[[tableView enclosingScrollView] contentView] ?: (NSView *)tableView;
 	
 	NSDivideRect([self currentCellFrame], &lowerEdgeRect, &ignored, 1.0, lowerEdge);
 	lowerEdgeRect = NSIntersectionRect(lowerEdgeRect, [contentView visibleRect]);

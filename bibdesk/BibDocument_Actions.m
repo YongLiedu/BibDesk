@@ -601,9 +601,7 @@
 #pragma mark | URL Field actions
 
 - (IBAction)openLocalURL:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
+	NSString *field = [sender representedObject] ?: BDSKLocalUrlString;
     [self openLocalURLForField:field];
 }
 
@@ -650,9 +648,7 @@
 }
 
 - (IBAction)revealLocalURL:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
+	NSString *field = [sender representedObject] ?: BDSKLocalUrlString;
     [self revealLocalURLForField:field];
 }
 
@@ -691,9 +687,7 @@
 }
 
 - (IBAction)openRemoteURL:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKUrlString;
+	NSString *field = [sender representedObject] ?: BDSKUrlString;
     [self openRemoteURLForField:field];
 }
 
@@ -730,9 +724,7 @@
 }
 
 - (IBAction)showNotesForLocalURL:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
+	NSString *field = [sender representedObject] ?: BDSKLocalUrlString;
     [self showNotesForLocalURLForField:field];
 }
 
@@ -776,9 +768,7 @@
 }
 
 - (IBAction)copyNotesForLocalURL:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
+	NSString *field = [sender representedObject] ?: BDSKLocalUrlString;
     [self copyNotesForLocalURLForField:field];
 }
 

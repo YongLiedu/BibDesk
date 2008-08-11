@@ -73,7 +73,6 @@
     conditionControllers = nil;
     [undoManager release];
     undoManager = nil;
-    editors = nil;
     [super dealloc];
 }
 

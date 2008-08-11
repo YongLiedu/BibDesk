@@ -936,10 +936,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 - (NSString *)fileNameExtensionForType:(NSString *)typeName saveOperation:(NSSaveOperationType)saveOperation
 {
     // this will never be called on 10.4, so we can safely call super
-    NSString *fileExtension = [super fileNameExtensionForType:typeName saveOperation:saveOperation];
-    if(fileExtension == nil)
-    	fileExtension = [[BDSKTemplate templateForStyle:typeName] fileExtension];
-	return fileExtension;
+    return [super fileNameExtensionForType:typeName saveOperation:saveOperation] ?: [[BDSKTemplate templateForStyle:typeName] fileExtension];
 }
 
 #define SAVE_ENCODING_VIEW_OFFSET 30.0
@@ -1136,9 +1133,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         NSString *errTitle = NSAutosaveOperation == docState.currentSaveOperationType ? NSLocalizedString(@"Unable to autosave file", @"Error description") : NSLocalizedString(@"Unable to save file", @"Error description");
         
         // @@ do this in fileWrapperOfType:forPublications:error:?  should just use error localizedDescription
-        NSString *errMsg = [nsError valueForKey:NSLocalizedRecoverySuggestionErrorKey];
-        if (nil == errMsg)
-            errMsg = NSLocalizedString(@"The underlying cause of this error is unknown.  Please submit a bug report with the file attached.", @"Error informative text");
+        NSString *errMsg = [nsError valueForKey:NSLocalizedRecoverySuggestionErrorKey] ?: NSLocalizedString(@"The underlying cause of this error is unknown.  Please submit a bug report with the file attached.", @"Error informative text");
         
         nsError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:errTitle underlyingError:nsError];
         [nsError setValue:errMsg forKey:NSLocalizedRecoverySuggestionErrorKey];        
@@ -1538,10 +1533,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         options |= BDSKBibTeXOptionDropInternalMask;
     
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
-        NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath] usedEncoding:NULL error:NULL];
-        
-        if (templateFile == nil)
-            templateFile = [NSMutableString string];
+        NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath] usedEncoding:NULL error:NULL] ?: [NSMutableString string];
         
         NSString *userName = NSFullUserName();
         if ([userName canBeConvertedToEncoding:encoding] == NO)
@@ -2627,9 +2619,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (BOOL)selectItemForPartialItem:(NSDictionary *)partialItem{
         
-    NSString *itemKey = [partialItem objectForKey:@"net_sourceforge_bibdesk_citekey"];
-    if(itemKey == nil)
-        itemKey = [partialItem objectForKey:BDSKCiteKeyString];
+    NSString *itemKey = [partialItem objectForKey:@"net_sourceforge_bibdesk_citekey"] ?: [partialItem objectForKey:BDSKCiteKeyString];
     
     BOOL matchFound = NO;
 
@@ -3115,9 +3105,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     
     [textStorage beginEditing];
     
-    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
-    if (template == nil)
-        template = [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
+    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle] ?: [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
     
     // make sure this is really one of the attributed string types...
     if([template templateFormat] & BDSKRichTextTemplateFormat){

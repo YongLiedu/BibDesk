@@ -211,10 +211,7 @@
 
 - (void)changeFont:(id)sender{
 	NSFontManager *fontManager = [NSFontManager sharedFontManager];
-	NSFont *font = [self currentFont];
-	
-    if (font == nil)
-		font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+	NSFont *font = [self currentFont] ?: [NSFont systemFontOfSize:[NSFont systemFontSize]];
     font = [fontManager convertFont:font];
     
     [self setCurrentFont:font];
@@ -226,9 +223,7 @@
 }
 
 - (void)updateFontPanel:(NSNotification *)notification{
-	NSFont *font = [self currentFont];
-    if (font == nil)
-		font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+	NSFont *font = [self currentFont] ?: [NSFont systemFontOfSize:[NSFont systemFontSize]];
 	[[NSFontManager sharedFontManager] setSelectedFont:font isMultiple:NO];
 	[[NSFontManager sharedFontManager] setAction:@selector(localChangeFont:)];
 }

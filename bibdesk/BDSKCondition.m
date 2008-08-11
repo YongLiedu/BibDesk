@@ -278,10 +278,8 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
         // use local values, as we may change them to support "Any Field"
         int comparison = stringComparison;
         NSString *value = stringValue;
-        NSString *itemValue = [item stringValueOfField:key];
         // unset values are considered empty strings
-        if (itemValue == nil)
-            itemValue = @"";
+        NSString *itemValue = [item stringValueOfField:key] ?: @"";
         // to speed up comparisons
         if ([itemValue isComplex] || [itemValue isInherited])
             itemValue = [NSString stringWithString:itemValue];
@@ -355,10 +353,9 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
 
 - (void)setKey:(NSString *)newKey {
 	// we never want the key to be nil. It is set to nil sometimes by the binding mechanism
-	if (newKey == nil) newKey = @"";
-    if (![key isEqualToString:newKey]) {
+    if (key != newKey) {
         [key release];
-        key = [newKey copy];
+        key = [(newKey ?: @"") copy];
     }
 }
 
@@ -485,10 +482,9 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
 
 - (void)setStringValue:(NSString *)newValue {
 	// we never want the value to be nil. It is set to nil sometimes by the binding mechanism
-	if (newValue == nil) newValue = @"";
-    if (![stringValue isEqualToString:newValue]) {
+    if (stringValue != newValue) {
         [stringValue release];
-        stringValue = [newValue retain];
+        stringValue = [(newValue ?: @"") retain];
     }
 }
 
@@ -749,20 +745,20 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
             *endDate = [today dateByAddingNumber:1-MIN(numberValue,andNumberValue) ofPeriod:periodValue];
             break;
         case BDSKDate: 
-            *startDate = (dateValue == nil) ? nil : [dateValue startOfDay];
+            *startDate = [dateValue startOfDay];
             *endDate = [*startDate dateByAddingNumber:1 ofPeriod:BDSKPeriodDay];
             break;
         case BDSKAfterDate: 
-            *startDate = (dateValue == nil) ? nil : [dateValue endOfDay];
+            *startDate = [dateValue endOfDay];
             *endDate = nil;
             break;
         case BDSKBeforeDate: 
             *startDate = nil;
-            *endDate = (dateValue == nil) ? nil : [dateValue startOfDay];
+            *endDate = [dateValue startOfDay];
             break;
         case BDSKInDateRange:
-            *startDate = (dateValue == nil) ? nil : [dateValue startOfDay];
-            *endDate = (toDateValue == nil) ? nil : [toDateValue endOfDay];
+            *startDate = [dateValue startOfDay];
+            *endDate = [toDateValue endOfDay];
             break;
     }
 }

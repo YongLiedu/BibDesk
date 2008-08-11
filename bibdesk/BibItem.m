@@ -893,9 +893,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 // this is used for the lower pane
 - (NSString *)title{
-    NSString *title = [self valueOfField:BDSKTitleString];
-	if (title == nil) 
-		title = @"";
+    NSString *title = [self valueOfField:BDSKTitleString] ?: @"";
 	if ([[self pubType] isEqualToString:BDSKInbookString]) {
 		NSString *chapter = [self valueOfField:BDSKChapterString];
 		if (![NSString isEmptyString:chapter]) {

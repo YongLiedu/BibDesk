@@ -248,9 +248,7 @@ enum {
 }
 
 - (NSString *)findString {
-	if (findString == nil)
-		return @"";
-    return [[findString retain] autorelease];
+    return [[(findString ?: @"") retain] autorelease];
 }
 
 - (void)setFindString:(NSString *)newFindString {
@@ -266,9 +264,7 @@ enum {
 }
 
 - (NSString *)replaceString {
-	if (replaceString == nil)
-		return @"";
-    return [[replaceString retain] autorelease];
+    return [[(replaceString ?: @"") retain] autorelease];
 }
 
 - (void)setReplaceString:(NSString *)newReplaceString {

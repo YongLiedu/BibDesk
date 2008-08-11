@@ -2209,9 +2209,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         // changeKey == nil, all fields are set
         if ([tableView editedRow] != -1) {
             NSString *key = [fields objectAtIndex:[tableView editedRow]];
-            NSString *tmpValue = [publication valueOfField:key];
-            if (tmpValue == nil)
-                tmpValue = @"";
+            NSString *tmpValue = [publication valueOfField:key] ?: @"";
             if ([changeKey isCitationField] == NO && [tableCellFormatter editAsComplexString])
                 tmpValue = [tmpValue stringAsBibTeXString];
             [[tableView currentEditor] setString:tmpValue];
@@ -2756,9 +2754,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if ([tv isEqual:tableView] && [[tableColumn identifier] isEqualToString:@"value"]) {
         if (ignoreEdit == NO) {
             NSString *field = [fields objectAtIndex:row];
-            NSString *oldValue = [publication valueOfField:field];
-            if (oldValue == nil)
-                oldValue = @"";
+            NSString *oldValue = [publication valueOfField:field] ?: @"";
             if (object == nil)
                 object = @"";
             

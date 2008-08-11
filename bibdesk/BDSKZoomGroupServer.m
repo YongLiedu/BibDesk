@@ -203,9 +203,7 @@ static NSString *BDSKHTTPProxySetting();
 
         [connection setResultEncodingToIANACharSetName:[info resultEncoding]];
         
-        NSString *proxy = [[info options] objectForKey:@"proxy"];
-        if (proxy == nil)
-            proxy = BDSKHTTPProxySetting();
+        NSString *proxy = [[info options] objectForKey:@"proxy"] ?: BDSKHTTPProxySetting();
         if (proxy)
             [connection setOption:proxy forKey:@"proxy"];
         

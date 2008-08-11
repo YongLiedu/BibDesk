@@ -576,8 +576,7 @@
 - (void)bookmarkLink:(id)sender{
 	NSDictionary *element = (NSDictionary *)[sender representedObject];
 	NSString *URLString = [(NSURL *)[element objectForKey:WebElementLinkURLKey] absoluteString];
-	NSString *title = [element objectForKey:WebElementLinkLabelKey];
-	if(title == nil) title = [URLString lastPathComponent];
+	NSString *title = [element objectForKey:WebElementLinkLabelKey] ?: [URLString lastPathComponent];
 	
     [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString proposedName:title modalForWindow:[self window]];
 }

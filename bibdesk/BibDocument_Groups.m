@@ -1552,9 +1552,9 @@ The groupedPublications array is a subset of the publications array, developed b
 			continue;
 		
 		if (groupName == nil)
-			groupName = [NSString stringWithFormat:@"group %@", [group name]];
+			groupName = [NSString stringWithFormat:NSLocalizedString(@"group %@", @"Partial status message"), [group name]];
 		else
-			groupName = @"selected groups";
+			groupName = NSLocalizedString(@"selected groups", @"Partial status message");
 		
         if ([group isStatic]) {
             [(BDSKStaticGroup *)group removePublicationsInArray:pubs];

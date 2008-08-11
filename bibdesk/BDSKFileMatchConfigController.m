@@ -139,9 +139,7 @@ static BOOL fileURLIsVisible(NSURL *fileURL)
     NSMutableArray *array = [NSMutableArray array];
     NSDocument *doc;
     while (doc = [e nextObject]) {
-        NSString *docType = [[[NSDocumentController sharedDocumentController] fileExtensionsFromType:[doc fileType]] lastObject];
-        if (nil == docType)
-            docType = @"";
+        NSString *docType = [[[NSDocumentController sharedDocumentController] fileExtensionsFromType:[doc fileType]] lastObject] ?: @"";
         NSDictionary *dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:[doc displayName], OATextWithIconCellStringKey, [NSImage imageForFileType:docType], OATextWithIconCellImageKey, [NSNumber numberWithBool:NO], @"useDocument", doc, @"document", nil];
         [array addObject:dict];
     }

@@ -158,9 +158,7 @@
 }
 
 - (BOOL) validateOpenLocalURLMenuItem:(NSMenuItem*) menuItem {
-	NSString *field = [menuItem representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
+	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
     
     NSEnumerator *e = [[self selectedPublications] objectEnumerator];
 	BibItem *pub = nil;
@@ -174,9 +172,7 @@
 }	
 
 - (BOOL) validateRevealLocalURLMenuItem:(NSMenuItem*) menuItem {
-	NSString *field = [menuItem representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
+	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
     
     NSEnumerator *e = [[self selectedPublications] objectEnumerator];
 	BibItem *pub = nil;
@@ -190,9 +186,7 @@
 }	
 
 - (BOOL) validateOpenRemoteURLMenuItem:(NSMenuItem*) menuItem {
-	NSString *field = [menuItem representedObject];
-    if (field == nil)
-		field = BDSKUrlString;
+	NSString *field = [menuItem representedObject] ?: BDSKUrlString;
     
     NSEnumerator *e = [[self selectedPublications] objectEnumerator];
 	BibItem *pub = nil;
@@ -206,9 +200,7 @@
 }	
 
 - (BOOL) validateShowNotesForLocalURLMenuItem:(NSMenuItem*) menuItem {
-	NSString *field = [menuItem representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
+	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
     
     NSEnumerator *e = [[self selectedPublications] objectEnumerator];
 	BibItem *pub = nil;
@@ -222,9 +214,7 @@
 }	
 
 - (BOOL) validateCopyNotesForLocalURLMenuItem:(NSMenuItem*) menuItem {
-	NSString *field = [menuItem representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
+	NSString *field = [menuItem representedObject] ?: BDSKLocalUrlString;
     
     NSEnumerator *e = [[self selectedPublications] objectEnumerator];
 	BibItem *pub = nil;

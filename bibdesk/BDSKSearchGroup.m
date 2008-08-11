@@ -79,13 +79,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 // designated initializer
 - (id)initWithType:(NSString *)aType serverInfo:(BDSKServerInfo *)info searchTerm:(NSString *)string;
 {
-    NSString *aName = [info name];
-    if (aName == nil)
-        aName = [info database];
-    if (aName == nil)
-        aName = string;
-    if (aName == nil)
-        aName = NSLocalizedString(@"Empty", @"Name for empty search group");
+    NSString *aName = (([info name] ?: [info database]) ?: string) ?: NSLocalizedString(@"Empty", @"Name for empty search group");
     if (self = [super initWithName:aName count:0]) {
         type = [aType copy];
         searchTerm = [string copy];
@@ -121,15 +115,12 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     NSString *aPort = [[bdsksearchURL port] stringValue];
     NSString *path = [bdsksearchURL path];
     NSString *aDatabase = [([path hasPrefix:@"/"] ? [path substringFromIndex:1] : path ? path : @"") stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *aName = [[bdsksearchURL parameterString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *aName = [[bdsksearchURL parameterString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] ?: aDatabase;
     NSString *query = [bdsksearchURL query];
     NSString *aSearchTerm = nil;
     NSString *aType = BDSKSearchGroupZoom;
     NSMutableDictionary *options = [NSMutableDictionary dictionary];
     NSEnumerator *queryEnum = [[query componentsSeparatedByString:@"&"] objectEnumerator];
-    
-    if (aName == nil)
-        aName = aDatabase;
     
     [options setValue:[bdsksearchURL password] forKey:@"password"];
     [options setValue:[bdsksearchURL user] forKey:@"username"];

@@ -198,9 +198,7 @@ There could be other extensions, like matching for every word with conjunction o
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:20];	
 
 	while(auth = [authEnum nextObject]) {
-        NSString *name = [auth lastName];
-        if (nil == name)
-            name = [auth name];
+        NSString *name = [auth lastName] ?: [auth name];
         if (nil != name) {
             [string appendString:name];
             [string appendFormat:@"%C", 0x1E];
@@ -231,9 +229,7 @@ There could be other extensions, like matching for every word with conjunction o
 	NSMutableString * surnames = [NSMutableString string];
 	auth = [authEnum nextObject];
 	if (auth) {
-        NSString *name = [auth lastName];
-        if (nil == name)
-            name = [auth name];
+        NSString *name = [auth lastName] ?: [auth name];
         if (nil != name)
             [surnames appendString:name];	
 		if([pubAuthors count] > 2){

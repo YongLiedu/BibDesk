@@ -214,8 +214,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 			tag = [sourceLine substringWithRange:NSMakeRange(0,2)];
 			
 			// find the BibTeX key
-			key = [typeManager fieldNameForJSTORTag:tag];
-			if(key == nil) key = tag;
+			key = [typeManager fieldNameForJSTORTag:tag] ?: tag;
 			
 			// get the value...
 			value = [[sourceLine substringWithRange:NSMakeRange(5,[sourceLine length]-5)]

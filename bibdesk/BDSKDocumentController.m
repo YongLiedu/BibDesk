@@ -384,10 +384,8 @@
     if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"]) {
         NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:absoluteURL];
         BDAlias *fileAlias = [BDAlias aliasWithData:[dictionary valueForKey:@"FileAlias"]];
-        NSString *fullPath = [fileAlias fullPath];
-        
-        if(fullPath == nil) // if the alias didn't work, let's see if we have a filepath key...
-            fullPath = [dictionary valueForKey:@"net_sourceforge_bibdesk_owningfilepath"];
+        // if the alias didn't work, let's see if we have a filepath key...
+        NSString *fullPath = [fileAlias fullPath] ?: [dictionary valueForKey:@"net_sourceforge_bibdesk_owningfilepath"];
         
         if(fullPath == nil){
             if(outError != nil) 

@@ -61,7 +61,7 @@
 @implementation BDSKPreviewItem
 
 + (BDSKPreviewItem *)sharedItem {
-    id sharedItem = nil;
+    static id sharedItem = nil;
     if (sharedItem == nil)
         sharedItem = [[self alloc] init];
     return sharedItem;

@@ -225,7 +225,7 @@
 	NSArray *items = nil;
     if ([NSString isEmptyString:key] == NO) 
 		items = [itemsForCiteKeys arrayForKey:key];
-    return (items == nil) ? [NSArray array] : items;
+    return items ?: [NSArray array];
 }
 
 - (BOOL)citeKeyIsUsed:(NSString *)key byItemOtherThan:(BibItem *)anItem;

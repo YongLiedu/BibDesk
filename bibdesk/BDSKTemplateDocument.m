@@ -365,9 +365,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
                 
                 parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateAttributedString:[attrString attributedSubstringFromRange:MAKE_RANGE(NSMaxRange(startRange), (sepRange.location == NSNotFound ? endRange.location : sepRange.location))]];
                 
-                font = [attrString attribute:NSFontAttributeName atIndex:startLoc effectiveRange:NULL];
-                if (font == nil)
-                    font = [NSFont userFontOfSize:0.0];
+                font = [attrString attribute:NSFontAttributeName atIndex:startLoc effectiveRange:NULL] ?: [NSFont userFontOfSize:0.0];
                 int traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
                 [self setFontName:[font familyName]];
                 [self setFontSize:[font pointSize]];

@@ -612,10 +612,7 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 - (NSString *)bibtexTypeForReferType:(NSString *)type {
-    NSString *btType = [bibtexTypeForReferTypeDict objectForKey:type];
-    if (nil == btType)
-        btType = BDSKMiscString;
-    return btType;
+    return [bibtexTypeForReferTypeDict objectForKey:type] ?: BDSKMiscString;
 }
 
 - (NSString *)bibtexTypeForHCiteType:(NSString *)type {
@@ -624,14 +621,8 @@ static BDSKTypeManager *sharedInstance = nil;
     if([[self bibTypesForFileType:BDSKBibtexString] containsObject:type])
         return type;
     
-    // then try to find 'type' in the custom dict:
-    NSString *btType = [bibtexTypeForHCiteTypeDict objectForKey:type];
-    
-    // if it's not there, give up and return "misc".
-    if (nil == btType)
-        btType = BDSKMiscString;
-    
-    return btType;
+    // then try to find 'type' in the custom dict:, and if it's not there, give up and return "misc".
+    return [bibtexTypeForHCiteTypeDict objectForKey:type] ?: BDSKMiscString;
 }
 
 
