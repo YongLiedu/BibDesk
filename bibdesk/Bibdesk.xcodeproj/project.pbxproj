@@ -4551,10 +4551,6 @@
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1203;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../BuildProducts/Debug\"",
-				);
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -4564,10 +4560,6 @@
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1203;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../BuildProducts/Debug\"",
-				);
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -4577,10 +4569,6 @@
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1203;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../BuildProducts/Debug\"",
-				);
 				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
