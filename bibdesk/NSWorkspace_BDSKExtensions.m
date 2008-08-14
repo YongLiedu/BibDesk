@@ -82,25 +82,21 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
      */
     
     OSStatus err = noErr;
-	AppleEvent theAEvent;
-	AEAddressDesc appAddress;
-	AEDescList targetListDesc;
-	OSType appCreator;
-    AEDesc searchText;
+    FSRef fileRef;
     
-    // initialize descriptors so we can safely dispose of them
-    AEInitializeDesc(&theAEvent);
-    AEInitializeDesc(&appAddress);
-    AEInitializeDesc(&targetListDesc);
-    AEInitializeDesc(&searchText);
-
+    // FSRefs are now valid across processes, so we can pass them directly
     fileURL = [fileURL fileURLByResolvingAliases]; 
     OBASSERT(fileURL != nil);
     if(fileURL == nil)
         err = fnfErr;
+    else if(CFURLGetFSRef((CFURLRef)fileURL, &fileRef) == NO)
+        err = coreFoundationUnknownErr;
     
     // Find the application that should open this file.  NB: we need to release this URL when we're done with it.
+    OSType invalidCreator = '???\?';
+	OSType appCreator = invalidCreator;
     CFURLRef appURL = NULL;
+    FSSpec appSpec;
 	if(noErr == err){
         NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
         NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
@@ -111,70 +107,52 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
             err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesAll, NULL, &appURL);
     }
     
-    // convert application location to FSSpec in case we need it
-    FSRef appRef;
-    CFURLGetFSRef(appURL, &appRef);
-    FSSpec appSpec;
-    FSGetCatalogInfo(&appRef, kFSCatInfoNone, NULL, NULL, &appSpec, NULL);
-    
-    // Get the type info of the creator application from LS, so we know should receive the event
-    LSItemInfoRecord lsRecord;
-    memset(&lsRecord, 0, sizeof(LSItemInfoRecord));
-    
-    if(err == noErr)
-        err = LSCopyItemInfoForURL(appURL, kLSRequestTypeCreator, &lsRecord);
+    if(err == noErr) {
+        // convert application location to FSSpec in case we need it
+        FSRef appRef;
+        if (CFURLGetFSRef(appURL, &appRef))
+            FSGetCatalogInfo(&appRef, kFSCatInfoNone, NULL, NULL, &appSpec, NULL);
+        else
+            err = fnfErr;
+        
+        // Get the type info of the creator application from LS, so we know should receive the event
+        LSItemInfoRecord lsRecord;
+        memset(&lsRecord, 0, sizeof(LSItemInfoRecord));
+        
+        if(err == noErr)
+            err = LSCopyItemInfoForURL(appURL, kLSRequestTypeCreator, &lsRecord);
+        
+        if (err == noErr){
+            appCreator = lsRecord.creator;
+            OBASSERT(appCreator != 0); 
+            OBASSERT(appCreator != invalidCreator); 
+            // if the app has an invalid creator, our AppleEvent stuff won't work
+            if (appCreator == 0 || appCreator == invalidCreator)
+                err = fnfErr;
+        } 
+    }
     
     if(appURL) CFRelease(appURL);
     
-    OSType invalidCreator = '???\?';
+    NSAppleEventDescriptor *openEvent = nil;
     
-    if (err == noErr){
-        appCreator = lsRecord.creator;
-        OBASSERT(appCreator != 0); 
-        OBASSERT(appCreator != invalidCreator); 
-    } 
-    else {
-        appCreator = invalidCreator;
-    }
-    
-    // if the app has an invalid creator, our AppleEvent stuff won't work
-    if (appCreator == invalidCreator)
-        err = fnfErr;
-    
-    if (err == noErr)
-        err = AECreateDesc(typeApplSignature, (Ptr) &appCreator, sizeof(OSType), &appAddress);
-    
-	if (err == noErr)
-        err = AECreateAppleEvent(kCoreEventClass, kAEOpenDocuments, &appAddress, kAutoGenerateReturnID, kAnyTransactionID, &theAEvent);
-    
-    // Here's the search text; convert it to UTF8 bytes without null termination.  If it's zero-length data, there's no point in passing it, and we'll just degrade to a standard file opening case.
-    NSData *UTF8data = [searchString dataUsingEncoding:NSUTF8StringEncoding];
-    if ([UTF8data length] && noErr == err) {
-
-        err = AECreateDesc(typeUTF8Text, [UTF8data bytes], [UTF8data length], &searchText);
+    if (err == noErr) {
+        NSAppleEventDescriptor *appDesc = nil;
+        NSAppleEventDescriptor *searchTextDesc = nil;
+        NSAppleEventDescriptor *fileListDesc = nil;
+        NSAppleEventDescriptor *fileDesc = nil;
         
-        // Add the search text to our event as keyAESearchText
-        if (err == noErr)
-            err = AEPutParamDesc(&theAEvent, keyAESearchText, &searchText);
+        appDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplSignature bytes:&appCreator length:sizeof(OSType)];
+        openEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:appDesc returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
+        fileDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFSRef bytes:&fileRef length:sizeof(FSRef)];
+        fileListDesc = [NSAppleEventDescriptor listDescriptor];
+        [fileListDesc insertDescriptor:fileDesc atIndex:1];
+        [openEvent setParamDescriptor:fileListDesc forKeyword:keyDirectObject];
+        if ([NSString isEmptyString:searchString] == NO)
+            [openEvent setParamDescriptor:[NSAppleEventDescriptor descriptorWithString:searchString] forKeyword:keyAESearchText];
     }
     
-	if (err == noErr)
-        // We could create a list from an array of FSSpecs, as in the original FinderLaunch sample
-        err = AECreateList(NULL, 0, FALSE, &targetListDesc);
-    
-    // FSRefs are now valid across processes, so we can pass them directly
-    FSRef fileRef;
-    if(CFURLGetFSRef((CFURLRef)fileURL, &fileRef) == NO)
-        err = coreFoundationUnknownErr;
-    
-    if (noErr == err)
-        err = AEPutPtr(&targetListDesc, 1, typeFSRef, &fileRef, sizeof(FSRef));
-	
-    /* add the file list to the apple event */
-    if( err == noErr )
-        err = AEPutParamDesc(&theAEvent, keyDirectObject, &targetListDesc);
-    
-    if (noErr == err) {
+    if (openEvent) {
         
         ProcessSerialNumber psn;
         // don't overwrite our appSpec...
@@ -188,7 +166,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
 
             // try to send the odoc event
             if (noErr == err)
-                err = AESendMessage(&theAEvent, NULL, kAENoReply, kAEDefaultTimeout);
+                err = AESendMessage([openEvent aeDesc], NULL, kAENoReply, kAEDefaultTimeout);
             
         }
         
@@ -206,27 +184,18 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
             typedef AppParameters **AppParametersHandle;
             
             AppParametersHandle params = NULL;
-            AEDesc launchDesc;
-            AEInitializeDesc(&launchDesc);
             // the coercion is apparently a key to making this work
-            err = AECoerceDesc(&theAEvent, typeAppParameters, &launchDesc);
-            params = (AppParametersHandle)(launchDesc.dataHandle);
+            NSAppleEventDescriptor *launchEvent = [openEvent coerceToDescriptorType:typeAppParameters];
+            params = (AppParametersHandle)([launchEvent aeDesc]->dataHandle);
             pb.launchAppParameters = *params;
             err = LaunchApplication (&pb);
-            AEDisposeDesc(&launchDesc);
         }
     }
     
     // handle the case of '????' creator and probably others
-    if (noErr != err)
+    if (noErr != err || openEvent == nil)
         err = (OSStatus)([self openURL:fileURL] == NO);
     
-    /* clean up and leave */
-	AEDisposeDesc(&targetListDesc);
-	AEDisposeDesc(&theAEvent);
-	AEDisposeDesc(&appAddress);
-    AEDisposeDesc(&searchText);
-	
     return (err == noErr);
 }
 
