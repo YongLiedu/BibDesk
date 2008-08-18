@@ -99,16 +99,20 @@
         
         if ([windowController document] == nil) {
             int idx = numberOfItems;
-            while (idx-- && [[windowsMenu itemAtIndex:idx] isSeparatorItem] == NO && 
-                   [[[[windowsMenu itemAtIndex:idx] target] windowController] document] == nil) {
-                    if ([[[windowsMenu itemAtIndex:idx] title] caseInsensitiveCompare:title] == NSOrderedAscending)
-                        break;
+            while (idx--) {
+                NSMenuItem *anItem = [windowsMenu itemAtIndex:idx];
+                if ([anItem isSeparatorItem] ||
+                    [[[anItem target] windowController] document] != nil ||
+                    [[anItem title] caseInsensitiveCompare:title] == NSOrderedAscending)
+                    break;
             }
             ++idx;
             if (itemIndex != idx) {
+                if (itemIndex < idx)
+                    idx--;
                 [item retain];
                 [windowsMenu removeItem:item];
-                [windowsMenu insertItem:item atIndex:itemIndex < --idx ? idx : idx];
+                [windowsMenu insertItem:item atIndex:idx];
                 [item release];
             }
             if (idx > 0 && [[windowsMenu itemAtIndex:idx - 1] isSeparatorItem] == NO && [[[[windowsMenu itemAtIndex:idx - 1] target] windowController] document] != nil)
@@ -174,14 +178,17 @@
             [item setIndentationLevel:1];
             
             if (idx >= 0) {
-                while (++idx < numberOfItems && [[windowsMenu itemAtIndex:idx] isSeparatorItem] == NO) {
-                    if ([[[windowsMenu itemAtIndex:idx] title] caseInsensitiveCompare:title] == NSOrderedDescending)
+                while (++idx < numberOfItems) {
+                    NSMenuItem *anItem = [windowsMenu itemAtIndex:idx];
+                    if ([anItem isSeparatorItem] || [[anItem title] caseInsensitiveCompare:title] == NSOrderedDescending)
                         break;
                 }
                 if (itemIndex != idx - 1) {
+                    if (itemIndex < idx)
+                        idx--;
                     [item retain];
                     [windowsMenu removeItem:item];
-                    [windowsMenu insertItem:item atIndex:itemIndex < idx ? --idx : idx];
+                    [windowsMenu insertItem:item atIndex:idx];
                     [item release];
                 }
             }
