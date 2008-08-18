@@ -47,6 +47,10 @@ static NSString *BDSKBookmarkTypeBookmarkString = @"bookmark";
 static NSString *BDSKBookmarkTypeFolderString = @"folder";
 static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
 
+
+@interface BDSKPlaceholderBookmark : BDSKBookmark
+@end
+
 @interface BDSKURLBookmark : BDSKBookmark {
     NSString *name;
     NSString *urlString;
@@ -66,75 +70,47 @@ static NSString *BDSKBookmarkTypeSeparatorString = @"separator";
 
 @implementation BDSKBookmark
 
-static BDSKBookmark *defaultPlaceholderBookmark = nil;
+static BDSKPlaceholderBookmark *defaultPlaceholderBookmark = nil;
 static Class BDSKBookmarkClass = Nil;
 
 + (void)initialize {
     OBINITIALIZE;
-    if (self == [BDSKBookmark class]) {
-        BDSKBookmarkClass = self;
-        defaultPlaceholderBookmark = (BDSKBookmark *)NSAllocateObject(BDSKBookmarkClass, 0, NSDefaultMallocZone());
-    }
+    BDSKBookmarkClass = self;
+    defaultPlaceholderBookmark = (BDSKPlaceholderBookmark *)NSAllocateObject([BDSKPlaceholderBookmark class], 0, NSDefaultMallocZone());
 }
 
 + (id)allocWithZone:(NSZone *)aZone {
-    return BDSKBookmarkClass == self ? defaultPlaceholderBookmark : NSAllocateObject(self, 0, aZone);
-}
-
-- (id)init {
-    if (self == defaultPlaceholderBookmark)
-        self = [self initWithUrlString:@"http://" name:nil];
-    else
-        self = [super init];
-    return self;
+    return BDSKBookmarkClass == self ? defaultPlaceholderBookmark : [super allocWithZone:aZone];
 }
 
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
-    if (self != defaultPlaceholderBookmark)
-        [self release];
-    return [[BDSKURLBookmark alloc] initWithUrlString:aUrlString name:aName ? aName : NSLocalizedString(@"New Boookmark", @"Default name for boookmark")];
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
-    if (self != defaultPlaceholderBookmark)
-        [self release];
-    return [[BDSKFolderBookmark alloc] initFolderWithChildren:aChildren name:aName];
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
 - (id)initFolderWithName:(NSString *)aName {
-    return [self initFolderWithChildren:[NSArray array] name:aName];
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
 - (id)initSeparator {
-    if (self != defaultPlaceholderBookmark)
-        [self release];
-    return [[BDSKSeparatorBookmark alloc] init];
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
-    if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeFolderString]) {
-        NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
-        NSDictionary *dict;
-        NSMutableArray *newChildren = [NSMutableArray array];
-        while (dict = [dictEnum nextObject])
-            [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
-        return [self initFolderWithChildren:newChildren name:[dictionary objectForKey:TITLE_KEY]];
-    } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeSeparatorString]) {
-        return [self initSeparator];
-    } else {
-        return [self initWithUrlString:[dictionary objectForKey:URL_KEY] name:[dictionary objectForKey:TITLE_KEY]];
-    }
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
 - (id)copyWithZone:(NSZone *)aZone {
     [self doesNotRecognizeSelector:_cmd];
     return nil;
-}
-
-- (void)dealloc {
-    if (self != defaultPlaceholderBookmark) {
-        [super dealloc];
-    }
 }
 
 - (NSDictionary *)dictionaryValue { return nil; }
@@ -184,6 +160,55 @@ static Class BDSKBookmarkClass = Nil;
     }
     return NO;
 }
+
+@end
+
+#pragma mark -
+
+@implementation BDSKPlaceholderBookmark
+
+- (id)init {
+    return [self initWithUrlString:@"http://" name:nil];
+}
+
+- (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
+    return [[BDSKURLBookmark alloc] initWithUrlString:aUrlString name:aName ? aName : NSLocalizedString(@"New Boookmark", @"Default name for boookmark")];
+}
+
+- (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
+    return [[BDSKFolderBookmark alloc] initFolderWithChildren:aChildren name:aName];
+}
+
+- (id)initFolderWithName:(NSString *)aName {
+    return [self initFolderWithChildren:[NSArray array] name:aName];
+}
+
+- (id)initSeparator {
+    return [[BDSKSeparatorBookmark alloc] init];
+}
+
+- (id)initWithDictionary:(NSDictionary *)dictionary {
+    if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeFolderString]) {
+        NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
+        NSDictionary *dict;
+        NSMutableArray *newChildren = [NSMutableArray array];
+        while (dict = [dictEnum nextObject])
+            [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
+        return [self initFolderWithChildren:newChildren name:[dictionary objectForKey:TITLE_KEY]];
+    } else if ([[dictionary objectForKey:TYPE_KEY] isEqualToString:BDSKBookmarkTypeSeparatorString]) {
+        return [self initSeparator];
+    } else {
+        return [self initWithUrlString:[dictionary objectForKey:URL_KEY] name:[dictionary objectForKey:TITLE_KEY]];
+    }
+}
+
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 @end
 

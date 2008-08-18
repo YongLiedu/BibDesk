@@ -47,6 +47,9 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
 #define BOOKMARK_TYPE_KEY   @"bookmarkType"
 
 
+@interface BDSKPlaceholderSearchBookmark : BDSKSearchBookmark
+@end
+
 @interface BDSKServerSearchBookmark : BDSKSearchBookmark {
     NSString *label;
     NSDictionary *info;
@@ -66,73 +69,47 @@ static NSString *BDSKSearchBookmarkTypeSeparatorString = @"separator";
 
 @implementation BDSKSearchBookmark
 
-static BDSKSearchBookmark *defaultPlaceholderSearchBookmark = nil;
+static BDSKPlaceholderSearchBookmark *defaultPlaceholderSearchBookmark = nil;
 static Class BDSKSearchBookmarkClass = Nil;
 
 + (void)initialize {
     OBINITIALIZE;
-    if (self == [BDSKSearchBookmark class]) {
-        BDSKSearchBookmarkClass = self;
-        defaultPlaceholderSearchBookmark = (BDSKSearchBookmark *)NSAllocateObject(BDSKSearchBookmarkClass, 0, NSDefaultMallocZone());
-    }
+    BDSKSearchBookmarkClass = self;
+    defaultPlaceholderSearchBookmark = (BDSKPlaceholderSearchBookmark *)NSAllocateObject([BDSKPlaceholderSearchBookmark class], 0, NSDefaultMallocZone());
 }
 
 + (id)allocWithZone:(NSZone *)aZone {
-    return BDSKSearchBookmarkClass == self ? defaultPlaceholderSearchBookmark : NSAllocateObject(self, 0, aZone);
-}
-
-- (id)init {
-    return self == defaultPlaceholderSearchBookmark ? nil : [super init];
+    return BDSKSearchBookmarkClass == self ? defaultPlaceholderSearchBookmark : [super allocWithZone:aZone];
 }
 
 - (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel {
-    if (self != defaultPlaceholderSearchBookmark)
-        [self release];
-    return [[BDSKFolderSearchBookmark alloc] initFolderWithChildren:aChildren label:aLabel];
-}
-
-- (id)initFolderWithLabel:(NSString *)aLabel {
-    return [self initFolderWithChildren:[NSArray array] label:aLabel];
-}
-
-- (id)initSeparator {
-    if (self != defaultPlaceholderSearchBookmark)
-        [self release];
-    return [[BDSKSeparatorSearchBookmark alloc] init];
-}
-
-- (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel {
-    if (self != defaultPlaceholderSearchBookmark)
-        [self release];
-    return [[BDSKServerSearchBookmark alloc] initWithInfo:aDictionary label:aLabel];
-}
-
-- (id)initWithDictionary:(NSDictionary *)dictionary {
-    if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeFolderString]) {
-        NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
-        NSDictionary *dict;
-        NSMutableArray *newChildren = [NSMutableArray array];
-        while (dict = [dictEnum nextObject])
-            [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
-        return [self initFolderWithChildren:newChildren label:[dictionary objectForKey:LABEL_KEY]];
-    } else if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeSeparatorString]) {
-        return [self initSeparator];
-    } else {
-        NSMutableDictionary *dict = [[dictionary mutableCopy] autorelease];
-        [dict removeObjectForKey:BOOKMARK_TYPE_KEY];
-        [dict removeObjectForKey:LABEL_KEY];
-        return [self initWithInfo:dict label:[dictionary objectForKey:LABEL_KEY]];
-    }
-}
-
-- (id)copyWithZone:(NSZone *)aZone {
+    [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
 
-- (void)dealloc {
-    if (self != defaultPlaceholderSearchBookmark) {
-        [super dealloc];
-    }
+- (id)initFolderWithLabel:(NSString *)aLabel {
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+- (id)initSeparator {
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+- (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel {
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+- (id)initWithDictionary:(NSDictionary *)dictionary {
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+- (id)copyWithZone:(NSZone *)aZone {
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
 - (NSDictionary *)dictionaryValue { return nil; }
@@ -180,6 +157,58 @@ static Class BDSKSearchBookmarkClass = Nil;
     }
     return NO;
 }
+
+@end
+
+#pragma mark -
+
+@implementation BDSKPlaceholderSearchBookmark
+
+- (id)init {
+    return nil;
+}
+
+- (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel {
+    return [[BDSKFolderSearchBookmark alloc] initFolderWithChildren:aChildren label:aLabel];
+}
+
+- (id)initFolderWithLabel:(NSString *)aLabel {
+    return [self initFolderWithChildren:[NSArray array] label:aLabel];
+}
+
+- (id)initSeparator {
+    return [[BDSKSeparatorSearchBookmark alloc] init];
+}
+
+- (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel {
+    return [[BDSKServerSearchBookmark alloc] initWithInfo:aDictionary label:aLabel];
+}
+
+- (id)initWithDictionary:(NSDictionary *)dictionary {
+    if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeFolderString]) {
+        NSEnumerator *dictEnum = [[dictionary objectForKey:CHILDREN_KEY] objectEnumerator];
+        NSDictionary *dict;
+        NSMutableArray *newChildren = [NSMutableArray array];
+        while (dict = [dictEnum nextObject])
+            [newChildren addObject:[[[[self class] alloc] initWithDictionary:dict] autorelease]];
+        return [self initFolderWithChildren:newChildren label:[dictionary objectForKey:LABEL_KEY]];
+    } else if ([[dictionary objectForKey:BOOKMARK_TYPE_KEY] isEqualToString:BDSKSearchBookmarkTypeSeparatorString]) {
+        return [self initSeparator];
+    } else {
+        NSMutableDictionary *dict = [[dictionary mutableCopy] autorelease];
+        [dict removeObjectForKey:BOOKMARK_TYPE_KEY];
+        [dict removeObjectForKey:LABEL_KEY];
+        return [self initWithInfo:dict label:[dictionary objectForKey:LABEL_KEY]];
+    }
+}
+
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 @end
 
