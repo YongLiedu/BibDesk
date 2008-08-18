@@ -44,4 +44,6 @@
     NSMutableDictionary *embeddedDictionary;
     pthread_rwlock_t rwlock;
 }
+- (id)init;
+- (id)initWithCapacity:(unsigned)capacity;
 @end

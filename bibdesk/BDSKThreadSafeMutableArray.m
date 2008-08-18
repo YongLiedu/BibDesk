@@ -57,14 +57,6 @@
     return self;
 }
 
-- (id)initWithObjects:(id *)objects count:(unsigned)count {
-    if (self = [super init]) {
-        embeddedArray = [[NSMutableArray allocWithZone:[self zone]] initWithObjects:objects count:count];
-        pthread_rwlock_init(&rwlock, NULL);
-    }
-    return self;
-}
-
 - (id)copyWithZone:(NSZone *)zone {
 	id copy;
     pthread_rwlock_rdlock(&rwlock);
