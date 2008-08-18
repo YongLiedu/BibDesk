@@ -40,6 +40,11 @@
 #import <OmniBase/assertions.h>
 #import "NSURL_BDSKExtensions.h"
 
+// private placeholder subclass
+
+@interface BDSKPlaceholderFile : BDSKFile
+@end
+
 // private subclasses returned by -[BDSKFile init...] methods
 
 @interface BDSKFSRefFile : BDSKFile <NSCopying>
@@ -61,7 +66,7 @@
 @end
 
 // singleton returned by -[BDSKFile allocWithZone:]
-static BDSKFile *defaultPlaceholderFile = nil;
+static BDSKPlaceholderFile *defaultPlaceholderFile = nil;
 static Class BDSKFileClass = Nil;
 
 @implementation BDSKFile
@@ -76,10 +81,8 @@ static Class BDSKFileClass = Nil;
 + (void)initialize
 {
     OBINITIALIZE;
-    if(self == [BDSKFile class]){
-        BDSKFileClass = self;
-        defaultPlaceholderFile = (BDSKFile *)NSAllocateObject(BDSKFileClass, 0, NSDefaultMallocZone());
-    }
+    BDSKFileClass = self;
+    defaultPlaceholderFile = (BDSKPlaceholderFile *)NSAllocateObject([BDSKPlaceholderFile class], 0, NSDefaultMallocZone());
 }
 
 + (id)allocWithZone:(NSZone *)aZone
@@ -92,44 +95,25 @@ static Class BDSKFileClass = Nil;
 // returns an FSRef wrapper
 - (id)initWithFSRef:(FSRef *)aRef;
 {
-    if(aRef != NULL){
-        self = [[BDSKFSRefFile alloc] initWithFSRef:aRef];
-    } else {
-        self = nil;
-    }
-    return self;
+    OBRequestConcreteImplementation(self, _cmd);
+    return nil;
 }
 
 // This is a common, convenient initializer, but we prefer to return the FSRef variant so we can use FSCompareFSRefs and survive external name changes.  If the file doesn't exist (yet), though, we return an NSURL variant.
 - (id)initWithURL:(NSURL *)aURL;
 {
-    FSRef aRef;
-    
-    // return a concrete subclass or nil
-    if(aURL && CFURLGetFSRef((CFURLRef)aURL, &aRef)){
-        self = [[BDSKFSRefFile alloc] initWithFSRef:&aRef];
-    } else if(aURL){
-        self = [[BDSKURLFile alloc] initWithURL:aURL];
-    } else {
-        // nil URL
-        self = nil;
-    }
-    return self;
+    OBRequestConcreteImplementation(self, _cmd);
+    return nil;
 }
 
 - (id)initWithPath:(NSString *)aPath;
 {
-    return [self initWithURL:[NSURL fileURLWithPath:aPath]];
+    OBRequestConcreteImplementation(self, _cmd);
+    return nil;
 }
 
 + (id)fileWithURL:(NSURL *)aURL { 
-    return [[[self allocWithZone:NULL] initWithURL:aURL] autorelease]; 
-}
-
-- (void)dealloc
-{
-    if ([self class] != BDSKFileClass)
-        [super dealloc];
+    return [[[self allocWithZone:nil] initWithURL:aURL] autorelease]; 
 }
 
 - (NSString *)description
@@ -162,14 +146,14 @@ static Class BDSKFileClass = Nil;
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    NSURL *aURL = [coder decodeObject];
-    return [self initWithURL:aURL]; // handles [super init]
+    OBRequestConcreteImplementation(self, _cmd);
+    return nil;
 }
 
-// immutable subclasses may override
 - (id)copyWithZone:(NSZone *)aZone
 {
-    return [[BDSKFile allocWithZone:aZone] initWithURL:[self fileURL]];
+    OBRequestConcreteImplementation(self, _cmd);
+    return nil;
 }
 
 // primitive methods: subclass responsibility
@@ -188,8 +172,7 @@ static Class BDSKFileClass = Nil;
 
 - (NSString *)fileName;
 {
-    OBRequestConcreteImplementation(self, _cmd);
-    return nil;
+    return [(id)CFURLCopyLastPathComponent((CFURLRef)[self fileURL]) autorelease];
 }
 
 // following properties are derived using the primitive methods, but subclasses may override for better performance
@@ -203,6 +186,56 @@ static Class BDSKFileClass = Nil;
 {
     return [[self path] stringByAbbreviatingWithTildeInPath];
 }
+
+@end
+
+#pragma mark -
+#pragma mark Placeholder subclass
+
+@implementation BDSKPlaceholderFile
+
+- (id)init {
+    return nil;
+}
+
+// returns an FSRef wrapper
+- (id)initWithFSRef:(FSRef *)aRef;
+{
+    return aRef != NULL ? [[BDSKFSRefFile alloc] initWithFSRef:aRef] : nil;
+}
+
+// This is a common, convenient initializer, but we prefer to return the FSRef variant so we can use FSCompareFSRefs and survive external name changes.  If the file doesn't exist (yet), though, we return an NSURL variant.
+- (id)initWithURL:(NSURL *)aURL;
+{
+    FSRef aRef;
+    
+    // return a concrete subclass or nil
+    if(aURL && CFURLGetFSRef((CFURLRef)aURL, &aRef))
+        return [[BDSKFSRefFile alloc] initWithFSRef:&aRef];
+    else if(aURL)
+        return [[BDSKURLFile alloc] initWithURL:aURL];
+    else
+        // nil URL
+        return nil;
+}
+
+- (id)initWithPath:(NSString *)aPath;
+{
+    return [self initWithURL:[NSURL fileURLWithPath:aPath]];
+}
+
+- (id)initWithCoder:(NSCoder *)coder
+{
+    return [self initWithURL:[coder decodeObject]];
+}
+
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 @end
 
@@ -263,11 +296,6 @@ static Class BDSKFileClass = Nil;
 - (const FSRef *)fsRef;
 {
     return NULL;
-}
-
-- (NSString *)fileName;
-{
-    return [(id)CFURLCopyLastPathComponent((CFURLRef)fileURL) autorelease];
 }
 
 @end
@@ -343,16 +371,11 @@ static Class BDSKFileClass = Nil;
     return fileRef;
 }
 
-static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
-{
-    HFSUniStr255 fileName;
-    OSErr err = FSGetCatalogInfo(fsRef, kFSCatInfoNone, NULL, &fileName, NULL, NULL);
-    return noErr == err ? CFStringCreateWithCharacters(CFAllocatorGetDefault(), fileName.unicode, fileName.length) : NULL;
-}
-
 - (NSString *)fileName;
 {
-    return [(NSString *)copyFileNameFromFSRef(fileRef) autorelease];
+    HFSUniStr255 fileName;
+    OSErr err = FSGetCatalogInfo(fileRef, kFSCatInfoNone, NULL, &fileName, NULL, NULL);
+    return noErr == err ? [(NSString *)CFStringCreateWithCharacters(CFAllocatorGetDefault(), fileName.unicode, fileName.length) autorelease] : NULL;
 }
 
 @end

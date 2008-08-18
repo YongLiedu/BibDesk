@@ -139,6 +139,11 @@ static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBaseP
     return alias;
 }
 
+// Private placeholder subclass
+
+@interface BDSKPlaceholderLinkedFile : BDSKLinkedFile
+@end
+
 // Private concrete subclasses
 
 @interface BDSKLinkedAliasFile : BDSKLinkedFile
@@ -172,46 +177,37 @@ static AliasHandle BDSKPathToAliasHandle(CFStringRef inPath, CFStringRef inBaseP
 
 @implementation BDSKLinkedFile
 
-static BDSKLinkedFile *defaultPlaceholderLinkedObject = nil;
-static Class BDSKLinkedObjectClass = Nil;
+static BDSKPlaceholderLinkedFile *defaultPlaceholderLinkedFile = nil;
+static Class BDSKLinkedFileClass = Nil;
 
 + (void)initialize
 {
     OBINITIALIZE;
-    if(self == [BDSKLinkedFile class]){
-        BDSKLinkedObjectClass = self;
-        defaultPlaceholderLinkedObject = (BDSKLinkedFile *)NSAllocateObject(BDSKLinkedObjectClass, 0, NSDefaultMallocZone());
-    }
+    BDSKLinkedFileClass = self;
+    defaultPlaceholderLinkedFile = (BDSKPlaceholderLinkedFile *)NSAllocateObject([BDSKPlaceholderLinkedFile class], 0, NSDefaultMallocZone());
 }
 
 + (id)allocWithZone:(NSZone *)aZone
 {
-    return BDSKLinkedObjectClass == self ? defaultPlaceholderLinkedObject : NSAllocateObject(self, 0, aZone);
+    return BDSKLinkedFileClass == self ? defaultPlaceholderLinkedFile : NSAllocateObject(self, 0, aZone);
 }
 
 - (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
 {
-    OBASSERT(self == defaultPlaceholderLinkedObject);
-    if([aURL isFileURL]){
-        self = [[BDSKLinkedAliasFile alloc] initWithURL:aURL delegate:aDelegate];
-    } else if (aURL){
-        self = [[BDSKLinkedURL alloc] initWithURL:aURL delegate:aDelegate];
-    } else {
-        self = nil;
-    }
-    return self;
+    OBRequestConcreteImplementation(self, _cmd);
+    return nil;
 }
 
 - (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
 {
-    OBASSERT(self == defaultPlaceholderLinkedObject);
-    return [[BDSKLinkedAliasFile alloc] initWithBase64String:base64String delegate:aDelegate];
+    OBRequestConcreteImplementation(self, _cmd);
+    return nil;
 }
 
 - (id)initWithURLString:(NSString *)aString;
 {
-    OBASSERT(self == defaultPlaceholderLinkedObject);
-    return [[BDSKLinkedURL alloc] initWithURLString:aString];
+    OBRequestConcreteImplementation(self, _cmd);
+    return nil;
 }
 
 - (id)copyWithZone:(NSZone *)aZone
@@ -229,12 +225,6 @@ static Class BDSKLinkedObjectClass = Nil;
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     OBRequestConcreteImplementation(self, _cmd);
-}
-
-- (void)dealloc
-{
-    if ([self class] != BDSKLinkedObjectClass)
-        [super dealloc];
 }
 
 - (NSString *)description {
@@ -282,6 +272,44 @@ static Class BDSKLinkedObjectClass = Nil;
 
 #pragma mark -
 
+@implementation BDSKPlaceholderLinkedFile
+
+- (id)init {
+    return nil;
+}
+
+- (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
+{
+    if([aURL isFileURL])
+        return [[BDSKLinkedAliasFile alloc] initWithURL:aURL delegate:aDelegate];
+    else if (aURL)
+        return [[BDSKLinkedURL alloc] initWithURL:aURL delegate:aDelegate];
+    else
+        return nil;
+}
+
+- (id)initWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
+{
+    return [[BDSKLinkedAliasFile alloc] initWithBase64String:base64String delegate:aDelegate];
+}
+
+- (id)initWithURLString:(NSString *)aString;
+{
+    return [[BDSKLinkedURL alloc] initWithURLString:aString];
+}
+
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
+
+@end
+
+#pragma mark -
+
 // Alias- and FSRef-based concrete subclass for local files
 
 @implementation BDSKLinkedAliasFile
@@ -290,17 +318,17 @@ static Class BDSKLinkedObjectClass = Nil;
 - (id)initWithAlias:(AliasHandle)anAlias relativePath:(NSString *)relPath delegate:(id)aDelegate;
 {
     OBASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
-    
+    self = [super init];
     if (anAlias == NULL) {
-        [[super init] release];
+        [self release];
         self = nil;
-    } else if (self = [super init]) {
+    } else if (self == nil) {
+        BDSKDisposeAliasHandle(anAlias);
+    } else {
         fileRef = NULL; // this is updated lazily, as we don't know the base path at this point
         alias = anAlias;
         relativePath = [relPath copy];
         delegate = aDelegate;
-    } else {
-        BDSKDisposeAliasHandle(anAlias);
     }
     return self;    
 }
