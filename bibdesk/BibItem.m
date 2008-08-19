@@ -2438,7 +2438,7 @@ static void addFilesToArray(const void *value, void *context)
 }
 
 - (BOOL)addFileForURL:(NSURL *)aURL autoFile:(BOOL)shouldAutoFile runScriptHook:(BOOL)runScriptHook {
-    BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:self] autorelease];
+    BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:self];
     if (aFile == nil)
         return NO;
     unsigned idx = [files count];

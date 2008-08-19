@@ -192,6 +192,21 @@ static Class BDSKLinkedFileClass = Nil;
     return BDSKLinkedFileClass == self ? defaultPlaceholderLinkedFile : NSAllocateObject(self, 0, aZone);
 }
 
++ (id)linkedFileWithURL:(NSURL *)aURL delegate:(id)aDelegate;
+{
+    return [[[self alloc] initWithURL:aURL delegate:aDelegate] autorelease];
+}
+
++ (id)linkedFileWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
+{
+    return [[[self alloc] initWithBase64String:base64String delegate:aDelegate] autorelease];
+}
+
++ (id)linkedFileWithURLString:(NSString *)aString;
+{
+    return [[[self alloc] initWithURLString:aString] autorelease];
+}
+
 - (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
 {
     OBRequestConcreteImplementation(self, _cmd);

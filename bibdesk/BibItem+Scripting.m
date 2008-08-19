@@ -145,7 +145,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(unsigned int)idx {
     if ([[self owner] isDocument]) {
-        BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
+        BDSKLinkedFile *file = [BDSKLinkedFile alloc] initWithURL:newURL delegate:self];
         if (file) {
             NSArray *localFiles = [self localFiles];
             if (idx > 0) {
@@ -179,7 +179,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 - (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(unsigned int)idx {
     if ([[self owner] isDocument]) {
         NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:newURLString];
-        BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
+        BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:self];
         if (file) {
             NSArray *remoteURLs = [self remoteURLs];
             if (idx < [remoteURLs count]) {
@@ -325,7 +325,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (void) setRemoteURLString:(NSString*) newURLString{
     if ([[self owner] isDocument]) {
-        BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURLString:newURLString] autorelease];
+        BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURLString:newURLString];
         if (file == nil)
             return;
         NSArray *remoteURLs = [self remoteURLs];
@@ -356,7 +356,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
         NSURL *newURL = [newPath hasPrefix:@"file://"] ? [NSURL URLWithString:newPath] : [NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]];
         if (newURL == nil)
             return;
-        BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:self] autorelease];
+        BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:self];
         if (file == nil)
             return;
         NSArray *localFiles = [self localFiles];

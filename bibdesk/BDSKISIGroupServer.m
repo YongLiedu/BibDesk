@@ -607,7 +607,7 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
     // insert the ISI URL into the normal file array if hasn't been put elsewhere
     if (isiURL && ISIURLFieldName == nil) {
         NSURL *newURL = [NSURL URLWithStringByNormalizingPercentEscapes:isiURL];
-        BDSKLinkedFile *file = [[[BDSKLinkedFile alloc] initWithURL:newURL delegate:pub] autorelease];
+        BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:pub];
         [pub insertObject:file inFilesAtIndex:0];
     }
     

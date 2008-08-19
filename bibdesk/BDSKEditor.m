@@ -543,7 +543,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         unsigned int anIndex = (unsigned int)contextInfo;
         NSURL *aURL = [[sheet URLs] objectAtIndex:0];
         if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication] autorelease];
+            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
             if (aFile == nil)
                 return;
             NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
@@ -597,7 +597,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             return;
         unsigned int anIndex = (unsigned int)contextInfo;
         if (anIndex != NSNotFound) {
-            BDSKLinkedFile *aFile = [[[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication] autorelease];
+            BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
             if (aFile == nil)
                 return;
             NSURL *oldURL = [[[publication objectInFilesAtIndex:anIndex] URL] retain];
@@ -1474,7 +1474,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     while (NSNotFound != idx) {
         if ((aURL = [enumerator nextObject]) && 
-            (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
+            (aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication])) {
             NSURL *oldURL = [[[publication objectInFilesAtIndex:idx] URL] retain];
             [publication removeObjectFromFilesAtIndex:idx];
             if (oldURL)
@@ -1484,7 +1484,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [[self document] userAddedURL:aURL forPublication:publication];
             if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
                 [publication autoFileLinkedFile:aFile];
-            [aFile release];
         }
         idx = [aSet indexGreaterThanIndex:idx];
     }
@@ -1500,12 +1499,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     while (NSNotFound != idx) {
         if ((aURL = [enumerator nextObject]) && 
-            (aFile = [[BDSKLinkedFile alloc] initWithURL:aURL delegate:publication])) {
+            (aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication])) {
             [publication insertObject:aFile inFilesAtIndex:idx - offset];
             [[self document] userAddedURL:aURL forPublication:publication];
             if (([NSApp currentModifierFlags] & NSCommandKeyMask) == 0)
                 [publication autoFileLinkedFile:aFile];
-            [aFile release];
         } else {
             // the indexes in aSet assume that we inserted the file
             offset++;

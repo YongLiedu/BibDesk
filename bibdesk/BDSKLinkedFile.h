@@ -41,6 +41,10 @@
 
 @interface BDSKLinkedFile : NSObject <NSCopying, NSCoding>
 
++ (id)linkedFileWithURL:(NSURL *)aURL delegate:(id)aDelegate;
++ (id)linkedFileWithBase64String:(NSString *)base64String delegate:(id)aDelegate;
++ (id)linkedFileWithURLString:(NSString *)aString;
+
 // creates a linked local file or remote URL object depending on the URL
 - (id)initWithURL:(NSURL *)aURL delegate:(id)aDelegate;
 // creates a linked local file
