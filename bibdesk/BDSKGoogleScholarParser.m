@@ -46,6 +46,7 @@
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
     // !!! other countries end up with e.g. scholar.google.be; checking for scholar.google.com may fail in those cases
+    // also some sites access google scholar via an ezproxy, so the suffix could be quite complex
     if (! [[url host] hasPrefix:@"scholar.google."]){
         return NO;
     }
@@ -68,33 +69,78 @@
 
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
+    NSString *googSearchResultNodePath = @"//p[@class='g']";
     
-    NSString *BibTexLinkNodePath = @"//a[contains(text(),'BibTeX')]";
+    NSString *BibTexLinkNodePath = @".//a[contains(text(),'BibTeX')]";
+	
+    NSString *targetUrlNodePath = @".//span[@class='w']/a";
     
-    NSError *error = nil;    
-
-    NSArray *BibTeXLinkNodes = [[xmlDocument rootElement] nodesForXPath:BibTexLinkNodePath
-                                                    error:&error];
-        
+    NSError *error = nil;
+            
+    // fetch the google search results
+    NSArray *googSearchResults = [[xmlDocument rootElement] nodesForXPath:googSearchResultNodePath
+                                                                    error:&error];
+    
     // bail out with an XML error if the Xpath query fails
-    if (nil == BibTeXLinkNodes) {
+    if (nil == googSearchResults) {
         if (outError) *outError = error;
         return nil;
-    }
+    }    
     
-    unsigned int i, iMax = [BibTeXLinkNodes count];
+    unsigned int i, iMax = [googSearchResults count];
     
     // check the number of nodes first
     if (0 == iMax) {
-        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"No BibTeX links found", @"Google scholar error")];
+        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"No search results found", @"Google scholar error")];
         [error setValue:NSLocalizedString(@"Unable to parse this page.  Please report this to BibDesk's developers and provide the URL.", @"Google scholar error") forKey:NSLocalizedRecoverySuggestionErrorKey];
         if (outError) *outError = error;
         return nil;
     }
-    
+        
     for(i=0; i < iMax; i++){
         
-        NSXMLNode *btlinknode = [BibTeXLinkNodes objectAtIndex:i];
+        NSXMLNode *googSearchResult = [googSearchResults objectAtIndex:i];
+        
+        NSString *targetUrlHrefValue = nil;
+        
+        // fetch the bibtex link
+        
+        NSArray *BibTeXLinkNodes = [googSearchResult nodesForXPath:BibTexLinkNodePath
+                                                             error:&error];
+        
+        if (nil == BibTeXLinkNodes) {
+
+            // This is an error since this method isn't supposed to be called if the bibtex
+            // links don't appear on the page
+            NSLog(@"Google Scholar Error: unable to parse bibtex url from search result %u due to xpath error", i);
+            continue;
+
+        } else if (1 != [BibTeXLinkNodes count]) {
+
+            // If Google ever start providing multiple alternative bibtex links for a
+            // single item we will need to deal with that
+            NSLog(@"Google Scholar Error: unable to parse bibtex url from search result %u, found %u bibtex urls (expected 1)", i, [BibTeXLinkNodes count]);
+            continue;
+
+        }
+        
+        // fetch the actual item url
+        NSArray *targetUrlNodes = [googSearchResult nodesForXPath:targetUrlNodePath
+                                                            error:&error];
+        
+        // skip if the target xpath fails, but continue with the bibtex import - some result
+        // types have no url (eg. Book or Citation entries)
+        if (nil != targetUrlNodes && 1 == [targetUrlNodes count]) {
+            
+            // successfully found the result target url
+            targetUrlHrefValue = [[targetUrlNodes objectAtIndex:0] stringValueOfAttribute:@"href"];
+            
+            // fix relative urls
+            if (![targetUrlHrefValue hasPrefix:@"http"])
+                targetUrlHrefValue = [[NSURL URLWithString:targetUrlHrefValue relativeToURL:url] absoluteString];
+        }
+        
+        NSXMLNode *btlinknode = [BibTeXLinkNodes objectAtIndex:0];
         
         NSString *hrefValue = [btlinknode stringValueOfAttribute:@"href"];
         
@@ -134,13 +180,9 @@
             bibtexItems = [BDSKBibTeXParser itemsFromString:bibTeXString document:nil isPartialData:&isPartialData error:&error];
         
         if ([bibtexItems count] && NO == isPartialData) {
-        BibItem *bibtexItem = [bibtexItems objectAtIndex:0]; 
+            BibItem *bibtexItem = [bibtexItems objectAtIndex:0]; 
         
-        // TODO: get a useful link for the URL field. 
-        // each item's title looks like <span class="w"><a href="link">title</a></span>
-        // but it'll take some xpath hacking to make sure we match title to bibtex link correctly.
-        
-        [items addObject:bibtexItem];
+            [items addObject:bibtexItem];
 			
 			NSString *bracedTitle = [bibtexItem valueOfField:BDSKTitleString inherit:NO];
 			
@@ -152,7 +194,18 @@
 				if ([mutableTitle isStringTeXQuotingBalancedWithBraces:YES connected:NO]) 
 					[bibtexItem setField:BDSKTitleString toValue:mutableTitle];
 				[mutableTitle release];
-			}				
+			}
+            
+            NSString *itemUrlField = [bibtexItem valueOfField:BDSKUrlString inherit:NO];
+            
+            if (
+                nil != targetUrlHrefValue &&
+                (nil == itemUrlField || 0 == [itemUrlField length])
+                ) {
+                
+                // target url was found successfully & is not explicitly set in the entry
+                [bibtexItem setField:BDSKUrlString toValue:targetUrlHrefValue];
+            }
         }
         else {
             // display a fake item in the table so the user knows one of the items failed to parse, but still gets the rest of the data
