@@ -84,23 +84,23 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 + (id)bookmarkWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
-    return [[[[self class] alloc] initWithUrlString:aUrlString name:aName] autorelease];
+    return [[[self alloc] initWithUrlString:aUrlString name:aName] autorelease];
 }
 
 + (id)bookmarkFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {
-    return [[[[self class] alloc] initFolderWithChildren:aChildren name:aName] autorelease];
+    return [[[self alloc] initFolderWithChildren:aChildren name:aName] autorelease];
 }
 
 + (id)bookmarkFolderWithName:(NSString *)aName {
-    return [[[[self class] alloc] initFolderWithName:aName] autorelease];
-}
+    return [[[self alloc] initFolderWithName:aName] autorelease];
+
 
 + (id)bookmarkSeparator {
-    return [[[[self class] alloc] initSeparator] autorelease];
+    return [[[self alloc] initSeparator] autorelease];
 }
 
 + (id)bookmarkWithDictionary:(NSDictionary *)dictionary {
-    return [[[[self class] alloc] initWithDictionary:dictionary] autorelease];
+    return [[[self alloc] initWithDictionary:dictionary] autorelease];
 }
 
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {

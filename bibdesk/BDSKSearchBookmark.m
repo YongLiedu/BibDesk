@@ -83,23 +83,23 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 + (id)searchBookmarkFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel {
-    return [[[[self class] alloc] initFolderWithChildren:aChildren label:aLabel] autorelease];
+    return [[[self alloc] initFolderWithChildren:aChildren label:aLabel] autorelease];
 }
 
 + (id)searchBookmarkFolderWithLabel:(NSString *)aLabel {
-    return [[[[self class] alloc] initFolderWithLabel:aLabel] autorelease];
+    return [[[self alloc] initFolderWithLabel:aLabel] autorelease];
 }
 
 + (id)searchBookmarkSeparator {
-    return [[[[self class] alloc] initSeparator] autorelease];
+    return [[[self alloc] initSeparator] autorelease];
 }
 
 + (id)searchBookmarkWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel {
-    return [[[[self class] alloc] initWithInfo:aDictionary label:aLabel] autorelease];
+    return [[[self alloc] initWithInfo:aDictionary label:aLabel] autorelease];
 }
 
 + (id)searchBookmarkWithDictionary:(NSDictionary *)dictionary {
-    return [[[[self class] alloc] initWithDictionary:dictionary] autorelease];
+    return [[[self alloc] initWithDictionary:dictionary] autorelease];
 }
 
 - (id)initFolderWithChildren:(NSArray *)aChildren label:(NSString *)aLabel {
