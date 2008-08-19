@@ -78,9 +78,9 @@ static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBo
         
         NSMutableArray *bookmarks = [NSMutableArray array];
         while (dict = [dictEnum nextObject]) {
-            BDSKSearchBookmark *bm = [[BDSKSearchBookmark alloc] initWithDictionary:dict];
-            [bookmarks addObject:bm];
-            [bm release];
+            BDSKSearchBookmark *bm = [BDSKSearchBookmark searchBookmarkWithDictionary:dict];
+            if (bm)
+                [bookmarks addObject:bm];
         }
         
         bookmarkRoot = [[BDSKSearchBookmark alloc] initFolderWithChildren:bookmarks label:nil];
@@ -125,11 +125,10 @@ static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBo
 }
 
 - (void)addBookmarkWithInfo:(NSDictionary *)info label:(NSString *)label toFolder:(BDSKSearchBookmark *)folder {
-    BDSKSearchBookmark *bookmark = [[BDSKSearchBookmark alloc] initWithInfo:info label:label];
+    BDSKSearchBookmark *bookmark = [BDSKSearchBookmark searchBookmarkWithInfo:info label:label];
     if (bookmark) {
         if (folder == nil) folder = bookmarkRoot;
         [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
-        [bookmark release];
     }
 }
 
@@ -151,7 +150,7 @@ static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBo
 #pragma mark Actions
 
 - (IBAction)insertBookmarkFolder:(id)sender {
-    BDSKSearchBookmark *folder = [[[BDSKSearchBookmark alloc] initFolderWithLabel:NSLocalizedString(@"Folder", @"default folder name")] autorelease];
+    BDSKSearchBookmark *folder = [BDSKSearchBookmark searchBookmarkFolderWithLabel:NSLocalizedString(@"Folder", @"default folder name")];
     int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKSearchBookmark *item = bookmarkRoot;
     unsigned int idx = [[bookmarkRoot children] count];
@@ -174,7 +173,7 @@ static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBo
 }
 
 - (IBAction)insertBookmarkSeparator:(id)sender {
-    BDSKSearchBookmark *separator = [[[BDSKSearchBookmark alloc] initSeparator] autorelease];
+    BDSKSearchBookmark *separator = [BDSKSearchBookmark searchBookmarkSeparator];
     int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKSearchBookmark *item = bookmarkRoot;
     unsigned int idx = [[bookmarkRoot children] count];

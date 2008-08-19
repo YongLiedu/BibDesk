@@ -48,6 +48,12 @@ enum {
     BDSKBookmark *parent;
 }
 
++ (id)bookmarkWithUrlString:(NSString *)aUrlString name:(NSString *)aName;
++ (id)bookmarkFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName;
++ (id)bookmarkFolderWithName:(NSString *)aName;
++ (id)bookmarkSeparator;
++ (id)bookmarkWithDictionary:(NSDictionary *)dictionary;
+
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName;
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName;
 - (id)initFolderWithName:(NSString *)aName;

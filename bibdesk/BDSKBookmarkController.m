@@ -88,9 +88,9 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
 			NSDictionary *dict;
 			
 			while(dict = [bEnum nextObject]){
-                BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithDictionary:dict];
-				[bookmarks addObject:bookmark];
-                [bookmark release];
+                BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithDictionary:dict];
+                if (bookmark)
+                    [bookmarks addObject:bookmark];
 			}
 		}
         
@@ -153,11 +153,10 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
 }
 
 - (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name toFolder:(BDSKBookmark *)folder {
-    BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithUrlString:urlString name:name];
+    BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:urlString name:name];
     if (bookmark) {
         if (folder == nil) folder = bookmarkRoot;
         [folder insertObject:bookmark inChildrenAtIndex:[folder countOfChildren]];
-        [bookmark release];
     }
 }
 
@@ -209,7 +208,7 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
 #pragma mark Actions
 
 - (IBAction)insertBookmark:(id)sender {
-    BDSKBookmark *bookmark = [[[BDSKBookmark alloc] initWithUrlString:@"http://" name:nil] autorelease];
+    BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:@"http://" name:nil];
     int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKBookmark *item = bookmarkRoot;
     unsigned int idx = [[bookmarkRoot children] count];
@@ -232,7 +231,7 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
 }
 
 - (IBAction)insertBookmarkFolder:(id)sender {
-    BDSKBookmark *folder = [[[BDSKBookmark alloc] initFolderWithName:NSLocalizedString(@"Folder", @"default folder name")] autorelease];
+    BDSKBookmark *folder = [BDSKBookmark bookmarkFolderWithName:NSLocalizedString(@"Folder", @"default folder name")];
     int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKBookmark *item = bookmarkRoot;
     unsigned int idx = [[bookmarkRoot children] count];
@@ -255,7 +254,7 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
 }
 
 - (IBAction)insertBookmarkSeparator:(id)sender {
-    BDSKBookmark *separator = [[[BDSKBookmark alloc] initSeparator] autorelease];
+    BDSKBookmark *separator = [BDSKBookmark bookmarkSeparator];
     int rowIndex = [[outlineView selectedRowIndexes] lastIndex];
     BDSKBookmark *item = bookmarkRoot;
     unsigned int idx = [[bookmarkRoot children] count];
@@ -536,11 +535,11 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
         if (idx == NSOutlineViewDropOnItemIndex && [item bookmarkType] == BDSKBookmarkTypeBookmark) {
             [item setUrlString:urlString];
         } else {
-            BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithUrlString:urlString name:nil];
+            BDSKBookmark *bookmark = [BDSKBookmark bookmarkWithUrlString:urlString name:nil];
             if (idx == NSOutlineViewDropOnItemIndex)
                 idx = [[item children] count];
-            [(BDSKBookmark *)item insertObject:bookmark inChildrenAtIndex:idx];
-            [bookmark release];
+            if (bookmark)
+                [(BDSKBookmark *)item insertObject:bookmark inChildrenAtIndex:idx];
         }
         return YES;
     }
