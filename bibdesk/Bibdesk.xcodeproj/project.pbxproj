@@ -131,22 +131,6 @@
 		CE17EE7F0E24F27600DE06EA /* BibDesk-App.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */; };
 		CE1A7F42090BEC3C00ACC864 /* BDSKHeaderPopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */; };
 		CE1A7F4E090BED5600ACC864 /* BDSKHeaderPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1A7EDE090BDF1C00ACC864 /* BDSKHeaderPopUpButton.m */; };
-		CE1F52990E50BF2200183FDA /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
-		CE1F529A0E50BF2200183FDA /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
-		CE1F529B0E50BF2200183FDA /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
-		CE1F529C0E50BF2200183FDA /* yaz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9B801830B41E89500A5A615 /* yaz.framework */; };
-		CE1F529D0E50BF2200183FDA /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
-		CE1F529E0E50BF2200183FDA /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
-		CE1F529F0E50BF2200183FDA /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE2BB5920E0BE1370090E848 /* FileView.framework */; };
-		CE1F52A00E50BF2200183FDA /* SkimNotes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEA451600E47C88E00D161AD /* SkimNotes.framework */; };
-		CE1F52A10E50BF4B00183FDA /* OmniBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
-		CE1F52A20E50BF4B00183FDA /* OmniFoundation.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
-		CE1F52A30E50BF4B00183FDA /* OmniAppKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
-		CE1F52A40E50BF4B00183FDA /* yaz.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9B801830B41E89500A5A615 /* yaz.framework */; };
-		CE1F52A50E50BF4B00183FDA /* AGRegex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
-		CE1F52A60E50BF4B00183FDA /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
-		CE1F52A70E50BF4B00183FDA /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE2BB5920E0BE1370090E848 /* FileView.framework */; };
-		CE1F52A80E50BF4B00183FDA /* SkimNotes.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEA451600E47C88E00D161AD /* SkimNotes.framework */; };
 		CE21D10B09208B9D0075E607 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE21D10909208B9D0075E607 /* BDSKGroup.m */; };
 		CE2209A8093639B0004D7D92 /* BDSKAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2209A6093639B0004D7D92 /* BDSKAlert.m */; };
 		CE2209AB09363A05004D7D92 /* BDSKAlert.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE2209A909363A05004D7D92 /* BDSKAlert.nib */; };
@@ -280,11 +264,6 @@
 		CEBA63D80A7CA0B500588BB7 /* BDSKCrossrefFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */; };
 		CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEBB8D8709C8B0D90074C79E /* Font.tiff */; };
 		CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */; };
-		CED1F40D0E5AF49D007A7B26 /* latex2rtf in Resources */ = {isa = PBXBuildFile; fileRef = CED1F40C0E5AF49C007A7B26 /* latex2rtf */; };
-		CED1F4350E5AF4FC007A7B26 /* BibImporter.mdimporter in Resources */ = {isa = PBXBuildFile; fileRef = CED1F40E0E5AF4FC007A7B26 /* BibImporter.mdimporter */; };
-		CED1F4360E5AF4FC007A7B26 /* BibDesk.qlgenerator in Resources */ = {isa = PBXBuildFile; fileRef = CED1F4210E5AF4FC007A7B26 /* BibDesk.qlgenerator */; };
-		CED1F4370E5AF530007A7B26 /* BibImporter.mdimporter in CopyFiles */ = {isa = PBXBuildFile; fileRef = CED1F40E0E5AF4FC007A7B26 /* BibImporter.mdimporter */; };
-		CED1F4380E5AF530007A7B26 /* BibDesk.qlgenerator in CopyFiles */ = {isa = PBXBuildFile; fileRef = CED1F4210E5AF4FC007A7B26 /* BibDesk.qlgenerator */; };
 		CED65AB70906BCC6003EED90 /* BDSKScriptHook.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */; };
 		CED65AB90906BCC6003EED90 /* BDSKScriptHookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */; };
 		CED65AC00906BE1F003EED90 /* BibPref_ScriptHooks.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65ABE0906BE1F003EED90 /* BibPref_ScriptHooks.m */; };
@@ -303,6 +282,25 @@
 		CEE23BF10BFBA827002B746B /* fonts.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022D510758073E00C3F701 /* fonts.cfg */; };
 		CEE23BF20BFBA827002B746B /* ignore.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022D560758073E00C3F701 /* ignore.cfg */; };
 		CEE23BF30BFBA827002B746B /* style.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022D690758073E00C3F701 /* style.cfg */; };
+		CEE8DD440E5C3F5B00EFA97F /* OmniBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
+		CEE8DD450E5C3F5B00EFA97F /* OmniFoundation.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
+		CEE8DD460E5C3F5B00EFA97F /* OmniAppKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */; };
+		CEE8DD470E5C3F5B00EFA97F /* yaz.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
+		CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
+		CEE8DD490E5C3F5B00EFA97F /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
+		CEE8DD4A0E5C3F5B00EFA97F /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
+		CEE8DD4B0E5C3F5B00EFA97F /* SkimNotes.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
+		CEE8DEC60E5C3FB700EFA97F /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
+		CEE8DEC70E5C3FB700EFA97F /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
+		CEE8DEC80E5C3FB700EFA97F /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */; };
+		CEE8DEC90E5C3FB700EFA97F /* yaz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
+		CEE8DECA0E5C3FB700EFA97F /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
+		CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
+		CEE8DECC0E5C3FB700EFA97F /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
+		CEE8DECD0E5C3FB700EFA97F /* SkimNotes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
+		CEE8DECE0E5C3FF000EFA97F /* skimnotes in Resources */ = {isa = PBXBuildFile; fileRef = CE7DC8DC0E0952BB00D6D76D /* skimnotes */; };
+		CEE8DEF00E5C402800EFA97F /* BibImporter.mdimporter in CopyFiles */ = {isa = PBXBuildFile; fileRef = F95CC113087F54BF002C5694 /* BibImporter.mdimporter */; };
+		CEE8DEF10E5C402800EFA97F /* BibDesk.qlgenerator in CopyFiles */ = {isa = PBXBuildFile; fileRef = F98C6FD00CDD30A2002FCAD8 /* BibDesk.qlgenerator */; };
 		CEEA4C6A0B57B0D400434059 /* BDSKBooleanValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEA4C680B57B0D400434059 /* BDSKBooleanValueTransformer.m */; };
 		CEEA5EA40B595EE200434059 /* ChangeFieldSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEA5E9E0B595EE200434059 /* ChangeFieldSheet.nib */; };
 		CEEC6C55093A411E00A64F54 /* BDSKCollapsibleView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */; };
@@ -829,7 +827,7 @@
 			dstPath = Contents/Library/QuickLook;
 			dstSubfolderSpec = 1;
 			files = (
-				CED1F4380E5AF530007A7B26 /* BibDesk.qlgenerator in CopyFiles */,
+				CEE8DEF10E5C402800EFA97F /* BibDesk.qlgenerator in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -839,14 +837,14 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				CE1F52A10E50BF4B00183FDA /* OmniBase.framework in CopyFiles */,
-				CE1F52A20E50BF4B00183FDA /* OmniFoundation.framework in CopyFiles */,
-				CE1F52A30E50BF4B00183FDA /* OmniAppKit.framework in CopyFiles */,
-				CE1F52A40E50BF4B00183FDA /* yaz.framework in CopyFiles */,
-				CE1F52A50E50BF4B00183FDA /* AGRegex.framework in CopyFiles */,
-				CE1F52A60E50BF4B00183FDA /* BTParse.framework in CopyFiles */,
-				CE1F52A70E50BF4B00183FDA /* FileView.framework in CopyFiles */,
-				CE1F52A80E50BF4B00183FDA /* SkimNotes.framework in CopyFiles */,
+				CEE8DD440E5C3F5B00EFA97F /* OmniBase.framework in CopyFiles */,
+				CEE8DD450E5C3F5B00EFA97F /* OmniFoundation.framework in CopyFiles */,
+				CEE8DD460E5C3F5B00EFA97F /* OmniAppKit.framework in CopyFiles */,
+				CEE8DD470E5C3F5B00EFA97F /* yaz.framework in CopyFiles */,
+				CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in CopyFiles */,
+				CEE8DD490E5C3F5B00EFA97F /* FileView.framework in CopyFiles */,
+				CEE8DD4A0E5C3F5B00EFA97F /* BTParse.framework in CopyFiles */,
+				CEE8DD4B0E5C3F5B00EFA97F /* SkimNotes.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -876,7 +874,7 @@
 			dstPath = Contents/Library/Spotlight;
 			dstSubfolderSpec = 1;
 			files = (
-				CED1F4370E5AF530007A7B26 /* BibImporter.mdimporter in CopyFiles */,
+				CEE8DEF00E5C402800EFA97F /* BibImporter.mdimporter in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1225,9 +1223,6 @@
 		CEBB8D8709C8B0D90074C79E /* Font.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Font.tiff; path = Images/Font.tiff; sourceTree = "<group>"; };
 		CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroupViewController.h; sourceTree = "<group>"; };
 		CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroupViewController.m; sourceTree = "<group>"; };
-		CED1F40C0E5AF49C007A7B26 /* latex2rtf */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = latex2rtf; path = ../../../BuildProducts/Debug/latex2rtf; sourceTree = SOURCE_ROOT; };
-		CED1F40E0E5AF4FC007A7B26 /* BibImporter.mdimporter */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BibImporter.mdimporter; sourceTree = BUILT_PRODUCTS_DIR; };
-		CED1F4210E5AF4FC007A7B26 /* BibDesk.qlgenerator */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BibDesk.qlgenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHook.h; sourceTree = "<group>"; };
 		CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptHook.m; sourceTree = "<group>"; };
 		CED65AB40906BCC6003EED90 /* BDSKScriptHookManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHookManager.h; sourceTree = "<group>"; };
@@ -1754,14 +1749,14 @@
 				F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */,
 				F98AACDE0D43DB5A00D3CD64 /* libssl.dylib in Frameworks */,
 				F98AACF50D43E13C00D3CD64 /* libcrypto.dylib in Frameworks */,
-				CE1F52990E50BF2200183FDA /* OmniBase.framework in Frameworks */,
-				CE1F529A0E50BF2200183FDA /* OmniFoundation.framework in Frameworks */,
-				CE1F529B0E50BF2200183FDA /* OmniAppKit.framework in Frameworks */,
-				CE1F529C0E50BF2200183FDA /* yaz.framework in Frameworks */,
-				CE1F529D0E50BF2200183FDA /* AGRegex.framework in Frameworks */,
-				CE1F529E0E50BF2200183FDA /* BTParse.framework in Frameworks */,
-				CE1F529F0E50BF2200183FDA /* FileView.framework in Frameworks */,
-				CE1F52A00E50BF2200183FDA /* SkimNotes.framework in Frameworks */,
+				CEE8DEC60E5C3FB700EFA97F /* OmniBase.framework in Frameworks */,
+				CEE8DEC70E5C3FB700EFA97F /* OmniFoundation.framework in Frameworks */,
+				CEE8DEC80E5C3FB700EFA97F /* OmniAppKit.framework in Frameworks */,
+				CEE8DEC90E5C3FB700EFA97F /* yaz.framework in Frameworks */,
+				CEE8DECA0E5C3FB700EFA97F /* AGRegex.framework in Frameworks */,
+				CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */,
+				CEE8DECC0E5C3FB700EFA97F /* BTParse.framework in Frameworks */,
+				CEE8DECD0E5C3FB700EFA97F /* SkimNotes.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1874,7 +1869,6 @@
 				27AF74ED08021E47006A6ADE /* Help Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				CEE23BAE0BFBA5FE002B746B /* Shared Support */,
-				CED1F3F70E5AF3E7007A7B26 /* Library */,
 				F98F307A088E0F2800C1427D /* Subprojects */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
@@ -1968,7 +1962,6 @@
 				CE12A16F0B44AED100416D19 /* SearchGroupServers.plist */,
 				CE2944000A7F939A00A46D05 /* PreferenceSearchTerms.plist */,
 				CE8962CA0CBEC10700EA2D98 /* TemplateOptions.plist */,
-				CED1F40C0E5AF49C007A7B26 /* latex2rtf */,
 			);
 			includeInIndex = 1;
 			name = Resources;
@@ -2358,15 +2351,6 @@
 				CEDB9BC80E2F405F0057FD09 /* SkimNotesTest.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		CED1F3F70E5AF3E7007A7B26 /* Library */ = {
-			isa = PBXGroup;
-			children = (
-				CED1F40E0E5AF4FC007A7B26 /* BibImporter.mdimporter */,
-				CED1F4210E5AF4FC007A7B26 /* BibDesk.qlgenerator */,
-			);
-			name = Library;
 			sourceTree = "<group>";
 		};
 		CEE23BAE0BFBA5FE002B746B /* Shared Support */ = {
@@ -3452,9 +3436,7 @@
 				CEDB58F40D3692A400E40354 /* ComplexStringEditor.nib in Resources */,
 				CE8F5F840DEEB26800061148 /* ZoomValues.strings in Resources */,
 				CE17EE7F0E24F27600DE06EA /* BibDesk-App.xcconfig in Resources */,
-				CED1F40D0E5AF49D007A7B26 /* latex2rtf in Resources */,
-				CED1F4350E5AF4FC007A7B26 /* BibImporter.mdimporter in Resources */,
-				CED1F4360E5AF4FC007A7B26 /* BibDesk.qlgenerator in Resources */,
+				CEE8DECE0E5C3FF000EFA97F /* skimnotes in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
