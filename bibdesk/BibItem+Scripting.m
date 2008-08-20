@@ -145,7 +145,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (void)insertObject:(NSURL *)newURL inLinkedFilesAtIndex:(unsigned int)idx {
     if ([[self owner] isDocument]) {
-        BDSKLinkedFile *file = [BDSKLinkedFile alloc] initWithURL:newURL delegate:self];
+        BDSKLinkedFile *file = [BDSKLinkedFile linkedFileWithURL:newURL delegate:self];
         if (file) {
             NSArray *localFiles = [self localFiles];
             if (idx > 0) {
