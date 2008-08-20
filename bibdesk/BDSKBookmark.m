@@ -93,7 +93,7 @@ static Class BDSKBookmarkClass = Nil;
 
 + (id)bookmarkFolderWithName:(NSString *)aName {
     return [[[self alloc] initFolderWithName:aName] autorelease];
-
+}
 
 + (id)bookmarkSeparator {
     return [[[self alloc] initSeparator] autorelease];
