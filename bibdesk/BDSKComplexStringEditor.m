@@ -38,7 +38,7 @@
 #import "BDSKComplexString.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKBackgroundView.h"
-#import <OmniBase/assertions.h>
+#import <OmniBase/OmniBase.h>
 #import "NSWindowController_BDSKExtensions.h"
 
 @interface BDSKComplexStringEditor (Private)

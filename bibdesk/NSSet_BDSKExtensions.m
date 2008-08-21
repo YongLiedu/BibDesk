@@ -38,7 +38,7 @@
 
 #import "NSSet_BDSKExtensions.h"
 #import <OmniBase/OmniBase.h>
-#import <OmniFoundation/CFSet-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKCountedSet.h"
 
 @implementation NSSet (BDSKExtensions)

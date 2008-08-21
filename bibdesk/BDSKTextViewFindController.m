@@ -37,7 +37,7 @@
  */
 
 #import "BDSKTextViewFindController.h"
-#import <OmniAppKit/OAFindPattern.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import <AGRegex/AGRegex.h>
 #import "BDSKRegExFindPattern.h"
 #import "BDSKFindFieldEditor.h"

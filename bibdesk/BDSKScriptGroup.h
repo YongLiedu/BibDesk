@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
-#import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKOwnerProtocol.h"
 
 @class OFMessageQueue, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;

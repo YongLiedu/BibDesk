@@ -38,7 +38,7 @@
 
 #import "BDSKHeaderPopUpButtonCell.h"
 #import "NSGeometry_BDSKExtensions.h"
-#import <OmniAppkit/NSImage-OAExtensions.h>
+#import <OmniAppkit/OmniAppkit.h>
 
 
 @implementation BDSKHeaderPopUpButtonCell

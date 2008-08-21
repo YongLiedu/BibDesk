@@ -39,7 +39,7 @@
 #import "BDSKScriptHookManager.h"
 #import "BibDocument.h"
 #import "BDSKStringConstants.h"
-#import <OmniFoundation/NSString-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 
 #define MAX_RUNNING_SCRIPT_HOOKS	100
 

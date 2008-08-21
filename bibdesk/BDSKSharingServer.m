@@ -48,8 +48,7 @@
 #import "BDSKSharedGroup.h"
 #import "BDSKAsynchronousDOServer.h"
 #import "BDSKThreadSafeMutableDictionary.h"
-#import <OmniBase/OBUtilities.h>
-#import <OmniBase/assertions.h>
+#import <OmniBase/OmniBase.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>

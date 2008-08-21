@@ -37,7 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OAApplication.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 
 @interface BDSKApplication : OAApplication 

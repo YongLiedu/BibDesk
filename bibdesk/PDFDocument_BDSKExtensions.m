@@ -37,7 +37,7 @@
  */
 
 #import "PDFDocument_BDSKExtensions.h"
-#import <OmniBase/OBUtilities.h>
+#import <OmniBase/OmniBase.h>
 
 
 @interface PDFDocument (BDSKPrivateDeclarations)

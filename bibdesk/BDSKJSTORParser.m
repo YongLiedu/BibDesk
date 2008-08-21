@@ -41,7 +41,7 @@
 #import "BDSKTypeManager.h"
 #import "BibItem.h"
 #import "BDSKAppController.h"
-#import <OmniBase/assertions.h>
+#import <OmniBase/OmniBase.h>
 #import "NSError_BDSKExtensions.h"
 
 //

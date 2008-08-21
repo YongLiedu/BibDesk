@@ -37,9 +37,9 @@
  */
 
 #import "NSImage_BDSKExtensions.h"
-#import <OmniFoundation/NSString-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "NSBezierPath_BDSKExtensions.h"
-#import <OmniAppKit/IconFamily.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @implementation NSImage (BDSKExtensions)
 

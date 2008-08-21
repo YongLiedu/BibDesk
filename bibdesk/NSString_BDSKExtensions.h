@@ -35,7 +35,7 @@
  */
 
 #import <Foundation/Foundation.h>
-#import <OmniFoundation/NSMutableString-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"

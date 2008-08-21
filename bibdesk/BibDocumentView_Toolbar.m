@@ -38,7 +38,7 @@
 #import "BibDocument_Search.h"
 #import "BDSKAppController.h"
 #import "NSImage_BDSKExtensions.h"
-#import <OmniAppKit/OAToolbarItem.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "OAToolbarItem_BDSKExtensions.h"
 #import "BDSKImagePopUpButton.h"
 #import "BibDocument_Actions.h"

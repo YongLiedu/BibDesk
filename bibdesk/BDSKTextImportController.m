@@ -42,10 +42,10 @@
 #import "BDSKTypeManager.h"
 #import "BDSKComplexStringEditor.h"
 #import "BDSKImagePopUpButton.h"
-#import <OmniAppKit/OATypeAheadSelectionHelper.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKTypeSelectHelper.h"
 #import <WebKit/WebKit.h>
-#import <OmniFoundation/NSString-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCrossrefFormatter.h"
 #import "BDSKCiteKeyFormatter.h"

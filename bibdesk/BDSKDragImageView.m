@@ -38,7 +38,7 @@
 
 #import "BDSKDragImageView.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import <OmniAppKit/OAApplication.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @implementation BDSKDragImageView
 

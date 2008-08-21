@@ -37,7 +37,7 @@
  */
 
 #import "BDSKAppController+Scripting.h"
-#import <OmniFoundation/OFPreference.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKScriptHookManager.h"
 #import "BDSKTypeManager.h"
 #import "BDSKMacroResolver.h"

@@ -40,8 +40,7 @@
 #import "BDSKCountedSet.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
-#import <OmniFoundation/OFMultiValueDictionary.h>
-#import <OmniFoundation/NSString-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "NSObject_BDSKExtensions.h"
 
 

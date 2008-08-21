@@ -38,7 +38,7 @@
 
 #import "BDSKStatusBar.h"
 #import "NSGeometry_BDSKExtensions.h"
-#import <OmniBase/assertions.h>
+#import <OmniBase/OmniBase.h>
 #import "CIImage_BDSKExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
 

@@ -38,7 +38,7 @@
  */
 
 #import "BDSKOverlay.h"
-#import <OmniAppKit/NSToolbar-OAExtensions.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @implementation BDSKOverlay
 

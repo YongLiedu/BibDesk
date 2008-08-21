@@ -37,7 +37,7 @@
  */
 
 #import "BDSKZoomableTextView.h"
-#import <OmniAppKit/NSView-OAExtensions.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKHeaderPopUpButton.h"
 #import "NSScrollview_BDSKExtensions.h"
 

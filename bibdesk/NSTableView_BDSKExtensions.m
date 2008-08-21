@@ -41,8 +41,8 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSLayoutManager_BDSKExtensions.h"
 #import "BDSKFieldEditor.h"
-#import <OmniAppKit/OAApplication.h>
-#import <OmniFoundation/OFPreference.h>
+#import <OmniFoundation/OmniFoundation.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @implementation NSTableView (BDSKExtensions)
 

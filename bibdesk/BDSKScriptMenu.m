@@ -37,10 +37,9 @@
  */
 
 #import "BDSKScriptMenu.h"
-#import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/NSMenu-OAExtensions.h>
 #import <OmniBase/OmniBase.h>
-#import <OmniAppKit/OAApplication.h>
+#import <OmniFoundation/OmniFoundation.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @interface BDSKScriptMenuController : NSObject
 + (id)sharedInstance;

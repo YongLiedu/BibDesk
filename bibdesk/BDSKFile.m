@@ -37,7 +37,7 @@
  */
 
 #import "BDSKFile.h"
-#import <OmniBase/assertions.h>
+#import <OmniBase/OmniBase.h>
 #import "NSURL_BDSKExtensions.h"
 
 // private placeholder subclass

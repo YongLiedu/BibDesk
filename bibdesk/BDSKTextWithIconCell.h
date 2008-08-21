@@ -37,9 +37,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OATextWithIconCell.h>
+#import <OmniAppKit/OmniAppKit.h>
 
-#import <AppKit/NSTextFieldCell.h>
 
 @interface BDSKTextWithIconCell : NSTextFieldCell
 {

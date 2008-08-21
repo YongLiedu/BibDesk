@@ -38,10 +38,7 @@
 
 #import "BDSKPreferenceController.h"
 #import "BDSKOverlay.h"
-#import <OmniAppKit/OAPreferencesIconView.h>
-#import <OmniAppKit/NSToolbar-OAExtensions.h>
-#import <OmniAppKit/OAPreferenceClient.h>
-#import <OmniAppKit/OAPreferenceClientRecord.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @interface NSArray (PreferencesSearch)
 - (BOOL)containsCaseInsensitiveSubstring:(NSString *)substring;

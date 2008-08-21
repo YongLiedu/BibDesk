@@ -42,7 +42,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BDSKMacroResolver.h"
-#import <OmniBase/OBUtilities.h>
+#import <OmniBase/OmniBase.h>
 
 
 @implementation BDSKGroup

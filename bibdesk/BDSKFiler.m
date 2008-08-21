@@ -40,7 +40,7 @@
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKPathColorTransformer.h"
-#import <OmniAppKit/NSTableView-OAExtensions.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BDSKAppController.h"

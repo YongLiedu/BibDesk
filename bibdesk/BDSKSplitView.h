@@ -37,7 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OASplitView.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 enum {
     BDSKMinBlendStyleMask = 1,

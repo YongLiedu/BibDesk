@@ -35,11 +35,9 @@
  */
 
 #import "NSString_BDSKExtensions.h"
-#import <OmniFoundation/NSString-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import <Cocoa/Cocoa.h>
 #import <AGRegex/AGRegex.h>
-#import <OmniFoundation/OFCharacterSet.h>
-#import <OmniFoundation/OFStringScanner.h>
 #import "BDSKStringConstants.h"
 #import "CFString_BDSKExtensions.h"
 #import "OFCharacterSet_BDSKExtensions.h"

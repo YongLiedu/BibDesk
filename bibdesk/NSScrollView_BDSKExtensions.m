@@ -37,7 +37,7 @@
  */
 
 #import "NSScrollView_BDSKExtensions.h"
-#import <OmniBase/OBUtilities.h>
+#import <OmniBase/OmniBase.h>
 #import "BDSKEdgeView.h"
 
 

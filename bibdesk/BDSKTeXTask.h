@@ -38,7 +38,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
+#import <OmniFoundation/OmniFoundation.h>
 
 enum {
 	BDSKGenerateLTB = 0,

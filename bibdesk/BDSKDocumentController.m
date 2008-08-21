@@ -56,7 +56,6 @@
 #import "BDSKGroupsArray.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplateDocument.h"
-#import <OmniBase/OBUtilities.h>
 
 @implementation BDSKDocumentController
 

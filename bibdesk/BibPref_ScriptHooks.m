@@ -39,8 +39,8 @@
 #import "BibPref_ScriptHooks.h"
 #import "BDSKScriptHookManager.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import <OmniFoundation/NSString-OFExtensions.h>
-#import <OmniAppKit/NSTableView-OAExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 
 @implementation BibPref_ScriptHooks

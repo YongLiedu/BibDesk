@@ -35,7 +35,7 @@
 
 @class AGRegex, AGRegexMatch;
 
-#import <OmniAppKit/OAFindControllerTargetProtocol.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @interface BDSKRegExFindPattern : NSObject <OAFindPattern>
 {

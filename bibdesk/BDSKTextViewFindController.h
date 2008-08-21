@@ -37,7 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OAFindController.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @interface BDSKTextViewFindController : OAFindController {
     IBOutlet NSPopUpButton *findTypePopUp;

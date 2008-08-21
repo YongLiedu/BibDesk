@@ -37,7 +37,7 @@
  */
 
 #import "BDSKStringParser.h"
-#import <OmniBase/OBUtilities.h>
+#import <OmniBase/OmniBase.h>
 #import "NSError_BDSKExtensions.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKPubMedParser.h"

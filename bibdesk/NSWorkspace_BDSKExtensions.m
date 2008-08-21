@@ -37,7 +37,7 @@
  */
 
 #import "NSWorkspace_BDSKExtensions.h"
-#import <OmniBase/assertions.h>
+#import <OmniBase/OmniBase.h>
 #import <Carbon/Carbon.h>
 #import "NSURL_BDSKExtensions.h"
 

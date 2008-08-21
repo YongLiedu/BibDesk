@@ -37,7 +37,7 @@
  */
 
 #import "NSTableHeaderView_BDSKExtensions.h"
-#import <OmniBase/OBUtilities.h>
+#import <OmniBase/OmniBase.h>
 
 
 @implementation NSTableHeaderView (BDSKExtensions)

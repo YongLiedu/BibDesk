@@ -63,7 +63,7 @@
 #import "BibAuthor+Scripting.h"
 #import "BDSKTypeManager.h"
 #import <Quartz/Quartz.h>
-#import <OmniFoundation/OFCFCallbacks.h>
+#import <OmniFoundation/OmniFoundation.h>
 
 
 const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {

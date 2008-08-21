@@ -41,7 +41,7 @@
 #import "BibItem.h"
 #import "BDSKSmartGroup.h"
 #import "BDSKOwnerProtocol.h"
-#import <OmniFoundation/NSArray-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 
 
 @implementation BDSKFilter

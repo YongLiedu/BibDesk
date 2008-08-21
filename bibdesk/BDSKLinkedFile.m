@@ -38,7 +38,7 @@
 
 #import "BDSKLinkedFile.h"
 #import <CoreServices/CoreServices.h>
-#import <OmniFoundation/NSData-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 
 static void BDSKDisposeAliasHandle(AliasHandle inAlias)
 {

@@ -41,7 +41,7 @@
 #import "BDSKAppController.h"
 #import "BDSKZoomableTextView.h"
 #import "BDSKZoomablePDFView.h"
-#import <OmniFoundation/NSThread-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BibDocument.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"

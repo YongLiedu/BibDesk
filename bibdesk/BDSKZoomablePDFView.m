@@ -37,11 +37,11 @@
  */
 
 #import "BDSKZoomablePDFView.h"
-#import <OmniAppKit/NSView-OAExtensions.h>
-#import <OmniBase/OBUtilities.h>
+#import <OmniBase/OmniBase.h>
+#import <OmniFoundation/OmniFoundation.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKHeaderPopUpButton.h"
 #import "NSString_BDSKExtensions.h"
-#import <OmniFoundation/NSString-OFExtensions.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSScrollView_BDSKExtensions.h"
 

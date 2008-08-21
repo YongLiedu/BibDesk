@@ -37,7 +37,7 @@
  */
 
 #import "BDSKFormatParser.h"
-#import <OmniFoundation/NSAttributedString-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BibAuthor.h"
 #import "BDSKConverter.h"

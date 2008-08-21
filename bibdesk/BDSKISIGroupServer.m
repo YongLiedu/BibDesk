@@ -44,7 +44,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import <OmniFoundation/OFStringScanner.h>
+#import <OmniFoundation/OmniFoundation.h>
 
 #define MAX_RESULTS 100
 #if(OMNI_FORCE_ASSERTIONS)

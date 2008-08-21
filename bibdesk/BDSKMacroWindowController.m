@@ -40,9 +40,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BDSKComplexString.h" // for BDSKMacroResolver protocol
 #import "BDSKStringConstants.h" // for notification name declarations
-#import <OmniFoundation/NSUndoManager-OFExtensions.h> // for isUndoingOrRedoing
-#import <OmniFoundation/NSString-OFExtensions.h>
-#import "OmniFoundation/NSData-OFExtensions.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKComplexStringEditor.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKBibTeXParser.h"
@@ -51,7 +49,7 @@
 #import "BibItem.h"
 #import "BDSKMacroResolver.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import <OmniAppKit/OATypeAheadSelectionHelper.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKTypeSelectHelper.h"
 #import "BibDocument.h"
 #import "BDSKMacro.h"

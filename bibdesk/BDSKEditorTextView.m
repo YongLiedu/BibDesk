@@ -39,7 +39,7 @@
 #import "BDSKEditorTextView.h"
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
-#import <OmniFoundation/OFPreference.h>
+#import <OmniFoundation/OmniFoundation.h>
 
 @interface BDSKEditorTextView (Private)
 

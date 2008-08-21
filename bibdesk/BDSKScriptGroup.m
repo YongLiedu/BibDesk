@@ -48,7 +48,7 @@
 #import "NSError_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSScanner_BDSKExtensions.h"
-#import <OmniFoundation/OFMessageQueue.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BibItem.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"

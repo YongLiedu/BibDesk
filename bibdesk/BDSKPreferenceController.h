@@ -37,7 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OAPreferenceController.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKSpotlightView.h"
 
 @class BDSKOverlayWindow;

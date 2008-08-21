@@ -39,8 +39,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKStringConstants.h"
-#import <OmniAppKit/OAGradientTableView.h>
-#import <OmniAppKit/OATextWithIconCell.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @interface BibPref_InputManager : OAPreferenceClient
 {

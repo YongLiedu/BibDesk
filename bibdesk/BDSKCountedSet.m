@@ -37,10 +37,8 @@
  */
 
 #import "BDSKCountedSet.h"
-#import <OmniFoundation/OFCFCallbacks.h>
-#import <OmniFoundation/CFDictionary-OFExtensions.h>
-#import <OmniFoundation/CFSet-OFExtensions.h>
-#import <OmniBase/assertions.h>
+#import <OmniBase/OmniBase.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "CFString_BDSKExtensions.h"
 
 const void *BDSKStringCopy(CFAllocatorRef allocator, const void *value)

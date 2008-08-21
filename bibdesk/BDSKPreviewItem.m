@@ -44,8 +44,7 @@
 #import "BDSKTypeManager.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
-#import <OmniFoundation/NSString-OFExtensions.h>
-#import <OmniFoundation/NSArray-OFExtensions.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKOwnerProtocol.h"
 #import "BDSKLinkedFile.h"
 

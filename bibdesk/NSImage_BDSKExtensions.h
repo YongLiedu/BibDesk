@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <ApplicationServices/ApplicationServices.h>
-#import <OmniAppKit/NSImage-OAExtensions.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @interface NSImage (BDSKExtensions)
 

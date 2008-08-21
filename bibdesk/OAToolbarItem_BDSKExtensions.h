@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <OmniAppKit/OAToolbarItem.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 
 @interface OAToolbarItem (BDSKExtensions)
