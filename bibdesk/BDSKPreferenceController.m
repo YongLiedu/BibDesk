@@ -39,6 +39,8 @@
 #import "BDSKPreferenceController.h"
 #import "BDSKOverlay.h"
 #import <OmniAppKit/OmniAppKit.h>
+#import <OmniAppKit/OAPreferenceClientRecord.h> // this is not contained in OmniAppKit.h
+#import <OmniAppKit/OAPreferencesIconView.h> // this is not contained in OmniAppKit.h
 
 @interface NSArray (PreferencesSearch)
 - (BOOL)containsCaseInsensitiveSubstring:(NSString *)substring;

@@ -39,6 +39,7 @@
 #import "BDSKErrorObjectController.h"
 #import <OmniBase/OmniBase.h>
 #import <BTParse/btparse.h>
+#import <BTParse/BDSKErrorObject.h>
 #import "BDSKErrorManager.h"
 #import "BDSKErrorEditor.h"
 #import "BDSKStringConstants.h"
