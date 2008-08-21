@@ -138,7 +138,6 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
     if (err == noErr) {
         NSAppleEventDescriptor *appDesc = nil;
-        NSAppleEventDescriptor *searchTextDesc = nil;
         NSAppleEventDescriptor *fileListDesc = nil;
         NSAppleEventDescriptor *fileDesc = nil;
         

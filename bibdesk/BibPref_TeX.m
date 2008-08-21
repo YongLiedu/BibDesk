@@ -42,6 +42,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKShellCommandFormatter.h"
 #import <OmniAppKit/OmniAppKit.h>
+#import <OmniAppKit/OAPreferenceClientRecord.h>
 
 #define BDSK_TEX_DOWNLOAD_URL @"http://tug.org/mactex/"
 
