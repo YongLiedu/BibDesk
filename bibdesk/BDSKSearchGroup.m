@@ -114,7 +114,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     NSString *aHost = [[bdsksearchURL host] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSString *aPort = [[bdsksearchURL port] stringValue];
     NSString *path = [bdsksearchURL path];
-    NSString *aDatabase = [([path hasPrefix:@"/"] ? [path substringFromIndex:1] : path ? path : @"") stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *aDatabase = [([path hasPrefix:@"/"] ? [path substringFromIndex:1] : path ?: @"") stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSString *aName = [[bdsksearchURL parameterString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] ?: aDatabase;
     NSString *query = [bdsksearchURL query];
     NSString *aSearchTerm = nil;
@@ -251,7 +251,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 - (void)setName:(NSString *)newName {}
 
 - (NSString *)toolTip {
-    return [NSString stringWithFormat:@"%@: %@", [[self serverInfo] name] ? [[self serverInfo] name] : @"", [self name]];
+    return [NSString stringWithFormat:@"%@: %@", [[self serverInfo] name] ?: @"", [self name]];
 }
 
 - (BOOL)isSearch { return YES; }

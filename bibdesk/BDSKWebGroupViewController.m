@@ -323,10 +323,10 @@
         
     if (frame == loadingWebFrame) {
         [self setRetrieving:NO];
-        [group addPublications:newPubs ? newPubs : [NSArray array]];
+        [group addPublications:newPubs ?: [NSArray array]];
         loadingWebFrame = nil;
     } else {
-        [group addPublications:newPubs ? newPubs : [NSArray array]];
+        [group addPublications:newPubs ?: [NSArray array]];
     }
 }
 

@@ -282,7 +282,7 @@
 
 // binding directly to person.personFromAddressBook.imageData in IB doesn't work for some reason
 - (NSData *)imageData{
-    return [[person personFromAddressBook] imageData] ? [[person personFromAddressBook] imageData] : [[NSImage imageForFileType:@"vcf"] TIFFRepresentation];
+    return [[person personFromAddressBook] imageData] ?: [[NSImage imageForFileType:@"vcf"] TIFFRepresentation];
 }
 
 #pragma mark actions

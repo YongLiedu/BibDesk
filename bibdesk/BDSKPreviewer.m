@@ -203,7 +203,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
         else
             path = [[server texTask] logFilePath];
     }
-    [[self window] setRepresentedFilename:path ? path : @""];
+    [[self window] setRepresentedFilename:path ?: @""];
 }
 
 - (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem

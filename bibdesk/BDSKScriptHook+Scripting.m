@@ -72,15 +72,15 @@
 }
 
 - (NSString *)scriptingField {
-    return field ? field : @"";
+    return field ?: @"";
 }
 
 - (NSArray *)scriptingOldValues {
-    return oldValues ? oldValues : [NSArray array];
+    return oldValues ?: [NSArray array];
 }
 
 - (NSArray *)scriptingNewValues {
-    return newValues ? newValues : [NSArray array];
+    return newValues ?: [NSArray array];
 }
 
 @end

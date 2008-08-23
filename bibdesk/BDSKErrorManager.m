@@ -151,7 +151,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
     [self willChangeValueForKey:@"displayName"];
     
     NSString *name = [document displayName];
-    [self setDocumentDisplayName:name ? name : @"?"];
+    [self setDocumentDisplayName:name ?: @"?"];
     
     NSEnumerator *mEnum = [[errorController managers] objectEnumerator];
     BDSKErrorManager *manager;

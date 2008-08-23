@@ -276,7 +276,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
     NSString *fname = [[[publication localFiles] firstObject] path];
-    return fname ? fname : @"";
+    return fname ?: @"";
 }
 
 - (BibItem *)publication{
@@ -1987,7 +1987,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 }
 
 - (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(int)mask{
-    mask |= [[self document] userChangedField:fieldName ofPublications:[NSArray arrayWithObject:publication] from:[NSArray arrayWithObject:oldValue ? oldValue : @""] to:[NSArray arrayWithObject:newValue]];
+    mask |= [[self document] userChangedField:fieldName ofPublications:[NSArray arrayWithObject:publication] from:[NSArray arrayWithObject:oldValue ?: @""] to:[NSArray arrayWithObject:newValue]];
     
     if (mask != 0) {
         NSString *status = nil;
@@ -2130,7 +2130,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         // If we are editing a crossref field, we should first set the new value, because resetFields will set the edited value. This happens when it is set through drag/drop
 		int editedRow = [tableView editedRow];
         if (editedRow != -1 && [[fields objectAtIndex:editedRow] isEqualToString:changeKey])
-            [[tableView currentEditor] setString:newValue ? newValue : @""];
+            [[tableView currentEditor] setString:newValue ?: @""];
         if ([changeKey isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:newValue] == [fields containsObject:changeKey]) {
 			// Crossref field was added or removed
             [self resetFields];
@@ -2189,7 +2189,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [authorTableView reloadData];
         
         if ([tableView editedRow] != -1 && [[fields objectAtIndex:[tableView editedRow]] isEqualToString:changeKey]) {
-            NSString *tmpValue = newValue ? newValue : @"";
+            NSString *tmpValue = newValue ?: @"";
             if ([changeKey isCitationField] == NO && [tableCellFormatter editAsComplexString])
                 tmpValue = [tmpValue stringAsBibTeXString];
             [[tableView currentEditor] setString:tmpValue];

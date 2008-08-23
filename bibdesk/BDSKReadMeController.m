@@ -172,7 +172,7 @@ static NSString *hostInfoString()
 
 - (void)displayString:(NSString *)string {
     @try {
-        [textView setString:(string ? string : @"Nothing to display.")];
+        [textView setString:(string ?: @"Nothing to display.")];
         [[textView textStorage] addAttribute:NSFontAttributeName value:[NSFont userFixedPitchFontOfSize:10.0f] range:NSMakeRange(0, [[textView textStorage] length])];
         [self showWindow:nil];
         

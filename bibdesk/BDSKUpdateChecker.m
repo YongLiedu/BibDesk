@@ -594,7 +594,7 @@
     if (button == NSAlertDefaultReturn) {
         [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:DOWNLOAD_URL]];
     } else if (button == NSAlertAlternateReturn) {
-        [self downloadAndDisplayReleaseNotesForVersion:altLatestVersion ? altLatestVersion : latestVersion];
+        [self downloadAndDisplayReleaseNotesForVersion:altLatestVersion ?: latestVersion];
     } else if (button == BDSKAlertAltAlternateReturn) {
         [self downloadAndDisplayReleaseNotesForVersion:latestVersion];
     }

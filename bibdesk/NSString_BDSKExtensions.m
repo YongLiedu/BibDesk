@@ -1236,7 +1236,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
         [mutableCopy deleteCharactersInRange:range];
         string = [mutableCopy autorelease];
     }
-    return string ? string : self;
+    return string ?: self;
 }
 
 #pragma mark HTML/XML

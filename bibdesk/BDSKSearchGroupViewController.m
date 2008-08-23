@@ -63,10 +63,10 @@
     OBASSERT(group);
     [self window];
     NSString *name = [[group serverInfo] name];
-    [searchField setStringValue:[group searchTerm] ? [group searchTerm] : @""];
+    [searchField setStringValue:[group searchTerm] ?: @""];
     [searchField setRecentSearches:[group history]];
     [searchButton setEnabled:[group isRetrieving] == NO];
-    [[searchField cell] setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search %@", @"search group field placeholder"), name ? name : @""]];
+    [[searchField cell] setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search %@", @"search group field placeholder"), name ?: @""]];
     [searchField setFormatter:[group searchStringFormatter]];
     [searchField selectText:self];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSearchGroupUpdatedNotification:) name:BDSKSearchGroupUpdatedNotification object:group];

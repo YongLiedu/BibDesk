@@ -697,7 +697,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         
         [dictionary setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
-        [dictionary setObject:savedSortKey ? savedSortKey : BDSKTitleString forKey:BDSKDefaultSortedTableColumnKey];
+        [dictionary setObject:savedSortKey ?: BDSKTitleString forKey:BDSKDefaultSortedTableColumnKey];
         [dictionary setBoolValue:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
         [dictionary setBoolValue:docState.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
@@ -1302,7 +1302,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             }
         }
         
-        NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
+        NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
         NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO relativeToPath:commonParent error:outError];
         NSString *bibtexPath = [[path stringByAppendingPathComponent:[path lastPathComponent]] stringByAppendingPathExtension:@"bib"];
         
@@ -1388,7 +1388,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     // export operations need their own encoding
     if(NSSaveToOperation == docState.currentSaveOperationType)
-        encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
+        encoding = [saveTextEncodingPopupButton encoding] ?: [BDSKStringEncodingManager defaultEncoding];
     
     if (isBibTeX){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
@@ -1846,7 +1846,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(success == NO){
         int rv;
         // run a modal dialog asking if we want to use partial data or give up
-        NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription] ? [error localizedDescription] : NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")
+        NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription] ?: NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file")
                                          defaultButton:NSLocalizedString(@"Give Up", @"Button title")
                                        alternateButton:NSLocalizedString(@"Edit File", @"Button title")
                                            otherButton:NSLocalizedString(@"Keep Going", @"Button title")
@@ -2350,7 +2350,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]){
             NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:fileName];
             Class aClass = NSClassFromString([dictionary objectForKey:@"class"]);
-            BDSKSearchGroup *group = [[[(aClass ? aClass : [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
+            BDSKSearchGroup *group = [[[(aClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
             if(group)
                 [groups addSearchGroup:group];
         }else if([unreadableTypes containsObject:[fileName pathExtension]]){

@@ -223,8 +223,8 @@
     if ([[info database] caseInsensitiveCompare:@"authors"] == NSOrderedSame) {
         BibAuthor *author = [BibAuthor authorWithName:searchTerm andPub:nil];
         BDSKDBLPAllPublicationsAuthorYear *invocation = [[BDSKDBLPAllPublicationsAuthorYear alloc] init];    
-        [invocation setParameters:([author firstName] ? [author firstName] : @"")
-                                                            in_familyName:([author lastName] ? [author lastName] : @"")
+        [invocation setParameters:([author firstName] ?: @"")
+                                                            in_familyName:([author lastName] ?: @"")
                      in_startYear:startYear in_endYear:endYear];    
         [scheduledService autorelease];
         scheduledService = invocation;

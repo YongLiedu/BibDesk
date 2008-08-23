@@ -174,7 +174,7 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
         BDSKBookmark *bm = [bookmarksArray objectAtIndex:i];
         if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
             NSString *name = [bm name];
-            NSMenuItem *item = [menu addItemWithTitle:name ? name : @"" action:NULL keyEquivalent:@""];
+            NSMenuItem *item = [menu addItemWithTitle:name ?: @"" action:NULL keyEquivalent:@""];
             [item setImage:[bm icon]];
             [item setIndentationLevel:level];
             [item setRepresentedObject:bm];

@@ -765,7 +765,7 @@
 	if (number > 0) {
 		for (c = fromChar; c <= toChar; c++) {
 			// try with the first added char set to c
-			uniqueStr = [baseStr stringByAppendingFormat:@"%@%C", separator ? separator : @"", c];
+			uniqueStr = [baseStr stringByAppendingFormat:@"%@%C", separator ?: @"", c];
 			uniqueStr = [self uniqueString:uniqueStr suffix:suffix separator:nil forField:fieldName ofItem:pub numberOfChars:number - 1 from:fromChar to:toChar force:NO];
 			if ([self stringIsValid:uniqueStr forField:fieldName ofItem:pub])
 				return uniqueStr;

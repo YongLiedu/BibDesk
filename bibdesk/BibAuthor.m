@@ -362,7 +362,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     }
     
     if(lastName){
-        [s appendFormat:@"<namePart type=\"family\">%@%@</namePart>", (vonPart ? vonPart : @""),
+        [s appendFormat:@"<namePart type=\"family\">%@%@</namePart>", (vonPart ?: @""),
             lastName];
     }
     

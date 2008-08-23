@@ -1132,7 +1132,7 @@
                 if ([url isFileURL] && [[[url path] pathExtension] isEqualToString:@"bdsksearch"]) {
                     NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:url];
                     Class groupClass = NSClassFromString([dictionary objectForKey:@"class"]);
-                    group = [[[(groupClass ? groupClass : [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
+                    group = [[[(groupClass ?: [BDSKSearchGroup class]) alloc] initWithDictionary:dictionary] autorelease];
                     if(group)
                         [groups addSearchGroup:(BDSKSearchGroup *)group];
                 } else if ([[url scheme] isEqualToString:@"x-bdsk-search"]) {

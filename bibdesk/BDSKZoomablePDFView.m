@@ -153,7 +153,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (void)saveDocumentAs:(id)sender;
 {
     NSString *name = [[[self document] documentURL] lastPathComponent];
-    [[NSSavePanel savePanel] beginSheetForDirectory:nil file:(name ? name : NSLocalizedString(@"Untitled.pdf", @"Default file name for saved PDF")) modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(saveDocumentSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    [[NSSavePanel savePanel] beginSheetForDirectory:nil file:(name ?: NSLocalizedString(@"Untitled.pdf", @"Default file name for saved PDF")) modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(saveDocumentSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent;

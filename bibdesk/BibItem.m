@@ -1527,7 +1527,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [info setObject:value forKey:(NSString *)kMDItemTitle];
     
     // this is what shows up in search results
-    [info setObject:value ? value : @"Unknown" forKey:(NSString *)kMDItemDisplayName];
+    [info setObject:value ?: @"Unknown" forKey:(NSString *)kMDItemDisplayName];
 
     [info setObject:[self pubAuthorsAsStrings] forKey:(NSString *)kMDItemAuthors];
 

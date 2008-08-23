@@ -395,7 +395,7 @@
 
 - (NSString *)scriptingScriptArguments {
     NSString *arguments = [self scriptArguments];
-    return arguments ? arguments : @"";
+    return arguments ?: @"";
 }
 
 - (void)setScriptingScriptArguments:(NSString *)newArguments {
@@ -604,7 +604,7 @@
 
 - (NSString *)URLString {
     NSString *URLString = [[[self document] webGroupViewController] URLString];
-    return URLString ? URLString : @"";
+    return URLString ?: @"";
 }
 
 - (void)setURLString:(NSString *)newURLString {

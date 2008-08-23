@@ -261,7 +261,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (NSString *) month {
 	NSString *month = [self valueOfField:BDSKMonthString];
-	return month ? month : @"";
+	return month ?: @"";
 }
 
 - (void) setMonth:(NSString*) newMonth {
@@ -277,7 +277,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (NSString *) year {
 	NSString *year = [self valueOfField:BDSKYearString];
-	return year ? year : @"";
+	return year ?: @"";
 }
 
 - (void) setYear:(NSString*) newYear {
@@ -424,12 +424,12 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (NSString*)rssString {
 	NSString *value = [self RSSValue];
-	return value ? value : @"";
+	return value ?: @"";
 }
 
 - (NSString*)risString {
 	NSString *value = [self RISStringValue];
-	return value ? value : @"";
+	return value ?: @"";
 }
 
 - (NSTextStorage *)styledTextValue {
@@ -454,7 +454,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (NSString *)keywords{
     NSString *keywords = [self valueOfField:BDSKKeywordsString];
-	return keywords ? keywords : @"";
+	return keywords ?: @"";
 }
 
 - (void)setKeywords:(NSString *)keywords{

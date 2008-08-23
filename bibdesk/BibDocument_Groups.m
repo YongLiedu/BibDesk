@@ -1058,7 +1058,7 @@ The groupedPublications array is a subset of the publications array, developed b
         BDSKSearchBookmark *bm = [bookmarksArray objectAtIndex:i];
         if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
             NSString *label = [bm label];
-            NSMenuItem *item = [menu addItemWithTitle:label ? label : @"" action:NULL keyEquivalent:@""];
+            NSMenuItem *item = [menu addItemWithTitle:label ?: @"" action:NULL keyEquivalent:@""];
             [item setImage:[bm icon]];
             [item setIndentationLevel:level];
             [item setRepresentedObject:bm];
@@ -1504,7 +1504,7 @@ The groupedPublications array is a subset of the publications array, developed b
             count++;
             if(field && [field isEqualToString:BDSKPubTypeString] == NO){
                 [changedPubs addObject:pub];
-                [oldValues addObject:oldValue ? oldValue : @""];
+                [oldValues addObject:oldValue ?: @""];
                 [newValues addObject:[pub valueOfField:field]];
             }
 		}else if(rv == BDSKOperationAsk){
@@ -1524,7 +1524,7 @@ The groupedPublications array is a subset of the publications array, developed b
                 count++;
                 if(field && [field isEqualToString:BDSKPubTypeString] == NO){
                     [changedPubs addObject:pub];
-                    [oldValues addObject:oldValue ? oldValue : @""];
+                    [oldValues addObject:oldValue ?: @""];
                     [newValues addObject:[pub valueOfField:field]];
                 }
 			}
@@ -1589,7 +1589,7 @@ The groupedPublications array is a subset of the publications array, developed b
 				tmpCount++;
                 if(field){
                     [changedPubs addObject:pub];
-                    [oldValues addObject:oldValue ? oldValue : @""];
+                    [oldValues addObject:oldValue ?: @""];
                     [newValues addObject:[pub valueOfField:field]];
                 }
 			}else if(rv == BDSKOperationAsk){
@@ -1605,7 +1605,7 @@ The groupedPublications array is a subset of the publications array, developed b
                     tmpCount++;
                     if(field){
                         [changedPubs addObject:pub];
-                        [oldValues addObject:oldValue ? oldValue : @""];
+                        [oldValues addObject:oldValue ?: @""];
                         [newValues addObject:[pub valueOfField:field]];
                     }
 				}
@@ -1655,7 +1655,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		if(rv == BDSKOperationSet || rv == BDSKOperationAppend){
 			count++;
             [changedPubs addObject:pub];
-            [oldValues addObject:oldValue ? oldValue : @""];
+            [oldValues addObject:oldValue ?: @""];
             [newValues addObject:[pub valueOfField:field]];
         }else if(rv == BDSKOperationAsk){
 			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
@@ -1669,7 +1669,7 @@ The groupedPublications array is a subset of the publications array, developed b
 				[pub replaceGroup:group withGroupNamed:newGroupName handleInherited:handleInherited];
                 count++;
                 [changedPubs addObject:pub];
-                [oldValues addObject:oldValue ? oldValue : @""];
+                [oldValues addObject:oldValue ?: @""];
                 [newValues addObject:[pub valueOfField:field]];
 			}
         }

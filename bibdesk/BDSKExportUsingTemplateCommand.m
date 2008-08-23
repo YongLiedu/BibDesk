@@ -85,7 +85,7 @@
         template = [BDSKTemplate templateForStyle:templateStyle];
 	} else if ([templateStyle isKindOfClass:[NSURL class]] ) {
         NSString *fileType = [[templateStyle path] pathExtension];
-        template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ? fileType : @"txt"];
+        template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ?: @"txt"];
 	} else if ([templateString isKindOfClass:[NSString class]] ) {
         template = [BDSKTemplate templateWithString:templateString fileType:@"txt"];
 	} else if ([templateAttrString isKindOfClass:[NSAttributedString class]] ) {

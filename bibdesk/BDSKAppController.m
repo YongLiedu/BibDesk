@@ -585,7 +585,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         if ([bm bookmarkType] == BDSKSearchBookmarkTypeFolder) {
             NSString *label = [bm label];
             NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[bm label]] autorelease];
-            NSMenuItem *item = [menu addItemWithTitle:label ? label : @"" action:NULL keyEquivalent:@""];
+            NSMenuItem *item = [menu addItemWithTitle:label ?: @"" action:NULL keyEquivalent:@""];
             [item setImage:[bm icon]];
             [item setSubmenu:submenu];
             [self addMenuItemsForSearchBookmarks:[bm children] toMenu:submenu];
@@ -593,7 +593,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [menu addItem:[NSMenuItem separatorItem]];
         } else {
             NSString *label = [bm label];
-            NSMenuItem *item = [menu addItemWithTitle:label ? label : @"" action:@selector(newSearchGroupFromBookmark:)  keyEquivalent:@""];
+            NSMenuItem *item = [menu addItemWithTitle:label ?: @"" action:@selector(newSearchGroupFromBookmark:)  keyEquivalent:@""];
             [item setRepresentedObject:[bm info]];
             [item setImage:[bm icon]];
         }
@@ -607,7 +607,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         if ([bm bookmarkType] == BDSKBookmarkTypeFolder) {
             NSString *name = [bm name];
             NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:[bm name]] autorelease];
-            NSMenuItem *item = [menu addItemWithTitle:name ? name : @"" action:NULL keyEquivalent:@""];
+            NSMenuItem *item = [menu addItemWithTitle:name ?: @"" action:NULL keyEquivalent:@""];
             [item setImage:[bm icon]];
             [item setSubmenu:submenu];
             [self addMenuItemsForBookmarks:[bm children] toMenu:submenu];
@@ -615,7 +615,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [menu addItem:[NSMenuItem separatorItem]];
         } else {
             NSString *name = [bm name];
-            NSMenuItem *item = [menu addItemWithTitle:name ? name : @"" action:@selector(openBookmark:)  keyEquivalent:@""];
+            NSMenuItem *item = [menu addItemWithTitle:name ?: @"" action:@selector(openBookmark:)  keyEquivalent:@""];
             [item setRepresentedObject:[bm URL]];
             [item setImage:[bm icon]];
         }

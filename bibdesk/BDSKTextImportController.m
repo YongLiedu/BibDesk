@@ -1794,7 +1794,7 @@
     
     while(metaName = [metaTagKeyE nextObject]){
         NSString *fieldName = [typeMan fieldNameForDublinCoreTerm:metaName];
-        fieldName = (fieldName ? fieldName : [metaName fieldName]);
+        fieldName = (fieldName ?: [metaName fieldName]);
         NSString *fieldValue = [metaTagDict objectForKey:metaName];
         
         // Special-case DC.date to get month and year, but still insert "DC.date"
@@ -1829,7 +1829,7 @@
     }
 
     NSString *bibtexType = [typeMan bibtexTypeForDublinCoreType:[metaTagDict objectForKey:@"DC.type"]];
-    [self setType:(bibtexType ? bibtexType : @"misc")];
+    [self setType:(bibtexType ?: @"misc")];
 
     [itemTableView reloadData];
 }

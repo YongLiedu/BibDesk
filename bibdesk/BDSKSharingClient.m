@@ -377,7 +377,7 @@ typedef struct _BDSKSharingClientFlags {
     }
     
     // doc says we're required to return empty NSData instead of nil
-    return password ? password : [NSData data];
+    return password ?: [NSData data];
 }
 
 // monitor the TXT record in case the server changes password requirements

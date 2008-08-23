@@ -502,7 +502,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 - (void)setPrefixTemplate:(NSAttributedString *)newPrefixTemplate {
     [[[self undoManager] prepareWithInvocationTarget:self] setPrefixTemplate:[[prefixTemplate copy] autorelease]];
-    [prefixTemplate setAttributedString:newPrefixTemplate ? newPrefixTemplate : [[[NSAttributedString alloc] init] autorelease]];
+    [prefixTemplate setAttributedString:newPrefixTemplate ?: [[[NSAttributedString alloc] init] autorelease]];
 }
 
 - (NSAttributedString *)suffixTemplate {
@@ -511,7 +511,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 - (void)setSuffixTemplate:(NSAttributedString *)newSuffixTemplate {
     [[[self undoManager] prepareWithInvocationTarget:self] setSuffixTemplate:[[suffixTemplate copy] autorelease]];
-    [suffixTemplate setAttributedString:newSuffixTemplate ? newSuffixTemplate : [[[NSAttributedString alloc] init] autorelease]];
+    [suffixTemplate setAttributedString:newSuffixTemplate ?: [[[NSAttributedString alloc] init] autorelease]];
 }
 
 - (NSAttributedString *)separatorTemplate {
@@ -520,7 +520,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 - (void)setSeparatorTemplate:(NSAttributedString *)newSeparatorTemplate {
     [[[self undoManager] prepareWithInvocationTarget:self] setSeparatorTemplate:[[separatorTemplate copy] autorelease]];
-    [separatorTemplate setAttributedString:newSeparatorTemplate ? newSeparatorTemplate : [[[NSAttributedString alloc] init] autorelease]];
+    [separatorTemplate setAttributedString:newSeparatorTemplate ?: [[[NSAttributedString alloc] init] autorelease]];
 }
 
 - (BOOL)isRichText {
@@ -1534,7 +1534,7 @@ static void (*originalSetObjectValue)(id, SEL, id) = NULL;
 }
 
 - (id)transformedValue:(id)string {
-	return string ? string : @"<None>";
+	return string ?: @"<None>";
 }
 
 - (id)reverseTransformedValue:(id)string {

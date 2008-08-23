@@ -192,7 +192,7 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName {
-    return [[BDSKURLBookmark alloc] initWithUrlString:aUrlString name:aName ? aName : NSLocalizedString(@"New Boookmark", @"Default name for boookmark")];
+    return [[BDSKURLBookmark alloc] initWithUrlString:aUrlString name:aName ?: NSLocalizedString(@"New Boookmark", @"Default name for boookmark")];
 }
 
 - (id)initFolderWithChildren:(NSArray *)aChildren name:(NSString *)aName {

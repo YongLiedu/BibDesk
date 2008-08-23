@@ -109,7 +109,7 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
             [command setScriptErrorNumber:NSArgumentsWrongScriptError];
             [command setScriptErrorString:@"The file is not a file or alias."];
         } else {
-            NSArray *fileExtensions = [[NSDocumentController sharedDocumentController] fileExtensionsFromType:fileType ? fileType : [self fileType]];
+            NSArray *fileExtensions = [[NSDocumentController sharedDocumentController] fileExtensionsFromType:fileType ?: [self fileType]];
             NSString *extension = [[fileURL path] pathExtension];
             if (extension == nil) {
                 extension = [fileExtensions objectAtIndex:0];

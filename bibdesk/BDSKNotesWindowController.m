@@ -71,7 +71,7 @@
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
     NSString *path = [url path];
-    return path ? path : @"";
+    return path ?: @"";
 }
 
 #pragma mark Actions
