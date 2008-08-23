@@ -1167,8 +1167,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
      
      */
     
-    NSParameterAssert(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4);
-    
     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 && NO == didSave && [absoluteURL isFileURL] && NSAutosaveOperation != saveOperation) {
         
         NSFileManager *fileManager = [NSFileManager defaultManager];
