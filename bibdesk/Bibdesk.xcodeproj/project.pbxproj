@@ -128,7 +128,6 @@
 		CE129A180B44088900416D19 /* BDSKEntrezGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CE129A160B44088900416D19 /* BDSKEntrezGroupServer.m */; };
 		CE12A1700B44AED200416D19 /* SearchGroupServers.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE12A16F0B44AED100416D19 /* SearchGroupServers.plist */; };
 		CE15C0D80AA5B9A3002C555F /* BDSKErrorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */; };
-		CE17EE7F0E24F27600DE06EA /* BibDesk-App.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */; };
 		CE1A7F42090BEC3C00ACC864 /* BDSKHeaderPopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */; };
 		CE1A7F4E090BED5600ACC864 /* BDSKHeaderPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1A7EDE090BDF1C00ACC864 /* BDSKHeaderPopUpButton.m */; };
 		CE21D10B09208B9D0075E607 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE21D10909208B9D0075E607 /* BDSKGroup.m */; };
@@ -3435,7 +3434,6 @@
 				F9EF94EB0D16014000314058 /* BDSKFileMigration.nib in Resources */,
 				CEDB58F40D3692A400E40354 /* ComplexStringEditor.nib in Resources */,
 				CE8F5F840DEEB26800061148 /* ZoomValues.strings in Resources */,
-				CE17EE7F0E24F27600DE06EA /* BibDesk-App.xcconfig in Resources */,
 				CEE8DECE0E5C3FF000EFA97F /* skimnotes in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
