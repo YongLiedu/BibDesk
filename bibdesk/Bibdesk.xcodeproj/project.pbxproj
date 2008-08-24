@@ -464,6 +464,7 @@
 		F963E45D0A1D828200695DDC /* BibPref_Export.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E4360A1D7B3600695DDC /* BibPref_Export.m */; };
 		F9676A010916B63900B42F6A /* BDSKCountedSet.m in Sources */ = {isa = PBXBuildFile; fileRef = F96769FF0916B63900B42F6A /* BDSKCountedSet.m */; };
 		F96F11970AAF4FD100815D06 /* NSData_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F96F11950AAF4FD100815D06 /* NSData_BDSKExtensions.m */; };
+		F9704FF10E6118080050F475 /* latex2rtf in Resources */ = {isa = PBXBuildFile; fileRef = F90B13010C298FC900144F1B /* latex2rtf */; };
 		F97073B00911592000526FC8 /* NSWorkspace_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F97073AE0911592000526FC8 /* NSWorkspace_BDSKExtensions.m */; };
 		F97198C40DADD32F00CA57AA /* BDSKDBLPGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F97198C00DADD32F00CA57AA /* BDSKDBLPGroupServer.m */; };
 		F97198C60DADD32F00CA57AA /* BDSKDBLPWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97198C20DADD32F00CA57AA /* BDSKDBLPWebServices.m */; };
@@ -3297,6 +3298,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9704FF10E6118080050F475 /* latex2rtf in Resources */,
 				CE6C0CB90BEE4974007BF0B5 /* MainMenu.nib in Resources */,
 				F9022CBF0758049200C3F701 /* ReadMe.nib in Resources */,
 				F9022CC6075804A600C3F701 /* AutoFile.nib in Resources */,
@@ -4548,7 +4550,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 1203;
+				CURRENT_PROJECT_VERSION = 1227;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -4557,7 +4559,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 1203;
+				CURRENT_PROJECT_VERSION = 1227;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -4566,7 +4568,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 1203;
+				CURRENT_PROJECT_VERSION = 1227;
 				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
