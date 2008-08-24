@@ -39,12 +39,12 @@
 
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
-#import <OmniFoundation/OmniFoundation.h>
+#import <OmniFoundation/OFResourceFork.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKVersionNumber.h"
 #import "NSError_BDSKExtensions.h"
-#import <SkimNotes/SkimNotes.h>
+#import <SkimNotes/SKNExtendedAttributeManager.h>
 
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
@@ -476,6 +476,36 @@ static void destroyTemporaryDirectory()
     return success;
 }
 
+// Sets a file ref descriptor from a path, without following symlinks
+// Based on OAAppKit's fillAEDescFromPath and an example in http://www.cocoadev.com/index.pl?FSMakeFSSpec
+static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDescPtr, NSString *path, BOOL isSymLink)
+{
+    FSRef fileRef;
+    AEDesc fileRefDesc;
+    OSErr err;
+
+    bzero(&fileRef, sizeof(fileRef));
+
+    err = FSPathMakeRefWithOptions((UInt8 *)[path fileSystemRepresentation], kFSPathMakeRefDoNotFollowLeafSymlink, &fileRef, NULL);
+    
+    if (err != noErr) 
+        return err;
+
+    AEInitializeDesc(&fileRefDesc);
+    err = AECreateDesc(typeFSRef, &fileRef, sizeof(fileRef), &fileRefDesc);
+
+    // Omni says the Finder isn't very good at coercions, so we have to do this ourselves; however we don't want to lose symlinks
+    if (err == noErr){
+        if(isSymLink == NO)
+            err = AECoerceDesc(&fileRefDesc, typeAlias, fileRefDescPtr);
+        else
+            err = AEDuplicateDesc(&fileRefDesc, fileRefDescPtr);
+    }
+    AEDisposeDesc(&fileRefDesc);
+    
+    return err;
+}
+
 static OSType finderSignatureBytes = 'MACS';
 
 // Sets the Finder comment (Spotlight comment) field via the Finder; this method takes 0.01s to execute, vs. 0.5s for NSAppleScript
@@ -487,11 +517,9 @@ static OSType finderSignatureBytes = 'MACS';
     NSString *path = [fileURL path];
     BOOL isSymLink = [[[self fileAttributesAtPath:path traverseLink:NO] objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink];
     BOOL success = YES;
-    NSAppleEventDescriptor *commentTextDesc = [NSAppleEventDescriptor descriptorWithString:comment];
-    FSRef fileRef;
-    NSAppleEventDescriptor *fileDesc = nil;
+    NSAppleEventDescriptor *commentTextDesc;
     OSErr err;
-    AEDesc builtEvent;
+    AEDesc fileDesc, builtEvent;
     const char *eventFormat =
         "'----': 'obj '{ "         // Direct object is the file comment we want to modify
         "  form: enum(prop), "     //  ... the comment is an object's property...
@@ -506,22 +534,13 @@ static OSType finderSignatureBytes = 'MACS';
         "             }, "
         "data: @";                 // The data is what we want to set the direct object to.
 
-    // Create an apple event descriptor from a path, without following symlinks
-    // Based on OAAppKit's fillAEDescFromPath and an example in http://www.cocoadev.com/index.pl?FSMakeFSSpec
-    bzero(&fileRef, sizeof(fileRef));
-    err = FSPathMakeRefWithOptions((UInt8 *)[path fileSystemRepresentation], kFSPathMakeRefDoNotFollowLeafSymlink, &fileRef, NULL);
+    commentTextDesc = [NSAppleEventDescriptor descriptorWithString:comment];
     
-    if (err != noErr) {
-        fileDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFSRef bytes:&fileRef length:sizeof(fileRef)];
-        // Omni says the Finder isn't very good at coercions, so we have to do this ourselves; however we don't want to lose symlinks
-        if (isSymLink == NO)
-            fileDesc = [fileDesc coerceToDescriptorType:typeAlias];
-        if (fileDesc == nil)
-            err = fnfErr;
-    }
     
     AEInitializeDesc(&builtEvent);
     
+    err = BDSKFillAEDescFromPath(&fileDesc, path, isSymLink);
+
     if (err == noErr)
         err = AEBuildAppleEvent(kAECoreSuite, kAESetData,
                                 typeApplSignature, &finderSignatureBytes, sizeof(finderSignatureBytes),
@@ -530,6 +549,7 @@ static OSType finderSignatureBytes = 'MACS';
                                 eventFormat,
                                 &fileDesc, [commentTextDesc aeDesc]);
 
+    AEDisposeDesc(&fileDesc);
 
     if (err == noErr)
         err = AESendMessage(&builtEvent, NULL, kAENoReply, kAEDefaultTimeout);
