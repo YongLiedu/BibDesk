@@ -702,9 +702,7 @@ static double runLoopTimeout = 30;
         [currentTask setArguments:arguments];
         [currentTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
         [currentTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
-        
         [currentTask launch];
-        
         
         if (rv == 0) {
             NSTimeInterval stopTime = [NSDate timeIntervalSinceReferenceDate] + runLoopTimeout;
@@ -721,6 +719,10 @@ static double runLoopTimeout = 30;
             // isRunning may return NO before the task has terminated, so we need to make sure it's done or NSTask will raise
             [currentTask terminate];
             
+            // @@ next call will raise an exception, so we'll pick up additional log info in the handler
+            if ([currentTask isRunning])
+                NSLog(@"%@ is still running", [currentTask launchPath]);
+            
             // this call will raise if the SIGTERM failed
             if (0 != [currentTask terminationStatus])
                 rv = 1;
@@ -729,7 +731,7 @@ static double runLoopTimeout = 30;
     @catch(id exception) {
         if([currentTask isRunning])
             [currentTask terminate];
-        NSLog(@"%@ %@ failed", [currentTask description], [currentTask launchPath]);
+        NSLog(@"%@: task %@ failed with exception %@", self, [currentTask launchPath], exception);
         rv = 2;
     }
     @finally {
