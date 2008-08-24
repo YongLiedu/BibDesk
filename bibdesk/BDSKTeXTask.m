@@ -273,62 +273,51 @@ static double runLoopTimeout = 30;
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasPDFData);
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasRTFData);
     
-    @try{
-        // make sure the PATH environment variable is set correctly
-        NSString *pdfTeXBinPathDir = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey] stringByDeletingLastPathComponent];
+    // make sure the PATH environment variable is set correctly
+    NSString *pdfTeXBinPathDir = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey] stringByDeletingLastPathComponent];
 
-        if(![pdfTeXBinPathDir isEqualToString:binDirPath]){
-            [binDirPath release];
-            binDirPath = [pdfTeXBinPathDir retain];
-            const char *path_cstring = getenv("PATH");
-            NSString *original_path = [NSString stringWithFileSystemRepresentation:path_cstring];
-            NSString *new_path = [NSString stringWithFormat: @"%@:%@", original_path, binDirPath];
-            setenv("PATH", [new_path fileSystemRepresentation], 1);
-        }
-        
-        if([self writeTeXFileForCiteKeys:citeKeys isLTB:(flag == BDSKGenerateLTB)]){
-            if([self writeBibTeXFile:bibStr]){
-                rv = [self runTeXTasksForLaTeX];
-            }else{
-                rv = 2;
-            }
+    if(![pdfTeXBinPathDir isEqualToString:binDirPath]){
+        [binDirPath release];
+        binDirPath = [pdfTeXBinPathDir retain];
+        const char *path_cstring = getenv("PATH");
+        NSString *original_path = [NSString stringWithFileSystemRepresentation:path_cstring];
+        NSString *new_path = [NSString stringWithFormat: @"%@:%@", original_path, binDirPath];
+        setenv("PATH", [new_path fileSystemRepresentation], 1);
+    }
+    
+    if([self writeTeXFileForCiteKeys:citeKeys isLTB:(flag == BDSKGenerateLTB)]){
+        if([self writeBibTeXFile:bibStr]){
+            rv = [self runTeXTasksForLaTeX];
         }else{
             rv = 2;
         }
+    }else{
+        rv = 2;
+    }
+    
+    if((rv & 2) == 0){
+        if (flag == BDSKGenerateLTB)
+            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasLTB);
+        else
+            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasLaTeX);
         
-        if((rv & 2) == 0){
-            if (flag == BDSKGenerateLTB)
-                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasLTB);
-            else
-                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasLaTeX);
+        if(flag > BDSKGenerateLaTeX){
+            rv |= [self runTeXTasksForPDF];
             
-            if(flag > BDSKGenerateLaTeX){
-                rv |= [self runTeXTasksForPDF];
-                
-                if((rv & 2) == 0){
+            if((rv & 2) == 0){
 
-                    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasPDFData);
+                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasPDFData);
+                
+                if(flag > BDSKGeneratePDF){
+                        rv |= [self runTeXTaskForRTF];
                     
-                    if(flag > BDSKGeneratePDF){
-                            rv |= [self runTeXTaskForRTF];
-                        
-                        if((rv & 2) == 0){
-                            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasRTFData);
-                        }
+                    if((rv & 2) == 0){
+                        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasRTFData);
                     }
                 }
             }
         }
-    }
-    @catch(id exception){
-        NSLog(@"discarding exception %@ in task %@", exception, self);
-        
-        // reset all flags
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasLTB);
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasLaTeX);
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasPDFData);
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasRTFData);
-    }        
+    }     
 	
 	if (nil != taskFinishedInvocation) {
         [taskFinishedInvocation setArgument:&rv atIndex:3];
@@ -702,17 +691,40 @@ static double runLoopTimeout = 30;
 }
 
 - (int)runTask:(NSString *)binPath withArguments:(NSArray *)arguments{
-    currentTask = [[NSTask alloc] init];
-    [currentTask setCurrentDirectoryPath:[texPath workingDirectory]];
-    [currentTask setLaunchPath:binPath];
-    [currentTask setArguments:arguments];
-    [currentTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-    [currentTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
-        
+    
     int rv = 0;
     
+    // NSTask raises exceptions for many reasons, so wrap all NSTask usage in an exception handler.  We don't want to jump past the caller and leave status flags and the data file lock in an inconsistent state.
     @try {
+        currentTask = [[NSTask alloc] init];
+        [currentTask setCurrentDirectoryPath:[texPath workingDirectory]];
+        [currentTask setLaunchPath:binPath];
+        [currentTask setArguments:arguments];
+        [currentTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
+        [currentTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
+        
         [currentTask launch];
+        
+        
+        if (rv == 0) {
+            NSTimeInterval stopTime = [NSDate timeIntervalSinceReferenceDate] + runLoopTimeout;
+            NSDate *limitDate = [NSDate dateWithTimeIntervalSinceReferenceDate:stopTime];
+            
+            // we're basically doing what -[NSTask waitUntilExit] does, with the additional twist of a hard limit on the time a process can run (30 seconds for a LaTeX run is a long time, even on a slow machine)
+            BOOL run;    
+            NSRunLoop *rl = [NSRunLoop currentRunLoop];
+            do {
+                NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+                run = [currentTask isRunning] && now < stopTime && [rl runMode:NSDefaultRunLoopMode beforeDate:limitDate];
+            } while (run);
+            
+            // isRunning may return NO before the task has terminated, so we need to make sure it's done or NSTask will raise
+            [currentTask terminate];
+            
+            // this call will raise if the SIGTERM failed
+            if (0 != [currentTask terminationStatus])
+                rv = 1;
+        }
     }
     @catch(id exception) {
         if([currentTask isRunning])
@@ -720,29 +732,11 @@ static double runLoopTimeout = 30;
         NSLog(@"%@ %@ failed", [currentTask description], [currentTask launchPath]);
         rv = 2;
     }
-    
-    if (rv == 0) {
-        NSTimeInterval stopTime = [NSDate timeIntervalSinceReferenceDate] + runLoopTimeout;
-        NSDate *limitDate = [NSDate dateWithTimeIntervalSinceReferenceDate:stopTime];
-        
-        // we're basically doing what -[NSTask waitUntilExit] does, with the additional twist of a hard limit on the time a process can run (30 seconds for a LaTeX run is a long time, even on a slow machine)
-        BOOL run;    
-        NSRunLoop *rl = [NSRunLoop currentRunLoop];
-        do {
-            NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
-            run = [currentTask isRunning] && now < stopTime && [rl runMode:NSDefaultRunLoopMode beforeDate:limitDate];
-        } while (run);
-        
-        // isRunning may return NO before the task has terminated, so we need to make sure it's done, or else NSTask raises an exception and our status flags are hosed
-        [currentTask terminate];
-        
-        if (0 != [currentTask terminationStatus])
-            rv = 1;
+    @finally {
+        [currentTask release];
+        currentTask = nil;
     }
     
-    [currentTask release];
-    currentTask = nil;
-
     return rv;
 }
 
