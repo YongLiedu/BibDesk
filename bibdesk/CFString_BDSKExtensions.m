@@ -333,12 +333,12 @@ void __BDDeleteArticlesForSorting(CFMutableStringRef mutableString)
     searchRange = CFRangeMake(start, MIN(length - start, maxRemoveLength));
     
     while(idx--){
-        found = CFStringFindWithOptions(mutableString, CFArrayGetValueAtIndex(articlesToRemove, idx), CFRangeMake(0, MIN(length, maxRemoveLength)), kCFCompareAnchored | kCFCompareCaseInsensitive, &articleRange);
+        found = CFStringFindWithOptions(mutableString, CFArrayGetValueAtIndex(articlesToRemove, idx), searchRange, kCFCompareAnchored | kCFCompareCaseInsensitive, &articleRange);
         
         // make sure the next character is whitespace before deleting, after checking bounds
-        if(found && length > articleRange.length && 
-           (__BDCharacterIsWhitespace(CFStringGetCharacterAtIndex(mutableString, articleRange.length)) ||
-            __BDCharacterIsPunctuation(CFStringGetCharacterAtIndex(mutableString, articleRange.length)))) {
+        if(found && length > articleRange.location + articleRange.length && 
+           (__BDCharacterIsWhitespace(CFStringGetCharacterAtIndex(mutableString, articleRange.location + articleRange.length)) ||
+            __BDCharacterIsPunctuation(CFStringGetCharacterAtIndex(mutableString, articleRange.location + articleRange.length)))) {
             articleRange.length++;
             CFStringDelete(mutableString, articleRange);
             break;
