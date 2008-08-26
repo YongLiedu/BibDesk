@@ -90,6 +90,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
 		<command name="open" code="aevtodoc" description="Open a document.">
 			<direct-parameter description="The file(s) to be opened.">
+				<type type="file"/>
 				<type type="file" list="yes"/>
 			</direct-parameter>
 			<!--
@@ -649,7 +650,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</responds-to>
 		</class>
 
-		<class name="publication" plural="publications" code="bibi" inherits="item"
+		<class name="publication" plural="publications" code="bibi"
 			description="A publication.">
             <cocoa class="BibItem"/>
             <element type="author" name="author" access="r"
@@ -779,7 +780,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </responds-to>
         </class>
         
-        <class name="author" plural="authors" code="auth" inherits="item"
+        <class name="author" plural="authors" code="auth"
 			description="Contains the name of an author, tries to analyze it and list all publications of that author. Author names can be split into four e.g. '(Jean) (de la) (Fontaine) (Jr.)'">
             <cocoa class="BibAuthor"/>
             <element type="publication" access="r"
@@ -832,7 +833,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa class="BibAuthor"/>
         </class>
         
-        <class name="macro" plural="macros" code="bmcr" inherits="item"
+        <class name="macro" plural="macros" code="bmcr"
 			description="A macro of a document or a global macro.">
             <cocoa class="BDSKMacro"/>
             <property name="value" code="fldv" type="text"
@@ -853,7 +854,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
         </class>
         
-        <class name="field" plural="fields" code="bfld" inherits="item"
+        <class name="field" plural="fields" code="bfld"
 			description="Field containing data for a publication.">
             <cocoa class="BDSKField"/>
             <property name="value" code="fldv" type="text"
@@ -874,7 +875,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
         </class>
 
-		<class name="linked URL" plural="linked URLs" code="URL " inherits="item"
+		<class name="linked URL" plural="linked URLs" code="URL "
 			description="A linked URL. This is a string.">
 			<cocoa class="NSString"/>
 			<type type="text"/>
@@ -886,7 +887,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </responds-to>
 		</class>
 
-		<class name="linked file" plural="linked files" code="File" inherits="item"
+		<class name="linked file" plural="linked files" code="File"
 			description="A linked file. This is a file or alias.">
 			<cocoa class="NSURL"/>
 			<type type="file"/>
@@ -918,7 +919,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </responds-to>
 		</class>
         
-        <class name="group" plural="groups" code="Grup" inherits="item"
+        <class name="group" plural="groups" code="Grup"
 			description="A group containing publications.">
             <cocoa class="BDSKGroup"/>
             <element type="publication"
@@ -1053,7 +1054,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
         </class>
         
-        <class name="script hook" plural="script hooks" code="bshk" inherits="item"
+        <class name="script hook" plural="script hooks" code="bshk"
 			description="A script hook.">
             <cocoa class="BDSKScriptHook"/>
             <property name="name" code="pnam" type="text" access="r"
@@ -1084,7 +1085,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
         </class>
         
-        <class name="condition" plural="conditions" code="Cond" inherits="item"
+        <class name="condition" plural="conditions" code="Cond"
 			description="A smart group condition.">
             <cocoa class="BDSKCondition"/>
             <property name="field name" code="fnam" type="text" access="r"
