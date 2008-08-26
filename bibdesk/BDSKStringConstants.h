@@ -196,7 +196,6 @@ extern NSString *BDSKAuthorNameDisplayKey;
 extern NSString *BDSKUpdateCheckIntervalKey;
 extern NSString *BDSKUpdateCheckLastDateKey;
 extern NSString *BDSKUpdateLatestNotifiedVersionKey;
-extern NSString *BDSKSpotlightVersionInfo;
 
 extern NSString *BDSKShouldShowWebGroupPrefKey;
 extern NSString *BDSKDefaultArrayJoinStringKey;
