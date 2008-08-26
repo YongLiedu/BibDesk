@@ -20,42 +20,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
 
 		<cocoa name="NSCoreSuite"/>
 
-<!-- The definition of AbstractObject is required for Panther -->        
-        <class name="item" code="cobj" description="A scriptable object.">
-            <cocoa class="AbstractObject"/>
-            <property name="class" code="pcls" type="type" access="r" description="The class of the object.">
-                <cocoa key="classCode"/>
-            </property>
-            <property name="properties" code="pALL" type="record" description="All of the object's properties.">
-                <cocoa key="scriptingProperties"/>
-            </property>
-<!--
-                        The blank method declarations are needed to emulate the existing
-                        NSCoreSuite.scriptSuite.framework.  Ordinarily, you wouldn't do this.
-                    -->
-            <responds-to name="count">
-                <cocoa method=""/>
-            </responds-to>
-            <responds-to name="delete">
-                <cocoa method=""/>
-            </responds-to>
-            <responds-to name="duplicate">
-                <cocoa method=""/>
-            </responds-to>
-            <responds-to name="exists">
-                <cocoa method=""/>
-            </responds-to>
-            <responds-to name="get">
-                <cocoa method=""/>
-            </responds-to>
-            <responds-to name="move">
-                <cocoa method=""/>
-            </responds-to>
-            <responds-to name="set">
-                <cocoa method=""/>
-            </responds-to>
-        </class>
-        
 		<class name="window" code="cwin"
 			description="A window.">
 			<cocoa class="NSWindow"/>
