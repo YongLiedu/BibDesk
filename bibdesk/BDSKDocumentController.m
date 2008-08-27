@@ -394,14 +394,18 @@
             
         NSURL *fileURL = [NSURL fileURLWithPath:fullPath];
         
-        NSError *error = nil; // this is a garbage pointer if the document is already open
+        // use a local variable in case it wasn't passed in, so we can always log this failure
+        NSError *error;
         document = [super openDocumentWithContentsOfURL:fileURL display:YES error:&error];
         
-        if(document == nil)
+        if(document == nil) {
             NSLog(@"document at URL %@ failed to open for reason: %@", fileURL, [error localizedFailureReason]);
-        else
-            if(![document selectItemForPartialItem:dictionary])
+            // assign to the outError or we'll crash...
+            if (outError) *outError = error;
+        } else if(![document selectItemForPartialItem:dictionary]) {
                 NSBeep();
+        }
+        
     } else if ([theUTI isEqualToUTI:@"net.sourceforge.bibdesk.bdsksearch"]) {
         
         NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:absoluteURL];
