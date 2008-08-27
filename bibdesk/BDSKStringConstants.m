@@ -211,6 +211,7 @@ NSString *BDSKWarnOnCiteKeyChangeKey = @"BDSKWarnOnCiteKeyChangeKey";
 NSString *BDSKUpdateCheckIntervalKey = @"BDSKUpdateCheckIntervalKey";
 NSString *BDSKUpdateCheckLastDateKey = @"BDSKUpdateCheckLastDateKey";
 NSString *BDSKUpdateLatestNotifiedVersionKey = @"BDSKUpdateLatestNotifiedVersionKey";
+NSString *BDSKSpotlightVersionInfo = @"BDSKSpotlightVersionInfo";
 
 NSString *BDSKShouldShowWebGroupPrefKey = @"BDSKShouldShowWebGroup";
 

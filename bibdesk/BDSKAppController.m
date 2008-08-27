@@ -376,6 +376,8 @@ static void fixLegacyTableColumnIdentifiers()
     if ([fileManager fileExistsAtPath:scriptsPath] == NO)
         [fileManager createDirectoryAtPath:scriptsPath attributes:nil];
     
+    [self doSpotlightImportIfNeeded];
+    
     // Improve web group perf on 10.5: http://lists.apple.com/archives/cocoa-dev/2007/Dec/msg00261.html
     // header does't say this is 10.5 only, but it doesn't show up in the 10.4u header
     if ([WebPreferences instancesRespondToSelector:@selector(setCacheModel:)])
@@ -1348,6 +1350,49 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         [userInfo release];
         [metadataCacheLock unlock];
         [pool release];
+    }
+}
+
+- (void)doSpotlightImportIfNeeded {
+    
+    // This code finds the spotlight importer and re-runs it if the importer or app version has changed since the last time we launched.
+    NSArray *pathComponents = [NSArray arrayWithObjects:[[NSBundle mainBundle] bundlePath], @"Contents", @"Library", @"Spotlight", @"BibImporter", nil];
+    NSString *importerPath = [[NSString pathWithComponents:pathComponents] stringByAppendingPathExtension:@"mdimporter"];
+    
+    NSBundle *importerBundle = [NSBundle bundleWithPath:importerPath];
+    NSString *importerVersion = [importerBundle objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
+    if (importerVersion) {
+        BDSKVersionNumber *importerVersionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:importerVersion] autorelease];
+        NSDictionary *versionInfo = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSpotlightVersionInfo];
+        
+        long sysVersion;
+        OSStatus err = Gestalt(gestaltSystemVersion, &sysVersion);
+        
+        BOOL runImporter = NO;
+        if ([versionInfo count] == 0) {
+            runImporter = YES;
+        } else {
+            NSString *lastImporterVersion = [versionInfo objectForKey:@"lastImporterVersion"];
+            BDSKVersionNumber *lastImporterVersionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:lastImporterVersion] autorelease];
+            
+            long lastSysVersion = [[versionInfo objectForKey:@"lastSysVersion"] longValue];
+            
+            runImporter = noErr == err ? ([lastImporterVersionNumber compareToVersionNumber:importerVersionNumber] == NSOrderedAscending || sysVersion > lastSysVersion) : YES;
+        }
+        if (runImporter) {
+            NSString *mdimportPath = @"/usr/bin/mdimport";
+            if ([[NSFileManager defaultManager] isExecutableFileAtPath:mdimportPath]) {
+                NSTask *importerTask = [[[NSTask alloc] init] autorelease];
+                [importerTask setLaunchPath:mdimportPath];
+                [importerTask setArguments:[NSArray arrayWithObjects:@"-r", importerPath, nil]];
+                [importerTask launch];
+                
+                NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithLong:sysVersion], @"lastSysVersion", importerVersion, @"lastImporterVersion", nil];
+                [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:info forKey:BDSKSpotlightVersionInfo];
+                
+            }
+            else NSLog(@"/usr/bin/mdimport not found!");
+        }
     }
 }
 
