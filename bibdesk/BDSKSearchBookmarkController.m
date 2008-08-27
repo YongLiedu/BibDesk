@@ -243,6 +243,10 @@ static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBo
     }
 }
 
+- (void)setChildren:(NSArray *)newChildren ofBookmark:(BDSKSearchBookmark *)bookmark {
+    [[bookmark mutableArrayValueForKey:BDSKSearchBookmarkChildrenKey] setArray:newChildren];
+}
+
 - (void)insertObjects:(NSArray *)newChildren inChildrenOfBookmark:(BDSKSearchBookmark *)bookmark atIndexes:(NSIndexSet *)indexes {
     [[bookmark mutableArrayValueForKey:BDSKSearchBookmarkChildrenKey] insertObjects:newChildren atIndexes:indexes];
 }
@@ -272,7 +276,7 @@ static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBo
                     [new removeObjectsInArray:oldValue];
                     [self stopObservingBookmarks:old];
                     [self startObservingBookmarks:new];
-                    [[[self undoManager] prepareWithInvocationTarget:bookmark] setChildren:oldValue];
+                    [[[self undoManager] prepareWithInvocationTarget:self] setChildren:oldValue ofBookmark:bookmark];
                 } else if ([keyPath isEqualToString:BDSKSearchBookmarkLabelKey]) {
                     [[[self undoManager] prepareWithInvocationTarget:bookmark] setLabel:oldValue];
                 }
