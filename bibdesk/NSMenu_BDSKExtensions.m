@@ -280,22 +280,31 @@ static id sharedOpenWithController = nil;
 
 + (id)sharedInstance
 {
-    if(nil == sharedOpenWithController)
-        sharedOpenWithController = [[self alloc] init];
+    if (sharedBookmarkController == nil)
+        [[self alloc] init];
     return sharedOpenWithController;
 }
 
-- (id)copyWithZone:(NSZone *)zone{
-    return [sharedOpenWithController retain];
++ (id)allocWithZone:(NSZone *)zone
+{
+    if (sharedBookmarkController == nil)
+        sharedBookmarkController = [[super allocWithZone:zone] init];
+    return sharedBookmarkController;
 }
+
+- (id)copyWithZone:(NSZone *)zone{ return self; }
 
 - (void)encodeWithCoder:(NSCoder *)coder{}
 
-- (id)initWithCoder:(NSCoder *)decoder{
-    [[self init] release];
-    self = [sharedOpenWithController retain];
-    return self;
-}
+- (id)initWithCoder:(NSCoder *)decoder { return self; }
+
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)chooseApplicationToOpenURL:(NSURL *)aURL;
 {
