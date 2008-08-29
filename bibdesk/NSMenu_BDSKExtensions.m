@@ -280,16 +280,16 @@ static id sharedOpenWithController = nil;
 
 + (id)sharedInstance
 {
-    if (sharedBookmarkController == nil)
+    if (sharedOpenWithController == nil)
         [[self alloc] init];
     return sharedOpenWithController;
 }
 
 + (id)allocWithZone:(NSZone *)zone
 {
-    if (sharedBookmarkController == nil)
-        sharedBookmarkController = [[super allocWithZone:zone] init];
-    return sharedBookmarkController;
+    if (sharedOpenWithController == nil)
+        sharedOpenWithController = [[super allocWithZone:zone] init];
+    return sharedOpenWithController;
 }
 
 - (id)copyWithZone:(NSZone *)zone{ return self; }
