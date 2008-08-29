@@ -103,6 +103,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
         // it corresponds to the last drawing item added to the mainQueue
         previewState = BDSKUnknownPreviewState;
         
+        generatedTypes = BDSKGenerateRTF;
+        
         // otherwise a document's previewer might mess up the window position of the shared previewer
         [self setShouldCascadeWindows:NO];
         
@@ -251,6 +253,17 @@ static BDSKPreviewer *sharedPreviewer = nil;
 {
     [self window];
     [(BDSKZoomableTextView *)rtfPreviewView setScaleFactor:scaleFactor];
+}
+
+
+- (int)generatedTypes;
+{
+    return generatedTypes;
+}
+
+- (void)setGeneratedTypes:(int)newGeneratedTypes;
+{
+    generatedTypes = newGeneratedTypes;
 }
 
 - (BOOL)isVisible{
@@ -620,8 +633,9 @@ static BDSKPreviewer *sharedPreviewer = nil;
                 }
                 [queueLock unlock];
             }
+            int generatedTypes = [dict objectForKey:@"generatedTypes"] ? [[dict objectForKey:@"generatedTypes"] intValue] : BDSKGenerateRTF;
             // previous task is done, so we can start a new one
-            success = [texTask runWithBibTeXString:[dict objectForKey:@"bibTeXString"]  citeKeys:[dict objectForKey:@"citeKeys"]];
+            success = [texTask runWithBibTeXString:[dict objectForKey:@"bibTeXString"]  citeKeys:[dict objectForKey:@"citeKeys"] generatedTypes:generatedTypes];
             [dict release];
         }
         

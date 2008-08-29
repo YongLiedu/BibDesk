@@ -66,6 +66,7 @@ typedef enum {
     
     BDSKPreviewerServer *server;
     BDSKPreviewState previewState;
+    int generatedTypes;
 }
 
 /*!
@@ -83,6 +84,9 @@ typedef enum {
 - (void)setPDFScaleFactor:(float)scaleFactor;
 - (float)RTFScaleFactor;
 - (void)setRTFScaleFactor:(float)scaleFactor;
+
+- (int)generatedTypes;
+- (void)setGeneratedTypes:(int)newGeneratedTypes;
 
 - (BOOL)isVisible;
 - (void)handleMainDocumentDidChangeNotification:(NSNotification *)notification;

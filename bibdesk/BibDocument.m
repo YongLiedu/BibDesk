@@ -66,6 +66,7 @@
 #import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKPreviewer.h"
+#import "BDSKTeXTask.h"
 #import "BDSKOverlay.h"
 #import "BDSKEditor.h"
 
@@ -3138,6 +3139,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
         [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
         [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
+        [previewer setGeneratedTypes:BDSKGeneratePDF];
         BDSKEdgeView *previewerBox = [[[BDSKEdgeView alloc] init] autorelease];
         [previewerBox setEdges:BDSKEveryEdgeMask];
         [previewerBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
