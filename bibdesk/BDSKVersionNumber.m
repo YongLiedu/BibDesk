@@ -69,13 +69,19 @@
                         } else if ([scanner scanString:@"beta" intoString:NULL] || [scanner scanString:@"b" intoString:NULL]) {
                             releaseType = BDSKBetaVersionType;
                             [mutableVersionString appendString:@"b"];
+                        } else if ([scanner scanString:@"development" intoString:NULL] || [scanner scanString:@"d" intoString:NULL]) {
+                            releaseType = BDSKDevelopmentVersionType;
+                            [mutableVersionString appendString:@"b"];
+                        } else if ([scanner scanString:@"final" intoString:NULL] || [scanner scanString:@"f" intoString:NULL]) {
+                            releaseType = BDSKReleaseCandidateVersionType;
+                            [mutableVersionString appendString:@"f"];
                         } else if ([scanner scanString:@"release candidate" intoString:NULL] || [scanner scanString:@"rc" intoString:NULL]) {
                             releaseType = BDSKReleaseCandidateVersionType;
                             [mutableVersionString appendString:@"rc"];
                         }
                         
                         if (releaseType != BDSKReleaseVersionType) {
-                            // we scanned an "a", "b", or "rc"
+                            // we scanned an "a", "b", "d", "f", or "rc"
                             componentCount++;
                             components = realloc(components, sizeof(*components) * componentCount);
                             components[componentCount - 1] = -releaseType;
@@ -155,6 +161,11 @@
 - (BOOL)isReleaseCandidate;
 {
     return releaseType == BDSKReleaseCandidateVersionType;
+}
+
+- (BOOL)isDevelopment;
+{
+    return releaseType == BDSKDevelopmentVersionType;
 }
 
 - (BOOL)isBeta;

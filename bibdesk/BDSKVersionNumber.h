@@ -22,6 +22,7 @@
 enum {
     BDSKReleaseVersionType,
     BDSKReleaseCandidateVersionType,
+    BDSKDevelopmentVersionType,
     BDSKBetaVersionType,
     BDSKAlphaVersionType,
 };
@@ -47,6 +48,7 @@ enum {
 - (int)releaseType;
 - (BOOL)isRelease;
 - (BOOL)isReleaseCandidate;
+- (BOOL)isDevelopment;
 - (BOOL)isBeta;
 - (BOOL)isAlpha;
 
