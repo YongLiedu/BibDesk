@@ -458,7 +458,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 		// this will start the spinning wheel
         [self displayPreviewsForState:BDSKWaitingPreviewState success:YES];
         // run the tex task in the background
-        [server runTeXTaskInBackgroundWithInfo:[NSDictionary dictionaryWithObjectsAndKeys:bibStr, @"bibTeXString", citeKeys, @"citeKeys", nil]];
+        [server runTeXTaskInBackgroundWithInfo:[NSDictionary dictionaryWithObjectsAndKeys:bibStr, @"bibTeXString", citeKeys, @"citeKeys", [NSNumber numberWithInt:generatedTypes], @"generatedTypes", nil]];
 	}	
 }
 
