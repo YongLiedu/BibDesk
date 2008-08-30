@@ -67,10 +67,12 @@ BOOL BDSKIsAppleScriptAtPath(NSString *path)
 
 BOOL BDSKIsExecutableFileAtPath(NSString *path)
 {
-    path = [path stringByStandardizingPath];
-    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
-    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
-                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text"))) : NO;
+    path = [path stringByStandardizingPath]; 	 
+    BOOL isExecutable = [[NSFileManager defaultManager] isExecutableFileAtPath:path]; 	 
+    // exclude packages and directories, which are not executable data 	 
+    BOOL isDir; 	 
+    [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir]; 	 
+    return (isExecutable && NO == isDir);
 }
 
 static OFMessageQueue *messageQueue = nil;
