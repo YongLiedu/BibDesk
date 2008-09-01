@@ -54,6 +54,8 @@
  
  The primary usage of the items returned is for pretty-printing a list to be displayed.  The title and names in particular may be formatted differently from the actual BibTeX file's content.
  
+ NOTE: TeXShop 2.18 and later depend on (at least) completionsForString: and orderedDocumentURLs, as well as the key-value pairs described above, so these should not be changed.
+ 
  */
 
 @protocol BDSKCompletionServer
