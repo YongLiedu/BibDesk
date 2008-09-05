@@ -169,7 +169,7 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
         
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(triStateCompare:)];
         
-    }else if([tcID isRatingField] || [tcID isEqualToString:BDSKRelevanceString]){
+    }else if([tcID isRatingField] || [tcID isEqualToString:BDSKRelevanceString] || [tcID isNumericField]){
         
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(numericCompare:)];
         
