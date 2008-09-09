@@ -447,7 +447,6 @@
 		F945240C0B4B15A6000A5E12 /* searchDocIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F945240B0B4B15A6000A5E12 /* searchDocIcon.icns */; };
 		F9463F4609436F7500CC4549 /* NSSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9463F4409436F7500CC4549 /* NSSet_BDSKExtensions.m */; };
 		F946DCE909FDC4B600D471DF /* BDSKAsynchronousDOServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */; };
-		F9484D8E08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8A08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */; };
 		F9484D9008D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */; };
 		F94AA36B0BE8FD87007BCE2B /* Preferences.strings in Resources */ = {isa = PBXBuildFile; fileRef = F94AA3690BE8FD87007BCE2B /* Preferences.strings */; };
 		F94DB0F90B3E2FA1006F37A2 /* BDSKSearchGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = F94DB0F70B3E2FA1006F37A2 /* BDSKSearchGroup.m */; };
@@ -3712,7 +3711,6 @@
 				F961FA9708C9429700332460 /* BDSKPrintableView.m in Sources */,
 				CE392ED508D034E4001CEAC8 /* BDSKRatingButtonCell.m in Sources */,
 				CE392F5E08D04083001CEAC8 /* BDSKRatingButton.m in Sources */,
-				F9484D8E08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h in Sources */,
 				F9484D9008D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m in Sources */,
 				F9252E2308F60D170045D563 /* BDSKFileContentSearchController.m in Sources */,
 				F925332408FC9FB80045D563 /* BDSKFileSearchIndex.m in Sources */,
