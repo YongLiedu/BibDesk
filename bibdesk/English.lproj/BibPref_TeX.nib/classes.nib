@@ -1,64 +1,142 @@
-{
-    IBClasses =     (
-                {
-            CLASS = BDSKEncodingPopUpButton;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSPopUpButton;
-        },
-                {
-            ACTIONS =             {
-                changeBibTexBinPath = id;
-                changeDefaultTeXEncoding = id;
-                changeStyle = id;
-                changeTexBinPath = id;
-                changeUsesTeX = id;
-                downloadTeX = id;
-                openTeXPreviewFile = id;
-                resetTeXPreviewFile = id;
-            };
-            CLASS = "BibPref_TeX";
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                bibTeXStyleField = NSComboBox;
-                bibtexBinaryPathField = NSTextField;
-                encodingPopUpButton = BDSKEncodingPopUpButton;
-                texBinaryPathField = NSTextField;
-                usesTeXButton = NSButton;
-            };
-            SUPERCLASS = OAPreferenceClient;
-        },
-                {
-            ACTIONS =             {
-                "" = id;
-            };
-            CLASS = FirstResponder;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            ACTIONS =             {
-                restoreDefaults = id;
-                setValueForSender = id;
-            };
-            CLASS = OAPreferenceClient;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                controlBox = NSView;
-                initialFirstResponder = NSView;
-                lastKeyView = NSView;
-            };
-            SUPERCLASS = OFObject;
-        },
-                {
-            CLASS = OBObject;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = OFObject;
-            LANGUAGE = ObjC;
-            SUPERCLASS = OBObject;
-        }
-    );
-    IBVersion = 1;
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKEncodingPopUpButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPopUpButton</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenuItem</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key></key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>OFObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OBObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>restoreDefaults</key>
+				<string>id</string>
+				<key>setValueForSender</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>OAPreferenceClient</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>controlBox</key>
+				<string>NSView</string>
+				<key>initialFirstResponder</key>
+				<string>NSView</string>
+				<key>lastKeyView</key>
+				<string>NSView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>OFObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>OBObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeBibTexBinPath</key>
+				<string>id</string>
+				<key>changeDefaultTeXEncoding</key>
+				<string>id</string>
+				<key>changeStyle</key>
+				<string>id</string>
+				<key>changeTexBinPath</key>
+				<string>id</string>
+				<key>changeUsesTeX</key>
+				<string>id</string>
+				<key>downloadTeX</key>
+				<string>id</string>
+				<key>openTeXPreviewFile</key>
+				<string>id</string>
+				<key>resetTeXPreviewFile</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BibPref_TeX</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>bibTeXStyleField</key>
+				<string>NSComboBox</string>
+				<key>bibtexBinaryPathField</key>
+				<string>NSTextField</string>
+				<key>encodingPopUpButton</key>
+				<string>BDSKEncodingPopUpButton</string>
+				<key>texBinaryPathField</key>
+				<string>NSTextField</string>
+				<key>usesTeXButton</key>
+				<string>NSButton</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>OAPreferenceClient</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>

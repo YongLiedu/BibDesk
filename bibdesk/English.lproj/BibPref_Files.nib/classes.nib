@@ -1,73 +1,160 @@
-{
-    IBClasses =     (
-                {
-            CLASS = BDSKEncodingPopUpButton;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSPopUpButton;
-        },
-                {
-            ACTIONS =             {
-                editTemplateFile = id;
-                resetConversions = id;
-                resetTemplateFile = id;
-                setAutosaveTime = id;
-                setDefaultStringEncoding = id;
-                setShouldAutosave = id;
-                showConversionEditor = id;
-                toggleSaveAnnoteAndAbstractAtEnd = id;
-                toggleShouldTeXify = id;
-                toggleShouldUseNormalizedNames = id;
-                toggleShouldUseTemplateFile = id;
-                toggleShowWarnings = id;
-            };
-            CLASS = "BibPref_Files";
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                autosaveDocumentButton = NSButton;
-                autosaveTimeField = NSTextField;
-                autosaveTimeStepper = NSStepper;
-                encodingPopUp = BDSKEncodingPopUpButton;
-                outputTemplateFileButton = NSButton;
-                saveAnnoteAndAbstractAtEndButton = NSButton;
-                shouldTeXifyCheckButton = NSButton;
-                showErrorsCheckButton = NSButton;
-                useNormalizedNamesButton = NSButton;
-                useTemplateFileButton = NSButton;
-            };
-            SUPERCLASS = OAPreferenceClient;
-        },
-                {
-            ACTIONS =             {
-                "" = id;
-            };
-            CLASS = FirstResponder;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            ACTIONS =             {
-                restoreDefaults = id;
-                setValueForSender = id;
-            };
-            CLASS = OAPreferenceClient;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                controlBox = NSView;
-                initialFirstResponder = NSView;
-                lastKeyView = NSView;
-            };
-            SUPERCLASS = OFObject;
-        },
-                {
-            CLASS = OBObject;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = OFObject;
-            LANGUAGE = ObjC;
-            SUPERCLASS = OBObject;
-        }
-    );
-    IBVersion = 1;
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKEncodingPopUpButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPopUpButton</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenuItem</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key></key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>OFObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OBObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>restoreDefaults</key>
+				<string>id</string>
+				<key>setValueForSender</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>OAPreferenceClient</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>controlBox</key>
+				<string>NSView</string>
+				<key>initialFirstResponder</key>
+				<string>NSView</string>
+				<key>lastKeyView</key>
+				<string>NSView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>OFObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>editTemplateFile</key>
+				<string>id</string>
+				<key>resetConversions</key>
+				<string>id</string>
+				<key>resetTemplateFile</key>
+				<string>id</string>
+				<key>setAutosaveTime</key>
+				<string>id</string>
+				<key>setDefaultStringEncoding</key>
+				<string>id</string>
+				<key>setShouldAutosave</key>
+				<string>id</string>
+				<key>showConversionEditor</key>
+				<string>id</string>
+				<key>toggleSaveAnnoteAndAbstractAtEnd</key>
+				<string>id</string>
+				<key>toggleShouldTeXify</key>
+				<string>id</string>
+				<key>toggleShouldUseNormalizedNames</key>
+				<string>id</string>
+				<key>toggleShouldUseTemplateFile</key>
+				<string>id</string>
+				<key>toggleShowWarnings</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BibPref_Files</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>autosaveDocumentButton</key>
+				<string>NSButton</string>
+				<key>autosaveTimeField</key>
+				<string>NSTextField</string>
+				<key>autosaveTimeStepper</key>
+				<string>NSStepper</string>
+				<key>encodingPopUp</key>
+				<string>BDSKEncodingPopUpButton</string>
+				<key>outputTemplateFileButton</key>
+				<string>NSButton</string>
+				<key>saveAnnoteAndAbstractAtEndButton</key>
+				<string>NSButton</string>
+				<key>shouldTeXifyCheckButton</key>
+				<string>NSButton</string>
+				<key>showErrorsCheckButton</key>
+				<string>NSButton</string>
+				<key>useNormalizedNamesButton</key>
+				<string>NSButton</string>
+				<key>useTemplateFileButton</key>
+				<string>NSButton</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>OAPreferenceClient</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>OBObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>

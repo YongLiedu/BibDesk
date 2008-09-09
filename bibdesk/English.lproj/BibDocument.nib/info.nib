@@ -2,56 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>IBDocumentLocation</key>
-	<string>58 186 356 240 0 0 1440 938 </string>
-	<key>IBEditorPositions</key>
-	<dict>
-		<key>101206</key>
-		<string>610 536 220 242 0 0 1440 938 </string>
-		<key>101223</key>
-		<string>610 536 220 242 0 0 1440 938 </string>
-		<key>101260</key>
-		<string>510 386 420 442 0 0 1440 938 </string>
-		<key>101282</key>
-		<string>610 536 220 242 0 0 1440 938 </string>
-		<key>433</key>
-		<string>69 313 241 503 0 0 1440 938 </string>
-		<key>661</key>
-		<string>532 634 376 112 0 0 1440 938 </string>
-		<key>702</key>
-		<string>552 637 336 108 0 0 1440 938 </string>
-		<key>819</key>
-		<string>69 313 281 412 0 0 1440 938 </string>
-		<key>923</key>
-		<string>532 611 376 142 0 0 1440 938 </string>
-	</dict>
 	<key>IBFramework Version</key>
-	<string>489.0</string>
+	<string>672</string>
 	<key>IBLastKnownRelativeProjectPath</key>
-	<string>../../Bibdesk.xcodeproj</string>
-	<key>IBLockedTabItems</key>
-	<array>
-		<integer>101208</integer>
-		<integer>101231</integer>
-	</array>
+	<string>../Bibdesk.xcodeproj</string>
 	<key>IBOldestOS</key>
 	<integer>5</integer>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>433</integer>
-		<integer>1112</integer>
-		<integer>101282</integer>
-		<integer>101206</integer>
-		<integer>5</integer>
-		<integer>101260</integer>
-		<integer>101223</integer>
-		<integer>819</integer>
-		<integer>702</integer>
-		<integer>661</integer>
-		<integer>923</integer>
+		<integer>1113</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>9C7010</string>
+	<string>9E17</string>
 	<key>targetFramework</key>
 	<string>IBCocoaFramework</string>
 </dict>
