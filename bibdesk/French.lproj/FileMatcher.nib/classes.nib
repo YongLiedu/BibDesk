@@ -1,76 +1,141 @@
-{
-    IBClasses =     (
-                {
-            ACTIONS =             {
-                abort = id;
-                configure = id;
-                openAction = id;
-            };
-            CLASS = BDSKFileMatcher;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                abortButton = NSButton;
-                configureButton = NSButton;
-                outlineView = NSOutlineView;
-                progressIndicator = NSProgressIndicator;
-                statusField = NSTextField;
-            };
-            SUPERCLASS = NSWindowController;
-        },
-                {
-            CLASS = BDSKGradientView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = BDSKGroupingOutlineView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSOutlineView;
-        },
-                {
-            ACTIONS =             {
-                hideMatches = id;
-                showMatches = id;
-            };
-            CLASS = BDSKOrphanedFilesArrayController;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                searchField = NSSearchField;
-            };
-            SUPERCLASS = NSArrayController;
-        },
-                {
-            ACTIONS =             {
-                matchFilesWithPubs = id;
-                refreshOrphanedFiles = id;
-                search = id;
-                showFile = id;
-                showOrphanedFiles = id;
-                stopRefreshing = id;
-            };
-            CLASS = BDSKOrphanedFilesFinder;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                arrayController = BDSKOrphanedFilesArrayController;
-                contextMenu = NSMenu;
-                matchButton = NSButton;
-                progressIndicator = NSProgressIndicator;
-                refreshButton = NSButton;
-                statusField = NSTextField;
-                tableView = NSTableView;
-            };
-            SUPERCLASS = NSWindowController;
-        },
-                {
-            CLASS = FirstResponder;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = OADataSourceTableColumn;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSTableColumn;
-        }
-    );
-    IBVersion = 1;
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>OADataSourceTableColumn</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableColumn</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSTableHeaderView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>abort</key>
+				<string>id</string>
+				<key>configure</key>
+				<string>id</string>
+				<key>openAction</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKFileMatcher</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>abortButton</key>
+				<string>NSButton</string>
+				<key>configureButton</key>
+				<string>NSButton</string>
+				<key>outlineView</key>
+				<string>NSOutlineView</string>
+				<key>progressIndicator</key>
+				<string>NSProgressIndicator</string>
+				<key>statusField</key>
+				<string>NSTextField</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKGroupingOutlineView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSOutlineView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>hideWindow</key>
+				<string>id</string>
+				<key>toggleShowingWindow</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>NSWindowController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSWindow</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSScrollView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeFont</key>
+				<string>id</string>
+				<key>invertSelection</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>NSTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSControl</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>

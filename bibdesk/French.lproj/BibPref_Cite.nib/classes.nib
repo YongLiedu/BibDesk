@@ -1,68 +1,142 @@
-{
-    IBClasses =     (
-                {
-            CLASS = BDSKDragCopyCiteKeyFormatter;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSFormatter;
-        },
-                {
-            ACTIONS =             {
-                changeAlternateDragCopyFormat = id;
-                changeAlternateDragCopyTemplate = id;
-                changeDefaultDragCopyFormat = id;
-                changeDefaultDragCopyTemplate = id;
-                changePrependTilde = id;
-                changeSeparateCite = id;
-                citeStringFieldChanged = id;
-                setCitationBracketStyle = id;
-            };
-            CLASS = "BibPref_Cite";
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                alternateDragCopyPopup = NSPopUpButton;
-                alternateDragCopyTemplatePopup = NSPopUpButton;
-                citeBehaviorLine = NSTextField;
-                citeBracketRadio = NSMatrix;
-                citeStringField = NSTextField;
-                defaultDragCopyPopup = NSPopUpButton;
-                defaultDragCopyTemplatePopup = NSPopUpButton;
-                prependTildeCheckButton = NSButton;
-                separateCiteCheckButton = NSButton;
-            };
-            SUPERCLASS = OAPreferenceClient;
-        },
-                {
-            ACTIONS =             {
-                "" = id;
-            };
-            CLASS = FirstResponder;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            ACTIONS =             {
-                restoreDefaults = id;
-                setValueForSender = id;
-            };
-            CLASS = OAPreferenceClient;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                controlBox = NSView;
-                initialFirstResponder = NSView;
-                lastKeyView = NSView;
-            };
-            SUPERCLASS = OFObject;
-        },
-                {
-            CLASS = OBObject;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = OFObject;
-            LANGUAGE = ObjC;
-            SUPERCLASS = OBObject;
-        }
-    );
-    IBVersion = 1;
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeAlternateDragCopyFormat</key>
+				<string>id</string>
+				<key>changeAlternateDragCopyTemplate</key>
+				<string>id</string>
+				<key>changeDefaultDragCopyFormat</key>
+				<string>id</string>
+				<key>changeDefaultDragCopyTemplate</key>
+				<string>id</string>
+				<key>changePrependTilde</key>
+				<string>id</string>
+				<key>changeSeparateCite</key>
+				<string>id</string>
+				<key>citeStringFieldChanged</key>
+				<string>id</string>
+				<key>setCitationBracketStyle</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BibPref_Cite</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>alternateDragCopyPopup</key>
+				<string>NSPopUpButton</string>
+				<key>alternateDragCopyTemplatePopup</key>
+				<string>NSPopUpButton</string>
+				<key>citeBehaviorLine</key>
+				<string>NSTextField</string>
+				<key>citeBracketRadio</key>
+				<string>NSMatrix</string>
+				<key>citeStringField</key>
+				<string>NSTextField</string>
+				<key>defaultDragCopyPopup</key>
+				<string>NSPopUpButton</string>
+				<key>defaultDragCopyTemplatePopup</key>
+				<string>NSPopUpButton</string>
+				<key>prependTildeCheckButton</key>
+				<string>NSButton</string>
+				<key>separateCiteCheckButton</key>
+				<string>NSButton</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>OAPreferenceClient</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenuItem</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key></key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>OBObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>OFObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OBObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>restoreDefaults</key>
+				<string>id</string>
+				<key>setValueForSender</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>OAPreferenceClient</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>controlBox</key>
+				<string>NSView</string>
+				<key>initialFirstResponder</key>
+				<string>NSView</string>
+				<key>lastKeyView</key>
+				<string>NSView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>OFObject</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>

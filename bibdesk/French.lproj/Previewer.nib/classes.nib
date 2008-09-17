@@ -1,94 +1,181 @@
-{
-    IBClasses =     (
-                {
-            CLASS = BDSKCollapsibleView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = BDSKContainerView;
-        },
-                {
-            CLASS = BDSKContainerView;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                contentView = id;
-            };
-            SUPERCLASS = NSView;
-        },
-                {
-            CLASS = BDSKOverlay;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSPanel;
-        },
-                {
-            CLASS = BDSKPreviewer;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                logView = NSTextView;
-                pdfView = BDSKZoomablePDFView;
-                progressIndicator = NSProgressIndicator;
-                progressOverlay = BDSKOverlay;
-                rtfPreviewView = NSTextView;
-                tabView = NSTabView;
-                warningImageView = NSImageView;
-                warningView = NSView;
-            };
-            SUPERCLASS = NSWindowController;
-        },
-                {
-            CLASS = BDSKZoomImageView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSImageView;
-        },
-                {
-            ACTIONS =             {
-                scalePopUpAction = id;
-            };
-            CLASS = BDSKZoomablePDFView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = PDFView;
-        },
-                {
-            CLASS = BDSKZoomableTextView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSTextView;
-        },
-                {
-            ACTIONS =             {
-                checkForUpdates = id;
-                showPreferencePanel = id;
-                showReadMeFile = id;
-                showRelNotes = id;
-                toggleShowingErrorPanel = id;
-                toggleShowingOrphanedFilesPanel = id;
-                toggleShowingPreviewPanel = id;
-                visitWebSite = id;
-            };
-            CLASS = BibAppController;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                columnsMenu = NSMenu;
-                copyAsTemplateMenu = NSMenu;
-                groupSortMenu = NSMenu;
-            };
-            SUPERCLASS = NSObject;
-        },
-                {
-            ACTIONS =             {
-                "" = id;
-            };
-            CLASS = FirstResponder;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = PDFImageView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSImageView;
-        },
-                {
-            CLASS = PDFView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSView;
-        }
-    );
-    IBVersion = 1;
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKCollapsibleView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKContainerView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>scalePopUpAction</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKZoomablePDFView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>PDFView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSTextView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSText</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>hideWindow</key>
+				<string>id</string>
+				<key>toggleShowingWindow</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>NSWindowController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key></key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKContainerView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>contentView</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKPreviewer</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>logView</key>
+				<string>NSTextView</string>
+				<key>pdfView</key>
+				<string>BDSKZoomablePDFView</string>
+				<key>progressIndicator</key>
+				<string>NSProgressIndicator</string>
+				<key>progressOverlay</key>
+				<string>BDSKOverlay</string>
+				<key>rtfPreviewView</key>
+				<string>NSTextView</string>
+				<key>tabView</key>
+				<string>NSTabView</string>
+				<key>warningImageView</key>
+				<string>NSImageView</string>
+				<key>warningView</key>
+				<string>NSView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKOverlay</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPanel</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>scalePopUpAction</key>
+				<string>id</string>
+				<key>zoomIn</key>
+				<string>id</string>
+				<key>zoomOut</key>
+				<string>id</string>
+				<key>zoomToActualSize</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKZoomableTextView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTextView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSWindow</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSScrollView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>PDFView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>
