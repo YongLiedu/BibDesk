@@ -386,7 +386,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     fileMacroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
     
     while (file = [fileE nextObject]) {
-        NSString *fileContent = [NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding guessEncoding:YES];
+        NSString *fileContent = [NSString stringWithContentsOfFile:file encoding:0 guessEncoding:YES];
         NSDictionary *macroDefs = nil;
         if (fileContent == nil) continue;
         if ([[file pathExtension] caseInsensitiveCompare:@"bib"] == NSOrderedSame)

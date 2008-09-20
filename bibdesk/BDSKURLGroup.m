@@ -211,7 +211,7 @@
     }
 
     // tried using -[NSString stringWithContentsOfFile:usedEncoding:error:] but it fails too often
-    NSString *contentString = [NSString stringWithContentsOfFile:filePath encoding:NSASCIIStringEncoding guessEncoding:YES];
+    NSString *contentString = [NSString stringWithContentsOfFile:filePath encoding:0 guessEncoding:YES];
     NSArray *pubs = nil;
     if (nil == contentString) {
         failedDownload = YES;
