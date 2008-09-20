@@ -46,7 +46,7 @@ volatile int caughtSignal = 0;
 @interface BDSKShellTask : NSObject {
     NSTask *task;
     // data used to store stdOut from the filter
-    NSMutableData *stdoutData;
+    NSData *stdoutData;
 }
 // Note: the returned data is not autoreleased
 - (NSData *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input;
@@ -102,7 +102,6 @@ volatile int caughtSignal = 0;
 - (id)init{
     if (self = [super init]) {
         task = [[NSTask alloc] init];
-        stdoutData = [[NSMutableData alloc] init];
     }
     return self;
 }
@@ -197,28 +196,28 @@ volatile int caughtSignal = 0;
     [task setStandardOutput:outputPipe];
     
     // ignore SIGPIPE, as it causes a crash (seems to happen if the binaries don't exist and you try writing to the pipe)
-    signal(SIGPIPE, SIG_IGN);
+    sig_t previousSignalMask = signal(SIGPIPE, SIG_IGN);
 
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+    [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:@"BDSKSpecialPipeServiceRunLoopMode"]];
 
     @try{
-        
-        [nc addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadCompletionNotification object:outputFileHandle];
-        [outputFileHandle readInBackgroundAndNotify];
 
         [task launch];
 
         if ([task isRunning]) {
             
+            if (input)
+                [inputFileHandle writeData:[input dataUsingEncoding:NSUTF8StringEncoding]];
+            [inputFileHandle closeFile];
+            
             // run the runloop and pick up our notifications
+            while (nil == stdoutData)
+                [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
             [task waitUntilExit];
             
-            [nc removeObserver:self name:NSFileHandleReadCompletionNotification object:outputFileHandle];
-            
-            // get leftover data, since the background method won't get the last read
-            NSData *remainingData = [outputFileHandle availableData];
-            if ([remainingData length])
-                [stdoutData appendData:remainingData];
+            [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
             
         } else {
             NSLog(@"Failed to launch task at \"%@\" or it exited without accepting input.  Termination status was %d", executablePath, [task terminationStatus]);
@@ -226,22 +225,20 @@ volatile int caughtSignal = 0;
     }
     @catch(id exception){
         // if the pipe failed, we catch an exception here and ignore it
-        NSLog(@"exception %@ encountered while trying to launch task %@", exception, executablePath);
-        [nc removeObserver:self name:NSFileHandleReadCompletionNotification object:outputFileHandle];
+        NSLog(@"exception %@ encountered while trying to run task %@", exception, executablePath);
+        [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
     }
     
     // reset signal handling to default behavior
-    signal(SIGPIPE, SIG_DFL);
+    signal(SIGPIPE, previousSignalMask);
 
     return [stdoutData length] ? stdoutData : nil;
 }
 
 - (void)stdoutNowAvailable:(NSNotification *)notification {
     NSData *outputData = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
-    if ([outputData length]) {
-        [stdoutData appendData:outputData];
-    }
-    [[notification object] readInBackgroundAndNotify];
+    if ([outputData length])
+        stdoutData = [outputData retain];
 }
 
 

@@ -500,10 +500,10 @@ static OFMessageQueue *messageQueue = nil;
 
     OFSimpleLock(&processingLock);
     
-    if (nil == stdoutData)
-        stdoutData = [[NSMutableData alloc] init];
-    else
-        [stdoutData setData:[NSData data]];
+    if (stdoutData) {
+        [stdoutData autorelease];
+        stdoutData = nil;
+    }
     
     NSString *outputString = nil;
     NSError *error = nil;
@@ -511,27 +511,27 @@ static OFMessageQueue *messageQueue = nil;
     NSFileHandle *outputFileHandle = [outputPipe fileHandleForReading];
     BOOL isRunning;
 
-    OFSimpleLock(&currentTaskLock);
-    currentTask = [[NSTask allocWithZone:[self zone]] init];    
-    [currentTask setStandardError:[NSFileHandle fileHandleWithStandardError]];
-    [currentTask setLaunchPath:path];
-    [currentTask setCurrentDirectoryPath:workingDirPath];
-    [currentTask setStandardOutput:outputPipe];
-    if ([args count])
-        [currentTask setArguments:args];
-    OFSimpleUnlock(&currentTaskLock);        
-    
     // ignore SIGPIPE, as it causes a crash (seems to happen if the binaries don't exist and you try writing to the pipe)
-    signal(SIGPIPE, SIG_IGN);
+    sig_t previousSignalMask = signal(SIGPIPE, SIG_IGN);
     
     int terminationStatus = 1;
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-
-    @try{
+    
+    @try {
         
-        [nc addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadCompletionNotification object:outputFileHandle];
-        [outputFileHandle readInBackgroundAndNotify];
-        
+        OFSimpleLock(&currentTaskLock);
+        currentTask = [[NSTask allocWithZone:[self zone]] init];    
+        [currentTask setStandardError:[NSFileHandle fileHandleWithStandardError]];
+        [currentTask setLaunchPath:path];
+        [currentTask setCurrentDirectoryPath:workingDirPath];
+        [currentTask setStandardOutput:outputPipe];
+        if ([args count])
+            [currentTask setArguments:args];
+        OFSimpleUnlock(&currentTaskLock);        
+    
+        [nc addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+        [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:@"BDSKSpecialPipeServiceRunLoopMode"]];
+    
         OFSimpleLock(&currentTaskLock);
         [currentTask launch];
         isRunning = [currentTask isRunning];
@@ -539,22 +539,13 @@ static OFMessageQueue *messageQueue = nil;
         
         if (isRunning) {
             
-            BOOL didRunLoop;
-            do {
-                // Run the run loop until the task is finished, and pick up the notifications
-                didRunLoop = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-                OFSimpleLock(&currentTaskLock);
-                isRunning = [currentTask isRunning];
-                OFSimpleUnlock(&currentTaskLock);        
-            } while (isRunning && didRunLoop);
+            // run the runloop and pick up our notifications
+            while (nil == stdoutData)
+                [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
+            [currentTask waitUntilExit];
                         
-            [nc removeObserver:self name:NSFileHandleReadCompletionNotification object:outputFileHandle];
+            [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
             
-            // get leftover data, since the background method won't get the last read
-            NSData *remainingData = [outputFileHandle availableData];
-            if ([remainingData length])
-                [stdoutData appendData:remainingData];
-
             outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSUTF8StringEncoding];
             if(outputString == nil)
                 outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:[NSString defaultCStringEncoding]];
@@ -576,7 +567,7 @@ static OFMessageQueue *messageQueue = nil;
             [currentTask terminate];
         OFSimpleUnlock(&currentTaskLock);        
         
-        [nc removeObserver:self name:NSFileHandleReadCompletionNotification object:outputFileHandle];
+        [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
 
         // if the pipe failed, we catch an exception here and ignore it
         error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to Run Script", @"Error description")];
@@ -584,7 +575,7 @@ static OFMessageQueue *messageQueue = nil;
     }
     
     // reset signal handling to default behavior
-    signal(SIGPIPE, SIG_DFL);
+    signal(SIGPIPE, previousSignalMask);
     
     OFSimpleLock(&currentTaskLock);
     [currentTask release];
@@ -607,10 +598,8 @@ static OFMessageQueue *messageQueue = nil;
 
 - (void)stdoutNowAvailable:(NSNotification *)notification {
     NSData *outputData = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
-    if ([outputData length]) {
-        [stdoutData appendData:outputData];
+    if ([outputData length])
+        stdoutData = [outputData retain];
     }
-    [[notification object] readInBackgroundAndNotify];
-}
 
 @end
