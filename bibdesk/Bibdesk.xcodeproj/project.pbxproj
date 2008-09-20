@@ -271,24 +271,24 @@
 		CED65DCD0907A338003EED90 /* BDSKScriptHook+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */; };
 		CEDB58F40D3692A400E40354 /* ComplexStringEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEDB58F20D3692A400E40354 /* ComplexStringEditor.nib */; };
 		CEE22B210BFB7DA8002B746B /* RelNotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F994B8F607F5F65F00751DA1 /* RelNotes.rtf */; };
-		CEE23BDB0BFBA768002B746B /* BibDeskInputManager in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022D2C0758069E00C3F701 /* BibDeskInputManager */; };
-		CEE23BDC0BFBA775002B746B /* Scripts in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEE23BD50BFBA6D6002B746B /* Scripts */; };
-		CEE23BDD0BFBA781002B746B /* Templates in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE97A3B90A28F19A00CF2DF3 /* Templates */; };
-		CEE23BE40BFBA78F002B746B /* previewtemplate.tex in CopyFiles */ = {isa = PBXBuildFile; fileRef = F91B5CC7076579830011ED22 /* previewtemplate.tex */; };
-		CEE23BE50BFBA78F002B746B /* template.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = F91B5CE407657A200011ED22 /* template.txt */; };
-		CEE23BEF0BFBA827002B746B /* direct.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022D4B0758073E00C3F701 /* direct.cfg */; };
-		CEE23BF00BFBA827002B746B /* english.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022D4D0758073E00C3F701 /* english.cfg */; };
-		CEE23BF10BFBA827002B746B /* fonts.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022D510758073E00C3F701 /* fonts.cfg */; };
-		CEE23BF20BFBA827002B746B /* ignore.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022D560758073E00C3F701 /* ignore.cfg */; };
-		CEE23BF30BFBA827002B746B /* style.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022D690758073E00C3F701 /* style.cfg */; };
-		CEE8DD440E5C3F5B00EFA97F /* OmniBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
-		CEE8DD450E5C3F5B00EFA97F /* OmniFoundation.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
-		CEE8DD460E5C3F5B00EFA97F /* OmniAppKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */; };
-		CEE8DD470E5C3F5B00EFA97F /* yaz.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
-		CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
-		CEE8DD490E5C3F5B00EFA97F /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
-		CEE8DD4A0E5C3F5B00EFA97F /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
-		CEE8DD4B0E5C3F5B00EFA97F /* SkimNotes.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
+		CEE23BDB0BFBA768002B746B /* BibDeskInputManager in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D2C0758069E00C3F701 /* BibDeskInputManager */; };
+		CEE23BDC0BFBA775002B746B /* Scripts in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEE23BD50BFBA6D6002B746B /* Scripts */; };
+		CEE23BDD0BFBA781002B746B /* Templates in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CE97A3B90A28F19A00CF2DF3 /* Templates */; };
+		CEE23BE40BFBA78F002B746B /* previewtemplate.tex in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F91B5CC7076579830011ED22 /* previewtemplate.tex */; };
+		CEE23BE50BFBA78F002B746B /* template.txt in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F91B5CE407657A200011ED22 /* template.txt */; };
+		CEE23BEF0BFBA827002B746B /* direct.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D4B0758073E00C3F701 /* direct.cfg */; };
+		CEE23BF00BFBA827002B746B /* english.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D4D0758073E00C3F701 /* english.cfg */; };
+		CEE23BF10BFBA827002B746B /* fonts.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D510758073E00C3F701 /* fonts.cfg */; };
+		CEE23BF20BFBA827002B746B /* ignore.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D560758073E00C3F701 /* ignore.cfg */; };
+		CEE23BF30BFBA827002B746B /* style.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D690758073E00C3F701 /* style.cfg */; };
+		CEE8DD440E5C3F5B00EFA97F /* OmniBase.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
+		CEE8DD450E5C3F5B00EFA97F /* OmniFoundation.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
+		CEE8DD460E5C3F5B00EFA97F /* OmniAppKit.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */; };
+		CEE8DD470E5C3F5B00EFA97F /* yaz.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
+		CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
+		CEE8DD490E5C3F5B00EFA97F /* FileView.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
+		CEE8DD4A0E5C3F5B00EFA97F /* BTParse.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
+		CEE8DD4B0E5C3F5B00EFA97F /* SkimNotes.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
 		CEE8DEC60E5C3FB700EFA97F /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
 		CEE8DEC70E5C3FB700EFA97F /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
 		CEE8DEC80E5C3FB700EFA97F /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */; };
@@ -298,8 +298,8 @@
 		CEE8DECC0E5C3FB700EFA97F /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
 		CEE8DECD0E5C3FB700EFA97F /* SkimNotes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
 		CEE8DECE0E5C3FF000EFA97F /* skimnotes in Resources */ = {isa = PBXBuildFile; fileRef = CE7DC8DC0E0952BB00D6D76D /* skimnotes */; };
-		CEE8DEF00E5C402800EFA97F /* BibImporter.mdimporter in CopyFiles */ = {isa = PBXBuildFile; fileRef = F95CC113087F54BF002C5694 /* BibImporter.mdimporter */; };
-		CEE8DEF10E5C402800EFA97F /* BibDesk.qlgenerator in CopyFiles */ = {isa = PBXBuildFile; fileRef = F98C6FD00CDD30A2002FCAD8 /* BibDesk.qlgenerator */; };
+		CEE8DEF00E5C402800EFA97F /* BibImporter.mdimporter in Copy Files: Spotlight */ = {isa = PBXBuildFile; fileRef = F95CC113087F54BF002C5694 /* BibImporter.mdimporter */; };
+		CEE8DEF10E5C402800EFA97F /* BibDesk.qlgenerator in Copy Files: QuickLook */ = {isa = PBXBuildFile; fileRef = F98C6FD00CDD30A2002FCAD8 /* BibDesk.qlgenerator */; };
 		CEEA4C6A0B57B0D400434059 /* BDSKBooleanValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEA4C680B57B0D400434059 /* BDSKBooleanValueTransformer.m */; };
 		CEEA5EA40B595EE200434059 /* ChangeFieldSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEA5E9E0B595EE200434059 /* ChangeFieldSheet.nib */; };
 		CEEC6C55093A411E00A64F54 /* BDSKCollapsibleView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */; };
@@ -311,7 +311,7 @@
 		CEEFE2B70B03FB0100668BB0 /* BDSKURLGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFE2B60B03FB0100668BB0 /* BDSKURLGroupSheet.nib */; };
 		CEEFE6C20B0403E700668BB0 /* BDSKGroupsArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */; };
 		CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
-		CEF181BD0CEB711700716E85 /* Bookmarks.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
+		CEF181BD0CEB711700716E85 /* Bookmarks.plist in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF71ADB0B91BBCB003A2771 /* BDSKNotesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF71AD90B91BBCB003A2771 /* BDSKNotesWindowController.m */; };
 		CEF71B080B91BFFF003A2771 /* NotesWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF71B060B91BFFF003A2771 /* NotesWindow.nib */; };
 		CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7295509CC88AB00802D48 /* BDSKFieldSheetController.m */; };
@@ -820,61 +820,65 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		CEEBA83C0D749C99000204B8 /* CopyFiles */ = {
+		CEEBA83C0D749C99000204B8 /* Copy Files: QuickLook */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = Contents/Library/QuickLook;
 			dstSubfolderSpec = 1;
 			files = (
-				CEE8DEF10E5C402800EFA97F /* BibDesk.qlgenerator in CopyFiles */,
+				CEE8DEF10E5C402800EFA97F /* BibDesk.qlgenerator in Copy Files: QuickLook */,
 			);
+			name = "Copy Files: QuickLook";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F9022E8B07580A7C00C3F701 /* CopyFiles */ = {
+		F9022E8B07580A7C00C3F701 /* Copy Files: Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				CEE8DD440E5C3F5B00EFA97F /* OmniBase.framework in CopyFiles */,
-				CEE8DD450E5C3F5B00EFA97F /* OmniFoundation.framework in CopyFiles */,
-				CEE8DD460E5C3F5B00EFA97F /* OmniAppKit.framework in CopyFiles */,
-				CEE8DD470E5C3F5B00EFA97F /* yaz.framework in CopyFiles */,
-				CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in CopyFiles */,
-				CEE8DD490E5C3F5B00EFA97F /* FileView.framework in CopyFiles */,
-				CEE8DD4A0E5C3F5B00EFA97F /* BTParse.framework in CopyFiles */,
-				CEE8DD4B0E5C3F5B00EFA97F /* SkimNotes.framework in CopyFiles */,
+				CEE8DD440E5C3F5B00EFA97F /* OmniBase.framework in Copy Files: Frameworks */,
+				CEE8DD450E5C3F5B00EFA97F /* OmniFoundation.framework in Copy Files: Frameworks */,
+				CEE8DD460E5C3F5B00EFA97F /* OmniAppKit.framework in Copy Files: Frameworks */,
+				CEE8DD470E5C3F5B00EFA97F /* yaz.framework in Copy Files: Frameworks */,
+				CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in Copy Files: Frameworks */,
+				CEE8DD490E5C3F5B00EFA97F /* FileView.framework in Copy Files: Frameworks */,
+				CEE8DD4A0E5C3F5B00EFA97F /* BTParse.framework in Copy Files: Frameworks */,
+				CEE8DD4B0E5C3F5B00EFA97F /* SkimNotes.framework in Copy Files: Frameworks */,
 			);
+			name = "Copy Files: Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F91B5C4E076412A10011ED22 /* CopyFiles */ = {
+		F91B5C4E076412A10011ED22 /* Copy Files: Shared Support */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 12;
 			files = (
-				CEE23BDB0BFBA768002B746B /* BibDeskInputManager in CopyFiles */,
-				CEE23BDC0BFBA775002B746B /* Scripts in CopyFiles */,
-				CEE23BDD0BFBA781002B746B /* Templates in CopyFiles */,
-				CEE23BE40BFBA78F002B746B /* previewtemplate.tex in CopyFiles */,
-				CEE23BE50BFBA78F002B746B /* template.txt in CopyFiles */,
-				CEF181BD0CEB711700716E85 /* Bookmarks.plist in CopyFiles */,
-				CEE23BEF0BFBA827002B746B /* direct.cfg in CopyFiles */,
-				CEE23BF00BFBA827002B746B /* english.cfg in CopyFiles */,
-				CEE23BF10BFBA827002B746B /* fonts.cfg in CopyFiles */,
-				CEE23BF20BFBA827002B746B /* ignore.cfg in CopyFiles */,
-				CEE23BF30BFBA827002B746B /* style.cfg in CopyFiles */,
+				CEE23BDB0BFBA768002B746B /* BibDeskInputManager in Copy Files: Shared Support */,
+				CEE23BDC0BFBA775002B746B /* Scripts in Copy Files: Shared Support */,
+				CEE23BDD0BFBA781002B746B /* Templates in Copy Files: Shared Support */,
+				CEE23BE40BFBA78F002B746B /* previewtemplate.tex in Copy Files: Shared Support */,
+				CEE23BE50BFBA78F002B746B /* template.txt in Copy Files: Shared Support */,
+				CEF181BD0CEB711700716E85 /* Bookmarks.plist in Copy Files: Shared Support */,
+				CEE23BEF0BFBA827002B746B /* direct.cfg in Copy Files: Shared Support */,
+				CEE23BF00BFBA827002B746B /* english.cfg in Copy Files: Shared Support */,
+				CEE23BF10BFBA827002B746B /* fonts.cfg in Copy Files: Shared Support */,
+				CEE23BF20BFBA827002B746B /* ignore.cfg in Copy Files: Shared Support */,
+				CEE23BF30BFBA827002B746B /* style.cfg in Copy Files: Shared Support */,
 			);
+			name = "Copy Files: Shared Support";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F95CC0ED087F542F002C5694 /* CopyFiles */ = {
+		F95CC0ED087F542F002C5694 /* Copy Files: Spotlight */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = Contents/Library/Spotlight;
 			dstSubfolderSpec = 1;
 			files = (
-				CEE8DEF00E5C402800EFA97F /* BibImporter.mdimporter in CopyFiles */,
+				CEE8DEF00E5C402800EFA97F /* BibImporter.mdimporter in Copy Files: Spotlight */,
 			);
+			name = "Copy Files: Spotlight";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -3005,20 +3009,20 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F993F1BC08553A61007A7657 /* Build configuration list for PBXNativeTarget "BibDesk" */;
 			buildPhases = (
-				F9E0B071083E450C000109C6 /* ShellScript */,
+				F9E0B071083E450C000109C6 /* Run Script: Genstrings */,
 				8D1107290486CEB800E47090 /* Resources */,
-				CEF8343E0C77502C00A3AD51 /* ShellScript */,
-				CEF834480C7750F000A3AD51 /* ShellScript */,
+				CEF8343E0C77502C00A3AD51 /* Run Script: Build Help */,
+				CEF834480C7750F000A3AD51 /* Run Script: Copy Help */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
-				F9022E8B07580A7C00C3F701 /* CopyFiles */,
+				F9022E8B07580A7C00C3F701 /* Copy Files: Frameworks */,
 				F920DB22075C2D40000C5FCA /* Rez */,
 				CE424A430D0F121400F824E7 /* Headers */,
-				F91B5C4E076412A10011ED22 /* CopyFiles */,
-				F95CC0ED087F542F002C5694 /* CopyFiles */,
-				CEEBA83C0D749C99000204B8 /* CopyFiles */,
-				F9FF213B09E83BAB00BB1706 /* ShellScript */,
-				F95C5E850D10E52400C81970 /* ShellScript */,
+				F91B5C4E076412A10011ED22 /* Copy Files: Shared Support */,
+				F95CC0ED087F542F002C5694 /* Copy Files: Spotlight */,
+				CEEBA83C0D749C99000204B8 /* Copy Files: QuickLook */,
+				F9FF213B09E83BAB00BB1706 /* Run Script: Strp headers and .DS_Store */,
+				F95C5E850D10E52400C81970 /* Run Script: Codesign */,
 			);
 			buildRules = (
 			);
@@ -3505,7 +3509,7 @@
 			shellPath = /bin/bash;
 			shellScript = "/usr/local/bin/ukrun \"$BUILD_DIR/$PRODUCT_NAME.$WRAPPER_EXTENSION\"";
 		};
-		CEF8343E0C77502C00A3AD51 /* ShellScript */ = {
+		CEF8343E0C77502C00A3AD51 /* Run Script: Build Help */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
 			files = (
@@ -3516,6 +3520,7 @@
 				"$(SRCROOT)/English.lproj/BibDesk Help/bibdesk.texi",
 				"$(SRCROOT)/English.lproj/BibDesk Help/version.texi",
 			);
+			name = "Run Script: Build Help";
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.html",
 				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.helpindex",
@@ -3524,7 +3529,7 @@
 			shellPath = /bin/sh;
 			shellScript = "HELP_NAME=\"BibDesk Help\"\n\nLOC_LANGS=(English)\n\nINPUT=\"${HELP_NAME}/bibdesk.texi\"\nTOOLS=\"${HELP_NAME}\"\nDEST=\"${HELP_NAME}\"\nPREFIX=\"${HELP_NAME}\"\n\nHELP_INDEXER=\"${SYSTEM_DEVELOPER_UTILITIES_DIR}/Help Indexer.app/Contents/MacOS/Help Indexer\"\n\nTARGET=\"${DERIVED_FILE_DIR}/${HELP_NAME}\"\n\ncd \"${SOURCE_ROOT}\"\n\n[ -d \"${TARGET}\" ] || /bin/mkdir -p \"${TARGET}\";\n\nfor LANG in ${LOC_LANGS[*]}; do\n\tLOC_TARGET=\"${TARGET}/${LANG}.lproj/${DEST}\";\n\t[ -d \"${LOC_TARGET}\" ] && /bin/rm -rf \"${LOC_TARGET}\"/* || /bin/mkdir -p \"${LOC_TARGET}\";\n\t\n\techo \"*** Creating help files in ${LOC_TARGET} ***\";\n\t\"${TOOLS}/texi2html\" \"${LANG}.lproj/${INPUT}\" --init-file=\"${TOOLS}/applehelp.init\" --prefix=\"${PREFIX}\" --output=\"${LOC_TARGET}\" --split=node --nonumber && \\\n\tpython \"${TOOLS}/postprocess-nontitle.py\" \"${LOC_TARGET}/${PREFIX}_\"*.html;\n\t\n\techo \"*** Indexing help in ${LOC_TARGET} ***\";\n\tif [ \"${LANG}\" = \"French\" ]; then STOPWORDS=\"fr\";\n\telif [ \"${LANG}\" = \"German\" ]; then STOPWORDS=\"de\";\n\telif [ \"${LANG}\" = \"Hungarian\" ]; then STOPWORDS=\"hu\";\n\telif [ \"${LANG}\" = \"Italian\" ]; then STOPWORDS=\"it\";\n\telif [ \"${LANG}\" = \"Spanish\" ]; then STOPWORDS=\"es\";\n\telif [ \"${LANG}\" = \"Swedish\" ]; then STOPWORDS=\"sv\";\n\telse LANG=\"en\";\n\tfi;\n\t\"${HELP_INDEXER}\" \"${LOC_TARGET}\" -Tokenizer 1 -ShowProgress NO -LogStyle 2 -IndexAnchors YES -TigerIndexing YES -GenerateSummaries YES -Stopwords \"${STOPWORDS}\" -MinTermLength 3 >&2;\ndone;\n";
 		};
-		CEF834480C7750F000A3AD51 /* ShellScript */ = {
+		CEF834480C7750F000A3AD51 /* Run Script: Copy Help */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3532,6 +3537,7 @@
 			inputPaths = (
 				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.html",
 			);
+			name = "Run Script: Copy Help";
 			outputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/English.lproj/BibDesk Help/BibDesk Help.html",
 				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/French.lproj/BibDesk Help",
@@ -3540,13 +3546,14 @@
 			shellPath = /bin/sh;
 			shellScript = "HELP_NAME=\"BibDesk Help\"\n\nSOURCE=\"${DERIVED_FILE_DIR}/${HELP_NAME}\";\nTARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\";\nDEST=\"${HELP_NAME}\"\n\ncd \"${TARGET}\"\n\nfor LOC_DIR in *.lproj; do\n\tLOC_SOURCE=\"${SOURCE}/${LOC_DIR}/${DEST}\";\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\";\n\tif [ -d \"${LOC_SOURCE}\" ]; then\n\t\techo \"*** Copying help files from ${LOC_SOURCE} to ${LOC_TARGET} ***\";\n\t\t/bin/rm -rf \"${LOC_TARGET}/\"*.html;\n\t\t/bin/cp -Rf \"${LOC_SOURCE}/\"*.html \"${LOC_TARGET}\";\n\t\t[ -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" ] && \\\n\t\t\t/bin/cp -f \"${LOC_SOURCE}/${HELP_NAME}.helpindex\" \"${LOC_TARGET}\";\n\telse\n\t\techo \"*** Linking help files from ${LOC_TARGET} to ${TARGET}/English.lproj/${DEST} ***\";\n\t\t( cd \"${LOC_DIR}\"; /bin/rm -rf \"${DEST}\"; /bin/ln -fFs ../English.lproj/\"${DEST}\"; )\n\tfi;\ndone;\n";
 		};
-		F95C5E850D10E52400C81970 /* ShellScript */ = {
+		F95C5E850D10E52400C81970 /* Run Script: Codesign */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Run Script: Codesign";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3579,26 +3586,28 @@
 			shellPath = /bin/sh;
 			shellScript = "####\n##\n## If you feel an undying urge to improve this,\n## discuss it with the poor slob that does the\n## releases first (and test it thoroughly)!\n##\n####\n\n# template image in source folder\nSRC_IMAGE=\"${SOURCE_ROOT}/BibDesk.dmg\"\n\n# temporary image\nDST_IMAGE=/tmp/BibDesk.dmg\n\n# final distribution image\nFINAL_IMAGE=\"$HOME/Desktop/BibDesk.dmg\"\n\n# see if this file already exists and bail\nif [ -f ${FINAL_IMAGE} ]; then\n\techo \"error: ${FINAL_IMAGE} exists\"\n\texit 1\nfi\n\n# see if a volume is already mounted or a\n# previous cp operation was botched\nif [ -e '/Volumes/BibDesk' ]; then\n\techo 'error: /Volumes/BibDesk exists'\n\techo 'warning: opening /Volumes in Finder'\n\t/usr/bin/open /Volumes/BibDesk\n\texit 1\nfi\n\n# remove temp image from a previous run\nif [ -f ${DST_IMAGE} ]; then\n\techo \"warning: removing ${DST_IMAGE}\"\n\t/bin/rm ${DST_IMAGE}\n\tif [ $? != 0 ]; then\n\t\techo \"error: failed to remove ${DST_IMAGE}\"\n\t\texit 1\n\tfi\nfi\n\n# stored zipped in svn, so unzip if needed\n# pass o to overwrite, or unzip waits for stdin\n# when trying to unpack the resource fork/EA\n\nif [ ! -f ${SRC_IMAGE} ]; then\n\t/usr/bin/unzip -uo ${SRC_IMAGE}.zip\n\tif [ $? != 0 ]; then\n\t\techo \"error: failed to unzip ${SRC_IMAGE}.zip\"\n\t\texit 1\n\tfi\nfi\n\n# copy empty image to /tmp\n/bin/cp ${SRC_IMAGE} /tmp\nif [ $? != 0 ]; then\n\techo \"error: failed to copy ${SRC_IMAGE} to /tmp\"\n\texit 1\nfi\n\n# mount image and use CpMac to copy all files\n/usr/bin/hdiutil attach ${DST_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to mount ${DST_IMAGE}\"\n\texit 1\nfi\n\n${SYSTEM_DEVELOPER_TOOLS}/CpMac -r ${BUILT_PRODUCTS_DIR}/BibDesk.app /Volumes/BibDesk\nif [ $? != 0 ]; then\n\techo \"error: failed to copy ${BUILT_PRODUCTS_DIR}/BibDesk.app\"\n\texit 1\nfi\n\n# tell finder to set the icon position\n/usr/bin/osascript -e \"tell application \\\"Finder\\\" to set the position of item 1 of the disk named \\\"BibDesk\\\" to {204, 148}\"\n\nif [ $? != 0 ]; then\n\techo \"error: Finder failed to set position\"\n\texit 1\nfi\n\n# data is copied, so unmount the volume\n/usr/sbin/diskutil eject /Volumes/BibDesk\nif [ $? != 0 ]; then\n\techo \"error: failed to eject /Volumes/BibDesk\"\n\texit 1\nfi\n\n# convert image to read only and compress\n/usr/bin/hdiutil convert ${DST_IMAGE} -format UDZO -imagekey zlib-level=9 -o ${FINAL_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to convert ${DST_IMAGE}\"\n\texit 1\nfi\n\n# set internet-enable bit for Safari, even\n# though I dislike internet-enabled images...\n/usr/bin/hdiutil internet-enable -YES ${FINAL_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to internet-enable ${DST_IMAGE}\"\n\texit 1\nfi\n\nexit 0";
 		};
-		F9E0B071083E450C000109C6 /* ShellScript */ = {
+		F9E0B071083E450C000109C6 /* Run Script: Genstrings */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Run Script: Genstrings";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "##\n## This takes a while to generate, so it's not worth\n## the wait for development builds.\n##\nif [ ${BUILD_STYLE} = \"Debug\" ]; then\n# Check to see if a previous version exists and create it\n# if not, or else pbxcp will complain.\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nexit 0\nfi\nfi\n#\n# Run the genstrings build phase\n#\ncd ${SOURCE_ROOT} && \\\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nmv English.lproj/Localizable.strings English.lproj/Localizable.strings.bak \nfi\n\n# skip OmniBase/macros.h because of genstrings crash\n# skip vendorsrc entirely? need to process .h files?\n\n/usr/bin/genstrings -q -o \"${SOURCE_ROOT}/English.lproj\" \\\n\t-skipTable BibTeXKeys \\\n\t-skipTable ZoomValues \\\n\t-skipTable TemplateOptions \\\n\t*.m 2>&1 | sed -e 's/^/warning: /g' | \\\n\tsed -e 's/warning:.*Warning:/warning:/g' >&2\n";
 		};
-		F9FF213B09E83BAB00BB1706 /* ShellScript */ = {
+		F9FF213B09E83BAB00BB1706 /* Run Script: Strp headers and .DS_Store */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Run Script: Strp headers and .DS_Store";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
