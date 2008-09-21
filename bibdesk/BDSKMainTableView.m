@@ -78,6 +78,12 @@ enum {
 - (void)setColumnType:(int)type;
 @end
 
+@interface BDSKMainTableHeaderView : NSTableHeaderView {
+    int columnForMenu;
+}
+- (int)columnForMenu;
+@end
+
 @interface BDSKMainTableView (Private)
 
 - (NSImage *)headerImageForField:(NSString *)field;
@@ -94,12 +100,15 @@ enum {
 @interface NSTableView (OAColumnConfigurationExtensionsThatShouldBeDeclared)
 - (void)autosizeColumn:(id)sender;
 - (void)autosizeAllColumns:(id)sender;
+- (void)_autosizeColumn:(NSTableColumn *)tableColumn;
 @end
 
 @implementation BDSKMainTableView
 
 - (void)awakeFromNib{
     [super awakeFromNib]; // this updates the font
+	
+	[self setHeaderView:[[[BDSKMainTableHeaderView alloc] initWithFrame:[[self headerView] frame]] autorelease]];	
     
     NSRect cornerViewFrame = [[self cornerView] frame];
     BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
@@ -616,6 +625,13 @@ enum {
         [[self delegate] tableView:self openParentForItemAtRow:row];
 }
 
+- (void)autosizeColumn:(id)sender;
+{
+    int clickedColumn = [(BDSKMainTableHeaderView *)[self headerView] columnForMenu];
+    if (clickedColumn >= 0)
+        [self _autosizeColumn:[[self tableColumns] objectAtIndex:clickedColumn]];
+}
+
 @end
 
 
@@ -627,6 +643,7 @@ enum {
 
 @end
 
+#pragma mark -
 
 @implementation NSColor (BDSKExtensions)
 
@@ -639,6 +656,7 @@ enum {
 
 @end
 
+#pragma mark -
 
 @implementation BDSKRoundRectButtonCell
 
@@ -666,3 +684,29 @@ enum {
 }
 
 @end
+
+#pragma mark -
+
+@implementation BDSKMainTableHeaderView 
+
+- (id)initWithFrame:(NSRect)frameRect {
+    if (self = [super initWithFrame:frameRect]) {
+        columnForMenu = -1;
+    }
+    return self;
+}
+
+- (NSMenu *)menuForEvent:(NSEvent *)theEvent {
+    NSMenu *menu = [super menuForEvent:theEvent];
+    NSMenuItem *menuItem = [menu itemAtIndex:[menu indexOfItemWithTarget:[self tableView] andAction:@selector(autosizeColumn:)]];
+    NSPoint clickPoint = [self convertPoint:[[NSApp currentEvent] locationInWindow] fromView:nil];
+    columnForMenu = [self columnAtPoint:clickPoint];
+    return menu;
+}
+
+- (int)columnForMenu {
+    return columnForMenu;
+}
+
+@end
+
