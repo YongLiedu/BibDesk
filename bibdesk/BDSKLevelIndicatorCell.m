@@ -61,6 +61,12 @@
     return obj;
 }
 
+- (NSSize)cellSize {
+    NSSize cellSize = [super cellSize];
+    cellSize.width = fminf(100.0, cellSize.width);
+    return cellSize;
+}
+
 - (void)setMaxHeight:(float)h;
 {
     maxHeight = h;
