@@ -313,6 +313,7 @@ enum {
         [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
         [tc setEditable:NO];
         [tc setMinWidth:16.0];
+        [tc setMaxWidth:1000.0];
     }
     
     // this may be called in response to a field type change, so the cell may also need to change, even if the column is already in the tableview
