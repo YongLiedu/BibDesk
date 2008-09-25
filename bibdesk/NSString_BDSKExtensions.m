@@ -173,42 +173,39 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 
 - (NSString *)initWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
 {
-    if(self = [self init]){
-        NSData *data = [[NSData allocWithZone:[self zone]] initWithContentsOfFile:path options:NSMappedRead error:NULL];
-        
-        NSString *string = nil;
-        
-        // if we're guessing, try the reliable encodings first
-        if(try && dataHasUnicodeByteOrderMark(data) && encoding != NSUnicodeStringEncoding)
-            string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:NSUnicodeStringEncoding];
-        if(try && nil == string && encoding != NSUTF8StringEncoding)
-            string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:NSUTF8StringEncoding];
-        
-        // read com.apple.TextEncoding on Leopard, or when reading a Tiger file saved on Leopard
-        if(try && nil == string) {
-            encoding = [[NSFileManager defaultManager] appleStringEncodingAtPath:path error:NULL];
-            if (encoding > 0)
-                string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:encoding];
-        }
-        
-        // try the encoding passed as a parameter, if non-zero (zero encoding is never valid)
-        if(nil == string && encoding > 0)
+    NSData *data = [[NSData allocWithZone:[self zone]] initWithContentsOfFile:path options:NSMappedRead error:NULL];
+    
+    NSString *string = nil;
+    
+    // if we're guessing, try the reliable encodings first
+    if(try && dataHasUnicodeByteOrderMark(data) && encoding != NSUnicodeStringEncoding)
+        string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:NSUnicodeStringEncoding];
+    if(try && nil == string && encoding != NSUTF8StringEncoding)
+        string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:NSUTF8StringEncoding];
+    
+    // read com.apple.TextEncoding on Leopard, or when reading a Tiger file saved on Leopard
+    if(try && nil == string) {
+        encoding = [[NSFileManager defaultManager] appleStringEncodingAtPath:path error:NULL];
+        if (encoding > 0)
             string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:encoding];
-        
-        // now we just try a few wild guesses
-        if(nil == string && try && encoding != [NSString defaultCStringEncoding])
-            string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:[NSString defaultCStringEncoding]];
-        if(nil == string && try && encoding != [BDSKStringEncodingManager defaultEncoding])
-            string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:[BDSKStringEncodingManager defaultEncoding]];
-        // final fallback is Mac Roman (gapless)
-        if(nil == string && try && encoding != NSMacOSRomanStringEncoding)
-            string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:NSMacOSRomanStringEncoding];
-        
-        [data release];
-        [self release];
-        self = string;
     }
-    return self;
+    
+    // try the encoding passed as a parameter, if non-zero (zero encoding is never valid)
+    if(nil == string && encoding > 0)
+        string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:encoding];
+    
+    // now we just try a few wild guesses
+    if(nil == string && try && encoding != [NSString defaultCStringEncoding])
+        string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:[NSString defaultCStringEncoding]];
+    if(nil == string && try && encoding != [BDSKStringEncodingManager defaultEncoding])
+        string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:[BDSKStringEncodingManager defaultEncoding]];
+    // final fallback is Mac Roman (gapless)
+    if(nil == string && try && encoding != NSMacOSRomanStringEncoding)
+        string = [[[self class] allocWithZone:[self zone]] initWithData:data encoding:NSMacOSRomanStringEncoding];
+    
+    [data release];
+    [self release];
+    return string;
 }
 
 
