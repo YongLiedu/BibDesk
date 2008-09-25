@@ -817,9 +817,14 @@ http://home.planet.nl/~faase009/GNU.txt
                   locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]];
 }
 
-// -[NSString compare: options:NSNumericSearch] is buggy for string literals (tested on 10.4.3), but CFStringCompare() works and returns the same comparison constants
+// -[NSString compare: options:NSNumericSearch] is buggy for string literals (tested on 10.4.3), but CFStringCompare() works and returns the same comparison constants.  Neither -[NSString compare:] or CFStringCompare() correctly handle negative numbers, though.
 - (NSComparisonResult)numericCompare:(NSString *)otherString{
-    return CFStringCompare((CFStringRef)self, (CFStringRef)otherString, kCFCompareNumerically);
+    NSDecimalNumber *a = [[NSDecimalNumber alloc] initWithString:self];
+    NSDecimalNumber *b = [[NSDecimalNumber alloc] initWithString:otherString];
+    NSComparisonResult ret = [a compare:b];
+    [a release];
+    [b release];
+    return ret;    
 }
 
 - (NSString *)stringByRemovingTeXAndStopWords;
