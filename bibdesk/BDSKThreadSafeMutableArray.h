@@ -45,4 +45,5 @@
 }
 - (id)init;
 - (id)initWithCapacity:(unsigned)capacity;
+- (id)initWithArray:(NSArray *)array;
 @end

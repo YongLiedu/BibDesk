@@ -71,16 +71,20 @@ const CFSetCallBacks BDSKCaseInsensitiveStringSetCallBacks = {
 
 @implementation BDSKCountedSet
 
-+ (id)allocWithZone:(NSZone *)aZone
-{
-    return NSAllocateObject(self, 0, aZone);
-}
-
 // designated initializer
 - (id)initWithKeyCallBacks:(const CFDictionaryKeyCallBacks *)keyCallBacks{
     
-    if(self = [super initWithCapacity:0])
+    if(self = [super init])
         dictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, keyCallBacks, &OFIntegerDictionaryValueCallbacks);
+    
+    return self;
+}
+
+// designated initializer
+- (id)initWithCountedSet:(BDSKCountedSet *)countedSet {
+    
+    if(self = [super init])
+        dictionary = CFDictionaryCreateMutableCopy(CFAllocatorGetDefault(), 0, countedSet->dictionary);
     
     return self;
 }
@@ -99,22 +103,12 @@ const CFSetCallBacks BDSKCaseInsensitiveStringSetCallBacks = {
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    BDSKCountedSet *copy = [[[self class] allocWithZone:zone] initWithCapacity:0];
-    if(copy->dictionary != NULL)
-        CFRelease(copy->dictionary);
-    // create an immutable dictionary that will raise an exception when you try to add/remove from it; copying makes sure we get the same callbacks
-    copy->dictionary = (CFMutableDictionaryRef)CFDictionaryCreateCopy(CFAllocatorGetDefault(), dictionary);    
-    return copy;
+    return [self mutableCopyWithZone:zone];
 }
 
 - (id)mutableCopyWithZone:(NSZone *)zone
 {
-    BDSKCountedSet *copy = [[[self class] allocWithZone:zone] initWithCapacity:0];
-    if(copy->dictionary != NULL)
-        CFRelease(copy->dictionary);
-    // copy to get the same callbacks
-    copy->dictionary = CFDictionaryCreateMutableCopy(CFAllocatorGetDefault(), 0, dictionary);
-    return copy;
+    return [[[self class] allocWithZone:zone] initWithCountedSet:self];
 }
 
 // if we ever need this, we could encode only for specific callbacks (see OFMultiValueDictionary)

@@ -64,6 +64,14 @@
 */
 - (id)initWithKeyCallBacks:(const CFDictionaryKeyCallBacks *)keyCallBacks;
 /*!
+    @method     initWithCountedSet:
+    @abstract   Designated initializer for this class.
+    @discussion Uses the same key callbacks and contains the same items as the passed in countedSet.
+    @param      countedSet (description)
+    @result     Returns a mutable set that contains the same items as the countedSet.
+*/
+- (id)initWithCountedSet:(BDSKCountedSet *)countedSet;
+/*!
     @method     initCaseInsensitive:withCapacity:
     @abstract   Assumes a set of string objects.
     @discussion (comprehensive description)

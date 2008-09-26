@@ -56,6 +56,14 @@
     return self;
 }
 
+- (id)initWithDictionary:(NSDictionary *)dictionary {
+    if (self = [super init]) {
+        embeddedDictionary = [[NSMutableDictionary allocWithZone:[self zone]] initWithDictionary:dictionary];
+		pthread_rwlock_init(&rwlock, NULL);
+    }
+    return self;
+}
+
 - (id)copyWithZone:(NSZone *)zone {
     pthread_rwlock_rdlock(&rwlock);
     id copy = [embeddedDictionary copyWithZone:zone];

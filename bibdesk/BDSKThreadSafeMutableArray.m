@@ -57,6 +57,14 @@
     return self;
 }
 
+- (id)initWithArray:(NSArray *)array {
+    if (self = [super init]) {
+        embeddedArray = [[NSMutableArray allocWithZone:[self zone]] initWithArray:array];
+        pthread_rwlock_init(&rwlock, NULL);
+    }
+    return self;
+}
+
 - (id)copyWithZone:(NSZone *)zone {
 	id copy;
     pthread_rwlock_rdlock(&rwlock);

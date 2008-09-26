@@ -46,4 +46,5 @@
 }
 - (id)init;
 - (id)initWithCapacity:(unsigned)capacity;
+- (id)initWithDictionary:(NSDictionary *)dictionary;
 @end
