@@ -294,15 +294,6 @@ static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionCont
     }
 }
 
-- (void)objectDidBeginEditing:(id)editor {
-    [filterController objectDidBeginEditing:editor];		
-}
-
-
-- (void)objectDidEndEditing:(id)editor {
-    [filterController objectDidEndEditing:editor];		
-}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (context == BDSKConditionControllerObservationContext) {
         OBASSERT(object == condition);
