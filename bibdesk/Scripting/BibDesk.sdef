@@ -90,6 +90,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
 		<command name="open" code="aevtodoc" description="Open a document.">
 			<direct-parameter description="The file(s) to be opened.">
+                <!--
+                    Skeleton.sdef has the following line, however it breaks Tiger.
+				<type type="file"/>
+                -->
 				<type type="file" list="yes"/>
 			</direct-parameter>
 			<!--
