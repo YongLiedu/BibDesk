@@ -498,7 +498,7 @@ The groupedPublications array is a subset of the publications array, developed b
         if([groupField isPersonField])
             countedSet = [[BDSKCountedSet alloc] initFuzzyAuthorCountedSet];
         else
-            countedSet = [[BDSKCountedSet alloc] initCaseInsensitive:YES withCapacity:[publications count]];
+            countedSet = [[BDSKCountedSet alloc] initCaseInsensitive:YES];
         
         int emptyCount = 0;
         

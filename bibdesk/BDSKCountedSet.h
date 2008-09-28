@@ -45,41 +45,22 @@
 
 /*!
     @class BDSKCountedSet
-    @abstract    A flexible subclass of NSCountedSet.
+    @abstract    A flexible subclass of NSMutableSet that is similar to NSCountedSet.
     @discussion  Can be used with case-insensitive strings, or any CFDictionaryKeyCallBacks structure for maximum flexibility.  Although this class inherits NSCoding from its superclass, support is not implemented.
 */
 
 
-@interface BDSKCountedSet : NSCountedSet {
+@interface BDSKCountedSet : NSMutableSet {
     CFMutableDictionaryRef dictionary;
     BOOL keysAreStrings;
 }
 
-/*!
-    @method     initWithKeyCallBacks:
-    @abstract   Designated initializer for this class.
-    @discussion Uses CFDictionaryKeyCallBacks structure for flexibility in key comparison (key meaning the objects in the set).  Don't rely on the usage of a CFDictionary as storage.
-    @param      keyCallBacks (description)
-    @result     Returns a mutable set that retains each object added (or copies the object, depending on the callbacks supplied).
-*/
+// designated initializer
 - (id)initWithKeyCallBacks:(const CFDictionaryKeyCallBacks *)keyCallBacks;
-/*!
-    @method     initWithCountedSet:
-    @abstract   Designated initializer for this class.
-    @discussion Uses the same key callbacks and contains the same items as the passed in countedSet.
-    @param      countedSet (description)
-    @result     Returns a mutable set that contains the same items as the countedSet.
-*/
 - (id)initWithCountedSet:(BDSKCountedSet *)countedSet;
-/*!
-    @method     initCaseInsensitive:withCapacity:
-    @abstract   Assumes a set of string objects.
-    @discussion (comprehensive description)
-    @param      caseInsensitive Set to YES if you want case-insensitive string key comparisons
-    @param      numItems Hint for size of the set (ignored)
-    @result     Returns a mutable set that retains each object added.
-*/
-- (id)initCaseInsensitive:(BOOL)caseInsensitive withCapacity:(unsigned)numItems;
+- (id)initCaseInsensitive:(BOOL)caseInsensitive;
+
+- (unsigned)countForObject:(id)object;
 
 @end
 

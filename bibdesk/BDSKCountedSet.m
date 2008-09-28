@@ -80,7 +80,6 @@ const CFSetCallBacks BDSKCaseInsensitiveStringSetCallBacks = {
     return self;
 }
 
-// designated initializer
 - (id)initWithCountedSet:(BDSKCountedSet *)countedSet {
     
     if(self = [super init])
@@ -89,8 +88,7 @@ const CFSetCallBacks BDSKCaseInsensitiveStringSetCallBacks = {
     return self;
 }
 
-- (id)initCaseInsensitive:(BOOL)caseInsensitive withCapacity:(unsigned)numItems
-{
+- (id)initCaseInsensitive:(BOOL)caseInsensitive {
     // used only for debug logging at present
     keysAreStrings = YES;
 
@@ -117,30 +115,13 @@ const CFSetCallBacks BDSKCaseInsensitiveStringSetCallBacks = {
     [NSException raise:NSGenericException format:@"Cannot serialize an %@ with custom key callbacks", [(id)isa name]];
 }
 
-#pragma mark NSCountedSet overrides
-
-// designated initializer for NSCountedSet, which is a concrete subclass of NSMutableSet (not part of the class cluster)
-- (id)initWithCapacity:(unsigned)numItems;
-{
-    return [self initCaseInsensitive:YES withCapacity:numItems];
-}
-
-// presumably the other init... methods call initWithCapacity:, so we should be fine with super's implementation
-- (id)initWithArray:(NSArray *)array;
-{
-    return [super initWithArray:array];
-}
-
-- (id)initWithSet:(NSSet *)set;
-{
-    return [super initWithSet:set];
-}
-
 - (void)dealloc
 {
     if(dictionary) CFRelease(dictionary);
     [super dealloc];
 }
+
+#pragma mark NSCountedSet methods
 
 - (unsigned)countForObject:(id)object;
 {
