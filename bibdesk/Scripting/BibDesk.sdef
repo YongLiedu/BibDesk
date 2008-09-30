@@ -303,7 +303,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 
 		<cocoa name="NSTextSuite"/>
 
-		<value-type name="color" code="colr">
+		<value-type name="RGB color" code="colr">
 			<cocoa class="NSColor"/>
 		</value-type>
 
@@ -318,7 +318,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				contradict the DTD, are NOT errors.  Cocoa Scripting in 10.4
 				uses them to accomplish certain type conversions. -->
 			<type type="text"/>
-			<property name="color" code="colr" type="color"
+			<property name="color" code="colr" type="RGB color"
 				description="The color of the first character.">
 				<cocoa key="foregroundColor"/>
 			</property>
@@ -341,7 +341,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="This subdivides the text into characters.">
 			<cocoa class="NSTextStorage"/>
 			<type type="text"/>
-			<property name="color" code="colr" type="color"
+			<property name="color" code="colr" type="RGB color"
 				description="The color of the first character.">
 				<cocoa key="foregroundColor"/>
 			</property>
@@ -364,7 +364,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="This subdivides the text into paragraphs.">
 			<cocoa class="NSTextStorage"/>
 			<type type="text"/>
-			<property name="color" code="colr" type="color"
+			<property name="color" code="colr" type="RGB color"
 				description="The color of the first character.">
 				<cocoa key="foregroundColor"/>
 			</property>
@@ -387,7 +387,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="This subdivides the text into words.">
 			<cocoa class="NSTextStorage"/>
 			<type type="text"/>
-			<property name="color" code="colr" type="color"
+			<property name="color" code="colr" type="RGB color"
 				description="The color of the first character.">
 				<cocoa key="foregroundColor"/>
 			</property>
@@ -410,7 +410,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="This subdivides the text into chunks that all have the same attributes.">
 			<cocoa class="NSTextStorage"/>
 			<type type="text"/>
-			<property name="color" code="colr" type="color"
+			<property name="color" code="colr" type="RGB color"
 				description="The color of the first character.">
 				<cocoa key="foregroundColor"/>
 			</property>
@@ -906,8 +906,13 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The Finder label of the file.">
                 <cocoa key="finderLabel"/>
             </property>  
-            <property name="Skim notes" code="SKnt" type="text" access="r"
+            <property name="Skim notes" code="SKnt" access="r"
                 description="The Skim notes for the file.">
+                <cocoa key="scriptingSkimNotes"/>
+                <type type="note" list="yes"/>
+            </property>  
+            <property name="text Skim notes" code="tSKn" type="text" access="r"
+                description="The text Skim notes for the file.">
                 <cocoa key="textSkimNotes"/>
             </property>  
             <property name="rich Skim notes" code="rSKn" type="rich text" access="r"
@@ -1250,6 +1255,88 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <enumerator name="DBLP" code="DBLP"
                 description="DBLP search server."/>
         </enumeration>
+        
+        <record-type name="note" code="Note"
+            description="A Skim note.">
+            <property name="type" code="NTyp" type="text" access="r"
+                description="The type of note.">
+                <cocoa key="type"/>
+            </property>
+            <contents name="text contents" code="Text" type="text" access="r"
+                description="The text of the note. ">
+                <cocoa key="contents"/>
+            </contents>
+            <property name="color" code="colr" type="RGB color" access="r"
+                description="The color of the note.">
+                <cocoa key="color"/>
+            </property>
+            <property name="page" code="Page" type="integer" access="r"
+                description="The page for the note.">
+                <cocoa key="pageIndex"/>
+            </property>
+            <property name="bounds" code="pbnd" type="rectangle" access="r"
+                description="The bounding rectangle of the note (left, top, right, bottom).">
+                <cocoa key="bounds"/>
+            </property>
+            <property name="font name" code="FntN" type="text" access="r"
+                description="The font name of a text note.">
+                <cocoa key="fontName"/>
+            </property>
+            <property name="font size" code="FntS" type="integer" access="r"
+                description="The font size in points of a text note.">
+                <cocoa key="fontSize"/>
+            </property>
+            <property name="font color" code="FntC" type="RGB color" access="r"
+                description="The text color of a text note.">
+                <cocoa key="fontColor"/>
+            </property>
+            <property name="extended text" code="XTxt" type="rich text" access="r"
+                description="The rich extended text of an anchored note.">
+                <cocoa key="text"/>
+            </property>
+            <property name="icon" code="iimg" type="icon type" access="r"
+                description="The icon type of an anchored note.">
+                <cocoa key="scriptingIconType"/>
+            </property>
+            <property name="interior color" code="IClr" type="RGBA color" access="r"
+                description="The fill color of a circle or box.">
+                <cocoa key="interiorColor"/>
+            </property>
+            <property name="line width" code="LnWd" type="real" access="r"
+                description="The line width of the note.">
+                <cocoa key="lineWidth"/>
+            </property>
+            <property name="line style" code="LnSt" type="text" access="r"
+                description="The line style of the note.">
+                <cocoa key="borderStyle"/>
+            </property>
+            <property name="dash pattern" code="DshP" access="r"
+                description="The dash pattern of the border of the note or of the line, a list of numbers.">
+                <cocoa key="dashPattern"/>
+                <type type="real" list="yes"/>
+            </property>
+            <property name="start point" code="SPnt" type="point" access="r"
+                description="The start point of a line (left, top).">
+                <cocoa key="startPoint"/>
+            </property>
+            <property name="end point" code="EPnt" type="point" access="r"
+                description="The end point of a line (left, top).">
+                <cocoa key="endPoint"/>
+            </property>
+            <property name="start line style" code="SLSt" type="text" access="r"
+                description="The start line style of a line.">
+                <cocoa key="startLineStyle"/>
+            </property>
+            <property name="end line style" code="ELSt" type="text" access="r"
+                description="The end line style of a line.">
+                <cocoa key="endLineStyle"/>
+            </property>
+            <property name="path list" code="Pths" access="r"
+                description="The list of paths for a freehand or markup note.">
+                <type type="point list" list="yes"/>
+                <cocoa key="pointLists"/>
+            </property>
+        </record-type>
         
         <command name="add" code="BDSKAdd "
 			description="Add items to a collection.">

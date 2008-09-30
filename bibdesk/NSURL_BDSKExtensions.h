@@ -58,6 +58,7 @@
 - (NSArray *)SkimNotes;
 - (NSString *)textSkimNotes;
 - (NSAttributedString *)richTextSkimNotes;
+- (NSArray *)scriptingSkimNotes;
 
 - (NSAttributedString *)linkedText;
 - (NSAttributedString *)icon;

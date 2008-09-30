@@ -386,6 +386,137 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return richTextSkimNotes ? [[[NSTextStorage alloc] initWithAttributedString:richTextSkimNotes] autorelease] : nil;
 }
 
+- (NSArray *)scriptingSkimNotes {
+    NSMutableArray *notes = [NSMutableArray array];
+    NSEnumerator *noteEnum = [[self SkimNotes] objectEnumerator];
+    NSDictionary *note;
+    while (note = [noteEnum nextObject]) {
+        note = [note mutableCopy];
+        id value;
+        if (value = [note objectForKey:SKNPDFAnnotationBoundsKey]) {
+            NSRect nsBounds = NSRectFromString(value);
+            Rect qdBounds;
+            qdBounds.left = round(NSMinX(nsBounds));
+            qdBounds.bottom = round(NSMinY(nsBounds));
+            qdBounds.right = round(NSMaxX(nsBounds));
+            qdBounds.top = round(NSMaxY(nsBounds));
+            [note setValue:[NSData dataWithBytes:&qdBounds length:sizeof(Rect)] forKey:SKNPDFAnnotationBoundsKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationPageIndexKey]) {
+            [note setValue:[NSNumber numberWithUnsignedInt:[value unsignedIntValue] + 1] forKey:SKNPDFAnnotationPageIndexKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationBorderStyleKey]) {
+            NSString *style = nil;
+            switch ([value intValue]) {
+                case 0: style = @"Solid"; break;
+                case 1: style = @"Dashed"; break;
+                case 2: style = @"Beveled"; break;
+                case 3: style = @"Inset"; break;
+                case 4: style = @"Underline"; break;
+            }
+            [note setValue:style forKey:SKNPDFAnnotationBorderStyleKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationStartPointKey]) {
+            NSPoint nsPoint = NSPointFromString(value);
+            Point qdPoint;
+            qdPoint.h = round(nsPoint.x);
+            qdPoint.v = round(nsPoint.y);
+            [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:SKNPDFAnnotationStartPointKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationEndPointKey]) {
+            NSPoint nsPoint = NSPointFromString(value);
+            Point qdPoint;
+            qdPoint.h = round(nsPoint.x);
+            qdPoint.v = round(nsPoint.y);
+            [note setValue:[NSData dataWithBytes:&qdPoint length:sizeof(Point)] forKey:SKNPDFAnnotationEndPointKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationStartLineStyleKey]) {
+            NSString *style = nil;
+            switch ([value intValue]) {
+                case 0: style = @"None"; break;
+                case 1: style = @"Square"; break;
+                case 2: style = @"Circle"; break;
+                case 3: style = @"Diamond"; break;
+                case 4: style = @"OpenArrow"; break;
+                case 5: style = @"ClosedArrow"; break;
+            }
+            [note setValue:style forKey:SKNPDFAnnotationStartLineStyleKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationEndLineStyleKey]) {
+            NSString *style = nil;
+            switch ([value intValue]) {
+                case 0: style = @"None"; break;
+                case 1: style = @"Square"; break;
+                case 2: style = @"Circle"; break;
+                case 3: style = @"Diamond"; break;
+                case 4: style = @"OpenArrow"; break;
+                case 5: style = @"ClosedArrow"; break;
+            }
+            [note setValue:style forKey:SKNPDFAnnotationEndLineStyleKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationIconTypeKey]) {
+            NSString *style = nil;
+            switch ([value intValue]) {
+                case 0: style = @"Comment"; break;
+                case 1: style = @"Key"; break;
+                case 2: style = @"Note"; break;
+                case 3: style = @"Help"; break;
+                case 4: style = @"NewParagraph"; break;
+                case 5: style = @"Paragraph"; break;
+                case 6: style = @"Insert"; break;
+            }
+            [note setValue:style forKey:SKNPDFAnnotationIconTypeKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationTextKey]) {
+            [note setValue:[[[NSTextStorage alloc] initWithAttributedString:value] autorelease] forKey:SKNPDFAnnotationTextKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationImageKey]) {
+            [note setValue:[value TIFFRepresentation] forKey:SKNPDFAnnotationImageKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationQuadrilateralPointsKey]) {
+            NSEnumerator *pointEnum = [value objectEnumerator];
+            NSString *pointString;
+            NSMutableArray *pathList = [NSMutableArray array];
+            NSMutableArray *points = [NSMutableArray array];
+            while (pointString = [pointEnum nextObject]) {
+                NSPoint nsPoint = NSPointFromString(pointString);
+                Point qdPoint;
+                qdPoint.h = round(nsPoint.x);
+                qdPoint.v = round(nsPoint.y);
+                [points addObject:[NSData dataWithBytes:&qdPoint length:sizeof(Point)]];
+                if ([points count] == 4) {
+                    [pathList addObject:points];
+                    points = [NSMutableArray array];
+                }
+            }
+            [note setValue:nil forKey:SKNPDFAnnotationQuadrilateralPointsKey];
+            [note setValue:pathList forKey:SKNPDFAnnotationPointListsKey];
+        }
+        if (value = [note objectForKey:SKNPDFAnnotationPointListsKey]) {
+            NSEnumerator *pathEnum = [value objectEnumerator];
+            NSArray *path;
+            NSMutableArray *pathList = [NSMutableArray array];
+            while (path = [pathEnum nextObject]) {
+                NSEnumerator *pointEnum = [path objectEnumerator];
+                NSString *pointString;
+                NSMutableArray *points = [NSMutableArray array];
+                while (pointString = [pointEnum nextObject]) {
+                    NSPoint nsPoint = NSPointFromString(pointString);
+                    Point qdPoint;
+                    qdPoint.h = round(nsPoint.x);
+                    qdPoint.v = round(nsPoint.y);
+                    [points addObject:[NSData dataWithBytes:&qdPoint length:sizeof(Point)]];
+                }
+                [pathList addObject:points];
+            }
+            [note setValue:pathList forKey:SKNPDFAnnotationPointListsKey];
+        }
+        [notes addObject:note];
+        [note release];
+    }
+    return notes;
+}
+
 - (int)finderLabel{
     return [FVFinderLabel finderLabelForURL:self];
 }
