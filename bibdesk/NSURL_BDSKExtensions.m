@@ -408,11 +408,11 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         if (value = [note objectForKey:SKNPDFAnnotationBorderStyleKey]) {
             NSString *style = nil;
             switch ([value intValue]) {
-                case 0: style = @"Solid"; break;
-                case 1: style = @"Dashed"; break;
-                case 2: style = @"Beveled"; break;
-                case 3: style = @"Inset"; break;
-                case 4: style = @"Underline"; break;
+                case kPDFBorderStyleSolid: style = @"solid"; break;
+                case kPDFBorderStyleDashed: style = @"dashed"; break;
+                case kPDFBorderStyleBeveled: style = @"beveled"; break;
+                case kPDFBorderStyleInset: style = @"inset"; break;
+                case kPDFBorderStyleUnderline: style = @"underline"; break;
             }
             [note setValue:style forKey:SKNPDFAnnotationBorderStyleKey];
         }
@@ -433,37 +433,37 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         if (value = [note objectForKey:SKNPDFAnnotationStartLineStyleKey]) {
             NSString *style = nil;
             switch ([value intValue]) {
-                case 0: style = @"None"; break;
-                case 1: style = @"Square"; break;
-                case 2: style = @"Circle"; break;
-                case 3: style = @"Diamond"; break;
-                case 4: style = @"OpenArrow"; break;
-                case 5: style = @"ClosedArrow"; break;
+                case kPDFLineStyleNone: style = @"none"; break;
+                case kPDFLineStyleSquare: style = @"square"; break;
+                case kPDFLineStyleCircle: style = @"circle"; break;
+                case kPDFLineStyleDiamond: style = @"diamond"; break;
+                case kPDFLineStyleOpenArrow: style = @"open arrow"; break;
+                case kPDFLineStyleClosedArrow: style = @"closed arrow"; break;
             }
             [note setValue:style forKey:SKNPDFAnnotationStartLineStyleKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationEndLineStyleKey]) {
             NSString *style = nil;
             switch ([value intValue]) {
-                case 0: style = @"None"; break;
-                case 1: style = @"Square"; break;
-                case 2: style = @"Circle"; break;
-                case 3: style = @"Diamond"; break;
-                case 4: style = @"OpenArrow"; break;
-                case 5: style = @"ClosedArrow"; break;
+                case kPDFLineStyleNone: style = @"none"; break;
+                case kPDFLineStyleSquare: style = @"square"; break;
+                case kPDFLineStyleCircle: style = @"circle"; break;
+                case kPDFLineStyleDiamond: style = @"diamond"; break;
+                case kPDFLineStyleOpenArrow: style = @"open arrow"; break;
+                case kPDFLineStyleClosedArrow: style = @"closed arrow"; break;
             }
             [note setValue:style forKey:SKNPDFAnnotationEndLineStyleKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationIconTypeKey]) {
             NSString *style = nil;
             switch ([value intValue]) {
-                case 0: style = @"Comment"; break;
-                case 1: style = @"Key"; break;
-                case 2: style = @"Note"; break;
-                case 3: style = @"Help"; break;
-                case 4: style = @"NewParagraph"; break;
-                case 5: style = @"Paragraph"; break;
-                case 6: style = @"Insert"; break;
+                case kPDFTextAnnotationIconComment: style = @"comment"; break;
+                case kPDFTextAnnotationIconKey: style = @"key"; break;
+                case kPDFTextAnnotationIconNote: style = @"note"; break;
+                case kPDFTextAnnotationIconHelp: style = @"help"; break;
+                case kPDFTextAnnotationIconNewParagraph: style = @"new paragraph"; break;
+                case kPDFTextAnnotationIconParagraph: style = @"paragraph"; break;
+                case kPDFTextAnnotationIconInsert: style = @"insert"; break;
             }
             [note setValue:style forKey:SKNPDFAnnotationIconTypeKey];
         }
