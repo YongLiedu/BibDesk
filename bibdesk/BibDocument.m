@@ -3543,6 +3543,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     BDSKPrintableView *printableView = [[[BDSKPrintableView alloc] initForScreenDisplay:NO] autorelease];
     NSAttributedString *attrString = nil;
     NSString *string = nil;
+    [printableView setPrintInfo:[self printInfo]];
     if (bottomPreviewDisplay == BDSKPreviewDisplayText) {
         attrString = [bottomPreviewTextView textStorage];
     } else if (sidePreviewDisplay == BDSKPreviewDisplayText) {

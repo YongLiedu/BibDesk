@@ -118,6 +118,11 @@
     }
 }
 
+- (void)setPrintInfo:(NSPrintInfo *)info {
+    [self setPrintInfo:info];
+    [self printInfoUpdated];
+}
+
 - (void)addPage {
     NSZone *zone = [self zone];
     unsigned numberOfPages = [self numberOfPages];
