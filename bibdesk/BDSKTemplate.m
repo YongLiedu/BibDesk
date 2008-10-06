@@ -358,6 +358,8 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         format = BDSKRTFDTemplateFormat;
     } else if ([extension isEqualToString:@"doc"]) {
         format = BDSKDocTemplateFormat;
+    } else if ([extension isEqualToString:@"docx"]) {
+        format = BDSKDocTemplateFormat;
     } else if ([extension isEqualToString:@"odt"]) {
         format = BDSKOdtTemplateFormat;
     } else if ([extension isEqualToString:@"html"] || [extension isEqualToString:@"htm"]) {

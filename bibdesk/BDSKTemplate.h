@@ -48,8 +48,9 @@ typedef enum _BDSKTemplateFormat {
     BDSKRTFTemplateFormat = 8,
     BDSKRTFDTemplateFormat = 16,
     BDSKDocTemplateFormat = 32,
-    BDSKOdtTemplateFormat = 64,
-    BDSKRichTextTemplateFormat = 124 // Rich HTML, RTF, RTFD, Doc, or ODT
+    BDSKDocxTemplateFormat = 64,
+    BDSKOdtTemplateFormat = 128,
+    BDSKRichTextTemplateFormat = 188 // Rich HTML, RTF, RTFD, Doc, Docx, or ODT
 } BDSKTemplateFormat;
 
 extern NSString *BDSKTemplateRoleString;

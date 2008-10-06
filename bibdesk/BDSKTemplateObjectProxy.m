@@ -74,6 +74,8 @@
             docType = NSRTFDTextDocumentType;
         else if(templateFormat == BDSKDocTemplateFormat)
             docType = NSDocFormatTextDocumentType;
+        else if(templateFormat == BDSKDocxTemplateFormat && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+            docType = @"NSOfficeOpenXML";
         else if(templateFormat == BDSKOdtTemplateFormat && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
             docType = @"NSOpenDocument";
         NSData *data = [self dataByParsingTemplate:template withObject:anObject publications:items];

@@ -1686,7 +1686,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     OBPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
-    OBPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKOdtTemplateFormat | BDSKRichHTMLTemplateFormat));
+    OBPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKRichHTMLTemplateFormat));
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:&docAttributes];
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
@@ -1704,6 +1704,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
     } else if (format & BDSKDocTemplateFormat) {
         return [fileTemplate docFormatFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
+    } else if ((format & BDSKDocxTemplateFormat) && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        [mutableAttributes setObject:@"NSOfficeOpenXML" forKey:NSDocumentTypeDocumentAttribute];
+        NSError *error = nil;
+        return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
     } else if ((format & BDSKOdtTemplateFormat) && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
         [mutableAttributes setObject:@"NSOpenDocument" forKey:NSDocumentTypeDocumentAttribute];
         NSError *error = nil;
