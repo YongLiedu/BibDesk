@@ -3360,7 +3360,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         }
         else {
             [unresolvedURLs addObject:value];
-            NSLog(@"*** error *** -[BDSKLinkedFile initWithURLString:] failed (%@)", key);
+            NSLog(@"*** error *** -[BDSKLinkedFile initWithURLString:] failed (%@ of %@)", key, [self citeKey]);
         }
         [keysToRemove addObject:key];
         
