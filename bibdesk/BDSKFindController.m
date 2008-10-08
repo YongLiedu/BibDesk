@@ -548,28 +548,17 @@ enum {
 }
 
 - (BOOL)stringIsValidAsComplexString:(NSString *)btstring errorMessage:(NSString **)errString{
-    BOOL valid = YES;
-    volatile BDSKComplexString *compStr;
-    NSString *reason = nil;    
+    volatile NSString *compStr;
+    NSError *error = nil;
     
-    NS_DURING
-        compStr = [NSString stringWithBibTeXString:btstring macroResolver:nil];
-    NS_HANDLER
-        if([[localException name] isEqualToString:BDSKComplexStringException]){
-            valid = NO;
-            reason = [localException reason];
-        } else {
-            [localException raise];
-        }
-    NS_ENDHANDLER
-    
-    if(!valid && errString != nil){
-        if(reason == nil)
-            reason = @"Complex string is invalid for unknown reason"; // shouldn't happen
-        
-        *errString = reason;
+    compStr = [NSString stringWithBibTeXString:btstring macroResolver:nil error:&error];
+    if (compStr == nil) {
+        *errString = [error localizedDescription];
+        if(*errString == nil)
+            *errString = @"Complex string is invalid for unknown reason"; // shouldn't happen
+        return NO;
     }
-    return valid;
+    return YES;
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
@@ -837,7 +826,7 @@ enum {
 	}
 	
 	if(findAsMacro)
-		findStr = [NSString stringWithBibTeXString:findStr macroResolver:[theDocument macroResolver]];
+		findStr = [NSString stringWithBibTeXString:findStr macroResolver:[theDocument macroResolver] error:NULL];
 	
 	// loop through the pubs to replace
     NSMutableArray *arrayOfItems = [NSMutableArray array];
@@ -968,9 +957,9 @@ enum {
 	}
 	
 	if(findAsMacro)
-		findStr = [NSString stringWithBibTeXString:findStr macroResolver:[theDocument macroResolver]];
+		findStr = [NSString stringWithBibTeXString:findStr macroResolver:[theDocument macroResolver] error:NULL];
 	if(replaceAsMacro)
-		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver]];
+		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver] error:NULL];
 		
 	// loop through the pubs to replace
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
@@ -1054,6 +1043,7 @@ enum {
     BibItem *bibItem;
     NSString *origStr;
 	NSString *complexStr;
+    NSError *error = nil;
 	unsigned number = 0;
 	
     while(bibItem = [pubE nextObject]){
@@ -1094,16 +1084,10 @@ enum {
             if([theRegex findInString:origStr]){
                 origStr = [theRegex replaceWithString:replStr inString:origStr];
                 if(replaceAsMacro || findAsMacro){
-                    @try {
-                        complexStr = [NSString stringWithBibTeXString:origStr macroResolver:[theDocument macroResolver]];
+                    if (complexStr = [NSString stringWithBibTeXString:origStr macroResolver:[theDocument macroResolver] error:NULL]) {
                         [bibItem setField:field toValue:complexStr];
                         number++;
                     }
-                    @catch (NSException *exception) {
-                         if([[exception name] isEqualToString:BDSKComplexStringException] == NO)
-                            [exception raise];
-                    }
-                    @catch (id exception) {}
                 } else {
                     [bibItem setField:field toValue:origStr];
                     number++;
@@ -1124,7 +1108,7 @@ enum {
     NSString *field = [self field];
 	
 	if(replaceAsMacro)
-		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver]];
+		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver] error:NULL];
 		
 	// loop through the pubs to replace
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
@@ -1184,7 +1168,7 @@ enum {
         return 0;
     
 	if(replaceAsMacro)
-		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver]];
+		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver] error:NULL];
 		
 	// loop through the pubs to replace
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
@@ -1243,7 +1227,7 @@ enum {
         return 0;
     
 	if(replaceAsMacro)
-		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver]];
+		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver] error:NULL];
 		
 	// loop through the pubs to replace
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems

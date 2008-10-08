@@ -55,7 +55,8 @@ enum {
     kBDSKParserIgnoredFrontMatter,               /* BDSKBibTeXParser ignored front matter   */
     kBDSKParserFailed,                           /* Some parser failed for some reason      */
     kBDSKFileOperationFailed,                    /* Generic file operation failure          */
-    kBDSKURLOperationFailed,                     /* Generic URL operation failure          */
+    kBDSKURLOperationFailed,                     /* Generic URL operation failure           */
+    kBDSKComplexStringError,                     /* Complex string parsing failed           */
 };
 
 extern NSString *BDSKUnderlyingItemErrorKey;

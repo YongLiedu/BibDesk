@@ -648,8 +648,8 @@
 }
 
 - (void)replaceEveryOccurrenceOfMacroKey:(NSString *)oldKey withKey:(NSString *)newKey{
-	NSString *findStr = [NSString stringWithBibTeXString:oldKey macroResolver:macroResolver];
-	NSString *replStr = [NSString stringWithBibTeXString:newKey macroResolver:macroResolver];
+	NSString *findStr = [NSString stringWithBibTeXString:oldKey macroResolver:macroResolver error:NULL];
+	NSString *replStr = [NSString stringWithBibTeXString:newKey macroResolver:macroResolver error:NULL];
     NSArray *docs = [macroResolver isEqual:[BDSKMacroResolver defaultMacroResolver]] ? [NSApp orderedDocuments] : [NSArray arrayWithObjects:[macroResolver owner], nil]; 
     NSEnumerator *docEnum = [docs objectEnumerator];
     BibDocument *doc;

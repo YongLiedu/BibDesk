@@ -135,12 +135,11 @@
 
 - (void)setBibTeXString:(NSString *)newValue {
     if ([macroResolver owner] && [[macroResolver owner] isDocument]) {
-        @try{
-            NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:macroResolver];
+        NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:macroResolver error:NULL];
+        if (value) {
             [macroResolver setMacroDefinition:value forMacro:name];
             [[macroResolver undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
-        }
-        @catch(id exception) {
+        } else {
             NSBeep();
         }
     } else {

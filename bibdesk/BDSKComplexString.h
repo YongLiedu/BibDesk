@@ -95,14 +95,15 @@
 + (id)stringWithNodes:(NSArray *)nodesArray  macroResolver:(BDSKMacroResolver *)macroResolver;
 
 /*!
-    @method     stringWithBibTeXString:macroResolver:
+    @method     stringWithBibTeXString:macroResolver:error:
     @abstract   Returns a newly allocated and initialized complex or simple string build from the BibTeX string value.
     @discussion -
     @param		btstring A BibTeX string value
     @param		macroResolver The macro resolver used to resolve macros in the complex string.
+    @param		outError When failing, will be set to the parsing error.
     @result     - 
 */
-+ (id)stringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver;
++ (id)stringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver error:(NSError **)outError;
 
 /*!
     @method     stringWithInheritedValue:
@@ -125,14 +126,15 @@
 - (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver;
 
 /*!
-    @method     initWithBibTeXString:macroResolver:
+    @method     initWithBibTeXString:macroResolver:error:
     @abstract   Initializes a complex string from a BibTeX string representation and a macroresolver. 
     @discussion Returns a non-complex string when the bibtex string is a single quotd string.
     @param		btstring A BibTeX string
     @param		macroResolver The macro resolver used to resolve macros in the complex string.
+    @param		outError When failing, will be set to the parsing error.
     @result     -
 */
-- (id)initWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver;
+- (id)initWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver error:(NSError **)outError;
 
 /*!
     @method     initWithInheritedValue:

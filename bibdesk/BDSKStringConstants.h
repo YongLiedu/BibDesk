@@ -314,7 +314,6 @@ extern NSString *BDSKEncodingsListChangedNotification;
 extern NSString *BDSKTemporaryFileMigrationNotification;
 
 #pragma mark Exception name strings
-extern NSString *BDSKComplexStringException;
 extern NSString *BDSKUnimplementedException;
 
 

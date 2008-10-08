@@ -37,6 +37,7 @@
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKComplexString.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSError_BDSKExtensions.h"
 #import "BDSKMacroResolver.h"
 
 @implementation BDSKComplexStringFormatter
@@ -137,29 +138,22 @@
     string = [string stringByReplacingCharactersInSet:[NSCharacterSet controlCharacterSet] withString:@""];
     string = [string stringByReplacingCharactersInSet:[NSCharacterSet illegalCharacterSet] withString:@""];
     
-    @try{
-        if (editAsComplexString) {
-            [self setParsedString:[NSString stringWithBibTeXString:string macroResolver:macroResolver]];
-        } else {
-            // not complex, but we check for balanced braces anyway
-            [self setParsedString:string];
-            if([string isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO)
-                // not really a complex string exception, but we'll handle it the same way
-                @throw [NSException exceptionWithName:BDSKComplexStringException reason:NSLocalizedString(@"Unbalanced braces", @"Exception description") userInfo:nil];
-        }
-
-    }
-    @catch(NSException *anException){
-        if([[anException name] isEqualToString:BDSKComplexStringException])
-            [self setParseError:[anException reason]];
-        else
-            @throw;
-    }
-    @catch(id anException){
-        @throw;
-    }
+    NSError *complexError = nil;
     
-    // if we use @finally here, this gets executed even if it wasn't our exception
+    if (editAsComplexString) {
+        NSString *complexString = [NSString stringWithBibTeXString:string macroResolver:macroResolver error:&complexError];
+        if (complexString)
+            [self setParsedString:complexString];
+    } else if ([string isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO) {
+        // not really a complex string exception, but we'll handle it the same way
+        complexError = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Unbalanced braces", @"error description")];
+    } else {
+        [self setParsedString:string];
+    }
+
+    if (complexError)
+        [self setParseError:[complexError localizedDescription]];
+    
     if(error)
         *error = [self parseError];
     if(obj)

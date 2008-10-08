@@ -335,7 +335,6 @@ NSString *BDSKTemporaryFileMigrationNotification = @"BDSKTemporaryFileMigrationN
 
 #pragma mark Exception name strings
 
-NSString *BDSKComplexStringException = @"BDSKComplexStringException";
 NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
 
 /*

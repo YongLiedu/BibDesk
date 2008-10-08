@@ -358,6 +358,8 @@ error:(NSError **)outError{
 	int nesting;
 	unichar ch;
     
+    NSError *error= nil;
+    
     static NSCharacterSet *bracesQuotesAndCommaCharSet = nil;
     if (bracesQuotesAndCommaCharSet == nil) {
         bracesQuotesAndCommaCharSet = [[NSCharacterSet characterSetWithCharactersInString:@"{}\","] retain];
@@ -421,19 +423,10 @@ error:(NSError **)outError{
             CFStringTrimWhitespace((CFMutableStringRef)value);
             
             key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            @try{
-                value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
+            if (value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver] error:&error])
                 [macros setObject:value forKey:key];
-            }
-            @catch(NSException *exception){
-                if([[exception name] isEqual:BDSKComplexStringException])
-                    NSLog(@"Ignoring invalid complex macro: %@", exception);
-                else
-                    NSLog(@"Ignoring exception while parsing macro: %@", exception);
-            }
-            @catch(id exception){
-                NSLog(@"Ignoring exception while parsing macro: %@", exception);
-            }
+            else
+                NSLog(@"Ignoring invalid complex macro: %@", [error localizedDescription]);
             
         }
 		
@@ -456,6 +449,8 @@ error:(NSError **)outError{
 	NSString *s;
 	int nesting;
 	unichar ch;
+    
+    NSError *error = nil;
     
     static NSCharacterSet *bracesAndQuotesCharSet = nil;
     if (bracesAndQuotesCharSet == nil) {
@@ -514,16 +509,10 @@ error:(NSError **)outError{
         CFStringTrimWhitespace((CFMutableStringRef)value);
         
         key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        @try{
-            value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
+        if (value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver] error:&error])
             [macros setObject:value forKey:key];
-        }
-        @catch(id exception){
-            if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKComplexStringException])
-                NSLog(@"Ignoring invalid complex macro: %@", exception);
-            else
-                NSLog(@"Ignoring exception while parsing macro: %@", exception);
-        }
+        else
+            NSLog(@"Ignoring invalid complex macro: %@", [error localizedDescription]);
 		
     }
 	

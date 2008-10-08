@@ -364,11 +364,15 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     NSDictionary *macros = [pw dictionaryForKey:BDSKGlobalMacroDefinitionsKey];
     NSEnumerator *keyEnum = [macros keyEnumerator];
     NSString *key;
+    NSString *value;
+    NSError *error = nil;
     
     while (key = [keyEnum nextObject]) {
         // we don't check for circular macros, there shouldn't be any. Or do we want to be paranoid?
-        [macroDefinitions setObject:[NSString stringWithBibTeXString:[macros objectForKey:key] macroResolver:self]
-                             forKey:key];
+        if (value = [NSString stringWithBibTeXString:[macros objectForKey:key] macroResolver:self error:&error])
+            [macroDefinitions setObject:value forKey:key];
+        else
+            NSLog(@"Ignoring invalid complex macro: %@", [error localizedDescription]);
     }
     if ([oldMacros count]) {
         // we remove the old style prefs, as they are now merged with the new ones

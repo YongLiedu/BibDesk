@@ -39,6 +39,7 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringNode.h"
 #import "BDSKMacroResolver.h"
+#import "NSError_BDSKExtensions.h"
 
 #pragma mark -
 #pragma mark Private complex string expansion
@@ -516,13 +517,14 @@ static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
     return self;
 }
 
-- (id)initWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver{
+- (id)initWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver error:(NSError **)outError {
 	btstring = [btstring stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
     // used for correct zoning
     NSZone *theZone = [self zone];
     // we will return another object
     [[self init] release];
+    self = nil;
     
     if([btstring length] == 0){
         // if the string was whitespace only, it becomes empty.
@@ -537,11 +539,12 @@ static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
     NSString *s = nil;
     int nesting;
     unichar ch;
+    NSError *error = nil;
     
     NSCharacterSet *bracesCharSet = [NSCharacterSet curlyBraceCharacterSet];
 	[BDSKComplexString class]; // make sure the class is initialized
     
-    while (![sc isAtEnd]) {
+    while (error == nil && NO == [sc isAtEnd]) {
         ch = [btstring characterAtIndex:[sc scanLocation]];
         if (ch == '{') {
             // a brace-quoted string, we look for the corresponding closing brace
@@ -566,15 +569,12 @@ static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
                 [sc setScanLocation:[sc scanLocation] + 1];
             }
             if (nesting > 0) {
-                [returnNodes release];
-                [sc release];
-                [nodeStr autorelease];
-                [NSException raise:BDSKComplexStringException
-                            format:@"Unbalanced string: [%@]", nodeStr];
+                error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unbalanced string: [%@]", @"error description"), nodeStr]];
+            } else {
+                node = [[BDSKStringNode alloc] initWithQuotedString:nodeStr];
+                [returnNodes addObject:node];
+                [node release];
             }
-			node = [[BDSKStringNode alloc] initWithQuotedString:nodeStr];
-            [returnNodes addObject:node];
-			[node release];
             [nodeStr release];
         }
         else if (ch == '"') {
@@ -596,15 +596,12 @@ static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
             // we don't accept unbalanced braces, as we always quote with braces
             // do we want to be more permissive and try to use "-quoted fields?
             if (nesting > 0 || ![nodeStr isStringTeXQuotingBalancedWithBraces:YES connected:NO]) {
-                [returnNodes release];
-                [sc release];
-                [nodeStr autorelease];
-                [NSException raise:BDSKComplexStringException
-                            format:@"Unbalanced string: [%@]", nodeStr];
+                error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unbalanced string: [%@]", @"error description"), nodeStr]];
+            } else {
+                node = [[BDSKStringNode alloc] initWithQuotedString:nodeStr];
+                [returnNodes addObject:node];
+                [node release];
             }
-			node = [[BDSKStringNode alloc] initWithQuotedString:nodeStr];
-            [returnNodes addObject:node];
-			[node release];
             [nodeStr release];
         }
         else if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:ch]) {
@@ -624,47 +621,40 @@ static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
         }
         else if (ch == '#') {
             // we found 2 # or a # at the beginning
-            [returnNodes release];
-            [sc release];
-            [NSException raise:BDSKComplexStringException
-                        format:@"Missing component"];
+            error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Invalid first character in component", @"error description")];
         }
         else {
-            [returnNodes release];
-            [sc release];
-            [NSException raise:BDSKComplexStringException
-                        format:@"Invalid first character in component"];
+            error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Invalid first character in component", @"error description")];
         }
         
-        // look for the next #-character, removing spaces around it
-        [sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
-        if (![sc isAtEnd]) {
-            if (![sc scanString:@"#" intoString:NULL]) {
-                [returnNodes release];
-                [sc release];
-                [NSException raise:BDSKComplexStringException
-                            format:@"Missing # character"];
-            }
+        if (error == nil) {
+            // look for the next #-character, removing spaces around it
             [sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
-            if ([sc isAtEnd]) {
-                // we found a # at the end
-                [returnNodes release];
-                [sc release];
-                [NSException raise:BDSKComplexStringException
-                            format:@"Empty component"];
+            if (![sc isAtEnd]) {
+                if (![sc scanString:@"#" intoString:NULL]) {
+                    error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Missing # character", @"error description")];
+                } else {
+                    [sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
+                    if ([sc isAtEnd]) {
+                        // we found a # at the end
+                        error = [NSError mutableLocalErrorWithCode:kBDSKComplexStringError localizedDescription:NSLocalizedString(@"Empty component", @"error description")];
+                    }
+                }
             }
         }
     }
-    
-    self = [[BDSKComplexString allocWithZone:theZone] initWithNodes:returnNodes macroResolver:theMacroResolver];
+    if (error == nil)
+        self = [[BDSKComplexString allocWithZone:theZone] initWithNodes:returnNodes macroResolver:theMacroResolver];
+    else if (outError != NULL)
+        *outError = error;
     [sc release];
     [returnNodes release];
     
     return self;
 }
 
-+ (id)stringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver{
-    return [[[self alloc] initWithBibTeXString:btstring macroResolver:theMacroResolver] autorelease];
++ (id)stringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver error:(NSError **)outError{
+    return [[[self alloc] initWithBibTeXString:btstring macroResolver:theMacroResolver error:outError] autorelease];
 }
 
 + (id)stringWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
