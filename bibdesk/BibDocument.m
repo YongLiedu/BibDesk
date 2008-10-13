@@ -50,7 +50,6 @@
 #import "BDSKGroupsArray.h"
 
 #import "BDSKUndoManager.h"
-#import "MultiplePageView.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringEncodingManager.h"

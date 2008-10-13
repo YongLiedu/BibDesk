@@ -45,7 +45,6 @@
 #import "BibDocument.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
-#import "BDSKPrintableView.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKAsynchronousDOServer.h"
@@ -327,13 +326,35 @@ static BDSKPreviewer *sharedPreviewer = nil;
 #pragma mark Drawing methods
 
 - (NSData *)PDFDataWithString:(NSString *)string color:(NSColor *)color{
-	NSData *data;
-	BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:YES];
-	[printableView setFont:[NSFont userFontOfSize:0.0]];
-	[printableView setTextColor:color];
-	data = [printableView PDFDataWithString:string];
-	[printableView release];
-	return data;
+    NSPrintInfo *printInfo = [[NSPrintInfo sharedPrintInfo] copy];
+    [printInfo setHorizontalPagination:NSFitPagination];
+    [printInfo setHorizontallyCentered:NO];
+    [printInfo setVerticallyCentered:NO];
+    [printInfo setLeftMargin:20.0];
+    [printInfo setRightMargin:20.0];
+    [printInfo setTopMargin:20.0];
+    [printInfo setBottomMargin:20.0];
+    
+    NSTextView *printableView = [[NSTextView alloc] initWithFrame:[printInfo imageablePageBounds]];
+    NSTextStorage *textStorage = [printableView textStorage];
+    [printableView setVerticallyResizable:YES];
+    [printableView setHorizontallyResizable:NO];
+    [printableView setTextContainerInset:NSMakeSize(20.0, 20.0)];
+    
+    [textStorage beginEditing];
+    [[textStorage mutableString] setString:string];
+    [textStorage addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [textStorage length])];
+    [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, [textStorage length])];
+    [textStorage endEditing];
+	
+    NSMutableData *data = [NSMutableData data];
+    NSPrintOperation *printOperation = [NSPrintOperation PDFOperationWithView:printableView insideRect:[printableView bounds] toData:data printInfo:printInfo];
+    [printOperation runOperation];
+    
+    [printableView release];
+    [printInfo release];
+    
+    return data;
 }
 
 - (void)displayPreviewsForState:(BDSKPreviewState)state success:(BOOL)success{
