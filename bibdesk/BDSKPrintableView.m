@@ -107,9 +107,7 @@
 - (void)printInfoUpdated {
     unsigned cnt, numberOfPages = [self numberOfPages];
     NSArray *textContainers = [[self layoutManager] textContainers];
-    
-    [super setPrintInfo:printInfo];
-    
+        
     for (cnt = 0; cnt < numberOfPages; cnt++) {
         NSRect textFrame = [self documentRectForPageNumber:cnt];
         NSTextContainer *textContainer = [textContainers objectAtIndex:cnt];
@@ -119,7 +117,7 @@
 }
 
 - (void)setPrintInfo:(NSPrintInfo *)info {
-    [self setPrintInfo:info];
+    [super setPrintInfo:info];
     [self printInfoUpdated];
 }
 
