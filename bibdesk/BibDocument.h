@@ -247,6 +247,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         BOOL                displayMigrationAlert;
     } docState;
     
+    NSDictionary *mainWindowSetupDictionary;
+    
     NSURL *saveTargetURL;
     
     BDSKItemSearchIndexes *searchIndexes;

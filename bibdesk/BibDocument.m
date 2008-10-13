@@ -321,6 +321,7 @@ enum {
     [searchButtonController release];
     [migrationController release];
     [documentSearch release];
+    [mainWindowSetupDictionary release];
     [super dealloc];
 }
 
@@ -671,13 +672,13 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 
 // returns empty dictionary if no attributes set
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes {
-    NSDictionary *dict = nil;
-    if ([self fileURL]) {
-        dict = [[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey atPath:[[self fileURL] path] traverseLink:YES error:NULL];
+    if (mainWindowSetupDictionary == nil) {
+        if ([self fileURL])
+            mainWindowSetupDictionary = [[[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey atPath:[[self fileURL] path] traverseLink:YES error:NULL] retain];
+        if (nil == mainWindowSetupDictionary)
+            mainWindowSetupDictionary = [[NSDictionary alloc] init];
     }
-    if (nil == dict)
-        dict = [NSDictionary dictionary];
-    return dict;
+    return mainWindowSetupDictionary;
 }
 
 - (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forSave:(BOOL)isSave{
@@ -750,6 +751,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
             NSLog(@"%@: %@", self, error);
         }
         
+        [mainWindowSetupDictionary release];
+        mainWindowSetupDictionary = [dictionary copy];
         [dictionary release];
     } 
 }
