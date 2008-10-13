@@ -3578,6 +3578,9 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 - (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
     NSPrintInfo *info = [[self printInfo] copy];
     [[info dictionary] addEntriesFromDictionary:printSettings];
+    [info setHorizontalPagination:NSFitPagination];
+    [info setHorizontallyCentered:NO];
+    [info setVerticallyCentered:NO];
     NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:[self printableView] printInfo:info];
     [info release];
     NSPrintPanel *printPanel = [printOperation printPanel];
