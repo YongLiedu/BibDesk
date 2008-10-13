@@ -376,6 +376,8 @@ enum {
         }
     }
     
+    [self updatePreviews];
+    
     if (docState.displayMigrationAlert) {
         docState.displayMigrationAlert = NO;
         // If a single file was migrated, this alert will be shown even if all other BibItems already use BDSKLinkedFile.  However, I think that's an edge case, since the user had to manually add that pub in a text editor or by setting the local-url field.  Items imported or added in BD will already use BDSKLinkedFile, so this notification won't be posted.
@@ -3075,7 +3077,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     // Coalesce these messages here, since something like select all -> generate cite keys will force a preview update for every
     // changed key, so we have to update all the previews each time.  This should be safer than using cancelPrevious... since those
     // don't get performed on the main thread (apparently), and can lead to problems.
-    if (docState.isDocumentClosed == NO)
+    if (docState.isDocumentClosed == NO && [documentWindow isVisible])
         [self queueSelectorOnce:@selector(doUpdatePreviews)];
 }
 
