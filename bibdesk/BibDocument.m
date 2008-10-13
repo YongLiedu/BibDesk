@@ -51,7 +51,6 @@
 
 #import "BDSKUndoManager.h"
 #import "MultiplePageView.h"
-#import "BDSKPrintableView.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringEncodingManager.h"
@@ -3547,10 +3546,12 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 }
 
 - (NSView *)printableView{
-    BDSKPrintableView *printableView = [[[BDSKPrintableView alloc] initForScreenDisplay:NO] autorelease];
+    NSTextView *printableView = [[[NSTextView alloc] initWithFrame:[[self printInfo] imageablePageBounds]] autorelease];
+    NSTextStorage *textStorage = [printableView textStorage];
     NSAttributedString *attrString = nil;
     NSString *string = nil;
-    [printableView setPrintInfo:[self printInfo]];
+    [printableView setVerticallyResizable:YES];
+    [printableView setHorizontallyResizable:NO];
     if (bottomPreviewDisplay == BDSKPreviewDisplayText) {
         attrString = [bottomPreviewTextView textStorage];
     } else if (sidePreviewDisplay == BDSKPreviewDisplayText) {
@@ -3559,12 +3560,16 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         // this occurs only when both FileViews are displayed, probably never happens
         string = [self bibTeXStringForPublications:[self selectedPublications]];
     }
-    if (attrString)
-        [printableView setAttributedString:attrString];
-    else if (string)
-        [printableView setString:string];
-    else
-        [printableView setString:NSLocalizedString(@"Error: nothing to print from document preview", @"printing error")];
+    if (attrString == nil && string == nil)
+        string = NSLocalizedString(@"Error: nothing to print from document preview", @"printing error");
+    [textStorage beginEditing];
+    if (attrString) {
+        [textStorage setAttributedString:attrString];
+    } else {
+        [[textStorage mutableString] setString:string];
+        [textStorage addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [textStorage length])];
+    }
+    [textStorage endEditing];
     return printableView;
 }
 

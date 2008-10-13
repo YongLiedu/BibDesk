@@ -305,8 +305,13 @@ static BDSKPreviewer *sharedPreviewer = nil;
     if([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0){
         [pdfView printWithInfo:[NSPrintInfo sharedPrintInfo] autoRotate:NO];
     }else{
-        BDSKPrintableView *printableView = [[[BDSKPrintableView alloc] initForScreenDisplay:NO] autorelease];
-        [printableView setAttributedString:[rtfPreviewView textStorage]];    
+        NSTextView *printableView = [[[NSTextView alloc] initWithFrame:[[NSPrintInfo sharedPrintInfo] imageablePageBounds]] autorelease];
+        NSTextStorage *textStorage = [printableView textStorage];
+        [printableView setVerticallyResizable:YES];
+        [printableView setHorizontallyResizable:NO];
+        [textStorage beginEditing];
+        [textStorage setAttributedString:[rtfPreviewView textStorage]];    
+        [textStorage endEditing];
         
         // Construct the print operation and setup Print panel
         NSPrintOperation *op = [NSPrintOperation printOperationWithView:printableView
