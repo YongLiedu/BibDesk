@@ -1043,7 +1043,6 @@ enum {
     BibItem *bibItem;
     NSString *origStr;
 	NSString *complexStr;
-    NSError *error = nil;
 	unsigned number = 0;
 	
     while(bibItem = [pubE nextObject]){

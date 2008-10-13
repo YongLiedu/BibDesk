@@ -699,7 +699,6 @@ enum {
 
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent {
     NSMenu *menu = [super menuForEvent:theEvent];
-    NSMenuItem *menuItem = [menu itemAtIndex:[menu indexOfItemWithTarget:[self tableView] andAction:@selector(autosizeColumn:)]];
     NSPoint clickPoint = [self convertPoint:[[NSApp currentEvent] locationInWindow] fromView:nil];
     columnForMenu = [self columnAtPoint:clickPoint];
     return menu;
