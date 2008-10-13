@@ -54,7 +54,7 @@ typedef struct _BDSKTeXTaskFlags {
     volatile int32_t hasRTFData;
 } BDSKTeXTaskFlags;
 
-@class BDSKTeXPath;
+@class BDSKTeXPath, BDSKTask;
 
 @interface BDSKTeXTask : NSObject {	
     NSString *texTemplatePath;
@@ -64,7 +64,7 @@ typedef struct _BDSKTeXTaskFlags {
 	id delegate;
     NSInvocation *taskShouldStartInvocation;
     NSInvocation *taskFinishedInvocation;
-    NSTask *currentTask;
+    BDSKTask *currentTask;
 	
     BDSKTeXTaskFlags flags;
 

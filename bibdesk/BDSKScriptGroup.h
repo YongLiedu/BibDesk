@@ -41,7 +41,7 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import "BDSKOwnerProtocol.h"
 
-@class OFMessageQueue, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
+@class OFMessageQueue, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes, BDSKTask;
 
 enum {
     BDSKShellScriptType,
@@ -60,9 +60,9 @@ extern BOOL BDSKIsExecutableFileAtPath(NSString *path);
     int scriptType;
     BOOL isRetrieving;
     BOOL failedDownload;
-    NSTask *currentTask;
+    BDSKTask *currentTask;
     NSString *workingDirPath;
-    NSMutableData *stdoutData;
+    NSData *stdoutData;
     OFSimpleLockType processingLock;    
     OFSimpleLockType currentTaskLock;
     BDSKItemSearchIndexes *searchIndexes;

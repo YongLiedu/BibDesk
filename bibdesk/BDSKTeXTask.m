@@ -47,6 +47,7 @@
 #import <libkern/OSAtomic.h>
 #import "NSSet_BDSKExtensions.h"
 #import "NSInvocation_BDSKExtensions.h"
+#import "BDSKTask.h"
 
 @interface BDSKTeXPath : NSObject
 {
@@ -691,53 +692,21 @@ static double runLoopTimeout = 30;
 }
 
 - (int)runTask:(NSString *)binPath withArguments:(NSArray *)arguments{
-    
-    int rv = 0;
-    
-    // NSTask raises exceptions for many reasons, so wrap all NSTask usage in an exception handler.  We don't want to jump past the caller and leave status flags and the data file lock in an inconsistent state.
-    @try {
-        currentTask = [[NSTask alloc] init];
+    currentTask = [[BDSKTask alloc] init];
         [currentTask setCurrentDirectoryPath:[texPath workingDirectory]];
         [currentTask setLaunchPath:binPath];
         [currentTask setArguments:arguments];
         [currentTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
         [currentTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
-        [currentTask launch];
         
-        if (rv == 0) {
-            NSTimeInterval stopTime = [NSDate timeIntervalSinceReferenceDate] + runLoopTimeout;
-            NSDate *limitDate = [NSDate dateWithTimeIntervalSinceReferenceDate:stopTime];
+    int rv = 0;
             
-            // we're basically doing what -[NSTask waitUntilExit] does, with the additional twist of a hard limit on the time a process can run (30 seconds for a LaTeX run is a long time, even on a slow machine)
-            BOOL run;    
-            NSRunLoop *rl = [NSRunLoop currentRunLoop];
-            do {
-                NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
-                run = [currentTask isRunning] && now < stopTime && [rl runMode:NSDefaultRunLoopMode beforeDate:limitDate];
-            } while (run);
+    [currentTask launch];
+    [currentTask waitUntilExit];
+    rv = [currentTask terminationStatus];
             
-            // isRunning may return NO before the task has terminated, so we need to make sure it's done or NSTask will raise
-            [currentTask terminate];
-            
-            // @@ next call will raise an exception, so we'll pick up additional log info in the handler
-            if ([currentTask isRunning])
-                NSLog(@"%@ is still running", [currentTask launchPath]);
-            
-            // this call will raise if the SIGTERM failed
-            if (0 != [currentTask terminationStatus])
-                rv = 1;
-        }
-    }
-    @catch(id exception) {
-        if([currentTask isRunning])
-            [currentTask terminate];
-        NSLog(@"%@: task %@ failed with exception %@", self, [currentTask launchPath], exception);
-        rv = 2;
-    }
-    @finally {
         [currentTask release];
         currentTask = nil;
-    }
     
     return rv;
 }

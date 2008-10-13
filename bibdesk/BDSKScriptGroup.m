@@ -54,6 +54,7 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKItemSearchIndexes.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "BDSKTask.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
 
@@ -520,7 +521,7 @@ static OFMessageQueue *messageQueue = nil;
     @try {
         
         OFSimpleLock(&currentTaskLock);
-        currentTask = [[NSTask allocWithZone:[self zone]] init];    
+        currentTask = [[BDSKTask allocWithZone:[self zone]] init];    
         [currentTask setStandardError:[NSFileHandle fileHandleWithStandardError]];
         [currentTask setLaunchPath:path];
         [currentTask setCurrentDirectoryPath:workingDirPath];
