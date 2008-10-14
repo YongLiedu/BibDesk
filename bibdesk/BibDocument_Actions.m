@@ -545,7 +545,7 @@
     
     NSString *lyxCmd = [NSString stringWithFormat:@"echo LYXCMD:BibDesk:citation-insert:%@ > \"%@\"", cites, lyxPipePath];
     
-    [NSTask runShellCommand:lyxCmd withInputString:nil];
+    [NSTask launchedTaskWithLaunchPath:@"/bin/sh" arguments:[NSArray arrayWithObjects:@"-c", lyxCmd, nil]];
 }
 - (IBAction)postItemToWeblog:(id)sender{
 
