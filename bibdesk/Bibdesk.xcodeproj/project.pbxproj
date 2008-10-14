@@ -182,6 +182,7 @@
 		CE3B5E7D09CEDE470017D339 /* BDSKMacroResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */; };
 		CE3B682B09D1B0190017D339 /* BDSKImagePopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */; };
 		CE3B682D09D1B0190017D339 /* BDSKImagePopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */; };
+		CE3C02A10EA54C650002AD5B /* KFAppleScriptHandlerAdditionsCore.m in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8B08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */; };
 		CE416B760CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE416B740CE5E25B00AAB04C /* BDSKBookmarkOutlineView.m */; };
 		CE4241360D0EAE0B00F824E7 /* BDSKEditorTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4241340D0EAE0B00F824E7 /* BDSKEditorTableView.m */; };
 		CE4241450D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4241430D0EAEFE00F824E7 /* BDSKEditorTextFieldCell.m */; };
@@ -3928,6 +3929,7 @@
 				CE3402750E014B3800A7FFE6 /* NSNumber_BDSKExtensions.m in Sources */,
 				F9C50D8B0EA3A2D6009FE098 /* BDSKTask.m in Sources */,
 				CE7611530EA49B6E00301E45 /* BDSKPrintableView.m in Sources */,
+				CE3C02A10EA54C650002AD5B /* KFAppleScriptHandlerAdditionsCore.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
