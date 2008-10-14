@@ -337,17 +337,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
     [printInfo setTopMargin:20.0];
     [printInfo setBottomMargin:20.0];
     
-    NSTextView *printableView = [[NSTextView alloc] initWithFrame:[printInfo imageablePageBounds]];
-    NSTextStorage *textStorage = [printableView textStorage];
-    [printableView setVerticallyResizable:YES];
-    [printableView setHorizontallyResizable:NO];
+    BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initWithString:string color:color printInfo:printInfo];
     [printableView setTextContainerInset:NSMakeSize(20.0, 20.0)];
-    
-    [textStorage beginEditing];
-    [[textStorage mutableString] setString:string];
-    [textStorage addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [textStorage length])];
-    [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, [textStorage length])];
-    [textStorage endEditing];
 	
     NSMutableData *data = [NSMutableData data];
     NSPrintOperation *printOperation = [NSPrintOperation PDFOperationWithView:printableView insideRect:[printableView bounds] toData:data printInfo:printInfo];

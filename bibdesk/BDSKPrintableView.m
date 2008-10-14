@@ -54,18 +54,25 @@
     return self;
 }
 
-- (id)initWithString:(NSString *)string printInfo:(NSPrintInfo *)printInfo {
+- (id)initWithString:(NSString *)string color:(NSColor *)color printInfo:(NSPrintInfo *)printInfo {
     if (self = [self initWithFrame:[(printInfo ?: [NSPrintInfo sharedPrintInfo]) imageablePageBounds]]) {
         [self setVerticallyResizable:YES];
         [self setHorizontallyResizable:NO];
-        if (string) {
+        if (string || color) {
             [[self textStorage] beginEditing];
             [[[self textStorage] mutableString] setString:string];
-            [[self textStorage] addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [[self textStorage] length])];
+            if (string)
+                [[self textStorage] addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [[self textStorage] length])];
+            if (color)
+                [[self textStorage] addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, [[self textStorage] length])];
             [[self textStorage] endEditing];
         }
     }
     return self;
+}
+
+- (id)initWithString:(NSString *)string printInfo:(NSPrintInfo *)printInfo {
+    return [self initWithString:string color:nil printInfo:printInfo];
 }
 
 - (BOOL)knowsPageRange:(NSRangePointer)range {
