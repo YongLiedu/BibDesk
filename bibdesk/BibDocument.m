@@ -50,7 +50,7 @@
 #import "BDSKGroupsArray.h"
 
 #import "BDSKUndoManager.h"
-#import "MultiplePageView.h"
+#import "BDSKPrintableView.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringEncodingManager.h"
@@ -3548,7 +3548,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 }
 
 - (NSView *)printableView{
-    NSTextView *printableView = [[[NSTextView alloc] initWithFrame:[[self printInfo] imageablePageBounds]] autorelease];
+    NSTextView *printableView = [[[BDSKPrintableView alloc] initWithFrame:[[self printInfo] imageablePageBounds]] autorelease];
     NSTextStorage *textStorage = [printableView textStorage];
     NSAttributedString *attrString = nil;
     NSString *string = nil;

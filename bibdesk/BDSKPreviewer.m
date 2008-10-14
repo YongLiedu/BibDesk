@@ -50,6 +50,7 @@
 #import "BDSKAsynchronousDOServer.h"
 #import "BDSKDocumentController.h"
 #import "NSImage_BDSKExtensions.h"
+#import "BDSKPrintableView.h"
 
 static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
@@ -304,7 +305,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
     if([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0){
         [pdfView printWithInfo:[NSPrintInfo sharedPrintInfo] autoRotate:NO];
     }else{
-        NSTextView *printableView = [[[NSTextView alloc] initWithFrame:[[NSPrintInfo sharedPrintInfo] imageablePageBounds]] autorelease];
+        NSTextView *printableView = [[[BDSKPrintableView alloc] initWithFrame:[[NSPrintInfo sharedPrintInfo] imageablePageBounds]] autorelease];
         NSTextStorage *textStorage = [printableView textStorage];
         [printableView setVerticallyResizable:YES];
         [printableView setHorizontallyResizable:NO];
