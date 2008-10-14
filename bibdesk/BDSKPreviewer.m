@@ -305,23 +305,20 @@ static BDSKPreviewer *sharedPreviewer = nil;
     if([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0){
         [pdfView printWithInfo:[NSPrintInfo sharedPrintInfo] autoRotate:NO];
     }else{
-        NSTextView *printableView = [[[BDSKPrintableView alloc] initWithFrame:[[NSPrintInfo sharedPrintInfo] imageablePageBounds]] autorelease];
-        NSTextStorage *textStorage = [printableView textStorage];
-        [printableView setVerticallyResizable:YES];
-        [printableView setHorizontallyResizable:NO];
-        [textStorage beginEditing];
-        [textStorage setAttributedString:[rtfPreviewView textStorage]];    
-        [textStorage endEditing];
-        
-        NSPrintInfo *printInfo = [[[NSPrintInfo sharedPrintInfo] copy] autorelease];
+        NSPrintInfo *printInfo = [[NSPrintInfo sharedPrintInfo] copy];
         [printInfo setHorizontalPagination:NSFitPagination];
         [printInfo setHorizontallyCentered:NO];
         [printInfo setVerticallyCentered:NO];
+        
+        NSView *printableView = [[BDSKPrintableView alloc] initWithAttributedString:[rtfPreviewView textStorage] printInfo:printInfo];
         
         // Construct the print operation and setup Print panel
         NSPrintOperation *op = [NSPrintOperation printOperationWithView:printableView printInfo:printInfo];
         [op setShowPanels:YES];
         [op setCanSpawnSeparateThread:YES];
+        
+        [printableView release];
+        [printInfo release];
         
         // Run operation, which shows the Print panel if showPanels was YES
         [op runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:NULL];

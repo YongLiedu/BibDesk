@@ -3547,45 +3547,39 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
         [super printDocument:sender];
 }
 
-- (NSView *)printableView{
-    NSTextView *printableView = [[[BDSKPrintableView alloc] initWithFrame:[[self printInfo] imageablePageBounds]] autorelease];
-    NSTextStorage *textStorage = [printableView textStorage];
+- (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
     NSAttributedString *attrString = nil;
     NSString *string = nil;
-    [printableView setVerticallyResizable:YES];
-    [printableView setHorizontallyResizable:NO];
-    if (bottomPreviewDisplay == BDSKPreviewDisplayText) {
+    if (bottomPreviewDisplay == BDSKPreviewDisplayText)
         attrString = [bottomPreviewTextView textStorage];
-    } else if (sidePreviewDisplay == BDSKPreviewDisplayText) {
+    else if (sidePreviewDisplay == BDSKPreviewDisplayText)
         attrString = [sidePreviewTextView textStorage];
-    } else {
+    else
         // this occurs only when both FileViews are displayed, probably never happens
         string = [self bibTeXStringForPublications:[self selectedPublications]];
-    }
-    if (attrString == nil && string == nil)
-        string = NSLocalizedString(@"Error: nothing to print from document preview", @"printing error");
-    [textStorage beginEditing];
-    if (attrString) {
-        [textStorage setAttributedString:attrString];
-    } else {
-        [[textStorage mutableString] setString:string];
-        [textStorage addAttribute:NSFontAttributeName value:[NSFont userFontOfSize:0.0] range:NSMakeRange(0, [textStorage length])];
-    }
-    [textStorage endEditing];
-    return printableView;
-}
-
-- (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
+    
     NSPrintInfo *info = [[self printInfo] copy];
     [[info dictionary] addEntriesFromDictionary:printSettings];
     [info setHorizontalPagination:NSFitPagination];
     [info setHorizontallyCentered:NO];
     [info setVerticallyCentered:NO];
-    NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:[self printableView] printInfo:info];
+    
+    NSTextView *printableView = nil;
+    if (attrString)
+        printableView = [[BDSKPrintableView alloc] initWithAttributedString:attrString printInfo:info];
+    else
+        printableView = [[BDSKPrintableView alloc] initWithString:string printInfo:info];
+    if (attrString == nil && string == nil)
+        string = NSLocalizedString(@"Error: nothing to print from document preview", @"printing error");
+    
+    NSPrintOperation *printOperation = [NSPrintOperation printOperationWithView:printableView printInfo:info];
+    [printableView release];
     [info release];
+    
     NSPrintPanel *printPanel = [printOperation printPanel];
     if ([printPanel respondsToSelector:@selector(setOptions:)])
         [printPanel setOptions:NSPrintPanelShowsCopies | NSPrintPanelShowsPageRange | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling | NSPrintPanelShowsPreview];
+    
     return printOperation;
 }
 
