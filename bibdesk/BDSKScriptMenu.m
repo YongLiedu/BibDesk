@@ -237,14 +237,15 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 			scriptName = [scriptName stringByRemovingSuffix:@".scpt"];
 			scriptName = [scriptName stringByRemovingSuffix:@".scptd"];
 			scriptName = [scriptName stringByRemovingSuffix:@".applescript"];
-			
+			NSString *showScriptName = [NSString stringWithFormat:NSLocalizedString(@"Show %@", @"menu item title"), scriptName];
+            
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptName action:@selector(executeScript:) keyEquivalent:@""];
 			[item setTarget:self];
 			[item setEnabled:YES];
 			[item setRepresentedObject:scriptFilename];
 			[menu addItem:item];
 			[item release];
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptName action:@selector(openScript:) keyEquivalent:@""];
+			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:showScriptName action:@selector(openScript:) keyEquivalent:@""];
 			[item setKeyEquivalentModifierMask:NSAlternateKeyMask];
 			[item setTarget:self];
 			[item setEnabled:YES];
