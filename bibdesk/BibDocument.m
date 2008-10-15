@@ -3075,43 +3075,34 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     if (maxItems > 0 && [items count] > maxItems)
         items = [items subarrayWithRange:NSMakeRange(0, maxItems)];
     
+    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle] ?: [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
+    NSAttributedString *templateString = nil;
+    
+    // make sure this is really one of the attributed string types...
+    if([template templateFormat] & BDSKRichTextTemplateFormat){
+        templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
+    } else if([template templateFormat] & BDSKPlainTextTemplateFormat){
+        // parse as plain text, so the HTML is interpreted properly by NSAttributedString
+        NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
+        // we generally assume UTF-8 encoding for all template-related files
+        if ([template templateFormat] == BDSKPlainHTMLTemplateFormat)
+            templateString = [[[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL] autorelease];
+        else
+            templateString = [[[NSAttributedString alloc] initWithString:str attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSFont userFontOfSize:0.0], NSFontAttributeName, nil]] autorelease];
+    }
+    
     // do this _before_ messing with the text storage; otherwise you can have a leftover selection that ends up being out of range
     static NSArray *zeroRanges = nil;
     if (zeroRanges == nil) zeroRanges = [[NSArray alloc] initWithObjects:[NSValue valueWithRange: NSMakeRange(0, 0)], nil];
     
     NSTextStorage *textStorage = [textView textStorage];
     [textView setSelectedRanges:zeroRanges];
-    
-    NSLayoutManager *layoutManager = [[textStorage layoutManagers] lastObject];
-    [layoutManager retain];
-    [textStorage removeLayoutManager:layoutManager]; // optimization: make sure the layout manager doesn't do any work while we're loading
-    
     [textStorage beginEditing];
-    
-    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle] ?: [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
-    
-    // make sure this is really one of the attributed string types...
-    if([template templateFormat] & BDSKRichTextTemplateFormat){
-        NSAttributedString *templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
+    if (templateString)
         [textStorage setAttributedString:templateString];
-    } else if([template templateFormat] & BDSKPlainTextTemplateFormat){
-        // parse as plain text, so the HTML is interpreted properly by NSAttributedString
-        NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
-        // we generally assume UTF-8 encoding for all template-related files
-        NSAttributedString *templateString = nil;
-        if ([template templateFormat] == BDSKPlainHTMLTemplateFormat)
-            templateString = [[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
-        else
-            templateString = [[NSAttributedString alloc] initWithString:str attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSFont systemFontOfSize:0.0], NSFontAttributeName, nil]];
-        [textStorage setAttributedString:templateString];
-        [templateString release];
-    } else {
+    else
         [[textStorage mutableString] setString:@""];
-    }
-    
     [textStorage endEditing];
-    [textStorage addLayoutManager:layoutManager];
-    [layoutManager release];
     
     if([NSString isEmptyString:[searchField stringValue]] == NO)
         [textView highlightComponentsOfSearchString:[searchField stringValue]];    
