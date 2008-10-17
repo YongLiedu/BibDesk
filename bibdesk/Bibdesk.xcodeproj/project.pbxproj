@@ -1025,7 +1025,7 @@
 		CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGroupCell.h; sourceTree = "<group>"; };
 		CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupCell.m; sourceTree = "<group>"; };
 		CE2BB58F0E0BE0EA0090E848 /* PDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PDFKit.framework; path = /System/Library/Frameworks/Quartz.framework/Frameworks/PDFKit.framework; sourceTree = "<absolute>"; };
-		CE2BB5920E0BE1370090E848 /* FileView.framework */ = {isa = PBXFileReference; path = FileView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE2BB5920E0BE1370090E848 /* FileView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FileView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE2C16F80A0A149E006F0A73 /* gear2.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear2.tiff; sourceTree = "<group>"; };
 		CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = importFolderIcon.tiff; sourceTree = "<group>"; };
 		CE2E78CA0D40F6BB00340B39 /* BDSKMultiValueDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMultiValueDictionary.h; sourceTree = "<group>"; };
@@ -1212,7 +1212,7 @@
 		CE9DBEDE093CF2640008648B /* BDSKBibliographyCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBibliographyCommand.m; sourceTree = "<group>"; };
 		CE9F853E0956A2C50073FCAD /* BDSKFieldEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFieldEditor.h; sourceTree = "<group>"; };
 		CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFieldEditor.m; sourceTree = "<group>"; };
-		CEA451600E47C88E00D161AD /* SkimNotes.framework */ = {isa = PBXFileReference; path = SkimNotes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEA451600E47C88E00D161AD /* SkimNotes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SkimNotes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEAB9F570B4FF20800673AC2 /* BDSKCitationFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCitationFormatter.h; sourceTree = "<group>"; };
 		CEAB9F580B4FF20800673AC2 /* BDSKCitationFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCitationFormatter.m; sourceTree = "<group>"; };
 		CEAC484E0A96589A00B8DF43 /* BDSKTemplatedTextCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTemplatedTextCommand.h; sourceTree = "<group>"; };
