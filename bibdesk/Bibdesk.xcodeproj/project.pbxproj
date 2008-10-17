@@ -1384,7 +1384,7 @@
 		F9022D150758066000C3F701 /* CharacterConversion.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = CharacterConversion.plist; sourceTree = "<group>"; };
 		F9022D180758066000C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = English; path = English.lproj/ReadMe.rtf; sourceTree = "<group>"; };
 		F9022D1B0758066000C3F701 /* TypeInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = TypeInfo.plist; sourceTree = "<group>"; };
-		F9022D2C0758069E00C3F701 /* BibDeskInputManager */ = {isa = PBXFileReference; lastKnownFileType = text; path = BibDeskInputManager; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9022D2C0758069E00C3F701 /* BibDeskInputManager */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BibDeskInputManager; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9022D4B0758073E00C3F701 /* direct.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = direct.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/direct.cfg; sourceTree = SOURCE_ROOT; };
 		F9022D4D0758073E00C3F701 /* english.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = english.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/english.cfg; sourceTree = SOURCE_ROOT; };
 		F9022D510758073E00C3F701 /* fonts.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = fonts.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/fonts.cfg; sourceTree = SOURCE_ROOT; };
