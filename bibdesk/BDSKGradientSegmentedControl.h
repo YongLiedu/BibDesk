@@ -45,5 +45,6 @@
 @interface BDSKGradientSegmentedCell : NSSegmentedCell {
     CGLayerRef layer;
     CGLayerRef selectedLayer;
+    CGLayerRef highlightedLayer;
 }
 @end
