@@ -522,8 +522,14 @@
     if ([self numberOfSelectedPubs] == 0)
         return;
     
-    NSString *lyxPipePath = [[NSFileManager defaultManager] newestLyXPipePath];
+    NSString *lyxPipePath = [[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKLyXPipePath"];
+    NSFileManager *fm = [NSFileManager defaultManager];
     int fd = 0;
+    
+    if (lyxPipePath && [[lyxPipePath pathExtension] length] == 0)
+        lyxPipePath = [lyxPipePath stringByAppendingPathExtension:@"in"];
+    if (lyxPipePath == nil || [fm fileExistsAtPath:lyxPipePath] == NO)
+        lyxPipePath = [fm newestLyXPipePath];
     
     if (lyxPipePath == nil) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Find LyX Pipe", @"Message in alert dialog when LyX pipe cannot be found")
