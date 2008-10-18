@@ -102,6 +102,12 @@
 @end
 
 
+
+@interface NSSegmentedCell (BDSKApplePrivateDeclarations)
+- (int)_trackingSegment;
+- (NSRect)_boundsForCellFrame:(NSRect)frame;
+@end
+
 @implementation BDSKGradientSegmentedCell
 
 - (void)dealloc {
@@ -109,6 +115,8 @@
         CGLayerRelease(layer);
     if (selectedLayer != NULL)
         CGLayerRelease(selectedLayer);
+    if (highlightedLayer != NULL)
+        CGLayerRelease(highlightedLayer);
     [super dealloc];
 }
 
@@ -135,7 +143,7 @@
     
     // see bug #1834337; drawing the status bar gradient is apparently really expensive on some hardware
     // suggestion from Scott Thompson on quartz-dev was to use a CGLayer; based on docs, this should be a good win
-    if (NULL == layer || NULL == selectedLayer) {
+    if (NULL == layer || NULL == selectedLayer || NULL == highlightedLayer) {
         NSSize layerSize = NSMakeSize(1.0, SEGMENTED_CONTROL_HEIGHT);
         NSRect layerRect = {NSZeroPoint, layerSize};
         CGContextRef layerContext;
@@ -144,6 +152,7 @@
         
         layer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
         selectedLayer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
+        highlightedLayer = CGLayerCreateWithContext(viewContext, *(CGSize *)&layerSize, NULL);
         
         if ([controlView isFlipped]) {
             startColor = [CIColor colorWithWhite:0.9];
@@ -172,11 +181,25 @@
         [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:layerContext flipped:NO]];
         [[NSBezierPath bezierPathWithRect:layerRect] fillPathVerticallyWithStartColor:startColor endColor:endColor];
         [NSGraphicsContext restoreGraphicsState];
+        
+        if ([controlView isFlipped]) {
+            startColor = [CIColor colorWithWhite:0.45];
+            endColor = [CIColor colorWithWhite:0.6];
+        } else {
+            startColor = [CIColor colorWithWhite:0.6];
+            endColor = [CIColor colorWithWhite:0.45];
+        }
+        
+        layerContext = CGLayerGetContext(highlightedLayer);
+        [NSGraphicsContext saveGraphicsState];
+        [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:layerContext flipped:NO]];
+        [[NSBezierPath bezierPathWithRect:layerRect] fillPathVerticallyWithStartColor:startColor endColor:endColor];
+        [NSGraphicsContext restoreGraphicsState];
     }
     
     [NSGraphicsContext saveGraphicsState];
     CGContextSetBlendMode(viewContext, kCGBlendModeNormal);
-    CGContextDrawLayerInRect(viewContext, *(CGRect *)&frame, [self isSelectedForSegment:segment] ? selectedLayer : layer);
+    CGContextDrawLayerInRect(viewContext, *(CGRect *)&frame, [self _trackingSegment] == segment ? highlightedLayer : [self isSelectedForSegment:segment] ? selectedLayer : layer);
     [NSGraphicsContext restoreGraphicsState];
     
     NSImage *image = [self imageForSegment:segment];
