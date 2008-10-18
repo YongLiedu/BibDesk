@@ -356,20 +356,19 @@ static void destroyTemporaryDirectory()
 }
 
 - (NSString *)newestLyXPipePath {
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *appSupportPath = [fm applicationSupportDirectory:kUserDomain];
-    NSDirectoryEnumerator *dirEnum = [fm enumeratorAtPath:appSupportPath];
+    NSString *appSupportPath = [self applicationSupportDirectory:kUserDomain];
+    NSDirectoryEnumerator *dirEnum = [self enumeratorAtPath:appSupportPath];
     NSString *file;
     NSString *lyxPipePath = nil;
     BDSKVersionNumber *version = nil;
     
     while (file = [dirEnum nextObject]) {
         NSString *fullPath = [appSupportPath stringByAppendingPathComponent:file];
-        NSDictionary *fileAttributes = [fm fileAttributesAtPath:fullPath traverseLink:YES];
+        NSDictionary *fileAttributes = [self fileAttributesAtPath:fullPath traverseLink:YES];
         if ([[fileAttributes fileType] isEqualToString:NSFileTypeDirectory]) {
             [dirEnum skipDescendents];
             NSString *pipePath = [fullPath stringByAppendingPathComponent:@".lyxpipe.in"];
-            if ([file hasPrefix:@"LyX"] && [fm fileExistsAtPath:pipePath]) {
+            if ([file hasPrefix:@"LyX"] && [self fileExistsAtPath:pipePath]) {
                 if (version == nil) {
                     lyxPipePath = pipePath;
                 } else {
@@ -388,7 +387,7 @@ static void destroyTemporaryDirectory()
     }
     if (lyxPipePath == nil) {
         NSString *pipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
-        if ([fm fileExistsAtPath:pipePath])
+        if ([self fileExistsAtPath:pipePath])
             lyxPipePath = pipePath;
     }
     return lyxPipePath;
