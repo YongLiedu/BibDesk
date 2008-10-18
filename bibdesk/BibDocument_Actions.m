@@ -83,7 +83,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPreviewer.h"
 #import "BDSKFileMigrationController.h"
-
+#import <sys/stat.h>
 #import <FileView/FVPreviewer.h>
 
 @implementation BibDocument (Actions)
@@ -523,30 +523,54 @@
         return;
     
     NSString *lyxPipePath = [[NSFileManager defaultManager] newestLyXPipePath];
+    int fd = 0;
     
     if (lyxPipePath == nil) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Find LyX Pipe", @"Message in alert dialog when LyX pipe cannot be found")
                                          defaultButton:nil
                                        alternateButton:nil
                                            otherButton:nil
-                            informativeTextWithFormat:NSLocalizedString(@"BibDesk was unable to find the LyX pipe." , @"Informative text in alert dialog")];
+                             informativeTextWithFormat:NSLocalizedString(@"BibDesk was unable to find the LyX pipe." , @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-        return;
+        
     }
-    
-    NSEnumerator *itemEnum = [[self selectedPublications] objectEnumerator];
-    BibItem *item;
-    NSMutableString *cites = [NSMutableString string];
-    
-    while (item = [itemEnum nextObject]) {
-        if ([cites length] > 0) [cites appendString:@","];
-        [cites appendString:[item citeKey]];
+    // open non-blocking, so we don't hang if the pipe goes away
+    else if (-1 != (fd = open([lyxPipePath fileSystemRepresentation], O_WRONLY | O_NONBLOCK))) {
+        
+        // check to see if the file is a named pipe; if not, continue anyway, since it is open for writing
+        struct stat sb;
+        if (fstat(fd, &sb) != 0 || (sb.st_mode & S_IFMT) != S_IFIFO) {
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid LyX Pipe", @"Alert dialog title") 
+                                             defaultButton:nil 
+                                           alternateButton:nil 
+                                               otherButton:nil 
+                                 informativeTextWithFormat:NSLocalizedString(@"The file at \"%@\" does not look like a LyX pipe.  You should quit LyX and possibly remove the file manually if this error persists.", @"Alert dialog text"), lyxPipePath];
+            [alert beginSheetModalForWindow:[self windowForSheet] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        }
+        else {
+            NSArray *citeKeys = [[self selectedPublications] valueForKey:@"citeKey"];
+            NSMutableString *cites = [NSMutableString stringWithString:@"LYXCMD:BibDesk:citation-insert:"];
+            [cites appendString:[citeKeys componentsJoinedByString:@","]];
+            // pipe uses line buffering, so append a newline
+            [cites appendString:@"\n"];
+            
+            // presumably the LyX document uses the same encoding as the .bib file, but citekeys should be 7 bit ASCII anyway
+            NSData *data = [cites dataUsingEncoding:[self documentStringEncoding]];
+            
+            sig_t sig = signal(SIGPIPE, SIG_IGN);
+            ssize_t len = write(fd, [data bytes], [data length]);
+            if (len != (ssize_t)[data length])
+                NSLog(@"Failed to write all data to LyX pipe \"%@\" (%d of %d bytes written)", lyxPipePath, len, [data length]);
+            signal(SIGPIPE, sig);
+        }
+        
+        close(fd);
+        
+    } else if (-1 == fd) {
+        NSLog(@"Failed to open() LyX pipe \"%@\" (%s)", lyxPipePath, strerror(errno));
     }
-    
-    NSString *lyxCmd = [NSString stringWithFormat:@"echo LYXCMD:BibDesk:citation-insert:%@ > \"%@\"", cites, lyxPipePath];
-    
-    [NSTask launchedTaskWithLaunchPath:@"/bin/sh" arguments:[NSArray arrayWithObjects:@"-c", lyxCmd, nil]];
 }
+
 - (IBAction)postItemToWeblog:(id)sender{
 
 	[NSException raise:BDSKUnimplementedException
