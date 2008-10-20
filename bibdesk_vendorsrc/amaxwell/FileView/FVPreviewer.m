@@ -97,7 +97,7 @@
         // Finder hides QL when it loses focus, then restores when it regains it; we can't do that easily, so just get rid of it
         [nc addObserver:self selector:@selector(stopPreview:) name:NSApplicationWillHideNotification object:nil];
         [nc addObserver:self selector:@selector(stopPreview:) name:NSApplicationWillResignActiveNotification object:nil];
-        [nc addObserver:self selector:@selector(stopPreview:) name:NSApplicationWillTerminateNotification object:nil];
+        [nc addObserver:self selector:@selector(appTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
     return self;
 }
@@ -109,6 +109,14 @@
     // forgot to set this in the nib; needed for viewing icons
     [[self window] setMinSize:[[self window] frame].size];
     [[self window] setDelegate:self];
+    
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"FVPreviewerPDFScaleFactor"]) {
+        float pdfScaleFactor = [[NSUserDefaults standardUserDefaults] floatForKey:@"FVPreviewerPDFScaleFactor"];
+        if (pdfScaleFactor > 0.0)
+            [pdfView setScaleFactor:pdfScaleFactor];
+        else
+            [pdfView setAutoScales:YES];
+    }
     
     id animation = [NSClassFromString(@"CABasicAnimation") animation];
     if (animation && [[self window] respondsToSelector:@selector(setAnimations:)]) {
@@ -150,6 +158,13 @@
         [qlTask terminate];
     [[self window] orderOut:self];
     [self setWebViewContextMenuDelegate:nil];
+}
+
+- (void)appTerminate:(NSNotification *)note
+{
+    if (pdfView)
+        [[NSUserDefaults standardUserDefaults] setFloat:([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]) forKey:@"FVPreviewerPDFScaleFactor"];
+    [self stopPreview:note];
 }
 
 - (NSString *)windowNibName { return @"FVPreviewer"; }
