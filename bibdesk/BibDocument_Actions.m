@@ -543,14 +543,14 @@
     // open non-blocking, so we don't hang if the pipe goes away
     else if (-1 != (fd = open([lyxPipePath fileSystemRepresentation], O_WRONLY | O_NONBLOCK))) {
         
-        // check to see if the file is a named pipe; if not, continue anyway, since it is open for writing
+        // check to see if the file is a named pipe; if not, show an error and close the file
         struct stat sb;
         if (fstat(fd, &sb) != 0 || (sb.st_mode & S_IFMT) != S_IFIFO) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid LyX Pipe", @"Alert dialog title") 
                                              defaultButton:nil 
                                            alternateButton:nil 
                                                otherButton:nil 
-                                 informativeTextWithFormat:NSLocalizedString(@"The file at \"%@\" does not look like a LyX pipe.  You should quit LyX and possibly remove the file manually if this error persists.", @"Alert dialog text"), lyxPipePath];
+                                 informativeTextWithFormat:NSLocalizedString(@"The file at \"%@\" does not look like a LyX pipe.  You should quit LyX and possibly remove the file manually if this error persists.", @"Alert dialog text, single string format specifier"), lyxPipePath];
             [alert beginSheetModalForWindow:[self windowForSheet] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         }
         else {
@@ -568,12 +568,65 @@
             if (len != (ssize_t)[data length])
                 NSLog(@"Failed to write all data to LyX pipe \"%@\" (%d of %d bytes written)", lyxPipePath, len, [data length]);
             signal(SIGPIPE, sig);
+            
+            // Now read the reply message from the server's output pipe; no stat() check on this, since it's not critical.
+            lyxPipePath = [[lyxPipePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"out"];
+            int reader = open([lyxPipePath fileSystemRepresentation], O_RDONLY | O_NONBLOCK);
+            
+            if (-1 != reader) {
+                
+                NSMutableData *replyData = [NSMutableData data];
+                char buf[1024];
+                ssize_t readLength;
+                sig = signal(SIGPIPE, SIG_IGN);
+                
+                // We passed O_NONBLOCK to open(), so block on the runloop with a short timeout in order to simulate a blocking read() on the pipe with a timeout.  Read() will only take this long in case of an error, in which case we'll probably get nothing out of the pipe anyway.
+                NSTimeInterval stopTime = [NSDate timeIntervalSinceReferenceDate] + 1.0;
+                
+                do {
+                    readLength = read(reader, buf, sizeof(buf));
+                    if (readLength > 0) [replyData appendBytes:buf length:readLength];
+                    [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+                } while (readLength > 0 || (readLength == -1 && EAGAIN == errno && [NSDate timeIntervalSinceReferenceDate] <= stopTime));
+                signal(SIGPIPE, sig);
+                
+                if ([replyData length]) {
+                    
+                    // documented to return ASCII, so UTF-8 is okay (includes a trailing newline)
+                    NSString *reply = [[[NSString alloc] initWithData:replyData encoding:NSUTF8StringEncoding] autorelease];
+                    reply = [reply stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+                    
+                    // reply uses ERROR or INFO and whatever name and command we passed in
+                    if ([reply hasPrefix:@"ERROR:BibDesk:citation-insert:"]) {
+                        reply = [reply stringByRemovingPrefix:@"ERROR:BibDesk:citation-insert:"];
+                        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"LyX Error", @"Alert dialog title") 
+                                                         defaultButton:nil 
+                                                       alternateButton:nil 
+                                                           otherButton:nil 
+                                             informativeTextWithFormat:NSLocalizedString(@"LyX replied with the following error message:  \"%@\"", @"Alert dialog text, single string format specifier"), reply];
+                        [alert beginSheetModalForWindow:[self windowForSheet] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];                    
+                    }
+                }
+                
+                close(reader);
+                
+            } else {
+                NSLog(@"Failed to open() LyX pipe \"%@\" for reading (%s)", lyxPipePath, strerror(errno));
+            }            
         }
         
         close(fd);
         
     } else if (-1 == fd) {
-        NSLog(@"Failed to open() LyX pipe \"%@\" (%s)", lyxPipePath, strerror(errno));
+        // local copy of errno since Foundation calls can overwrite it...
+        int err = errno;
+        // not clear why this happens, but a user reported it and the fix was removing the fifo manually in Terminal
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid LyX Pipe", @"Alert dialog title") 
+                                         defaultButton:nil 
+                                       alternateButton:nil 
+                                           otherButton:nil 
+                             informativeTextWithFormat:NSLocalizedString(@"Unable to open the LyX pipe at \"%@\" for writing.  You should quit LyX and possibly remove the pipe manually if this error persists.  The underlying system error code was %d (%s).", @"Alert dialog text"), lyxPipePath, err, strerror(err)];
+        [alert beginSheetModalForWindow:[self windowForSheet] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
 }
 
