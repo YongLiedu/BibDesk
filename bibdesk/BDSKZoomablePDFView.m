@@ -353,9 +353,9 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (void)beginGestureWithEvent:(NSEvent *)theEvent {
-    startOfGesture = YES;
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super beginGestureWithEvent:theEvent];
+    startOfGesture = YES;
 }
 
 - (void)endGestureWithEvent:(NSEvent *)theEvent {
