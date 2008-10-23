@@ -47,7 +47,6 @@
 
 @interface NSString (BDSKMARCParserExtensions)
 - (BOOL)isMARCString;
-- (BOOL)isUNIMARCString;
 - (BOOL)isFormattedMARCString;
 - (BOOL)isMARCXMLString;
 - (NSString *)stringByFixingFormattedMARCStart;
@@ -74,7 +73,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 @implementation BDSKMARCParser
 
 + (BOOL)canParseString:(NSString *)string{
-	return [string isMARCString] || [string isUNIMARCString] || [string isFormattedMARCString] || [string isMARCXMLString];
+	return [string isMARCString] || [string isFormattedMARCString] || [string isMARCXMLString];
 }
 
 + (NSArray *)itemsFromFormattedMARCString:(NSString *)itemString error:(NSError **)outError{
@@ -186,7 +185,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     return returnArray;
 }
 
-+ (NSArray *)itemsFromMARCString:(NSString *)itemString isUNIMARC:(BOOL)isUNIMARC error:(NSError **)outError{
++ (NSArray *)itemsFromMARCString:(NSString *)itemString error:(NSError **)outError{
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
 	
@@ -197,6 +196,8 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     NSString *fieldTerminator = [NSString stringWithFormat:@"%C", 0x1E];
     NSString *subFieldIndicator = [NSString stringWithFormat:@"%C", 0x1F];
 	
+    BOOL isUNIMARC = [itemString characterAtIndex:23] == ' ';
+    
     NSArray *records = [itemString componentsSeparatedByString:recordTerminator];
     
     NSEnumerator *recordEnum = [records objectEnumerator];
@@ -287,8 +288,8 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
     BOOL isUNIMARC = NO;
-    if([itemString isMARCString] || (isUNIMARC = [itemString isUNIMARCString])){
-        return [self itemsFromMARCString:itemString isUNIMARC:isUNIMARC error:outError];
+    if([itemString isMARCString]){
+        return [self itemsFromMARCString:itemString error:outError];
     }else if([itemString isFormattedMARCString]){
         return [self itemsFromFormattedMARCString:itemString error:outError];
     }else if([itemString isMARCXMLString]){
@@ -400,23 +401,19 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 
 @implementation NSString (BDSKMARCParserExtensions)
 
+// Regexes:
+// MARC: @"^[0-9]{5}[a-z]{3}[ a][ a0-9]22[0-9]{5}[ 1-8uz][ a-z][ r]45[ 0A-Z]0([0-9]{12})+%C"
+// German libraries are converting from MAB to MARC, but they sometimes just leave the leader from the MAB2 format, so we'll accept that too
+// MAB: @"^[0-9]{5}[a-z][a-zA-Z0-9 \\-\\.]{4}[0-9]{7}[a-zA-Z0-9 \\-\\.]{6}[a-z]([0-9]{12})+%C"
+// UNIMARC: @"^[0-9]{5}[a-z]{3}[ 012][ a0-9]22[0-9]{5}[ 1-8uz][ a-z][ r]45[ 0A-Z] ([0-9]{12})+%C"
+// Formatted MARC: @"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+"
+
 - (BOOL)isMARCString{
     unsigned fieldTerminator = 0x1E;
-    NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[a-z]{3}[ a][ a0-9]22[0-9]{5}[ 1-8uz][ a-z][ r]45[ 0A-Z]0([0-9]{12})+%C", fieldTerminator];
+    NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[0-9a-zA-Z \\-\\.]{19}([0-9]{12})+%C", fieldTerminator];
     AGRegex *MARCRegex = [AGRegex regexWithPattern:pattern];
-    // German libraries are converting from MAB to MARC, but they sometimes just leave the leader from the MAB2 format, so we'll accept that too
-    pattern = [NSString stringWithFormat:@"^[0-9]{5}[a-z][a-zA-Z0-9 \\-\\.]{4}[0-9]{7}[a-zA-Z0-9 \\-\\.]{6}[a-z]([0-9]{12})+%C", fieldTerminator];
-    AGRegex *MABRegex = [AGRegex regexWithPattern:pattern];
     
-    return nil != [MARCRegex findInString:self] || nil != [MABRegex findInString:self];
-}
-
-- (BOOL)isUNIMARCString{
-    unsigned fieldTerminator = 0x1E;
-    NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[a-z]{3}[ 012][ a0-9]22[0-9]{5}[ 1-8uz][ a-z][ r]45[ 0A-Z] ([0-9]{12})+%C", fieldTerminator];
-    AGRegex *UNIMARCRegex = [AGRegex regexWithPattern:pattern];
-    
-    return nil != [UNIMARCRegex findInString:self] ;
+    return nil != [MARCRegex findInString:self];
 }
 
 - (BOOL)isFormattedMARCString{
