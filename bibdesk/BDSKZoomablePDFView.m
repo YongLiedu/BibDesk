@@ -46,6 +46,12 @@
 #import "NSScrollView_BDSKExtensions.h"
 
 
+@interface NSResponder (BDSKGesturesPrivate)
+- (void)magnifyWithEvent:(NSEvent *)theEvent;
+- (void)beginGestureWithEvent:(NSEvent *)theEvent;
+- (void)endGestureWithEvent:(NSEvent *)theEvent;
+@end
+
 @implementation BDSKZoomablePDFView
 
 /* For genstrings:
@@ -344,6 +350,28 @@ static float BDSKScaleMenuFontSize = 11.0;
     // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
     while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
     return cnt > 0;
+}
+
+- (void)beginGestureWithEvent:(NSEvent *)theEvent {
+    startOfGesture = YES;
+    if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
+        [super beginGestureWithEvent:theEvent];
+}
+
+- (void)endGestureWithEvent:(NSEvent *)theEvent {
+    startOfGesture = NO;
+    if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
+        [super endGestureWithEvent:theEvent];
+}
+
+- (void)magnifyWithEvent:(NSEvent *)theEvent {
+    if ([theEvent deltaZ] > 0.0) {
+        [self zoomIn:nil];
+        startOfGesture = NO;
+    } else if ([theEvent deltaZ] < 0.0) {
+        [self zoomOut:nil];
+        startOfGesture = NO;
+    }
 }
 
 #pragma mark Scrollview
