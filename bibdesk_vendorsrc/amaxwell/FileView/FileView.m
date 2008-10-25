@@ -2520,10 +2520,10 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
 }
 
 // scrollRectToVisible doesn't scroll the entire rect to visible
-- (void)scrollRectToVisible:(NSRect)aRect
+- (BOOL)scrollRectToVisible:(NSRect)aRect
 {
     NSRect visibleRect = [self visibleRect];
-
+    BOOL didScroll = NO;
     if (NSContainsRect(visibleRect, aRect) == NO) {
         
         CGFloat heightDifference = NSHeight(visibleRect) - NSHeight(aRect);
@@ -2534,9 +2534,10 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
             // force the top of the selectionRect to the top of the view
             aRect.size.height = NSHeight(visibleRect);
         }
-        [super scrollRectToVisible:aRect];
+        didScroll = [super scrollRectToVisible:aRect];
     }
-} 
+    return didScroll;
+}  
 
 - (IBAction)selectPreviousIcon:(id)sender;
 {
