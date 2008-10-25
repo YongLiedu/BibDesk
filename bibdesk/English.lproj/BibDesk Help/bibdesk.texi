@@ -1606,7 +1606,7 @@ the @uref{http://www.isiknowledge.com/,ISI Web of Knowledge}, and
 the @uref{http://dblp.uni-trier.de/,DBLP Computer Science Bibliography}.
 
 To search these databases, select @menutitle{New Search Group} 
-from the @menutitle{File} menu and select the desired search from 
+from the @menutitle{Searches} menu and select the desired search from 
 the menu that appears.
 
 @menu
