@@ -64,7 +64,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
         [type release];
     type = [[NSString alloc] initWithString:[NSString stringWithFourCharCode:theType]];
     
-    if (nameBuffer)
+    if (noErr == ResError())
         nameString = [[NSString alloc] initWithString:(NSString *)CFStringCreateWithPascalString(NULL, nameBuffer, kCFStringEncodingMacRoman)];
     else
         nameString = [[NSString alloc] initWithString:@""];
