@@ -41,6 +41,12 @@
 #import "BDSKHeaderPopUpButton.h"
 #import "NSScrollview_BDSKExtensions.h"
 
+@interface NSResponder (BDSKGesturesPrivate)
+- (void)magnifyWithEvent:(NSEvent *)theEvent;
+- (void)beginGestureWithEvent:(NSEvent *)theEvent;
+- (void)endGestureWithEvent:(NSEvent *)theEvent;
+@end
+
 @implementation BDSKZoomableTextView
 
 /* For genstrings:
@@ -246,6 +252,28 @@ static float BDSKScaleMenuFontSize = 11.0;
     [menu insertItemWithTitle:NSLocalizedString(@"Actual Size", @"Menu item title") action:@selector(zoomToActualSize:) keyEquivalent:@"" atIndex:0];
     
     return menu;
+}
+
+- (void)beginGestureWithEvent:(NSEvent *)theEvent {
+    if ([[BDSKZoomableTextView superclass] instancesRespondToSelector:_cmd])
+        [super beginGestureWithEvent:theEvent];
+    startOfGesture = YES;
+}
+
+- (void)endGestureWithEvent:(NSEvent *)theEvent {
+    startOfGesture = NO;
+    if ([[BDSKZoomableTextView superclass] instancesRespondToSelector:_cmd])
+        [super endGestureWithEvent:theEvent];
+}
+
+- (void)magnifyWithEvent:(NSEvent *)theEvent {
+    if ([theEvent deltaZ] > 0.0) {
+        [self zoomIn:nil];
+        startOfGesture = NO;
+    } else if ([theEvent deltaZ] < 0.0) {
+        [self zoomOut:nil];
+        startOfGesture = NO;
+    }
 }
 
 @end
