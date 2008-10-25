@@ -681,7 +681,7 @@ char DTFile::CharacterAtCurrentPosition(void) const
     return toReturn;
 }
 
-bool DTFile::CheckWriteErrorState(char *errStr) const
+bool DTFile::CheckWriteErrorState(const char *errStr) const
 {
     if (!IsOpen()) {
         DTErrorMessage(errStr,"No file");

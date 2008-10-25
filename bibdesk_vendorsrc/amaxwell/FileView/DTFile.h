@@ -135,7 +135,7 @@ public:
     void pinfo(void) const;
     
 private:
-    bool CheckWriteErrorState(char *) const;    
+    bool CheckWriteErrorState(const char *) const;    
     
     DTFileStorage *storage;
 };

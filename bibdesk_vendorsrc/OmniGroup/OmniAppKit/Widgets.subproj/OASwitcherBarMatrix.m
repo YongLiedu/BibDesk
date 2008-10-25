@@ -28,7 +28,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     return [self initWithFrame:frameRect mode:NSRadioModeMatrix cellClass:[OASwitcherBarButtonCell class] numberOfRows:0 numberOfColumns:0];
 }
 
-- (id)initWithFrame:(NSRect)frameRect mode:(int)aMode prototype:(NSCell *)aCell numberOfRows:(int)rowsHigh numberOfColumns:(int)colsWide;
+- (id)initWithFrame:(NSRect)frameRect mode:(NSMatrixMode)aMode prototype:(NSCell *)aCell numberOfRows:(int)rowsHigh numberOfColumns:(int)colsWide;
 {
     OBPRECONDITION(!aCell || [aCell isKindOfClass:[OASwitcherBarButtonCell class]]);
     if (!aCell)
@@ -37,7 +37,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     return [self _commonSwitcherBarMatrixInit];
 }
 
-- (id)initWithFrame:(NSRect)frameRect mode:(int)aMode cellClass:(Class)factoryId numberOfRows:(int)rowsHigh numberOfColumns:(int)colsWide;
+- (id)initWithFrame:(NSRect)frameRect mode:(NSMatrixMode)aMode cellClass:(Class)factoryId numberOfRows:(int)rowsHigh numberOfColumns:(int)colsWide;
 {
     OBPRECONDITION(!factoryId || OBClassIsSubclassOfClass(factoryId, [OASwitcherBarButtonCell class]));
     if (!factoryId)

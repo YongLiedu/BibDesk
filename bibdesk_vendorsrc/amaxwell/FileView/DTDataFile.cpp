@@ -169,9 +169,9 @@ void DTDataFileContent::ReadInContent(void)
     // DataTank Binary File BE\0  - Big endian
     
     // that is 24 bytes.
-    char *identifierOld = "DataTank Binary File v1\0";
-    char *identifierLE = "DataTank Binary File LE\0";
-    char *identifierBE = "DataTank Binary File BE\0";
+    const char *identifierOld = "DataTank Binary File v1\0";
+    const char *identifierLE = "DataTank Binary File LE\0";
+    const char *identifierBE = "DataTank Binary File BE\0";
     
     int howManyRead = fread(tempString,1,24,theFile);
     if (howManyRead==0) {
@@ -408,9 +408,9 @@ void DTDataFile::WriteHeaderIfNecessary(void)
     if (content->content.size()>0)
         return;
     
-    char *identifierLE = "DataTank Binary File LE\0";
-    char *identifierBE = "DataTank Binary File BE\0";
-    char *identifier;
+    const char *identifierLE = "DataTank Binary File LE\0";
+    const char *identifierBE = "DataTank Binary File BE\0";
+    const char *identifier;
     
     if (content->swapBytes) {
         if (DTDataStorage::RunningOnBigEndianMachine())
