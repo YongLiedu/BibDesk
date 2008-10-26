@@ -70,35 +70,38 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
 
 @implementation BDSKPreferenceController
 
+static id sharedController = nil;
+
 + (id)sharedPreferenceController;
 {
-    static id sharedController = nil;
-
-    if(nil == sharedController)
-        sharedController = [[self alloc] init];
-    
+    if (nil == sharedController)
+        [[self alloc] init];
     return sharedController;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedController ?: [super allocWithZone:zone];
 }
 
 - (id)init
 {
-    if(self = [super init]){
+    if ((sharedController == nil) && (sharedController = self = [super init])) {
         isSearchActive = NO;
         NSString *path = [[NSBundle mainBundle] pathForResource:@"PreferenceSearchTerms" ofType:@"plist"];
         if(nil == path)
             [NSException raise:NSInternalInconsistencyException format:@"unable to find search terms dictionary"];
         clientIdentiferSearchTerms = [[NSDictionary alloc] initWithContentsOfFile:path];
     }
-    return self;
+    return sharedController;
 }
 
-- (void)dealloc
-{
-    [clientIdentiferSearchTerms release];
-    [searchTerm release];
-    [overlay release];
-    [super dealloc];
-}
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)awakeFromNib;
 {
