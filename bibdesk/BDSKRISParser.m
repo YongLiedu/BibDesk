@@ -261,10 +261,12 @@ static NSString *RISEndPageString = @"Ep";
     if(year){
         unsigned first = [year rangeOfString:@"/"].location;
         if (first != NSNotFound) {
-            unsigned second = [year rangeOfString:@"/" options:0 range:NSMakeRange(first, [year length] - first)].location;
-            if ([pubDict objectForKey:BDSKMonthString] == nil && second != NSNotFound && second > first + 1)
-                [pubDict setObject:[year substringWithRange:NSMakeRange(first, second - first)] forKey:BDSKMonthString];
             [pubDict setObject:[year substringToIndex:first] forKey:BDSKYearString];
+            if ([pubDict objectForKey:BDSKMonthString] == nil && [year length] > first + 1) {
+                unsigned second = [year rangeOfString:@"/" options:0 range:NSMakeRange(first + 1, [year length] - first - 1)].location;
+                if (second != NSNotFound && second > first + 1)
+                    [pubDict setObject:[year substringWithRange:NSMakeRange(first + 1, second - first - 1)] forKey:BDSKMonthString];
+            }
         }
     }
 }
