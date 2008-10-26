@@ -68,26 +68,32 @@
 									forName:@"BDSKNewPathColorTransformer"];
 }
 
+static BDSKFiler *sharedFiler = nil;
+
 + (BDSKFiler *)sharedFiler{
-    static BDSKFiler *sharedFiler = nil;
-	if(!sharedFiler){
-		sharedFiler = [[BDSKFiler alloc] init];
+	if (sharedFiler == nil)
+		[[BDSKFiler alloc] init];
+	return sharedFiler;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedFiler ?: [super allocWithZone:zone];
+}
+
+- (id)init{
+	if((sharedFiler == nil) && (sharedFiler = self = [super init])){
+		errorInfoDicts = [[NSMutableArray alloc] initWithCapacity:10];
 	}
 	return sharedFiler;
 }
 
-- (id)init{
-	if(self = [super init]){
-		errorInfoDicts = [[NSMutableArray alloc] initWithCapacity:10];
-	}
-	return self;
-}
+- (id)retain { return self; }
 
-- (void)dealloc{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-	[errorInfoDicts release];
-	[super dealloc];
-}
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 #pragma mark Auto file methods
 

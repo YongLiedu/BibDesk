@@ -41,20 +41,24 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAlert.h"
 
-static BDSKCharacterConversion *sharedConversionEditor;
 
 @implementation BDSKCharacterConversion
 
+static BDSKCharacterConversion *sharedConversionEditor;
+
 + (BDSKCharacterConversion *)sharedConversionEditor{
-    if (!sharedConversionEditor) {
-        sharedConversionEditor = [[BDSKCharacterConversion alloc] init];
-    }
+    if (sharedConversionEditor == nil)
+        [[BDSKCharacterConversion alloc] init];
     return sharedConversionEditor;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedConversionEditor ?: [super allocWithZone:zone];
 }
 
 - (id)init
 {
-    if (self = [super initWithWindowNibName:@"BDSKCharacterConversion"]) {    
+    if ((sharedConversionEditor == nil) && (sharedConversionEditor = self = [super initWithWindowNibName:@"BDSKCharacterConversion"])) {  
 		
 		oneWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
 		twoWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
@@ -68,20 +72,16 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		[self updateDicts];
 		
 	}
-    return self;
+    return sharedConversionEditor;
 }
 
-- (void)dealloc
-{
-    [oneWayDict release];
-    [twoWayDict release];
-	[currentArray release];
-	[texFormatter release];
-    [defaultOneWayRomanSet release];
-	[romanSet release];
-	[texSet release];
-    [super dealloc];
-}
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)awakeFromNib {
 	texFormatter = [[BDSKTeXFormatter alloc] init];

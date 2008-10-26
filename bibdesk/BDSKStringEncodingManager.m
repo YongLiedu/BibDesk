@@ -128,9 +128,8 @@ enum {
 static BDSKStringEncodingManager *sharedEncodingManager = nil;
 
 + (BDSKStringEncodingManager *)sharedEncodingManager{
-    if(!sharedEncodingManager){
-        sharedEncodingManager = [[BDSKStringEncodingManager alloc] init];
-    }
+    if (sharedEncodingManager == nil)
+        [[self alloc] init];
     return sharedEncodingManager;
 }
 
@@ -139,19 +138,23 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
     return [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
 }
 
--(id)init{
-    if(sharedEncodingManager != nil){
-        [self release];
-        self = sharedEncodingManager;
-    } else 
-        self = [super init];
-    return self;
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedEncodingManager ?: [super allocWithZone:zone];
 }
 
-- (void)dealloc{
-    if(self != sharedEncodingManager)
-        [super dealloc];
+- (id)init{
+    if (sharedEncodingManager == nil)
+        sharedEncodingManager = [super init];
+    return sharedEncodingManager;
 }
+
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 #pragma mark -
 

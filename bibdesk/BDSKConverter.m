@@ -57,32 +57,32 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
 
 @implementation BDSKConverter
 
+static BDSKConverter *sharedConverter = nil;
+
 + (BDSKConverter *)sharedConverter{
-    static BDSKConverter *theConverter = nil;
-    if(!theConverter){
-	theConverter = [[BDSKConverter alloc] init];
-    }
-    return theConverter;
+    if (sharedConverter == nil)
+        [[self alloc] init];
+    return sharedConverter;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedConverter ?: [super allocWithZone:zone];
 }
 
 - (id)init{
-    if(self = [super init]){
-	[self loadDict];
+    if ((sharedConverter == nil) && (sharedConverter = self = [super init])) {
+        [self loadDict];
     }
-    return self;
+    return sharedConverter;
 }
 
-- (void)dealloc{
-    [finalCharSet release];
-    [accentCharSet release];
-    [texifyConversions release];
-    [detexifyConversions release];
-    [texifyAccents release];
-    [detexifyAccents release];
-    [baseCharacterSetForTeX release];
-    [super dealloc];
-}
-    
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)loadDict{
     

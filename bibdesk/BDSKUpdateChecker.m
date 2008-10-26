@@ -75,17 +75,22 @@
 
 @implementation BDSKUpdateChecker
 
+static id sharedInstance = nil;
+
 + (id)sharedChecker;
 {
-    static id sharedInstance = nil;
     if (nil == sharedInstance)
-        sharedInstance = [[self alloc] init];
+        [[self alloc] init];
     return sharedInstance;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedInstance ?: [super allocWithZone:zone];
 }
 
 - (id)init
 {
-    if (self = [super init]) {
+    if ((sharedInstance == nil) && (sharedInstance = self = [super init])) {
         plistLock = [[NSLock alloc] init];
         propertyListFromServer = nil;
         keyForCurrentMajorVersion = nil;
@@ -99,33 +104,16 @@
                          selector:@selector(handleUpdateIntervalChanged:) 
                     forPreference:[OFPreference preferenceForKey:BDSKUpdateCheckIntervalKey]];
     }
-    return self;
+    return sharedInstance;
 }
 
-- (void)dealloc
-{
-    [OFPreference removeObserver:self forPreference:nil];
-    
-    // these objects are only accessed from the main thread
-    [releaseNotesWindowController release];
-    [self setUpdateTimer:nil];
+- (id)retain { return self; }
 
-    // propertyListFromServer is currently the only object shared between threads
-    [plistLock lock];
-    [propertyListFromServer release];
-    propertyListFromServer = nil;
-    [plistLock unlock];
-    [plistLock release];
-    plistLock = nil;
-    
-    // ...well, also these, but they don't change and dealloc is never called anyway
-    [localVersionNumber release];
-    localVersionNumber = nil;
-    [keyForCurrentMajorVersion release];
-    keyForCurrentMajorVersion = nil;
-    
-    [super dealloc];
-}
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)scheduleUpdateCheckIfNeeded;
 {

@@ -60,10 +60,13 @@ static NSArray *scriptHookNames = nil;
 @implementation BDSKScriptHookManager
 
 + (BDSKScriptHookManager *)sharedManager {
-	if (sharedManager == nil) {
-		sharedManager = [[BDSKScriptHookManager alloc] init];
-	}
+	if (sharedManager == nil)
+		[[self alloc] init];
 	return sharedManager;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedManager ?: [super allocWithZone:zone];
 }
 
 + (NSArray *)scriptHookNames {
@@ -83,19 +86,19 @@ static NSArray *scriptHookNames = nil;
 }
 
 - (id)init {
-    if (sharedManager != nil)
-		[NSException raise:NSInternalInconsistencyException format:@"attempt to instantiate a second %@", [self class]];
-	
-	if (self = [super init]) {
+    if ((sharedManager == nil) && (sharedManager = self = [super init])) {
 		scriptHooks = [[NSMutableDictionary alloc] initWithCapacity:3];
 	}
-	return self;
+	return sharedManager;
 }
 
-- (void)dealloc {
-	[scriptHooks release];
-	[super dealloc];
-}
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (BDSKScriptHook *)scriptHookWithUniqueID:(NSNumber *)uniqueID {
 	return [scriptHooks objectForKey:uniqueID];

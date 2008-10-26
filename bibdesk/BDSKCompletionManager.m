@@ -44,24 +44,32 @@
 
 @implementation BDSKCompletionManager
 
+static id sharedManager = nil;
+
 + (id)sharedManager {
-    static id sharedManager = nil;
     if (sharedManager == nil)
-        sharedManager = [[self alloc] init];
+        [[self alloc] init];
     return sharedManager;
 }
 
-- (id)init {
-    if(self = [super init]){
-        autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
-    }
-    return self;
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedManager ?: [super allocWithZone:zone];
 }
 
-- (void)dealloc {
-    [autoCompletionDict release];
-    [super dealloc];
+- (id)init {
+    if((sharedManager == nil) && (sharedManager = self = [super init])) {
+        autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
+    }
+    return sharedManager;
 }
+
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)addNamesForCompletion:(NSArray *)names {
     NSMutableSet *nameSet = [autoCompletionDict objectForKey:BDSKAuthorString];

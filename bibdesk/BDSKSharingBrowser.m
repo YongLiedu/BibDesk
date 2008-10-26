@@ -60,21 +60,26 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     return sharedBrowser;
 }
 
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedBrowser ?: [super allocWithZone:zone];
+}
+
 - (id)init{
-    if (self = [super init]){
+    if ((sharedBrowser == nil) && (sharedBrowser = self = [super init])) {
         sharingClients = nil;
         browser = nil;
         unresolvedNetServices = nil;        
     }
-    return self;
+    return sharedBrowser;
 }
 
-- (void)dealloc{
-    [sharingClients release];
-    [browser release];
-    [unresolvedNetServices release];
-    [super dealloc];
-}
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (NSSet *)sharingClients{
     return sharingClients;

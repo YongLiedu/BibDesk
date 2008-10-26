@@ -69,24 +69,29 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 + (id)sharedFinder {
     if (sharedFinder == nil)
-        sharedFinder = [[[self class] alloc] init];
+        [[[self class] alloc] init];
     return sharedFinder;
 }
 
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedFinder ?: [super allocWithZone:zone];
+}
+
 - (id)init {
-    if (self = [super init]) {
+    if ((sharedFinder == nil) && (sharedFinder = self = [super init])) {
         orphanedFiles = [[NSMutableArray alloc] init];
         wasLaunched = NO;
     }
-    return self;
+    return sharedFinder;
 }
 
-- (void)dealloc {
-    [server stopDOServer];
-    [server release];
-    [orphanedFiles release];
-    [super dealloc];
-}
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)awakeFromNib{
     [tableView setDoubleAction:@selector(showFile:)];

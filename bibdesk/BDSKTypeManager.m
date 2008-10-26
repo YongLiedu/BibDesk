@@ -45,144 +45,112 @@
 static BDSKTypeManager *sharedInstance = nil;
 
 @implementation BDSKTypeManager
-+ (BDSKTypeManager *)sharedManager{
-    return sharedInstance;
-}
 
 + (void)initialize
 {
     OBINITIALIZE;
-    if(sharedInstance == nil) 
-        sharedInstance = [[self alloc] init];
+    [self sharedManager];
+}
+
++ (BDSKTypeManager *)sharedManager{
+    if (sharedInstance == nil)
+        [[self alloc] init];
+    return sharedInstance;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedInstance ?: [super allocWithZone:zone];
 }
 
 - (id)init{
-    self = [super init];
-    
-    if(!self)
-        return nil;
-	
-	[self reloadTypeInfo];
-	
-    NSMutableCharacterSet *tmpSet;
-    // this set is used for warning the user on manual entry of a citekey; allows ASCII characters and some math symbols
-    // arm: up through 1.3.12 we allowed non-ASCII characters in here, but btparse chokes on them and so does BibTeX.  TLC 2nd ed. says that cite keys are TeX commands, and subject to the same restrictions as such [a-zA-Z0-9], but this is generally relaxed in the case of BibTeX to include some punctuation.
-    tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(21, 126 - 21)] mutableCopy];
-    [tmpSet removeCharactersInString:@" '\"@,\\#}{~%()"];
-    [tmpSet invert];
-    invalidCiteKeyCharSet = [tmpSet copy];
-    [tmpSet release];
-    
-	fragileCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@"&$^"] copy];
-    
-    tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (unsigned int)'a', 26)] mutableCopy];
-    [tmpSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
-    [tmpSet addCharactersInRange:NSMakeRange( (unsigned int)'-', 15)];  //  -./0123456789:;
-    
-    // this is used for generated cite keys, very strict!
-	strictInvalidCiteKeyCharSet = [[tmpSet invertedSet] copy];  // don't release this
-    [tmpSet release];
+    if ((sharedInstance == nil) && (sharedInstance = self = [super init])) {
+        
+        [self reloadTypeInfo];
+        
+        NSMutableCharacterSet *tmpSet;
+        // this set is used for warning the user on manual entry of a citekey; allows ASCII characters and some math symbols
+        // arm: up through 1.3.12 we allowed non-ASCII characters in here, but btparse chokes on them and so does BibTeX.  TLC 2nd ed. says that cite keys are TeX commands, and subject to the same restrictions as such [a-zA-Z0-9], but this is generally relaxed in the case of BibTeX to include some punctuation.
+        tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(21, 126 - 21)] mutableCopy];
+        [tmpSet removeCharactersInString:@" '\"@,\\#}{~%()"];
+        [tmpSet invert];
+        invalidCiteKeyCharSet = [tmpSet copy];
+        [tmpSet release];
+        
+        fragileCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@"&$^"] copy];
+        
+        tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (unsigned int)'a', 26)] mutableCopy];
+        [tmpSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
+        [tmpSet addCharactersInRange:NSMakeRange( (unsigned int)'-', 15)];  //  -./0123456789:;
+        
+        // this is used for generated cite keys, very strict!
+        strictInvalidCiteKeyCharSet = [[tmpSet invertedSet] copy];  // don't release this
+        [tmpSet release];
 
-	// this set is used for warning the user on manual entry of a local-url; allows non-ASCII characters and some math symbols
-    invalidLocalUrlCharSet = [[NSCharacterSet characterSetWithCharactersInString:@":"] copy];
-    
-	// this is used for generated local urls
-	strictInvalidLocalUrlCharSet = [invalidLocalUrlCharSet copy];  // don't release this
+        // this set is used for warning the user on manual entry of a local-url; allows non-ASCII characters and some math symbols
+        invalidLocalUrlCharSet = [[NSCharacterSet characterSetWithCharactersInString:@":"] copy];
+        
+        // this is used for generated local urls
+        strictInvalidLocalUrlCharSet = [invalidLocalUrlCharSet copy];  // don't release this
 
-	
-	tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(1,31)] mutableCopy];
-	[tmpSet addCharactersInString:@"/?<>\\:*|\""];
-	
-	// this is used for generated local urls, stricted for use of windoze-compatible file names
-    veryStrictInvalidLocalUrlCharSet = [tmpSet copy];
-    [tmpSet release];
-    
-	// see the URI specifications for the valid characters
-	NSMutableCharacterSet *validSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (unsigned int)'a', 26)] mutableCopy];
-    [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
-    [validSet addCharactersInString:@"-._~:/?#[]@!$&'()*+,;="];
-	
-	// this set is used for warning the user on manual entry of a remote url
-    invalidRemoteUrlCharSet = [[validSet invertedSet] copy];
-    [validSet release];
-    
-	// this is used for generated remote urls
-	strictInvalidRemoteUrlCharSet = [invalidRemoteUrlCharSet copy];  // don't release this
-	
-	invalidGeneralCharSet = [[NSCharacterSet alloc] init];
-	
-	strictInvalidGeneralCharSet = [[NSCharacterSet alloc] init];
-    
-    separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] copy];
-    separatorOFCharSet = [[OFCharacterSet alloc] initWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]];
-    
-    localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-    remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-    allURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-    [self reloadURLFields];
-    
-    ratingFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-    triStateFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-    booleanFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-    citationFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-    personFieldsSet = [[NSMutableSet alloc] initWithCapacity:2];
-    [self reloadSpecialFields];
-    
-    singleValuedGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-    invalidGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-    [self reloadGroupFields];
-    
-    // observe the pref changes for custom fields
-    NSEnumerator *prefKeyEnum = [[NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil] objectEnumerator];
-    NSString *prefKey;
-    while (prefKey = [prefKeyEnum nextObject])
-        [OFPreference addObserver:self selector:@selector(customFieldsDidChange:) forPreference:[OFPreference preferenceForKey:prefKey]];
-    
-	return self;
+        
+        tmpSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(1,31)] mutableCopy];
+        [tmpSet addCharactersInString:@"/?<>\\:*|\""];
+        
+        // this is used for generated local urls, stricted for use of windoze-compatible file names
+        veryStrictInvalidLocalUrlCharSet = [tmpSet copy];
+        [tmpSet release];
+        
+        // see the URI specifications for the valid characters
+        NSMutableCharacterSet *validSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (unsigned int)'a', 26)] mutableCopy];
+        [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
+        [validSet addCharactersInString:@"-._~:/?#[]@!$&'()*+,;="];
+        
+        // this set is used for warning the user on manual entry of a remote url
+        invalidRemoteUrlCharSet = [[validSet invertedSet] copy];
+        [validSet release];
+        
+        // this is used for generated remote urls
+        strictInvalidRemoteUrlCharSet = [invalidRemoteUrlCharSet copy];  // don't release this
+        
+        invalidGeneralCharSet = [[NSCharacterSet alloc] init];
+        
+        strictInvalidGeneralCharSet = [[NSCharacterSet alloc] init];
+        
+        separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] copy];
+        separatorOFCharSet = [[OFCharacterSet alloc] initWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]];
+        
+        localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        allURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
+        [self reloadURLFields];
+        
+        ratingFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        triStateFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        booleanFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        citationFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+        personFieldsSet = [[NSMutableSet alloc] initWithCapacity:2];
+        [self reloadSpecialFields];
+        
+        singleValuedGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
+        invalidGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
+        [self reloadGroupFields];
+        
+        // observe the pref changes for custom fields
+        NSEnumerator *prefKeyEnum = [[NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil] objectEnumerator];
+        NSString *prefKey;
+        while (prefKey = [prefKeyEnum nextObject])
+            [OFPreference addObserver:self selector:@selector(customFieldsDidChange:) forPreference:[OFPreference preferenceForKey:prefKey]];
+    }
+	return sharedInstance;
 }
 
-- (void)dealloc{
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[fileTypesDict release];
-	[fieldsForTypesDict release];
-	[typesForFileTypeDict release];
-	[fieldNameForPubMedTagDict release];
-	[pubMedTagForFieldNameDict release];
-	[bibtexTypeForPubMedTypeDict release];
-	[fieldNamesForMARCTagDict release];
-	[fieldNamesForUNIMARCTagDict release];
-    [fieldNameForJSTORTagDict release];
-    [fieldDescriptionForJSTORTagDict release];
-    [fieldNameForWebOfScienceTagDict release];
-    [fieldDescriptionForWebOfScienceTagDict release];
-    [bibtexTypeForWebOfScienceTypeDict release];
-    [fieldNameForReferTagDict release];
-    [bibtexTypeForReferTypeDict release];
-    [bibtexTypeForHCiteTypeDict release];
-    [bibtexTypeForDublinCoreTypeDict release];
-    [fieldNameForDublinCoreTermDict release];
-	[MODSGenresForBibTeXTypeDict release];
-	[allFieldNames release];
-	[invalidCiteKeyCharSet release];
-	[strictInvalidCiteKeyCharSet release];
-	[invalidLocalUrlCharSet release];
-	[strictInvalidLocalUrlCharSet release];
-	[invalidRemoteUrlCharSet release];
-	[strictInvalidRemoteUrlCharSet release];
-	[invalidGeneralCharSet release];
-	[strictInvalidGeneralCharSet release];
-    [localFileFieldsSet release];
-    [remoteURLFieldsSet release];
-    [allURLFieldsSet release];
-    [ratingFieldsSet release];
-    [triStateFieldsSet release];
-    [booleanFieldsSet release];
-    [citationFieldsSet release];
-    [personFieldsSet release];
-    [singleValuedGroupFieldsSet release];
-    [invalidGroupFieldsSet release];
-	[super dealloc];
-}
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)reloadTypeInfo{
     // Load the TypeInfo plists

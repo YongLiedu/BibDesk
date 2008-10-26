@@ -64,15 +64,20 @@ static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBo
 
 @implementation BDSKSearchBookmarkController
 
+static BDSKSearchBookmarkController *sharedBookmarkController = nil;
+
 + (id)sharedBookmarkController {
-    static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     if (sharedBookmarkController == nil)
-        sharedBookmarkController = [[self alloc] init];
+        [[self alloc] init];
     return sharedBookmarkController;
 }
 
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedBookmarkController ?: [super allocWithZone:zone];
+}
+
 - (id)init {
-    if (self = [super init]) {
+    if ((sharedBookmarkController == nil) && (sharedBookmarkController = self = [super initWithWindowNibName:@"SearchBookmarksWindow"])) {
         NSEnumerator *dictEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKSearchGroupBookmarksKey] objectEnumerator];
         NSDictionary *dict;
         
@@ -86,17 +91,16 @@ static NSString *BDSKSearchBookmarkPropertiesObservationContext = @"BDSKSearchBo
         bookmarkRoot = [[BDSKSearchBookmark alloc] initFolderWithChildren:bookmarks label:nil];
         [self startObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
     }
-    return self;
+    return sharedBookmarkController;
 }
 
-- (void)dealloc {
-    [self stopObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [bookmarkRoot release];
-    [super dealloc];
-}
+- (id)retain { return self; }
 
-- (NSString *)windowNibName { return @"SearchBookmarksWindow"; }
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)windowDidLoad {
     [self setupToolbar];

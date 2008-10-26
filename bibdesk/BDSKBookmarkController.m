@@ -68,16 +68,20 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
 
 @implementation BDSKBookmarkController
 
+static id sharedBookmarkController = nil;
+
 + (id)sharedBookmarkController {
-    static id sharedBookmarkController = nil;
-    if (sharedBookmarkController == nil) {
-        sharedBookmarkController = [[self alloc] init];
-    }
+    if (sharedBookmarkController == nil)
+        [[self alloc] init];
     return sharedBookmarkController;
 }
 
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedBookmarkController ?: [super allocWithZone:zone];
+}
+
 - (id)init {
-    if (self = [super init]) {
+    if (sharedBookmarkController == nil && (sharedBookmarkController = self = [super initWithWindowNibName:@"BookmarksWindow"])) {
 		undoManager = nil;
         
         NSMutableArray *bookmarks = [NSMutableArray array];
@@ -99,17 +103,16 @@ static NSString *BDSKBookmarkPropertiesObservationContext = @"BDSKBookmarkProper
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];
     }
-    return self;
+    return sharedBookmarkController;
 }
 
-- (void)dealloc {
-    [self stopObservingBookmarks:[NSArray arrayWithObject:bookmarkRoot]];
-    [bookmarkRoot release];
-    [undoManager release];
-    [super dealloc];
-}
+- (id)retain { return self; }
 
-- (NSString *)windowNibName { return @"BookmarksWindow"; }
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)windowDidLoad {
     [self setupToolbar];

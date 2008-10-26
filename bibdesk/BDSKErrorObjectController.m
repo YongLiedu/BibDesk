@@ -69,57 +69,49 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 + (BDSKErrorObjectController *)sharedErrorObjectController;
 {
-    if(!sharedErrorObjectController)
-        sharedErrorObjectController = [[BDSKErrorObjectController alloc] init];
+    if(sharedErrorObjectController == nil)
+        [[BDSKErrorObjectController alloc] init];
     return sharedErrorObjectController;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedErrorObjectController ?: [super allocWithZone:zone];
 }
 
 - (id)init;
 {
-    if(self = [super initWithWindowNibName:[self windowNibName]]){
-        if(sharedErrorObjectController){
-            [self release];
-            self = sharedErrorObjectController;
-        } else {
-            errors = [[NSMutableArray alloc] initWithCapacity:10];
-            managers = [[NSMutableArray alloc] initWithCapacity:4];
-            lastIndex = 0;
-            handledNonIgnorableError = NO;
-            
-            [managers addObject:[BDSKErrorManager allItemsErrorManager]];
-            
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(handleErrorNotification:)
-                                                         name:BDSKParserErrorNotification
-                                                       object:nil];
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(handleRemoveDocumentNotification:)
-                                                         name:BDSKDocumentControllerRemoveDocumentNotification
-                                                       object:nil];
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(handleRemovePublicationNotification:)
-                                                         name:BDSKDocDelItemNotification
-                                                       object:nil];
-        }
+    if((sharedErrorObjectController == nil) && (sharedErrorObjectController = self = [super initWithWindowNibName:@"BDSKErrorPanel"])){
+        errors = [[NSMutableArray alloc] initWithCapacity:10];
+        managers = [[NSMutableArray alloc] initWithCapacity:4];
+        lastIndex = 0;
+        handledNonIgnorableError = NO;
+        
+        [managers addObject:[BDSKErrorManager allItemsErrorManager]];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleErrorNotification:)
+                                                     name:BDSKParserErrorNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleRemoveDocumentNotification:)
+                                                     name:BDSKDocumentControllerRemoveDocumentNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleRemovePublicationNotification:)
+                                                     name:BDSKDocDelItemNotification
+                                                   object:nil];
     }
     
-    return self;
+    return sharedErrorObjectController;
 }
 
-- (NSString *)windowNibName;
-{
-    return @"BDSKErrorPanel";
-}
+- (id)retain { return self; }
 
+- (id)autorelease { return self; }
 
-- (void)dealloc;
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [errors release];
-    [managers release];
-    [currentErrors release];
-    [super dealloc];
-}
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (void)awakeFromNib;
 {
