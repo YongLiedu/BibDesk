@@ -58,13 +58,13 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
 
 - (void)replacementSetHasHorizontalScroller:(BOOL)flag;
 {
-    if ([[self placards] count] != 0)
+    if ([[self placards] count] == 0)
         originalSetHasHorizontalScroller(self, _cmd, flag);
 }
 
 - (void)replacementSetAutohidesScrollers:(BOOL)flag;
 {
-    if ([[self placards] count] != 0)
+    if ([[self placards] count] == 0)
         originalSetAutohidesScrollers(self, _cmd, flag);
 }
 
