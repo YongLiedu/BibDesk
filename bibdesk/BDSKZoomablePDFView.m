@@ -302,7 +302,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if([self autoScales]){
         [super zoomIn:sender];
     }else{
-        int cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+        int cnt = 1, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
         float scaleFactor = [self scaleFactor];
         
         // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
@@ -317,13 +317,13 @@ static float BDSKScaleMenuFontSize = 11.0;
     if([self autoScales]){
         [super zoomOut:sender];
     }else{
-        int cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+        int cnt = 1, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
         float scaleFactor = [self scaleFactor];
         
         // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
         while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
         cnt--;
-        if (cnt < 0) cnt++;
+        while (cnt < 1) cnt++;
         [self setScaleFactor:BDSKDefaultScaleMenuFactors[cnt]];
     }
 }
@@ -333,7 +333,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         return NO;
     if([self autoScales])   
         return YES;
-    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    unsigned cnt = 1, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
     float scaleFactor = [self scaleFactor];
     // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
     while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
@@ -345,11 +345,11 @@ static float BDSKScaleMenuFontSize = 11.0;
         return NO;
     if([self autoScales])   
         return YES;
-    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    unsigned cnt = 1, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
     float scaleFactor = [self scaleFactor];
     // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
     while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
-    return cnt > 0;
+    return cnt > 1;
 }
 
 - (void)beginGestureWithEvent:(NSEvent *)theEvent {
