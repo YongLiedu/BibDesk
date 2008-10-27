@@ -133,10 +133,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
     [warningImageView setImage:image];
     [image release];
 	
-    rect = [warningView frame];
-    if([self isSharedPreviewer])    
-        rect.origin.x += 22.0;
-    
     // we use threads, so better let the progressIndicator also use them
     [progressIndicator setUsesThreadedAnimation:YES];
     minSize.height += NSMinY([[progressIndicator superview] frame]);
