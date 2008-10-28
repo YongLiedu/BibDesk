@@ -259,13 +259,24 @@ static NSString *RISEndPageString = @"Ep";
     NSString *year = [pubDict objectForKey:BDSKYearString];
     
     if(year){
-        unsigned first = [year rangeOfString:@"/"].location;
+        unsigned first = NSNotFound, second = NSNotFound, third = NSNotFound, length = [year length];
+        first = [year rangeOfString:@"/"].location;
+        if (first != NSNotFound && first + 1 < length) {
+            second = [year rangeOfString:@"/" options:0 range:NSMakeRange(first + 1, length - first - 1)].location;
+            if (second != NSNotFound && second + 1 < length)
+                third = [year rangeOfString:@"/" options:0 range:NSMakeRange(second + 1, length - second - 1)].location;
+        }
         if (first != NSNotFound) {
             [pubDict setObject:[year substringToIndex:first] forKey:BDSKYearString];
-            if ([pubDict objectForKey:BDSKMonthString] == nil && [year length] > first + 1) {
-                unsigned second = [year rangeOfString:@"/" options:0 range:NSMakeRange(first + 1, [year length] - first - 1)].location;
-                if (second != NSNotFound && second > first + 1)
-                    [pubDict setObject:[year substringWithRange:NSMakeRange(first + 1, second - first - 1)] forKey:BDSKMonthString];
+            if (second != NSNotFound) {
+                if ([pubDict objectForKey:BDSKMonthString] == nil) {
+                    if (second > first + 1)
+                        [pubDict setObject:[year substringWithRange:NSMakeRange(first + 1, second - first - 1)] forKey:BDSKMonthString];
+                    else if (third != NSNotFound && third < length - 1)
+                        [pubDict setObject:[year substringWithRange:NSMakeRange(third + 1, length - third - 1)] forKey:BDSKMonthString];
+                }
+                if (third != NSNotFound && third > second + 1 && [pubDict objectForKey:@"Day"] == nil)
+                    [pubDict setObject:[year substringWithRange:NSMakeRange(second + 1, third - second - 1)] forKey:@"Day"];
             }
         }
     }
