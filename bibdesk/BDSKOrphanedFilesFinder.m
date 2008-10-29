@@ -239,7 +239,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (NSMenu *)tableView:(NSTableView *)tableView contextMenuForRow:(int)row column:(int)column{
-    return contextMenu;
+    return [[arrayController selectedObjects] count] ? contextMenu : nil;
 }
 
 - (IBAction)showFile:(id)sender{
