@@ -50,7 +50,7 @@
     NSMutableArray *orphanedFiles;
     BOOL wasLaunched;
     BDSKOrphanedFileServer *server;
-    
+    NSArray *draggedFiles;
     IBOutlet NSButton *matchButton;
 }
 

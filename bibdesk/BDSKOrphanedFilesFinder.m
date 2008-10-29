@@ -54,6 +54,7 @@
 #import "BDSKFileMatcher.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKLinkedFile.h"
+#import "BDSKAlert.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
@@ -208,7 +209,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 #pragma mark Accessors
  
 - (NSArray *)orphanedFiles {
-    return [[orphanedFiles retain] autorelease];
+    return [[orphanedFiles copy] autorelease];
 }
 
 - (unsigned)countOfOrphanedFiles {
@@ -274,10 +275,48 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
-    NSArray *filePaths = [[[arrayController arrangedObjects] objectsAtIndexes:rowIndexes] valueForKey:@"path"];
+    [draggedFiles release];
+    draggedFiles = [[[arrayController arrangedObjects] objectsAtIndexes:rowIndexes] retain];
+    NSArray *filePaths = [draggedFiles valueForKey:@"path"];
     [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
     [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
     return YES;
+}
+
+- (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
+    return isLocal ? NSDragOperationEvery : NSDragOperationCopy | NSDragOperationDelete;
+}
+
+- (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSArray *files = [(NSArray *)contextInfo autorelease];
+    if (returnCode == NSAlertDefaultReturn) {
+        [[self mutableArrayValueForKey:@"orphanedFiles"] removeObjectsInArray:files];
+        NSEnumerator *pathEnum = [[files valueForKey:@"path"] objectEnumerator];
+        NSString *path;
+        while (path = [pathEnum nextObject]) {
+            NSString *folderPath = [path stringByDeletingLastPathComponent];
+            NSString *fileName = [path lastPathComponent];
+            int tag = 0;
+            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
+        }
+    }
+}
+
+- (void)tableView:(NSTableView *)tv concludeDragOperation:(NSDragOperation)operation{
+    if (operation == NSDragOperationDelete && [draggedFiles count]) {
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
+                                             defaultButton:NSLocalizedString(@"Yes", @"Button title")
+                                           alternateButton:NSLocalizedString(@"No", @"Button title")
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:self 
+                         didEndSelector:@selector(trashAlertDidEnd:returnCode:contextInfo:)  
+                     didDismissSelector:NULL 
+                            contextInfo:[draggedFiles retain]];
+    }
+    [draggedFiles release];
+    draggedFiles = nil;
 }
 
 #pragma mark table dragimage
