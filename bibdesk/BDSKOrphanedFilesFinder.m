@@ -268,6 +268,35 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     }
 }   
 
+- (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSArray *files = [(NSArray *)contextInfo autorelease];
+    if (returnCode == NSAlertDefaultReturn) {
+        [[self mutableArrayValueForKey:@"orphanedFiles"] removeObjectsInArray:files];
+        NSEnumerator *pathEnum = [[files valueForKey:@"path"] objectEnumerator];
+        NSString *path;
+        while (path = [pathEnum nextObject]) {
+            NSString *folderPath = [path stringByDeletingLastPathComponent];
+            NSString *fileName = [path lastPathComponent];
+            int tag = 0;
+            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
+        }
+    }
+}
+
+- (IBAction)moveToTrash:(id)sender{
+    NSArray *files = [arrayController selectedObjects];
+    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Files to Trash?", @"Message in alert dialog when deleting a file")
+                                         defaultButton:NSLocalizedString(@"Yes", @"Button title")
+                                       alternateButton:NSLocalizedString(@"No", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"Do you want to move the removed files to the trash?", @"Informative text in alert dialog")];
+    [alert beginSheetModalForWindow:[self window]
+                      modalDelegate:self 
+                     didEndSelector:@selector(trashAlertDidEnd:returnCode:contextInfo:)  
+                 didDismissSelector:NULL 
+                        contextInfo:[files retain]];
+}
+
 // for 10.3 compatibility and OmniAppKit dataSource methods
 - (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray*)rows toPasteboard:(NSPasteboard*)pboard{
 	NSIndexSet *rowIndexes = [NSIndexSet indexSetWithIndexesInArray:rows];
@@ -285,21 +314,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
     return isLocal ? NSDragOperationEvery : NSDragOperationCopy | NSDragOperationDelete;
-}
-
-- (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSArray *files = [(NSArray *)contextInfo autorelease];
-    if (returnCode == NSAlertDefaultReturn) {
-        [[self mutableArrayValueForKey:@"orphanedFiles"] removeObjectsInArray:files];
-        NSEnumerator *pathEnum = [[files valueForKey:@"path"] objectEnumerator];
-        NSString *path;
-        while (path = [pathEnum nextObject]) {
-            NSString *folderPath = [path stringByDeletingLastPathComponent];
-            NSString *fileName = [path lastPathComponent];
-            int tag = 0;
-            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:folderPath destination:nil files:[NSArray arrayWithObjects:fileName, nil] tag:&tag];
-        }
-    }
 }
 
 - (void)tableView:(NSTableView *)tv concludeDragOperation:(NSDragOperation)operation{

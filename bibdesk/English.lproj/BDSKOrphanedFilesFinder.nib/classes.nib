@@ -14,19 +14,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSControl</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSMenu</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -71,6 +71,8 @@
 				<key>hideOrphanedFilesPanel</key>
 				<string>id</string>
 				<key>matchFilesWithPubs</key>
+				<string>id</string>
+				<key>moveToTrash</key>
 				<string>id</string>
 				<key>refreshOrphanedFiles</key>
 				<string>id</string>

@@ -64,6 +64,7 @@
 - (IBAction)matchFilesWithPubs:(id)sender;
 
 - (IBAction)showFile:(id)sender;
+- (IBAction)moveToTrash:(id)sender;
 - (IBAction)search:(id)sender;
 
 - (NSArray *)orphanedFiles;
