@@ -166,6 +166,24 @@ static float BDSKScaleMenuFontSize = 11.0;
     }
 }
 
+- (unsigned int)lowerIndexForScaleFactor:(float)scale {
+    unsigned int i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    for (i = count - 1; i > 0; i--) {
+        if (scale * 1.01 > BDSKDefaultScaleMenuFactors[i])
+            return i;
+    }
+    return 1;
+}
+
+- (unsigned int)upperIndexForScaleFactor:(float)scale {
+    unsigned int i, count = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    for (i = 1; i < count; i++) {
+        if (scale * 0.99 < BDSKDefaultScaleMenuFactors[i])
+            return i;
+    }
+    return count - 1;
+}
+
 - (float)scaleFactor {
     return scaleFactor;
 }
@@ -176,12 +194,13 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 - (void)setScaleFactor:(float)newScaleFactor adjustPopup:(BOOL)flag {
 	if (flag) {
-		unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-		
-		// We only work with some preset zoom values, so choose one of the appropriate values
-		while (cnt < numberOfDefaultItems - 1 && newScaleFactor > 0.5 * (BDSKDefaultScaleMenuFactors[cnt] + BDSKDefaultScaleMenuFactors[cnt + 1])) cnt++;
-		[scalePopUpButton selectItemAtIndex:cnt];
-		newScaleFactor = BDSKDefaultScaleMenuFactors[cnt];
+            unsigned int i = [self lowerIndexForScaleFactor:newScaleFactor], upper = [self upperIndexForScaleFactor:newScaleFactor];
+            if (upper > i) {
+                if (newScaleFactor > 0.5 * (BDSKDefaultScaleMenuFactors[i] + BDSKDefaultScaleMenuFactors[upper]))
+                    i = upper;
+            }
+            [scalePopUpButton selectItemAtIndex:i];
+            newScaleFactor = BDSKDefaultScaleMenuFactors[i];
     }
 	
 	if (fabsf(scaleFactor - newScaleFactor) > 0.01) {
@@ -202,23 +221,16 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (IBAction)zoomIn:(id)sender{
-    int cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    
-    // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
-    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
-    cnt++;
-    while (cnt >= numberOfDefaultItems) cnt--;
-    [self setScaleFactor:BDSKDefaultScaleMenuFactors[cnt]];
+    unsigned int numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    unsigned int i = [self lowerIndexForScaleFactor:[self scaleFactor]];
+    if (i < numberOfDefaultItems - 1) i++;
+    [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
 }
 
 - (IBAction)zoomOut:(id)sender{
-    int cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    
-    // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
-    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
-    cnt--;
-    if (cnt < 0) cnt++;
-    [self setScaleFactor:BDSKDefaultScaleMenuFactors[cnt]];
+    unsigned int i = [self upperIndexForScaleFactor:[self scaleFactor]];
+    if (i > 1) i--;
+    [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
 }
 
 - (BOOL)canZoomToActualSize{
@@ -226,15 +238,14 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (BOOL)canZoomIn{
-    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
-    return cnt < numberOfDefaultItems - 1;
+    unsigned int numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    unsigned int i = [self lowerIndexForScaleFactor:[self scaleFactor]];
+    return i < numberOfDefaultItems - 1;
 }
 
 - (BOOL)canZoomOut{
-    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
-    return cnt > 0;
+    unsigned int i = [self upperIndexForScaleFactor:[self scaleFactor]];
+    return i > 1;
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
