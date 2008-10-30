@@ -84,6 +84,8 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (self = [super initWithFrame:frameRect]) {
         scalePopUpButton = nil;
         [self makeScalePopUpButton];
+        isPinchZoom = NO;
+        pinchZoomFactor = 1.0;
     }
     return self;
 }
@@ -92,6 +94,8 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (self = [super initWithCoder:decoder]) {
         scalePopUpButton = nil;
         [self makeScalePopUpButton];
+        isPinchZoom = NO;
+        pinchZoomFactor = 1.0;
     }
     return self;
 }
@@ -265,6 +269,10 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (void)setScaleFactor:(float)newScaleFactor {
+    if (isPinchZoom) {
+        pinchZoomFactor *= newScaleFactor / [self scaleFactor];
+        return;
+    }
     NSPoint scrollPoint = (NSPoint)[self scrollPositionAsPercentage];
 	[self setScaleFactor:newScaleFactor adjustPopup:YES];
     [self setScrollPositionAsPercentage:scrollPoint];
@@ -355,23 +363,22 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (void)beginGestureWithEvent:(NSEvent *)theEvent {
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super beginGestureWithEvent:theEvent];
-    startOfGesture = YES;
+    pinchZoomFactor = 1.0;
 }
 
 - (void)endGestureWithEvent:(NSEvent *)theEvent {
-    startOfGesture = NO;
+    if (pinchZoomFactor > 1.1 || pinchZoomFactor < 0.9)
+        [self setScaleFactor:pinchZoomFactor * [self scaleFactor]];
+    pinchZoomFactor = 1.0;
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super endGestureWithEvent:theEvent];
 }
 
 - (void)magnifyWithEvent:(NSEvent *)theEvent {
-    if ([theEvent deltaZ] > 0.0) {
-        [self zoomIn:nil];
-        startOfGesture = NO;
-    } else if ([theEvent deltaZ] < 0.0) {
-        [self zoomOut:nil];
-        startOfGesture = NO;
-    }
+    isPinchZoom = YES;
+    if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
+        [super magnifyWithEvent:theEvent];
+    isPinchZoom = NO;
 }
 
 #pragma mark Scrollview
