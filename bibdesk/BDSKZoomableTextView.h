@@ -42,7 +42,7 @@
 @interface BDSKZoomableTextView : NSTextView {
     NSPopUpButton *scalePopUpButton;
     float scaleFactor;
-    BOOL startOfGesture;
+    float pinchZoomFactor;
 }
 
 - (void)scalePopUpAction:(id)sender;
