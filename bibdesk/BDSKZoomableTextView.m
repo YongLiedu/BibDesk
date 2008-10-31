@@ -42,6 +42,16 @@
 #import "NSScrollview_BDSKExtensions.h"
 
 
+@interface NSResponder (BDSKGesturesPrivate)
+- (void)magnifyWithEvent:(NSEvent *)theEvent;
+- (void)beginGestureWithEvent:(NSEvent *)theEvent;
+- (void)endGestureWithEvent:(NSEvent *)theEvent;
+@end
+
+@interface NSEvent (BDSKGesturesPrivate)
+- (float)magnification;
+@end
+
 @implementation BDSKZoomableTextView
 
 /* For genstrings:
@@ -72,6 +82,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (id)initWithFrame:(NSRect)rect {
     if (self = [super initWithFrame:rect]) {
 		scaleFactor = 1.0;
+        pinchZoomFactor = 1.0;
     }
     return self;
 }
@@ -79,6 +90,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (id)initWithCoder:(NSCoder *)coder {
     if (self = [super initWithCoder:coder]) {
 		scaleFactor = 1.0;
+        pinchZoomFactor = 1.0;
     }
     return self;
 }
@@ -258,6 +270,25 @@ static float BDSKScaleMenuFontSize = 11.0;
     [menu insertItemWithTitle:NSLocalizedString(@"Actual Size", @"Menu item title") action:@selector(zoomToActualSize:) keyEquivalent:@"" atIndex:0];
     
     return menu;
+}
+
+- (void)beginGestureWithEvent:(NSEvent *)theEvent {
+    if ([[BDSKZoomableTextView superclass] instancesRespondToSelector:_cmd])
+        [super beginGestureWithEvent:theEvent];
+    pinchZoomFactor = 1.0;
+}
+
+- (void)endGestureWithEvent:(NSEvent *)theEvent {
+    if (pinchZoomFactor > 1.1 || pinchZoomFactor < 0.9)
+        [self setScaleFactor:pinchZoomFactor * [self scaleFactor]];
+    pinchZoomFactor = 1.0;
+    if ([[BDSKZoomableTextView superclass] instancesRespondToSelector:_cmd])
+        [super endGestureWithEvent:theEvent];
+}
+
+- (void)magnifyWithEvent:(NSEvent *)theEvent {
+    if ([theEvent respondsToSelector:@selector(magnification)])
+        pinchZoomFactor *= 1.0 + fmaxf(-0.5, fminf(1.0 , [theEvent magnification]));
 }
 
 @end
