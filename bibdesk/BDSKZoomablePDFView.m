@@ -46,16 +46,6 @@
 #import "NSScrollView_BDSKExtensions.h"
 
 
-@interface NSResponder (BDSKGesturesPrivate)
-- (void)magnifyWithEvent:(NSEvent *)theEvent;
-- (void)beginGestureWithEvent:(NSEvent *)theEvent;
-- (void)endGestureWithEvent:(NSEvent *)theEvent;
-@end
-
-@interface NSEvent (BDSKGesturesPrivate)
-- (float)magnification;
-@end
-
 @implementation BDSKZoomablePDFView
 
 /* For genstrings:
@@ -88,7 +78,6 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (self = [super initWithFrame:frameRect]) {
         scalePopUpButton = nil;
         [self makeScalePopUpButton];
-        pinchZoomFactor = 1.0;
     }
     return self;
 }
@@ -97,7 +86,6 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (self = [super initWithCoder:decoder]) {
         scalePopUpButton = nil;
         [self makeScalePopUpButton];
-        pinchZoomFactor = 1.0;
     }
     return self;
 }
@@ -361,25 +349,6 @@ static float BDSKScaleMenuFontSize = 11.0;
         return YES;
     unsigned int i = [self upperIndexForScaleFactor:[self scaleFactor]];
     return i > 1;
-}
-
-- (void)beginGestureWithEvent:(NSEvent *)theEvent {
-    if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
-        [super beginGestureWithEvent:theEvent];
-    pinchZoomFactor = 1.0;
-}
-
-- (void)endGestureWithEvent:(NSEvent *)theEvent {
-    if (pinchZoomFactor > 1.1 || pinchZoomFactor < 0.9)
-        [self setScaleFactor:pinchZoomFactor * [self scaleFactor]];
-    pinchZoomFactor = 1.0;
-    if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
-        [super endGestureWithEvent:theEvent];
-}
-
-- (void)magnifyWithEvent:(NSEvent *)theEvent {
-    if ([theEvent respondsToSelector:@selector(magnification)])
-        pinchZoomFactor *= [theEvent magnification];
 }
 
 #pragma mark Scrollview
