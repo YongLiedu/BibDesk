@@ -48,12 +48,14 @@
 
 @interface NSResponder (BDSKGesturesPrivate)
 - (void)magnifyWithEvent:(NSEvent *)theEvent;
+- (void)rotateWithEvent:(NSEvent *)theEvent;
 - (void)beginGestureWithEvent:(NSEvent *)theEvent;
 - (void)endGestureWithEvent:(NSEvent *)theEvent;
 @end
 
 @interface NSEvent (BDSKGesturesPrivate)
 - (float)magnification;
+- (float)rotation;
 @end
 
 @implementation BDSKZoomablePDFView
@@ -88,6 +90,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (self = [super initWithFrame:frameRect]) {
         scalePopUpButton = nil;
         pinchZoomFactor = 1.0;
+        gestureRotation = 0.0;
         [self makeScalePopUpButton];
     }
     return self;
@@ -97,6 +100,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (self = [super initWithCoder:decoder]) {
         scalePopUpButton = nil;
         pinchZoomFactor = 1.0;
+        gestureRotation = 0.0;
         [self makeScalePopUpButton];
     }
     return self;
@@ -367,12 +371,18 @@ static float BDSKScaleMenuFontSize = 11.0;
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super beginGestureWithEvent:theEvent];
     pinchZoomFactor = 1.0;
+    gestureRotation = 0.0;
 }
 
 - (void)endGestureWithEvent:(NSEvent *)theEvent {
-    if (pinchZoomFactor > 1.1 || pinchZoomFactor < 0.9)
+    if (fabsf(pinchZoomFactor - 1.0) > 0.1)
         [self setScaleFactor:pinchZoomFactor * [self scaleFactor]];
+    if (fabsf(gestureRotation) > 45.0) {
+        [[self currentPage] setRotation:[[self currentPage] rotation] + (int)(90.0 * froundf(gestureRotation / 90.0))];
+        [self setNeedsDisplay:YES];
+    }
     pinchZoomFactor = 1.0;
+    gestureRotation = 0.0;
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super endGestureWithEvent:theEvent];
 }
@@ -380,6 +390,13 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (void)magnifyWithEvent:(NSEvent *)theEvent {
     if ([theEvent respondsToSelector:@selector(magnification)])
         pinchZoomFactor *= 1.0 + fmaxf(-0.5, fminf(1.0 , [theEvent magnification]));
+}
+
+- (void)rotateWithEvent:(NSEvent *)theEvent {
+    if ([theEvent respondsToSelector:@selector(magnification)])
+        pinchZoomFactor *= 1.0 + fmaxf(-0.5, fminf(1.0 , [theEvent magnification]));
+    if ([theEvent respondsToSelector:@selector(rotation)])
+        gestureRotation += [theEvent rotation];
 }
 
 #pragma mark Scrollview
