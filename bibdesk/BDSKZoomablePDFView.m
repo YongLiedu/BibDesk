@@ -378,7 +378,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (fabsf(pinchZoomFactor - 1.0) > 0.1)
         [self setScaleFactor:fmaxf(pinchZoomFactor * [self scaleFactor], BDSKDefaultScaleMenuFactors[1])];
     if (fabsf(gestureRotation) > 45.0) {
-        [[self currentPage] setRotation:[[self currentPage] rotation] + (int)(90.0 * froundf(gestureRotation / 90.0))];
+        [[self currentPage] setRotation:[[self currentPage] rotation] + (int)(90.0 * roundf(gestureRotation / 90.0))];
         [self setNeedsDisplay:YES];
     }
     pinchZoomFactor = 1.0;
