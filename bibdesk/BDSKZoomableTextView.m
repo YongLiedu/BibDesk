@@ -280,7 +280,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 - (void)endGestureWithEvent:(NSEvent *)theEvent {
     if (pinchZoomFactor > 1.1 || pinchZoomFactor < 0.9)
-        [self setScaleFactor:pinchZoomFactor * [self scaleFactor]];
+        [self setScaleFactor:fmaxf(pinchZoomFactor * [self scaleFactor], BDSKDefaultScaleMenuFactors[1])];
     pinchZoomFactor = 1.0;
     if ([[BDSKZoomableTextView superclass] instancesRespondToSelector:_cmd])
         [super endGestureWithEvent:theEvent];
