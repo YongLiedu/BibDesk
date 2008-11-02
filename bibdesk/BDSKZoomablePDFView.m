@@ -292,6 +292,13 @@ static float BDSKScaleMenuFontSize = 11.0;
     return count - 1;
 }
 
+- (unsigned int)indexForScaleFactor:(float)scaleFactor {
+    unsigned int lower = [self lowerIndexForScaleFactor:scaleFactor], upper = [self upperIndexForScaleFactor:scaleFactor];
+    if (upper > lower && scaleFactor < 0.5 * (BDSKDefaultScaleMenuFactors[lower] + BDSKDefaultScaleMenuFactors[upper]))
+        return lower;
+    return upper;
+}
+
 - (void)setScaleFactor:(float)newScaleFactor {
     NSPoint scrollPoint = (NSPoint)[self scrollPositionAsPercentage];
 	[self setScaleFactor:newScaleFactor adjustPopup:YES];
@@ -304,11 +311,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 		if (newScaleFactor < 0.01) {
             newScaleFactor = 0.0;
         } else {
-            unsigned int i = [self lowerIndexForScaleFactor:newScaleFactor], upper = [self upperIndexForScaleFactor:newScaleFactor];
-            if (upper > i) {
-                if (newScaleFactor > 0.5 * (BDSKDefaultScaleMenuFactors[i] + BDSKDefaultScaleMenuFactors[upper]))
-                    i = upper;
-            }
+            unsigned int i = [self indexForScaleFactor:newScaleFactor];
             [scalePopUpButton selectItemAtIndex:i];
             newScaleFactor = BDSKDefaultScaleMenuFactors[i];
         }
@@ -388,8 +391,15 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (void)magnifyWithEvent:(NSEvent *)theEvent {
-    if ([theEvent respondsToSelector:@selector(magnification)])
+    if ([theEvent respondsToSelector:@selector(magnification)]) {
         pinchZoomFactor *= 1.0 + fmaxf(-0.5, fminf(1.0 , [theEvent magnification]));
+        float scaleFactor = pinchZoomFactor * [self scaleFactor];
+        unsigned int i = [self indexForScaleFactor:fmaxf(scaleFactor, BDSKDefaultScaleMenuFactors[1])];
+        if (i != [self indexForScaleFactor:[self scaleFactor]]) {
+            [self setScaleFactor:BDSKDefaultScaleMenuFactors[i]];
+            pinchZoomFactor = scaleFactor / [self scaleFactor];
+        }
+    }
 }
 
 - (void)rotateWithEvent:(NSEvent *)theEvent {
