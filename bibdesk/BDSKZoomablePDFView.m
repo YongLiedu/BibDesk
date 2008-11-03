@@ -370,6 +370,28 @@ static float BDSKScaleMenuFontSize = 11.0;
     return i > 1;
 }
 
+#pragma mark Scrollview
+
+- (NSScrollView *)scrollView;
+{
+    return [[self documentView] enclosingScrollView];
+}
+
+- (void)setScrollerSize:(NSControlSize)controlSize;
+{
+    NSScrollView *scrollView = [[self documentView] enclosingScrollView];
+    [scrollView setHasHorizontalScroller:YES];
+    [scrollView setHasVerticalScroller:YES];
+    [[scrollView horizontalScroller] setControlSize:controlSize];
+    [[scrollView verticalScroller] setControlSize:controlSize];
+	if(scalePopUpButton){
+		[[scalePopUpButton cell] setControlSize:controlSize];
+        [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - controlSize]];
+	}
+}
+
+#pragma mark Gestures
+
 - (void)beginGestureWithEvent:(NSEvent *)theEvent {
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super beginGestureWithEvent:theEvent];
@@ -403,30 +425,8 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (void)rotateWithEvent:(NSEvent *)theEvent {
-    if ([theEvent respondsToSelector:@selector(magnification)])
-        pinchZoomFactor *= 1.0 + fmaxf(-0.5, fminf(1.0 , [theEvent magnification]));
     if ([theEvent respondsToSelector:@selector(rotation)])
         gestureRotation += [theEvent rotation];
-}
-
-#pragma mark Scrollview
-
-- (NSScrollView *)scrollView;
-{
-    return [[self documentView] enclosingScrollView];
-}
-
-- (void)setScrollerSize:(NSControlSize)controlSize;
-{
-    NSScrollView *scrollView = [[self documentView] enclosingScrollView];
-    [scrollView setHasHorizontalScroller:YES];
-    [scrollView setHasVerticalScroller:YES];
-    [[scrollView horizontalScroller] setControlSize:controlSize];
-    [[scrollView verticalScroller] setControlSize:controlSize];
-	if(scalePopUpButton){
-		[[scalePopUpButton cell] setControlSize:controlSize];
-        [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - controlSize]];
-	}
 }
 
 @end
