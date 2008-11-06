@@ -48,14 +48,12 @@
 
 @interface NSResponder (BDSKGesturesPrivate)
 - (void)magnifyWithEvent:(NSEvent *)theEvent;
-- (void)rotateWithEvent:(NSEvent *)theEvent;
 - (void)beginGestureWithEvent:(NSEvent *)theEvent;
 - (void)endGestureWithEvent:(NSEvent *)theEvent;
 @end
 
 @interface NSEvent (BDSKGesturesPrivate)
 - (float)magnification;
-- (float)rotation;
 @end
 
 @implementation BDSKZoomablePDFView
@@ -90,7 +88,6 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (self = [super initWithFrame:frameRect]) {
         scalePopUpButton = nil;
         pinchZoomFactor = 1.0;
-        gestureRotation = 0.0;
         [self makeScalePopUpButton];
     }
     return self;
@@ -100,7 +97,6 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (self = [super initWithCoder:decoder]) {
         scalePopUpButton = nil;
         pinchZoomFactor = 1.0;
-        gestureRotation = 0.0;
         [self makeScalePopUpButton];
     }
     return self;
@@ -396,18 +392,12 @@ static float BDSKScaleMenuFontSize = 11.0;
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super beginGestureWithEvent:theEvent];
     pinchZoomFactor = 1.0;
-    gestureRotation = 0.0;
 }
 
 - (void)endGestureWithEvent:(NSEvent *)theEvent {
     if (fabsf(pinchZoomFactor - 1.0) > 0.1)
         [self setScaleFactor:fmaxf(pinchZoomFactor * [self scaleFactor], BDSKDefaultScaleMenuFactors[1])];
-    if (fabsf(gestureRotation) > 45.0) {
-        [[self currentPage] setRotation:[[self currentPage] rotation] + (int)(90.0 * roundf(gestureRotation / 90.0))];
-        [self setNeedsDisplay:YES];
-    }
     pinchZoomFactor = 1.0;
-    gestureRotation = 0.0;
     if ([[BDSKZoomablePDFView superclass] instancesRespondToSelector:_cmd])
         [super endGestureWithEvent:theEvent];
 }
@@ -422,11 +412,6 @@ static float BDSKScaleMenuFontSize = 11.0;
             pinchZoomFactor = scaleFactor / [self scaleFactor];
         }
     }
-}
-
-- (void)rotateWithEvent:(NSEvent *)theEvent {
-    if ([theEvent respondsToSelector:@selector(rotation)])
-        gestureRotation += [theEvent rotation];
 }
 
 @end
