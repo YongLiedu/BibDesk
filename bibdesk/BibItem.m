@@ -137,7 +137,7 @@ CFHashCode BibItemEquivalenceHash(const void *item)
     OBASSERT([(id)item isKindOfClass:[BibItem class]]);
     
     NSString *type = [(BibItem *)item pubType];
-    CFHashCode hash = OFCaseInsensitiveStringHash(type);
+    CFHashCode hash = type ? OFCaseInsensitiveStringHash(type) : 0;
 	
 	// hash only the standard fields; are these all we should compare?
 	BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
