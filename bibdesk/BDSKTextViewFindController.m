@@ -65,6 +65,13 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
     [super dealloc];
 }
 
+- (void)awakeFromNib {
+    if ([[BDSKTextViewFindController superclass] instancesRespondToSelector:_cmd])
+        [super awakeFromNib];
+    if ([findPanel respondsToSelector:@selector(setCollectionBehavior:)])
+        [findPanel setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace];
+}
+
 - (IBAction)performFindPanelAction:(id)sender;
 {
 	switch ([sender tag]) {

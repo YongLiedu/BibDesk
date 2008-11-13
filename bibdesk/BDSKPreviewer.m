@@ -119,7 +119,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 #pragma mark UI setup and display
 
-- (void)awakeFromNib{
+- (void)windowDidLoad{
     float pdfScaleFactor = 0.0;
     float rtfScaleFactor = 1.0;
     BDSKCollapsibleView *collapsibleView = (BDSKCollapsibleView *)[[[progressOverlay contentView] subviews] firstObject];
@@ -141,6 +141,9 @@ static BDSKPreviewer *sharedPreviewer = nil;
     
     if([self isSharedPreviewer]){
         [self setWindowFrameAutosaveName:BDSKPreviewPanelFrameAutosaveName];
+        
+        if ([[self window] respondsToSelector:@selector(setCollectionBehavior:)])
+            [[self window] setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
         
         rect = [warningView frame];
         rect.origin.x += 22.0;

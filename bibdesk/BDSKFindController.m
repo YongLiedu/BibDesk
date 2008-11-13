@@ -119,7 +119,10 @@ enum {
     [super dealloc];
 }
 
-- (void)awakeFromNib{
+- (void)windowDidLoad{
+    if ([[self window] respondsToSelector:@selector(setCollectionBehavior:)])
+        [[self window] setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace];
+    
     BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     NSMutableArray *extraFields = [NSMutableArray arrayWithObjects:BDSKCiteKeyString, BDSKPubTypeString, BDSKRemoteURLString, nil];
     [extraFields addObjectsFromArray:[[btm noteFieldsSet] allObjects]];
