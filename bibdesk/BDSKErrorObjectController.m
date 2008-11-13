@@ -115,9 +115,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (void)awakeFromNib;
 {
-    if ([[self window] respondsToSelector:@selector(setCollectionBehavior:)])
-        [[self window] setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
-    
     [errorTableView setDoubleAction:@selector(gotoError:)];
     
     [errorsController setFilterManager:[BDSKErrorManager allItemsErrorManager]];

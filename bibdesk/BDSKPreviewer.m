@@ -142,9 +142,6 @@ static BDSKPreviewer *sharedPreviewer = nil;
     if([self isSharedPreviewer]){
         [self setWindowFrameAutosaveName:BDSKPreviewPanelFrameAutosaveName];
         
-        if ([[self window] respondsToSelector:@selector(setCollectionBehavior:)])
-            [[self window] setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
-        
         rect = [warningView frame];
         rect.origin.x += 22.0;
         [warningView setFrame:rect];
