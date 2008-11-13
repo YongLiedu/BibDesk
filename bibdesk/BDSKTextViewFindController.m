@@ -53,11 +53,23 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
 
 @implementation BDSKTextViewFindController
 
+static id sharedFindController = nil;
+
++ (id)sharedFindController {
+	if (sharedFindController == nil)
+		[[BDSKTextViewFindController alloc] init];
+	return sharedFindController;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    return sharedFindController ?: [super allocWithZone:zone];
+}
+
 - (id)init {
-    if (self = [super init]) {
+	if ((sharedFindController == nil) && (sharedFindController = self = [super init])){
 		findFieldEditor = nil;
-    }
-    return self;
+	}
+	return sharedFindController;
 }
 
 - (void)dealloc {
@@ -65,12 +77,13 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
     [super dealloc];
 }
 
-- (void)awakeFromNib {
-    if ([[BDSKTextViewFindController superclass] instancesRespondToSelector:_cmd])
-        [super awakeFromNib];
-    if ([findPanel respondsToSelector:@selector(setCollectionBehavior:)])
-        [findPanel setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace];
-}
+- (id)retain { return self; }
+
+- (id)autorelease { return self; }
+
+- (void)release {}
+
+- (unsigned)retainCount { return UINT_MAX; }
 
 - (IBAction)performFindPanelAction:(id)sender;
 {
@@ -153,6 +166,8 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
 - (void)loadInterface;
 {
     [[NSBundle mainBundle] loadNibNamed:@"BDSKTextViewFindPanel.nib" owner:self];
+    if ([findPanel respondsToSelector:@selector(setCollectionBehavior:)])
+        [findPanel setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace];
     [replaceInSelectionCheckbox retain];
     [findPanel setFrameUsingName:BDSKTextViewFindPanelTitle];
     [findPanel setFrameAutosaveName:BDSKTextViewFindPanelTitle];

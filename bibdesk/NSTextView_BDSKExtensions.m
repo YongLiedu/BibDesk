@@ -43,12 +43,8 @@
 
 @implementation NSTextView (BDSKExtensions)
 
-static BDSKTextViewFindController *findController = nil;
-
 - (IBAction)performFindPanelAction:(id)sender{
-    if (findController == nil)
-        findController = [[BDSKTextViewFindController alloc] init];
-	[findController performFindPanelAction:sender];
+	[[BDSKTextViewFindController sharedFindController] performFindPanelAction:sender];
 }
 
 // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag

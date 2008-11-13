@@ -43,5 +43,6 @@
     IBOutlet NSPopUpButton *findTypePopUp;
     NSTextView *findFieldEditor;
 }
++ (id)sharedFindController;
 - (IBAction)performFindPanelAction:(id)sender;
 @end
