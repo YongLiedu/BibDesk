@@ -303,7 +303,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 
 		<cocoa name="NSTextSuite"/>
 
-		<value-type name="RGB color" code="cRGB">
+		<value-type name="color" code="colr">
 			<cocoa class="NSColor"/>
 		</value-type>
 
@@ -318,7 +318,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				contradict the DTD, are NOT errors.  Cocoa Scripting in 10.4
 				uses them to accomplish certain type conversions. -->
 			<type type="text"/>
-			<property name="color" code="colr" type="RGB color"
+			<property name="color" code="colr" type="color"
 				description="The color of the first character.">
 				<cocoa key="foregroundColor"/>
 			</property>
@@ -341,7 +341,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="This subdivides the text into characters.">
 			<cocoa class="NSTextStorage"/>
 			<type type="text"/>
-			<property name="color" code="colr" type="RGB color"
+			<property name="color" code="colr" type="color"
 				description="The color of the first character.">
 				<cocoa key="foregroundColor"/>
 			</property>
@@ -364,7 +364,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="This subdivides the text into paragraphs.">
 			<cocoa class="NSTextStorage"/>
 			<type type="text"/>
-			<property name="color" code="colr" type="RGB color"
+			<property name="color" code="colr" type="color"
 				description="The color of the first character.">
 				<cocoa key="foregroundColor"/>
 			</property>
@@ -387,7 +387,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="This subdivides the text into words.">
 			<cocoa class="NSTextStorage"/>
 			<type type="text"/>
-			<property name="color" code="colr" type="RGB color"
+			<property name="color" code="colr" type="color"
 				description="The color of the first character.">
 				<cocoa key="foregroundColor"/>
 			</property>
@@ -410,7 +410,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="This subdivides the text into chunks that all have the same attributes.">
 			<cocoa class="NSTextStorage"/>
 			<type type="text"/>
-			<property name="color" code="colr" type="RGB color"
+			<property name="color" code="colr" type="color"
 				description="The color of the first character.">
 				<cocoa key="foregroundColor"/>
 			</property>
@@ -1118,6 +1118,12 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
         </class>
         
+        <class name="point list" plural="point lists" code="PtLi"
+            description="A list of points.">
+            <cocoa class="NSArray"/>
+            <type type="point" list="yes"/>
+        </class>
+        
         <record-type name="date condition value" code="CDVl">
             <property name="period" code="Perd" type="integer"
                 description="The amount of a period of the date condition.">
@@ -1271,7 +1277,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The text of the note. ">
                 <cocoa key="contents"/>
             </contents>
-            <property name="color" code="colr" type="RGB color" access="r"
+            <property name="color" code="colr" type="color" access="r"
                 description="The color of the note.">
                 <cocoa key="color"/>
             </property>
@@ -1291,7 +1297,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The font size in points of a text note.">
                 <cocoa key="fontSize"/>
             </property>
-            <property name="font color" code="FntC" type="RGB color" access="r"
+            <property name="font color" code="FntC" type="color" access="r"
                 description="The text color of a text note.">
                 <cocoa key="fontColor"/>
             </property>
@@ -1303,11 +1309,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The image of an anchored note as a TIFF picture.">
                 <cocoa key="image"/>
             </property>
-            <property name="icon" code="iimg" type="icon type" access="r"
+            <property name="icon" code="iimg" type="text" access="r"
                 description="The icon type of an anchored note.">
                 <cocoa key="scriptingIconType"/>
             </property>
-            <property name="interior color" code="IClr" type="RGBA color" access="r"
+            <property name="interior color" code="IClr" type="color" access="r"
                 description="The fill color of a circle or box.">
                 <cocoa key="interiorColor"/>
             </property>
