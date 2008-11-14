@@ -444,6 +444,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="Bibdesk specific commands and classes for dealing with bibliographies and publications.">
         <cocoa name="BibDeskSuite"/>
 
+		<value-type name="TIFF picture" code="TIFF"
+			description="A TIFF image.">
+			<cocoa class="NSData"/>
+		</value-type>
+
 		<class name="application" code="capp"
 			description="Bibdesk's top level scripting object.">
 			<cocoa class="BDSKApplication"/>
@@ -1294,7 +1299,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The rich extended text of an anchored note.">
                 <cocoa key="text"/>
             </property>
-            <property name="image" code="Imag" type="any" access="r"
+            <property name="image" code="Imag" type="TIFF picture" access="r"
                 description="The image of an anchored note as a TIFF picture.">
                 <cocoa key="image"/>
             </property>
