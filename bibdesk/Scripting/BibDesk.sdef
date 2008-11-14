@@ -1273,10 +1273,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The type of note.">
                 <cocoa key="type"/>
             </property>
-            <contents name="text contents" code="Text" type="text" access="r"
-                description="The text of the note. ">
+            <property name="text contents" code="Text" type="text" access="r"
+                description="The text of the note.">
                 <cocoa key="contents"/>
-            </contents>
+            </property>
             <property name="color" code="colr" type="color" access="r"
                 description="The color of the note.">
                 <cocoa key="color"/>
