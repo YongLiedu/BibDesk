@@ -303,7 +303,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 
 		<cocoa name="NSTextSuite"/>
 
-		<value-type name="RGB color" code="colr">
+		<value-type name="RGB color" code="cRGB">
 			<cocoa class="NSColor"/>
 		</value-type>
 
@@ -1293,6 +1293,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <property name="extended text" code="XTxt" type="rich text" access="r"
                 description="The rich extended text of an anchored note.">
                 <cocoa key="text"/>
+            </property>
+            <property name="image" code="Imag" type="any" access="r"
+                description="The image of an anchored note as a TIFF picture.">
+                <cocoa key="image"/>
             </property>
             <property name="icon" code="iimg" type="icon type" access="r"
                 description="The icon type of an anchored note.">

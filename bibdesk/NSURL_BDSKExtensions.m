@@ -471,7 +471,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
             [note setValue:[[[NSTextStorage alloc] initWithAttributedString:value] autorelease] forKey:SKNPDFAnnotationTextKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationImageKey]) {
-            [note setValue:[value TIFFRepresentation] forKey:SKNPDFAnnotationImageKey];
+            [note setValue:[NSAppleEventDescriptor descriptorWithDescriptorType:typeTIFF data:[value TIFFRepresentation]] forKey:SKNPDFAnnotationImageKey];
         }
         if (value = [note objectForKey:SKNPDFAnnotationQuadrilateralPointsKey]) {
             NSEnumerator *pointEnum = [value objectEnumerator];
