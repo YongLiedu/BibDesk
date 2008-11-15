@@ -93,6 +93,9 @@
 	return NO;
 }
 
+- (void)concludeDragOperation:(id <NSDraggingInfo>)sender {
+}
+
 - (void)mouseDown:(NSEvent *)theEvent
 {
     BOOL keepOn = YES;
