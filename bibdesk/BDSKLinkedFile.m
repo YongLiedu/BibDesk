@@ -84,6 +84,17 @@ static CFDataRef BDSKCopyAliasHandleToData(AliasHandle inAlias)
     return data;
 }
 
+static const FSRef *BDSKBaseRefIfOnSameVolume(const FSRef *inBaseRef, const FSRef *inRef)
+{
+    FSCatalogInfo baseCatalogInfo, catalogInfo;
+    BOOL sameVolume = NO;
+    if (inBaseRef != NULL && inRef != NULL &&
+        noErr == FSGetCatalogInfo(inBaseRef, kFSCatInfoVolume, &baseCatalogInfo, NULL, NULL, NULL) &&
+        noErr == FSGetCatalogInfo(inRef, kFSCatInfoVolume, &catalogInfo, NULL, NULL, NULL))
+        sameVolume = baseCatalogInfo.volume == catalogInfo.volume;
+    return sameVolume ? inBaseRef : NULL;
+}
+
 static Boolean BDSKAliasHandleToFSRef(const AliasHandle inAlias, const FSRef *inBaseRef, FSRef *outRef, Boolean *shouldUpdate)
 {
     OSStatus err = noErr;
@@ -100,7 +111,7 @@ static AliasHandle BDSKFSRefToAliasHandle(const FSRef *inRef, const FSRef *inBas
     OSStatus err = noErr;
     AliasHandle	alias = NULL;
     
-    err = FSNewAlias(inBaseRef, inRef, &alias);
+    err = FSNewAlias(BDSKBaseRefIfOnSameVolume(inBaseRef, inRef), inRef, &alias);
     
     if (err != noErr) {
         BDSKDisposeAliasHandle(alias);
@@ -666,7 +677,7 @@ static Class BDSKLinkedFileClass = Nil;
     
     // update the alias
     if (alias != NULL)
-        FSUpdateAlias(baseRef, fileRef, alias, &didUpdate);
+        FSUpdateAlias(BDSKBaseRefIfOnSameVolume(baseRef, fileRef), fileRef, alias, &didUpdate);
     else
         alias = BDSKFSRefToAliasHandle(fileRef, baseRef);
     
