@@ -3025,7 +3025,7 @@
 				F91B5C4E076412A10011ED22 /* Copy Files: Shared Support */,
 				F95CC0ED087F542F002C5694 /* Copy Files: Spotlight */,
 				CEEBA83C0D749C99000204B8 /* Copy Files: QuickLook */,
-				F9FF213B09E83BAB00BB1706 /* Run Script: Strp headers and .DS_Store */,
+				F9FF213B09E83BAB00BB1706 /* Run Script: Strip headers and .DS_Store */,
 				F95C5E850D10E52400C81970 /* Run Script: Codesign */,
 			);
 			buildRules = (
@@ -3603,19 +3603,19 @@
 			shellPath = /bin/sh;
 			shellScript = "##\n## This takes a while to generate, so it's not worth\n## the wait for development builds.\n##\nif [ ${BUILD_STYLE} = \"Debug\" ]; then\n# Check to see if a previous version exists and create it\n# if not, or else pbxcp will complain.\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nexit 0\nfi\nfi\n#\n# Run the genstrings build phase\n#\ncd ${SOURCE_ROOT} && \\\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nmv English.lproj/Localizable.strings English.lproj/Localizable.strings.bak \nfi\n\n# skip OmniBase/macros.h because of genstrings crash\n# skip vendorsrc entirely? need to process .h files?\n\n/usr/bin/genstrings -q -o \"${SOURCE_ROOT}/English.lproj\" \\\n\t-skipTable BibTeXKeys \\\n\t-skipTable ZoomValues \\\n\t-skipTable TemplateOptions \\\n\t*.m 2>&1 | sed -e 's/^/warning: /g' | \\\n\tsed -e 's/warning:.*Warning:/warning:/g' >&2\n";
 		};
-		F9FF213B09E83BAB00BB1706 /* Run Script: Strp headers and .DS_Store */ = {
+		F9FF213B09E83BAB00BB1706 /* Run Script: Strip headers and .DS_Store */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Run Script: Strp headers and .DS_Store";
+			name = "Run Script: Strip headers and .DS_Store";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\necho \"*** stripping header files from frameworks ***\"\nfind \"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\" -type file -name \"*.h\" -delete\n\necho \"*** stripping .DS_STORE files ***\"\nfind \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}\" -type file -name \".DS_STORE\" -delete\n\n#echo \"*** stripping IB files from NIBs ***\"\n#find \"${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}\" -type file \\( -name \"classes.nib\" -or -name \"info.nib\" -or -name \"data.dependency\" \\) -delete\n";
+			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\necho \"*** stripping header files from frameworks ***\"\nfind \"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\" -type file -name \"*.h\" -delete\nfind \"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\" \\( -type d -or -type l \\) -name Headers -delete\n\necho \"*** stripping .DS_STORE files ***\"\nfind \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}\" -type file -name \".DS_STORE\" -delete\n\n#echo \"*** stripping IB files from NIBs ***\"\n#find \"${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}\" -type file \\( -name \"classes.nib\" -or -name \"info.nib\" -or -name \"data.dependency\" \\) -delete\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
