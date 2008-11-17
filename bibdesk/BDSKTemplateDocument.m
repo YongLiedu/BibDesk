@@ -1510,7 +1510,9 @@ static void (*originalSetObjectValue)(id, SEL, id) = NULL;
 }
 
 + (void)load {
-     originalSetObjectValue = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(setObjectValue:), @selector(replacementSetObjectValue:));
+    // in later versions, messing with the binding info causes an infinite loop and crash 
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+        originalSetObjectValue = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(setObjectValue:), @selector(replacementSetObjectValue:));
 }
 
 @end
