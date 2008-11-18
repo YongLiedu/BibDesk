@@ -509,7 +509,7 @@
 
     // OAInternetConfig will use the default mail helper (at least it works with Mail.app and Entourage)
     OAInternetConfig *ic = [OAInternetConfig internetConfig];
-    [ic launchMailTo:nil
+    [ic launchMailTo:@""
           carbonCopy:nil
      blindCarbonCopy:nil
              subject:@"BibDesk references"
