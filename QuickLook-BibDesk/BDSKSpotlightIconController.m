@@ -38,21 +38,26 @@
 
 #import "BDSKSpotlightIconController.h"
 
-static NSString *lockString = @"BDSKSpotlightIconController";
-
 static id controller = nil;
 static NSImage *applicationIcon = nil;
 
 @interface BDSKSpotlightIconController (Private)
++ (void)freeStatics;
 - (id)initWithBundle:(NSBundle *)bundle;
 - (NSBitmapImageRep *)imageRepWithMetadataItem:(id)anItem;
+- (void)loadValuesFromMetadataItem:(id)anItem;
 @end
-
-@implementation BDSKSpotlightIconController
 
 void BDSKSpotlightIconControllerFreeStatics()
 {
-    @synchronized(lockString) {
+    [BDSKSpotlightIconController freeStatics];
+}
+
+@implementation BDSKSpotlightIconController
+
++ (void)freeStatics
+{
+    @synchronized(self) {
         [controller release];
         controller = nil;
         [applicationIcon release];
@@ -63,9 +68,15 @@ void BDSKSpotlightIconControllerFreeStatics()
 + (NSBitmapImageRep *)imageRepWithMetadataItem:(id)anItem forBundle:(NSBundle *)bundle
 {
     NSBitmapImageRep *imageRep = nil;
-    @synchronized(lockString) {
+    @synchronized(self) {
         if (nil == controller)
             controller = [[self alloc] initWithBundle:bundle];
+        if (applicationIcon == nil) {
+            NSString *iconPath = [bundle pathForImageResource:@"FolderPenIcon"];
+            applicationIcon = [[NSImage alloc] initWithContentsOfFile:iconPath];
+            [applicationIcon setName:@"FolderPenIcon"];
+            [applicationIcon setSize:NSMakeSize(128, 128)];
+        }
         imageRep = [controller imageRepWithMetadataItem:anItem];
     }
     return imageRep;
@@ -75,13 +86,6 @@ void BDSKSpotlightIconControllerFreeStatics()
 {
     self = [super init];
     if (self) {
-        // make sure the icon is loaded
-        if (applicationIcon == nil) {
-            NSString *iconPath = [bundle pathForImageResource:@"FolderPenIcon"];
-            applicationIcon = [[NSImage alloc] initWithContentsOfFile:iconPath];
-            [applicationIcon setName:@"FolderPenIcon"];
-            [applicationIcon setSize:NSMakeSize(128, 128)];
-        }
         // manually load the nib, since +[NSBundle loadNibName...] won't work
         BOOL loaded = [bundle loadNibFile:[self windowNibName] externalNameTable:[NSDictionary dictionaryWithObject:self forKey:@"NSOwner"] withZone:[self zone]];
         if (loaded) {
@@ -111,19 +115,7 @@ void BDSKSpotlightIconControllerFreeStatics()
     [[[tableView tableColumns] objectAtIndex:0] setHeaderCell:cell];
     [[[tableView tableColumns] objectAtIndex:1] setHeaderCell:cell];
     [cell release];
-    
-    [tableView setGridColor:[NSColor keyboardFocusIndicatorColor]];
 }    
-
-- (int)numberOfRowsInTableView:(NSTableView *)tv { 
-    int count = [values count];
-    return MIN(count, 10);
-}
-
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row;
-{
-    return [[values objectAtIndex:row] objectForKey:[tableColumn identifier]];
-}
 
 static NSDictionary *createDictionaryWithAttributeAndValue(NSString *attribute, id value)
 {
@@ -161,6 +153,9 @@ static NSArray *createDictionariesFromMultivaluedAttribute(NSString *attribute, 
 {
     // anItem is key-value coding compliant
     NSDictionary *dict;
+    
+    [self willChangeValueForKey:@"values"];
+    
     [values removeAllObjects];
     
     dict = createDictionaryWithAttributeAndValue(@"Container:", [anItem valueForKey:@"net_sourceforge_bibdesk_container"]);
@@ -182,6 +177,15 @@ static NSArray *createDictionariesFromMultivaluedAttribute(NSString *attribute, 
     array = createDictionariesFromMultivaluedAttribute(@"Keywords:", [anItem valueForKey:(NSString *)kMDItemKeywords]);
     [values addObjectsFromArray:array];
     [array release];
+    
+    while ([values count] < 10) {
+        // empty attribute name for the rest
+        dict = createDictionaryWithAttributeAndValue(@"", @"");
+        [values addObject:dict];
+        [dict release];
+    }
+    
+    [self didChangeValueForKey:@"values"];
 }
 
 - (NSBitmapImageRep *)imageRepWithMetadataItem:(id)anItem;
@@ -192,6 +196,7 @@ static NSArray *createDictionariesFromMultivaluedAttribute(NSString *attribute, 
     NSView *contentView = [[self window] contentView];
     NSBitmapImageRep *imageRep = [contentView bitmapImageRepForCachingDisplayInRect:[contentView frame]];
     [contentView cacheDisplayInRect:[contentView frame] toBitmapImageRep:imageRep];
+    [[imageRep TIFFRepresentation] writeToFile:@"/Users/hofman/Desktop/image.tiff" atomically:YES];
     return imageRep;
 }    
 
@@ -200,9 +205,8 @@ static NSArray *createDictionariesFromMultivaluedAttribute(NSString *attribute, 
 
 @implementation BDSKSpotlightIconTableView
 
-- (void)drawRect:(NSRect)rect {
-    
-    [super drawRect:rect];
+- (void)drawGridInClipRect:(NSRect)rect {    
+    [super drawGridInClipRect:rect];
     if ([self isFlipped]) {
         CGContextRef context;
         

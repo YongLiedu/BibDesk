@@ -1,33 +1,50 @@
-{
-    IBClasses = (
-        {CLASS = BDSKClearView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {
-            CLASS = BDSKSpotlightIconController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {clearView = BDSKClearView; tableView = BDSKSpotlightIconTableView; }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {
-            CLASS = BDSKSpotlightIconTableView; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSTableView; 
-        }, 
-        {CLASS = ClearView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {
-            ACTIONS = {saveAction = id; }; 
-            CLASS = Controller; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {clearView = ClearView; saveButton = NSButton; tableView = IconTableView; }; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = IconTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {
-            CLASS = WindowController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {clearView = ClearView; tableView = IconTableView; }; 
-            SUPERCLASS = NSWindowController; 
-        }
-    ); 
-    IBVersion = 1; 
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKSpotlightIconController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>clearView</key>
+				<string>BDSKClearView</string>
+				<key>tableView</key>
+				<string>BDSKSpotlightIconTableView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKSpotlightIconTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKClearView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>
