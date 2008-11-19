@@ -196,7 +196,6 @@ static NSArray *createDictionariesFromMultivaluedAttribute(NSString *attribute, 
     NSView *contentView = [[self window] contentView];
     NSBitmapImageRep *imageRep = [contentView bitmapImageRepForCachingDisplayInRect:[contentView frame]];
     [contentView cacheDisplayInRect:[contentView frame] toBitmapImageRep:imageRep];
-    [[imageRep TIFFRepresentation] writeToFile:@"/Users/hofman/Desktop/image.tiff" atomically:YES];
     return imageRep;
 }    
 
