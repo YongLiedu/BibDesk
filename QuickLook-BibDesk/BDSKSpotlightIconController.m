@@ -117,73 +117,38 @@ void BDSKSpotlightIconControllerFreeStatics()
     [cell release];
 }    
 
-static NSDictionary *createDictionaryWithAttributeAndValue(NSString *attribute, id value)
+static void addDictionaryWithAttributeAndValue(NSMutableArray *array, NSString *attribute, id value)
 {
-    NSDictionary *dict;
-    if (nil == value)
-        value = @"";
-    dict = [[NSDictionary alloc] initWithObjectsAndKeys:attribute, @"attributeName", value, @"attributeValue", nil];
-    return dict;
+    NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:attribute, @"attributeName", value ?: @"", @"attributeValue", nil];
+    [array addObject:dict];
+    [dict release];
 }
 
-static NSArray *createDictionariesFromMultivaluedAttribute(NSString *attribute, NSArray *values)
+static void addDictionariesFromMultivaluedAttribute(NSMutableArray *array, NSString *attribute, NSArray *values)
 {
-    NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:[values count]];
-    NSEnumerator *e = [values objectEnumerator];
-    id value = [e nextObject];
-    
-    NSDictionary *dict;
-    
-    if (value) {
-        dict = createDictionaryWithAttributeAndValue(attribute, value);
-        [array addObject:dict];
-        [dict release];
-    }
-    
-    while (value = [e nextObject]) {
+    for (id value in values) {
+        addDictionaryWithAttributeAndValue(array, attribute, value);
         // empty attribute name for the rest
-        dict = createDictionaryWithAttributeAndValue(@"", value);
-        [array addObject:dict];
-        [dict release];
+        attribute = @"";
     }
-    return array;
 }
 
 - (void)loadValuesFromMetadataItem:(id)anItem;
 {
-    // anItem is key-value coding compliant
-    NSDictionary *dict;
-    
     [self willChangeValueForKey:@"values"];
     
     [values removeAllObjects];
     
-    dict = createDictionaryWithAttributeAndValue(@"Container:", [anItem valueForKey:@"net_sourceforge_bibdesk_container"]);
-    [values addObject:dict];
-    [dict release];
-
-    dict = createDictionaryWithAttributeAndValue(@"Title:", [anItem valueForKey:(NSString *)kMDItemTitle]);
-    [values addObject:dict];
-    [dict release];
+    // anItem is key-value coding compliant
+    addDictionaryWithAttributeAndValue(values, @"Container:", [anItem valueForKey:@"net_sourceforge_bibdesk_container"]);
+    addDictionaryWithAttributeAndValue(values, @"Title:", [anItem valueForKey:(NSString *)kMDItemTitle]);
+    addDictionaryWithAttributeAndValue(values, @"Year:", [dateFormatter stringFromDate:[anItem valueForKey:@"net_sourceforge_bibdesk_publicationdate"]]);
+    addDictionariesFromMultivaluedAttribute(values, @"Authors:", [anItem valueForKey:(NSString *)kMDItemAuthors]);
+    addDictionariesFromMultivaluedAttribute(values, @"Keywords:", [anItem valueForKey:(NSString *)kMDItemKeywords]);
     
-    dict = createDictionaryWithAttributeAndValue(@"Year:", [dateFormatter stringFromDate:[anItem valueForKey:@"net_sourceforge_bibdesk_publicationdate"]]);
-    [values addObject:dict];
-    [dict release];
-    
-    NSArray *array = createDictionariesFromMultivaluedAttribute(@"Authors:", [anItem valueForKey:(NSString *)kMDItemAuthors]);
-    [values addObjectsFromArray:array];
-    [array release];
-    
-    array = createDictionariesFromMultivaluedAttribute(@"Keywords:", [anItem valueForKey:(NSString *)kMDItemKeywords]);
-    [values addObjectsFromArray:array];
-    [array release];
-    
-    while ([values count] < 10) {
-        // empty attribute name for the rest
-        dict = createDictionaryWithAttributeAndValue(@"", @"");
-        [values addObject:dict];
-        [dict release];
-    }
+    while ([values count] < 10)
+        // empty lines for the rest
+        addDictionaryWithAttributeAndValue(values, @"", @"");
     
     [self didChangeValueForKey:@"values"];
 }
@@ -191,7 +156,6 @@ static NSArray *createDictionariesFromMultivaluedAttribute(NSString *attribute, 
 - (NSBitmapImageRep *)imageRepWithMetadataItem:(id)anItem;
 {
     [self loadValuesFromMetadataItem:anItem];
-    [tableView reloadData];
     
     NSView *contentView = [[self window] contentView];
     NSBitmapImageRep *imageRep = [contentView bitmapImageRepForCachingDisplayInRect:[contentView frame]];
