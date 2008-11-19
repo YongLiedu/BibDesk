@@ -84,11 +84,9 @@ void BDSKSpotlightIconControllerFreeStatics()
 
 - (id)initWithBundle:(NSBundle *)bundle
 {
-    self = [super init];
-    if (self) {
+    if (self = [super init]) {
         // manually load the nib, since +[NSBundle loadNibName...] won't work
-        BOOL loaded = [bundle loadNibFile:[self windowNibName] externalNameTable:[NSDictionary dictionaryWithObject:self forKey:@"NSOwner"] withZone:[self zone]];
-        if (loaded) {
+        if ([bundle loadNibFile:@"SpotlightFileIconController" externalNameTable:[NSDictionary dictionaryWithObject:self forKey:@"NSOwner"] withZone:[self zone]]) {
             values = [[NSMutableArray alloc] initWithCapacity:16];
             dateFormatter = [[NSDateFormatter alloc] init];
             [dateFormatter setDateFormat:@"yyyy"];
@@ -104,18 +102,10 @@ void BDSKSpotlightIconControllerFreeStatics()
 {
     [values release];
     [dateFormatter release];
+    [window release];
+    [arrayController release];
     [super dealloc];
 }
-
-- (NSString *)windowNibName { return @"SpotlightFileIconController"; }
-
-- (void)awakeFromNib
-{
-    NSCell *cell = [[NSCell alloc] init];
-    [[[tableView tableColumns] objectAtIndex:0] setHeaderCell:cell];
-    [[[tableView tableColumns] objectAtIndex:1] setHeaderCell:cell];
-    [cell release];
-}    
 
 static void addDictionaryWithAttributeAndValue(NSMutableArray *array, NSString *attribute, id value)
 {
@@ -157,11 +147,11 @@ static void addDictionariesFromMultivaluedAttribute(NSMutableArray *array, NSStr
 {
     [self loadValuesFromMetadataItem:anItem];
     
-    NSView *contentView = [[self window] contentView];
+    NSView *contentView = [window contentView];
     NSBitmapImageRep *imageRep = [contentView bitmapImageRepForCachingDisplayInRect:[contentView frame]];
     [contentView cacheDisplayInRect:[contentView frame] toBitmapImageRep:imageRep];
     return imageRep;
-}    
+}
 
 @end
 
@@ -170,21 +160,15 @@ static void addDictionariesFromMultivaluedAttribute(NSMutableArray *array, NSStr
 
 - (void)drawGridInClipRect:(NSRect)rect {    
     [super drawGridInClipRect:rect];
+    CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
+    CGContextSaveGState(context);
     if ([self isFlipped]) {
-        CGContextRef context;
-        
-        context = [[NSGraphicsContext currentContext] graphicsPort];
-        CGContextSaveGState(context); {
-            CGContextTranslateCTM(context, 0, NSMaxY(rect));
-            CGContextScaleCTM(context, 1, -1);
-            
-            rect.origin.y = 0; // We've translated ourselves so it's zero
-            [applicationIcon drawAtPoint:NSMakePoint(10.0f, NSMaxY([self frame]) - 128) fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:1.0f];
-        } CGContextRestoreGState(context);
+        CGContextTranslateCTM(context, 0.0f, NSMaxY([self frame]));
+        CGContextScaleCTM(context, 1.0f, -1.0f);
+        rect.origin.y = 0.0f; // We've translated ourselves so it's zero
     }
-    else {
-        [applicationIcon drawAtPoint:NSMakePoint(10.0f, NSMaxY([self frame]) - 128) fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0f];
-    }
+    [applicationIcon drawAtPoint:NSMakePoint(10.0f, NSMaxY([self frame]) - 128.0f) fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:1.0f];
+    CGContextRestoreGState(context);
 }
 
 @end
@@ -193,8 +177,7 @@ static void addDictionariesFromMultivaluedAttribute(NSMutableArray *array, NSStr
 
 - (void)drawRect:(NSRect)r
 {
-    r = [self frame];
-    [[NSColor clearColor] setFill];
+    [[NSColor whiteColor] setFill];
     NSRectFill(r);
 }
 

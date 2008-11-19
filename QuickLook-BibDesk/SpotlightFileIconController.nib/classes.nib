@@ -11,13 +11,13 @@
 			<string>ObjC</string>
 			<key>OUTLETS</key>
 			<dict>
-				<key>clearView</key>
-				<string>BDSKClearView</string>
-				<key>tableView</key>
-				<string>BDSKSpotlightIconTableView</string>
+				<key>arrayController</key>
+				<string>NSArrayController</string>
+				<key>window</key>
+				<string>NSWindow</string>
 			</dict>
 			<key>SUPERCLASS</key>
-			<string>NSWindowController</string>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

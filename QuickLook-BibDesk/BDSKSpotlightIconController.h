@@ -39,9 +39,9 @@
 
 @class BDSKClearView, BDSKSpotlightIconTableView;
 
-@interface BDSKSpotlightIconController : NSWindowController {
-    IBOutlet BDSKSpotlightIconTableView *tableView;
-    IBOutlet BDSKClearView *clearView;
+@interface BDSKSpotlightIconController : NSObject {
+    IBOutlet NSWindow *window;
+    IBOutlet NSArrayController *arrayController;
     NSMutableArray *values;    
     NSDateFormatter *dateFormatter;
 }
