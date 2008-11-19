@@ -88,14 +88,15 @@ static NSAttributedString *createAttributedStringWithContentsOfURLByGuessingEnco
 }
 
 // wash the app icon over a white page background
-static void drawBackgroundAndApplicationIconInCurrentContext()
+static void drawBackgroundAndApplicationIconInCurrentContext(QLThumbnailRequestRef thumbnail)
 {
     [[NSColor whiteColor] setFill];
     NSRect pageRect = NSMakeRect(0, 0, _paperSize.width, _paperSize.height);
     NSRectFillUsingOperation(pageRect, NSCompositeSourceOver);
     
-    NSString *iconPath = [BDSKGetQLMainBundle() pathForResource:@"FolderPenIcon" ofType:@"icns"];
-    NSImage *appIcon = [[NSImage alloc] initWithContentsOfFile:iconPath];
+    NSURL *iconURL = (NSURL *)CFBundleCopyResourceURL(QLThumbnailRequestGetGeneratorBundle(thumbnail), CFSTR("FolderPenIcon"), CFSTR("icns"), NULL);
+    NSImage *appIcon = [[NSImage alloc] initWithContentsOfFile:[iconURL path]];
+    [iconURL release];
     
     NSRect iconRect = NSZeroRect;
     // draw the icon smaller than the text container
@@ -184,7 +185,7 @@ static void drawIconForThumbnailWithAttributedString(QLThumbnailRequestRef thumb
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext:nsContext];
     
-    drawBackgroundAndApplicationIconInCurrentContext();
+    drawBackgroundAndApplicationIconInCurrentContext(thumbnail);
     drawAttributedStringInCurrentContext(attrString);
     
     QLThumbnailRequestFlushContext(thumbnail, ctxt);
@@ -218,8 +219,12 @@ static bool generateThumbnailForCacheFile(QLThumbnailRequestRef thumbnail, CFURL
     
     NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:(NSURL *)url];
     NSBitmapImageRep *imageRep = nil;
-    if (nil != dictionary)
-        imageRep = [BDSKSpotlightIconController imageRepWithMetadataItem:dictionary];
+    if (nil != dictionary) {
+        NSURL *bundleURL = (NSURL *)CFBundleCopyBundleURL(QLThumbnailRequestGetGeneratorBundle(thumbnail));
+        NSBundle *bundle = [NSBundle bundleWithPath:[bundleURL path]];
+        [bundleURL release];
+        imageRep = [BDSKSpotlightIconController imageRepWithMetadataItem:dictionary forBundle:bundle];
+    }
     
     if (nil != imageRep) {
         NSRect drawFrame = NSZeroRect;

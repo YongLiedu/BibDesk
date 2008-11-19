@@ -46,7 +46,7 @@
     NSDateFormatter *dateFormatter;
 }
 
-+ (NSBitmapImageRep *)imageRepWithMetadataItem:(id)anItem;
++ (NSBitmapImageRep *)imageRepWithMetadataItem:(id)anItem forBundle:(NSBundle *)bundle;
 
 @end
 
@@ -55,5 +55,3 @@
 
 @interface BDSKClearView : NSView
 @end
-
-extern NSBundle *BDSKGetQLMainBundle();

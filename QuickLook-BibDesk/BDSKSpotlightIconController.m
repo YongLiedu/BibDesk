@@ -39,10 +39,14 @@
 #import "BDSKSpotlightIconController.h"
 
 static NSString *lockString = @"BDSKSpotlightIconController";
-NSBundle *BDSKGetQLMainBundle() { return [NSBundle bundleWithIdentifier:@"net.sourceforge.bibdesk.quicklookgenerator"]; }
 
 static id controller = nil;
 static NSImage *applicationIcon = nil;
+
+@interface BDSKSpotlightIconController (Private)
+- (id)initWithBundle:(NSBundle *)bundle;
+- (NSBitmapImageRep *)imageRepWithMetadataItem:(id)anItem;
+@end
 
 @implementation BDSKSpotlightIconController
 
@@ -56,23 +60,30 @@ void BDSKSpotlightIconControllerFreeStatics()
     }
 }
 
-+ (NSBitmapImageRep *)imageRepWithMetadataItem:(id)anItem
++ (NSBitmapImageRep *)imageRepWithMetadataItem:(id)anItem forBundle:(NSBundle *)bundle
 {
     NSBitmapImageRep *imageRep = nil;
     @synchronized(lockString) {
         if (nil == controller)
-            controller = [[self alloc] init];
+            controller = [[self alloc] initWithBundle:bundle];
         imageRep = [controller imageRepWithMetadataItem:anItem];
     }
     return imageRep;
 }
 
-- (id)init
+- (id)initWithBundle:(NSBundle *)bundle
 {
     self = [super init];
     if (self) {
+        // make sure the icon is loaded
+        if (applicationIcon == nil) {
+            NSString *iconPath = [bundle pathForImageResource:@"FolderPenIcon"];
+            applicationIcon = [[NSImage alloc] initWithContentsOfFile:iconPath];
+            [applicationIcon setName:@"FolderPenIcon"];
+            [applicationIcon setSize:NSMakeSize(128, 128)];
+        }
         // manually load the nib, since +[NSBundle loadNibName...] won't work
-        BOOL loaded = [BDSKGetQLMainBundle() loadNibFile:[self windowNibName] externalNameTable:[NSDictionary dictionaryWithObject:self forKey:@"NSOwner"] withZone:[self zone]];
+        BOOL loaded = [bundle loadNibFile:[self windowNibName] externalNameTable:[NSDictionary dictionaryWithObject:self forKey:@"NSOwner"] withZone:[self zone]];
         if (loaded) {
             values = [[NSMutableArray alloc] initWithCapacity:16];
             dateFormatter = [[NSDateFormatter alloc] init];
@@ -188,16 +199,6 @@ static NSArray *createDictionariesFromMultivaluedAttribute(NSString *attribute, 
 
 
 @implementation BDSKSpotlightIconTableView
-
-+ (void)initialize
-{
-    if (nil == applicationIcon) {
-        NSString *iconPath = [BDSKGetQLMainBundle() pathForImageResource:@"FolderPenIcon"];
-        applicationIcon = [[NSImage alloc] initWithContentsOfFile:iconPath];
-        [applicationIcon setName:@"FolderPenIcon"];
-        [applicationIcon setSize:NSMakeSize(128, 128)];
-    }
-}
 
 - (void)drawRect:(NSRect)rect {
     
