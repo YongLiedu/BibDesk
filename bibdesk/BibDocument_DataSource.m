@@ -1063,8 +1063,14 @@
                         NSString *auxString = [NSString stringWithContentsOfFile:file encoding:[self documentStringEncoding] guessEncoding:YES];
                         NSString *command = @"\\bibcite{"; // we used to get the command by looking at the line after \bibdata, but that's unreliable as there can be other stuff in between the \bibcite commands
                         
-                        if (auxString == nil || [auxString rangeOfString:command].length == 0)
+                        if (auxString == nil)
                             return NO;
+                        if ([auxString rangeOfString:command].length == 0) {
+                            // biblatex uses \citation
+                            command = @"\\citation{";
+                            if ([auxString rangeOfString:command].length == 0)
+                                return NO;
+                        }
                         
                         NSScanner *scanner = [NSScanner scannerWithString:auxString];
                         NSString *key = nil;
