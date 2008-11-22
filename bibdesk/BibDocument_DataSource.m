@@ -1066,7 +1066,7 @@
                         if (auxString == nil)
                             return NO;
                         if ([auxString rangeOfString:command].length == 0) {
-                            // biblatex uses \citation
+                            // if there are no \bibcite commands we'll use the cite's, which are usualy added as \citation commands to the .aux file
                             command = @"\\citation{";
                             if ([auxString rangeOfString:command].length == 0)
                                 return NO;
