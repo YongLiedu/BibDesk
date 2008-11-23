@@ -413,27 +413,18 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
 {
-    OFPreferenceWrapper *defaults = [OFPreferenceWrapper sharedPreferenceWrapper];
-    int flag = [[defaults objectForKey:BDSKStartupBehaviorKey] intValue];
-    switch(flag){
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    switch ([[pw objectForKey:BDSKStartupBehaviorKey] intValue]) {
         case 0:
             return YES;
         case 1:
             return NO;
         case 2:
-            {
-                // this will be called each time the dock icon is clicked, but we only want to show the open dialog once
-                static BOOL isOpening = NO;
-                if(NO == isOpening){
-                    isOpening = YES;
-                    [[NSDocumentController sharedDocumentController] openDocument:nil];
-                    isOpening = NO;
-                }
-            }
+            [[NSDocumentController sharedDocumentController] openDocument:nil];
             return NO;
         case 3:
             {
-                NSData *data = [defaults objectForKey:BDSKDefaultBibFileAliasKey];
+                NSData *data = [pw objectForKey:BDSKDefaultBibFileAliasKey];
                 BDAlias *alias = nil;
                 if([data length])
                     alias = [BDAlias aliasWithData:data];
@@ -444,7 +435,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             return NO;
         case 4:
             {
-                NSArray *files = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastOpenFileNamesKey];
+                NSArray *files = [pw objectForKey:BDSKLastOpenFileNamesKey];
                 NSEnumerator *fileEnum = [files objectEnumerator];
                 NSDictionary *dict;
                 NSURL *fileURL;
@@ -462,7 +453,8 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 // we don't want to reopen last open files when re-activating the app
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
-    return NO;
+    int startupOption = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKStartupBehaviorKey] intValue];
+    return flag == NO && (startupOption == 0 || startupOption == 3);
 }
 
 - (void)openRecentItemFromDock:(id)sender{
