@@ -254,8 +254,13 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
         foundRange = [s rangeOfString:@"\\pageref{" options:NSBackwardsSearch range:searchRange];
         
         // could also be an eqref (amsmath)
-        if(foundRange.location == NSNotFound)
+        if(foundRange.location == NSNotFound){
             foundRange = [s rangeOfString:@"\\eqref{" options:NSBackwardsSearch range:searchRange];
+            
+            // or an autoref (amsmath)
+            if(foundRange.location == NSNotFound)
+                foundRange = [s rangeOfString:@"\\autoref{" options:NSBackwardsSearch range:searchRange];
+        }
     }
     unsigned idx = NSMaxRange(foundRange);
     idx = (idx < r.location ? r.location - idx : 0);
