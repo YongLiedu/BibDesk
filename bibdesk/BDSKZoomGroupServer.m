@@ -51,10 +51,6 @@ static NSString *BDSKMARCXMLString = @"MARC XML";
 static NSString *BDSKDCXMLString = @"DC XML";
 static NSString *BDSKMODSString = @"MODS";
 
-
-static NSString *BDSKHTTPProxySetting();
-
-
 @implementation BDSKZoomGroupServer
 
 + (void)initialize
@@ -203,13 +199,9 @@ static NSString *BDSKHTTPProxySetting();
 
         [connection setResultEncodingToIANACharSetName:[info resultEncoding]];
         
-        NSString *proxy = [[info options] objectForKey:@"proxy"] ?: BDSKHTTPProxySetting();
-        if (proxy)
-            [connection setOption:proxy forKey:@"proxy"];
-        
         NSEnumerator *keyEnum = [[info options] keyEnumerator];
         NSString *key;
-        NSSet *specialKeys = [NSSet setWithObjects:@"proxy", @"password", @"username", @"recordSyntax", @"resultEncoding", @"removeDiacritics", @"queryConfig", nil];
+        NSSet *specialKeys = [NSSet setWithObjects:@"password", @"username", @"recordSyntax", @"resultEncoding", @"removeDiacritics", @"queryConfig", nil];
         
         while (key = [keyEnum nextObject]) {
             if ([specialKeys containsObject:key] == NO)
@@ -348,49 +340,3 @@ static NSString *BDSKHTTPProxySetting();
 }
 
 @end
-
-
-static NSString *BDSKHTTPProxySetting()
-{
-    Boolean result;
-    CFDictionaryRef proxyDict;
-    CFNumberRef enableNum;
-    int enable;
-    NSString *host;
-    NSNumber *port;
-    NSString *proxy = nil;
-    
-    // Get the dictionary.
-    
-    proxyDict = SCDynamicStoreCopyProxies(NULL);
-    result = (proxyDict != NULL);
-
-    // Get the enable flag.  This isn't a CFBoolean, but a CFNumber.
-    if (result) {
-        enableNum = (CFNumberRef)CFDictionaryGetValue(proxyDict, kSCPropNetProxiesHTTPEnable);
-        result = (enableNum != NULL) && (CFGetTypeID(enableNum) == CFNumberGetTypeID());
-    }
-    if (result)
-        result = CFNumberGetValue(enableNum, kCFNumberIntType, &enable) && (enable != 0);
-    
-    // Get the proxy host.
-    if (result) {
-        host = (NSString *)CFDictionaryGetValue(proxyDict, kSCPropNetProxiesHTTPProxy);
-        result = [host isKindOfClass:[NSString class]];
-    }
-    
-    // Get the proxy port.
-    if (result) {
-        port = (NSNumber *)CFDictionaryGetValue(proxyDict, kSCPropNetProxiesHTTPPort);
-        result = [port isKindOfClass:[NSNumber class]];
-    }
-    
-    if (result)
-        proxy = [NSString stringWithFormat:@"%@:%i", host, [port intValue]];
-
-    // Clean up.
-    if (proxyDict)
-        CFRelease(proxyDict);
-    
-    return proxy;
-}
