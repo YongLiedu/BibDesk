@@ -77,6 +77,9 @@ SMTP_SERVER="smtp.olypen.com"
 
 def removeTemporaryDirectory():
     shutil.rmtree(TEMP_DIR)
+    # remove so it doesn't mess up LaunchServices
+    if os.access(BUILT_APP, os.F_OK) is True:
+        shutil.rmtree(BUILT_APP)
 
 def sendEmailAndRemoveTemporaryDirectory():
     print 'sending e-mail notification that build_bibdesk.py failed'
@@ -274,10 +277,8 @@ finally:
 #
 # Save this plist as ~/Library/LaunchAgents/com.mac.amaxwell.build_bibdesk.plist
 # 
-# Load: `launchctl load -S Aqua -w ~/Library/LaunchAgents/com.mac.amaxwell.build_bibdesk.plist`
+# Load: `launchctl load -w ~/Library/LaunchAgents/com.mac.amaxwell.build_bibdesk.plist`
 # Unload: `launchctl unload -w ~/Library/LaunchAgents/com.mac.amaxwell.build_bibdesk.plist`
-#
-# The "-S Aqua" is critical, or the keychain interaction will fail.
 #
 
 # <?xml version="1.0" encoding="UTF-8"?>
@@ -288,6 +289,11 @@ finally:
 #   <true/>
 #   <key>Label</key>
 #   <string>com.mac.amaxwell.build_bibdesk</string>
+#   <key>LimitLoadToSessionType</key>
+#   <array>
+#       <string>Aqua</string>
+#       <string>LoginWindow</string>
+#   </array>
 #   <key>LowPriorityIO</key>
 #   <true/>
 #   <key>Nice</key>
@@ -296,10 +302,6 @@ finally:
 #   <array>
 #       <string>/Volumes/Local/Users/amaxwell/bin/build_bibdesk.py</string>
 #   </array>
-#   <key>StandardErrorPath</key>
-#   <string>/tmp/build_bibdesk_stderr.txt</string>
-#   <key>StandardOutPath</key>
-#   <string>/tmp/build_bibdesk_stdout.txt</string>
 #   <key>StartCalendarInterval</key>
 #   <dict>
 #       <key>Hour</key>
@@ -309,4 +311,3 @@ finally:
 #   </dict>
 # </dict>
 # </plist>
-#
