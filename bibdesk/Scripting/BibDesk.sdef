@@ -1524,7 +1524,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </result>
         </command>
         
-        <command name="bibliography for" code="BDSKbibf"
+        <command name="bibliography for" code="BDSKbibf" hidden="yes"
 			description="Returns bibliography information for the publications passed to the command. This command is deprecated, use 'templated text' or 'templated rich text' instead'">
             <cocoa name="bibliographyFor" class="BDSKBibliographyCommand"/>
             <direct-parameter description="The list of publications to generate a bibliography for.">
