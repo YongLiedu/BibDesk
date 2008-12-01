@@ -848,7 +848,7 @@ enum {
             NSEnumerator *fileEnum = [[bibItem remoteURLs] objectEnumerator];
             BDSKLinkedFile *file;
             
-        while (file = [fileEnum nextObject]) {
+            while (file = [fileEnum nextObject]) {
                 origStr = [[file URL] absoluteString];
                 
                 if(searchScope == FCWholeFieldSearch){
