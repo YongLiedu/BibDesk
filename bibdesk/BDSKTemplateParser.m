@@ -444,7 +444,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             if (type == BDSKValueTemplateTagType) {
                 
                 if (keyValue)
-                    [result appendString:[keyValue templateStringValue]];
+                    [result appendString:[keyValue templateStringValue] ?: @""];
                 
             } else if (type == BDSKCollectionTemplateTagType) {
                 
@@ -481,16 +481,16 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                     }
                     switch ([tag matchType]) {
                         case BDSKTemplateTagMatchEqual:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] caseInsensitiveCompare:matchString] == NSOrderedSame;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] ?: @"" caseInsensitiveCompare:matchString] == NSOrderedSame;
                             break;
                         case BDSKTemplateTagMatchContain:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] ?: @"" rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
                             break;
                         case BDSKTemplateTagMatchSmaller:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
+                            isMatch = [matchString isEqualToString:@""] ? NO : [[keyValue templateStringValue] ?: @"" localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
                             break;
                         case BDSKTemplateTagMatchSmallerOrEqual:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] ?: @"" localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
                             break;
                         default:
                             isMatch = [keyValue isNotEmpty];
@@ -808,16 +808,16 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                     }
                     switch ([tag matchType]) {
                         case BDSKTemplateTagMatchEqual:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] caseInsensitiveCompare:matchString] == NSOrderedSame;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] ?: @"" caseInsensitiveCompare:matchString] == NSOrderedSame;
                             break;
                         case BDSKTemplateTagMatchContain:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] ?: @"" rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
                             break;
                         case BDSKTemplateTagMatchSmaller:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
+                            isMatch = [matchString isEqualToString:@""] ? NO : [[keyValue templateStringValue] ?: @"" localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
                             break;
                         case BDSKTemplateTagMatchSmallerOrEqual:
-                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
+                            isMatch = [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] ?: @"" localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
                             break;
                         default:
                             isMatch = [keyValue isNotEmpty];
@@ -892,7 +892,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 }
 
 - (NSAttributedString *)templateAttributedStringValueWithAttributes:(NSDictionary *)attributes {
-    return [[[NSAttributedString alloc] initWithString:[self templateStringValue] attributes:attributes] autorelease];
+    return [[[NSAttributedString alloc] initWithString:[self templateStringValue] ?: @"" attributes:attributes] autorelease];
 }
 
 @end
