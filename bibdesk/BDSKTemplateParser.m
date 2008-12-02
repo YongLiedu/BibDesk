@@ -886,7 +886,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
     NSString *description = nil;
     if ([self respondsToSelector:@selector(stringValue)])
         description = [self performSelector:@selector(stringValue)];
-    if ([self respondsToSelector:@selector(string)])
+    else if ([self respondsToSelector:@selector(string)])
         description = [self performSelector:@selector(string)];
     return description ?: [self description];
 }
@@ -930,15 +930,9 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 @implementation NSNull (BDSKTemplateParser)
 
-- (NSString *)templateStringValue
-{
-    return @"";
-}
+- (NSString *)templateStringValue { return @""; }
 
-- (BOOL)isNotEmpty
-{
-    return NO;
-}
+- (BOOL)isNotEmpty { return NO; }
 
 @end
 
@@ -946,15 +940,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 @implementation NSString (BDSKTemplateParser)
 
-- (NSString *)templateStringValue
-{
-    return self;
-}
-
-- (BOOL)isNotEmpty
-{
-    return [self isEqualToString:@""] == NO;
-}
+- (NSString *)templateStringValue { return self; }
 
 @end
 
@@ -983,10 +969,18 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 #pragma mark -
 
-@implementation BibAuthor (BDSKTemplateParser)
+@implementation NSNumber (BDSKTemplateParser)
 
 - (BOOL)isNotEmpty {
-    return [BibAuthor emptyAuthor] != self;
+    return [self isEqualToNumber:[NSNumber numberWithBool:NO]] == NO && [self isEqualToNumber:[NSNumber numberWithInt:0]] == NO;
 }
+
+@end
+
+#pragma mark -
+
+@implementation BibAuthor (BDSKTemplateParser)
+
+- (BOOL)isNotEmpty { return [BibAuthor emptyAuthor] != self; }
 
 @end
