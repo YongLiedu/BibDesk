@@ -928,6 +928,22 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 #pragma mark -
 
+@implementation NSNull (BDSKTemplateParser)
+
+- (NSString *)templateStringValue
+{
+    return @"";
+}
+
+- (BOOL)isNotEmpty
+{
+    return NO;
+}
+
+@end
+
+#pragma mark -
+
 @implementation NSString (BDSKTemplateParser)
 
 - (NSString *)templateStringValue
@@ -943,9 +959,6 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 @end
 
 #pragma mark -
-
-@interface NSAttributedString (BDSKTemplateParser)
-@end
 
 @implementation NSAttributedString (BDSKTemplateParser)
 
@@ -969,9 +982,6 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 @end
 
 #pragma mark -
-
-@interface BibAuthor (BDSKTemplateParser)
-@end
 
 @implementation BibAuthor (BDSKTemplateParser)
 
