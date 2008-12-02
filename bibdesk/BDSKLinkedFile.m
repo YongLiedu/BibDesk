@@ -471,7 +471,7 @@ static Class BDSKLinkedFileClass = Nil;
 // Should we implement -isEqual: and -hash?
 
 - (NSString *)stringValue {
-    return [self path];
+    return [self path] ?: @"";
 }
 
 - (BOOL)isFile
