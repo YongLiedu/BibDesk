@@ -378,6 +378,7 @@ static BDSKFiler *sharedFiler = nil;
         [fieldName release];
         fieldName = nil;
         options = 0;
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:window];
     }
 }
 
