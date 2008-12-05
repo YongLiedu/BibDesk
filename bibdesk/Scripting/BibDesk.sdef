@@ -1538,6 +1538,22 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="Deprecated. Generates a bibliography from the selected items and puts it on the clipboard. This command has to be sent to a document.">
             <!-- This is a silly command name. But AppleScript choked on all the reasonable ones as they contained words like copy or bibliography, which are already taken. =&gt; Ugly but less confusing. -->
         </command>    
+
+        <command name="import" code="BDSKImpt"
+			description="Imports publications in the document using a string format.">
+            <cocoa name="import" class="BDSKImportCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="from" code="from"
+                description="The string or file containing publications in a supported string format.">
+                <type type="text"/>
+                <type type="file"/>
+                <cocoa key="from"/>
+            </parameter>
+            <result description="The publications parsed from the string format and added to the document">
+                <type type="publication" list="yes"/>
+            </result>
+        </command>
         
         <command name="parse format" code="BDSKpfmt"
 			description="Parses a format string for a field from a publication. Does not set the field.">
