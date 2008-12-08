@@ -47,6 +47,11 @@
 @end
 
 
+enum {
+    BDSKTemplateInlineAtStart = 1,
+    BDSKTemplateInlineAtEnd = 2
+};
+
 /*!
 @class BDSKTemplateParser
 @abstract A parser class for parsing string and attributed string templates
@@ -66,14 +71,14 @@ The keys should be valid key paths (i.e. only letters and dots) and spaces are n
 + (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object;
 + (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
 + (NSArray *)arrayByParsingTemplateString:(NSString *)template;
-+ (NSArray *)arrayByParsingTemplateString:(NSString *)template isSubtemplate:(BOOL)isSubtemplate;
++ (NSArray *)arrayByParsingTemplateString:(NSString *)template inlineOptions:(int)inlineOptions;
 + (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex;
 + (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate;
 
 + (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object;
 + (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
 + (NSArray *)arrayByParsingTemplateAttributedString:(NSAttributedString *)template;
-+ (NSArray *)arrayByParsingTemplateAttributedString:(NSAttributedString *)template isSubtemplate:(BOOL)isSubtemplate;
++ (NSArray *)arrayByParsingTemplateAttributedString:(NSAttributedString *)template inlineOptions:(int)inlineOptions;
 + (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex;
 + (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate;
 

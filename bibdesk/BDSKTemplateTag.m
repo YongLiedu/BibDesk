@@ -46,6 +46,64 @@
 
 #pragma mark -
 
+@implementation BDSKPlaceholderTemplateTag
+
+- (id)initWithString:(NSString *)aString atStartOfLine:(BOOL)flag {
+    if (self = [super init]) {
+        string = [aString copy];
+        inlineOptions = BDSKTemplateInlineAtEnd;
+        if (flag)
+            inlineOptions = BDSKTemplateInlineAtStart;
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [string release];
+    [super dealloc];
+}
+
+- (NSString *)string {
+    return string;
+}
+
+- (NSArray *)templateArray {
+    return [BDSKTemplateParser arrayByParsingTemplateString:string inlineOptions:inlineOptions];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKRichPlaceholderTemplateTag
+
+- (id)initWithAttributedString:(NSAttributedString *)anAttributedString atStartOfLine:(BOOL)flag {
+    if (self = [super init]) {
+        attributedString = [anAttributedString copy];
+        inlineOptions = BDSKTemplateInlineAtEnd;
+        if (flag)
+            inlineOptions = BDSKTemplateInlineAtStart;
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [attributedString release];
+    [super dealloc];
+}
+
+- (NSAttributedString *)attributedString {
+    return attributedString;
+}
+
+- (NSArray *)templateArray {
+    return [BDSKTemplateParser arrayByParsingTemplateAttributedString:attributedString inlineOptions:inlineOptions];
+}
+
+@end
+
+#pragma mark -
+
 @implementation BDSKValueTemplateTag
 
 - (id)initWithKeyPath:(NSString *)aKeyPath {
@@ -93,10 +151,10 @@
 
 @implementation BDSKCollectionTemplateTag
 
-- (id)initWithKeyPath:(NSString *)aKeyPath itemTemplateString:(NSString *)anItemTemplateString separatorTemplateString:(NSString *)aSeparatorTemplateString {
+- (id)initWithKeyPath:(NSString *)aKeyPath itemTemplate:(BDSKPlaceholderTemplateTag *)anItemTemplate separatorTemplate:(BDSKPlaceholderTemplateTag *)aSeparatorTemplate {
     if (self = [super initWithKeyPath:aKeyPath]) {
-        itemTemplateString = [anItemTemplateString retain];
-        separatorTemplateString = [aSeparatorTemplateString retain];
+        itemPlaceholderTemplate = [anItemTemplate retain];
+        separatorPlaceholderTemplate = [aSeparatorTemplate retain];
         itemTemplate = nil;
         separatorTemplate = nil;
     }
@@ -104,8 +162,8 @@
 }
 
 - (void)dealloc {
-    [itemTemplateString release];
-    [separatorTemplateString release];
+    [itemPlaceholderTemplate release];
+    [separatorPlaceholderTemplate release];
     [itemTemplate release];
     [separatorTemplate release];
     [super dealloc];
@@ -114,14 +172,14 @@
 - (BDSKTemplateTagType)type { return BDSKCollectionTemplateTagType; }
 
 - (NSArray *)itemTemplate {
-    if (itemTemplate == nil && itemTemplateString)
-        itemTemplate = [[BDSKTemplateParser arrayByParsingTemplateString:itemTemplateString isSubtemplate:YES] retain];
+    if (itemTemplate == nil && itemPlaceholderTemplate)
+        itemTemplate = [[itemPlaceholderTemplate templateArray] retain];
     return itemTemplate;
 }
 
 - (NSArray *)separatorTemplate {
-    if (separatorTemplate == nil && separatorTemplateString)
-        separatorTemplate = [[BDSKTemplateParser arrayByParsingTemplateString:separatorTemplateString isSubtemplate:YES] retain];
+    if (separatorTemplate == nil && separatorPlaceholderTemplate)
+        separatorTemplate = [[separatorPlaceholderTemplate templateArray] retain];
     return separatorTemplate;
 }
 
@@ -131,10 +189,10 @@
 
 @implementation BDSKRichCollectionTemplateTag
 
-- (id)initWithKeyPath:(NSString *)aKeyPath itemTemplateAttributedString:(NSAttributedString *)anItemTemplateString separatorTemplateAttributedString:(NSAttributedString *)aSeparatorTemplateString {
+- (id)initWithKeyPath:(NSString *)aKeyPath itemTemplate:(BDSKRichPlaceholderTemplateTag *)anItemTemplate separatorTemplate:(BDSKRichPlaceholderTemplateTag *)aSeparatorTemplate {
     if (self = [super initWithKeyPath:aKeyPath]) {
-        itemTemplateAttributedString = [anItemTemplateString retain];
-        separatorTemplateAttributedString = [aSeparatorTemplateString retain];
+        itemPlaceholderTemplate = [anItemTemplate retain];
+        separatorPlaceholderTemplate = [aSeparatorTemplate retain];
         itemTemplate = nil;
         separatorTemplate = nil;
     }
@@ -142,8 +200,8 @@
 }
 
 - (void)dealloc {
-    [itemTemplateAttributedString release];
-    [separatorTemplateAttributedString release];
+    [itemPlaceholderTemplate release];
+    [separatorPlaceholderTemplate release];
     [itemTemplate release];
     [separatorTemplate release];
     [super dealloc];
@@ -152,14 +210,14 @@
 - (BDSKTemplateTagType)type { return BDSKCollectionTemplateTagType; }
 
 - (NSArray *)itemTemplate {
-    if (itemTemplate == nil && itemTemplateAttributedString)
-        itemTemplate = [[BDSKTemplateParser arrayByParsingTemplateAttributedString:itemTemplateAttributedString isSubtemplate:YES] retain];
+    if (itemTemplate == nil && itemPlaceholderTemplate)
+        itemTemplate = [[itemPlaceholderTemplate templateArray] retain];
     return itemTemplate;
 }
 
 - (NSArray *)separatorTemplate {
-    if (separatorTemplate == nil && separatorTemplateAttributedString)
-        separatorTemplate = [[BDSKTemplateParser arrayByParsingTemplateAttributedString:separatorTemplateAttributedString isSubtemplate:YES] retain];
+    if (separatorTemplate == nil && separatorPlaceholderTemplate)
+        separatorTemplate = [[separatorPlaceholderTemplate templateArray] retain];
     return separatorTemplate;
 }
 
@@ -201,7 +259,7 @@
 - (NSArray *)subtemplateAtIndex:(unsigned)idx {
     id subtemplate = [subtemplates objectAtIndex:idx];
     if ([subtemplate isKindOfClass:[NSArray class]] == NO) {
-         subtemplate = [[BDSKTemplateParser arrayByParsingTemplateString:subtemplate isSubtemplate:YES] retain];
+         subtemplate = [subtemplate templateArray];
         [subtemplates replaceObjectAtIndex:idx withObject:subtemplate];
     }
     return subtemplate;
@@ -216,7 +274,7 @@
 - (NSArray *)subtemplateAtIndex:(unsigned)idx {
     id subtemplate = [subtemplates objectAtIndex:idx];
     if ([subtemplate isKindOfClass:[NSArray class]] == NO) {
-        subtemplate = [[BDSKTemplateParser arrayByParsingTemplateAttributedString:subtemplate isSubtemplate:YES] retain];
+        subtemplate = [subtemplate templateArray];
         [subtemplates replaceObjectAtIndex:idx withObject:subtemplate];
     }
     return subtemplate;
