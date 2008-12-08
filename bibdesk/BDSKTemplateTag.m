@@ -115,13 +115,13 @@
 
 - (NSArray *)itemTemplate {
     if (itemTemplate == nil && itemTemplateString)
-        itemTemplate = [[BDSKTemplateParser arrayByParsingTemplateString:itemTemplateString] retain];
+        itemTemplate = [[BDSKTemplateParser arrayByParsingTemplateString:itemTemplateString isSubtemplate:YES] retain];
     return itemTemplate;
 }
 
 - (NSArray *)separatorTemplate {
     if (separatorTemplate == nil && separatorTemplateString)
-        separatorTemplate = [[BDSKTemplateParser arrayByParsingTemplateString:separatorTemplateString] retain];
+        separatorTemplate = [[BDSKTemplateParser arrayByParsingTemplateString:separatorTemplateString isSubtemplate:YES] retain];
     return separatorTemplate;
 }
 
@@ -153,13 +153,13 @@
 
 - (NSArray *)itemTemplate {
     if (itemTemplate == nil && itemTemplateAttributedString)
-        itemTemplate = [[BDSKTemplateParser arrayByParsingTemplateAttributedString:itemTemplateAttributedString] retain];
+        itemTemplate = [[BDSKTemplateParser arrayByParsingTemplateAttributedString:itemTemplateAttributedString isSubtemplate:YES] retain];
     return itemTemplate;
 }
 
 - (NSArray *)separatorTemplate {
     if (separatorTemplate == nil && separatorTemplateAttributedString)
-        separatorTemplate = [[BDSKTemplateParser arrayByParsingTemplateAttributedString:separatorTemplateAttributedString] retain];
+        separatorTemplate = [[BDSKTemplateParser arrayByParsingTemplateAttributedString:separatorTemplateAttributedString isSubtemplate:YES] retain];
     return separatorTemplate;
 }
 
@@ -201,7 +201,7 @@
 - (NSArray *)subtemplateAtIndex:(unsigned)idx {
     id subtemplate = [subtemplates objectAtIndex:idx];
     if ([subtemplate isKindOfClass:[NSArray class]] == NO) {
-         subtemplate = [[BDSKTemplateParser arrayByParsingTemplateString:subtemplate] retain];
+         subtemplate = [[BDSKTemplateParser arrayByParsingTemplateString:subtemplate isSubtemplate:YES] retain];
         [subtemplates replaceObjectAtIndex:idx withObject:subtemplate];
     }
     return subtemplate;
@@ -216,7 +216,7 @@
 - (NSArray *)subtemplateAtIndex:(unsigned)idx {
     id subtemplate = [subtemplates objectAtIndex:idx];
     if ([subtemplate isKindOfClass:[NSArray class]] == NO) {
-        subtemplate = [[BDSKTemplateParser arrayByParsingTemplateAttributedString:subtemplate] retain];
+        subtemplate = [[BDSKTemplateParser arrayByParsingTemplateAttributedString:subtemplate isSubtemplate:YES] retain];
         [subtemplates replaceObjectAtIndex:idx withObject:subtemplate];
     }
     return subtemplate;
