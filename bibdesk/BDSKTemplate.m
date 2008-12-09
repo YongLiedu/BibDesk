@@ -62,21 +62,31 @@ NSString *BDSKTemplateLocalizedScriptString = nil;
 
 static inline NSString *itemTemplateSubstring(NSString *templateString){
     int start, end, length = [templateString length];
+    unsigned int nonwsLoc;
     NSRange range = [templateString rangeOfString:@"<$publications>"];
     start = NSMaxRange(range);
     if (start != NSNotFound) {
-        range = [templateString rangeOfTrailingEmptyLineInRange:NSMakeRange(start, length - start)];
-        if (range.location != NSNotFound)
-            start = NSMaxRange(range);
+        nonwsLoc = [templateString rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:0 range:NSMakeRange(start, length - start)].location;
+        if (nonwsLoc != NSNotFound) {
+            unichar firstChar = [templateString characterAtIndex:nonwsLoc];
+            if ([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
+                if (firstChar == NSCarriageReturnCharacter && (int)nonwsLoc + 1 < length && [templateString characterAtIndex:nonwsLoc + 1] == NSNewlineCharacter)
+                    start = nonwsLoc + 2;
+                else 
+                    start = nonwsLoc + 1;
+            }
+        }
         range = [templateString rangeOfString:@"</$publications>" options:0 range:NSMakeRange(start, length - start)];
         end = range.location;
         if (end != NSNotFound) {
             range = [templateString rangeOfString:@"<?$publications>" options:0 range:NSMakeRange(start, end - start)];
             if (range.location != NSNotFound)
                 end = range.location;
-            range = [templateString rangeOfLeadingEmptyLineInRange:NSMakeRange(start, end - start)];
-            if (range.location != NSNotFound)
-                end = range.location;
+            nonwsLoc = [templateString rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:NSBackwardsSearch range:NSMakeRange(start, end - start)].location;
+            if (nonwsLoc != NSNotFound) {
+                if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[templateString characterAtIndex:nonwsLoc]])
+                    end = nonwsLoc + 1;
+            }
         } else
             return nil;
     } else

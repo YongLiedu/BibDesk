@@ -299,6 +299,38 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 #define MAKE_RANGE(start, end) NSMakeRange(start, end - start)
 
+static inline unsigned int startOfTrailingEmptyLine(NSString *string, NSRange range, BOOL requireNL) {
+    NSRange lastCharRange = [string rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:NSBackwardsSearch range:range];
+    unsigned int start = NSNotFound;
+    if (lastCharRange.location != NSNotFound) {
+        unichar lastChar = [string characterAtIndex:lastCharRange.location];
+        unsigned int rangeEnd = NSMaxRange(lastCharRange);
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:lastChar])
+            start = rangeEnd;
+    } else if (requireNL == NO) {
+        start = range.location;
+    }
+    return start;
+}
+
+static inline unsigned int endOfLeadingEmptyLine(NSString *string, NSRange range, BOOL requireNL) {
+    NSRange firstCharRange = [string rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:0 range:range];
+    unsigned int end = NSNotFound;
+    if (firstCharRange.location != NSNotFound) {
+        unichar firstChar = [string characterAtIndex:firstCharRange.location];
+        unsigned int rangeEnd = NSMaxRange(firstCharRange);
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
+            if (firstChar == NSCarriageReturnCharacter && rangeEnd < NSMaxRange(range) && [string characterAtIndex:rangeEnd] == NSNewlineCharacter)
+                end = rangeEnd + 1;
+            else 
+                end = rangeEnd;
+        }
+    } else if (requireNL == NO) {
+        end = NSMaxRange(range);
+    }
+    return end;
+}
+
 - (BOOL)readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError {
     NSArray *parsedTemplate = nil;
     NSDictionary *templateDict = nil;
@@ -306,7 +338,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     NSAttributedString *attrString = nil;
     NSString *str = nil;
     NSRange startRange, endRange = { NSNotFound, 0 }, sepRange = { NSNotFound, 0 }, wsRange;
-    unsigned int length, startLoc = NSNotFound;
+    unsigned int length, startLoc = NSNotFound, tmpLoc;
     
     [self setRichText:[typeName isEqualToString:BDSKRichTextTemplateDocumentType]];
     
@@ -325,31 +357,31 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         if (startRange.location != NSNotFound) {
             startLoc = startRange.location;
             
-            wsRange = [str rangeOfTrailingEmptyLineRequiringNewline:NO range:MAKE_RANGE(0, startRange.location)];
-            if (wsRange.location != NSNotFound)
-                startRange = MAKE_RANGE(wsRange.location, NSMaxRange(startRange));
-            wsRange = [str rangeOfLeadingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), length)];
-            if (wsRange.location != NSNotFound)
-                startRange = MAKE_RANGE(startRange.location, NSMaxRange(wsRange));
+            tmpLoc = startOfTrailingEmptyLine(str, MAKE_RANGE(0, startRange.location), NO);
+            if (tmpLoc != NSNotFound)
+                startRange = MAKE_RANGE(tmpLoc, NSMaxRange(startRange));
+            tmpLoc = endOfLeadingEmptyLine(str, MAKE_RANGE(NSMaxRange(startRange), length), YES);
+            if (tmpLoc != NSNotFound)
+                startRange = MAKE_RANGE(startRange.location, tmpLoc);
             
             endRange = [str rangeOfString:@"</$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), length)];
             
             if (endRange.location != NSNotFound) {
-                wsRange = [str rangeOfTrailingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
-                if (wsRange.location != NSNotFound)
-                    endRange = MAKE_RANGE(wsRange.location, NSMaxRange(endRange));
-                wsRange = [str rangeOfLeadingEmptyLineRequiringNewline:NO range:MAKE_RANGE(NSMaxRange(endRange), length)];
-                if (wsRange.location != NSNotFound)
-                    endRange = MAKE_RANGE(endRange.location, NSMaxRange(wsRange));
+                tmpLoc = startOfTrailingEmptyLine(str, MAKE_RANGE(NSMaxRange(startRange), endRange.location), YES);
+                if (tmpLoc != NSNotFound)
+                    endRange = MAKE_RANGE(tmpLoc, NSMaxRange(endRange));
+                tmpLoc = endOfLeadingEmptyLine(str, MAKE_RANGE(NSMaxRange(endRange), length), NO);
+                if (tmpLoc != NSNotFound)
+                    endRange = MAKE_RANGE(endRange.location, tmpLoc);
                 
                 sepRange = [str rangeOfString:@"<?$publications>" options:NSBackwardsSearch range:MAKE_RANGE(NSMaxRange(startRange), endRange.location)];
                 if (sepRange.location != NSNotFound) {
-                    wsRange = [str rangeOfTrailingEmptyLineInRange:MAKE_RANGE(NSMaxRange(startRange), sepRange.location)];
-                    if (wsRange.location != NSNotFound)
-                        sepRange = MAKE_RANGE(wsRange.location, NSMaxRange(sepRange));
-                    wsRange = [str rangeOfLeadingEmptyLineInRange:MAKE_RANGE(NSMaxRange(sepRange), endRange.location)];
-                    if (wsRange.location != NSNotFound)
-                        sepRange = MAKE_RANGE(sepRange.location, NSMaxRange(wsRange));
+                    tmpLoc = startOfTrailingEmptyLine(str, MAKE_RANGE(NSMaxRange(startRange), sepRange.location), YES);
+                    if (tmpLoc != NSNotFound)
+                        sepRange = MAKE_RANGE(tmpLoc, NSMaxRange(sepRange));
+                    tmpLoc = endOfLeadingEmptyLine(str, MAKE_RANGE(NSMaxRange(sepRange), endRange.location), YES);
+                    if (tmpLoc != NSNotFound)
+                        sepRange = MAKE_RANGE(sepRange.location, tmpLoc);
                 }
             }
         }
