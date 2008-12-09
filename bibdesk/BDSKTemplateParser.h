@@ -47,11 +47,6 @@
 @end
 
 
-enum {
-    BDSKTemplateInlineAtStart = 1,
-    BDSKTemplateInlineAtEnd = 2
-};
-
 /*!
 @class BDSKTemplateParser
 @abstract A parser class for parsing string and attributed string templates
