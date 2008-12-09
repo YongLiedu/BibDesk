@@ -297,7 +297,8 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
             
             // scan the key, must be letters and dots. We don't allow extra spaces
             // scanUpToCharactersFromSet is used for efficiency instead of scanCharactersFromSet
-            [scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag];
+            if ([scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag] == NO)
+                tag = @"";
             
             if ([scanner scanString:VALUE_TAG_CLOSE_DELIM intoString:nil]) {
                 
@@ -586,7 +587,8 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
             
             // scan the key, must be letters and dots. We don't allow extra spaces
             // scanUpToCharactersFromSet is used for efficiency instead of scanCharactersFromSet
-            [scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag];
+            if ([scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag] == NO)
+                tag = @"";
 
             if ([scanner scanString:VALUE_TAG_CLOSE_DELIM intoString:nil]) {
                 
