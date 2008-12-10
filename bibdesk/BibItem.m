@@ -2160,7 +2160,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSParameterAssert(nil != template);
     NSString *string = nil;
     [self prepareForTemplateParsing];
-    string = [BDSKTemplateParser stringByParsingTemplate:[template stringForType:[self pubType]] usingObject:self];
+    string = [BDSKTemplateParser stringByParsingTemplateString:[template stringForType:[self pubType]] usingObject:self];
     [self cleanupAfterTemplateParsing];
     return string;
 }
@@ -2169,7 +2169,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSParameterAssert(nil != template);
     NSAttributedString *string = nil;
     [self prepareForTemplateParsing];
-    string = [BDSKTemplateParser attributedStringByParsingTemplate:[template attributedStringForType:[self pubType]] usingObject:self];
+    string = [BDSKTemplateParser attributedStringByParsingTemplateAttributedString:[template attributedStringForType:[self pubType]] usingObject:self];
     [self cleanupAfterTemplateParsing];
     return string;
 }

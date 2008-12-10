@@ -48,7 +48,7 @@
     NSString *string = [template mainPageString];
     NSString *scriptPath = [template scriptPath];
     BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items template:template];
-    string = [BDSKTemplateParser stringByParsingTemplate:string usingObject:objectProxy delegate:objectProxy];
+    string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
     if(scriptPath)
         string = [NSTask runShellCommand:scriptPath withInputString:string];
@@ -61,7 +61,7 @@
     if(scriptPath == nil){
         BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items template:template];
         attrString = [template mainPageAttributedStringWithDocumentAttributes:docAttributes];
-        attrString = [BDSKTemplateParser attributedStringByParsingTemplate:attrString usingObject:objectProxy delegate:objectProxy];
+        attrString = [BDSKTemplateParser attributedStringByParsingTemplateAttributedString:attrString usingObject:objectProxy delegate:objectProxy];
         [objectProxy release];
     }else{
         NSString *docType = nil;
@@ -88,7 +88,7 @@
     NSString *string = [template mainPageString];
     NSString *scriptPath = [template scriptPath];
     BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items template:template];
-    string = [BDSKTemplateParser stringByParsingTemplate:string usingObject:objectProxy delegate:objectProxy];
+    string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
     return [NSTask runRawShellCommand:scriptPath withInputString:string];
 }

@@ -63,19 +63,19 @@ The keys should be valid key paths (i.e. only letters and dots) and spaces are n
 */
 @interface BDSKTemplateParser : NSObject
 
-+ (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object;
-+ (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
-+ (NSArray *)arrayByParsingTemplateString:(NSString *)template;
++ (NSString *)stringByParsingTemplateString:(NSString *)templateString usingObject:(id)object;
++ (NSString *)stringByParsingTemplateString:(NSString *)templateString usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
++ (NSArray *)arrayByParsingTemplateString:(NSString *)templateString;
 + (NSArray *)arrayByParsingTemplateString:(NSString *)templateString isSubtemplate:(BOOL)isSubtemplate;
-+ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex;
-+ (NSString *)stringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate;
++ (NSString *)stringFromTemplateArray:(NSArray *)templateArray usingObject:(id)object atIndex:(int)anIndex;
++ (NSString *)stringFromTemplateArray:(NSArray *)templateArray usingObject:(id)object atIndex:(int)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate;
 
-+ (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object;
-+ (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
-+ (NSArray *)arrayByParsingTemplateAttributedString:(NSAttributedString *)template;
++ (NSAttributedString *)attributedStringByParsingTemplateAttributedString:(NSAttributedString *)templateAttrString usingObject:(id)object;
++ (NSAttributedString *)attributedStringByParsingTemplateAttributedString:(NSAttributedString *)templateAttrString usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
++ (NSArray *)arrayByParsingTemplateAttributedString:(NSAttributedString *)templateAttrString;
 + (NSArray *)arrayByParsingTemplateAttributedString:(NSAttributedString *)templateAttrString isSubtemplate:(BOOL)isSubtemplate;
-+ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex;
-+ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)template usingObject:(id)object atIndex:(int)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate;
++ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)templateArray usingObject:(id)object atIndex:(int)anIndex;
++ (NSAttributedString *)attributedStringFromTemplateArray:(NSArray *)templateArray usingObject:(id)object atIndex:(int)anIndex delegate:(id <BDSKTemplateParserDelegate>)delegate;
 
 @end
 

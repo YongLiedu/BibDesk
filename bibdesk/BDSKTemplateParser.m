@@ -255,11 +255,11 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
 
 #pragma mark Parsing string templates
 
-+ (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object {
-    return [self stringByParsingTemplate:template usingObject:object delegate:nil];
++ (NSString *)stringByParsingTemplateString:(NSString *)template usingObject:(id)object {
+    return [self stringByParsingTemplateString:template usingObject:object delegate:nil];
 }
 
-+ (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
++ (NSString *)stringByParsingTemplateString:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
     return [self stringFromTemplateArray:[self arrayByParsingTemplateString:template] usingObject:object atIndex:1 delegate:delegate];
 }
 
@@ -535,11 +535,11 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
 
 #pragma mark Parsing attributed string templates
 
-+ (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object {
-    return [self attributedStringByParsingTemplate:template usingObject:object delegate:nil];
++ (NSAttributedString *)attributedStringByParsingTemplateAttributedString:(NSAttributedString *)template usingObject:(id)object {
+    return [self attributedStringByParsingTemplateAttributedString:template usingObject:object delegate:nil];
 }
 
-+ (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
++ (NSAttributedString *)attributedStringByParsingTemplateAttributedString:(NSAttributedString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
     return [self attributedStringFromTemplateArray:[self arrayByParsingTemplateAttributedString:template] usingObject:object atIndex:1 delegate:delegate];
 }
 
