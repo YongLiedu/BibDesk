@@ -273,7 +273,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     
     while (![scanner isAtEnd]) {
         NSString *beforeText = nil;
-        NSString *tag = nil;
+        NSString *tag = @"";
         int start;
                 
         if ([scanner scanUpToString:START_TAG_OPEN_DELIM intoString:&beforeText]) {
@@ -292,8 +292,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
             
             // scan the key, must be letters and dots. We don't allow extra spaces
             // scanUpToCharactersFromSet is used for efficiency instead of scanCharactersFromSet
-            if ([scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag] == NO)
-                tag = @"";
+            [scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag];
             
             if ([scanner scanString:VALUE_TAG_CLOSE_DELIM intoString:nil]) {
                 
@@ -304,13 +303,14 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 
             } else if ([scanner scanString:COLLECTION_TAG_CLOSE_DELIM intoString:nil]) {
                 
-                NSString *itemTemplate = nil, *separatorTemplate = nil;
+                NSString *itemTemplate = @"", *separatorTemplate = nil;
                 NSString *endTag;
                 NSRange sepTagRange;
                 
                 // collection template tag
                 endTag = endCollectionTagWithTag(tag);
-                if ([scanner scanString:endTag intoString:nil] == NO && [scanner scanUpToString:endTag intoString:&itemTemplate] && [scanner scanString:endTag intoString:nil]) {
+                [scanner scanUpToString:endTag intoString:&itemTemplate];
+                if ([scanner scanString:endTag intoString:nil]) {
                     sepTagRange = [itemTemplate rangeOfString:sepCollectionTagWithTag(tag)];
                     if (sepTagRange.location != NSNotFound) {
                         separatorTemplate = [itemTemplate substringFromIndex:NSMaxRange(sepTagRange)];
@@ -324,47 +324,44 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 
             } else {
                 
-                NSString *matchString = nil;
+                NSString *matchString = @"";
                 BDSKTemplateTagMatchType matchType = BDSKTemplateTagMatchOther;
                 
                 if ([scanner scanString:CONDITION_TAG_EQUAL intoString:nil]) {
-                    if([scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString] == NO)
-                        matchString = @"";
+                    [scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString];
                     matchType = BDSKTemplateTagMatchEqual;
                 } else if ([scanner scanString:CONDITION_TAG_CONTAIN intoString:nil]) {
-                    if([scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString] == NO)
-                        matchString = @"";
+                    [scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString];
                     matchType = BDSKTemplateTagMatchContain;
                 } else if ([scanner scanString:CONDITION_TAG_SMALLER_OR_EQUAL intoString:nil]) {
-                    if([scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString] == NO)
-                        matchString = @"";
+                    [scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString];
                     matchType = BDSKTemplateTagMatchSmallerOrEqual;
                 } else if ([scanner scanString:CONDITION_TAG_SMALLER intoString:nil]) {
-                    if([scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString] == NO)
-                        matchString = @"";
+                    [scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString];
                     matchType = BDSKTemplateTagMatchSmaller;
                 }
                 
                 if ([scanner scanString:CONDITION_TAG_CLOSE_DELIM intoString:nil]) {
                     
                     NSMutableArray *subTemplates, *matchStrings;
-                    NSString *subTemplate = nil;
+                    NSString *subTemplate = @"";
                     NSString *endTag, *altTag;
                     NSRange altTagRange;
                     
                     // condition template tag
                     endTag = endConditionTagWithTag(tag);
-                    if ([scanner scanString:endTag intoString:nil] == NO && [scanner scanUpToString:endTag intoString:&subTemplate] && [scanner scanString:endTag intoString:nil]) {
+                    [scanner scanUpToString:endTag intoString:&subTemplate];
+                    if ([scanner scanString:endTag intoString:nil]) {
                         
                         subTemplates = [[NSMutableArray alloc] init];
-                        matchStrings = [[NSMutableArray alloc] initWithObjects:matchString ?: @"", nil];
+                        matchStrings = [[NSMutableArray alloc] initWithObjects:matchString, nil];
                         
                         if (matchType != BDSKTemplateTagMatchOther) {
                             altTag = compareConditionTagWithTag(tag, matchType);
                             altTagRange = altConditionTagRange(subTemplate, altTag, &matchString);
                             while (altTagRange.location != NSNotFound) {
                                 [subTemplates addObject:[subTemplate substringToIndex:altTagRange.location]];
-                                [matchStrings addObject:matchString ?: @""];
+                                [matchStrings addObject:matchString];
                                 subTemplate = [subTemplate substringFromIndex:NSMaxRange(altTagRange)];
                                 altTagRange = altConditionTagRange(subTemplate, altTag, &matchString);
                             }
@@ -534,7 +531,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     
     while (![scanner isAtEnd]) {
         NSString *beforeText = nil;
-        NSString *tag = nil;
+        NSString *tag = @"";
         int start;
         NSDictionary *attr = nil;
         
@@ -557,8 +554,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
             
             // scan the key, must be letters and dots. We don't allow extra spaces
             // scanUpToCharactersFromSet is used for efficiency instead of scanCharactersFromSet
-            if ([scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag] == NO)
-                tag = @"";
+            [scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag];
 
             if ([scanner scanString:VALUE_TAG_CLOSE_DELIM intoString:nil]) {
                 
@@ -569,7 +565,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 
             } else if ([scanner scanString:COLLECTION_TAG_CLOSE_DELIM intoString:nil]) {
                 
-                NSString *itemTemplateString = nil;
+                NSString *itemTemplateString = @"";
                 NSAttributedString *itemTemplate = nil, *separatorTemplate = nil;
                 NSString *endTag;
                 NSRange sepTagRange;
@@ -579,7 +575,8 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 if ([scanner scanString:endTag intoString:nil])
                     continue;
                 start = [scanner scanLocation];
-                if ([scanner scanUpToString:endTag intoString:&itemTemplateString] && [scanner scanString:endTag intoString:nil]) {
+                [scanner scanUpToString:endTag intoString:&itemTemplateString];
+                if ([scanner scanString:endTag intoString:nil]) {
                     itemTemplate = [template attributedSubstringFromRange:NSMakeRange(start, [itemTemplateString length])];
                     
                     sepTagRange = [[itemTemplate string] rangeOfString:sepCollectionTagWithTag(tag)];
@@ -596,7 +593,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 
             } else {
                 
-                NSString *matchString = nil;
+                NSString *matchString = @"";
                 BDSKTemplateTagMatchType matchType = BDSKTemplateTagMatchOther;
                 
                 if ([scanner scanString:CONDITION_TAG_EQUAL intoString:nil]) {
@@ -620,28 +617,27 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 if ([scanner scanString:CONDITION_TAG_CLOSE_DELIM intoString:nil]) {
                     
                     NSMutableArray *subTemplates, *matchStrings;
-                    NSAttributedString *subTemplate = nil;
+                    NSAttributedString *subTemplate = @"";
                     NSString *subTemplateString, *endTag, *altTag;
                     NSRange altTagRange;
                     
                     // condition template tag
                     endTag = endConditionTagWithTag(tag);
                     altTag = altConditionTagWithTag(tag);
-                    if ([scanner scanString:endTag intoString:nil])
-                        continue;
                     start = [scanner scanLocation];
-                    if ([scanner scanUpToString:endTag intoString:&subTemplateString] && [scanner scanString:endTag intoString:nil]) {
+                    [scanner scanUpToString:endTag intoString:&subTemplateString];
+                    if ([scanner scanString:endTag intoString:nil]) {
                         subTemplate = [template attributedSubstringFromRange:NSMakeRange(start, [subTemplateString length])];
                         
                         subTemplates = [[NSMutableArray alloc] init];
-                        matchStrings = [[NSMutableArray alloc] initWithObjects:matchString ?: @"", nil];
+                        matchStrings = [[NSMutableArray alloc] initWithObjects:matchString, nil];
                         
                         if (matchType != BDSKTemplateTagMatchOther) {
                             altTag = compareConditionTagWithTag(tag, matchType);
                             altTagRange = altConditionTagRange([subTemplate string], altTag, &matchString);
                             while (altTagRange.location != NSNotFound) {
                                 [subTemplates addObject:[subTemplate attributedSubstringFromRange:NSMakeRange(0, altTagRange.location)]];
-                                [matchStrings addObject:matchString ?: @""];
+                                [matchStrings addObject:matchString];
                                 subTemplate = [subTemplate attributedSubstringFromRange:NSMakeRange(NSMaxRange(altTagRange), [subTemplate length] - NSMaxRange(altTagRange))];
                                 altTagRange = altConditionTagRange([subTemplate string], altTag, &matchString);
                             }
