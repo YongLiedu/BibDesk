@@ -150,6 +150,8 @@ typedef NSInteger BDSKTemplateTagMatchType;
 - (NSString *)text;
 - (void)setText:(NSString *)newText;
 
+- (void)appendText:(NSString *)newText;
+
 @end
 
 #pragma mark -
@@ -162,5 +164,7 @@ typedef NSInteger BDSKTemplateTagMatchType;
 
 - (NSAttributedString *)attributedText;
 - (void)setAttributedText:(NSAttributedString *)newAttributedText;
+
+- (void)appendAttributedText:(NSAttributedString *)newAttributedText;
 
 @end

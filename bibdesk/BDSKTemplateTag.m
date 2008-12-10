@@ -222,6 +222,18 @@
     return subtemplate;
 }
 
+- (void)appendAttributedText:(NSAttributedString *)newAttributedText {
+    NSMutableAttributedString *newAttrText = [attributedText mutableCopy];
+    [newAttrText appendAttributedString:newAttributedText];
+    [newAttrText fixAttributesInRange:NSMakeRange(0, [newAttrText length])];
+    [self setAttributedText:newAttrText];
+    [newAttrText release];
+}
+
+- (void)appendText:(NSString *)newText {
+    [self setText:[text stringByAppendingString:newText]];
+}
+
 @end
 
 #pragma mark -

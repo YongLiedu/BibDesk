@@ -281,7 +281,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 
         if ([scanner scanUpToString:START_TAG_OPEN_DELIM intoString:&beforeText]) {
             if (currentTag && [(BDSKTemplateTag *)currentTag type] == BDSKTextTemplateTagType) {
-                [(BDSKTextTemplateTag *)currentTag setText:[[(BDSKTextTemplateTag *)currentTag text] stringByAppendingString:beforeText]];
+                [(BDSKTextTemplateTag *)currentTag appendText:beforeText];
             } else {
                 currentTag = [[BDSKTextTemplateTag alloc] initWithText:beforeText];
                 [result addObject:currentTag];
@@ -394,7 +394,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     
                     // an open delimiter without a close delimiter, so no template tag. Rewind
                     if (currentTag && [(BDSKTemplateTag *)currentTag type] == BDSKTextTemplateTagType) {
-                        [(BDSKTextTemplateTag *)currentTag setText:[[(BDSKTextTemplateTag *)currentTag text] stringByAppendingString:START_TAG_OPEN_DELIM]];
+                        [(BDSKTextTemplateTag *)currentTag appendText:START_TAG_OPEN_DELIM];
                     } else {
                         currentTag = [[BDSKTextTemplateTag alloc] initWithText:START_TAG_OPEN_DELIM];
                         [result addObject:currentTag];
@@ -560,17 +560,12 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
         NSString *tag = nil;
         int start;
         NSDictionary *attr = nil;
-        NSMutableAttributedString *tmpAttrStr = nil;
         
         start = [scanner scanLocation];
                 
         if ([scanner scanUpToString:START_TAG_OPEN_DELIM intoString:&beforeText]) {
             if (currentTag && [(BDSKTemplateTag *)currentTag type] == BDSKTextTemplateTagType) {
-                tmpAttrStr = [[(BDSKRichTextTemplateTag *)currentTag attributedText] mutableCopy];
-                [tmpAttrStr appendAttributedString:[template attributedSubstringFromRange:NSMakeRange(start, [beforeText length])]];
-                [tmpAttrStr fixAttributesInRange:NSMakeRange(0, [tmpAttrStr length])];
-                [(BDSKRichTextTemplateTag *)currentTag setAttributedText:tmpAttrStr];
-                [tmpAttrStr release];
+                [(BDSKRichTextTemplateTag *)currentTag appendAttributedText:[template attributedSubstringFromRange:NSMakeRange(start, [beforeText length])]];
             } else {
                 currentTag = [[BDSKRichTextTemplateTag alloc] initWithAttributedText:[template attributedSubstringFromRange:NSMakeRange(start, [beforeText length])]];
                 [result addObject:currentTag];
@@ -696,11 +691,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                     
                     // a START_TAG_OPEN_DELIM without COLLECTION_TAG_CLOSE_DELIM, so no template tag. Rewind
                     if (currentTag && [(BDSKTemplateTag *)currentTag type] == BDSKTextTemplateTagType) {
-                        tmpAttrStr = [[(BDSKRichTextTemplateTag *)currentTag attributedText] mutableCopy];
-                        [tmpAttrStr appendAttributedString:[template attributedSubstringFromRange:NSMakeRange(start - [START_TAG_OPEN_DELIM length], [START_TAG_OPEN_DELIM length])]];
-                        [tmpAttrStr fixAttributesInRange:NSMakeRange(0, [tmpAttrStr length])];
-                        [(BDSKRichTextTemplateTag *)currentTag setAttributedText:tmpAttrStr];
-                        [tmpAttrStr release];
+                        [(BDSKRichTextTemplateTag *)currentTag appendAttributedText:[template attributedSubstringFromRange:NSMakeRange(start - [START_TAG_OPEN_DELIM length], [START_TAG_OPEN_DELIM length])]];
                     } else {
                         currentTag = [[BDSKRichTextTemplateTag alloc] initWithAttributedText:[template attributedSubstringFromRange:NSMakeRange(start - [START_TAG_OPEN_DELIM length], [START_TAG_OPEN_DELIM length])]];
                         [result addObject:currentTag];
