@@ -393,7 +393,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     // remove whitespace before and after collection and condition tags up till newlines
     int i, count = [result count];
     
-    for (i = count - 1; i >= 0; i++) {
+    for (i = count - 1; i >= 0; i--) {
         BDSKTemplateTag *tag = [result objectAtIndex:i];
         
         if ([tag type] != BDSKTextTemplateTagType) continue;
@@ -690,7 +690,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     // remove whitespace before and after collection and condition tags up till newlines
     int i, count = [result count];
     
-    for (i = count - 1; i >= 0; i++) {
+    for (i = count - 1; i >= 0; i--) {
         BDSKTemplateTag *tag = [result objectAtIndex:i];
         
         if ([tag type] != BDSKTextTemplateTagType) continue;
