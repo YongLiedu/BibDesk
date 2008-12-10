@@ -39,8 +39,6 @@
 #import "BDSKTemplateParser.h"
 #import "BDSKTemplateTag.h"
 #import "NSString_BDSKExtensions.h"
-#import "NSAttributedString_BDSKExtensions.h"
-#import "NSArray_BDSKExtensions.h"
 #import "BibAuthor.h"
 
 #define START_TAG_OPEN_DELIM            @"<$"
