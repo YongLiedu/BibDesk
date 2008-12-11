@@ -272,11 +272,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSControl</string>
+			<string>BDSKEncodingPopUpButton</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSView</string>
+			<string>NSPopUpButton</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -288,11 +288,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKEncodingPopUpButton</string>
+			<string>NSControl</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSPopUpButton</string>
+			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -390,19 +390,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKSplitView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>OASplitView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>OASplitView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSSplitView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKSplitView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OASplitView</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>

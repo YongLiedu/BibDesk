@@ -950,7 +950,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 }
 
 #define SAVE_ENCODING_VIEW_OFFSET 30.0
-#define SAVE_FORMAT_POPUP_OFFSET 31.0
+#define SAVE_FORMAT_POPUP_OFFSET 66.0
 
 static NSPopUpButton *popUpButtonSubview(NSView *view)
 {
@@ -975,39 +975,35 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     if([super prepareSavePanel:savePanel] == NO)
         return NO;
     
-    NSView *accessoryView = [savePanel accessoryView];
-    NSPopUpButton *saveFormatPopupButton = popUpButtonSubview(accessoryView);
-    OBASSERT(saveFormatPopupButton != nil);
-    NSRect popupFrame = [saveTextEncodingPopupButton frame];
-    popupFrame.origin.y += SAVE_FORMAT_POPUP_OFFSET;
-    [saveFormatPopupButton setFrame:popupFrame];
-    [saveAccessoryView addSubview:saveFormatPopupButton];
-    NSRect savFrame = [saveAccessoryView frame];
-    savFrame.size.width = NSWidth([accessoryView frame]);
-    
     if(NSSaveToOperation == docState.currentSaveOperationType){
+        NSView *accessoryView = [savePanel accessoryView];
+        OBASSERT(accessoryView != nil);
+        NSPopUpButton *saveFormatPopupButton = popUpButtonSubview(accessoryView);
+        OBASSERT(saveFormatPopupButton != nil);
+        NSRect savFrame = [saveAccessoryView frame];
+        savFrame.size.width = NSWidth([accessoryView frame]);
         NSRect exportFrame = [exportAccessoryView frame];
         savFrame.origin = NSMakePoint(0.0, SAVE_ENCODING_VIEW_OFFSET);
         [saveAccessoryView setFrame:savFrame];
         exportFrame.size.width = NSWidth(savFrame);
         [exportAccessoryView setFrame:exportFrame];
         [exportAccessoryView addSubview:saveAccessoryView];
-        accessoryView = exportAccessoryView;
+        NSRect popupFrame = [saveTextEncodingPopupButton frame];
+        popupFrame.origin.y = SAVE_FORMAT_POPUP_OFFSET;
+        [saveFormatPopupButton setFrame:popupFrame];
+        [exportAccessoryView addSubview:saveFormatPopupButton];
+        [savePanel setAccessoryView:exportAccessoryView];
     }else{
-        [saveAccessoryView setFrame:savFrame];
-        accessoryView = saveAccessoryView;
+        [savePanel setAccessoryView:saveAccessoryView];
     }
-    [savePanel setAccessoryView:accessoryView];
     
     // set the popup to reflect the document's present string encoding
     [saveTextEncodingPopupButton setEncoding:[self documentStringEncoding]];
     [saveTextEncodingPopupButton setEnabled:YES];
     
     [exportSelectionCheckButton setState:NSOffState];
-    if(NSSaveToOperation == docState.currentSaveOperationType){
+    if(NSSaveToOperation == docState.currentSaveOperationType)
         [exportSelectionCheckButton setEnabled:[self numberOfSelectedPubs] > 0 || [self hasLibraryGroupSelected] == NO];
-    }
-    [accessoryView setNeedsDisplay:YES];
     
     return YES;
 }
