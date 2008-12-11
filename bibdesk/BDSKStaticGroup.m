@@ -113,12 +113,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 }
 
 - (void)addPublication:(BibItem *)item {
-    if ([publications containsObjectIdenticalTo:item] == YES)
-        return;
-    [[[self undoManager] prepareWithInvocationTarget:self] removePublication:item];
-    [publications addObject:item];
-    [self setCount:[publications count]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:self];
+    [self addPublicationsFromArray:[NSArray arrayWithObjects:item, nil]];
 }
 
 - (void)addPublicationsFromArray:(NSArray *)items {
@@ -136,17 +131,19 @@ static NSString *BDSKLastImportLocalizedString = nil;
 }
 
 - (void)removePublication:(BibItem *)item {
-    if ([publications containsObjectIdenticalTo:item] == NO)
-        return;
-    [[[self undoManager] prepareWithInvocationTarget:self] addPublication:item];
-    [publications removeObject:item];
-    [self setCount:[publications count]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:self];
+    [self removePublicationsInArray:[NSArray arrayWithObjects:item, nil]];
 }
 
 - (void)removePublicationsInArray:(NSArray *)items {
-    [[[self undoManager] prepareWithInvocationTarget:self] addPublicationsFromArray:items];
-    [publications removeObjectsInArray:items];
+    NSMutableArray *removedItems = [NSMutableArray array];
+    NSEnumerator *itemEnum = [items objectEnumerator];
+    BibItem *item;
+    while (item = [itemEnum nextObject]) {
+        if ([publications containsObject:item] == NO) continue;
+        [removedItems addObject:item];
+        [publications removeObject:item];
+    }
+    [[[self undoManager] prepareWithInvocationTarget:self] addPublicationsFromArray:removedItems];
     [self setCount:[publications count]];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:self];
 }
