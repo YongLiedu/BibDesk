@@ -84,7 +84,6 @@ The keys should be valid key paths (i.e. only letters and dots) and spaces are n
 
 - (BOOL)isNotEmpty;
 
-- (id)safeValueForKeyPath:(NSString *)keyPath;
 - (id)templateValueForKeyPath:(NSString *)keyPath;
 
 - (NSString *)templateStringValue;
