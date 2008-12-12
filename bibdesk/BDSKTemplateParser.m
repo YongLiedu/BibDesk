@@ -200,6 +200,37 @@ static inline NSRange altConditionTagRange(NSString *template, NSString *altTag,
     return altTagRange;
 }
 
+static inline id templateValueForKeyPath(id object, NSString *keyPath, int anIndex) {
+    if ([keyPath hasPrefix:@"#"] && anIndex > 0) {
+        object = [NSNumber numberWithInt:anIndex];
+        if ([keyPath length] == 1)
+            return object;
+        if ([keyPath hasPrefix:@"#."] == NO || [keyPath length] < 3)
+            return nil;
+        keyPath = [keyPath substringFromIndex:2];
+    }
+    if (object == nil)
+        return nil;
+    id value = nil;
+    NSString *trailingKeyPath = nil;
+    unsigned int atIndex = [keyPath rangeOfString:@"@"].location;
+    if (atIndex != NSNotFound) {
+        unsigned int dotIndex = [keyPath rangeOfString:@"." options:0 range:NSMakeRange(atIndex + 1, [keyPath length] - atIndex - 1)].location;
+        if (dotIndex != NSNotFound) {
+            static NSSet *arrayOperators = nil;
+            if (arrayOperators == nil)
+                arrayOperators = [[NSSet alloc] initWithObjects:@"@avg", @"@max", @"@min", @"@sum", @"@distinctUnionOfArrays", @"@distinctUnionOfObjects", @"@distinctUnionOfSets", @"@unionOfArrays", @"@unionOfObjects", @"@unionOfSets", nil];
+            if ([arrayOperators containsObject:[keyPath substringWithRange:NSMakeRange(atIndex, dotIndex - atIndex)]] == NO) {
+                trailingKeyPath = [keyPath substringFromIndex:dotIndex + 1];
+                keyPath = [keyPath substringToIndex:dotIndex];
+            }
+        }
+    }
+    @try{ value = [object valueForKeyPath:keyPath]; }
+    @catch(id exception) { value = nil; }
+    return trailingKeyPath ? templateValueForKeyPath(value, trailingKeyPath, 0) : value;
+}
+
 static inline BOOL matchesCondition(NSString *keyValue, NSString *matchString, BDSKTemplateTagMatchType matchType) {
     switch (matchType) {
         case BDSKTemplateTagMatchEqual:
@@ -257,7 +288,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
 }
 
 + (NSString *)stringByParsingTemplateString:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
-    return [self stringFromTemplateArray:[self arrayByParsingTemplateString:template] usingObject:object atIndex:1 delegate:delegate];
+    return [self stringFromTemplateArray:[self arrayByParsingTemplateString:template] usingObject:object atIndex:0 delegate:delegate];
 }
 
 + (NSArray *)arrayByParsingTemplateString:(NSString *)template {
@@ -439,15 +470,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
         } else {
             
             NSString *keyPath = [tag keyPath];
-            id keyValue = nil;
-            
-            if ([keyPath hasPrefix:@"#"]) {
-                keyValue = [NSNumber numberWithInt:anIndex];
-                if ([keyPath hasPrefix:@"#."] && [keyPath length] > 2)
-                    keyValue = [keyValue templateValueForKeyPath:[keyPath substringFromIndex:2]];
-            } else {
-                keyValue = [object templateValueForKeyPath:keyPath];
-            }
+            id keyValue = templateValueForKeyPath(object, keyPath, anIndex);
             
             if (type == BDSKValueTemplateTagType) {
                 
@@ -484,7 +507,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 for (i = 0; i < count; i++) {
                     matchString = [matchStrings objectAtIndex:i];
                     if ([matchString hasPrefix:@"$"])
-                        matchString = [[object templateValueForKeyPath:[matchString substringFromIndex:1]] templateStringValue] ?: @"";
+                        matchString = [templateValueForKeyPath(object, [matchString substringFromIndex:1], anIndex) templateStringValue] ?: @"";
                     if (matchesCondition(keyValue, matchString, [tag matchType])) {
                         subtemplate = [tag subtemplateAtIndex:i];
                         break;
@@ -512,7 +535,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
 }
 
 + (NSAttributedString *)attributedStringByParsingTemplateAttributedString:(NSAttributedString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
-    return [self attributedStringFromTemplateArray:[self arrayByParsingTemplateAttributedString:template] usingObject:object atIndex:1 delegate:delegate];
+    return [self attributedStringFromTemplateArray:[self arrayByParsingTemplateAttributedString:template] usingObject:object atIndex:0 delegate:delegate];
 }
 
 + (NSArray *)arrayByParsingTemplateAttributedString:(NSAttributedString *)template {
@@ -711,15 +734,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
         } else {
             
             NSString *keyPath = [tag keyPath];
-            id keyValue = nil;
-            
-            if ([keyPath hasPrefix:@"#"]) {
-                keyValue = [NSNumber numberWithInt:anIndex];
-                if ([keyPath hasPrefix:@"#."] && [keyPath length] > 2)
-                    keyValue = [keyValue templateValueForKeyPath:[keyPath substringFromIndex:2]];
-            } else {
-                keyValue = [object templateValueForKeyPath:keyPath];
-            }
+            id keyValue = templateValueForKeyPath(object, keyPath, anIndex);
             
             if (type == BDSKValueTemplateTagType) {
                 
@@ -758,7 +773,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 for (i = 0; i < count; i++) {
                     matchString = [matchStrings objectAtIndex:i];
                     if ([matchString hasPrefix:@"$"])
-                        matchString = [[object templateValueForKeyPath:[matchString substringFromIndex:1]] templateStringValue] ?: @"";
+                        matchString = [templateValueForKeyPath(object, [matchString substringFromIndex:1], anIndex) templateStringValue] ?: @"";
                     if (matchesCondition(keyValue, matchString, [tag matchType])) {
                         subtemplate = [tag subtemplateAtIndex:i];
                         break;
@@ -794,27 +809,6 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
     if ([self respondsToSelector:@selector(length)])
         return [(id)self length] > 0;
     return YES;
-}
-
-- (id)templateValueForKeyPath:(NSString *)keyPath {
-    id value = nil;
-    NSString *trailingKeyPath = nil;
-    unsigned int atIndex = [keyPath rangeOfString:@"@"].location;
-    if (atIndex != NSNotFound) {
-        unsigned int dotIndex = [keyPath rangeOfString:@"." options:0 range:NSMakeRange(atIndex + 1, [keyPath length] - atIndex - 1)].location;
-        if (dotIndex != NSNotFound) {
-            static NSSet *arrayOperators = nil;
-            if (arrayOperators == nil)
-                arrayOperators = [[NSSet alloc] initWithObjects:@"@avg", @"@max", @"@min", @"@sum", @"@distinctUnionOfArrays", @"@distinctUnionOfObjects", @"@distinctUnionOfSets", @"@unionOfArrays", @"@unionOfObjects", @"@unionOfSets", nil];
-            if ([arrayOperators containsObject:[keyPath substringWithRange:NSMakeRange(atIndex, dotIndex - atIndex)]] == NO) {
-                trailingKeyPath = [keyPath substringFromIndex:dotIndex + 1];
-                keyPath = [keyPath substringToIndex:dotIndex];
-            }
-        }
-    }
-    @try{ value = [self valueForKeyPath:keyPath]; }
-    @catch(id exception) { value = nil; }
-    return trailingKeyPath ? [value templateValueForKeyPath:trailingKeyPath] : value;
 }
 
 - (NSString *)templateStringValue {
