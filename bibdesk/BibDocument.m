@@ -933,7 +933,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 
 + (BOOL)isNativeType:(NSString *)aType
 {
-    return [super isNativeType:aType] && [aType isEqualToString:BDSKRISDocumentType] == NO;
+    return [aType isEqualToString:BDSKBibTeXDocumentType];
 }
 
 + (NSArray *)writableTypes
