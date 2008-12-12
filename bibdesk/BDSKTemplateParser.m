@@ -328,15 +328,15 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 BDSKTemplateTagMatchType matchType = BDSKTemplateTagMatchOther;
                 
                 if ([scanner scanString:CONDITION_TAG_EQUAL intoString:nil])
-                    matchType = SKTemplateTagMatchEqual;
+                    matchType = BDSKTemplateTagMatchEqual;
                 else if ([scanner scanString:CONDITION_TAG_CONTAIN intoString:nil])
-                    matchType = SKTemplateTagMatchContain;
+                    matchType = BDSKTemplateTagMatchContain;
                 else if ([scanner scanString:CONDITION_TAG_SMALLER_OR_EQUAL intoString:nil])
-                    matchType = SKTemplateTagMatchSmallerOrEqual;
+                    matchType = BDSKTemplateTagMatchSmallerOrEqual;
                 else if ([scanner scanString:CONDITION_TAG_SMALLER intoString:nil])
-                    matchType = SKTemplateTagMatchSmaller;
+                    matchType = BDSKTemplateTagMatchSmaller;
                 
-                if (matchType != SKTemplateTagMatchOther)
+                if (matchType != BDSKTemplateTagMatchOther)
                     [scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString];
                 
                 if ([scanner scanString:CONDITION_TAG_CLOSE_DELIM intoString:nil]) {
@@ -595,15 +595,15 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 BDSKTemplateTagMatchType matchType = BDSKTemplateTagMatchOther;
                 
                 if ([scanner scanString:CONDITION_TAG_EQUAL intoString:nil])
-                    matchType = SKTemplateTagMatchEqual;
+                    matchType = BDSKTemplateTagMatchEqual;
                 else if ([scanner scanString:CONDITION_TAG_CONTAIN intoString:nil])
-                    matchType = SKTemplateTagMatchContain;
+                    matchType = BDSKTemplateTagMatchContain;
                 else if ([scanner scanString:CONDITION_TAG_SMALLER_OR_EQUAL intoString:nil])
-                    matchType = SKTemplateTagMatchSmallerOrEqual;
+                    matchType = BDSKTemplateTagMatchSmallerOrEqual;
                 else if ([scanner scanString:CONDITION_TAG_SMALLER intoString:nil])
-                    matchType = SKTemplateTagMatchSmaller;
+                    matchType = BDSKTemplateTagMatchSmaller;
                 
-                if (matchType != SKTemplateTagMatchOther)
+                if (matchType != BDSKTemplateTagMatchOther)
                     [scanner scanUpToString:CONDITION_TAG_CLOSE_DELIM intoString:&matchString];
                 
                 if ([scanner scanString:CONDITION_TAG_CLOSE_DELIM intoString:nil]) {
