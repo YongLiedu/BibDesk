@@ -38,9 +38,20 @@
 
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKTableSortDescriptor.h"
+#import "BDSKTemplateParser.h"
 
 
 @implementation NSArray (BDSKExtensions)
+
+- (id)nonEmpty {
+    NSMutableArray *nonEmptyArray = [NSMutableArray array];
+    NSEnumerator *objEnum = [self objectEnumerator];
+    id obj;
+    while (obj = [objEnum nextObject])
+        if ([obj isNotEmpty])
+            [nonEmptyArray addObject:obj];
+    return nonEmptyArray;
+}
 
 - (id)firstObject;
 {

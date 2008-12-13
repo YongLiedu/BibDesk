@@ -39,7 +39,11 @@
 #import <Cocoa/Cocoa.h>
 
 @interface NSSet (BDSKExtensions)
+
 + (id)caseInsensitiveStringSetWithObjects:(id)firstObj, ...;
+
+- (id)nonEmpty;
+
 @end
 
 @interface NSMutableSet (BDSKExtensions)

@@ -41,6 +41,8 @@
 
 @interface NSArray (BDSKExtensions)
 
+- (id)nonEmpty;
+
 - (id)firstObject;
 - (id)secondObject;
 - (id)thirdObject;

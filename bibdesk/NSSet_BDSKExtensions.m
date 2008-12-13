@@ -40,6 +40,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 #import "BDSKCountedSet.h"
+#import "BDSKTemplateParser.h"
 
 @implementation NSSet (BDSKExtensions)
 
@@ -60,6 +61,16 @@
     NSSet *returnSet = (NSSet *)CFSetCreateCopy(CFAllocatorGetDefault(), set);
     CFRelease(set);
     return [returnSet autorelease];
+}
+
+- (id)nonEmpty {
+    NSMutableSet *nonEmptySet = [NSMutableSet set];
+    NSEnumerator *objEnum = [self objectEnumerator];
+    id obj;
+    while (obj = [objEnum nextObject])
+        if ([obj isNotEmpty])
+            [nonEmptySet addObject:obj];
+    return nonEmptySet;
 }
 
 @end
