@@ -38,7 +38,7 @@
 
 #import "BDSKTemplateParser.h"
 #import "BDSKTemplateTag.h"
-#import "NSString_BDSKExtensions.h"
+#import "NSCharacterSet_BDSKExtensions.h"
 #import "BibAuthor.h"
 
 #define START_TAG_OPEN_DELIM            @"<$"
@@ -184,17 +184,31 @@ static id templateValueForKeyPath(id object, NSString *keyPath, int anIndex) {
 }
 
 static inline BOOL matchesCondition(NSString *keyValue, NSString *matchString, BDSKTemplateTagMatchType matchType) {
-    switch (matchType) {
-        case BDSKTemplateTagMatchEqual:
-            return [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] ?: @"" caseInsensitiveCompare:matchString] == NSOrderedSame;
-        case BDSKTemplateTagMatchContain:
-            return [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] ?: @"" rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
-        case BDSKTemplateTagMatchSmaller:
-            return [matchString isEqualToString:@""] ? NO : [[keyValue templateStringValue] ?: @"" localizedCaseInsensitiveNumericCompare:matchString] == NSOrderedAscending;
-        case BDSKTemplateTagMatchSmallerOrEqual:
-            return [matchString isEqualToString:@""] ? NO == [keyValue isNotEmpty] : [[keyValue templateStringValue] ?: @"" localizedCaseInsensitiveNumericCompare:matchString] != NSOrderedDescending;
-        default:
-            return [keyValue isNotEmpty];
+    if ([matchString isEqualToString:@""]) {
+        switch (matchType) {
+            case BDSKTemplateTagMatchEqual:
+            case BDSKTemplateTagMatchContain:
+            case BDSKTemplateTagMatchSmallerOrEqual:
+                return NO == [keyValue isNotEmpty];
+            case BDSKTemplateTagMatchSmaller:
+                return NO;
+            default:
+                return [keyValue isNotEmpty];
+        }
+    } else {
+        NSString *stringValue = [keyValue templateStringValue] ?: @"";
+        switch (matchType) {
+            case BDSKTemplateTagMatchEqual:
+                return [stringValue caseInsensitiveCompare:matchString] == NSOrderedSame;
+            case BDSKTemplateTagMatchContain:
+                return [stringValue rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+            case BDSKTemplateTagMatchSmaller:
+                return [stringValue compare:matchString options:NSCaseInsensitiveSearch | NSNumericSearch] == NSOrderedAscending;
+            case BDSKTemplateTagMatchSmallerOrEqual:
+                return [stringValue compare:matchString options:NSCaseInsensitiveSearch | NSNumericSearch] != NSOrderedDescending;
+            default:
+                return NO;
+        }
     }
 }
 
