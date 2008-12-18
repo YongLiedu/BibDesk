@@ -204,7 +204,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 {        
     static NSSet *scriptExtensions = nil;
     if (scriptExtensions == nil)
-        [[NSSet alloc] initWithObjects:@"scpt", @"scptd", @"applescript", @"sh", @"py", @"rb", @"app", nil];
+        scriptExtensions = [[NSSet alloc] initWithObjects:@"scpt", @"scptd", @"applescript", @"sh", @"command", @"py", @"rb", @"pl", @"pm", @"app", nil];
     
     // we call this method recursively; if the menu is nil, the stuff we add won't be retained
     NSParameterAssert(menu != nil);
