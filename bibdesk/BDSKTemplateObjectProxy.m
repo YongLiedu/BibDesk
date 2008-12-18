@@ -111,7 +111,6 @@
         publications = [items copy];
         publicationsContext = [itemsContext copy];
         template = [aTemplate retain];
-        currentIndex = 0;
     }
     return self;
 }
@@ -141,7 +140,6 @@
         }
         [pub setItemIndex:idx];
     }
-    currentIndex = 0;
     return publications;
 }
 
@@ -155,6 +153,7 @@
     NSAutoreleasePool *pool = nil;
     NSMutableDictionary *parsedTemplates = [NSMutableDictionary dictionary];
     NSArray *parsedTemplate;
+    int currentIndex = 0;
     
     if (format & BDSKPlainTextTemplateFormat) {
         

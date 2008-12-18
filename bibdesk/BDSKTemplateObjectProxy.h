@@ -46,7 +46,6 @@
     NSArray *publications;
     NSArray *publicationsContext;
     BDSKTemplate *template;
-    unsigned int currentIndex;
 }
 
 + (NSString *)stringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items;
