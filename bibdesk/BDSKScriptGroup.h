@@ -48,9 +48,6 @@ enum {
     BDSKAppleScriptType
 };
 
-extern BOOL BDSKIsAppleScriptAtPath(NSString *path);
-extern BOOL BDSKIsExecutableFileAtPath(NSString *path);
-
 @interface BDSKScriptGroup : BDSKMutableGroup <BDSKOwner> {
     BDSKPublicationsArray *publications;
     BDSKMacroResolver *macroResolver;

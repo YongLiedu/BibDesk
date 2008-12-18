@@ -58,24 +58,6 @@
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
 
-BOOL BDSKIsAppleScriptAtPath(NSString *path)
-{
-    path = [path stringByStandardizingPath];
-    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
-    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
-                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text"))) : NO;
-}
-
-BOOL BDSKIsExecutableFileAtPath(NSString *path)
-{
-    path = [path stringByStandardizingPath]; 	 
-    BOOL isExecutable = [[NSFileManager defaultManager] isExecutableFileAtPath:path]; 	 
-    // exclude packages and directories, which are not executable data 	 
-    BOOL isDir; 	 
-    [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir]; 	 
-    return (isExecutable && NO == isDir);
-}
-
 static OFMessageQueue *messageQueue = nil;
 
 @implementation BDSKScriptGroup
@@ -112,7 +94,7 @@ static OFMessageQueue *messageQueue = nil;
         [self release];
         self = nil;
     } else {
-        self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:BDSKIsAppleScriptAtPath(path) ? BDSKAppleScriptType : BDSKShellScriptType];
+        self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:[[NSFileManager defaultManager] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType : BDSKShellScriptType];
     }
     return self;
 }

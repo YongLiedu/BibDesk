@@ -45,6 +45,7 @@
 #import "BDSKVersionNumber.h"
 #import "NSError_BDSKExtensions.h"
 #import <SkimNotes/SKNExtendedAttributeManager.h>
+#import "NSWorkspace_BDSKExtensions.h"
 
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
@@ -237,6 +238,26 @@ static void destroyTemporaryDirectory()
     }
     
     return path;
+}
+
+- (BOOL)isAppleScriptFileAtPath:(NSString *)path {
+    path = [path stringByStandardizingPath];
+    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
+    // what about .scptd?
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
+                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text"))) : NO;
+}
+
+- (BOOL)isApplicationAtPath:(NSString *)path {
+    path = [path stringByStandardizingPath];
+    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.application"))) : NO;
+}
+
+- (BOOL)isApplicationBundleAtPath:(NSString *)path {
+    path = [path stringByStandardizingPath];
+    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.application-bundle"))) : NO;
 }
 
 #pragma mark Temporary files and directories

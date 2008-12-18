@@ -42,6 +42,10 @@
 
 @interface NSFileManager (BDSKExtensions)
 
+- (BOOL)isAppleScriptFileAtPath:(NSString *)path;
+- (BOOL)isApplicationAtPath:(NSString *)path;
+- (BOOL)isApplicationBundleAtPath:(NSString *)path;
+
 - (NSString *)currentApplicationSupportPathForCurrentUser;
 - (NSString *)applicationSupportDirectory:(SInt16)domain;
 - (NSString *)applicationsDirectory;
