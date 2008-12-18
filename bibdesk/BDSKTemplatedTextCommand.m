@@ -116,13 +116,33 @@
 	} else {
         items = publications;
     }
+	
+	// the 'in' parameter can select the items context to template
+    obj = [params objectForKey:@"in"];
+    NSArray *itemsContext = nil;
+	if (obj) {
+		// the parameter is present
+		if ([obj isKindOfClass:[BibItem class]]) {
+            items = [NSArray arrayWithObject:obj];
+		} else if ([obj isKindOfClass:[NSArray class]]) {
+            id lastObject = [obj lastObject];
+            if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+        } else {
+			// wrong kind of argument
+			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
+			[self setScriptErrorString:NSLocalizedString(@"The 'in' option needs to be a publication or a list of publications.",@"Error description")];
+			return [[[NSTextStorage alloc] init] autorelease];;
+		}
+		
+	}
     
     NSString *templatedText = nil;
     
     if ([template templateFormat] & BDSKRichTextTemplateFormat) {
-        templatedText = [[BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:document publications:items documentAttributes:NULL] string];
+        templatedText = [[BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext documentAttributes:NULL] string];
     } else {
-        templatedText = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items];
+        templatedText = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext];
     }
 	
 	return templatedText;
@@ -203,12 +223,32 @@
 	} else {
         items = publications;
     }
+	
+	// the 'in' parameter can select the items context to template
+    obj = [params objectForKey:@"in"];
+    NSArray *itemsContext = nil;
+	if (obj) {
+		// the parameter is present
+		if ([obj isKindOfClass:[BibItem class]]) {
+            items = [NSArray arrayWithObject:obj];
+		} else if ([obj isKindOfClass:[NSArray class]]) {
+            id lastObject = [obj lastObject];
+            if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+        } else {
+			// wrong kind of argument
+			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
+			[self setScriptErrorString:NSLocalizedString(@"The 'in' option needs to be a publication or a list of publications.",@"Error description")];
+			return [[[NSTextStorage alloc] init] autorelease];;
+		}
+		
+	}
     
     if ([template templateFormat] & BDSKRichTextTemplateFormat) {
-        NSAttributedString *templatedRichText = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:document publications:items documentAttributes:NULL];
+        NSAttributedString *templatedRichText = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext documentAttributes:NULL];
         return [[[NSTextStorage alloc] initWithAttributedString:templatedRichText] autorelease];
     } else {
-        NSString *templatedText = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items];
+        NSString *templatedText = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext];
         return [[[NSTextStorage alloc] initWithString:templatedText] autorelease];
     }
 }

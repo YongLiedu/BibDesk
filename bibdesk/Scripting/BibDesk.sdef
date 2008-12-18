@@ -1472,6 +1472,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <type type="publication"/>
                 <cocoa key="for"/>
             </parameter>                
+            <parameter name="in" code="in  " optional="yes"
+                description="Specifies an ordered list of publications used to provide the itemIndex of the exported publications. These must include the parsed publications themselves and defaults to the exported publications.">
+                <type type="publication" list="yes"/>
+                <cocoa key="in"/>
+            </parameter>                
         </command>
         
         <command name="templated text" code="BDSKttxt"
@@ -1494,6 +1499,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <type type="publication" list="yes"/>
                 <type type="publication"/>
                 <cocoa key="for"/>
+            </parameter>                
+            <parameter name="in" code="in  " optional="yes"
+                description="Specifies an ordered list of publications used to provide the itemIndex of the parsed publications. These must include the parsed publications themselves and defaults to the parsed publications.">
+                <type type="publication" list="yes"/>
+                <cocoa key="in"/>
             </parameter>                
             <result description="the templated text" type="text">
             </result>
@@ -1519,6 +1529,11 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <type type="publication" list="yes"/>
                 <type type="publication"/>
                 <cocoa key="for"/>
+            </parameter>                
+            <parameter name="in" code="in  " optional="yes"
+                description="Specifies an ordered list of publications used to provide the itemIndex of the parsed publications. These must include the parsed publications themselves and defaults to the parsed publications.">
+                <type type="publication" list="yes"/>
+                <cocoa key="in"/>
             </parameter>                
             <result description="the templated rich text" type="rich text">
             </result>

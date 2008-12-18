@@ -45,9 +45,13 @@
 @implementation BDSKTemplateObjectProxy
 
 + (NSString *)stringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items {
+    return [self stringByParsingTemplate:template withObject:anObject publications:items publicationsContext:nil];
+}
+
++ (NSString *)stringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext {
     NSString *string = [template mainPageString];
     NSString *scriptPath = [template scriptPath];
-    BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items template:template];
+    BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items publicationsContext:itemsContext template:template];
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
     if(scriptPath)
@@ -56,10 +60,14 @@
 }
 
 + (NSAttributedString *)attributedStringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items documentAttributes:(NSDictionary **)docAttributes {
+    return [self attributedStringByParsingTemplate:template withObject:anObject publications:items publicationsContext:nil documentAttributes:docAttributes];
+}
+
++ (NSAttributedString *)attributedStringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext documentAttributes:(NSDictionary **)docAttributes {
     NSAttributedString *attrString = nil;
     NSString *scriptPath = [template scriptPath];
     if(scriptPath == nil){
-        BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items template:template];
+        BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items publicationsContext:itemsContext template:template];
         attrString = [template mainPageAttributedStringWithDocumentAttributes:docAttributes];
         attrString = [BDSKTemplateParser attributedStringByParsingTemplateAttributedString:attrString usingObject:objectProxy delegate:objectProxy];
         [objectProxy release];
@@ -85,18 +93,23 @@
 }
 
 + (NSData *)dataByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items {
+    return [self dataByParsingTemplate:template withObject:anObject publications:items publicationsContext:nil];
+}
+
++ (NSData *)dataByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext {
     NSString *string = [template mainPageString];
     NSString *scriptPath = [template scriptPath];
-    BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items template:template];
+    BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items publicationsContext:itemsContext template:template];
     string = [BDSKTemplateParser stringByParsingTemplateString:string usingObject:objectProxy delegate:objectProxy];
     [objectProxy release];
     return [NSTask runRawShellCommand:scriptPath withInputString:string];
 }
 
-- (id)initWithObject:(id)anObject publications:(NSArray *)items template:(BDSKTemplate *)aTemplate {
+- (id)initWithObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext template:(BDSKTemplate *)aTemplate {
     if (self = [super init]) {
         object = [anObject retain];
         publications = [items copy];
+        publicationsContext = [itemsContext copy];
         template = [aTemplate retain];
         currentIndex = 0;
     }
@@ -106,16 +119,34 @@
 - (void)dealloc {
     [object release];
     [publications release];
+    [publicationsContext release];
     [template release];
     [super dealloc];
 }
 
 - (id)valueForUndefinedKey:(NSString *)key { return [object valueForKey:key]; }
 
-- (NSArray *)publications { return publications; }
+- (NSArray *)publications {
+    NSEnumerator *e = [publications objectEnumerator];
+    BibItem *pub;
+    unsigned int idx = 0;
+    
+    while (pub = [e nextObject]) {
+        if (publicationsContext) {
+            idx = [publicationsContext indexOfObject:pub];
+            if (idx == NSNotFound)
+                idx = 0;
+        } else {
+            ++idx;
+        }
+        [pub setItemIndex:idx];
+    }
+    currentIndex = 0;
+    return publications;
+}
 
 - (id)publicationsUsingTemplate{
-    NSEnumerator *e = [publications objectEnumerator];
+    NSEnumerator *e = [[self publications] objectEnumerator];
     BibItem *pub = nil;
     
     OBPRECONDITION(nil != template);
@@ -146,9 +177,8 @@
                 if (parsedTemplate)
                     [parsedTemplates setObject:parsedTemplate forKey:[pub pubType]];
             }
-            [pub setItemIndex:++currentIndex];
             [pub prepareForTemplateParsing];
-            [returnString appendString:[BDSKTemplateParser stringFromTemplateArray:parsedTemplate usingObject:pub atIndex:currentIndex]];
+            [returnString appendString:[BDSKTemplateParser stringFromTemplateArray:parsedTemplate usingObject:pub atIndex:++currentIndex]];
             [pub cleanupAfterTemplateParsing];
             [pool release];
         }
@@ -171,9 +201,8 @@
                 }
                 [parsedTemplates setObject:parsedTemplate forKey:[pub pubType]];
             }
-            [pub setItemIndex:++currentIndex];
             [pub prepareForTemplateParsing];
-            [returnString appendAttributedString:[BDSKTemplateParser attributedStringFromTemplateArray:parsedTemplate usingObject:pub atIndex:currentIndex]];
+            [returnString appendAttributedString:[BDSKTemplateParser attributedStringFromTemplateArray:parsedTemplate usingObject:pub atIndex:++currentIndex]];
             [pub cleanupAfterTemplateParsing];
             [pool release];
         }
@@ -189,14 +218,12 @@
 
 // BDSKTemplateParserDelegate protocol
 - (void)templateParserWillParseTemplate:(id)template usingObject:(id)anObject isAttributed:(BOOL)flag {
-    if ([anObject isKindOfClass:[BibItem class]]) {
-        [(BibItem *)anObject setItemIndex:++currentIndex];
+    if ([anObject respondsToSelector:@selector(prepareForTemplateParsing)])
         [(BibItem *)anObject prepareForTemplateParsing];
-    }
 }
 
 - (void)templateParserDidParseTemplate:(id)template usingObject:(id)anObject isAttributed:(BOOL)flag {
-    if ([anObject isKindOfClass:[BibItem class]]) 
+    if ([anObject respondsToSelector:@selector(cleanupAfterTemplateParsing)])
         [(BibItem *)anObject cleanupAfterTemplateParsing];
 }
 

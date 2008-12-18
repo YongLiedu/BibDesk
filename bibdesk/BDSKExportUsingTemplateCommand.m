@@ -139,13 +139,33 @@
 	} else {
         items = publications;
     }
+	
+	// the 'in' parameter can select the items context to template
+    obj = [params objectForKey:@"in"];
+    NSArray *itemsContext = nil;
+	if (obj) {
+		// the parameter is present
+		if ([obj isKindOfClass:[BibItem class]]) {
+            items = [NSArray arrayWithObject:obj];
+		} else if ([obj isKindOfClass:[NSArray class]]) {
+            id lastObject = [obj lastObject];
+            if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+        } else {
+			// wrong kind of argument
+			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
+			[self setScriptErrorString:NSLocalizedString(@"The 'in' option needs to be a publication or a list of publications.",@"Error description")];
+			return [[[NSTextStorage alloc] init] autorelease];;
+		}
+		
+	}
     
     NSData *fileData = nil;
     
     if ([template templateFormat] & BDSKRichTextTemplateFormat) {
-        fileData = [document attributedStringDataForPublications:items usingTemplate:template];
+        fileData = [document attributedStringDataForPublications:items publicationsContext:itemsContext usingTemplate:template];
     } else {
-        fileData = [document stringDataForPublications:items usingTemplate:template];
+        fileData = [document stringDataForPublications:items publicationsContext:itemsContext usingTemplate:template];
     }
     
     if (fileURL) {

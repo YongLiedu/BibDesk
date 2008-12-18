@@ -44,15 +44,19 @@
 @interface BDSKTemplateObjectProxy : NSObject <BDSKTemplateParserDelegate> {
     id object;
     NSArray *publications;
+    NSArray *publicationsContext;
     BDSKTemplate *template;
-    int currentIndex;
+    unsigned int currentIndex;
 }
 
 + (NSString *)stringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items;
++ (NSString *)stringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext;
 + (NSAttributedString *)attributedStringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items documentAttributes:(NSDictionary **)docAttributes;
++ (NSAttributedString *)attributedStringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext documentAttributes:(NSDictionary **)docAttributes;
 + (NSData *)dataByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items;
++ (NSData *)dataByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext;
 
-- (id)initWithObject:(id)anObject publications:(NSArray *)items template:(BDSKTemplate *)aTemplate;
+- (id)initWithObject:(id)anObject publications:(NSArray *)items publicationsContext:(NSArray *)itemsContext template:(BDSKTemplate *)aTemplate;
 
 - (NSArray *)publications;
 - (id)publicationsUsingTemplate;

@@ -1678,22 +1678,30 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSData *)stringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
+    return [self stringDataForPublications:items publicationsContext:nil usingTemplate:template];
+}
+
+- (NSData *)stringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
     OBPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
     
-    NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
+    NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext];
     return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
 }
 
 - (NSData *)attributedStringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
+    return [self attributedStringDataForPublications:items publicationsContext:nil usingTemplate:template];
+}
+
+- (NSData *)attributedStringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
     OBPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
     OBPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKRichHTMLTemplateFormat));
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:&docAttributes];
+    NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
     
     // create some useful metadata, with an option to disable for the paranoid
@@ -1721,20 +1729,28 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSData *)dataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
+    return [self dataForPublications:items publicationsContext:nil usingTemplate:template];
+}
+
+- (NSData *)dataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
     OBPRECONDITION(nil != template && nil != [template scriptPath]);
     
-    NSData *fileTemplate = [BDSKTemplateObjectProxy dataByParsingTemplate:template withObject:self publications:items];
+    NSData *fileTemplate = [BDSKTemplateObjectProxy dataByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext];
     return fileTemplate;
 }
 
 - (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
+    return [self fileWrapperForPublications:items publicationsContext:nil usingTemplate:template];
+}
+
+- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
     OBPRECONDITION(nil != template && [template templateFormat] & BDSKRTFDTemplateFormat);
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:&docAttributes];
+    NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
     
     return [fileTemplate RTFDFileWrapperFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
 }
