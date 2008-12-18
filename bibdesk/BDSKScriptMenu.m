@@ -42,17 +42,12 @@
 #import <OmniAppKit/OmniAppKit.h>
 #import "NSFileManager_BDSKExtensions.h"
 
-@interface BDSKScriptMenuController : NSObject
-+ (id)sharedInstance;
-@end
-
 @interface BDSKScriptMenu (Private)
 - (NSArray *)scriptPaths;
 - (NSArray *)directoryContentsAtPath:(NSString *)path lastModified:(NSDate **)lastModifiedDate;
 - (void)updateSubmenu:(NSMenu *)menu withScripts:(NSArray *)scripts;
 - (void)executeScript:(id)sender;
 - (void)openScript:(id)sender;
-- (void)reloadScriptMenu;
 @end
 
 @implementation BDSKScriptMenu
@@ -70,11 +65,11 @@ static int recursionDepth = 0;
 {
     // title is currently unused
     NSString *scriptMenuTitle = @"Scripts";
-    NSMenu *newMenu = [[BDSKScriptMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle];
-    NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
+    NSMenu *newMenu = [[self allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle];
+    NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
     [scriptItem setImage:[NSImage imageNamed:@"OAScriptMenu"]];
     [scriptItem setSubmenu:newMenu];
-    [newMenu setDelegate:[BDSKScriptMenuController sharedInstance]];
+    [newMenu setDelegate:newMenu];
     [newMenu release];
     int itemIndex = [[NSApp mainMenu] numberOfItems] - 1;
     if (itemIndex > 0)
@@ -112,7 +107,8 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     return date;
 }
         
-- (void)reloadScriptMenu;
+
+- (void)menuNeedsUpdate:(BDSKScriptMenu *)menu
 {
     NSMutableArray *scripts;
     NSMutableArray *defaultScripts;
@@ -149,9 +145,15 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             [scripts insertObjects:defaultScripts atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, count)]];
         }
         [defaultScripts release];
-        [self updateSubmenu:self withScripts:scripts];        
+        [self updateSubmenu:menu withScripts:scripts];        
     }   
     [scripts release];
+}
+
+- (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action
+{
+    // implemented so the menu isn't populated on every key event
+    return NO;
 }
 
 - (NSArray *)directoryContentsAtPath:(NSString *)path lastModified:(NSDate **)lastModifiedDate
@@ -183,14 +185,12 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
                 dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, @"filename", nil];
                 [fileArray addObject:dict];
                 [dict release];
-            } else if (isDir) {
-                if ([[NSWorkspace sharedWorkspace] isFilePackageAtPath:filePath] == NO) {
-                    NSArray *content = [self directoryContentsAtPath:filePath lastModified:lastModifiedDate];
-                    if ([content count] > 0) {
-                        dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, @"filename", content, @"content", nil];
-                        [fileArray addObject:dict];
-                        [dict release];
-                    }
+            } else if (isDir && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:filePath] == NO) {
+                NSArray *content = [self directoryContentsAtPath:filePath lastModified:lastModifiedDate];
+                if ([content count] > 0) {
+                    dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, @"filename", content, @"content", nil];
+                    [fileArray addObject:dict];
+                    [dict release];
                 }
             }
         }
@@ -338,30 +338,6 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
         [[NSWorkspace sharedWorkspace] selectFile:scriptFilename inFileViewerRootedAtPath:@""];
     else
         [[NSWorkspace sharedWorkspace] openFile:scriptFilename];
-}
-
-@end
-
-@implementation BDSKScriptMenuController
-
-static id sharedScriptMenuController = nil;
-
-+ (id)sharedInstance;
-{
-    if(nil == sharedScriptMenuController)
-        sharedScriptMenuController = [[self alloc] init];
-    return sharedScriptMenuController;
-}
-
-- (void)menuNeedsUpdate:(BDSKScriptMenu *)menu
-{
-    [menu reloadScriptMenu];
-}
-
-- (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action
-{
-    // implemented so the menu isn't populated on every key event
-    return NO;
 }
 
 @end
