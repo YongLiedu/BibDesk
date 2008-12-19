@@ -265,14 +265,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     static NSArray *scriptPaths = nil;
     
     if(nil == scriptPaths){
-        NSString *appSupportDirectory = nil;
-        
-        id appDelegate = [NSApp delegate];
-        if (appDelegate != nil && [appDelegate respondsToSelector:@selector(applicationSupportDirectoryName)])
-            appSupportDirectory = [appDelegate applicationSupportDirectoryName];
-        
-        if (appSupportDirectory == nil)
-            appSupportDirectory = [[NSProcessInfo processInfo] processName];
+        NSString *appSupportDirectory = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
         
         NSArray *libraries = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSAllDomainsMask, YES);
         unsigned int libraryIndex, libraryCount;
