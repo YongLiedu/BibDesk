@@ -185,7 +185,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
                 dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, @"filename", nil];
                 [fileArray addObject:dict];
                 [dict release];
-            } else if (isDir && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:filePath] == NO) {
+            } else if (isDir && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:filePath] == NO && [fm isBundleAtPath:filePath] == NO) {
                 NSArray *content = [self directoryContentsAtPath:filePath lastModified:lastModifiedDate];
                 if ([content count] > 0) {
                     dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, @"filename", content, @"content", nil];

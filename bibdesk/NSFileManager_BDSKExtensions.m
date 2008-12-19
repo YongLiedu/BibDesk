@@ -243,7 +243,6 @@ static void destroyTemporaryDirectory()
 - (BOOL)isAppleScriptFileAtPath:(NSString *)path {
     path = [path stringByStandardizingPath];
     NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
-    // what about .scptd?
     return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
                      UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text")) ||
                      UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script-bundle")) ) : NO;
@@ -252,13 +251,13 @@ static void destroyTemporaryDirectory()
 - (BOOL)isApplicationAtPath:(NSString *)path {
     path = [path stringByStandardizingPath];
     NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
-    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.application"))) : NO;
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, kUTTypeApplication)) : NO;
 }
 
-- (BOOL)isApplicationBundleAtPath:(NSString *)path {
+- (BOOL)isBundleAtPath:(NSString *)path {
     path = [path stringByStandardizingPath];
     NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
-    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.application-bundle"))) : NO;
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, kUTTypeBundle)) : NO;
 }
 
 #pragma mark Temporary files and directories
