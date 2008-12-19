@@ -317,9 +317,29 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             }
         }
     } else if ([fm isApplicationAtPath:scriptFilename]) {
-        [[NSWorkspace sharedWorkspace] launchApplication:scriptFilename];
+        BOOL result = [[NSWorkspace sharedWorkspace] launchApplication:scriptFilename];
+        if (result == NO) {
+            NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The application '%@' could not be launched.", @"Message in alert dialog when failing to launch an app"), scriptName]
+                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Show", @"Button title")
+                                               otherButton:nil
+                                 informativeTextWithFormat:nil];
+            if ([alert runModal] == NSAlertAlternateReturn) {
+                [[NSWorkspace sharedWorkspace] selectFile:scriptFilename inFileViewerRootedAtPath:@""];
+            }
+        }
     } else if ([fm isExecutableFileAtPath:scriptFilename]) {
-        [NSTask launchedTaskWithLaunchPath:scriptFilename arguments:[NSArray array]];
+        BOOL result = [NSTask launchedTaskWithLaunchPath:scriptFilename arguments:[NSArray array]];
+        if (result == NO) {
+            NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"Message in alert dialog when failing to execute script"), scriptName]
+                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Edit Script", @"Button title")
+                                               otherButton:nil
+                                 informativeTextWithFormat:nil];
+            if ([alert runModal] == NSAlertAlternateReturn) {
+                [[NSWorkspace sharedWorkspace] openFile:scriptFilename];
+            }
+        }
     }
 }
 
