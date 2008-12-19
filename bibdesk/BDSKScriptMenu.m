@@ -329,17 +329,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             }
         }
     } else if ([fm isExecutableFileAtPath:scriptFilename]) {
-        BOOL result = [NSTask launchedTaskWithLaunchPath:scriptFilename arguments:[NSArray array]];
-        if (result == NO) {
-            NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"Message in alert dialog when failing to execute script"), scriptName]
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Edit Script", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:nil];
-            if ([alert runModal] == NSAlertAlternateReturn) {
-                [[NSWorkspace sharedWorkspace] openFile:scriptFilename];
-            }
-        }
+        [NSTask launchedTaskWithLaunchPath:scriptFilename arguments:[NSArray array]];
     }
 }
 
