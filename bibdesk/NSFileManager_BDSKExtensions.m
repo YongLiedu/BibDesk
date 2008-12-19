@@ -245,7 +245,8 @@ static void destroyTemporaryDirectory()
     NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
     // what about .scptd?
     return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
-                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text"))) : NO;
+                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text")) ||
+                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script-bundle")) ) : NO;
 }
 
 - (BOOL)isApplicationAtPath:(NSString *)path {

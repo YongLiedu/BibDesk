@@ -1299,6 +1299,24 @@
 				</array>
 			</dict>
 		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+				<string>public.composite-content</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>script bundle</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.apple.applescript.script-bundle</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>scptd</string>
+				</array>
+			</dict>
+		</dict>
 	</array>
 </dict>
 </plist>
