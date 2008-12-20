@@ -40,7 +40,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 #import <OmniAppKit/OmniAppKit.h>
-#import "NSFileManager_BDSKExtensions.h"
+#import "NSWorkspace_BDSKExtensions.h"
 
 @interface BDSKScriptMenu (Private)
 - (NSArray *)scriptPaths;
@@ -164,6 +164,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
         recursionDepth++;
         
         NSFileManager *fm = [NSFileManager defaultManager];
+        NSWorkspace *wm = [NSWorkspace sharedWorkspace];
         NSEnumerator *fileEnum = [[fm directoryContentsAtPath:path] objectEnumerator];
         NSString *file;
         
@@ -181,11 +182,11 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             NSDictionary *dict;
             
             if ([file hasPrefix:@"."]) {
-            } else if ([fm isAppleScriptFileAtPath:filePath] || [fm isApplicationAtPath:filePath] || ([fm isExecutableFileAtPath:filePath] && isDir == NO)) {
+            } else if ([wm isAppleScriptFileAtPath:filePath] || [wm isApplicationAtPath:filePath] || ([fm isExecutableFileAtPath:filePath] && isDir == NO)) {
                 dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, @"filename", nil];
                 [fileArray addObject:dict];
                 [dict release];
-            } else if (isDir && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:filePath] == NO && [fm isBundleAtPath:filePath] == NO) {
+            } else if (isDir && [wm isFolderAtPath:filePath]) {
                 NSArray *content = [self directoryContentsAtPath:filePath lastModified:lastModifiedDate];
                 if ([content count] > 0) {
                     dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, @"filename", content, @"content", nil];
@@ -287,13 +288,14 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 - (void)executeScript:(id)sender;
 {
     NSFileManager *fm = [NSFileManager defaultManager];
+    NSWorkspace *wm = [NSWorkspace sharedWorkspace];
     NSString *scriptFilename, *scriptName;
     NSDictionary *errorDictionary;
     
     scriptFilename = [sender representedObject];
-    scriptName = [[NSFileManager defaultManager] displayNameAtPath:scriptFilename];
+    scriptName = [fm displayNameAtPath:scriptFilename];
     
-    if ([fm isAppleScriptFileAtPath:scriptFilename]) {
+    if ([wm isAppleScriptFileAtPath:scriptFilename]) {
         NSAppleScript *script;
         NSAppleEventDescriptor *result;
         script = [[[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:scriptFilename] error:&errorDictionary] autorelease];
@@ -313,11 +315,11 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
                                                otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
             if ([alert runModal] == NSAlertAlternateReturn) {
-                [[NSWorkspace sharedWorkspace] openFile:scriptFilename];
+                [wm openFile:scriptFilename];
             }
         }
-    } else if ([fm isApplicationAtPath:scriptFilename]) {
-        BOOL result = [[NSWorkspace sharedWorkspace] launchApplication:scriptFilename];
+    } else if ([wm isApplicationAtPath:scriptFilename]) {
+        BOOL result = [wm launchApplication:scriptFilename];
         if (result == NO) {
             NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"The application '%@' could not be launched.", @"Message in alert dialog when failing to launch an app"), scriptName]
                                              defaultButton:NSLocalizedString(@"OK", @"Button title")
@@ -325,7 +327,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
                                                otherButton:nil
                                  informativeTextWithFormat:nil];
             if ([alert runModal] == NSAlertAlternateReturn) {
-                [[NSWorkspace sharedWorkspace] selectFile:scriptFilename inFileViewerRootedAtPath:@""];
+                [wm selectFile:scriptFilename inFileViewerRootedAtPath:@""];
             }
         }
     } else if ([fm isExecutableFileAtPath:scriptFilename]) {
@@ -336,11 +338,12 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 - (void)openScript:(id)sender;
 {
     NSString *scriptFilename = [sender representedObject];
-	
-    if ([[NSFileManager defaultManager] isApplicationAtPath:scriptFilename])
-        [[NSWorkspace sharedWorkspace] selectFile:scriptFilename inFileViewerRootedAtPath:@""];
+	NSWorkspace *wm = [NSWorkspace sharedWorkspace];
+    
+    if ([wm isApplicationAtPath:scriptFilename])
+        [wm selectFile:scriptFilename inFileViewerRootedAtPath:@""];
     else
-        [[NSWorkspace sharedWorkspace] openFile:scriptFilename];
+        [wm openFile:scriptFilename];
 }
 
 @end

@@ -53,6 +53,12 @@
 
 - (BOOL)openLinkedFile:(NSString *)fullPath;
 - (BOOL)openLinkedURL:(NSURL *)aURL;
+- (BOOL)openURL:(NSURL *)aURL withApplicationURL:(NSURL *)applicationURL;
+
+- (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
+- (NSURL *)defaultEditorOrViewerURLForURL:(NSURL *)aURL;
+- (NSArray *)editorAndViewerNamesAndBundleIDsForPathExtension:(NSString *)extension;
+- (NSImage *)iconForFileURL:(NSURL *)fileURL;
 
 /*!
     @method     UTIForURL:
@@ -74,11 +80,9 @@
 */
 - (NSString *)UTIForPathExtension:(NSString *)extension;
 
-- (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
-- (NSURL *)defaultEditorOrViewerURLForURL:(NSURL *)aURL;
-- (NSArray *)editorAndViewerNamesAndBundleIDsForPathExtension:(NSString *)extension;
-- (NSImage *)iconForFileURL:(NSURL *)fileURL;
-- (BOOL)openURL:(NSURL *)aURL withApplicationURL:(NSURL *)applicationURL;
+- (BOOL)isAppleScriptFileAtPath:(NSString *)path;
+- (BOOL)isApplicationAtPath:(NSString *)path;
+- (BOOL)isFolderAtPath:(NSString *)path;
 
 @end
 

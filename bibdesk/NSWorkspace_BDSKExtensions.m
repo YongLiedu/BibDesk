@@ -254,25 +254,21 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     return rv;
 }
 
-- (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
+- (BOOL)openURL:(NSURL *)aURL withApplicationURL:(NSURL *)applicationURL;
 {
-    return [self UTIForURL:fileURL resolveAliases:YES error:error];
-}
-
-- (NSString *)UTIForURL:(NSURL *)fileURL;
-{
-    NSError *error;
-    NSString *theUTI = [self UTIForURL:fileURL error:&error];
-#if defined (OMNI_ASSERTIONS_ON)
-    if (nil == theUTI)
-        NSLog(@"%@", error);
-#endif
-    return theUTI;
-}
-
-- (NSString *)UTIForPathExtension:(NSString *)extension;
-{
-    return [(id)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL) autorelease];
+    OSStatus err = kLSUnknownErr;
+    if(nil != aURL){
+        LSLaunchURLSpec launchSpec;
+        memset(&launchSpec, 0, sizeof(LSLaunchURLSpec));
+        launchSpec.appURL = (CFURLRef)applicationURL;
+        launchSpec.itemURLs = (CFArrayRef)[NSArray arrayWithObject:aURL];
+        launchSpec.passThruParams = NULL;
+        launchSpec.launchFlags = kLSLaunchDefaults;
+        launchSpec.asyncRefCon = NULL;
+        
+        err = LSOpenFromURLSpec(&launchSpec, NULL);
+    }
+    return noErr == err ? YES : NO;
 }
 
 - (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
@@ -357,21 +353,42 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     return image;
 }
 
-- (BOOL)openURL:(NSURL *)aURL withApplicationURL:(NSURL *)applicationURL;
+- (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
 {
-    OSStatus err = kLSUnknownErr;
-    if(nil != aURL){
-        LSLaunchURLSpec launchSpec;
-        memset(&launchSpec, 0, sizeof(LSLaunchURLSpec));
-        launchSpec.appURL = (CFURLRef)applicationURL;
-        launchSpec.itemURLs = (CFArrayRef)[NSArray arrayWithObject:aURL];
-        launchSpec.passThruParams = NULL;
-        launchSpec.launchFlags = kLSLaunchDefaults;
-        launchSpec.asyncRefCon = NULL;
-        
-        err = LSOpenFromURLSpec(&launchSpec, NULL);
-    }
-    return noErr == err ? YES : NO;
+    return [self UTIForURL:fileURL resolveAliases:YES error:error];
+}
+
+- (NSString *)UTIForURL:(NSURL *)fileURL;
+{
+    NSError *error;
+    NSString *theUTI = [self UTIForURL:fileURL error:&error];
+#if defined (OMNI_ASSERTIONS_ON)
+    if (nil == theUTI)
+        NSLog(@"%@", error);
+#endif
+    return theUTI;
+}
+
+- (NSString *)UTIForPathExtension:(NSString *)extension;
+{
+    return [(id)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL) autorelease];
+}
+
+- (BOOL)isAppleScriptFileAtPath:(NSString *)path {
+    NSString *theUTI = [self UTIForURL:[NSURL fileURLWithPath:[path stringByStandardizingPath]]];
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
+                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text")) ||
+                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script-bundle")) ) : NO;
+}
+
+- (BOOL)isApplicationAtPath:(NSString *)path {
+    NSString *theUTI = [self UTIForURL:[NSURL fileURLWithPath:[path stringByStandardizingPath]]];
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, kUTTypeApplication)) : NO;
+}
+
+- (BOOL)isFolderAtPath:(NSString *)path {
+    NSString *theUTI = [self UTIForURL:[NSURL fileURLWithPath:[path stringByStandardizingPath]]];
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, kUTTypeFolder)) : NO;
 }
 
 @end

@@ -53,7 +53,7 @@
 #import "BDSKWebGroupViewController.h"
 #import "BDSKCondition.h"
 #import "BDSKFilter.h"
-#import "NSFileManager_BDSKExtensions.h"
+#import "NSWorkspace_BDSKExtensions.h"
 
 
 @implementation BDSKGroup (Scripting)
@@ -390,7 +390,7 @@
 
 - (void)setScriptURL:(NSURL *)newScriptURL {
     [self setScriptPath:[newScriptURL path]];
-    [self setScriptType:[[NSFileManager defaultManager] isAppleScriptFileAtPath:[newScriptURL path]] ? BDSKAppleScriptType : BDSKShellScriptType];
+    [self setScriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:[newScriptURL path]] ? BDSKAppleScriptType : BDSKShellScriptType];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 

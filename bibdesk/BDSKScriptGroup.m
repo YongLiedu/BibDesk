@@ -94,7 +94,7 @@ static OFMessageQueue *messageQueue = nil;
         [self release];
         self = nil;
     } else {
-        self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:[[NSFileManager defaultManager] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType : BDSKShellScriptType];
+        self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:[[NSWorkspace sharedWorkspace] isAppleScriptFileAtPath:path] ? BDSKAppleScriptType : BDSKShellScriptType];
     }
     return self;
 }
