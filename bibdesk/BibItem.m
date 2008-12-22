@@ -74,6 +74,8 @@
 #import "BDSKScriptHookManager.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKCompletionManager.h"
+#import "BDSKMacroResolver.h"
+#import "BDSKMacro.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -2377,6 +2379,25 @@ static void addFilesToArray(const void *value, void *context)
     fileContext ctxt = {(CFMutableArrayRef)remoteURLs, NO, YES};
     CFArrayApplyFunction((CFArrayRef)files, CFRangeMake(0, [files count]), addFilesToArray, &ctxt);
     return remoteURLs;
+}
+
+- (NSArray *)usedMacros {
+    NSMutableSet *macros = [NSMutableSet set];
+    NSEnumerator *valueEnum = [pubFields objectEnumerator];
+    NSString *value;
+    while (value = [valueEnum nextObject]) {
+        if ([value isComplex] == NO) continue;
+        NSEnumerator *nodeEnum = [[value nodes] objectEnumerator];
+        BDSKStringNode *node;
+        while (node = [nodeEnum nextObject]) {
+            if ([node type] != BSN_MACRODEF) continue;
+            BDSKMacroResolver *resolver = [[(BDSKComplexString *)value macroResolver] valueOfMacro:[node value]] ? [(BDSKComplexString *)value macroResolver] : [BDSKMacroResolver defaultMacroResolver];
+            BDSKMacro *macro = [[BDSKMacro alloc] initWithName:[node value] macroResolver:resolver];
+            [macros addObject:macro];
+            [macro release];
+        }
+    }
+    return [macros allObjects];
 }
 
 #pragma mark -

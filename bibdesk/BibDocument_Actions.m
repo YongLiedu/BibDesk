@@ -85,6 +85,7 @@
 #import "BDSKFileMigrationController.h"
 #import <sys/stat.h>
 #import <FileView/FVPreviewer.h>
+#import "BDSKMacro.h"
 
 @implementation BibDocument (Actions)
 
@@ -465,8 +466,9 @@
 }
 
 - (IBAction)emailPubCmd:(id)sender{
-    NSMutableArray *items = [[self selectedPublications] mutableCopy];
-    NSEnumerator *e = [[[self selectedPublications] valueForKeyPath:@"@unionOfArrays.localFiles"] objectEnumerator];
+    NSArray *pubs = [self selectedPublications];
+    NSMutableArray *items = [pubs mutableCopy];
+    NSEnumerator *e = [[pubs valueForKeyPath:@"@unionOfArrays.localFiles"] objectEnumerator];
     BDSKLinkedFile *file;
     BibItem *pub;
     
@@ -491,6 +493,16 @@
         else
             [body setString:[BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items]];
     } else {
+        NSArray *usedMacros = [pubs valueForKeyPath:@"@distinctUnionOfArrays.usedMacros"];
+        BDSKMacro *macro;
+        if ([usedMacros count]) {
+            e = [usedMacros objectEnumerator];
+            while (macro = [e nextObject]) {
+                if ([macro value] && [[macro value] isEqual:[NSNull null]] == NO)
+                    [body appendFormat:@"@string{%@ = %@}\n", [macro name], [macro bibTeXString]];
+            }
+            [body appendString:@"\n\n"];
+        }
         e = [items objectEnumerator];
         while (pub = [e nextObject]) {
             // use the detexified version without internal fields, since TeXification introduces things that 
