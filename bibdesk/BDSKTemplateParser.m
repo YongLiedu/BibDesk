@@ -215,7 +215,7 @@ static inline BOOL matchesCondition(NSString *keyValue, NSString *matchString, B
 static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplateTagType typeBefore, BDSKTemplateTagType typeAfter, BOOL isSubtemplate) {
     NSRange range = NSMakeRange(0, [string length]);
     
-    if (typeAfter == BDSKCollectionTemplateTagType || typeAfter == BDSKConditionTemplateTagType || (isSubtemplate == -1 && typeAfter == -1)) {
+    if (typeAfter == BDSKCollectionTemplateTagType || typeAfter == BDSKConditionTemplateTagType || (isSubtemplate && typeAfter == -1)) {
         // remove whitespace at the end, just before the collection or condition tag
         NSRange lastCharRange = [string rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:NSBackwardsSearch range:range];
         if (lastCharRange.location != NSNotFound) {
@@ -223,11 +223,11 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
             unsigned int rangeEnd = NSMaxRange(lastCharRange);
             if ([[NSCharacterSet newlineCharacterSet] characterIsMember:lastChar])
                 range.length = rangeEnd;
-        } else if (typeBefore == -1) {
+        } else if (isSubtemplate == NO && typeBefore == -1) {
             range.length = 0;
         }
     }
-    if (typeBefore == BDSKCollectionTemplateTagType || typeBefore == BDSKConditionTemplateTagType || (isSubtemplate == -1 && typeBefore == -1)) {
+    if (typeBefore == BDSKCollectionTemplateTagType || typeBefore == BDSKConditionTemplateTagType || (isSubtemplate && typeBefore == -1)) {
         // remove whitespace and a newline at the start, just after the collection or condition tag
         NSRange firstCharRange = [string rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:0 range:range];
         if (firstCharRange.location != NSNotFound) {
@@ -239,7 +239,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
                 else 
                     range = NSMakeRange(rangeEnd, NSMaxRange(range) - rangeEnd);
             }
-        } else if (typeAfter == -1) {
+        } else if (isSubtemplate == NO && typeAfter == -1) {
             range.length = 0;
         }
     }
@@ -406,7 +406,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
         if ([tag type] != BDSKTextTemplateTagType) continue;
         
         NSString *string = [(BDSKTextTemplateTag *)tag text];
-        NSRange range = range = rangeAfterRemovingEmptyLines(string, i > 0 ? [(BDSKTemplateTag *)[result objectAtIndex:i - 1] type] : -1, i < count - 1 ? [(BDSKTemplateTag *)[result objectAtIndex:i + 1] type] : -1, isSubtemplate);
+        NSRange range = rangeAfterRemovingEmptyLines(string, i > 0 ? [(BDSKTemplateTag *)[result objectAtIndex:i - 1] type] : -1, i < count - 1 ? [(BDSKTemplateTag *)[result objectAtIndex:i + 1] type] : -1, isSubtemplate);
         
         if (range.length == 0)
             [result removeObjectAtIndex:i];
@@ -669,7 +669,7 @@ static inline NSRange rangeAfterRemovingEmptyLines(NSString *string, BDSKTemplat
         
         NSAttributedString *attrString = [(BDSKRichTextTemplateTag *)tag attributedText];
         NSString *string = [attrString string];
-        NSRange range = range = rangeAfterRemovingEmptyLines(string, i > 0 ? [(BDSKTemplateTag *)[result objectAtIndex:i - 1] type] : -1, i < count - 1 ? [(BDSKTemplateTag *)[result objectAtIndex:i + 1] type] : -1, isSubtemplate);
+        NSRange range = rangeAfterRemovingEmptyLines(string, i > 0 ? [(BDSKTemplateTag *)[result objectAtIndex:i - 1] type] : -1, i < count - 1 ? [(BDSKTemplateTag *)[result objectAtIndex:i + 1] type] : -1, isSubtemplate);
         
         if (range.length == 0)
             [result removeObjectAtIndex:i];
