@@ -44,3 +44,6 @@
 
 @interface BDSKTemplatedRichTextCommand : NSScriptCommand {}
 @end
+
+@interface BDSKTemplatedRTFCommand : NSScriptCommand {}
+@end

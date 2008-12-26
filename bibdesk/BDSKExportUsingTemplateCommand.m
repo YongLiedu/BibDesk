@@ -74,9 +74,10 @@
 	id templateStyle = [params objectForKey:@"using"];
 	id templateString = [params objectForKey:@"usingText"];
 	id templateAttrString = [params objectForKey:@"usingRichText"];
+	id templateRTF = [params objectForKey:@"usingRTF"];
 	BDSKTemplate *template = nil;
     // make sure we get something
-	if (templateStyle == nil && templateString == nil && templateAttrString == nil) {
+	if (templateStyle == nil && templateString == nil && templateAttrString == nil && templateRTF == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
         return nil;
 	}
@@ -89,6 +90,9 @@
 	} else if ([templateString isKindOfClass:[NSString class]] ) {
         template = [BDSKTemplate templateWithString:templateString fileType:@"txt"];
 	} else if ([templateAttrString isKindOfClass:[NSAttributedString class]] ) {
+        template = [BDSKTemplate templateWithAttributedString:templateAttrString fileType:@"rtf"];
+	} else if ([templateRTF isKindOfClass:[NSAppleEventDescriptor class]] ) {
+        templateAttrString = [[[NSAttributedString alloc] initWithRTF:[templateRTF data] documentAttributes:nil] autorelease];
         template = [BDSKTemplate templateWithAttributedString:templateAttrString fileType:@"rtf"];
     }
     if (template == nil) {

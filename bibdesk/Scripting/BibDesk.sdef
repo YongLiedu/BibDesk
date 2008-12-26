@@ -645,6 +645,9 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<responds-to name="templated rich text">
 				<cocoa method=""/>
 			</responds-to>
+			<responds-to name="templated RTF">
+				<cocoa method=""/>
+			</responds-to>
 			<responds-to name="export">
 				<cocoa method=""/>
 			</responds-to>
@@ -1447,18 +1450,22 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
             <parameter name="using template" code="uset" optional="yes"
-                description="The name or file of the template to use. Either this, 'using text', or 'using rich text' should be used.">
+                description="The name or file of the template to use. Either this, 'using text', 'using rich text', or 'using RTF' should be used.">
                 <type type="text"/>
                 <type type="file"/>
                 <cocoa key="using"/>
             </parameter>
             <parameter name="using text" code="usTx" type="text" optional="yes"
-                description="The template text to use. Either this, 'using template', or 'using rich text' should be used.">
+                description="The template text to use. Either this, 'using template', 'using rich text', or 'using RTF' should be used.">
                 <cocoa key="usingText"/>
             </parameter>
             <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
-                description="The template rich text to use. Either this, 'using template', or 'using text' should be used.">
+                description="The template rich text to use. Either this, 'using template', 'using text', or 'using RTF' should be used.">
                 <cocoa key="usingRichText"/>
+            </parameter>
+            <parameter name="using RTF" code="uRTF" type="any" optional="yes"
+                description="The template RTF to use. Either this, 'using template', 'using text', or 'using rich text' should be used.">
+                <cocoa key="usingRTF"/>
             </parameter>
             <parameter name="to" code="to  "
                 description="The file to export to, or the clipboard">
@@ -1521,8 +1528,12 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="using"/>
             </parameter>
             <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
-                description="The template rich text to use. Either this or 'using' should be used.">
+                description="The template rich text to use. Either this, 'using', or 'using RTF' should be used.">
                 <cocoa key="usingRichText"/>
+            </parameter>
+            <parameter name="using RTF" code="uRTF" type="any" optional="yes"
+                description="The template RTF to use. Either this, 'using', or 'using rich text' should be used.">
+                <cocoa key="usingRTF"/>
             </parameter>
             <parameter name="for" code="for " optional="yes"
                 description="Specifies the publication or list of publications to parse.">
@@ -1536,6 +1547,40 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="in"/>
             </parameter>                
             <result description="the templated rich text" type="rich text">
+            </result>
+        </command>
+        
+        <command name="templated RTF" code="BDSKtRTF"
+			description="Returns an RTF representation of publications in the document using a template.">
+            <cocoa name="templatedRichText" class="BDSKTemplatedRTFCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using" code="usng" optional="yes"
+                description="The name or file of the template to use. Either this or 'using rich text' should be used.">
+                <type type="text"/>
+                <type type="file"/>
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="using rich text" code="usRT" type="rich text" optional="yes"
+                description="The template rich text to use. Either this, 'using', or 'using RTF' should be used.">
+                <cocoa key="usingRichText"/>
+            </parameter>
+            <parameter name="using RTF" code="uRTF" type="any" optional="yes"
+                description="The template RTF to use. Either this, 'using', or 'using rich text' should be used.">
+                <cocoa key="usingRTF"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to parse.">
+                <type type="publication" list="yes"/>
+                <type type="publication"/>
+                <cocoa key="for"/>
+            </parameter>                
+            <parameter name="in" code="in  " optional="yes"
+                description="Specifies an ordered list of publications used to provide the itemIndex of the parsed publications. These must include the parsed publications themselves and defaults to the parsed publications.">
+                <type type="publication" list="yes"/>
+                <cocoa key="in"/>
+            </parameter>                
+            <result description="the templated RTF data" type="any">
             </result>
         </command>
         

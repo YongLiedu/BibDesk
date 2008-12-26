@@ -52,7 +52,7 @@
 	NSDictionary *params = [self evaluatedArguments];
 	if (!params) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-			return @"";
+        return [NSNull null];
 	}
 	
 	BibDocument *document = nil;
@@ -68,7 +68,7 @@
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
 		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"Error description")];
-		return @"";
+        return [NSNull null];
 	}
 	
 	// the 'using' parameters gives the template name or file to use
@@ -78,7 +78,7 @@
     // make sure we get something
 	if (templateStyle == nil && templateString == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-		return @"";
+        return [NSNull null];
 	}
 	// make sure we get the right thing
 	if ([templateStyle isKindOfClass:[NSString class]] ) {
@@ -91,7 +91,7 @@
     }
     if (template == nil) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-        return @"";
+        return [NSNull null];
 	}
 	
 	// the 'for' parameter can select the items to template
@@ -110,7 +110,7 @@
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"Error description")];
-			return @"";
+            return [NSNull null];
 		}
 		
 	} else {
@@ -132,7 +132,7 @@
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"The 'in' option needs to be a publication or a list of publications.",@"Error description")];
-			return [[[NSTextStorage alloc] init] autorelease];;
+            return [NSNull null];
 		}
 		
 	}
@@ -159,7 +159,7 @@
 	NSDictionary *params = [self evaluatedArguments];
 	if (!params) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-			return [[[NSTextStorage alloc] init] autorelease];;
+        return [NSNull null];
 	}
 	
 	BibDocument *document = nil;
@@ -174,18 +174,19 @@
     } else {
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"Error description")];
-			return [[[NSTextStorage alloc] init] autorelease];;
+		[self setScriptErrorString:NSLocalizedString(@"The templated rich text command can only be sent to the documents.", @"Error description")];
+        return [NSNull null];
 	}
 	
 	// the 'using' parameters gives the template name to use
 	id templateStyle = [params objectForKey:@"using"];
 	id templateAttrString = [params objectForKey:@"usingRichText"];
+	id templateRTF = [params objectForKey:@"usingRTF"];
 	BDSKTemplate *template = nil;
     // make sure we get something
-	if (templateStyle == nil && templateAttrString == nil) {
+	if (templateStyle == nil && templateAttrString == nil && templateRTF == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-        return [[[NSTextStorage alloc] init] autorelease];
+        return [NSNull null];
 	}
 	// make sure we get the right thing
 	if ([templateStyle isKindOfClass:[NSString class]] ) {
@@ -195,10 +196,13 @@
         template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ?: @"rtf"];
 	} else if ([templateAttrString isKindOfClass:[NSAttributedString class]] ) {
         template = [BDSKTemplate templateWithAttributedString:templateAttrString fileType:@"rtf"];
+	} else if ([templateRTF isKindOfClass:[NSAppleEventDescriptor class]] ) {
+        templateAttrString = [[[NSAttributedString alloc] initWithRTF:[templateRTF data] documentAttributes:nil] autorelease];
+        template = [BDSKTemplate templateWithAttributedString:templateAttrString fileType:@"rtf"];
     }
     if (template == nil) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-        return [[[NSTextStorage alloc] init] autorelease];
+        return [NSNull null];
 	}
 	
 	// the 'for' parameter can select the items to template
@@ -217,7 +221,7 @@
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"Error description")];
-			return [[[NSTextStorage alloc] init] autorelease];;
+            return [NSNull null];
 		}
 		
 	} else {
@@ -239,7 +243,7 @@
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"The 'in' option needs to be a publication or a list of publications.",@"Error description")];
-			return [[[NSTextStorage alloc] init] autorelease];;
+            return [NSNull null];
 		}
 		
 	}
@@ -250,6 +254,116 @@
     } else {
         NSString *templatedText = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext];
         return [[[NSTextStorage alloc] initWithString:templatedText] autorelease];
+    }
+}
+
+@end
+
+
+@implementation BDSKTemplatedRTFCommand
+
+- (id)performDefaultImplementation {
+
+	// figure out parameters first
+	NSDictionary *params = [self evaluatedArguments];
+	if (!params) {
+		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+        return [NSAppleEventDescriptor descriptorWithDescriptorType:'RTF ' data:[[[[NSAttributedString alloc] init] autorelease] RTFFromRange:NSMakeRange(0, 0) documentAttributes:nil]];
+	}
+	
+	BibDocument *document = nil;
+	id receiver = [self evaluatedReceivers];
+    NSScriptObjectSpecifier *dP = [self directParameter];
+	id dPO = [dP objectsByEvaluatingSpecifier];
+
+	if ([receiver isKindOfClass:[BibDocument class]]) {
+        document = receiver;
+    } else if ([dPO isKindOfClass:[BibDocument class]]) {
+        document = dPO;
+    } else {
+		// give up
+		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+		[self setScriptErrorString:NSLocalizedString(@"The templated RTF command can only be sent to the documents.", @"Error description")];
+        return [NSNull null];
+	}
+	
+	// the 'using' parameters gives the template name to use
+	id templateStyle = [params objectForKey:@"using"];
+	id templateAttrString = [params objectForKey:@"usingRichText"];
+	id templateRTF = [params objectForKey:@"usingRTF"];
+	BDSKTemplate *template = nil;
+    // make sure we get something
+	if (templateStyle == nil && templateAttrString == nil && templateRTF == nil) {
+		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+        return [NSNull null];
+	}
+	// make sure we get the right thing
+	if ([templateStyle isKindOfClass:[NSString class]] ) {
+        template = [BDSKTemplate templateForStyle:templateStyle];
+	} else if ([templateStyle isKindOfClass:[NSURL class]] ) {
+        NSString *fileType = [[templateStyle path] pathExtension];
+        template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ?: @"rtf"];
+	} else if ([templateAttrString isKindOfClass:[NSAttributedString class]] ) {
+        template = [BDSKTemplate templateWithAttributedString:templateAttrString fileType:@"rtf"];
+	} else if ([templateRTF isKindOfClass:[NSAppleEventDescriptor class]] ) {
+        templateAttrString = [[[NSAttributedString alloc] initWithRTF:[templateRTF data] documentAttributes:nil] autorelease];
+        template = [BDSKTemplate templateWithAttributedString:templateAttrString fileType:@"rtf"];
+    }
+    if (template == nil) {
+		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
+        return [NSNull null];
+	}
+	
+	// the 'for' parameter can select the items to template
+	NSArray *publications = [document publications];
+    id obj = [params objectForKey:@"for"];
+    NSArray *items = nil;
+	if (obj) {
+		// the parameter is present
+		if ([obj isKindOfClass:[BibItem class]]) {
+            items = [NSArray arrayWithObject:obj];
+		} else if ([obj isKindOfClass:[NSArray class]]) {
+            id lastObject = [obj lastObject];
+            if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+        } else {
+			// wrong kind of argument
+			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
+			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"Error description")];
+            return [NSNull null];
+		}
+		
+	} else {
+        items = publications;
+    }
+	
+	// the 'in' parameter can select the items context to template
+    obj = [params objectForKey:@"in"];
+    NSArray *itemsContext = nil;
+	if (obj) {
+		// the parameter is present
+		if ([obj isKindOfClass:[BibItem class]]) {
+            items = [NSArray arrayWithObject:obj];
+		} else if ([obj isKindOfClass:[NSArray class]]) {
+            id lastObject = [obj lastObject];
+            if ([lastObject isKindOfClass:[BibItem class]] == NO && [lastObject respondsToSelector:@selector(objectsByEvaluatingSpecifier)])
+                items = [obj arrayByPerformingSelector:@selector(objectsByEvaluatingSpecifier)];
+        } else {
+			// wrong kind of argument
+			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
+			[self setScriptErrorString:NSLocalizedString(@"The 'in' option needs to be a publication or a list of publications.",@"Error description")];
+            return [NSNull null];
+		}
+		
+	}
+    
+    if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+        NSAttributedString *templatedRichText = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext documentAttributes:NULL];
+        return [NSAppleEventDescriptor descriptorWithDescriptorType:'RTF ' data:[templatedRichText RTFFromRange:NSMakeRange(0, [templatedRichText length]) documentAttributes:nil]];
+    } else {
+        NSString *templatedText = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext];
+        NSAttributedString *templatedRichText = [[[NSAttributedString alloc] initWithString:templatedText] autorelease];
+        return [NSAppleEventDescriptor descriptorWithDescriptorType:'RTF ' data:[templatedRichText RTFFromRange:NSMakeRange(0, [templatedRichText length]) documentAttributes:nil]];
     }
 }
 
