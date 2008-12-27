@@ -191,6 +191,8 @@
             return @"";
         case 1:
             return [self objectAtIndex:0];
+        case 2:
+            return [self componentsJoinedByString:@" & "];
         default:
             return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[self lastObject]];
     }
@@ -223,7 +225,7 @@
 
 - (NSString *)componentsJoinedByAmpersandWithSingleEtAlAfterTwo
 {
-    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByString:@"&"];
+    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByString:@" & "];
 }
 
 - (NSString *)componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive
