@@ -4037,12 +4037,6 @@ Or you can use @emph{collection value keys}. As these returns a single value, it
 <$collectionKey.@@collectionValueKey/>
 @end example
 
-Collection value keys can only appear at the end of the key path. Also most collection modifier keys 
-can only appear at the end of the key path. However four collection modifer keys 
-(@code{@@unionOfObjects}, @code{@@distinctUnionOfObjects}, @code{@@unionOfArrays}, and @code{@@distinctUnionOfArrays}) 
-require a property key path for the items of the collection to the right of it. 
-Moreover, there can be only a single modifier key starting with @code{@@} in a key path.
-
 @subheading Condition tags
 
 Another template tag is used to include part of a template depending on whether a value is empty or not. 
@@ -4141,6 +4135,16 @@ You can modify the counter with value modifier keys for a number.
 @heading Value keys
 
 Here are lists of value keys that could be used in BibDesk export templates. 
+
+@subheading General
+
+@multitable {self} {}
+@headitem Key @tab Description
+@item self
+@tab 
+@item description
+@tab 
+@end multitable
 
 @subheading Document
 
@@ -4508,6 +4512,8 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @item @@lastOneObjects
 @tab 
+@item @@self
+@tab 
 @end multitable
 
 
@@ -4585,6 +4591,10 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item @@arraySortedByAuthorOrEditor
 @tab 
 @item @@arraySortedByTitle
+@tab 
+@item @@indexRanges
+@tab 
+@item @@indexRangeStrings
 @tab 
 @end multitable
 

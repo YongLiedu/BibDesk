@@ -238,6 +238,62 @@
     return [self count] > 6 ? [[[self firstSixObjects] componentsJoinedByComma] stringByAppendingString:@", et al."] : [self componentsJoinedByCommaAndAmpersand];
 }
 
+- (NSArray *)indexRanges {
+    NSEnumerator *itemEnum = [[self sortedArrayUsingSelector:@selector(compare:)] objectEnumerator];
+    id item;
+    NSMutableArray *array = [NSMutableArray array];
+    int start = INT_MIN, end = INT_MIN;
+    
+    while (item = [itemEnum nextObject]) {
+        if ([item respondsToSelector:@selector(intValue)] == NO) continue;
+        int value = [item intValue];
+        if (value != end + 1) {
+            if (start != INT_MIN) {
+                NSArray *range = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:start], start == end ? nil : [NSNumber numberWithInt:end], nil];
+                [array addObject:range];
+                [range release];
+            }
+            start = value;
+        }
+        end = value;
+    }
+    if (start != INT_MIN) {
+        NSArray *range = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:start], start == end ? nil : [NSNumber numberWithInt:end], nil];
+        [array addObject:range];
+        [range release];
+    }
+    
+    return array;
+}
+
+- (NSArray *)indexRangeStrings {
+    NSEnumerator *itemEnum = [[self sortedArrayUsingSelector:@selector(compare:)] objectEnumerator];
+    id item;
+    NSMutableArray *array = [NSMutableArray array];
+    int start = INT_MIN, end = INT_MIN;
+    
+    while (item = [itemEnum nextObject]) {
+        if ([item respondsToSelector:@selector(intValue)] == NO) continue;
+        int value = [item intValue];
+        if (value != end + 1) {
+            if (start != INT_MIN) {
+                NSString *string = [[NSString alloc] initWithFormat:(start == end ? @"%i" : @"%i-%i"), start, end];
+                [array addObject:string];
+                [string release];
+            }
+            start = value;
+        }
+        end = value;
+    }
+    if (start != INT_MIN) {
+        NSString *string = [[NSString alloc] initWithFormat:(start == end ? @"%i" : @"%i-%i"), start, end];
+        [array addObject:string];
+        [string release];
+    }
+    
+    return array;
+}
+
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
 {
     NSMutableArray *array = [NSMutableArray array];
