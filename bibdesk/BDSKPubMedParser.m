@@ -179,6 +179,24 @@
             [page release];
         }
     }
+    
+    NSString *date = [pubDict objectForKey:@"Dp"];
+    if (date != nil) {
+        AGRegex *dateRegex = [AGRegex regexWithPattern:@"^([1-9][0-9]{3})\\s*(([A-Z][a-z]{2}){0,1}\\s*([1-9][0-9]{0,1}){0,1})"];
+        AGRegexMatch *dateMatch = [dateRegex findInString:date];
+        
+        // Provide a valid year from DP
+        if ([pubDict objectForKey:BDSKYearString] == nil) {
+            if ([dateMatch count] > 1)
+                [pubDict setObject:[dateMatch groupAtIndex:1] forKey:BDSKYearString];
+            else
+                [pubDict setObject:date forKey:BDSKYearString];
+        }
+        // Provide a valid month from DP
+        if ([pubDict objectForKey:BDSKMonthString] == nil && [dateMatch count] > 2)
+            [pubDict setObject:[dateMatch groupAtIndex:2] forKey:BDSKMonthString];
+        [pubDict removeObjectForKey:@"Dp"];
+    }
 }
 
 // Adds ER tags to a stream of PubMed records, so it's (more) valid RIS
