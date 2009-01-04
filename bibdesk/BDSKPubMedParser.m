@@ -76,8 +76,6 @@
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
     
-    itemString = [self stringByFixingInputString:itemString];
-        
     BibItem *newBI = nil;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
     
@@ -98,23 +96,21 @@
     
     while(sourceLine = [sourceLineE nextObject]){
 
-        if(([sourceLine length] > 5 && [[sourceLine substringWithRange:NSMakeRange(4,2)] isEqualToString:@"- "]) ||
-           [sourceLine isEqualToString:@"ER  -"]){
+        if([sourceLine length] > 5 && [[sourceLine substringWithRange:NSMakeRange(4,2)] isEqualToString:@"- "]){
 			// this is a "key - value" line
 			
 			// first save the last key/value pair if necessary
-			if(tag && ![tag isEqualToString:@"ER"]){
+			if(tag)
 				[self addString:mutableValue toDictionary:pubDict forTag:tag];
-			}
 			
 			// get the tag...
             tag = [[sourceLine substringWithRange:NSMakeRange(0,4)] 
 						stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
 			
-			if([tag isEqualToString:@"ER"]){
-				// we are done with this publication
+			if([tag isEqualToString:@"PMID"]){
+				// we are done with the previous publication
 				
-				if([[pubDict allKeys] count] > 0){
+				if([pubDict count] > 0){
                     [self fixPublicationDictionary:pubDict];
                     newBI = [[BibItem alloc] initWithType:[self pubTypeFromDictionary:pubDict]
                                                  fileType:BDSKBibtexString
@@ -127,9 +123,6 @@
 				
 				// reset these for the next pub
 				[pubDict removeAllObjects];
-				
-				// we don't care about the rest, ER has no value
-				continue;
 			}
 			
 			// get the value...
@@ -148,6 +141,18 @@
 			[mutableValue appendString:[sourceLine stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet]];
         }
         
+    }
+    
+    // add the last item
+    if([pubDict count] > 0){
+        [self fixPublicationDictionary:pubDict];
+        newBI = [[BibItem alloc] initWithType:[self pubTypeFromDictionary:pubDict]
+                                     fileType:BDSKBibtexString
+                                      citeKey:nil
+                                    pubFields:pubDict
+                                        isNew:YES];
+        [returnArray addObject:newBI];
+        [newBI release];
     }
     
     if(outError) *outError = nil;
@@ -292,65 +297,6 @@
             [pubDict setObject:[dateMatch groupAtIndex:2] forKey:BDSKMonthString];
         [pubDict removeObjectForKey:@"Dp"];
     }
-}
-
-// Adds ER tags to a stream of PubMed records, so it's (more) valid RIS
-+ (NSString *)stringByFixingInputString:(NSString *)inputString;
-{
-    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:inputString];
-    NSMutableString *fixedString = [[NSMutableString alloc] initWithCapacity:[inputString length]];
-    
-    NSString *scannedString = [scanner readFullTokenUpToString:@"PMID- "];
-    unsigned start;
-    unichar prevChar;
-    BOOL scannedPMID = NO;
-    
-    // this means we scanned some garbage before the PMID tag, or else this isn't a PubMed string...
-    OBPRECONDITION([NSString isEmptyString:scannedString]);
-    
-    do {
-        
-        start = scannerScanLocation(scanner);
-        
-        // scan past the PMID tag
-        scannedPMID = scannerReadString(scanner, @"PMID- ");
-        OBPRECONDITION(scannedPMID);
-        
-        // scan to the next PMID tag
-        scannedString = [scanner readFullTokenUpToString:@"PMID- "];
-        [fixedString appendString:[inputString substringWithRange:NSMakeRange(start, scannerScanLocation(scanner) - start)]];
-        
-        // see if the previous character is a newline; if not, then some clod put a "PMID- " in the text
-        if(scannerScanLocation(scanner)){
-            prevChar = *(scanner->scanLocation - 1);
-            if(BDIsNewlineCharacter(prevChar))
-                [fixedString appendString:@"ER  - \r\n"];
-            // if we're operating on a text selection, it may not have a trailing newline
-            else if (scannerHasData(scanner) == NO)
-                [fixedString appendString:@"\r\nER  - \r\n"];
-        }
-        
-        OBASSERT(scannedString);
-        
-    } while(scannerHasData(scanner));
-    
-    OBPOSTCONDITION(!scannerHasData(scanner));
-    
-    [scanner release];
-    OBPOSTCONDITION(![NSString isEmptyString:fixedString]);
-    
-#if OMNI_FORCE_ASSERTIONS
-    // Here's our reference method, which caused swap death on large strings (AGRegex uses a lot of autoreleased NSData objects)
-	NSString *tmpStr;
-	
-    AGRegex *regex = [AGRegex regexWithPattern:@"(?<!\\A)^PMID- " options:AGRegexMultiline];
-    tmpStr = [regex replaceWithString:@"ER  - \r\nPMID- " inString:inputString];
-	
-    tmpStr = [tmpStr stringByAppendingString:@"ER  - \r\n"];
-    OBPOSTCONDITION([tmpStr isEqualToString:fixedString]);
-#endif
-    
-    return [fixedString autorelease];
 }
 
 @end
