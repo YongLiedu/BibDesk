@@ -231,7 +231,6 @@
 
 static NSString *RISStartPageString = @"Sp";
 static NSString *RISEndPageString = @"Ep";
-static NSString *RISDateString = @"Dp";
 
 + (void)fixPublicationDictionary:(NSMutableDictionary *)pubDict;
 {
