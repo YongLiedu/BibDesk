@@ -163,27 +163,15 @@
 
 + (void)addString:(NSMutableString *)value toDictionary:(NSMutableDictionary *)pubDict forTag:(NSString *)tag;
 {
-	NSString *key = nil;
+	NSString *key = [[BDSKTypeManager sharedManager] fieldNameForPubMedTag:tag];
+	BOOL isAuthor = [key isPersonField];
 	NSString *oldString = nil;
     NSString *newString = nil;
-	
-	// we handle fieldnames for authors later, as FAU can duplicate AU. All others are treated as AU. 
-	if([tag isEqualToString:@"A1"] || [tag isEqualToString:@"A2"] || [tag isEqualToString:@"A3"])
-		tag = @"AU";
-    // PubMed uses IP for issue number and IS for ISBN
-    if([tag isEqualToString:@"IP"])
-        key = BDSKNumberString;
-    else if([tag isEqualToString:@"IS"])
-        key = @"Issn";
-	else
-        key = [[BDSKTypeManager sharedManager] fieldNameForPubMedTag:tag];
+    
+	// we handle fieldnames for authors later, as FAU can duplicate AU
     if(key == nil || [key isEqualToString:BDSKAuthorString]) key = [tag fieldName];
 	oldString = [pubDict objectForKey:key];
 	
-	BOOL isAuthor = ([key isEqualToString:@"Fau"] ||
-					 [key isEqualToString:@"Au"] ||
-					 [key isEqualToString:BDSKEditorString]);
-    
     // sometimes we have authors as "Feelgood, D.R.", but BibTeX and btparse need "Feelgood, D. R." for parsing
     // this leads to some unnecessary trailing space, though, in some cases (e.g. "Feelgood, D. R. ") so we can
     // either ignore it, be clever and not add it after the last ".", or add it everywhere and collapse it later
@@ -252,16 +240,19 @@
 
 + (void)fixPublicationDictionary:(NSMutableDictionary *)pubDict;
 {
-    // choose the authors from the FAU or AU tag as available
+    // choose the authors from the FAU or AU or CN tag as available
     NSString *authors;
     
     if(authors = [pubDict objectForKey:@"Fau"]){
         [pubDict setObject:authors forKey:BDSKAuthorString];
 		[pubDict removeObjectForKey:@"Fau"];
-		// should we remove the AU also?
+		[pubDict removeObjectForKey:@"Au"];
     }else if(authors = [pubDict objectForKey:@"Au"]){
         [pubDict setObject:authors forKey:BDSKAuthorString];
 		[pubDict removeObjectForKey:@"Au"];
+    }else if(authors = [pubDict objectForKey:@"Cn"]){
+        [pubDict setObject:authors forKey:BDSKAuthorString];
+		[pubDict removeObjectForKey:@"Cn"];
 	}
     
     NSString *pages = [pubDict objectForKey:BDSKPagesString];
