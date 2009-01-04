@@ -37,8 +37,8 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "BDSKRISParser.h"
+#import "BDSKStringParser.h"
 
-@interface BDSKPubMedParser : BDSKRISParser {
+@interface BDSKPubMedParser : BDSKStringParser {
 }
 @end

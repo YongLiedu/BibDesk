@@ -176,6 +176,9 @@ static BDSKTypeManager *sharedInstance = nil;
     [self setFieldNameForPubMedTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY]];
     [self setPubMedTagForFieldNameDict:[typeInfoDict objectForKey:PUBMED_TAGS_FOR_BIBTEX_FIELDS_KEY]];
     [self setBibtexTypeForPubMedTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY]];
+    [self setFieldNameForRISTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_RIS_TAGS_KEY]];
+    [self setRISTagForFieldNameDict:[typeInfoDict objectForKey:RIS_TAGS_FOR_BIBTEX_FIELDS_KEY]];
+    [self setBibtexTypeForRISTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_RIS_TYPES_KEY]];
     [self setFieldNamesForMARCTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_MARC_TAGS_KEY]];
     [self setFieldNamesForUNIMARCTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_UNIMARC_TAGS_KEY]];
     [self setMODSGenresForBibTeXTypeDict:[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY]];
@@ -311,6 +314,27 @@ static BDSKTypeManager *sharedInstance = nil;
     if(pubMedTagForFieldNameDict != newNames){
         [pubMedTagForFieldNameDict release];
         pubMedTagForFieldNameDict = [newNames copy];
+    }
+}
+
+- (void)setBibtexTypeForRISTypeDict:(NSDictionary *)newNames{
+    if(bibtexTypeForRISTypeDict != newNames){
+        [bibtexTypeForRISTypeDict release];
+        bibtexTypeForRISTypeDict = [newNames copy];
+    }
+}
+
+- (void)setFieldNameForRISTagDict:(NSDictionary *)newNames{
+    if(fieldNameForRISTagDict != newNames){
+        [fieldNameForRISTagDict release];
+        fieldNameForRISTagDict = [newNames copy];
+    }
+}
+
+- (void)setRISTagForFieldNameDict:(NSDictionary *)newNames{
+    if(RISTagForFieldNameDict != newNames){
+        [RISTagForFieldNameDict release];
+        RISTagForFieldNameDict = [newNames copy];
     }
 }
 
@@ -483,6 +507,14 @@ static BDSKTypeManager *sharedInstance = nil;
     return [bibtexTypeForPubMedTypeDict objectForKey:type];
 }
 
+- (NSString *)fieldNameForRISTag:(NSString *)tag{
+    return [fieldNameForRISTagDict objectForKey:tag];
+}
+
+- (NSString *)bibtexTypeForRISType:(NSString *)type{
+    return [bibtexTypeForRISTypeDict objectForKey:type];
+}
+
 - (NSDictionary *)fieldNamesForMARCTag:(NSString *)tag{
     return [fieldNamesForMARCTagDict objectForKey:tag];
 }
@@ -513,7 +545,7 @@ static BDSKTypeManager *sharedInstance = nil;
 
 - (NSString *)RISTypeForBibTeXType:(NSString *)type{
     
-    NSArray *types = [bibtexTypeForPubMedTypeDict allKeysForObject:type];
+    NSArray *types = [bibtexTypeForRISTypeDict allKeysForObject:type];
     NSString *newType = nil;
         
     if([types count]) {

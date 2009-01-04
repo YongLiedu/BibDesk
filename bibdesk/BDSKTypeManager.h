@@ -50,6 +50,9 @@
 #define BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY     @"BibTeXFieldNamesForPubMedTags"
 #define PUBMED_TAGS_FOR_BIBTEX_FIELDS_KEY     @"PubMedTagsForBibTeXFieldNames"
 #define BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY     @"BibTeXTypesForPubMedTypes"
+#define BIBTEX_FIELDS_FOR_RIS_TAGS_KEY        @"BibTeXFieldNamesForRISTags"
+#define RIS_TAGS_FOR_BIBTEX_FIELDS_KEY        @"RISTagsForBibTeXFieldNames"
+#define BIBTEX_TYPES_FOR_RIS_TYPES_KEY        @"BibTeXTypesForRISTypes"
 #define BIBTEX_FIELDS_FOR_MARC_TAGS_KEY       @"BibTeXFieldNamesForMARCTags"
 #define BIBTEX_FIELDS_FOR_UNIMARC_TAGS_KEY    @"BibTeXFieldNamesForUNIMARCTags"
 #define BIBTEX_FIELDS_FOR_JSTOR_TAGS_KEY      @"BibTeXFieldNamesForJSTORTags"
@@ -73,6 +76,9 @@
 	NSDictionary *fieldNameForPubMedTagDict;
 	NSDictionary *pubMedTagForFieldNameDict;
 	NSDictionary *bibtexTypeForPubMedTypeDict;
+	NSDictionary *fieldNameForRISTagDict;
+	NSDictionary *RISTagForFieldNameDict;
+	NSDictionary *bibtexTypeForRISTypeDict;
 	NSDictionary *fieldNamesForMARCTagDict;
 	NSDictionary *fieldNamesForUNIMARCTagDict;
 	NSDictionary *fieldNameForJSTORTagDict;
@@ -125,6 +131,9 @@
 - (void)setBibtexTypeForPubMedTypeDict:(NSDictionary *)newNames;
 - (void)setFieldNameForPubMedTagDict:(NSDictionary *)newNames;
 - (void)setPubMedTagForFieldNameDict:(NSDictionary *)newNames;
+- (void)setBibtexTypeForRISTypeDict:(NSDictionary *)newNames;
+- (void)setFieldNameForRISTagDict:(NSDictionary *)newNames;
+- (void)setRISTagForFieldNameDict:(NSDictionary *)newNames;
 - (void)setFieldNamesForMARCTagDict:(NSDictionary *)newNames;
 - (void)setFieldNamesForUNIMARCTagDict:(NSDictionary *)newNames;
 - (void)setFileTypesDict:(NSDictionary *)newTypes;
@@ -153,6 +162,8 @@
 - (NSArray *)bibTypesForFileType:(NSString *)fileType;
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type;
+- (NSString *)fieldNameForRISTag:(NSString *)tag;
+- (NSString *)bibtexTypeForRISType:(NSString *)type;
 - (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type;
 - (NSString *)bibtexTypeForReferType:(NSString *)type;
 

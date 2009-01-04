@@ -45,18 +45,10 @@
 
 
 @interface BDSKRISParser (Private)
-
-/*!
-@function   isDuplicateAuthor
- @abstract   Check to see if we have a duplicate author in the list
- @discussion Some online databases (Scopus in particular) give us RIS with multiple instances of the same author.
- BibTeX accepts this, and happily prints out duplicate author names.  This isn't a very robust check.
- @param      oldList Existing author list in the dictionary
- @param      newAuthor The author that we want to add
- @result     Returns YES if it's a duplicate
- */
-static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
-
++ (void)addString:(NSMutableString *)value toDictionary:(NSMutableDictionary *)pubDict forTag:(NSString *)tag;
++ (NSString *)pubTypeFromDictionary:(NSDictionary *)pubDict;
++ (NSString *)stringByFixingInputString:(NSString *)inputString;
++ (void)fixPublicationDictionary:(NSMutableDictionary *)pubDict;
 @end
 
 
@@ -77,6 +69,8 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
     [scanner release];
     return isRIS;
 }
+
+// The RIS specs can be found at http://www.refman.com/support/risformat_intro.asp
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
     
@@ -176,7 +170,7 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
     if([tag isEqualToString:@"IS"])
         key = BDSKNumberString;
 	else
-        key = [[BDSKTypeManager sharedManager] fieldNameForPubMedTag:tag];
+        key = [[BDSKTypeManager sharedManager] fieldNameForRISTag:tag];
 	if(key == nil) key = [tag fieldName];
 	oldString = [pubDict objectForKey:key];
 	
@@ -193,7 +187,7 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
 	// other duplicates keys should have at least different tags, so we use the tag instead
 	if(![NSString isEmptyString:oldString]){
 		if(isAuthor){
-			if(isDuplicateAuthor(oldString, value)){
+			if([[oldString componentsSeparatedByString:@" and "] containsObject:value]){
 				NSLog(@"Not adding duplicate author %@", value);
 			}else{
 				newString = [[NSString alloc] initWithFormat:@"%@ and %@", oldString, value];
@@ -230,8 +224,8 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
 {
     BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSString *type = BDSKArticleString;
-    if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]] != nil)
-        type = [typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]];
+    if([typeManager bibtexTypeForRISType:[pubDict objectForKey:@"Ty"]] != nil)
+        type = [typeManager bibtexTypeForRISType:[pubDict objectForKey:@"Ty"]];
     return type;
 }
 
@@ -289,15 +283,6 @@ static NSString *RISDateString = @"Dp";
     // Scopus doesn't put the end tag ER on a separate line.
     AGRegex *endTag = [AGRegex regexWithPattern:@"([^\r\n])ER  - $" options:AGRegexMultiline];
     return [endTag replaceWithString:@"$1\r\nER  - " inString:inputString];
-}
-
-@end
-
-@implementation BDSKRISParser (Private)
-
-static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor){ // check to see if it's a duplicate; this relies on the whitespace around the " and ", and is basically a hack for Scopus
-    NSArray *oldAuthArray = [oldList componentsSeparatedByString:@" and "];
-    return [oldAuthArray containsObject:newAuthor];
 }
 
 @end

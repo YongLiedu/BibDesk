@@ -44,6 +44,14 @@
 #import "NSString_BDSKExtensions.h"
 
 
+@interface BDSKPubMedParser (Private)
++ (void)addString:(NSMutableString *)value toDictionary:(NSMutableDictionary *)pubDict forTag:(NSString *)tag;
++ (NSString *)pubTypeFromDictionary:(NSDictionary *)pubDict;
++ (NSString *)stringByFixingInputString:(NSString *)inputString;
++ (void)fixPublicationDictionary:(NSMutableDictionary *)pubDict;
+@end
+
+
 @implementation BDSKPubMedParser
 
 + (BOOL)canParseString:(NSString *)string{
@@ -59,6 +67,93 @@
         isPubMed = YES;
     [scanner release];
     return isPubMed;
+}
+
+// The Medline specs can be found at http://www.nlm.nih.gov/bsd/mms/medlineelements.html
+
++ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
+    
+    // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
+    itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
+    
+    itemString = [self stringByFixingInputString:itemString];
+        
+    BibItem *newBI = nil;
+    NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
+    
+    //dictionary is the publication entry
+    NSMutableDictionary *pubDict = [[NSMutableDictionary alloc] init];
+    
+    NSArray *sourceLines = [itemString sourceLinesBySplittingString];
+    
+    NSEnumerator *sourceLineE = [sourceLines objectEnumerator];
+    NSString *sourceLine = nil;
+    
+    NSString *tag = nil;
+    NSString *value = nil;
+    NSMutableString *mutableValue = [NSMutableString string];
+    NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    
+    NSSet *tagsNotToConvert = [NSSet setWithObjects:@"UR", @"L1", @"L2", @"L3", @"L4", nil];
+    
+    while(sourceLine = [sourceLineE nextObject]){
+
+        if(([sourceLine length] > 5 && [[sourceLine substringWithRange:NSMakeRange(4,2)] isEqualToString:@"- "]) ||
+           [sourceLine isEqualToString:@"ER  -"]){
+			// this is a "key - value" line
+			
+			// first save the last key/value pair if necessary
+			if(tag && ![tag isEqualToString:@"ER"]){
+				[self addString:mutableValue toDictionary:pubDict forTag:tag];
+			}
+			
+			// get the tag...
+            tag = [[sourceLine substringWithRange:NSMakeRange(0,4)] 
+						stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
+			
+			if([tag isEqualToString:@"ER"]){
+				// we are done with this publication
+				
+				if([[pubDict allKeys] count] > 0){
+                    [self fixPublicationDictionary:pubDict];
+                    newBI = [[BibItem alloc] initWithType:[self pubTypeFromDictionary:pubDict]
+                                                 fileType:BDSKBibtexString
+                                                  citeKey:nil
+                                                pubFields:pubDict
+                                                    isNew:YES];
+					[returnArray addObject:newBI];
+					[newBI release];
+				}
+				
+				// reset these for the next pub
+				[pubDict removeAllObjects];
+				
+				// we don't care about the rest, ER has no value
+				continue;
+			}
+			
+			// get the value...
+			value = [[sourceLine substringWithRange:NSMakeRange(6,[sourceLine length]-6)]
+						stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
+			
+			// don't convert specials in URL/link fields, bug #1244625
+			if(![tagsNotToConvert containsObject:tag])
+				value = [value stringByConvertingHTMLToTeX];
+		
+			[mutableValue setString:value];                
+			
+		} else {
+			// this is a continuation of a multiline value
+			[mutableValue appendString:@" "];
+			[mutableValue appendString:[sourceLine stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet]];
+        }
+        
+    }
+    
+    if(outError) *outError = nil;
+    
+    [pubDict release];
+    return returnArray;
 }
 
 + (void)addString:(NSMutableString *)value toDictionary:(NSMutableDictionary *)pubDict forTag:(NSString *)tag;
