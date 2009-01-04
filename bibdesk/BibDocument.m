@@ -1833,8 +1833,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
 	if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
-    }else if([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
-		success = [self readFromData:data ofStringType:BDSKRISStringType fromURL:absoluteURL encoding:encoding error:&error];
     }else{
 		// sniff the string to see what format we got
 		NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
