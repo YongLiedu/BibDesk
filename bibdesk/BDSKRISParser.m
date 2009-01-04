@@ -256,34 +256,31 @@ static NSString *RISDateString = @"Dp";
        [pubDict removeObjectForKey:RISEndPageString];
 	}
     
-    // the DP field should have the format YYYY/MM/DD/part, but may only contain the year
-    NSString *date = [pubDict objectForKey:RISDateString];
+    // the PY field should have the format YYYY/MM/DD/part, but may only contain the year
+    NSString *year = [pubDict objectForKey:BDSKYearString];
     
-    if(date){
-        unsigned first = NSNotFound, second = NSNotFound, third = NSNotFound, length = [date length];
-        first = [date rangeOfString:@"/"].location;
+    if (year) {
+        unsigned first = NSNotFound, second = NSNotFound, third = NSNotFound, length = [year length];
+        first = [year rangeOfString:@"/"].location;
         if (first != NSNotFound && first + 1 < length) {
-            second = [date rangeOfString:@"/" options:0 range:NSMakeRange(first + 1, length - first - 1)].location;
+            second = [year rangeOfString:@"/" options:0 range:NSMakeRange(first + 1, length - first - 1)].location;
             if (second != NSNotFound && second + 1 < length)
-                third = [date rangeOfString:@"/" options:0 range:NSMakeRange(second + 1, length - second - 1)].location;
+                third = [year rangeOfString:@"/" options:0 range:NSMakeRange(second + 1, length - second - 1)].location;
         }
         if (first != NSNotFound) {
             if ([pubDict objectForKey:BDSKYearString] == nil)
-                [pubDict setObject:[date substringToIndex:first] forKey:BDSKYearString];
+                [pubDict setObject:[year substringToIndex:first] forKey:BDSKYearString];
             if (second != NSNotFound) {
                 if ([pubDict objectForKey:BDSKMonthString] == nil) {
                     if (second > first + 1)
-                        [pubDict setObject:[date substringWithRange:NSMakeRange(first + 1, second - first - 1)] forKey:BDSKMonthString];
+                        [pubDict setObject:[year substringWithRange:NSMakeRange(first + 1, second - first - 1)] forKey:BDSKMonthString];
                     else if (third != NSNotFound && third < length - 1)
-                        [pubDict setObject:[date substringWithRange:NSMakeRange(third + 1, length - third - 1)] forKey:BDSKMonthString];
+                        [pubDict setObject:[year substringWithRange:NSMakeRange(third + 1, length - third - 1)] forKey:BDSKMonthString];
                 }
                 if (third != NSNotFound && third > second + 1 && [pubDict objectForKey:@"Day"] == nil)
-                    [pubDict setObject:[date substringWithRange:NSMakeRange(second + 1, third - second - 1)] forKey:@"Day"];
+                    [pubDict setObject:[year substringWithRange:NSMakeRange(second + 1, third - second - 1)] forKey:@"Day"];
             }
-        } else if ([pubDict objectForKey:BDSKYearString] != nil) {
-            [pubDict setObject:date forKey:BDSKYearString];
         }
-        [pubDict removeObjectForKey:RISDateString];
     }
 }
 
