@@ -93,6 +93,41 @@
         Y1 = Year; 
         Y2 = Month; 
     }; 
+    BibTeXFieldNamesForRISTags = {
+        AB = Abstract; 
+        AD = Address; 
+        AU = Author;
+        BT = Booktitle; 
+        CP = Address; 
+        CT = Title; 
+        CY = Address; 
+        ED = Editor; 
+        IS = Number; 
+        JA = Journal; 
+        JF = Journal; 
+        JO = Journal; 
+        KW = Keywords; 
+        L1 = "Local-Url"; 
+        LA = Language; 
+        N1 = Annote; 
+        N2 = Abstract; 
+        PB = Publisher; 
+        PG = Pages; 
+        PY = Year; 
+        RP = Status; 
+        SN = Isbn; 
+        T1 = Title; 
+        T2 = Booktitle; 
+        T3 = Title; 
+        TA = Journal; 
+        TI = Title; 
+        UI = Medlineref; 
+        UR = Url; 
+        VI = Volume; 
+        VL = Volume; 
+        Y1 = Year; 
+        Y2 = Month; 
+    }; 
     BibTeXFieldNamesForWebOfScienceTags = {
         AB = Abstract; 
         AR = Pages; 
@@ -174,6 +209,19 @@
         unpublished = unpublished; 
     }; 
     BibTeXTypesForPubMedTypes = {
+        BOOK = book; 
+        CHAP = inbook; 
+        CONF = inproceedings; 
+        ELEC = electronic; 
+        GEN = misc; 
+        JOUR = article; 
+        "Journal Article" = article; 
+        MGZN = article; 
+        RPRT = techreport; 
+        SER = incollection; 
+        UNPB = unpublished; 
+    }; 
+    BibTeXTypesForRISTypes = {
         BOOK = book; 
         CHAP = inbook; 
         CONF = inproceedings; 
@@ -420,6 +468,29 @@
         url = {self = ("web site"); }; 
     }; 
     PubMedTagsForBibTeXFieldNames = {
+        Abstract = AB; 
+        Address = AD; 
+        Annote = N1; 
+        Author = AU;
+        Booktitle = T2;
+        Editor = ED; 
+        Isbn = SN; 
+        Journal = JO; 
+        Keywords = KW; 
+        Language = LA; 
+        "Local-Url" = L1; 
+        Medlineref = UI; 
+        Month = Y2; 
+        Number = IS; 
+        Pages = PG; 
+        Title = T1; 
+        Publisher = PB; 
+        Status = PS; 
+        Url = UR; 
+        Volume = VL; 
+        Year = Y1; 
+    }; 
+    RISTagsForBibTeXFieldNames = {
         Abstract = AB; 
         Address = AD; 
         Annote = N1; 
