@@ -273,19 +273,19 @@
     
     NSString *date = [pubDict objectForKey:BDSKDateString];
     if (date != nil) {
-        AGRegex *dateRegex = [AGRegex regexWithPattern:@"^([1-9][0-9]{3})\\s*(([A-Z][a-z]{2}){0,1}\\s*([1-9][0-9]{0,1}){0,1})"];
-        AGRegexMatch *dateMatch = [dateRegex findInString:date];
+        // the DP field should be something like "2001", "2001 Apr", "2001 Apr 15", "2001 Apr-May", or "2001 Spring"
+        NSArray *dateComponents = [date componentsSeparatedByString:@" "];
         
         // Provide a valid year from the date
         if ([pubDict objectForKey:BDSKYearString] == nil) {
-            if ([dateMatch count] > 1)
-                [pubDict setObject:[dateMatch groupAtIndex:1] forKey:BDSKYearString];
+            if ([dateComponents count] > 0)
+                [pubDict setObject:[dateComponents objectAtIndex:0] forKey:BDSKYearString];
             else
                 [pubDict setObject:date forKey:BDSKYearString];
         }
         // Provide a valid month from the date
-        if ([pubDict objectForKey:BDSKMonthString] == nil && [dateMatch count] > 2)
-            [pubDict setObject:[dateMatch groupAtIndex:2] forKey:BDSKMonthString];
+        if ([pubDict objectForKey:BDSKMonthString] == nil && [dateComponents count] > 1)
+            [pubDict setObject:[dateComponents objectAtIndex:1] forKey:BDSKMonthString];
     }
 }
 
