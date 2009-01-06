@@ -163,9 +163,6 @@
 	NSString *oldString = nil;
     NSString *newString = nil;
 	
-	// we handle fieldnames for authors later, as FAU can duplicate AU. All others are treated as AU. 
-	if([tag isEqualToString:@"A1"] || [tag isEqualToString:@"A2"] || [tag isEqualToString:@"A3"])
-		tag = @"AU";
     // most RIS uses IS for issue number
     if([tag isEqualToString:@"IS"])
         key = BDSKNumberString;

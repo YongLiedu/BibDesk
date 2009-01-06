@@ -1803,7 +1803,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
     NSMutableArray *keys = [[self allFieldNames] mutableCopy];
-	BOOL hasAU = [keys containsObject:@"AU"];
     [keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
     [keys removeObject:BDSKDateAddedString];
     [keys removeObject:BDSKDateModifiedString];
@@ -1814,27 +1813,15 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     // get the type, which may exist in pubFields if this was originally an RIS import; we must have only _one_ TY field,
     // since they mark the beginning of each entry
     NSString *risType = [self valueOfField:@"TY" inherit:NO];
-    if([NSString isEmptyString:risType] == NO) {
+    if ([NSString isEmptyString:risType] == NO)
         [keys removeObject:@"TY"];
-    } else {
-        risType = [self valueOfField:@"PT" inherit:NO]; // Medline RIS
-        if ([NSString isEmptyString:risType] == NO)
-            [keys removeObject:@"PT"];
-    }
-
-    if ([NSString isEmptyString:risType])    
+    else
         risType = [btm RISTypeForBibTeXType:[self pubType]];
     
     // enumerate the remaining keys
     NSEnumerator *e = [keys objectEnumerator];
 	NSString *tag;
-	NSArray *auths;
 	[keys release];
-    
-	if([keys containsObject:@"PMID"]){
-		[s appendFormat:@"PMID- %@\n", risType];
-        [keys removeObject:@"PMID"];
-	}
 	
     [s appendFormat:@"TY  - %@\n", risType];
     
@@ -1842,38 +1829,33 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		tag = [btm RISTagForBibTeXFieldName:k];
         v = [self valueOfField:k inherit:NO];
         
-        if([k isEqualToString:BDSKAuthorString]){
-			// if we also have an AU field, we use the FAU tag, otherwise we use AU
-			tag = (hasAU ? @"FAU" : @"AU ");
-            auths = [v componentsSeparatedByString:@" and "];
-			v = [auths componentsJoinedByString:[NSString stringWithFormat:@"\n%@ - ", tag]];
-        }else if([k isEqualToString:@"AU"] || [k isEqualToString:BDSKEditorString]){
-            auths = [v componentsSeparatedByString:@" and "];
-			v = [auths componentsJoinedByString:[NSString stringWithFormat:@"\n%@  - ", tag]];
-        }else if([k isEqualToString:BDSKKeywordsString]){
+        if ([k isEqualToString:BDSKAuthorString] || [k isEqualToString:BDSKEditorString]) {
+            v = [[[self peopleArrayForField:k] valueForKey:@"normalizedName"] componentsJoinedByString:[NSString stringWithFormat:@"\n%@  - ", tag]];
+        } else if ([k isEqualToString:BDSKKeywordsString]){
 			NSMutableArray *arr = [NSMutableArray arrayWithCapacity:1];
             NSCharacterSet *sepCharSet = [btm separatorCharacterSetForField:BDSKKeywordsString];
-			if([v rangeOfCharacterFromSet:sepCharSet].location != NSNotFound) {
+			if ([v rangeOfCharacterFromSet:sepCharSet].location != NSNotFound) {
 				NSScanner *wordScanner = [NSScanner scannerWithString:v];
 				[wordScanner setCharactersToBeSkipped:nil];
 				
-				while(![wordScanner isAtEnd]) {
-					if([wordScanner scanUpToCharactersFromSet:sepCharSet intoString:&v])
+				while ([wordScanner isAtEnd] == NO) {
+					if ([wordScanner scanUpToCharactersFromSet:sepCharSet intoString:&v])
 						[arr addObject:v];
 					[wordScanner scanCharactersFromSet:sepCharSet intoString:nil];
 				}
 				v = [arr componentsJoinedByString:[NSString stringWithFormat:@"\n%@  - ", tag]];
 			}
+        } else if ([k isEqualToString:BDSKPagesString]) {
+            NSRange r = [v rangeOfString:@" -- "];
+            if (r.length == 0)
+                r = [v rangeOfString:@"-"];
+            if (r.length)
+                v = [NSString stringWithFormat:@"%@\nEP  - %@", [v substringWithRange:NSMakeRange(0, r.location)], [v substringFromIndex:NSmaxRange(r)]];
         }
         
-		if(![v isEqualToString:@""]){
+		if ([NSString isEmptyString:s] == NO) {
 			[s appendString:tag];
-			if([tag length] == 2)
-				[s appendString:@"  - "];
-			else if([tag length] == 3)
-				[s appendString:@" - "];
-			else
-				[s appendString:@"- "];
+			[s appendString:@"  - "];
             [s appendString:[v stringByRemovingTeX]]; // this won't help with math, but removing $^_ is probably not a good idea
 			[s appendString:@"\n"];
 		}

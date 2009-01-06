@@ -80,8 +80,11 @@
         VI = Volume; 
     }; 
     BibTeXFieldNamesForRISTags = {
-        AB = Abstract; 
+        AB = Annote; 
         AD = Address; 
+        A1 = Author;
+        A2 = Author;
+        A3 = Author;
         AU = Author;
         BT = Booktitle; 
         CP = Address; 
@@ -94,11 +97,9 @@
         JO = Journal; 
         KW = Keywords; 
         L1 = "Local-Url"; 
-        LA = Language; 
         N1 = Annote; 
         N2 = Abstract; 
         PB = Publisher; 
-        PG = Pages; 
         PY = Year; 
         RP = Status; 
         SN = Isbn; 
@@ -107,9 +108,7 @@
         T3 = Title; 
         TA = Journal; 
         TI = Title; 
-        UI = Medlineref; 
         UR = Url; 
-        VI = Volume; 
         VL = Volume; 
         Y1 = Year; 
         Y2 = Month; 
@@ -468,33 +467,31 @@
         Medlineref = UI; 
         Number = IP; 
         Pages = PG; 
-        Source = SO;
+        Source = SO; 
         Title = TI; 
         Status = STM; 
         Volume = VI; 
     }; 
     RISTagsForBibTeXFieldNames = {
-        Abstract = AB; 
+        Abstract = N2; 
         Address = AD; 
         Annote = N1; 
-        Author = AU;
-        Booktitle = T2;
+        Author = AU; 
+        Booktitle = T2; 
         Editor = ED; 
         Isbn = SN; 
         Journal = JO; 
         Keywords = KW; 
-        Language = LA; 
         "Local-Url" = L1; 
-        Medlineref = UI; 
         Month = Y2; 
         Number = IS; 
         Pages = PG; 
         Title = T1; 
-        Publisher = PB; 
-        Status = PS; 
+        Publisher = SP; 
+        Status = RP; 
         Url = UR; 
         Volume = VL; 
-        Year = Y1; 
+        Year = PY; 
     }; 
     RequiredTypesForFileType = {
         BibTeX = (
