@@ -337,7 +337,7 @@ static inline unsigned int endOfLeadingEmptyLine(NSString *string, NSRange range
     NSFont *font = nil;
     NSAttributedString *attrString = nil;
     NSString *str = nil;
-    NSRange startRange, endRange = { NSNotFound, 0 }, sepRange = { NSNotFound, 0 }, wsRange;
+    NSRange startRange, endRange = { NSNotFound, 0 }, sepRange = { NSNotFound, 0 };
     unsigned int length, startLoc = NSNotFound, tmpLoc;
     
     [self setRichText:[typeName isEqualToString:BDSKRichTextTemplateDocumentType]];

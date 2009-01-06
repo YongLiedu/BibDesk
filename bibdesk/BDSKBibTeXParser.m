@@ -443,8 +443,8 @@ error:(NSError **)outError{
     
     NSMutableDictionary *macros = [NSMutableDictionary dictionary];
     NSString *key = nil;
-    NSMutableString *value;
-    BOOL quoted;
+    NSMutableString *value = nil;
+    BOOL quoted = NO;
 
 	NSString *s;
 	int nesting;
