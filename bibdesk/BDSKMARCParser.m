@@ -287,7 +287,6 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 }
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
-    BOOL isUNIMARC = NO;
     if([itemString isMARCString]){
         return [self itemsFromMARCString:itemString error:outError];
     }else if([itemString isFormattedMARCString]){
