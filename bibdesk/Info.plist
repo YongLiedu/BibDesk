@@ -92,7 +92,7 @@
 			<key>CFBundleTypeName</key>
 			<string>RIS/Medline File</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 			<key>NSExportableAs</key>

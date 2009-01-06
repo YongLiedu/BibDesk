@@ -931,11 +931,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 #pragma mark -
 #pragma mark  Document Saving
 
-+ (BOOL)isNativeType:(NSString *)aType
-{
-    return [aType isEqualToString:BDSKBibTeXDocumentType];
-}
-
 + (NSArray *)writableTypes
 {
     NSMutableArray *writableTypes = [[[super writableTypes] mutableCopy] autorelease];
