@@ -102,7 +102,7 @@
 
 - (BOOL)isRefMinerLoCString;
 {
-    AGRegex *locRegex = [AGRegex regexWithPattern:@"^.+LDR [a-z0-9 ]{24})\n{0,2}[0-9]{3} " options:AGRegexMultiline];
+    AGRegex *locRegex = [AGRegex regexWithPattern:@"^.+LDR [a-z0-9 ]{24}\n{0,2}[0-9]{3} " options:AGRegexMultiline];
     return nil != [locRegex findInString:self];
 }
 
