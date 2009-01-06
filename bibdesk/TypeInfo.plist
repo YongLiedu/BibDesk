@@ -73,6 +73,7 @@
         LA = Language; 
         OT = Keywords; 
         PG = Pages; 
+        SO = Source; 
         STM = Status; 
         TI = Title; 
         UI = Medlineref; 
@@ -203,8 +204,8 @@
         "Newspaper Article" = article; 
         "Congress" = conference; 
         "Clinical Conference" = conference; 
-        "Consensus Development Conference" = conference,
-        "Consensus Development Conference, NIH" = conference,
+        "Consensus Development Conference" = conference; 
+        "Consensus Development Conference, NIH" = conference; 
         Comment = misc; 
         "Technical Report" = techreport; 
         "Technical Report" = techreport; 
@@ -467,6 +468,7 @@
         Medlineref = UI; 
         Number = IP; 
         Pages = PG; 
+        Source = SO;
         Title = TI; 
         Status = STM; 
         Volume = VI; 
