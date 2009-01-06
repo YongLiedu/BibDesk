@@ -1850,7 +1850,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             if (r.length == 0)
                 r = [v rangeOfString:@"-"];
             if (r.length)
-                v = [NSString stringWithFormat:@"%@\nEP  - %@", [v substringWithRange:NSMakeRange(0, r.location)], [v substringFromIndex:NSmaxRange(r)]];
+                v = [NSString stringWithFormat:@"%@\nEP  - %@", [v substringWithRange:NSMakeRange(0, r.location)], [v substringFromIndex:NSMaxRange(r)]];
         }
         
 		if ([NSString isEmptyString:s] == NO) {
