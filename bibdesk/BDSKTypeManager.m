@@ -536,7 +536,7 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 - (NSString *)RISTagForBibTeXFieldName:(NSString *)name{
-    NSString *tag = [pubMedTagForFieldNameDict objectForKey:name];
+    NSString *tag = [RISTagForFieldNameDict objectForKey:name];
     if(tag)
         return tag;
     else
