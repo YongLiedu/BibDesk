@@ -74,9 +74,8 @@
         OT = Keywords; 
         PG = Pages; 
         SO = Source; 
-        STM = Status; 
+        STAT = Status; 
         TI = Title; 
-        UI = Medlineref; 
         VI = Volume; 
     }; 
     BibTeXFieldNamesForRISTags = {
@@ -196,18 +195,15 @@
     BibTeXTypesForPubMedTypes = {
         Biography = book; 
         "Journal Article" = article; 
-        "Classical Article " = article; 
+        "Classical Article" = article; 
         "Corrected and Republished Article" = article; 
         "Historical Article" = article; 
-        "Newspaper Article" = article; 
         "Newspaper Article" = article; 
         "Congress" = conference; 
         "Clinical Conference" = conference; 
         "Consensus Development Conference" = conference; 
         "Consensus Development Conference, NIH" = conference; 
         Comment = misc; 
-        "Technical Report" = techreport; 
-        "Technical Report" = techreport; 
         "Technical Report" = techreport; 
     }; 
     BibTeXTypesForRISTypes = {
@@ -464,12 +460,11 @@
         Journal = TA; 
         Keywords = OT; 
         Language = LA; 
-        Medlineref = UI; 
         Number = IP; 
         Pages = PG; 
         Source = SO; 
         Title = TI; 
-        Status = STM; 
+        Status = STAT; 
         Volume = VI; 
     }; 
     RISTagsForBibTeXFieldNames = {
@@ -535,44 +530,6 @@
             url, 
             electronic, 
             webpage
-        ); 
-        PubMed = (
-            JOUR, 
-            ABST, 
-            ADVS, 
-            ART, 
-            BILL, 
-            BOOK, 
-            CASE, 
-            CHAP, 
-            COMP, 
-            CONF, 
-            CTLG, 
-            DATA, 
-            ELEC, 
-            GEN, 
-            HEAR, 
-            ICOMM, 
-            INPR, 
-            JFULL, 
-            FOUR, 
-            MAP, 
-            MGZN, 
-            MPCT, 
-            MUSIC, 
-            NEWS, 
-            PAMP, 
-            PAT, 
-            PCOMM, 
-            RPRT, 
-            SER, 
-            SLIDE, 
-            SOUND, 
-            STAT, 
-            THES, 
-            UNBILI, 
-            UNPB, 
-            VIDEO
         ); 
     }; 
 }
