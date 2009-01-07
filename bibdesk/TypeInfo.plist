@@ -69,7 +69,7 @@
         GN = Note; 
         IP = Number; 
         IS = Issn; 
-        JT = Journal; 
+        TA = Journal; 
         LA = Language; 
         OT = Keywords; 
         PG = Pages; 
@@ -461,7 +461,7 @@
         Annote = GN; 
         Author = AU;
         Issn = IS; 
-        Journal = JT; 
+        Journal = TA; 
         Keywords = OT; 
         Language = LA; 
         Medlineref = UI; 
