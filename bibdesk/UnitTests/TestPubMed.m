@@ -66,6 +66,18 @@ static NSString *jefferisetal= @"PMID- 17382886\nOWN - NLM\nSTAT- MEDLINE\nDA  -
 	STAssertEqualObjects(@"Jefferis", [[b firstAuthor] valueForKey:@"lastName"],@"Greg Jefferis's last name");
 	STAssertEqualObjects(@"Liqun Luo", [[b lastAuthor] valueForKey:@"name"],@"Liqun Luo's full name");
 	STAssertEqualObjects(@"Luo", [[b lastAuthor] valueForKey:@"lastName"],@"Liqun Luo's last name");
+	// Date fields
+	STAssertEqualObjects([b valueForKey:@"pubDate"],
+						 [NSCalendarDate
+						  dateWithString:@"23 March 2007"
+						  calendarFormat:@"%d %B %Y"],
+						 @"Publication Date");
+	// Test pubFields ie direct results of parser
+	// ==============
+	// Date fields
+	STAssertEqualObjects(@"2007 Mar 23",[b valueOfField:@"Dp"],@" for PubMed field DP (Date of Publication)");
+	STAssertEqualObjects(@"2007",[b valueOfField:@"Year"],@"");
+	STAssertEqualObjects(@"Mar 23",[b valueOfField:@"Month"],@"");
 	
 }
 
