@@ -91,6 +91,9 @@
 #import "BDSKWebGroupViewController.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
 
+#define WEB_URL @"http://bibdesk.sourceforge.net/"
+#define WIKI_URL @"http://apps.sourceforge.net/mediawiki/bibdesk/"
+
 @implementation BDSKAppController
 
 // remove legacy comparisons of added/created/modified strings in table column code from prefs
@@ -825,14 +828,14 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (IBAction)visitWebSite:(id)sender{
     if(![[NSWorkspace sharedWorkspace] openURL:
-        [NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]]){
+        [NSURL URLWithString:WEB_URL]]){
         NSBeep();
     }
 }
 
 - (IBAction)visitWiki:(id)sender{
     if(![[NSWorkspace sharedWorkspace] openURL:
-        [NSURL URLWithString:@"http://bibdesk.sourceforge.net/wiki/"]]){
+        [NSURL URLWithString:WIKI_URL]]){
         NSBeep();
     }
 }
