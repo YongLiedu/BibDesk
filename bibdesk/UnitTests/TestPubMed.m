@@ -95,4 +95,31 @@ static NSString *jefferisetal= @"PMID- 17382886\nOWN - NLM\nSTAT- MEDLINE\nDA  -
 	
 }
 
+- (void)testMedlineDateOfPublicationVariants{
+	BibItem *b;
+	// Year Only
+	b = [[BDSKStringParser itemsFromString:@"PMID- 13054692\nDP  - 1953\nTI  - Test.\nPG  - 737-8\nFAU - WATSON, J D\nPT  - Journal Article\nJT  - Nature\n"
+									 error:NULL] lastObject];
+	STAssertEqualObjects([b valueOfField:@"Year"],@"1953", @"for Year field");
+	STAssertEqualObjects([b valueOfField:@"Month"],@"", @"for Month field");
+
+	// Year and Month (no Day)
+	b = [[BDSKStringParser itemsFromString:@"PMID- 13054692\nDP  - 1953 Mar\nTI  - Test.\nPG  - 737-8\nFAU - WATSON, J D\nPT  - Journal Article\nJT  - Nature\n"
+									 error:NULL] lastObject];
+	STAssertEqualObjects([b valueOfField:@"Year"],@"1953", @"for Year field");
+	STAssertEqualObjects([b valueOfField:@"Month"],@"Mar", @"for Month field");
+
+	// Year and Season	
+	b = [[BDSKStringParser itemsFromString:@"PMID- 13054692\nDP  - 1953 Spring\nTI  - Test.\nPG  - 737-8\nFAU - WATSON, J D\nPT  - Journal Article\nJT  - Nature\n"
+									 error:NULL] lastObject];
+	STAssertEqualObjects([b valueOfField:@"Year"],@"1953", @"for Year field");
+	STAssertEqualObjects([b valueOfField:@"Month"],@"Spring", @"for Month field");
+
+	// Year and Month Range
+	b = [[BDSKStringParser itemsFromString:@"PMID- 13054692\nDP  - 1953 Jan-Feb\nTI  - Test.\nPG  - 737-8\nFAU - WATSON, J D\nPT  - Journal Article\nJT  - Nature\n"
+									 error:NULL] lastObject];
+	STAssertEqualObjects([b valueOfField:@"Year"],@"1953", @"for Year field");
+	STAssertEqualObjects([b valueOfField:@"Month"],@"Jan-Feb", @"for Month field");
+	
+}
 @end
