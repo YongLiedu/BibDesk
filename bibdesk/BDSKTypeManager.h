@@ -129,7 +129,6 @@
 - (void)setMODSGenresForBibTeXTypeDict:(NSDictionary *)newNames;
 - (void)setBibtexTypeForPubMedTypeDict:(NSDictionary *)newNames;
 - (void)setFieldNameForPubMedTagDict:(NSDictionary *)newNames;
-- (void)setPubMedTagForFieldNameDict:(NSDictionary *)newNames;
 - (void)setBibtexTypeForRISTypeDict:(NSDictionary *)newNames;
 - (void)setFieldNameForRISTagDict:(NSDictionary *)newNames;
 - (void)setRISTagForFieldNameDict:(NSDictionary *)newNames;
