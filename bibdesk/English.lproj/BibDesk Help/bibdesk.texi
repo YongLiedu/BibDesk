@@ -159,8 +159,8 @@ about the BibTeX file format.
 @heading Online Resources
 @itemize
 @item @uref{http://bibdesk.sourceforge.net, BibDesk Website}
-@item @uref{http://apps.sourceforge.net/mediawiki/bibdesk/index.php?Main_Page, BibDesk Wiki}
-@item @uref{http://apps.sourceforge.net/mediawiki/bibdesk/index.php/FAQ, BibDesk FAQ}
+@item @uref{http://apps.sourceforge.net/mediawiki/bibdesk/index.php?title=Main_Page, BibDesk Wiki}
+@item @uref{http://apps.sourceforge.net/mediawiki/bibdesk/index.php?title=FAQ, BibDesk FAQ}
 @item @uref{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}
 @item @uref{http://bibdesk.sourceforge.net/manual/, Online Copy of This Manual}
 @end itemize
@@ -2172,7 +2172,7 @@ For @uref{http://www.lyx.org/, LyX} users, Mark Reid has written an AppleScript 
 to LyX, and his script is available at @uref{http://www.threewordslong.com/projects/misc/bibdesktolyx/}.
 
 BibDesk also provides a Distributed Objects API for developers to search for publications.  
-See the @uref{http://apps.sourceforge.net/mediawiki/bibdesk/index.php/Other_Applications, BibDesk Wiki} for details and examples.
+See the @uref{http://apps.sourceforge.net/mediawiki/bibdesk/index.php?title=Other_Applications, BibDesk Wiki} for details and examples.
 
 @c --------------------------------------------------------------------------------------
 
