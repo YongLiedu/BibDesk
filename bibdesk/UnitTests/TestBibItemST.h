@@ -12,7 +12,7 @@
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKStringConstants.h"
-
+#import "BDSKTypeManager.h"
 
 @interface TestBibItemST : SenTestCase {
 
