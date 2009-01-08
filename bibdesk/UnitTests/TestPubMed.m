@@ -121,6 +121,10 @@ static NSString *semCell = @"PMID- 16439169\nOWN - NLM\nSTAT- MEDLINE\nDA  - 200
 //						 @"2007 Mar 23", @" for PubMed field DP (Date of Publication)");
 	STAssertEqualObjects([b valueOfField:@"Dp"],
 						 @"", @" have decided to remove DP (Date of Publication) field");
+	// Check that DP is copied into the BibTex date field as Christiaan Hofman would like
+	// I still worry that this date field and the BibItem pubDate variable may get confused.
+	STAssertEqualObjects([b valueOfField:BDSKDateString],
+						 @"2007 Mar 23", @" ie PubMed DP field => BibTex Date field");
 	STAssertEqualObjects([b valueOfField:@"Year"],
 						 @"2007", @"for Year field");
 	STAssertEqualObjects([b valueOfField:@"Month"],
