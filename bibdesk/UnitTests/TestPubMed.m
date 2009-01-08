@@ -77,21 +77,24 @@ static NSString *jefferisetal= @"PMID- 17382886\nOWN - NLM\nSTAT- MEDLINE\nDA  -
 	STAssertEqualObjects([[b lastAuthor] valueForKey:@"lastName"],
 						 @"Luo", @"Liqun Luo's last name");
 	// Date fields
-	STAssertEqualObjects([b valueForKey:@"pubDate"],
-						 [NSCalendarDate
-						  dateWithString:@"23 March 2007"
-						  calendarFormat:@"%d %B %Y"],
-						 @"for BibItem pubDate Publication Date");
+
+	// GJ TODO - wouldn't it be nice to have the date parse the full date info 
+	// if available in the Month field.  Right now everything is converted to the
+	// 15th of the month even if more info is available	
+	STAssertEqualObjects([b displayValueOfField:BDSKPubDateString],
+						 @"Mar 2007", @"for BibItem pubDate Publication Date");
 
 	// Test pubFields ie direct results of BDSKPubMedParser
 	// ==============
 	// Date fields
+//	STAssertEqualObjects([b valueOfField:@"Dp"],
+//						 @"2007 Mar 23", @" for PubMed field DP (Date of Publication)");
 	STAssertEqualObjects([b valueOfField:@"Dp"],
-						 @"2007 Mar 23", @" for PubMed field DP (Date of Publication)");
+						 @"", @" have decided to remove DP (Date of Publication) field");
 	STAssertEqualObjects([b valueOfField:@"Year"],
 						 @"2007", @"for Year field");
 	STAssertEqualObjects([b valueOfField:@"Month"],
-						 @"Mar 23", @"for Month field");
+						 @"Mar", @"for Month field");
 	
 }
 
