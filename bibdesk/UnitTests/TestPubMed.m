@@ -29,9 +29,11 @@ static NSString *jefferisetal= @"PMID- 17382886\nOWN - NLM\nSTAT- MEDLINE\nDA  -
 
 - (void)testCanParseString{
 	
-    STAssertEquals(YES, [BDSKStringParser canParseString:watsonCrick ofType:BDSKPubMedStringType ],@"Check that we can parse a basic PubMed record");
+    STAssertEquals([BDSKStringParser canParseString:watsonCrick ofType:BDSKPubMedStringType ],
+				   YES, @"Check that we can parse a basic PubMed record");
     // GJ: Maybe it would be nice to make this possible some day ...
-	STAssertEquals(NO, [BDSKStringParser canParseString:watsonCrick],@"Can't parse without type information");
+	STAssertEquals([BDSKStringParser canParseString:watsonCrick],
+				   NO, @"Can't parse without type information");
 }
 
 - (void)testContentStringType{
@@ -47,37 +49,49 @@ static NSString *jefferisetal= @"PMID- 17382886\nOWN - NLM\nSTAT- MEDLINE\nDA  -
 	STAssertEqualObjects(@"article", [b pubType],@"");
 	// Authors
 	STAssertEquals( (NSUInteger) 2, [[b pubAuthors] count],@"There are 2 authors");
-	STAssertEqualObjects(@"J D WATSON", [[b firstAuthor] valueForKey:@"name"],@"Watson's full name");
-	STAssertEqualObjects(@"WATSON", [[b firstAuthor] valueForKey:@"lastName"],@"Watson's last name");
-	STAssertEqualObjects(@"F H CRICK", [[b lastAuthor] valueForKey:@"name"],@"Crick's full name");
-	STAssertEqualObjects(@"CRICK", [[b lastAuthor] valueForKey:@"lastName"],@"Crick's last name");
+	STAssertEqualObjects([[b firstAuthor] valueForKey:@"name"],
+						 @"J D WATSON", @"Watson's full name");
+	STAssertEqualObjects([[b firstAuthor] valueForKey:@"lastName"],
+						 @"WATSON", @"Watson's last name");
+	STAssertEqualObjects([[b lastAuthor] valueForKey:@"name"],
+						 @"F H CRICK", @"Crick's full name");
+	STAssertEqualObjects([[b lastAuthor] valueForKey:@"lastName"],
+						 @"CRICK", @"Crick's last name");
 }
 
 - (void)testRecentMedlineArticleParsing{
 	BibItem *b = [[BDSKStringParser itemsFromString:jefferisetal error:NULL] lastObject];
 	
-	// Test BibDesk internal fields
+	// Test BibItem internal fields
 	// ============================
 	// Article Type
-	STAssertEqualObjects(@"article", [b pubType],@"");
+	STAssertEqualObjects([b pubType], @"article", @"");
 	// Authors
 	STAssertEquals( (NSUInteger) 7, [[b pubAuthors] count],@"There are 7 authors");
-	STAssertEqualObjects(@"Gregory S X E Jefferis", [[b firstAuthor] valueForKey:@"name"],@"Greg Jefferis's full name");
-	STAssertEqualObjects(@"Jefferis", [[b firstAuthor] valueForKey:@"lastName"],@"Greg Jefferis's last name");
-	STAssertEqualObjects(@"Liqun Luo", [[b lastAuthor] valueForKey:@"name"],@"Liqun Luo's full name");
-	STAssertEqualObjects(@"Luo", [[b lastAuthor] valueForKey:@"lastName"],@"Liqun Luo's last name");
+	STAssertEqualObjects([[b firstAuthor] valueForKey:@"name"],
+						 @"Gregory S X E Jefferis", @"Greg Jefferis's full name");
+	STAssertEqualObjects([[b firstAuthor] valueForKey:@"lastName"],
+						 @"Jefferis", @"Greg Jefferis's last name");
+	STAssertEqualObjects([[b lastAuthor] valueForKey:@"name"],
+						 @"Liqun Luo", @"Liqun Luo's full name");
+	STAssertEqualObjects([[b lastAuthor] valueForKey:@"lastName"],
+						 @"Luo", @"Liqun Luo's last name");
 	// Date fields
 	STAssertEqualObjects([b valueForKey:@"pubDate"],
 						 [NSCalendarDate
 						  dateWithString:@"23 March 2007"
 						  calendarFormat:@"%d %B %Y"],
-						 @"Publication Date");
-	// Test pubFields ie direct results of parser
+						 @"for BibItem pubDate Publication Date");
+
+	// Test pubFields ie direct results of BDSKPubMedParser
 	// ==============
 	// Date fields
-	STAssertEqualObjects(@"2007 Mar 23",[b valueOfField:@"Dp"],@" for PubMed field DP (Date of Publication)");
-	STAssertEqualObjects(@"2007",[b valueOfField:@"Year"],@"");
-	STAssertEqualObjects(@"Mar 23",[b valueOfField:@"Month"],@"");
+	STAssertEqualObjects([b valueOfField:@"Dp"],
+						 @"2007 Mar 23", @" for PubMed field DP (Date of Publication)");
+	STAssertEqualObjects([b valueOfField:@"Year"],
+						 @"2007", @"for Year field");
+	STAssertEqualObjects([b valueOfField:@"Month"],
+						 @"Mar 23", @"for Month field");
 	
 }
 
