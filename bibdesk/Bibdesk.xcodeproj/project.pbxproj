@@ -335,6 +335,12 @@
 		CEFDBDC60AEA86F0009EE99D /* BDSKStaticGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */; };
 		CEFDBDDE0AEA87F8009EE99D /* BDSKCategoryGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */; };
 		EF168DFE0F1133AD002F4D9F /* TestUnitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EF168DFD0F1133AD002F4D9F /* TestUnitTest.m */; };
+		EF902B890F12343000E5DE14 /* TestBibItemST.m in Sources */ = {isa = PBXBuildFile; fileRef = EF902B880F12343000E5DE14 /* TestBibItemST.m */; };
+		EF902C520F12406E00E5DE14 /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
+		EF902DA40F12410300E5DE14 /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
+		EF902DA50F12410300E5DE14 /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
+		EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
+		EF902DA70F12410300E5DE14 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
 		F900CD0A0A8EA97D005C3A0F /* UKDirectoryEnumerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */; };
 		F9022C1D0758013E00C3F701 /* BDAlias.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C1C0758013E00C3F701 /* BDAlias.m */; };
 		F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */; };
@@ -1313,6 +1319,8 @@
 		EF168DDE0F11325B002F4D9F /* UnitTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTests-Info.plist"; sourceTree = "<group>"; };
 		EF168DFC0F1133AD002F4D9F /* TestUnitTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestUnitTest.h; path = UnitTests/TestUnitTest.h; sourceTree = "<group>"; };
 		EF168DFD0F1133AD002F4D9F /* TestUnitTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestUnitTest.m; path = UnitTests/TestUnitTest.m; sourceTree = "<group>"; };
+		EF902B870F12343000E5DE14 /* TestBibItemST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestBibItemST.h; path = UnitTests/TestBibItemST.h; sourceTree = "<group>"; };
+		EF902B880F12343000E5DE14 /* TestBibItemST.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestBibItemST.m; path = UnitTests/TestBibItemST.m; sourceTree = "<group>"; };
 		F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UKDirectoryEnumerator.h; path = ukdirectoryenumerator/UKDirectoryEnumerator.h; sourceTree = "<group>"; };
 		F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UKDirectoryEnumerator.m; path = ukdirectoryenumerator/UKDirectoryEnumerator.m; sourceTree = "<group>"; };
 		F9022C1B0758013E00C3F701 /* BDAlias.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDAlias.h; sourceTree = "<group>"; };
@@ -1785,6 +1793,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EF902DA40F12410300E5DE14 /* OmniBase.framework in Frameworks */,
+				EF902C520F12406E00E5DE14 /* OmniFoundation.framework in Frameworks */,
+				EF902DA50F12410300E5DE14 /* OmniAppKit.framework in Frameworks */,
+				EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */,
+				EF902DA70F12410300E5DE14 /* BTParse.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2442,6 +2455,8 @@
 				EF168DDE0F11325B002F4D9F /* UnitTests-Info.plist */,
 				EF168DFC0F1133AD002F4D9F /* TestUnitTest.h */,
 				EF168DFD0F1133AD002F4D9F /* TestUnitTest.m */,
+				EF902B870F12343000E5DE14 /* TestBibItemST.h */,
+				EF902B880F12343000E5DE14 /* TestBibItemST.m */,
 			);
 			comments = "This group was added by Greg Jefferis for new the style SenTest based unit tests directly supported by Apple.";
 			name = UnitTests;
@@ -4016,6 +4031,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EF168DFE0F1133AD002F4D9F /* TestUnitTest.m in Sources */,
+				EF902B890F12343000E5DE14 /* TestBibItemST.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4682,7 +4698,10 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/BibDesk.app/Contents/MacOS/BibDesk";
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				FRAMEWORK_SEARCH_PATHS = (
+					/GD/dev/build,
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
