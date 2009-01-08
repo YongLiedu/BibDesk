@@ -451,22 +451,6 @@
         unpublished = {self = (unpublished); }; 
         url = {self = ("web site"); }; 
     }; 
-    PubMedTagsForBibTeXFieldNames = {
-        Abstract = AB; 
-        Address = AD; 
-        Annote = GN; 
-        Author = AU;
-        Issn = IS; 
-        Journal = TA; 
-        Keywords = OT; 
-        Language = LA; 
-        Number = IP; 
-        Pages = PG; 
-        Source = SO; 
-        Title = TI; 
-        Status = STAT; 
-        Volume = VI; 
-    }; 
     RISTagsForBibTeXFieldNames = {
         Abstract = N2; 
         Address = AD; 

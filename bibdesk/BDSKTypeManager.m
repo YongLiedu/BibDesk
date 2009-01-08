@@ -173,7 +173,6 @@ static BDSKTypeManager *sharedInstance = nil;
 
     [self setFileTypesDict:[typeInfoDict objectForKey:FILE_TYPES_KEY]];
     [self setFieldNameForPubMedTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY]];
-    [self setPubMedTagForFieldNameDict:[typeInfoDict objectForKey:PUBMED_TAGS_FOR_BIBTEX_FIELDS_KEY]];
     [self setBibtexTypeForPubMedTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY]];
     [self setFieldNameForRISTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_RIS_TAGS_KEY]];
     [self setRISTagForFieldNameDict:[typeInfoDict objectForKey:RIS_TAGS_FOR_BIBTEX_FIELDS_KEY]];
@@ -306,13 +305,6 @@ static BDSKTypeManager *sharedInstance = nil;
     if(fieldNameForPubMedTagDict != newNames){
         [fieldNameForPubMedTagDict release];
         fieldNameForPubMedTagDict = [newNames copy];
-    }
-}
-
-- (void)setPubMedTagForFieldNameDict:(NSDictionary *)newNames{
-    if(pubMedTagForFieldNameDict != newNames){
-        [pubMedTagForFieldNameDict release];
-        pubMedTagForFieldNameDict = [newNames copy];
     }
 }
 

@@ -48,7 +48,6 @@
 #define REQUIRED_TYPES_FOR_FILE_TYPE_KEY      @"RequiredTypesForFileType"
 #define FILE_TYPES_KEY                        @"FileTypes"
 #define BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY     @"BibTeXFieldNamesForPubMedTags"
-#define PUBMED_TAGS_FOR_BIBTEX_FIELDS_KEY     @"PubMedTagsForBibTeXFieldNames"
 #define BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY     @"BibTeXTypesForPubMedTypes"
 #define BIBTEX_FIELDS_FOR_RIS_TAGS_KEY        @"BibTeXFieldNamesForRISTags"
 #define RIS_TAGS_FOR_BIBTEX_FIELDS_KEY        @"RISTagsForBibTeXFieldNames"
