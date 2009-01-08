@@ -24,11 +24,60 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
 }
 
 - (void)testInitWithType{		
+	
+	// This was Mike's original test, but I'm not sure what Less, von More is supposed to mean anyway
 	NSDictionary *pubFields = [NSDictionary dictionaryWithObjectsAndKeys:@"Hello", BDSKTitleString,
 							   @"Less, von More, Jr.", BDSKAuthorString, nil];
 	BibItem *b = [[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
 	
     STAssertEquals(1, [b numberOfAuthors],@"Check that Less, von More, Jr. parses to single author");
+}
+
+- (void)testComplexAuthorNameNormalisation{
+	// Check for parsing of two variants
+	// "First von Last" "von Last, First"
+	NSDictionary *pubFields1 = [NSDictionary dictionaryWithObjectsAndKeys:@"Hello", BDSKTitleString,
+								@"First von Last", BDSKAuthorString, nil];
+	NSDictionary *pubFields2 = [NSDictionary dictionaryWithObjectsAndKeys:@"Hello", BDSKTitleString,
+								@"von Last, First", BDSKAuthorString, nil];
+	BibItem *b1 = [[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields1 isNew:YES];
+	BibItem *b2 = [[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields2 isNew:YES];
+
+	STAssertEqualObjects([[b1 firstAuthor] firstName], @"First", @"first name of First von Last");
+	STAssertEqualObjects([[b1 firstAuthor] lastName], @"Last", @"last name of First von Last");
+	STAssertEqualObjects([[b1 firstAuthor] vonPart], @"von", @"von part of First von Last");
+	STAssertEqualObjects([[b2 firstAuthor] firstName], @"First", @"first name of von Last, First");
+	STAssertEqualObjects([[b2 firstAuthor] lastName], @"Last", @"last name of von Last, First");
+	STAssertEqualObjects([[b2 firstAuthor] vonPart], @"von", @"von part of von Last, First");
+	
+	STAssertEqualObjects([b1 bibTeXAuthorStringNormalized:YES],[b2 bibTeXAuthorStringNormalized:YES],
+						 @"check normalised representation of complex author names");		
+}
+
+- (void)testComplexAuthorNameNormalisationWithJr{
+	// Check for parsing of two variants
+	// "First von Last, Jr" "von Last, Jr, First"
+	NSDictionary *pubFields1 = [NSDictionary dictionaryWithObjectsAndKeys:@"Hello", BDSKTitleString,
+								@"First von Last, Jr.", BDSKAuthorString, nil];
+	NSDictionary *pubFields2 = [NSDictionary dictionaryWithObjectsAndKeys:@"Hello", BDSKTitleString,
+								@"von Last, Jr., First", BDSKAuthorString, nil];
+	BibItem *b1 = [[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields1 isNew:YES];
+	BibItem *b2 = [[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields2 isNew:YES];
+	
+	// GJ: my understanding was that "First von Last, Jr." was an acceptable BibTex form,
+	// but a note before BibAuthor's setupNames method suggests otherwise
+//	STAssertEqualObjects([[b1 firstAuthor] firstName], @"First", @"first name of First von Last, Jr.");
+//	STAssertEqualObjects([[b1 firstAuthor] lastName], @"Last", @"last name of First von Last, Jr.");
+//	STAssertEqualObjects([[b1 firstAuthor] vonPart], @"von", @"von part of First von Last, Jr.");
+//	STAssertEqualObjects([[b1 firstAuthor] jrPart], @"Jr.", @"jr part of First von Last, Jr.");
+	
+	STAssertEqualObjects([[b2 firstAuthor] firstName], @"First", @"first name of von Last, Jr., First");
+	STAssertEqualObjects([[b2 firstAuthor] lastName], @"Last", @"last name of von Last, Jr., First");
+	STAssertEqualObjects([[b2 firstAuthor] vonPart], @"von", @"von part of von Last, Jr., First");
+	STAssertEqualObjects([[b2 firstAuthor] jrPart], @"Jr.", @"jr part of von Last, Jr., First");
+
+//	STAssertEqualObjects([b1 bibTeXAuthorStringNormalized:YES],[b2 bibTeXAuthorStringNormalized:YES],
+//						 @"check normalised representation of complex author names");
 }
 
 - (void)testParseTwoRecords{

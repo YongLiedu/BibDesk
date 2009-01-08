@@ -10,6 +10,7 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OmniFoundation.h>
 #import "BibItem.h"
+#import "BibAuthor.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
