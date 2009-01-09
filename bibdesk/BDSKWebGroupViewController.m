@@ -5,7 +5,7 @@
 //  Created by Michael McCracken on 1/26/07.
 
 /*
- This software is Copyright (c) 2007-2008
+ This software is Copyright (c) 2007-2009
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
