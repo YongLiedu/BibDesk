@@ -293,7 +293,7 @@ static CFDictionaryRef selectorTable = NULL;
         fileOrder = nil;
         identifierURL = createUniqueURL();
         
-        [self setFileType:inFileType];
+        [self setFileType:inFileType ?: BDSKBibtexString];
         [self setPubTypeWithoutUndo:type];
         [self setDate: nil];
         [self setDateAdded: nil];
@@ -369,7 +369,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if([coder allowsKeyedCoding]){
         if(self = [super init]){
             pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
-            [self setFileType:[coder decodeObjectForKey:@"fileType"]];
+            [self setFileType:[coder decodeObjectForKey:@"fileType"] ?: BDSKBibtexString];
             [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
             [self setDate:ensureCalendarDate([coder decodeObjectForKey:@"pubDate"])];
             [self setDateAdded:ensureCalendarDate([coder decodeObjectForKey:@"dateAdded"])];
