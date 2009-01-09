@@ -87,13 +87,21 @@
     BOOL canRemove = ([[filter conditions] count] > 1);
 	
 	[conditionControllers removeAllObjects];
-	while (condition = [cEnum nextObject]) {
-		controller = [[BDSKConditionController alloc] initWithFilterController:self condition:[[condition copy] autorelease]];
-        [controller setCanRemove:canRemove];
-		[conditionControllers addObject:[controller autorelease]];
+    if ([[filter conditions] count]) {
+        while (condition = [cEnum nextObject]) {
+            controller = [[BDSKConditionController alloc] initWithFilterController:self condition:[[condition copy] autorelease]];
+            [controller setCanRemove:canRemove];
+            [conditionControllers addObject:[controller autorelease]];
+            [conditionsView addView:[controller view]];
+        }
+	} else {
+        // add a dummy controller when there's no condition, so we have an add button
+        controller = [[BDSKConditionController alloc] initWithFilterController:self condition:nil];
+        [controller setCanRemove:NO];
+        [conditionControllers addObject:[controller autorelease]];
         [conditionsView addView:[controller view]];
-	}
-	
+    }
+    
 	[self updateUI];
 }
 
@@ -117,6 +125,8 @@
         NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
         
         [conditions addObjectsByMakingObjectsFromArray:conditionControllers performSelector:@selector(condition)];
+        // remove the dummy condition
+        [conditions removeObject:[NSNull null]];
         [filter setConditions:conditions];
         [filter setConjunction:[self conjunction]];
         
@@ -131,12 +141,16 @@
 }
 
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController {
-	unsigned int idx = [conditionControllers indexOfObject:aConditionController];
+	// remove this one if it's a dummy controller
+    if ([aConditionController condition] == nil)
+        [self removeConditionController:[[aConditionController retain] autorelease]];
+	
+    unsigned int idx = [conditionControllers indexOfObject:aConditionController];
 	if (idx == NSNotFound) 
 		idx = [conditionControllers count];
     else
         ++idx;
-	BDSKConditionController *newController = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
+    BDSKConditionController *newController = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
     [self insertConditionController:newController atIndex:idx];
 }
 

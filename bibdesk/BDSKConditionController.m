@@ -148,7 +148,15 @@ static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionCont
     [self layoutComparisonControls];
     [self layoutValueControls];
     
-    [self startObserving];
+    if (condition == nil) {
+        // hide everything except for the Add button when this is a dummy condition controller
+        [keyComboBox setHidden:YES];
+        [comparisonBox setHidden:YES];
+        [valueBox setHidden:YES];
+        [removeButton setHidden:YES];
+    } else {
+        [self startObserving];
+    }
 }
 
 - (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
