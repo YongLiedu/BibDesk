@@ -98,7 +98,7 @@
 }
 
 - (void)updateUI {
-	if ([conditionControllers count] == 1) {
+	if ([conditionControllers count] < 2) {
 		[messageStartTextField setStringValue:NSLocalizedString(@"Match the following condition:", @"Label for smart group editor")];
 		[conjunctionPopUp setHidden:YES];
 		[messageEndTextField setHidden:YES];
@@ -133,9 +133,11 @@
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController {
 	unsigned int idx = [conditionControllers indexOfObject:aConditionController];
 	if (idx == NSNotFound) 
-		idx = [conditionControllers count] - 1;
+		idx = [conditionControllers count];
+    else
+        ++idx;
 	BDSKConditionController *newController = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
-    [self insertConditionController:newController atIndex:idx + 1];
+    [self insertConditionController:newController atIndex:idx];
 }
 
 - (void)insertConditionController:(BDSKConditionController *)newController atIndex:(unsigned int)idx {
