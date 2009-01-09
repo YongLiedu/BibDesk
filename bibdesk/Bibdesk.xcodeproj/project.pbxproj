@@ -3138,7 +3138,7 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
-			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "bibdesk" */;
+			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
 			compatibilityVersion = "Xcode 3.0";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
@@ -4762,29 +4762,6 @@
 			};
 			name = Release;
 		};
-		EF168DE10F11325B002F4D9F /* Test */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
-				INFOPLIST_FILE = "UnitTests-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Cocoa,
-					"-framework",
-					SenTestingKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = UnitTests;
-				WRAPPER_EXTENSION = octest;
-			};
-			name = Test;
-		};
 		F993F1BD08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
@@ -4802,16 +4779,6 @@
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
-		};
-		F993F1BF08553A61007A7657 /* Test */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */;
-			buildSettings = {
-				CURRENT_PROJECT_VERSION = 1371;
-				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
-				VERSIONING_SYSTEM = "apple-generic";
-			};
-			name = Test;
 		};
 		F993F1EA08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -4865,24 +4832,6 @@
 			};
 			name = Release;
 		};
-		F993F1EC08553A61007A7657 /* Test */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = HeaderDoc;
-				REZ_PREPROCESSOR_DEFINITIONS = "";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Test;
-		};
 		F993F1EF08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4934,24 +4883,6 @@
 				ZERO_LINK = NO;
 			};
 			name = Release;
-		};
-		F993F1F108553A61007A7657 /* Test */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = DiskImage;
-				REZ_PREPROCESSOR_DEFINITIONS = "";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Test;
 		};
 		F993F1F908553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -5014,29 +4945,6 @@
 				ZERO_LINK = NO;
 			};
 			name = Release;
-		};
-		F993F1FB08553A61007A7657 /* Test */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Foundation.framework/Headers/Foundation.h";
-				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
-				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
-				GCC_WARN_UNKNOWN_PRAGMAS = NO;
-				INFOPLIST_FILE = "TestBibItem-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-				);
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = TestBibItem;
-				REZ_PREPROCESSOR_DEFINITIONS = "";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost";
-			};
-			name = Test;
 		};
 		F993F1FE08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -5102,30 +5010,6 @@
 			};
 			name = Release;
 		};
-		F993F20008553A61007A7657 /* Test */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = $BUILD_DIR/;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Foundation.framework/Headers/Foundation.h";
-				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
-				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
-				GCC_WARN_UNKNOWN_PRAGMAS = NO;
-				INFOPLIST_FILE = "TestComplexString-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-				);
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = TestComplexString;
-				REZ_PREPROCESSOR_DEFINITIONS = "";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost";
-			};
-			name = Test;
-		};
 		F993F20308553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */;
@@ -5140,13 +5024,6 @@
 			};
 			name = Release;
 		};
-		F993F20508553A61007A7657 /* Test */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */;
-			buildSettings = {
-			};
-			name = Test;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -5155,7 +5032,6 @@
 			buildConfigurations = (
 				EF168DDF0F11325B002F4D9F /* Debug */,
 				EF168DE00F11325B002F4D9F /* Release */,
-				EF168DE10F11325B002F4D9F /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -5165,7 +5041,6 @@
 			buildConfigurations = (
 				F993F1BD08553A61007A7657 /* Debug */,
 				F993F1BE08553A61007A7657 /* Release */,
-				F993F1BF08553A61007A7657 /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -5175,7 +5050,6 @@
 			buildConfigurations = (
 				F993F1EA08553A61007A7657 /* Debug */,
 				F993F1EB08553A61007A7657 /* Release */,
-				F993F1EC08553A61007A7657 /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -5185,7 +5059,6 @@
 			buildConfigurations = (
 				F993F1EF08553A61007A7657 /* Debug */,
 				F993F1F008553A61007A7657 /* Release */,
-				F993F1F108553A61007A7657 /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -5195,7 +5068,6 @@
 			buildConfigurations = (
 				F993F1F908553A61007A7657 /* Debug */,
 				F993F1FA08553A61007A7657 /* Release */,
-				F993F1FB08553A61007A7657 /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -5205,17 +5077,15 @@
 			buildConfigurations = (
 				F993F1FE08553A61007A7657 /* Debug */,
 				F993F1FF08553A61007A7657 /* Release */,
-				F993F20008553A61007A7657 /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		F993F20208553A61007A7657 /* Build configuration list for PBXProject "bibdesk" */ = {
+		F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F993F20308553A61007A7657 /* Debug */,
 				F993F20408553A61007A7657 /* Release */,
-				F993F20508553A61007A7657 /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
