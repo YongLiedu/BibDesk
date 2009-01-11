@@ -25,6 +25,7 @@
 				F98870D307580E94001D4D49 /* ShellScript */,
 			);
 			dependencies = (
+				CE17F5380F1A868F00E741DD /* PBXTargetDependency */,
 			);
 			name = DiskImage;
 			productName = DiskImage;
@@ -545,6 +546,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CE17F5370F1A868F00E741DD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D1107260486CEB800E47090 /* BibDesk */;
+			remoteInfo = BibDesk;
+		};
 		CE52E69C0E2D2B87007B6C62 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
@@ -4050,6 +4058,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		CE17F5380F1A868F00E741DD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D1107260486CEB800E47090 /* BibDesk */;
+			targetProxy = CE17F5370F1A868F00E741DD /* PBXContainerItemProxy */;
+		};
 		CEA4516A0E47C8C000D161AD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SkimNotes;
