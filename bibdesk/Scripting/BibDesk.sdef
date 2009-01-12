@@ -1013,7 +1013,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
             <property name="file" code="file" type="file"
                 description="The file for the external group">
-                <cocoa key="fileURL"/>
+                <cocoa key="scriptingFileURL"/>
             </property>  
         </class>
         

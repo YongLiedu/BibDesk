@@ -356,12 +356,12 @@
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
-- (NSURL *)fileURL {
+- (NSURL *)scriptingFileURL {
     NSURL *fileURL = [self URL];
     return [fileURL isFileURL] ? fileURL : (id)[NSNull null];
 }
 
-- (void)setFileURL:(NSURL *)newURL {
+- (void)setScriptingFileURL:(NSURL *)newURL {
     [self setURL:newURL];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
