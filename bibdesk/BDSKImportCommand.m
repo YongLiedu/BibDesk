@@ -120,7 +120,7 @@
         return nil;
 	}
 	
-    NSArray *pubs = [document newPublicationsForString:string type:BDSKUnknownStringType verbose:NO error:NULL];
+    NSArray *pubs = [document publicationsForString:string type:BDSKUnknownStringType verbose:NO error:NULL];
 	if ([pubs count])
     	[document addPublications:pubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:NO edit:NO];
 	

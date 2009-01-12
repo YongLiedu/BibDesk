@@ -310,7 +310,7 @@
             }
             int type = [string contentStringType];
             if(type != BDSKUnknownStringType)
-                newPubs = [document newPublicationsForString:string type:type verbose:NO error:&error];
+                newPubs = [document publicationsForString:string type:type verbose:NO error:&error];
         }
         if (nil == newPubs) {
             // !!! logs are here to help diagnose problems that users are reporting

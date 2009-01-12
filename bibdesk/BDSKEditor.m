@@ -2499,7 +2499,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		NSString *pbString = [pboard stringForType:NSStringPboardType];
         NSError *error = nil;
         // this returns nil when there was a parser error and the user didn't decide to proceed anyway
-        draggedPubs = [[self document] newPublicationsForString:pbString type:[pbString contentStringType] verbose:NO error:&error];
+        draggedPubs = [[self document] publicationsForString:pbString type:[pbString contentStringType] verbose:NO error:&error];
         // we ignore warnings for parsing with temporary keys, but we want to ignore the cite key in that case
         if([[error userInfo] objectForKey:@"temporaryCiteKey"] != nil){
             hasTemporaryCiteKey = YES;
@@ -2508,7 +2508,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	}else if([pboardType isEqualToString:BDSKBibItemPboardType]){
 		NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
         // we can't just unarchive, as this gives complex strings with the wrong macroResolver
-		draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
+		draggedPubs = [[self document] publicationsFromArchivedData:pbData];
 	}
     
     // this happens when we didn't find a valid pboardType or parsing failed
@@ -2793,7 +2793,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             if ([field isCitationField]){
                 
                 NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
-                NSArray *draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
+                NSArray *draggedPubs = [[self document] publicationsFromArchivedData:pbData];
                 
                 if ([draggedPubs count]) {
                     
@@ -2809,7 +2809,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
             } else if ([field isEqualToString:BDSKCrossrefString]){
                 
                 NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
-                NSArray *draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
+                NSArray *draggedPubs = [[self document] publicationsFromArchivedData:pbData];
                 NSString *crossref = [[draggedPubs firstObject] citeKey];
                 
                 if ([NSString isEmptyString:crossref])

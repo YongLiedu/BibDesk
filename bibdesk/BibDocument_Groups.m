@@ -1464,7 +1464,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [archiver finishEncoding];
     [archiver release];
     
-    newPubs = [self newPublicationsFromArchivedData:data];
+    newPubs = [self publicationsFromArchivedData:data];
     
     [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:YES edit:NO];
 	
@@ -1802,7 +1802,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [archiver finishEncoding];
     [archiver release];
     
-    newPubs = [self newPublicationsFromArchivedData:data];
+    newPubs = [self publicationsFromArchivedData:data];
 	
     [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:NO edit:NO];
     

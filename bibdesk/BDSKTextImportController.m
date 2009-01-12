@@ -1841,7 +1841,7 @@
         return;
 		
     NSError *error = nil;
-    NSArray *pubs = [document newPublicationsForString:string type:type verbose:NO error:&error];
+    NSArray *pubs = [document publicationsForString:string type:type verbose:NO error:&error];
     
     // ignore warnings for parsing with temporary citekeys, as we're not interested in the cite key
     if ([[error userInfo] valueForKey:@"temporaryCiteKey"] != nil)

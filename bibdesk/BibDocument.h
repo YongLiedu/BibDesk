@@ -415,11 +415,11 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect edit:(BOOL)shouldEdit;
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select verbose:(BOOL)verbose error:(NSError **)error;
 - (BOOL)addPublicationsFromFile:(NSString *)fileName verbose:(BOOL)verbose error:(NSError **)outError;
-- (NSArray *)newPublicationsFromArchivedData:(NSData *)data;
-- (NSArray *)newPublicationsForString:(NSString *)string type:(int)type verbose:(BOOL)verbose error:(NSError **)error;
-- (NSArray *)newPublicationsForFiles:(NSArray *)filenames error:(NSError **)error;
+- (NSArray *)publicationsFromArchivedData:(NSData *)data;
+- (NSArray *)publicationsForString:(NSString *)string type:(int)type verbose:(BOOL)verbose error:(NSError **)error;
+- (NSArray *)publicationsForFiles:(NSArray *)filenames error:(NSError **)error;
 - (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles verbose:(BOOL)verbose error:(NSError **)error;
-- (NSArray *)newPublicationForURLFromPasteboard:(NSPasteboard *)pboard error:(NSError **)error;
+- (NSArray *)publicationsForURLFromPasteboard:(NSPasteboard *)pboard error:(NSError **)error;
 
 // Private methods
 

@@ -2152,17 +2152,17 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if([type isEqualToString:BDSKBibItemPboardType]){
         NSData *pbData = [pb dataForType:BDSKBibItemPboardType];
-		newPubs = [self newPublicationsFromArchivedData:pbData];
+		newPubs = [self publicationsFromArchivedData:pbData];
     } else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){ // pasteboard type from Reference Miner, determined using Pasteboard Peeker
         NSString *pbString = [pb stringForType:BDSKReferenceMinerStringPboardType]; 	
         // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
-		newPubs = [self newPublicationsForString:pbString type:BDSKReferenceMinerStringType verbose:verbose error:&error];
+		newPubs = [self publicationsForString:pbString type:BDSKReferenceMinerStringType verbose:verbose error:&error];
         if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
             error = nil; // accept temporary cite keys, but show a warning later
     }else if([type isEqualToString:NSStringPboardType]){
         NSString *pbString = [pb stringForType:NSStringPboardType]; 	
 		// sniff the string to see what its type is
-		newPubs = [self newPublicationsForString:pbString type:BDSKUnknownStringType verbose:verbose error:&error];
+		newPubs = [self publicationsForString:pbString type:BDSKUnknownStringType verbose:verbose error:&error];
         if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
             error = nil; // accept temporary cite keys, but show a warning later
     }else if([type isEqualToString:NSFilenamesPboardType]){
@@ -2173,22 +2173,22 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		if(temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"])
             error = nil; // accept temporary cite keys, but show a warning later
         if ([unparseableFiles count] > 0) {
-            newFilePubs = [self newPublicationsForFiles:unparseableFiles error:&error];
+            newFilePubs = [self publicationsForFiles:unparseableFiles error:&error];
             newPubs = [newPubs arrayByAddingObjectsFromArray:newFilePubs];
         }
         [unparseableFiles release];
     }else if([type isEqualToString:BDSKWeblocFilePboardType]){
         NSURL *pbURL = [NSURL URLWithString:[pb stringForType:BDSKWeblocFilePboardType]]; 	
 		if([pbURL isFileURL])
-            newPubs = newFilePubs = [self newPublicationsForFiles:[NSArray arrayWithObject:[pbURL path]] error:&error];
+            newPubs = newFilePubs = [self publicationsForFiles:[NSArray arrayWithObject:[pbURL path]] error:&error];
         else
-            newPubs = [self newPublicationForURLFromPasteboard:pb error:&error];
+            newPubs = [self publicationsForURLFromPasteboard:pb error:&error];
     }else if([type isEqualToString:NSURLPboardType]){
         NSURL *pbURL = [NSURL URLFromPasteboard:pb]; 	
 		if([pbURL isFileURL])
-            newPubs = newFilePubs = [self newPublicationsForFiles:[NSArray arrayWithObject:[pbURL path]] error:&error];
+            newPubs = newFilePubs = [self publicationsForFiles:[NSArray arrayWithObject:[pbURL path]] error:&error];
         else
-            newPubs = [self newPublicationForURLFromPasteboard:pb error:&error];
+            newPubs = [self publicationsForURLFromPasteboard:pb error:&error];
 	}else{
         // errors are key, value
         OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description"), nil);
@@ -2222,7 +2222,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return YES;
 }
 
-- (NSArray *)newPublicationsFromArchivedData:(NSData *)data{
+- (NSArray *)publicationsFromArchivedData:(NSData *)data{
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
     
     [BDSKComplexString setMacroResolverForUnarchiving:macroResolver];
@@ -2237,7 +2237,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 // pass BDSKUnkownStringType to allow BDSKStringParser to sniff the text and determine the format
-- (NSArray *)newPublicationsForString:(NSString *)string type:(int)type verbose:(BOOL)verbose error:(NSError **)outError {
+- (NSArray *)publicationsForString:(NSString *)string type:(int)type verbose:(BOOL)verbose error:(NSError **)outError {
     NSArray *newPubs = nil;
     NSError *parseError = nil;
     BOOL isPartialData = NO;
@@ -2362,7 +2362,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                     type = [contentString contentStringType];
                 
                 NSError *parseError = nil;
-                NSArray *contentArray = (type == BDSKUnknownStringType) ? nil : [self newPublicationsForString:contentString type:type verbose:verbose error:&parseError];
+                NSArray *contentArray = (type == BDSKUnknownStringType) ? nil : [self publicationsForString:contentString type:type verbose:verbose error:&parseError];
                 
                 if(contentArray == nil){
                     // unable to parse, we link the file and can ignore the error
@@ -2386,7 +2386,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return array;
 }
 
-- (NSArray *)newPublicationsForFiles:(NSArray *)filenames error:(NSError **)error {
+- (NSArray *)publicationsForFiles:(NSArray *)filenames error:(NSError **)error {
     NSMutableArray *newPubs = [NSMutableArray arrayWithCapacity:[filenames count]];
 	NSEnumerator *e = [filenames objectEnumerator];
 	NSString *fnStr = nil;
@@ -2431,7 +2431,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	return newPubs;
 }
 
-- (NSArray *)newPublicationForURLFromPasteboard:(NSPasteboard *)pboard error:(NSError **)error {
+- (NSArray *)publicationsForURLFromPasteboard:(NSPasteboard *)pboard error:(NSError **)error {
     
     NSMutableArray *pubs = nil;
     
