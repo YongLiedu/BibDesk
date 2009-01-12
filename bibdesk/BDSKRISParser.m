@@ -61,11 +61,7 @@
     
     // skip leading whitespace
     [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
-    
-    if([scanner scanString:@"TY" intoString:nil] &&
-       [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil] &&
-       [scanner scanString:@"-" intoString:nil]) // for RIS
-        isRIS = YES;
+    isRIS = [scanner scanString:@"TY  - " intoString:nil];
     [scanner release];
     return isRIS;
 }
