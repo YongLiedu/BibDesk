@@ -130,8 +130,8 @@
 - (NSString *)URLString;
 - (void)setURLString:(NSString *)newURLString;
 
-- (NSURL *)fileURL;
-- (void)setFileURL:(NSURL *)newURL;
+- (NSURL *)scriptingFileURL;
+- (void)setScriptingFileURL:(NSURL *)newURL;
 
 @end
 
