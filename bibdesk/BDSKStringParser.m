@@ -96,12 +96,14 @@ static Class classForType(int stringType)
 + (BOOL)canParseString:(NSString *)string ofType:(int)stringType{
     if (stringType == BDSKUnknownStringType)
         stringType = [string contentStringType];
+    OBASSERT(self != [BDSKStringParser class]);
     Class parserClass = classForType(stringType);
     OBASSERT(parserClass != [BDSKStringParser class]);
     return parserClass != Nil ? [parserClass canParseString:string] : NO;
 }
 
 + (NSArray *)itemsFromString:(NSString *)string ofType:(int)stringType error:(NSError **)outError{
+    OBASSERT(self != [BDSKStringParser class]);
     if (stringType == BDSKUnknownStringType)
         stringType = [string contentStringType];
     OBASSERT(stringType != BDSKBibTeXStringType);
