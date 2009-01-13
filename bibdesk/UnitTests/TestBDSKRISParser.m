@@ -25,8 +25,10 @@ static NSString *badRISSingleSpace = @"TY - JOUR\nT1 - Julian Steward, American 
 	
     STAssertEquals([BDSKStringParser canParseString:goodRIS ofType:BDSKRISStringType ],
 				   YES, @"Check that we can parse a basic RIS record");
-    STAssertEquals([BDSKStringParser canParseString:goodRIS ofType:BDSKRISStringType ],
+    STAssertEquals([BDSKStringParser canParseString:goodRISNoFinalReturnOrSpace ofType:BDSKRISStringType ],
 				   YES, @"Check that we can parse a basic RIS record even with missing final return");
+    STAssertEquals([BDSKStringParser canParseString:goodRIS ofType:BDSKUnknownStringType ],
+				   YES, @"Check that we can parse a basic RIS record without type information");
     STAssertEquals([BDSKStringParser canParseString:badRISSingleSpace ofType:BDSKRISStringType ],
 				   NO, @"Check that we reject a RIS record with a missing space in front of dash");
 }
@@ -37,8 +39,8 @@ static NSString *badRISSingleSpace = @"TY - JOUR\nT1 - Julian Steward, American 
 }
 
 - (void)testRISToMinimalBibTex{
-	BibItem *b = [[BDSKStringParser itemsFromString:goodRIS error:NULL] lastObject];
-	BibItem *b2 = [[BDSKStringParser itemsFromString:goodRISNoFinalReturnOrSpace error:NULL] lastObject];
+	BibItem *b = [[BDSKStringParser itemsFromString:goodRIS ofType:BDSKUnknownStringType error:NULL] lastObject];
+	BibItem *b2 = [[BDSKStringParser itemsFromString:goodRISNoFinalReturnOrSpace ofType:BDSKUnknownStringType error:NULL] lastObject];
 	
 	// These are fairly broad spectrum tests - would probably be better to break it down some more.
 	

@@ -46,7 +46,7 @@ static NSString *semCell = @"PMID- 16439169\nOWN - NLM\nSTAT- MEDLINE\nDA  - 200
 - (void)setUp {
     // create the object(s) that we want to test
     [super setUp];
-	//bibitem = [[BDSKStringParser itemsFromString:watsonCrick error:NULL] lastObject];
+	//bibitem = [[BDSKStringParser itemsFromString:watsonCrick ofType:BDSKUnknownStringType error:NULL] lastObject];
 	//STAssertNotNil(bibitem,@"Check that we can parse the Watson Crick PubMed record");
 	//    testable = [[Testable alloc] init];
 }
@@ -59,11 +59,10 @@ static NSString *semCell = @"PMID- 16439169\nOWN - NLM\nSTAT- MEDLINE\nDA  - 200
 
 - (void)testCanParseString{
 	
-    STAssertEquals([BDSKStringParser canParseString:watsonCrick ofType:BDSKPubMedStringType ],
+    STAssertEquals([BDSKStringParser canParseString:watsonCrick ofType:BDSKPubMedStringType],
 				   YES, @"Check that we can parse a basic PubMed record");
-    // GJ: Maybe it would be nice to make this possible some day ...
-	STAssertEquals([BDSKStringParser canParseString:watsonCrick],
-				   NO, @"Can't parse without type information");
+	STAssertEquals([BDSKStringParser canParseString:watsonCrick ofType:BDSKUnknownStringType],
+				   YES, @"Check that we can parse a basic PubMed record without type information");
 }
 
 - (void)testContentStringType{
@@ -71,7 +70,7 @@ static NSString *semCell = @"PMID- 16439169\nOWN - NLM\nSTAT- MEDLINE\nDA  - 200
 }
 
 - (void)testOldMedlineArticleParsing{
-	BibItem *b = [[BDSKStringParser itemsFromString:watsonCrick error:NULL] lastObject];
+	BibItem *b = [[BDSKStringParser itemsFromString:watsonCrick ofType:BDSKUnknownStringType error:NULL] lastObject];
 
 	// Test BibDesk internal fields
 	// ============================
@@ -90,7 +89,7 @@ static NSString *semCell = @"PMID- 16439169\nOWN - NLM\nSTAT- MEDLINE\nDA  - 200
 }
 
 - (void)testRecentMedlineArticleParsing{
-	BibItem *b = [[BDSKStringParser itemsFromString:jefferisetal error:NULL] lastObject];
+	BibItem *b = [[BDSKStringParser itemsFromString:jefferisetal ofType:BDSKUnknownStringType error:NULL] lastObject];
 	
 	// Test BibItem internal fields
 	// ============================
@@ -132,7 +131,7 @@ static NSString *semCell = @"PMID- 16439169\nOWN - NLM\nSTAT- MEDLINE\nDA  - 200
 	
 }
 - (void)testAbbreviatedJournalTitle{
-	BibItem *b = [[BDSKStringParser itemsFromString:semCell error:NULL] lastObject];
+	BibItem *b = [[BDSKStringParser itemsFromString:semCell ofType:BDSKUnknownStringType error:NULL] lastObject];
 	
 	// NB this is the value of the TA (abbreviated) field which is preferred over the 
 	// JT field because that field often contains annoying additions eg:
@@ -146,7 +145,7 @@ static NSString *semCell = @"PMID- 16439169\nOWN - NLM\nSTAT- MEDLINE\nDA  - 200
 }
 
 - (void)testParseMedlineToMinimalBibTex{
-	BibItem *b = [[BDSKStringParser itemsFromString:jefferisetal error:NULL] lastObject];
+	BibItem *b = [[BDSKStringParser itemsFromString:jefferisetal ofType:BDSKUnknownStringType error:NULL] lastObject];
 
 	// These are fairly broad spectrum tests - would probably be better to break it down some more.
 	
@@ -154,7 +153,7 @@ static NSString *semCell = @"PMID- 16439169\nOWN - NLM\nSTAT- MEDLINE\nDA  - 200
 						 @"@article{cite-key,\n\tAuthor = {Jefferis, Gregory S X E and Potter, Christopher J and Chan, Alexander M and Marin, Elizabeth C and Rohlfing, Torsten and Maurer, Calvin R Jr and Luo, Liqun},\n\tJournal = {Cell},\n\tMonth = {Mar},\n\tNumber = {6},\n\tPages = {1187--1203},\n\tTitle = {Comprehensive maps of Drosophila higher olfactory centers: spatially segregated fruit and pheromone representation.},\n\tVolume = {128},\n\tYear = {2007}}",
 						 @"BibTex format error for PubMed record, Jefferis et al Cell 2007");
 	// This has a funky Journal Title
-	b = [[BDSKStringParser itemsFromString:semCell error:NULL] lastObject];
+	b = [[BDSKStringParser itemsFromString:semCell ofType:BDSKUnknownStringType error:NULL] lastObject];
 
 	STAssertEqualObjects([b bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask],
 						 @"@article{cite-key,\n\tAuthor = {Jefferis, Gregory S X E and Hummel, Thomas},\n\tJournal = {Semin Cell Dev Biol},\n\tMonth = {Feb},\n\tNumber = {1},\n\tPages = {50--65},\n\tTitle = {Wiring specificity in the olfactory system.},\n\tVolume = {17},\n\tYear = {2006}}",
@@ -165,25 +164,25 @@ static NSString *semCell = @"PMID- 16439169\nOWN - NLM\nSTAT- MEDLINE\nDA  - 200
 	BibItem *b;
 	// Year Only
 	b = [[BDSKStringParser itemsFromString:@"PMID- 13054692\nDP  - 1953\nTI  - Test.\nPG  - 737-8\nFAU - WATSON, J D\nPT  - Journal Article\nJT  - Nature\n"
-									 error:NULL] lastObject];
+                                    ofType:BDSKUnknownStringType error:NULL] lastObject];
 	STAssertEqualObjects([b valueOfField:@"Year"],@"1953", @"for Year field");
 	STAssertEqualObjects([b valueOfField:@"Month"],@"", @"for Month field");
 
 	// Year and Month (no Day)
 	b = [[BDSKStringParser itemsFromString:@"PMID- 13054692\nDP  - 1953 Mar\nTI  - Test.\nPG  - 737-8\nFAU - WATSON, J D\nPT  - Journal Article\nJT  - Nature\n"
-									 error:NULL] lastObject];
+                                    ofType:BDSKUnknownStringType error:NULL] lastObject];
 	STAssertEqualObjects([b valueOfField:@"Year"],@"1953", @"for Year field");
 	STAssertEqualObjects([b valueOfField:@"Month"],@"Mar", @"for Month field");
 
 	// Year and Season	
 	b = [[BDSKStringParser itemsFromString:@"PMID- 13054692\nDP  - 1953 Spring\nTI  - Test.\nPG  - 737-8\nFAU - WATSON, J D\nPT  - Journal Article\nJT  - Nature\n"
-									 error:NULL] lastObject];
+									ofType:BDSKUnknownStringType error:NULL] lastObject];
 	STAssertEqualObjects([b valueOfField:@"Year"],@"1953", @"for Year field");
 	STAssertEqualObjects([b valueOfField:@"Month"],@"Spring", @"for Month field");
 
 	// Year and Month Range
 	b = [[BDSKStringParser itemsFromString:@"PMID- 13054692\nDP  - 1953 Jan-Feb\nTI  - Test.\nPG  - 737-8\nFAU - WATSON, J D\nPT  - Journal Article\nJT  - Nature\n"
-									 error:NULL] lastObject];
+									ofType:BDSKUnknownStringType error:NULL] lastObject];
 	STAssertEqualObjects([b valueOfField:@"Year"],@"1953", @"for Year field");
 	STAssertEqualObjects([b valueOfField:@"Month"],@"Jan-Feb", @"for Month field");
 	
