@@ -292,7 +292,7 @@
     DOMDocument *domDocument = [frame DOMDocument];
     
     NSError *error = nil;
-    NSArray *newPubs = [BDSKWebParser itemsFromDocument:domDocument fromURL:url error:&error];
+    NSArray *newPubs = [BDSKWebParser itemsFromDocument:domDocument fromURL:url ofType:BDSKUnknownWebType error:&error];
     if (nil == newPubs) {
         WebDataSource *dataSource = [frame dataSource];
         if ([[[dataSource mainResource] MIMEType] isEqualToString:@"text/plain"]) { 
