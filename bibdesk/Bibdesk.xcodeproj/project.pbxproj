@@ -337,6 +337,7 @@
 		CEFDBDDE0AEA87F8009EE99D /* BDSKCategoryGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */; };
 		EF168DFE0F1133AD002F4D9F /* TestUnitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EF168DFD0F1133AD002F4D9F /* TestUnitTest.m */; };
 		EF1970D30F13B70900B87E59 /* TestBDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = EF1970D20F13B70900B87E59 /* TestBDSKTypeManager.m */; };
+		EF54ED180F1B5EDB00D59E07 /* TestBDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = EF54ED170F1B5EDB00D59E07 /* TestBDSKRISParser.m */; };
 		EF902B890F12343000E5DE14 /* TestBibItemST.m in Sources */ = {isa = PBXBuildFile; fileRef = EF902B880F12343000E5DE14 /* TestBibItemST.m */; };
 		EF902C520F12406E00E5DE14 /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
 		EF902DA40F12410300E5DE14 /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
@@ -1331,6 +1332,7 @@
 		EF168DFD0F1133AD002F4D9F /* TestUnitTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestUnitTest.m; path = UnitTests/TestUnitTest.m; sourceTree = "<group>"; };
 		EF1970D10F13B70900B87E59 /* TestBDSKTypeManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestBDSKTypeManager.h; path = UnitTests/TestBDSKTypeManager.h; sourceTree = "<group>"; };
 		EF1970D20F13B70900B87E59 /* TestBDSKTypeManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestBDSKTypeManager.m; path = UnitTests/TestBDSKTypeManager.m; sourceTree = "<group>"; };
+		EF54ED170F1B5EDB00D59E07 /* TestBDSKRISParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestBDSKRISParser.m; path = UnitTests/TestBDSKRISParser.m; sourceTree = "<group>"; };
 		EF902B870F12343000E5DE14 /* TestBibItemST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestBibItemST.h; path = UnitTests/TestBibItemST.h; sourceTree = "<group>"; };
 		EF902B880F12343000E5DE14 /* TestBibItemST.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestBibItemST.m; path = UnitTests/TestBibItemST.m; sourceTree = "<group>"; };
 		EFA7218E0F12BD80005B2F5F /* TestPubMed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestPubMed.h; path = UnitTests/TestPubMed.h; sourceTree = "<group>"; };
@@ -2475,6 +2477,7 @@
 				EFA7218F0F12BD80005B2F5F /* TestPubMed.m */,
 				EF1970D10F13B70900B87E59 /* TestBDSKTypeManager.h */,
 				EF1970D20F13B70900B87E59 /* TestBDSKTypeManager.m */,
+				EF54ED170F1B5EDB00D59E07 /* TestBDSKRISParser.m */,
 			);
 			comments = "This group was added by Greg Jefferis for new the style SenTest based unit tests directly supported by Apple.";
 			name = UnitTests;
@@ -4052,6 +4055,7 @@
 				EF902B890F12343000E5DE14 /* TestBibItemST.m in Sources */,
 				EFA721900F12BD80005B2F5F /* TestPubMed.m in Sources */,
 				EF1970D30F13B70900B87E59 /* TestBDSKTypeManager.m in Sources */,
+				EF54ED180F1B5EDB00D59E07 /* TestBDSKRISParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
