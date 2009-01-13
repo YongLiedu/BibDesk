@@ -64,7 +64,7 @@ static Class webParserClassForType(int stringType)
 		case BDSKSpiresWebType: 
             return [BDSKSpiresParser class];
         default:
-            return nil;
+            return Nil;
     }    
 }
 
@@ -82,34 +82,6 @@ static Class webParserClassForType(int stringType)
     if([BDSKSpiresParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
 		return BDSKSpiresWebType;
     return BDSKUnknownWebType;
-}
-
-+ (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url ofType:(int)webType{
-    Class parserClass = webParserClassForType(webType);
-    return parserClass != Nil ? [parserClass canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url] : NO;
-}
-
-+ (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-    return NO;
-}
-
-+ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument 
-                   xmlDocument:(NSXMLDocument *)xmlDocument 
-                       fromURL:(NSURL *)url
-                        ofType:(int)webType error:(NSError **)outError{
-        
-    Class parserClass = Nil;
-    if (webType == BDSKUnknownWebType)
-        webType = [self webTypeOfDocument:domDocument xmlDocument:xmlDocument fromURL:url];
-    
-    parserClass = webParserClassForType(webType);
-    
-    // don't return nil here; this may be the Google Scholar homepage or something, and we don't want to display an error message for it
-    // this may lead to some false negatives if the heuristics for canParseDocument::: change.
-    if (Nil == parserClass)
-        return [NSArray array];
-    
-    return [parserClass itemsFromDocument:domDocument xmlDocument:xmlDocument fromURL:url error:outError];
 }
 
 // entry point from view controller
@@ -134,20 +106,28 @@ static Class webParserClassForType(int stringType)
         return nil;
     }
     
-    return [self itemsFromDocument:domDocument xmlDocument:xmlDoc fromURL:url error:outError];
+    int webType = [self webTypeOfDocument:domDocument xmlDocument:xmlDoc fromURL:url];
+    
+    Class parserClass = webParserClassForType(webType);
+    
+    OBASSERT(parserClass != [BDSKWebParser class]);
+    
+    // don't return nil here; this may be the Google Scholar homepage or something, and we don't want to display an error message for it
+    // this may lead to some false negatives if the heuristics for canParseDocument::: change.
+    if (Nil == parserClass)
+        return [NSArray array];
+    
+    return [parserClass itemsFromDocument:domDocument xmlDocument:xmlDoc fromURL:url error:outError];
 }
 
-+ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument
-                   xmlDocument:(NSXMLDocument *)xmlDocument 
-                       fromURL:(NSURL *)url
-                         error:(NSError **)outError{
++ (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
+    OBRequestConcreteImplementation(self, _cmd);
+    return NO;
+}
 
-    if([self class] == [BDSKWebParser class]){
-        return [self itemsFromDocument:domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url ofType:BDSKUnknownWebType error:outError];
-    }else{
-        OBRequestConcreteImplementation(self, _cmd);
-        return nil;
-    }
++ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
+    OBRequestConcreteImplementation(self, _cmd);
+    return nil;
 }
 
 @end

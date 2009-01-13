@@ -49,20 +49,14 @@ enum {
     BDSKSpiresWebType
 };
 
+// this method is the main entry point for the BDSKWebParser class
+// it should not be overridden by the concrete subclasses
 @interface BDSKWebParser : NSObject
-
-// IMPORTANT NOTE:
-// Use this method as the main interface to this class. It will build the XMLDocument and figure out the type for you:
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError;
+@end
 
-
-+ (int)webTypeOfDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url;
-
-+ (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url ofType:(int)webType;
+// these methods must be implemented by the concrete subclasses, and are invalid for the BDSKWebParser class
+@interface BDSKWebParser (SubclassResponsibility)
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url;
-
-+ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url ofType:(int)webType error:(NSError **)outError;
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError;
-
-
 @end
