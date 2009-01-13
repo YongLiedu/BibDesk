@@ -29,9 +29,6 @@ static NSString *badRISSingleSpace = @"TY - JOUR\nT1 - Julian Steward, American 
 				   YES, @"Check that we can parse a basic RIS record even with missing final return");
     STAssertEquals([BDSKStringParser canParseString:badRISSingleSpace ofType:BDSKRISStringType ],
 				   NO, @"Check that we reject a RIS record with a missing space in front of dash");
-    // GJ: Maybe it would be nice to make this possible some day ...
-	STAssertEquals([BDSKStringParser canParseString:goodRIS],
-				   NO, @"Can't parse without type information");
 }
 
 - (void)testContentStringType{
