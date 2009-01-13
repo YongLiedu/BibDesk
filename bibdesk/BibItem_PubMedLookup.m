@@ -58,7 +58,7 @@
 + (id)itemWithPMID:(NSString *)pmid;
 {
     NSString *string = [BDSKPubMedLookupHelper referenceForPMID:pmid];
-    return string ? [[BDSKStringParser itemsFromString:string error:NULL] lastObject] : nil;
+    return string ? [[BDSKStringParser itemsFromString:string ofType:BDSKUnknownStringType error:NULL] lastObject] : nil;
 }
 
 @end
