@@ -53,10 +53,6 @@
 
 @implementation BDSKStringParser
 
-+ (BOOL)canParseString:(NSString *)string{
-    return NO;
-}
-
 static Class classForType(int stringType)
 {
     Class parserClass = Nil;
@@ -98,28 +94,39 @@ static Class classForType(int stringType)
 }
 
 + (BOOL)canParseString:(NSString *)string ofType:(int)stringType{
+    if (stringType == BDSKUnknownStringType)
+        stringType = [string contentStringType];
     Class parserClass = classForType(stringType);
+    OBASSERT(parserClass != [BDSKStringParser class]);
     return parserClass != Nil ? [parserClass canParseString:string] : NO;
 }
 
-+ (NSArray *)itemsFromString:(NSString *)itemString ofType:(int)stringType error:(NSError **)outError{
-    Class parserClass = Nil;
++ (NSArray *)itemsFromString:(NSString *)string ofType:(int)stringType error:(NSError **)outError{
     if (stringType == BDSKUnknownStringType)
-        stringType = [itemString contentStringType];
-    // @@ currently returns Nil for BibTeX types
+        stringType = [string contentStringType];
     OBASSERT(stringType != BDSKBibTeXStringType);
     OBASSERT(stringType != BDSKNoKeyBibTeXStringType);
-    parserClass = classForType(stringType);
+    Class parserClass = classForType(stringType);
+    OBASSERT(parserClass != [BDSKStringParser class]);
     if (Nil == parserClass && outError){
         *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unsupported or invalid format", @"error when parsing text fails")];
         [*outError setValue:NSLocalizedString(@"BibDesk was not able to determine the syntax of this data.  It may be incorrect or an unsupported type of text.", @"error description when parsing text fails") forKey:NSLocalizedRecoverySuggestionErrorKey];
     }
-    return [parserClass itemsFromString:itemString error:outError];
+    return [parserClass itemsFromString:string error:outError];
 }
 
-+ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
++ (BOOL)canParseString:(NSString *)string{
     if([self class] == [BDSKStringParser class]){
-        return [self itemsFromString:itemString ofType:BDSKUnknownStringType error:outError];
+        return [self canParseString:string ofType:BDSKUnknownStringType];
+    }else{
+        OBRequestConcreteImplementation(self, _cmd);
+        return NO;
+    }
+}
+
++ (NSArray *)itemsFromString:(NSString *)string error:(NSError **)outError{
+    if([self class] == [BDSKStringParser class]){
+        return [self itemsFromString:string ofType:BDSKUnknownStringType error:outError];
     }else{
         OBRequestConcreteImplementation(self, _cmd);
         return nil;

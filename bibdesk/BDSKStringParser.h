@@ -54,15 +54,18 @@ enum {
     BDSKSciFinderStringType
 };
 
-@interface BDSKStringParser : NSObject {
-}
-
+// these methods are valid for the abstract class, and should not be used or defined for a concrete subclass
+// for BDSKUnknownStringType, type will be determined using [string contentStringType]
+@interface BDSKStringParser : NSObject
 + (BOOL)canParseString:(NSString *)string ofType:(int)stringType;
++ (NSArray *)itemsFromString:(NSString *)string ofType:(int)stringType error:(NSError **)outError;
+@end
+
+// these methods must be implemented by the concrete subclasses
+// for the abstract class, these will call the corresponding method above using BDSKUnknownStringType
+@interface BDSKStringParser (SubclassResponsibility)
 + (BOOL)canParseString:(NSString *)string;
-
-+ (NSArray *)itemsFromString:(NSString *)itemString ofType:(int)stringType error:(NSError **)outError;
-+ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError;
-
++ (NSArray *)itemsFromString:(NSString *)string error:(NSError **)outError;
 @end
 
 
