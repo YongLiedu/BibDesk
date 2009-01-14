@@ -246,18 +246,18 @@ static NSImage *unlockedIcon = nil;
         NSData *archive = [client archivedPublications];
         NSArray *pubs = nil;
         if (archive) {
-            [BDSKComplexString setMacroResolverForUnarchiving:[self macroResolver]];
+            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
             pubs = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
-            [BDSKComplexString setMacroResolverForUnarchiving:nil];
+            [NSString setMacroResolverForUnarchiving:nil];
         }
         [self setPublications:pubs];
     } else if ([key isEqualToString:@"archivedMacros"]) {
         NSData *archive = [client archivedMacros];
         NSDictionary *macros = nil;
         if (archive) {
-            [BDSKComplexString setMacroResolverForUnarchiving:[self macroResolver]];
+            [NSString setMacroResolverForUnarchiving:[self macroResolver]];
             macros = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
-            [BDSKComplexString setMacroResolverForUnarchiving:nil];
+            [NSString setMacroResolverForUnarchiving:nil];
         }
         NSEnumerator *macroEnum = [macros keyEnumerator];
         NSString *macro;

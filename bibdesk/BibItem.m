@@ -352,9 +352,9 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (id)copyWithMacroResolver:(BDSKMacroResolver *)macroResolver{
-    [BDSKComplexString setMacroResolverForUnarchiving:macroResolver];
+    [NSString setMacroResolverForUnarchiving:macroResolver];
 	id theCopy = [[NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:self]] retain];
-    [BDSKComplexString setMacroResolverForUnarchiving:nil];
+    [NSString setMacroResolverForUnarchiving:nil];
     return theCopy;
 }
 
@@ -2373,7 +2373,7 @@ static void addFilesToArray(const void *value, void *context)
         BDSKStringNode *node;
         while (node = [nodeEnum nextObject]) {
             if ([node type] != BSN_MACRODEF) continue;
-            BDSKMacroResolver *resolver = [[(BDSKComplexString *)value macroResolver] valueOfMacro:[node value]] ? [(BDSKComplexString *)value macroResolver] : [BDSKMacroResolver defaultMacroResolver];
+            BDSKMacroResolver *resolver = [[value macroResolver] valueOfMacro:[node value]] ? [value macroResolver] : [BDSKMacroResolver defaultMacroResolver];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:[node value] macroResolver:resolver];
             [macros addObject:macro];
             [macro release];

@@ -137,7 +137,7 @@ static BDSKConverter *sharedConverter = nil;
     [self setDetexifyAccents:[wholeDict objectForKey:TEX_TO_ROMAN_ACCENTS_KEY]];
 }
 
-- (NSString *)copyComplexString:(BDSKComplexString *)cs byCopyingStringNodesUsingSelector:(SEL)copySelector {
+- (NSString *)copyComplexString:(NSString *)cs byCopyingStringNodesUsingSelector:(SEL)copySelector {
     NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
     BDSKStringNode *node, *newNode;
     NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:[[cs nodes] count]];
@@ -164,7 +164,7 @@ static BDSKConverter *sharedConverter = nil;
     
 	// TeXify only string nodes of complex strings;
 	if([s isComplex]){
-        return [self copyComplexString:(BDSKComplexString *)s byCopyingStringNodesUsingSelector:_cmd];
+        return [self copyComplexString:s byCopyingStringNodesUsingSelector:_cmd];
 	}
     
     if([NSString isEmptyString:s]){
@@ -274,7 +274,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 
 	// deTeXify only string nodes of complex strings;
 	if([s isComplex]){
-        return [self copyComplexString:(BDSKComplexString *)s byCopyingStringNodesUsingSelector:_cmd];
+        return [self copyComplexString:s byCopyingStringNodesUsingSelector:_cmd];
 	}
     
     if([NSString isEmptyString:s]){

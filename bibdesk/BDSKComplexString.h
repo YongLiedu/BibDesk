@@ -41,46 +41,12 @@
 
 @class BDSKMacroResolver;
 
-/* BDSKComplexString is a string that may be a concatenation of strings, 
-    some of which are macros.
-   It's a concrete subclass of NSString, which means it can be used 
-    anywhere an NSString can.
-   The string always has an expandedValue, which is treated as the 
-    actual value if you treat it as an NSString. That value
-    is either the expanded value or the value of the macro itself. */
+/* This is a category on NSString containing the API for complex strings. */
 
-
-@interface BDSKComplexString : NSString <NSCopying, NSCoding>{
-  NSArray *nodes;			/* an array of BDSKStringNodes. */
-
-  BDSKMacroResolver *macroResolver;
-  
-  BOOL complex;
-  BOOL inherited;
-  
-  NSString *expandedString;
-  unsigned long long modification;
-  unsigned long long defaultModification;
-}
+@interface NSString (BDSKComplexStringExtensions)
 
 + (BDSKMacroResolver *)macroResolverForUnarchiving;
 + (void)setMacroResolverForUnarchiving:(BDSKMacroResolver *)aMacroResolver;
-
-/*!
-    @method     macroResolver
-    @abstract   Returns the object used to resolve macros in the complex string
-    @discussion (description)
-    @result     -
-*/
-- (BDSKMacroResolver *)macroResolver;
-
-@end
-
-/* These is a category on NSString containing the class factory methods for 
-    creating concrete BDSKComplexStrings, as well as a bunch of ceomplex string 
-    methods that we want to be able to call on any NSString as well. */
-
-@interface NSString (BDSKComplexStringExtensions)
 
 + (BOOL)isEmptyAsComplexString:(NSString *)aString;
 
@@ -179,6 +145,14 @@
 - (BOOL)isInherited;
 
 /*!
+    @method     macroResolver
+    @abstract   Returns the object used to resolve macros in the complex string
+    @discussion (description)
+    @result     -
+*/
+- (BDSKMacroResolver *)macroResolver;
+
+/*!
     @method     nodes
     @abstract   The string nodes of the string. Returns an array containing a single string-type node when the receiver is not complex.
     @discussion (description)
@@ -223,12 +197,12 @@
 - (NSString *)stringAsBibTeXString;
 
 /*!
-    @method     stringAsExpandedBibTeXString
-    @abstract   Returns the value of the string as a BibTeX string value, enclosed in quoting braces.
-    @discussion For complex strings this returns the expanded bibtex string; calls stringAsBibTeXString for non-complex strings.
+    @method     expandedString
+    @abstract   Returns the expanded value of the string.
+    @discussion -
     @result     (description)
 */
-- (NSString *)stringAsExpandedBibTeXString;
+- (NSString *)expandedString;
 
 /*!
     @method     hasSubstring:options:
@@ -248,7 +222,5 @@
 - (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned)opts replacements:(unsigned int *)number;
 
 - (NSString *)stringByPrependingString:(NSString *)string;
-
-- (NSString *)replacementStringByAppendingString:(NSString *)string;
 
 @end

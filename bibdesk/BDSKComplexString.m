@@ -41,19 +41,42 @@
 #import "BDSKMacroResolver.h"
 #import "NSError_BDSKExtensions.h"
 
-#pragma mark -
-#pragma mark Private complex string expansion
-
 static NSCharacterSet *macroCharSet = nil;
 static NSZone *complexStringExpansionZone = NULL;
 static Class BDSKComplexStringClass = Nil;
 
 static BDSKMacroResolver *macroResolverForUnarchiving = nil;
 
+/* BDSKComplexString is a string that may be a concatenation of strings, 
+    some of which are macros.
+   It's a concrete subclass of NSString, which means it can be used 
+    anywhere an NSString can.
+   The string always has an expandedValue, which is treated as the 
+    actual value if you treat it as an NSString. That value
+    is either the expanded value or the value of the macro itself. */
+
+@interface BDSKComplexString : NSString {
+  NSArray *nodes;			/* an array of BDSKStringNodes. */
+
+  BDSKMacroResolver *macroResolver;
+  
+  BOOL complex;
+  BOOL inherited;
+  
+  NSString *expandedString;
+  unsigned long long modification;
+  unsigned long long defaultModification;
+}
+
+@end
+
+#pragma mark -
+#pragma mark Private complex string expansion
+
 #define STACK_BUFFER_SIZE 256
 
 static inline
-CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolver *macroResolver)
+NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolver *macroResolver)
 {
 	BDSKStringNode *node = nil;
     BDSKStringNode **stringNodes, *stackBuffer[STACK_BUFFER_SIZE];
@@ -87,17 +110,17 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
             expandedValue = (CFStringRef)[macroResolver valueOfMacro:(NSString *)nodeVal];
             if(expandedValue == nil && macroResolver != [BDSKMacroResolver defaultMacroResolver])
                 expandedValue = (CFStringRef)[[BDSKMacroResolver defaultMacroResolver] valueOfMacro:(NSString *)nodeVal];
-            CFStringAppend(mutStr, (expandedValue != nil ? expandedValue : nodeVal));
-        } else {
-            CFStringAppend(mutStr, nodeVal);
+            if(expandedValue)
+                nodeVal = expandedValue;
         }
+        CFStringAppend(mutStr, nodeVal);
     }
     
     OBPOSTCONDITION(!BDIsEmptyString(mutStr));
     
     if(stackBuffer != stringNodes) NSZoneFree(complexStringExpansionZone, stringNodes);
     
-    return mutStr;
+    return (NSString *)mutStr;
 }
 
 @implementation BDSKComplexString
@@ -122,17 +145,6 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     
     BDSKComplexStringClass = self;
 
-}
-
-+ (BDSKMacroResolver *)macroResolverForUnarchiving{
-    return macroResolverForUnarchiving;
-}
-
-+ (void)setMacroResolverForUnarchiving:(BDSKMacroResolver *)aMacroResolver{
-    if (macroResolverForUnarchiving != aMacroResolver) {
-        [macroResolverForUnarchiving release];
-        macroResolverForUnarchiving = [aMacroResolver retain];
-    }
 }
 
 + (id)allocWithZone:(NSZone *)aZone{
@@ -180,7 +192,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
         defaultModification = 0;
         expandedString = nil;
 		if (complex) {
-			macroResolver = [(BDSKComplexString *)aValue macroResolver];
+			macroResolver = [aValue macroResolver];
             if (macroResolver == [BDSKMacroResolver defaultMacroResolver]) 
                 macroResolver = nil;
         }
@@ -227,7 +239,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
             nodes = [[coder decodeObjectForKey:@"nodes"] retain];
             complex = [coder decodeBoolForKey:@"complex"];
             inherited = [coder decodeBoolForKey:@"inherited"];
-            macroResolver = [BDSKComplexString macroResolverForUnarchiving];
+            macroResolver = [[self class] macroResolverForUnarchiving];
             expandedString = nil;
             modification = 0;
             defaultModification = 0;
@@ -253,19 +265,6 @@ Rather than relying on the same call sequence to be used, I think we should igno
 - (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
 {
     return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
-}
-
-- (NSString *)expandedString {
-    if (expandedString == nil ||
-        (macroResolver != nil && modification != [macroResolver modification]) ||
-        (complex && defaultModification != [[BDSKMacroResolver defaultMacroResolver] modification])) {
-        [expandedString release];
-        expandedString = (NSString *)__BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
-        if (macroResolver)
-            modification = [macroResolver modification];
-        defaultModification != [[BDSKMacroResolver defaultMacroResolver] modification];
-    }
-    return expandedString;
 }
 
 #pragma mark overridden NSString Methods
@@ -351,6 +350,19 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	return [self compare:other options:mask];
 }
 
+- (NSString *)expandedString {
+    if (expandedString == nil ||
+        (macroResolver != nil && modification != [macroResolver modification]) ||
+        (complex && defaultModification != [[BDSKMacroResolver defaultMacroResolver] modification])) {
+        [expandedString release];
+        expandedString = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
+        if (macroResolver)
+            modification = [macroResolver modification];
+        defaultModification != [[BDSKMacroResolver defaultMacroResolver] modification];
+    }
+    return expandedString;
+}
+
 // Returns the bibtex value of the string.
 - (NSString *)stringAsBibTeXString{
     unsigned int i = 0;
@@ -369,19 +381,6 @@ Rather than relying on the same call sequence to be used, I think we should igno
     }
     
     return retStr; 
-}
-
-- (NSString *)stringAsExpandedBibTeXString{
-    NSString *expValue = [self expandedString];
-    if(expValue == nil)
-        return @"";
-    
-    NSMutableString *bibtexString = [NSMutableString stringWithCapacity:([expValue length] + 2)];
-    [bibtexString appendCharacter:'{'];
-    [bibtexString appendString:expValue];
-    [bibtexString appendCharacter:'}'];
-    
-    return bibtexString;
 }
 
 - (BOOL)hasSubstring:(NSString *)target options:(unsigned)opts{
@@ -489,20 +488,25 @@ Rather than relying on the same call sequence to be used, I think we should igno
     return newString;
 }
 
-#pragma mark complex string methods
-
 - (BDSKMacroResolver *)macroResolver{
     return (macroResolver == nil && complex == YES) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
 }
 
 @end
 
+#pragma mark -
+
 @implementation NSString (ComplexStringExtensions)
 
-static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
++ (BDSKMacroResolver *)macroResolverForUnarchiving{
+    return macroResolverForUnarchiving;
+}
 
-+ (void)didLoad{
-    originalStringByAppendingString = (id (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(stringByAppendingString:), @selector(replacementStringByAppendingString:));
++ (void)setMacroResolverForUnarchiving:(BDSKMacroResolver *)aMacroResolver{
+    if (macroResolverForUnarchiving != aMacroResolver) {
+        [macroResolverForUnarchiving release];
+        macroResolverForUnarchiving = [aMacroResolver retain];
+    }
 }
 
 - (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
@@ -681,6 +685,10 @@ static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
 	return NO;
 }
 
+- (BDSKMacroResolver *)macroResolver{
+    return nil;
+}
+
 - (NSArray *)nodes{
     BDSKStringNode *node = [[BDSKStringNode alloc] initWithQuotedString:self];
     NSArray *nodes = [NSArray arrayWithObject:node];
@@ -717,8 +725,8 @@ static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
 	return mutableString;
 }
 
-- (NSString *)stringAsExpandedBibTeXString{
-    return [self stringAsBibTeXString];
+- (NSString *)expandedString{
+    return self;
 }
         
 - (BOOL)hasSubstring:(NSString *)target options:(unsigned)opts{
@@ -769,6 +777,8 @@ static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
 	}
 }
 
+static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
+
 - (NSString *)replacementStringByAppendingString:(NSString *)string{
     NSString *newString = nil;
     if ([self isEqualToString:@""]) {
@@ -777,13 +787,17 @@ static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
         BDSKStringNode *node = [[BDSKStringNode alloc] initWithQuotedString:self];
         NSMutableArray *nodes = [[NSMutableArray alloc] initWithObjects:node, nil];
         [nodes addObjectsFromArray:[string nodes]];
-        newString = [BDSKComplexString stringWithNodes:nodes macroResolver:[(BDSKComplexString *)string macroResolver]];
+        newString = [BDSKComplexString stringWithNodes:nodes macroResolver:[string macroResolver]];
         [node release];
         [nodes release];
 	} else {
         newString = originalStringByAppendingString(self, _cmd, string);
     }
     return newString;
+}
+
++ (void)didLoad{
+    originalStringByAppendingString = (id (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(stringByAppendingString:), @selector(replacementStringByAppendingString:));
 }
 
 @end
