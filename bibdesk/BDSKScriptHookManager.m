@@ -162,12 +162,8 @@ static NSArray *scriptHookNames = nil;
 		return NO;
 	id value = nil;
 	// set the user info values
-	if ((value = [userInfo objectForKey:@"field"]) != nil)
-		[scriptHook setField:value];
-	if ((value = [userInfo objectForKey:@"oldValues"]) != nil)
-		[scriptHook setOldValues:value];
-	if ((value = [userInfo objectForKey:@"newValues"]) != nil)
-		[scriptHook setNewValues:value];
+    if (userInfo)
+        [scriptHook setValuesForKeysWithDictionary:userInfo];
 	// execute the script and remove the script hook
 	return [self runScriptHook:scriptHook forPublications:items document:document];
 }
