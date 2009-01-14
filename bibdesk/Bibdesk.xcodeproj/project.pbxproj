@@ -38,50 +38,8 @@
 		2730078107CF20B500F2E485 /* BDSKComplexStringEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077A07CF20B500F2E485 /* BDSKComplexStringEditor.m */; };
 		2730078307CF20B500F2E485 /* BDSKMacroWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */; };
 		273007A007CF214E00F2E485 /* MacroWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = 2730079D07CF214E00F2E485 /* MacroWindow.nib */; };
-		275E272307838F7B0070398A /* TestBibItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 275E271D07838F7B0070398A /* TestBibItem.h */; };
-		275E272407838F7B0070398A /* TestBibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 275E271E07838F7B0070398A /* TestBibItem.m */; };
-		275E277F078396210070398A /* BibItem.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C6D075802E300C3F701 /* BibItem.h */; };
-		275E2780078396220070398A /* BibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C6E075802E300C3F701 /* BibItem.m */; };
-		275E2783078397510070398A /* BDSKBibTeXParser.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C950758038000C3F701 /* BDSKBibTeXParser.h */; };
-		275E2784078397520070398A /* BDSKBibTeXParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C960758038000C3F701 /* BDSKBibTeXParser.m */; };
-		275E2788078397BB0070398A /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
-		275E2789078397BF0070398A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		275E278B078397D90070398A /* UnitKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 275E26FB07838EB80070398A /* UnitKit.framework */; };
-		275E278D078397EE0070398A /* BDSKTypeManager.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C970758038000C3F701 /* BDSKTypeManager.h */; };
-		275E278E078397EF0070398A /* BDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C980758038000C3F701 /* BDSKTypeManager.m */; };
-		275E27930783982A0070398A /* BDSKAppController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C5D075802E300C3F701 /* BDSKAppController.h */; };
-		275E27940783982A0070398A /* BDSKAppController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C5E075802E300C3F701 /* BDSKAppController.m */; };
-		275E2795078398320070398A /* BibAuthor.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C5F075802E300C3F701 /* BibAuthor.h */; };
-		275E2796078398330070398A /* BibAuthor.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C60075802E300C3F701 /* BibAuthor.m */; };
-		275E279C078398540070398A /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
-		275E27C3078398D80070398A /* BDSKConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C3A0758027800C3F701 /* BDSKConverter.h */; };
-		275E27C4078398D90070398A /* BDSKConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3B0758027800C3F701 /* BDSKConverter.m */; };
-		275E27C8078399210070398A /* BDSKStringConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C930758038000C3F701 /* BDSKStringConstants.h */; };
-		275E27C9078399220070398A /* BDSKStringConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C940758038000C3F701 /* BDSKStringConstants.m */; };
-		275E27E407839A710070398A /* BDSKComplexStringFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C480758027800C3F701 /* BDSKComplexStringFormatter.h */; };
-		275E27E507839A720070398A /* BDSKComplexStringFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C490758027800C3F701 /* BDSKComplexStringFormatter.m */; };
-		275E27E607839A7B0070398A /* BDSKPreviewer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C58075802E300C3F701 /* BDSKPreviewer.m */; };
-		275E27E707839A7C0070398A /* BDSKPreviewer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C57075802E300C3F701 /* BDSKPreviewer.h */; };
 		27AFAF9D080D1E1B0096F5D2 /* BDSKTextImportController.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */; };
 		27AFAFAA080D1E5B0096F5D2 /* TextImport.nib in Resources */ = {isa = PBXBuildFile; fileRef = 27AFAFA8080D1E5B0096F5D2 /* TextImport.nib */; };
-		27CD036A07D82CB700806B7E /* TestComplexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 27CD031A07D82C4E00806B7E /* TestComplexString.h */; };
-		27CD036B07D82CB700806B7E /* TestComplexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 27CD031B07D82C4E00806B7E /* TestComplexString.m */; };
-		27CD03A307D82CFF00806B7E /* UnitKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 275E26FB07838EB80070398A /* UnitKit.framework */; };
-		27CD03B807D82D1900806B7E /* BDSKComplexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 273007A407CF216700F2E485 /* BDSKComplexString.h */; };
-		27CD03B907D82D1A00806B7E /* BDSKComplexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 2730077807CF20B500F2E485 /* BDSKComplexString.m */; };
-		27CD03BA07D82D3200806B7E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		27CD03BB07D82D3600806B7E /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
-		27CD03BC07D82D4600806B7E /* BDSKConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C3A0758027800C3F701 /* BDSKConverter.h */; };
-		27CD03BD07D82D4700806B7E /* BDSKConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3B0758027800C3F701 /* BDSKConverter.m */; };
-		27CD03BE07D82D5000806B7E /* BDSKStringConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C930758038000C3F701 /* BDSKStringConstants.h */; };
-		27CD03BF07D82D5100806B7E /* BDSKStringConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C940758038000C3F701 /* BDSKStringConstants.m */; };
-		27CD03C007D82D5F00806B7E /* BDSKTypeManager.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C970758038000C3F701 /* BDSKTypeManager.h */; };
-		27CD03C107D82D6000806B7E /* BDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C980758038000C3F701 /* BDSKTypeManager.m */; };
-		27CD03C407D82D8500806B7E /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
-		27CD03C607D82D9100806B7E /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
-		27CD03CF07D82DED00806B7E /* AGRegex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
-		27CD047107D82DF600806B7E /* OmniBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
-		27CD047207D82DF600806B7E /* OmniFoundation.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
 		3D0D76AF084898AA00A495A5 /* BibPref_Crossref.nib in Resources */ = {isa = PBXBuildFile; fileRef = 3D0D76AD084898AA00A495A5 /* BibPref_Crossref.nib */; };
 		3D0D76B3084898C100A495A5 /* BibPref_Crossref.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D0D76B1084898C100A495A5 /* BibPref_Crossref.m */; };
 		3D4373AD07FB3E960007BA84 /* gear.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3D4373AC07FB3E960007BA84 /* gear.tiff */; };
@@ -838,18 +796,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		27CD03CE07D82DD400806B7E /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				27CD047107D82DF600806B7E /* OmniBase.framework in CopyFiles */,
-				27CD047207D82DF600806B7E /* OmniFoundation.framework in CopyFiles */,
-				27CD03CF07D82DED00806B7E /* AGRegex.framework in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		CEEBA83C0D749C99000204B8 /* Copy Files: QuickLook */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -926,7 +872,6 @@
 		2730079E07CF214E00F2E485 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/MacroWindow.nib; sourceTree = "<group>"; };
 		273007A407CF216700F2E485 /* BDSKComplexString.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKComplexString.h; sourceTree = "<group>"; };
 		275E26FB07838EB80070398A /* UnitKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UnitKit.framework; path = /Library/Frameworks/UnitKit.framework; sourceTree = "<absolute>"; };
-		275E270707838EE30070398A /* TestBibItem.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TestBibItem.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		275E270807838EE30070398A /* TestBibItem-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TestBibItem-Info.plist"; sourceTree = "<group>"; };
 		275E271D07838F7B0070398A /* TestBibItem.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = TestBibItem.h; sourceTree = "<group>"; };
 		275E271E07838F7B0070398A /* TestBibItem.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = TestBibItem.m; sourceTree = "<group>"; };
@@ -939,7 +884,6 @@
 		27AFAFA9080D1E5B0096F5D2 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/TextImport.nib; sourceTree = "<group>"; };
 		27CD031A07D82C4E00806B7E /* TestComplexString.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = TestComplexString.h; sourceTree = SOURCE_ROOT; };
 		27CD031B07D82C4E00806B7E /* TestComplexString.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = TestComplexString.m; sourceTree = SOURCE_ROOT; };
-		27CD032407D82C7400806B7E /* TestComplexString.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TestComplexString.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		27CD032507D82C7400806B7E /* TestComplexString-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TestComplexString-Info.plist"; sourceTree = "<group>"; };
 		27D4FB5407DE7A83001CAB00 /* HelpNotes.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = HelpNotes.txt; sourceTree = "<group>"; };
 		27D4FB5707DE7A97001CAB00 /* build_instructions.tex */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = build_instructions.tex; sourceTree = "<group>"; };
@@ -1758,29 +1702,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		275E270407838EE30070398A /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				275E2788078397BB0070398A /* OmniFoundation.framework in Frameworks */,
-				275E2789078397BF0070398A /* Cocoa.framework in Frameworks */,
-				275E278B078397D90070398A /* UnitKit.framework in Frameworks */,
-				275E279C078398540070398A /* OmniAppKit.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		27CD032107D82C7400806B7E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				27CD03A307D82CFF00806B7E /* UnitKit.framework in Frameworks */,
-				27CD03BA07D82D3200806B7E /* Cocoa.framework in Frameworks */,
-				27CD03BB07D82D3600806B7E /* AGRegex.framework in Frameworks */,
-				27CD03C407D82D8500806B7E /* OmniFoundation.framework in Frameworks */,
-				27CD03C607D82D9100806B7E /* OmniBase.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8D11072E0486CEB800E47090 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1873,8 +1794,6 @@
 			isa = PBXGroup;
 			children = (
 				8D1107320486CEB800E47090 /* BibDesk.app */,
-				275E270707838EE30070398A /* TestBibItem.bundle */,
-				27CD032407D82C7400806B7E /* TestComplexString.bundle */,
 				EF168DDD0F11325B002F4D9F /* UnitTests.octest */,
 			);
 			name = Products;
@@ -3007,35 +2926,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		275E270107838EE30070398A /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				275E272307838F7B0070398A /* TestBibItem.h in Headers */,
-				275E277F078396210070398A /* BibItem.h in Headers */,
-				275E2783078397510070398A /* BDSKBibTeXParser.h in Headers */,
-				275E278D078397EE0070398A /* BDSKTypeManager.h in Headers */,
-				275E27930783982A0070398A /* BDSKAppController.h in Headers */,
-				275E2795078398320070398A /* BibAuthor.h in Headers */,
-				275E27C3078398D80070398A /* BDSKConverter.h in Headers */,
-				275E27C8078399210070398A /* BDSKStringConstants.h in Headers */,
-				275E27E407839A710070398A /* BDSKComplexStringFormatter.h in Headers */,
-				275E27E707839A7C0070398A /* BDSKPreviewer.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		27CD031E07D82C7400806B7E /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				27CD036A07D82CB700806B7E /* TestComplexString.h in Headers */,
-				27CD03B807D82D1900806B7E /* BDSKComplexString.h in Headers */,
-				27CD03BC07D82D4600806B7E /* BDSKConverter.h in Headers */,
-				27CD03BE07D82D5000806B7E /* BDSKStringConstants.h in Headers */,
-				27CD03C007D82D5F00806B7E /* BDSKTypeManager.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		CE424A430D0F121400F824E7 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -3050,45 +2940,6 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		275E270607838EE30070398A /* TestBibItem */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F993F1F808553A61007A7657 /* Build configuration list for PBXNativeTarget "TestBibItem" */;
-			buildPhases = (
-				275E270107838EE30070398A /* Headers */,
-				275E270207838EE30070398A /* Resources */,
-				275E270307838EE30070398A /* Sources */,
-				275E270407838EE30070398A /* Frameworks */,
-				275E270507838EE30070398A /* ShellScript */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = TestBibItem;
-			productName = TestBibItem;
-			productReference = 275E270707838EE30070398A /* TestBibItem.bundle */;
-			productType = "com.apple.product-type.bundle";
-		};
-		27CD032307D82C7400806B7E /* TestComplexString */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F993F1FD08553A61007A7657 /* Build configuration list for PBXNativeTarget "TestComplexString" */;
-			buildPhases = (
-				27CD031E07D82C7400806B7E /* Headers */,
-				27CD031F07D82C7400806B7E /* Resources */,
-				27CD032007D82C7400806B7E /* Sources */,
-				27CD032107D82C7400806B7E /* Frameworks */,
-				27CD032207D82C7400806B7E /* ShellScript */,
-				27CD03CE07D82DD400806B7E /* CopyFiles */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = TestComplexString;
-			productName = TestComplexString;
-			productReference = 27CD032407D82C7400806B7E /* TestComplexString.bundle */;
-			productType = "com.apple.product-type.bundle";
-		};
 		8D1107260486CEB800E47090 /* BibDesk */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F993F1BC08553A61007A7657 /* Build configuration list for PBXNativeTarget "BibDesk" */;
@@ -3214,8 +3065,6 @@
 				8D1107260486CEB800E47090 /* BibDesk */,
 				F98870CE07580E5F001D4D49 /* HeaderDoc */,
 				F98870D407580E94001D4D49 /* DiskImage */,
-				275E270607838EE30070398A /* TestBibItem */,
-				27CD032307D82C7400806B7E /* TestComplexString */,
 				EF168DDC0F11325B002F4D9F /* UnitTests */,
 			);
 		};
@@ -3414,20 +3263,6 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
-		275E270207838EE30070398A /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		27CD031F07D82C7400806B7E /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8D1107290486CEB800E47090 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -3593,32 +3428,6 @@
 /* End PBXRezBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		275E270507838EE30070398A /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
-			shellScript = "/usr/local/bin/ukrun \"$BUILD_DIR/$PRODUCT_NAME.$WRAPPER_EXTENSION\"";
-		};
-		27CD032207D82C7400806B7E /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
-			shellScript = "/usr/local/bin/ukrun \"$BUILD_DIR/$PRODUCT_NAME.$WRAPPER_EXTENSION\"";
-		};
 		CEF8343E0C77502C00A3AD51 /* Run Script: Build Help */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
@@ -3740,35 +3549,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		275E270307838EE30070398A /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				275E272407838F7B0070398A /* TestBibItem.m in Sources */,
-				275E2780078396220070398A /* BibItem.m in Sources */,
-				275E2784078397520070398A /* BDSKBibTeXParser.m in Sources */,
-				275E278E078397EF0070398A /* BDSKTypeManager.m in Sources */,
-				275E27940783982A0070398A /* BDSKAppController.m in Sources */,
-				275E2796078398330070398A /* BibAuthor.m in Sources */,
-				275E27C4078398D90070398A /* BDSKConverter.m in Sources */,
-				275E27C9078399220070398A /* BDSKStringConstants.m in Sources */,
-				275E27E507839A720070398A /* BDSKComplexStringFormatter.m in Sources */,
-				275E27E607839A7B0070398A /* BDSKPreviewer.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		27CD032007D82C7400806B7E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				27CD036B07D82CB700806B7E /* TestComplexString.m in Sources */,
-				27CD03B907D82D1A00806B7E /* BDSKComplexString.m in Sources */,
-				27CD03BD07D82D4700806B7E /* BDSKConverter.m in Sources */,
-				27CD03BF07D82D5100806B7E /* BDSKStringConstants.m in Sources */,
-				27CD03C107D82D6000806B7E /* BDSKTypeManager.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8D11072C0486CEB800E47090 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -4907,132 +4687,6 @@
 			};
 			name = Release;
 		};
-		F993F1F908553A61007A7657 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Foundation.framework/Headers/Foundation.h";
-				GCC_PREPROCESSOR_DEFINITIONS = "";
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
-				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
-				GCC_WARN_UNKNOWN_PRAGMAS = NO;
-				INFOPLIST_FILE = "TestBibItem-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-				);
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = TestBibItem;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost";
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
-		F993F1FA08553A61007A7657 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Foundation.framework/Headers/Foundation.h";
-				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = YES;
-				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_SIGN_COMPARE = NO;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNKNOWN_PRAGMAS = NO;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_PARAMETER = NO;
-				GCC_WARN_UNUSED_VALUE = YES;
-				INFOPLIST_FILE = "TestBibItem-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-				);
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = TestBibItem;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost";
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		F993F1FE08553A61007A7657 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = $BUILD_DIR/;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Foundation.framework/Headers/Foundation.h";
-				GCC_PREPROCESSOR_DEFINITIONS = "";
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
-				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
-				GCC_WARN_UNKNOWN_PRAGMAS = NO;
-				INFOPLIST_FILE = "TestComplexString-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-				);
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = TestComplexString;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost";
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
-		F993F1FF08553A61007A7657 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = $BUILD_DIR/;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Foundation.framework/Headers/Foundation.h";
-				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = YES;
-				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_SIGN_COMPARE = NO;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNKNOWN_PRAGMAS = NO;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_PARAMETER = NO;
-				GCC_WARN_UNUSED_VALUE = YES;
-				INFOPLIST_FILE = "TestComplexString-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-				);
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = TestComplexString;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost";
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
 		F993F20308553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CEEBA6860D746DD7000204B8 /* BibDesk-Debug.xcconfig */;
@@ -5082,24 +4736,6 @@
 			buildConfigurations = (
 				F993F1EF08553A61007A7657 /* Debug */,
 				F993F1F008553A61007A7657 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		F993F1F808553A61007A7657 /* Build configuration list for PBXNativeTarget "TestBibItem" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F993F1F908553A61007A7657 /* Debug */,
-				F993F1FA08553A61007A7657 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		F993F1FD08553A61007A7657 /* Build configuration list for PBXNativeTarget "TestComplexString" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F993F1FE08553A61007A7657 /* Debug */,
-				F993F1FF08553A61007A7657 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
