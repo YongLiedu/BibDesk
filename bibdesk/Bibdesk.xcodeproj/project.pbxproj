@@ -871,10 +871,6 @@
 		2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKMacroWindowController.m; sourceTree = "<group>"; };
 		2730079E07CF214E00F2E485 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/MacroWindow.nib; sourceTree = "<group>"; };
 		273007A407CF216700F2E485 /* BDSKComplexString.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKComplexString.h; sourceTree = "<group>"; };
-		275E26FB07838EB80070398A /* UnitKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UnitKit.framework; path = /Library/Frameworks/UnitKit.framework; sourceTree = "<absolute>"; };
-		275E270807838EE30070398A /* TestBibItem-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TestBibItem-Info.plist"; sourceTree = "<group>"; };
-		275E271D07838F7B0070398A /* TestBibItem.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = TestBibItem.h; sourceTree = "<group>"; };
-		275E271E07838F7B0070398A /* TestBibItem.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = TestBibItem.m; sourceTree = "<group>"; };
 		275E271F07838F7B0070398A /* TestSystemServices.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = TestSystemServices.h; sourceTree = "<group>"; };
 		275E272007838F7B0070398A /* TestSystemServices.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = TestSystemServices.m; sourceTree = "<group>"; };
 		275E272107838F7B0070398A /* TestURLHandling.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = TestURLHandling.h; sourceTree = "<group>"; };
@@ -882,9 +878,6 @@
 		27AFAF9A080D1E1B0096F5D2 /* BDSKTextImportController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextImportController.h; sourceTree = "<group>"; };
 		27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextImportController.m; sourceTree = "<group>"; };
 		27AFAFA9080D1E5B0096F5D2 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/TextImport.nib; sourceTree = "<group>"; };
-		27CD031A07D82C4E00806B7E /* TestComplexString.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = TestComplexString.h; sourceTree = SOURCE_ROOT; };
-		27CD031B07D82C4E00806B7E /* TestComplexString.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = TestComplexString.m; sourceTree = SOURCE_ROOT; };
-		27CD032507D82C7400806B7E /* TestComplexString-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TestComplexString-Info.plist"; sourceTree = "<group>"; };
 		27D4FB5407DE7A83001CAB00 /* HelpNotes.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = HelpNotes.txt; sourceTree = "<group>"; };
 		27D4FB5707DE7A97001CAB00 /* build_instructions.tex */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = build_instructions.tex; sourceTree = "<group>"; };
 		27D4FB5807DE7A97001CAB00 /* HackingBibDesk.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = HackingBibDesk.rtf; sourceTree = "<group>"; };
@@ -1802,17 +1795,10 @@
 		275E26FA07838E150070398A /* Test */ = {
 			isa = PBXGroup;
 			children = (
-				275E271D07838F7B0070398A /* TestBibItem.h */,
-				275E271E07838F7B0070398A /* TestBibItem.m */,
-				27CD031A07D82C4E00806B7E /* TestComplexString.h */,
-				27CD031B07D82C4E00806B7E /* TestComplexString.m */,
 				275E271F07838F7B0070398A /* TestSystemServices.h */,
 				275E272007838F7B0070398A /* TestSystemServices.m */,
 				275E272107838F7B0070398A /* TestURLHandling.h */,
 				275E272207838F7B0070398A /* TestURLHandling.m */,
-				275E270807838EE30070398A /* TestBibItem-Info.plist */,
-				27CD032507D82C7400806B7E /* TestComplexString-Info.plist */,
-				275E26FB07838EB80070398A /* UnitKit.framework */,
 			);
 			name = Test;
 			sourceTree = "<group>";
