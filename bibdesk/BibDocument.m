@@ -2225,13 +2225,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSArray *)publicationsFromArchivedData:(NSData *)data{
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
     
-    [BDSKComplexString setMacroResolverForUnarchiving:macroResolver];
+    [NSString setMacroResolverForUnarchiving:macroResolver];
     
     NSArray *newPubs = [unarchiver decodeObjectForKey:@"publications"];
     [unarchiver finishDecoding];
     [unarchiver release];
     
-    [BDSKComplexString setMacroResolverForUnarchiving:nil];
+    [NSString setMacroResolverForUnarchiving:nil];
     
     return newPubs;
 }
