@@ -147,55 +147,27 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
 
 }
 
-+ (id)allocWithZone:(NSZone *)aZone{
-    return NSAllocateObject(self, 0, aZone);
-}
-
-- (id)init{
-    [[super init] release];
-	return self = [@"" retain];
-}
-
 /* designated initializer */
-- (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
+- (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)aMacroResolver{
+    OBASSERT([nodesArray count] > 0);
     if (self = [super init]) {
-        if ([nodesArray count] == 0) {
-            [self release];
-            self = nil;
-        } else if ([nodesArray count] == 1 && [(BDSKStringNode *)[nodesArray objectAtIndex:0] type] == BSN_STRING) {
-            [self release];
-            self = [[(BDSKStringNode *)[nodesArray objectAtIndex:0] value] retain];
-        } else {
-            nodes = [nodesArray copyWithZone:[self zone]];
-            // we don't retain, as the macroResolver might retain us as a macro value
-            macroResolver = (theMacroResolver == [BDSKMacroResolver defaultMacroResolver]) ? nil : theMacroResolver;
-            complex = YES;
-            expandedString = nil;
-            modification = 0;
-            defaultModification = 0;
-        }
+        nodes = [nodesArray copyWithZone:[self zone]];
+        // we don't retain, as the macroResolver might retain us as a macro value
+        macroResolver = (aMacroResolver == [BDSKMacroResolver defaultMacroResolver]) ? nil : aMacroResolver;
+        complex = YES;
+		inherited = NO;
+        expandedString = nil;
+        modification = 0;
+        defaultModification = 0;
 	}		
     return self;
 }
 
 - (id)initWithInheritedValue:(NSString *)aValue {
-    if (self = [super init]) {
-		if (aValue == nil) {
-			[self release];
-			return self = nil;
-		}
-        
-        nodes = [[aValue nodes] retain];
+    OBASSERT(aValue != nil);
+    if (self = [self initWithNodes:[aValue nodes] macroResolver:[aValue macroResolver]]) {
         complex = [aValue isComplex];
 		inherited = YES;
-        modification = 0;
-        defaultModification = 0;
-        expandedString = nil;
-		if (complex) {
-			macroResolver = [aValue macroResolver];
-            if (macroResolver == [BDSKMacroResolver defaultMacroResolver]) 
-                macroResolver = nil;
-        }
 	}
 	return self;
 }
@@ -298,9 +270,9 @@ Rather than relying on the same call sequence to be used, I think we should igno
 - (id)copyUninheritedWithZone:(NSZone *)zone{
 	
 	if (inherited == NO) 
-        return [self retain];
+        return [self copyWithZone:zone];
 	else 
-        return [[BDSKComplexString allocWithZone:zone] initWithNodes:nodes macroResolver:macroResolver];
+        return [[NSString allocWithZone:zone] initWithNodes:nodes macroResolver:macroResolver];
 }
 
 - (BOOL)isComplex {
@@ -509,15 +481,23 @@ Rather than relying on the same call sequence to be used, I think we should igno
     }
 }
 
-- (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
-    [[self init] release];
-    self = [[BDSKComplexString alloc] initWithNodes:nodesArray macroResolver:theMacroResolver];
+- (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)aMacroResolver{
+    if ([nodesArray count] == 1 && [(BDSKStringNode *)[nodesArray objectAtIndex:0] type] == BSN_STRING) {
+        self = [self initWithString:[(BDSKStringNode *)[nodesArray objectAtIndex:0] value]];
+    } else { 
+        [[self init] release];
+        self = nil;
+        if ([nodesArray count])
+            self = [[BDSKComplexString alloc] initWithNodes:nodesArray macroResolver:aMacroResolver];
+    }
     return self;
 }
 
 - (id)initWithInheritedValue:(NSString *)aValue{
     [[self init] release];
-    self = [[BDSKComplexString alloc] initWithInheritedValue:aValue];
+    self = nil;
+    if (aValue)
+        self = [[BDSKComplexString alloc] initWithInheritedValue:aValue];
     return self;
 }
 
@@ -648,7 +628,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
         }
     }
     if (error == nil)
-        self = [[BDSKComplexString allocWithZone:theZone] initWithNodes:returnNodes macroResolver:theMacroResolver];
+        self = [[NSString allocWithZone:theZone] initWithNodes:returnNodes macroResolver:theMacroResolver];
     else if (outError != NULL)
         *outError = error;
     [sc release];
@@ -662,11 +642,11 @@ Rather than relying on the same call sequence to be used, I think we should igno
 }
 
 + (id)stringWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
-    return [[[BDSKComplexString alloc] initWithNodes:nodesArray macroResolver:theMacroResolver] autorelease];
+    return [[[self alloc] initWithNodes:nodesArray macroResolver:theMacroResolver] autorelease];
 }
 
 + (id)stringWithInheritedValue:(NSString *)aValue{
-    return [[[BDSKComplexString alloc] initWithInheritedValue:aValue] autorelease];
+    return [[[self alloc] initWithInheritedValue:aValue] autorelease];
 }
 
 - (id)copyUninherited{
