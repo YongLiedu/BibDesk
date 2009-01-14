@@ -86,6 +86,8 @@ static Class webParserClassForType(int stringType)
 
 // entry point from view controller
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError{
+    OBASSERT(self == [BDSKWebParser class]);
+    
     NSError *error = nil;    
     
     NSString *htmlString = [(id)[domDocument documentElement] outerHTML];
