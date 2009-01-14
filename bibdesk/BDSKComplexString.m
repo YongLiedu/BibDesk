@@ -504,16 +504,11 @@ Rather than relying on the same call sequence to be used, I think we should igno
 - (id)initWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver error:(NSError **)outError {
 	btstring = [btstring stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
-    // used for correct zoning
-    NSZone *theZone = [self zone];
-    // we will return another object
-    [[self init] release];
-    self = nil;
-    
     if([btstring length] == 0){
         // if the string was whitespace only, it becomes empty.
         // empty strings are a special case, they are not complex.
-        return self = [@"" retain];
+        // CMH: an empty bibtex string is really invalid, so shouldn't we return nil?
+        return self = [self initWithString:@""];
     }
     
 	NSMutableArray *returnNodes = [[NSMutableArray alloc] initWithCapacity:5];
@@ -627,10 +622,13 @@ Rather than relying on the same call sequence to be used, I think we should igno
             }
         }
     }
-    if (error == nil)
-        self = [[NSString allocWithZone:theZone] initWithNodes:returnNodes macroResolver:theMacroResolver];
-    else if (outError != NULL)
-        *outError = error;
+    if (error == nil) {
+        self = [self initWithNodes:returnNodes macroResolver:theMacroResolver];
+    } else {
+        [[self init] release];
+        self = nil;
+        if (outError != NULL) *outError = error;
+    }
     [sc release];
     [returnNodes release];
     
