@@ -114,27 +114,6 @@
     STAssertEquals( [[cs nodes] count], (NSUInteger) 3,nil);
 }
 
-- (void)testEmptyStringFromBibTeXString{
-    NSString *cs = [NSString stringWithBibTeXString:@""
-											   macroResolver:[self macroResolver] error:nil];
-    STAssertNotNil(cs,nil);
-    STAssertFalse([cs isComplex],nil);
-    STAssertEqualObjects(cs,@"",nil);
-	// CH confirms this is no longer the case
-//    STAssertNil([cs nodes],nil);
-}
-
-- (void)testWhitespaceStringFromBibTeXString{
-    NSString *cs = [NSString stringWithBibTeXString:@" "
-											   macroResolver:[self macroResolver] error:nil];
-    STAssertNotNil(cs,nil);
-    STAssertFalse([cs isComplex],nil);
-    STAssertEqualObjects( (NSString *)cs,@"",nil);
-	// CH confirms this is no longer the case
-//    STAssertNil([cs nodes],nil);
-}
-
-
 - (void)testDisplayTwoNumbers{
     NSArray *a = [NSArray arrayWithObjects:[BDSKStringNode nodeWithNumberString:@"14"], 
 				  [BDSKStringNode nodeWithNumberString:@"14"], nil];
