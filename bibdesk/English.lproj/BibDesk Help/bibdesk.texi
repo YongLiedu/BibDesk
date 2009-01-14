@@ -3415,12 +3415,12 @@ It exports an RSS representation of the document in the same folder as the BibTe
             <span class="aslangkeyword">set</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">file</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocument</span>
             <span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"Finder"</span>
                 <span class="ascomment">-- extract containing folder and file name</span>
-                <span class="aslangkeyword">set</span> <span class="asvariable">theFolder</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">container</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">theFolder</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">container</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">text</span>
                 <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span>
                 <span class="ascomment">-- change extension to "rss"</span>
                 <span class="aslangkeyword">if the</span> <span class="asappkeyword">name extension</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span> <span class="asappkeyword">is not</span> <span class="asvalue">""</span> <span class="aslangkeyword">then</span>
                     <span class="aslangkeyword">set</span> <span class="asappkeyword">AppleScript</span><span class="asvalue">'s</span> <span class="asappkeyword">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">"."</span>
-                    <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">text items</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">text items</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">text</span>
                 <span class="aslangkeyword">end if</span>
                 <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFileExtension</span>
                 <span class="ascomment">-- create a reference to the file</span>
@@ -3450,12 +3450,12 @@ It exports an RSS representation of the document in the same folder as the BibTe
             @b{set} theDocFile @b{to the} file of theDocument
             @b{tell} application "Finder"
                 @i{-- extract containing folder and file name}
-                @b{set} theFolder @b{to the} container of theDocFile @b{as} string
+                @b{set} theFolder @b{to the} container of theDocFile @b{as} text
                 @b{set} theFileName @b{to the} name of theDocFile
                 @i{-- change extension to "rss"}
                 @b{if} file theFileName @b{of} folder theFolder exists @b{then}
                     @b{set} AppleScript's text item delimiters @b{to} "."
-                    @b{set} theFileName @b{to} text item 1 @b{thru} -2 of theFileName @b{as} string
+                    @b{set} theFileName @b{to} text item 1 @b{thru} -2 of theFileName @b{as} text
                 @b{end if}
                 @b{set} theFileName @b{to} theFileName & theTemplateName
                 @i{-- create a reference to the file}
