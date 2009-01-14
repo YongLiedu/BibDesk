@@ -66,7 +66,7 @@
 	[openPanel setAllowsMultipleSelection:NO];
     [openPanel beginSheetForDirectory:directory 
 								 file:nil
-								types:[NSArray arrayWithObject:@"scpt"] 
+								types:[NSArray arrayWithObjects:@"scpt", @"scptd", @"applescript", nil] 
 					   modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 						modalDelegate:self 
 					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
