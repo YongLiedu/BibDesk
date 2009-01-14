@@ -2415,11 +2415,15 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             BOOL tryPubMed = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePubMedMetadata];
             if(newBI == nil && tryPubMed && [lastPathComponent containsCharacterInSet:[NSCharacterSet nonDecimalDigitCharacterSet]] == NO)
                 newBI = [BibItem itemWithPMID:lastPathComponent];
-            
+
+			// GJ try parsing pdf to extract info that is then used to get a PubMed record
+			if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTerm])
+				newBI = [BibItem itemByParsingPdf:fnStr];			
+			
             // fall back on the least reliable metadata source (hidden pref)
             if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata])
                 newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
-            
+			
             if(newBI == nil)
                 newBI = [[[BibItem alloc] init] autorelease];
             

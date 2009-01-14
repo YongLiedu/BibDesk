@@ -42,5 +42,6 @@
 @interface BibItem (PubMedLookup)
 
 + (id)itemWithPMID:(NSString *)pmid;
++ (id)itemByParsingPdf:(NSString *)pdfPath;
 
 @end

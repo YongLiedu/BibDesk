@@ -39,9 +39,11 @@
 #import "BibItem_PubMedLookup.h"
 #import <WebKit/WebKit.h>
 #import "BDSKStringParser.h"
+#import <Quartz/Quartz.h>
+#import <AGRegex/AGRegex.h>
 
 @interface BDSKPubMedLookupHelper : NSObject
-+ (NSString *)referenceForPMID:(NSString *)pmid;
++ (NSString *)referenceForPubMedSearchTerm:(NSString *)pmid;
 @end
 
 @implementation BibItem (PubMedLookup)
@@ -55,9 +57,51 @@
  
  */
 
++ (id)itemByParsingPdf:(NSString *)pdfPath;
+{
+	NSString *doi=nil;
+	
+	PDFDocument *pdfd = [[PDFDocument alloc] initWithURL:[NSURL fileURLWithPath:pdfPath]];
+	if(pdfd==NULL) return nil;
+
+	NSUInteger i=0, pageCount=[pdfd pageCount];
+
+	// try the first 2 pages for dois
+	for(i=0;i<2 & i<pageCount;i++){
+		
+		NSString *pdftextthispage = [[pdfd pageAtIndex:i] string];
+		// If we've got nothing to parse, try the next page
+		if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
+		
+		AGRegex *doiRegex = [AGRegex regexWithPattern:@"doi[: ]+([0-9.]+[ \\/][A-Z0-9.\\-_]+)" 
+											  options:AGRegexMultiline|AGRegexCaseInsensitive];
+		AGRegexMatch *match = [doiRegex findInString:pdftextthispage];
+		if([match groupAtIndex:1]!=nil){
+			doi = [NSString stringWithString:[match groupAtIndex:1]];
+			// replace any spaces with /
+			// first converting any internal whitespace to single space 			
+			doi = [doi stringByNormalizingSpacesAndLineBreaks];
+			doi = [doi stringByReplacingOccurrencesOfString:@" " withString:@"/"];
+		} else {
+			//		Be more restrictive about initial part but less about
+			//		actual DOI string - offer 3 alternatives for 'hinge' 
+			//		including standard slash
+			AGRegex *doiRegex2 = [AGRegex regexWithPattern:@"doi[: ]+(10\\.[0-9]{4})[ \\/0]([A-Z0-9.\\-_]+)"
+												   options:AGRegexMultiline|AGRegexCaseInsensitive];
+			match = [doiRegex2 findInString:pdftextthispage];
+			if([match groupAtIndex:1]!=nil && [match groupAtIndex:2]!=nil)
+				doi = [NSString stringWithFormat:@"%@/%@",[match groupAtIndex:1],[match groupAtIndex:2]];
+		}
+		if(doi!=nil) break;
+	}
+	[pdfd release];
+	// NB pubmed search will work equally for pubmed id or doi
+	return doi ? [BibItem itemWithPMID:doi] : nil;
+}
+
 + (id)itemWithPMID:(NSString *)pmid;
 {
-    NSString *string = [BDSKPubMedLookupHelper referenceForPMID:pmid];
+    NSString *string = [BDSKPubMedLookupHelper referenceForPubMedSearchTerm:pmid];
     return string ? [[BDSKStringParser itemsFromString:string ofType:BDSKUnknownStringType error:NULL] lastObject] : nil;
 }
 
@@ -84,7 +128,7 @@
     return canConnect;
 }
 
-+ (NSString *)referenceForPMID:(NSString *)pmid;
++ (NSString *)referenceForPubMedSearchTerm:(NSString *)pmid;
 {
     NSParameterAssert(pmid != nil);
     
