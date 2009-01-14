@@ -210,7 +210,7 @@
     
     if (theURL == nil) return;
     
-    [self loadURL:[NSURL URLWithString:newURLString]];
+    [self loadURL:theURL];
 }
 
 - (IBAction)goBackForward:(id)sender {
