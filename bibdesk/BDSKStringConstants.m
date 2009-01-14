@@ -66,6 +66,7 @@ NSString *BDSKShouldUsePDFMetadata = @"BDSKShouldUsePDFMetadata";
 NSString *BDSKShouldWritePDFMetadata = @"BDSKShouldWritePDFMetadata";
 NSString *BDSKShouldUsePubMedMetadata = @"BDSKShouldUsePubMedMetadata";
 NSString *BDSKShouldParsePDFToGeneratePubMedSearchTerm = @"BDSKShouldParsePDFToGeneratePubMedSearchTerm";
+NSString *BDSKExternalScriptToGeneratePubMedSearchTerm = @"BDSKExternalScriptToGeneratePubMedSearchTerm";
 
 NSString *BDSKIntersectGroupsKey = @"BDSKIntersectGroupsKey";
 NSString *BDSKSearchGroupBookmarksKey = @"BDSKSearchGroupBookmarksKey";

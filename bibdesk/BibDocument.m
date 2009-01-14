@@ -2416,6 +2416,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             if(newBI == nil && tryPubMed && [lastPathComponent containsCharacterInSet:[NSCharacterSet nonDecimalDigitCharacterSet]] == NO)
                 newBI = [BibItem itemWithPMID:lastPathComponent];
 
+			// GJ try parsing pdf with external script to extract info that is then used to get a PubMed record
+            if(newBI == nil){
+				NSString *externalScript=[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKExternalScriptToGeneratePubMedSearchTerm];
+				// note externalScript can be nil - in which case we will get a nil return
+				newBI = [BibItem itemByParsingPdf:fnStr usingExternalScript:externalScript];
+			}
+
 			// GJ try parsing pdf to extract info that is then used to get a PubMed record
 			if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTerm])
 				newBI = [BibItem itemByParsingPdf:fnStr];			

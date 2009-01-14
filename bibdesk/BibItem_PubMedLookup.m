@@ -44,6 +44,7 @@
 
 @interface BDSKPubMedLookupHelper : NSObject
 + (NSString *)referenceForPubMedSearchTerm:(NSString *)pmid;
++ (NSString *)PMIDFromPDF:(NSString *)pdfPath byCallingExternalScript:(NSString *)scriptPath ;
 @end
 
 @implementation BibItem (PubMedLookup)
@@ -56,6 +57,20 @@
  - See http://www.ncbi.nlm.nih.gov/entrez/query/static/eutils_help.html for details.
  
  */
+
++ (id)itemByParsingPdf:(NSString *)pdfPath usingExternalScript:(NSString *)scriptPath;
+{
+	if(scriptPath==nil) return nil;
+	
+	NSString *pubmedTerm = [BDSKPubMedLookupHelper PMIDFromPDF:pdfPath
+								 byCallingExternalScript:scriptPath];
+
+	if(pubmedTerm==nil) return nil;
+	pubmedTerm = [pubmedTerm stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	if([pubmedTerm isEqualToString:@""]) return nil;
+	
+    return [BibItem itemWithPMID:pubmedTerm];
+}
 
 + (id)itemByParsingPdf:(NSString *)pdfPath;
 {
@@ -126,6 +141,41 @@
         NSLog(@"%@", details);
     
     return canConnect;
+}
+
++ (NSString *)PMIDFromPDF:(NSString *)pdfPath byCallingExternalScript:(NSString *)scriptPath ;
+{
+	// GJ - call an external script to get a PMID
+	NSTask *task;
+
+    task = [[NSTask alloc] init];
+    [task setLaunchPath: scriptPath];
+	
+    NSArray *arguments;
+    arguments = [NSArray arrayWithObjects: pdfPath, nil];
+    [task setArguments: arguments];
+	
+    NSPipe *scriptPipe;
+    scriptPipe = [NSPipe pipe];
+    [task setStandardOutput: scriptPipe];
+	
+    NSFileHandle *file;
+    file = [scriptPipe fileHandleForReading];
+	
+    [task launch];
+	
+    NSData *data;
+    data = [file readDataToEndOfFile];
+	[task release];
+	
+	if ([data length]==0) return nil;
+	
+    NSString *string;
+    string = [[NSString alloc] initWithData: data
+								   encoding: NSUTF8StringEncoding];
+	[string autorelease];
+	
+	return string;
 }
 
 + (NSString *)referenceForPubMedSearchTerm:(NSString *)pmid;
