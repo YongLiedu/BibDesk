@@ -58,7 +58,7 @@
  
  */
 
-+ (id)itemByParsingPdf:(NSString *)pdfPath usingExternalScript:(NSString *)scriptPath;
++ (id)itemByParsingPDFFile:(NSString *)pdfPath usingExternalScript:(NSString *)scriptPath;
 {
 	if(scriptPath==nil) return nil;
 	
@@ -72,7 +72,7 @@
     return [BibItem itemWithPMID:pubmedTerm];
 }
 
-+ (id)itemByParsingPdf:(NSString *)pdfPath;
++ (id)itemByParsingPDFFile:(NSString *)pdfPath;
 {
 	NSString *doi=nil;
 	
