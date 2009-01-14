@@ -19,11 +19,11 @@
 }
 
 - (void)testStringFromBibTeXString{
-    BDSKStringNode *sn = [BDSKStringNode nodeWithQuotedString:@"{string}"];
+    BDSKStringNode *sn = [BDSKStringNode nodeWithQuotedString:@"string"];
     
     STAssertNotNil(sn,nil);
     STAssertEquals(BSN_STRING, [sn type],nil);
-    STAssertEqualObjects(@"{string}", [sn value],nil);
+    STAssertEqualObjects(@"string", [sn value],nil);
 }
 
 - (void)testMacroFromBibTeXString{
@@ -124,7 +124,6 @@
     STAssertEqualObjects(cs,@"1414",nil);
 }
 
-
 - (void)testDisplayThreeNumbers{
     NSArray *a = [NSArray arrayWithObjects:[BDSKStringNode nodeWithNumberString:@"14"], 
 				  [BDSKStringNode nodeWithNumberString:@"14"], 
@@ -136,5 +135,13 @@
     STAssertEqualObjects(cs,@"141414",nil);
 }
 
+- (void)testDisplaySingleStringNode{
+    NSArray *a = [NSArray arrayWithObjects:[BDSKStringNode nodeWithQuotedString:@"string"], nil];
+    NSString *cs = [NSString stringWithNodes:a
+										macroResolver:[self macroResolver]];
+    STAssertNotNil(cs,nil);
+    STAssertFalse([cs isComplex],nil);
+    STAssertEqualObjects(cs,@"string",nil);
+}
 
 @end
