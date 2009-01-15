@@ -141,7 +141,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"libraryGroups" index:0] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"libraryGroups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
 - (NSArray *)scriptingPublications {
@@ -185,14 +185,8 @@
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
-    NSArray *groups = [[doc groups] staticGroups];
-	unsigned idx = [groups indexOfObjectIdenticalTo:self];
-    if (idx != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"staticGroups" index:idx] autorelease];
-    } else {
-        return nil;
-    }
+    NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"staticGroups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
 - (void)insertInScriptingPublications:(BibItem *)pub {
@@ -226,7 +220,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"lastImportGroups" index:0] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"lastImportGroups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
 - (void)setAsName:(NSString *)newName {
@@ -261,14 +255,8 @@
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
-    NSArray *groups = [[doc groups] smartGroups];
-	unsigned idx = [groups indexOfObjectIdenticalTo:self];
-    if (idx != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"smartGroups" index:idx] autorelease];
-    } else {
-        return nil;
-    }
+    NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"smartGroups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
 - (NSArray *)conditions {
@@ -311,14 +299,8 @@
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
-    NSArray *groups = [[doc groups] categoryGroups];
-	unsigned idx = [groups indexOfObjectIdenticalTo:self];
-    if (idx != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"fieldGroups" index:idx] autorelease];
-    } else {
-        return nil;
-    }
+    NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"fieldGroups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
 - (void)insertInScriptingPublications:(BibItem *)pub {
@@ -351,14 +333,8 @@
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
-    NSArray *groups = [[doc groups] URLGroups];
-	unsigned idx = [groups indexOfObjectIdenticalTo:self];
-    if (idx != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"externalFileGroups" index:idx] autorelease];
-    } else {
-        return nil;
-    }
+    NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"externalFileGroups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
 - (NSString *)URLString {
@@ -388,14 +364,8 @@
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
-    NSArray *groups = [[doc groups] scriptGroups];
-	unsigned idx = [groups indexOfObjectIdenticalTo:self];
-    if (idx != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"scriptGroups" index:idx] autorelease];
-    } else {
-        return nil;
-    }
+    NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"scriptGroups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
 - (NSURL *)scriptURL {
@@ -426,14 +396,8 @@
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
-    NSArray *groups = [[doc groups] searchGroups];
-	unsigned idx = [groups indexOfObjectIdenticalTo:self];
-    if (idx != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"searchGroups" index:idx] autorelease];
-    } else {
-        return nil;
-    }
+    NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"searchGroups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
 - (NSString *)scriptingSearchTerm {
@@ -595,14 +559,8 @@
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
-    NSArray *groups = [[doc groups] sharedGroups];
-	unsigned idx = [groups indexOfObjectIdenticalTo:self];
-    if (idx != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"sharedGroups" index:idx] autorelease];
-    } else {
-        return nil;
-    }
+    NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"sharedGroups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
 @end
@@ -614,7 +572,7 @@
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
     NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-    return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"webGroups" index:0] autorelease];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"webGroups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
 - (NSString *)URLString {
