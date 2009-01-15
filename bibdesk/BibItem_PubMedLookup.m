@@ -124,6 +124,18 @@
 	return pii;
 }
 
+- (NSString *) stringByExtractingAnyBibliographicIDFromString;
+{
+	NSString *bid;
+	
+	// first try DOI
+	bid = [self stringByExtractingDOIFromString];
+	
+	// next try Elsevier PII
+	if(bid==nil) bid = [self stringByExtractingNormalisedPIIFromString];
+
+	return bid;
+}
 @end
 
 @implementation BibItem (PubMedLookup)
@@ -139,27 +151,40 @@
 
 + (id)itemByParsingPDFFile:(NSString *)pdfPath;
 {
-	NSString *doi=nil;
+	// see if we can find any bibliographic info in the filename
+	NSString *bid=nil;
+	bid=[[pdfPath lastPathComponent] stringByExtractingAnyBibliographicIDFromString];
+	if(bid!=nil) return bid;
 	
 	PDFDocument *pdfd = [[PDFDocument alloc] initWithURL:[NSURL fileURLWithPath:pdfPath]];
 	if(pdfd==NULL) return nil;
-
-	NSUInteger i=0, pageCount=[pdfd pageCount];
-
-	// try the first 2 pages for dois
-	for(i=0;i<2 & i<pageCount;i++){
+	
+	// ... else see if we can find a doi in the pdf title attribute
+	if(bid==nil){
+		NSString *pdfTitle = [[pdfd documentAttributes] valueForKey:PDFDocumentTitleAttribute];	
+		bid=[pdfTitle stringByExtractingAnyBibliographicIDFromString];
+	}
+	
+	// ... else directly parse text for doi
+	if(bid==nil){
 		
-		NSString *pdftextthispage = [[pdfd pageAtIndex:i] string];
-		// If we've got nothing to parse, try the next page
-		if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
-		
-		doi = [pdftextthispage stringByExtractingDOIFromString];
+		NSUInteger i=0, pageCount=[pdfd pageCount];
 
-		if(doi!=nil) break;
+		// try the first 2 pages for dois
+		for(i=0;i<2 & i<pageCount;i++){
+			
+			NSString *pdftextthispage = [[pdfd pageAtIndex:i] string];
+			// If we've got nothing to parse, try the next page
+			if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
+			
+			bid = [pdftextthispage stringByExtractingDOIFromString];
+
+			if(bid!=nil) break;
+		}
 	}
 	[pdfd release];
-	// NB pubmed search will work equally for pubmed id or doi
-	return doi ? [BibItem itemWithPMID:doi] : nil;
+	// NB pubmed search will work equally for pubmed id, doi, PII etc
+	return bid ? [BibItem itemWithPMID:bid] : nil;
 }
 
 + (id)itemWithPMID:(NSString *)pmid;
