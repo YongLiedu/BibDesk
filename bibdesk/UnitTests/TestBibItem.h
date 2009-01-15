@@ -1,5 +1,5 @@
 //
-//  TestBibItemST.h
+//  TestBibItem.h
 //  Bibdesk
 //
 //  Created by Gregory Jefferis on 2009-01-05.
@@ -44,7 +44,7 @@
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
 
-@interface TestBibItemST : SenTestCase {
+@interface TestBibItem : SenTestCase {
 
 }
 

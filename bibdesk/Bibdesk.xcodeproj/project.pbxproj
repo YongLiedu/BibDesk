@@ -296,13 +296,13 @@
 		EF168DFE0F1133AD002F4D9F /* TestUnitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EF168DFD0F1133AD002F4D9F /* TestUnitTest.m */; };
 		EF1970D30F13B70900B87E59 /* TestBDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = EF1970D20F13B70900B87E59 /* TestBDSKTypeManager.m */; };
 		EF54ED180F1B5EDB00D59E07 /* TestBDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = EF54ED170F1B5EDB00D59E07 /* TestBDSKRISParser.m */; };
-		EF902B890F12343000E5DE14 /* TestBibItemST.m in Sources */ = {isa = PBXBuildFile; fileRef = EF902B880F12343000E5DE14 /* TestBibItemST.m */; };
+		EF902B890F12343000E5DE14 /* TestBibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = EF902B880F12343000E5DE14 /* TestBibItem.m */; };
 		EF902C520F12406E00E5DE14 /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
 		EF902DA40F12410300E5DE14 /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
 		EF902DA50F12410300E5DE14 /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
 		EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
 		EF902DA70F12410300E5DE14 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
-		EF90A8DD0F172ADD00EC79EA /* TestComplexStringST.m in Sources */ = {isa = PBXBuildFile; fileRef = EF90A8DC0F172ADD00EC79EA /* TestComplexStringST.m */; };
+		EF90A8DD0F172ADD00EC79EA /* TestComplexString.m in Sources */ = {isa = PBXBuildFile; fileRef = EF90A8DC0F172ADD00EC79EA /* TestComplexString.m */; };
 		EFA721900F12BD80005B2F5F /* TestPubMed.m in Sources */ = {isa = PBXBuildFile; fileRef = EFA7218F0F12BD80005B2F5F /* TestPubMed.m */; };
 		F900CD0A0A8EA97D005C3A0F /* UKDirectoryEnumerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */; };
 		F9022C1D0758013E00C3F701 /* BDAlias.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C1C0758013E00C3F701 /* BDAlias.m */; };
@@ -1269,10 +1269,10 @@
 		EF1970D10F13B70900B87E59 /* TestBDSKTypeManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestBDSKTypeManager.h; path = UnitTests/TestBDSKTypeManager.h; sourceTree = "<group>"; };
 		EF1970D20F13B70900B87E59 /* TestBDSKTypeManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestBDSKTypeManager.m; path = UnitTests/TestBDSKTypeManager.m; sourceTree = "<group>"; };
 		EF54ED170F1B5EDB00D59E07 /* TestBDSKRISParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestBDSKRISParser.m; path = UnitTests/TestBDSKRISParser.m; sourceTree = "<group>"; };
-		EF902B870F12343000E5DE14 /* TestBibItemST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestBibItemST.h; path = UnitTests/TestBibItemST.h; sourceTree = "<group>"; };
-		EF902B880F12343000E5DE14 /* TestBibItemST.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestBibItemST.m; path = UnitTests/TestBibItemST.m; sourceTree = "<group>"; };
-		EF90A8DB0F172ADD00EC79EA /* TestComplexStringST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestComplexStringST.h; path = UnitTests/TestComplexStringST.h; sourceTree = "<group>"; };
-		EF90A8DC0F172ADD00EC79EA /* TestComplexStringST.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestComplexStringST.m; path = UnitTests/TestComplexStringST.m; sourceTree = "<group>"; };
+		EF902B870F12343000E5DE14 /* TestBibItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestBibItem.h; path = UnitTests/TestBibItem.h; sourceTree = "<group>"; };
+		EF902B880F12343000E5DE14 /* TestBibItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestBibItem.m; path = UnitTests/TestBibItem.m; sourceTree = "<group>"; };
+		EF90A8DB0F172ADD00EC79EA /* TestComplexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestComplexString.h; path = UnitTests/TestComplexString.h; sourceTree = "<group>"; };
+		EF90A8DC0F172ADD00EC79EA /* TestComplexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestComplexString.m; path = UnitTests/TestComplexString.m; sourceTree = "<group>"; };
 		EFA7218E0F12BD80005B2F5F /* TestPubMed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestPubMed.h; path = UnitTests/TestPubMed.h; sourceTree = "<group>"; };
 		EFA7218F0F12BD80005B2F5F /* TestPubMed.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestPubMed.m; path = UnitTests/TestPubMed.m; sourceTree = "<group>"; };
 		F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UKDirectoryEnumerator.h; path = ukdirectoryenumerator/UKDirectoryEnumerator.h; sourceTree = "<group>"; };
@@ -2375,15 +2375,15 @@
 				EF168DDE0F11325B002F4D9F /* UnitTests-Info.plist */,
 				EF168DFC0F1133AD002F4D9F /* TestUnitTest.h */,
 				EF168DFD0F1133AD002F4D9F /* TestUnitTest.m */,
-				EF902B870F12343000E5DE14 /* TestBibItemST.h */,
-				EF902B880F12343000E5DE14 /* TestBibItemST.m */,
+				EF902B870F12343000E5DE14 /* TestBibItem.h */,
+				EF902B880F12343000E5DE14 /* TestBibItem.m */,
 				EFA7218E0F12BD80005B2F5F /* TestPubMed.h */,
 				EFA7218F0F12BD80005B2F5F /* TestPubMed.m */,
 				EF1970D10F13B70900B87E59 /* TestBDSKTypeManager.h */,
 				EF1970D20F13B70900B87E59 /* TestBDSKTypeManager.m */,
 				EF54ED170F1B5EDB00D59E07 /* TestBDSKRISParser.m */,
-				EF90A8DB0F172ADD00EC79EA /* TestComplexStringST.h */,
-				EF90A8DC0F172ADD00EC79EA /* TestComplexStringST.m */,
+				EF90A8DB0F172ADD00EC79EA /* TestComplexString.h */,
+				EF90A8DC0F172ADD00EC79EA /* TestComplexString.m */,
 			);
 			comments = "This group was added by Greg Jefferis for new the style SenTest based unit tests directly supported by Apple.";
 			name = UnitTests;
@@ -3819,11 +3819,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				EF168DFE0F1133AD002F4D9F /* TestUnitTest.m in Sources */,
-				EF902B890F12343000E5DE14 /* TestBibItemST.m in Sources */,
+				EF902B890F12343000E5DE14 /* TestBibItem.m in Sources */,
 				EFA721900F12BD80005B2F5F /* TestPubMed.m in Sources */,
 				EF1970D30F13B70900B87E59 /* TestBDSKTypeManager.m in Sources */,
 				EF54ED180F1B5EDB00D59E07 /* TestBDSKRISParser.m in Sources */,
-				EF90A8DD0F172ADD00EC79EA /* TestComplexStringST.m in Sources */,
+				EF90A8DD0F172ADD00EC79EA /* TestComplexString.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

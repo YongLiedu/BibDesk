@@ -1,5 +1,5 @@
 //
-//  TestComplexStringST.h
+//  TestComplexString.h
 //  Bibdesk
 //
 //  Created by Gregory Jefferis on 2009-01-09.
@@ -18,7 +18,7 @@
 
 @end
 
-@interface TestComplexStringST : SenTestCase {
+@interface TestComplexString : SenTestCase {
 
 }
 

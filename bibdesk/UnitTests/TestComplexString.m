@@ -1,12 +1,12 @@
 //
-//  TestComplexStringST.m
+//  TestComplexString.m
 //  Bibdesk
 //
 //  Created by Gregory Jefferis on 2009-01-09.
 //  Copyright 2009 Gregory Jefferis. All rights reserved.
 //
 
-#import "TestComplexStringST.h"
+#import "TestComplexString.h"
 
 
 @implementation TestStringNode
@@ -36,7 +36,7 @@
 
 @end
 
-@implementation TestComplexStringST
+@implementation TestComplexString
 
 
 - (BDSKMacroResolver *)macroResolver;
