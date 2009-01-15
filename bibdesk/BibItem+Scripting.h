@@ -61,6 +61,8 @@
 - (void)insertObject:(NSString *)newURLString inLinkedURLsAtIndex:(unsigned int)idx;
 - (void)removeObjectFromLinkedURLsAtIndex:(unsigned int)idx;
 
+- (id)uniqueID;
+
 - (id)scriptingDocument;
 - (id)group;
 

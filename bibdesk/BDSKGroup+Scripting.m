@@ -73,9 +73,24 @@
     }
 }
 
+- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)uniqueID {
+	NSURL *identifierURL = [NSURL URLWithString:uniqueID];
+    id pub = nil;
+    if (identifierURL) {
+        if ([self respondsToSelector:@selector(publications)]) {
+            pub = [[(id<BDSKOwner>)self publications] itemForIdentifierURL:identifierURL];
+        } else {
+            pub = [[document publications] itemForIdentifierURL:identifierURL];
+            if ([self containsItem:pub] == NO)
+                pub = nil;
+        }
+    }
+    return pub ?: [NSNull null];
+}
+
 - (NSArray *)scriptingPublications {
     if ([self respondsToSelector:@selector(publications)]) {
-        return [(id)self publications];
+        return [(id<BDSKOwner>)self publications];
     } else {
         NSEnumerator *pubEnum = [[document publications] objectEnumerator];
         BibItem *pub;

@@ -175,6 +175,12 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 
 #pragma mark Publications
 
+- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)uniqueID {
+	NSURL *identifierURL = [NSURL URLWithString:uniqueID];
+    id item = identifierURL ? [[self publications] itemForIdentifierURL:identifierURL] : nil;
+    return item ?: [NSNull null];
+}
+
 - (NSArray *)scriptingPublications {
     return [self publications];
 }

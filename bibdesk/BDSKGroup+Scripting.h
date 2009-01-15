@@ -51,6 +51,7 @@
 
 @interface BDSKGroup (Scripting)
 
+- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)uniqueID;
 - (NSArray *)scriptingPublications;
 
 - (NSArray *)authors;

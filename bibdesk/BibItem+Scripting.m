@@ -61,12 +61,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
  Needs a properly working -document method to work with multpiple documents.
 */
 - (NSScriptObjectSpecifier *) objectSpecifier {
-    // only items belonging to a BibDocument are scriptable
-	NSArray *ar = [[self owner] publications];
-	unsigned idx = [ar indexOfObjectIdenticalTo:self];
-    if ([self owner] && idx != NSNotFound) {
+    // only items belonging to an owner are scriptable
+    if ([self owner]) {
         NSScriptObjectSpecifier *containerRef = [(id)[self owner] objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"scriptingPublications" index:idx] autorelease];
+        return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"scriptingPublications" uniqueID:[self uniqueID]] autorelease];
     } else {
         return nil;
     }
@@ -200,6 +198,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (void)removeObjectFromLinkedURLsAtIndex:(unsigned int)idx {
     [[self mutableArrayValueForKey:@"files"] removeObject:[[self remoteURLs] objectAtIndex:idx]];
+}
+
+- (id)uniqueID {
+    return [[self identifierURL] absoluteString];
 }
 
 - (id)scriptingDocument {

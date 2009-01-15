@@ -42,6 +42,7 @@
 
 @interface BibDocument (Scripting) 
 
+- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)uniqueID;
 - (NSArray *)scriptingPublications;
 - (void)insertInScriptingPublications:(BibItem *)pub;
 - (void)insertObject:(BibItem *)pub inScriptingPublicationsAtIndex:(unsigned int)idx;

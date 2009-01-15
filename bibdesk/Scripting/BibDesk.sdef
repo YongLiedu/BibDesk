@@ -679,6 +679,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The remote URLs linked to the publication.">
                 <cocoa key="linkedURLs"/>
             </element>
+            <property name="id" code="ID  " type="text" access="r"
+                description="Unique ID of the publication.">
+                <cocoa key="uniqueID"/>
+            </property>  
             <property name="cite key" code="ckey" type="text"
                 description="Key for citing the publication.">
                 <cocoa key="scriptingCiteKey"/>
