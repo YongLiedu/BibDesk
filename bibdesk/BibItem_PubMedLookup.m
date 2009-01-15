@@ -172,7 +172,7 @@
 	NSString *pubMedSearch=nil;
 	pubMedSearch=[[pdfPath lastPathComponent] stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
 	if(pubMedSearch!=nil){
-		bi=[BibItem itemWithPMID:pubMedSearch];
+		bi=[BibItem itemWithPubMedSearchTerm:pubMedSearch];
 		if(bi!=nil) return bi;
 	}
 	
@@ -183,7 +183,7 @@
 	NSString *pdfTitle = [[pdfd documentAttributes] valueForKey:PDFDocumentTitleAttribute];	
 	pubMedSearch=[pdfTitle stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
 	if(pubMedSearch!=nil){
-		bi=[BibItem itemWithPMID:pubMedSearch];
+		bi=[BibItem itemWithPubMedSearchTerm:pubMedSearch];
 		if(bi!=nil) return bi;
 	}
 	
@@ -208,10 +208,10 @@
 
 	[pdfd release];
 	// NB pubmed search will work equally for pubmed id, doi, PII etc
-	return pubMedSearch ? [BibItem itemWithPMID:pubMedSearch] : nil;
+	return pubMedSearch ? [BibItem itemWithPubMedSearchTerm:pubMedSearch] : nil;
 }
 
-+ (id)itemWithPMID:(NSString *)pmid;
++ (id)itemWithPubMedSearchTerm:(NSString *)pmid;
 {
     NSString *string = [BDSKPubMedLookupHelper referenceForPubMedSearchTerm:pmid];
     return string ? [[BDSKStringParser itemsFromString:string ofType:BDSKUnknownStringType error:NULL] lastObject] : nil;

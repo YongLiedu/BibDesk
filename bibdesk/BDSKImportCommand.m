@@ -120,7 +120,7 @@
         }
         pubs = [document publicationsForString:string type:BDSKUnknownStringType verbose:NO error:NULL];
     } else if (searchTerm) {
-        pubs = [NSArray arrayWithObjects:[BibItem itemWithPMID:searchTerm], nil];
+        pubs = [NSArray arrayWithObjects:[BibItem itemWithPubMedSearchTerm:searchTerm], nil];
     } else {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
         return nil;

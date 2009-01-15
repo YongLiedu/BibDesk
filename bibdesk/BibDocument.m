@@ -2414,7 +2414,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             NSString *lastPathComponent = [[fnStr lastPathComponent] stringByDeletingPathExtension];
             BOOL tryPubMed = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePubMedMetadata];
             if(newBI == nil && tryPubMed && [lastPathComponent containsCharacterInSet:[NSCharacterSet nonDecimalDigitCharacterSet]] == NO)
-                newBI = [BibItem itemWithPMID:lastPathComponent];
+                newBI = [BibItem itemWithPubMedSearchTerm:lastPathComponent];
 
 			// GJ try parsing pdf to extract info that is then used to get a PubMed record
 			if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTerm])
