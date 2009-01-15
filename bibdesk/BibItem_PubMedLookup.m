@@ -170,7 +170,7 @@
 	
 	// see if we can find any bibliographic info in the filename
 	NSString *pubMedSearch=nil;
-	pubMedSearch=[[pdfPath lastPathComponent] stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
+	pubMedSearch=[[[pdfPath lastPathComponent] stringByDeletingPathExtension] stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
 	if(pubMedSearch!=nil){
 		bi=[BibItem itemWithPubMedSearchTerm:pubMedSearch];
 		if(bi!=nil) return bi;
@@ -211,9 +211,9 @@
 	return pubMedSearch ? [BibItem itemWithPubMedSearchTerm:pubMedSearch] : nil;
 }
 
-+ (id)itemWithPubMedSearchTerm:(NSString *)pmid;
++ (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
 {
-    NSString *string = [BDSKPubMedLookupHelper referenceForPubMedSearchTerm:pmid];
+    NSString *string = [BDSKPubMedLookupHelper referenceForPubMedSearchTerm:searchTerm];
     return string ? [[BDSKStringParser itemsFromString:string ofType:BDSKUnknownStringType error:NULL] lastObject] : nil;
 }
 

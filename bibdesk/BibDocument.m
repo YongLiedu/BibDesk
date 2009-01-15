@@ -123,6 +123,7 @@
 #import "BDSKDocumentSearch.h"
 #import "NSImage_BDSKExtensions.h"
 #import <SkimNotes/SkimNotes.h>
+#import "NSWorkspace_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -2417,7 +2418,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 newBI = [BibItem itemWithPubMedSearchTerm:lastPathComponent];
 
 			// GJ try parsing pdf to extract info that is then used to get a PubMed record
-			if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTerm])
+			if(newBI == nil && [[[NSWorkspace sharedWorkspace] UTIForURL:url] isEqualToUTI:(NSString *)kUTTypePDF] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTerm])
 				newBI = [BibItem itemByParsingPDFFile:fnStr];			
 			
             // fall back on the least reliable metadata source (hidden pref)
