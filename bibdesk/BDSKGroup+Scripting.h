@@ -63,6 +63,8 @@
 - (BDSKMacro *)valueInMacrosWithName:(NSString *)aName;
 - (NSArray *)macros;
 
+- (NSString *)scriptingUniqueID;
+
 - (NSString *)scriptingName;
 
 @end

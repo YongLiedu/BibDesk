@@ -45,6 +45,14 @@
 #import <OmniBase/OmniBase.h>
 
 
+static NSString *createUniqueID(void)
+{
+    CFUUIDRef uuid = CFUUIDCreate(NULL);
+    NSString *uuidStr = (id)CFUUIDCreateString(NULL, uuid);
+    CFRelease(uuid);
+    return uuidStr;
+}    
+
 @implementation BDSKGroup
 
 // super's designated initializer
@@ -76,6 +84,7 @@
         name = [aName copy];
         count = aCount;
         document = nil;
+        uniqueID = createUniqueID();
     }
     return self;
 }
@@ -97,6 +106,7 @@
     if (self = [super init]) {
         name = [[decoder decodeObjectForKey:@"name"] retain];
         count = [decoder decodeIntForKey:@"count"];
+        uniqueID = createUniqueID();
     }
     return self;
 }
@@ -114,6 +124,7 @@
 
 - (void)dealloc {
     [name release];
+    [uniqueID release];
     [super dealloc];
 }
 
@@ -135,6 +146,17 @@
 }
 
 // accessors
+
+- (NSString *)uniqueID {
+    return uniqueID;
+}
+
+- (void)setUniqueID:(NSString *)newID {
+    if (uniqueID != newID) {
+        [uniqueID release];
+        uniqueID = [newID retain];
+    }
+}
 
 - (id)name {
     return [[name retain] autorelease];

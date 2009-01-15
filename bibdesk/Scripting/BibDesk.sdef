@@ -953,6 +953,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="Macros defined in the group">
 				<cocoa key="macros"/>
 			</element>
+            <property name="id" code="ID  " type="text" access="r"
+                description="Unique ID of the group.">
+                <cocoa key="scriptingUniqueID"/>
+            </property>  
             <property name="name" code="pnam" type="text"
                 description="The group's name.">
                 <cocoa key="scriptingName"/>

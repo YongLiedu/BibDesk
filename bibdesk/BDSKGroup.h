@@ -46,6 +46,7 @@
 	id name;
 	int count;
     BibDocument *document;
+    NSString *uniqueID;
 }
 
 /*!
@@ -66,6 +67,9 @@
 
 - (id)initWithDictionary:(NSDictionary *)groupDict;
 - (NSDictionary *)dictionaryValue;
+
+- (NSString *)uniqueID;
+- (void)setUniqueID:(NSString *)newID;
 
 /*!
 	@method name

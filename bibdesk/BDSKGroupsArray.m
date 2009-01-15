@@ -322,6 +322,20 @@
 
 #pragma mark Mutable accessors
 
+- (void)duplicateUniqueIDsFromGroups:(NSArray *)oldGroups toGroups:(NSArray *)newGroups {
+    NSMutableDictionary *ids = [NSMutableDictionary dictionary];
+    NSEnumerator *groupEnum = [oldGroups objectEnumerator];
+    BDSKGroup *group;
+    NSString *uniqueID;
+    while (group = [groupEnum nextObject])
+        [ids setObject:[group uniqueID] forKey:[group stringValue]];
+    groupEnum = [newGroups objectEnumerator];
+    while (group = [groupEnum nextObject]) {
+        if (uniqueID = [ids objectForKey:[group stringValue]])
+            [group setUniqueID:uniqueID];
+    }
+}
+
 - (void)setLastImportedPublications:(NSArray *)pubs{
     if(lastImportGroup == nil) {
         lastImportGroup = [[BDSKStaticGroup alloc] initWithLastImport:pubs];
@@ -334,6 +348,10 @@
 - (void)setSharedGroups:(NSArray *)array{
     if(sharedGroups != array){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
+        
+        // try to preserve the unique ID when we regenerate the groups
+        if ([array count] && [sharedGroups count])
+            [self duplicateUniqueIDsFromGroups:sharedGroups toGroups:array];
         
         [sharedGroups removeObjectsInArray:array];
         [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:sharedGroups];
@@ -453,6 +471,10 @@
 - (void)setCategoryGroups:(NSArray *)array{
     if(categoryGroups != array){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
+        
+        // try to preserve the unique ID when we regenerate the groups
+        if ([[[array lastObject] key] isEqualToString:[[categoryGroups lastObject] key]])
+            [self duplicateUniqueIDsFromGroups:categoryGroups toGroups:array];
         
         [categoryGroups makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
         [categoryGroups release];

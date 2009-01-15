@@ -45,6 +45,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKGroup.h"
+#import "BDSKGroup+Scripting.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKURLGroup.h"
 #import "BDSKScriptGroup.h"
@@ -242,6 +243,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 
 #pragma mark Groups
 
+- (BDSKGroup *)valueInGroupsWithUniqueID:(NSString *)aUniqueID {
+    unsigned int idx = [[groups valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [groups objectAtIndex:idx];
+}
+
 - (BDSKGroup *)valueInGroupsWithName:(NSString *)name {
     NSArray *names = [groups valueForKey:@"stringValue"];
     unsigned int idx = [names indexOfObject:name];
@@ -317,6 +323,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return [groups staticGroups];
 }
 
+- (BDSKStaticGroup *)valueInStaticGroupsWithUniqueID:(NSString *)aUniqueID {
+    unsigned int idx = [[[groups staticGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [[groups staticGroups] objectAtIndex:idx];
+}
+
 - (BDSKStaticGroup *)valueInStaticGroupsWithName:(NSString *)name {
     unsigned int idx = [[[groups staticGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups staticGroups] objectAtIndex:idx];
@@ -346,6 +357,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 
 - (NSArray *)smartGroups {
     return [groups smartGroups];
+}
+
+- (BDSKSmartGroup *)valueInSmartGroupsWithUniqueID:(NSString *)aUniqueID {
+    unsigned int idx = [[[groups smartGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [[groups smartGroups] objectAtIndex:idx];
 }
 
 - (BDSKSmartGroup *)valueInSmartGroupsWithName:(NSString *)name {
@@ -379,6 +395,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return [groups categoryGroups];
 }
 
+- (BDSKCategoryGroup *)valueInFieldGroupsWithUniqueID:(NSString *)aUniqueID {
+    unsigned int idx = [[[groups categoryGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [[groups categoryGroups] objectAtIndex:idx];
+}
+
 - (BDSKCategoryGroup *)valueInFieldGroupsWithName:(NSString *)name {
     id field = [self currentGroupField];
     NSArray *names = [[groups categoryGroups] valueForKey:@"name"];
@@ -400,6 +421,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 
 - (NSArray *)externalFileGroups {
     return [groups URLGroups];
+}
+
+- (BDSKURLGroup *)valueInExternalFileGroupsWithUniqueID:(NSString *)aUniqueID {
+    unsigned int idx = [[[groups URLGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [[groups URLGroups] objectAtIndex:idx];
 }
 
 - (BDSKURLGroup *)valueInExternalFileGroupsWithName:(NSString *)name {
@@ -433,6 +459,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return [groups scriptGroups];
 }
 
+- (BDSKScriptGroup *)valueInScriptGroupsWithUniqueID:(NSString *)aUniqueID {
+    unsigned int idx = [[[groups scriptGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [[groups scriptGroups] objectAtIndex:idx];
+}
+
 - (BDSKScriptGroup *)valueInScriptGroupsWithName:(NSString *)name {
     unsigned int idx = [[[groups scriptGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups scriptGroups] objectAtIndex:idx];
@@ -464,6 +495,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return [groups searchGroups];
 }
 
+- (BDSKSearchGroup *)valueInSearchGroupsWithUniqueID:(NSString *)aUniqueID {
+    unsigned int idx = [[[groups searchGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [[groups searchGroups] objectAtIndex:idx];
+}
+
 - (BDSKSearchGroup *)valueInSearchGroupsWithName:(NSString *)name {
     unsigned int idx = [[[groups searchGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups searchGroups] objectAtIndex:idx];
@@ -493,6 +529,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return [groups sharedGroups];
 }
 
+- (BDSKSharedGroup *)valueInSharedGroupsWithUniqueID:(NSString *)aUniqueID {
+    unsigned int idx = [[[groups sharedGroups] valueForKey:@"scriptingUniqueID"] indexOfObject:aUniqueID];
+    return idx == NSNotFound ? nil : [[groups sharedGroups] objectAtIndex:idx];
+}
+
 - (BDSKSharedGroup *)valueInSharedGroupsWithName:(NSString *)name {
     unsigned int idx = [[[groups sharedGroups] valueForKey:@"name"] indexOfObject:name];
     return idx == NSNotFound ? nil : [[groups sharedGroups] objectAtIndex:idx];
@@ -502,6 +543,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 
 - (NSArray *)libraryGroups {
     return [NSArray arrayWithObject:[groups libraryGroup]];
+}
+
+- (BDSKGroup *)valueInLibraryGroupsWithUniqueID:(NSString *)aUniqueID {
+    BDSKGroup *group = [[self groups] libraryGroup];
+    return [[group scriptingUniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
 }
 
 - (BDSKGroup *)valueInLibraryGroupsWithName:(NSString *)name {
@@ -516,6 +562,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     return [group count] ? [NSArray arrayWithObject:group] : [NSArray array];
 }
 
+- (BDSKGroup *)valueInLastImportGroupsWithUniqueID:(NSString *)aUniqueID {
+    BDSKGroup *group = [groups lastImportGroup];
+    return [[group scriptingUniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
+}
+
 - (BDSKGroup *)valueInLastImportGroupsWithName:(NSString *)name {
     BDSKGroup *group = [groups lastImportGroup];
     return [[group name] caseInsensitiveCompare:name] == NSOrderedSame && [group count] ? group : nil;
@@ -525,6 +576,11 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
 
 - (NSArray *)webGroups {
     return [NSArray arrayWithObjects:[groups webGroup], nil];
+}
+
+- (BDSKWebGroup *)valueInWebGroupsWithUniqueID:(NSString *)aUniqueID {
+    BDSKWebGroup *group = [groups webGroup];
+    return [[group scriptingUniqueID] isEqualToString:aUniqueID] == NSOrderedSame ? group : nil;
 }
 
 - (BDSKWebGroup *)valueInWebGroupsWithName:(NSString *)name {

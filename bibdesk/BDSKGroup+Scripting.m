@@ -64,17 +64,12 @@
 
 - (NSScriptObjectSpecifier *)objectSpecifier {
     BibDocument *doc = (BibDocument *)[self document];
-	unsigned idx = [[doc groups] indexOfObjectIdenticalTo:self];
-    if (idx != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"groups" index:idx] autorelease];
-    } else {
-        return nil;
-    }
+    NSScriptObjectSpecifier *containerRef = [doc objectSpecifier];
+    return [[[NSUniqueIDSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"groups" uniqueID:[self scriptingUniqueID]] autorelease];
 }
 
-- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)uniqueID {
-	NSURL *identifierURL = [NSURL URLWithString:uniqueID];
+- (id)valueInScriptingPublicationsWithUniqueID:(NSString *)aUniqueID {
+	NSURL *identifierURL = [NSURL URLWithString:aUniqueID];
     id pub = nil;
     if (identifierURL) {
         if ([self respondsToSelector:@selector(publications)]) {
@@ -127,6 +122,10 @@
 
 - (BDSKMacro *)valueInMacrosWithName:(NSString *)aName {
     return [[self macroResolver] valueInMacrosWithName:aName];
+}
+
+- (NSString *)scriptingUniqueID {
+    return [self uniqueID];
 }
 
 - (NSString *)scriptingName {
