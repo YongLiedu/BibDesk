@@ -1612,11 +1612,16 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa name="import" class="BDSKImportCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
-            <parameter name="from" code="from"
-                description="The string or file containing publications in a supported string format.">
+            <parameter name="from" code="from" optional="yes"
+                description="The string or file containing publications in a supported string format. Either this or 'for search term' must be specified.">
                 <type type="text"/>
                 <type type="file"/>
                 <cocoa key="from"/>
+            </parameter>
+            <parameter name="for search term" code="Srch" optional="yes"
+                description="The search term to search the PubMed database. Either this or 'from' must be specified.">
+                <type type="text"/>
+                <cocoa key="searchTerm"/>
             </parameter>
             <result description="The publications parsed from the string format and added to the document">
                 <type type="publication" list="yes"/>

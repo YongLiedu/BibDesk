@@ -72,6 +72,7 @@
 #import "BDSKImportCommand.h"
 #import "BibDocument.h"
 #import "BibItem.h"
+#import "BibItem_PubMedLookup.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKStringParser.h"
 
@@ -105,26 +106,29 @@
 	
 	// the 'from' parameters gives the template name to use
 	id string = [params objectForKey:@"from"];
+	id searchTerm = [params objectForKey:@"searchTerm"];
+    NSArray *pubs = nil;
     // make sure we get something
-	if (string == nil) {
+	if (string) {
+        // make sure we get the right thing
+        if ([string isKindOfClass:[NSURL class]]) {
+            string = [NSString stringWithContentsOfFile:[string path] encoding:0 guessEncoding:YES];
+        }
+        if ([string isKindOfClass:[NSString class]] == NO) {
+            [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
+            return nil;
+        }
+        pubs = [document publicationsForString:string type:BDSKUnknownStringType verbose:NO error:NULL];
+    } else if (searchTerm) {
+        pubs = [NSArray arrayWithObjects:[BibItem itemWithPMID:searchTerm], nil];
+    } else {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
         return nil;
 	}
-	// make sure we get the right thing
-	if ([string isKindOfClass:[NSURL class]]) {
-        string = [NSString stringWithContentsOfFile:[string path] encoding:0 guessEncoding:YES];
-	}
-    
-    if ([string isKindOfClass:[NSString class]] == NO) {
-		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-        return nil;
-	}
-	
-    NSArray *pubs = [document publicationsForString:string type:BDSKUnknownStringType verbose:NO error:NULL];
 	if ([pubs count])
     	[document addPublications:pubs publicationsToAutoFile:nil temporaryCiteKey:nil selectLibrary:NO edit:NO];
 	
-    return pubs;
+    return pubs ?: [NSArray array];
 }
 
 @end
