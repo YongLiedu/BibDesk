@@ -44,7 +44,7 @@
 
 @interface BDSKPubMedLookupHelper : NSObject
 + (NSString *)referenceForPubMedSearchTerm:(NSString *)pmid;
-+ (NSString *)PMIDFromPDF:(NSString *)pdfPath byCallingExternalScript:(NSString *)scriptPath ;
++ (NSString *)PMIDFromPDFFile:(NSString *)pdfPath byCallingExternalScript:(NSString *)scriptPath ;
 @end
 
 @implementation BibItem (PubMedLookup)
@@ -143,7 +143,7 @@
     return canConnect;
 }
 
-+ (NSString *)PMIDFromPDF:(NSString *)pdfPath byCallingExternalScript:(NSString *)scriptPath ;
++ (NSString *)PMIDFromPDFFile:(NSString *)pdfPath byCallingExternalScript:(NSString *)scriptPath ;
 {
 	// GJ - call an external script to get a PMID
 	NSTask *task;
