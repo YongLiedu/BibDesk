@@ -47,6 +47,7 @@
 #import "BDSKItemSearchIndexes.h"
 #import "BDSKISIGroupServer.h"
 #import "BDSKDBLPGroupServer.h"
+#import "BDSKGroup+Scripting.h"
 
 NSString *BDSKSearchGroupEntrez = @"entrez";
 NSString *BDSKSearchGroupZoom = @"zoom";
@@ -65,10 +66,10 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
         NSDictionary *info = [[(NSCreateCommand *)cmd resolvedKeyDictionary] objectForKey:@"scriptingServerInfo"];
         if ([info objectForKey:@"type"]) {
             switch ([[info objectForKey:@"type"] intValue]) {
-                case 'Entr': aType = BDSKSearchGroupEntrez; break;
-                case 'Zoom': aType = BDSKSearchGroupZoom; break;
-                case 'ISI ': aType = BDSKSearchGroupISI; break;
-                case 'DBLP': aType = BDSKSearchGroupDBLP; break;
+                case BDSKScriptingSearchGroupEntrez: aType = BDSKSearchGroupEntrez; break;
+                case BDSKScriptingSearchGroupZoom: aType = BDSKSearchGroupZoom; break;
+                case BDSKScriptingSearchGroupISI: aType = BDSKSearchGroupISI; break;
+                case BDSKScriptingSearchGroupDBLP: aType = BDSKSearchGroupDBLP; break;
                 default: break;
             }
         }
@@ -126,11 +127,11 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     [options setValue:[bdsksearchURL user] forKey:@"username"];
    
     if (aPort == nil) {
-        if ([aType caseInsensitiveCompare:BDSKSearchGroupEntrez])
+        if ([aHost caseInsensitiveCompare:BDSKSearchGroupEntrez])
             aType = BDSKSearchGroupEntrez;
-        else if ([aType caseInsensitiveCompare:BDSKSearchGroupISI])
+        else if ([aHost caseInsensitiveCompare:BDSKSearchGroupISI])
             aType = BDSKSearchGroupISI;
-        else if ([aType caseInsensitiveCompare:BDSKSearchGroupDBLP])
+        else if ([aHost caseInsensitiveCompare:BDSKSearchGroupDBLP])
             aType = BDSKSearchGroupDBLP;
     }
     
@@ -270,10 +271,6 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     return [publications containsObject:item];
 }
 
-- (BDSKItemSearchIndexes *)searchIndexes{
-    return searchIndexes;
-}
-
 #pragma mark BDSKOwner protocol
 
 - (BDSKPublicationsArray *)publications;
@@ -327,10 +324,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
-- (BDSKMacroResolver *)macroResolver;
-{
-    return macroResolver;
-}
+- (BDSKMacroResolver *)macroResolver { return macroResolver; }
 
 // search groups are not saved, so we don't register undo with the document's undo manager
 - (NSUndoManager *)undoManager { return nil; }
@@ -341,21 +335,25 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 
 - (BOOL)isDocument { return NO; }
 
+- (BDSKItemSearchIndexes *)searchIndexes { return searchIndexes; }
+
 #pragma mark Searching
 
 - (void)resetServerWithInfo:(BDSKServerInfo *)info {
     [server terminate];
     [server release];
+    Class serverClass = Nil;
     if ([type isEqualToString:BDSKSearchGroupEntrez])
-        server = [[BDSKEntrezGroupServer alloc] initWithGroup:self serverInfo:info];
+        serverClass = [BDSKEntrezGroupServer class];
     else if ([type isEqualToString:BDSKSearchGroupZoom])
-        server = [[BDSKZoomGroupServer alloc] initWithGroup:self serverInfo:info];
+        serverClass = [BDSKZoomGroupServer class];
     else if ([type isEqualToString:BDSKSearchGroupISI])
-        server = [[BDSKISIGroupServer alloc] initWithGroup:self serverInfo:info];
+        serverClass = [BDSKISIGroupServer class];
     else if ([type isEqualToString:BDSKSearchGroupDBLP])
-        server = [[BDSKDBLPGroupServer alloc] initWithGroup:self serverInfo:info];
+        serverClass = [BDSKDBLPGroupServer class];
     else
         OBASSERT_NOT_REACHED("unknown search group type");
+    server = [[serverClass alloc] initWithGroup:self serverInfo:info];
 }
 
 - (void)search;

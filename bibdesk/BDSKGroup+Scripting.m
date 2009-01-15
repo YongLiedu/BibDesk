@@ -415,13 +415,13 @@
     int serverType = 0;
     
     if ([serverInfo isEntrez])
-        serverType = 'Entr';
+        serverType = BDSKScriptingSearchGroupEntrez;
     else if ([serverInfo isZoom])
-        serverType = 'Zoom';
+        serverType = BDSKScriptingSearchGroupZoom;
     else if ([serverInfo isISI])
-        serverType = 'ISI ';
+        serverType = BDSKScriptingSearchGroupISI;
     else if ([serverInfo isDBLP])
-        serverType = 'DBLP';
+        serverType = BDSKScriptingSearchGroupDBLP;
     else
         return nil;
     
@@ -445,16 +445,16 @@
     NSString *serverType = type;
      
     switch ([[info objectForKey:@"type"] intValue]) {
-        case 'Entr':
+        case BDSKScriptingSearchGroupEntrez:
             serverType = BDSKSearchGroupEntrez;
             break;
-        case 'Zoom':
+        case BDSKScriptingSearchGroupZoom:
             serverType = BDSKSearchGroupZoom;
             break;
-        case 'ISI ':
+        case BDSKScriptingSearchGroupISI:
             serverType = BDSKSearchGroupISI;
             break;
-        case 'DBLP':
+        case BDSKScriptingSearchGroupDBLP:
             serverType = BDSKSearchGroupDBLP;
             break;
         default:
@@ -536,13 +536,13 @@
 
 - (int)scriptingServerType {
     if ([type isEqualToString:BDSKSearchGroupEntrez])
-        return 'Entr';
+        return BDSKScriptingSearchGroupEntrez;
     else if ([type isEqualToString:BDSKSearchGroupZoom])
-        return 'Zoom';
+        return BDSKScriptingSearchGroupZoom;
     else if ([type isEqualToString:BDSKSearchGroupISI])
-        return 'ISI ';
+        return BDSKScriptingSearchGroupISI;
     else if ([type isEqualToString:BDSKSearchGroupDBLP])
-        return 'DBLP';
+        return BDSKScriptingSearchGroupDBLP;
     else
         return 0;
 }
