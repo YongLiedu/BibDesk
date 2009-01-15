@@ -43,6 +43,5 @@
 
 + (id)itemWithPMID:(NSString *)pmid;
 + (id)itemByParsingPDFFile:(NSString *)pdfPath;
-+ (id)itemByParsingPDFFile:(NSString *)pdfPath usingExternalScript:(NSString *)scriptPath;
 
 @end

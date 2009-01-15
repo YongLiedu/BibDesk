@@ -123,7 +123,6 @@ extern NSString *BDSKShouldUsePDFMetadata;
 extern NSString *BDSKShouldWritePDFMetadata;
 extern NSString *BDSKShouldUsePubMedMetadata;
 extern NSString *BDSKShouldParsePDFToGeneratePubMedSearchTerm;
-extern NSString *BDSKExternalScriptToGeneratePubMedSearchTerm;
 
 extern NSString *BDSKIntersectGroupsKey;
 extern NSString *BDSKSearchGroupBookmarksKey;
