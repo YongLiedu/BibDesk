@@ -71,6 +71,59 @@
 	}
 	return doi;
 }
+
+- (NSString *) stringByExtractingPIIFromString;
+{
+	// nb this method will NOT attempt to 'denormalise' normalised PIIs
+	
+	NSString *pii=nil;
+	// next Elsevier PII
+	// Some useful info at:
+	// http://www.weizmann.ac.il/home/comartin/doi.html
+	// It has the form Sxxxx-xxxx(yy)zzzzz-c,
+	// where xxxx-xxxx is the 8-digit ISSN (International Systematic Serial Number) of the journal,
+	// yy are the last two digits of the year, 
+	// zzzzz is an article number within that year of the journal, 
+	// and c is a checksum digit
+	// sometimes it is also normalised by removing all non alpha characters 
+	// (and this is how it is stored in PubMed)
+	
+	//S0092867402007006 or S0092-8674(02)00700-6
+	// NB occasionally the checksum is X and once I have seen: 0092-8674(93)90422-M
+	// ie terminal M and missing X
+	// Unfortunately Elsevier switched from submitting the standard form to PubMed
+	// to the normalised form.
+	
+	// I have relaxed the regex for the missing S full form BUT not for the normalised form
+	
+	AGRegex *PIIRegex = [AGRegex regexWithPattern:@"S{0,1}[0-9]{4}-[0-9]{3}[0-9X][(][0-9]{2}[)][0-9]{5}-[0-9MX]"
+										  options:AGRegexMultiline|AGRegexCaseInsensitive];
+	
+	AGRegexMatch *match = [PIIRegex findInString:self];
+	if([match groupAtIndex:0]!=nil)
+		pii = [NSString stringWithString:[match groupAtIndex:0]];
+	if(pii==nil){
+		// try normalised form
+		AGRegex *PIIRegex2 = [AGRegex regexWithPattern:@"S[0-9]{7}[0-9X][0-9]{7}[0-9MX]"
+											   options:AGRegexCaseInsensitive];
+		match = [PIIRegex2 findInString:self];
+		
+		if([match groupAtIndex:0]!=nil)
+			pii = [NSString stringWithString:[match groupAtIndex:0]];
+	}
+		
+	return pii;
+}
+
+- (NSString *) stringByExtractingNormalisedPIIFromString;
+{
+	NSString *pii=[self stringByExtractingPIIFromString];
+	if(pii!=nil)
+	pii = [pii stringByReplacingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"()-"]
+									 withString:@""];
+	return pii;
+}
+
 @end
 
 @implementation BibItem (PubMedLookup)

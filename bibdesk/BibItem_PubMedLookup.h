@@ -42,7 +42,8 @@
 @interface NSString (PubMedLookup)
 
 - (NSString *) stringByExtractingDOIFromString;
-
+- (NSString *) stringByExtractingPIIFromString;
+- (NSString *) stringByExtractingNormalisedPIIFromString;
 @end
 
 @interface BibItem (PubMedLookup)
