@@ -873,8 +873,6 @@
 		273007A407CF216700F2E485 /* BDSKComplexString.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKComplexString.h; sourceTree = "<group>"; };
 		275E271F07838F7B0070398A /* TestSystemServices.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = TestSystemServices.h; sourceTree = "<group>"; };
 		275E272007838F7B0070398A /* TestSystemServices.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = TestSystemServices.m; sourceTree = "<group>"; };
-		275E272107838F7B0070398A /* TestURLHandling.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = TestURLHandling.h; sourceTree = "<group>"; };
-		275E272207838F7B0070398A /* TestURLHandling.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = TestURLHandling.m; sourceTree = "<group>"; };
 		27AFAF9A080D1E1B0096F5D2 /* BDSKTextImportController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextImportController.h; sourceTree = "<group>"; };
 		27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextImportController.m; sourceTree = "<group>"; };
 		27AFAFA9080D1E5B0096F5D2 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/TextImport.nib; sourceTree = "<group>"; };
@@ -1797,8 +1795,6 @@
 			children = (
 				275E271F07838F7B0070398A /* TestSystemServices.h */,
 				275E272007838F7B0070398A /* TestSystemServices.m */,
-				275E272107838F7B0070398A /* TestURLHandling.h */,
-				275E272207838F7B0070398A /* TestURLHandling.m */,
 			);
 			name = Test;
 			sourceTree = "<group>";
