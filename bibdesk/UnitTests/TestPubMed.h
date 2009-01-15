@@ -3,7 +3,7 @@
 //  Bibdesk
 //
 //  Created by Gregory Jefferis on 2009-01-05.
-/* This software is Copyright (c) 2002-2009
+/* This software is Copyright (c) 2009
  Gregory Jefferis. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -35,15 +35,10 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 #import <SenTestingKit/SenTestingKit.h>
 #import <Cocoa/Cocoa.h>
-#import <OmniFoundation/OmniFoundation.h>
-#import "BibItem.h"
-#import "BDSKBibTeXParser.h"
-#import "BDSKStringConstants.h"
-#import "BDSKPubMedParser.h"
 
+@class BibItem;
 
 @interface TestPubMed : SenTestCase {
 	BibItem *bibitem;

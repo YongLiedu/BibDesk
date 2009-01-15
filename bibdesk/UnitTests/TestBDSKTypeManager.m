@@ -3,7 +3,7 @@
 //  Bibdesk
 //
 //  Created by Gregory Jefferis on 2009-01-06.
-/* This software is Copyright (c) 2002-2009
+/* This software is Copyright (c) 2009
  Gregory Jefferis. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,9 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 #import "TestBDSKTypeManager.h"
+#import <OmniFoundation/OmniFoundation.h>
+#import "BDSKTypeManager.h"
 
 
 @implementation TestBDSKTypeManager

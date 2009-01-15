@@ -1,8 +1,8 @@
 //
-//  TestComplexString.h
+//  TestBDSKRISParser.h
 //  Bibdesk
 //
-//  Created by Gregory Jefferis on 2009-01-09.
+//  Created by Gregory Jefferis on 2009-01-12.
 /* This software is Copyright (c) 2009
  Gregory Jefferis. All rights reserved.
 
@@ -38,14 +38,7 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import <Cocoa/Cocoa.h>
 
-@interface TestStringNode : SenTestCase {
-    
+
+@interface TestBDSKRISParser : SenTestCase {
 }
-
-@end
-
-@interface TestComplexString : SenTestCase {
-
-}
-
 @end

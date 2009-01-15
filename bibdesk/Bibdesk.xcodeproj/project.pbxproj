@@ -1060,6 +1060,7 @@
 		CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchBookmarkController.h; sourceTree = "<group>"; };
 		CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchBookmarkController.m; sourceTree = "<group>"; };
 		CE43865D0BB8274600A56987 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SearchBookmarksWindow.nib; sourceTree = "<group>"; };
+		CE452AC00F1EBBD500DA1A5A /* TestBDSKRISParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestBDSKRISParser.h; sourceTree = "<group>"; };
 		CE4B5F110BF3DB1300A73E42 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibDocument.nib; sourceTree = "<group>"; };
 		CE4B691A09E9235200CCA14F /* SmallLock_Locked.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = SmallLock_Locked.tiff; sourceTree = "<group>"; };
 		CE4B691B09E9235200CCA14F /* SmallLock_Unlocked.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = SmallLock_Unlocked.tiff; sourceTree = "<group>"; };
@@ -2381,6 +2382,7 @@
 				EFA7218F0F12BD80005B2F5F /* TestPubMed.m */,
 				EF1970D10F13B70900B87E59 /* TestBDSKTypeManager.h */,
 				EF1970D20F13B70900B87E59 /* TestBDSKTypeManager.m */,
+				CE452AC00F1EBBD500DA1A5A /* TestBDSKRISParser.h */,
 				EF54ED170F1B5EDB00D59E07 /* TestBDSKRISParser.m */,
 				EF90A8DB0F172ADD00EC79EA /* TestComplexString.h */,
 				EF90A8DC0F172ADD00EC79EA /* TestComplexString.m */,
