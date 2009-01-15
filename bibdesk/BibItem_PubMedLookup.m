@@ -62,7 +62,7 @@
 {
 	if(scriptPath==nil) return nil;
 	
-	NSString *pubmedTerm = [BDSKPubMedLookupHelper PMIDFromPDF:pdfPath
+	NSString *pubmedTerm = [BDSKPubMedLookupHelper PMIDFromPDFFile:pdfPath
 								 byCallingExternalScript:scriptPath];
 
 	if(pubmedTerm==nil) return nil;
