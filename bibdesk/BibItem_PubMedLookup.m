@@ -46,6 +46,33 @@
 + (NSString *)referenceForPubMedSearchTerm:(NSString *)pmid;
 @end
 
+@implementation NSString (PubMedLookup)
+- (NSString *) stringByExtractingDOIFromString;
+{
+	NSString *doi=nil;
+	AGRegex *doiRegex = [AGRegex regexWithPattern:@"doi[: ]+([0-9.]+[ \\/][A-Z0-9.\\-_]+)" 
+										  options:AGRegexMultiline|AGRegexCaseInsensitive];
+	AGRegexMatch *match = [doiRegex findInString:self];
+	if([match groupAtIndex:1]!=nil){
+		doi = [NSString stringWithString:[match groupAtIndex:1]];
+		// replace any spaces with /
+		// first converting any internal whitespace to single space 			
+		doi = [doi stringByNormalizingSpacesAndLineBreaks];
+		doi = [doi stringByReplacingOccurrencesOfString:@" " withString:@"/"];
+	} else {
+		//		Be more restrictive about initial part but less about
+		//		actual DOI string - offer 3 alternatives for 'hinge' 
+		//		including standard slash
+		AGRegex *doiRegex2 = [AGRegex regexWithPattern:@"doi[: ]+(10\\.[0-9]{4})[ \\/0]([A-Z0-9.\\-_]+)"
+											   options:AGRegexMultiline|AGRegexCaseInsensitive];
+		match = [doiRegex2 findInString:self];
+		if([match groupAtIndex:1]!=nil && [match groupAtIndex:2]!=nil)
+			doi = [NSString stringWithFormat:@"%@/%@",[match groupAtIndex:1],[match groupAtIndex:2]];
+	}
+	return doi;
+}
+@end
+
 @implementation BibItem (PubMedLookup)
 
 /* Based on public domain sample code written by Oleg Khovayko, available at
@@ -73,25 +100,8 @@
 		// If we've got nothing to parse, try the next page
 		if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
 		
-		AGRegex *doiRegex = [AGRegex regexWithPattern:@"doi[: ]+([0-9.]+[ \\/][A-Z0-9.\\-_]+)" 
-											  options:AGRegexMultiline|AGRegexCaseInsensitive];
-		AGRegexMatch *match = [doiRegex findInString:pdftextthispage];
-		if([match groupAtIndex:1]!=nil){
-			doi = [NSString stringWithString:[match groupAtIndex:1]];
-			// replace any spaces with /
-			// first converting any internal whitespace to single space 			
-			doi = [doi stringByNormalizingSpacesAndLineBreaks];
-			doi = [doi stringByReplacingOccurrencesOfString:@" " withString:@"/"];
-		} else {
-			//		Be more restrictive about initial part but less about
-			//		actual DOI string - offer 3 alternatives for 'hinge' 
-			//		including standard slash
-			AGRegex *doiRegex2 = [AGRegex regexWithPattern:@"doi[: ]+(10\\.[0-9]{4})[ \\/0]([A-Z0-9.\\-_]+)"
-												   options:AGRegexMultiline|AGRegexCaseInsensitive];
-			match = [doiRegex2 findInString:pdftextthispage];
-			if([match groupAtIndex:1]!=nil && [match groupAtIndex:2]!=nil)
-				doi = [NSString stringWithFormat:@"%@/%@",[match groupAtIndex:1],[match groupAtIndex:2]];
-		}
+		doi = [pdftextthispage stringByExtractingDOIFromString];
+
 		if(doi!=nil) break;
 	}
 	[pdfd release];

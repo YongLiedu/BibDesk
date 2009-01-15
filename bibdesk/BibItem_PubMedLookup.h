@@ -39,6 +39,12 @@
 #import <Cocoa/Cocoa.h>
 #import "BibItem.h"
 
+@interface NSString (PubMedLookup)
+
+- (NSString *) stringByExtractingDOIFromString;
+
+@end
+
 @interface BibItem (PubMedLookup)
 
 + (id)itemWithPMID:(NSString *)pmid;
