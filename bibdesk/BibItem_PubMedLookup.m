@@ -125,33 +125,40 @@
 	return pii;
 }
 
-- (NSString *) stringByExtractingAnyBibliographicIDFromString;
+- (NSString *) stringByMakingPubmedSearchFromAnyBibliographicIDsInString;
 {
-	NSString *bid;
+	NSString *pubMedSearch=nil,*doi=nil,*pii=nil;
 	
 	// first try DOI
-	bid = [self stringByExtractingDOIFromString];
+	doi = [self stringByExtractingDOIFromString];
+	if(doi) return [NSString stringWithFormat:@"%@ [AID]",doi];
 	
 	// next try Elsevier PII
-	if(bid==nil) bid = [self stringByExtractingNormalisedPIIFromString];
+	pii = [self stringByExtractingPIIFromString];
+	// nb we need to search for both forms and the standard one must be quoted
+	if(pii) return [NSString stringWithFormat:@"\"%@\" [AID] OR %@ [AID]",
+					 pii,[pii stringByExtractingNormalisedPIIFromString]];
 
 	// next try looking for any nature publishing group form
-	if(bid==nil && ([self length]>(NSUInteger)6)){
+	if([self length]>(NSUInteger)6){
 		// kMDItemTitle = "npgrj_nmeth_1241 821..827"
 		// kMDItemTitle = "NPGRJ_NMETH_989 73..79"
 		
-		NSString *npg,*firstPart,*secondPart;
-		npg=[self lowercaseString];
-		firstPart = [npg substringToIndex:6];
-		secondPart = [npg substringFromIndex:6];
+		NSString *npg,*npglc,*firstPart,*secondPart;
+		npglc=[self lowercaseString];
+		firstPart = [npglc substringToIndex:6];
+		secondPart = [npglc substringFromIndex:6];
 		if([firstPart isEqualToString:@"npgrj_"]){
 			NSArray *npgParts = [secondPart componentsSeparatedByString:@" "];
-			if ([npgParts count] > 0)
-				bid=[npgParts objectAtIndex:0];
+			if ([npgParts count] > 0) {
+				npg = [npgParts objectAtIndex:0];
+				return [NSString stringWithFormat:@"%@ [AID] OR %@ [AID]",
+						npg,[npg stringByRemovingString:@"_"]];
+			}
 		}
 	}
 	
-	return bid;
+	return nil;
 }
 @end
 
@@ -159,40 +166,49 @@
 
 + (id)itemByParsingPDFFile:(NSString *)pdfPath;
 {
+	BibItem *bi=nil;
+	
 	// see if we can find any bibliographic info in the filename
-	NSString *bid=nil;
-	bid=[[pdfPath lastPathComponent] stringByExtractingAnyBibliographicIDFromString];
-	if(bid!=nil) return bid;
+	NSString *pubMedSearch=nil;
+	pubMedSearch=[[pdfPath lastPathComponent] stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
+	if(pubMedSearch!=nil){
+		bi=[BibItem itemWithPMID:pubMedSearch];
+		if(bi!=nil) return bi;
+	}
 	
 	PDFDocument *pdfd = [[PDFDocument alloc] initWithURL:[NSURL fileURLWithPath:pdfPath]];
 	if(pdfd==NULL) return nil;
 	
-	// ... else see if we can find a doi in the pdf title attribute
-	if(bid==nil){
-		NSString *pdfTitle = [[pdfd documentAttributes] valueForKey:PDFDocumentTitleAttribute];	
-		bid=[pdfTitle stringByExtractingAnyBibliographicIDFromString];
+	// ... else see if we can find any bibliographic info in the pdf title attribute
+	NSString *pdfTitle = [[pdfd documentAttributes] valueForKey:PDFDocumentTitleAttribute];	
+	pubMedSearch=[pdfTitle stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
+	if(pubMedSearch!=nil){
+		bi=[BibItem itemWithPMID:pubMedSearch];
+		if(bi!=nil) return bi;
 	}
 	
 	// ... else directly parse text for doi
-	if(bid==nil){
+	NSUInteger i=0, pageCount=[pdfd pageCount];
+
+	// try the first 2 pages for dois
+	for(i=0;i<2 & i<pageCount;i++){
 		
-		NSUInteger i=0, pageCount=[pdfd pageCount];
+		NSString *pdftextthispage = [[pdfd pageAtIndex:i] string];
+		// If we've got nothing to parse, try the next page
+		if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
+		
+		pubMedSearch = [pdftextthispage stringByExtractingDOIFromString];
 
-		// try the first 2 pages for dois
-		for(i=0;i<2 & i<pageCount;i++){
-			
-			NSString *pdftextthispage = [[pdfd pageAtIndex:i] string];
-			// If we've got nothing to parse, try the next page
-			if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
-			
-			bid = [pdftextthispage stringByExtractingDOIFromString];
-
-			if(bid!=nil) break;
+		if(pubMedSearch!=nil) {
+			// may as well restrict doi search to pubmed AID field
+			pubMedSearch = [pubMedSearch stringByAppendingString:@" [AID]"];
+			break;
 		}
 	}
+
 	[pdfd release];
 	// NB pubmed search will work equally for pubmed id, doi, PII etc
-	return bid ? [BibItem itemWithPMID:bid] : nil;
+	return pubMedSearch ? [BibItem itemWithPMID:pubMedSearch] : nil;
 }
 
 + (id)itemWithPMID:(NSString *)pmid;

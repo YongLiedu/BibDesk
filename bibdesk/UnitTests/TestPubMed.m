@@ -241,4 +241,19 @@ static NSString *PIIMissingInitialSandWithTerminalM=@"0092-8674(93)90422-M";
 	STAssertNil([@"" stringByExtractingNormalisedPIIFromString],nil);	
 }
 
+- (void)testStringByMakingPubmedSearchFromAnyBibliographicIDsInString{
+	// Check DOI identifiers
+	STAssertEqualObjects([textFromBenton2009 stringByMakingPubmedSearchFromAnyBibliographicIDsInString],
+						 @"10.1016/j.cell.2008.12.001 [AID]",nil);
+	// Check Elsevier PII identifiers
+	STAssertEqualObjects([originalPII stringByMakingPubmedSearchFromAnyBibliographicIDsInString],
+						  @"\"S0092-8674(02)00700-6\" [AID] OR S0092867402007006 [AID]",nil);
+	
+	// Check Nature Publishing group identifiers, note pubmed search is case insensitive
+	STAssertEqualObjects([@"NPGRJ_NMETH_989 73..79" stringByMakingPubmedSearchFromAnyBibliographicIDsInString],
+						 @"nmeth_989 [AID] OR nmeth989 [AID]",nil);
+	STAssertNil([@"rhubarb_NMETH_989 73..79" stringByMakingPubmedSearchFromAnyBibliographicIDsInString]
+				,nil);
+}
+
 @end
