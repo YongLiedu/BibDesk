@@ -134,6 +134,22 @@
 	// next try Elsevier PII
 	if(bid==nil) bid = [self stringByExtractingNormalisedPIIFromString];
 
+	// next try looking for any nature publishing group form
+	if(bid==nil && ([self length]>(NSUInteger)6)){
+		// kMDItemTitle = "npgrj_nmeth_1241 821..827"
+		// kMDItemTitle = "NPGRJ_NMETH_989 73..79"
+		
+		NSString *npg,*firstPart,*secondPart;
+		npg=[self lowercaseString];
+		firstPart = [npg substringToIndex:6];
+		secondPart = [npg substringFromIndex:6];
+		if([firstPart isEqualToString:@"npgrj_"]){
+			NSArray *npgParts = [secondPart componentsSeparatedByString:@" "];
+			if ([npgParts count] > 0)
+				bid=[npgParts objectAtIndex:0];
+		}
+	}
+	
 	return bid;
 }
 @end
