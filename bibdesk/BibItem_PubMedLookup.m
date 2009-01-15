@@ -41,9 +41,10 @@
 #import "BDSKStringParser.h"
 #import <Quartz/Quartz.h>
 #import <AGRegex/AGRegex.h>
+#import "NSURL_BDSKExtensions.h"
 
 @interface BDSKPubMedLookupHelper : NSObject
-+ (NSString *)referenceForPubMedSearchTerm:(NSString *)pmid;
++ (NSString *)referenceForPubMedSearchTerm:(NSString *)searchTerm;
 @end
 
 @implementation NSString (PubMedLookup)
@@ -156,15 +157,6 @@
 
 @implementation BibItem (PubMedLookup)
 
-/* Based on public domain sample code written by Oleg Khovayko, available at
- http://www.ncbi.nlm.nih.gov/entrez/query/static/eutils_example.pl
- 
- - We pass tool=bibdesk for their tracking purposes.  
- - We use lower case characters in the URL /except/ for WebEnv
- - See http://www.ncbi.nlm.nih.gov/entrez/query/static/eutils_help.html for details.
- 
- */
-
 + (id)itemByParsingPDFFile:(NSString *)pdfPath;
 {
 	// see if we can find any bibliographic info in the filename
@@ -213,6 +205,15 @@
 
 @implementation BDSKPubMedLookupHelper
 
+/* Based on public domain sample code written by Oleg Khovayko, available at
+ http://www.ncbi.nlm.nih.gov/entrez/query/static/eutils_example.pl
+ 
+ - We pass tool=bibdesk for their tracking purposes.  
+ - We use lower case characters in the URL /except/ for WebEnv
+ - See http://www.ncbi.nlm.nih.gov/entrez/query/static/eutils_help.html for details.
+ 
+ */
+
 + (NSString *)baseURLString { return @"http://eutils.ncbi.nlm.nih.gov/entrez/eutils"; }
 
 + (BOOL)canConnect;
@@ -232,9 +233,9 @@
     return canConnect;
 }
 
-+ (NSString *)referenceForPubMedSearchTerm:(NSString *)pmid;
++ (NSString *)referenceForPubMedSearchTerm:(NSString *) searchTerm;
 {
-    NSParameterAssert(pmid != nil);
+    NSParameterAssert(searchTerm != nil);
     
     NSString *toReturn = nil;
     
@@ -244,8 +245,8 @@
     NSXMLDocument *document = nil;
     
     // get the initial XML document with our search parameters in it; we ask for 2 results at most
-    NSString *esearch = [[[self class] baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=pubmed&retmax=2&usehistory=y&term=%@&tool=bibdesk", pmid];
-    NSURL *theURL = [NSURL URLWithString:esearch]; 
+    NSString *esearch = [[[self class] baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=pubmed&retmax=2&usehistory=y&term=%@&tool=bibdesk", searchTerm];
+	NSURL *theURL = [NSURL URLWithStringByNormalizingPercentEscapes:esearch];
     OBPRECONDITION(theURL);
     
     NSURLRequest *request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
