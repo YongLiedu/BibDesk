@@ -940,7 +940,7 @@
 					<key>BDSKShouldUsePDFMetadata</key>
 					<false/>
 					<key>BDSKShouldUsePubMedMetadata</key>
-					<true/>
+					<false/>
 					<key>BDSKShouldParsePDFToGeneratePubMedSearchTerm</key>
 					<true/>
 					<key>BDSKShouldWritePDFMetadata</key>
