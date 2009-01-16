@@ -324,6 +324,8 @@ static CFDateFormatterRef numericDateFormatter = NULL;
             break;
         case BDSKPeriodWeek:
             [components setWeek:number];
+            [components setWeekday:0];
+            [components setDay:NSUndefinedDateComponent];
             [components setMonth:NSUndefinedDateComponent];
             break;
         case BDSKPeriodMonth:
