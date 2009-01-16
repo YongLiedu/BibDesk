@@ -94,7 +94,6 @@
 - (void)cancelDownload;
 - (void)setLocalUrlFromDownload;
 - (void)setDownloading:(BOOL)downloading;
-- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (BOOL)addCurrentSelectionToFieldAtIndex:(unsigned int)index;
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value;
@@ -984,14 +983,6 @@
     }
 }
 
-- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        [download setDestination:[sheet filename] allowOverwrite:YES];
-    } else {
-        [self cancelDownload];
-    }
-}
-
 #pragma mark Menu validation
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
@@ -1219,12 +1210,21 @@
 }
 
 - (void)download:(NSURLDownload *)theDownload decideDestinationWithSuggestedFilename:(NSString *)filename{
-	[[NSSavePanel savePanel] beginSheetForDirectory:nil
-											   file:filename
-									 modalForWindow:[self window]
-									  modalDelegate:self
-									 didEndSelector:@selector(saveDownloadPanelDidEnd:returnCode:contextInfo:)
-										contextInfo:nil];
+	NSString *extension = [filename pathExtension];
+   
+	NSSavePanel *sPanel = [NSSavePanel savePanel];
+    if (NO == [extension isEqualToString:@""]) 
+		[sPanel setRequiredFileType:extension];
+    [sPanel setAllowsOtherFileTypes:YES];
+    [sPanel setCanSelectHiddenExtension:YES];
+	
+    // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
+    int returnCode = [sPanel runModalForDirectory:nil file:filename];
+    if (returnCode == NSOKButton) {
+        [download setDestination:[sheet filename] allowOverwrite:YES];
+    } else {
+        [self cancelDownload];
+    }
 }
 
 - (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned)length{
