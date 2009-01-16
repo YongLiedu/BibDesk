@@ -199,8 +199,8 @@ static CFDateFormatterRef numericDateFormatter = NULL;
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSWeekCalendarUnit;
     NSDateComponents *components = [calendar components:unitFlags fromDate:self];
-    // @@ or should we use -firstWeekday?
-    [components setWeekday:1];
+    // the week jumps at firstWeekday, not at weekday=1
+    [components setWeekday:[calendar firstWeekday]];
     [components setHour:0];
     [components setMinute:0];
     [components setSecond:0];
@@ -213,7 +213,8 @@ static CFDateFormatterRef numericDateFormatter = NULL;
 {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     NSDateComponents *components = [NSDateComponents dateComponentsWithYear:0 month:NSUndefinedDateComponent day:0 hour:0 minute:0 second:-1];
-    [components setWeek:1];
+    // the week jumps at firstWeekday, not at weekday=1
+    [components setWeekday:[calendar firstWeekday] - 1 ?: 7];
     NSDate *date = [calendar dateByAddingComponents:components toDate:[self startOfWeek] options:0];
     [calendar release];
     return date;
