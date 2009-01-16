@@ -54,6 +54,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
     BibDocument *document;
     WebFrame *loadingWebFrame;
     NSUndoManager *undoManager;
+    NSMutableArray *downloads;
 }
 
 - (id)initWithGroup:(BDSKWebGroup *)aGroup document:(BibDocument *)aDocument;
@@ -75,5 +76,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 
 - (IBAction)addBookmark:(id)sender;
 - (IBAction)bookmarkLink:(id)sender;
+
+- (IBAction)downloadLink:(id)sender;
 
 @end
