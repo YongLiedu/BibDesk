@@ -1532,7 +1532,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (drop)
         options |= BDSKBibTeXOptionDropInternalMask;
     
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFileKey]){
         NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath] usedEncoding:NULL error:NULL] ?: [NSMutableString string];
         
         NSString *userName = NSFullUserName();
@@ -2413,16 +2413,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                     
             // next best metadata source: if the filename is purely decimal digits, try getting it from PubMed
             NSString *lastPathComponent = [[fnStr lastPathComponent] stringByDeletingPathExtension];
-            BOOL tryPubMed = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePubMedMetadata];
+            BOOL tryPubMed = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePubMedMetadataKey];
             if(newBI == nil && tryPubMed && [lastPathComponent containsCharacterInSet:[NSCharacterSet nonDecimalDigitCharacterSet]] == NO)
                 newBI = [BibItem itemWithPubMedSearchTerm:[NSString stringWithFormat:@"%@ [PMID]", lastPathComponent]];
 
 			// GJ try parsing pdf to extract info that is then used to get a PubMed record
-			if(newBI == nil && [[[NSWorkspace sharedWorkspace] UTIForURL:url] isEqualToUTI:(NSString *)kUTTypePDF] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTerm])
+			if(newBI == nil && [[[NSWorkspace sharedWorkspace] UTIForURL:url] isEqualToUTI:(NSString *)kUTTypePDF] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldParsePDFToGeneratePubMedSearchTermKey])
 				newBI = [BibItem itemByParsingPDFFile:fnStr];			
 			
             // fall back on the least reliable metadata source (hidden pref)
-            if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata])
+            if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadataKey])
                 newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
 			
             if(newBI == nil)

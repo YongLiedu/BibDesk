@@ -3193,7 +3193,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 {
     NSParameterAssert([field isLocalFileField]);
     
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata]){
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadataKey]){
         NSError *error = nil;
         if([[self PDFMetadata] addToURL:[self URLForField:field] error:&error] == NO && error != nil)
             [NSApp presentError:error];

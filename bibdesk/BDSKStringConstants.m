@@ -54,7 +54,7 @@ NSString *BDSKStartupBehaviorKey = @"Startup Behavior";
 NSString *BDSKLastOpenFileNamesKey = @"Last Open FileNames";
 NSString *BDSKAutoCheckForUpdatesKey = @"Check for updates when starting";
 NSString *BDSKEmailTemplateKey = @"BDSKEmailTemplateKey";
-NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
+NSString *BDSKShouldUseTemplateFileKey = @"Write template file when saving";
 NSString *BDSKShowingPreviewKey = @"Showing Preview";
 NSString *BDSKSnoopDrawerContentKey = @"Snoop Drawer Content";
 NSString *BDSKFilterFieldHistoryKey = @"Open using filter command history";
@@ -62,10 +62,10 @@ NSString *BDSKEditorShouldCheckSpellingContinuouslyKey = @"Check spelling contin
 NSString *BDSKIgnoredSortTermsKey = @"Terms ignored when sorting";
 NSString *BDSKEditorFormShouldAutoCompleteKey = @"BDSKEditorFormShouldAutoCompleteKey";
 NSString *BDSKReadExtendedAttributesKey = @"BDSKReadExtendedAttributesKey";
-NSString *BDSKShouldUsePDFMetadata = @"BDSKShouldUsePDFMetadata";
-NSString *BDSKShouldWritePDFMetadata = @"BDSKShouldWritePDFMetadata";
-NSString *BDSKShouldUsePubMedMetadata = @"BDSKShouldUsePubMedMetadata";
-NSString *BDSKShouldParsePDFToGeneratePubMedSearchTerm = @"BDSKShouldParsePDFToGeneratePubMedSearchTerm";
+NSString *BDSKShouldUsePDFMetadataKey = @"BDSKShouldUsePDFMetadata";
+NSString *BDSKShouldWritePDFMetadataKey = @"BDSKShouldWritePDFMetadata";
+NSString *BDSKShouldUsePubMedMetadataKey = @"BDSKShouldUsePubMedMetadata";
+NSString *BDSKShouldParsePDFToGeneratePubMedSearchTermKey = @"BDSKShouldParsePDFToGeneratePubMedSearchTerm";
 
 NSString *BDSKIntersectGroupsKey = @"BDSKIntersectGroupsKey";
 NSString *BDSKSearchGroupBookmarksKey = @"BDSKSearchGroupBookmarksKey";
@@ -213,7 +213,7 @@ NSString *BDSKWarnOnCiteKeyChangeKey = @"BDSKWarnOnCiteKeyChangeKey";
 NSString *BDSKUpdateCheckIntervalKey = @"BDSKUpdateCheckIntervalKey";
 NSString *BDSKUpdateCheckLastDateKey = @"BDSKUpdateCheckLastDateKey";
 NSString *BDSKUpdateLatestNotifiedVersionKey = @"BDSKUpdateLatestNotifiedVersionKey";
-NSString *BDSKSpotlightVersionInfo = @"BDSKSpotlightVersionInfo";
+NSString *BDSKSpotlightVersionInfoKey = @"BDSKSpotlightVersionInfo";
 
 NSString *BDSKShouldShowWebGroupPrefKey = @"BDSKShouldShowWebGroup";
 
@@ -368,14 +368,14 @@ NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
  BDSKShouldShowWebGroup                          bool    false
  BDSKEditorFormShouldAutoCompleteKey             bool    true
  BDSKReadExtendedAttributesKey                   bool    false   // read/write BibTeX to files
- BDSKShouldUsePDFMetadata                        bool    false   // reads standard PDF info
- BDSKShouldWritePDFMetadata                      bool    false   // writes standard PDF info
+ BDSKShouldUsePDFMetadataKey                        bool    false   // reads standard PDF info
+ BDSKShouldWritePDFMetadataKey                      bool    false   // writes standard PDF info
  BDSKAddISIXMLStringToAnnote                     bool    false
  BDSKDisableISITitleCasing                       bool    false
  BDSKISISourceXMLTagPriority                     array   nil
  BDSKISIURLFieldName                             string  nil     // assign ISI URL to specified field
  BDSKDefaultArrayJoinString                      string  "/"
- BDSKShouldUsePubMedMetadata                     bool    true    // treat filename as PMID
+ BDSKShouldUsePubMedMetadataKey                     bool    true    // treat filename as PMID
 
  */
 

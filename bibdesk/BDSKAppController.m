@@ -1358,7 +1358,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
     NSString *importerVersion = [importerBundle objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
     if (importerVersion) {
         BDSKVersionNumber *importerVersionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:importerVersion] autorelease];
-        NSDictionary *versionInfo = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSpotlightVersionInfo];
+        NSDictionary *versionInfo = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSpotlightVersionInfoKey];
         
         long sysVersion;
         OSStatus err = Gestalt(gestaltSystemVersion, &sysVersion);
@@ -1383,7 +1383,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
                 [importerTask launch];
                 
                 NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithLong:sysVersion], @"lastSysVersion", importerVersion, @"lastImporterVersion", nil];
-                [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:info forKey:BDSKSpotlightVersionInfo];
+                [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:info forKey:BDSKSpotlightVersionInfoKey];
                 
             }
             else NSLog(@"/usr/bin/mdimport not found!");

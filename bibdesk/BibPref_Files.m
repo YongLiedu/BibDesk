@@ -67,7 +67,7 @@
     [shouldTeXifyCheckButton setState:[defaults boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] ? NSOnState : NSOffState];
     [saveAnnoteAndAbstractAtEndButton setState:[defaults boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] ? NSOnState : NSOffState];
     [useNormalizedNamesButton setState:[defaults boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] ? NSOnState : NSOffState];
-    [useTemplateFileButton setState:[defaults boolForKey:BDSKShouldUseTemplateFile] ? NSOnState : NSOffState];
+    [useTemplateFileButton setState:[defaults boolForKey:BDSKShouldUseTemplateFileKey] ? NSOnState : NSOffState];
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
@@ -101,7 +101,7 @@
 }
 
 - (IBAction)toggleShouldUseTemplateFile:(id)sender{
-    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldUseTemplateFile];
+    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldUseTemplateFileKey];
     [defaults autoSynchronize];
 }
 

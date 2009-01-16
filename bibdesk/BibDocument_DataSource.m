@@ -580,7 +580,7 @@
                             if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
                                 NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
                             // writing the standard PDF metadata alters the original file, so we'll make it a separate preference; this is also really slow
-                            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldWritePDFMetadata])
+                            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldWritePDFMetadataKey])
                                 [pub addPDFMetadataToFileForLocalURLField:dragColumnId];
                         }
                         row = [rowIndexes indexGreaterThanIndex:row];
