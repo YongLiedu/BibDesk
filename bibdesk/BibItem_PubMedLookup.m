@@ -42,6 +42,7 @@
 #import <Quartz/Quartz.h>
 #import <AGRegex/AGRegex.h>
 #import "NSURL_BDSKExtensions.h"
+#import "NSString_BDSKExtensions.h"
 
 @interface BDSKPubMedLookupHelper : NSObject
 + (NSString *)referenceForPubMedSearchTerm:(NSString *)searchTerm;
@@ -259,6 +260,8 @@
         return toReturn;
         
     NSXMLDocument *document = nil;
+    
+    searchTerm = [searchTerm stringByAddingPercentEscapesIncludingReserved];
     
     // get the initial XML document with our search parameters in it; we ask for 2 results at most
     NSString *esearch = [[[self class] baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=pubmed&retmax=2&usehistory=y&term=%@&tool=bibdesk", searchTerm];
