@@ -1221,7 +1221,7 @@
     // we need to do this modally, not using a sheet, as the download may otherwise finish on Leopard before the sheet is done
     int returnCode = [sPanel runModalForDirectory:nil file:filename];
     if (returnCode == NSOKButton) {
-        [download setDestination:[sheet filename] allowOverwrite:YES];
+        [download setDestination:[sPanel filename] allowOverwrite:YES];
     } else {
         [self cancelDownload];
     }
