@@ -1,0 +1,221 @@
+//
+//  BDSKArxivParser.m
+//  Bibdesk
+//
+//  Created by Christiaan Hofman on 1/16/09.
+/*
+ This software is Copyright (c) 2008-2009
+ Christiaan Hofman. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Christiaan Hofman nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#import "BDSKArxivParser.h"
+#import "BibItem.h"
+#import "NSError_BDSKExtensions.h"
+#import "NSXMLNode_BDSKExtensions.h"
+#import <AGRegEx/AGRegEx.h>
+
+
+@implementation BDSKArxivParser
+
++ (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
+    
+    // !!! other countries end up with e.g. fr.arxiv.org; checking for scholar.arxiv.com may fail in those cases
+    if (NO == [[[url host] lowercaseString] hasSuffix:@"arxiv.org"]){
+        return NO;
+    }
+    
+    NSString *containsArxivLinkNode = @"//span[@class='list-identifier']"; 
+    
+    NSError *error = nil;    
+
+    int nodecount = [[[xmlDocument rootElement] nodesForXPath:containsArxivLinkNode error:&error] count];
+
+    return nodecount > 0;
+}
+
+
+// Despite the name, this method assumes there's only one bibitem to be had from the document. 
+// A potential enhancement would be to recognize documents that are index lists of citations
+// and follow links two levels deep to get bibitems from each citation in the list.
+
++ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
+
+    NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
+    
+    NSString *arxivSearchResultNodePath = @"//dl/dt";
+    
+    NSString *arxivLinkNodePath = @".//span[@class='list-identifier']";
+    NSString *arxivIDNodePath = @"./a[contains(text(),'arXiv:')]";
+    NSString *pdfURLNodePath = @"./a[contains(text(),'pdf')]";
+
+    NSString *titleNodePath = @".//div[@class='list-title']";
+    NSString *authorsNodePath = @".//div[@class='list-authors']/a";
+    NSString *journalNodePath = @".//div[@class='list-journal-ref']";
+    NSString *abstractNodePath = @".//p";
+    
+    AGRegex *journalRegex = [AGRegex regexWithPattern:@"(.*) +([^ ]*) +\\(([0-9]{4})\\) +([^ ]*)"
+                                              options:AGRegexMultiline];
+    
+    NSError *error = nil;
+            
+    // fetch the arxiv search results
+    NSArray *arxivSearchResults = [[xmlDocument rootElement] nodesForXPath:arxivSearchResultNodePath
+                                                                     error:&error];
+    
+    // bail out with an XML error if the Xpath query fails
+    if (nil == arxivSearchResults) {
+        if (outError) *outError = error;
+        return nil;
+    }    
+    
+    unsigned int i, iMax = [arxivSearchResults count];
+    
+    // check the number of nodes first
+    if (0 == iMax) {
+        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"No search results found", @"ArXiv error")];
+        [error setValue:NSLocalizedString(@"Unable to parse this page.  Please report this to BibDesk's developers and provide the URL.", @"ArXiv error") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        if (outError) *outError = error;
+        return nil;
+    }
+        
+    for(i = 0; i < iMax; i++){
+        
+        NSXMLNode *arxivSearchResult = [arxivSearchResults objectAtIndex:i];
+        
+        // fetch the arxiv links
+        
+        NSArray *arxivLinkNodes = [arxivSearchResult nodesForXPath:arxivLinkNodePath
+                                                             error:&error];
+        
+        if (nil == arxivLinkNodes) {
+
+            // This is an error since this method isn't supposed to be called if the bibtex
+            // links don't appear on the page
+            NSLog(@"ArXiv Error: unable to parse bibtex url from search result %u due to xpath error", i);
+            continue;
+
+        } else if (1 != [arxivLinkNodes count]) {
+
+            // If Google ever start providing multiple alternative bibtex links for a
+            // single item we will need to deal with that
+            NSLog(@"ArXiv Error: unable to parse bibtex url from search result %u, found %u bibtex urls (expected 1)", i, [arxivLinkNodes count]);
+            continue;
+
+        }
+        
+        NSXMLNode *arxivLinkNode = [arxivLinkNodes objectAtIndex:0];
+        NSXMLNode *arxivMetaNode = [arxivSearchResult nextSibling];
+        NSArray *nodes;
+        
+        NSMutableDictionary *pubFields = [NSMutableDictionary dictionary];
+        NSString *string = nil;
+        
+        nodes = [arxivLinkNode nodesForXPath:pdfURLNodePath error:&error];
+        if (nil != nodes && 1 == [nodes count]) {
+            // successfully found the result PDF url
+            if (string = [[nodes objectAtIndex:0] stringValueOfAttribute:@"href"]) {
+                // fix relative urls
+                if (NO == [string hasPrefix:@"http"])
+                    string = [[NSURL URLWithString:string relativeToURL:url] absoluteString];
+                [pubFields setValue:string forKey:BDSKUrlString];
+            }
+        }
+        
+        // search for arXiv ID
+        nodes = [arxivLinkNode nodesForXPath:arxivIDNodePath error:&error];
+        if (nil != nodes && 1 == [nodes count]) {
+            if (string = [[nodes objectAtIndex:0] stringValue]) {
+                if ([string hasCaseInsensitivePrefix:@"arXiv:"])
+                    string = [string substringFromIndex:6];
+                [pubFields setValue:string forKey:@"Eprint"];
+            }
+        }
+        
+        // search for title
+        nodes = [arxivMetaNode nodesForXPath:titleNodePath error:&error];
+        if (nil != nodes && 1 == [nodes count]) {
+            if (string = [[[nodes objectAtIndex:0] childAtIndex:1] stringValue])
+                [pubFields setValue:string forKey:BDSKTitleString];
+        }
+        
+        // search for authors
+        nodes = [arxivMetaNode nodesForXPath:authorsNodePath error:&error];
+        if (nil != nodes && 0 < [nodes count]) {
+            if (string = [[nodes valueForKey:@"stringValue"] componentsJoinedByString:@" and "])
+                [pubFields setValue:string forKey:BDSKAuthorString];
+        }
+        
+        // search for journal ref
+        nodes = [arxivMetaNode nodesForXPath:journalNodePath error:&error];
+        if (nil != nodes && 1 == [nodes count]) {
+            NSXMLNode *journalRefNode = [nodes objectAtIndex:0];
+            // actual journal ref comes after a span containing a label
+            if ([journalRefNode childCount] > 1) {
+                if (string = [[journalRefNode childAtIndex:1] stringValue]) {
+                    // try to get full journal ref components, as "Journal Volume (Year) Pages"
+                    AGRegexMatch *match = [journalRegex findInString:string];
+                    if ([match groupAtIndex:0]) {
+                        [pubFields setValue:[match groupAtIndex:1] forKey:BDSKJournalString];
+                        [pubFields setValue:[match groupAtIndex:2] forKey:BDSKVolumeString];
+                        [pubFields setValue:[match groupAtIndex:3] forKey:BDSKYearString];
+                        [pubFields setValue:[match groupAtIndex:4] forKey:BDSKPagesString];
+                    } else {
+                        // couldn't find expected format, just set everything in the Journal field
+                        [pubFields setValue:string forKey:BDSKJournalString];
+                    }
+                }
+            }
+        }
+        
+        // search for abstract
+        nodes = [arxivMetaNode nodesForXPath:abstractNodePath error:&error];
+        if (nil != nodes && 1 == [nodes count]) {
+            if (string = [[nodes objectAtIndex:0] stringValue])
+                [pubFields setValue:string forKey:BDSKAbstractString];
+        }
+        
+        BibItem *item = [[BibItem alloc] initWithType:BDSKArticleString fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
+        [items addObject:item];
+        [item release];
+        
+    }
+        
+    if (0 == [items count]) {
+        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"No search results found", @"ArXiv error")];
+        [error setValue:NSLocalizedString(@"Unable to parse this page.  Please report this to BibDesk's developers and provide the URL.", @"ArXiv error") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        if (outError) *outError = error;
+    }
+    
+    return items;  
+    
+}
+
+@end
