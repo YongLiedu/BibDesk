@@ -51,3 +51,7 @@
 - (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
 @end
 
+@interface NSTextStorage (BDSKExtensions)
+- (id)scriptingRTF;
+@end
+

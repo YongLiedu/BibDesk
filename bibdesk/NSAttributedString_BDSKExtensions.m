@@ -217,9 +217,18 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
 @end
 
 @implementation NSAttributedString (TeXComparison)
+
 - (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
 {
     return [[self string] localizedCaseInsensitiveNonTeXNonArticleCompare:[other string]];
+}
+
+@end
+
+@implementation NSTextStorage (BDSKExtensions)
+
+- (id)scriptingRTF {
+    return [NSAppleEventDescriptor descriptorWithDescriptorType:'RTF ' data:[self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:nil]];
 }
 
 @end

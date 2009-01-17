@@ -330,6 +330,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The size in points of the first character.">
 				<cocoa key="fontSize"/>
 			</property>
+            <property name="RTF" code="RTF " type="any"
+                description="The raw RTF data.">
+                <cocoa key="scriptingRTF"/>
+            </property>
 			<element type="character"/>
 			<element type="paragraph"/>
 			<element type="word"/>
@@ -353,6 +357,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The size in points of the first character.">
 				<cocoa key="fontSize"/>
 			</property>
+            <property name="RTF" code="RTF " type="any"
+                description="The raw RTF data.">
+                <cocoa key="scriptingRTF"/>
+            </property>
 			<element type="character"/>
 			<element type="paragraph"/>
 			<element type="word"/>
@@ -376,6 +384,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The size in points of the first character.">
 				<cocoa key="fontSize"/>
 			</property>
+            <property name="RTF" code="RTF " type="any"
+                description="The raw RTF data.">
+                <cocoa key="scriptingRTF"/>
+            </property>
 			<element type="character"/>
 			<element type="paragraph"/>
 			<element type="word"/>
@@ -399,6 +411,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The size in points of the first character.">
 				<cocoa key="fontSize"/>
 			</property>
+            <property name="RTF" code="RTF " type="any"
+                description="The raw RTF data.">
+                <cocoa key="scriptingRTF"/>
+            </property>
 			<element type="character"/>
 			<element type="paragraph"/>
 			<element type="word"/>
@@ -422,6 +438,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The size in points of the first character.">
 				<cocoa key="fontSize"/>
 			</property>
+            <property name="RTF" code="RTF " type="any"
+                description="The raw RTF data.">
+                <cocoa key="scriptingRTF"/>
+            </property>
 			<element type="character"/>
 			<element type="paragraph"/>
 			<element type="word"/>
