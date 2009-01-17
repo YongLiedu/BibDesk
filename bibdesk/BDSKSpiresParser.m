@@ -69,7 +69,7 @@
 // A potential enhancement would be to recognize documents that are index lists of citations
 // and follow links two levels deep to get bibitems from each citation in the list.
 
-+ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{log_method();
++ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
 
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
