@@ -42,6 +42,7 @@
 @interface NSNumber (BDSKExtensions)
 
 - (NSNumber *)numberByAddingOne;
+- (NSNumber *)numberBySubstractingOne;
 
 - (NSString *)romanNumeralValue;
 - (NSString *)alphaCounterValue;
