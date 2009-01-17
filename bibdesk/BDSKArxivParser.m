@@ -81,8 +81,12 @@
     NSString *journalNodePath = @".//div[@class='list-journal-ref']";
     NSString *abstractNodePath = @".//p";
     
-    AGRegex *journalRegex = [AGRegex regexWithPattern:@"(.*) +([^ ]*) +\\(([0-9]{4})\\) +([^ ]*)"
-                                              options:AGRegexMultiline];
+    AGRegex *journalRegex1 = [AGRegex regexWithPattern:@"(.+) +([^ ]+) +\\(([0-9]{4})\\) +([^ ]+)"
+                                               options:AGRegexMultiline];
+    AGRegex *journalRegex2 = [AGRegex regexWithPattern:@"(.+[^0-9]) +([^ ]+), +([^ ]+) +\\(([0-9]{4})\\)"
+                                               options:AGRegexMultiline];
+    AGRegex *journalRegex3 = [AGRegex regexWithPattern:@"(.+[^0-9])([0-9]+):(.*),([0-9]{4})"
+                                               options:AGRegexMultiline];
     
     NSError *error = nil;
             
@@ -181,15 +185,27 @@
             if ([journalRefNode childCount] > 1) {
                 if (string = [[journalRefNode childAtIndex:1] stringValue]) {
                     // try to get full journal ref components, as "Journal Volume (Year) Pages"
-                    AGRegexMatch *match = [journalRegex findInString:string];
+                    AGRegexMatch *match = [journalRegex1 findInString:string];
                     if ([match groupAtIndex:0]) {
                         [pubFields setValue:[match groupAtIndex:1] forKey:BDSKJournalString];
                         [pubFields setValue:[match groupAtIndex:2] forKey:BDSKVolumeString];
                         [pubFields setValue:[match groupAtIndex:3] forKey:BDSKYearString];
                         [pubFields setValue:[match groupAtIndex:4] forKey:BDSKPagesString];
                     } else {
-                        // couldn't find expected format, just set everything in the Journal field
-                        [pubFields setValue:string forKey:BDSKJournalString];
+                        // try the old format "Journal Volume, Pages (Year)"
+                        match = [journalRegex2 findInString:string];
+                        if ([match groupAtIndex:0] == nil)
+                            // try the old format "JournalVolume:Pages,Year"
+                            match = [journalRegex3 findInString:string];
+                        if ([match groupAtIndex:0]) {
+                            [pubFields setValue:[match groupAtIndex:1] forKey:BDSKJournalString];
+                            [pubFields setValue:[match groupAtIndex:2] forKey:BDSKVolumeString];
+                            [pubFields setValue:[match groupAtIndex:3] forKey:BDSKPagesString];
+                            [pubFields setValue:[match groupAtIndex:4] forKey:BDSKYearString];
+                        } else {
+                            // couldn't find expected format, just set everything in the Journal field
+                            [pubFields setValue:string forKey:BDSKJournalString];
+                        }
                     }
                 }
             }
