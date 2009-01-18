@@ -152,7 +152,19 @@ def runXcodeBuild():
         rc = 1
         logFile.write('xcodebuild failed')
     return rc
-    
+
+def runXcodeUnitTest():
+	# nb right now UnitTests only valid for Debug config.  Also do we need clean here?
+    cmd = ["/usr/bin/xcodebuild", "-configuration", "Debug", "-target", "UnitTests", "clean", "build"]
+    try:
+        logFile = open(LOG_PATH, "a", -1)
+        x = subprocess.Popen(cmd, cwd=SOURCE_DIR, stdout=logFile, stderr=logFile)
+        rc = x.wait()
+    except Exception, e:
+        rc = 1
+        logFile.write('xcodebuild unit tests failed')
+    return rc
+
 def createDiskImage(imageName):
             
     # create an image from the app folder
@@ -209,6 +221,12 @@ if os.access(BUILT_APP, os.F_OK) == False:
     sendEmailAndRemoveTemporaryDirectory()
     exit(1)
     
+# Run the unit tests
+rc = runXcodeUnitTest()
+if rc != 0:
+    sendEmailAndRemoveTemporaryDirectory()
+    exit(1)
+
 # create a name for the disk image based on today's date
 imageName = datetime.date.today().strftime("%Y%m%d")
 imageName = os.path.join(TEMP_DIR, "BibDesk-" + imageName + ".dmg")
