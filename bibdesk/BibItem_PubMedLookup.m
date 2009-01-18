@@ -39,7 +39,6 @@
 #import "BibItem_PubMedLookup.h"
 #import <WebKit/WebKit.h>
 #import "BDSKStringParser.h"
-#import <Quartz/Quartz.h>
 #import <AGRegex/AGRegex.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
@@ -165,6 +164,37 @@
 
 @implementation BibItem (PubMedLookup)
 
++ (id)itemByParsingPDFDocument: (PDFDocument *) pdfd  {
+	// See if we can find any bibliographic info in the pdf title attribute
+	BibItem *bi=nil ;
+
+	NSString *pubMedSearch;
+	NSString *pdfTitle = [[pdfd documentAttributes] valueForKey:PDFDocumentTitleAttribute];	
+	pubMedSearch=[pdfTitle stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
+	if(pubMedSearch!=nil){
+		bi=[BibItem itemWithPubMedSearchTerm:pubMedSearch];
+	}
+	
+	// ... else directly parse text of first two pages for doi
+	NSUInteger i=0;
+	for(;bi==nil && i<2 && i<[pdfd pageCount];i++){
+		
+		NSString *pdftextthispage = [[pdfd pageAtIndex:i] string];
+		// If we've got nothing to parse, try the next page
+		if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
+		
+		pubMedSearch = [pdftextthispage stringByExtractingDOIFromString];
+		
+		if(pubMedSearch!=nil) {
+			// may as well restrict doi search to pubmed AID field
+			pubMedSearch = [pubMedSearch stringByAppendingString:@" [AID]"];
+			bi = [BibItem itemWithPubMedSearchTerm:pubMedSearch];
+		}
+	}
+	
+	return bi;
+}
+
 + (id)itemByParsingPDFFile:(NSString *)pdfPath;
 {
 	BibItem *bi=nil;
@@ -180,36 +210,11 @@
 	PDFDocument *pdfd = [[PDFDocument alloc] initWithURL:[NSURL fileURLWithPath:pdfPath]];
 	if(pdfd==NULL) return nil;
 	
-	// ... else see if we can find any bibliographic info in the pdf title attribute
-	NSString *pdfTitle = [[pdfd documentAttributes] valueForKey:PDFDocumentTitleAttribute];	
-	pubMedSearch=[pdfTitle stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
-	if(pubMedSearch!=nil){
-		bi=[BibItem itemWithPubMedSearchTerm:pubMedSearch];
-		if(bi!=nil) return bi;
-	}
-	
-	// ... else directly parse text for doi
-	NSUInteger i=0, pageCount=[pdfd pageCount];
-
-	// try the first 2 pages for dois
-	for(i=0;i<2 & i<pageCount;i++){
-		
-		NSString *pdftextthispage = [[pdfd pageAtIndex:i] string];
-		// If we've got nothing to parse, try the next page
-		if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
-		
-		pubMedSearch = [pdftextthispage stringByExtractingDOIFromString];
-
-		if(pubMedSearch!=nil) {
-			// may as well restrict doi search to pubmed AID field
-			pubMedSearch = [pubMedSearch stringByAppendingString:@" [AID]"];
-			break;
-		}
-	}
+	bi = [self itemByParsingPDFDocument: pdfd];
 
 	[pdfd release];
-	// NB pubmed search will work equally for pubmed id, doi, PII etc
-	return pubMedSearch ? [BibItem itemWithPubMedSearchTerm:pubMedSearch] : nil;
+
+	return bi;
 }
 
 + (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;

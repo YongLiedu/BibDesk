@@ -37,6 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <Quartz/Quartz.h>
 #import "BibItem.h"
 
 @interface NSString (PubMedLookup)
@@ -51,5 +52,6 @@
 
 + (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;
 + (id)itemByParsingPDFFile:(NSString *)pdfPath;
++ (id)itemByParsingPDFDocument:(PDFDocument *)pdfd;
 
 @end
