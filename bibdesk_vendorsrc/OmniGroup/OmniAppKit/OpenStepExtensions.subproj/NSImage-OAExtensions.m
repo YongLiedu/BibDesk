@@ -31,7 +31,10 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 @implementation NSImage (OAExtensions)
 
-#ifdef DEBUG
+// CMH: removed integral size checks, because this may fail even on system images, and we don't want to always run into assertion failures when running unit tests
+
+//#ifdef DEBUG
+#if 0
 
 // Photoshop likes to save files with non-integral DPI.  This can cause hard to find bugs later on, so lets just find out about this right away.
 static id (*original_initWithContentsOfFile)(id self, SEL _cmd, NSString *fileName);
