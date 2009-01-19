@@ -55,11 +55,14 @@ from email.mime.text import MIMEText
 # svn checkout directory
 SOURCE_DIR="/Volumes/Local/Users/amaxwell/build/bibdesk-clean"
 
-# wherever the final app ends up
-BUILT_APP="/Volumes/Local/Users/amaxwell/BuildProducts/Release/BibDesk.app"
-
 # create a private temporary directory
 TEMP_DIR=tempfile.mkdtemp("build_bibdesk_py")
+OBJROOT = os.path.join(TEMP_DIR, "objroot")
+SYMROOT = os.path.join(TEMP_DIR, "symroot")
+
+# wherever the final app ends up
+BUILT_APP = os.path.join(SYMROOT, "Release", "BibDesk.app")
+
 TEMP_DMG=os.path.join(TEMP_DIR, "BibDesk.dmg")
 
 # number of days to keep files on the server
@@ -77,9 +80,6 @@ SMTP_SERVER="smtp.olypen.com"
 
 def removeTemporaryDirectory():
     shutil.rmtree(TEMP_DIR)
-    # remove so it doesn't mess up LaunchServices
-    if os.access(BUILT_APP, os.F_OK) is True:
-        shutil.rmtree(BUILT_APP)
 
 def sendEmailAndRemoveTemporaryDirectory():
     print 'sending e-mail notification that build_bibdesk.py failed'
@@ -143,7 +143,7 @@ def runVersionBump():
     return rc
     
 def runXcodeBuild():
-    cmd = ["/usr/bin/xcodebuild", "-configuration", "Release", "-target", "BibDesk", "clean", "build"]
+    cmd = ["/usr/bin/xcodebuild", "-configuration", "Release", "-target", "BibDesk", "clean", "build", "SYMROOT=" + SYMROOT, "OBJROOT=" + OBJROOT]
     try:
         logFile = open(LOG_PATH, "a", -1)
         x = subprocess.Popen(cmd, cwd=SOURCE_DIR, stdout=logFile, stderr=logFile)
@@ -154,8 +154,8 @@ def runXcodeBuild():
     return rc
 
 def runXcodeUnitTest():
-	# nb right now UnitTests only valid for Debug config.  Also do we need clean here?
-    cmd = ["/usr/bin/xcodebuild", "-configuration", "Debug", "-target", "UnitTests", "clean", "build"]
+	# nb right now UnitTests only valid for Debug config
+    cmd = ["/usr/bin/xcodebuild", "-configuration", "Debug", "-target", "UnitTests", "clean", "build", "SYMROOT=" + SYMROOT, "OBJROOT=" + OBJROOT]
     try:
         logFile = open(LOG_PATH, "a", -1)
         x = subprocess.Popen(cmd, cwd=SOURCE_DIR, stdout=logFile, stderr=logFile)
@@ -201,6 +201,12 @@ rc = runSvnUpdate()
 if rc != 0:
     sendEmailAndRemoveTemporaryDirectory()
     exit(1)
+
+# run the unit test target first, since it builds quicker
+rc = runXcodeUnitTest()
+if rc != 0:
+    sendEmailAndRemoveTemporaryDirectory()
+    exit(1)
     
 # bump the project version with agvtool
 rc = runVersionBump()
@@ -221,12 +227,6 @@ if os.access(BUILT_APP, os.F_OK) == False:
     sendEmailAndRemoveTemporaryDirectory()
     exit(1)
     
-# Run the unit tests
-rc = runXcodeUnitTest()
-if rc != 0:
-    sendEmailAndRemoveTemporaryDirectory()
-    exit(1)
-
 # create a name for the disk image based on today's date
 imageName = datetime.date.today().strftime("%Y%m%d")
 imageName = os.path.join(TEMP_DIR, "BibDesk-" + imageName + ".dmg")
