@@ -69,18 +69,14 @@ static NSString *badRISSingleSpace = @"TY - JOUR\nT1 - Julian Steward, American 
 	BibItem *b2 = [[BDSKStringParser itemsFromString:goodRISNoFinalReturnOrSpace ofType:BDSKUnknownStringType error:NULL] lastObject];
 	
 	// These are fairly broad spectrum tests - would probably be better to break it down some more.
-	// Turn off the normalised author setting if it is ON.  Otherwise we should have:
-	// Author = {Pinkoski, Mark}
-	BOOL authorNormalization = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
 	
-	STAssertEqualObjects([b bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask],
-						 @"@article{cite-key,\n\tAuthor = {Marc Pinkoski},\n\tJournal = {Histories of Anthropology Annual},\n\tPages = {172--204},\n\tTitle = {Julian Steward, American Anthropology, and Colonialism},\n\tVolume = {4},\n\tYear = {2008}}",
-						 @"BibTex format error for RIS record, Pinkoski 2008");
-	STAssertEqualObjects([b2 bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask],
-						 @"@article{cite-key,\n\tAuthor = {Marc Pinkoski},\n\tJournal = {Histories of Anthropology Annual},\n\tPages = {172--204},\n\tTitle = {Julian Steward, American Anthropology, and Colonialism},\n\tVolume = {4},\n\tYear = {2008}}",
-						 @"BibTex format error for RIS record, Pinkoski 2008");
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:authorNormalization forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
+	STAssertEqualObjects([b bibTeXAuthorStringNormalized:YES],@"Pinkoski, Marc",nil);
+	STAssertEqualObjects([b valueOfField:BDSKTitleString],@"Julian Steward, American Anthropology, and Colonialism",nil);
+	STAssertEqualObjects([b valueOfField:BDSKJournalString],@"Histories of Anthropology Annual",nil);
+	STAssertEqualObjects([b valueOfField:BDSKPagesString],@"172--204",nil);
+	STAssertEqualObjects([b valueOfField:BDSKYearString],@"2008",nil);
+
+	STAssertEqualObjects([b2 bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask],[b bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask],@"final return should not affect RIS parsing");
 }
 
 @end

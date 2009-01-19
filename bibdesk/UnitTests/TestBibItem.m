@@ -42,6 +42,7 @@
 #import "BDSKBibTeXParser.h"
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
+#import "BDSKStringParser.h"
 
 static NSString *oneItem = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl = {http://citeseer.nj.nec.com/70627.html},\nTitle = {Optimizing ML with Run-Time Code Generation},\nBooktitle = {PLDI},\nAuthor = {Peter Lee and Mark Leone}}";
 static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl = {http://citeseer.nj.nec.com/70627.html},\nTitle = {Optimizing ML with Run-Time Code Generation},\nBooktitle = {PLDI},\nAuthor = {Peter Lee and Mark Leone}}\n\n@inproceedings{yang01LoopTransformPowerImpact,\nYear = {2001},\nTitle = {Power and Energy Impact by Loop Transformations},\nBooktitle = {COLP '01},\nAuthor = {Hongbo Yang and Guang R. Gao and Andres Marquez and George Cai and Ziang Hu}}";
@@ -113,6 +114,28 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
 
 //	STAssertEqualObjects([b1 bibTeXAuthorStringNormalized:YES],[b2 bibTeXAuthorStringNormalized:YES],
 //						 @"check normalised representation of complex author names");
+}
+
+- (void)testMakeMinimalBibtex{
+	// Note, this test is deliberately rather fragile, so feel free to refine if it breaks
+	// with a new behaviour that you consider reasonable
+	BOOL isPartialData = NO;
+	NSError *parseError = nil;
+	
+	NSArray *testArray = [BDSKBibTeXParser itemsFromString:oneItem document:nil isPartialData:&isPartialData error:&parseError];
+	
+	BibItem *item1 = [testArray objectAtIndex:0];
+
+	// Turn off the normalised author setting if it is ON.  Otherwise we should have:
+	// Author = {Lee, Peter and Leone, Mark}
+	BOOL authorNormalization = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
+	NSString * leeAsBibtex = [item1 bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask];
+	STAssertEqualObjects([leeAsBibtex stringByReplacingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\t\n"]
+															withString:@""],
+						 @"@inproceedings{Lee96RTOptML,Author = {Peter Lee and Mark Leone},Booktitle = {PLDI},Title = {Optimizing ML with Run-Time Code Generation},Year = {1996}}",nil);
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:authorNormalization forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
+	
 }
 
 - (void)testParseTwoRecords{
