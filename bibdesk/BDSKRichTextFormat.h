@@ -1,10 +1,10 @@
 //
-//  BDSKTemplatedTextCommand.h
+//  BDSKRichTextFormat.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 8/18/06.
+//  Created by Christiaan Hofman on 1/19/09.
 /*
- This software is Copyright (c) 2006-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,20 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKTemplatedTextCommand : NSScriptCommand {}
+@interface BDSKRichTextFormat : NSObject {
+    NSData *data;
+    NSString *name;
+}
+
+- (id)initWithData:(NSData *)aData;
+- (id)initWithName:(NSString *)aName;
+
+- (NSString *)name;
+- (NSTextStorage *)richText;
+
 @end
 
-@interface BDSKTemplatedRichTextCommand : NSScriptCommand {}
+
+@interface NSApplication (BDSKRichTextFormat)
+- (BDSKRichTextFormat *)valueInRichTextWithName:(NSString *)name;
 @end
