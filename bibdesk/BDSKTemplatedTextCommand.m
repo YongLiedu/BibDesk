@@ -245,26 +245,17 @@
 		
 	}
     
-    NSString *string = nil;
     NSAttributedString *attrString = nil;
-    NSData *data = nil;
-    BDSKRichTextFormat *richTextFormat = nil;
-    NSScriptObjectSpecifier *containerRef = nil;
-    
     if ([template templateFormat] & BDSKRichTextTemplateFormat) {
         attrString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext documentAttributes:NULL];
     } else {
-        if (string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext])
+        NSString *string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items publicationsContext:itemsContext];
+        if (string)
             attrString = [[[NSAttributedString alloc] initWithString:string] autorelease];
     }
     
-    if (attrString && 
-        (data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil]) &&
-        (richTextFormat = [[[BDSKRichTextFormat alloc] initWithData:data] autorelease]) &&
-        (containerRef = [richTextFormat objectSpecifier])) {
-        return [[[NSPropertySpecifier alloc] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"richText"] autorelease];
-    }
-    return nil;
+    NSData *data = [attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil];
+    return data ? [BDSKRichTextFormat richTextSpecifierWithData:data] : nil;
 }
 
 @end

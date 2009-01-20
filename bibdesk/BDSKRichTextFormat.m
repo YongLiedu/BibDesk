@@ -42,11 +42,18 @@
 
 @implementation BDSKRichTextFormat
 
++ (id)richTextSpecifierWithData:(NSData *)aData {
+    BDSKRichTextFormat *rtf = [[BDSKRichTextFormat alloc] initWithData:aData];
+    NSScriptObjectSpecifier *rtfSpecifier = [rtf objectSpecifier];
+    NSPropertySpecifier *richTextSpecifier = rtfSpecifier ? [[[NSPropertySpecifier alloc] initWithContainerClassDescription:[rtfSpecifier keyClassDescription] containerSpecifier:rtfSpecifier key:@"richText"] autorelease] : nil;
+    [rtf release];
+    return richTextSpecifier;
+}
+
 - (id)initWithData:(NSData *)aData {
     if (self = [super init]) {
         if (aData) {
             data = [aData retain];
-            name = nil;
         } else {
             [self release];
             self = nil;
@@ -56,21 +63,14 @@
 }
 
 - (id)initWithName:(NSString *)aName {
-    if (self = [super init]) {
-        if (aName) {
-            name = [aName retain];
-            data = nil;
-        } else {
-            [self release];
-            self = nil;
-        }
-    }
+    NSData *aData = [[NSData alloc] initWithBase64String:aName];
+    self = [self initWithData:aData];
+    [aData release];
     return self;
 }
 
 - (void)dealloc {
     [data release];
-    [name release];
     [super dealloc];
 }
 
@@ -80,15 +80,11 @@
 }
 
 - (NSString *)name {
-    if (name == nil)
-        name = [[data base64String] retain];
-    return name;
+    return [data base64String];
 }
 
 - (NSTextStorage *)richText {
-    if (data == nil)
-        data = [[NSData alloc] initWithBase64String:name];
-    return data ? [[[NSTextStorage alloc] initWithRTF:data documentAttributes:nil] autorelease] : nil;
+    return [[[NSTextStorage alloc] initWithRTF:data documentAttributes:nil] autorelease];
 }
 
 @end
@@ -110,12 +106,10 @@
     
     if ([descriptor isKindOfClass:[NSAppleEventDescriptor class]] == NO) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError];
+        return nil;
     } else {
-        NSScriptObjectSpecifier *containerRef = [[[[BDSKRichTextFormat alloc] initWithData:[descriptor data]] autorelease] objectSpecifier];
-        if (containerRef)
-            return [[[NSPropertySpecifier alloc] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"richText"] autorelease];
+        return [BDSKRichTextFormat richTextSpecifierWithData:[descriptor data]];
     }
-    return nil;
 }
 
 @end

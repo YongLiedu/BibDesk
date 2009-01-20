@@ -41,8 +41,9 @@
 
 @interface BDSKRichTextFormat : NSObject {
     NSData *data;
-    NSString *name;
 }
+
++ (id)richTextSpecifierWithData:(NSData *)aData;
 
 - (id)initWithData:(NSData *)aData;
 - (id)initWithName:(NSString *)aName;
