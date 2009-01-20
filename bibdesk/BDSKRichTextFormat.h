@@ -56,3 +56,7 @@
 @interface NSApplication (BDSKRichTextFormat)
 - (BDSKRichTextFormat *)valueInRichTextWithName:(NSString *)name;
 @end
+
+
+@interface BDSKRichTextForCommand : NSScriptCommand
+@end

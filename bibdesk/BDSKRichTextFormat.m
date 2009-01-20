@@ -101,3 +101,21 @@
 }
 
 @end
+
+
+@implementation BDSKRichTextForCommand
+
+- (id)performDefaultImplementation {
+    id descriptor = [self directParameter];
+    
+    if ([descriptor isKindOfClass:[NSAppleEventDescriptor class]] == NO) {
+		[self setScriptErrorNumber:NSArgumentsWrongScriptError];
+    } else {
+        NSScriptObjectSpecifier *containerRef = [[[[BDSKRichTextFormat alloc] initWithData:[descriptor data]] autorelease] objectSpecifier];
+        if (containerRef)
+            return [[[NSPropertySpecifier alloc] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"richText"] autorelease];
+    }
+    return nil;
+}
+
+@end

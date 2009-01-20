@@ -1682,6 +1682,13 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </parameter>
         </command>
         
+        <command name="rich text for" code="BDSKRICt"
+			description="Convert raw RTF data to rich text.">
+            <cocoa name="RichTextFor" class="NSScriptCommand"/>
+            <direct-parameter type="any" description="The raw RTF data."/>
+            <result description="The rich text" type="rich text"/>
+        </command>
+        
     </suite>
 	
 </dictionary>
