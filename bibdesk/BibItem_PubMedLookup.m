@@ -127,7 +127,7 @@
 
 - (NSString *) stringByMakingPubmedSearchFromAnyBibliographicIDsInString;
 {
-	NSString *pubMedSearch=nil,*doi=nil,*pii=nil;
+	NSString *doi=nil,*pii=nil;
 	
 	// first try DOI
 	doi = [self stringByExtractingDOIFromString];
