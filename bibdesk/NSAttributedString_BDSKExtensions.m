@@ -214,21 +214,34 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     return rect;
 }
 
-@end
-
-@implementation NSAttributedString (TeXComparison)
-
 - (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
 {
     return [[self string] localizedCaseInsensitiveNonTeXNonArticleCompare:[other string]];
 }
 
+#pragma mark Scripting support
+
++ (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor {
+    NSError *error;
+    return [[[self alloc] initWithData:[descriptor data] options:[NSDictionary dictionary] documentAttributes:NULL error:&error] autorelease];
+}
+
+- (id)scriptingRtfDescriptor {
+    return [NSAppleEventDescriptor descriptorWithDescriptorType:'RTF ' data:[self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:nil]];
+}
+
 @end
+
 
 @implementation NSTextStorage (BDSKExtensions)
 
 - (id)scriptingRTF {
-    return [NSAppleEventDescriptor descriptorWithDescriptorType:'RTF ' data:[self RTFFromRange:NSMakeRange(0, [self length]) documentAttributes:nil]];
+    return self;
+}
+
+- (void)setScriptingRTF:(id)attrString {
+    if (attrString)
+        [self setAttributedString:attrString];
 }
 
 @end

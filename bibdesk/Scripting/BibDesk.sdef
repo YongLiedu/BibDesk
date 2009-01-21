@@ -307,6 +307,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<cocoa class="NSColor"/>
 		</value-type>
 
+		<value-type name="RTF" code="RTF ">
+			<cocoa class="NSColor"/>
+		</value-type>
+
         <!--
             According to the documentation and standard examples, the code for rich txt should be "ctxt".
             However this is a mistake, as ctxt corresponds to type "text", which is the recommended type for strings.
@@ -330,7 +334,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The size in points of the first character.">
 				<cocoa key="fontSize"/>
 			</property>
-            <property name="RTF" code="RTF " type="any"
+            <property name="RTF" code="RTF " type="RTF"
                 description="The raw RTF data.">
                 <cocoa key="scriptingRTF"/>
             </property>
@@ -357,7 +361,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The size in points of the first character.">
 				<cocoa key="fontSize"/>
 			</property>
-            <property name="RTF" code="RTF " type="any"
+            <property name="RTF" code="RTF " type="RTF"
                 description="The raw RTF data.">
                 <cocoa key="scriptingRTF"/>
             </property>
@@ -384,7 +388,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The size in points of the first character.">
 				<cocoa key="fontSize"/>
 			</property>
-            <property name="RTF" code="RTF " type="any"
+            <property name="RTF" code="RTF " type="RTF"
                 description="The raw RTF data.">
                 <cocoa key="scriptingRTF"/>
             </property>
@@ -411,7 +415,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The size in points of the first character.">
 				<cocoa key="fontSize"/>
 			</property>
-            <property name="RTF" code="RTF " type="any"
+            <property name="RTF" code="RTF " type="RTF"
                 description="The raw RTF data.">
                 <cocoa key="scriptingRTF"/>
             </property>
@@ -438,7 +442,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="The size in points of the first character.">
 				<cocoa key="fontSize"/>
 			</property>
-            <property name="RTF" code="RTF " type="any"
+            <property name="RTF" code="RTF " type="RTF"
                 description="The raw RTF data.">
                 <cocoa key="scriptingRTF"/>
             </property>

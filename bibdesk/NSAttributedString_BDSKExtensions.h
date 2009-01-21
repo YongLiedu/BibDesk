@@ -45,13 +45,17 @@
 
 - (NSRect)boundingRectForDrawingInViewWithSize:(NSSize)size;
 
-@end
-
-@interface NSAttributedString (TeXComparison)
 - (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
+
++ (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor;
+- (id)scriptingRtfDescriptor;
+
 @end
 
 @interface NSTextStorage (BDSKExtensions)
+
 - (id)scriptingRTF;
+- (void)setScriptingRTF:(id)attrString;
+
 @end
 
