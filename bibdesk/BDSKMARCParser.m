@@ -428,9 +428,9 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 }
 
 - (NSString *)stringByFixingFormattedMARCStart{
-    AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
+    AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
     unsigned start = [[regex findInString:self] range].location;
-    return start == 0 ? self : [self substringFromIndex:start];
+    return start == 0 || start == NSNotFound ? self : [self substringFromIndex:start];
 }
 
 - (NSString *)stringByRemovingPunctuationCharactersAndBracketedText{
