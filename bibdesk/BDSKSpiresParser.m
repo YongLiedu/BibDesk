@@ -52,7 +52,7 @@
     if (spiresHosts == nil)
         spiresHosts = [[NSArray alloc] initWithObjects:@"www.slac.stanford.edu", @"www-library.desy.de", @"www-spires.fnal.gov", @"usparc.ihep.su", @"www-spires.dur.ac.uk", @"www.yukawa.kyoto-u.ac.jp", @"www.spires.lipi.go.id", nil];
     
-    if ([spiresHosts containsObject:[url host]] == NO || [[url path] hasPrefix:@"/spires"] == NO)
+    if ([spiresHosts containsObject:[[url host] lowercaseString]] == NO || [[[url path] lowercaseString] hasPrefix:@"/spires"] == NO)
         return NO;
     
     NSString *containsBibTexLinkNode = @"//a[contains(text(),'BibTeX')]"; 

@@ -45,7 +45,7 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
     
-    if (! [[url host] isEqualToString:@"portal.acm.org"]){
+    if ([[url host] caseInsensitiveCompare:@"portal.acm.org"] != NSOrderedSame){
         return NO;
     }
     

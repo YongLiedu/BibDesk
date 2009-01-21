@@ -47,7 +47,7 @@
     
     // !!! other countries end up with e.g. scholar.google.be; checking for scholar.google.com may fail in those cases
     // also some sites access google scholar via an ezproxy, so the suffix could be quite complex
-    if (! [[url host] hasPrefix:@"scholar.google."]){
+    if (! [[[url host] lowercaseString] hasPrefix:@"scholar.google."]){
         return NO;
     }
     
