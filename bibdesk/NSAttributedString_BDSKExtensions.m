@@ -222,8 +222,13 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
 #pragma mark Scripting support
 
 + (id)scriptingRtfWithDescriptor:(NSAppleEventDescriptor *)descriptor {
-    NSError *error;
-    return [[[self alloc] initWithData:[descriptor data] options:[NSDictionary dictionary] documentAttributes:NULL error:&error] autorelease];
+    NSString *string = [descriptor stringValue];
+    if (string) {
+        return [[[self alloc] initWithString:string] autorelease];
+    } else {
+        NSError *error;
+        return [[[self alloc] initWithData:[descriptor data] options:[NSDictionary dictionary] documentAttributes:NULL error:&error] autorelease];
+    }
 }
 
 - (id)scriptingRtfDescriptor {
