@@ -535,8 +535,8 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				<type type="text" list="yes"/>
 				<cocoa key="richTextTemplateNames"/>
 			</property>
-			<property name="clipboard" code="pcli" type="specifier" access="r"
-				description="The clipboard">
+			<property name="clipboard" code="pcli" type="specifier" access="r" hidden="yes"
+				description="The clipboard. Deprecated.">
 				<cocoa key="clipboard"/>
 			</property>
 			<responds-to name="open">
@@ -1510,9 +1510,9 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="usingRichText"/>
             </parameter>
             <parameter name="to" code="to  "
-                description="The file to export to, or the clipboard">
+                description="The file to export to.">
                 <type type="file"/>
-                <type type="specifier"/>
+                <type type="specifier" hidden="yes"/>
                 <cocoa key="to"/>
             </parameter>
             <parameter name="for" code="for " optional="yes"
