@@ -1162,7 +1162,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The name for the rich text format.">
                 <cocoa key="name"/>
             </property>
-            <contents name="rich text" code="ctxt" type="rich text" access="r"
+            <contents name="rich text" code="ricT" type="rich text" access="r"
                 description="The rich text representation of the rich text format.">
                 <cocoa key="richText"/>
             </contents>
