@@ -308,7 +308,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 		</value-type>
 
 		<value-type name="RTF" code="RTF ">
-			<cocoa class="NSColor"/>
+			<cocoa class="NSAttributedString"/>
 		</value-type>
 
         <!--
@@ -1689,7 +1689,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         <command name="rich text for" code="BDSKRICt"
 			description="Convert raw RTF data to rich text.">
             <cocoa name="RichTextFor" class="NSScriptCommand"/>
-            <direct-parameter type="any" description="The raw RTF data."/>
+            <direct-parameter type="RTF" description="The raw RTF data."/>
             <result description="The rich text" type="specifier"/>
         </command>
         

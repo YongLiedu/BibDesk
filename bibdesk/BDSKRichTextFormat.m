@@ -103,13 +103,13 @@
 @implementation BDSKRichTextForCommand
 
 - (id)performDefaultImplementation {
-    id descriptor = [self directParameter];
+    id attrString = [self directParameter];
     
-    if ([descriptor isKindOfClass:[NSAppleEventDescriptor class]] == NO) {
+    if ([attrString isKindOfClass:[NSAttributedString class]] == NO) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError];
         return nil;
     } else {
-        return [BDSKRichTextFormat richTextSpecifierWithData:[descriptor data]];
+        return [BDSKRichTextFormat richTextSpecifierWithData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil]];
     }
 }
 
