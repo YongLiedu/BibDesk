@@ -55,7 +55,7 @@
 
 
 @interface NSApplication (BDSKRichTextFormat)
-- (BDSKRichTextFormat *)valueInRichTextWithName:(NSString *)name;
+- (BDSKRichTextFormat *)valueInRichTextFormatWithName:(NSString *)name;
 @end
 
 

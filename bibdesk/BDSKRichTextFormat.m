@@ -93,7 +93,7 @@
 
 @implementation NSApplication (BDSKRichTextFormat)
 
-- (BDSKRichTextFormat *)valueInRichTextWithName:(NSString *)name {
+- (BDSKRichTextFormat *)valueInRichTextFormatWithName:(NSString *)name {
     return [[[BDSKRichTextFormat alloc] initWithName:name] autorelease];
 }
 
