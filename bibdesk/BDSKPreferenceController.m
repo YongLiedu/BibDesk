@@ -54,7 +54,7 @@
     NSString *aString;
     while(idx--){
         aString = [self objectAtIndex:idx];
-        if([aString rangeOfString:substring options:NSCaseInsensitiveSearch].length > 0)
+        if([aString rangeOfString:substring options:NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch].length > 0)
             return YES;
     }
     return NO;
