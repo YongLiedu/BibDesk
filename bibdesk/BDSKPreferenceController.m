@@ -91,6 +91,22 @@ static id sharedController = nil;
         if(nil == path)
             [NSException raise:NSInternalInconsistencyException format:@"unable to find search terms dictionary"];
         clientIdentiferSearchTerms = [[NSDictionary alloc] initWithContentsOfFile:path];
+        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithContentsOfFile:path];
+        if(nil == path)
+            [NSException raise:NSInternalInconsistencyException format:@"unable to find search terms dictionary"];
+        NSEnumerator *keyEnum = [[tmpDict allKeys] objectEnumerator];
+        NSString *key;
+        while (key = [keyEnum nextObject]) {
+            NSMutableArray *array = [[NSMutableArray alloc] init];
+            NSEnumerator *stringEnum = [[tmpDict objectForKey:key] objectEnumerator];
+            NSString *string;
+            while (string = [stringEnum nextObject])
+                [array addObject:NSLocalizedStringFromTable(string, @"PreferenceSearchTerms", @"")];
+            [tmpDict setObject:array forKey:key];
+            [array release];
+        }
+        clientIdentiferSearchTerms = [tmpDict copy];
+        [tmpDict release];
     }
     return sharedController;
 }
