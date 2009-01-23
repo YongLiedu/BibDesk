@@ -42,25 +42,6 @@
 #import <OmniAppKit/OAPreferenceClientRecord.h> // this is not contained in OmniAppKit.h
 #import <OmniAppKit/OAPreferencesIconView.h> // this is not contained in OmniAppKit.h
 
-@interface NSArray (PreferencesSearch)
-- (BOOL)containsCaseInsensitiveSubstring:(NSString *)substring;
-@end
-
-@implementation NSArray (PreferencesSearch)
-
-- (BOOL)containsCaseInsensitiveSubstring:(NSString *)substring;
-{
-    unsigned idx = [self count];
-    NSString *aString;
-    while(idx--){
-        aString = [self objectAtIndex:idx];
-        if([aString rangeOfString:substring options:NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch].length > 0)
-            return YES;
-    }
-    return NO;
-}
-
-@end
 
 @interface OAPreferenceController (PrivateMethods)
 - (void)_showAllIcons:(id)sender;
@@ -97,13 +78,13 @@ static id sharedController = nil;
         NSEnumerator *keyEnum = [[tmpDict allKeys] objectEnumerator];
         NSString *key;
         while (key = [keyEnum nextObject]) {
-            NSMutableArray *array = [[NSMutableArray alloc] init];
+            NSMutableString *searchString = [[NSMutableString alloc] init];
             NSEnumerator *stringEnum = [[tmpDict objectForKey:key] objectEnumerator];
             NSString *string;
             while (string = [stringEnum nextObject])
-                [array addObject:NSLocalizedStringFromTable(string, @"PreferenceSearchTerms", @"")];
-            [tmpDict setObject:array forKey:key];
-            [array release];
+                [searchString appendFormat:@"%@%C", NSLocalizedStringFromTable(string, @"PreferenceSearchTerms", @""), 0x1E];
+            [tmpDict setObject:searchString forKey:key];
+            [searchString release];
         }
         clientIdentiferSearchTerms = [tmpDict copy];
         [tmpDict release];
@@ -194,15 +175,15 @@ static id sharedController = nil;
         for(i = 0; i < numberOfRecords; i++){
             
             
-            NSArray *array = nil;
+            NSString *string = nil;
             identifier = [[records objectAtIndex:i] identifier];
 
             OBPRECONDITION(identifier != nil);
             if(nil != identifier)
-                array = [clientIdentiferSearchTerms objectForKey:identifier];
-            OBPOSTCONDITION(array != nil);
+                string = [clientIdentiferSearchTerms objectForKey:identifier];
+            OBPOSTCONDITION(string != nil);
             
-            if(array != nil && [array containsCaseInsensitiveSubstring:searchTerm]){
+            if([string rangeOfString:searchTerm options:NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch].length > 0){
                 // this is a private method, but declared in the header
                 NSRect rect = [view _boundsForIndex:i];
                 
