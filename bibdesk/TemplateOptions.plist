@@ -367,6 +367,10 @@
         {
             displayName = "Uppercase";
             key = uppercaseString;
+        },
+        {
+            displayName = "Capitalized";
+            key = capitalizedString;
         }
     );
 }
