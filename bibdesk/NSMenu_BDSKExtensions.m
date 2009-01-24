@@ -179,11 +179,10 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
                         [uniqueNamesAndURLs removeObjectAtIndex:idx];
                 }
             }
-            if ([versionStrings containsObject:versionString] == NO || isPreferred) {
+            if ([versionStrings containsObject:versionString ?: [NSNull null]] == NO || isPreferred) {
                 BDSKVersionNumber *versionNumber = versionString ? [[BDSKVersionNumber alloc] initWithVersionString:versionString] : nil;
                 NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:appURL, @"appURL", versionString, @"versionString", shortVersionString, @"shortVersionString", versionNumber, @"versionNumber", nil];
-                if (versionString)
-                    [versionStrings addObject:versionString];
+                [versionStrings addObject:versionString ?: [NSNull null]];
                 [versionNumber release];
                 [uniqueNamesAndURLs addObject:dict];
                 [dict release];
