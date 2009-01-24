@@ -1372,7 +1372,7 @@ For a discussion of the implications of encoding choice, see @ref{Character Enco
 The preview panel shows you the currently selected references as a
 formatted bibliography. The bibliography's format is based on the
 current style file (set in the preference pane 
-@ref{Preview Preferences}). This helps in spotting errors and omissions in your
+@ref{TeX Preview Preferences}). This helps in spotting errors and omissions in your
 references, as LaTeX and BibTeX are actually used to generate the PDF preview. 
 The front matter and macros from the current bibliography document are
 used for previewing.
@@ -1390,7 +1390,7 @@ similar programs.
 An odd-sized page layout is used so that you don't have to scroll in order to see
 the text, which allows you to have a smaller preview window.  However, this is not
 desirable for printed output, so you may wish to edit the LaTeX template file
-(see the @ref{Preview Preferences} preference pane for more details).
+(see the @ref{TeX Preview Preferences} preference pane for more details).
 
 @c --------------------------------------------------------------------------------------
 
@@ -2418,7 +2418,7 @@ from the @menutitle{BibDesk} menu, or press the key shortcut @cmd{,} (Command
 * General Preferences::        Change what BibDesk does when starting up, such as opening specific files.                
 * Display Preferences::        Change the overall appearance of the main window.
 * Citation Preferences::       Set what you get when copying or dragging citations to other apps.               
-* Preview Preferences::        Change the default settings for using LaTeX in the typeset preview window.       
+* TeX Preview Preferences::    Change the default settings for using LaTeX in the typeset preview window.       
 * Sharing Preferences::        Set your sharing preferences. 
 * Completion Preferences::     Install and configure the autocompletion system.           
 * Files Preferences::          Set preferences for opening and saving files.             
@@ -2527,7 +2527,7 @@ The alternate default format is used when the Option key is held down during the
 
 @c --------------------------------------------------------------------------------------
 
-@node Preview Preferences
+@node TeX Preview Preferences
 @c DO NOT LOCALIZE THE NEXT LINE
 @anchor{PreviewPreferences}
 @section Preview
