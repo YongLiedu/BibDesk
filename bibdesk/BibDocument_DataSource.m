@@ -572,16 +572,12 @@
 
                     while(row != NSNotFound){
                         pub = [shownPublications objectAtIndex:row];
-                        path = [[pub localFileURLForField:dragColumnId] path];
-                        if(path != nil){
+                        if (path = [[pub localFileURLForField:dragColumnId] path]){
                             [filePaths addObject:path];
                             NSError *xerror = nil;
                             // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
                             if([[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:0 error:&xerror] == NO)
                                 NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
-                            // writing the standard PDF metadata alters the original file, so we'll make it a separate preference; this is also really slow
-                            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldWritePDFMetadataKey])
-                                [pub addPDFMetadataToFileForLocalURLField:dragColumnId];
                         }
                         row = [rowIndexes indexGreaterThanIndex:row];
                     }

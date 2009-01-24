@@ -63,8 +63,6 @@ NSString *BDSKIgnoredSortTermsKey = @"Terms ignored when sorting";
 NSString *BDSKEditorFormShouldAutoCompleteKey = @"BDSKEditorFormShouldAutoCompleteKey";
 NSString *BDSKReadExtendedAttributesKey = @"BDSKReadExtendedAttributesKey";
 NSString *BDSKShouldUsePDFMetadataKey = @"BDSKShouldUsePDFMetadata";
-NSString *BDSKShouldWritePDFMetadataKey = @"BDSKShouldWritePDFMetadata";
-NSString *BDSKShouldUsePubMedMetadataKey = @"BDSKShouldUsePubMedMetadata";
 NSString *BDSKShouldParsePDFToGeneratePubMedSearchTermKey = @"BDSKShouldParsePDFToGeneratePubMedSearchTerm";
 
 NSString *BDSKIntersectGroupsKey = @"BDSKIntersectGroupsKey";
@@ -369,7 +367,6 @@ NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
  BDSKEditorFormShouldAutoCompleteKey             bool    true
  BDSKReadExtendedAttributesKey                   bool    false   // read/write BibTeX to files
  BDSKShouldUsePDFMetadataKey                        bool    false   // reads standard PDF info
- BDSKShouldWritePDFMetadataKey                      bool    false   // writes standard PDF info
  BDSKAddISIXMLStringToAnnote                     bool    false
  BDSKDisableISITitleCasing                       bool    false
  BDSKISISourceXMLTagPriority                     array   nil

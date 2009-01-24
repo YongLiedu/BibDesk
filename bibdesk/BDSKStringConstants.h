@@ -120,8 +120,6 @@ extern NSString *BDSKIgnoredSortTermsKey;
 extern NSString *BDSKEditorFormShouldAutoCompleteKey;
 extern NSString *BDSKReadExtendedAttributesKey;
 extern NSString *BDSKShouldUsePDFMetadataKey;
-extern NSString *BDSKShouldWritePDFMetadataKey;
-extern NSString *BDSKShouldUsePubMedMetadataKey;
 extern NSString *BDSKShouldParsePDFToGeneratePubMedSearchTermKey;
 
 extern NSString *BDSKIntersectGroupsKey;
