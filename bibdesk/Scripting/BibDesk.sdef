@@ -311,10 +311,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<cocoa class="NSAttributedString"/>
 		</value-type>
 
-        <!--
-            According to the documentation and standard examples, the code for rich txt should be "ctxt".
-            However this is a mistake, as ctxt corresponds to type "text", which is the recommended type for strings.
-        -->
 		<class name="rich text" plural="rich text" code="ricT"
 			description="Rich (styled) text">
 			<cocoa class="NSTextStorage"/>
@@ -461,6 +457,27 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				<cocoa key="filename"/>
 			</property>
 		</class>
+
+        <class name="rich text format" plural="rich text formats" code="RTFt" hidden="yes"
+            description="Rich text format, encoding rich text.">
+            <cocoa class="BDSKRichTextFormat"/>
+            <property name="name" code="pnam" type="text" access="r"
+                description="The name for the rich text format.">
+                <cocoa key="name"/>
+            </property>
+            <contents name="rich text" code="ricT" type="rich text" access="r"
+                description="The rich text representation of the rich text format.">
+                <cocoa key="richText"/>
+            </contents>
+        </class>
+        
+        <command name="rich text for" code="BDSKRICt"
+			description="Convert raw RTF data to rich text.">
+            <cocoa class="BDSKRichTextForCommand"/>
+            <direct-parameter type="RTF" description="The raw RTF data."/>
+            <result description="The rich text" type="specifier"/>
+        </command>
+
 	</suite>
     
     
@@ -1154,19 +1171,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <cocoa class="NSArray"/>
             <type type="point" list="yes"/>
         </class>
-
-        <class name="rich text format" plural="rich text formats" code="RTFt" hidden="yes"
-            description="Rich text format, encoding rich text.">
-            <cocoa class="BDSKRichTextFormat"/>
-            <property name="name" code="pnam" type="text" access="r"
-                description="The name for the rich text format.">
-                <cocoa key="name"/>
-            </property>
-            <contents name="rich text" code="ricT" type="rich text" access="r"
-                description="The rich text representation of the rich text format.">
-                <cocoa key="richText"/>
-            </contents>
-        </class>
         
         <record-type name="date condition value" code="CDVl">
             <property name="period" code="Perd" type="integer"
@@ -1684,13 +1688,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The script hook that was invoked.">
                 <cocoa key="forScriptHook"/>
             </parameter>
-        </command>
-        
-        <command name="rich text for" code="BDSKRICt"
-			description="Convert raw RTF data to rich text.">
-            <cocoa name="RichTextFor" class="NSScriptCommand"/>
-            <direct-parameter type="RTF" description="The raw RTF data."/>
-            <result description="The rich text" type="specifier"/>
         </command>
         
     </suite>
