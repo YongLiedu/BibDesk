@@ -693,6 +693,9 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<responds-to name="export">
 				<cocoa method=""/>
 			</responds-to>
+			<responds-to name="import">
+				<cocoa method=""/>
+			</responds-to>
 			<responds-to name="search">
 				<cocoa method=""/>
 			</responds-to>
