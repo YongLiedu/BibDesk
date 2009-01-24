@@ -70,36 +70,6 @@
 		return nil;
 	}
 	
-	// the 'using' parameters gives the template name to use
-	id templateStyle = [params objectForKey:@"using"];
-	id templateString = [params objectForKey:@"usingText"];
-	id templateAttrString = [params objectForKey:@"usingRichText"];
-	id templateRTF = [params objectForKey:@"usingRTF"];
-	BDSKTemplate *template = nil;
-    // make sure we get something
-	if (templateStyle == nil && templateString == nil && templateAttrString == nil && templateRTF == nil) {
-		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-        return nil;
-	}
-	// make sure we get the right thing
-	if ([templateStyle isKindOfClass:[NSString class]] ) {
-        template = [BDSKTemplate templateForStyle:templateStyle];
-	} else if ([templateStyle isKindOfClass:[NSURL class]] ) {
-        NSString *fileType = [[templateStyle path] pathExtension];
-        template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ?: @"txt"];
-	} else if ([templateString isKindOfClass:[NSString class]] ) {
-        template = [BDSKTemplate templateWithString:templateString fileType:@"txt"];
-	} else if ([templateAttrString isKindOfClass:[NSAttributedString class]] ) {
-        template = [BDSKTemplate templateWithAttributedString:templateAttrString fileType:@"rtf"];
-	} else if ([templateRTF isKindOfClass:[NSAppleEventDescriptor class]] ) {
-        templateAttrString = [[[NSAttributedString alloc] initWithRTF:[templateRTF data] documentAttributes:nil] autorelease];
-        template = [BDSKTemplate templateWithAttributedString:templateAttrString fileType:@"rtf"];
-    }
-    if (template == nil) {
-		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-        return nil;
-	}
-	
 	// the 'to' parameters gives the file to save to, either as a path or a url (it seems)
 	id fileObj = [params objectForKey:@"to"];
     NSURL *fileURL = nil;
@@ -114,8 +84,36 @@
         if (fileURL == nil)
             return nil;
     } else if ([fileObj isKindOfClass:[NSURL class]]) {
-        fileURL = (NSURL*)fileObj;
+        fileURL = (NSURL *)fileObj;
     } else if ([fileObj isKindOfClass:[NSPropertySpecifier class]] == NO || [[fileObj key] isEqualToString:@"clipboard"] == NO) {
+		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
+        return nil;
+	}
+	
+	// the 'using' parameters gives the template name to use
+	id templateStyle = [params objectForKey:@"using"];
+	id templateString = [params objectForKey:@"usingText"];
+	id templateAttrString = [params objectForKey:@"usingRichText"];
+	BDSKTemplate *template = nil;
+    // make sure we get something
+	if (templateStyle == nil && templateString == nil && templateAttrString == nil) {
+		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+        return nil;
+	}
+	// make sure we get the right thing
+	if ([templateStyle isKindOfClass:[NSString class]] ) {
+        template = [BDSKTemplate templateForStyle:templateStyle];
+	} else if ([templateStyle isKindOfClass:[NSURL class]] ) {
+        NSString *fileType = [[templateStyle path] pathExtension];
+        template = [BDSKTemplate templateWithName:@"" mainPageURL:templateStyle fileType:fileType ?: @"txt"];
+	} else if ([templateString isKindOfClass:[NSString class]] ) {
+        NSString *fileType = [[fileURL path] pathExtension];
+        template = [BDSKTemplate templateWithString:templateString fileType:fileType ?: @"txt"];
+	} else if ([templateAttrString isKindOfClass:[NSAttributedString class]] ) {
+        NSString *fileType = [[fileURL path] pathExtension];
+        template = [BDSKTemplate templateWithAttributedString:templateAttrString fileType:fileType ?: @"rtf"];
+    }
+    if (template == nil) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
         return nil;
 	}
@@ -159,7 +157,7 @@
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"The 'in' option needs to be a publication or a list of publications.",@"Error description")];
-			return [[[NSTextStorage alloc] init] autorelease];;
+			return [[[NSTextStorage alloc] init] autorelease];
 		}
 		
 	}
@@ -170,6 +168,12 @@
         fileData = [document attributedStringDataForPublications:items publicationsContext:itemsContext usingTemplate:template];
     } else {
         fileData = [document stringDataForPublications:items publicationsContext:itemsContext usingTemplate:template];
+    }
+    
+    if (fileData == nil) {
+        [self setScriptErrorNumber:NSInternalScriptError];
+        [self setScriptErrorString:NSLocalizedString(@"Could not parse template.",@"Error description")];
+        return nil;
     }
     
     if (fileURL) {
