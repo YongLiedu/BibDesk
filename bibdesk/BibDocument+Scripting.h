@@ -124,6 +124,4 @@
 - (NSArray *)groupSelection;
 - (void)setGroupSelection:(NSArray *)newSelection;
 
-- (NSTextStorage*) textStorageForPublications:(NSArray *)pubs;
-
 @end

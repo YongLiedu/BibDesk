@@ -618,17 +618,6 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     [self selectGroups:groupsToSelect];
 }
 
-- (NSTextStorage*) textStorageForPublications:(NSArray *)pubs {
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
-    [pboardHelper declareType:NSRTFPboardType dragCopyType:BDSKRTFDragCopyType forItems:pubs forPasteboard:pboard];
-    NSData *data = [pboard dataForType:NSRTFPboardType];
-    [pboardHelper clearPromisedTypesForPasteboard:pboard];
-    
-    if(data == nil) return [[[NSTextStorage alloc] init] autorelease];
-    	
-	return [[[NSTextStorage alloc] initWithRTF:data documentAttributes:NULL] autorelease];
-}
-
 - (id)clipboard {
     NSScriptClassDescription *containerClassDescription = (NSScriptClassDescription *)[NSClassDescription classDescriptionForClass:[NSApp class]];
     return [[[NSPropertySpecifier allocWithZone: [self zone]] 
