@@ -1,5 +1,5 @@
 //
-//  BDSKOpenCommand.m
+//  BDSKShowCommand.m
 //  BibDesk
 //
 //  Created by Sven-S. Porst on 14.09.04.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKOpenCommand.h"
+#import "BDSKShowCommand.h"
 #import "BibDocument_Actions.h"
 #import "BibItem+Scripting.h"
 #import "BibAuthor.h"
@@ -47,7 +47,7 @@ It can be used with
 . authors to open their author window
 */
 
-@implementation BDSKOpenCommand
+@implementation BDSKShowCommand
 
 - (id)performDefaultImplementation {
 	// get direct object 

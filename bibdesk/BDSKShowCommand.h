@@ -1,5 +1,5 @@
 //
-//  BDSKOpenCommand.h
+//  BDSKShowCommand.h
 //  BibDesk
 //
 //  Created by Sven-S. Porst on 14.09.04.
@@ -40,7 +40,7 @@
 #import "BibDocument.h"
 
 
-@interface BDSKOpenCommand : NSScriptCommand {
+@interface BDSKShowCommand : NSScriptCommand {
 
 }
 

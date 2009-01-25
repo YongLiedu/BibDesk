@@ -1445,7 +1445,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="show" code="BDSKshow"
 			description="Shows an author or a publication in a separate window for editing.">
-            <cocoa class="BDSKOpenCommand"/>
+            <cocoa class="BDSKShowCommand"/>
             <direct-parameter description="The author or publication to show in the new window.">
                 <type type="author"/>
                 <type type="publication"/>

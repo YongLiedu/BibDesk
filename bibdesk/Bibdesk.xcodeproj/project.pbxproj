@@ -76,7 +76,6 @@
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		CE023F5D0CC50F87003F52E5 /* Add_Small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */; };
-		CE071ED00F213EB300244F5C /* BDSKArxivParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CE071ECE0F213EB300244F5C /* BDSKArxivParser.h */; };
 		CE071ED10F213EB300244F5C /* BDSKArxivParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */; };
 		CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */; };
 		CE0B58AB0F2A237F00EA051F /* PreferenceSearchTerms.strings in Resources */ = {isa = PBXBuildFile; fileRef = CE0B58AA0F2A237F00EA051F /* PreferenceSearchTerms.strings */; };
@@ -320,7 +319,7 @@
 		F9022C7A075802E300C3F701 /* NSTask_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C5A075802E300C3F701 /* NSTask_BDSKExtensions.m */; };
 		F9022C7C075802E300C3F701 /* BDSKAppController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C5E075802E300C3F701 /* BDSKAppController.m */; };
 		F9022C7D075802E300C3F701 /* BibAuthor.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C60075802E300C3F701 /* BibAuthor.m */; };
-		F9022C7E075802E300C3F701 /* BDSKOpenCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C62075802E300C3F701 /* BDSKOpenCommand.m */; };
+		F9022C7E075802E300C3F701 /* BDSKShowCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C62075802E300C3F701 /* BDSKShowCommand.m */; };
 		F9022C7F075802E300C3F701 /* BibDocument_DataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C64075802E300C3F701 /* BibDocument_DataSource.m */; };
 		F9022C80075802E300C3F701 /* BibDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C66075802E300C3F701 /* BibDocument.m */; };
 		F9022C81075802E300C3F701 /* BDSKEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C68075802E300C3F701 /* BDSKEditor.m */; };
@@ -1309,8 +1308,8 @@
 		F9022C5E075802E300C3F701 /* BDSKAppController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKAppController.m; sourceTree = "<group>"; };
 		F9022C5F075802E300C3F701 /* BibAuthor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibAuthor.h; sourceTree = "<group>"; };
 		F9022C60075802E300C3F701 /* BibAuthor.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibAuthor.m; sourceTree = "<group>"; };
-		F9022C61075802E300C3F701 /* BDSKOpenCommand.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKOpenCommand.h; sourceTree = "<group>"; };
-		F9022C62075802E300C3F701 /* BDSKOpenCommand.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKOpenCommand.m; sourceTree = "<group>"; };
+		F9022C61075802E300C3F701 /* BDSKShowCommand.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKShowCommand.h; sourceTree = "<group>"; };
+		F9022C62075802E300C3F701 /* BDSKShowCommand.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKShowCommand.m; sourceTree = "<group>"; };
 		F9022C63075802E300C3F701 /* BibDocument_DataSource.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibDocument_DataSource.h; sourceTree = "<group>"; };
 		F9022C64075802E300C3F701 /* BibDocument_DataSource.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibDocument_DataSource.m; sourceTree = "<group>"; };
 		F9022C65075802E300C3F701 /* BibDocument.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibDocument.h; sourceTree = "<group>"; };
@@ -1958,7 +1957,7 @@
 				CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */,
 				CEAC51550A97730800B8DF43 /* BDSKExportUsingTemplateCommand.m */,
 				CE40EC530EE9AAEF00BCF379 /* BDSKImportCommand.m */,
-				F9022C62075802E300C3F701 /* BDSKOpenCommand.m */,
+				F9022C62075802E300C3F701 /* BDSKShowCommand.m */,
 				CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */,
 				F9022FC107580B9400C3F701 /* BDSKSearchForCommand.m */,
 				CE83E3A40D294EE300BB7AD8 /* BDSKSortCommand.m */,
@@ -2613,7 +2612,7 @@
 				F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */,
 				CE2E78CA0D40F6BB00340B39 /* BDSKMultiValueDictionary.h */,
 				CEF71AD80B91BBCB003A2771 /* BDSKNotesWindowController.h */,
-				F9022C61075802E300C3F701 /* BDSKOpenCommand.h */,
+				F9022C61075802E300C3F701 /* BDSKShowCommand.h */,
 				CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */,
 				F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */,
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
@@ -2928,7 +2927,6 @@
 				F9C50D8A0EA3A2D6009FE098 /* BDSKTask.h in Headers */,
 				CE7611520EA49B6E00301E45 /* BDSKPrintableView.h in Headers */,
 				CE40EC540EE9AAEF00BCF379 /* BDSKImportCommand.h in Headers */,
-				CE071ED00F213EB300244F5C /* BDSKArxivParser.h in Headers */,
 				CEC3158C0F24D0B9008D2C75 /* BDSKRichTextFormat.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3562,7 +3560,7 @@
 				F9022C7A075802E300C3F701 /* NSTask_BDSKExtensions.m in Sources */,
 				F9022C7C075802E300C3F701 /* BDSKAppController.m in Sources */,
 				F9022C7D075802E300C3F701 /* BibAuthor.m in Sources */,
-				F9022C7E075802E300C3F701 /* BDSKOpenCommand.m in Sources */,
+				F9022C7E075802E300C3F701 /* BDSKShowCommand.m in Sources */,
 				F9022C7F075802E300C3F701 /* BibDocument_DataSource.m in Sources */,
 				F9022C80075802E300C3F701 /* BibDocument.m in Sources */,
 				F9022C81075802E300C3F701 /* BDSKEditor.m in Sources */,
