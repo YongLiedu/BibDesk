@@ -3311,13 +3311,13 @@ of the "Aid" field is set in the editor.
         <span class="aslangkeyword">repeat with</span> <span class="asvariable">aPub</span> <span class="aslangkeyword">in</span> <span class="asvariable">thePubs</span>
             <span class="aslangkeyword">tell</span> <span class="asvariable">aPub</span>
                 <span class="ascomment">-- check that we can set the field</span>
-                <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">yes</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">true</span>
                 <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then</span>
-                    <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">no</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">false</span>
                 <span class="aslangkeyword">else</span>
                     <span class="aslangkeyword">repeat with</span> <span class="asvariable">aField</span> <span class="aslangkeyword">in</span> <span class="asvariable">theRequiredFields</span>
                         <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">aField</span> <span class="aslangkeyword">is</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then</span>
-                            <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">no</span>
+                            <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">false</span>
                         <span class="aslangkeyword">end if</span>
                     <span class="aslangkeyword">end repeat</span>
                 <span class="aslangkeyword">end if</span>
@@ -3350,13 +3350,13 @@ of the "Aid" field is set in the editor.
         @b{repeat with} aPub @b{in} thePubs
             @b{tell} aPub
                 @i{-- check that we can set the field}
-                @b{set} shouldSet @b{to} yes
+                @b{set} shouldSet @b{to} true
                 @b{if} (value @b{of} field  theFieldToSet @b{is not} "") @b{then}
-                    @b{set} shouldSet @b{to} no
+                    @b{set} shouldSet @b{to} false
                 @b{else}
                     @b{repeat with} aField @b{in} theRequiredFields
                         @b{if} (value @b{of} field aField @b{is} "") @b{then}
-                            @b{set} shouldSet @b{to} no
+                            @b{set} shouldSet @b{to} false
                         @b{end if}
                     @b{end repeat}
                 @b{end if}
