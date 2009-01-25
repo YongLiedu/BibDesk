@@ -249,12 +249,16 @@
 }
 
 - (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard {
-    @try {
-        // can raise NSPasteboardCommunicationException
-        [pboard performSelector:@selector(setData:forType:) withObject:nil withObjectsFromArray:[self promisedTypesForPasteboard:pboard]];
-    }
-    @catch(id exception) {
-        NSLog(@"ignoring exception %@ in -[%@ %@]", exception, [self class], NSStringFromSelector(_cmd));
+    NSEnumerator *typeEnum = [[self promisedTypesForPasteboard:pboard] objectEnumerator];
+    NSString *type;
+    while (type = [typeEnum nextObject]) {
+        @try {
+            // can raise NSPasteboardCommunicationException
+            [pboard setData:nil forType:type];
+        }
+        @catch(id exception) {
+            NSLog(@"ignoring exception %@ in -[%@ %@]", exception, [self class], NSStringFromSelector(_cmd));
+        }
     }
     [self removePromisedTypesForPasteboard:pboard];
 }
