@@ -156,7 +156,6 @@
 		CE4376F70D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4376F50D24341E00C993CF /* NSViewAnimation_BDSKExtensions.m */; };
 		CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */; };
 		CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE43865C0BB8274600A56987 /* SearchBookmarksWindow.nib */; };
-		CE4A7EFA0BAED4EC004AD07D /* BDSKBibliographyCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE9DBEDE093CF2640008648B /* BDSKBibliographyCommand.m */; };
 		CE4B5F100BF3DB0200A73E42 /* BibDocument.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE4B5F0F0BF3DB0200A73E42 /* BibDocument.nib */; };
 		CE4B691C09E9235200CCA14F /* SmallLock_Locked.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE4B691A09E9235200CCA14F /* SmallLock_Locked.tiff */; };
 		CE4B691D09E9235200CCA14F /* SmallLock_Unlocked.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE4B691B09E9235200CCA14F /* SmallLock_Unlocked.tiff */; };
@@ -1184,8 +1183,6 @@
 		CE969E310931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTableHeaderView_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE969E320931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTableHeaderView_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE97A3B90A28F19A00CF2DF3 /* Templates */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Templates; sourceTree = "<group>"; };
-		CE9DBEDD093CF2640008648B /* BDSKBibliographyCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBibliographyCommand.h; sourceTree = "<group>"; };
-		CE9DBEDE093CF2640008648B /* BDSKBibliographyCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBibliographyCommand.m; sourceTree = "<group>"; };
 		CE9F853E0956A2C50073FCAD /* BDSKFieldEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFieldEditor.h; sourceTree = "<group>"; };
 		CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFieldEditor.m; sourceTree = "<group>"; };
 		CEA451600E47C88E00D161AD /* SkimNotes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SkimNotes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1959,7 +1956,6 @@
 				F9022FBF07580B9400C3F701 /* BibDesk.sdef */,
 				CE3011A10D5CC41D00C0B7FA /* BDSKAddCommand.m */,
 				CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */,
-				CE9DBEDE093CF2640008648B /* BDSKBibliographyCommand.m */,
 				CEAC51550A97730800B8DF43 /* BDSKExportUsingTemplateCommand.m */,
 				CE40EC530EE9AAEF00BCF379 /* BDSKImportCommand.m */,
 				F9022C62075802E300C3F701 /* BDSKOpenCommand.m */,
@@ -2519,7 +2515,6 @@
 				F946DCE609FDC4B600D471DF /* BDSKAsynchronousDOServer.h */,
 				CE4D85260C3A8C8E002C20CB /* BDSKAutofileCommand.h */,
 				3D824AA607D099C300FB2F67 /* BDSKBackgroundView.h */,
-				CE9DBEDD093CF2640008648B /* BDSKBibliographyCommand.h */,
 				F9022C950758038000C3F701 /* BDSKBibTeXParser.h */,
 				CE8BE5450D99A10700E314A4 /* BDSKBookmark.h */,
 				CEF83F350C77911F00A3AD51 /* BDSKBookmarkController.h */,
@@ -3770,7 +3765,6 @@
 				F9BE68380B80F94000B2597C /* BDSKFileMatchConfigController.m in Sources */,
 				F9A5B10C0B8CEA9600C52257 /* BDSKCenterScaledImageCell.m in Sources */,
 				CEF71ADB0B91BBCB003A2771 /* BDSKNotesWindowController.m in Sources */,
-				CE4A7EFA0BAED4EC004AD07D /* BDSKBibliographyCommand.m in Sources */,
 				CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */,
 				F9B3405E0BBC16720072C2B0 /* BibItem_PubMedLookup.m in Sources */,
 				F924FC020BC3FFFC00672839 /* AMButtonBar.m in Sources */,

@@ -1445,7 +1445,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="show" code="BDSKshow"
 			description="Shows an author or a publication in a separate window for editing.">
-            <cocoa name="Show" class="BDSKOpenCommand"/>
+            <cocoa class="BDSKOpenCommand"/>
             <direct-parameter description="The author or publication to show in the new window.">
                 <type type="author"/>
                 <type type="publication"/>
@@ -1454,7 +1454,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="search" code="BDSKsrch"
 			description="Returns a list of publications matching the given string. Typical usage: search for string.">
-            <cocoa name="Search" class="BDSKSearchForCommand"/>
+            <cocoa class="BDSKSearchForCommand"/>
             <!-- this needs to be optional or the autocomplete script handler won't work -->
             <direct-parameter type="specifier" optional="yes"
                 description="The object responding to the command. Either the application or a document."/>
@@ -1475,7 +1475,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="sort" code="BDSKSort"
 			description="Returns a list of publications sorted by a field.">
-            <cocoa name="Sort" class="BDSKSortCommand"/>
+            <cocoa class="BDSKSortCommand"/>
             <direct-parameter
                 description="The publications to sort.">
                 <type type="publication" list="yes"/>
@@ -1499,7 +1499,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 
         <command name="export" code="BDSKexpt"
 			description="Exports publications in the document using a template to file.">
-            <cocoa name="exportUsingTemplate" class="BDSKExportUsingTemplateCommand"/>
+            <cocoa class="BDSKExportUsingTemplateCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
             <parameter name="using template" code="uset" optional="yes"
@@ -1537,7 +1537,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="templated text" code="BDSKttxt"
 			description="Returns a string representation of publications in the document using a template.">
-            <cocoa name="templatedText" class="BDSKTemplatedTextCommand"/>
+            <cocoa class="BDSKTemplatedTextCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
             <parameter name="using" code="usng" optional="yes"
@@ -1567,7 +1567,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="templated rich text" code="BDSKtrtx"
 			description="Returns a styled text representation of publications in the document using a template.">
-            <cocoa name="templatedRichText" class="BDSKTemplatedRichTextCommand"/>
+            <cocoa class="BDSKTemplatedRichTextCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
             <parameter name="using" code="usng" optional="yes"
@@ -1594,25 +1594,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <result description="the templated rich text" type="specifier">
             </result>
         </command>
-        
-        <command name="bibliography for" code="BDSKbibf" hidden="yes"
-			description="Returns bibliography information for the publications passed to the command. This command is deprecated, use 'templated text' or 'templated rich text' instead'">
-            <cocoa name="bibliographyFor" class="BDSKBibliographyCommand"/>
-            <direct-parameter description="The list of publications to generate a bibliography for.">
-                <type type="publication" list="yes"/>
-            </direct-parameter>
-            <result type="rich text"
-			description="Bibliography as styled text"/>
-        </command>
-        
-        <command name="selectionToClipboard" code="BDSKsbtc" hidden="yes" 
-			description="Deprecated. Generates a bibliography from the selected items and puts it on the clipboard. This command has to be sent to a document.">
-            <!-- This is a silly command name. But AppleScript choked on all the reasonable ones as they contained words like copy or bibliography, which are already taken. =&gt; Ugly but less confusing. -->
-        </command>    
 
         <command name="import" code="BDSKImpt"
 			description="Imports publications in the document using a string format.">
-            <cocoa name="import" class="BDSKImportCommand"/>
+            <cocoa class="BDSKImportCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
             <parameter name="from" code="from" optional="yes"
@@ -1633,7 +1618,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="parse format" code="BDSKpfmt"
 			description="Parses a format string for a field from a publication. Does not set the field.">
-            <cocoa name="ParseFormat" class="BDSKParseFormatCommand"/>
+            <cocoa class="BDSKParseFormatCommand"/>
             <direct-parameter type="text"
                 description="The format string to parse."/>
             <parameter name="for" code="for " optional="yes"
@@ -1660,7 +1645,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="auto file" code="BDSKAfil"
 			description="Auto file a linked file.">
-            <cocoa name="AutoFile" class="BDSKAutoFileCommand"/>
+            <cocoa class="BDSKAutoFileCommand"/>
             <direct-parameter type="publication"
                 description="The pubication for which to auto file a linked file."/>
             <parameter name="for" type="text" code="for " optional="yes" hidden="yes"
@@ -1683,7 +1668,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <command name="perform BibDesk action with publications" code="BDSKpAct"
 			description="Script handler invoked by script hooks.">
-            <cocoa name="PerformBibdeskActionWithPublications" class="NSScriptCommand"/>
+            <cocoa class="NSScriptCommand"/>
             <direct-parameter description="A list of publications that is acted upon.">
                 <type type="publication" list="yes"/>
             </direct-parameter>
