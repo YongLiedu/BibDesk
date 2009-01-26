@@ -958,6 +958,15 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The Finder label of the file.">
                 <cocoa key="finderLabel"/>
             </property>  
+            <property name="tags" code="Tags" hidden="yes"
+                description="The Open Meta tags for the file.">
+                <type type="text" list="yes"/>
+                <cocoa key="openMetaTags"/>
+            </property>  
+            <property name="rating" code="rate" type="real" hidden="yes"
+                description="The Open Meta rating for the file.">
+                <cocoa key="openMetaRating"/>
+            </property>  
             <property name="Skim notes" code="SKnt" access="r"
                 description="The Skim notes for the file.">
                 <cocoa key="scriptingSkimNotes"/>

@@ -43,6 +43,7 @@
 #import <FileView/FVFinderLabel.h>
 #import "NSWorkspace_BDSKExtensions.h"
 #import <SkimNotes/SkimNotes.h>
+#import "NSFileManager_BDSKExtensions.h"
 
 @implementation NSURL (BDSKExtensions)
 
@@ -524,6 +525,23 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 - (void)setFinderLabel:(int)label{
     if (label < 0 || label > 7) label = 0;
     [FVFinderLabel setFinderLabel:label forURL:self];
+}
+
+- (NSArray *)openMetaTags{
+    return [[NSFileManager defaultManager] openMetaTagsAtPath:[self path] error:NULL] ?: [NSArray array];
+}
+
+- (void)setOpenMetaTags:(NSArray *)array{
+    [[NSFileManager defaultManager] setOpenMetaTags:array atPath:[self path] error:NULL];
+}
+
+- (double)openMetaRating{
+    return [[[NSFileManager defaultManager] openMetaRatingAtPath:[self path] error:NULL] doubleValue];
+}
+
+- (void)setOpenMetaRating:(double)rating{
+    NSNumber *number = rating > 0.0 ? [NSNumber numberWithDouble:rating] : nil;
+    [[NSFileManager defaultManager] setOpenMetaRating:number atPath:[self path] error:NULL];
 }
 
 @end
