@@ -116,10 +116,9 @@ static void (*originalSetRepresentedURL)(id, SEL, id) = NULL;
     id delegate = [self delegate];
     if (delegate && [delegate respondsToSelector:@selector(representedFilenameForWindow:)]) {
         NSString *newPath = [delegate representedFilenameForWindow:self];
-        NSURL *newURL = newPath ? [NSURL fileURLWithPath:newPath] : nil;
-        // if it returns nil, use the path we were passed
-        if (newURL) 
-            url = newURL;
+        // if it returns nil, use the purlath we were passed
+        if (newPath) 
+            url = [NSURL fileURLWithPath:newPath];
     }
     originalSetRepresentedURL(self, _cmd, url);
 }
