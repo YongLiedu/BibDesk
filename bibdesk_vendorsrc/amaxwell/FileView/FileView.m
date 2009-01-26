@@ -2792,10 +2792,6 @@ static NSURL *makeCopyOfFileAtURL(NSURL *fileURL) {
         [FVFinderLabel setFinderLabel:label forURL:[selectedURLs objectAtIndex:i]];
     }
     [self setNeedsDisplay:YES];
-    
-    // we have to close the menu manually; FVColorMenuCell returns its control view's menu item
-    if ([sender respondsToSelector:@selector(enclosingMenuItem)] && [[[sender enclosingMenuItem] menu] respondsToSelector:@selector(cancelTracking)])
-        [[[sender enclosingMenuItem] menu] cancelTracking];
 }
 
 static void addFinderLabelsToSubmenu(NSMenu *submenu)
