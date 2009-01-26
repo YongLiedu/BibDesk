@@ -2112,7 +2112,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	if (sender != publication && NO == parentDidChange)
 		return;
 	
-	if([changeKey isEqualToString:BDSKLocalFileString] || [changeKey isEqualToString:BDSKRemoteURLString]){
+	if([changeKey isEqualToString:BDSKLocalFileString]){
+        [fileView reloadIcons];
+        [[self window] setRepresentedFilename:[self representedFilenameForWindow:[self window]]];
+    }
+	else if([changeKey isEqualToString:BDSKRemoteURLString]){
         [fileView reloadIcons];
     }
 	else if([changeKey isEqualToString:BDSKPubTypeString]){
