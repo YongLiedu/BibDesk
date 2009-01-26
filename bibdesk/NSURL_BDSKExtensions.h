@@ -60,6 +60,13 @@
 - (NSAttributedString *)richTextSkimNotes;
 - (NSArray *)scriptingSkimNotes;
 
+- (int)finderLabel;
+- (void)setFinderLabel:(int)label;
+- (NSArray *)openMetaTags;
+- (void)setOpenMetaTags:(NSArray *)array;
+- (double)openMetaRating;
+- (void)setOpenMetaRating:(double)rating;
+
 - (NSAttributedString *)linkedText;
 - (NSAttributedString *)icon;
 - (NSAttributedString *)smallIcon;

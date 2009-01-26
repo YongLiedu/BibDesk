@@ -304,6 +304,36 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return data ? [[[NSAttributedString alloc] initWithRTF:data documentAttributes:NULL] autorelease] : nil;
 }
 
+#pragma mark Metadata
+
+- (int)finderLabel{
+    return [FVFinderLabel finderLabelForURL:self];
+}
+
+- (void)setFinderLabel:(int)label{
+    if (label < 0 || label > 7) label = 0;
+    [FVFinderLabel setFinderLabel:label forURL:self];
+}
+
+- (NSArray *)openMetaTags{
+    return [[NSFileManager defaultManager] openMetaTagsAtPath:[self path] error:NULL] ?: [NSArray array];
+}
+
+- (void)setOpenMetaTags:(NSArray *)array{
+    if ([array isEqual:[NSNull null]] || [array count] == 0)
+        array = nil;
+    [[NSFileManager defaultManager] setOpenMetaTags:array atPath:[self path] error:NULL];
+}
+
+- (double)openMetaRating{
+    return [[[NSFileManager defaultManager] openMetaRatingAtPath:[self path] error:NULL] doubleValue];
+}
+
+- (void)setOpenMetaRating:(double)rating{
+    NSNumber *number = rating > 0.0 ? [NSNumber numberWithDouble:rating] : nil;
+    [[NSFileManager defaultManager] setOpenMetaRating:number atPath:[self path] error:NULL];
+}
+
 #pragma mark Templating
 
 - (NSAttributedString *)linkedText {
@@ -516,32 +546,6 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
         [note release];
     }
     return notes;
-}
-
-- (int)finderLabel{
-    return [FVFinderLabel finderLabelForURL:self];
-}
-
-- (void)setFinderLabel:(int)label{
-    if (label < 0 || label > 7) label = 0;
-    [FVFinderLabel setFinderLabel:label forURL:self];
-}
-
-- (NSArray *)openMetaTags{
-    return [[NSFileManager defaultManager] openMetaTagsAtPath:[self path] error:NULL] ?: [NSArray array];
-}
-
-- (void)setOpenMetaTags:(NSArray *)array{
-    [[NSFileManager defaultManager] setOpenMetaTags:array atPath:[self path] error:NULL];
-}
-
-- (double)openMetaRating{
-    return [[[NSFileManager defaultManager] openMetaRatingAtPath:[self path] error:NULL] doubleValue];
-}
-
-- (void)setOpenMetaRating:(double)rating{
-    NSNumber *number = rating > 0.0 ? [NSNumber numberWithDouble:rating] : nil;
-    [[NSFileManager defaultManager] setOpenMetaRating:number atPath:[self path] error:NULL];
 }
 
 @end
