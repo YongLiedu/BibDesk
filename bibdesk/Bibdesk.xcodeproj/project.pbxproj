@@ -478,7 +478,6 @@
 		F9BE68350B80F92900B2597C /* FileMatcherConfigSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9BE68330B80F92800B2597C /* FileMatcherConfigSheet.nib */; };
 		F9BE68380B80F94000B2597C /* BDSKFileMatchConfigController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9BE68360B80F94000B2597C /* BDSKFileMatchConfigController.m */; };
 		F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */ = {isa = PBXBuildFile; fileRef = F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */; };
-		F9C50D8A0EA3A2D6009FE098 /* BDSKTask.h in Headers */ = {isa = PBXBuildFile; fileRef = F9C50D880EA3A2D6009FE098 /* BDSKTask.h */; };
 		F9C50D8B0EA3A2D6009FE098 /* BDSKTask.m in Sources */ = {isa = PBXBuildFile; fileRef = F9C50D890EA3A2D6009FE098 /* BDSKTask.m */; };
 		F9CE58EC0842411D0072DF55 /* ArrowImage.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */; };
 		F9CEFCBC0A90090B00A0E54E /* BDSKOrphanedFileServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */; };
@@ -2924,7 +2923,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				F9C50D8A0EA3A2D6009FE098 /* BDSKTask.h in Headers */,
 				CE7611520EA49B6E00301E45 /* BDSKPrintableView.h in Headers */,
 				CE40EC540EE9AAEF00BCF379 /* BDSKImportCommand.h in Headers */,
 				CEC3158C0F24D0B9008D2C75 /* BDSKRichTextFormat.h in Headers */,
