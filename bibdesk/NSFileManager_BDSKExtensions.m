@@ -46,6 +46,9 @@
 #import "NSError_BDSKExtensions.h"
 #import <SkimNotes/SKNExtendedAttributeManager.h>
 
+#define OPEN_META_TAGS_KEY @"com.apple.metadata:kOMUserTags"
+#define OPEN_META_RATING_KEY @"com.apple.metadata:kOMStarRating"
+
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
 */
@@ -841,6 +844,35 @@ static OSType finderSignatureBytes = 'MACS';
     }
     
     return nsEncoding;
+}
+
+#pragma mark Open Meta tags
+
+// Support for Open Meta tags and rating
+// These are just definitions for special EA names and the format of their values
+// They're saved as serialized property list values, which is the same as SKNExtendedAttributeManager does without splitting and compression
+// See http://code.google.com/p/openmeta/ for some documentation and sample code
+
+- (NSArray *)openMetaTagsAtPath:(NSString *)path error:(NSError **)error {
+    return [[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:OPEN_META_TAGS_KEY atPath:path traverseLink:YES error:error];
+}
+
+- (BOOL)setOpenMetaTags:(NSArray *)tags atPath:(NSString *)path error:(NSError **)error {
+   if (tags)
+        return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OPEN_META_TAGS_KEY toPropertyListValue:tags atPath:path options:kSKNXattrNoCompress error:error];
+    else
+        return [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttribute:OPEN_META_TAGS_KEY atPath:path traverseLink:YES error:error];
+}
+
+- (NSNumber *)openMetaRatingAtPath:(NSString *)path error:(NSError **)error {
+    return [[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:OPEN_META_RATING_KEY atPath:path traverseLink:YES error:error];
+}
+
+- (BOOL)setOpenMetaRating:(NSNumber *)rating atPath:(NSString *)path error:(NSError **)error {
+    if (rating)
+        return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OPEN_META_RATING_KEY toPropertyListValue:rating atPath:path options:kSKNXattrNoCompress error:error];
+    else
+        return [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttribute:OPEN_META_RATING_KEY atPath:path traverseLink:YES error:error];
 }
 
 @end
