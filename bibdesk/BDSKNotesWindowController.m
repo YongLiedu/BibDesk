@@ -39,6 +39,7 @@
 #import "BDSKNotesWindowController.h"
 #import "BDSKAppController.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 
 @implementation BDSKNotesWindowController
@@ -59,11 +60,16 @@
 }
 
 - (void)dealloc {
+    [url release];
     [notes release];
     [super dealloc];
 }
 
 - (NSString *)windowNibName { return @"NotesWindow"; }
+
+- (void)awakeFromNib {
+    [self setWindowFrameAutosaveNameOrCascade:@"NotesWindow"];
+}
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
     return [NSString stringWithFormat:@"%@ %@ %@", [[url path] lastPathComponent], [NSString emdashString], NSLocalizedString(@"Notes", @"Partial window title")];
