@@ -47,21 +47,25 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
+    [coder encodeConditionalObject:_matrix forKey:@"_matrix"];
+    [coder encodeConditionalObject:_labelField forKey:@"_labelField"];
+    [coder encodeConditionalObject:_labelNameField forKey:@"_labelNameField"];
     [coder encodeConditionalObject:_target forKey:@"_target"];
     if (_action)
         [coder encodeObject:NSStringFromSelector(_action) forKey:@"_action"];
 }
 
-// Copying the menu calls -initWithCoder:, but it doesn't recreate subviews or connections (or both?).
-- (id)awakeAfterUsingCoder:(NSCoder *)coder
+- (void)setupSubviews
 {
-    id target = [self target];
-    SEL action = [self action];
-    [self release];
-    self = [[FVColorMenuView menuView] retain];
-    [self setAction:action];
-    [self setTarget:target];
-    return self;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:nil];
+    [_labelNameField setStringValue:@""];
+    [[_labelField cell] setFont:[NSFont menuBarFontOfSize:0]];
+    NSBundle *bundle = [NSBundle bundleForClass:[FVColorMenuView self]];
+    [_labelField setStringValue:NSLocalizedStringFromTableInBundle(@"Label:", @"FileView", bundle, @"Finder label menu item title")];
+    [_labelField sizeToFit];
+    
+    [_matrix setTarget:self];
+    [_matrix setAction:@selector(fvLabelColorAction:)];
 }
 
 - (id)initWithFrame:(NSRect)aRect
@@ -76,23 +80,20 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    self = [super initWithCoder:coder];
-    _target = [coder decodeObjectForKey:@"_target"];
-    _action = NSSelectorFromString([coder decodeObjectForKey:@"_action"]);
+    if (self = [super initWithCoder:coder]) {
+        _matrix = [coder decodeObjectForKey:@"_matrix"];
+        _labelField = [coder decodeObjectForKey:@"_labelField"];
+        _labelNameField = [coder decodeObjectForKey:@"_labelNameField"];
+        _target = [coder decodeObjectForKey:@"_target"];
+        _action = NSSelectorFromString([coder decodeObjectForKey:@"_action"]);
+        [self setupSubviews];
+    }
     return self;
 }
 
 - (void)awakeFromNib
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_handleColorNameUpdate:) name:FVColorNameUpdateNotification object:nil];
-    [_labelNameField setStringValue:@""];
-    [[_labelField cell] setFont:[NSFont menuBarFontOfSize:0]];
-    NSBundle *bundle = [NSBundle bundleForClass:[FVColorMenuView self]];
-    [_labelField setStringValue:NSLocalizedStringFromTableInBundle(@"Label:", @"FileView", bundle, @"Finder label menu item title")];
-    [_labelField sizeToFit];
-    
-    [_matrix setTarget:self];
-    [_matrix setAction:@selector(fvLabelColorAction:)];
+    [self setupSubviews];
 }
 
 - (void)dealloc
@@ -147,19 +148,22 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
 {
     FVColorMenuView *menuView = nil;
     
-    NSNib *nib = [[NSNib alloc] initWithNibNamed:@"FVColorMenuView" bundle:[NSBundle bundleForClass:[FVColorMenuView self]]];
+    NSNib *nib = [[NSNib alloc] initWithNibNamed:@"FVColorMenuView" bundle:[NSBundle bundleForClass:[FVColorMenuView class]]];
     NSArray *objects;
     
     if ([nib instantiateNibWithOwner:nil topLevelObjects:&objects]) {
         NSParameterAssert([objects count] > 0);
         NSUInteger i = [objects count];
         while (i--) {
-            if ([objects objectAtIndex:i] != NSApp)
-                menuView = [[[objects objectAtIndex:i] retain] autorelease];
+            if ([[objects objectAtIndex:i] isKindOfClass:[FVColorMenuView class]]) {
+                menuView = [objects objectAtIndex:i];
+                break;
+            }
         }
     }
     [nib release];
-    return menuView;
+    // top level objects in a nib are implicitly retained, but we should return an autoreleased object
+    return [menuView autorelease];
 }
 
 @end
