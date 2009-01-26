@@ -80,6 +80,22 @@
     return path ?: @"";
 }
 
+- (NSArray *)tags {
+    return [url openMetaTags];
+}
+
+- (void)setTags:(NSArray *)tags {
+    [url setOpenMetaTags:tags];
+}
+
+- (double)rating {
+    return [url openMetaRating];
+}
+
+- (void)setRating:(double)rating {
+    [url setOpenMetaRating:rating];
+}
+
 #pragma mark Actions
 
 - (IBAction)refresh:(id)sender {
