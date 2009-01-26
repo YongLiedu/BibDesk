@@ -38,11 +38,16 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDSKSplitView;
 
 @interface BDSKNotesWindowController : NSWindowController {
     NSURL *url;
     NSMutableArray *notes;
+    float lastTagsHeight;
     IBOutlet NSOutlineView *outlineView;
+    IBOutlet NSTokenField *tokenField;
+    IBOutlet BDSKSplitView *splitView;
+    IBOutlet NSObjectController *ownerController;
 }
 
 - (id)initWithURL:(NSURL *)aURL;

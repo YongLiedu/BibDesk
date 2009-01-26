@@ -40,6 +40,7 @@
 #import "BDSKAppController.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "BDSKSplitView.h"
 
 
 @implementation BDSKNotesWindowController
@@ -67,8 +68,21 @@
 
 - (NSString *)windowNibName { return @"NotesWindow"; }
 
-- (void)awakeFromNib {
+- (void)windowWillClose:(NSNotification *)notification {
+    [ownerController commitEditing];
+    [ownerController setContent:nil];
+}
+
+- (void)windowDidLoad {
     [self setWindowFrameAutosaveNameOrCascade:@"NotesWindow"];
+    
+    [splitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKNotesWindow"];
+    if ([self windowFrameAutosaveName] == nil) {
+        // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
+        [splitView setPositionAutosaveName:nil];
+    }
+    
+    [tokenField setTokenizingCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
@@ -85,7 +99,9 @@
 }
 
 - (void)setTags:(NSArray *)tags {
-    [url setOpenMetaTags:tags];
+    NSArray *oldTags = [url openMetaTags];
+    if (([oldTags count] > 0 || [tags count] > 0) && [oldTags isEqualToArray:tags] == NO)
+        [url setOpenMetaTags:tags];
 }
 
 - (double)rating {
@@ -200,6 +216,76 @@
     [pboard setString:string forType:NSStringPboardType];
     
     return YES;
+}
+
+#pragma mark NSTokenField deldegate methods
+
+- (NSString *)tokenField:(NSTokenField *)tokenField editingStringForRepresentedObject:(id)representedObject {
+    return [representedObject stringByReplacingCharactersInSet:[NSCharacterSet whitespaceCharacterSet] withString:@"_"];
+}
+
+- (id)tokenField:(NSTokenField *)tokenField representedObjectForEditingString:(NSString *)editingString {
+    return [editingString stringByReplacingOccurrencesOfString:@"_" withString:@" "];
+}
+
+- (BOOL)tokenField:(NSTokenField *)tokenField writeRepresentedObjects:(NSArray *)objects toPasteboard:(NSPasteboard *)pboard {
+    if (objects) {
+        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+        [pboard setString:[objects componentsJoinedByString:@" "] forType:NSStringPboardType];
+        return YES;
+    }
+    return NO;
+}
+
+#pragma mark NSSplitView deldegate methods
+
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
+    NSView *notesView = [[sender subviews] objectAtIndex:0]; // outlineView
+    NSView *tagsView = [[sender subviews] objectAtIndex:1]; // tokenField
+    NSRect notesFrame = [notesView frame];
+    NSRect tagsFrame = [tagsView frame];
+    
+    if(NSHeight(tagsFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+        lastTagsHeight = NSHeight(tagsFrame); // cache this
+        notesFrame.size.height += lastTagsHeight;
+        tagsFrame.size.height = 0.0;
+    } else {
+        if(lastTagsHeight <= 0.0)
+            lastTagsHeight = 22.0; // a reasonable value to start
+        tagsFrame.size.height = lastTagsHeight;
+        notesFrame.size.height = NSHeight([sender frame]) - lastTagsHeight - [sender dividerThickness];
+        if (NSHeight(notesFrame) < 0.0) {
+            notesFrame.size.height = 0.0;
+            tagsFrame.size.height = NSHeight([sender frame]) - [sender dividerThickness];
+            lastTagsHeight = NSHeight(tagsFrame);
+        }
+    }
+    [notesView setFrame:notesFrame];
+    [tagsView setFrame:tagsFrame];
+    [sender adjustSubviews];
+    // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:sender];
+    [[sender window] invalidateCursorRectsForView:sender];
+}
+
+- (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize{
+    NSView *notesView = [[sender subviews] objectAtIndex:0]; // outlineView
+    NSView *tagsView = [[sender subviews] objectAtIndex:1]; // tokenField
+    NSRect notesFrame = [notesView frame];
+    NSRect tagsFrame = [tagsView frame];
+    NSSize newSize = [sender frame].size;
+    
+    notesFrame.size.height += newSize.height - oldSize.height;
+    if (NSHeight(notesFrame) < 0.0) {
+        notesFrame.size.height = 0.0;
+        tagsFrame.size.height = newSize.height - [sender dividerThickness];
+        lastTagsHeight = NSHeight(tagsFrame);
+    }
+    [notesView setFrame:notesFrame];
+    [tagsView setFrame:tagsFrame];
+    [sender adjustSubviews];
+    // fix for NSSplitView bug, which doesn't send this in adjustSubviews
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:sender];
 }
 
 @end
