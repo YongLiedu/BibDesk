@@ -96,6 +96,7 @@
 @implementation NSWindow (BDSKExtensions)
 
 static void (*originalSetRepresentedFilename)(id, SEL, id) = NULL;
+static void (*originalSetRepresentedURL)(id, SEL, id) = NULL;
 
 // see bug #1471488; overriding representedFilename is not sufficient; apparently the window doesn't use its accessor
 - (void)replacementSetRepresentedFilename:(NSString *)path;
@@ -110,9 +111,24 @@ static void (*originalSetRepresentedFilename)(id, SEL, id) = NULL;
     originalSetRepresentedFilename(self, _cmd, path);
 }
 
+- (void)replacementSetRepresentedURL:(NSURL *)url;
+{
+    id delegate = [self delegate];
+    if (delegate && [delegate respondsToSelector:@selector(representedFilenameForWindow:)]) {
+        NSString *newPath = [delegate representedFilenameForWindow:self];
+        NSURL *newURL = newPath ? [NSURL fileURLWithPath:newPath] : nil;
+        // if it returns nil, use the path we were passed
+        if (newURL) 
+            url = newURL;
+    }
+    originalSetRepresentedURL(self, _cmd, url);
+}
+
 + (void)didLoad;
 {
     originalSetRepresentedFilename = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(setRepresentedFilename:), @selector(replacementSetRepresentedFilename:));
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+        originalSetRepresentedURL = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(setRepresentedURL:), @selector(replacementSetRepresentedURL:));
 }
 
 @end
