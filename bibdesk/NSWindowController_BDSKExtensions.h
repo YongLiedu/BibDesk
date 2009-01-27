@@ -49,10 +49,3 @@
 - (void)setWindowFrameAutosaveNameOrCascade:(NSString *)name setFrame:(NSRect)frameRect;
 
 @end
-
-// Allows the window's delegate (usually an NSWindowController) to
-// override the representedFilename of the window.  Can return nil
-// to use the window's default representedFilename, or @"" for nothing.
-@interface NSObject (BDSKWindowDelegate)
-- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow;
-@end

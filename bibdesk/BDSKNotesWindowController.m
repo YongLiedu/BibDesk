@@ -93,9 +93,9 @@
     return [NSString stringWithFormat:@"%@ %@ %@", [[url path] lastPathComponent], [NSString emdashString], NSLocalizedString(@"Notes", @"Partial window title")];
 }
 
-- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    NSString *path = [url path];
-    return path ?: @"";
+- (void)synchronizeWindowTitleWithDocumentName {
+    [super synchronizeWindowTitleWithDocumentName];
+    [[self window] setRepresentedFilename:[url path]];
 }
 
 - (void)reloadNotes {

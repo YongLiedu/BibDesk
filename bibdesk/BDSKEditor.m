@@ -274,9 +274,9 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     return [publication displayTitle];
 }
 
-- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    NSString *fname = [[[publication localFiles] firstObject] path];
-    return fname ?: @"";
+- (void)synchronizeWindowTitleWithDocumentName {
+    [super synchronizeWindowTitleWithDocumentName];
+    [[self window] setRepresentedFilename:[[[publication localFiles] firstObject] path]];
 }
 
 - (BibItem *)publication{
@@ -2114,7 +2114,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	
 	if([changeKey isEqualToString:BDSKLocalFileString]){
         [fileView reloadIcons];
-        [[self window] setRepresentedFilename:[self representedFilenameForWindow:[self window]]];
+        [self synchronizeWindowTitleWithDocumentName];
     }
 	else if([changeKey isEqualToString:BDSKRemoteURLString]){
         [fileView reloadIcons];
@@ -2143,7 +2143,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [self reloadTable];
         }
 		[authorTableView reloadData];
-		[[self window] setTitle:[publication displayTitle]];
+		[self synchronizeWindowTitleWithDocumentName];
 	}
     else if([changeKey isNoteField]){
         if(ignoreFieldChange == NO) {
@@ -2188,7 +2188,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         // this is a normal field displayed in the tableView
         
         if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString])
-            [[self window] setTitle:[publication displayTitle]];
+            [self synchronizeWindowTitleWithDocumentName];
         else if([changeKey isPersonField])
             [authorTableView reloadData];
         

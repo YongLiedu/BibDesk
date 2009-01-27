@@ -140,8 +140,10 @@
     return title;
 }
 
-- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    return [[macroResolver owner] isDocument] ? nil : @"";
+- (void)synchronizeWindowTitleWithDocumentName {
+    [super synchronizeWindowTitleWithDocumentName];
+    if ([[macroResolver owner] isDocument] == NO)
+        [[self window] setRepresentedFilename:nil];
 }
 
 - (void)windowWillClose:(NSNotification *)notification{

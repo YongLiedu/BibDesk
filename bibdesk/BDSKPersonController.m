@@ -144,8 +144,10 @@
     return [person name];
 }
 
-- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    return [owner isDocument] ? nil : @"";
+- (void)synchronizeWindowTitleWithDocumentName {
+    [super synchronizeWindowTitleWithDocumentName];
+    if ([owner isDocument] == NO)
+        [[self window] setRepresentedFilename:nil];
 }
 
 - (void)windowWillClose:(NSNotification *)note {
