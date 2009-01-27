@@ -43,6 +43,10 @@
 #import "BDSKSplitView.h"
 
 
+@interface BDSKNotesWindowController (Private)
+- (void)reloadNotes;
+@end
+
 @implementation BDSKNotesWindowController
 
 - (id)initWithURL:(NSURL *)aURL {
@@ -55,7 +59,7 @@
         url = [aURL retain];
         notes = [[NSMutableArray alloc] init];
         
-        [self refresh:self];
+        [self reloadNotes];
     }
     return self;
 }
@@ -94,27 +98,7 @@
     return path ?: @"";
 }
 
-- (NSArray *)tags {
-    return [url openMetaTags];
-}
-
-- (void)setTags:(NSArray *)tags {
-    NSArray *oldTags = [url openMetaTags];
-    if (([oldTags count] > 0 || [tags count] > 0) && [oldTags isEqualToArray:tags] == NO)
-        [url setOpenMetaTags:tags];
-}
-
-- (double)rating {
-    return [url openMetaRating];
-}
-
-- (void)setRating:(double)rating {
-    [url setOpenMetaRating:rating];
-}
-
-#pragma mark Actions
-
-- (IBAction)refresh:(id)sender {
+- (void)reloadNotes {
     NSEnumerator *dictEnum = [[url SkimNotes] objectEnumerator];
     NSDictionary *dict;
     
@@ -131,8 +115,33 @@
     }
     
     [notes sortUsingDescriptors:[NSArray arrayWithObject:[[[NSSortDescriptor alloc] initWithKey:@"page" ascending:YES] autorelease]]];
-    
-    [outlineView reloadData];
+}
+
+- (NSArray *)tags {
+    return [url openMetaTags];
+}
+
+- (void)setTags:(NSArray *)tags {
+    NSArray *oldTags = [url openMetaTags];
+    if (([oldTags count] > 0 || [tags count] > 0) && [oldTags isEqualToArray:tags] == NO)
+        [url setOpenMetaTags:tags];
+}
+
+- (double)rating {
+    return [url openMetaRating];
+}
+
+- (void)setRating:(double)rating {
+    if (fabs([url openMetaRating] - rating) > 0)
+        [url setOpenMetaRating:rating];
+}
+
+#pragma mark Actions
+
+- (IBAction)refresh:(id)sender {
+    [self reloadNotes];
+    [self setTags:[self tags]];
+    [self setRating:[self rating]];
 }
 
 - (IBAction)openInSkim:(id)sender {
