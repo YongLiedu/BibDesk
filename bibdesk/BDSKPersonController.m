@@ -146,8 +146,9 @@
 
 - (void)synchronizeWindowTitleWithDocumentName {
     [super synchronizeWindowTitleWithDocumentName];
+    // clearing the proxy icon when this does not belong to the document, somehow passing nil does not work
     if ([owner isDocument] == NO)
-        [[self window] setRepresentedFilename:nil];
+        [[self window] setRepresentedFilename:@""];
 }
 
 - (void)windowWillClose:(NSNotification *)note {

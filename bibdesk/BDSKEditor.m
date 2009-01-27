@@ -276,7 +276,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)synchronizeWindowTitleWithDocumentName {
     [super synchronizeWindowTitleWithDocumentName];
-    [[self window] setRepresentedFilename:[[[publication localFiles] firstObject] path]];
+    // replace the proxy icon with the first linked file, somehow passing nil does not work
+    [[self window] setRepresentedFilename:[[[publication localFiles] firstObject] path] ?: @""];
 }
 
 - (BibItem *)publication{

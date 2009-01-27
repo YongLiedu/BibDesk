@@ -95,7 +95,8 @@
 
 - (void)synchronizeWindowTitleWithDocumentName {
     [super synchronizeWindowTitleWithDocumentName];
-    [[self window] setRepresentedFilename:[url path]];
+    // replace the proxy icon with the url, somehow passing nil does not work
+    [[self window] setRepresentedFilename:[url path] ?: @""];
 }
 
 - (void)reloadNotes {
