@@ -67,7 +67,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         textCell = [[NSTextFieldCell alloc] initTextCell:@""];
-		[textCell setFont:[NSFont labelFontOfSize:0]];
+		[textCell setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
 		
         iconCell = [[BDSKCenterScaledImageCell alloc] init];
 		
