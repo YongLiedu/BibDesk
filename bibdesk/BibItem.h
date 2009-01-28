@@ -92,6 +92,7 @@ enum {
     float searchScore;
     NSURL *identifierURL;
     NSMutableArray *files;
+    unsigned int colorLabel;
 }
 
 - (NSArray *)files;
@@ -469,6 +470,9 @@ enum {
     @param      rating The new value for the rating.
 */
 - (void)setRating:(unsigned int)rating;
+
+- (unsigned int)colorLabel;
+- (void)setColorLabel:(unsigned int)label;
 
 /*!
     @method     setField:toRatingValue:

@@ -481,6 +481,10 @@
         return nil;
 }
 
+- (unsigned int)tableView:(NSTableView *)tv colorLabelForRow:(int)row {
+    return [[[self shownPublications] objectAtIndex:row] colorLabel];
+}
+
 #pragma mark TableView dragging source
 
 // for 10.3 compatibility and OmniAppKit dataSource methods

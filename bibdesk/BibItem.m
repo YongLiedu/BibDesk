@@ -1012,6 +1012,14 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         [self setField:field toRatingValue:rating];
 }
 
+- (unsigned int)colorLabel {
+    return MIN([[self valueOfField:@"Bdsk-Label" inherit:NO] intValue], 7);
+}
+
+- (void)setColorLabel:(unsigned int)label {
+	[self setField:@"Bdsk-Label" toValue:[NSString stringWithFormat:@"%i", MIN(label, 7U)]];
+}
+
 - (void)setHasBeenEdited:(BOOL)flag{
     hasBeenEdited = flag;
 }

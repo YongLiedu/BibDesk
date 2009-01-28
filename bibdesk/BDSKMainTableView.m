@@ -58,6 +58,7 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
+#import <FileView/FVFinderLabel.h>
 
 enum {
     BDSKColumnTypeText,
@@ -190,6 +191,23 @@ enum {
     // we use the same for Delete and the Backspace
     // Omni's implementation of deleteForward: selects the next item, which selects the wrong item too early because we may delay for the warning
     [self deleteBackward:sender];
+}
+
+- (void)highlightSelectionInClipRect:(NSRect)clipRect{
+    if ([[self delegate] respondsToSelector:@selector(tableView:colorLabelForRow:)]) {
+        NSRange visibleRows = [self rowsInRect:clipRect];
+        unsigned int row;
+        unsigned int label;
+        NSRect ignored, rect;
+        for (row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
+            if (label = [[self delegate] tableView:self colorLabelForRow:row]) {
+                NSDivideRect([self rectOfRow:row], &ignored, &rect, 1.0, NSMaxYEdge);
+                [FVFinderLabel drawFinderLabel:label inRect:NSInsetRect(rect, 1.0, 0.0) roundEnds:YES];
+            }
+        }
+    }
+    
+    [super highlightSelectionInClipRect:clipRect];
 }
 
 #pragma mark Alternating row color
