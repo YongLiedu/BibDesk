@@ -268,11 +268,17 @@
 }
 
 - (void)insertObject:(BDSKCondition *)condition inConditionsAtIndex:(unsigned int)idx {
-	NSMutableArray *conditions = [[[self filter] conditions] mutableCopy];
-    [conditions insertObject:condition atIndex:idx];
-    [[self filter] setConditions:conditions];
-    [conditions release];
-    [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+	if ([condition group]) {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot add condition from another smart group, use make or duplicate.",@"Error description")];
+	} else {
+        NSMutableArray *conditions = [[[self filter] conditions] mutableCopy];
+        [conditions insertObject:condition atIndex:idx];
+        [[self filter] setConditions:conditions];
+        [conditions release];
+        [[[self document] undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    }
 }
 
 - (void)removeObjectFromConditionsAtIndex:(unsigned int)idx {
