@@ -200,7 +200,6 @@ enum {
         unsigned int row;
         NSColor *color;
         NSRect ignored, rect;
-        float radius;
         for (row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
             if ([self isRowSelected:row]) continue;
             if (color = [[self delegate] tableView:self highlightColorForRow:row]) {
