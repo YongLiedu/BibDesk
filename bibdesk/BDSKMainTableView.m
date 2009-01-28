@@ -200,13 +200,14 @@ enum {
         unsigned int row;
         NSColor *color;
         NSRect ignored, rect;
+        float radius;
         for (row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
             if ([self isRowSelected:row]) continue;
             if (color = [[self delegate] tableView:self highlightColorForRow:row]) {
                 [NSGraphicsContext saveGraphicsState];
                 [color setFill];
                 NSDivideRect([self rectOfRow:row], &ignored, &rect, 1.0, NSMaxYEdge);
-                [NSBezierPath fillRoundRectInRect:NSInsetRect(rect, 1.0, 0.0) radius:0.5 * NSHeight(rect)];
+                [NSBezierPath fillHorizontalOvalAroundRect:NSInsetRect(rect, 1.0 + 0.5 * NSHeight(rect), 0.0)];
                 [NSGraphicsContext restoreGraphicsState];
             }
         }
