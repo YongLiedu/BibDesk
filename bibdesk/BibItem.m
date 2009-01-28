@@ -1040,7 +1040,7 @@ typedef union _BDSKRGBAInt {
 }
 
 - (void)setColor:(NSColor *)aColor {
-    float r, g, b, a;
+    float r = 0.0, g = 0.0, b = 0.0, a = 0.0;
     [[aColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getRed:&r green:&g blue:&b alpha:&a];
     // store a 32 bit color instead of the floating point values
     BDSKRGBAInt u;
