@@ -674,8 +674,10 @@
 }
 
 - (void)changeColor:(id)sender {
-    [[self selectedPublications] makeObjectsPerformSelector:@selector(setColor:) withObject:[sender color]];
-	[[self undoManager] setActionName:NSLocalizedString(@"Change Color", @"Undo action name")];
+    if ([self hasExternalGroupsSelected] == NO) {
+        [[self selectedPublications] makeObjectsPerformSelector:@selector(setColor:) withObject:[sender color]];
+        [[self undoManager] setActionName:NSLocalizedString(@"Change Color", @"Undo action name")];
+    }
 }
 
 #pragma mark URL actions
