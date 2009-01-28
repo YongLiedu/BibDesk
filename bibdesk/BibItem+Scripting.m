@@ -310,11 +310,13 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 
 - (NSColor *)scriptingColor {
-	return [self color];
+	return [self color] ?: (id)[NSNull null];
 }
 
 - (void)setScriptingColor:(NSColor *)newColor {
     if ([[self owner] isDocument]) {
+        if (newColor == [NSNull null])
+            [newColor = nil;
         [self setColor:newColor];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
