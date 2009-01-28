@@ -1013,11 +1013,11 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (unsigned int)colorLabel {
-    return MIN([[self valueOfField:@"Bdsk-Label" inherit:NO] intValue], 7);
+    return MIN((unsigned int)[[self valueOfField:@"Bdsk-Label" inherit:NO] intValue], 7U);
 }
 
 - (void)setColorLabel:(unsigned int)label {
-	[self setField:@"Bdsk-Label" toValue:[NSString stringWithFormat:@"%i", MIN(label, 7U)]];
+	[self setField:@"Bdsk-Label" toValue:label ? [NSString stringWithFormat:@"%i", MIN(label, 7U)] : nil];
 }
 
 - (void)setHasBeenEdited:(BOOL)flag{
