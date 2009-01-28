@@ -80,6 +80,9 @@
 - (NSDate*)scriptingDateAdded;
 - (NSDate*)scriptingDateModified;
 
+- (NSColor *)scriptingColor;
+- (void)setScriptingColor:(NSColor *)newColor;
+
 // more (pseudo) accessors for key-value coding
 - (NSString*)remoteURLString;
 - (void)setRemoteURLString:(NSString*) newURLString;

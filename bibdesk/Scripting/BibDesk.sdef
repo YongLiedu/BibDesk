@@ -821,6 +821,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Whether the publication is external.">
                 <cocoa key="isExternal"/>
             </property>  
+            <property name="color" code="colr" type="color"
+                description="The color for the publication.">
+                <cocoa key="scriptingColor"/>
+            </property>  
             <responds-to name="add">
                 <cocoa method=""/>
             </responds-to>

@@ -309,8 +309,20 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 
+- (NSColor *)scriptingColor {
+	return [self color];
+}
 
-
+- (void)setScriptingColor:(NSColor *)newColor {
+    if ([[self owner] isDocument]) {
+        [self setColor:newColor];
+        [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+    } else {
+        NSScriptCommand *cmd = [NSScriptCommand currentCommand];
+        [cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+        [cmd setScriptErrorString:NSLocalizedString(@"Cannot set property of external publication.",@"Error description")];
+    }
+}
 
 /*
  ssp: 2004-07-11
