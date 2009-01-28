@@ -315,8 +315,8 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 - (void)setScriptingColor:(NSColor *)newColor {
     if ([[self owner] isDocument]) {
-        if (newColor == [NSNull null])
-            [newColor = nil;
+        if ([newColor isEqual:[NSNull null]])
+            newColor = nil;
         [self setColor:newColor];
         [[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     } else {
