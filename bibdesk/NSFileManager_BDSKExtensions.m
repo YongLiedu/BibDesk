@@ -861,7 +861,7 @@ static OSType finderSignatureBytes = 'MACS';
    if (tags)
         return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OPEN_META_TAGS_KEY toPropertyListValue:tags atPath:path options:kSKNXattrNoCompress error:error];
     else
-        return [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttribute:OPEN_META_TAGS_KEY atPath:path traverseLink:YES error:error];
+        return [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttributeNamed:OPEN_META_TAGS_KEY atPath:path traverseLink:YES error:error];
 }
 
 - (NSNumber *)openMetaRatingAtPath:(NSString *)path error:(NSError **)error {
@@ -872,7 +872,7 @@ static OSType finderSignatureBytes = 'MACS';
     if (rating)
         return [[SKNExtendedAttributeManager sharedNoSplitManager] setExtendedAttributeNamed:OPEN_META_RATING_KEY toPropertyListValue:rating atPath:path options:kSKNXattrNoCompress error:error];
     else
-        return [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttribute:OPEN_META_RATING_KEY atPath:path traverseLink:YES error:error];
+        return [[SKNExtendedAttributeManager sharedNoSplitManager] removeExtendedAttributeNamed:OPEN_META_RATING_KEY atPath:path traverseLink:YES error:error];
 }
 
 @end
