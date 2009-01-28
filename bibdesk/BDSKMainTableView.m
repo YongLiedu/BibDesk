@@ -58,7 +58,6 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
-#import <FileView/FVFinderLabel.h>
 
 enum {
     BDSKColumnTypeText,
@@ -194,20 +193,24 @@ enum {
 }
 
 - (void)highlightSelectionInClipRect:(NSRect)clipRect{
-    if ([[self delegate] respondsToSelector:@selector(tableView:colorLabelForRow:)]) {
+    [super highlightSelectionInClipRect:clipRect];
+    
+    if ([[self delegate] respondsToSelector:@selector(tableView:highlightColorForRow:)]) {
         NSRange visibleRows = [self rowsInRect:clipRect];
         unsigned int row;
-        unsigned int label;
+        NSColor *color;
         NSRect ignored, rect;
         for (row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
-            if (label = [[self delegate] tableView:self colorLabelForRow:row]) {
+            if ([self isRowSelected:row]) continue;
+            if (color = [[self delegate] tableView:self highlightColorForRow:row]) {
+                [NSGraphicsContext saveGraphicsState];
+                [color setFill];
                 NSDivideRect([self rectOfRow:row], &ignored, &rect, 1.0, NSMaxYEdge);
-                [FVFinderLabel drawFinderLabel:label inRect:NSInsetRect(rect, 1.0, 0.0) roundEnds:YES];
+                [NSBezierPath fillRoundRectInRect:NSInsetRect(rect, 1.0, 0.0) radius:0.5 * NSHeight(rect)];
+                [NSGraphicsContext restoreGraphicsState];
             }
         }
     }
-    
-    [super highlightSelectionInClipRect:clipRect];
 }
 
 #pragma mark Alternating row color

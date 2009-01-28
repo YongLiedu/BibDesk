@@ -79,6 +79,8 @@
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
+static NSString *BDSKColorString = @"Bdsk-Color";
+
 
 enum {
     BDSKStringFieldCollection, 
@@ -1012,12 +1014,44 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         [self setField:field toRatingValue:rating];
 }
 
-- (unsigned int)colorLabel {
-    return MIN((unsigned int)[[self valueOfField:@"Bdsk-Label" inherit:NO] intValue], 7U);
+typedef union _BDSKRGBAInt {
+    struct {
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+        uint8_t a;
+    } rgba;
+    uint32_t uintValue;
+} BDSKRGBAInt;
+
+- (NSColor *)color {
+    NSColor *color = nil;
+    NSString *colorString = [self valueOfField:BDSKColorString inherit:NO];
+    if ([NSString isEmptyString:colorString] == NO) {
+        // there is no unsignedIntValue, so gho through long long = int64_t.
+        long long int64Value = [colorString longLongValue];
+        if (int64Value <= (long long)ULONG_MAX && int64Value > 0LL) {
+            BDSKRGBAInt u;
+            u.uintValue = CFSwapInt32BigToHost((uint32_t)int64Value);
+            color = [NSColor colorWithCalibratedRed:u.rgba.r / 255.0 green:u.rgba.g / 255.0 blue:u.rgba.b / 255.0 alpha:u.rgba.a / 255.0];
+        }
+    }
+    return color;
 }
 
-- (void)setColorLabel:(unsigned int)label {
-	[self setField:@"Bdsk-Label" toValue:label ? [NSString stringWithFormat:@"%i", MIN(label, 7U)] : nil];
+- (void)setColor:(NSColor *)aColor {
+    float r, g, b, a;
+    [[aColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getRed:&r green:&g blue:&b alpha:&a];
+    // store a 32 bit color instead of the floating point values
+    BDSKRGBAInt u;
+    u.rgba.r = (uint32_t)(r * 255);
+    u.rgba.g = (uint32_t)(g * 255);
+    u.rgba.b = (uint32_t)(b * 255);
+    u.rgba.a = (uint32_t)(a * 255);
+    NSString *colorString = nil;
+    if ((u.rgba.r < 245 || u.rgba.g < 245 || u.rgba.b < 245) && (u.rgba.r > 10 || u.rgba.g > 10 || u.rgba.b > 10) && u.rgba.a > 10)
+        colorString = [NSString stringWithFormat:@"%u", CFSwapInt32HostToBig(u.uintValue)];
+    [self setField:BDSKColorString toValue:colorString];
 }
 
 - (void)setHasBeenEdited:(BOOL)flag{

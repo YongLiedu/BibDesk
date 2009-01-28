@@ -673,6 +673,11 @@
 #endif
 }
 
+- (void)changeColor:(id)sender {
+    [[self selectedPublications] makeObjectsPerformSelector:@selector(setColor:) withObject:[sender color]];
+	[[self undoManager] setActionName:NSLocalizedString(@"Change Color", @"Undo action name")];
+}
+
 #pragma mark URL actions
 
 - (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex

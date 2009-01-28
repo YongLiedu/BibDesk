@@ -481,8 +481,8 @@
         return nil;
 }
 
-- (unsigned int)tableView:(NSTableView *)tv colorLabelForRow:(int)row {
-    return [[[self shownPublications] objectAtIndex:row] colorLabel];
+- (NSColor *)tableView:(NSTableView *)tv highlightColorForRow:(int)row {
+    return [[[self shownPublications] objectAtIndex:row] color];
 }
 
 #pragma mark TableView dragging source

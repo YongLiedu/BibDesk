@@ -66,7 +66,7 @@
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView;
 - (void)tableView:(NSTableView *)aTableView importItemAtRow:(int)rowIndex;
 - (void)tableView:(NSTableView *)aTableView openParentForItemAtRow:(int)rowIndex;
-- (unsigned int)tableView:(NSTableView *)aTableView colorLabelForRow:(int)rowIndex;
+- (NSColor *)tableView:(NSTableView *)aTableView highlightColorForRow:(int)rowIndex;
 @end
 
 

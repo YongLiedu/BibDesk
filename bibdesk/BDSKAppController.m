@@ -386,6 +386,7 @@ static void fixLegacyTableColumnIdentifiers()
     if ([WebPreferences instancesRespondToSelector:@selector(setCacheModel:)])
         [[WebPreferences standardPreferences] setCacheModel:WebCacheModelDocumentBrowser];
     
+    [[NSColorPanel sharedColorPanel] setShowsAlpha:YES];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{

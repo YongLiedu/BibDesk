@@ -471,8 +471,8 @@ enum {
 */
 - (void)setRating:(unsigned int)rating;
 
-- (unsigned int)colorLabel;
-- (void)setColorLabel:(unsigned int)label;
+- (NSColor *)color;
+- (void)setColor:(NSColor *)label;
 
 /*!
     @method     setField:toRatingValue:
