@@ -86,6 +86,8 @@
 static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
 static NSString *BDSKEditorObservationContext = @"BDSKEditorObservationContext";
 
+static NSString *BDSKColorString = @"Bdsk-Color";
+
 // offset of the table from the left window edge
 #define TABLE_OFFSET 13.0
 
@@ -3008,7 +3010,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSString *field;
     BDSKTypeManager *tm = [BDSKTypeManager sharedManager];
     NSString *type = [publication pubType];
-	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects:BDSKDateAddedString, BDSKDateModifiedString, nil];
+	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects:BDSKDateAddedString, BDSKDateModifiedString, BDSKColorString, nil];
     
     [ignoredKeys unionSet:[tm noteFieldsSet]];
     [ignoredKeys unionSet:[tm ratingFieldsSet]];
