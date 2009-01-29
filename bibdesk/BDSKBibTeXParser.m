@@ -948,7 +948,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
         
         // Special case handling of abstract & annote is to avoid losing newlines in preexisting files.
         // In addition, we need to preserve newlines in file fields for base64 decoding, instead of replacing with a space.
-        if([fieldName isNoteField] || [fieldName hasCaseInsensitivePrefix:@"Bdsk-File-"]){
+        if([fieldName isNoteField] || [fieldName hasPrefix:@"Bdsk-File-"]){
             
             // this is guaranteed to point to a meaningful error if copyStringFromNoteField fails
             NSString *errorString = nil;

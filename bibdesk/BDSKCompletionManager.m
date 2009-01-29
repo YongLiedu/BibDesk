@@ -88,7 +88,7 @@ static id sharedManager = nil;
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     
-	if(BDIsEmptyString((CFStringRef)entry) || [entry isNumericField] || [entry isURLField] || [entry isPersonField] || [entry isCitationField] || [entry hasCaseInsensitivePrefix:@"Bdsk-"])	
+	if(BDIsEmptyString((CFStringRef)entry) || [entry isNumericField] || [entry isURLField] || [entry isPersonField] || [entry isCitationField] || [entry hasPrefix:@"Bdsk-"])	
 		return;
 
     if([entry isEqualToString:BDSKBooktitleString])	
