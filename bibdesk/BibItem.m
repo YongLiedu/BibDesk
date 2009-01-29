@@ -1004,7 +1004,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 - (unsigned int)rating{
     NSArray *ratingFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey];
     NSString *field = [ratingFields containsObject:BDSKRatingString] ? BDSKRatingString : [ratingFields firstObject];
-	return field ? [self ratingValueOfField:field] : 0;
+	return field ? (unsigned int)[self ratingValueOfField:field] : 0U;
 }
 
 - (void)setRating:(unsigned int)rating{
@@ -1355,7 +1355,7 @@ typedef union _BDSKRGBAInt {
 - (void)setField:(NSString *)field toRatingValue:(unsigned int)rating{
 	if (rating > 5)
 		rating = 5;
-	[self setField:field toValue:[NSString stringWithFormat:@"%i", rating]];
+	[self setField:field toValue:[NSString stringWithFormat:@"%u", rating]];
 }
 
 - (BOOL)boolValueOfField:(NSString *)field{
