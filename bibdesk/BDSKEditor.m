@@ -86,8 +86,6 @@
 static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
 static NSString *BDSKEditorObservationContext = @"BDSKEditorObservationContext";
 
-static NSString *BDSKColorString = @"Bdsk-Color";
-
 // offset of the table from the left window edge
 #define TABLE_OFFSET 13.0
 
