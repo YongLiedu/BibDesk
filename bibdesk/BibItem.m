@@ -1027,13 +1027,9 @@ typedef union _BDSKRGBAInt {
     NSColor *color = nil;
     NSString *colorString = [self valueOfField:BDSKColorString inherit:NO];
     if ([NSString isEmptyString:colorString] == NO) {
-        // there is no unsignedIntValue, so gho through long long = int64_t.
-        long long int64Value = [colorString longLongValue];
-        if (int64Value <= (long long)ULONG_MAX && int64Value > 0LL) {
-            BDSKRGBAInt u;
-            u.uintValue = CFSwapInt32BigToHost((uint32_t)int64Value);
-            color = [NSColor colorWithCalibratedRed:u.rgba.r / 255.0 green:u.rgba.g / 255.0 blue:u.rgba.b / 255.0 alpha:u.rgba.a / 255.0];
-        }
+        BDSKRGBAInt u;
+        u.uintValue = CFSwapInt32BigToHost([colorString unsignedIntValue]);
+        color = [NSColor colorWithCalibratedRed:u.rgba.r / 255.0 green:u.rgba.g / 255.0 blue:u.rgba.b / 255.0 alpha:u.rgba.a / 255.0];
     }
     return color;
 }
