@@ -43,6 +43,7 @@
 #import <sys/event.h>
 #import <sys/time.h>
 #import <sys/resource.h>
+#import <pthread.h>
 
 @interface BDSKTask (Private)
 
@@ -274,11 +275,6 @@ static void __BDSKTaskNotify(void *info)
     else if (nil != fh) {
         fd_err = [fh isEqual:[NSFileHandle fileHandleWithNullDevice]] ? fd_null : [fh fileDescriptor];
     }
-    
-    rlim_t maxOpenFiles = OPEN_MAX;
-    struct rlimit openFileLimit;
-    if (getrlimit(RLIMIT_NOFILE, &openFileLimit) == 0)
-        maxOpenFiles = openFileLimit.rlim_cur;
 
     // !!! No CF or Cocoa after this point in the child process!
     _processIdentifier = fork();
@@ -293,11 +289,6 @@ static void __BDSKTaskNotify(void *info)
         if (-1 != fd_inp) dup2(fd_inp, STDIN_FILENO);        
         if (-1 != fd_out) dup2(fd_out, STDOUT_FILENO);
         if (-1 != fd_err) dup2(fd_err, STDERR_FILENO);  
-        
-        // close all other inherited file descriptors
-        rlim_t j;
-        for (j = 3; j < maxOpenFiles; j++) 
-            close(j);
         
         chdir(workingDir);
         int ret = execve(args[0], args, env);
@@ -333,7 +324,7 @@ static void __BDSKTaskNotify(void *info)
         _internal->_rl = (CFRunLoopRef)CFRetain(CFRunLoopGetCurrent());
         CFRunLoopSourceContext rlcontext = { 0, self, CFRetain, CFRelease, CFCopyDescription, CFEqual, CFHash, NULL, NULL, __BDSKTaskNotify };
         _internal->_rlsource = CFRunLoopSourceCreate(CFAllocatorGetDefault(), 0, &rlcontext);
-        CFRunLoopAddSource(_internal->_rl, _internal->_rlsource, kCFRunLoopDefaultMode);
+        CFRunLoopAddSource(_internal->_rl, _internal->_rlsource, kCFRunLoopCommonModes);
         CFRelease(_internal->_rlsource);
     }
     [handlesToClose release];
@@ -458,7 +449,6 @@ static void __BDSKTaskNotify(void *info)
     // runloop source is still retaining us
     CFRunLoopSourceSignal(_internal->_rlsource);
     CFRunLoopWakeUp(_internal->_rl);
-
 }
 
 @end
