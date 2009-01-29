@@ -201,12 +201,17 @@ enum {
         NSColor *color;
         NSRect ignored, rect;
         for (row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
-            if ([self isRowSelected:row]) continue;
             if (color = [[self delegate] tableView:self highlightColorForRow:row]) {
                 [NSGraphicsContext saveGraphicsState];
-                [color setFill];
+                [color set];
                 NSDivideRect([self rectOfRow:row], &ignored, &rect, 1.0, NSMaxYEdge);
-                [NSBezierPath fillHorizontalOvalAroundRect:NSInsetRect(rect, 1.0 + 0.5 * NSHeight(rect), 0.0)];
+                if ([self isRowSelected:row]) {
+                    [NSBezierPath setDefaultLineWidth:2.0];
+                    [NSBezierPath strokeHorizontalOvalAroundRect:NSInsetRect(rect, 2.0 + 0.5 * NSHeight(rect), 1.0)];
+                    [NSBezierPath setDefaultLineWidth:1.0];
+                } else {
+                    [NSBezierPath fillHorizontalOvalAroundRect:NSInsetRect(rect, 1.0 + 0.5 * NSHeight(rect), 0.0)];
+                }
                 [NSGraphicsContext restoreGraphicsState];
             }
         }
@@ -269,6 +274,7 @@ enum {
         case BDSKColumnTypeLocalFile:
             cell = [[[BDSKTextWithIconCell alloc] init] autorelease];
             [cell setLineBreakMode:NSLineBreakByClipping];
+            [cell setDrawsHighlight:NO];
             break;
         case BDSKColumnTypeRating:
             cell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];
@@ -314,7 +320,7 @@ enum {
             break;
         case BDSKColumnTypeText:
         default:
-            cell = [[[NSTextFieldCell alloc] initTextCell:@""] autorelease];
+            cell = [[[BDSKTextFieldCell alloc] initTextCell:@""] autorelease];
             [cell setBordered:NO];
             [cell setLineBreakMode:NSLineBreakByTruncatingTail];
             break;
@@ -709,6 +715,16 @@ enum {
 
 #pragma mark -
 
+@implementation BDSKTextFieldCell
+
+- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    return nil;
+}
+
+@end
+
+#pragma mark -
+
 @implementation BDSKMainTableHeaderView 
 
 - (id)initWithFrame:(NSRect)frameRect {
@@ -730,4 +746,3 @@ enum {
 }
 
 @end
-

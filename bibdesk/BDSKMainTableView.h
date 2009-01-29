@@ -77,3 +77,7 @@
 
 @interface BDSKRoundRectButtonCell : NSButtonCell
 @end
+
+
+@interface BDSKTextFieldCell : NSTextFieldCell
+@end
