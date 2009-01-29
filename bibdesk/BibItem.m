@@ -1669,12 +1669,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *key = @"Bdsk-File-1";
     
     while ([pubFields objectForKey:key])
-        key = [NSString stringWithFormat:@"Bdsk-File-%d", ++fileIndex];
+        key = [NSString stringWithFormat:@"Bdsk-File-%u", ++fileIndex];
     
     key = @"Bdsk-Url-1";
     
     while ([pubFields objectForKey:key])
-        key = [NSString stringWithFormat:@"Bdsk-Url-%d", ++urlIndex];
+        key = [NSString stringWithFormat:@"Bdsk-Url-%u", ++urlIndex];
     
     NSMutableString *string = nil;
     NSString *value;
@@ -1684,9 +1684,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         for (i = 0; i < iMax; i++) {
             file = [files objectAtIndex:i];
             if ([file isFile])
-                key = [NSString stringWithFormat:@"Bdsk-File-%d", fileIndex++];
+                key = [NSString stringWithFormat:@"Bdsk-File-%u", fileIndex++];
             else
-                key = [NSString stringWithFormat:@"Bdsk-Url-%d", urlIndex++];
+                key = [NSString stringWithFormat:@"Bdsk-Url-%u", urlIndex++];
             value = [file stringRelativeToPath:basePath];
             OBPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
             [string appendFormat:@",\n\t%@ = {%@}", key, value];
@@ -3390,7 +3390,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         [keysToRemove addObject:key];
         
         // next key in the sequence; increment i first, so it's guaranteed correct
-        key = [NSString stringWithFormat:@"Bdsk-File-%d", ++i];
+        key = [NSString stringWithFormat:@"Bdsk-File-%u", ++i];
     }
     
     // reset i so we can get all of the remote URL types
@@ -3410,7 +3410,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         [keysToRemove addObject:key];
         
         // next key in the sequence; increment i first, so it's guaranteed correct
-        key = [NSString stringWithFormat:@"Bdsk-Url-%d", ++i];
+        key = [NSString stringWithFormat:@"Bdsk-Url-%u", ++i];
     }
     
     if ([owner fileURL])
@@ -3424,11 +3424,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     // add unresolved URLs back in, and make sure the remaining keys are contiguous
     if (unresolvedFileCount) {
         for (i = 0; i < unresolvedFileCount; i++)
-            [pubFields setObject:[unresolvedFiles objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%d", i + 1]];
+            [pubFields setObject:[unresolvedFiles objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-File-%u", i + 1]];
     }
     if (unresolvedURLCount) {
         for (i = 0; i < unresolvedURLCount; i++)
-            [pubFields setObject:[unresolvedURLs objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-Url-%d", i + 1]];
+            [pubFields setObject:[unresolvedURLs objectAtIndex:i] forKey:[NSString stringWithFormat:@"Bdsk-Url-%u", i + 1]];
     }
     
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
