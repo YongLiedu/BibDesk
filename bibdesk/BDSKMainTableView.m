@@ -274,7 +274,6 @@ enum {
         case BDSKColumnTypeLocalFile:
             cell = [[[BDSKTextWithIconCell alloc] init] autorelease];
             [cell setLineBreakMode:NSLineBreakByClipping];
-            [cell setDrawsHighlight:NO];
             break;
         case BDSKColumnTypeRating:
             cell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];

@@ -89,7 +89,7 @@
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 {
     NSColor *color = nil;
-    if (_oaFlags.drawsHighlight)
+    if (_oaFlags.drawsHighlight && [self drawsBackground])
         color = [super highlightColorWithFrame:cellFrame inView:controlView];
     return color;
 }
