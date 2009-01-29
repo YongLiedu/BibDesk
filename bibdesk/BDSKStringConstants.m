@@ -268,6 +268,7 @@ NSString *BDSKImportOrderString = @"Import Order";
 NSString *BDSKRelevanceString = @"Search Relevance";
 NSString *BDSKPubTypeString = @"BibTeX Type"; // this is used for -[BibItem setPubType:], not equivalent to @"Type"
 NSString *BDSKCiteKeyString = @"Cite Key";
+NSString *BDSKColorString = @"Bdsk-Color";
 NSString *BDSKLocalFileString = @"Local File";
 NSString *BDSKRemoteURLString = @"Remote URL";
 NSString *BDSKAllFieldsString = @"Any Field";

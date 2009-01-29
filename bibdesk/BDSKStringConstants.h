@@ -208,6 +208,7 @@ extern NSString *BDSKEditorFileViewIconScaleKey;
 #pragma mark Field name strings
 
 extern NSString *BDSKCiteKeyString;
+extern NSString *BDSKColorString;
 extern NSString *BDSKLocalFileString;
 extern NSString *BDSKRemoteURLString;
 extern NSString *BDSKAnnoteString;

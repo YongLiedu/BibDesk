@@ -79,7 +79,6 @@
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
-static NSString *BDSKColorString = @"Bdsk-Color";
 
 
 enum {
