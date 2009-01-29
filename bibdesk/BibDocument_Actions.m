@@ -674,7 +674,7 @@
 }
 
 - (void)changeColor:(id)sender {
-    if ([self hasExternalGroupsSelected] == NO) {
+    if ([self hasExternalGroupsSelected] == NO && [self isDisplayingFileContentSearch] == NO) {
         [[self selectedPublications] makeObjectsPerformSelector:@selector(setColor:) withObject:[sender color]];
         [[self undoManager] setActionName:NSLocalizedString(@"Change Color", @"Undo action name")];
     }
