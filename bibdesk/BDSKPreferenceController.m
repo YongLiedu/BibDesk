@@ -82,7 +82,7 @@ static id sharedController = nil;
             NSEnumerator *stringEnum = [[tmpDict objectForKey:key] objectEnumerator];
             NSString *string;
             while (string = [stringEnum nextObject])
-                [searchString appendFormat:@"%@%C", NSLocalizedStringFromTable(string, @"PreferenceSearchTerms", @""), 0x1E];
+                [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:@"PreferenceSearchTerms"], 0x1E];
             [tmpDict setObject:searchString forKey:key];
             [searchString release];
         }

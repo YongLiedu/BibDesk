@@ -140,7 +140,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
             
             while (dict = [dictEnum nextObject]) {
                 dict = [dict mutableCopy];
-                [(NSMutableDictionary *)dict setObject:NSLocalizedStringFromTable([dict objectForKey:@"displayName"], @"TemplateOptions", @"") forKey:@"displayName"];
+                [(NSMutableDictionary *)dict setObject:[[NSBundle mainBundle] localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"] forKey:@"displayName"];
                 [array addObject:dict];
                 [dict release];
             }
@@ -816,7 +816,7 @@ static inline unsigned int endOfLeadingEmptyLine(NSString *string, NSRange range
         NSEnumerator *dictEnum = [[templateOptions valueForKey:key] objectEnumerator];
         NSDictionary *dict;
         while (dict = [dictEnum nextObject]) {
-            NSMenuItem *item = [menu addItemWithTitle:NSLocalizedStringFromTable([dict objectForKey:@"displayName"], @"TemplateOptions", @"")
+            NSMenuItem *item = [menu addItemWithTitle:[[NSBundle mainBundle] localizedStringForKey:[dict objectForKey:@"displayName"] value:@"" table:@"TemplateOptions"]
                                                action:@selector(changeValueFromMenu:) keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:[dict objectForKey:@"key"]];
