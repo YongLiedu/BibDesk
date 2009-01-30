@@ -160,7 +160,6 @@ static NSArray *scriptHookNames = nil;
 	BDSKScriptHook *scriptHook = [self makeScriptHookWithName:name];
 	if (scriptHook == nil)
 		return NO;
-	id value = nil;
 	// set the user info values
     if (userInfo)
         [scriptHook setValuesForKeysWithDictionary:userInfo];
