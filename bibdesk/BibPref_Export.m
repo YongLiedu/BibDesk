@@ -522,14 +522,11 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 #pragma mark ToolTips and Context menu
 
-- (NSString *)outlineView:(NSOutlineView *)ov toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation;
+- (NSString *)outlineView:(NSOutlineView *)ov toolTipForCell:(NSCell *)cell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tc item:(id)item mouseLocation:(NSPoint)mouseLocation
 {
     NSString *tooltip = nil;
-    if(row >= 0){
-        id item = [outlineView itemAtRow:row];
-        if ([[tableColumn identifier] isEqualToString:BDSKTemplateNameString] && [item isLeaf])
-            tooltip = [[item representedFileURL] path];
-    }
+    if ([[tc identifier] isEqualToString:BDSKTemplateNameString] && [item isLeaf])
+        tooltip = [[item representedFileURL] path];
     return tooltip;
 }
 
