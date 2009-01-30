@@ -56,8 +56,8 @@
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\fs22 \cf0 \
-Last update: 22 January 2009 (rev 
-\f2\fs20 14111)
+Last update: 30 January 2009 (rev 
+\f2\fs20 14192)
 \f1\fs22 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -70,15 +70,15 @@ New Features\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
 \ls1\ilvl0
 \f1\i0\b0\fs22 \cf0 {\listtext	\'95	}New import AppleScript command to add publications from a text format and from a PubMed search\
-\pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
-\ls1\ilvl0\cf0 {\listtext	\'95	}AppleScript support for generating templated numbered citations\
-\pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
-\ls1\ilvl0\cf0 {\listtext	\'95	}The Script menu now also allows non-AppleScript scripts and .app bundles\
+{\listtext	\'95	}AppleScript support for generating templated numbered citations\
+{\listtext	\'95	}The Script menu now also allows non-AppleScript scripts and .app bundles\
 {\listtext	\'95	}Improved template and AppleScript support for numbered items, for use in templated citations\
 {\listtext	\'95	}BibDesk can now automatically fill citation info from PubMed for dropped PDFs when a DOI or PII could be found. Can be disabled through a hidden preference\
 {\listtext	\'95	}Added download support for links in the built-in browser\
 {\listtext	\'95	}Support for the arXiv in the web group\
 {\listtext	\'95	}Improved AppleScript support for rich text\
+{\listtext	\'95	}Initial support for Open Meta tags of linked files. Accessible through AppleScript and readable in the Skim Notes window\
+{\listtext	\'95	}You can now color publication items using the Colors panel.\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
 \ls2\ilvl0
 \f0\i\b\fs26 \cf0 \
@@ -87,16 +87,18 @@ New Features\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
 \ls3\ilvl0
 \f1\i0\b0\fs22 \cf0 {\listtext	\'95	}Reopen empty or default database when reactivating BibDesk, if appropriate\
-\pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
-\ls3\ilvl0\cf0 {\listtext	\'95	}Remove system proxy usage, since it breaks z39.50 searching when a user actually has a proxy set. Thanks to Sergei Mariev for testing assistance\
-\pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
-\ls3\ilvl0\cf0 {\listtext	\'95	}Improve template support\
+{\listtext	\'95	}Remove system proxy usage, since it breaks z39.50 searching when a user actually has a proxy set. Thanks to Sergei Mariev for testing assistance\
+{\listtext	\'95	}Improve template support\
 {\listtext	\'95	}Improvements to PubMed and RIS parsing and export\
 {\listtext	\'95	}Make sure smart group condition sheet always allows adding new conditions\
 {\listtext	\'95	}Fix loading an external file group containing relative links\
 {\listtext	\'95	}Don't try to parse invalid RIS as RIS, so it can be handled manually\
 {\listtext	\'95	}Publications and groups are now tracked through a unique ID, so their reference won't be invalidated when items are added\
 {\listtext	\'95	}Fix week-based date checking in smart groups\
+{\listtext	\'95	}Respect the file type when exporting templated rich text using AppleScript\
+{\listtext	\'95	}Fix some memory leaks\
+{\listtext	\'95	}Fix proxy icon in publication window\
+{\listtext	\'95	}Fix AppleScript support for smart group conditions\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f0\b\fs28 \cf0 \
