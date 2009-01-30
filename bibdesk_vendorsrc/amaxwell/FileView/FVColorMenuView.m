@@ -122,8 +122,8 @@ static NSString * const FVColorNameUpdateNotification = @"FVColorNameUpdateNotif
     [NSApp sendAction:[self action] to:[self target] from:self];
     
     // we have to close the menu manually
-    if ([sender respondsToSelector:@selector(enclosingMenuItem)] && [[[sender enclosingMenuItem] menu] respondsToSelector:@selector(cancelTracking)])
-        [[[sender enclosingMenuItem] menu] cancelTracking];
+    if ([self respondsToSelector:@selector(enclosingMenuItem)] && [[[self enclosingMenuItem] menu] respondsToSelector:@selector(cancelTracking)])
+        [[[self enclosingMenuItem] menu] cancelTracking];
 }
 
 - (void)selectLabel:(NSUInteger)label;
