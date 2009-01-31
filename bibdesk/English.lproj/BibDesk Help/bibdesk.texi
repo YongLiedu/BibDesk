@@ -2070,7 +2070,7 @@ want to use the Custom Citation Strings Drawer.
 @kindex Shift-Cmd-C
 
 Choosing @menutitle{Show/Hide Custom Citation Strings} from the Window menu
-(@shiftcmd{C}) toggles a drawer that allows you to drag and drop
+(@ctrcmd{C}) toggles a drawer that allows you to drag and drop
 citations into a TeX document using custom-defined citation strings,
 such as @code{fullcite}, @code{citet}, and @code{citep}.
 
