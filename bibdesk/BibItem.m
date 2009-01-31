@@ -76,6 +76,7 @@
 #import "BDSKCompletionManager.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKMacro.h"
+#import "NSColor_BDSKExtensions.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -1013,40 +1014,15 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         [self setField:field toRatingValue:rating];
 }
 
-typedef union _BDSKRGBAInt {
-    struct {
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
-        uint8_t a;
-    } rgba;
-    uint32_t uintValue;
-} BDSKRGBAInt;
-
 - (NSColor *)color {
-    NSColor *color = nil;
-    NSString *colorString = [self valueOfField:BDSKColorString inherit:NO];
-    if ([NSString isEmptyString:colorString] == NO) {
-        BDSKRGBAInt u;
-        u.uintValue = CFSwapInt32BigToHost([colorString unsignedIntValue]);
-        color = [NSColor colorWithCalibratedRed:u.rgba.r / 255.0 green:u.rgba.g / 255.0 blue:u.rgba.b / 255.0 alpha:u.rgba.a / 255.0];
-    }
-    return color;
+    return [NSColor colorWithFourByteString:[self valueOfField:BDSKColorString inherit:NO]];
 }
 
 - (void)setColor:(NSColor *)aColor {
-    float r = 0.0, g = 0.0, b = 0.0, a = 0.0;
-    [[aColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getRed:&r green:&g blue:&b alpha:&a];
-    // store a 32 bit color instead of the floating point values
-    BDSKRGBAInt u;
-    u.rgba.r = (uint32_t)(r * 255);
-    u.rgba.g = (uint32_t)(g * 255);
-    u.rgba.b = (uint32_t)(b * 255);
-    u.rgba.a = (uint32_t)(a * 255);
-    NSString *colorString = nil;
-    if ((u.rgba.r < 245 || u.rgba.g < 245 || u.rgba.b < 245) && (u.rgba.r > 10 || u.rgba.g > 10 || u.rgba.b > 10) && u.rgba.a > 10)
-        colorString = [NSString stringWithFormat:@"%u", CFSwapInt32HostToBig(u.uintValue)];
-    [self setField:BDSKColorString toValue:colorString];
+    if ([aColor isBlackOrWhiteOrTransparentForMargin:0.04])
+        [self setField:BDSKColorString toValue:nil];
+    else
+        [self setField:BDSKColorString toValue:[aColor fourByteStringValue]];
 }
 
 - (void)setHasBeenEdited:(BOOL)flag{

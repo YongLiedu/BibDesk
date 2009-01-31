@@ -58,6 +58,7 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
+#import "NSColor_BDSKExtensions.h"
 
 enum {
     BDSKColumnTypeText,
@@ -667,19 +668,6 @@ enum {
 - (int)columnType { return columnType; }
 
 - (void)setColumnType:(int)type { columnType = type; }
-
-@end
-
-#pragma mark -
-
-@implementation NSColor (BDSKExtensions)
-
-+ (NSArray *)alternateControlAlternatingRowBackgroundColors {
-    static NSArray *altColors = nil;
-    if (altColors == nil)
-        altColors = [[NSArray alloc] initWithObjects:[NSColor controlBackgroundColor], [NSColor colorWithCalibratedRed:0.934203 green:0.991608 blue:0.953552 alpha:1.0], nil];
-    return altColors;
-}
 
 @end
 
