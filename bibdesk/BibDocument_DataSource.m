@@ -947,11 +947,18 @@
     BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
     if(tv == tableView){
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil]];
         
         if([self hasExternalGroupsSelected] || type == nil) 
 			return NSDragOperationNone;
-		if (isDragFromGroupTable && docState.dragFromExternalGroups && [self hasLibraryGroupSelected]) {
+		if ([type isEqualToString:NSColorPboardType]) {
+            if (row == -1 || row == [tableView numberOfRows])
+                return NSDragOperationNone;
+            else if (op == NSTableViewDropAbove)
+                [tv setDropRow:row dropOperation:NSTableViewDropOn];
+            return NSDragOperationEvery;
+        }
+        if (isDragFromGroupTable && docState.dragFromExternalGroups && [self hasLibraryGroupSelected]) {
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }
@@ -1017,7 +1024,7 @@
     NSPasteboard *pboard = [info draggingPasteboard];
     
     if(tv == tableView){
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, NSColorPboardType, nil]];
         
         if([self hasExternalGroupsSelected])
             return NO;
@@ -1038,7 +1045,11 @@
                 [urlsToAdd addObject:[NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]]];
             }else if([type isEqualToString:NSURLPboardType]){
                 [urlsToAdd addObject:[NSURL URLFromPasteboard:pboard]];
-            }else return NO;
+            }else if([type isEqualToString:NSColorPboardType]){
+                [[[self shownPublications] objectAtIndex:row] setColor:[NSColor colorFromPasteboard:pboard]];
+                return YES;
+            }else
+                return NO;
             
             if([urlsToAdd count] == 0)
                 return NO;
