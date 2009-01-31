@@ -278,7 +278,6 @@
 		CEEFE6C20B0403E700668BB0 /* BDSKGroupsArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */; };
 		CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF181BD0CEB711700716E85 /* Bookmarks.plist in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
-		CEF2EEE60F3462A900A7989E /* NSColor_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */; };
 		CEF2EEE70F3462A900A7989E /* NSColor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */; };
 		CEF71ADB0B91BBCB003A2771 /* BDSKNotesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF71AD90B91BBCB003A2771 /* BDSKNotesWindowController.m */; };
 		CEF71B080B91BFFF003A2771 /* NotesWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF71B060B91BFFF003A2771 /* NotesWindow.nib */; };
@@ -2072,7 +2071,6 @@
 				CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */,
 				F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */,
 				CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */,
-				CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */,
 				CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */,
 				F9022C9D0758038000C3F701 /* NSImage_BDSKExtensions.m */,
 				F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */,
@@ -2747,6 +2745,7 @@
 				F97BF0B7090AE7520063504B /* NSBezierPath_BDSKExtensions.h */,
 				CE28346109176C88006B4C63 /* NSBezierPath_CoreImageExtensions.h */,
 				F9025DC70969AD2C008A551C /* NSCharacterSet_BDSKExtensions.h */,
+				CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */,
 				F96F11940AAF4FD100815D06 /* NSData_BDSKExtensions.h */,
 				F9235017089A813E00EFEB06 /* NSDate_BDSKExtensions.h */,
 				CE6775140A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h */,
@@ -2932,7 +2931,6 @@
 				CE7611520EA49B6E00301E45 /* BDSKPrintableView.h in Headers */,
 				CE40EC540EE9AAEF00BCF379 /* BDSKImportCommand.h in Headers */,
 				CEC3158C0F24D0B9008D2C75 /* BDSKRichTextFormat.h in Headers */,
-				CEF2EEE60F3462A900A7989E /* NSColor_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
