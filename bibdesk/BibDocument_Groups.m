@@ -82,6 +82,7 @@
 #import "BDSKSearchButtonController.h"
 #import "BDSKSharingClient.h"
 #import "WebURLsWithTitles.h"
+#import "NSColor_BDSKExtensions.h"
 
 
 @implementation BibDocument (Groups)
