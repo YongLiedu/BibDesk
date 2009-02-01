@@ -42,6 +42,7 @@
 #import <AGRegex/AGRegex.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
+#import "PDFMetadata.h"
 
 @interface BDSKPubMedLookupHelper : NSObject
 + (NSString *)referenceForPubMedSearchTerm:(NSString *)searchTerm;
@@ -169,7 +170,7 @@
 	BibItem *bi=nil ;
 
 	NSString *pubMedSearch;
-	NSString *pdfTitle = [[pdfd documentAttributes] valueForKey:PDFDocumentTitleAttribute];	
+	NSString *pdfTitle = [[pdfd documentAttributes] valueForKey:BDSKPDFDocumentTitleAttribute];	
 	pubMedSearch=[pdfTitle stringByMakingPubmedSearchFromAnyBibliographicIDsInString];
 	if(pubMedSearch!=nil){
 		bi=[BibItem itemWithPubMedSearchTerm:pubMedSearch];
