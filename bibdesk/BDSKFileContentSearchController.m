@@ -105,7 +105,7 @@
     [cell setMaxHeight:17.0 * 0.7];
     
     // set up the image/text cell combination
-    [(BDSKTextWithIconCell *)[[tableView tableColumnWithIdentifier:@"title"] dataCell] setDrawsHighlight:NO];
+    [(BDSKTextWithIconCell *)[[tableView tableColumnWithIdentifier:@"title"] dataCell] setHasDarkHighlight:YES];
     
     OBPRECONDITION([[tableView enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self

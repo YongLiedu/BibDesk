@@ -74,7 +74,7 @@ static int tableIconSize = 24;
     }
     	
     BDSKTextWithIconCell *cell = [[[BDSKTextWithIconCell alloc] init] autorelease];
-    [cell setDrawsHighlight:NO];
+    [cell setHasDarkHighlight:YES];
     [[tableView tableColumnWithIdentifier:@"AppList"] setDataCell:cell];
     [tableView setRowHeight:(tableIconSize + 2)];
 

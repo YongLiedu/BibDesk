@@ -42,22 +42,16 @@
 @interface BDSKTextWithIconCell : NSTextFieldCell
 {
     NSImage *icon;
-    struct {
-        unsigned int drawsHighlight:1;
-        unsigned int imagePosition:3;
-        unsigned int settingUpFieldEditor:1;
-    } _oaFlags;
+    BOOL hasDarkHighlight;
+    BOOL settingUpFieldEditor;
 }
 
 // API
 - (NSImage *)icon;
 - (void)setIcon:(NSImage *)anIcon;
 
-- (NSCellImagePosition)imagePosition;
-- (void)setImagePosition:(NSCellImagePosition)aPosition;
-
-- (BOOL)drawsHighlight;
-- (void)setDrawsHighlight:(BOOL)flag;
+- (BOOL)hasDarkHighlight;
+- (void)setHasDarkHighlight:(BOOL)flag;
 
 - (NSRect)textRectForBounds:(NSRect)aRect;
 - (NSRect)iconRectForBounds:(NSRect)aRect;
@@ -65,10 +59,15 @@
 @end
 
 
+enum {
+    BDSKFilePathDisplayFullPath,
+    BDSKFilePathDisplayTildeAbbreviatedPath,
+    BDSKFilePathDisplayFilename    
+};
+
 @interface BDSKFilePathCell : BDSKTextWithIconCell {
     int displayType;
 }
-// 0: full path, 1: tilde abbreviated path, 2: file name
 - (int)displayType;
 - (void)setDisplayType:(int)type;
 @end

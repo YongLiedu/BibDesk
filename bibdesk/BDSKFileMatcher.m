@@ -121,8 +121,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
     [outlineView setAutoresizesOutlineColumn:NO];
 
     BDSKTextWithIconCell *titleCell = [[BDSKTextWithIconCell alloc] initTextCell:@""];
-    [titleCell setDrawsHighlight:NO];
-    [titleCell setImagePosition:NSImageLeft];
+    [titleCell setHasDarkHighlight:YES];
     [[outlineView tableColumnWithIdentifier:@"title"] setDataCell:titleCell];
     [titleCell release];
     

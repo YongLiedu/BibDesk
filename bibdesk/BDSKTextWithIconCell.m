@@ -51,9 +51,8 @@
 - (id)init;
 {
     if (self = [super initTextCell:@""]) {
-        [self setImagePosition:NSImageLeft];
         [self setEditable:YES];
-        [self setDrawsHighlight:YES];
+        [self setHasDarkHighlight:YES];
         [self setScrollable:YES];
         [self setLineBreakMode:NSLineBreakByTruncatingTail];
     }
@@ -63,8 +62,7 @@
 - (id)initWithCoder:(NSCoder *)coder;
 {
     if (self = [super initWithCoder:coder]) {
-        [self setImagePosition:NSImageLeft];
-        [self setDrawsHighlight:YES];
+        [self setHasDarkHighlight:NO];
     }
     return self;
 }
@@ -82,17 +80,14 @@
     BDSKTextWithIconCell *copy = [super copyWithZone:zone];
     
     copy->icon = [icon retain];
-    copy->_oaFlags.drawsHighlight = _oaFlags.drawsHighlight;
+    copy->hasDarkHighlight = hasDarkHighlight;
     
     return copy;
 }
 
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 {
-    NSColor *color = nil;
-    if (_oaFlags.drawsHighlight && [self drawsBackground])
-        color = [super highlightColorWithFrame:cellFrame inView:controlView];
-    return color;
+    return nil;
 }
 
 - (NSColor *)textColor;
@@ -107,12 +102,12 @@
     if ([self respondsToSelector:@selector(backgroundStyle)]) {
         NSBackgroundStyle style = [self backgroundStyle];
         if (NSBackgroundStyleLight == style)
-            return (!_oaFlags.drawsHighlight && _cFlags.highlighted) ? [NSColor textBackgroundColor] : [NSColor blackColor];
+            return (hasDarkHighlight && _cFlags.highlighted) ? [NSColor textBackgroundColor] : [NSColor blackColor];
     }
         
-    if (_oaFlags.settingUpFieldEditor)
+    if (settingUpFieldEditor)
         color = [NSColor blackColor];
-    else if (!_oaFlags.drawsHighlight && _cFlags.highlighted)
+    else if (hasDarkHighlight && _cFlags.highlighted)
         color = [NSColor textBackgroundColor];
     else
         color = [super textColor];
@@ -162,44 +157,21 @@
 
 - (NSRect)textRectForBounds:(NSRect)aRect;
 {
-    NSRectEdge rectEdge; 
-    float imageWidth = 0.0;
-
-    if (_oaFlags.imagePosition == NSImageLeft) {
-        rectEdge = NSMinXEdge;
-        imageWidth = NSHeight(aRect) - 1;
-    } else {
-        rectEdge =  NSMaxXEdge;
-        if (icon)
-            imageWidth = [icon size].width;
-    }
-
+    float imageWidth = NSHeight(aRect) - 1;
     NSRect ignored, textRect = aRect;
-    if (imageWidth > 0)
-        NSDivideRect(aRect, &ignored, &textRect, BORDER_BETWEEN_EDGE_AND_IMAGE + imageWidth + BORDER_BETWEEN_IMAGE_AND_TEXT, rectEdge);
+    
+    NSDivideRect(aRect, &ignored, &textRect, BORDER_BETWEEN_EDGE_AND_IMAGE + imageWidth + BORDER_BETWEEN_IMAGE_AND_TEXT, NSMinXEdge);
     
     return textRect;
 }
 
 - (NSRect)iconRectForBounds:(NSRect)aRect;
 {
-    NSRectEdge rectEdge; 
-    float imageWidth = 0.0;
-
-    if (_oaFlags.imagePosition == NSImageLeft) {
-        rectEdge = NSMinXEdge;
-        imageWidth = NSHeight(aRect) - 1;
-    } else {
-        rectEdge =  NSMaxXEdge;
-        if (icon == nil)
-            imageWidth = [icon size].width;
-    }
-
+    float imageWidth = NSHeight(aRect) - 1;
     NSRect ignored, imageRect = aRect;
-    if (imageWidth > 0)
-        NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE, rectEdge);
-
-    NSDivideRect(imageRect, &imageRect, &ignored, imageWidth, rectEdge);
+    
+    NSDivideRect(aRect, &ignored, &imageRect, BORDER_BETWEEN_EDGE_AND_IMAGE, NSMinXEdge);
+    NSDivideRect(imageRect, &imageRect, &ignored, imageWidth, NSMinXEdge);
     
     return imageRect;
 }
@@ -214,11 +186,7 @@
     
     // Draw the image
     NSRect imageRect = [self iconRectForBounds:aRect];
-    float imageHeight = 0.0;
-    if (_oaFlags.imagePosition == NSImageLeft)
-        imageHeight = NSHeight(aRect) - 1;
-    else if (icon == nil)
-        imageHeight = [icon size].height;
+    float imageHeight = NSHeight(aRect) - 1;
     imageRect = BDSKCenterRectVertically(imageRect, imageHeight, [controlView isFlipped]);
     [self drawIconWithFrame:imageRect inView:controlView];
 }
@@ -230,16 +198,16 @@
 
 - (void)editWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject event:(NSEvent *)theEvent;
 {
-    _oaFlags.settingUpFieldEditor = YES;
+    settingUpFieldEditor = YES;
     [super editWithFrame:aRect inView:controlView editor:textObj delegate:anObject event:theEvent];
-    _oaFlags.settingUpFieldEditor = NO;
+    settingUpFieldEditor = NO;
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength;
 {
-    _oaFlags.settingUpFieldEditor = YES;
+    settingUpFieldEditor = YES;
     [super selectWithFrame:[self textRectForBounds:aRect] inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
-    _oaFlags.settingUpFieldEditor = NO;
+    settingUpFieldEditor = NO;
 }
 
 - (void)setObjectValue:(id <NSCopying>)obj;
@@ -263,24 +231,14 @@
     icon = [anIcon retain];
 }
 
-- (NSCellImagePosition)imagePosition;
+- (BOOL)hasDarkHighlight;
 {
-    return _oaFlags.imagePosition;
+    return hasDarkHighlight;
 }
 
-- (void)setImagePosition:(NSCellImagePosition)aPosition;
+- (void)setHasDarkHighlight:(BOOL)flag;
 {
-    _oaFlags.imagePosition = aPosition;
-}
-
-- (BOOL)drawsHighlight;
-{
-    return _oaFlags.drawsHighlight;
-}
-
-- (void)setDrawsHighlight:(BOOL)flag;
-{
-    _oaFlags.drawsHighlight = flag;
+    hasDarkHighlight = flag;
 }
 
 @end
@@ -291,7 +249,7 @@
 - (id)init;
 {
     if (self = [super init]) {
-        [self setDisplayType:1];
+        [self setDisplayType:BDSKFilePathDisplayTildeAbbreviatedPath];
         [self setLineBreakMode:NSLineBreakByTruncatingMiddle];
     }
     return self;
@@ -300,7 +258,7 @@
 - (id)initWithCoder:(NSCoder *)coder;
 {
     if (self = [super initWithCoder:coder]) {
-        [self setDisplayType:1];
+        [self setDisplayType:BDSKFilePathDisplayTildeAbbreviatedPath];
     }
     return self;
 }
@@ -348,13 +306,13 @@
     
 	NSString *displayPath = path;
     switch (displayType) {
-        case 0:
+        case BDSKFilePathDisplayFullPath:
             displayPath = path;
             break;
-        case 1:
+        case BDSKFilePathDisplayTildeAbbreviatedPath:
             displayPath = [path stringByAbbreviatingWithTildeInPath];
             break;
-        case 2:
+        case BDSKFilePathDisplayFilename:
             displayPath = [path lastPathComponent];
     }
 	if(image && displayPath){
@@ -369,17 +327,6 @@
 
 @end
 
-/* Category that implements -[NSObject valueForKey:] with OATextWithIconCellStringKey and OATextWithIconCellImageKey, so we can use any object that is KVC-compliant for -string or -attributedString and -image.  However, this breaks objects that provide these values via valueForUndefinedKey:, so it's a bad idea to pollute NSObject like this.
-
-We should probably change the definition of OATextWithIconCell*Key to have a prefix on it since -image or -attributedString are common method names.
- */
-/*
-@interface NSObject (BDSKTextWithIconCell) @end
-@implementation NSObject (BDSKTextWithIconCell)
-- (id)string { return nil; }
-- (id)image { return nil; }
-@end
-*/
 
 // special cases for strings
 @interface NSString (BDSKTextWithIconCell) @end
