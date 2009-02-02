@@ -207,9 +207,26 @@ static NSString *PIIMissingInitialSandWithTerminalM=@"0092-8674(93)90422-M";
 	static NSString *pdfTitleFromAtaman2009=@"doi:10.1016/j.neuron.2008.01.026";
 	static NSString *textWithoutADOI=@"*Correspondence: leslie@mail.rockefeller.edu\n";
 	static NSString *doiInUrl=@"http://www.jcb.org/cgi/doi/10.1083/jcb.200611141\n";
+//	NSString *doiWithInterveningHighUnicode = [NSString stringWithUTF8String:"To whom correspondence should be addressed. E-mail: borst@neuro.mpg.de.\n\u00a9 2005 by The National Academy of Sciences of the USA\n6172\u2013 6176 \udbff\udc00 PNAS \udbff\udc00 April 26, 2005 \udbff\udc00 vol. 102 \udbff\udc00 no. 17 www.pnas.org\udbff\udc01cgi\udbff\udc01doi\udbff\udc0110.1073\udbff\udc01pnas.0500491102"];
+	NSString *doiWithInterveningHighUnicode = @"To whom correspondence should be addressed. E-mail: borst@neuro.mpg.de.\n\\u00a9 2005 by The National Academy of Sciences of the USA\n6172\\u2013 6176 \\udbff\\udc00 PNAS \\udbff\\udc00 April 26, 2005 \\udbff\\udc00 vol. 102 \\udbff\\udc00 no. 17 www.pnas.org\\udbff\\udc01cgi\\udbff\\udc01doi\\udbff\\udc0110.1073\\udbff\\udc01pnas.0500491102";
+
+	//DOI 10.1016/j.cell.2008.12.001
 	STAssertEqualObjects([textFromBenton2009 stringByExtractingDOIFromString],@"10.1016/j.cell.2008.12.001",nil);
 	STAssertEqualObjects([pdfTitleFromAtaman2009 stringByExtractingDOIFromString],@"10.1016/j.neuron.2008.01.026",nil);
+	STAssertEqualObjects([@"doi:10.1016/S0166-2236(03)00166-8" stringByExtractingDOIFromString],@"10.1016/S0166-2236(03)00166-8",nil);
+//	STAssertEqualObjects([doiWithInterveningHighUnicode stringByExtractingDOIFromString],@"10.1073/pnas.0500491102",nil);
 	STAssertEqualObjects([doiInUrl stringByExtractingDOIFromString],@"10.1083/jcb.200611141",nil);
+
+	// More dois extracted from test pdfs from Miguel Ortiz Lombardia
+	STAssertEqualObjects([@"doi:10.1371/ journal.pbio.0060283\n" stringByExtractingDOIFromString],@"10.1371/journal.pbio.0060283",nil);
+	// this doi is not present in pubmed, although the 'ar010054t' part is present as ar010054t [pii].
+//	STAssertEqualObjects([@"10.1021/ar010054t\n" stringByExtractingDOIFromString],@"10.1021/ar010054t",nil);
+	// Let's just say we don't parse this one for now
+	STAssertEqualObjects([@"10.1021/ar010054t\n" stringByExtractingDOIFromString],nil,nil);
+	STAssertEqualObjects([@"doi:10.1371/\njournal.pbio.0060283" stringByExtractingDOIFromString],@"10.1371/journal.pbio.0060283",nil);
+	// Check that a PNAS doi can be stitched backtogether
+	STAssertEqualObjects([@"doi 10.1073 pnas.0810631106\n" stringByExtractingDOIFromString],@"10.1073/pnas.0810631106",nil);
+
 	
 	STAssertNil([textWithoutADOI stringByExtractingDOIFromString],nil);
 	STAssertNil([@"" stringByExtractingDOIFromString],nil);

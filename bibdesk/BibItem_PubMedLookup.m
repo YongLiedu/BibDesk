@@ -49,29 +49,48 @@
 @end
 
 @implementation NSString (PubMedLookup)
+static NSString *doiRegexString = @"doi[:\\s\\x{D800}-\\x{F8FF}/]{1,2}(10\\.[0-9]{3,4})[\\s/0\\x{D800}-\\x{F8FF}]{1,3}(\\S+)";
 - (NSString *) stringByExtractingDOIFromString;
 {
 	NSString *doi=nil;
-	AGRegex *doiRegex = [AGRegex regexWithPattern:@"doi[: ]+([0-9.]+[ \\/][A-Z0-9.\\-_]+)" 
-										  options:AGRegexMultiline|AGRegexCaseInsensitive];
+
+	// The high unicode characters are supposed to handle an unusual case from PNAS
+	// here is another exampled of a doi regex = /(10\.[0-9]+\/[a-z0-9\.\-\+\/\(\)]+)/i;
+	// from http://userscripts.org/scripts/review/8939
+	AGRegex *doiRegex= [AGRegex regexWithPattern:doiRegexString
+										 options:AGRegexMultiline|AGRegexCaseInsensitive];
 	AGRegexMatch *match = [doiRegex findInString:self];
-	if([match groupAtIndex:1]!=nil){
-		doi = [NSString stringWithString:[match groupAtIndex:1]];
-		// replace any spaces with /
-		// first converting any internal whitespace to single space 			
-		doi = [doi stringByNormalizingSpacesAndLineBreaks];
-		doi = [doi stringByReplacingOccurrencesOfString:@" " withString:@"/"];
-	} else {
-		//		Be more restrictive about initial part but less about
-		//		actual DOI string - offer 3 alternatives for 'hinge' 
-		//		including standard slash
-		AGRegex *doiRegex2 = [AGRegex regexWithPattern:@"doi[: ]+(10\\.[0-9]{4})[ \\/0]([A-Z0-9.\\-_]+)"
-											   options:AGRegexMultiline|AGRegexCaseInsensitive];
-		match = [doiRegex2 findInString:self];
-		if([match groupAtIndex:1]!=nil && [match groupAtIndex:2]!=nil)
-			doi = [NSString stringWithFormat:@"%@/%@",[match groupAtIndex:1],[match groupAtIndex:2]];
-	}
+	if([match groupAtIndex:1]!=nil && [match groupAtIndex:2]!=nil)
+		doi = [NSString stringWithFormat:@"%@/%@",[match groupAtIndex:1],[match groupAtIndex:2]];
 	return doi;
+}
+
+- (NSString *) pubmedSearchByExtractingAllDOIsFromString;
+{
+	// handle strings containing multiple dois
+	// eventual goal will be 
+	NSString *doisearch=nil;
+	
+	// The high unicode characters are supposed to handle an unusual case from PNAS
+	// here is another exampled of a doi regex = /(10\.[0-9]+\/[a-z0-9\.\-\+\/\(\)]+)/i;
+	// from http://userscripts.org/scripts/review/8939
+	AGRegex *doiRegex= [AGRegex regexWithPattern:doiRegexString
+										 options:AGRegexMultiline|AGRegexCaseInsensitive];
+	AGRegexMatch *match;
+	NSEnumerator *doienum = [doiRegex findEnumeratorInString:self];
+	while (match = [doienum nextObject] ) {
+		NSString* doi;
+		if([match groupAtIndex:1]!=nil && [match groupAtIndex:2]!=nil){			
+			doi = [NSString stringWithFormat:@"\"%@/%@\" [AID]",[match groupAtIndex:1],[match groupAtIndex:2]];
+			if(doisearch) doisearch=[doisearch stringByAppendingFormat:@" OR %@",doi];
+			else doisearch=doi;
+		}
+	}
+	
+	if(doisearch) NSLog(@"doisearch is: %@",doisearch);
+	else NSLog(@"string is: %@",self);
+
+	return doisearch;
 }
 
 - (NSString *) stringByExtractingPIIFromString;
@@ -185,10 +204,11 @@
 		if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
 		
 		pubMedSearch = [pdftextthispage stringByExtractingDOIFromString];
+		pubMedSearch = [pdftextthispage pubmedSearchByExtractingAllDOIsFromString];
 		
 		if(pubMedSearch!=nil) {
 			// may as well restrict doi search to pubmed AID field
-			pubMedSearch = [pubMedSearch stringByAppendingString:@" [AID]"];
+//			pubMedSearch = [pubMedSearch stringByAppendingString:@" [AID]"];
 			bi = [BibItem itemWithPubMedSearchTerm:pubMedSearch];
 		}
 	}
