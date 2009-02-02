@@ -49,14 +49,15 @@
 @end
 
 @implementation NSString (PubMedLookup)
-static NSString *doiRegexString = @"doi[:\\s\\x{D800}-\\x{F8FF}/]{1,2}(10\\.[0-9]{3,4})[\\s/0\\x{D800}-\\x{F8FF}]{1,3}(\\S+)";
+
+// here is another exampled of a doi regex = /(10\.[0-9]+\/[a-z0-9\.\-\+\/\(\)]+)/i;
+// from http://userscripts.org/scripts/review/8939
+static NSString *doiRegexString = @"doi[:\\s/]{1,2}(10\\.[0-9]{3,4})[\\s/0]{1,3}(\\S+)";
+
 - (NSString *) stringByExtractingDOIFromString;
 {
 	NSString *doi=nil;
 
-	// The high unicode characters are supposed to handle an unusual case from PNAS
-	// here is another exampled of a doi regex = /(10\.[0-9]+\/[a-z0-9\.\-\+\/\(\)]+)/i;
-	// from http://userscripts.org/scripts/review/8939
 	AGRegex *doiRegex= [AGRegex regexWithPattern:doiRegexString
 										 options:AGRegexMultiline|AGRegexCaseInsensitive];
 	AGRegexMatch *match = [doiRegex findInString:self];
@@ -71,9 +72,6 @@ static NSString *doiRegexString = @"doi[:\\s\\x{D800}-\\x{F8FF}/]{1,2}(10\\.[0-9
 	// eventual goal will be 
 	NSString *doisearch=nil;
 	
-	// The high unicode characters are supposed to handle an unusual case from PNAS
-	// here is another exampled of a doi regex = /(10\.[0-9]+\/[a-z0-9\.\-\+\/\(\)]+)/i;
-	// from http://userscripts.org/scripts/review/8939
 	AGRegex *doiRegex= [AGRegex regexWithPattern:doiRegexString
 										 options:AGRegexMultiline|AGRegexCaseInsensitive];
 	AGRegexMatch *match;
@@ -87,9 +85,6 @@ static NSString *doiRegexString = @"doi[:\\s\\x{D800}-\\x{F8FF}/]{1,2}(10\\.[0-9
 		}
 	}
 	
-	if(doisearch) NSLog(@"doisearch is: %@",doisearch);
-	else NSLog(@"string is: %@",self);
-
 	return doisearch;
 }
 
@@ -111,11 +106,11 @@ static NSString *doiRegexString = @"doi[:\\s\\x{D800}-\\x{F8FF}/]{1,2}(10\\.[0-9
 	
 	//S0092867402007006 or S0092-8674(02)00700-6
 	// NB occasionally the checksum is X and once I have seen: 0092-8674(93)90422-M
-	// ie terminal M and missing X
+	// ie terminal M and missing S
 	// Unfortunately Elsevier switched from submitting the standard form to PubMed
 	// to the normalised form.
 	
-	// I have relaxed the regex for the missing S full form BUT not for the normalised form
+	// I have relaxed the regex to allow a missing S in the full form BUT not the normalised form
 	
 	AGRegex *PIIRegex = [AGRegex regexWithPattern:@"S{0,1}[0-9]{4}-[0-9]{3}[0-9X][(][0-9]{2}[)][0-9]{5}-[0-9MX]"
 										  options:AGRegexMultiline|AGRegexCaseInsensitive];
@@ -203,6 +198,10 @@ static NSString *doiRegexString = @"doi[:\\s\\x{D800}-\\x{F8FF}/]{1,2}(10\\.[0-9
 		// If we've got nothing to parse, try the next page
 		if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
 		
+		// Clean up any high unicode characters which can flummox the regex
+		NSCharacterSet *extendedUnicode=[NSCharacterSet characterSetWithRange:NSMakeRange(0x10000, 0x10FFFF-0x10000)];
+		pdftextthispage = [pdftextthispage stringByReplacingCharactersInSet:extendedUnicode withString:@" "];
+
 		pubMedSearch = [pdftextthispage stringByExtractingDOIFromString];
 		pubMedSearch = [pdftextthispage pubmedSearchByExtractingAllDOIsFromString];
 		
