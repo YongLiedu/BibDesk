@@ -37,8 +37,8 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
-#import "BDSKStringConstants.h"
+#import <Cocoa/Cocoa.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @class BDSKFormatStringFieldEditor;
 

@@ -35,9 +35,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import <OmniAppKit/OmniAppKit.h>
-#import "BDSKStringConstants.h"
-#import "BDSKFieldNameFormatter.h"
-#import "BDSKMacroWindowController.h"
+
+@class BDSKMacroWindowController;
 
 @interface BibPref_Defaults : OAPreferenceClient
 {

@@ -35,14 +35,16 @@
  */
 
 #import "BibPref_TeX.h"
+#import <OmniFoundation/OmniFoundation.h>
+#import <OmniAppKit/OAPreferenceClientRecord.h>
+#import "BDSKStringConstants.h"
 #import "BDSKAppController.h"
 #import "BDSKStringEncodingManager.h"
 #import "BDSKPreviewer.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKShellCommandFormatter.h"
-#import <OmniAppKit/OmniAppKit.h>
-#import <OmniAppKit/OAPreferenceClientRecord.h>
+#import "BDSKStringConstants.h"
 
 #define BDSK_TEX_DOWNLOAD_URL @"http://tug.org/mactex/"
 

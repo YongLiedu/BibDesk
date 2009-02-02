@@ -37,8 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKStringConstants.h"
-#import "BibItem.h"
+#import <OmniAppKit/OmniAppKit.h>
 
 @class BDSKFormatStringFieldEditor;
 

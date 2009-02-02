@@ -37,8 +37,10 @@
  */
 
 #import "BibPref_Display.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTemplate.h"
 #import "BibAuthor.h"
+#import "BDSKStringConstants.h"
 
 
 @implementation BibPref_Display

@@ -37,7 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKStringConstants.h"
+#import <OmniAppKit/OmniAppKit.h>
 
 @interface BibPref_ScriptHooks : OAPreferenceClient {
 	IBOutlet NSTableView *tableView;

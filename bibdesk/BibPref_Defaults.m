@@ -34,6 +34,7 @@
  */
 
 #import "BibPref_Defaults.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTypeInfoEditor.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKMacroResolver.h"
@@ -41,6 +42,9 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "BDSKStringConstants.h"
+#import "BDSKFieldNameFormatter.h"
+#import "BDSKMacroWindowController.h"
 
 // this corresponds with the menu item order in the nib
 enum {

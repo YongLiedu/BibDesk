@@ -35,6 +35,9 @@
  */
 
 #import "BibPref_General.h"
+#import <OmniFoundation/OmniFoundation.h>
+#import "BDSKStringConstants.h"
+#import "BDSKAppController.h"
 #import "BDSKUpdateChecker.h"
 #import "BDSKTemplate.h"
 #import "BDAlias.h"

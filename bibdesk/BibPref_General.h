@@ -35,8 +35,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKStringConstants.h"
-#import "BDSKAppController.h"
+#import <OmniAppKit/OmniAppKit.h>
 
 @interface BibPref_General : OAPreferenceClient {
     IBOutlet NSMatrix *startupBehaviorRadio;

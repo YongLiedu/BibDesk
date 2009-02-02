@@ -37,7 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKStringConstants.h"
+#import <OmniAppKit/OmniAppKit.h>
 
 @class BDSKEncodingPopUpButton;
 

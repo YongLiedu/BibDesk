@@ -37,10 +37,12 @@
  */
 
 #import "BDSKFiler.h"
+#import "BDSKStringConstants.h"
+#import "BibItem.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKPathColorTransformer.h"
-#import <OmniAppKit/OmniAppKit.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BDSKAppController.h"

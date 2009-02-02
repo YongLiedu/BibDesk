@@ -40,6 +40,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSLayoutManager_BDSKExtensions.h"
+#import <OmniAppKit/OmniAppKit.h>
 
 /* Almost all of this code is copy-and-paste from OATextWithIconCell, except for the text layout (which seems wrong in OATextWithIconCell). */
 

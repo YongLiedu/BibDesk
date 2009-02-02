@@ -40,7 +40,7 @@
 #import "BDSKScriptHookManager.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKStringConstants.h"
 
 
 @implementation BibPref_ScriptHooks

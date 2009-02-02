@@ -37,6 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 typedef enum {
     BDSKExportTemplateList = 0,

@@ -35,8 +35,10 @@
  */
 
 #import "BibPref_Cite.h"
+#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTemplate.h"
 #import "BibDocument.h"
+#import "BDSKStringConstants.h"
 
 #define MAX_PREVIEW_WIDTH	465.0
 

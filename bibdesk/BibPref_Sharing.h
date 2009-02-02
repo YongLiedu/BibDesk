@@ -38,6 +38,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <OmniAppKit/OmniAppKit.h>
 
 @interface BibPref_Sharing : OAPreferenceClient
 {
