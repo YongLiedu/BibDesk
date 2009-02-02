@@ -37,7 +37,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
 
 extern NSString *BDSKGroupCellStringKey;
 extern NSString *BDSKGroupCellImageKey;
