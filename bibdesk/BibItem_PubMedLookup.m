@@ -144,16 +144,17 @@ static NSString *doiRegexString = @"doi[:\\s/]{1,2}(10\\.[0-9]{3,4})[\\s/0]{1,3}
 {
 	NSString *doi=nil,*pii=nil;
 	
-	// first try DOI
-	doi = [self stringByExtractingDOIFromString];
-	if(doi) return [NSString stringWithFormat:@"%@ [AID]",doi];
-	
-	// next try Elsevier PII
+	// first try Elsevier PII
 	pii = [self stringByExtractingPIIFromString];
 	// nb we need to search for both forms and the standard one must be quoted
 	if(pii) return [NSString stringWithFormat:@"\"%@\" [AID] OR %@ [AID]",
 					 pii,[pii stringByExtractingNormalisedPIIFromString]];
 
+	// next try DOI
+	doi = [self stringByExtractingDOIFromString];
+	if(doi) return [NSString stringWithFormat:@"%@ [AID]",doi];
+	
+	
 	// next try looking for any nature publishing group form
 	if([self length]>(NSUInteger)6){
 		// kMDItemTitle = "npgrj_nmeth_1241 821..827"
