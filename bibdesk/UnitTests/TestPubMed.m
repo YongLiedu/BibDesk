@@ -206,8 +206,11 @@ static NSString *PIIMissingInitialSandWithTerminalM=@"0092-8674(93)90422-M";
 - (void)testDOIParsing{
 	static NSString *pdfTitleFromAtaman2009=@"doi:10.1016/j.neuron.2008.01.026";
 	static NSString *textWithoutADOI=@"*Correspondence: leslie@mail.rockefeller.edu\n";
+	static NSString *doiInUrl=@"http://www.jcb.org/cgi/doi/10.1083/jcb.200611141\n";
 	STAssertEqualObjects([textFromBenton2009 stringByExtractingDOIFromString],@"10.1016/j.cell.2008.12.001",nil);
 	STAssertEqualObjects([pdfTitleFromAtaman2009 stringByExtractingDOIFromString],@"10.1016/j.neuron.2008.01.026",nil);
+	STAssertEqualObjects([doiInUrl stringByExtractingDOIFromString],@"10.1083/jcb.200611141",nil);
+	
 	STAssertNil([textWithoutADOI stringByExtractingDOIFromString],nil);
 	STAssertNil([@"" stringByExtractingDOIFromString],nil);
 }
