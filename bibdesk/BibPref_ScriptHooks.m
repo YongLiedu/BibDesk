@@ -41,6 +41,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
+#import "NSArray_BDSKExtensions.h"
 
 
 @implementation BibPref_ScriptHooks
@@ -49,6 +50,7 @@
     [super awakeFromNib];
 	[tableView setTarget:self];
 	[tableView setDoubleAction:@selector(showOrChooseScriptFile:)];
+    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
 	[self tableViewSelectionDidChange:nil];
 }
 
@@ -153,6 +155,34 @@
 		return [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 }
 
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+    if (type && row >= 0 && row < [tableView numberOfRows]) {
+        NSString *path = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
+        if ([[NSSet setWithObjects:@"scpt", @"scptd", @"applescript", nil] containsObject:[path pathExtension]]) {
+            [tableView setDropRow:row dropOperation:NSTableViewDropOn];
+            return NSDragOperationEvery;
+        }
+    }
+    return NSDragOperationNone;
+}
+
+- (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+    if (type) {
+        NSString *path = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
+        NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
+        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
+        [dict setObject:path forKey:name];
+        [defaults setObject:dict forKey:BDSKScriptHooksKey];
+        [self valuesHaveChanged];
+        return YES;
+    }
+    return NO;
+}
+
 #pragma mark TableView Delegate methods
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
@@ -163,6 +193,19 @@
 
 - (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	return NO;
+}
+
+- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
+    if ([rows count]) {
+        NSArray *names = [BDSKScriptHookManager scriptHookNames];
+        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
+        NSEnumerator *rowEnum = [rows objectEnumerator];
+        NSNumber *row;
+        while (row = [rowEnum nextObject])
+            [dict removeObjectForKey:[names objectAtIndex:[row intValue]]];
+        [defaults setObject:dict forKey:BDSKScriptHooksKey];
+        [self valuesHaveChanged];
+    }
 }
 
 @end
