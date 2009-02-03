@@ -52,7 +52,7 @@
 {
     if (self = [super initTextCell:@""]) {
         [self setEditable:YES];
-        [self setHasDarkHighlight:YES];
+        [self setHasDarkHighlight:NO];
         [self setScrollable:YES];
         [self setLineBreakMode:NSLineBreakByTruncatingTail];
     }
