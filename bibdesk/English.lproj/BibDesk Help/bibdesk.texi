@@ -2308,9 +2308,6 @@ popup button. You can either export the whole database, or just the references w
 
 BibDesk provides several default templates, for export to HTML, RSS, Rich Text (RTF, RTFD) and to windows Doc format. 
 
-In order to use a non-default template the last menu item @menutitle{Using Template} should be chosen. 
-This allows you to choose a template from a popup button in the save dialog window. 
-
 @c --------------------------------------------------------------------------------------
 
 @node Customizing Templates
