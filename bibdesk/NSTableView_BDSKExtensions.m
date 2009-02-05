@@ -149,10 +149,10 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
     if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
         return;
     NSFontManager *fontManager = [NSFontManager sharedFontManager];
-    OFPreferenceWrapper *defaults = [OFPreferenceWrapper sharedPreferenceWrapper];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     
-    NSString *fontName = [defaults objectForKey:fontNamePrefKey];
-    float fontSize = [defaults floatForKey:fontSizePrefKey];
+    NSString *fontName = [pw objectForKey:fontNamePrefKey];
+    float fontSize = [pw floatForKey:fontSizePrefKey];
 	NSFont *font = nil;
         
     if(fontName != nil)
@@ -162,8 +162,8 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
     font = [fontManager convertFont:font];
     
     // set the name last, as that's what we observe
-    [defaults setFloat:[font pointSize] forKey:fontSizePrefKey];
-    [defaults setObject:[font fontName] forKey:fontNamePrefKey];
+    [pw setFloat:[font pointSize] forKey:fontSizePrefKey];
+    [pw setObject:[font fontName] forKey:fontNamePrefKey];
 }
 
 - (void)tableViewFontChanged:(NSNotification *)notification {
