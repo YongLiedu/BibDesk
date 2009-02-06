@@ -315,10 +315,10 @@
 
 - (void)openParentItemForField:(NSString *)field;
 
-- (IBAction)openParentItemAction:(id)sender;
-
 - (IBAction)selectCrossrefParentAction:(id)sender;
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;
+
+- (IBAction)tableButtonAction:(id)sender;
 
 - (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 

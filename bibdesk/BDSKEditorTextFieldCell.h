@@ -42,6 +42,7 @@
 @interface BDSKEditorTextFieldCell : NSTextFieldCell {
     NSButtonCell *buttonCell;
     BOOL hasButton;
+    NSImage *image;
 }
 
 - (BOOL)hasButton;

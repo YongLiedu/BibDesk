@@ -40,6 +40,7 @@
 #import "NSImage_BDSKExtensions.h"
 
 #define BUTTON_MARGIN 2.0
+#define BUTTON_SIZE NSMakeSize(12.0, 12.0)
 
 @implementation BDSKEditorTextFieldCell
 
@@ -53,6 +54,9 @@
     [buttonCell setButtonType:NSMomentaryChangeButton];
     [buttonCell setBordered:NO];
     [buttonCell setImagePosition:NSImageOnly];
+    if ([buttonCell respondsToSelector:@selector(setImageScaling:)])
+        [buttonCell setImageScaling:NSImageScaleProportionallyDown];
+    image = nil;
 }
 
 - (id)initTextCell:(NSString *)aString {
@@ -73,10 +77,12 @@
     BDSKEditorTextFieldCell *copy = [super copyWithZone:zone];
     copy->buttonCell = [buttonCell copyWithZone:zone];
     copy->hasButton = hasButton;
+    copy->image = [image retain];
     return copy;
 }
 
 - (void)dealloc {
+    [image release];
     [buttonCell release];
     [super dealloc];
 }
@@ -119,6 +125,17 @@
         return [super trackMouse:theEvent inRect:cellFrame ofView:controlView untilMouseUp:untilMouseUp];
 }
 
+- (NSImage *)image {
+    return image;
+}
+
+- (void)setImage:(NSImage *)newImage {
+    if (image != newImage) {
+        [image release];
+        image = [newImage retain];
+    }
+}
+
 - (BOOL)hasButton {
     return hasButton;
 }
@@ -148,8 +165,8 @@
 - (NSRect)buttonRectForBounds:(NSRect)theRect {
 	NSRect buttonRect = NSZeroRect;
     
-	if ([self hasButton]) {
-        NSSize size = [buttonCell cellSize];
+	if ([self hasButton] || [self image]) {
+        NSSize size = BUTTON_SIZE;
         buttonRect.origin.x = NSMaxX(theRect) - size.width - BUTTON_MARGIN;
         buttonRect.origin.y = ceilf(NSMidY(theRect) - 0.5 * size.height);
         buttonRect.size = size;
@@ -158,9 +175,9 @@
 }
 
 - (NSRect)drawingRectForBounds:(NSRect)theRect {
-	if ([self hasButton]) {
+	if ([self hasButton] || [self image]) {
         NSRect ignored;
-        NSSize size = [buttonCell cellSize];
+        NSSize size = BUTTON_SIZE;
         NSDivideRect(theRect, &ignored, &theRect, size.width + BUTTON_MARGIN, NSMaxXEdge);
     }
     return [super drawingRectForBounds:theRect];
@@ -169,8 +186,20 @@
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     [super drawInteriorWithFrame:cellFrame inView:controlView];
 	
-	if ([self hasButton])
-        [buttonCell drawWithFrame:[self buttonRectForBounds:cellFrame] inView:controlView];
+	if ([self hasButton] || [self image]) {
+        NSRect buttonRect = [self buttonRectForBounds:cellFrame];
+        NSImage *theImage = [self image] ?: [NSImage arrowImage];
+        if ([buttonCell respondsToSelector:@selector(setImageScaling:)] == NO && NSEqualSizes([theImage size], buttonRect.size) == NO) {
+            NSImage *scaledImage = [[[NSImage alloc] initWithSize:buttonRect.size] autorelease];
+            NSRect targetRect = {NSZeroPoint, buttonRect.size};
+            [scaledImage lockFocus];
+            [theImage drawInRect:targetRect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+            [scaledImage unlockFocus];
+            theImage = scaledImage;
+        }
+        [buttonCell setImage:theImage];
+        [buttonCell drawWithFrame:buttonRect inView:controlView];
+    }
 }
 
 // NSTextFieldCell draws this with the wrong baseline, or possibly it wraps lines even though the cell is set to clip
@@ -186,7 +215,7 @@
 - (NSSize)cellSize
 {
     NSSize cellSize = [super cellSize];
-    if ([self hasButton])
+    if ([self hasButton] || [self image])
         cellSize.width += [buttonCell cellSize].width + BUTTON_MARGIN;
     return cellSize;
 }

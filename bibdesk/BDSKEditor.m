@@ -162,7 +162,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [tableView setBackgroundColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     
     BDSKEditorTextFieldCell *dataCell = [[tableView tableColumnWithIdentifier:@"value"] dataCell];
-    [dataCell setButtonAction:@selector(openParentItemAction:)];
+    [dataCell setButtonAction:@selector(tableButtonAction:)];
     [dataCell setButtonTarget:self];
     [dataCell setEditable:isEditable];
     [dataCell setSelectable:YES]; // the previous call may reset this
@@ -1012,6 +1012,14 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	
 }
 
+- (IBAction)tableButtonAction:(id)sender{
+    NSString *field = [fields objectAtIndex:[tableView clickedRow]];
+    if ([field isURLField])
+        [[NSWorkspace sharedWorkspace] openLinkedURL:[publication URLForField:field]];
+    else
+        [self openParentItemForField:[field isEqualToString:BDSKCrossrefString] ? nil : field];
+}
+
 // these methods are for crossref interaction with the table
 - (void)openParentItemForField:(NSString *)field{
     BibItem *parent = [publication crossrefParent];
@@ -1020,11 +1028,6 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         if(editor && field)
             [editor setKeyField:field];
     }
-}
-
-- (IBAction)openParentItemAction:(id)sender{
-    NSString *field = [fields objectAtIndex:[tableView clickedRow]];
-	[self openParentItemForField:[field isEqualToString:BDSKCrossrefString] ? nil : field];
 }
 
 - (IBAction)selectCrossrefParentAction:(id)sender{
@@ -2875,6 +2878,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 formatter = citationFormatter;
             [cell setFormatter:formatter];
             [cell setHasButton:[[publication valueOfField:field] isInherited] || ([field isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:[publication valueOfField:field inherit:NO]] == NO)];
+            [cell setImage:[field isURLField] ? [publication imageForURLField:field] : nil];
         }
     }
 }
