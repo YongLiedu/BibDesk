@@ -326,6 +326,11 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     if([identifier isEqualToString:BDSKTemplateRoleString]) {
         [cell removeAllItems];
         [cell addItemsWithObjectValues:([item isLeaf]) ? roles : fileTypes];
+        if(([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]) || 
+           ([item isLeaf] == NO && templatePrefList == BDSKServiceTemplateList))
+            [cell setEnabled:NO];
+        else
+            [cell setEnabled:YES];
     }
 }
 
@@ -595,31 +600,6 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
                        modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
                         modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
                           contextInfo:[item retain]];
-}
-
-#pragma mark Combo box
-
-- (NSCell *)tableView:(NSTableView *)tableView column:(OADataSourceTableColumn *)tableColumn dataCellForRow:(int)row;
-{
-    static NSComboBoxCell *disabledCell = nil;
-    
-    id cell = [tableColumn dataCell];
-    id item = [(NSOutlineView *)tableView itemAtRow:row];
-    
-    if(([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]) || 
-       ([item isLeaf] == NO && templatePrefList == BDSKServiceTemplateList)){
-        // setting an NSComboBoxCell to disabled in outlineView:willDisplayCell:... results in a non-editable cell with black text instead of disabled text; creating a new cell works around that problem
-        if (disabledCell == nil) {
-            disabledCell = [[NSComboBoxCell alloc] initTextCell:@""];
-            [disabledCell setButtonBordered:NO];
-            [disabledCell setBordered:NO];
-            [disabledCell setControlSize:NSSmallControlSize];
-            [disabledCell setFont:[cell font]];
-            [disabledCell setEnabled:NO];
-        }
-        cell = disabledCell;
-    }
-    return cell;
 }
 
 @end
