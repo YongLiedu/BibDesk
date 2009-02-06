@@ -42,8 +42,11 @@
 @interface BDSKEditorTextFieldCell : NSTextFieldCell {
     NSButtonCell *buttonCell;
     BOOL hasButton;
-    NSImage *image;
+    NSURL *url;
 }
+
+- (NSURL *)URL;
+- (void)setURL:(NSURL *)newURL;
 
 - (BOOL)hasButton;
 - (void)setHasButton:(BOOL)flag;

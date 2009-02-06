@@ -212,7 +212,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self resetFields];
     [self setupMatrix];
     if (isEditable)
-        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
+        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
     
     // Setup the citekey textfield
     BDSKCiteKeyFormatter *citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
@@ -2614,7 +2614,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	if (dragFieldEditor == nil) {
 		dragFieldEditor = [[BDSKFieldEditor alloc] init];
         if (isEditable)
-            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]];
+            [(BDSKFieldEditor *)dragFieldEditor registerForDelegatedDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
 	}
 	return dragFieldEditor;
 }
@@ -2776,16 +2776,22 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if ([tv isEqual:tableView]) {
         NSPasteboard *pboard = [info draggingPasteboard];
         NSString *field;
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
         
-        if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]]) {
+        if (type) {
             if (row == -1)
                 row = [tableView numberOfRows] - 1;
             else if (op ==  NSTableViewDropAbove)
                 row = fminf(row, [tableView numberOfRows] - 1);
             [tableView setDropRow:row dropOperation:NSTableViewDropOn];
             field = [fields objectAtIndex:row];
-            if ([field isCitationField] || [field isEqualToString:BDSKCrossrefString])
+            if ([type isEqualToString:BDSKBibItemPboardType] && ([field isCitationField] || [field isEqualToString:BDSKCrossrefString])) {
                 return NSDragOperationEvery;
+            } else if ([type isEqualToString:NSFilenamesPboardType] && [field isLocalFileField]) {
+                return NSDragOperationEvery;
+            } else if (([type isEqualToString:NSURLPboardType] || [type isEqualToString:BDSKWeblocFilePboardType]) && [field isRemoteURLField]) {
+                return NSDragOperationEvery;
+            }
         }
     }
     return NSDragOperationNone;
@@ -2794,9 +2800,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
     if ([tv isEqual:tableView]) {
         NSPasteboard *pboard = [info draggingPasteboard];
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+        NSString *field = [fields objectAtIndex:row];
         
-        if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, nil]]){
-            NSString *field = [fields objectAtIndex:row];
+        if ([type isEqualToString:BDSKBibItemPboardType]) {
             
             if ([field isCitationField]){
                 
@@ -2848,6 +2855,30 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 return YES;
                     
             }
+        } else if ([type isEqualToString:NSFilenamesPboardType]) {
+            
+            NSString *filename = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
+            if (filename) {
+                [self recordChangingField:field toValue:[[NSURL fileURLWithPath:filename] absoluteString]];
+                return YES;
+            }
+            
+        } else if ([type isEqualToString:NSURLPboardType]) {
+            
+            NSURL *url = [NSURL URLFromPasteboard:pboard];
+            if (url) {
+                [self recordChangingField:field toValue:[url absoluteString]];
+                return YES;
+            }
+            
+        } else if ([type isEqualToString:BDSKWeblocFilePboardType]) {
+            
+            NSURL *url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]];
+            if (url) {
+                [self recordChangingField:field toValue:[url absoluteString]];
+                return YES;
+            }
+            
         }
     }
     return NO;
@@ -2878,7 +2909,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 formatter = citationFormatter;
             [cell setFormatter:formatter];
             [cell setHasButton:[[publication valueOfField:field] isInherited] || ([field isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:[publication valueOfField:field inherit:NO]] == NO)];
-            [cell setImage:[field isURLField] ? [publication imageForURLField:field] : nil];
+            [cell setURL:[field isURLField] ? [publication URLForField:field] : nil];
         }
     }
 }
@@ -2889,6 +2920,13 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         return [NSString stringWithFormat:@"%@ (%@)", [person displayName], [[person field] localizedFieldName]];
     }
     return nil;
+}
+
+- (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal {
+	if ([tv isEqual:tableView]) {
+        return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
+    }
+    return NSDragOperationNone;
 }
 
 #pragma mark Splitview delegate methods

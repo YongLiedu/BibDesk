@@ -56,7 +56,7 @@
     [buttonCell setImagePosition:NSImageOnly];
     if ([buttonCell respondsToSelector:@selector(setImageScaling:)])
         [buttonCell setImageScaling:NSImageScaleProportionallyDown];
-    image = nil;
+    url = nil;
 }
 
 - (id)initTextCell:(NSString *)aString {
@@ -77,12 +77,12 @@
     BDSKEditorTextFieldCell *copy = [super copyWithZone:zone];
     copy->buttonCell = [buttonCell copyWithZone:zone];
     copy->hasButton = hasButton;
-    copy->image = [image retain];
+    copy->url = [url retain];
     return copy;
 }
 
 - (void)dealloc {
-    [image release];
+    [url release];
     [buttonCell release];
     [super dealloc];
 }
@@ -108,8 +108,23 @@
             if (insideButton) {
                 // NSButtonCell does not highlight itself, it tracks until a click or the mouse exits
                 [buttonCell highlight:YES withFrame:buttonRect inView:controlView];
-                if ([buttonCell trackMouse:theEvent inRect:buttonRect ofView:controlView untilMouseUp:NO])
+                if ([buttonCell trackMouse:theEvent inRect:buttonRect ofView:controlView untilMouseUp:NO]) {
                     keepOn = NO;
+                } else if ([self URL]) {
+                    keepOn = NO;
+                    [buttonCell highlight:NO withFrame:buttonRect inView:controlView];
+                    NSImage *image = [[NSImage imageForURL:[self URL]] dragImageWithCount:0];
+                    NSSize imageSize = [image size];
+                    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
+                    if ([[self URL] isFileURL]) {
+                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
+                        [pboard setPropertyList:[NSArray arrayWithObjects:[[self URL] path], nil] forType:NSFilenamesPboardType];
+                    } else {
+                        [pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, nil] owner:nil];
+                        [[self URL] writeToPasteboard:pboard];
+                    }
+                    [controlView dragImage:image at:NSMakePoint(mouseLoc.x - 0.5f * imageSize.width, mouseLoc.y + 0.5f * imageSize.height) offset:NSZeroSize event:theEvent pasteboard:pboard source:controlView slideBack:YES]; 
+                }
                 [buttonCell highlight:NO withFrame:buttonRect inView:controlView];
             }
             if (keepOn) {
@@ -125,14 +140,14 @@
         return [super trackMouse:theEvent inRect:cellFrame ofView:controlView untilMouseUp:untilMouseUp];
 }
 
-- (NSImage *)image {
-    return image;
+- (NSURL *)URL {
+    return url;
 }
 
-- (void)setImage:(NSImage *)newImage {
-    if (image != newImage) {
-        [image release];
-        image = [newImage retain];
+- (void)setURL:(NSURL *)newURL {
+    if (url != newURL) {
+        [url release];
+        url = [newURL retain];
     }
 }
 
@@ -165,7 +180,7 @@
 - (NSRect)buttonRectForBounds:(NSRect)theRect {
 	NSRect buttonRect = NSZeroRect;
     
-	if ([self hasButton] || [self image]) {
+	if ([self hasButton] || [self URL]) {
         NSSize size = BUTTON_SIZE;
         buttonRect.origin.x = NSMaxX(theRect) - size.width - BUTTON_MARGIN;
         buttonRect.origin.y = ceilf(NSMidY(theRect) - 0.5 * size.height);
@@ -175,7 +190,7 @@
 }
 
 - (NSRect)drawingRectForBounds:(NSRect)theRect {
-	if ([self hasButton] || [self image]) {
+	if ([self hasButton] || [self URL]) {
         NSRect ignored;
         NSSize size = BUTTON_SIZE;
         NSDivideRect(theRect, &ignored, &theRect, size.width + BUTTON_MARGIN, NSMaxXEdge);
@@ -186,9 +201,9 @@
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     [super drawInteriorWithFrame:cellFrame inView:controlView];
 	
-	if ([self hasButton] || [self image]) {
+	if ([self hasButton] || [self URL]) {
         NSRect buttonRect = [self buttonRectForBounds:cellFrame];
-        NSImage *theImage = [self image] ?: [NSImage arrowImage];
+        NSImage *theImage = [self URL] ? [NSImage imageForURL:[self URL]] : [NSImage arrowImage];
         if ([buttonCell respondsToSelector:@selector(setImageScaling:)] == NO && NSEqualSizes([theImage size], buttonRect.size) == NO) {
             NSImage *scaledImage = [[[NSImage alloc] initWithSize:buttonRect.size] autorelease];
             NSRect targetRect = {NSZeroPoint, buttonRect.size};
@@ -215,7 +230,7 @@
 - (NSSize)cellSize
 {
     NSSize cellSize = [super cellSize];
-    if ([self hasButton] || [self image])
+    if ([self hasButton] || [self URL])
         cellSize.width += [buttonCell cellSize].width + BUTTON_MARGIN;
     return cellSize;
 }
