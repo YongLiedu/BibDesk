@@ -1421,7 +1421,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
             NSImage *image = hasMissingFile ? [NSImage redPaperclipImage] : [NSImage paperclipImage];
-            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:image, BDSKTextWithIconCellStringKey, label, BDSKTextWithIconCellStringKey, nil];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:image, BDSKTextWithIconCellImageKey, label, BDSKTextWithIconCellStringKey, nil];
         }
         return cellDictionary;
     }else if([field isEqualToString:BDSKRemoteURLString]){
@@ -1429,7 +1429,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
-            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSImage genericInternetLocationImage], BDSKTextWithIconCellStringKey, label, BDSKTextWithIconCellStringKey, nil];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSImage genericInternetLocationImage], BDSKTextWithIconCellImageKey, label, BDSKTextWithIconCellStringKey, nil];
         }
         return cellDictionary;
     }else{

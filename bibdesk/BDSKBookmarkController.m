@@ -433,7 +433,7 @@ static id sharedBookmarkController = nil;
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
     NSString *tcID = [tableColumn identifier];
     if ([tcID isEqualToString:@"name"]) {
-        return [NSDictionary dictionaryWithObjectsAndKeys:[item name], BDSKTextWithIconCellStringKey, [item icon], BDSKTextWithIconCellStringKey, nil];
+        return [NSDictionary dictionaryWithObjectsAndKeys:[item name], BDSKTextWithIconCellStringKey, [item icon], BDSKTextWithIconCellImageKey, nil];
     } else if ([tcID isEqualToString:@"url"]) {
         if ([item bookmarkType] == BDSKBookmarkTypeFolder) {
             int count = [[item children] count];

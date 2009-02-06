@@ -269,7 +269,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
 }
 
 - (id)transformedValue:(id)pub {
-    return [NSDictionary dictionaryWithObjectsAndKeys:[pub title], BDSKTextWithIconCellStringKey, [NSImage imageNamed:@"cacheDoc"], BDSKTextWithIconCellStringKey, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:[pub title], BDSKTextWithIconCellStringKey, [NSImage imageNamed:@"cacheDoc"], BDSKTextWithIconCellImageKey, nil];
 }
 
 @end

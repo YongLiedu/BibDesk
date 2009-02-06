@@ -332,7 +332,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
     NSString *tcID = [tableColumn identifier];
     if ([tcID isEqualToString:@"label"]) {
-        return [NSDictionary dictionaryWithObjectsAndKeys:[item label], BDSKTextWithIconCellStringKey, [item icon], BDSKTextWithIconCellStringKey, nil];
+        return [NSDictionary dictionaryWithObjectsAndKeys:[item label], BDSKTextWithIconCellStringKey, [item icon], BDSKTextWithIconCellImageKey, nil];
     } else if ([tcID isEqualToString:@"server"]) {
         if ([item bookmarkType] == BDSKSearchBookmarkTypeFolder) {
             int count = [[item children] count];

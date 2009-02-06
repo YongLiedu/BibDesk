@@ -293,7 +293,7 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
         NSDictionary *dict = (NSDictionary *)obj;
         if ([[dict objectForKey:BDSKTextWithIconCellStringKey] isKindOfClass:[NSString class]]) {
             path = [[dict objectForKey:BDSKTextWithIconCellStringKey] stringByStandardizingPath];
-            image = [dict objectForKey:BDSKTextWithIconCellStringKey];
+            image = [dict objectForKey:BDSKTextWithIconCellImageKey];
             if(image == nil && path && [[NSFileManager defaultManager] fileExistsAtPath:path])
                 image = [NSImage imageForFile:path];
         } else {
@@ -319,7 +319,7 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
 	if(image && displayPath){
 		NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
                                 displayPath, BDSKTextWithIconCellStringKey, 
-                                image, BDSKTextWithIconCellStringKey, nil];
+                                image, BDSKTextWithIconCellImageKey, nil];
         [super setObjectValue:dict];
 	} else {
         [super setObjectValue:displayPath];

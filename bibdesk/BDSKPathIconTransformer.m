@@ -58,7 +58,7 @@
 	if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
 		return [NSDictionary dictionaryWithObjectsAndKeys:
 					abbrevPath, BDSKTextWithIconCellStringKey, 
-					[NSImage imageForFile:path], BDSKTextWithIconCellStringKey, nil];
+					[NSImage imageForFile:path], BDSKTextWithIconCellImageKey, nil];
 	} else {
 		return abbrevPath;
 	}
@@ -81,7 +81,7 @@
 	if(abbrevPath && [[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
 		return [NSDictionary dictionaryWithObjectsAndKeys:
             abbrevPath, BDSKTextWithIconCellStringKey, 
-            [NSImage imageForURL:fileURL], BDSKTextWithIconCellStringKey, nil];
+            [NSImage imageForURL:fileURL], BDSKTextWithIconCellImageKey, nil];
 	} else {
 		return abbrevPath;
 	}

@@ -108,12 +108,12 @@ static int tableIconSize = 24;
         
         if(err == noErr){
             [dictionary setValue:[[(NSURL *)theURL lastPathComponent] stringByDeletingPathExtension] forKey:BDSKTextWithIconCellStringKey];
-            [dictionary setValue:[[NSWorkspace sharedWorkspace] iconForFileURL:(NSURL *)theURL] forKey:BDSKTextWithIconCellStringKey];
+            [dictionary setValue:[[NSWorkspace sharedWorkspace] iconForFileURL:(NSURL *)theURL] forKey:BDSKTextWithIconCellImageKey];
             [dictionary setValue:bundleID forKey:BDSKBundleIdentifierKey];
         } else {
             // if LS failed us (my cache was corrupt when I wrote this code, so it's been tested)
             [dictionary setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unable to find icon for",@"Message when unable to find app for plugin"), bundleID] forKey:BDSKTextWithIconCellStringKey];
-            [dictionary setValue:[NSImage iconWithSize:NSMakeSize(tableIconSize, tableIconSize) forToolboxCode:kGenericApplicationIcon] forKey:BDSKTextWithIconCellStringKey];
+            [dictionary setValue:[NSImage iconWithSize:NSMakeSize(tableIconSize, tableIconSize) forToolboxCode:kGenericApplicationIcon] forKey:BDSKTextWithIconCellImageKey];
             [dictionary setValue:bundleID forKey:BDSKBundleIdentifierKey];
         }
         
