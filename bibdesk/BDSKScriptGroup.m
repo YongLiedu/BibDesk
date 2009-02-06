@@ -568,9 +568,9 @@ static OFMessageQueue *messageQueue = nil;
     if (terminationStatus != EXIT_SUCCESS || nil == outputString) {
         if(error == nil)
             error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"Error description")];
-        [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFailWithError:) forObject:self withObject:error];
+        [self performSelectorOnMainThread:@selector(scriptDidFailWithError:) forObject:self withObject:error waitUntilDone:NO];
     } else {
-        [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFinishWithResult:) forObject:self withObject:outputString];
+        [self performSelectorOnMainThread:@selector(scriptDidFinishWithResult:) withObject:outputString waitUntilDone:NO];
     }
     
     [outputString release];
