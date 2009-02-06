@@ -2778,7 +2778,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         NSString *field;
         NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
         
-        if (type) {
+        if (type && [[info draggingSource] isEqual:tableView] == NO) {
             if (row == -1)
                 row = [tableView numberOfRows] - 1;
             else if (op ==  NSTableViewDropAbove)
