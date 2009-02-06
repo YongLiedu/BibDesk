@@ -1,5 +1,5 @@
 //
-//  OAToolbarItem_BDSKExtensions.h
+//  BDSKToolbarItem.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 6/26/06.
@@ -36,8 +36,8 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <OmniAppKit/OmniAppKit.h>
+#import <Cocoa/Cocoa.h>
 
 
-@interface OAToolbarItem (BDSKExtensions)
+@interface BDSKToolbarItem : NSToolbarItem
 @end

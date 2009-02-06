@@ -459,7 +459,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 - (void)setupToolbar {
     // Create a new toolbar instance, and attach it to our document window
     NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BDSKSearchBookmarksToolbarIdentifier] autorelease];
-    OAToolbarItem *item;
+    NSToolbarItem *item;
     
     toolbarItems = [[NSMutableDictionary alloc] initWithCapacity:3];
     
@@ -473,7 +473,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     
     // Add template toolbar items
     
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BDSKSearchBookmarksNewFolderToolbarItemIdentifier];
+    item = [[NSToolbarItem alloc] initWithItemIdentifier:BDSKSearchBookmarksNewFolderToolbarItemIdentifier];
     [item setLabel:NSLocalizedString(@"New Folder", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"New Folder", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Add a New Folder", @"Tool tip message")];
@@ -483,7 +483,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     [toolbarItems setObject:item forKey:BDSKSearchBookmarksNewFolderToolbarItemIdentifier];
     [item release];
     
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier];
+    item = [[NSToolbarItem alloc] initWithItemIdentifier:BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier];
     [item setLabel:NSLocalizedString(@"New Separator", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"New Separator", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Add a New Separator", @"Tool tip message")];
@@ -493,7 +493,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     [toolbarItems setObject:item forKey:BDSKSearchBookmarksNewSeparatorToolbarItemIdentifier];
     [item release];
     
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BDSKSearchBookmarksDeleteToolbarItemIdentifier];
+    item = [[NSToolbarItem alloc] initWithItemIdentifier:BDSKSearchBookmarksDeleteToolbarItemIdentifier];
     [item setLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Delete Selected Items", @"Tool tip message")];

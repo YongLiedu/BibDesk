@@ -246,6 +246,7 @@ enum {
         docState.didImport = NO;
         docState.itemChangeMask = 0;
         docState.displayMigrationAlert = NO;
+        docState.inOptionKeyState = NO;
         
         // these are created lazily when needed
         fileSearchController = nil;
@@ -2981,16 +2982,42 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification{
-    unsigned int modifierFlags = [NSApp currentModifierFlags];
+    BOOL isOptionKeyState = ([NSApp currentModifierFlags] & NSAlternateKeyMask) != 0;
     
-    if (modifierFlags & NSAlternateKeyMask) {
-        [groupAddButton setImage:[NSImage imageNamed:@"GroupAddSmart"]];
-        [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAddSmart_Pressed"]];
-        [groupAddButton setToolTip:NSLocalizedString(@"Add new smart group.", @"Tool tip message")];
-    } else {
-        [groupAddButton setImage:[NSImage imageNamed:@"GroupAdd"]];
-        [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAdd_Pressed"]];
-        [groupAddButton setToolTip:NSLocalizedString(@"Add new group.", @"Tool tip message")];
+    if (docState.inOptionKeyState != isOptionKeyState) {
+        docState.inOptionKeyState = isOptionKeyState;
+        
+        NSToolbarItem *toolbarItem = [toolbarItems objectForKey:@"BibDocumentToolbarNewItemIdentifier"];
+        
+        if (isOptionKeyState) {
+            [groupAddButton setImage:[NSImage imageNamed:@"GroupAddSmart"]];
+            [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAddSmart_Pressed"]];
+            [groupAddButton setToolTip:NSLocalizedString(@"Add new smart group.", @"Tool tip message")];
+            
+            static NSImage *alternateNewToolbarImage = nil;
+            if (alternateNewToolbarImage == nil) {
+                alternateNewToolbarImage = [[NSImage alloc] initWithSize:NSMakeSize(32, 32)];
+                [alternateNewToolbarImage lockFocus];
+                NSImage *srcImage = [NSImage imageNamed:@"newdoc"];
+                [srcImage drawInRect:NSMakeRect(0, 0, 32, 32) fromRect:NSMakeRect(0, 0, [srcImage size].width, [srcImage size].height) operation:NSCompositeSourceOver fraction:1.0]; 
+                [[NSImage imageWithSmallIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
+                [alternateNewToolbarImage unlockFocus];
+            }
+            
+            [toolbarItem setLabel:NSLocalizedString(@"New with Crossref", @"Toolbar item label")];
+            [toolbarItem setToolTip:NSLocalizedString(@"Create new publication with crossref", @"Tool tip message")];
+            [toolbarItem setImage:alternateNewToolbarImage];
+            [toolbarItem setAction:@selector(createNewPubUsingCrossrefAction:)];
+        } else {
+            [groupAddButton setImage:[NSImage imageNamed:@"GroupAdd"]];
+            [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAdd_Pressed"]];
+            [groupAddButton setToolTip:NSLocalizedString(@"Add new group.", @"Tool tip message")];
+            
+            [toolbarItem setLabel:NSLocalizedString(@"New", @"Toolbar item label")];
+            [toolbarItem setToolTip:NSLocalizedString(@"Create new publication", @"Tool tip message")];
+            [toolbarItem setImage:[NSImage imageNamed: @"newdoc"]];
+            [toolbarItem setAction:@selector(newPub:)];
+        }
     }
 }
 

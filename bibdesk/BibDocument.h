@@ -245,6 +245,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         BOOL                didImport;
         int                 itemChangeMask;
         BOOL                displayMigrationAlert;
+        BOOL                inOptionKeyState;
     } docState;
     
     NSDictionary *mainWindowSetupDictionary;

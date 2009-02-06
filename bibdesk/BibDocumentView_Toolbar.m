@@ -38,8 +38,7 @@
 #import "BibDocument_Search.h"
 #import "BDSKAppController.h"
 #import "NSImage_BDSKExtensions.h"
-#import <OmniAppKit/OmniAppKit.h>
-#import "OAToolbarItem_BDSKExtensions.h"
+#import "BDSKToolbarItem.h"
 #import "BDSKImagePopUpButton.h"
 #import "BibDocument_Actions.h"
 #import "BDSKCustomCiteDrawerController.h"
@@ -63,7 +62,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
 - (void) setupToolbar {
     // Create a new toolbar instance, and attach it to our document window
     NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BibDocumentToolbarIdentifier] autorelease];
-    OAToolbarItem *item;
+    BDSKToolbarItem *item;
     NSMenuItem *menuItem;
     
     toolbarItems = [[NSMutableDictionary alloc] initWithCapacity:9];
@@ -79,28 +78,18 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     // Add template toolbar items
     
     // New
-    NSImage *image = [[[NSImage alloc] initWithSize:NSMakeSize(32, 32)] autorelease];
-    [image lockFocus];
-    NSImage *srcImage = [NSImage imageNamed:@"newdoc"];
-    [srcImage drawInRect:NSMakeRect(0, 0, 32, 32) fromRect:NSMakeRect(0, 0, [srcImage size].width, [srcImage size].height) operation:NSCompositeSourceOver fraction:1.0]; 
-    [[NSImage imageWithSmallIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
-    [image unlockFocus];
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarNewItemIdentifier];
+    item = [[BDSKToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarNewItemIdentifier];
     [item setLabel:NSLocalizedString(@"New", @"Toolbar item label")];
-    [item setOptionKeyLabel:NSLocalizedString(@"New with Crossref", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"New Publication", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Create new publication", @"Tool tip message")];
-    [item setOptionKeyToolTip:NSLocalizedString(@"Create new publication with crossref", @"Tool tip message")];
     [item setTarget:self];
     [item setImage:[NSImage imageNamed: @"newdoc"]];
-    [item setOptionKeyImage:image];
     [item setAction:@selector(newPub:)];
-    [item setOptionKeyAction:@selector(createNewPubUsingCrossrefAction:)];
     [toolbarItems setObject:item forKey:BibDocumentToolbarNewItemIdentifier];
     [item release];
     
     // Delete
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarDeleteItemIdentifier];
+    item = [[BDSKToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarDeleteItemIdentifier];
     [item setLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Delete Publication", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Delete selected publication(s)", @"Tool tip message")];
@@ -111,7 +100,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [item release];
     
     // Edit
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarEditItemIdentifier];
+    item = [[BDSKToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarEditItemIdentifier];
     [item setLabel:NSLocalizedString(@"Edit", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Edit Publication", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Edit selected publication(s)", @"Tool tip message")];
@@ -122,7 +111,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [item release];
     
     // Preview (nil targeted -> app delegate)
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarPreviewItemIdentifier];
+    item = [[BDSKToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarPreviewItemIdentifier];
     [item setLabel:NSLocalizedString(@"TeX Preview", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Show/Hide TeX Preview", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Show/Hide TeX preview panel", @"Tool tip message")];
@@ -133,7 +122,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [item release];
     
     // Cite Drawer
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarCiteDrawerItemIdentifier];
+    item = [[BDSKToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarCiteDrawerItemIdentifier];
     [item setLabel:NSLocalizedString(@"Cite Drawer", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Toggle Custom Citations Drawer", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Toggle custom citations drawer", @"Tool tip message")];
@@ -148,8 +137,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
 										   action:@selector(makeSearchFieldKey:)
 									keyEquivalent:@""] autorelease];
 	[menuItem setTarget:self];
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarSearchItemIdentifier];
-    [item setDelegate:self];
+    item = [[BDSKToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarSearchItemIdentifier];
     [item setLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
     [item setTarget:self];
@@ -166,8 +154,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
 										   action:NULL 
 									keyEquivalent:@""] autorelease];
 	[menuItem setSubmenu: actionMenu];
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarActionItemIdentifier];
-    [item setDelegate:self];
+    item = [[BDSKToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarActionItemIdentifier];
     [item setLabel:NSLocalizedString(@"Action", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Publication Action", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Action for selected publications", @"Tool tip message")];
@@ -184,8 +171,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
 										   action:NULL 
 									keyEquivalent:@""] autorelease];
 	[menuItem setSubmenu: groupMenu];
-    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarGroupActionItemIdentifier];
-    [item setDelegate:self];
+    item = [[BDSKToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarGroupActionItemIdentifier];
     [item setLabel:NSLocalizedString(@"Group Action", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Group Action", @"Toolbar item label")];
     [item setToolTip:NSLocalizedString(@"Action for groups list", @"Tool tip message")];
@@ -202,7 +188,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
 }
 
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdent willBeInsertedIntoToolbar:(BOOL)willBeInserted {
-    OAToolbarItem *item = [toolbarItems objectForKey:itemIdent];
+    BDSKToolbarItem *item = [toolbarItems objectForKey:itemIdent];
     if (willBeInserted == NO)
         item = [[item copy] autorelease];
     return item;

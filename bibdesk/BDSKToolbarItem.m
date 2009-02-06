@@ -1,5 +1,5 @@
 //
-//  OAToolbarItem_BDSKExtensions.m
+//  BDSKToolbarItem.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 6/26/06.
@@ -36,20 +36,17 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "OAToolbarItem_BDSKExtensions.h"
+#import "BDSKToolbarItem.h"
 
 
-@implementation OAToolbarItem (BDSKExtensions)
+@implementation BDSKToolbarItem
 
-// implement NSCopying, as this is not defined in OmniAppKit
-- (id)copyWithZone:(NSZone *)zone{
-    id copy = [super copyWithZone:zone];
-    [copy setDelegate:[self delegate]];
-    [copy setOptionKeyImage:[self optionKeyImage]];
-    [copy setOptionKeyLabel:[self optionKeyLabel]];
-    [copy setOptionKeyToolTip:[self optionKeyToolTip]];
-    [copy setOptionKeyAction:[self optionKeyAction]];
-    return copy;
+- (void)validate {
+    if ([self view] && [[[self toolbar] delegate] respondsToSelector:@selector(validateToolbarItem:)]) {
+        BOOL enabled = [[[self toolbar] delegate] validateToolbarItem:self];
+        [self setEnabled:enabled];
+    }
+    [super validate];
 }
 
 @end
