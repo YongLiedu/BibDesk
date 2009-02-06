@@ -213,7 +213,7 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
 
 - (void)setObjectValue:(id <NSCopying>)obj;
 {
-    [self setIcon:[(NSObject *)obj valueForKey:BDSKTextWithIconCellStringKey]];
+    [self setIcon:[(NSObject *)obj valueForKey:BDSKTextWithIconCellImageKey]];
     [super setObjectValue:[(NSObject *)obj valueForKey:BDSKTextWithIconCellStringKey]];
 }
 
