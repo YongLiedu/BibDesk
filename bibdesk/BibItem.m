@@ -371,7 +371,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         if(self = [super init]){
-            pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
+            pubFields = [[NSMutableDictionary alloc] initWithDictionary:[coder decodeObjectForKey:@"pubFields"]];
             [self setFileType:[coder decodeObjectForKey:@"fileType"] ?: BDSKBibtexString];
             [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
             [self setDate:ensureCalendarDate([coder decodeObjectForKey:@"pubDate"])];
@@ -379,7 +379,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             [self setDateModified:ensureCalendarDate([coder decodeObjectForKey:@"dateModified"])];
             [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
-            files = [[coder decodeObjectForKey:@"files"] mutableCopy];
+            files = [[NSMutableArray alloc] initWithArray:[coder decodeObjectForKey:@"files"]];
             [files makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
             // set by the document, which we don't archive
             owner = nil;
