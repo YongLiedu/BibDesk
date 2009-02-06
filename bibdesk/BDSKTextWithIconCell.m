@@ -42,7 +42,8 @@
 #import "NSLayoutManager_BDSKExtensions.h"
 #import <OmniAppKit/OmniAppKit.h>
 
-/* Almost all of this code is copy-and-paste from OATextWithIconCell, except for the text layout (which seems wrong in OATextWithIconCell). */
+NSString *BDSKTextWithIconCellStringKey = @"string";
+NSString *BDSKTextWithIconCellImageKey = @"image";
 
 @implementation BDSKTextWithIconCell
 
@@ -212,8 +213,8 @@
 
 - (void)setObjectValue:(id <NSCopying>)obj;
 {
-    [self setIcon:[(NSObject *)obj valueForKey:OATextWithIconCellImageKey]];
-    [super setObjectValue:[(NSObject *)obj valueForKey:OATextWithIconCellStringKey]];
+    [self setIcon:[(NSObject *)obj valueForKey:BDSKTextWithIconCellStringKey]];
+    [super setObjectValue:[(NSObject *)obj valueForKey:BDSKTextWithIconCellStringKey]];
 }
 
 // API
@@ -290,9 +291,9 @@
             image = [NSImage imageForURL:fileURL];
     } else if ([obj isKindOfClass:[NSDictionary class]]) {
         NSDictionary *dict = (NSDictionary *)obj;
-        if ([[dict objectForKey:OATextWithIconCellStringKey] isKindOfClass:[NSString class]]) {
-            path = [[dict objectForKey:OATextWithIconCellStringKey] stringByStandardizingPath];
-            image = [dict objectForKey:OATextWithIconCellImageKey];
+        if ([[dict objectForKey:BDSKTextWithIconCellStringKey] isKindOfClass:[NSString class]]) {
+            path = [[dict objectForKey:BDSKTextWithIconCellStringKey] stringByStandardizingPath];
+            image = [dict objectForKey:BDSKTextWithIconCellStringKey];
             if(image == nil && path && [[NSFileManager defaultManager] fileExistsAtPath:path])
                 image = [NSImage imageForFile:path];
         } else {
@@ -317,8 +318,8 @@
     }
 	if(image && displayPath){
 		NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                displayPath, OATextWithIconCellStringKey, 
-                                image, OATextWithIconCellImageKey, nil];
+                                displayPath, BDSKTextWithIconCellStringKey, 
+                                image, BDSKTextWithIconCellStringKey, nil];
         [super setObjectValue:dict];
 	} else {
         [super setObjectValue:displayPath];

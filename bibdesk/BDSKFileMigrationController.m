@@ -44,6 +44,7 @@
 #import "BibItem.h"
 #import "BDSKLinkedFile.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "BDSKTextWithIconCell.h"
 
 static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow";
 
@@ -268,7 +269,7 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
 }
 
 - (id)transformedValue:(id)pub {
-    return [NSDictionary dictionaryWithObjectsAndKeys:[pub title], OATextWithIconCellStringKey, [NSImage imageNamed:@"cacheDoc"], OATextWithIconCellImageKey, nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:[pub title], BDSKTextWithIconCellStringKey, [NSImage imageNamed:@"cacheDoc"], BDSKTextWithIconCellStringKey, nil];
 }
 
 @end

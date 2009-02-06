@@ -410,10 +410,10 @@ static NSString *titleStringWithPub(BibItem *pub)
         [theNode setValue:pub forKey:@"pub"];
         
         // grab these strings on the main thread, since we need them in the worker thread
-        [theNode setValue:titleStringWithPub(pub)  forKey:OATextWithIconCellStringKey];
+        [theNode setValue:titleStringWithPub(pub)  forKey:BDSKTextWithIconCellStringKey];
         [theNode setValue:searchStringWithPub(pub) forKey:@"searchString"];
 
-        [theNode setValue:[NSImage imageNamed:@"cacheDoc"] forKey:OATextWithIconCellImageKey];
+        [theNode setValue:[NSImage imageNamed:@"cacheDoc"] forKey:BDSKTextWithIconCellStringKey];
 
         [nodes addObject:theNode];
         [theNode release];
@@ -498,8 +498,8 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
                 for (i =  0; i < iMax; i++) {
                     BDSKTreeNode *child = [[BDSKTreeNode alloc] init];
                     [child setValue:(id)urls[i] forKey:@"fileURL"];
-                    [child setValue:[[(id)urls[i] path] stringByAbbreviatingWithTildeInPath] forKey:OATextWithIconCellStringKey];
-                    [child setValue:[[NSWorkspace sharedWorkspace] iconForFileURL:(NSURL *)urls[i]] forKey:OATextWithIconCellImageKey];
+                    [child setValue:[[(id)urls[i] path] stringByAbbreviatingWithTildeInPath] forKey:BDSKTextWithIconCellStringKey];
+                    [child setValue:[[NSWorkspace sharedWorkspace] iconForFileURL:(NSURL *)urls[i]] forKey:BDSKTextWithIconCellStringKey];
                     [child setValue:searchString forKey:@"searchString"];
                     thisScore = scores[i];
                     maxScore = MAX(maxScore, thisScore);

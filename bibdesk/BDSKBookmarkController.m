@@ -42,6 +42,7 @@
 #import "BibDocument.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKBookmarkOutlineView.h"
+#import "BDSKTextWithIconCell.h"
 
 static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
 
@@ -432,7 +433,7 @@ static id sharedBookmarkController = nil;
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
     NSString *tcID = [tableColumn identifier];
     if ([tcID isEqualToString:@"name"]) {
-        return [NSDictionary dictionaryWithObjectsAndKeys:[item name], OATextWithIconCellStringKey, [item icon], OATextWithIconCellImageKey, nil];
+        return [NSDictionary dictionaryWithObjectsAndKeys:[item name], BDSKTextWithIconCellStringKey, [item icon], BDSKTextWithIconCellStringKey, nil];
     } else if ([tcID isEqualToString:@"url"]) {
         if ([item bookmarkType] == BDSKBookmarkTypeFolder) {
             int count = [[item children] count];

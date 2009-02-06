@@ -40,6 +40,7 @@
 #import "NSImage_BDSKExtensions.h"
 #import <OmniAppKit/OmniAppKit.h>
 #import "NSFileManager_BDSKExtensions.h"
+#import "BDSKTextWithIconCell.h"
 
 @implementation BDSKPathIconTransformer
 
@@ -56,8 +57,8 @@
     path = [path stringByStandardizingPath];
 	if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
 		return [NSDictionary dictionaryWithObjectsAndKeys:
-					abbrevPath, OATextWithIconCellStringKey, 
-					[NSImage imageForFile:path], OATextWithIconCellImageKey, nil];
+					abbrevPath, BDSKTextWithIconCellStringKey, 
+					[NSImage imageForFile:path], BDSKTextWithIconCellStringKey, nil];
 	} else {
 		return abbrevPath;
 	}
@@ -79,8 +80,8 @@
 	NSString *abbrevPath = [[fileURL path] stringByAbbreviatingWithTildeInPath];
 	if(abbrevPath && [[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
 		return [NSDictionary dictionaryWithObjectsAndKeys:
-            abbrevPath, OATextWithIconCellStringKey, 
-            [NSImage imageForURL:fileURL], OATextWithIconCellImageKey, nil];
+            abbrevPath, BDSKTextWithIconCellStringKey, 
+            [NSImage imageForURL:fileURL], BDSKTextWithIconCellStringKey, nil];
 	} else {
 		return abbrevPath;
 	}

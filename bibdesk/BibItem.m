@@ -77,6 +77,7 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKMacro.h"
 #import "NSColor_BDSKExtensions.h"
+#import "BDSKTextWithIconCell.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -1420,7 +1421,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
             NSImage *image = hasMissingFile ? [NSImage redPaperclipImage] : [NSImage paperclipImage];
-            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:image, OATextWithIconCellImageKey, label, OATextWithIconCellStringKey, nil];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:image, BDSKTextWithIconCellStringKey, label, BDSKTextWithIconCellStringKey, nil];
         }
         return cellDictionary;
     }else if([field isEqualToString:BDSKRemoteURLString]){
@@ -1428,7 +1429,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
         NSDictionary *cellDictionary = nil;
         if (count > 0) {
             NSString *label = 1 == count ? NSLocalizedString(@"1 item", @"") : [NSString stringWithFormat:NSLocalizedString(@"%d items", @""), count];
-            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSImage genericInternetLocationImage], OATextWithIconCellImageKey, label, OATextWithIconCellStringKey, nil];
+            cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSImage genericInternetLocationImage], BDSKTextWithIconCellStringKey, label, BDSKTextWithIconCellStringKey, nil];
         }
         return cellDictionary;
     }else{

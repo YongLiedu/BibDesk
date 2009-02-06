@@ -78,7 +78,7 @@ static int tableIconSize = 24;
     [[tableView tableColumnWithIdentifier:@"AppList"] setDataCell:cell];
     [tableView setRowHeight:(tableIconSize + 2)];
 
-    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:OATextWithIconCellStringKey ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
+    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:BDSKTextWithIconCellStringKey ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
     [arrayController setSortDescriptors:[NSArray arrayWithObject:sort]];
     
     [self updateUI];
@@ -91,7 +91,7 @@ static int tableIconSize = 24;
 
     // use a set so we don't add duplicate items to the array (not that it's particularly harmful)
     NSMutableSet *currentBundleIdentifiers = [NSMutableSet caseInsensitiveStringSet];
-    [currentBundleIdentifiers addObjectsFromArray:[[arrayController content] valueForKey:OATextWithIconCellStringKey]];
+    [currentBundleIdentifiers addObjectsFromArray:[[arrayController content] valueForKey:BDSKTextWithIconCellStringKey]];
     
     NSEnumerator *identifierE = [identifiers objectEnumerator];
         
@@ -107,13 +107,13 @@ static int tableIconSize = 24;
                                                  &theURL );
         
         if(err == noErr){
-            [dictionary setValue:[[(NSURL *)theURL lastPathComponent] stringByDeletingPathExtension] forKey:OATextWithIconCellStringKey];
-            [dictionary setValue:[[NSWorkspace sharedWorkspace] iconForFileURL:(NSURL *)theURL] forKey:OATextWithIconCellImageKey];
+            [dictionary setValue:[[(NSURL *)theURL lastPathComponent] stringByDeletingPathExtension] forKey:BDSKTextWithIconCellStringKey];
+            [dictionary setValue:[[NSWorkspace sharedWorkspace] iconForFileURL:(NSURL *)theURL] forKey:BDSKTextWithIconCellStringKey];
             [dictionary setValue:bundleID forKey:BDSKBundleIdentifierKey];
         } else {
             // if LS failed us (my cache was corrupt when I wrote this code, so it's been tested)
-            [dictionary setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unable to find icon for",@"Message when unable to find app for plugin"), bundleID] forKey:OATextWithIconCellStringKey];
-            [dictionary setValue:[NSImage iconWithSize:NSMakeSize(tableIconSize, tableIconSize) forToolboxCode:kGenericApplicationIcon] forKey:OATextWithIconCellImageKey];
+            [dictionary setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unable to find icon for",@"Message when unable to find app for plugin"), bundleID] forKey:BDSKTextWithIconCellStringKey];
+            [dictionary setValue:[NSImage iconWithSize:NSMakeSize(tableIconSize, tableIconSize) forToolboxCode:kGenericApplicationIcon] forKey:BDSKTextWithIconCellStringKey];
             [dictionary setValue:bundleID forKey:BDSKBundleIdentifierKey];
         }
         
