@@ -106,13 +106,14 @@
 		BOOL keepOn = YES;
 		while (keepOn) {
             if (insideButton) {
-                // NSButtonCell does not highlight itself, it tracks until a click or the mouse exits
+                // NSButtonCell does not highlight itself
                 [buttonCell highlight:YES withFrame:buttonRect inView:controlView];
-                if ([buttonCell trackMouse:theEvent inRect:buttonRect ofView:controlView untilMouseUp:NO]) {
+                // tracks until a click (returns YES) or the mouse exits (returns NO)
+                keepOn = (NO == [buttonCell trackMouse:theEvent inRect:buttonRect ofView:controlView untilMouseUp:NO]);
+                [buttonCell highlight:NO withFrame:buttonRect inView:controlView];
+                if (keepOn && [self URL]) {
+                    // mouse dragged outside a URL icon, start a drag and stop tracking ourselves
                     keepOn = NO;
-                } else if ([self URL]) {
-                    keepOn = NO;
-                    [buttonCell highlight:NO withFrame:buttonRect inView:controlView];
                     NSImage *image = [[NSImage imageForURL:[self URL]] dragImageWithCount:0];
                     NSSize imageSize = [image size];
                     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
@@ -125,7 +126,6 @@
                     }
                     [controlView dragImage:image at:NSMakePoint(mouseLoc.x - 0.5f * imageSize.width, mouseLoc.y + 0.5f * imageSize.height) offset:NSZeroSize event:theEvent pasteboard:pboard source:controlView slideBack:YES]; 
                 }
-                [buttonCell highlight:NO withFrame:buttonRect inView:controlView];
             }
             if (keepOn) {
                 // we're dragging outside the button, wait for a mouseup or move back inside
