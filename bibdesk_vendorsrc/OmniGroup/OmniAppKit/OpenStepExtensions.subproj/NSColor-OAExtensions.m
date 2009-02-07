@@ -605,7 +605,8 @@ static float _colorCloseness(const OANamedColorEntry *e1, const OANamedColorEntr
     if (entryCount == 0) {
 	// Avoid crasher below if something goes wrong in building the entries
 	OBASSERT_NOT_REACHED("No color entries found");
-	return @"";
+    // CMH: fixed a bug. This was returning @"", which is not an NSColor
+	return nil;
     }
 
     // Entries at the end of the array have higher precedence; loop backwards
