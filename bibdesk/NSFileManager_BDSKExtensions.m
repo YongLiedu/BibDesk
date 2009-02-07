@@ -300,62 +300,40 @@ static void destroyTemporaryDirectory()
 // note: IC is not thread safe
 - (NSURL *)downloadFolderURL;
 {
+    OSStatus err = fnfErr;
+    FSRef pathRef;
+    CFURLRef downloadsURL = NULL;
+    
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        
-        const OSType dlFolder = 'down'; // 10.5 Folders.h: kDownloadsFolderType = 'down' /* Refers to the ~/Downloads folder*/
-        FSRef folderRef;
-        OSStatus err = FSFindFolder(kUserDomain, dlFolder, TRUE, &folderRef);
-        CFURLRef folderURL = NULL;
-        if (noErr == err)
-            folderURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &folderRef);
-        
-        if (NULL != folderURL)
-            return [(id)folderURL autorelease];
-        
-        // otherwise continue and try IC, which has been deprecated for years and leaks like a sieve
-    }
-    
-    NSAssert([NSThread inMainThread], @"InternetConfig is not thread safe");
-    OSStatus err;
-	ICInstance inst;
-	ICAttr junk = 0;
-	ICFileSpec spec;
-    
-	static CFURLRef pathURL = NULL;
-    static BOOL alreadyTried = NO;
-    
-    if (NO == alreadyTried) {
-        
-        alreadyTried = YES;
-        
+#endif
+        err = FSFindFolder(kUserDomain, kDownloadsFolderType, TRUE, &pathRef);
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
+    } else {
+        ICInstance inst;
+        ICAttr junk = 0;
+        ICFileSpec spec;
         long size = sizeof(ICFileSpec);
-        FSRef pathRef;
         
-        err = ICStart(&inst, 'BDSK');
-        
-        if (noErr == err)
+        err = ICStart(&inst, 'SKim');
+        if (noErr == err) {
             err = ICBegin(inst, icReadOnlyPerm);
-        
-        if (err == noErr)
-        {
-            //Get the downloads folder
-            err = ICGetPref(inst, kICDownloadFolder, &junk, &spec, &size);
             
-            if (noErr == err) {
+            if (err == noErr) {
+                err = ICGetPref(inst, kICDownloadFolder, &junk, &spec, &size);
                 ICEnd(inst);
-                ICStop(inst);
+                if (err == noErr)
+                    err = FSpMakeFSRef(&(spec.fss), &pathRef);
             }
             
-            // convert FSSpec to FSRef
-            err = FSpMakeFSRef(&(spec.fss), &pathRef);
-            
-            if(err == noErr)
-                pathURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
-            
-
+            ICStop(inst);
         }
     }
-    return (NSURL *)pathURL;
+#endif
+    if(err == noErr)
+        downloadsURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
+    
+    return (NSURL *)downloadsURL;
 }
 
 - (NSString *)newestLyXPipePath {
