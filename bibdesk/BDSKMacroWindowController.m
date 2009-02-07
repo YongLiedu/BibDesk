@@ -557,11 +557,12 @@
 }
 
 // called from tableView paste: action defined in NSTableView_OAExtensions
-- (void)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
-    if(isEditable == NO || [[pboard types] containsObject:NSStringPboardType] == NO)
-        return;
-    NSString *pboardStr = [pboard stringForType:NSStringPboardType];
-    [self addMacrosFromBibTeXString:pboardStr];
+- (BOOL)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
+    if(isEditable && [[pboard types] containsObject:NSStringPboardType]) {
+        NSString *pboardStr = [pboard stringForType:NSStringPboardType];
+        [self addMacrosFromBibTeXString:pboardStr];
+    }
+    return YES;
 }
 
 // called from tableView delete: action defined in NSTableView_OAExtensions

@@ -64,6 +64,6 @@
 @interface NSObject (BDSKItemPasteboardHelperDelegate)
 // this one is compulsory
 - (NSString *)pasteboardHelper:(BDSKItemPasteboardHelper *)pboardHelper bibTeXStringForItems:(NSArray *)items;
-- (NSString *)pasteboardHelperWillBeginGenerating:(BDSKItemPasteboardHelper *)pboardHelper;
-- (NSString *)pasteboardHelperDidEndGenerating:(BDSKItemPasteboardHelper *)pboardHelper;
+- (void)pasteboardHelperWillBeginGenerating:(BDSKItemPasteboardHelper *)pboardHelper;
+- (void)pasteboardHelperDidEndGenerating:(BDSKItemPasteboardHelper *)pboardHelper;
 @end

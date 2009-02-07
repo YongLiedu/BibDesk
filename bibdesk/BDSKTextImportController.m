@@ -1533,30 +1533,30 @@
 }
 
 // this is used by the paste: action defined in NSTableView-OAExtensions
-- (void)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
+- (BOOL)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
 	int idx = [tv selectedRow];
 	NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
 	
-	if (type == nil || idx == -1)
-		return;
-	
-    NSString *selKey = [fields objectAtIndex:idx];
-	NSString *string = [pboard stringForType:NSStringPboardType];
-    NSString *oldValue = [item valueOfField:selKey];
-    
-    if(([NSApp currentModifierFlags] & NSControlKeyMask) != 0 && 
-       [NSString isEmptyString:oldValue] == NO && 
-       [selKey isSingleValuedField] == NO){
+	if (type && idx != -1) {
+        NSString *selKey = [fields objectAtIndex:idx];
+        NSString *string = [pboard stringForType:NSStringPboardType];
+        NSString *oldValue = [item valueOfField:selKey];
         
-        NSString *separator;
-        if([selKey isPersonField])
-            separator = @" and ";
-        else
-            separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
-        string = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, string];
+        if(([NSApp currentModifierFlags] & NSControlKeyMask) != 0 && 
+           [NSString isEmptyString:oldValue] == NO && 
+           [selKey isSingleValuedField] == NO){
+            
+            NSString *separator;
+            if([selKey isPersonField])
+                separator = @" and ";
+            else
+                separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+            string = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, string];
+        }
+        
+        [self recordChangingField:selKey toValue:string];
     }
-	
-	[self recordChangingField:selKey toValue:string];
+    return YES;
 }
 
 - (void)tableView:(NSTableView *)tableView deleteRows:(NSArray *)rows{

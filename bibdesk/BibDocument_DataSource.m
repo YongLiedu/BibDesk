@@ -1344,17 +1344,18 @@
 	}
 }
 
-- (void)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
+- (BOOL)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
 
 	if (tv != tableView) {
 		NSBeep();
-		return;
+		return NO;
 	}
 
     NSError *error = nil;
 	if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&error] == NO) {
         [tv presentError:error];
 	}
+    return YES;
 }
 
 // as the window delegate, we receive these from NSInputManager and doCommandBySelector:
