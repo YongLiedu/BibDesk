@@ -2774,24 +2774,28 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
     if ([tv isEqual:tableView]) {
-        NSPasteboard *pboard = [info draggingPasteboard];
-        NSString *field;
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+        if (row == -1)
+            row = [tableView numberOfRows] - 1;
+        else if (op ==  NSTableViewDropAbove)
+            row = fminf(row, [tableView numberOfRows] - 1);
+        [tableView setDropRow:row dropOperation:NSTableViewDropOn];
         
-        if (type && [[info draggingSource] isEqual:tableView] == NO) {
-            if (row == -1)
-                row = [tableView numberOfRows] - 1;
-            else if (op ==  NSTableViewDropAbove)
-                row = fminf(row, [tableView numberOfRows] - 1);
-            [tableView setDropRow:row dropOperation:NSTableViewDropOn];
-            field = [fields objectAtIndex:row];
-            if ([type isEqualToString:BDSKBibItemPboardType] && ([field isCitationField] || [field isEqualToString:BDSKCrossrefString])) {
+        NSPasteboard *pboard = [info draggingPasteboard];
+        NSString *field = [fields objectAtIndex:row];
+        
+        if ([field isCitationField] || [field isEqualToString:BDSKCrossrefString]) {
+            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]])
                 return NSDragOperationEvery;
-            } else if ([type isEqualToString:NSFilenamesPboardType] && [field isLocalFileField]) {
-                return NSDragOperationEvery;
-            } else if (([type isEqualToString:NSURLPboardType] || [type isEqualToString:BDSKWeblocFilePboardType]) && [field isRemoteURLField]) {
-                return NSDragOperationEvery;
+        } else if ([field isLocalFileField]) {
+            NSString *type;
+            if ((type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, nil]]) &&
+                ([type isEqualToString:NSURLPboardType] == NO || [[NSURL URLFromPasteboard:pboard] isFileURL])) {
+                NSDragOperation mask = [info draggingSourceOperationMask];
+                return mask == NSDragOperationGeneric ? NSDragOperationLink : mask == NSDragOperationCopy ? NSDragOperationCopy : NSDragOperationEvery;
             }
+        } else if ([field isRemoteURLField]) {
+            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]])
+                return NSDragOperationEvery;
         }
     }
     return NSDragOperationNone;
@@ -2800,28 +2804,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
     if ([tv isEqual:tableView]) {
         NSPasteboard *pboard = [info draggingPasteboard];
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
         NSString *field = [fields objectAtIndex:row];
+        NSString *type;
         
-        if ([type isEqualToString:BDSKBibItemPboardType]) {
-            
-            if ([field isCitationField]){
-                
-                NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
-                NSArray *draggedPubs = [[self document] publicationsFromArchivedData:pbData];
-                
-                if ([draggedPubs count]) {
-                    
-                    NSString *citeKeys = [[draggedPubs valueForKey:@"citeKey"] componentsJoinedByString:@","];
-                    NSString *oldValue = [[[publication valueOfField:field inherit:NO] retain] autorelease];
-                    NSString *newValue = [NSString isEmptyString:oldValue] ? citeKeys : [NSString stringWithFormat:@"%@,%@", oldValue, citeKeys];
-                    
-                    [self recordChangingField:field toValue:newValue];
-                    
-                    return YES;
-                }
-                
-            } else if ([field isEqualToString:BDSKCrossrefString]){
+        if ([field isEqualToString:BDSKCrossrefString]){
+            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]]) {
                 
                 NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
                 NSArray *draggedPubs = [[self document] publicationsFromArchivedData:pbData];
@@ -2853,32 +2840,72 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                 [self recordChangingField:BDSKCrossrefString toValue:crossref];
                 
                 return YES;
+                
+            }
+        } else if ([field isCitationField]) {
+            if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]]) {
+                
+                NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
+                NSArray *draggedPubs = [[self document] publicationsFromArchivedData:pbData];
+                
+                if ([draggedPubs count]) {
                     
+                    NSString *citeKeys = [[draggedPubs valueForKey:@"citeKey"] componentsJoinedByString:@","];
+                    NSString *oldValue = [[[publication valueOfField:field inherit:NO] retain] autorelease];
+                    NSString *newValue = [NSString isEmptyString:oldValue] ? citeKeys : [NSString stringWithFormat:@"%@,%@", oldValue, citeKeys];
+                    
+                    [self recordChangingField:field toValue:newValue];
+                    
+                    return YES;
+                }
+                
             }
-        } else if ([type isEqualToString:NSFilenamesPboardType]) {
-            
-            NSString *filename = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
-            if (filename) {
-                [self recordChangingField:field toValue:[[NSURL fileURLWithPath:filename] absoluteString]];
-                return YES;
+        } else if ([field isLocalFileField]) {
+            if (type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, nil]]) {
+                
+                NSURL *url = nil;
+                NSString *filename = nil;
+                if ([type isEqualToString:NSURLPboardType])
+                    url = [NSURL URLFromPasteboard:pboard];
+                else if ([type isEqualToString:NSFilenamesPboardType])
+                    filename = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
+                
+                if (filename || url) {
+                    NSDragOperation mask = [info draggingSourceOperationMask];
+                    if (mask == NSDragOperationGeneric) {
+                        NSString *basePath = [publication basePath];
+                        if (filename == nil)
+                            filename = [url path];
+                        if (basePath)
+                            filename = [basePath relativePathToFilename:filename];
+                    } else if (mask == NSDragOperationCopy) {
+                        if (filename == nil)
+                            filename = [url path];
+                    } else {
+                        if (url == nil)
+                            url = [NSURL fileURLWithPath:filename];
+                        filename = [url absoluteString];
+                    }
+                    [self recordChangingField:field toValue:filename];
+                    return YES;
+                }
+                
             }
-            
-        } else if ([type isEqualToString:NSURLPboardType]) {
-            
-            NSURL *url = [NSURL URLFromPasteboard:pboard];
-            if (url) {
-                [self recordChangingField:field toValue:[url absoluteString]];
-                return YES;
+        } else if ([field isRemoteURLField]) {
+            if (type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSURLPboardType, nil]]) {
+                
+                NSString *urlString = nil;
+                if ([type isEqualToString:NSURLPboardType])
+                    urlString = [[NSURL URLFromPasteboard:pboard] absoluteString];
+                else if ([type isEqualToString:BDSKWeblocFilePboardType])
+                    urlString = [pboard stringForType:BDSKWeblocFilePboardType];
+                
+                if (urlString) {
+                    [self recordChangingField:field toValue:urlString];
+                    return YES;
+                }
+                
             }
-            
-        } else if ([type isEqualToString:BDSKWeblocFilePboardType]) {
-            
-            NSURL *url = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]];
-            if (url) {
-                [self recordChangingField:field toValue:[url absoluteString]];
-                return YES;
-            }
-            
         }
     }
     return NO;
