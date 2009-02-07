@@ -333,7 +333,7 @@ static void destroyTemporaryDirectory()
     if(err == noErr)
         downloadsURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
     
-    return (NSURL *)downloadsURL;
+    return [(NSURL *)downloadsURL autorelease];
 }
 
 - (NSString *)newestLyXPipePath {
