@@ -63,7 +63,7 @@
 
 - (NSSize)cellSize {
     // this is used for column auto-resizing, and NSLevelIndicatorCell seems to return an insanely large size
-    NSSize cellSize = [super cellSize];NSLog(NSStringFromSize(cellSize));
+    NSSize cellSize = [super cellSize];
     cellSize.width = fminf(100.0, cellSize.width);
     return cellSize;
 }
