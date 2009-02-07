@@ -376,7 +376,7 @@ BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList)
     [super dealloc];
 }
 
-- (int)hash { return hash; }
+- (unsigned)hash { return hash; }
 - (NSDate *)date { return date; }
 - (NSString *)message { return message; }
 - (NSString *)sender { return sender; }
