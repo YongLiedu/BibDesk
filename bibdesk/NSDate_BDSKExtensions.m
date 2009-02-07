@@ -87,6 +87,9 @@ static CFDateFormatterRef numericDateFormatter = NULL;
     if(enLocale) CFRelease(enLocale);
 }
     
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning fixme: uses deprecated API, use NSDateFormatter instead
+#endif
 - (id)initWithMonthDayYearString:(NSString *)dateString;
 {    
     [[self init] release];

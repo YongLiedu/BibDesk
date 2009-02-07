@@ -101,6 +101,9 @@ static Boolean BDSKAliasHandleToFSRef(const AliasHandle inAlias, const FSRef *in
     short aliasCount = 1;
     
     // it would be preferable to search the (relative) path before the fileID, but than links to symlinks will always be resolved to the target
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning fixme: FSMatchAliasNoUI is deprecated, use FSMatchAliasBulk instead
+#endif
     err = FSMatchAliasNoUI(inBaseRef, kARMNoUI | kARMSearch | kARMSearchRelFirst | kARMTryFileIDFirst, inAlias, &aliasCount, outRef, shouldUpdate, NULL, NULL);
     
     return noErr == err;
