@@ -505,7 +505,9 @@ static NSZone *enumeratorZone = NULL;
         // Now, if we're at the file system root, consult .hidden on what other files we should hide:
         if( [path isEqualToString: @"/"] )  // At the root level, we have some specially hidden Unix folders:
         {
-            NSArray*    hiddenList = [[NSString stringWithContentsOfFile: @"/.hidden"] componentsSeparatedByString: @"\n"];
+            NSStringEncoding encoding;
+            NSError*         error;
+            NSArray*         hiddenList = [[NSString stringWithContentsOfFile: @"/.hidden" usedEncoding:&encoding error:&error] componentsSeparatedByString: @"\n"];
             [arr removeObjectsInArray: hiddenList];
         }
         // End of autoreleased area.
