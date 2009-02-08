@@ -2407,7 +2407,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (NSString *)statusBar:(BDSKStatusBar *)statusBar toolTipForIdentifier:(NSString *)identifier {
 	NSArray *requiredFields = nil;
-	NSMutableArray *missingFields = [[NSMutableArray alloc] initWithCapacity:5];
+	NSMutableArray *missingFields = [NSMutableArray arrayWithCapacity:5];
 	NSString *tooltip = nil;
 	
 	if ([identifier isEqualToString:@"NeedsToGenerateCiteKey"]) {

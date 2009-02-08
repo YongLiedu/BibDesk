@@ -127,6 +127,8 @@
                 
                 [items addObject:bibtexItem];
             }
+            
+            [btXMLDoc release];
         }
 
     }

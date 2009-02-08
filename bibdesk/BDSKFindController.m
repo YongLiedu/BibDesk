@@ -1131,7 +1131,10 @@ enum {
             
             if (replFile = [[BDSKLinkedFile alloc] initWithURL:[NSURL URLWithString:replStr]]) {
                 if([remoteURLs count] == 0){
-                    if(shouldSetWhenEmpty == NO) continue;
+                    if(shouldSetWhenEmpty == NO) {
+                        [replFile release];
+                        continue;
+                    }
                 }else{
                     [files removeObjectsInArray:remoteURLs];
                 }

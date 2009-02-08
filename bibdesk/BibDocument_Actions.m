@@ -511,6 +511,7 @@
             [body appendString:@"\n\n"];
         }
     }
+    [items release];
     
     // ampersands are common in publication names
     [body replaceOccurrencesOfString:@"&" withString:@"\\&" options:NSLiteralSearch range:NSMakeRange(0, [body length])];

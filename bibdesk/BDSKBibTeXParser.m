@@ -707,6 +707,7 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
                 
                     if (nil == s || nil == translatedString) {
                         [nodes release];
+                        [translatedString release];
                         return nil;
                     }
                         

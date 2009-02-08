@@ -259,6 +259,7 @@
         if (downloads == nil)
             downloads = [[NSMutableArray alloc] init];
         [downloads addObject:download];
+        [download release];
     } else
         NSBeep();
 }

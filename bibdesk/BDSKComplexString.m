@@ -381,16 +381,16 @@ Rather than relying on the same call sequence to be used, I think we should igno
 }
 
 - (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned)opts replacements:(unsigned int *)number{
-	NSMutableArray *newNodes = [nodes mutableCopy];
 	NSArray *targetNodes = [target nodes];
 	NSArray *replNodes = [replacement nodes];
+	NSMutableArray *newNodes;
 	NSString *newString;
 	
 	unsigned int num = 0;
 	int tNum = [targetNodes count];
 	int rNum = [replNodes count];
 	int min = 0;
-	int max = [newNodes count] - tNum;
+	int max = [nodes count] - tNum;
 	BOOL back = (BOOL)(opts & NSBackwardsSearch);
 	int i;
 	
@@ -406,7 +406,8 @@ Rather than relying on the same call sequence to be used, I think we should igno
 		else
 			max = min;
 	}
-	
+    
+	newNodes = [nodes mutableCopy];
 	i = (back ? max : min);
 	while (i <= max && i >= min) {
 		if ([(BDSKStringNode *)[newNodes objectAtIndex:i] compareNode:[targetNodes objectAtIndex:0] options:opts] == NSOrderedSame) {
