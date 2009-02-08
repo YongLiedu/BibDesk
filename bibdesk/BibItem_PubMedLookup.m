@@ -305,22 +305,17 @@ static void removeAliens(NSMutableString *string)
 	NSUInteger i=0;
 	for(;bi==nil && i<2 && i<[pdfd pageCount];i++){
 		
-		NSString *pdftextthispage = [[pdfd pageAtIndex:i] string];
+		NSMutableString *pdftextthispage = [NSMutableString stringWithCapacity:1000];
+		[pdftextthispage setString:[[pdfd pageAtIndex:i] string]];
 		// If we've got nothing to parse, try the next page
 		if(pdftextthispage==nil || [pdftextthispage length]<4) continue;
 		
 		// Clean up any high unicode characters which can flummox the regex
-		NSCharacterSet *extendedUnicode=[NSCharacterSet characterSetWithRange:NSMakeRange(0x10000, 0x10FFFF-0x10000)];
-		pdftextthispage = [pdftextthispage stringByReplacingCharactersInSet:extendedUnicode withString:@" "];
-
-		pubMedSearch = [pdftextthispage stringByExtractingDOIFromString];
+		[pdftextthispage removeAliens];
 		pubMedSearch = [pdftextthispage pubmedSearchByExtractingAllDOIsFromString];
 		
-		if(pubMedSearch!=nil) {
-			// may as well restrict doi search to pubmed AID field
-//			pubMedSearch = [pubMedSearch stringByAppendingString:@" [AID]"];
+		if(pubMedSearch!=nil)
 			bi = [BibItem itemWithPubMedSearchTerm:pubMedSearch];
-		}
 	}
 	
 	return bi;
