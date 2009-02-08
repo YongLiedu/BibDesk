@@ -173,7 +173,8 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 /*" Prompts the user for a directory (using an open panel), then updates the text field to display it and calls -setValueForSender: specifying that field as the sender. "*/
 - (void)pickDirectoryForTextField:(NSTextField *)textField;
 {
-    NSOpenPanel *openPanel = [NSOpenPanel new];
+    // CMH: added an autorelease to avoid a leak
+    NSOpenPanel *openPanel = [[NSOpenPanel new] autorelease];
     [openPanel setCanChooseDirectories:YES];
     if ([openPanel runModalForTypes:nil] != NSOKButton)
 	return;

@@ -681,6 +681,7 @@ static NSString *windowFrameSaveName = @"Preferences";
             separator = [[NSBox alloc] initWithFrame:NSMakeRect(separatorMargin, boxHeight + verticalSpaceBelowTextField, NSWidth([preferenceBox bounds]) - separatorMargin - separatorMargin, 1)];
             [separator setBoxType:NSBoxSeparator];
             [showAllIconsView addSubview:separator];
+            [separator release];
             boxHeight += verticalSpaceAboveTextField + verticalSpaceBelowTextField;
         }
         boxHeight += verticalSpaceBelowTextField + 1;
@@ -734,6 +735,7 @@ static NSString *windowFrameSaveName = @"Preferences";
 
     defaultToolbarItems = [[constantToolbarItems arrayByAddingObjectsFromArray:defaultClients] retain];
     allowedToolbarItems = [[constantToolbarItems arrayByAddingObjectsFromArray:allClients] retain];
+    [allClients release];
 
     toolbar = [[OAPreferencesToolbar alloc] initWithIdentifier:@"OAPreferenceIdentifiers"];
     [toolbar setAllowsUserCustomization:YES];
