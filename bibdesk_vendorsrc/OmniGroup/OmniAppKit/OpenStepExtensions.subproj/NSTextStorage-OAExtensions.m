@@ -420,7 +420,8 @@ static id (*originalValueInCharactersAtIndex)(id self, SEL _cmd, int i) = NULL;
 
 + (id)coerceList:(NSArray *)array toClass:(Class)aClass;
 {
-    NSTextStorage *result = [[NSTextStorage alloc] init];
+    // CMH: added an autorelease to fix a leak
+    NSTextStorage *result = [[[NSTextStorage alloc] init] autorelease];
     NSScriptCoercionHandler *coercer = [NSScriptCoercionHandler sharedCoercionHandler];
     int index, count;
     
