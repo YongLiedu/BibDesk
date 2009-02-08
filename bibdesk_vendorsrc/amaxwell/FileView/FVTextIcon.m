@@ -89,7 +89,7 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
 }
 
 // caller will own the returned object
-+ (NSTextStorage *)popTextStorage
++ (NSTextStorage *)newTextStorage
 {
     OSSpinLockLock(&_cacheLock);
     NSTextStorage *textStorage = [_cachedTextSystems anyObject];
@@ -103,7 +103,7 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     return textStorage;
 }
 
-// assumes the object was retrieved from +popTextStorage and /not/ (auto)released
+// assumes the object was retrieved from +newTextStorage and /not/ (auto)released
 + (void)pushTextStorage:(NSTextStorage *)textStorage
 {
     OSSpinLockLock(&_cacheLock);
@@ -350,7 +350,7 @@ static OSSpinLock _cacheLock = OS_SPINLOCK_INIT;
     // definitely use the context cache for this, since these bitmaps are pretty huge
     CGContextRef ctxt = [FVBitmapContextCache newBitmapContextOfWidth:_paperSize.width height:_paperSize.height];
     
-    NSTextStorage *textStorage = [FVTextIcon popTextStorage];
+    NSTextStorage *textStorage = [FVTextIcon newTextStorage];
     
     // originally kept the attributed string as an ivar, but it's not worth it in most cases
     
