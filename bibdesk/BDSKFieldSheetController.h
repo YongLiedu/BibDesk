@@ -73,18 +73,18 @@
 @interface BDSKChangeFieldSheetController : BDSKRemoveFieldSheetController {
     IBOutlet NSComboBox *newFieldsComboBox;
     IBOutlet NSTextField *newPromptField;
-    NSString *newPrompt;
-    NSArray *newFieldsArray;
+    NSString *addedPrompt;
+    NSArray *addedFieldsArray;
     NSString *newField;
 }
 
-- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields newPrompt:(NSString *)newPromptString newFieldsArray:(NSArray *)newFields;
+- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields addedPrompt:(NSString *)newPromptString addedFieldsArray:(NSArray *)newFields;
 
 - (NSString *)newField;
 - (void)setNewField:(NSString *)newField;
-- (NSArray *)newFieldsArray;
-- (void)setNewFieldsArray:(NSArray *)array;
-- (NSString *)newPrompt;
-- (void)setNewPrompt:(NSString *)promptString;
+- (NSArray *)addedFieldsArray;
+- (void)setAddedFieldsArray:(NSArray *)array;
+- (NSString *)addedPrompt;
+- (void)setAddedPrompt:(NSString *)promptString;
 
 @end

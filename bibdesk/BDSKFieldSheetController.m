@@ -156,19 +156,19 @@
 
 @implementation BDSKChangeFieldSheetController
 
-- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields newPrompt:(NSString *)newPromptString newFieldsArray:(NSArray *)newFields {
+- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields addedPrompt:(NSString *)newPromptString addedFieldsArray:(NSArray *)newFields {
     if (self = [super initWithPrompt:promptString fieldsArray:fields]) {
         [self window]; // make sure the nib is loaded
         field = nil;
-        [self setNewPrompt:newPromptString];
-        [self setNewFieldsArray:newFields];
+        [self setAddedPrompt:newPromptString];
+        [self setAddedFieldsArray:newFields];
     }
     return self;
 }
 
 - (void)dealloc {
-    [newPrompt release];
-    [newFieldsArray release];
+    [addedPrompt release];
+    [addedFieldsArray release];
     [newField release];
     [super dealloc];
 }
@@ -194,25 +194,25 @@
     }
 }
 
-- (NSArray *)newFieldsArray{
-    return newFieldsArray;
+- (NSArray *)addedFieldsArray{
+    return addedFieldsArray;
 }
 
-- (void)setNewFieldsArray:(NSArray *)array{
-    if (newFieldsArray != array) {
-        [newFieldsArray release];
-        newFieldsArray = [array retain];
+- (void)setAddedFieldsArray:(NSArray *)array{
+    if (addedFieldsArray != array) {
+        [addedFieldsArray release];
+        addedFieldsArray = [array retain];
     }
 }
 
-- (NSString *)newPrompt{
-    return newPrompt;
+- (NSString *)addedPrompt{
+    return addedPrompt;
 }
 
-- (void)setNewPrompt:(NSString *)promptString{
-    if (newPrompt != promptString) {
-        [newPrompt release];
-        newPrompt = [promptString retain];
+- (void)setAddedPrompt:(NSString *)promptString{
+    if (addedPrompt != promptString) {
+        [addedPrompt release];
+        addedPrompt = [promptString retain];
     }
 }
 
@@ -223,7 +223,7 @@
     NSRect oldNewPromptFrame = [newPromptField frame];
     [promptField setStringValue:(prompt)? prompt : @""];
     [promptField sizeToFit];
-    [newPromptField setStringValue:(newPrompt)? newPrompt : @""];
+    [newPromptField setStringValue:(addedPrompt)? addedPrompt : @""];
     [newPromptField sizeToFit];
     NSRect newPromptFrame = [promptField frame];
     NSRect newNewPromptFrame = [newPromptField frame];
@@ -247,7 +247,7 @@
 
 - (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
     if (formatter == [(NSTextField *)newFieldsComboBox formatter])
-        return [self newFieldsArray];
+        return [self addedFieldsArray];
     else
         return nil;
 }
