@@ -117,7 +117,8 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     dragImageOffset->x = NSMidX([self bounds]) - dragPoint.x;
     dragImageOffset->y = dragPoint.y - NSMidY([self bounds]);
 
-    dragImage = [[NSImage alloc] init];
+    // CMH: added autorelease to fix a leak
+    dragImage = [[[NSImage alloc] init] autorelease];
     [dragImage addRepresentation:cachedImageRep];
     [cachedImageRep release];
     

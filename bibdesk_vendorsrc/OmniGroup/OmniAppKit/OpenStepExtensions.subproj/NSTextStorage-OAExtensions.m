@@ -396,7 +396,8 @@ static id (*originalValueInCharactersAtIndex)(id self, SEL _cmd, int i) = NULL;
 
 + (id)coerceRecord:(NSDictionary *)dictionary toClass:(Class)aClass
 {
-    NSTextStorage *result = [[NSTextStorage alloc] init];
+    // CMH: added an autorelease to fix a leak
+    NSTextStorage *result = [[[NSTextStorage alloc] init] autorelease];
 
     // Set text first so we have a range to apply the other attributes over.
     NSMutableDictionary *tempDict = [dictionary mutableCopy];

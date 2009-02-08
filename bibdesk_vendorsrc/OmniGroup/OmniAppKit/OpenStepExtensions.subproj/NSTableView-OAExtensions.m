@@ -179,7 +179,8 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
     dragImageOffset->x = NSMidX([self bounds]) - dragPoint.x;
     dragImageOffset->y = dragPoint.y - NSMidY([self bounds]);
 
-    dragImage = [[NSImage alloc] init];
+    // CMH: added an autorelease to fix a leak
+    dragImage = [[[NSImage alloc] init] autorelease];
     [dragImage addRepresentation:cachedImageRep];
     [cachedImageRep release];
 
