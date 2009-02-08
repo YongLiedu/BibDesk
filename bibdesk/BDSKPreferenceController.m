@@ -73,7 +73,7 @@ static id sharedController = nil;
             [NSException raise:NSInternalInconsistencyException format:@"unable to find search terms dictionary"];
         clientIdentiferSearchTerms = [[NSDictionary alloc] initWithContentsOfFile:path];
         NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithContentsOfFile:path];
-        if(nil == path)
+        if(nil == tmpDict)
             [NSException raise:NSInternalInconsistencyException format:@"unable to find search terms dictionary"];
         NSEnumerator *keyEnum = [[tmpDict allKeys] objectEnumerator];
         NSString *key;
