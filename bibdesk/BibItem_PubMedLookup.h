@@ -48,6 +48,11 @@
 - (NSString *) stringByMakingPubmedSearchFromAnyBibliographicIDsInString;
 @end
 
+@interface NSMutableString (PubMedLookup)
+
+- (void)removeAliens;
+@end
+
 @interface BibItem (PubMedLookup)
 
 + (id)itemWithPubMedSearchTerm:(NSString *)searchTerm;

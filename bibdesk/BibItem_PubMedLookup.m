@@ -178,6 +178,116 @@ static NSString *doiRegexString = @"doi[:\\s/]{1,2}(10\\.[0-9]{3,4})[\\s/0]{1,3}
 }
 @end
 
+@implementation NSMutableString (PubMedLookup)
+
+/* NS and CF character sets won't find these, 
+ due to the way CFString handles surrogate pairs.
+ The surrogate pair inlines were borrowed from
+ CFCharacterSetPriv.h in CF-lite-476.13. */
+static inline bool __SKIsSurrogateHighCharacter(const UniChar character) {
+    return ((character >= 0xD800UL) && (character <= 0xDBFFUL) ? true :
+			false);
+}
+
+static inline bool __SKIsSurrogateLowCharacter(const UniChar character) {
+    return ((character >= 0xDC00UL) && (character <= 0xDFFFUL) ? true :
+			false);
+}
+
+static inline UTF32Char __SKGetLongCharacterForSurrogatePair(const UniChar
+															 surrogateHigh, const UniChar surrogateLow) {
+    return ((surrogateHigh - 0xD800UL) << 10) + (surrogateLow - 0xDC00UL) +
+	0x0010000UL;
+}
+
+static inline bool __SKIsPrivateUseCharacter(const UTF32Char ch)
+{
+    return ((ch >= 0xE000UL && ch <= 0xF8FFUL) ||    /* private use area */
+            (ch >= 0xF0000UL && ch <= 0xFFFFFUL) ||  /* supplementary private use A */
+            (ch >= 0x100000UL && ch <= 0x10FFFFUL)); /* supplementary private use B */
+}
+
+#define SURROGATE_START 0xD800
+#define SURROGATE_END 0xDFFF
+
+// Remove anything in the private use planes, and/or malformed surrogate pair sequences rdar://problem/6273932
+static void removeAliens(NSMutableString *string)
+{    
+    // make a (mutable) copy only if needed
+    CFMutableStringRef theString = (void *)string;
+    
+    CFStringInlineBuffer inlineBuffer;
+    CFIndex length = CFStringGetLength(theString);
+    
+    // use the current mutable string with the inline buffer, but make a new mutable copy if needed
+	CFStringInitInlineBuffer(theString, &inlineBuffer, CFRangeMake(0,
+																   length));
+    UniChar ch;
+    
+#define LAZY_COPY do{if((void*)string==theString){theString=CFStringCreateMutableCopy(CFGetAllocator(theString), 0, theString);}} while(0)
+	
+	// idx is current index into the inline buffer, and delIdx is current index in the mutable string
+	CFIndex idx = 0, delIdx = 0;
+	
+    while(idx < length){
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
+        if (__SKIsPrivateUseCharacter(ch)) {
+            LAZY_COPY;
+            CFStringDelete(theString, CFRangeMake(delIdx, 1));
+        } else if ((ch >= SURROGATE_START) && (ch <= SURROGATE_END)) {
+            
+            if ((idx + 1) < length) {
+                
+                UniChar highChar = ch;
+                UniChar lowChar =
+				CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx + 1);
+                UTF32Char longChar =
+				__SKGetLongCharacterForSurrogatePair(highChar, lowChar);
+                // if we only have half of a surrogate pair, delete the offending character
+                if (__SKIsSurrogateLowCharacter(lowChar) == false ||
+					__SKIsSurrogateHighCharacter(highChar) == false) {
+                    LAZY_COPY;
+                    CFStringDelete(theString, CFRangeMake(delIdx, 1));
+                    // only deleted a single char, so don't need to adjust idx
+                } else if (__SKIsPrivateUseCharacter(longChar)) {
+                    LAZY_COPY;
+                    // remove the pair; can't display private use characters
+                    CFStringDelete(theString, CFRangeMake(delIdx, 2));
+                    // adjust since we removed two characters...
+                    idx++;
+                } else {
+                    // valid surrogate pair, so we'll leave it alone
+                    delIdx += 2;
+                    idx++;
+                }
+                
+            } else {
+                // insufficient length for this to be a valid sequence, so it's only half of a surrogate pair
+                LAZY_COPY;
+                CFStringDelete(theString, CFRangeMake(delIdx, 1));
+			}
+			
+		} else {
+			// keep track of our index in the copy and the original
+			delIdx++;
+		}
+		idx++;
+	}
+	
+	// if the local var is non-NULL and is not the parameter, then it's a copy
+	if (theString && theString != (void *)string) {
+		[string setString:(NSMutableString *)theString];
+		CFRelease(theString);
+	}
+}
+
+- (void)removeAliens;
+{
+	removeAliens(self);
+}
+
+@end
+
 @implementation BibItem (PubMedLookup)
 
 + (id)itemByParsingPDFDocument: (PDFDocument *) pdfd  {
