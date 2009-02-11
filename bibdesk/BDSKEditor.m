@@ -543,6 +543,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if(returnCode == NSOKButton){
         unsigned int anIndex = (unsigned int)contextInfo;
         NSURL *aURL = [[sheet URLs] objectAtIndex:0];
+        BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey];
         if (anIndex != NSNotFound) {
             BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
             if (aFile == nil)
@@ -554,10 +555,10 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
             [oldURL release];
             [publication insertObject:aFile inFilesAtIndex:anIndex];
             [[self document] userAddedURL:aURL forPublication:publication];
-            if ([disableAutoFileButton state] == NSOffState)
+            if (shouldAutoFile)
                 [publication autoFileLinkedFile:aFile];
         } else {
-            [publication addFileForURL:aURL autoFile:YES runScriptHook:YES];
+            [publication addFileForURL:aURL autoFile:shouldAutoFile runScriptHook:YES];
         }
         [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }        
