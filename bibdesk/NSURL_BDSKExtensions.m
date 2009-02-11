@@ -165,18 +165,23 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     CFAllocatorRef allocator = CFGetAllocator(theURL);
     CFURLRef newURL = CFURLCreateCopyDeletingLastPathComponent(allocator,(CFURLRef)theURL);
     
+    if(newURL == NULL){
+        if (lastPathComponent) CFRelease(lastPathComponent);
+        return nil;
+    }
+    
     theURL = BDCopyFileURLResolvingAliases(newURL);
-    CFRelease(newURL);
+    if (newURL) CFRelease(newURL);
     
     if(theURL == nil){
-        CFRelease(lastPathComponent);
+        if (lastPathComponent) CFRelease(lastPathComponent);
         return nil;
     }
     
     // non-last path components have to be folders, right?
     newURL = CFURLCreateCopyAppendingPathComponent(allocator, (CFURLRef)theURL, lastPathComponent, FALSE);
-    CFRelease(lastPathComponent);
-    CFRelease(theURL);
+    if (lastPathComponent) CFRelease(lastPathComponent);
+    if (theURL) CFRelease(theURL);
     
     return [(id)newURL autorelease];
 }
