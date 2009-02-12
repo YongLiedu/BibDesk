@@ -99,7 +99,7 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 // convenience method for keychain
 + (NSData *)sharingPasswordForCurrentUserUnhashed;
 {
-    // find pw from keychain
+    // find password from keychain
     OSStatus err;
     
     void *passwordData = NULL;
@@ -154,7 +154,7 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
 + (NSData *)passwordHashedForKeychainServiceName:(NSString *)name;
 {
-    // use the service name to get pw from keychain and hash it with sha1 for comparison purposes
+    // use the service name to get password from keychain and hash it with sha1 for comparison purposes
     OSStatus err;
     
     const char *nameCString = [name UTF8String];

@@ -2076,10 +2076,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString{
-	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", ([sud boolForKey:BDSKCitePrependTildeKey] ? @"~" : @""), citeString, [sud stringForKey:BDSKCiteStartBracketKey]]; 
-	NSString *endCite = [sud stringForKey:BDSKCiteEndBracketKey]; 
-	NSString *separator = [sud boolForKey:BDSKSeparateCiteKey] ? [endCite stringByAppendingString:startCite] : @",";
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", ([pw boolForKey:BDSKCitePrependTildeKey] ? @"~" : @""), citeString, [pw stringForKey:BDSKCiteStartBracketKey]]; 
+	NSString *endCite = [pw stringForKey:BDSKCiteEndBracketKey]; 
+	NSString *separator = [pw boolForKey:BDSKSeparateCiteKey] ? [endCite stringByAppendingString:startCite] : @",";
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     

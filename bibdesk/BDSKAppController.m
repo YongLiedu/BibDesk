@@ -247,7 +247,7 @@ static void fixLegacyTableColumnIdentifiers()
         [alert setAlertStyle:NSCriticalAlertStyle];
         button = [alert runModal];
         if (button == NSAlertAlternateReturn){
-            formatString = [[pw preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
+            formatString = [[OFPreference preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
             [pw setObject:formatString forKey:BDSKCiteKeyFormatKey];
             [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }else{
@@ -318,7 +318,7 @@ static void fixLegacyTableColumnIdentifiers()
             [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
             [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
         } else if (button == NSAlertAlternateReturn) {
-            formatString = [[pw preferenceForKey:BDSKLocalFileFormatKey] defaultObjectValue];			
+            formatString = [[OFPreference preferenceForKey:BDSKLocalFileFormatKey] defaultObjectValue];			
             [pw setObject:formatString forKey:BDSKLocalFileFormatKey];
             [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }

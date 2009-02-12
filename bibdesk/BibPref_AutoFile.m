@@ -355,7 +355,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[formatSheetField selectText:self];
 		return NO;
 	} else if (rv == NSAlertAlternateReturn){
-		formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalFileFormatKey] defaultObjectValue];
+		formatString = [[OFPreference preferenceForKey:BDSKLocalFileFormatKey] defaultObjectValue];
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalFileFormatKey];
 		[[NSApp delegate] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 	}

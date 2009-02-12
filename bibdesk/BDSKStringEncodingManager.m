@@ -373,7 +373,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 - (IBAction)revertToDefault:(id)sender {
     [encodings autorelease];
     encodings = nil;
-    [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKStringEncodingsKey] restoreDefaultValue];
+    [[OFPreference preferenceForKey:BDSKStringEncodingsKey] restoreDefaultValue];
     (void)[self enabledEncodings];					// Regenerate default list
     [self noteEncodingListChange:NO updateList:YES postNotification:YES];
 }

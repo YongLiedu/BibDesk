@@ -263,7 +263,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[formatSheetField selectText:self];
 		return NO;
 	} else if (rv == NSAlertAlternateReturn){
-		formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
+		formatString = [[OFPreference preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
 		[[NSApp delegate] setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 	}

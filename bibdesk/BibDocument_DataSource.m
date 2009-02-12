@@ -494,11 +494,11 @@
 }
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
-    OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
-	int dragCopyType = [sud integerForKey:dragCopyTypeKey];
+	int dragCopyType = [pw integerForKey:dragCopyTypeKey];
     BOOL success = NO;
-	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
+	NSString *citeString = [pw stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
     NSArray *additionalFilenames = nil;
     
@@ -691,7 +691,7 @@
     
     if (dragCopyType == BDSKTemplateDragCopyType) {
         NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
-        NSString *template = [sud stringForKey:dragCopyTemplateKey];
+        NSString *template = [pw stringForKey:dragCopyTemplateKey];
         unsigned templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
             dragCopyType += templateIdx;
@@ -834,11 +834,11 @@
         isIcon = YES;
     
 	} else {
-		OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
+		OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 		NSMutableString *s = [NSMutableString string];
         NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
         
-        dragCopyType = [sud integerForKey:dragCopyTypeKey];
+        dragCopyType = [pw integerForKey:dragCopyTypeKey];
         
 		// don't depend on this being non-zero; this method gets called for drags where promisedDraggedItems is nil
 		count = [promisedDraggedItems count];
