@@ -45,6 +45,7 @@
 #define LEFT_MARGIN				5.0
 #define RIGHT_MARGIN			15.0
 #define MARGIN_BETWEEN_ITEMS	2.0
+#define VERTICAL_OFFSET         0.0
 
 
 @implementation BDSKStatusBar
@@ -129,7 +130,8 @@
         size = [self cellSizeForIcon:icon];
         NSDivideRect(textRect, &iconRect, &textRect, size.width, NSMaxXEdge);
         NSDivideRect(textRect, &ignored, &textRect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
-        iconRect = BDSKCenterRectVertically(iconRect, size.height, [self isFlipped]);
+        iconRect = BDSKCenterRectVertically(iconRect, size.height, NO);
+        iconRect.origin.y += VERTICAL_OFFSET;
 		[iconCell setImage:icon];
 		[iconCell drawWithFrame:iconRect inView:self];
 	}
@@ -137,7 +139,8 @@
 	if (textRect.size.width < 0.0)
 		textRect.size.width = 0.0;
 	size = [textCell cellSize];
-    textRect = BDSKCenterRectVertically(textRect, size.height, [self isFlipped]);
+    textRect = BDSKCenterRectVertically(textRect, size.height, NO);
+    textRect.origin.y += VERTICAL_OFFSET;
 	[textCell drawWithFrame:textRect inView:self];
 }
 
@@ -344,7 +347,8 @@
         size = [self cellSizeForIcon:[dict objectForKey:@"icon"]];
         NSDivideRect(rect, &iconRect, &rect, size.width, NSMaxXEdge);
         NSDivideRect(rect, &ignored, &rect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
-        iconRect = BDSKCenterRectVertically(iconRect, size.height, [self isFlipped]);
+        iconRect = BDSKCenterRectVertically(iconRect, size.height, NO);
+        iconRect.origin.y += VERTICAL_OFFSET;
 		[self addToolTipRect:iconRect owner:self userData:[dict objectForKey:@"identifier"]];
 	}
 }
@@ -402,6 +406,7 @@
         NSDivideRect([self bounds], &ignored, &rect, RIGHT_MARGIN, NSMaxXEdge);
         NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
         rect = BDSKCenterRect(rect, size, [self isFlipped]);
+        rect.origin.y += VERTICAL_OFFSET;
 		[progressIndicator setFrame:rect];
 		
         [self addSubview:progressIndicator];
