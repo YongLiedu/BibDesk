@@ -43,6 +43,8 @@
 @interface BDSKNotesWindowController : NSWindowController {
     NSURL *url;
     NSMutableArray *notes;
+    NSArray *tags;
+    double rating;
     float lastTagsHeight;
     IBOutlet NSOutlineView *outlineView;
     IBOutlet NSTokenField *tokenField;
@@ -52,8 +54,10 @@
 
 - (id)initWithURL:(NSURL *)aURL;
 
-- (NSArray *)tags ;
+- (NSArray *)tags;
+- (void)setTags:(NSArray *)newTags;
 - (double)rating;
+- (void)setRating:(double)newRating;
 
 - (IBAction)refresh:(id)sender;
 - (IBAction)openInSkim:(id)sender;

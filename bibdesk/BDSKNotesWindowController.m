@@ -58,8 +58,10 @@
         
         url = [aURL retain];
         notes = [[NSMutableArray alloc] init];
+        tags = nil;
+        rating = 0.0;
         
-        [self reloadNotes];
+        [self refresh:nil];
     }
     return self;
 }
@@ -67,6 +69,7 @@
 - (void)dealloc {
     [url release];
     [notes release];
+    [tags release];
     [super dealloc];
 }
 
@@ -119,19 +122,30 @@
 }
 
 - (NSArray *)tags {
-    return [url openMetaTags];
+    return tags;
+}
+
+- (void)setTags:(NSArray *)newTags {
+    if (tags != newTags) {
+        [tags release];
+        tags = [newTags retain];
+    }
 }
 
 - (double)rating {
-    return [url openMetaRating];
+    return rating;
+}
+
+- (void)setRating:(double)newRating {
+    rating = newRating;
 }
 
 #pragma mark Actions
 
 - (IBAction)refresh:(id)sender {
     [self reloadNotes];
-    [self setTags:[self tags]];
-    [self setRating:[self rating]];
+    [self setTags:[url openMetaTags]];
+    [self setRating:[url openMetaRating]];
 }
 
 - (IBAction)openInSkim:(id)sender {
