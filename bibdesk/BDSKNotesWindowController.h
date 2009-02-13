@@ -53,9 +53,7 @@
 - (id)initWithURL:(NSURL *)aURL;
 
 - (NSArray *)tags ;
-- (void)setTags:(NSArray *)tags;
 - (double)rating;
-- (void)setRating:(double)rating;
 
 - (IBAction)refresh:(id)sender;
 - (IBAction)openInSkim:(id)sender;
