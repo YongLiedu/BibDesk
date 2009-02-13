@@ -94,13 +94,8 @@ enum {
 - (void)updateColumnsMenu;
 - (IBAction)importItem:(id)sender;
 - (IBAction)openParentItem:(id)sender;
-
-@end
-
-@interface NSTableView (OAColumnConfigurationExtensionsThatShouldBeDeclared)
 - (void)autosizeColumn:(id)sender;
 - (void)autosizeAllColumns:(id)sender;
-- (void)_autosizeColumn:(NSTableColumn *)tableColumn;
 @end
 
 @implementation BDSKMainTableView
@@ -652,11 +647,37 @@ enum {
         [[self delegate] tableView:self openParentForItemAtRow:row];
 }
 
-- (void)autosizeColumn:(id)sender;
-{
+- (void)doAutosizeColumn:(unsigned int)column {
+    int row, numRows = [self numberOfRows];
+    NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
+    id cell;
+    float width = 0.0;
+    
+    for (row = 0; row < numRows; row++) {
+        if ([self respondsToSelector:@selector(preparedCellAtColumn:row:)]) {
+            cell = [self preparedCellAtColumn:column row:row];
+        } else {
+            cell = [tableColumn dataCellForRow:row];
+            if ([[self delegate] respondsToSelector:@selector(tableView:willDisplayCell:forTableColumn:row:)])
+                [[self delegate] tableView:self willDisplayCell:cell forTableColumn:tableColumn row:row];
+            [cell setObjectValue:[[self dataSource] tableView:self objectValueForTableColumn:tableColumn row:row]];
+        }
+        width = fmaxf(width, [cell cellSize].width);
+    }
+    width = fminf([tableColumn maxWidth], fmaxf([tableColumn minWidth], width));
+    [tableColumn setWidth:width];
+}
+
+- (void)autosizeColumn:(id)sender {
     int clickedColumn = [(BDSKMainTableHeaderView *)[self headerView] columnForMenu];
     if (clickedColumn >= 0)
-        [self _autosizeColumn:[[self tableColumns] objectAtIndex:clickedColumn]];
+        [self doAutosizeColumn:clickedColumn];
+}
+
+- (void)autosizeAllColumns:(id)sender {
+    unsigned int column, numColumns = [self numberOfColumns];
+    for (column = 0; column < numColumns; column++)
+        [self doAutosizeColumn:column];
 }
 
 @end
