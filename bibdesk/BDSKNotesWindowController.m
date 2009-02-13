@@ -122,19 +122,8 @@
     return [url openMetaTags];
 }
 
-- (void)setTags:(NSArray *)tags {
-    NSArray *oldTags = [url openMetaTags];
-    if (([oldTags count] > 0 || [tags count] > 0) && [oldTags isEqualToArray:tags] == NO)
-        [url setOpenMetaTags:tags];
-}
-
 - (double)rating {
     return [url openMetaRating];
-}
-
-- (void)setRating:(double)rating {
-    if (fabs([url openMetaRating] - rating) > 0)
-        [url setOpenMetaRating:rating];
 }
 
 #pragma mark Actions

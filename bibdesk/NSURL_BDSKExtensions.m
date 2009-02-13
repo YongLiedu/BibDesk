@@ -324,19 +324,8 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return [[NSFileManager defaultManager] openMetaTagsAtPath:[self path] error:NULL] ?: [NSArray array];
 }
 
-- (void)setOpenMetaTags:(NSArray *)array{
-    if ([array isEqual:[NSNull null]] || [array count] == 0)
-        array = nil;
-    [[NSFileManager defaultManager] setOpenMetaTags:array atPath:[self path] error:NULL];
-}
-
 - (double)openMetaRating{
     return [[[NSFileManager defaultManager] openMetaRatingAtPath:[self path] error:NULL] doubleValue];
-}
-
-- (void)setOpenMetaRating:(double)rating{
-    NSNumber *number = rating > 0.0 ? [NSNumber numberWithDouble:rating] : nil;
-    [[NSFileManager defaultManager] setOpenMetaRating:number atPath:[self path] error:NULL];
 }
 
 #pragma mark Templating
