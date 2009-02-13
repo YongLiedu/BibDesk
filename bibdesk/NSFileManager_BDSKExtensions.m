@@ -830,6 +830,7 @@ static OSType finderSignatureBytes = 'MACS';
 // These are just definitions for special EA names and the format of their values
 // They're saved as serialized property list values, which is the same as SKNExtendedAttributeManager does without splitting and compression
 // See http://code.google.com/p/openmeta/ for some documentation and sample code
+// Probably we should not write them, because really the com.apple.metadata domain is private to Apple, http://ironicsoftware.com/community/comments.php?DiscussionID=632&amp;page=1
 
 - (NSArray *)openMetaTagsAtPath:(NSString *)path error:(NSError **)error {
     return [[SKNExtendedAttributeManager sharedNoSplitManager] propertyListFromExtendedAttributeNamed:OPEN_META_TAGS_KEY atPath:path traverseLink:YES error:error];
