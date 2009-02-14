@@ -103,14 +103,14 @@ void print_error (bt_error *err)
         
         if (err->item_desc && err->item > 0) /* going to print an item number? */
         {
-            [errObj setItemDescription:[NSString stringWithCString:err->item_desc]];
+            [errObj setItemDescription:[NSString stringWithUTF8String:err->item_desc]];
             [errObj setItemNumber:err->item];
         }
         
         name = errclass_names[(int) err->class];
         if (name)
         {
-            [errObj setErrorClassName:[NSString stringWithCString:name]];
+            [errObj setErrorClassName:[NSString stringWithUTF8String:name]];
         }
         
         if (err->class > BTERR_USAGEWARN)
@@ -118,7 +118,7 @@ void print_error (bt_error *err)
         else
             [errObj setIsIgnorableWarning:YES];
         
-        [errObj setErrorMessage:[NSString stringWithCString:err->message]];
+        [errObj setErrorMessage:[NSString stringWithUTF8String:err->message]];
         
         [errObj report];
         [errObj release];
