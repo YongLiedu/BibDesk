@@ -51,9 +51,6 @@
 - (NSString *)fontNamePreferenceKey;
 - (NSString *)fontSizePreferenceKey;
 
-- (void)removeAllTableColumns;
-- (void)scrollRowToCenter:(unsigned int)row;
-- (NSArray *)tableColumnIdentifiers;
 - (IBAction)invertSelection:(id)sender;
 - (NSControlSize)cellControlSize;
 

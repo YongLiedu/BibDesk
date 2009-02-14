@@ -59,6 +59,10 @@
 - (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)index;
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier;
 
+- (void)removeAllTableColumns;
+- (NSArray *)tableColumnIdentifiers;
+- (void)scrollRowToCenter:(unsigned int)row;
+
 @end
 
 
