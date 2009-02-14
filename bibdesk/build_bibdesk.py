@@ -37,7 +37,7 @@ import tempfile
 import shutil
 
 import datetime
-from ftplib import FTP
+import paramiko
 
 import smtplib
 from email.mime.text import MIMEText
@@ -63,13 +63,14 @@ SYMROOT = os.path.join(TEMP_DIR, "symroot")
 # wherever the final app ends up
 BUILT_APP = os.path.join(SYMROOT, "Release", "BibDesk.app")
 
-TEMP_DMG=os.path.join(TEMP_DIR, "BibDesk.dmg")
+TEMP_DMG = os.path.join(TEMP_DIR, "BibDesk.dmg")
 
 # number of days to keep files on the server
-AGE_LIMIT=14
+AGE_LIMIT = 14
 
 # nightly build ftp server
-HOST_NAME='bibdesk.demokratia.org'
+HOST_NAME = 'michael-mccracken.net'
+SERVER_PATH = "/users/home/michaelmccracken/web/public/bibdesk/nightlies"
 
 # path for error logging (log is e-mailed in case of failure)
 LOG_PATH=os.path.join(TEMP_DIR, "build_bibdesk_py.log")
@@ -242,8 +243,8 @@ def dateFromString(datePart):
 
 def removeOldFiles(ftp):
     try:
-        ftp.cwd("/beta")
-        dirlist = ftp.nlst()
+        ftp.chdir(SERVER_PATH)
+        dirlist = ftp.listdir()
         for fileName in dirlist:
             if fileName.startswith("BibDesk-") and fileName.endswith(".dmg"):
                 datePart = fileName.replace("BibDesk-", "")
@@ -252,10 +253,10 @@ def removeOldFiles(ftp):
                     # check to see how old the file is, based on its name
                     diff = datetime.date.today() - dateFromString(datePart)
                     if diff.days >= AGE_LIMIT:
-                        ftp.delete(fileName)
+                        ftp.unlink(fileName)
                 else:
                     # file had BibDesk- as prefix, so assume it's a bad filename
-                    ftp.delete(fileName)
+                    ftp.unlink(fileName)
     except Exception, e:
         print "Failed deleting old files", e
 
@@ -268,21 +269,24 @@ if len(d["username"]) == 0 or len(d["password"]) == 0:
     exit(1)
 
 # create the ftp object and log in...
-ftp = FTP(HOST_NAME)
-ftp.login(d["username"], d["password"])
-ftp.set_pasv(False)
+t = paramiko.Transport((HOST_NAME, 22))
+t.connect(username=d["username"], password=d["password"])
+sftp = paramiko.SFTPClient.from_transport(t)
+
 
 # remove old files before uploading
-removeOldFiles(ftp)
+removeOldFiles(sftp)
 
 # now try to put the new file in place
 try:
-    ftp.cwd("/beta")
-    ftp.storbinary("STOR " + os.path.basename(imageName), open(imageName, "rb"), 4096)
+    sftp.chdir(SERVER_PATH)
+    sftp.put(imageName, os.path.basename(imageName))
 except Exception, e:
     print "Failed to upload file", e
 finally:
-    ftp.quit()
+    sftp.close()
+    # close the connection or else we don't exit because of a select() loop hanging around
+    t.close()
     removeTemporaryDirectory()
   
 #
