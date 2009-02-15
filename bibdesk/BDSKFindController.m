@@ -1212,7 +1212,7 @@ enum {
                 origStr = @"";
             }
             
-            [bibItem setField:field toValue:[replStr stringByAppendingString:origStr]];
+            [bibItem setField:field toValue:[replStr complexStringByAppendingString:origStr]];
             number++;
             
         }
@@ -1271,7 +1271,7 @@ enum {
                 origStr = @"";
             }
             
-            [bibItem setField:field toValue:[origStr stringByAppendingString:replStr]];
+            [bibItem setField:field toValue:[origStr complexStringByAppendingString:replStr]];
             number++;
             
         }

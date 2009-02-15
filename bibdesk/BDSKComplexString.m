@@ -437,10 +437,10 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	return newString;
 }
 
-- (NSString *)stringByAppendingString:(NSString *)string{
+- (NSString *)complexStringByAppendingString:(NSString *)string{
 	NSString *newString = nil;
     if ([self isComplex] == NO) {
-        newString = [[nodes objectAtIndex:0] stringByAppendingString:string];
+        newString = [[nodes objectAtIndex:0] complexStringByAppendingString:string];
     } else if ([string isEqualAsComplexString:@""]) {
         newString = self;
     } else {
@@ -756,9 +756,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	}
 }
 
-static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
-
-- (NSString *)replacementStringByAppendingString:(NSString *)string{
+- (NSString *)complexStringByAppendingString:(NSString *)string{
     NSString *newString = nil;
     if ([self isEqualToString:@""]) {
         newString = string;
@@ -770,13 +768,9 @@ static id (*originalStringByAppendingString)(id, SEL, id) = NULL;
         [node release];
         [nodes release];
 	} else {
-        newString = originalStringByAppendingString(self, _cmd, string);
+        newString = [self stringByAppendingString:string];
     }
     return newString;
-}
-
-+ (void)didLoad{
-    originalStringByAppendingString = (id (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(stringByAppendingString:), @selector(replacementStringByAppendingString:));
 }
 
 @end
