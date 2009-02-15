@@ -36,7 +36,6 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import "NSCharacterSet_BDSKExtensions.h"
-#import "OFCharacterSet_BDSKExtensions.h"
 
 @implementation NSCharacterSet (BDSKExtensions)
 
