@@ -41,7 +41,6 @@
 @interface OFCharacterSet (BDSKExtensions)
 
 + (OFCharacterSet *)commaCharacterSet;
-+ (OFCharacterSet *)newlineCharacterSet;
 + (OFCharacterSet *)whitespaceCharacterSet;
 
 @end

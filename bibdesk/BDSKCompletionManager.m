@@ -39,7 +39,6 @@
 #import "BDSKCompletionManager.h"
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
-#import "OFCharacterSet_BDSKExtensions.h"
 
 
 @implementation BDSKCompletionManager
@@ -131,7 +130,7 @@ static id sharedManager = nil;
 }
 
 - (NSRange)entry:(NSString *)entry rangeForUserCompletion:(NSRange)charRange ofString:(NSString *)fullString {
-    OFCharacterSet *wsCharSet = [OFCharacterSet whitespaceCharacterSet];
+    NSCharacterSet *wsCharSet = [NSCharacterSet whitespaceCharacterSet];
     NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:entry];
 
 	if ([entry isEqualToString:BDSKEditorString])	

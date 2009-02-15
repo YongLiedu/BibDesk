@@ -41,22 +41,11 @@
 @implementation OFCharacterSet (BDSKExtensions)
 
 static OFCharacterSet *commaCharacterSet = nil;
-static OFCharacterSet *newlineCharacterSet = nil;
 static OFCharacterSet *whitespaceCharacterSet = nil;
 
 + (void)didLoad;
 {
     commaCharacterSet = [[OFCharacterSet alloc] initWithString:@","];
-        
-    // character set with all newline characters (including the weird Unicode ones)
-    // character set with all newline characters (including the weird Unicode ones)
-    CFMutableCharacterSetRef newlineCFCharacterSet = NULL;
-    newlineCFCharacterSet = CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
-    CFCharacterSetInvert(newlineCFCharacterSet); // no whitespace in this one, but it also has all letters...
-    CFCharacterSetIntersect(newlineCFCharacterSet, CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
-    newlineCharacterSet = [[OFCharacterSet alloc] initWithCharacterSet:(NSCharacterSet *)newlineCFCharacterSet];
-    CFRelease(newlineCFCharacterSet);
-    
     // whitespaceOFCharacterSet is too limited
     whitespaceCharacterSet = [[OFCharacterSet alloc] initWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
 }
@@ -64,11 +53,6 @@ static OFCharacterSet *whitespaceCharacterSet = nil;
 + (OFCharacterSet *)commaCharacterSet;
 {
     return commaCharacterSet;
-}
-
-+ (OFCharacterSet *)newlineCharacterSet;
-{
-    return newlineCharacterSet;
 }
 
 + (OFCharacterSet *)whitespaceCharacterSet;
