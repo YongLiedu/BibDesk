@@ -65,11 +65,11 @@
     [super terminate:sender];
 }
 
-// workaround for AppKit bug in target determination for undo in sheets, compare 
+// workaround for Tiger AppKit bug in target determination for undo in sheets, compare 
 // http://developer.apple.com/documentation/Cocoa/Conceptual/NSPersistentDocumentTutorial/08_CreationSheet/chapter_9_section_6.html 
 
 - (id)targetForAction:(SEL)anAction to:(id)aTarget from:(id)sender{
-    if (anAction == @selector(undo:) || anAction == @selector(redo:)) {
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && (anAction == @selector(undo:) || anAction == @selector(redo:))) {
         NSWindow *theKeyWindow = [self keyWindow];
         if ([theKeyWindow isSheet] && [theKeyWindow respondsToSelector:anAction])
             return theKeyWindow;
@@ -78,7 +78,7 @@
 }
 
 - (BOOL)sendAction:(SEL)anAction to:(id)theTarget from:(id)sender{
-    if (anAction == @selector(undo:) || anAction == @selector(redo:)) {
+    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4 && (anAction == @selector(undo:) || anAction == @selector(redo:))) {
         NSWindow *theKeyWindow = [self keyWindow];
         if ([theKeyWindow isSheet] && [theKeyWindow respondsToSelector:anAction])
             return [super sendAction:anAction to:theKeyWindow from:sender];
