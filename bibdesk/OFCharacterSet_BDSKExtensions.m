@@ -40,14 +40,12 @@
 
 @implementation OFCharacterSet (BDSKExtensions)
 
-static OFCharacterSet *curlyBraceCharacterSet = nil;
 static OFCharacterSet *commaCharacterSet = nil;
 static OFCharacterSet *newlineCharacterSet = nil;
 static OFCharacterSet *whitespaceCharacterSet = nil;
 
 + (void)didLoad;
 {
-    curlyBraceCharacterSet = [[OFCharacterSet alloc] initWithString:@"{}"];
     commaCharacterSet = [[OFCharacterSet alloc] initWithString:@","];
         
     // character set with all newline characters (including the weird Unicode ones)
@@ -62,11 +60,6 @@ static OFCharacterSet *whitespaceCharacterSet = nil;
     // whitespaceOFCharacterSet is too limited
     whitespaceCharacterSet = [[OFCharacterSet alloc] initWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
 }
-
-+ (OFCharacterSet *)curlyBraceCharacterSet;
-{  
-    return curlyBraceCharacterSet; 
-}    
 
 + (OFCharacterSet *)commaCharacterSet;
 {

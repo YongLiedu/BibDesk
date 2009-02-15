@@ -40,7 +40,6 @@
 
 @interface OFCharacterSet (BDSKExtensions)
 
-+ (OFCharacterSet *)curlyBraceCharacterSet;
 + (OFCharacterSet *)commaCharacterSet;
 + (OFCharacterSet *)newlineCharacterSet;
 + (OFCharacterSet *)whitespaceCharacterSet;

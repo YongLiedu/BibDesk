@@ -40,7 +40,6 @@
 #import <AGRegex/AGRegex.h>
 #import "BDSKStringConstants.h"
 #import "CFString_BDSKExtensions.h"
-#import "OFCharacterSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSScanner_BDSKExtensions.h"
 #import "html2tex.h"
@@ -228,7 +227,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 }
 
 - (NSString *)stringByRemovingCurlyBraces{
-    return [self stringByRemovingCharactersInOFCharacterSet:[OFCharacterSet curlyBraceCharacterSet]];
+    return [self stringByReplacingCharactersInSet:[NSCharacterSet curlyBraceCharacterSet] withString:@""];
 }
 
 - (NSString *)stringByRemovingTeX{
