@@ -54,7 +54,6 @@
 #import "BDAlias.h"
 #import "BDSKErrorObjectController.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "OFCharacterSet_BDSKExtensions.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKSharingServer.h"
 #import "BDSKPreferenceController.h"
