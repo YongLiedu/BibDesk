@@ -282,7 +282,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
             fields = [fields stringByAppendingString:[sourceXMLTagPriority componentsJoinedByString:@" "]];
         
         // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  Note that the value we're passing as [info database] is referred to as  "edition" in the WoS docs.
-        OFStringScanner *scanner;
+        NSScanner *scanner;
         switch (operation) {
         
         case search:
@@ -306,11 +306,12 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
             break;
         
         case retrieveRecid:
-            scanner = [[[OFStringScanner alloc] initWithString:searchTerm] autorelease];
+            scanner = [[[NSScanner alloc] initWithString:searchTerm] autorelease];
             identifiers = [[[NSMutableArray alloc] init] autorelease];
-            while ([scanner scanUpToCharacterInSet:[NSCharacterSet decimalDigitCharacterSet]]) {
-                NSString *token = [scanner readFullTokenWithDelimiterOFCharacterSet:[OFCharacterSet whitespaceOFCharacterSet]];
-                [identifiers addObject:token];
+            while ([scanner scanUpToCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:NULL]) {
+                NSString *token;
+                if ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&token])
+                    [identifiers addObject:token];
             }
             availableResultsLocal = [identifiers count];
             break;
