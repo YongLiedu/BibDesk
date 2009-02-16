@@ -302,7 +302,7 @@
 
 - (IBAction)alternateCut:(id)sender {
 	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView || firstResponder == [fileSearchController tableView]) {
+	if (firstResponder == tableView) {
 		[tableView copy:sender];
 		[self alternateDelete:sender];
 	}

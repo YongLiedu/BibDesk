@@ -58,7 +58,7 @@
     if ([documentWindow isKeyWindow] == NO)
         return NO;
 	id firstResponder = [documentWindow firstResponder];
-	if ((firstResponder != tableView && firstResponder != [fileSearchController tableView]) ||
+	if (firstResponder != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
         [self hasExternalGroupsSelected] == YES) {
 		// no selection or selection includes shared groups
@@ -74,7 +74,7 @@
     if ([documentWindow isKeyWindow] == NO)
         return NO;
 	id firstResponder = [documentWindow firstResponder];
-	if ((firstResponder != tableView && firstResponder != [fileSearchController tableView]) ||
+	if (firstResponder != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
         [self hasExternalGroupsSelected] == YES) {
 		// no selection
@@ -90,7 +90,7 @@
     if ([documentWindow isKeyWindow] == NO)
         return NO;
 	id firstResponder = [documentWindow firstResponder];
-	if ((firstResponder != tableView && firstResponder != [fileSearchController tableView]) ||
+	if (firstResponder != tableView ||
 		[self numberOfSelectedPubs] == 0) {
 		// no selection
 		return NO;
