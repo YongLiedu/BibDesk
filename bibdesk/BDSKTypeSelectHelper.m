@@ -298,8 +298,8 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
     [self stopTimer];
     processing = NO;
     
-    NSText *fieldEditor = [[NSApp keyWindow] fieldEditor:YES forObject:self];
-    if ([fieldEditor delegate] == self) {
+    NSTextView *fieldEditor = (NSTextView *)[[NSApp keyWindow] fieldEditor:YES forObject:self];
+    if ([fieldEditor delegate] == self && [fieldEditor hasMarkedText]) {
         // we pass a dummy key event to the field editor to clear any hanging dead keys (marked text)
         NSEvent *keyEvent = [NSEvent keyEventWithType:NSKeyDown
                                              location:NSZeroPoint
