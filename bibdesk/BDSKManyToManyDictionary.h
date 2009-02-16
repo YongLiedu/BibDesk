@@ -1,5 +1,5 @@
 //
-//  BDSKMultiValueDictionary.h
+//  BDSKManyToManyDictionary.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 1/18/08.
@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface BDSKMultiValueDictionary : NSObject {
+@interface BDSKManyToManyDictionary : NSObject {
     CFMutableDictionaryRef dictionary;
     CFMutableDictionaryRef inverseDictionary;
 }
@@ -57,6 +57,6 @@
 - (void)addObject:(id)anObject forKeys:(NSSet *)newKeys;
 - (void)removeObject:(id)anObject forKey:(id)aKey;
 - (void)removeAllObjects;
-- (void)addEntriesFromDictionary:(BDSKMultiValueDictionary *)otherDictionary;
+- (void)addEntriesFromDictionary:(BDSKManyToManyDictionary *)otherDictionary;
 
 @end

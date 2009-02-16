@@ -1,5 +1,5 @@
 //
-//  BDSKMultiValueDictionary.m
+//  BDSKManyToManyDictionary.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 1/18/08.
@@ -36,10 +36,10 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKMultiValueDictionary.h"
+#import "BDSKManyToManyDictionary.h"
 
 
-@implementation BDSKMultiValueDictionary
+@implementation BDSKManyToManyDictionary
 
 - (id)init {
     if (self = [super init]) {
@@ -113,7 +113,7 @@
 }
 
 typedef struct _addValueContext {
-    BDSKMultiValueDictionary *dict;
+    BDSKManyToManyDictionary *dict;
     id value;
     BOOL inverse;
 } addValueContext;
@@ -170,7 +170,7 @@ static void addEntryFunction(const void *key, const void *value, void *context) 
     [[ctxt->dict _setForValue:(id)key inverse:ctxt->inverse create:YES] unionSet:(NSSet *)value];
 }
 
-- (void)addEntriesFromDictionary:(BDSKMultiValueDictionary *)otherDictionary {
+- (void)addEntriesFromDictionary:(BDSKManyToManyDictionary *)otherDictionary {
     addValueContext ctxt;
     ctxt.dict = self;
     ctxt.value = nil;

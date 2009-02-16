@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKFileSearchIndex, BDSKThreadSafeMutableArray, BDSKMultiValueDictionary;
+@class BDSKFileSearchIndex, BDSKThreadSafeMutableArray, BDSKManyToManyDictionary;
 
 @protocol BDSKFileSearchIndexDelegate <NSObject>
 
@@ -58,7 +58,7 @@ typedef struct _BDSKSearchIndexFlags
 @interface BDSKFileSearchIndex : NSObject {
     SKIndexRef index;
     CFMutableDataRef indexData;
-    BDSKMultiValueDictionary *identifierURLs;
+    BDSKManyToManyDictionary *identifierURLs;
     NSMutableDictionary *signatures;
     id delegate;
     

@@ -41,7 +41,7 @@
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKThreadSafeMutableArray.h"
-#import "BDSKMultiValueDictionary.h"
+#import "BDSKManyToManyDictionary.h"
 #import "NSObject_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
@@ -113,7 +113,7 @@
         flags.shouldKeepRunning = 1;
         
         // maintain dictionaries mapping URL -> identifierURL, since SKIndex properties are slow; this should be accessed with the rwlock
-        identifierURLs = [[BDSKMultiValueDictionary alloc] init];
+        identifierURLs = [[BDSKManyToManyDictionary alloc] init];
 		pthread_rwlock_init(&rwlock, NULL);
         
         progressValue = 0.0;
@@ -287,7 +287,7 @@ static inline BOOL isIndexCacheForDocumentURL(NSString *path, NSURL *documentURL
 }
 
 static void addItemFunction(const void *value, void *context) {
-    BDSKMultiValueDictionary *dict = (BDSKMultiValueDictionary *)context;
+    BDSKManyToManyDictionary *dict = (BDSKManyToManyDictionary *)context;
     NSDictionary *item = (NSDictionary *)value;
     NSURL *identifierURL = [item objectForKey:@"identifierURL"];
     NSSet *keys = [[NSSet alloc] initWithArray:[item objectForKey:@"urls"]];
