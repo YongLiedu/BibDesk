@@ -521,7 +521,7 @@ The groupedPublications array is a subset of the publications array, developed b
         BDSKGroup *group;
                 
         // now add the group names that we found from our BibItems, using a generic folder icon
-        // use OATextWithIconCell keys
+        // use BDSKTextWithIconCell keys
         while(groupName = [groupEnum nextObject]){
             group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:[countedSet countForObject:groupName]];
             [mutableGroups addObject:group];
