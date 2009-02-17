@@ -190,27 +190,27 @@
         case 0:
             return @"";
         case 1:
-            return [self objectAtIndex:0];
+            return [[self objectAtIndex:0] description];
         case 2:
             return [self componentsJoinedByString:@" & "];
         default:
-            return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[self lastObject]];
+            return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[[self lastObject] description]];
     }
 }
 
 - (NSString *)componentsWithEtAlAfterOne
 {
-    return [self count] > 1 ? [[self firstObject] stringByAppendingString:@" et al."] : [self firstObject];
+    return [self count] > 1 ? [NSString stringWithFormat:@"%@ et al.", [self objectAtIndex:0]] : [[self firstObject] description];
 }
 
 - (NSString *)componentsJoinedByAndWithSingleEtAlAfterTwo
 {
-    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByAnd];
+    return [self count] > 2 ? [NSString stringWithFormat:@"%@ et al.", [self objectAtIndex:0]] : [self componentsJoinedByAnd];
 }
 
 - (NSString *)componentsJoinedByCommaAndAndWithSingleEtAlAfterThree
 {
-    return [self count] > 3 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByCommaAndAnd];
+    return [self count] > 3 ? [NSString stringWithFormat:@"%@ et al.", [self objectAtIndex:0]] : [self componentsJoinedByCommaAndAnd];
 }
 
 - (NSString *)componentsJoinedByAndWithEtAlAfterTwo
@@ -225,12 +225,12 @@
 
 - (NSString *)componentsJoinedByAmpersandWithSingleEtAlAfterTwo
 {
-    return [self count] > 2 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByString:@" & "];
+    return [self count] > 2 ? [NSString stringWithFormat:@"%@ et al.", [self objectAtIndex:0]] : [self componentsJoinedByString:@" & "];
 }
 
 - (NSString *)componentsJoinedByCommaAndAmpersandWithSingleEtAlAfterFive
 {
-    return [self count] > 5 ? [[self firstObject] stringByAppendingString:@" et al."] : [self componentsJoinedByCommaAndAmpersand];
+    return [self count] > 5 ? [NSString stringWithFormat:@"%@ et al.", [self objectAtIndex:0]] : [self componentsJoinedByCommaAndAmpersand];
 }
 
 - (NSString *)componentsJoinedByCommaAndAmpersandWithEtAlAfterSix
