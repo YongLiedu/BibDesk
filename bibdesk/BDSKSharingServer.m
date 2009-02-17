@@ -600,7 +600,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         }
         [pubs removeAllObjects];
     }
-    [pubs addObjectsFromSet:set];
+    [pubs addObjectsFromArray:[set allObjects]];
     [set release];
     return pubs;
 }

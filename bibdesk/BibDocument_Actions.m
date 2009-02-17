@@ -1679,7 +1679,11 @@
         // Tests equality based on standard fields (high probability that these will be duplicates)
         countOfItems = [pubsToRemove count];
         NSSet *uniquePubs = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &callBacks);
-        [pubsToRemove removeIdenticalObjectsFromArray:[uniquePubs allObjects]]; // remove all unique ones based on pointer equality
+        NSEnumerator *pubEnum = [uniquePubs objectEnumerator];
+        BibItem *pub;
+        // remove all unique ones based on pointer equality
+        while (pub = [pubEnum nextObject])
+            [pubsToRemove removeObjectIdenticalTo:pub];
         [uniquePubs release];
         
         // original buffer should be large enough, since we've only removed items from pubsToRemove
