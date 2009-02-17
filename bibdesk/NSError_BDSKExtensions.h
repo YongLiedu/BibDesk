@@ -63,12 +63,14 @@ extern NSString *BDSKUnderlyingItemErrorKey;
 
 @interface NSError (BDSKExtensions) <NSMutableCopying>
 
-+ (id)mutableErrorWithDomain:(NSString *)domain code:(int)code userInfo:(NSDictionary *)dict;
-
 // returns the BibDesk-specific error domain
 + (NSString *)localErrorDomain;
 
+// returns BibDesk-specific errors that don't allow valueForKey: and setValue:forKey: usage
++ (id)localErrorWithCode:(int)code localizedDescription:(NSString *)description;
+
 // returns BibDesk-specific errors that can allow valueForKey: and setValue:forKey: usage
++ (id)mutableErrorWithDomain:(NSString *)domain code:(int)code userInfo:(NSDictionary *)dict;
 + (id)mutableLocalErrorWithCode:(int)code localizedDescription:(NSString *)description;
 + (id)mutableLocalErrorWithCode:(int)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
 

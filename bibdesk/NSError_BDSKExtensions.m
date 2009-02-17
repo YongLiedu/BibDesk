@@ -123,21 +123,24 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
     return [[self domain] isEqualToString:[NSError localErrorDomain]];
 }
 
++ (id)localErrorWithCode:(int)code localizedDescription:(NSString *)description;
+{
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, nil];
+    return [[[self alloc] initWithDomain:[NSError localErrorDomain] code:code userInfo:userInfo] autorelease];
+}
+
 + (id)mutableLocalErrorWithCode:(int)code localizedDescription:(NSString *)description;
 {
-    [[self init] release];
     return [[[BDSKMutableError alloc] initLocalErrorWithCode:code localizedDescription:description] autorelease];
 }
 
 + (id)mutableErrorWithDomain:(NSString *)domain code:(int)code userInfo:(NSDictionary *)dict;
 {
-    [[self init] release];
     return [[[BDSKMutableError alloc] initWithDomain:domain code:code userInfo:dict] autorelease];
 }
 
 + (id)mutableLocalErrorWithCode:(int)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
 {
-    [[self init] release];
     id error = [NSError mutableLocalErrorWithCode:code localizedDescription:description];
     [error embedError:underlyingError];
     return error;
