@@ -38,7 +38,7 @@
 
 #import "BDSKHeaderPopUpButtonCell.h"
 #import "NSGeometry_BDSKExtensions.h"
-#import <OmniAppkit/OmniAppKit.h>
+#import "NSImage_BDSKExtensions.h"
 
 
 @implementation BDSKHeaderPopUpButtonCell
@@ -145,10 +145,7 @@
 		
         indicatorRect = BDSKCenterRect(indicatorRect, indicatorSize, [controlView isFlipped]);
 		
-		if ([controlView isFlipped])
-			[indicatorImage drawFlippedInRect:indicatorRect operation:NSCompositeSourceOver];
-		else
-			[indicatorImage drawInRect:indicatorRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+		[indicatorImage drawFlipped:[controlView isFlipped] inRect:indicatorRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 	}
 	
 	// Two little arrows. We could also use some image here

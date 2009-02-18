@@ -432,4 +432,23 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
     return toReturn;    
 }
 
+- (void)drawFlippedInRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(float)delta {
+    [NSGraphicsContext saveGraphicsState];
+    NSAffineTransform *transform = [NSAffineTransform transform];
+    [transform translateXBy:NSMaxX(dstRect) yBy:0.0];
+    [transform scaleXBy:-1.0 yBy:1.0];
+    [transform translateXBy:-NSMinX(dstRect) yBy:0.0];
+    [transform concat];
+    [self drawInRect:dstRect fromRect:srcRect operation:op fraction:delta];
+    [NSGraphicsContext restoreGraphicsState];
+}
+
+- (void)drawFlipped:(BOOL)isFlipped inRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(float)delta {
+    if (isFlipped) {
+        [self drawFlippedInRect:dstRect fromRect:srcRect operation:op fraction:delta];
+    } else {
+        [self drawInRect:dstRect fromRect:srcRect operation:op fraction:delta];
+    }
+}
+
 @end

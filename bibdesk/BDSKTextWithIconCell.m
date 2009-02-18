@@ -147,10 +147,7 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
         // this is the critical part that NSImageCell doesn't do
         [ctxt setImageInterpolation:NSImageInterpolationHigh];
         
-        if ([controlView isFlipped])
-            [img drawFlippedInRect:drawFrame fromRect:srcRect operation:NSCompositeSourceOver fraction:1.0];
-        else
-            [img drawInRect:drawFrame fromRect:srcRect operation:NSCompositeSourceOver fraction:1.0];
+        [img drawFlipped:[controlView isFlipped] inRect:drawFrame fromRect:srcRect operation:NSCompositeSourceOver fraction:1.0];
         
         [ctxt restoreGraphicsState];
     }
