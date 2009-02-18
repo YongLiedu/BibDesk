@@ -34,11 +34,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKPreferencePane.h"
 
 @class BDSKMacroWindowController;
 
-@interface BibPref_Defaults : OAPreferenceClient
+@interface BibPref_Defaults : BDSKPreferencePane
 {
     IBOutlet NSButton* convertURLFieldsButton;
     IBOutlet NSButton* removeLocalFileFieldsButton;
@@ -72,6 +72,8 @@
 - (IBAction)addGlobalMacroFile:(id)sender;
 - (IBAction)delGlobalMacroFiles:(id)sender;
 - (IBAction)changeDefaultPDFViewer:(id)sender;
+
+- (void)updateUI;
 
 @end
 

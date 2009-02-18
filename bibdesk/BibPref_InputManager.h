@@ -38,9 +38,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKPreferencePane.h"
 
-@interface BibPref_InputManager : OAPreferenceClient
+@class OAGradientTableView;
+
+@interface BibPref_InputManager : BDSKPreferencePane
 {
     IBOutlet OAGradientTableView *tableView;
     IBOutlet NSButton *enableButton;
@@ -48,6 +50,8 @@
     NSString *inputManagerPath;
     NSMutableArray *applications;
 }
+
+- (void)updateUI;
 
 - (void)addApplicationsWithIdentifiers:(NSArray *)identifiers;
 - (void)synchronizePreferences;

@@ -37,11 +37,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKPreferencePane.h"
 
 @class BDSKEncodingPopUpButton;
 
-@interface BibPref_Files : OAPreferenceClient {
+@interface BibPref_Files : BDSKPreferencePane {
     IBOutlet NSButton *showErrorsCheckButton;
     IBOutlet BDSKEncodingPopUpButton *encodingPopUp;
     IBOutlet NSButton *shouldTeXifyCheckButton;

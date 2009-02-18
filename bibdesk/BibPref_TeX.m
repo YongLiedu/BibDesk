@@ -35,8 +35,6 @@
  */
 
 #import "BibPref_TeX.h"
-#import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/OAPreferenceClientRecord.h>
 #import "BDSKStringConstants.h"
 #import "BDSKAppController.h"
 #import "BDSKStringEncodingManager.h"
@@ -45,6 +43,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKShellCommandFormatter.h"
 #import "BDSKStringConstants.h"
+#import "BDSKPreferenceController.h"
 
 #define BDSK_TEX_DOWNLOAD_URL @"http://tug.org/mactex/"
 
@@ -60,8 +59,6 @@ static NSSet *standardStyles = nil;
 }
 
 - (void)awakeFromNib{
-    [super awakeFromNib];
-    
     BDSKShellCommandFormatter *formatter = [[BDSKShellCommandFormatter alloc] init];
     [texBinaryPathField setFormatter:formatter];
     [texBinaryPathField setDelegate:self];
@@ -71,7 +68,7 @@ static NSSet *standardStyles = nil;
 }
 
 - (void)updateTeXPathUI{
-    NSString *teXPath = [defaults objectForKey:BDSKTeXBinPathKey];
+    NSString *teXPath = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey];
     [texBinaryPathField setStringValue:teXPath];
     if ([BDSKShellCommandFormatter isValidExecutableCommand:teXPath])
         [texBinaryPathField setTextColor:[NSColor blackColor]];
@@ -80,7 +77,7 @@ static NSSet *standardStyles = nil;
 }
 
 - (void)updateBibTeXPathUI{
-    NSString *bibTeXPath = [defaults objectForKey:BDSKBibTeXBinPathKey];
+    NSString *bibTeXPath = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBibTeXBinPathKey];
     [bibtexBinaryPathField setStringValue:bibTeXPath];
     if ([BDSKShellCommandFormatter isValidExecutableCommand:bibTeXPath])
         [bibtexBinaryPathField setTextColor:[NSColor blackColor]];
@@ -92,35 +89,32 @@ static NSSet *standardStyles = nil;
     [self updateTeXPathUI];
     [self updateBibTeXPathUI];
     
-    [usesTeXButton setState:[defaults boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
+    [usesTeXButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
   
-    [bibTeXStyleField setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
-    [bibTeXStyleField setEnabled:[defaults boolForKey:BDSKUsesTeXKey]];
-    [encodingPopUpButton setEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncodingKey]];
+    [bibTeXStyleField setStringValue:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey]];
+    [bibTeXStyleField setEnabled:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey]];
+    [encodingPopUpButton setEncoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey]];
 }
 
 -(IBAction)changeTexBinPath:(id)sender{
-    [defaults setObject:[sender stringValue] forKey:BDSKTeXBinPathKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[sender stringValue] forKey:BDSKTeXBinPathKey];
     [self updateTeXPathUI];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)changeBibTexBinPath:(id)sender{
-    [defaults setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
     [self updateBibTeXPathUI];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)changeUsesTeX:(id)sender{
     if ([sender state] == NSOffState) {		
-        [defaults setBool:NO forKey:BDSKUsesTeXKey];
+        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKUsesTeXKey];
 		
 		// hide preview panel if necessary
 		[[BDSKPreviewer sharedPreviewer] hideWindow:self];
     }else{
-        [defaults setBool:YES forKey:BDSKUsesTeXKey];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:BDSKUsesTeXKey];
     }
-    [defaults autoSynchronize];
 }
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error
@@ -130,7 +124,7 @@ static NSSet *standardStyles = nil;
                                    alternateButton:nil
                                        otherButton:nil
                          informativeTextWithFormat:@"%@", error];
-    [alert beginSheetModalForWindow:[controlBox window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+    [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         
     // allow the user to end editing and ignore the warning, since TeX may not be installed
     return YES;
@@ -139,41 +133,26 @@ static NSSet *standardStyles = nil;
 - (void)styleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSString *newStyle = [(id)contextInfo autorelease];
     if (NSAlertDefaultReturn == returnCode) {
-        [defaults setObject:newStyle forKey:BDSKBTStyleKey];
+        [[NSUserDefaults standardUserDefaults] setObject:newStyle forKey:BDSKBTStyleKey];
     } else if (NSAlertAlternateReturn == returnCode) {
-        [bibTeXStyleField setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
+        [bibTeXStyleField setStringValue:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey]];
     } else {
         [self openTeXPreviewFile:self];
     }
-    [defaults autoSynchronize];
 }
 
 - (BOOL)alertShowHelp:(NSAlert *)alert;
 {
-    OAPreferenceController *pc = [OAPreferenceController sharedPreferenceController];
-    NSEnumerator *recordsEnum = [[pc clientRecords] objectEnumerator];
-    
-    // this is crazy, but there's no way to get a client record from a client, since we don't know the identifier or short title
-    OAPreferenceClientRecord *record;
-    while(record = [recordsEnum nextObject]) {
-        if ([[record title] isEqualToString:title])
-            break;
-    }
-    if (record) {
-        NSString *helpAnchor = [record helpURL];
-        NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-        [[NSHelpManager sharedHelpManager] openHelpAnchor:helpAnchor inBook:helpBookName];
-    }
+    [preferenceController showHelp:nil];
     return YES;
 }
 
 - (IBAction)changeStyle:(id)sender{
     NSString *newStyle = [sender stringValue];
-    NSString *oldStyle = [defaults stringForKey:BDSKBTStyleKey];
+    NSString *oldStyle = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBTStyleKey];
     if ([newStyle isEqualToString:oldStyle] == NO) {
         if ([standardStyles containsObject:newStyle]){
-            [defaults setObject:[sender stringValue] forKey:BDSKBTStyleKey];
-            [defaults autoSynchronize];
+            [[NSUserDefaults standardUserDefaults] setObject:[sender stringValue] forKey:BDSKBTStyleKey];
         } else {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"This is a not a standard BibTeX style", @"Message in alert dialog")
                                              defaultButton:NSLocalizedString(@"Use Anyway", @"Button title")
@@ -183,7 +162,7 @@ static NSSet *standardStyles = nil;
             // for the help delegate method
             [alert setShowsHelp:YES];
             [alert setDelegate:self];
-            [alert beginSheetModalForWindow:[[self controlBox] window]
+            [alert beginSheetModalForWindow:[[self view] window]
                               modalDelegate:self
                              didEndSelector:@selector(styleAlertDidEnd:returnCode:contextInfo:)
                                 contextInfo:[newStyle copy]];
@@ -216,7 +195,7 @@ static NSSet *standardStyles = nil;
                                        alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                            otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @"Informative text in alert dialog")];
-        [alert beginSheetModalForWindow:[[self controlBox] window]
+        [alert beginSheetModalForWindow:[[self view] window]
                           modalDelegate:self
                          didEndSelector:@selector(openTemplateFailureSheetDidEnd:returnCode:path:)
                             contextInfo:[[url path] retain]];
@@ -242,7 +221,7 @@ static NSSet *standardStyles = nil;
 								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
 									   otherButton:nil 
 						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will revert the TeX template file to its original content.", @"Informative text in alert dialog")];
-	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+	[alert beginSheetModalForWindow:[[self view] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) 
 						contextInfo:NULL];
@@ -253,8 +232,7 @@ static NSSet *standardStyles = nil;
 }
 
 - (IBAction)changeDefaultTeXEncoding:(id)sender{
-    [defaults setInteger:[(BDSKEncodingPopUpButton *)sender encoding] forKey:BDSKTeXPreviewFileEncodingKey];        
-    [defaults autoSynchronize];
+    [[NSUserDefaults standardUserDefaults] setInteger:[(BDSKEncodingPopUpButton *)sender encoding] forKey:BDSKTeXPreviewFileEncodingKey];        
 }
 
 

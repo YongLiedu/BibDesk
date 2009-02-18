@@ -65,7 +65,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)awakeFromNib{
-    [super awakeFromNib];
 	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:BDSKLocalFileString fileType:BDSKBibtexString];
     [formatSheetField setFormatter:formatter];
 	[formatter release];
@@ -81,16 +80,16 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)updateUI{
-    NSString *formatString = [formatSheetField currentEditor] ? [formatSheetField stringValue] : [defaults stringForKey:BDSKLocalFileFormatKey];
+    NSString *formatString = [formatSheetField currentEditor] ? [formatSheetField stringValue] : [[NSUserDefaults standardUserDefaults] stringForKey:BDSKLocalFileFormatKey];
 	NSAttributedString *attrFormat = nil;
-    int formatPresetChoice = [defaults integerForKey:BDSKLocalFileFormatPresetKey];
+    int formatPresetChoice = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKLocalFileFormatPresetKey];
 	BOOL custom = (formatPresetChoice == 0);
     NSString * error;
-	NSString *papersFolder = [[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath];
+	NSString *papersFolder = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath];
 	NSRect frame;
 	
-    [filePapersAutomaticallyCheckButton setState:[defaults boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
-    [warnOnMoveFolderCheckButton setState:[defaults boolForKey:BDSKWarnOnMoveFolderKey] ? NSOnState : NSOffState];
+    [filePapersAutomaticallyCheckButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
+    [warnOnMoveFolderCheckButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnMoveFolderKey] ? NSOnState : NSOffState];
 
     if ([NSString isEmptyString:papersFolder]) {
 		[papersFolderLocationTextField setStringValue:USE_DOCUMENT_FOLDER];
@@ -104,8 +103,8 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[papersFolderLocationRadio selectCellWithTag:0];
 	}
 
-    [formatLowercaseCheckButton setState:[defaults boolForKey:BDSKLocalFileLowercaseKey] ? NSOnState : NSOffState];
-    [formatCleanRadio selectCellWithTag:[defaults integerForKey:BDSKLocalFileCleanOptionKey]];
+    [formatLowercaseCheckButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKLocalFileLowercaseKey] ? NSOnState : NSOffState];
+    [formatCleanRadio selectCellWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKLocalFileCleanOptionKey]];
 	
 	if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
@@ -117,7 +116,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 			frame.size.width = MAX_PREVIEW_WIDTH;
 			[previewTextField setFrame:frame];
 		}
-		[controlBox setNeedsDisplay:YES];
+		[[self view] setNeedsDisplay:YES];
 	} else {
 		[self setLocalUrlFormatInvalidWarning:YES message:error];
 		[previewTextField setStringValue:NSLocalizedString(@"Invalid Format", @"Preview for invalid autogeneration format")];
@@ -139,8 +138,8 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (IBAction)setPapersFolderPathFromTextField:(id)sender{
-    [defaults setObject:[[sender stringValue] stringByStandardizingPath] forKey:BDSKPapersFolderPathKey];
-    [self valuesHaveChanged];
+    [[NSUserDefaults standardUserDefaults] setObject:[[sender stringValue] stringByStandardizingPath] forKey:BDSKPapersFolderPathKey];
+    [self updateUI];
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender{
@@ -154,7 +153,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     [openPanel beginSheetForDirectory:nil 
 								 file:nil
 								types:nil
-					   modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+					   modalForWindow:[[self view] window] 
 						modalDelegate:self 
 					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
 						  contextInfo:NULL];
@@ -163,38 +162,35 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if (returnCode == NSOKButton) {
 		NSString *path = [[sheet filenames] objectAtIndex: 0];
-		[defaults setObject:path forKey:BDSKPapersFolderPathKey];
+		[[NSUserDefaults standardUserDefaults] setObject:path forKey:BDSKPapersFolderPathKey];
 	}
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)papersFolderLocationAction:(id)sender{
 	if ([[sender selectedCell] tag] == 0) {
         if ([NSString isEmptyString:lastPapersFolderPath]) {
             [self choosePapersFolderLocationAction:sender];
-            [defaults autoSynchronize];
         } else {
-            [defaults setObject:lastPapersFolderPath forKey:BDSKPapersFolderPathKey];
-            [self valuesHaveChanged];
+            [[NSUserDefaults standardUserDefaults] setObject:lastPapersFolderPath forKey:BDSKPapersFolderPathKey];
+            [self updateUI];
         }
 	} else {
         [lastPapersFolderPath release];
-        lastPapersFolderPath = [[defaults objectForKey:BDSKPapersFolderPathKey] retain];
-		[defaults setObject:@"" forKey:BDSKPapersFolderPathKey];
-		[self valuesHaveChanged];
+        lastPapersFolderPath = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKPapersFolderPathKey] retain];
+		[[NSUserDefaults standardUserDefaults] setObject:@"" forKey:BDSKPapersFolderPathKey];
+		[self updateUI];
 	}
 }
 
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender{
-	[defaults setBool:([filePapersAutomaticallyCheckButton state] == NSOnState)
+	[[NSUserDefaults standardUserDefaults] setBool:([filePapersAutomaticallyCheckButton state] == NSOnState)
 			   forKey:BDSKFilePapersAutomaticallyKey];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)toggleWarnOnMoveFolderAction:(id)sender{
-	[defaults setBool:([warnOnMoveFolderCheckButton state] == NSOnState)
+	[[NSUserDefaults standardUserDefaults] setBool:([warnOnMoveFolderCheckButton state] == NSOnState)
 			   forKey:BDSKWarnOnMoveFolderKey];
-    [defaults autoSynchronize];
 }
 
 // presently just used to display the warning if the path for autofile was invalid
@@ -205,7 +201,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
                                        alternateButton:nil
                                            otherButton:nil
                              informativeTextWithFormat:@"%@", error];
-        [alert beginSheetModalForWindow:[[self controlBox] window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     return NO;
 }
@@ -223,13 +219,12 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (IBAction)changeLocalUrlLowercase:(id)sender{
-    [defaults setBool:([sender state] == NSOnState) forKey:BDSKLocalFileLowercaseKey];
-	[self valuesHaveChanged];
+    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKLocalFileLowercaseKey];
+	[self updateUI];
 }
 
 - (IBAction)setFormatCleanOption:(id)sender{
-	[defaults setInteger:[[sender selectedCell] tag] forKey:BDSKLocalFileCleanOptionKey];
-    [defaults autoSynchronize];
+	[[NSUserDefaults standardUserDefaults] setInteger:[[sender selectedCell] tag] forKey:BDSKLocalFileCleanOptionKey];
 }
 
 - (IBAction)localUrlFormatAdd:(id)sender{
@@ -250,7 +245,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[formatSheetField setStringValue:[formatString stringByAppendingString:newSpecifier]];
 	}
 	
-	// this handles the new defaults and the UI update
+	// this handles the new [NSUserDefaults standardUserDefaults] and the UI update
 	[self localUrlFormatChanged:sender];
 	
 	// select the 'arbitrary' numbers
@@ -276,9 +271,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	
 	if (sender == formatPresetPopUp || sender == formatPresetSheetPopUp) {
 		presetChoice = [[sender selectedItem] tag];
-		if (presetChoice == [defaults integerForKey:BDSKLocalFileFormatPresetKey]) 
+		if (presetChoice == [[NSUserDefaults standardUserDefaults] integerForKey:BDSKLocalFileFormatPresetKey]) 
 			return; // nothing changed
-		[defaults setInteger:presetChoice forKey:BDSKLocalFileFormatPresetKey];
+		[[NSUserDefaults standardUserDefaults] setInteger:presetChoice forKey:BDSKLocalFileFormatPresetKey];
 		if (presetChoice > 0) {
 			formatString = presetFormatStrings[presetChoice - 1];
 		} else if (presetChoice == 0) {
@@ -289,15 +284,15 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 			return;
 		}
 		// this one is always valid
-		[defaults setObject:formatString forKey:BDSKLocalFileFormatKey];
+		[[NSUserDefaults standardUserDefaults] setObject:formatString forKey:BDSKLocalFileFormatKey];
 	}
 	else { //changed the text field or added from the repository
 		NSString *error = nil;
 		NSAttributedString *attrFormat = nil;
 		formatString = [formatSheetField stringValue];
-		//if ([formatString isEqualToString:[defaults stringForKey:BDSKLocalFileFormatKey]]) return; // nothing changed
+		//if ([formatString isEqualToString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKLocalFileFormatKey]]) return; // nothing changed
 		if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
-			[defaults setObject:formatString forKey:BDSKLocalFileFormatKey];
+			[[NSUserDefaults standardUserDefaults] setObject:formatString forKey:BDSKLocalFileFormatKey];
 		}
 		else {
 			[self setLocalUrlFormatInvalidWarning:YES message:error];
@@ -306,25 +301,30 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		}
 	}
 	[[NSApp delegate] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 #pragma mark Format sheet stuff
 
 - (IBAction)showFormatSheet:(id)sender{
-	if ([[self controlBox] window]) {
+	if ([[self view] window]) {
         [NSApp beginSheet:formatSheet
-           modalForWindow:[[self controlBox] window]
+           modalForWindow:[[self view] window]
             modalDelegate:self
            didEndSelector:NULL
               contextInfo:nil];
     }
 }
 
-- (void)didBecomeCurrentPreferenceClient {
-    [super didBecomeCurrentPreferenceClient];
+- (void)didSelect {
+    [super didSelect];
     if ([formatWarningButton isHidden] == NO && [formatSheet isVisible] == NO)
         [self showFormatSheet:self];
+}
+
+- (void)didShowWindow {
+    [super didShowWindow];
+    [self didSelect];
 }
 
 - (BOOL)canCloseFormatSheet{
@@ -338,7 +338,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) 
 		return YES;
 	
-	formatString = [defaults stringForKey:BDSKLocalFileFormatKey];
+	formatString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKLocalFileFormatKey];
 	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:NULL]) {
 		// The currently set local-url format is valid, so we can keep it 
 		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
@@ -355,8 +355,8 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[formatSheetField selectText:self];
 		return NO;
 	} else if (rv == NSAlertAlternateReturn){
-		formatString = [[OFPreference preferenceForKey:BDSKLocalFileFormatKey] defaultObjectValue];
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalFileFormatKey];
+		formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKLocalFileFormatKey];
+		[[NSUserDefaults standardUserDefaults] setObject:formatString forKey:BDSKLocalFileFormatKey];
 		[[NSApp delegate] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 	}
 	[self updateUI];

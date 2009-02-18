@@ -1,9 +1,11 @@
-// BibPref_Cite.h
-// BibDesk
-// Created by Michael McCracken, 2002
+//
+//  BDSKPreferenceWindow.m
+//  Bibdesk
+//
+//  Created by Christiaan Hofman on 2/17/09.
 /*
- This software is Copyright (c) 2002-2009
- Michael O. McCracken. All rights reserved.
+ This software is Copyright (c) 2009
+ Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -17,7 +19,7 @@
     the documentation and/or other materials provided with the
     distribution.
 
- - Neither the name of Michael O. McCracken nor the names of any
+ - Neither the name of Christiaan Hofman nor the names of any
     contributors may be used to endorse or promote products derived
     from this software without specific prior written permission.
 
@@ -33,35 +35,22 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#import <Cocoa/Cocoa.h>
-#import "BDSKPreferencePane.h"
 
-@interface BibPref_Cite : BDSKPreferencePane
-{
-    IBOutlet NSPopUpButton* defaultDragCopyPopup;
-    IBOutlet NSPopUpButton* defaultDragCopyTemplatePopup;
-    IBOutlet NSPopUpButton* alternateDragCopyPopup;
-    IBOutlet NSPopUpButton* alternateDragCopyTemplatePopup;
-    
-    IBOutlet NSTextField* citeBehaviorLine; /*! for feedback */
-    IBOutlet NSTextField* citeStringField; /*! for user input */
-    IBOutlet NSButton* separateCiteCheckButton;
-    IBOutlet NSButton* prependTildeCheckButton;
-	IBOutlet NSMatrix* citeBracketRadio;
+#import "BDSKPreferenceWindow.h"
+
+
+@implementation BDSKPreferenceWindow
+
+- (void)toggleToolbarShown:(id)sender {}
+- (void)runToolbarCustomizationPalette:(id)sender {}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem action] == @selector(toggleToolbarShown:) || [menuItem action] == @selector(runToolbarCustomizationPalette:))
+        return NO;
+    else if ([[BDSKPreferenceWindow superclass] instancesRespondToSelector:_cmd])
+        return [super validateMenuItem:menuItem];
+    else
+        return YES;
 }
 
-- (IBAction)changeDefaultDragCopyFormat:(id)sender;
-- (IBAction)changeDefaultDragCopyTemplate:(id)sender;
-- (IBAction)changeAlternateDragCopyFormat:(id)sender;
-- (IBAction)changeAlternateDragCopyTemplate:(id)sender;
-- (IBAction)changeSeparateCite:(id)sender;
-- (IBAction)changePrependTilde:(id)sender;
-- (IBAction)citeStringFieldChanged:(id)sender;
-- (IBAction)setCitationBracketStyle:(id)sender;
-
-- (void)handleTemplatePrefsChanged;
-
-@end
-
-@interface BDSKDragCopyCiteKeyFormatter : NSFormatter
 @end

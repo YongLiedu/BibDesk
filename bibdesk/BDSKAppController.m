@@ -120,7 +120,10 @@ static void fixLegacyTableColumnIdentifiers()
 + (void)initialize
 {
     OBINITIALIZE;
-        
+    
+    // this loads the inital values for the prefs
+    [BDSKPreferenceController sharedPreferenceController];
+    
     // make sure we use Spotlight's plugins on 10.4 and later
     SKLoadDefaultExtractorPlugIns();
 
@@ -841,7 +844,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }
 
 - (IBAction)showPreferencePanel:(id)sender{
-    [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:sender];
+    [[BDSKPreferenceController sharedPreferenceController] showWindow:sender];
 }
 
 - (IBAction)toggleShowingErrorPanel:(id)sender{

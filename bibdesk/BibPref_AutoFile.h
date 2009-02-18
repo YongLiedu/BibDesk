@@ -38,11 +38,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKPreferencePane.h"
 
 @class BDSKFormatStringFieldEditor;
 
-@interface BibPref_AutoFile : OAPreferenceClient {
+@interface BibPref_AutoFile : BDSKPreferencePane {
     IBOutlet NSPanel *formatSheet;
 	IBOutlet NSTextField* papersFolderLocationTextField;
 	IBOutlet NSButton* choosePapersFolderLocationButton;

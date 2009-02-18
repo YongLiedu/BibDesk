@@ -47,7 +47,6 @@
 @implementation BibPref_ScriptHooks
 
 - (void)awakeFromNib{
-    [super awakeFromNib];
 	[tableView setTarget:self];
 	[tableView setDoubleAction:@selector(showOrChooseScriptFile:)];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
@@ -69,7 +68,7 @@
     [openPanel beginSheetForDirectory:directory 
 								 file:nil
 								types:[NSArray arrayWithObjects:@"scpt", @"scptd", @"applescript", nil] 
-					   modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+					   modalForWindow:[[self view] window] 
 						modalDelegate:self 
 					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
 						  contextInfo:NULL];
@@ -85,10 +84,10 @@
 
 	int row = [tableView selectedRow]; // cannot be -1
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey]];
 	[dict setObject:path forKey:name];
-	[defaults setObject:dict forKey:BDSKScriptHooksKey];
-	[self valuesHaveChanged];
+	[[NSUserDefaults standardUserDefaults] setObject:dict forKey:BDSKScriptHooksKey];
+	[self updateUI];
 }
 
 - (IBAction)removeScriptHook:(id)sender{
@@ -96,10 +95,10 @@
 	if (row == -1) return;
 	
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey]];
 	[dict removeObjectForKey:name];
-	[defaults setObject:dict forKey:BDSKScriptHooksKey];
-	[self valuesHaveChanged];
+	[[NSUserDefaults standardUserDefaults] setObject:dict forKey:BDSKScriptHooksKey];
+	[self updateUI];
 }
 
 - (void)showOrChooseScriptFile:(id)sender {
@@ -109,7 +108,7 @@
 		return;
 	
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSString *path = [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
+	NSString *path = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	
 	if ([NSString isEmptyString:path]) {
 		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -136,7 +135,7 @@
 	if([colID isEqualToString:@"name"]){
 		return name;
 	}else{
-		return [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
+		return [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	}
 }
 
@@ -147,12 +146,12 @@
 		return nil;
 	
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSString *path = [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
+	NSString *path = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	
 	if ([NSString isEmptyString:path])
 		return NSLocalizedString(@"No script hook associated with this action. Doubleclick or use the \"+\" button to add one.", @"Tooltip message");
 	else
-		return [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
+		return [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
@@ -174,10 +173,10 @@
     if (type) {
         NSString *path = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
         NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
+        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey]];
         [dict setObject:path forKey:name];
-        [defaults setObject:dict forKey:BDSKScriptHooksKey];
-        [self valuesHaveChanged];
+        [[NSUserDefaults standardUserDefaults] setObject:dict forKey:BDSKScriptHooksKey];
+        [self updateUI];
         return YES;
     }
     return NO;
@@ -198,13 +197,13 @@
 - (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
     if ([rows count]) {
         NSArray *names = [BDSKScriptHookManager scriptHookNames];
-        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
+        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey]];
         NSEnumerator *rowEnum = [rows objectEnumerator];
         NSNumber *row;
         while (row = [rowEnum nextObject])
             [dict removeObjectForKey:[names objectAtIndex:[row intValue]]];
-        [defaults setObject:dict forKey:BDSKScriptHooksKey];
-        [self valuesHaveChanged];
+        [[NSUserDefaults standardUserDefaults] setObject:dict forKey:BDSKScriptHooksKey];
+        [self updateUI];
     }
 }
 

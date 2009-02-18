@@ -49,8 +49,6 @@
 
 - (void)awakeFromNib
 {
-    [super awakeFromNib];
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingNameChanged:) name:BDSKSharingNameChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleClientConnectionsChanged:) name:BDSKClientConnectionsChangedNotification object:nil];
     
@@ -81,14 +79,14 @@
 
 - (void)updateUI
 {
-    [enableSharingButton setState:[defaults boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
-    [enableBrowsingButton setState:[defaults boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
-    [usePasswordButton setState:[defaults boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
-    [passwordField setEnabled:[defaults boolForKey:BDSKSharingRequiresPasswordKey]];
+    [enableSharingButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
+    [enableBrowsingButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
+    [usePasswordButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
+    [passwordField setEnabled:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKSharingRequiresPasswordKey]];
     
     [sharedNameField setStringValue:[BDSKSharingServer sharingName]];
     NSString *statusMessage = nil;
-    if([defaults boolForKey:BDSKShouldShareFilesKey]){
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShareFilesKey]){
         unsigned int number = [[BDSKSharingServer defaultServer] numberOfConnections];
         if(number == 1)
             statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
@@ -102,8 +100,8 @@
 
 - (IBAction)togglePassword:(id)sender
 {
-    [defaults setBool:([sender state] == NSOnState) forKey:BDSKSharingRequiresPasswordKey];
-    [self valuesHaveChanged];
+    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKSharingRequiresPasswordKey];
+    [self updateUI];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
 }
 
@@ -116,16 +114,15 @@
 // setting to the empty string will restore the default
 - (IBAction)changeSharedName:(id)sender
 {
-    [defaults setObject:[sender stringValue] forKey:BDSKSharingNameKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[sender stringValue] forKey:BDSKSharingNameKey];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:self];
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 - (IBAction)toggleBrowsing:(id)sender
 {
     BOOL flag = ([sender state] == NSOnState);
-    [defaults setBool:flag forKey:BDSKShouldLookForSharedFilesKey];
-    [defaults autoSynchronize];
+    [[NSUserDefaults standardUserDefaults] setBool:flag forKey:BDSKShouldLookForSharedFilesKey];
     if(flag == YES)
         [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
     else
@@ -139,9 +136,9 @@
     else
         [[BDSKSharingServer defaultServer] disableSharing];
 
-    [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldShareFilesKey];
+    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKShouldShareFilesKey];
     
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 @end

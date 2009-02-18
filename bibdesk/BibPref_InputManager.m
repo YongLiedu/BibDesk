@@ -40,6 +40,7 @@
 
 #import "BibPref_InputManager.h"
 #import <OmniFoundation/OmniFoundation.h>
+#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
 #import "NSImage_BDSKExtensions.h"
@@ -59,8 +60,6 @@ static int tableIconSize = 24;
 @implementation BibPref_InputManager
 
 - (void)awakeFromNib{
-    [super awakeFromNib];
-    
     NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     inputManagerPath = [[libraryPath stringByAppendingPathComponent:@"/InputManagers/BibDeskInputManager"] retain];
 
@@ -152,7 +151,7 @@ static int tableIconSize = 24;
         [enableButton setTitle:isCurrent ? NSLocalizedString(@"Reinstall",@"Button title") : NSLocalizedString(@"Update", @"Button title")];
     
     // this is a hack to show the blue highlight for the tableview, since it keeps losing first responder status
-    [[controlBox window] makeFirstResponder:tableView];
+    [[[self view] window] makeFirstResponder:tableView];
 }
 
 #pragma mark Citekey autocompletion
@@ -189,7 +188,7 @@ static int tableIconSize = 24;
 					 alternateButton:nil
 					     otherButton:nil
 			       informativeTextWithFormat:NSLocalizedString(@"Unable to install plugin at %@, please check file or directory permissions.", @"Informative text in alert dialog"), inputManagerPath];
-	[anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
+	[anAlert beginSheetModalForWindow:[[self view] window]
 			    modalDelegate:nil
 			   didEndSelector:nil
 			      contextInfo:nil];    
@@ -204,7 +203,7 @@ static int tableIconSize = 24;
                                    alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                        otherButton:nil
                          informativeTextWithFormat:NSLocalizedString(@"This will install a plugin bundle in ~/Library/InputManagers/BibDeskInputManager.  If you experience text input problems or strange application behavior after installing the plugin, try removing the \"BibDeskInputManager\" subfolder.", @"Informative text in alert dialog")];
-    [alert beginSheetModalForWindow:[[self controlBox] window]
+    [alert beginSheetModalForWindow:[[self view] window]
                       modalDelegate:self
                      didEndSelector:@selector(enableCompletionSheetDidEnd:returnCode:contextInfo:)
                         contextInfo:NULL];
@@ -219,7 +218,7 @@ static int tableIconSize = 24;
     [op beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory]
 			  file:nil
 			 types:[NSArray arrayWithObject:@"app"]
-		modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
+		modalForWindow:[[self view] window]
 		 modalDelegate:self
 		didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:)
 		   contextInfo:nil];
@@ -240,7 +239,7 @@ static int tableIconSize = 24;
                              alternateButton:nil
                              otherButton:nil
                        informativeTextWithFormat:NSLocalizedString(@"%@ is not a Cocoa application.", @"Informative text in alert dialog"), [[sheet filenames] objectAtIndex:0]];
-            [anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
+            [anAlert beginSheetModalForWindow:[[self view] window]
                     modalDelegate:nil
                        didEndSelector:nil
                       contextInfo:nil];
@@ -256,7 +255,7 @@ static int tableIconSize = 24;
                              alternateButton:nil
                              otherButton:nil
                        informativeTextWithFormat:NSLocalizedString(@"The selected application does not have a bundle identifier.  Please inform the author of %@.", @"Informative text in alert dialog"), [[sheet filenames] objectAtIndex:0]];
-            [anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
+            [anAlert beginSheetModalForWindow:[[self view] window]
                     modalDelegate:nil
                        didEndSelector:nil
                       contextInfo:nil];

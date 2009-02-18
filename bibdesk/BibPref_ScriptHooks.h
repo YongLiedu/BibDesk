@@ -37,9 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKPreferencePane.h"
 
-@interface BibPref_ScriptHooks : OAPreferenceClient {
+@interface BibPref_ScriptHooks : BDSKPreferencePane {
 	IBOutlet NSTableView *tableView;
 	IBOutlet NSButton *addButton;
 	IBOutlet NSButton *removeButton;
