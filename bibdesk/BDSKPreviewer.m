@@ -51,6 +51,7 @@
 #import "BDSKDocumentController.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKPrintableView.h"
+#import "BDSKPreferenceController.h"
 
 static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
