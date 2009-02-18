@@ -1122,6 +1122,7 @@
 		CE62DE4F0F4B797B00BDF01E /* next.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = next.tiff; sourceTree = "<group>"; };
 		CE62DE500F4B797B00BDF01E /* previous.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = previous.tiff; sourceTree = "<group>"; };
 		CE62DE570F4B7C6A00BDF01E /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/Preferences.nib; sourceTree = "<group>"; };
+		CE62DF9B0F4C1EB100BDF01E /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/Preferences.nib; sourceTree = "<group>"; };
 		CE6775140A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSDictionary_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSDictionary_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSParagraphStyle_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -1885,7 +1886,6 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				CE62DE590F4B7C8300BDF01E /* Preferences.nib */,
 				F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */,
 				F9022DDA0758089500C3F701 /* Images */,
 				3D8A54F6082D1F86008E818C /* BibDesk Help */,
@@ -1927,6 +1927,7 @@
 				CED65AC10906BE65003EED90 /* BibPref_ScriptHooks.nib */,
 				F95D3FA509DDF51D00D793A6 /* BibPref_Sharing.nib */,
 				F9022CE10758050E00C3F701 /* BibPref_TeX.nib */,
+				CE62DE590F4B7C8300BDF01E /* Preferences.nib */,
 				CEF83F4C0C7792D300A3AD51 /* BookmarksWindow.nib */,
 				CEEA5E9E0B595EE200434059 /* ChangeFieldSheet.nib */,
 				CEDB58F20D3692A400E40354 /* ComplexStringEditor.nib */,
@@ -4179,6 +4180,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE62DE570F4B7C6A00BDF01E /* English */,
+				CE62DF9B0F4C1EB100BDF01E /* French */,
 			);
 			name = Preferences.nib;
 			sourceTree = "<group>";
