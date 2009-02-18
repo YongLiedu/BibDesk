@@ -49,6 +49,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAlert.h"
 #import "BDSKLinkedFile.h"
+#import "BDSKPreferenceController.h"
 
 // these keys should correspond to the table column identifiers
 #define FILE_KEY           @"file"
