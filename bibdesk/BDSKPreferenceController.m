@@ -98,7 +98,7 @@ static id sharedController = nil;
         categoryDicts = [[NSMutableDictionary alloc] init];
         records = [[NSMutableDictionary alloc] init];
         panes = [[NSMutableDictionary alloc] init];
-        identiferSearchTerms = [[NSMutableDictionary alloc] init];
+        identifierSearchTerms = [[NSMutableDictionary alloc] init];
         selectedPaneIdentifier = [@"" retain];
         helpBookName = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookName"] retain];
         [self loadPreferences];
@@ -486,7 +486,7 @@ static id sharedController = nil;
         unsigned int j, jMax = [paneIDs count];
         
         for (j = 0; j < jMax; j++) {
-            NSString *string = [identiferSearchTerms objectForKey:[paneIDs objectAtIndex:j]];
+            NSString *string = [identifierSearchTerms objectForKey:[paneIDs objectAtIndex:j]];
             if ([string rangeOfString:searchTerm options:NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch].location != NSNotFound) {
                 // as the overlay exactly covers the iconView, and both the spotlightView and the iconView are flipped, they should use the same coordinate space
                 // don't go through screen coordinates, as the overlay may not have been put in place yet at this point
@@ -609,7 +609,7 @@ static inline NSComparisonResult compareSystemVersion(NSString *version, SInt32 
                     NSString *string;
                     while (string = [stringEnum nextObject])
                         [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:DEFAULTS_TABLE], 0x1E];
-                    [identiferSearchTerms setObject:searchString forKey:identifier];
+                    [identifierSearchTerms setObject:searchString forKey:identifier];
                     [searchString release];
                 }
             }

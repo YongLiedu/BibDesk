@@ -57,7 +57,7 @@
     NSString *delayedPaneIdentifier;
     NSMutableDictionary *toolbarItems;
     NSString *helpBookName;
-    NSMutableDictionary *identiferSearchTerms;
+    NSMutableDictionary *identifierSearchTerms;
 }
 
 + (id)sharedPreferenceController;
