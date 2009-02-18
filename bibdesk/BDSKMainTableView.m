@@ -380,7 +380,7 @@ enum {
     [self performSelector:@selector(addTableColumn:) withObjectsFromArray:columns];
     [self selectRowIndexes:selectedRows byExtendingSelection:NO];
     [self setHighlightedTableColumn:highlightedColumn]; 
-    [self tableViewFontChanged:nil];
+    [self tableViewFontChanged];
     [self updateColumnsMenu];
 }
 
