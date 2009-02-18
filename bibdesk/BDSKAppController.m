@@ -517,7 +517,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)aNotification{
-    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
 }
 
 #pragma mark Menu stuff

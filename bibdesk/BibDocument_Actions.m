@@ -86,6 +86,7 @@
 #import <sys/stat.h>
 #import <FileView/FVPreviewer.h>
 #import "BDSKMacro.h"
+#import "BDSKAppController.h"
 
 @implementation BibDocument (Actions)
 
@@ -506,7 +507,7 @@
         e = [items objectEnumerator];
         while (pub = [e nextObject]) {
             // use the detexified version without internal fields, since TeXification introduces things that 
-            // AppleScript can't deal with (OAInternetConfig may end up using AS)
+            // AppleScript can't deal with (emailTo:... may end up using AS)
             [body appendString:[pub bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask]];
             [body appendString:@"\n\n"];
         }
@@ -520,15 +521,7 @@
     // escape double quotes
     [body replaceOccurrencesOfString:@"\"" withString:@"\\\"" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
 
-    // OAInternetConfig will use the default mail helper (at least it works with Mail.app and Entourage)
-    OAInternetConfig *ic = [OAInternetConfig internetConfig];
-    [ic launchMailTo:@""
-          carbonCopy:nil
-     blindCarbonCopy:nil
-             subject:@"BibDesk references"
-                body:body
-         attachments:files];
-
+    [[NSApp delegate] emailTo:@"" subject:@"BibDesk references" body:body attachments:files];
 }
 
 - (IBAction)sendToLyX:(id)sender {

@@ -1,10 +1,10 @@
 //
-//  BDSKApplication.h
+//  BDSKGradientTableView.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 10/26/06.
+//  Created by Christiaan Hofman on 2/18/09.
 /*
- This software is Copyright (c) 2006-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
 
 
-@interface BDSKApplication : NSApplication 
-- (unsigned int)currentModifierFlags;
+@interface BDSKGradientTableView : NSTableView
+
 @end

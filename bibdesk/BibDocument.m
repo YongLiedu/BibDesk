@@ -2739,7 +2739,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                  object:nil];
         [nc addObserver:self
                selector:@selector(handleFlagsChangedNotification:)
-                   name:OAFlagsChangedNotification
+                   name:BDSKFlagsChangedNotification
                  object:nil];
         [nc addObserver:self
                selector:@selector(handleApplicationWillTerminateNotification:)

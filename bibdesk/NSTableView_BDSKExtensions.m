@@ -265,7 +265,7 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
 		[[self dataSource] tableView:self concludeDragOperation:operation];
     
     // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
-    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
 }
 
 - (NSImage *)replacementDragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent *)dragEvent offset:(NSPointPointer)dragImageOffset{
@@ -338,3 +338,19 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
 }
 
 @end
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
+@implementation NSTableColumn (BDSKExtensions)
+- (id)dataCellForRow:(NSInteger)row {
+    id cell = [self dataCell];
+    id tableView = [self tableView];
+    if ([tableView isKindOfClass:[NSOutlineView class]] && [[tableView delegate] respondsToSelector:@selector(outlineView:dataCellForTableColumn:item:)])
+        cell = [[tableView delegate] outlineView:tableView dataCellForTableColumn:self item:[tableView itemAtRow:row]];
+    else if ([tableView isKindOfClass:[NSTableView class]] && [[tableView delegate] respondsToSelector:@selector(tableView:dataCellForTableColumn:row:)])
+        cell = [[tableView delegate] tableView:tableView dataCellForTableColumn:self row:row];
+    return cell;
+}
+@end
+#else
+#warning fixme: remove NSTableColumn category
+#endif

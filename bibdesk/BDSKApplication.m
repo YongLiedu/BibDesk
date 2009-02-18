@@ -39,6 +39,8 @@
 #import "BDSKApplication.h"
 #import "BibDocument.h"
 #import "BDAlias.h"
+#import <OmniBase/OmniBase.h>
+
 
 @interface NSWindow (BDSKApplication)
 // these are implemented in AppKit as private methods
@@ -47,6 +49,15 @@
 @end
 
 @implementation BDSKApplication
+
++ (id)sharedApplication {
+    static id sharedApplication = nil;
+    if (sharedApplication == nil) {
+        sharedApplication = [super sharedApplication];
+        [OBObject self]; // Trigger +[OBPostLoader processClasses]
+    }
+    return sharedApplication;
+}
 
 - (IBAction)terminate:(id)sender {
     NSArray *fileNames = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileName"];
@@ -63,6 +74,28 @@
     [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKLastOpenFileNamesKey];
     
     [super terminate:sender];
+}
+
+- (void)sendEvent:(NSEvent *)event {
+    [super sendEvent:event];
+    if ([event type] == NSFlagsChanged) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:self];
+    }
+}
+
+- (unsigned int)currentModifierFlags {
+    unsigned int flags = 0;
+    UInt32 currentKeyModifiers = GetCurrentKeyModifiers();
+    if (currentKeyModifiers & cmdKey)
+        flags |= NSCommandKeyMask;
+    if (currentKeyModifiers & shiftKey)
+        flags |= NSShiftKeyMask;
+    if (currentKeyModifiers & optionKey)
+        flags |= NSAlternateKeyMask;
+    if (currentKeyModifiers & controlKey)
+        flags |= NSControlKeyMask;
+    
+    return flags;
 }
 
 // workaround for Tiger AppKit bug in target determination for undo in sheets, compare 
