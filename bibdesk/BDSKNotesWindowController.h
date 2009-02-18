@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKSplitView;
+@class BDSKGradientSplitView;
 
 @interface BDSKNotesWindowController : NSWindowController {
     NSURL *url;
@@ -48,7 +48,7 @@
     float lastTagsHeight;
     IBOutlet NSOutlineView *outlineView;
     IBOutlet NSTokenField *tokenField;
-    IBOutlet BDSKSplitView *splitView;
+    IBOutlet BDSKGradientSplitView *splitView;
     IBOutlet NSObjectController *ownerController;
 }
 

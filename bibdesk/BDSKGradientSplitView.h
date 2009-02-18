@@ -1,5 +1,5 @@
 //
-//  BDSKSplitView.h
+//  BDSKGradientSplitView.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 31/10/05.
@@ -45,7 +45,7 @@ enum {
     BDSKStatusBarBlendStyleMask = 4
 };
 
-@interface BDSKSplitView : OASplitView {
+@interface BDSKGradientSplitView : OASplitView {
     int blendStyle;
     CGLayerRef dividerLayer;
     CGLayerRef minBlendLayer;
@@ -58,6 +58,6 @@ enum {
 @end
 
 
-@interface NSObject (BDSKSplitViewExtendedDelegate)
-- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset;
+@interface NSObject (BDSKGradientSplitViewExtendedDelegate)
+- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(int)offset;
 @end

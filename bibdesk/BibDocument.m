@@ -78,7 +78,7 @@
 #import <ApplicationServices/ApplicationServices.h>
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
-#import "BDSKSplitView.h"
+#import "BDSKGradientSplitView.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKZoomablePDFView.h"
 #import "BDSKZoomableTextView.h"
@@ -3613,7 +3613,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     [sender adjustSubviews];
 }
 
-- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
+- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(int)offset {
     int i = [[sender subviews] count] - 2;
     OBASSERT(i >= 0);
 	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];

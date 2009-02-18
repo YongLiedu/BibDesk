@@ -73,7 +73,7 @@
 #import "BDSKTemplateObjectProxy.h"
 #import "BDSKMainTableView.h"
 #import "BDSKGroupTableView.h"
-#import "BDSKSplitView.h"
+#import "BDSKGradientSplitView.h"
 #import "NSTask_BDSKExtensions.h"
 #import "BDSKColoredBox.h"
 #import "BDSKStringParser.h"

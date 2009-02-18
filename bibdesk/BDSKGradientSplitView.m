@@ -1,5 +1,5 @@
 //
-//  BDSKSplitView.m
+//  BDSKGradientSplitView.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 31/10/05.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKSplitView.h"
+#import "BDSKGradientSplitView.h"
 #import "BDSKStatusBar.h"
 #import "NSBezierPath_CoreImageExtensions.h"
 #import "CIImage_BDSKExtensions.h"
@@ -44,7 +44,7 @@
 #define END_JOIN_WIDTH 3.0f
 #define END_JOIN_HEIGHT 20.0f
 
-@interface BDSKSplitView (Private)
+@interface BDSKGradientSplitView (Private)
 
 - (float)horizontalFraction;
 - (void)setHorizontalFraction:(float)newFract;
@@ -54,7 +54,7 @@
 
 @end
 
-@implementation BDSKSplitView
+@implementation BDSKGradientSplitView
 
 + (CIColor *)startColor{
     static CIColor *startColor = nil;

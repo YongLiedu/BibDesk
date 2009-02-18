@@ -74,7 +74,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKCitationFormatter.h"
 #import "BDSKNotesWindowController.h"
-#import "BDSKSplitView.h"
+#import "BDSKGradientSplitView.h"
 #import <FileView/FileView.h>
 #import "BDSKLinkedFile.h"
 #import "NSObject_BDSKExtensions.h"
@@ -197,8 +197,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self setWindowFrameAutosaveNameOrCascade:BDSKEditorFrameAutosaveName];
     
     // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
-    [mainSplitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKEditorMainSplitView"];
-    [fileSplitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKEditorFileSplitView"];
+    [mainSplitView setPositionAutosaveName:@"BDSKGradientSplitView Frame BDSKEditorMainSplitView"];
+    [fileSplitView setPositionAutosaveName:@"BDSKGradientSplitView Frame BDSKEditorFileSplitView"];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [mainSplitView setPositionAutosaveName:nil];
@@ -2959,7 +2959,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 #pragma mark Splitview delegate methods
 
-- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
+- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(int)offset {
     if ([sender isEqual:mainSplitView]) {
         NSView *tabs = [[mainSplitView subviews] objectAtIndex:0]; // tabs
         NSView *files = [[mainSplitView subviews] objectAtIndex:1]; // files+authors
