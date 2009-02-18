@@ -115,7 +115,7 @@ static id sharedController = nil;
 - (unsigned)retainCount { return UINT_MAX; }
 
 // windiwDidLoad comes after the window is already moved onscreen, I think that's wrong
-- (void)awakeFromNib {
+- (void)windowDidLoad {
     [self setupToolbar];
     [[self window] setShowsToolbarButton:NO];
     
