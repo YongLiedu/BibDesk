@@ -56,15 +56,15 @@ Category on BDSKAppController making the papers folder readable for scripting
 }
 
 - (NSString *)papersFolder {
-	return [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey] stringByStandardizingPath];
+	return [[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey] stringByStandardizingPath];
 }
 
 - (NSString *)citeKeyFormat {
-	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteKeyFormatKey];
+	return [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteKeyFormatKey];
 }
 
 - (NSString *)localFileFormat {
-	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKLocalFileFormatKey];
+	return [[NSUserDefaults standardUserDefaults] stringForKey:BDSKLocalFileFormatKey];
 }
 
 - (NSArray *)allTypes {

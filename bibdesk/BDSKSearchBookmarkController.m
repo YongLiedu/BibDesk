@@ -79,7 +79,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 - (id)init {
     if ((sharedBookmarkController == nil) && (sharedBookmarkController = self = [super initWithWindowNibName:@"SearchBookmarksWindow"])) {
-        NSEnumerator *dictEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKSearchGroupBookmarksKey] objectEnumerator];
+        NSEnumerator *dictEnum = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKSearchGroupBookmarksKey] objectEnumerator];
         NSDictionary *dict;
         
         NSMutableArray *bookmarks = [NSMutableArray array];
@@ -149,7 +149,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 }
 
 - (void)saveBookmarks {
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[bookmarkRoot children] valueForKey:@"dictionaryValue"] forKey:BDSKSearchGroupBookmarksKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[[bookmarkRoot children] valueForKey:@"dictionaryValue"] forKey:BDSKSearchGroupBookmarksKey];
 }
 
 #pragma mark Actions

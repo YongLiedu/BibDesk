@@ -120,7 +120,6 @@
 
 - (void)reloadTypeInfo;
 - (void)reloadAllFieldNames;
-- (void)customFieldsDidChange:(NSNotification *)notification;
 - (void)reloadURLFields;
 - (void)reloadSpecialFields;
 - (void)reloadGroupFields;

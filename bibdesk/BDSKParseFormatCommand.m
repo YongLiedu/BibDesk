@@ -112,7 +112,7 @@
         NSArray *requiredFields = [BDSKFormatParser requiredFieldsForFormat:formatString];
         
         if ((isFileField || isFile) &&
-            ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
+            ([NSString isEmptyString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey]] && 
              [NSString isEmptyString:[[[[pub owner] fileURL] path] stringByDeletingLastPathComponent]]))
             return [NSNull null];
         

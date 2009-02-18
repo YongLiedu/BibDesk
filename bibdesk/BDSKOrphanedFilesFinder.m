@@ -129,7 +129,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (NSURL *)baseURL
 {
-    NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPapersFolderPathKey];
+    NSString *papersFolderPath = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKPapersFolderPathKey];
     
     // old prefs may not have a standarized path
     papersFolderPath = [papersFolderPath stringByStandardizingPath];

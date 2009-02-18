@@ -205,7 +205,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 }
 
 + (NSArray *)exportTemplates{
-    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
+    NSData *prefData = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKExportTemplateTree];
     if ([prefData length])
         return [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
     else 
@@ -213,7 +213,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 }
 
 + (NSArray *)serviceTemplates{
-    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
+    NSData *prefData = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKServiceTemplateTree];
     if ([prefData length])
         return [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
     else 

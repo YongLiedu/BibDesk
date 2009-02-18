@@ -268,7 +268,7 @@
     
     if ([item hasEmptyOrDefaultCiteKey])
         [item setCiteKey:[item suggestedCiteKey]];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [[item filesToBeFiled] count]){
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] && [[item filesToBeFiled] count]){
         NSEnumerator *fileEnum = [[item filesToBeFiled] objectEnumerator];
         BDSKLinkedFile *file;
         NSMutableArray *files = [NSMutableArray array];
@@ -339,7 +339,7 @@
 - (IBAction)changeTypeOfBibAction:(id)sender{
     NSString *type = [[sender selectedItem] title];
     [self setType:type];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:type
+    [[NSUserDefaults standardUserDefaults] setObject:type
                                                       forKey:BDSKPubTypeStringKey];
 
 	[[item undoManager] setActionName:NSLocalizedString(@"Change Type", @"Undo action name")];
@@ -495,7 +495,7 @@
 	if (canSet == NO){
 		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?", @"Informative text in alert");
 		NSString *otherButton = nil;
-		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+		if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
 			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to file the paper now using the available fields, cancel autofile for this paper, or wait until the necessary fields are set?", @"Informative text in alert dialog"),
 			otherButton = NSLocalizedString(@"Wait", @"Button title");
 		}
@@ -769,7 +769,7 @@
     [itemTypeButton removeAllItems];
     [itemTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] bibTypesForFileType:[item fileType]]];
     
-    NSString *type = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPubTypeStringKey];
+    NSString *type = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKPubTypeStringKey];
     
     [self setType:type];
     
@@ -1304,7 +1304,7 @@
         if([selKey isPersonField])
             separator = @" and ";
         else
-            separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+            separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
         selString = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, selString];
     }
     
@@ -1351,7 +1351,7 @@
 
 - (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textview {
     if (control == itemTableView)
-		return [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorFormShouldAutoCompleteKey];
+		return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditorFormShouldAutoCompleteKey];
 	return NO;
 }
 
@@ -1428,7 +1428,7 @@
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
     [item setField:fieldName toValue:value];
 	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] &&
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey] &&
        [item canGenerateAndSetCiteKey]){
         [self generateCiteKey:nil];
         if ([item hasEmptyOrDefaultCiteKey] == NO)
@@ -1441,7 +1441,7 @@
 - (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file
 {
     // we can't autofile if it's disabled or there is nothing to file
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [file URL] == nil)
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [file URL] == nil)
 		return NO;
 	
 	if ([item canSetURLForLinkedFile:file]) {
@@ -1523,7 +1523,7 @@
             if([key isPersonField])
                 separator = @" and ";
             else
-                separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+                separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
             value = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, value];
         }
         
@@ -1550,7 +1550,7 @@
             if([selKey isPersonField])
                 separator = @" and ";
             else
-                separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+                separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
             string = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, string];
         }
         

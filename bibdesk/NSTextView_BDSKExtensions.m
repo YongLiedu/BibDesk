@@ -81,13 +81,13 @@
 // allows persistent spell checking in text views
 
 - (void)toggleContinuousSpellChecking:(id)sender{
-    BOOL state = ![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    BOOL state = ![[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
     [sender setState:state];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:state forKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    [[NSUserDefaults standardUserDefaults] setBool:state forKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
 }
 
 - (BOOL)isContinuousSpellCheckingEnabled{
-    return [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
 }
 
 - (void)highlightComponentsOfSearchString:(NSString *)searchString;

@@ -191,7 +191,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)restartSharedBrowsingIfNeeded;
 {
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldLookForSharedFilesKey]){
         [self disableSharedBrowsing];
         [self enableSharedBrowsing];
     }

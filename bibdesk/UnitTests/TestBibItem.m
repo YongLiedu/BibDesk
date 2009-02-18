@@ -128,13 +128,13 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
 
 	// Turn off the normalised author setting if it is ON.  Otherwise we should have:
 	// Author = {Lee, Peter and Leone, Mark}
-	BOOL authorNormalization = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
+	BOOL authorNormalization = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey];
+	[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
 	NSString * leeAsBibtex = [item1 bibTeXStringWithOptions:BDSKBibTeXOptionDropInternalMask];
 	STAssertEqualObjects([leeAsBibtex stringByReplacingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\t\n"]
 															withString:@""],
 						 @"@inproceedings{Lee96RTOptML,Author = {Peter Lee and Mark Leone},Booktitle = {PLDI},Title = {Optimizing ML with Run-Time Code Generation},Year = {1996}}",nil);
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:authorNormalization forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
+	[[NSUserDefaults standardUserDefaults] setBool:authorNormalization forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
 	
 }
 

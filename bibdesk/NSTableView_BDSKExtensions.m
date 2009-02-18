@@ -44,6 +44,9 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import <OmniAppKit/OmniAppKit.h>
 
+
+static void *BDSKTableViewFontDefaultsObservationContext = @"BDSKTableViewFontDefaultsObservationContext";
+
 @implementation NSTableView (BDSKExtensions)
 
 static BOOL (*originalBecomeFirstResponder)(id, SEL) = NULL;
@@ -125,17 +128,20 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
 
 - (void)awakeFromNib {
     // there was no original awakeFromNib
+    /*
     NSString *fontNamePrefKey = [self fontNamePreferenceKey];
     [self tableViewFontChanged:nil];
     if (fontNamePrefKey != nil) {
-        [OFPreference addObserver:self
-                         selector:@selector(tableViewFontChanged:)
-                    forPreference:[OFPreference preferenceForKey:fontNamePrefKey]];
+        [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
+            forKeyPath:[@"values." stringByAppendingString:fontNamePrefKey]
+               options:0
+               context:BDSKTableViewFontDefaultsObservationContext];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(updateFontPanel:)
                                                      name:NSWindowDidBecomeKeyNotification
                                                    object:[self window]];
     }
+    */
 }
 
 - (NSControlSize)cellControlSize {
@@ -149,10 +155,10 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
     if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
         return;
     NSFontManager *fontManager = [NSFontManager sharedFontManager];
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     
-    NSString *fontName = [pw objectForKey:fontNamePrefKey];
-    float fontSize = [pw floatForKey:fontSizePrefKey];
+    NSString *fontName = [sud objectForKey:fontNamePrefKey];
+    float fontSize = [sud floatForKey:fontSizePrefKey];
 	NSFont *font = nil;
         
     if(fontName != nil)
@@ -162,8 +168,8 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
     font = [fontManager convertFont:font];
     
     // set the name last, as that's what we observe
-    [pw setFloat:[font pointSize] forKey:fontSizePrefKey];
-    [pw setObject:[font fontName] forKey:fontNamePrefKey];
+    [sud setFloat:[font pointSize] forKey:fontSizePrefKey];
+    [sud setObject:[font fontName] forKey:fontNamePrefKey];
 }
 
 - (void)tableViewFontChanged:(NSNotification *)notification {
@@ -172,8 +178,8 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
     if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
         return;
 
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
+    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePrefKey];
+    float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePrefKey];
 	NSFont *font = nil;
     
     if(fontName != nil)
@@ -193,8 +199,8 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
     NSString *fontNamePrefKey = [self fontNamePreferenceKey];
     NSString *fontSizePrefKey = [self fontSizePreferenceKey];
     if ([[[self window] firstResponder] isEqual:self] && fontNamePrefKey != nil && fontSizePrefKey != nil) {
-        NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
-        float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
+        NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePrefKey];
+        float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePrefKey];
         [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     }
 }
@@ -208,6 +214,16 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
         [self selectRowIndexes:indexesToSelect byExtendingSelection:NO];
     } else {
         NSBeep();
+    }
+}
+
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == BDSKTableViewFontDefaultsObservationContext) {
+        [self tableViewFontChanged:nil];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 
@@ -228,7 +244,15 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
 
 - (void)replacementDealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [OFPreference removeObserver:self forPreference:nil];
+#warning This is not safe!
+    /*
+    @try {
+        NSString *fontNamePrefKey = [self fontNamePreferenceKey];
+        if (fontNamePrefKey)
+            [[NSUserDefaultsController sharedUserDefaultsController] removeObserver:self forKeyPath:[@"values." stringByAppendingString:fontNamePrefKey]];
+    }
+    @catch (id e) {}
+    */
     originalDealloc(self, _cmd);
 }
 

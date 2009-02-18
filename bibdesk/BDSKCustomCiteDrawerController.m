@@ -47,7 +47,7 @@
 - (id)initForDocument:(BibDocument *)aDocument{
     if(self = [super init]){
 		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
-		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
+		[customStringArray setArray:[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKCustomCiteStringsKey]];
         document = aDocument;
     }
     return self;
@@ -93,7 +93,7 @@
     [tableView reloadData];
 	[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	[tableView editColumn:0 row:row withEvent:nil select:YES];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
+    [[NSUserDefaults standardUserDefaults] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }
 
 - (IBAction)removeCustomCiteString:(id)sender{
@@ -104,7 +104,7 @@
 		[[drawer parentWindow] makeFirstResponder:tableView];
 	[customStringArray removeObjectAtIndex:[tableView selectedRow]];
 	[tableView reloadData];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
+    [[NSUserDefaults standardUserDefaults] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }
 
 #pragma mark -
@@ -120,7 +120,7 @@
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     [customStringArray replaceObjectAtIndex:row withObject:object];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
+    [[NSUserDefaults standardUserDefaults] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }
 
 #pragma mark TableView delegate

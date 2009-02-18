@@ -67,7 +67,7 @@
     if(self = [super init]) {
         libraryGroup = [[BDSKGroup alloc] initLibraryGroup];
         [libraryGroup setDocument:aDocument];
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShowWebGroupPrefKey]){
+        if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShowWebGroupPrefKey]){
             webGroup = [[BDSKWebGroup alloc] initWithName:NSLocalizedString(@"Web", @"Web")];
             [webGroup setDocument:aDocument];
         }else{

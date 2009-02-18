@@ -136,7 +136,7 @@ enum {
     [formatter release];
 	
 	[statusBar retain]; // we need to retain, as we might remove it from the window
-	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowFindStatusBarKey]) {
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowFindStatusBarKey]) {
 		[self toggleStatusBar:nil];
 	}
 	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
@@ -238,11 +238,11 @@ enum {
 }
 
 - (NSString *)field {
-    return [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKFindControllerLastFindAndReplaceFieldKey];
+    return [[NSUserDefaults standardUserDefaults] objectForKey:BDSKFindControllerLastFindAndReplaceFieldKey];
 }
 
 - (void)setField:(NSString *)newField {
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newField forKey:BDSKFindControllerLastFindAndReplaceFieldKey];
+    [[NSUserDefaults standardUserDefaults] setObject:newField forKey:BDSKFindControllerLastFindAndReplaceFieldKey];
     if ([newField isEqualToString:BDSKRemoteURLString]) {
         [self setFindAsMacro:NO];
         [self setReplaceAsMacro:NO];
@@ -605,7 +605,7 @@ enum {
 
 - (IBAction)toggleStatusBar:(id)sender{
 	[statusBar toggleInWindow:[self window] offset:1.0];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowFindStatusBarKey];
+	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowFindStatusBarKey];
 }
 
 #pragma mark Find and Replace Action methods

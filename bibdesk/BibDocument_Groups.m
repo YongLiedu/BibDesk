@@ -233,7 +233,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification{
     // use the most recently changed group as default for newly opened documents; could also store on a per-document basis
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
+    [[NSUserDefaults standardUserDefaults] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
 	[self updateCategoryGroupsPreservingSelection:NO];
 }
 
@@ -612,7 +612,7 @@ The groupedPublications array is a subset of the publications array, developed b
         NSEnumerator *groupEnum;
         BDSKGroup *group;
         NSMutableArray *filteredArray = [NSMutableArray arrayWithCapacity:[publications count]];
-        BOOL intersectGroups = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKIntersectGroupsKey];
+        BOOL intersectGroups = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKIntersectGroupsKey];
         
         // to take union, we add the items contained in a selected group
         // to intersect, we remove the items not contained in a selected group
@@ -783,7 +783,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (NSMenu *)groupFieldsMenu {
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenuItem *menuItem;
-	NSEnumerator *fieldEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] objectEnumerator];
+	NSEnumerator *fieldEnum = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] objectEnumerator];
 	NSString *field;
 	
     [menu addItemWithTitle:NSLocalizedString(@"No Field", @"Menu item title") action:NULL keyEquivalent:@""];
@@ -862,9 +862,9 @@ The groupedPublications array is a subset of the publications array, developed b
 		return;
 	}
 	
-	NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+	NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
 	[array addObject:newGroupField];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];	
+	[[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
     
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldAddRemoveNotification
                                                         object:self
@@ -896,7 +896,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-	NSArray *groupFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey];
+	NSArray *groupFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey];
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCrossrefString, nil]
                                               excluding:[[[typeMan invalidGroupFieldsSet] allObjects] arrayByAddingObjectsFromArray:groupFields]];
     
@@ -915,9 +915,9 @@ The groupedPublications array is a subset of the publications array, developed b
     if(returnCode == NSCancelButton || [NSString isEmptyString:oldGroupField])
         return;
     
-    NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+    NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
     [array removeObject:oldGroupField];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];
+    [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];
     [array release];
     
 	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
@@ -950,7 +950,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
-                                                                                                       fieldsArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey]];
+                                                                                                       fieldsArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey]];
 	[removeFieldController beginSheetModalForWindow:documentWindow
                                       modalDelegate:self
                                      didEndSelector:@selector(removeGroupFieldSheetDidEnd:returnCode:contextInfo:)
@@ -1298,8 +1298,8 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (IBAction)changeIntersectGroupsAction:(id)sender {
     BOOL flag = (BOOL)[sender tag];
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKIntersectGroupsKey] != flag) {
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:flag forKey:BDSKIntersectGroupsKey];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKIntersectGroupsKey] != flag) {
+        [[NSUserDefaults standardUserDefaults] setBool:flag forKey:BDSKIntersectGroupsKey];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupTableSelectionChangedNotification object:self];
     }
 }

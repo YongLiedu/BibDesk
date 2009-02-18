@@ -70,10 +70,10 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
 {
     self = [self initWithWindowNibName:[self windowNibName]];
     if (self) {
-        OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+        NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
         results = [NSMutableArray new];
-        keepLocalFileFields = NO == [pw boolForKey:BDSKRemoveConvertedLocalFileFieldsKey];
-        keepRemoteURLFields = NO == [pw boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey];
+        keepLocalFileFields = NO == [sud boolForKey:BDSKRemoveConvertedLocalFileFieldsKey];
+        keepRemoteURLFields = NO == [sud boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey];
         useSelection = NO;
     }
     return self;

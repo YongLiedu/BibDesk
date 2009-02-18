@@ -98,8 +98,8 @@
 // remove legacy comparisons of added/created/modified strings in table column code from prefs
 static void fixLegacyTableColumnIdentifiers()
 {
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    NSMutableArray *fixedTableColumnIdentifiers = [[[pw arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *fixedTableColumnIdentifiers = [[[sud arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
 
     unsigned idx;
     BOOL didFixIdentifier = NO;
@@ -114,7 +114,7 @@ static void fixLegacyTableColumnIdentifiers()
         }
     }
     if (didFixIdentifier)
-        [pw setObject:fixedTableColumnIdentifiers forKey:BDSKShownColsNamesKey];
+        [sud setObject:fixedTableColumnIdentifiers forKey:BDSKShownColsNamesKey];
 }
 
 + (void)initialize
@@ -129,22 +129,22 @@ static void fixLegacyTableColumnIdentifiers()
 
     [NSDateFormatter setDefaultFormatterBehavior:NSDateFormatterBehavior10_4];
     
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     
     // eliminate support for some legacy keys
     fixLegacyTableColumnIdentifiers();
     
     // legacy pref key removed prior to release of 1.3.1 (stored path instead of alias)
-    NSString *filePath = [pw objectForKey:@"Default Bib File"];
+    NSString *filePath = [sud objectForKey:@"Default Bib File"];
     if(filePath) {
         BDAlias *alias = [BDAlias aliasWithPath:filePath];
         if(alias)
-            [pw setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
-        [pw removeObjectForKey:@"Default Bib File"];
+            [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+        [sud removeObjectForKey:@"Default Bib File"];
     }
     
     // enforce Author and Editor as person fields
-    NSArray *personFields = [pw stringArrayForKey:BDSKPersonFieldsKey];
+    NSArray *personFields = [sud stringArrayForKey:BDSKPersonFieldsKey];
     int idx = 0;
     if ([personFields containsObject:BDSKAuthorString] == NO || [personFields containsObject:BDSKEditorString] == NO) {
         personFields  = [personFields mutableCopy];
@@ -152,7 +152,7 @@ static void fixLegacyTableColumnIdentifiers()
             [(NSMutableArray *)personFields insertObject:BDSKAuthorString atIndex:idx++];
         if ([personFields containsObject:BDSKEditorString] == NO)
             [(NSMutableArray *)personFields insertObject:BDSKEditorString atIndex:idx];
-        [pw setObject:personFields forKey:BDSKPersonFieldsKey];
+        [sud setObject:personFields forKey:BDSKPersonFieldsKey];
         [personFields release];
     }
     
@@ -232,13 +232,13 @@ static void fixLegacyTableColumnIdentifiers()
 }
 
 - (void)checkFormatStrings {
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    NSString *formatString = [pw objectForKey:BDSKCiteKeyFormatKey];
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    NSString *formatString = [sud objectForKey:BDSKCiteKeyFormatKey];
     NSString *error = nil;
     int button = 0;
     
     if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
-        [pw setObject:formatString forKey:BDSKCiteKeyFormatKey];
+        [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
         [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     }else{
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format")
@@ -249,8 +249,8 @@ static void fixLegacyTableColumnIdentifiers()
         [alert setAlertStyle:NSCriticalAlertStyle];
         button = [alert runModal];
         if (button == NSAlertAlternateReturn){
-            formatString = [[OFPreference preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
-            [pw setObject:formatString forKey:BDSKCiteKeyFormatKey];
+            formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKCiteKeyFormatKey];
+            [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
             [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }else{
             [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
@@ -258,8 +258,7 @@ static void fixLegacyTableColumnIdentifiers()
         }
     }
     
-    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
-    formatString = [pw objectForKey:BDSKLocalFileFormatKey];
+    formatString = [sud objectForKey:BDSKLocalFileFormatKey];
     error = nil;
     
     if ([sud boolForKey:@"BDSKDidMigrateLocalUrlFormatDefaultsKey"] == NO) {
@@ -277,18 +276,18 @@ static void fixLegacyTableColumnIdentifiers()
                     case 3: formatString = @"%a1/%T5%n0%e"; break;
                 }
             }
-            [pw setObject:formatString forKey:BDSKLocalFileFormatKey];
-            [pw setInteger:0 forKey:BDSKLocalFileFormatPresetKey];
+            [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
+            [sud setInteger:0 forKey:BDSKLocalFileFormatPresetKey];
             if (formatLowercase)
-                [pw setObject:formatLowercase forKey:BDSKLocalFileLowercaseKey];
+                [sud setObject:formatLowercase forKey:BDSKLocalFileLowercaseKey];
             if (formatCleanOption)
-                [pw setObject:formatCleanOption forKey:BDSKLocalFileCleanOptionKey];
+                [sud setObject:formatCleanOption forKey:BDSKLocalFileCleanOptionKey];
         }
         [sud setBool:YES forKey:@"BDSKDidMigrateLocalUrlFormatDefaultsKey"];
     }
     
     if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
-        [pw setObject:formatString forKey:BDSKLocalFileFormatKey];
+        [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
         [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
     } else {
         NSString *fixedFormatString = nil;
@@ -303,7 +302,7 @@ static void fixLegacyTableColumnIdentifiers()
             fixedFormatString = [[[formatString stringByDeletingPathExtension] stringByAppendingString:@"%n0"] stringByAppendingPathExtension:[formatString pathExtension]];
         }
         if (fixedFormatString && [BDSKFormatParser validateFormat:&fixedFormatString forField:BDSKLocalFileString inFileType:BDSKBibtexString error:NULL]) {
-            [pw setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
+            [sud setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
             [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             otherButton = NSLocalizedString(@"Fix", @"Button title");
         }
@@ -315,13 +314,13 @@ static void fixLegacyTableColumnIdentifiers()
         [alert setAlertStyle:NSCriticalAlertStyle];
         button = [alert runModal];
         if (button == NSAlertDefaultReturn) {
-            [pw setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
+            [sud setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
             [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
             [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
             [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
         } else if (button == NSAlertAlternateReturn) {
-            formatString = [[OFPreference preferenceForKey:BDSKLocalFileFormatKey] defaultObjectValue];			
-            [pw setObject:formatString forKey:BDSKLocalFileFormatKey];
+            formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKLocalFileFormatKey];			
+            [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
             [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }
     }
@@ -351,11 +350,11 @@ static void fixLegacyTableColumnIdentifiers()
         NSLog(@"failed to register completion connection; another BibDesk process must be running");  
     
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-    if(![versionString isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey]])
+    if(![versionString isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKLastVersionLaunchedKey]])
         [self showRelNotes:nil];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
+    if([[NSUserDefaults standardUserDefaults] objectForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
         [self showReadMeFile:nil];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:versionString forKey:BDSKLastVersionLaunchedKey];
+    [[NSUserDefaults standardUserDefaults] setObject:versionString forKey:BDSKLastVersionLaunchedKey];
     
     [[BDSKUpdateChecker sharedChecker] scheduleUpdateCheckIfNeeded];
     
@@ -364,10 +363,10 @@ static void fixLegacyTableColumnIdentifiers()
         [self showInputManagerUpdateAlert];
     
     // Ensure the previewer and TeX task get created now in order to avoid a spurious "unable to copy helper file" warning when quit->document window closes->first call to [BDSKPreviewer sharedPreviewer]
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey])
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey])
         [BDSKPreviewer sharedPreviewer];
 	
-	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowingPreviewKey])
+	if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowingPreviewKey])
 		[[BDSKPreviewer sharedPreviewer] showWindow:self];
     
     // copy files to application support
@@ -419,8 +418,8 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
 {
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    switch ([[pw objectForKey:BDSKStartupBehaviorKey] intValue]) {
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    switch ([[sud objectForKey:BDSKStartupBehaviorKey] intValue]) {
         case 0:
             return YES;
         case 1:
@@ -430,7 +429,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             return NO;
         case 3:
             {
-                NSData *data = [pw objectForKey:BDSKDefaultBibFileAliasKey];
+                NSData *data = [sud objectForKey:BDSKDefaultBibFileAliasKey];
                 BDAlias *alias = nil;
                 if([data length])
                     alias = [BDAlias aliasWithData:data];
@@ -441,7 +440,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             return NO;
         case 4:
             {
-                NSArray *files = [pw objectForKey:BDSKLastOpenFileNamesKey];
+                NSArray *files = [sud objectForKey:BDSKLastOpenFileNamesKey];
                 NSEnumerator *fileEnum = [files objectEnumerator];
                 NSDictionary *dict;
                 NSURL *fileURL;
@@ -459,7 +458,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 // we don't want to reopen last open files when re-activating the app
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
-    int startupOption = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKStartupBehaviorKey] intValue];
+    int startupOption = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKStartupBehaviorKey] intValue];
     return flag == NO && (startupOption == 0 || startupOption == 3);
 }
 
@@ -567,7 +566,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 - (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {
 
 	if ([toolbarItem action] == @selector(toggleShowingPreviewPanel:)) {
-		return ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]);
+		return ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey]);
 	}
 	
     return [super validateToolbarItem:toolbarItem];
@@ -721,7 +720,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }
 
 - (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner {
-	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
+	NSString *papersFolderPath = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey];
 	if ([NSString isEmptyString:papersFolderPath])
 		papersFolderPath = [[[owner fileURL] path] stringByDeletingLastPathComponent];
 	if ([NSString isEmptyString:papersFolderPath])
@@ -918,7 +917,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         }
         
     } else if (([[theURL scheme] isEqualToString:@"http"] || [[theURL scheme] isEqualToString:@"https"]) &&
-               [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShowWebGroupPrefKey]) {
+               [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShowWebGroupPrefKey]) {
         
         // try the main document first
         document = [[NSDocumentController sharedDocumentController] mainDocument];
@@ -1361,7 +1360,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
     NSString *importerVersion = [importerBundle objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
     if (importerVersion) {
         BDSKVersionNumber *importerVersionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:importerVersion] autorelease];
-        NSDictionary *versionInfo = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSpotlightVersionInfoKey];
+        NSDictionary *versionInfo = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKSpotlightVersionInfoKey];
         
         long sysVersion;
         OSStatus err = Gestalt(gestaltSystemVersion, &sysVersion);
@@ -1386,7 +1385,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
                 [importerTask launch];
                 
                 NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithLong:sysVersion], @"lastSysVersion", importerVersion, @"lastImporterVersion", nil];
-                [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:info forKey:BDSKSpotlightVersionInfoKey];
+                [[NSUserDefaults standardUserDefaults] setObject:info forKey:BDSKSpotlightVersionInfoKey];
                 
             }
             else NSLog(@"/usr/bin/mdimport not found!");

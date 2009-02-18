@@ -189,7 +189,7 @@
 
 - (void)disableGroupRenameWarningAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if ([alert checkValue] == YES) {
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnRenameGroupKey];
+		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRenameGroupKey];
 	}
 }
 
@@ -198,7 +198,7 @@
 		if ([[groups objectAtIndex:row] hasEditableName] == NO) 
 			return NO;
 		else if (NSLocationInRange(row, [groups rangeOfCategoryGroups]) &&
-				 [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRenameGroupKey]) {
+				 [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey]) {
 			
 			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
 												 defaultButton:NSLocalizedString(@"OK", @"Button title")
@@ -271,7 +271,7 @@
 }
 
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView{
-    NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
+    NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKColumnWidthsKey]];
     [defaultTableColumnWidths addEntriesFromDictionary:tableColumnWidths];
     return defaultTableColumnWidths;
 }
@@ -292,11 +292,11 @@
 	if([notification object] != tableView) return;
       
     // current setting will override those already in the prefs; we may not be displaying all the columns in prefs right now, but we want to preserve their widths
-    NSMutableDictionary *defaultWidths = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey] mutableCopy];
+    NSMutableDictionary *defaultWidths = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKColumnWidthsKey] mutableCopy];
     [tableColumnWidths release];
     tableColumnWidths = [[self currentTableColumnWidthsAndIdentifiers] retain];
     [defaultWidths addEntriesFromDictionary:tableColumnWidths];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:defaultWidths forKey:BDSKColumnWidthsKey];
+    [[NSUserDefaults standardUserDefaults] setObject:defaultWidths forKey:BDSKColumnWidthsKey];
     [defaultWidths release];
 }
 
@@ -304,7 +304,7 @@
 - (void)tableViewColumnDidMove:(NSNotification *)notification{
 	if([notification object] != tableView) return;
     
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
+    [[NSUserDefaults standardUserDefaults] setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
                                                       forKey:BDSKShownColsNamesKey];
 }
 
@@ -458,7 +458,7 @@
 }
 
 - (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv{
-	if (tv == groupTableView && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRenameGroupKey])
+	if (tv == groupTableView && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey])
 		return NO;
 	return YES;
 }
@@ -494,11 +494,11 @@
 }
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
-	int dragCopyType = [pw integerForKey:dragCopyTypeKey];
+	int dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
-	NSString *citeString = [pw stringForKey:BDSKCiteStringKey];
+	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
     NSArray *additionalFilenames = nil;
     
@@ -691,7 +691,7 @@
     
     if (dragCopyType == BDSKTemplateDragCopyType) {
         NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
-        NSString *template = [pw stringForKey:dragCopyTemplateKey];
+        NSString *template = [sud stringForKey:dragCopyTemplateKey];
         unsigned templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
             dragCopyType += templateIdx;
@@ -796,7 +796,7 @@
 }
 
 - (NSImage *)tableView:(NSTableView *)tv dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{
-    return [self dragImageForPromisedItemsUsingCiteString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]];
+    return [self dragImageForPromisedItemsUsingCiteString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey]];
 }
 
 - (NSImage *)dragImageForPromisedItemsUsingCiteString:(NSString *)citeString{
@@ -834,11 +834,11 @@
         isIcon = YES;
     
 	} else {
-		OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+		NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
 		NSMutableString *s = [NSMutableString string];
         NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
         
-        dragCopyType = [pw integerForKey:dragCopyTypeKey];
+        dragCopyType = [sud integerForKey:dragCopyTypeKey];
         
 		// don't depend on this being non-zero; this method gets called for drags where promisedDraggedItems is nil
 		count = [promisedDraggedItems count];

@@ -402,7 +402,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             if(pub)
                 [currentErrors makeObjectsPerformSelector:@selector(setPublication:) withObject:pub];
             [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
-            if([self isWindowVisible] == NO && (handledNonIgnorableError || [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey]))
+            if([self isWindowVisible] == NO && (handledNonIgnorableError || [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowWarningsKey]))
                 [self showWindow:self];
             handledNonIgnorableError = NO;
         }

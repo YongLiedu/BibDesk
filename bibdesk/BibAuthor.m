@@ -281,7 +281,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 }
 
 - (NSString *)displayName{
-    int mask = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAuthorNameDisplayKey];
+    int mask = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKAuthorNameDisplayKey];
 
     NSString *theName = nil;
 

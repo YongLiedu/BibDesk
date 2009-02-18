@@ -66,7 +66,7 @@
 @implementation BibDocument (Search)
 
 - (IBAction)changeSearchType:(id)sender{
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
+    [[NSUserDefaults standardUserDefaults] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
     [self search:searchField];
 }
 
@@ -227,7 +227,7 @@ Ensure that views are always ordered vertically from top to bottom as
 NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 {
     // surround with wildcards for substring search; should we check for any operators?
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSearchMenuTagKey] == 0)
+    if ([[NSUserDefaults standardUserDefaults] integerForKey:BDSKSearchMenuTagKey] == 0)
         searchFieldString = [NSString stringWithFormat:@"*%@*", searchFieldString];
     return searchFieldString;
 }

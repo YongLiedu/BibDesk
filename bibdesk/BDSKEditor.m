@@ -177,7 +177,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     // Setup the statusbar
 	[statusBar retain]; // we need to retain, as we might remove it from the window
-	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowEditorStatusBarKey]) {
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowEditorStatusBarKey]) {
 		[self toggleStatusBar:nil];
 	}
 	[statusBar setDelegate:self];
@@ -263,7 +263,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	
     [self updateCiteKeyDuplicateWarning];
     
-    [fileView setIconScale:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFileViewIconScaleKey]];
+    [fileView setIconScale:[[NSUserDefaults standardUserDefaults] floatForKey:BDSKEditorFileViewIconScaleKey]];
     [fileView setAutoScales:YES];
     [fileView addObserver:self forKeyPath:@"iconScale" options:0 context:BDSKEditorObservationContext];
     [fileView setEditable:isEditable];
@@ -365,7 +365,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (IBAction)toggleStatusBar:(id)sender{
 	[statusBar toggleBelowView:mainSplitView offset:1.0];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowEditorStatusBarKey];
+	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowEditorStatusBarKey];
 }
 
 - (IBAction)openLinkedFile:(id)sender{
@@ -517,7 +517,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [oPanel setCanChooseDirectories:YES];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]) {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]) {
         if (disableAutoFileButton == nil) {
             disableAutoFileButton = [[NSButton alloc] init];
             [disableAutoFileButton setBezelStyle:NSRoundedBezelStyle];
@@ -543,7 +543,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if(returnCode == NSOKButton){
         unsigned int anIndex = (unsigned int)contextInfo;
         NSURL *aURL = [[sheet URLs] objectAtIndex:0];
-        BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey];
+        BOOL shouldAutoFile = [disableAutoFileButton state] == NSOffState && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey];
         if (anIndex != NSNotFound) {
             BDSKLinkedFile *aFile = [BDSKLinkedFile linkedFileWithURL:aURL delegate:publication];
             if (aFile == nil)
@@ -795,7 +795,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	if([alert checkValue] == YES)
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
+		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
     if(returnCode == NSAlertAlternateReturn)
         return;
@@ -851,7 +851,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (IBAction)generateCiteKey:(id)sender{
     if([publication hasEmptyOrDefaultCiteKey] == NO && 
-       [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
+       [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
         BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys")
                                              defaultButton:NSLocalizedString(@"Generate", @"Button title")
                                            alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
@@ -932,7 +932,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	if (canSet == NO){
 		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?",@"");
 		NSString *otherButton = nil;
-		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+		if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
 			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to file the paper now using the available fields, cancel autofile for this paper, or wait until the necessary fields are set?", @"Informative text in alert dialog"),
 			otherButton = NSLocalizedString(@"Wait", @"Button title");
 		}
@@ -963,7 +963,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSString *newType = [bibTypeButton titleOfSelectedItem];
     if(![[publication pubType] isEqualToString:newType]){
         [publication setPubType:newType];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newType
+        [[NSUserDefaults standardUserDefaults] setObject:newType
                                                           forKey:BDSKPubTypeStringKey];
 		
 		[[self undoManager] setActionName:NSLocalizedString(@"Change Type", @"Undo action name")];
@@ -990,7 +990,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (IBAction)changeFlag:(id)sender{
 	NSButtonCell *cell = [sender selectedCell];
 	NSString *field = [cell representedObject];
-    BOOL isTriState = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:field];
+    BOOL isTriState = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:field];
     
     if(isTriState){
         NSCellStateValue oldState = [publication triStateValueOfField:field];
@@ -1519,7 +1519,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 {
-    int moveToTrash = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
+    int moveToTrash = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? -1 : 0;
     [self deleteURLsAtIndexes:indexSet moveToTrash:moveToTrash];
     return YES;
 }
@@ -1559,7 +1559,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     NSString *downloadsDirectory = [[[NSUserDefaults standardUserDefaults] stringForKey:@"BDSKDownloadsDirectory"] stringByExpandingTildeInPath];
     BOOL isDir;
     
-    if (downloadsDirectory == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [NSString isEmptyString:extension] == NO)
+    if (downloadsDirectory == nil && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] && [NSString isEmptyString:extension] == NO)
         downloadsDirectory = [NSSearchPathForDirectoriesInDomains(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4 ? NSDownloadsDirectory : NSDesktopDirectory, NSUserDomainMask, YES) firstObject];
     
     if ([NSString isEmptyString:extension] == NO && [[NSFileManager defaultManager] fileExistsAtPath:downloadsDirectory isDirectory:&isDir] && isDir) {
@@ -1581,7 +1581,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)trashAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
 {
     if (alert && [alert checkValue])
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKAskToTrashFilesKey];
+        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKAskToTrashFilesKey];
     NSArray *fileURLs = [(NSArray *)contextInfo autorelease];
     if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *urlEnum = [fileURLs objectEnumerator];
@@ -1632,7 +1632,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (context == BDSKEditorObservationContext) {
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
+        [[NSUserDefaults standardUserDefaults] setFloat:[fileView iconScale] forKey:BDSKEditorFileViewIconScaleKey];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
@@ -1761,7 +1761,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
         NSString *value = [publication valueOfField:field];
         
         if([value isInherited] &&
-           [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnEditInheritedKey]){
+           [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnEditInheritedKey]){
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
                                                  defaultButton:NSLocalizedString(@"OK", @"Button title")
                                                alternateButton:NSLocalizedString(@"Cancel", @"Button title")
@@ -1787,7 +1787,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if ([alert checkValue] == YES)
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
+		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
 }
 
 // send by the formatter when validation failed
@@ -2326,7 +2326,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textview {
     if (control == tableView)
-		return [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorFormShouldAutoCompleteKey];
+		return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditorFormShouldAutoCompleteKey];
 	return NO;
 }
 
@@ -2459,7 +2459,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)updateCiteKeyAutoGenerateStatus{
-	if ([publication hasEmptyOrDefaultCiteKey] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey]) {
+	if ([publication hasEmptyOrDefaultCiteKey] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey]) {
 		if ([[statusBar iconIdentifiers] containsObject:@"NeedsToGenerateCiteKey"] == NO) {
 			NSString *tooltip = NSLocalizedString(@"The cite key needs to be generated.", @"Tool tip message");
 			[statusBar addIcon:[NSImage imageNamed:@"key"] withIdentifier:@"NeedsToGenerateCiteKey" toolTip:tooltip];
@@ -2654,11 +2654,11 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     if(![publication hasBeenEdited]){
         errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to keep it?", @"Informative text in alert dialog");
     // case 2: cite key hasn't been set, and paper needs to be filed
-    }else if([publication hasEmptyOrDefaultCiteKey] && [[publication filesToBeFiled] count] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([publication hasEmptyOrDefaultCiteKey] && [[publication filesToBeFiled] count] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 3: only the paper needs to be filed
-    }else if([[publication filesToBeFiled] count] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([[publication filesToBeFiled] count] && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"Informative text in alert dialog");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 4: only the cite key needs to be set
@@ -3228,10 +3228,10 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)setupMatrix{
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    NSArray *ratingFields = [pw stringArrayForKey:BDSKRatingFieldsKey];
-    NSArray *booleanFields = [pw stringArrayForKey:BDSKBooleanFieldsKey];
-    NSArray *triStateFields = [pw stringArrayForKey:BDSKTriStateFieldsKey];
+	NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    NSArray *ratingFields = [sud stringArrayForKey:BDSKRatingFieldsKey];
+    NSArray *booleanFields = [sud stringArrayForKey:BDSKBooleanFieldsKey];
+    NSArray *triStateFields = [sud stringArrayForKey:BDSKTriStateFieldsKey];
     int numRows, numCols, numEntries = [ratingFields count] + [booleanFields count] + [triStateFields count], i;
     NSPoint origin = [matrix frame].origin;
 	NSEnumerator *e;

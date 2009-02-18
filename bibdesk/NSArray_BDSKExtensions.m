@@ -180,7 +180,7 @@
 
 - (NSString *)componentsJoinedByDefaultJoinString
 {
-    return [self componentsJoinedByString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultArrayJoinStringKey]];
+    return [self componentsJoinedByString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultArrayJoinStringKey]];
 }
 
 - (NSString *)componentsJoinedByCommaAndAmpersand

@@ -102,7 +102,7 @@
 }	
 
 - (BOOL) validateCopyAsMenuItem:(NSMenuItem*) menuItem {
-    BOOL usesTeX = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey];
+    BOOL usesTeX = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey];
 	int copyType = [menuItem tag];
     
     if (usesTeX == NO && (copyType == BDSKPDFDragCopyType || copyType == BDSKRTFDragCopyType || copyType == BDSKLaTeXDragCopyType || copyType == BDSKLTBDragCopyType))
@@ -529,7 +529,7 @@
             state = NSOnState;
     }
     [menuItem setState:state];
-    return tag != BDSKPreviewDisplayTeX || [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey];
+    return tag != BDSKPreviewDisplayTeX || [[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey];
 }
 
 - (BOOL)validateChangeSidePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
@@ -542,11 +542,11 @@
             state = NSOnState;
     }
     [menuItem setState:state];
-    return tag != BDSKPreviewDisplayTeX || [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey];
+    return tag != BDSKPreviewDisplayTeX || [[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey];
 }
 
 - (BOOL)validateChangeIntersectGroupsMenuItem:(NSMenuItem *)menuItem {
-    [menuItem setState: ((BOOL)[menuItem tag] == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKIntersectGroupsKey]) ? NSOnState : NSOffState];
+    [menuItem setState: ((BOOL)[menuItem tag] == [[NSUserDefaults standardUserDefaults] integerForKey:BDSKIntersectGroupsKey]) ? NSOnState : NSOffState];
     return YES;
 }
 
@@ -583,13 +583,13 @@
 }
 
 - (BOOL)validateRefreshSharingMenuItem:(NSMenuItem *)menuItem {
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    return ([pw boolForKey:BDSKShouldShareFilesKey]);
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    return ([sud boolForKey:BDSKShouldShareFilesKey]);
 }
 
 - (BOOL)validateRefreshSharedBrowsingMenuItem:(NSMenuItem *)menuItem {
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    return ([pw boolForKey:BDSKShouldLookForSharedFilesKey]);
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    return ([sud boolForKey:BDSKShouldLookForSharedFilesKey]);
 }
 
 - (BOOL)validateRefreshURLGroupsMenuItem:(NSMenuItem *)menuItem {
@@ -626,11 +626,11 @@
 - (BOOL)validateRefreshAllExternalGroupsMenuItem:(NSMenuItem *)menuItem {
     return [[groups URLGroups] count] > 0 ||
            [[groups scriptGroups] count] > 0 ||
-           [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey];
+           [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShareFilesKey];
 }
 
 - (BOOL)validateChangeSearchTypeMenuItem:(NSMenuItem *)menuItem {
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSearchMenuTagKey] == [menuItem tag])
+    if ([[NSUserDefaults standardUserDefaults] integerForKey:BDSKSearchMenuTagKey] == [menuItem tag])
         [menuItem setState:NSOnState];
     else
         [menuItem setState:NSOffState];

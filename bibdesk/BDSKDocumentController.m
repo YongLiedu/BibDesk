@@ -62,8 +62,8 @@
 - (id)init
 {
     if(self = [super init]){
-		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldAutosaveDocumentKey])
-		    [self setAutosavingDelay:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutosaveTimeIntervalKey]];
+		if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldAutosaveDocumentKey])
+		    [self setAutosavingDelay:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKAutosaveTimeIntervalKey]];
         
 		[[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleWindowDidBecomeMainNotification:)
@@ -201,7 +201,7 @@
     [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
     [oPanel setAccessoryView:openUsingFilterAccessoryView];
 
-    NSMutableArray *commandHistory = [NSMutableArray arrayWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKFilterFieldHistoryKey]];
+    NSMutableArray *commandHistory = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKFilterFieldHistoryKey]];
     NSSet *uniqueCommandHistory = [NSSet setWithArray:commandHistory];
     
     // this is a workaround for older versions which added the same command multiple times; it screws up the order
@@ -241,7 +241,7 @@
             [commandHistory insertObject:shellCommand atIndex:0];
             [commandHistory removeLastObject];
         }
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
+        [[NSUserDefaults standardUserDefaults] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
     }
 }
 

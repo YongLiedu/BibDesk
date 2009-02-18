@@ -117,7 +117,7 @@ static NSArray *scriptHookNames = nil;
 		return nil;
 	}
 	// We could also build a cache of scripts for each name.
-	NSString *path = [[[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
+	NSString *path = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	NSAppleScript *script = nil;
 	
 	if ([NSString isEmptyString:path]) {

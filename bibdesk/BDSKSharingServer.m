@@ -82,7 +82,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
     
     // update the text field in prefs if necessary (or that could listen for computer name changes...)
-    if([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey]])
+    if([NSString isEmptyString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKSharingNameKey]])
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:nil];
     [pool release];
 }
@@ -167,7 +167,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 + (NSString *)sharingName;
 {
     // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
-    NSString *sharingName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey];
+    NSString *sharingName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKSharingNameKey];
     OBASSERT(dynamicStore);
     // default to the computer name as set in sys prefs (sharing)
     if([NSString isEmptyString:sharingName])
@@ -212,7 +212,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;
 {
     // if we're using the computer name, restart sharing so the name propagates correctly; avoid conflicts with other users' share names
-    if([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey]])
+    if([NSString isEmptyString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKSharingNameKey]])
         [self restartSharingIfNeeded];
 }
 
@@ -266,7 +266,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [netService setDelegate:self];
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
     [dictionary setObject:[BDSKSharingServer supportedProtocolVersion] forKey:BDSKTXTVersionKey];
-    [dictionary setObject:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKSharingRequiresPasswordKey] forKey:BDSKTXTAuthenticateKey];
+    [dictionary setObject:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKSharingRequiresPasswordKey] forKey:BDSKTXTAuthenticateKey];
     [netService setTXTRecordData:[NSNetService dataFromTXTRecordDictionary:dictionary]];
     
     server = [[BDSKSharingDOServer alloc] init];
@@ -341,7 +341,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)restartSharingIfNeeded;
 {
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey]){
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShareFilesKey]){
         [self disableSharing];
         
         // give the server a moment to stop
@@ -529,7 +529,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (BOOL)authenticateComponents:(NSArray *)components withData:(NSData *)authenticationData
 {
     BOOL status = YES;
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSharingRequiresPasswordKey]){
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKSharingRequiresPasswordKey]){
         NSData *myPasswordHashed = [[BDSKPasswordController sharingPasswordForCurrentUserUnhashed] sha1Signature];
         status = [authenticationData isEqual:myPasswordHashed];
     }

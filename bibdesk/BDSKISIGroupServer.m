@@ -498,7 +498,7 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
     // this is now a field/value set for a particular publication record
     NSXMLNode *child = [record childCount] ? [record childAtIndex:0] : nil;
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
-    NSString *keywordSeparator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
     NSMutableDictionary *sourceTagValues = [NSMutableDictionary dictionary];
     NSString *isiURL = nil;
     

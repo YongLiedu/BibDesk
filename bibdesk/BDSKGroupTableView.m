@@ -145,8 +145,8 @@
     NSString *fontSizePrefKey = [self fontSizePreferenceKey];
     if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
         return;
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
+    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePrefKey];
+    float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePrefKey];
     NSFont *font = nil;
 
     if(nil != fontName)

@@ -99,7 +99,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     FSSpec appSpec;
 	if(noErr == err){
         NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
-        NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
+        NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
         NSString *bundleID = [defaultViewers objectForKey:extension];
 		if (bundleID)
             err = LSFindApplicationForInfo(kLSUnknownCreator, (CFStringRef)bundleID, NULL, NULL, &appURL);
@@ -228,7 +228,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
 
 - (BOOL)openLinkedFile:(NSString *)fullPath {
     NSString *extension = [[fullPath pathExtension] lowercaseString];
-    NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
+    NSDictionary *defaultViewers = [[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey];
     NSString *appID = [defaultViewers objectForKey:extension];
     NSString *appPath = appID ? [self absolutePathForAppBundleWithIdentifier:appID] : nil;
     BOOL rv = NO;

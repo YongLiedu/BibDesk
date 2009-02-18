@@ -158,7 +158,7 @@
 			   [parentType isEqualToString:BDSKBookletString] || 
 			   [parentType isEqualToString:BDSKTechreportString] || 
 			   [parentType isEqualToString:BDSKManualString]) {
-		if (![[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] isEqualToString:BDSKInbookString]) 
+		if (![[[NSUserDefaults standardUserDefaults] stringForKey:BDSKPubTypeStringKey] isEqualToString:BDSKInbookString]) 
 			[newBI setPubType:BDSKIncollectionString];
 	}
     [self addNewPubAndEdit:newBI];
@@ -180,7 +180,7 @@
 
 - (void)removePubsAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if ([alert checkValue] == YES)
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnRemovalFromGroupKey];
+		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRemovalFromGroupKey];
     if (returnCode == NSAlertDefaultReturn)
         [self removePublications:[self selectedPublications] fromGroups:[self selectedGroups]];
 }
@@ -202,7 +202,7 @@
 			return;
 		}
         // the items may not belong to the groups that you're trying to remove them from, but we'll warn as if they were
-        if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
             NSString *groupName = ([selectedGroups count] > 1 ? NSLocalizedString(@"multiple groups", @"multiple groups") : [NSString stringWithFormat:NSLocalizedString(@"group \"%@\"", @"group \"Name\""), [[selectedGroups firstObject] stringValue]]);
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
                                                  defaultButton:NSLocalizedString(@"Yes", @"Button title")
@@ -226,7 +226,7 @@
 
 - (void)deletePubsAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if (alert != nil && [alert checkValue] == YES)
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnDeleteKey];
+		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnDeleteKey];
     if (returnCode == NSAlertOtherReturn)
         return;
     
@@ -266,7 +266,7 @@
         return;
     }
 	
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnDeleteKey]) {
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnDeleteKey]) {
         NSString *info;
         if (numSelectedPubs > 1)
             info = [NSString stringWithFormat:NSLocalizedString(@"You are about to delete %i publications. Do you want to proceed?", @"Informative text in alert dialog"), numSelectedPubs];
@@ -311,7 +311,7 @@
 - (IBAction)copyAsAction:(id)sender{
 	int copyType = [sender tag];
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-	NSString *citeString = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey];
+	NSString *citeString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey];
 	[self writePublications:[self selectedPublications] forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
 }
 
@@ -330,7 +330,7 @@
     [self selectPublications:newPubs];
     [newPubs release];
 	
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey]) {
         [self editPubCmd:nil]; // this will aske the user when there are many pubs
     }
 }
@@ -476,7 +476,7 @@
     NSMutableString *body = [NSMutableString string];
     NSMutableArray *files = [NSMutableArray array];
     
-    NSString *templateName = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKEmailTemplateKey];
+    NSString *templateName = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKEmailTemplateKey];
     BDSKTemplate *template = nil;
     
     if ([NSString isEmptyString:templateName] == NO)
@@ -1156,12 +1156,12 @@
 
 - (IBAction)toggleStatusBar:(id)sender{
 	[statusBar toggleBelowView:mainBox offset:1.0];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowStatusBarKey];
+	[[NSUserDefaults standardUserDefaults] setBool:[statusBar isVisible] forKey:BDSKShowStatusBarKey];
 }
 
 - (IBAction)changeMainTableFont:(id)sender{
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKMainTableViewFontNameKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKMainTableViewFontSizeKey];
+    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKMainTableViewFontNameKey];
+    float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKMainTableViewFontSizeKey];
 	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
     
@@ -1171,8 +1171,8 @@
 }
 
 - (IBAction)changeGroupTableFont:(id)sender{
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKGroupTableViewFontNameKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKGroupTableViewFontSizeKey];
+    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKGroupTableViewFontNameKey];
+    float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKGroupTableViewFontSizeKey];
 	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
     
@@ -1199,8 +1199,8 @@
         [self updateBottomPreviewPane];
         if ([sender isEqual:bottomPreviewButton] == NO)
             [bottomPreviewButton selectSegmentWithTag:bottomPreviewDisplay];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:bottomPreviewDisplayTemplate forKey:BDSKBottomPreviewDisplayTemplateKey];
+        [[NSUserDefaults standardUserDefaults] setInteger:bottomPreviewDisplay forKey:BDSKBottomPreviewDisplayKey];
+        [[NSUserDefaults standardUserDefaults] setObject:bottomPreviewDisplayTemplate forKey:BDSKBottomPreviewDisplayTemplateKey];
     }
 }
 
@@ -1222,8 +1222,8 @@
         [self updateSidePreviewPane];
         if ([sender isEqual:sidePreviewButton] == NO)
             [sidePreviewButton selectSegmentWithTag:sidePreviewDisplay];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
+        [[NSUserDefaults standardUserDefaults] setInteger:sidePreviewDisplay forKey:BDSKSidePreviewDisplayKey];
+        [[NSUserDefaults standardUserDefaults] setObject:sidePreviewDisplayTemplate forKey:BDSKSidePreviewDisplayTemplateKey];
     }
 }
 
@@ -1490,7 +1490,7 @@
 
 - (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if([alert checkValue] == YES)
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
+		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
     
     if(returnCode == NSAlertDefaultReturn)
         [self generateCiteKeysForPublications:[self selectedPublications]];
@@ -1502,7 +1502,7 @@
 	if (numberOfSelectedPubs == 0 ||
         [self hasExternalGroupsSelected] == YES) return;
     
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
         NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"Message in alert dialog when generating cite keys") : NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys");
         NSString *message = numberOfSelectedPubs > 1 ? [NSString stringWithFormat:NSLocalizedString(@"This action will generate cite keys for %d publications.  This action is undoable.", @"Informative text in alert dialog"), numberOfSelectedPubs] : NSLocalizedString(@"This action will generate a cite key for the selected publication.  This action is undoable.", @"Informative text in alert dialog");
         BDSKAlert *alert = [BDSKAlert alertWithMessageText:alertTitle
@@ -1580,7 +1580,7 @@
 - (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	BOOL overwrite = (returnCode == NSAlertAlternateReturn);
 	
-	NSSet *parentTypes = [NSSet setWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
+	NSSet *parentTypes = [NSSet setWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
 	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
 	BibItem *aPub;
 	

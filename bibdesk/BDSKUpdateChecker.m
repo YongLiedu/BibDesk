@@ -46,6 +46,8 @@
 #define DOWNLOAD_URL @"http://bibdesk.sourceforge.net/"
 #define BIBDESK_VERSION_KEY @"BibDesk"
 
+static void *BDSKUpdateCheckerDefaultsObservationContext = @"BDSKUpdateCheckerDefaultsObservationContext";
+
 @interface BDSKUpdateChecker (Private)
 
 - (NSURL *)propertyListURL;
@@ -57,7 +59,6 @@
 - (BDSKVersionNumber *)localVersionNumber;
 - (BOOL)downloadPropertyListFromServer:(NSError **)error;
 
-- (void)handleUpdateIntervalChanged:(NSNotification *)note;
 - (void)setUpdateTimer:(NSTimer *)aTimer;
 - (CFGregorianUnits)updateCheckGregorianUnits;
 - (NSTimeInterval)updateCheckTimeInterval;
@@ -100,9 +101,10 @@ static id sharedInstance = nil;
         localVersionNumber = [[BDSKVersionNumber alloc] initWithVersionString:versionString];
         keyForCurrentMajorVersion = [[self keyForVersion:versionString] retain];
         
-        [OFPreference addObserver:self 
-                         selector:@selector(handleUpdateIntervalChanged:) 
-                    forPreference:[OFPreference preferenceForKey:BDSKUpdateCheckIntervalKey]];
+        [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self 
+            forKeyPath:[@"values." stringByAppendingString:BDSKUpdateCheckIntervalKey]
+               options:0
+               context:BDSKUpdateCheckerDefaultsObservationContext];
     }
     return sharedInstance;
 }
@@ -148,7 +150,7 @@ static id sharedInstance = nil;
 - (IBAction)checkForUpdates:(id)sender;
 {    
     // reset date of last check and reschedule the timer
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[NSDate date] description] forKey:BDSKUpdateCheckLastDateKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[[NSDate date] description] forKey:BDSKUpdateCheckLastDateKey];
     [self scheduleUpdateCheckIfNeeded];
 
     // check for network availability and display a warning if it's down
@@ -171,9 +173,9 @@ static id sharedInstance = nil;
     }
     
     if(remoteVersion && (notifiedVersion == nil || [notifiedVersion compareToVersionNumber:remoteVersion] == NSOrderedAscending)){
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[remoteVersion cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
+        [[NSUserDefaults standardUserDefaults] setObject:[remoteVersion cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
     } else if(remoteVersionForCurrentMajor && (notifiedVersion == nil || [notifiedVersion compareToVersionNumber:remoteVersionForCurrentMajor] == NSOrderedAscending)){
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[remoteVersionForCurrentMajor cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
+        [[NSUserDefaults standardUserDefaults] setObject:[remoteVersionForCurrentMajor cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
     }
     
     if(remoteVersionForCurrentMajor && [remoteVersionForCurrentMajor compareToVersionNumber:localVersion] == NSOrderedDescending){
@@ -258,7 +260,7 @@ static id sharedInstance = nil;
 
 - (BDSKVersionNumber *)latestNotifiedVersionNumber;
 {
-    NSString *versionString = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKUpdateLatestNotifiedVersionKey];
+    NSString *versionString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKUpdateLatestNotifiedVersionKey];
     BDSKVersionNumber *versionNumber = [[[BDSKVersionNumber alloc] initWithVersionString:versionString] autorelease];
     return versionNumber;
 }
@@ -326,9 +328,12 @@ static id sharedInstance = nil;
 
 #pragma mark Automatic update checking
 
-- (void)handleUpdateIntervalChanged:(NSNotification *)note;
-{
-    [self scheduleUpdateCheckIfNeeded];
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == BDSKUpdateCheckerDefaultsObservationContext) {
+        [self scheduleUpdateCheckIfNeeded];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 - (void)setUpdateTimer:(NSTimer *)aTimer;
@@ -343,7 +348,7 @@ static id sharedInstance = nil;
 // returns the update check granularity
 - (CFGregorianUnits)updateCheckGregorianUnits;
 {
-    BDSKUpdateCheckInterval intervalType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUpdateCheckIntervalKey];
+    BDSKUpdateCheckInterval intervalType = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKUpdateCheckIntervalKey];
     
     CFGregorianUnits dateUnits = { 0, 0, 0, 0, 0, 0 };
     
@@ -370,7 +375,7 @@ static id sharedInstance = nil;
 // returns UTC date of next update check
 - (NSDate *)nextUpdateCheckDate;
 {
-    NSDate *lastCheck = [NSDate dateWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKUpdateCheckLastDateKey]] ?: [NSDate distantPast];
+    NSDate *lastCheck = [NSDate dateWithString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKUpdateCheckLastDateKey]] ?: [NSDate distantPast];
     
     CFAbsoluteTime lastCheckTime = CFDateGetAbsoluteTime((CFDateRef)lastCheck);
     
@@ -385,7 +390,7 @@ static id sharedInstance = nil;
     [NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground) toTarget:self withObject:nil];
     
     // set the current date as the date of the last update check
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[NSDate date] description] forKey:BDSKUpdateCheckLastDateKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[[NSDate date] description] forKey:BDSKUpdateCheckLastDateKey];
     [self scheduleUpdateCheckIfNeeded];
 }
 
@@ -490,9 +495,9 @@ static id sharedInstance = nil;
     if(notifiedVersion && [notifiedVersion compareToVersionNumber:remoteVersion] != NSOrderedAscending){
         remoteVersion = nil;
     } else if(remoteVersion){
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[remoteVersion cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
+        [[NSUserDefaults standardUserDefaults] setObject:[remoteVersion cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
     } else if(remoteVersionForCurrentMajor && (notifiedVersion == nil || [notifiedVersion compareToVersionNumber:remoteVersionForCurrentMajor] == NSOrderedAscending)){
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[remoteVersionForCurrentMajor cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
+        [[NSUserDefaults standardUserDefaults] setObject:[remoteVersionForCurrentMajor cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
     }
     
     if(remoteVersionForCurrentMajor && [remoteVersionForCurrentMajor compareToVersionNumber:localVersion] == NSOrderedDescending){

@@ -418,7 +418,7 @@
 
 - (void)saveSortDescriptors
 {
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
 }
 
 - (void)windowWillClose:(NSNotification *)notification

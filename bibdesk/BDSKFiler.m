@@ -101,7 +101,7 @@ static BDSKFiler *sharedFiler = nil;
 
 - (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check{
 	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
+	NSString *papersFolderPath = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey];
 	BOOL isDir;
 
 	if(![NSString isEmptyString:papersFolderPath] && !([fm fileExistsAtPath:[fm resolveAliasesInPath:papersFolderPath] isDirectory:&isDir] && isDir)){
@@ -560,7 +560,7 @@ static BDSKFiler *sharedFiler = nil;
             }
             if(statusFlag == BDSKNoError){
                 if([fileType isEqualToString:NSFileTypeDirectory] && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:resolvedPath] == NO && force == NO && 
-                   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnMoveFolderKey]){
+                   [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnMoveFolderKey]){
                     BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")
                                                          defaultButton:NSLocalizedString(@"Move", @"Button title")
                                                        alternateButton:NSLocalizedString(@"Don't Move", @"Button title") 
@@ -570,7 +570,7 @@ static BDSKFiler *sharedFiler = nil;
                     [alert setCheckValue:NO];
                     ignoreMove = (NSAlertAlternateReturn == [alert runModal]);
                     if([alert checkValue] == YES)
-                        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
+                        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
                 }
                 if(ignoreMove){
                     status = NSLocalizedString(@"Shouldn't move folder.", @"AutoFile error message");
