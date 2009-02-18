@@ -29,7 +29,6 @@
     #import "NSString_BDSKExtensions.h"
     #import "BDSKComplexString.h"
     #import "BDSKStringConstants.h"
-    #import "BDSKPreferenceController.h"
 
 #define __FILENAMEASNSSTRING__ \
 [[NSString stringWithFileSystemRepresentation:__FILE__] lastPathComponent]
