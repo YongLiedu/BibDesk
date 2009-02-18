@@ -95,9 +95,6 @@
 - (void)tableView:(NSTableView *)aTableView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString;
 - (void)tableView:(NSTableView *)aTableView typeSelectHelper:(BDSKTypeSelectHelper *)aTypeSelectHelper updateSearchString:(NSString *)searchString;
 
-- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)aTableView;
-- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)aTableView;
-
 @end
 
 
