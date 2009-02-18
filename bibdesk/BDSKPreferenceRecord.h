@@ -1,8 +1,8 @@
 //
-//  BDSKPreferencePane.h
+//  BDSKPreferenceRecord.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 2/17/09.
+//  Created by Christiaan Hofman on 2/18/09.
 /*
  This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
@@ -38,30 +38,27 @@
 
 #import <Cocoa/Cocoa.h>
 
-enum {
-    BDSKPreferencePaneUnselectCancel,
-    BDSKPreferencePaneUnselectNow,
-    BDSKPreferencePaneUnselectLater
-};
-typedef int BDSKPreferencePaneUnselectReply;
 
-@class BDSKPreferenceController, BDSKPreferenceRecord;
-
-@interface BDSKPreferencePane : NSWindowController {
-    IBOutlet NSView *view;
-    BDSKPreferenceRecord *record;
-    BDSKPreferenceController *preferenceController;
+@interface BDSKPreferenceRecord : NSObject {
+    NSString *identifier;
+    Class paneClass;
+    NSString *nibName;
+    NSString *title;
+    NSString *label;
+    NSString *toolTip;
+    NSImage *icon;
+    NSString *helpAnchor;
+    NSURL *helpURL;
+    NSDictionary *initialValues;
+    NSArray *searchTerms;
+    NSDictionary *dictionary;
 }
 
-- (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController;
-
-- (BDSKPreferenceController *)preferenceController;
-
-- (NSView *)view;
-
-- (BDSKPreferenceRecord *)record;
+- (id)initWithDictionary:(NSDictionary *)aDictionary;
 
 - (NSString *)identifier;
+- (Class)paneClass;
+- (NSString *)nibName;
 - (NSString *)title;
 - (NSString *)label;
 - (NSString *)toolTip;
@@ -69,22 +66,7 @@ typedef int BDSKPreferencePaneUnselectReply;
 - (NSString *)helpAnchor;
 - (NSURL *)helpURL;
 - (NSDictionary *)initialValues;
-
-- (void)revertDefaults;
-
-// these are sent to the selected pane and by default do nothing
-
-- (void)willSelect;
-- (void)didSelect;
-
-// if this returns BDSKPreferencePaneUnselectLater, -replyToShouldUnselect: should be called when this is resolved
-- (BDSKPreferencePaneUnselectReply)shouldUnselect;
-- (void)willUnselect;
-- (void)didUnselect;
-
-- (void)willShowWindow;
-- (void)didShowWindow;
-- (BOOL)shouldCloseWindow;
-- (void)willCloseWindow;
+- (NSArray *)searchTerms;
+- (NSDictionary *)dictionary;
 
 @end

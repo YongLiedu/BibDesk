@@ -45,6 +45,7 @@
 #import "BDSKStringConstants.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKMacroWindowController.h"
+#import "BDSKPreferenceRecord.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -67,8 +68,8 @@ static NSSet *alwaysDisabledFields = nil;
         alwaysDisabledFields = [[NSSet alloc] initWithObjects:BDSKAuthorString, BDSKEditorString, nil];
 }
 
-- (id)initWithNibName:(NSString *)nibName identifier:(NSString *)anIdentifier forPreferenceController:(BDSKPreferenceController *)aController {
-	if(self = [super initWithNibName:nibName identifier:anIdentifier forPreferenceController:aController]){
+- (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
+	if(self = [super initWithRecord:aRecord forPreferenceController:aController]){
         globalMacroFiles = [[NSMutableArray alloc] initWithArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGlobalMacroFilesKey]];
        
         customFieldsArray = [[NSMutableArray alloc] initWithCapacity:6];

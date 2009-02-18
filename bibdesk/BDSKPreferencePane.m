@@ -38,13 +38,14 @@
 
 #import "BDSKPreferencePane.h"
 #import "BDSKPreferenceController.h"
+#import "BDSKPreferenceRecord.h"
 
 
 @implementation BDSKPreferencePane
 
-- (id)initWithNibName:(NSString *)nibName identifier:(NSString *)anIdentifier forPreferenceController:(BDSKPreferenceController *)aController {
-    if (self = [super initWithWindowNibName:nibName ?: [self windowNibName]]) {
-        identifier = [anIdentifier retain];
+- (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
+    if (self = [super initWithWindowNibName:[record nibName] ?: [self windowNibName]]) {
+        record = [aRecord retain];
         preferenceController = aController;
     }
     return self;
@@ -52,13 +53,7 @@
 
 - (void)dealloc {
     [view release];
-    [identifier release];
-    [title release];
-    [label release];
-    [icon release];
-    [helpAnchor release];
-    [helpURL release];
-    [initialValues release];
+    [record release];
     [super dealloc];
 }
 
@@ -77,85 +72,40 @@
     return view;
 }
 
+- (BDSKPreferenceRecord *)record {
+    return record;
+}
+
 - (NSString *)identifier {
-    return identifier;
+    return [record identifier];
 }
 
 - (NSString *)title {
-    return (title ?: label) ?: identifier;
-}
-
-- (void)setTitle:(NSString *)newTitle {
-    if (title != newTitle) {
-        [title release];
-        title = [newTitle retain];
-    }
+    return ([record title] ?: [record label]) ?: [record identifier];
 }
 
 - (NSString *)label {
-    return (label ?: title) ?: identifier;
-}
-
-- (void)setLabel:(NSString *)newLabel {
-    if (label != newLabel) {
-        [label release];
-        label = [newLabel retain];
-    }
+    return ([record label] ?: [record title]) ?: [record identifier];
 }
 
 - (NSString *)toolTip {
-    return (toolTip ?: title) ?: label;
-}
-
-- (void)setToolTip:(NSString *)newToolTip {
-    if (toolTip != newToolTip) {
-        [toolTip release];
-        toolTip = [newToolTip retain];
-    }
+    return ([record toolTip] ?: [record title]) ?: [record label];
 }
 
 - (NSImage *)icon {
-    return icon;
-}
-
-- (void)setIcon:(NSImage *)newIcon {
-    if (icon != newIcon) {
-        [icon release];
-        icon = [newIcon retain];
-    }
+    return [record icon];
 }
 
 - (NSString *)helpAnchor {
-    return helpAnchor;
-}
-
-- (void)setHelpAnchor:(NSString *)newHelpAnchor {
-    if (helpAnchor != newHelpAnchor) {
-        [helpAnchor release];
-        helpAnchor = [newHelpAnchor retain];
-    }
+    return [record helpAnchor];
 }
 
 - (NSURL *)helpURL {
-    return helpURL;
-}
-
-- (void)setHelpURL:(NSURL *)newHelpURL {
-    if (helpURL != newHelpURL) {
-        [helpURL release];
-        helpURL = [newHelpURL retain];
-    }
+    return [record helpURL];
 }
 
 - (NSDictionary *)initialValues {
-    return initialValues;
-}
-
-- (void)setInitialValues:(NSDictionary *)newInitialValues {
-    if (initialValues != newInitialValues) {
-        [initialValues release];
-        initialValues = [newInitialValues retain];
-    }
+    return [record initialValues];
 }
 
 - (void)revertDefaults {

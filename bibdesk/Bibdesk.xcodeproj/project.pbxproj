@@ -250,6 +250,7 @@
 		CED65DC90907A2FD003EED90 /* BDSKParseFormatCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */; };
 		CED65DCD0907A338003EED90 /* BDSKScriptHook+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */; };
 		CEDB58F40D3692A400E40354 /* ComplexStringEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEDB58F20D3692A400E40354 /* ComplexStringEditor.nib */; };
+		CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */; };
 		CEE22B210BFB7DA8002B746B /* RelNotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F994B8F607F5F65F00751DA1 /* RelNotes.rtf */; };
 		CEE23BDB0BFBA768002B746B /* BibDeskInputManager in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D2C0758069E00C3F701 /* BibDeskInputManager */; };
 		CEE23BDC0BFBA775002B746B /* Scripts in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEE23BD50BFBA6D6002B746B /* Scripts */; };
@@ -1251,6 +1252,8 @@
 		CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BDSKScriptHook+Scripting.m"; sourceTree = "<group>"; };
 		CEDB58F30D3692A400E40354 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ComplexStringEditor.nib; sourceTree = "<group>"; };
 		CEDB58F50D3692B700E40354 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/ComplexStringEditor.nib; sourceTree = "<group>"; };
+		CEDBDE490F4C863500190AF5 /* BDSKPreferenceRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreferenceRecord.h; sourceTree = "<group>"; };
+		CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPreferenceRecord.m; sourceTree = "<group>"; };
 		CEE23BD50BFBA6D6002B746B /* Scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Scripts; sourceTree = "<group>"; };
 		CEEA4C680B57B0D400434059 /* BDSKBooleanValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKBooleanValueTransformer.m; sourceTree = "<group>"; };
 		CEEA4C690B57B0D400434059 /* BDSKBooleanValueTransformer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKBooleanValueTransformer.h; sourceTree = "<group>"; };
@@ -2276,6 +2279,8 @@
 				F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */,
 				F91F284709A661A700419960 /* PDFMetadata.m */,
 				F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */,
+				CEDBDE490F4C863500190AF5 /* BDSKPreferenceRecord.h */,
+				CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -3896,6 +3901,7 @@
 				CE62E0940F4C46D600BDF01E /* BDSKSplitView.m in Sources */,
 				CE62E0BA0F4C4A2100BDF01E /* BDSKTableView.m in Sources */,
 				CE62E0C00F4C4A5500BDF01E /* BDSKOutlineView.m in Sources */,
+				CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

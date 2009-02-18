@@ -51,6 +51,7 @@
     BDSKOverlayWindow *overlay;
     NSMutableArray *categories;
     NSMutableDictionary *categoryDicts;
+    NSMutableDictionary *records;
     NSMutableDictionary *panes;
     NSString *selectedPaneIdentifier;
     NSString *delayedPaneIdentifier;

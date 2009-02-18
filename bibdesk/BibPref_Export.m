@@ -45,13 +45,14 @@
 #import "BDSKTemplate.h"
 #import "BDSKAppController.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "BDSKPreferenceRecord.h"
 
 static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 @implementation BibPref_Export
 
-- (id)initWithNibName:(NSString *)nibName identifier:(NSString *)anIdentifier forPreferenceController:(BDSKPreferenceController *)aController {
-	if(self = [super initWithNibName:nibName identifier:anIdentifier forPreferenceController:aController]){
+- (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
+	if(self = [super initWithRecord:aRecord forPreferenceController:aController]){
         
         NSData *data = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKExportTemplateTree];
         if([data length])

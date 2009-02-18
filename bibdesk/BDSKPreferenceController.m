@@ -37,6 +37,7 @@
  */
 
 #import "BDSKPreferenceController.h"
+#import "BDSKPreferenceRecord.h"
 #import "BDSKPreferencePane.h"
 #import "BDSKPreferenceIconView.h"
 #import "BDSKOverlay.h"
@@ -45,17 +46,9 @@
 #define LOCALIZATION_TABLE @"Preferences"
 #define DEFAULTS_TABLE @"Preferences"
 #define IDENTIFIER_KEY @"identifier"
-#define CLASS_KEY @"class"
-#define NIB_NAME_KEY @"nibName"
 #define TITLE_KEY @"title"
-#define LABEL_KEY @"label"
-#define TOOL_TIP_KEY @"toolTip"
-#define ICON_KEY @"icon"
-#define HELP_ANCHOR_KEY @"helpAnchor"
-#define HELP_URL_KEY @"helpURL"
 #define INITIAL_VALUES_KEY @"initialValues"
 #define PANES_KEY @"panes"
-#define SEARCH_TERMS_KEY @"searchTerms"
 #define MINIMUM_SYSTEM_VERSION_KEY @"minimumSystemVersion"
 #define MAXIMUM_SYSTEM_VERSION_KEY @"maximumSystemVersion"
 
@@ -70,6 +63,7 @@ static NSString *BDSKPreferencesToolbarSearchItemIdentifier = @"BDSKPreferencesT
 - (void)iconViewShowPane:(id)sender;
 - (void)setSelectedPaneIdentifier:(NSString *)identifier;
 - (void)setupToolbar;
+- (void)loadPreferences;
 - (void)loadPanes;
 - (BDSKPreferenceIconView *)iconView;
 - (void)changeContentView:(NSView *)view display:(BOOL)display;
@@ -102,11 +96,12 @@ static id sharedController = nil;
     if ((sharedController == nil) && (sharedController = self = [super initWithWindowNibName:@"Preferences"])) {
         categories = [[NSMutableArray alloc] init];
         categoryDicts = [[NSMutableDictionary alloc] init];
+        records = [[NSMutableDictionary alloc] init];
         panes = [[NSMutableDictionary alloc] init];
         identiferSearchTerms = [[NSMutableDictionary alloc] init];
         selectedPaneIdentifier = [@"" retain];
         helpBookName = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookName"] retain];
-        [self loadPanes];
+        [self loadPreferences];
     }
     return self;
 }
@@ -125,6 +120,8 @@ static id sharedController = nil;
     [[self window] setShowsToolbarButton:NO];
     
     [[self window] setTitle:[self defaultWindowTitle]];
+    
+    [self loadPanes];
     
     iconView = [[BDSKPreferenceIconView alloc] initWithPreferenceController:self];
     [iconView setAction:@selector(iconViewShowPane:)];
@@ -532,7 +529,7 @@ static inline NSComparisonResult compareSystemVersion(NSString *version, SInt32 
         return NSOrderedSame;
 }
 
-- (void)loadPanes {
+- (void)loadPreferences {
     NSString *plistPath = [[NSBundle mainBundle] pathForResource:DEFAULTS_TABLE ofType:@"plist"];
     NSEnumerator *catEnum = [[NSArray arrayWithContentsOfFile:plistPath] objectEnumerator];
     NSDictionary *dict;
@@ -549,44 +546,21 @@ static inline NSComparisonResult compareSystemVersion(NSString *version, SInt32 
         NSDictionary *paneDict;
         
         while (paneDict = [paneEnum nextObject]) {
-            NSDictionary *defaults = [paneDict valueForKey:INITIAL_VALUES_KEY];
+            BDSKPreferenceRecord *record = [[BDSKPreferenceRecord alloc] initWithDictionary:paneDict];
+            NSString *identifier = [record identifier];
             // should we register defaults for panes that are not loaded?
-            [initialValues addEntriesFromDictionary:defaults];
-            NSString *identifier = [paneDict valueForKey:IDENTIFIER_KEY];
-            Class paneClass = NSClassFromString([paneDict valueForKey:CLASS_KEY]);
-            if (identifier == nil || paneClass == nil) {
-                NSLog(@"Could not get identifier or class of preference pane for %@", paneDict);
+            [initialValues addEntriesFromDictionary:[record initialValues]];
+            if (identifier == nil) {
+                NSLog(@"Could not get identifier of preference pane for %@", paneDict);
+            } else if ([record paneClass] == nil) {
+                NSLog(@"Could not get class of preference pane for %@", paneDict);
             } else {
+                [records setObject:record forKey:identifier];
                 NSString *minimumSystemVersion = [paneDict valueForKey:MINIMUM_SYSTEM_VERSION_KEY];
                 NSString *maximumSystemVersion = [paneDict valueForKey:MAXIMUM_SYSTEM_VERSION_KEY];
                 if ((minimumSystemVersion == nil || compareSystemVersion(minimumSystemVersion, major, minor, bugfix) == NSOrderedDescending) &&
-                    (maximumSystemVersion == nil || compareSystemVersion(maximumSystemVersion, major, minor, bugfix) == NSOrderedAscending)) {
-                    BDSKPreferencePane *pane = [[paneClass alloc] initWithNibName:[paneDict valueForKey:NIB_NAME_KEY] identifier:identifier forPreferenceController:self];
-                    if (pane == nil) {
-                        NSLog(@"Could not create preference pane for %@", paneDict);
-                    } else {
-                        [pane setIcon:[NSImage imageNamed:[paneDict valueForKey:ICON_KEY]]];
-                        [pane setTitle:[paneDict valueForKey:TITLE_KEY]];
-                        [pane setLabel:[paneDict valueForKey:LABEL_KEY]];
-                        [pane setToolTip:[paneDict valueForKey:TOOL_TIP_KEY]];
-                        [pane setHelpAnchor:[paneDict valueForKey:HELP_ANCHOR_KEY]];
-                        [pane setHelpURL:[paneDict valueForKey:HELP_URL_KEY] ? [NSURL URLWithString:[paneDict valueForKey:HELP_URL_KEY]] : nil];
-                        [pane setInitialValues:defaults];
-                        [paneArray addObject:identifier];
-                        [panes setObject:pane forKey:identifier];
-                        [pane release];
-                        NSArray *searchTerms = [paneDict valueForKey:SEARCH_TERMS_KEY];
-                        if ([searchTerms count]) {
-                            NSMutableString *searchString = [[NSMutableString alloc] init];
-                            NSEnumerator *stringEnum = [searchTerms objectEnumerator];
-                            NSString *string;
-                            while (string = [stringEnum nextObject])
-                                [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:DEFAULTS_TABLE], 0x1E];
-                            [identiferSearchTerms setObject:searchString forKey:identifier];
-                            [searchString release];
-                        }
-                    }
-                }
+                    (maximumSystemVersion == nil || compareSystemVersion(maximumSystemVersion, major, minor, bugfix) == NSOrderedAscending))
+                    [paneArray addObject:identifier];
             }
         }
         
@@ -609,6 +583,37 @@ static inline NSComparisonResult compareSystemVersion(NSString *version, SInt32 
     if ([initialValues count]) {
         [[NSUserDefaults standardUserDefaults] registerDefaults:initialValues];
         [[NSUserDefaultsController sharedUserDefaultsController] setInitialValues:initialValues];
+    }
+}
+
+- (void)loadPanes {
+    NSEnumerator *catEnum = [categories objectEnumerator];
+    NSString *category;
+	
+    while (category = [catEnum nextObject]) {
+        NSEnumerator *paneEnum = [[[categoryDicts objectForKey:category] valueForKey:PANES_KEY] objectEnumerator];
+        NSString *identifier;
+        
+        while (identifier = [paneEnum nextObject]) {
+            BDSKPreferenceRecord *record = [records objectForKey:identifier];
+            BDSKPreferencePane *pane = [[[record paneClass] alloc] initWithRecord:record forPreferenceController:self];
+            if (pane == nil) {
+                NSLog(@"Could not create preference pane for %@", record);
+            } else {
+                [panes setObject:pane forKey:identifier];
+                [pane release];
+                NSArray *searchTerms = [record searchTerms];
+                if ([searchTerms count]) {
+                    NSMutableString *searchString = [[NSMutableString alloc] init];
+                    NSEnumerator *stringEnum = [searchTerms objectEnumerator];
+                    NSString *string;
+                    while (string = [stringEnum nextObject])
+                        [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:DEFAULTS_TABLE], 0x1E];
+                    [identiferSearchTerms setObject:searchString forKey:identifier];
+                    [searchString release];
+                }
+            }
+        }
     }
 }
 
