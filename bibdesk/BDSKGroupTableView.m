@@ -269,7 +269,7 @@
         return;
     
     [super selectRowIndexes:indexes byExtendingSelection:shouldExtend];
-    // this is needed because we draw multiple selections differently and OAGradientTableView calls this only for deprecated 10.3 methods
+    // this is needed because we draw multiple selections differently and BDSKGradientTableView calls this only for deprecated 10.3 methods
     [self setNeedsDisplay:YES];
 }
 

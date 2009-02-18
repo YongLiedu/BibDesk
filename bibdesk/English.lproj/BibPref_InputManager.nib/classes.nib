@@ -78,7 +78,7 @@
 				<key>enableButton</key>
 				<string>NSButton</string>
 				<key>tableView</key>
-				<string>OAGradientTableView</string>
+				<string>BDSKGradientTableView</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>BDSKPreferencePane</string>
@@ -106,7 +106,7 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>OAGradientTableView</string>
+			<string>BDSKGradientTableView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>

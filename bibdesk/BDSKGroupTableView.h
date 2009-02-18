@@ -37,7 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKGradientTableView.h"
 
 @class BDSKGroupTableView, BDSKTypeSelectHelper;
 
@@ -49,7 +49,7 @@
 
 @end
 
-@interface BDSKGroupTableView : OAGradientTableView {
+@interface BDSKGroupTableView : BDSKGradientTableView {
     BDSKTypeSelectHelper *typeSelectHelper;
 }
 - (BDSKTypeSelectHelper *)typeSelectHelper;

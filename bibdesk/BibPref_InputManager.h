@@ -40,11 +40,11 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKPreferencePane.h"
 
-@class OAGradientTableView;
+@class BDSKGradientTableView;
 
 @interface BibPref_InputManager : BDSKPreferencePane
 {
-    IBOutlet OAGradientTableView *tableView;
+    IBOutlet BDSKGradientTableView *tableView;
     IBOutlet NSButton *enableButton;
     IBOutlet NSArrayController *arrayController;
     NSString *inputManagerPath;

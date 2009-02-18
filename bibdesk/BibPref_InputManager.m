@@ -50,6 +50,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BDSKGradientTableView.h"
 
 CFStringRef BDSKInputManagerID = CFSTR("net.sourceforge.bibdesk.inputmanager");
 CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles that we recognize");
