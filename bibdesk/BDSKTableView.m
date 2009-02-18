@@ -415,7 +415,7 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
 		[[self dataSource] tableView:self concludeDragOperation:operation];
     
     // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
-    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
 }
 
 - (NSImage *)dragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent *)dragEvent offset:(NSPointPointer)dragImageOffset{
