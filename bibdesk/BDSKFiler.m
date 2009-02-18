@@ -469,7 +469,7 @@ static BDSKFiler *sharedFiler = nil;
 	}
 }
 
-- (NSMenu *)tableView:(NSTableView *)tableView contextMenuForRow:(int)row column:(int)column{
+- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(int)rowIndex {
     return contextMenu;
 }
 

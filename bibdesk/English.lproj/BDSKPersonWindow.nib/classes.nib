@@ -50,6 +50,41 @@
 			<string>ObjC</string>
 		</dict>
 		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeFont</key>
+				<string>id</string>
+				<key>copy</key>
+				<string>id</string>
+				<key>cut</key>
+				<string>id</string>
+				<key>delete</key>
+				<string>id</string>
+				<key>duplicate</key>
+				<string>id</string>
+				<key>insertNewline</key>
+				<string>id</string>
+				<key>invertSelection</key>
+				<string>id</string>
+				<key>moveDown</key>
+				<string>id</string>
+				<key>moveUp</key>
+				<string>id</string>
+				<key>paste</key>
+				<string>id</string>
+				<key>scrollToBeginningOfDocument</key>
+				<string>id</string>
+				<key>scrollToEndOfDocument</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
 			<key>CLASS</key>
 			<string>NSWindow</string>
 			<key>LANGUAGE</key>
@@ -118,7 +153,7 @@
 				<key>publicationArrayController</key>
 				<string>NSArrayController</string>
 				<key>publicationTableView</key>
-				<string>NSTableView</string>
+				<string>BDSKTableView</string>
 				<key>splitView</key>
 				<string>BDSKSplitView</string>
 			</dict>

@@ -37,6 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKOutlineView.h"
 
 @class BDSKGradientSplitView;
 
@@ -65,12 +66,11 @@
 @end
 
 
-@interface BDSKNotesOutlineView : NSOutlineView
+@interface BDSKNotesOutlineView : BDSKOutlineView
 @end
 
 
 @interface NSObject(BDSKNotesOutlineViewDelegate)
 - (BOOL)outlineView:(NSOutlineView *)ov canResizeRowByItem:(id)item;
 - (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(int)newHeight byItem:(id)item;
-- (void)outlineView:(NSOutlineView *)ov copyItems:(NSArray *)items;
 @end

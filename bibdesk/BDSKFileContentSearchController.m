@@ -54,6 +54,7 @@
 #import "BibDocument_Search.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKTableView.h"
 
 
 @implementation BDSKFileContentSearchController
@@ -99,6 +100,9 @@
 {
     [tableView setTarget:self];
     [tableView setDoubleAction:@selector(tableAction:)];
+    
+    [tableView setFontNamePreferenceKey:BDSKFileContentSearchTableViewFontNameKey];
+    [tableView setFontSizePreferenceKey:BDSKFileContentSearchTableViewFontSizeKey];
     
     BDSKLevelIndicatorCell *cell = [[tableView tableColumnWithIdentifier:@"score"] dataCell];
     [cell setEnabled:NO]; // this is required to make it non-editable
@@ -445,22 +449,20 @@
     return [(id)displayName autorelease];
 }
 
-- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
-    return BDSKFileContentSearchTableViewFontNameKey;
-}
-
-- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
-    return BDSKFileContentSearchTableViewFontSizeKey;
-}
-
 - (void)tableView:(NSTableView *)tv insertNewline:(id)sender{
     if ([[self document] respondsToSelector:_cmd])
         [[self document] tableView:tv insertNewline:sender];
 }
 
-- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
+- (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
     if ([[self document] respondsToSelector:_cmd])
-        [[self document] tableView:tv deleteRows:rows];
+        [[self document] tableView:tv deleteRowsWithIndexes:rowIndexes];
+}
+
+- (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+    if ([[self document] respondsToSelector:_cmd])
+        return [[self document] tableView:tv canDeleteRowsWithIndexes:rowIndexes];
+    return NO;
 }
 
 @end

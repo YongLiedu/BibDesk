@@ -60,7 +60,6 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [typeSelectHelper release];
     [super dealloc];
 }
 
@@ -96,40 +95,15 @@
                                                  name:NSViewFrameDidChangeNotification
                                                object:[[self enclosingScrollView] contentView]];
     
-    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
-    [typeSelectHelper setDataSource:[self delegate]];
-    [typeSelectHelper setCyclesSimilarResults:NO];
-    [typeSelectHelper setMatchesPrefix:NO];
-}
-
-- (BDSKTypeSelectHelper *)typeSelectHelper{
-    return typeSelectHelper;
+    BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [aTypeSelectHelper setCyclesSimilarResults:NO];
+    [aTypeSelectHelper setMatchesPrefix:NO];
+    [self setTypeSelectHelper:aTypeSelectHelper];
+    [aTypeSelectHelper release];
 }
 
 - (NSPopUpButtonCell *)popUpHeaderCell{
 	return [(BDSKGroupTableHeaderView *)[self headerView] popUpHeaderCell];
-}
-
-- (void)reloadData{
-    [super reloadData];
-    [typeSelectHelper rebuildTypeSelectSearchCache]; // if we resorted or searched, the cache is stale
-}
-
-- (void)keyDown:(NSEvent *)theEvent
-{
-    if ([[theEvent characters] length] == 0)
-        return;
-	// modified from NSTableView-OAExtensions.h which uses a shared typeahead helper instance (which we can't access to force it to recache)
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableTypeAheadSelection"]) {
-
-        // @@ this is a hack; recaching in -reloadData doesn't work for us the first time around, but we don't want to recache on every keystroke
-        if([[typeSelectHelper valueForKey:@"searchCache"] count] == 0)
-            [typeSelectHelper rebuildTypeSelectSearchCache];
-
-        if ([typeSelectHelper processKeyDownEvent:theEvent])
-            return;
-	}
-    [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
 }
 
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note

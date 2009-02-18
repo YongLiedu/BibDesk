@@ -702,15 +702,7 @@ static NSColor *fillColor = nil;
 
 @end
 
-/* Groups items under the top-level outline, and uses a gradient fill for the top level row background.  Grid lines are drawn when the outline has data.
-*/
-
-@interface BDSKGroupingOutlineView : NSOutlineView
-{
-    CIColor *topColor;
-    CIColor *bottomColor;
-}
-@end
+#pragma mark -
 
 @implementation BDSKGroupingOutlineView
 

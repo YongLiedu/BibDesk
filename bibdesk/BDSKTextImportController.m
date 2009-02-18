@@ -1532,8 +1532,7 @@
     return YES;
 }
 
-// this is used by the paste: action defined in NSTableView-OAExtensions
-- (BOOL)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
+- (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	int idx = [tv selectedRow];
 	NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
 	
@@ -1556,12 +1555,11 @@
         
         [self recordChangingField:selKey toValue:string];
     }
-    return YES;
 }
 
-- (void)tableView:(NSTableView *)tableView deleteRows:(NSArray *)rows{
-    if([rows count]){
-        NSString *field = [fields objectAtIndex:[[rows objectAtIndex:0] intValue]];
+- (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+    if([rowIndexes count]){
+        NSString *field = [fields objectAtIndex:[rowIndexes firstIndex]];
         [self recordChangingField:field toValue:@""];
     }
 }
@@ -1592,37 +1590,20 @@
 
 #pragma mark || Methods to support the type-select selector.
 
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
+- (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
     if(!searchString)
         [statusLine setStringValue:[self isInTemporaryTypeSelectMode] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
     else
         [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @"Status message"), [searchString fieldName]]];
 }
 
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
+- (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
     [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"No field:", @"Status message"), [searchString fieldName]]];
 }
 
-- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
+- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
     return fields;
 }
-    // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
-
-- (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
-    if([itemTableView numberOfSelectedRows] == 1)
-        return [itemTableView selectedRow];
-    else
-        return NSNotFound;
-}
-// Type-select behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
-
-// fixme -  also need to call the processkeychars in keydown...
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
-    OBPRECONDITION([[self window] firstResponder] == itemTableView);
-    [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
-    [itemTableView scrollRowToVisible:itemIndex];
-}
-// We call this when a type-select match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
 
 - (void)startTemporaryTypeSelectMode{
     if (temporaryTypeSelectMode == YES)

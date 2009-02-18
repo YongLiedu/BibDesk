@@ -515,6 +515,11 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     // TableView setup
     [tableView removeAllTableColumns];
     
+    [tableView setFontNamePreferenceKey:BDSKMainTableViewFontNameKey];
+    [tableView setFontSizePreferenceKey:BDSKMainTableViewFontSizeKey];
+    [groupTableView setFontNamePreferenceKey:BDSKGroupTableViewFontNameKey];
+    [groupTableView setFontSizePreferenceKey:BDSKGroupTableViewFontSizeKey];
+    
     tableColumnWidths = [[xattrDefaults objectForKey:BDSKColumnWidthsKey] retain];
     [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[sud objectForKey:BDSKShownColsNamesKey]]];
     sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[sud objectForKey:BDSKDefaultSortedTableColumnKey]] retain];

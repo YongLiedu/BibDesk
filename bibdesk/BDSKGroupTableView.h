@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGradientTableView.h"
 
-@class BDSKGroupTableView, BDSKTypeSelectHelper;
+@class BDSKGroupTableView;
 
 @protocol BDSKGroupTableDelegate <NSObject>
 
@@ -49,10 +49,7 @@
 
 @end
 
-@interface BDSKGroupTableView : BDSKGradientTableView {
-    BDSKTypeSelectHelper *typeSelectHelper;
-}
-- (BDSKTypeSelectHelper *)typeSelectHelper;
+@interface BDSKGroupTableView : BDSKGradientTableView
 - (NSPopUpButtonCell *)popUpHeaderCell;
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 - (void)updateHighlights;

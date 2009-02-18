@@ -38,10 +38,10 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKOrphanedFileServer, BDSKOrphanedFilesArrayController;
+@class BDSKOrphanedFileServer, BDSKOrphanedFilesArrayController, BDSKTableView;
 
 @interface BDSKOrphanedFilesFinder : NSWindowController  {
-    IBOutlet NSTableView *tableView;
+    IBOutlet BDSKTableView *tableView;
     IBOutlet NSButton *refreshButton;
     IBOutlet BDSKOrphanedFilesArrayController *arrayController;
     IBOutlet NSProgressIndicator *progressIndicator;

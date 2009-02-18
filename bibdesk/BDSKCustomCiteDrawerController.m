@@ -131,12 +131,6 @@
 
 #pragma mark TableView dragging source
 
-// for 10.3 compatibility and OmniAppKit dataSource methods
-- (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray*)rows toPasteboard:(NSPasteboard*)pboard{
-	NSMutableIndexSet *rowIndexes = [NSIndexSet indexSetWithIndexesInArray:rows];
-	return [self tableView:tv writeRowsWithIndexes:rowIndexes toPasteboard:pboard];
-}
-
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
 	NSString *citeString = [customStringArray objectAtIndex:[rowIndexes firstIndex]];
     NSArray *pubs = [document selectedPublications];

@@ -353,7 +353,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [addButton setEnabled:[self canAddItem]];
 }
 
-- (void)tableView:(NSTableView *)tableView deleteRows:(NSArray *)rows;
+- (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items;
 {
     // currently we don't allow multiple selection, so we'll ignore the rows argument
     if([self canDeleteSelectedItem])
@@ -362,15 +362,24 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         NSBeep();
 }
 
+- (BOOL)outlineView:(NSOutlineView *)ov canDeleteItems:(NSArray *)items {
+    // currently we don't allow multiple selection, so we'll ignore the rows argument
+    return [self canDeleteSelectedItem];
+}
+
 #pragma mark Drag / drop
 
 - (BOOL)outlineView:(NSOutlineView *)ov writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard{
     BDSKTemplate *item = [items lastObject];
-    if ([item isLeaf] == NO || [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO) {
+    if (pboard == [NSPasteboard pasteboardWithName:NSDragPboard] && ([item isLeaf] == NO || [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO)) {
         [pboard declareTypes:[NSArray arrayWithObject:BDSKTemplateRowsPboardType] owner:nil];
         [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:[items lastObject]] forType:BDSKTemplateRowsPboardType];
         return YES;
     }
+    return NO;
+}
+
+- (BOOL)outlineView:(NSOutlineView *)ov canCopyItems:(NSArray *)items {
     return NO;
 }
 
@@ -535,25 +544,25 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     return tooltip;
 }
 
-- (NSMenu *)tableView:(NSOutlineView *)tv contextMenuForRow:(int)row column:(int)column;
+- (NSMenu *)outlineView:(NSOutlineView *)ov menuForTableColumn:(NSTableColumn *)tableColumn item:(id)item;
 {
     NSMenu *menu = nil;
     
-    if(0 == column && row >= 0 && [[outlineView itemAtRow:row] isLeaf]){
+    if([[tableColumn identifier] isEqualToString:BDSKTemplateNameString] && [item isLeaf]){
         menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
         
-        NSURL *theURL = [[tv itemAtRow:row] representedFileURL];
-        NSMenuItem *item = nil;
+        NSURL *theURL = [item representedFileURL];
+        NSMenuItem *menuItem = nil;
     
         if(nil != theURL){
-            item = [menu addItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") andSubmenuOfApplicationsForURL:theURL];
+            menuItem = [menu addItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") andSubmenuOfApplicationsForURL:theURL];
             
-            item = [menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder", @"Menu item title") action:@selector(revealInFinder:) keyEquivalent:@""];
-            [item setTarget:self];
+            menuItem = [menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder", @"Menu item title") action:@selector(revealInFinder:) keyEquivalent:@""];
+            [menuItem setTarget:self];
         }
         
-        item = [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis] action:@selector(chooseFile:) keyEquivalent:@""];
-        [item setTarget:self];
+        menuItem = [menu addItemWithTitle:[NSLocalizedString(@"Choose File", @"Menu item title") stringByAppendingEllipsis] action:@selector(chooseFile:) keyEquivalent:@""];
+        [menuItem setTarget:self];
     }
     
     return menu;
@@ -563,9 +572,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 {
     SEL action = [menuItem action];
     BOOL validate = NO;
-    if(@selector(delete:) == action){
-        validate = [self canDeleteSelectedItem];
-    } else if(@selector(revealInFinder:) == action || @selector(chooseFile:) == action){
+    if (@selector(revealInFinder:) == action || @selector(chooseFile:) == action) {
         int row = [outlineView selectedRow];
         if(row >= 0)
             validate = [[outlineView itemAtRow:row] isLeaf];

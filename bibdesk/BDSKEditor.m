@@ -2950,13 +2950,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return nil;
 }
 
-- (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-	if ([tv isEqual:tableView]) {
-        return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
-    }
-    return NSDragOperationNone;
-}
-
 #pragma mark Splitview delegate methods
 
 - (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(int)offset {

@@ -103,25 +103,6 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     return title;
 }
 
-- (int)numberOfRowsInTableView:(NSTableView *)tableView { return 0; }
-- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row { return nil; }
-- (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column;
-{
-    NSZone *zone = [NSMenu menuZone];
-    NSMenu *menu = [[[NSMenu allocWithZone:zone] initWithTitle:@""] autorelease];
-    if (row >= 0 && column >=0) {
-        NSMenuItem *anItem = [[NSMenuItem allocWithZone:zone] initWithTitle:NSLocalizedString(@"Open Parent Directory in Finder", @"") action:@selector(openParentDirectory:) keyEquivalent:@""];
-        [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
-        [menu addItem:anItem];
-        [anItem release];
-        anItem = [[NSMenuItem allocWithZone:zone] initWithTitle:NSLocalizedString(@"Edit Publication", @"") action:@selector(editPublication:) keyEquivalent:@""];
-        [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
-        [menu addItem:anItem];
-        [anItem release];
-    }
-    return [menu numberOfItems] > 0 ? menu : nil;
-}
-
 - (IBAction)migrate:(id)sender;
 {
     NSMutableArray *observedResults = [self mutableArrayValueForKey:@"results"];
@@ -240,6 +221,14 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     else NSBeep();
 }
 
+- (void)showHelp:(id)sender
+{
+    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"FileMigration" inBook:helpBookName];
+}
+
+#pragma mark TableView delegate
+
 - (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tc row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation
 {
     NSString *tooltip = nil;
@@ -250,10 +239,21 @@ static NSString *BDSKFileMigrationFrameAutosaveName = @"BDSKFileMigrationWindow"
     return tooltip;
 }
 
-- (void)showHelp:(id)sender
+- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(int)row;
 {
-    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"FileMigration" inBook:helpBookName];
+    NSZone *zone = [NSMenu menuZone];
+    NSMenu *menu = [[[NSMenu allocWithZone:zone] initWithTitle:@""] autorelease];
+    if (row >= 0 && tableColumn) {
+        NSMenuItem *anItem = [[NSMenuItem allocWithZone:zone] initWithTitle:NSLocalizedString(@"Open Parent Directory in Finder", @"") action:@selector(openParentDirectory:) keyEquivalent:@""];
+        [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
+        [menu addItem:anItem];
+        [anItem release];
+        anItem = [[NSMenuItem allocWithZone:zone] initWithTitle:NSLocalizedString(@"Edit Publication", @"") action:@selector(editPublication:) keyEquivalent:@""];
+        [anItem setRepresentedObject:[[self mutableArrayValueForKey:@"results"] objectAtIndex:row]];
+        [menu addItem:anItem];
+        [anItem release];
+    }
+    return [menu numberOfItems] > 0 ? menu : nil;
 }
 
 @end

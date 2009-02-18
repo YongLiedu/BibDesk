@@ -37,8 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKTableView.h"
 
 
-@interface BDSKGradientTableView : NSTableView
+@interface BDSKGradientTableView : BDSKTableView
 
 @end

@@ -36,7 +36,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKPreferencePane.h"
 
-@class BDSKMacroWindowController;
+@class BDSKMacroWindowController, BDSKTableView;
 
 @interface BibPref_Defaults : BDSKPreferencePane
 {
@@ -46,7 +46,7 @@
     IBOutlet NSButton* delSelectedDefaultFieldButton;
     IBOutlet NSButton* addDefaultFieldButton;
     IBOutlet NSWindow* globalMacroFileSheet;
-    IBOutlet NSTableView* globalMacroFilesTableView;
+    IBOutlet BDSKTableView* globalMacroFilesTableView;
     IBOutlet NSTableView* defaultFieldsTableView;
     IBOutlet NSButton *editGlobalMacroDefsButton;
     IBOutlet NSMenu *fieldTypeMenu;
@@ -76,5 +76,3 @@
 - (void)updateUI;
 
 @end
-
-@interface MacroFileTableView : NSTableView {} @end

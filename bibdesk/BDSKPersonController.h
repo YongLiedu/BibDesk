@@ -39,12 +39,7 @@
 #import <AppKit/AppKit.h>
 #import "BDSKOwnerProtocol.h"
 
-@class BibDocument;
-@class BibAuthor;
-
-@class BDSKDragImageView;
-@class BDSKCollapsibleView;
-@class BDSKSplitView;
+@class BibDocument, BibAuthor, BDSKDragImageView, BDSKCollapsibleView, BDSKSplitView, BDSKTableView;
 
 @interface BDSKPersonController : NSWindowController {
     BibAuthor *person;
@@ -55,7 +50,7 @@
 	float lastPickerHeight;
     IBOutlet NSTextField *nameTextField;
     IBOutlet BDSKDragImageView *imageView;
-    IBOutlet NSTableView *publicationTableView;
+    IBOutlet BDSKTableView *publicationTableView;
     IBOutlet NSTableView *nameTableView;
     IBOutlet NSTableView *fieldTableView;
     IBOutlet BDSKCollapsibleView *collapsibleView;

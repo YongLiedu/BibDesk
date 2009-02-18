@@ -119,26 +119,16 @@ enum {
     [self setCornerView:cornerViewButton];
     [cornerViewButton release];
     
-    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
-    [typeSelectHelper setDataSource:[self delegate]]; // which is the bibdocument
-    [typeSelectHelper setCyclesSimilarResults:YES];
-    [typeSelectHelper setMatchesPrefix:NO];
+    BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [aTypeSelectHelper setCyclesSimilarResults:YES];
+    [aTypeSelectHelper setMatchesPrefix:NO];
+    [self setTypeSelectHelper:aTypeSelectHelper];
+    [aTypeSelectHelper release];
 }
 
 - (void)dealloc{
-    [typeSelectHelper setDataSource:nil];
-    [typeSelectHelper release];
     [alternatingRowBackgroundColors release];
     [super dealloc];
-}
-
-- (void)reloadData{
-    [super reloadData];
-    [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeSelectSearchCache)]; // if we resorted or searched, the cache is stale
-}
-
-- (BDSKTypeSelectHelper *)typeSelectHelper{
-    return typeSelectHelper;
 }
 
 - (void)keyDown:(NSEvent *)event{
@@ -175,8 +165,7 @@ enum {
 			row++;
         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
         [self scrollRowToVisible:row];
-    // pass it on the typeahead selector
-    }else if ([typeSelectHelper processKeyDownEvent:event] == NO){
+    }else {
         [super keyDown:event];
     }
 }

@@ -33,26 +33,20 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
-@class BDSKTypeSelectHelper;
+#import "BDSKTableView.h"
 
 /*!
     @class BDSKMainTableView
     @abstract Drag n' Droppable Tableview
     @discussion Subclass of NSTableview that allows drag n' drop.
 */
-@interface BDSKMainTableView : NSTableView
+@interface BDSKMainTableView : BDSKTableView
 {
-    // for supporting type-ahead in the tableview:
-    // datasource methods to support this are over in BibDocument_DataSource
-    BDSKTypeSelectHelper *typeSelectHelper;
     NSArray *alternatingRowBackgroundColors;
 }
 
 - (void)setAlternatingRowBackgroundColors:(NSArray *)colorArray;
 - (NSArray *)alternatingRowBackgroundColors;
-
-- (BDSKTypeSelectHelper *)typeSelectHelper;
 
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
 - (NSMenu *)columnsMenu;

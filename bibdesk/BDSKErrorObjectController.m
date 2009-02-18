@@ -344,36 +344,10 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 // copy error messages
 - (IBAction)copy:(id)sender{
-    if([[self window] isKeyWindow] && [errorTableView numberOfSelectedRows] > 0){
-        NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-        NSMutableString *s = [[NSMutableString string] retain];
-        NSEnumerator *objEnumerator = [[errorsController selectedObjects] objectEnumerator];
-		int lineNumber;
-        
-        // Columns order:  @"File Name\t\tLine Number\t\tMessage Type\t\tMessage Text\n"];
-		BDSKErrorObject *errObj;
-		
-        while(errObj = [objEnumerator nextObject]){
-            [s appendString:[[errObj editor] displayName]];
-            [s appendString:@"\t\t"];
-            
-			lineNumber = [errObj lineNumber];
-			if(lineNumber == -1)
-				[s appendString:NSLocalizedString(@"Unknown line number", @"Error message for error window")];
-			else
-				[s appendFormat:@"%i", lineNumber];
-            [s appendString:@"\t\t"];
-            
-            [s appendString:[errObj errorClassName]];
-            [s appendString:@"\t\t"];
-            
-            [s appendString:[errObj errorMessage]];
-            [s appendString:@"\n\n"];
-        }
-        [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [pasteboard setString:s forType:NSStringPboardType];
-    }
-    
+    if ([errorTableView canCopy])
+        [errorTableView copy:nil];
+    else
+        NSBeep();
 }
 
 - (IBAction)gotoError:(id)sender{
@@ -432,10 +406,50 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
 }
 
-#pragma mark TableView tooltips
+#pragma mark TableView delegate
 
 - (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)aTableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
 	return [[[errorsController arrangedObjects] objectAtIndex:row] errorMessage];
+}
+
+#pragma mark TableView dataSource
+
+// dummy, we use bindings
+- (int)numberOfRowsInTableView:(NSTableView *)tv { return 0; }
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)row { return nil; }
+
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
+    NSMutableString *s = [[NSMutableString string] retain];
+    NSEnumerator *objEnumerator = [[errorsController selectedObjects] objectEnumerator];
+    int lineNumber;
+    
+    // Columns order:  @"File Name\t\tLine Number\t\tMessage Type\t\tMessage Text\n"];
+    BDSKErrorObject *errObj;
+    
+    while(errObj = [objEnumerator nextObject]){
+        [s appendString:[[errObj editor] displayName]];
+        [s appendString:@"\t\t"];
+        
+        lineNumber = [errObj lineNumber];
+        if(lineNumber == -1)
+            [s appendString:NSLocalizedString(@"Unknown line number", @"Error message for error window")];
+        else
+            [s appendFormat:@"%i", lineNumber];
+        [s appendString:@"\t\t"];
+        
+        [s appendString:[errObj errorClassName]];
+        [s appendString:@"\t\t"];
+        
+        [s appendString:[errObj errorMessage]];
+        [s appendString:@"\n\n"];
+    }
+    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [pboard setString:s forType:NSStringPboardType];
+    return YES;
+}
+
+- (NSDragOperation)tableView:(NSTableView *)aTableView draggingSourceOperationMaskForLocal:(BOOL)flag {
+    return NSDragOperationEvery;
 }
 
 @end

@@ -150,4 +150,8 @@
     }
 }
 
+- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
+    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
+}
+
 @end

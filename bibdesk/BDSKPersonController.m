@@ -49,6 +49,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKSplitView.h"
+#import "BDSKTableView.h"
 #import <AddressBook/AddressBook.h>
 
 @implementation BDSKPersonController
@@ -88,6 +89,9 @@
 	if ([NSWindowController instancesRespondToSelector:@selector(awakeFromNib)]){
         [super awakeFromNib];
 	}
+    
+    [publicationTableView setFontNamePreferenceKey:BDSKPersonTableViewFontNameKey];
+    [publicationTableView setFontSizePreferenceKey:BDSKPersonTableViewFontSizeKey];
 	
 	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
 	[imageView setDelegate:self];
@@ -424,20 +428,6 @@
     if ([notification object] == nameTableView || [notification object] == fieldTableView) {
         [self updateFilter];
     }
-}
-
-- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
-    if (tv == publicationTableView)
-        return BDSKPersonTableViewFontNameKey;
-    else 
-        return nil;
-}
-
-- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
-    if (tv == publicationTableView)
-        return BDSKPersonTableViewFontSizeKey;
-    else 
-        return nil;
 }
 
 #pragma mark Dragging delegate methods

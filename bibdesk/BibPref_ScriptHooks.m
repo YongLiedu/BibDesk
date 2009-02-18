@@ -190,18 +190,19 @@
 	[removeButton setEnabled:(row != -1)];
 }
 
-- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	return NO;
 }
 
-- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
-    if ([rows count]) {
+- (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+    if ([rowIndexes count]) {
         NSArray *names = [BDSKScriptHookManager scriptHookNames];
         NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey]];
-        NSEnumerator *rowEnum = [rows objectEnumerator];
-        NSNumber *row;
-        while (row = [rowEnum nextObject])
-            [dict removeObjectForKey:[names objectAtIndex:[row intValue]]];
+        unsigned int row = [rowIndexes firstIndex];
+        while (row != NSNotFound) {
+            [dict removeObjectForKey:[names objectAtIndex:row]];
+            row = [rowIndexes indexGreaterThanIndex:row];
+        }
         [[NSUserDefaults standardUserDefaults] setObject:dict forKey:BDSKScriptHooksKey];
         [self updateUI];
     }

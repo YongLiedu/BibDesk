@@ -46,6 +46,7 @@
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKMacroWindowController.h"
 #import "BDSKPreferenceRecord.h"
+#import "BDSKTableView.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -454,6 +455,28 @@ static NSSet *alwaysDisabledFields = nil;
     }
 }
 
+- (void)tableViewInsertNewline:(NSTableView *)tv {
+    if (tv == globalMacroFilesTableView && [globalMacroFilesTableView numberOfSelectedRows] == 1)
+        [globalMacroFilesTableView editColumn:0 row:[globalMacroFilesTableView selectedRow] withEvent:nil select:YES];
+    else
+        NSBeep();
+}
+
+#pragma mark TableView Extended DataaSource
+
+- (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+    if (tv == globalMacroFilesTableView) {
+        [globalMacroFiles removeObjectsAtIndexes:rowIndexes];
+        
+        [globalMacroFilesTableView reloadData];
+        [[NSUserDefaults standardUserDefaults] setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+    }
+}
+
+- (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+    return tv == globalMacroFilesTableView;
+}
+
 #pragma mark Add and Del fields buttons
 
 - (IBAction)delSelectedDefaultField:(id)sender{
@@ -594,38 +617,9 @@ static NSSet *alwaysDisabledFields = nil;
     [[NSUserDefaults standardUserDefaults] setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
 }
 
-- (IBAction)delGlobalMacroFiles:(id)sender{
-    NSIndexSet *indexes = [globalMacroFilesTableView selectedRowIndexes];
-    
-    [globalMacroFiles removeObjectsAtIndexes:indexes];
-    
-    [globalMacroFilesTableView reloadData];
-    [[NSUserDefaults standardUserDefaults] setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-}
-
-@end
-
-@implementation MacroFileTableView
-
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return NSDragOperationCopy;
-}
-
-- (void)keyDown:(NSEvent *)event{
-    if ([[event characters] length] == 0)
-        return;
-    unichar c = [[event characters] characterAtIndex:0];
-    if (c == NSDeleteCharacter ||
-        c == NSBackspaceCharacter) {
-        [[self delegate] delGlobalMacroFiles:nil];
-    }else if(c == NSNewlineCharacter ||
-             c == NSEnterCharacter ||
-             c == NSCarriageReturnCharacter){
-                if([self numberOfSelectedRows] == 1)
-                    [self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
-    }else{
-        [super keyDown:event];
-    }
+- (IBAction)delGlobalMacroFiles:(id)sender {
+    if ([globalMacroFilesTableView canDelete])
+        [globalMacroFilesTableView delete:sender];
 }
 
 @end
