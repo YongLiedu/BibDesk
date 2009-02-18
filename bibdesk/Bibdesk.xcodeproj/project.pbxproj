@@ -183,8 +183,8 @@
 		CE62DE510F4B797B00BDF01E /* next.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE62DE4F0F4B797B00BDF01E /* next.tiff */; };
 		CE62DE520F4B797B00BDF01E /* previous.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE62DE500F4B797B00BDF01E /* previous.tiff */; };
 		CE62DE5A0F4B7C8300BDF01E /* Preferences.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE62DE590F4B7C8300BDF01E /* Preferences.nib */; };
-		CE62E04A0F4C3D9400BDF01E /* BDSKGradientTableView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE62E0480F4C3D9400BDF01E /* BDSKGradientTableView.h */; };
 		CE62E04B0F4C3D9500BDF01E /* BDSKGradientTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE62E0490F4C3D9400BDF01E /* BDSKGradientTableView.m */; };
+		CE62E0940F4C46D600BDF01E /* BDSKSplitView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE62E0920F4C46D600BDF01E /* BDSKSplitView.m */; };
 		CE6775170A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */; };
 		CE6C04450BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */; };
 		CE6C04810BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6C047F0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m */; };
@@ -1124,6 +1124,8 @@
 		CE62DF9B0F4C1EB100BDF01E /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/Preferences.nib; sourceTree = "<group>"; };
 		CE62E0480F4C3D9400BDF01E /* BDSKGradientTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGradientTableView.h; sourceTree = "<group>"; };
 		CE62E0490F4C3D9400BDF01E /* BDSKGradientTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGradientTableView.m; sourceTree = "<group>"; };
+		CE62E0910F4C46D600BDF01E /* BDSKSplitView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSplitView.h; sourceTree = "<group>"; };
+		CE62E0920F4C46D600BDF01E /* BDSKSplitView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSplitView.m; sourceTree = "<group>"; };
 		CE6775140A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSDictionary_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSDictionary_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSParagraphStyle_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -2098,6 +2100,8 @@
 				CE62DE490F4B788800BDF01E /* BDSKPreferenceIconCell.m */,
 				CE62E0480F4C3D9400BDF01E /* BDSKGradientTableView.h */,
 				CE62E0490F4C3D9400BDF01E /* BDSKGradientTableView.m */,
+				CE62E0910F4C46D600BDF01E /* BDSKSplitView.h */,
+				CE62E0920F4C46D600BDF01E /* BDSKSplitView.m */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -2972,7 +2976,6 @@
 				CE62DE3B0F4B777800BDF01E /* BDSKPreferenceWindow.h in Headers */,
 				CE62DE420F4B77D600BDF01E /* BDSKPreferenceIconView.h in Headers */,
 				CE62DE4A0F4B788800BDF01E /* BDSKPreferenceIconCell.h in Headers */,
-				CE62E04A0F4C3D9400BDF01E /* BDSKGradientTableView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3880,6 +3883,7 @@
 				CE62DE430F4B77D600BDF01E /* BDSKPreferenceIconView.m in Sources */,
 				CE62DE4B0F4B788800BDF01E /* BDSKPreferenceIconCell.m in Sources */,
 				CE62E04B0F4C3D9500BDF01E /* BDSKGradientTableView.m in Sources */,
+				CE62E0940F4C46D600BDF01E /* BDSKSplitView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

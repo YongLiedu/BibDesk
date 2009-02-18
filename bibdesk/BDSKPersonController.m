@@ -48,6 +48,7 @@
 #import "BDSKPublicationsArray.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
+#import "BDSKSplitView.h"
 #import <AddressBook/AddressBook.h>
 
 @implementation BDSKPersonController
@@ -90,7 +91,7 @@
 	
 	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
 	[imageView setDelegate:self];
-	[splitView setPositionAutosaveName:@"OASplitView Position BibPersonView"];
+	[splitView setPositionAutosaveName:@"BibPersonView"];
 
     if (isEditable && nil != owner) {
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -567,7 +568,7 @@
     [sender adjustSubviews];
 }
 
-- (void)splitView:(OASplitView *)sender multipleClick:(NSEvent *)mouseEvent{
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
     if ([sender isEqual:splitView]) {
         
         NSView *pickerView = [[sender subviews] objectAtIndex:0];

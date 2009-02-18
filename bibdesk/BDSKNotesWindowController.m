@@ -83,7 +83,7 @@
 - (void)windowDidLoad {
     [self setWindowFrameAutosaveNameOrCascade:@"NotesWindow"];
     
-    [splitView setPositionAutosaveName:@"BDSKGradientSplitView Frame BDSKNotesWindow"];
+    [splitView setPositionAutosaveName:@"BDSKNotesWindow"];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [splitView setPositionAutosaveName:nil];

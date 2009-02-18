@@ -6,6 +6,14 @@
 	<array>
 		<dict>
 			<key>CLASS</key>
+			<string>NSApplication</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>NSMenu</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -94,7 +102,7 @@
 				<key>fieldArrayController</key>
 				<string>NSArrayController</string>
 				<key>fieldNameSplitView</key>
-				<string>OASplitView</string>
+				<string>BDSKSplitView</string>
 				<key>fieldTableView</key>
 				<string>NSTableView</string>
 				<key>imageView</key>
@@ -112,14 +120,14 @@
 				<key>publicationTableView</key>
 				<string>NSTableView</string>
 				<key>splitView</key>
-				<string>OASplitView</string>
+				<string>BDSKSplitView</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSWindowController</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>OASplitView</string>
+			<string>BDSKSplitView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>

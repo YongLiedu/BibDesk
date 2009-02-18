@@ -1,10 +1,10 @@
 //
-//  BDSKGradientSplitView.h
+//  BDSKSplitView.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 31/10/05.
+//  Created by Christiaan Hofman on 2/18/09.
 /*
- This software is Copyright (c) 2005-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,22 +37,21 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKSplitView.h"
 
-enum {
-    BDSKMinBlendStyleMask = 1,
-    BDSKMaxBlendStyleMask = 2,
-    BDSKStatusBarBlendStyleMask = 4
-};
 
-@interface BDSKGradientSplitView : BDSKSplitView {
-    int blendStyle;
-    CGLayerRef dividerLayer;
-    CGLayerRef minBlendLayer;
-    CGLayerRef maxBlendLayer;
+@interface BDSKSplitView : NSSplitView {
+    NSString *positionAutosaveName;
 }
 
-- (int)blendStyle;
-- (void)setBlendStyle:(int)mask;
+- (NSString *)positionAutosaveName;
+- (void)setPositionAutosaveName:(NSString *)name;
 
+- (float)fraction;
+- (void)setFraction:(float)newFraction;
+
+@end
+
+
+@interface NSObject (BDSKSplitViewExtendedDelegate)
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset;
 @end

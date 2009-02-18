@@ -44,7 +44,7 @@
 
 @class BDSKDragImageView;
 @class BDSKCollapsibleView;
-@class OASplitView;
+@class BDSKSplitView;
 
 @interface BDSKPersonController : NSWindowController {
     BibAuthor *person;
@@ -59,8 +59,8 @@
     IBOutlet NSTableView *nameTableView;
     IBOutlet NSTableView *fieldTableView;
     IBOutlet BDSKCollapsibleView *collapsibleView;
-    IBOutlet OASplitView *splitView;
-    IBOutlet OASplitView *fieldNameSplitView;
+    IBOutlet BDSKSplitView *splitView;
+    IBOutlet BDSKSplitView *fieldNameSplitView;
     IBOutlet NSArrayController *publicationArrayController;
     IBOutlet NSArrayController *fieldArrayController;
     IBOutlet NSArrayController *nameArrayController;

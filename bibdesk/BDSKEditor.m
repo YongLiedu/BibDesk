@@ -197,8 +197,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     [self setWindowFrameAutosaveNameOrCascade:BDSKEditorFrameAutosaveName];
     
     // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
-    [mainSplitView setPositionAutosaveName:@"BDSKGradientSplitView Frame BDSKEditorMainSplitView"];
-    [fileSplitView setPositionAutosaveName:@"BDSKGradientSplitView Frame BDSKEditorFileSplitView"];
+    [mainSplitView setPositionAutosaveName:@"BDSKEditorMainSplitView"];
+    [fileSplitView setPositionAutosaveName:@"BDSKEditorFileSplitView"];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [mainSplitView setPositionAutosaveName:nil];
