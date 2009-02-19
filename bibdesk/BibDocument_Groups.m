@@ -84,6 +84,7 @@
 #import "WebURLsWithTitles.h"
 #import "NSColor_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
+#import "BDSKApplication.h"
 
 
 @implementation BibDocument (Groups)

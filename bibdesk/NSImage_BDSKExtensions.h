@@ -55,6 +55,7 @@
 
 + (NSImage *)imageForURL:(NSURL *)aURL;
 + (NSImage *)imageForFile:(NSString *)path;
++ (NSImage *)imageForFileType:(NSString *)fileType;
 + (NSImage *)paperclipImage;
 + (NSImage *)redPaperclipImage;
 

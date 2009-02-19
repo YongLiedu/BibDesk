@@ -35,6 +35,7 @@
 #import "BibDocument.h"
 #import "BDSKOrphanedFilesFinder.h"
 #import "BDSKTextWithIconCell.h"
+#import "NSImage_BDSKExtensions.h"
 
 @implementation BDSKFileMatchConfigController
 

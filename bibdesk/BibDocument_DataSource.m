@@ -77,6 +77,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import <FileView/FileView.h>
+#import "BDSKApplication.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 

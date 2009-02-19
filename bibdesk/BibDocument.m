@@ -48,6 +48,7 @@
 #import "BDSKSearchGroup.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKGroupsArray.h"
+#import "BDSKApplication.h"
 
 #import "BDSKUndoManager.h"
 #import "BDSKPrintableView.h"

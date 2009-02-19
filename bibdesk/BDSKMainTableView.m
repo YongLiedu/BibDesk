@@ -57,6 +57,7 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
+#import "NSMenu_BDSKExtensions.h"
 
 enum {
     BDSKColumnTypeText,

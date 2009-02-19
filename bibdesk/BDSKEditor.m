@@ -82,6 +82,7 @@
 #import "BDSKEditorTextFieldCell.h"
 #import "BDSKCompletionManager.h"
 #import <FileView/FVPreviewer.h>
+#import "BDSKApplication.h"
 
 static NSString *BDSKEditorFrameAutosaveName = @"BDSKEditor window autosave name";
 static NSString *BDSKEditorObservationContext = @"BDSKEditorObservationContext";

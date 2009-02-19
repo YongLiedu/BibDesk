@@ -57,6 +57,22 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 
 @implementation NSMenu (BDSKExtensions)
 
+- (void)removeAllItems {
+    unsigned int numItems = 0;
+    while (numItems = [self numberOfItems])
+        [self removeItemAtIndex:numItems - 1];
+}
+
+- (NSMenuItem *)itemWithAction:(SEL)action {
+    unsigned int i = [self numberOfItems];
+    while (i--) {
+        NSMenuItem *item = [self itemAtIndex:i];
+        if ([item action] == action)
+            return item;
+    }
+    return nil;
+}
+
 - (void)addItemsFromMenu:(NSMenu *)other;
 {
     unsigned i, count = [other numberOfItems];

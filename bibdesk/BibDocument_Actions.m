@@ -88,6 +88,7 @@
 #import <FileView/FVPreviewer.h>
 #import "BDSKMacro.h"
 #import "BDSKAppController.h"
+#import "BDSKApplication.h"
 
 @implementation BibDocument (Actions)
 

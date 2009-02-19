@@ -40,6 +40,7 @@
 #import "BibDocument.h"
 #import "BDAlias.h"
 #import <OmniBase/OmniBase.h>
+#import <Carbon/Carbon.h>
 
 
 @interface NSWindow (BDSKApplication)

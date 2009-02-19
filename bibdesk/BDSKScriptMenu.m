@@ -40,6 +40,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 #import "NSWorkspace_BDSKExtensions.h"
+#import "NSMenu_BDSKExtensions.h"
 
 @interface BDSKScriptMenu (Private)
 - (NSArray *)scriptPaths;

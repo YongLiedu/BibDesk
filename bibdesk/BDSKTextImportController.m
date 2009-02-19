@@ -66,6 +66,7 @@
 #import "BDSKBookmarkController.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKCompletionManager.h"
+#import "BDSKApplication.h"
 
 @interface BDSKTextImportController (Private)
 

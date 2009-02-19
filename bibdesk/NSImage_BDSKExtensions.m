@@ -38,7 +38,7 @@
 
 #import "NSImage_BDSKExtensions.h"
 #import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/IconFamily.h>
+#import "IconFamily.h"
 #import "NSBezierPath_BDSKExtensions.h"
 
 @implementation NSImage (BDSKExtensions)
@@ -290,6 +290,27 @@
         }
     }
 #endif
+    return image != [NSNull null] ? image : nil;
+}
+
++ (NSImage *)imageForFileType:(NSString *)fileType {
+    static NSMutableDictionary *imageDictionary = nil;
+    
+    if (!fileType)
+        return nil;
+   
+    // if no file type, we'll just cache the path and waste some memory
+    if (imageDictionary == nil)
+        imageDictionary = [[NSMutableDictionary alloc] init];
+    
+    id image = [imageDictionary objectForKey:fileType];
+    if (image == nil) {
+        image = [[NSWorkspace sharedWorkspace] iconForFileType:fileType];
+        [image setFlipped:NO];
+        if (image == nil)
+            image = [NSNull null];
+        [imageDictionary setObject:image forKey:fileType];
+    }
     return image != [NSNull null] ? image : nil;
 }
 

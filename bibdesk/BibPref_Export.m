@@ -163,7 +163,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 - (IBAction)addNode:(id)sender;
 {
     // may be nil
-    BDSKTreeNode *selectedNode = [outlineView selectedItem];
+    int row = [outlineView selectedRow];
+    BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
     BDSKTemplate *newNode = [[BDSKTemplate alloc] init];
 
     if([selectedNode isLeaf]){
@@ -195,7 +196,9 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 - (IBAction)removeNode:(id)sender;
 {
-    BDSKTreeNode *selectedNode = [outlineView selectedItem];
+    
+    int row = [outlineView selectedRow];
+    BDSKTreeNode *selectedNode = row == -1 ? nil : [outlineView itemAtRow:row];
     if(nil != selectedNode){
         if([selectedNode isLeaf])
             [[selectedNode parent] removeChild:selectedNode];
@@ -334,7 +337,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 - (BOOL)canDeleteSelectedItem
 {
-    BDSKTreeNode *selItem = [outlineView selectedItem];
+    int row = [outlineView selectedRow];
+    BDSKTreeNode *selItem = row == -1 ? nil : [outlineView itemAtRow:row];
     if (selItem == nil)
         return NO;
     return ((templatePrefList == BDSKExportTemplateList && [selItem isLeaf] == NO) || 
@@ -344,7 +348,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 // we can't add items to the services outline view
 - (BOOL)canAddItem
 {
-    return ((templatePrefList == BDSKExportTemplateList) || nil != [outlineView selectedItem]);
+    return ((templatePrefList == BDSKExportTemplateList) || -1 != [outlineView selectedRow]);
 }
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification;
