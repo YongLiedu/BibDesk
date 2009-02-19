@@ -48,7 +48,7 @@
 
 - (id)initWithCaseInsensitiveKeys:(BOOL)caseInsensitive {
     if (self = [super init]) {
-        dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, caseInsensitive ? &BDSKCaseInsensitiveStringKeyDictionaryCallBacks : &kBDSKCaseInse, &kCFTypeDictionaryValueCallbacks);
+        dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, caseInsensitive ? &BDSKCaseInsensitiveStringKeyDictionaryCallBacks : &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     }
     return self;
 }
