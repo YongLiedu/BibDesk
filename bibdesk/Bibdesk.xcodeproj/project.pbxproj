@@ -1269,6 +1269,8 @@
 		CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCollapsibleView.m; sourceTree = "<group>"; };
 		CEEC70DF093B6EC200A64F54 /* BDSKDragImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDragImageView.h; sourceTree = "<group>"; };
 		CEEC70E0093B6EC200A64F54 /* BDSKDragImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDragImageView.m; sourceTree = "<group>"; };
+		CEED2A830F4D856E0078E87A /* IconFamily.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IconFamily.h; sourceTree = "<group>"; };
+		CEED2A840F4D856E0078E87A /* IconFamily.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IconFamily.m; sourceTree = "<group>"; };
 		CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroupSheetController.m; sourceTree = "<group>"; };
 		CEEFDDFE0B03ED0200668BB0 /* BDSKScriptGroupSheetController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroupSheetController.h; sourceTree = "<group>"; };
 		CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKURLGroupSheetController.m; sourceTree = "<group>"; };
@@ -2031,6 +2033,7 @@
 				CE3E4A070E75B9910014C328 /* BDAlias */,
 				CE3E4A080E75B9F20014C328 /* Ken Ferry */,
 				F924FC140BC4000B00672839 /* harmless */,
+				CEED2A820F4D85220078E87A /* IconFamily */,
 			);
 			name = "Third Party Sources";
 			path = vendorsrc;
@@ -2442,6 +2445,16 @@
 				CE17EE7E0E24F27400DE06EA /* BibDesk-App.xcconfig */,
 			);
 			name = Configurations;
+			sourceTree = "<group>";
+		};
+		CEED2A820F4D85220078E87A /* IconFamily */ = {
+			isa = PBXGroup;
+			children = (
+				CEED2A830F4D856E0078E87A /* IconFamily.h */,
+				CEED2A840F4D856E0078E87A /* IconFamily.m */,
+			);
+			name = IconFamily;
+			path = iconfamily;
 			sourceTree = "<group>";
 		};
 		EF168DE70F1132CC002F4D9F /* UnitTests */ = {
