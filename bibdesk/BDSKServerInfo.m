@@ -123,22 +123,26 @@
     [super dealloc];
 }
 
+static inline isEqualOrBothNil(id object1, id object2) {
+    return (object1 == nil && object2 == nil) || [object1 isEqual:object2];
+}
+
 - (BOOL)isEqual:(id)other {
     BOOL isEqual = NO;
     // we don't compare the name, as that is just a label
     if ([self isMemberOfClass:[other class]] == NO || [[self type] isEqualToString:[(BDSKServerInfo *)other type]] == NO)
         isEqual = NO;
     else if ([self isEntrez] || [self isISI] || [self isDBLP])
-        isEqual = OFISEQUAL([self database], [other database]);
+        isEqual = isEqualOrBothNil([self database], [other database]);
     else if ([self isZoom])
-        isEqual = OFISEQUAL([self host], [other host]) && 
-                  OFISEQUAL([self port], [(BDSKServerInfo *)other port]) && 
-                  OFISEQUAL([self database], [other database]) && 
-                  OFISEQUAL([self password], [other password]) && 
-                  OFISEQUAL([self username], [other username]) && 
-                  (OFISEQUAL([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
+        isEqual = isEqualOrBothNil([self host], [other host]) && 
+                  isEqualOrBothNil([self port], [(BDSKServerInfo *)other port]) && 
+                  isEqualOrBothNil([self database], [other database]) && 
+                  isEqualOrBothNil([self password], [other password]) && 
+                  isEqualOrBothNil([self username], [other username]) && 
+                  (isEqualOrBothNil([self options], [(BDSKServerInfo *)other options]) || ([[self options] count] == 0 && [[(BDSKServerInfo *)other options] count] == 0));
     else
-        isEqual = OFISEQUAL([self host], [other host]);
+        isEqual = isEqualOrBothNil([self host], [other host]);
     return isEqual;
 }
 
