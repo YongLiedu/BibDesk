@@ -45,7 +45,7 @@ typedef enum{
     BSN_MACRODEF = 2
 } BDSKStringNodeType;
 
-@interface BDSKStringNode : OFObject <NSCopying, NSCoding>{
+@interface BDSKStringNode : NSObject <NSCopying, NSCoding>{
     @public
     BDSKStringNodeType type; 
     NSString *value;
