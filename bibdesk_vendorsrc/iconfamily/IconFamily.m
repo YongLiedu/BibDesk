@@ -22,7 +22,6 @@
 */
 
 #import "IconFamily.h"
-#import "NSString+CarbonFSRefCreation.h"
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
 // This is defined in 10.5 and beyond in IconStorage.h
@@ -37,6 +36,9 @@ enum {
   kIconServices256PixelDataARGB = 'ic08' /* non-premultiplied 256x256 ARGB bitmap*/
 };
 #endif
+
+
+static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL createFile);
 
 
 @interface IconFamily (Internals)
@@ -119,7 +121,7 @@ enum {
             DisposeHandle( (Handle)hIconFamily );
             hIconFamily = NULL;
         }
-		if (![path getFSRef:&ref createFileIfNecessary:NO]) {
+		if (!IconFamilyGetFSRefCreatingFile(path, &ref, NO)) {
 			[self autorelease];
 			return nil;
 		}
@@ -161,7 +163,7 @@ enum {
             hIconFamily = NULL;
         }
 
-        if( ![path getFSRef:&ref createFileIfNecessary:NO] )
+        if( !IconFamilyGetFSRefCreatingFile(path, &ref, NO) )
         {
             [self autorelease];
             return nil;
@@ -694,7 +696,7 @@ enum {
 	
     // Get an FSRef for the target file's parent directory that we can use in
     // the FSCreateResFile() and FNNotify() calls below.
-    if (![parentDirectory getFSRef:&parentDirectoryFSRef createFileIfNecessary:NO])
+    if (!IconFamilyGetFSRefCreatingFile(parentDirectory, &parentDirectoryFSRef, NO))
 		return NO;
 	
 	// Get the name of the file, for FSCreateResFile.
@@ -720,7 +722,7 @@ enum {
 	result = ResError();
 	if (result == dupFNErr) {
         // If the call to FSCreateResFile() returned dupFNErr, targetFileFSRef will not have been set, so create it from the path.
-        if (![path getFSRef:&targetFileFSRef createFileIfNecessary:NO])
+        if (!IconFamilyGetFSRefCreatingFile(path, &targetFileFSRef, NO))
             return NO;
     } else if (result != noErr) {
 		return NO;
@@ -822,7 +824,7 @@ enum {
     Handle hExistingCustomIcon;
 
     // Get an FSRef for the target file.
-    if (![path getFSRef:&targetFileFSRef createFileIfNecessary:NO])
+    if (!IconFamilyGetFSRefCreatingFile(path, &targetFileFSRef, NO))
         return NO;
 	
     // Open the file's resource fork, if it has one.
@@ -896,7 +898,7 @@ enum {
         return NO;
 
     // Get an FSRef for the folder.
-    if( ![path getFSRef:&targetFolderFSRef createFileIfNecessary:NO] )
+    if( !IconFamilyGetFSRefCreatingFile(path, &targetFolderFSRef, NO) )
         return NO;
 
     // Remove and re-create any existing "Icon\r" file in the directory, and get an FSRef for it.
@@ -906,7 +908,7 @@ enum {
         if( ![fm removeFileAtPath:iconrPath handler:nil] )
             return NO;
     }
-    if( ![iconrPath getFSRef:&iconrFSRef createFileIfNecessary:YES] )
+    if( !IconFamilyGetFSRefCreatingFile(iconrPath, &iconrFSRef, YES) )
         return NO;
 
     // Get type and creator information for the Icon file.
@@ -1584,4 +1586,47 @@ enum {
 
 @end
 
+// Function to create an FSRef from a file.
+// This was originally implemented as a method in a category NSString (CarbonFSRefCreation).
+
+static BOOL IconFamilyGetFSRefCreatingFile(NSString *path, FSRef *fsRef, BOOL createFile)
+{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    CFURLRef urlRef;
+    Boolean gotFSRef;
+    
+    // Check whether the file exists already.  If not, create an empty file if requested.
+    if (![fileManager fileExistsAtPath:path]) {
+        if (createFile) {
+            if (![@"" writeToFile:path atomically:YES]) {
+                return NO;
+            }
+        } else {
+            return NO;
+        }
+    }
+
+    // Create a CFURL with the specified POSIX path.
+    urlRef = CFURLCreateWithFileSystemPath( kCFAllocatorDefault,
+                                            (CFStringRef) path,
+                                            kCFURLPOSIXPathStyle,
+                                            FALSE /* isDirectory */ );
+    if (urlRef == NULL) {
+//        printf( "** Couldn't make a CFURLRef for the file.\n" );
+        return NO;
+    }
+    
+    // Try to create an FSRef from the URL.  (If the specified file doesn't exist, this
+    // function will return false, but if we've reached this code we've already insured
+    // that the file exists.)
+    gotFSRef = CFURLGetFSRef( urlRef, fsRef );
+    CFRelease( urlRef );
+
+    if (!gotFSRef) {
+//        printf( "** Couldn't get an FSRef for the file.\n" );
+        return NO;
+    }
+    
+    return YES;
+}
 
