@@ -46,6 +46,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
 #import "UKDirectoryEnumerator.h"
+#import "BDSKMessageQueue.h"
 
 @interface BDSKFileSearchIndex (Private)
 
@@ -345,7 +346,7 @@ static void addItemFunction(const void *value, void *context) {
             pthread_rwlock_unlock(&rwlock);
         }
         
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+        [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forTarget:self];
         
         NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
         NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
@@ -383,7 +384,7 @@ static void addItemFunction(const void *value, void *context) {
                     progressValue = (numberIndexed / totalObjectCount) * 100;
                 }
                 
-                [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+                [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forTarget:self];
             }
             
             [pool release];
@@ -400,7 +401,7 @@ static void addItemFunction(const void *value, void *context) {
         }
         [URLsToRemove release];
         
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+        [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forTarget:self];
         
         [items release];
         items = itemsToAdd;
@@ -474,7 +475,7 @@ static void addItemFunction(const void *value, void *context) {
         [pool release];
         pool = [NSAutoreleasePool new];
         
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+        [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forTarget:self];
         OSMemoryBarrier();
     }
         
@@ -684,7 +685,7 @@ static void addItemFunction(const void *value, void *context) {
             
     // this will update the delegate when all is complete
     [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:1];        
-    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forTarget:self];
 }
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
@@ -707,7 +708,7 @@ static void addItemFunction(const void *value, void *context) {
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
 	
-    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forTarget:self];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
@@ -753,7 +754,7 @@ static void addItemFunction(const void *value, void *context) {
     [addedURLs release];
     [sameURLs release];
     
-    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forTarget:self];
 }    
 
 - (void)handleMachMessage:(void *)msg

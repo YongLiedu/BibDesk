@@ -100,6 +100,8 @@ enum {
 
 @implementation BDSKMainTableView
 
++ (BOOL)shouldQueueTypeSelectHelper { return YES; }
+
 - (void)awakeFromNib{
     [super awakeFromNib]; // this updates the font
 	

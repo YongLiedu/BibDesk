@@ -41,6 +41,7 @@
 #import "NSError_BDSKExtensions.h"
 #import "BDSKVersionNumber.h"
 #import <SystemConfiguration/SystemConfiguration.h>
+#import "BDSKMessageQueue.h"
 
 #define PROPERTY_LIST_URL @"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"
 #define DOWNLOAD_URL @"http://bibdesk.sourceforge.net/"
@@ -501,9 +502,9 @@ static id sharedInstance = nil;
     }
     
     if(remoteVersionForCurrentMajor && [remoteVersionForCurrentMajor compareToVersionNumber:localVersion] == NSOrderedDescending){
-        [[OFMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:alternativeVersion:) forObject:self withObject:[remoteVersionForCurrentMajor cleanVersionString] withObject:[remoteVersion cleanVersionString]];
+        [[BDSKMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:alternativeVersion:) forTarget:self withObject:[remoteVersionForCurrentMajor cleanVersionString] withObject:[remoteVersion cleanVersionString]];
     } else if(remoteVersion && [remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
-        [[OFMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:alternativeVersion:) forObject:self withObject:[remoteVersion cleanVersionString] withObject:nil];
+        [[BDSKMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:alternativeVersion:) forTarget:self withObject:[remoteVersion cleanVersionString] withObject:nil];
         
     } else if((nil == remoteVersionForCurrentMajor || nil == remoteVersion) && nil != error){
         // was showing an alert for this, but apparently it's really common for the check to fail

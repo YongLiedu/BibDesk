@@ -41,7 +41,7 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import "BDSKOwnerProtocol.h"
 
-@class OFMessageQueue, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes, BDSKTask;
+@class BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes, BDSKTask;
 
 enum {
     BDSKShellScriptType,

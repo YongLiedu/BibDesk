@@ -89,6 +89,7 @@
 #import "BDSKWebGroup.h"
 #import "BDSKWebGroupViewController.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
+#import "BDSKMessageQueue.h"
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://apps.sourceforge.net/mediawiki/bibdesk/"
@@ -174,7 +175,7 @@ static void fixLegacyTableColumnIdentifiers()
         requiredFieldsForLocalFile = nil;
         
         metadataCacheLock = [[NSLock alloc] init];
-        metadataMessageQueue = [[OFMessageQueue alloc] init];
+        metadataMessageQueue = [[BDSKMessageQueue alloc] init];
         [metadataMessageQueue startBackgroundProcessors:1];
         canWriteMetadata = 1;
     }
@@ -1238,7 +1239,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
 
 - (void)rebuildMetadataCache:(id)userInfo{        
-    [metadataMessageQueue queueSelector:@selector(privateRebuildMetadataCache:) forObject:self withObject:userInfo];
+    [metadataMessageQueue queueSelector:@selector(privateRebuildMetadataCache:) forTarget:self withObject:userInfo];
 }
 
 - (void)privateRebuildMetadataCache:(id)userInfo{

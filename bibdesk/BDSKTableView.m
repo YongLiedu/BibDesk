@@ -39,11 +39,14 @@
 #import "BDSKTableView.h"
 #import "BDSKTypeSelectHelper.h"
 #import "NSLayoutManager_BDSKExtensions.h"
+#import "BDSKMessageQueue.h"
 
 
 static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableViewFontDefaultsObservationContext";
 
 @implementation BDSKTableView
+
++ (BOOL)shouldQueueTypeSelectHelper { return NO; }
 
 - (void)dealloc {
     [self setFontNamePreferenceKey:nil]; // this will also stop observing
@@ -69,7 +72,12 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
 
 - (void)reloadData {
     [super reloadData];
-    [typeSelectHelper rebuildTypeSelectSearchCache];
+    if (typeSelectHelper) {
+        if ([[self class] shouldQueueTypeSelectHelper])
+            [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(rebuildTypeSelectSearchCache) forTarget:typeSelectHelper];
+        else
+            [typeSelectHelper rebuildTypeSelectSearchCache];
+    }
 }
 
 #pragma mark Font preferences methods

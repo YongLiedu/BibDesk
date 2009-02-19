@@ -126,6 +126,7 @@
 #import <SkimNotes/SkimNotes.h>
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
+#import "BDSKMessageQueue.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -2971,7 +2972,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     
     
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
-    [self queueSelectorOnce:@selector(handlePrivateBibItemChanged)];
+    [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(handlePrivateBibItemChanged) forTarget:self];
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{
@@ -3117,7 +3118,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     // changed key, so we have to update all the previews each time.  This should be safer than using cancelPrevious... since those
     // don't get performed on the main thread (apparently), and can lead to problems.
     if (docState.isDocumentClosed == NO && [documentWindow isVisible])
-        [self queueSelectorOnce:@selector(doUpdatePreviews)];
+        [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(doUpdatePreviews) forTarget:self];
 }
 
 - (void)updatePreviewer:(BDSKPreviewer *)aPreviewer{

@@ -55,20 +55,20 @@
 #import "BDSKItemSearchIndexes.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKTask.h"
+#import "BDSKMessageQueue.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
 
-static OFMessageQueue *messageQueue = nil;
+static BDSKMessageQueue *messageQueue = nil;
 
 @implementation BDSKScriptGroup
 
 + (void)initialize
 {
     if (nil == messageQueue) {
-        messageQueue = [[OFMessageQueue alloc] init];
+        messageQueue = [[BDSKMessageQueue alloc] init];
         // use a small pool of threads for running NSTasks
         [messageQueue startBackgroundProcessors:2];
-        [messageQueue setSchedulesBasedOnPriority:NO];
     }
 }
 
@@ -221,7 +221,7 @@ static OFMessageQueue *messageQueue = nil;
         if (error) {
             [self scriptDidFailWithError:error];
         } else {
-            [messageQueue queueSelector:@selector(runShellScriptAtPath:withArguments:) forObject:self withObject:standardizedPath withObject:argsArray];
+            [messageQueue queueSelector:@selector(runShellScriptAtPath:withArguments:) forTarget:self withObject:standardizedPath withObject:argsArray];
             isRetrieving = YES;
         }
     } else if (scriptType == BDSKAppleScriptType) {

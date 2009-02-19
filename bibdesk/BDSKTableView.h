@@ -47,6 +47,8 @@
     NSIndexSet *draggedRowIndexes;
 }
 
++ (BOOL)shouldQueueTypeSelectHelper;
+
 - (BDSKTypeSelectHelper *)typeSelectHelper;
 - (void)setTypeSelectHelper:(BDSKTypeSelectHelper *)newTypeSelectHelper;
 
