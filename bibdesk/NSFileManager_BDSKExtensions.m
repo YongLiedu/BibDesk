@@ -91,14 +91,6 @@ typedef struct WLDragMapEntryStruct
 @end
 
 
-@interface OFResourceFork (BDSKExtensions)
-
-// the setData:forResourceType: method apparently sets the wrong resID, so we use this method to override that
-- (void)setData:(NSData *)contentData forResourceType:(ResType)resType resID:(short)resID;
-
-@end
-
-
 @implementation NSFileManager (BDSKExtensions)
 
 static NSString *temporaryBaseDirectory = nil;
@@ -946,28 +938,6 @@ static OSType finderSignatureBytes = 'MACS';
     [result performSelector:@selector(appendData:) withObjectsByMakingObjectsFromArray:entries performSelector:@selector(entryData)];
     
     return result;
-}
-
-@end
-
-@implementation OFResourceFork (BDSKExtensions)
-
-- (void)setData:(NSData *)contentData forResourceType:(ResType)resType resID:(short)resID;
-{
-    SInt16 oldCurRsrcMap;
-    
-    oldCurRsrcMap = CurResFile();
-    UseResFile(refNum);
-    
-    const void *data = [contentData bytes];
-    Handle dataHandle;
-    PtrToHand(data, &dataHandle, [contentData length]);
-    Str255 dst;
-    CFStringGetPascalString(CFSTR("OFResourceForkData"), dst, 256, kCFStringEncodingASCII);
-    AddResource(dataHandle, resType, resID, dst);
-    
-    UpdateResFile(refNum);
-    UseResFile(oldCurRsrcMap);
 }
 
 @end
