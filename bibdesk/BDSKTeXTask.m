@@ -120,7 +120,7 @@ static double runLoopTimeout = 30;
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     // returns 0 if the key doesn't exist
     if ([[NSUserDefaults standardUserDefaults] floatForKey:@"BDSKTeXTaskRunLoopTimeout"] > 1)

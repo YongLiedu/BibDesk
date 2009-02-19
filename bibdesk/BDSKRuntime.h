@@ -56,3 +56,5 @@ extern IMP BDSKReplaceInstanceMethodImplementationFromSelector(Class aClass, SEL
 extern IMP BDSKReplaceClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
 extern void BDSKAddInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
 extern void BDSKAddClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
+
+extern void BDSKRequestConcreteImplementation(id self, SEL aSelector);

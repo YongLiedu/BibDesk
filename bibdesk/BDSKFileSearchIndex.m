@@ -83,7 +83,7 @@
 
 - (id)initWithDocument:(id)aDocument
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread inMainThread]);
 
     self = [super init];
         
@@ -308,7 +308,7 @@ static void addItemFunction(const void *value, void *context) {
     double totalObjectCount = [items count];
     double numberIndexed = 0;
     
-    OBPRECONDITION(items);
+    BDSKPRECONDITION(items);
     
     [items retain];
     
@@ -428,11 +428,11 @@ static void addItemFunction(const void *value, void *context) {
         
         SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
         
-        OBPOSTCONDITION(skDocument);
+        BDSKPOSTCONDITION(skDocument);
         
         if (skDocument != NULL) {
             
-            OBASSERT(signature);
+            BDSKASSERT(signature);
             [signatures setObject:signature forKey:aURL];
             
             SKIndexAddDocument(index, skDocument, NULL, TRUE);
@@ -444,7 +444,7 @@ static void addItemFunction(const void *value, void *context) {
 - (void)removeFileURL:(NSURL *)aURL{
     SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
     
-    OBPOSTCONDITION(skDocument);
+    BDSKPOSTCONDITION(skDocument);
     
     if (skDocument != NULL) {
         [signatures removeObjectForKey:aURL];
@@ -486,9 +486,9 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)indexFileURLs:(NSSet *)urlsToAdd forIdentifierURL:(NSURL *)identifierURL
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
     
-    OBASSERT(identifierURL);
+    BDSKASSERT(identifierURL);
     
     NSEnumerator *urlEnumerator = [urlsToAdd objectEnumerator];
     NSURL *url = nil;
@@ -509,9 +509,9 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)removeFileURLs:(NSSet *)urlsToRemove forIdentifierURL:(NSURL *)identifierURL
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
-    OBASSERT(identifierURL);
+    BDSKASSERT(identifierURL);
         
     NSEnumerator *urlEnum = nil;
     NSURL *url = nil;
@@ -536,9 +536,9 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
     
-    OBASSERT(identifierURL);
+    BDSKASSERT(identifierURL);
     
     NSEnumerator *urlEnumerator = [urlsToReindex objectEnumerator];
     NSURL *url = nil;
@@ -644,7 +644,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)searchIndexDidUpdate
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread inMainThread]);
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1) {
         // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes.  Even though this is always queued and supposed to be sent once, it can still be sent too often.
@@ -662,7 +662,7 @@ static void addItemFunction(const void *value, void *context) {
 // @@ only sent after the initial indexing so the controller knows to remove the progress bar; can possibly be removed entirely and delegate can check finishedInitialIndexing when it gets searchIndexDidUpdate:
 - (void)searchIndexDidFinish
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread inMainThread]);
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
         [delegate searchIndexDidFinish:self];
@@ -670,7 +670,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)processNotification:(NSNotification *)note
 {    
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread inMainThread]);
     // Forward the notification to the correct thread
     [notificationQueue addObject:note];
     [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
@@ -678,10 +678,10 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)handleDocAddItemNotification:(NSNotification *)note
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
 	NSArray *searchIndexInfo = [[note userInfo] valueForKey:@"searchIndexInfo"];
-    OBPRECONDITION(searchIndexInfo);
+    BDSKPRECONDITION(searchIndexInfo);
             
     // this will update the delegate when all is complete
     [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:1];        
@@ -690,7 +690,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
 	NSEnumerator *itemEnumerator = [[[note userInfo] valueForKey:@"searchIndexInfo"] objectEnumerator];
     id anItem;
@@ -713,7 +713,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
     
     NSDictionary *item = [note userInfo];
     NSURL *identifierURL = [item objectForKey:@"identifierURL"];
@@ -759,7 +759,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)handleMachMessage:(void *)msg
 {
-    OBASSERT([NSThread inMainThread] == NO);
+    BDSKASSERT([NSThread inMainThread] == NO);
 
     while ( [notificationQueue count] ) {
         NSNotification *note = [[notificationQueue objectAtIndex:0] retain];

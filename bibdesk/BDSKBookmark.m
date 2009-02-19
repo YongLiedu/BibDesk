@@ -74,7 +74,7 @@ static BDSKPlaceholderBookmark *defaultPlaceholderBookmark = nil;
 static Class BDSKBookmarkClass = Nil;
 
 + (void)initialize {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     BDSKBookmarkClass = self;
     defaultPlaceholderBookmark = (BDSKPlaceholderBookmark *)NSAllocateObject([BDSKPlaceholderBookmark class], 0, NSDefaultMallocZone());
 }

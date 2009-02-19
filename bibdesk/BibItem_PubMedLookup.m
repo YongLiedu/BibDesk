@@ -397,7 +397,7 @@ static void removeAliens(NSMutableString *string)
     // get the initial XML document with our search parameters in it; we ask for 2 results at most
     NSString *esearch = [[[self class] baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=pubmed&retmax=2&usehistory=y&term=%@&tool=bibdesk", searchTerm];
 	NSURL *theURL = [NSURL URLWithStringByNormalizingPercentEscapes:esearch];
-    OBPRECONDITION(theURL);
+    BDSKPRECONDITION(theURL);
     
     NSURLRequest *request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
     NSURLResponse *response;
@@ -421,7 +421,7 @@ static void removeAliens(NSMutableString *string)
             // get the first result (zero-based indexing)
             NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=medline&retmode=text&retstart=0&retmax=1&db=pubmed&query_key=%@&WebEnv=%@&tool=bibdesk", queryKey, webEnv];
             theURL = [NSURL URLWithString:efetch];
-            OBPOSTCONDITION(theURL);
+            BDSKPOSTCONDITION(theURL);
             
             request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:1.0];
             NSData *efetchResult = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];

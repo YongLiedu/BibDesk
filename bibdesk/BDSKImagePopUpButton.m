@@ -121,14 +121,14 @@
 }
 
 - (void)animationDidStop:(BDSKImageFadeAnimation *)anAnimation {
-    OBASSERT(anAnimation == animation);
+    BDSKASSERT(anAnimation == animation);
     [animation setDelegate:nil];
     [animation autorelease];
     animation = nil;
 }
 
 - (void)animationDidEnd:(BDSKImageFadeAnimation *)anAnimation {
-    OBASSERT(anAnimation == animation);
+    BDSKASSERT(anAnimation == animation);
     [self setIconImage:[anAnimation finalImage]];
     [animation setDelegate:nil];
     [animation autorelease];

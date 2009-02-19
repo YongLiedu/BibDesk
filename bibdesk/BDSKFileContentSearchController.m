@@ -111,7 +111,7 @@
     // set up the image/text cell combination
     [(BDSKTextWithIconCell *)[[tableView tableColumnWithIdentifier:@"title"] dataCell] setHasDarkHighlight:YES];
     
-    OBPRECONDITION([[tableView enclosingScrollView] contentView]);
+    BDSKPRECONDITION([[tableView enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleClipViewFrameChangedNotification:)
                                                  name:NSViewFrameDidChangeNotification
@@ -180,8 +180,8 @@
     BOOL isDir;
     NSURL *fileURL = [[[resultsArrayController arrangedObjects] objectAtIndex:row] URL];
     
-    OBASSERT(fileURL);
-    OBASSERT(searchField);
+    BDSKASSERT(fileURL);
+    BDSKASSERT(searchField);
 
     if(![[NSFileManager defaultManager] fileExistsAtPath:[fileURL path] isDirectory:&isDir]){
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"File Does Not Exist", @"Message in alert dialog when file could not be found")

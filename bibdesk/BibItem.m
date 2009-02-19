@@ -134,13 +134,13 @@ enum {
 
 CFHashCode BibItemCaseInsensitiveCiteKeyHash(const void *item)
 {
-    OBASSERT([(id)item isKindOfClass:[BibItem class]]);
+    BDSKASSERT([(id)item isKindOfClass:[BibItem class]]);
     return BDCaseInsensitiveStringHash([(BibItem *)item citeKey]);
 }
 
 CFHashCode BibItemEquivalenceHash(const void *item)
 {
-    OBASSERT([(id)item isKindOfClass:[BibItem class]]);
+    BDSKASSERT([(id)item isKindOfClass:[BibItem class]]);
     
     NSString *type = [(BibItem *)item pubType];
     CFHashCode hash = type ? BDCaseInsensitiveStringHash(type) : 0;
@@ -215,7 +215,7 @@ static CFDictionaryRef selectorTable = NULL;
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     NSMutableParagraphStyle *defaultStyle = [[NSMutableParagraphStyle alloc] init];
     [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
@@ -893,7 +893,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	if (c == nil) {
 		c = @"";
 	}
-    OBPOSTCONDITION(c != nil);
+    BDSKPOSTCONDITION(c != nil);
 	return c;
 }
 
@@ -913,7 +913,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 	}
     if ([title isComplex] || [title isInherited])
         title = [NSString stringWithFormat:@"%@", title];
-    OBPOSTCONDITION(title != nil);
+    BDSKPOSTCONDITION(title != nil);
 	return title;
 }
 
@@ -928,7 +928,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 			emptyTitle = [NSLocalizedString(@"Empty Title", @"Publication display title for empty title") retain];
 		title = emptyTitle;
 	}
-    OBPOSTCONDITION([NSString isEmptyString:title] == NO);
+    BDSKPOSTCONDITION([NSString isEmptyString:title] == NO);
 	return [title stringByRemovingTeX];
 }
 
@@ -1067,7 +1067,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (void)setCiteKeyString:(NSString *)newCiteKey{
     // parser doesn't allow empty cite keys
-    OBPRECONDITION([NSString isEmptyString:newCiteKey] == NO);
+    BDSKPRECONDITION([NSString isEmptyString:newCiteKey] == NO);
     if(newCiteKey != citeKey){
         [citeKey autorelease];
         citeKey = [newCiteKey copy];
@@ -1191,7 +1191,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (void)setField:(NSString *)key toValue:(NSString *)value withModDate:(NSCalendarDate *)date{
-    OBPRECONDITION(key != nil);
+    BDSKPRECONDITION(key != nil);
     // use a copy of the old value, since this may be a mutable value
     NSString *oldValue = [[pubFields objectForKey:key] copy];
     if ([oldValue isEqualAsComplexString:@""]) {
@@ -1291,7 +1291,7 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (void)setField:(NSString *)field toStringValue:(NSString *)value{
-    OBASSERT([field isEqualToString:BDSKAllFieldsString] == NO);
+    BDSKASSERT([field isEqualToString:BDSKAllFieldsString] == NO);
 	
 	if([field isBooleanField]){
 		[self setField:field toBoolValue:[value booleanValue]];
@@ -1661,7 +1661,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             else
                 key = [NSString stringWithFormat:@"Bdsk-Url-%u", urlIndex++];
             value = [file stringRelativeToPath:basePath];
-            OBPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
+            BDSKPRECONDITION([value rangeOfCharacterFromSet:[NSCharacterSet curlyBraceCharacterSet]].length == 0);
             [string appendFormat:@",\n\t%@ = {%@}", key, value];
         }
     }
@@ -2765,7 +2765,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		return NO;
 	
 	if ([self canSetURLForLinkedFile:file]) {
-        OBASSERT([owner isDocument]);
+        BDSKASSERT([owner isDocument]);
         if ([owner isDocument]) {
             [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:file]
                                   fromDocument:(BibDocument *)owner
@@ -2824,18 +2824,18 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (BOOL)isContainedInGroupNamed:(id)name forField:(NSString *)field {
-    OBASSERT([field isPersonField] ? [name isKindOfClass:[BibAuthor class]] : 1);
+    BDSKASSERT([field isPersonField] ? [name isKindOfClass:[BibAuthor class]] : 1);
 	return [[self groupsForField:field] containsObject:name];
 }
 
 - (int)addToGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES && [owner isDocument]);
+	BDSKASSERT([aGroup isCategory] == YES && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
     
     // don't add it twice; this is typed as id because it may be a BibAuthor or NSString, so be careful
 	id groupName = [group name];
 	NSString *field = [group key];
-	OBASSERT(field != nil);
+	BDSKASSERT(field != nil);
     if([[self groupsForField:field] containsObject:groupName])
         return BDSKOperationIgnore;
 	
@@ -2887,11 +2887,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (int)removeFromGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES && [owner isDocument]);
+	BDSKASSERT([aGroup isCategory] == YES && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
-	OBASSERT(field != nil && [field isEqualToString:BDSKPubTypeString] == NO);
+	BDSKASSERT(field != nil && [field isEqualToString:BDSKPubTypeString] == NO);
 	NSSet *groupNames = [groups objectForKey:field];
     if([groupNames containsObject:groupName] == NO)
         return BDSKOperationIgnore;
@@ -2949,7 +2949,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	
 	// handle authors separately
     if([field isPersonField]){
-		OBASSERT([groupName isKindOfClass:[BibAuthor class]]);
+		BDSKASSERT([groupName isKindOfClass:[BibAuthor class]]);
 		NSEnumerator *authEnum = [[self peopleArrayForField:field] objectEnumerator];
 		BibAuthor *auth;
 		NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [[groupName lastName] length] - 5];
@@ -3026,11 +3026,11 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 }
 
 - (int)replaceGroup:(BDSKGroup *)aGroup withGroupNamed:(NSString *)newGroupName handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES && [owner isDocument]);
+	BDSKASSERT([aGroup isCategory] == YES && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
-	OBASSERT(field != nil);
+	BDSKASSERT(field != nil);
 	NSSet *groupNames = [groups objectForKey:field];
     if([groupNames containsObject:groupName] == NO)
         return BDSKOperationIgnore;
@@ -3076,7 +3076,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	
 	// handle authors separately
     if([field isPersonField]){
-		OBASSERT([groupName isKindOfClass:[BibAuthor class]]);
+		BDSKASSERT([groupName isKindOfClass:[BibAuthor class]]);
 		NSEnumerator *authEnum = [[self peopleArrayForField:field] objectEnumerator];
 		BibAuthor *auth;
 		NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [[groupName lastName] length] - 5];
@@ -3258,7 +3258,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 
 - (void)setPubTypeWithoutUndo:(NSString *)newType{
     newType = [newType entryType];
-    OBASSERT(![NSString isEmptyString:newType]);
+    BDSKASSERT(![NSString isEmptyString:newType]);
 	if(![[self pubType] isEqualToString:newType]){
 		[pubType release];
 		pubType = [newType copy];

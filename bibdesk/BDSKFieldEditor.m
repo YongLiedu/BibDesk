@@ -217,7 +217,7 @@ static inline BOOL completionWindowIsVisibleForTextView(NSTextView *textView)
 
 static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextView *textView)
 {
-    OBPRECONDITION([[BDSKTextViewCompletionController sharedController] respondsToSelector:selector]);
+    BDSKPRECONDITION([[BDSKTextViewCompletionController sharedController] respondsToSelector:selector]);
     if(completionWindowIsVisibleForTextView(textView)){
         [[BDSKTextViewCompletionController sharedController] performSelector:selector withObject:nil];
         return YES;
@@ -274,7 +274,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 
 - (NSRange)rangeForUserCompletion {
     // @@ check this if we have problems inserting accented characters; super's implementation can mess that up
-    OBPRECONDITION([self markedRange].length == 0);    
+    BDSKPRECONDITION([self markedRange].length == 0);    
     NSRange charRange = [super rangeForUserCompletion];
 	if ([[self delegate] respondsToSelector:@selector(textView:rangeForUserCompletion:)]) 
 		return [[self delegate] textView:self rangeForUserCompletion:charRange];
@@ -287,7 +287,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 {
     id delegate = [self delegate];
     SEL delegateSEL = @selector(control:textView:completions:forPartialWordRange:indexOfSelectedItem:);
-    OBPRECONDITION(delegate == nil || [delegate isKindOfClass:[NSControl class]]); // typically the NSForm
+    BDSKPRECONDITION(delegate == nil || [delegate isKindOfClass:[NSControl class]]); // typically the NSForm
     
     NSArray *completions = nil;
     

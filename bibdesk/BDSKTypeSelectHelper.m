@@ -328,7 +328,7 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
 
 - (void)searchWithStickyMatch:(BOOL)sticky;
 {
-    OBPRECONDITION(dataSource != nil);
+    BDSKPRECONDITION(dataSource != nil);
     
     if ([searchString length]) {
         unsigned int selectedIndex, startIndex, foundIndex;

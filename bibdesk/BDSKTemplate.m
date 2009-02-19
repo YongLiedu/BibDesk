@@ -352,7 +352,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (BDSKTemplateFormat)templateFormat;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     NSString *extension = [[self valueForKey:BDSKTemplateRoleString] lowercaseString];
     BDSKTemplateFormat format = BDSKUnknownTemplateFormat;
     NSURL *url = [self mainPageTemplateURL];
@@ -390,13 +390,13 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSString *)fileExtension;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     return [self valueForKey:BDSKTemplateRoleString];
 }
 
 - (NSString *)mainPageString;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     NSURL *mainPageURL = [self mainPageTemplateURL];
     if (mainPageURL) {
         return [NSString stringWithContentsOfURL:[self mainPageTemplateURL] encoding:NSUTF8StringEncoding error:NULL];
@@ -407,7 +407,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSAttributedString *)mainPageAttributedStringWithDocumentAttributes:(NSDictionary **)docAttributes;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     NSURL *mainPageURL = [self mainPageTemplateURL];
     if (mainPageURL) {
         return [[[NSAttributedString alloc] initWithURL:[self mainPageTemplateURL] documentAttributes:docAttributes] autorelease];
@@ -419,7 +419,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSString *)stringForType:(NSString *)type;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     NSURL *theURL = nil;
     if(nil != type)
         theURL = [self templateURLForType:type];
@@ -436,7 +436,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSAttributedString *)attributedStringForType:(NSString *)type;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     NSURL *theURL = nil;
     if(nil != type)
         theURL = [self templateURLForType:type];
@@ -448,32 +448,32 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSString *)scriptPath;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     return [NSString stringWithContentsOfURL:[self scriptURL] encoding:NSUTF8StringEncoding error:NULL];
 }
 
 - (NSURL *)mainPageTemplateURL;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     return [self templateURLForType:BDSKTemplateMainPageString];
 }
 
 - (NSURL *)defaultItemTemplateURL;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     return [self templateURLForType:BDSKTemplateDefaultItemString];
 }
 
 - (NSURL *)templateURLForType:(NSString *)pubType;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     NSParameterAssert(nil != pubType);
     return [[self childForRole:pubType] representedFileURL];
 }
 
 - (NSArray *)accessoryFileURLs;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     NSMutableArray *fileURLs = [NSMutableArray array];
     NSEnumerator *childE = [[self children] objectEnumerator];
     BDSKTemplate *aChild;
@@ -490,7 +490,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSURL *)scriptURL;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     return [[self childForRole:BDSKTemplateScriptString] representedFileURL];
 }
 
@@ -511,7 +511,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (id)childForRole:(NSString *)role;
 {
-    OBASSERT([self parent] == nil);
+    BDSKASSERT([self parent] == nil);
     NSParameterAssert(nil != role);
     NSEnumerator *nodeE = [[self children] objectEnumerator];
     id aNode = nil;
@@ -526,7 +526,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (void)setRepresentedFileURL:(NSURL *)aURL;
 {
-    OBASSERT([self isLeaf]);
+    BDSKASSERT([self isLeaf]);
     BDAlias *alias = nil;
     alias = [[BDAlias alloc] initWithURL:aURL];
     
@@ -544,7 +544,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 - (NSURL *)representedFileURL;
 {
-    OBASSERT([self isLeaf]);
+    BDSKASSERT([self isLeaf]);
     BDAlias *alias = [[BDAlias alloc] initWithData:[self valueForKey:@"_BDAlias"]];
     NSURL *theURL = [alias fileURLNoUI];
     [alias release];

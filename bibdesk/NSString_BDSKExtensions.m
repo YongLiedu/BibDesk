@@ -86,7 +86,7 @@ static int MAX_RATING = 5;
             CFDictionaryAddValue(ratings, (const void *)i, (const void *)[[ratingString copy] autorelease]);
             [ratingString appendCharacter:(0x278A + i)];
         } while(i++ < MAX_RATING);
-        OBPOSTCONDITION((int)[(id)ratings count] == MAX_RATING + 1);
+        BDSKPOSTCONDITION((int)[(id)ratings count] == MAX_RATING + 1);
     }
     return (NSString *)CFDictionaryGetValue(ratings, (const void *)rating);
 }
@@ -847,8 +847,8 @@ http://home.planet.nl/~faase009/GNU.txt
     BDDeleteTeXForSorting(modifiedOther);
     
     // the mutating functions above should only create an empty string, not a nil string
-    OBASSERT(modifiedSelf != nil);
-    OBASSERT(modifiedOther != nil);
+    BDSKASSERT(modifiedSelf != nil);
+    BDSKASSERT(modifiedOther != nil);
     
     // CFComparisonResult returns same values as NSComparisonResult
     CFComparisonResult result = CFStringCompare(modifiedSelf, modifiedOther, kCFCompareCaseInsensitive | kCFCompareLocalized);

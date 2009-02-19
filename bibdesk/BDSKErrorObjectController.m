@@ -62,7 +62,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 + (void)initialize;
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
 	[NSValueTransformer setValueTransformer:[[[BDSKLineNumberTransformer alloc] init] autorelease]
 									forName:@"BDSKLineNumberTransformer"];
 }
@@ -213,7 +213,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (BDSKErrorEditor *)editorForPasteDragData:(NSData *)data document:(BibDocument *)document{
-    OBASSERT(document != nil);
+    BDSKASSERT(document != nil);
     
     BDSKErrorManager *manager = [self managerForDocument:document create:YES];
     
@@ -245,7 +245,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)showEditorForLastPasteDragError{
     if(lastIndex < [self countOfErrors]){
         BDSKErrorObject *errObj = [self objectInErrorsAtIndex:lastIndex];
-        OBASSERT([[errObj editor] isPasteDrag]);
+        BDSKASSERT([[errObj editor] isPasteDrag]);
         [self showWindow:self];
         [self showEditorForErrorObject:errObj];
         NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(lastIndex, [self countOfErrors] - lastIndex)];
@@ -362,7 +362,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     if(currentErrors == nil){
         currentErrors = [[NSMutableArray alloc] initWithCapacity:10];
     } else {
-        OBASSERT([currentErrors count] == 0);
+        BDSKASSERT([currentErrors count] == 0);
         [currentErrors removeAllObjects];
     }
     lastIndex = [self countOfErrors];

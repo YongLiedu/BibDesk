@@ -86,7 +86,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
     // FSRefs are now valid across processes, so we can pass them directly
     fileURL = [fileURL fileURLByResolvingAliases]; 
-    OBASSERT(fileURL != nil);
+    BDSKASSERT(fileURL != nil);
     if(fileURL == nil)
         err = fnfErr;
     else if(CFURLGetFSRef((CFURLRef)fileURL, &fileRef) == NO)
@@ -124,8 +124,8 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
         
         if (err == noErr){
             appCreator = lsRecord.creator;
-            OBASSERT(appCreator != 0); 
-            OBASSERT(appCreator != invalidCreator); 
+            BDSKASSERT(appCreator != 0); 
+            BDSKASSERT(appCreator != invalidCreator); 
             // if the app has an invalid creator, our AppleEvent stuff won't work
             if (appCreator == 0 || appCreator == invalidCreator)
                 err = fnfErr;

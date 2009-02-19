@@ -135,7 +135,7 @@
 	NSString *citeString = [customStringArray objectAtIndex:[rowIndexes firstIndex]];
     NSArray *pubs = [document selectedPublications];
     
-	OBPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
+	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
 
     [document setDragFromExternalGroups:[document hasExternalGroupsSelected]];
     

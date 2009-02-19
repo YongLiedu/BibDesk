@@ -45,7 +45,7 @@ static NSString *BDSKRangeKey = @"__BDSKRange";
 
 static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDictionaries, NSMutableString *mutableString, NSDictionary *attributes, NSRange *rangePtr)
 {
-    OBASSERT(nil != mutableString);
+    BDSKASSERT(nil != mutableString);
     
     // we need something to copy and add to the array
     if (nil == attributes)

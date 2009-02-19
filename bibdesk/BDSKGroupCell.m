@@ -60,7 +60,7 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 
 + (void)initialize;
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     if (NULL == integerStringDictionary) {
         integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKIntegerDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
@@ -159,7 +159,7 @@ static NSString *stringWithInteger(int count)
 
 - (void)setObjectValue:(id <NSObject, NSCopying>)obj {
     // we should not set a derived value such as the group name here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
-    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
+    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
     
     [super setObjectValue:obj];
     
@@ -322,7 +322,7 @@ static NSString *stringWithInteger(int count)
 
 - (void)recacheCountAttributes {
 	NSFont *countFont = [NSFont fontWithName:@"Helvetica-Bold" size:([[self font] pointSize] - 1)] ?: [NSFont boldSystemFontOfSize:([[self font] pointSize] - 1)];
-	OBPRECONDITION(countFont);     
+	BDSKPRECONDITION(countFont);     
 
 	[countAttributes removeAllObjects];
     [countAttributes setObject:[NSColor alternateSelectedControlTextColor] forKey:NSForegroundColorAttributeName];

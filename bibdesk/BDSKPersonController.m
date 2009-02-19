@@ -481,7 +481,7 @@
 
 	// if we don't have a match in the address book, this will create a new person record
 	NSData *data = [[ABPerson personWithAuthor:person] vCardRepresentation];
-	OBPOSTCONDITION(data);
+	BDSKPOSTCONDITION(data);
 
 	if(data == nil)
 		return NO;

@@ -328,7 +328,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
         // if there was no character, we don't bother creating a mutable copy of the string
         convertedSoFar = [s copy];
     }
-    OBPOSTCONDITION(nil != convertedSoFar);
+    BDSKPOSTCONDITION(nil != convertedSoFar);
     return convertedSoFar; 
 }
 

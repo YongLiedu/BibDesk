@@ -178,3 +178,9 @@ void BDSKAddInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector
 void BDSKAddClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector) {
     BDSKSetMethodImplementationFromSelector(aClass, aSelector, impSelector, NO, BDSKAddOnly);
 }
+
+void BDSKRequestConcreteImplementation(id self, SEL aSelector) {
+    BDSKASSERT_NOT_REACHED("Concrete implementation needed");
+    [NSException raise:@"BDSKAbstractImplementation" format:@"%@ needs a concrete implementation of %@%@", [self class], [self class] == self ? @"+" : @"-", NSStringFromSelector(aSelector)];
+    exit(1);  // notreached, but needed to pacify the compiler
+}

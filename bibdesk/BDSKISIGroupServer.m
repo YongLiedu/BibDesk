@@ -225,13 +225,13 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 - (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread inMainThread]);
     [group addPublications:pubs];
 }
 
 - (void)setPublicationsOfGroup:(bycopy NSArray *)pubs;
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread inMainThread]);
     [group setPublications:pubs];
 }
 

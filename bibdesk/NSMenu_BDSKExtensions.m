@@ -222,7 +222,7 @@ static inline NSArray *copyUniqueVersionedNamesAndURLsForURLs(NSArray *appURLs, 
 - (void)replaceAllItemsWithApplicationsForURL:(NSURL *)aURL;
 {    
     // assumption: last item is "Choose..." item; note that this item may be the only thing retaining aURL
-    OBASSERT([self numberOfItems] > 0);
+    BDSKASSERT([self numberOfItems] > 0);
     while([self numberOfItems] > 1)
         [self removeItemAtIndex:0];
     
@@ -348,9 +348,9 @@ static id sharedOpenWithController = nil;
 }
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
-    OBASSERT([menu numberOfItems] > 0);
+    BDSKASSERT([menu numberOfItems] > 0);
     NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] valueForKey:BDSKMenuTargetURL];
-    OBASSERT(theURL != nil);
+    BDSKASSERT(theURL != nil);
     if(theURL != nil)
         [menu replaceAllItemsWithApplicationsForURL:theURL];
 }

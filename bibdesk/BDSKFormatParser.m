@@ -1158,10 +1158,10 @@
 {
     // initWithFrame sets up the entire text system for us
     if(self = [super initWithFrame:frameRect]){
-        OBASSERT(field != nil);
+        BDSKASSERT(field != nil);
         parseField = [field copy];
         
-        OBASSERT(fileType != nil);
+        BDSKASSERT(fileType != nil);
         parseFileType = [fileType copy];
     }
     return self;
@@ -1226,10 +1226,10 @@
 - (id)initWithField:(NSString *)field fileType:(NSString *)fileType; {
     // initWithFrame sets up the entire text system for us
     if(self = [super init]){
-        OBASSERT(field != nil);
+        BDSKASSERT(field != nil);
         parseField = [field copy];
         
-        OBASSERT(fileType != nil);
+        BDSKASSERT(fileType != nil);
         parseFileType = [fileType copy];
     }
     return self;

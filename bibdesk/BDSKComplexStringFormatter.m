@@ -223,7 +223,7 @@
 }
 
 - (void)setDelegate:(id)newDelegate {
-    OBPRECONDITION([newDelegate respondsToSelector:@selector(formatter:shouldEditAsComplexString:)]);
+    BDSKPRECONDITION([newDelegate respondsToSelector:@selector(formatter:shouldEditAsComplexString:)]);
 	delegate = newDelegate;
 }
 

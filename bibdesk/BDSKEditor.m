@@ -115,7 +115,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     // limit the scope to the default downloads directory (from Internet Config)        
     NSURL *downloadURL = [[NSFileManager defaultManager] downloadFolderURL];
@@ -154,7 +154,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 - (void)windowDidLoad{
 	
     // we should have a document at this point, as the nib is not loaded before -window is called, which shouldn't happen before the document shows us
-    OBASSERT([self document]);
+    BDSKASSERT([self document]);
     
     [[self window] setBackgroundColor:[NSColor colorWithCalibratedWhite:0.935 alpha:1.0]];
     
@@ -768,7 +768,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     if (field == nil)
         field = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
     
-    OBASSERT(field == nil || [fields containsObject:field]);
+    BDSKASSERT(field == nil || [fields containsObject:field]);
     
     // if we don't deselect this cell, we can't remove it from the form
     [self finalizeChangesPreservingSelection:NO];
@@ -1466,7 +1466,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex forDrop:(id <NSDraggingInfo>)info dropOperation:(FVDropOperation)operation;
 {
-    OBASSERT(anIndex != NSNotFound);
+    BDSKASSERT(anIndex != NSNotFound);
     [publication moveFilesAtIndexes:aSet toIndex:anIndex];
     return YES;
 }

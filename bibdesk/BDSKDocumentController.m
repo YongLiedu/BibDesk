@@ -121,7 +121,7 @@
     // may need to revisit this for new document classes
     
     if ([aDocument respondsToSelector:@selector(documentStringEncoding)]) {
-        OBPRECONDITION([aDocument isKindOfClass:[BibDocument class]]);
+        BDSKPRECONDITION([aDocument isKindOfClass:[BibDocument class]]);
         
         NSStringEncoding encoding = [(BibDocument *)aDocument documentStringEncoding];
         

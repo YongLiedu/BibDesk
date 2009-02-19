@@ -59,7 +59,7 @@
 
 + (NSBezierPath*)bezierPathWithRoundRectInRect:(NSRect)rect radius:(float)radius
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread inMainThread]);
     
     // Make sure radius doesn't exceed a maximum size to avoid artifacts:
     float rectLimit = fminf(NSHeight(rect), NSWidth(rect));
@@ -116,7 +116,7 @@
 
 + (NSBezierPath*)bezierPathWithHorizontalOvalAroundRect:(NSRect)rect
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread inMainThread]);
 
     float radius = 0.5f * rect.size.height;
     NSBezierPath *path = [self bezierPath];

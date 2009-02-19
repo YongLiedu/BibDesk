@@ -334,7 +334,7 @@ static int BDSKCompletionMinHeight = 20;
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:idx] byExtendingSelection:NO];
         
         // originalString changes as we update; the range can be incorrect if we have an accent character being replaced
-        OBPRECONDITION([[textView string] length] >= NSMaxRange(charRange));
+        BDSKPRECONDITION([[textView string] length] >= NSMaxRange(charRange));
         [self setOriginalString:([[textView string] length] >= NSMaxRange(charRange) ? [[textView string] substringWithRange:charRange] : nil)];
         
     }

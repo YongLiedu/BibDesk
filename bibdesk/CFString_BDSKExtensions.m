@@ -603,7 +603,7 @@ CFStringRef __BDXMLCreateStringWithEntityReferences(CFStringRef sourceString) {
                 CFStringAppendCharacters(result, &c, 1);
         } else if (CFCharacterSetIsCharacterMember(entityCharacters, c)) {
             // This is a low-ascii, non-whitespace byte and isn't allowed in XML character at all.  Drop it.
-            OBASSERT(c < 0x20 && c != 0x9 && c != 0xA && c != 0xD);
+            BDSKASSERT(c < 0x20 && c != 0x9 && c != 0xA && c != 0xD);
         } else {
             CFStringAppendCharacters(result, &c, 1);
         }
@@ -625,7 +625,7 @@ CFIndex __BDIndexOfCharacterNotRepresentableInCFEncoding(CFStringRef string, CFS
         thisBufferCharacters = CFStringGetBytes(string, scanningRange, anEncoding, 0, FALSE, NULL, bufLen, &usedBufLen);
         if (thisBufferCharacters == 0)
             break;
-        OBASSERT(thisBufferCharacters <= scanningRange.length);
+        BDSKASSERT(thisBufferCharacters <= scanningRange.length);
         scanningRange.location += thisBufferCharacters;
         scanningRange.length -= thisBufferCharacters;
     }
@@ -878,7 +878,7 @@ Boolean BDStringHasAccentedCharacters(CFStringRef string)
 // 2. Replace characters not representable in string encoding with numbered character references
 CFStringRef BDXMLCreateStringWithEntityReferencesInCFEncoding(CFStringRef string, CFStringEncoding encoding) {
     CFStringRef tmpString = __BDXMLCreateStringWithEntityReferences(string);
-    OBASSERT(tmpString);
+    BDSKASSERT(tmpString);
     CFStringRef result = __BDXMLCreateStringInCFEncoding(tmpString, encoding);
     CFRelease(tmpString);
     return result;

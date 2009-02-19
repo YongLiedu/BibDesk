@@ -131,7 +131,7 @@
 }
 
 - (void)dealloc{
-    OBASSERT(download == nil);
+    BDSKASSERT(download == nil);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // next line is a workaround for a nasty webview crasher; looks like it messages a garbage pointer to its undo manager
     [webView setEditingDelegate:nil];

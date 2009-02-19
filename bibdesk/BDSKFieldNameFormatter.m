@@ -54,7 +54,7 @@
 }
 
 - (void)setDelegate:(id)newDelegate {
-    OBPRECONDITION(newDelegate == nil || [newDelegate respondsToSelector:@selector(fieldNameFormatterKnownFieldNames:)]);
+    BDSKPRECONDITION(newDelegate == nil || [newDelegate respondsToSelector:@selector(fieldNameFormatterKnownFieldNames:)]);
     delegate = newDelegate;
 }
 

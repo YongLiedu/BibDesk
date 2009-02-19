@@ -116,7 +116,7 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
         CFStringAppend(mutStr, nodeVal);
     }
     
-    OBPOSTCONDITION(!BDIsEmptyString(mutStr));
+    BDSKPOSTCONDITION(!BDIsEmptyString(mutStr));
     
     if(stackBuffer != stringNodes) NSZoneFree(complexStringExpansionZone, stringNodes);
     
@@ -127,7 +127,7 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
 
 + (void)initialize{
     
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     NSMutableCharacterSet *tmpSet = [[NSMutableCharacterSet alloc] init];
     [tmpSet addCharactersInRange:NSMakeRange(48,10)]; // 0-9
@@ -149,7 +149,7 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
 
 /* designated initializer */
 - (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)aMacroResolver{
-    OBASSERT([nodesArray count] > 0);
+    BDSKASSERT([nodesArray count] > 0);
     if (self = [super init]) {
         nodes = [nodesArray copyWithZone:[self zone]];
         // we don't retain, as the macroResolver might retain us as a macro value
@@ -164,7 +164,7 @@ NSString *__BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolv
 }
 
 - (id)initWithInheritedValue:(NSString *)aValue {
-    OBASSERT(aValue != nil);
+    BDSKASSERT(aValue != nil);
     if (self = [self initWithNodes:[aValue nodes] macroResolver:[aValue macroResolver]]) {
         complex = [aValue isComplex];
 		inherited = YES;
@@ -207,7 +207,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         if (self = [super init]) {
-            OBASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
+            BDSKASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
             nodes = [[coder decodeObjectForKey:@"nodes"] retain];
             complex = [coder decodeBoolForKey:@"complex"];
             inherited = [coder decodeBoolForKey:@"inherited"];
@@ -225,7 +225,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 - (void)encodeWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
-        OBASSERT([coder isKindOfClass:[NSKeyedArchiver class]]);
+        BDSKASSERT([coder isKindOfClass:[NSKeyedArchiver class]]);
         [coder encodeObject:nodes forKey:@"nodes"];
         [coder encodeBool:complex forKey:@"complex"];
         [coder encodeBool:inherited forKey:@"inherited"];

@@ -76,9 +76,9 @@
         } else {
             host = [aHost copy];
             // unknown type; you'll get a surprise if these are set to nil, so maybe we should just raise here...
-            OBPRECONDITION(nil == aDbase);
-            OBPRECONDITION(nil == opts);
-            OBPRECONDITION(nil == aPort);
+            BDSKPRECONDITION(nil == aDbase);
+            BDSKPRECONDITION(nil == opts);
+            BDSKPRECONDITION(nil == aPort);
             port = nil;
             database = nil;
             options = nil;

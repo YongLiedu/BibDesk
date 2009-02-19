@@ -48,7 +48,7 @@ static NSCharacterSet *keySepCharSet = nil;
 static NSCharacterSet *keyCharSet = nil;
 
 + (void)initialize {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     // comma and space are used to separate the keys
     

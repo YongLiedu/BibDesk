@@ -165,7 +165,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [self insertControlView:[searchGroupViewController view] atTop:NO];
     
     BDSKSearchGroup *group = [[self selectedGroups] firstObject];
-    OBASSERT([group isSearch]);
+    BDSKASSERT([group isSearch]);
     [searchGroupViewController setGroup:group];
 }
 
@@ -1186,7 +1186,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)editGroupAtRow:(int)row {
-	OBASSERT(row != -1);
+	BDSKASSERT(row != -1);
 	BDSKGroup *group = [groups objectAtIndex:row];
     
     if ([group isEditable] == NO) {
@@ -1201,7 +1201,7 @@ The groupedPublications array is a subset of the publications array, developed b
         [filterController release];
 	} else if ([group isCategory]) {
         // this must be a person field
-        OBASSERT([[group name] isKindOfClass:[BibAuthor class]]);
+        BDSKASSERT([[group name] isKindOfClass:[BibAuthor class]]);
 		[self showPerson:(BibAuthor *)[group name]];
 	} else if ([group isURL]) {
         BDSKURLGroupSheetController *sheetController = [(BDSKURLGroupSheetController *)[BDSKURLGroupSheetController alloc] initWithGroup:(BDSKURLGroup *)group];
@@ -1225,7 +1225,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	} 
 	
 	int row = [groupTableView selectedRow];
-	OBASSERT(row != -1);
+	BDSKASSERT(row != -1);
 	if(row > 0) [self editGroupAtRow:row];
 }
 
@@ -1236,7 +1236,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	} 
 	
 	int row = [groupTableView selectedRow];
-	OBASSERT(row != -1);
+	BDSKASSERT(row != -1);
 	if (row <= 0) return;
     
     if([self tableView:groupTableView shouldEditTableColumn:[[groupTableView tableColumns] objectAtIndex:0] row:row])
@@ -1309,7 +1309,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)editGroupWithoutWarning:(BDSKGroup *)group {
     unsigned i = [groups indexOfObject:group];
-    OBASSERT(i != NSNotFound);
+    BDSKASSERT(i != NSNotFound);
     
     if(i != NSNotFound){
         [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
@@ -1478,7 +1478,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-	OBASSERT([group isSmart] == NO && [group isExternal] == NO && [group isEqual:[groups libraryGroup]] == NO && [group isEqual:[groups lastImportGroup]] == NO);
+	BDSKASSERT([group isSmart] == NO && [group isExternal] == NO && [group isEqual:[groups libraryGroup]] == NO && [group isEqual:[groups lastImportGroup]] == NO);
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
@@ -1498,7 +1498,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	int rv;
     
     while(pub = [pubEnum nextObject]){
-        OBASSERT([pub isKindOfClass:[BibItem class]]);        
+        BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
         
         if(field && [field isEqualToString:BDSKPubTypeString] == NO)
             oldValue = [[[pub valueOfField:field] retain] autorelease];
@@ -1583,7 +1583,7 @@ The groupedPublications array is a subset of the publications array, developed b
             continue;
         
 		while(pub = [pubEnum nextObject]){
-			OBASSERT([pub isKindOfClass:[BibItem class]]);        
+			BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
 			
             if(field)
                 oldValue = [[[pub valueOfField:field] retain] autorelease];
@@ -1651,7 +1651,7 @@ The groupedPublications array is a subset of the publications array, developed b
     NSString *field = [(BDSKCategoryGroup *)group key];
 	
 	while(pub = [pubEnum nextObject]){
-		OBASSERT([pub isKindOfClass:[BibItem class]]);        
+		BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
 		
         oldValue = [[[pub valueOfField:field] retain] autorelease];
 		rv = [pub replaceGroup:group withGroupNamed:newGroupName handleInherited:handleInherited];

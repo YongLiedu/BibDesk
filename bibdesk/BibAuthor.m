@@ -57,7 +57,7 @@ static BibAuthor *emptyAuthorInstance = nil;
 
 + (void)initialize{
     
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     emptyAuthorInstance = [[BibAuthor alloc] initWithName:@"" andPub:nil forField:BDSKAuthorString];
 }
     
@@ -92,7 +92,7 @@ static BibAuthor *emptyAuthorInstance = nil;
     
 
 + (id)emptyAuthor{
-    OBASSERT(emptyAuthorInstance != nil);
+    BDSKASSERT(emptyAuthorInstance != nil);
     return emptyAuthorInstance;
 }
 
@@ -197,8 +197,8 @@ static BibAuthor *emptyAuthorInstance = nil;
 static inline BOOL
 __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames)
 {
-    OBASSERT(myFirstNames);
-    OBASSERT(otherFirstNames);
+    BDSKASSERT(myFirstNames);
+    BDSKASSERT(otherFirstNames);
     
     CFIndex i, cnt = MIN(CFArrayGetCount(myFirstNames), CFArrayGetCount(otherFirstNames));
     CFStringRef myName;
@@ -238,7 +238,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 - (BOOL)fuzzyEqual:(BibAuthor *)otherAuth{
     
     // required for access to flags; could also raise an exception
-    OBASSERT([otherAuth isKindOfClass:[self class]]); 
+    BDSKASSERT([otherAuth isKindOfClass:[self class]]); 
         
     // check to see if last names match; if not, we can return immediately
     if(CFStringCompare((CFStringRef)fuzzyName, (CFStringRef)otherAuth->fuzzyName, kCFCompareCaseInsensitive|kCFCompareLocalized) != kCFCompareEqualTo)
@@ -439,10 +439,10 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
     if(name != nil)
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Attempt to modify non-nil attribute of immutable object %@", self] userInfo:nil];
     
-    OBASSERT(firstName == nil);
-    OBASSERT(vonPart == nil);
-    OBASSERT(lastName == nil);
-    OBASSERT(jrPart == nil);
+    BDSKASSERT(firstName == nil);
+    BDSKASSERT(vonPart == nil);
+    BDSKASSERT(lastName == nil);
+    BDSKASSERT(jrPart == nil);
     
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     
@@ -536,10 +536,10 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
 
 - (void)setupNames{
     
-    OBASSERT(name == nil);
-    OBASSERT(fullLastName == nil);
-    OBASSERT(normalizedName == nil);
-    OBASSERT(sortableName == nil);
+    BDSKASSERT(name == nil);
+    BDSKASSERT(fullLastName == nil);
+    BDSKASSERT(normalizedName == nil);
+    BDSKASSERT(sortableName == nil);
 	
 	// temporary string storage
     NSMutableString *theName = [[NSMutableString alloc] initWithCapacity:14];
@@ -638,9 +638,9 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
 
 - (void)setupAbbreviatedNames
 {
-    OBASSERT(abbreviatedName == nil);
-    OBASSERT(abbreviatedNormalizedName == nil);
-    OBASSERT(unpunctuatedAbbreviatedNormalizedName == nil);
+    BDSKASSERT(abbreviatedName == nil);
+    BDSKASSERT(abbreviatedNormalizedName == nil);
+    BDSKASSERT(unpunctuatedAbbreviatedNormalizedName == nil);
     
     CFArrayRef theFirstNames = (CFArrayRef)firstNames;
     CFIndex idx, firstNameCount = CFArrayGetCount(theFirstNames);
@@ -735,13 +735,13 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
 // fuzzy equality requires that last names be equal case-insensitively, so equal objects are guaranteed the same hash
 CFHashCode BibAuthorFuzzyHash(const void *item)
 {
-    OBASSERT([(id)item isKindOfClass:[BibAuthor class]]);
+    BDSKASSERT([(id)item isKindOfClass:[BibAuthor class]]);
     return BDCaseInsensitiveStringHash([(BibAuthor *)item lastName]);
 }
 
 Boolean BibAuthorFuzzyEqual(const void *value1, const void *value2)
 {        
-    OBASSERT([(id)value1 isKindOfClass:[BibAuthor class]] && [(id)value2 isKindOfClass:[BibAuthor class]]);
+    BDSKASSERT([(id)value1 isKindOfClass:[BibAuthor class]] && [(id)value2 isKindOfClass:[BibAuthor class]]);
     return [(BibAuthor *)value1 fuzzyEqual:(BibAuthor *)value2];
 }
 

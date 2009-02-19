@@ -50,6 +50,7 @@
 #import "BDSKReferParser.h"
 #import "BDSKMODSParser.h"
 #import "BDSKSciFinderParser.h"
+#import "BDSKRuntime.h"
 
 @implementation BDSKStringParser
 
@@ -94,22 +95,22 @@ static Class classForType(int stringType)
 }
 
 + (BOOL)canParseString:(NSString *)string ofType:(int)stringType{
-    OBASSERT(self == [BDSKStringParser class]);
+    BDSKASSERT(self == [BDSKStringParser class]);
     if (stringType == BDSKUnknownStringType)
         stringType = [string contentStringType];
     Class parserClass = classForType(stringType);
-    OBASSERT(parserClass != [BDSKStringParser class]);
+    BDSKASSERT(parserClass != [BDSKStringParser class]);
     return [parserClass canParseString:string];
 }
 
 + (NSArray *)itemsFromString:(NSString *)string ofType:(int)stringType error:(NSError **)outError{
-    OBASSERT(self == [BDSKStringParser class]);
+    BDSKASSERT(self == [BDSKStringParser class]);
     if (stringType == BDSKUnknownStringType)
         stringType = [string contentStringType];
-    OBASSERT(stringType != BDSKBibTeXStringType);
-    OBASSERT(stringType != BDSKNoKeyBibTeXStringType);
+    BDSKASSERT(stringType != BDSKBibTeXStringType);
+    BDSKASSERT(stringType != BDSKNoKeyBibTeXStringType);
     Class parserClass = classForType(stringType);
-    OBASSERT(parserClass != [BDSKStringParser class]);
+    BDSKASSERT(parserClass != [BDSKStringParser class]);
     if (Nil == parserClass && outError){
         *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unsupported or invalid format", @"error when parsing text fails")];
         [*outError setValue:NSLocalizedString(@"BibDesk was not able to determine the syntax of this data.  It may be incorrect or an unsupported type of text.", @"error description when parsing text fails") forKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -121,7 +122,7 @@ static Class classForType(int stringType)
     if([self class] == [BDSKStringParser class]){
         return [self canParseString:string ofType:BDSKUnknownStringType];
     }else{
-        OBRequestConcreteImplementation(self, _cmd);
+        BDSKRequestConcreteImplementation(self, _cmd);
         return NO;
     }
 }
@@ -130,7 +131,7 @@ static Class classForType(int stringType)
     if([self class] == [BDSKStringParser class]){
         return [self itemsFromString:string ofType:BDSKUnknownStringType error:outError];
     }else{
-        OBRequestConcreteImplementation(self, _cmd);
+        BDSKRequestConcreteImplementation(self, _cmd);
         return nil;
     }
 }

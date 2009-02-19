@@ -427,7 +427,7 @@
 }
 
 - (void)showPerson:(BibAuthor *)person{
-    OBASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
+    BDSKASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
     BDSKPersonController *pc = nil;
 	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
 	NSWindowController *wc;
@@ -1546,7 +1546,7 @@
 }
 
 - (IBAction)selectCrossrefParentAction:(id)sender{
-    OBASSERT([self isDisplayingFileContentSearch] == NO);
+    BDSKASSERT([self isDisplayingFileContentSearch] == NO);
     BibItem *selectedBI = [[self selectedPublications] lastObject];
     [self selectCrossrefParentForItem:selectedBI];
 }
@@ -1597,7 +1597,7 @@
     CFIndex idx = [shownPublications count];
     id object1 = nil, object2 = nil;
     
-    OBASSERT(sortKey);
+    BDSKASSERT(sortKey);
     
     NSMutableIndexSet *rowsToSelect = [NSMutableIndexSet indexSet];
     CFIndex countOfItems = 0;

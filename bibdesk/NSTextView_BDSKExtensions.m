@@ -146,7 +146,7 @@
     
     // use the layout manager to add temporary attributes; the advantage for our purpose is that temporary attributes don't print
     NSLayoutManager *layoutManager = [self layoutManager];
-    OBPRECONDITION(layoutManager);
+    BDSKPRECONDITION(layoutManager);
     if(layoutManager == nil)
         return;
     

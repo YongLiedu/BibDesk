@@ -118,7 +118,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 + (void)initialize;
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     // Ensure that computer name changes are propagated as future clients connect to a document.  Also, note that the OS will change the computer name to avoid conflicts by appending "(2)" or similar to the previous name, which is likely the most common scenario.
     if(dynamicStore == NULL){
@@ -153,8 +153,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
             CFArrayAppendValue(keys, key);
             BDSKHostNameChangedNotification = (NSString *)key;
             
-            OBASSERT(BDSKComputerNameChangedNotification);
-            OBASSERT(BDSKHostNameChangedNotification);
+            BDSKASSERT(BDSKComputerNameChangedNotification);
+            BDSKASSERT(BDSKHostNameChangedNotification);
                 
             if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
                 fprintf(stderr, "unable to register for dynamic store notifications.\n");
@@ -168,11 +168,11 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 {
     // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
     NSString *sharingName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKSharingNameKey];
-    OBASSERT(dynamicStore);
+    BDSKASSERT(dynamicStore);
     // default to the computer name as set in sys prefs (sharing)
     if([NSString isEmptyString:sharingName])
         sharingName = [(id)SCDynamicStoreCopyComputerName(dynamicStore, NULL) autorelease];
-    OBPOSTCONDITION(sharingName);
+    BDSKPOSTCONDITION(sharingName);
     return sharingName;
 }
 
@@ -277,7 +277,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     // register for notifications
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     
-    OBASSERT(BDSKComputerNameChangedNotification);
+    BDSKASSERT(BDSKComputerNameChangedNotification);
     
     [nc addObserver:self
            selector:@selector(handleComputerNameChangedNotification:)

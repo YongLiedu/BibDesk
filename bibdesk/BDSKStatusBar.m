@@ -155,10 +155,10 @@
 	float shiftHeight = NSHeight([self frame]) + offset;
 	statusRect.size.height = NSHeight([self frame]);
 	
-	OBASSERT(contentView != nil);
+	BDSKASSERT(contentView != nil);
 	
 	if ([self superview]) {
-		OBASSERT([[self superview] isEqual:contentView]);
+		BDSKASSERT([[self superview] isEqual:contentView]);
 		viewFrame.size.height += shiftHeight;
 		if ([contentView isFlipped] == NO)
 			viewFrame.origin.y -= shiftHeight;
@@ -187,7 +187,7 @@
 	NSView *view;
 	NSRect viewFrame;
 	
-	OBASSERT(contentView != nil);
+	BDSKASSERT(contentView != nil);
 	
 	if ([self superview])
 		shiftHeight = -shiftHeight;

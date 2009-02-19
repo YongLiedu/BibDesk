@@ -235,7 +235,7 @@
             NSString *key = [info objectForKey:@"macroKey"];
             if (key) {
                 unsigned idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
-                OBASSERT(idx != NSNotFound);
+                BDSKASSERT(idx != NSNotFound);
                 [self removeObjectFromMacrosAtIndex:idx];
             } else {
                 [self setMacros:[NSArray array]];
@@ -246,7 +246,7 @@
             NSString *oldKey = [info objectForKey:@"oldKey"];
             unsigned idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[oldKey lowercaseString]];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:newKey macroResolver:macroResolver];
-            OBASSERT(idx != NSNotFound);
+            BDSKASSERT(idx != NSNotFound);
             [self replaceObjectInMacrosAtIndex:idx withObject:macro];
             [macro release];
         }
@@ -258,7 +258,7 @@
 #pragma mark Actions
 
 - (IBAction)addMacro:(id)sender{
-    OBASSERT(isEditable);
+    BDSKASSERT(isEditable);
     NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
     // find a unique new macro key
     int i = 0;
@@ -275,7 +275,7 @@
 }
 
 - (IBAction)removeSelectedMacros:(id)sender{
-    OBASSERT(isEditable);
+    BDSKASSERT(isEditable);
     NSArray *macrosToRemove = [[[arrayController arrangedObjects] objectsAtIndexes:[tableView selectedRowIndexes]] valueForKey:@"name"];
     NSEnumerator *keyEnum = [macrosToRemove objectEnumerator];
     NSString *key;

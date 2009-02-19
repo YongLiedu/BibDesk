@@ -185,7 +185,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 - (void)handleMainDocumentDidChangeNotification:(NSNotification *)notification
 {
-    OBASSERT([self isSharedPreviewer]);
+    BDSKASSERT([self isSharedPreviewer]);
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] && [self isWindowVisible])
         [[[NSDocumentController sharedDocumentController] mainDocument] updatePreviewer:self];
 }
@@ -270,7 +270,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 #pragma mark Actions
 
 - (IBAction)showWindow:(id)sender{
-    OBASSERT([self isSharedPreviewer]);
+    BDSKASSERT([self isSharedPreviewer]);
 	[super showWindow:self];
 	[progressOverlay orderFront:sender];
 	[(BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument] updatePreviewer:self];
@@ -430,7 +430,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 		
 	}
 	
-	OBPOSTCONDITION(pdfData != nil);
+	BDSKPOSTCONDITION(pdfData != nil);
 	
 	// draw the PDF preview
     PDFDocument *pdfDocument = [[PDFDocument alloc] initWithData:pdfData];
@@ -513,7 +513,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 }
 
 - (void)handleApplicationWillTerminate:(NSNotification *)notification{
-    OBASSERT([self isSharedPreviewer]);
+    BDSKASSERT([self isSharedPreviewer]);
     
 	// save the visibility of the previewer
 	[[NSUserDefaults standardUserDefaults] setBool:[self isWindowVisible] forKey:BDSKShowingPreviewKey];

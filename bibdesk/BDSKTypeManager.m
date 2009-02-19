@@ -49,7 +49,7 @@ static BDSKTypeManager *sharedInstance = nil;
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     [self sharedManager];
 }
 
@@ -588,7 +588,7 @@ static BDSKTypeManager *sharedInstance = nil;
         if(name == nil)
             name = tag; // guard against a nil return; it turns out that not all WOS tags are documented
 	}
-    OBPOSTCONDITION(name);
+    BDSKPOSTCONDITION(name);
     return name;
 }
 

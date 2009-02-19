@@ -144,7 +144,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 			
 			NSArray *valueArray = [sourceLine componentsSeparatedByString:@"\t"];
 			
-			OBPRECONDITION([valueArray count] == [keyArray count]);
+			BDSKPRECONDITION([valueArray count] == [keyArray count]);
 			
 			int count = [keyArray count];
 			int i;

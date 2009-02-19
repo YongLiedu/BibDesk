@@ -456,7 +456,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     [invocation getReturnValue:&treeNodes];
     [treeNodes autorelease];
     
-    OBPOSTCONDITION([treeNodes count]);
+    BDSKPOSTCONDITION([treeNodes count]);
         
     NSParameterAssert(NULL != searchIndex);
     SKIndexFlush(searchIndex);

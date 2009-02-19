@@ -187,7 +187,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     
     while(sourceLine = [sourceLineE nextObject]){
         
-        OBPRECONDITION([sourceLine hasPrefix:@"FN"] == NO && [sourceLine hasPrefix:@"VR"] == NO && [sourceLine hasPrefix:@"EF"] == NO);
+        BDSKPRECONDITION([sourceLine hasPrefix:@"FN"] == NO && [sourceLine hasPrefix:@"VR"] == NO && [sourceLine hasPrefix:@"EF"] == NO);
         
         if([sourceLine length] >= 2 && isTagLine(sourceLine)){
  			

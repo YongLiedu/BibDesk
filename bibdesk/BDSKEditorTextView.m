@@ -255,7 +255,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
 
 - (void)doCommonSetup;
 {
-    OBPRECONDITION([self textStorage]);
+    BDSKPRECONDITION([self textStorage]);
 #if defined(MAC_OS_X_VERSION_10_5) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
 #warning 10.5: remove URL detection
 #endif

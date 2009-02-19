@@ -206,7 +206,7 @@ enum {
 @implementation BibDocument
 
 + (void)initialize {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     [NSImage makePreviewDisplayImages];
 }
@@ -376,7 +376,7 @@ enum {
         if(hfsPath == nil) NSLog(@"No path available from event %@ (descriptor %@)", event, [event descriptorForKeyword:keyAEResult]);
         NSURL *fileURL = (hfsPath == nil ? nil : [(id)CFURLCreateWithFileSystemPath(CFAllocatorGetDefault(), (CFStringRef)hfsPath, kCFURLHFSPathStyle, FALSE) autorelease]);
         
-        OBPOSTCONDITION(fileURL != nil);
+        BDSKPOSTCONDITION(fileURL != nil);
         if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
             // strip extra search criteria
             NSRange range = [searchString rangeOfString:@":"];
@@ -990,9 +990,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     if(NSSaveToOperation == docState.currentSaveOperationType){
         NSView *accessoryView = [savePanel accessoryView];
-        OBASSERT(accessoryView != nil);
+        BDSKASSERT(accessoryView != nil);
         NSPopUpButton *saveFormatPopupButton = popUpButtonSubview(accessoryView);
-        OBASSERT(saveFormatPopupButton != nil);
+        BDSKASSERT(saveFormatPopupButton != nil);
         NSRect savFrame = [saveAccessoryView frame];
         savFrame.size.width = NSWidth([accessoryView frame]);
         NSRect exportFrame = [exportAccessoryView frame];
@@ -1375,7 +1375,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
         }
     }else if ([aType isEqualToString:BDSKArchiveDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"tgz"]]){
-        OBASSERT_NOT_REACHED("Should not save a fileWrapper for archive");
+        BDSKASSERT_NOT_REACHED("Should not save a fileWrapper for archive");
     }else{
         NSError *error = nil;
         NSData *data = [self dataOfType:aType forPublications:items error:&error];
@@ -1700,7 +1700,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSData *)stringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
+    BDSKPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
     
     NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext];
     return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
@@ -1713,9 +1713,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSData *)attributedStringDataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    OBPRECONDITION(nil != template);
+    BDSKPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
-    OBPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKRichHTMLTemplateFormat));
+    BDSKPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKDocxTemplateFormat | BDSKOdtTemplateFormat | BDSKRichHTMLTemplateFormat));
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
@@ -1751,7 +1751,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSData *)dataForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    OBPRECONDITION(nil != template && nil != [template scriptPath]);
+    BDSKPRECONDITION(nil != template && nil != [template scriptPath]);
     
     NSData *fileTemplate = [BDSKTemplateObjectProxy dataByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext];
     return fileTemplate;
@@ -1764,7 +1764,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items publicationsContext:(NSArray *)itemsContext usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    OBPRECONDITION(nil != template && [template templateFormat] & BDSKRTFDTemplateFormat);
+    BDSKPRECONDITION(nil != template && [template templateFormat] & BDSKRTFDTemplateFormat);
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items publicationsContext:itemsContext documentAttributes:&docAttributes];
     
@@ -2338,7 +2338,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
 	}else if(type == BDSKNoKeyBibTeXStringType){
         
-        OBASSERT(parseError == nil);
+        BDSKASSERT(parseError == nil);
         
         // return an error when we inserted temporary keys, let the caller decide what to do with it
         // don't override a parseError though, as that is probably more relevant
@@ -3101,7 +3101,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     if (docState.isDocumentClosed)
         return;
 
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread inMainThread]);
     
     //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
     [self updateBottomPreviewPane];
@@ -3565,7 +3565,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 
 - (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
     int i = [[sender subviews] count] - 2;
-    OBASSERT(i >= 0);
+    BDSKASSERT(i >= 0);
 	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
 	NSView *firstView = [[sender subviews] objectAtIndex:i];
 	NSView *secondView = [[sender subviews] objectAtIndex:++i];
@@ -3632,7 +3632,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 
 - (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(int)offset {
     int i = [[sender subviews] count] - 2;
-    OBASSERT(i >= 0);
+    BDSKASSERT(i >= 0);
 	NSView *zerothView = i == 0 ? nil : [[sender subviews] objectAtIndex:0];
 	NSView *firstView = [[sender subviews] objectAtIndex:i];
 	NSView *secondView = [[sender subviews] objectAtIndex:++i];

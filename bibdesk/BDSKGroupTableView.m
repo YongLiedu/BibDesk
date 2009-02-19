@@ -68,7 +68,7 @@
     if([self numberOfColumns] == 0) 
 		[NSException raise:BDSKUnimplementedException format:@"%@ needs at least one column.", [self class]];
     NSTableColumn *column = [[self tableColumns] objectAtIndex:0];
-    OBPRECONDITION(column);
+    BDSKPRECONDITION(column);
  	
 	NSTableHeaderView *currentTableHeaderView = [self headerView];
 	BDSKGroupTableHeaderView *customTableHeaderView = [[BDSKGroupTableHeaderView alloc] initWithTableColumn:column];
@@ -89,7 +89,7 @@
     
     [super awakeFromNib]; // this updates the font
     
-    OBPRECONDITION([[self enclosingScrollView] contentView]);
+    BDSKPRECONDITION([[self enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleClipViewFrameChangedNotification:)
                                                  name:NSViewFrameDidChangeNotification
@@ -315,7 +315,7 @@
     NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     
     int colIndex = [self columnAtPoint:location];
-    OBASSERT(colIndex != -1);
+    BDSKASSERT(colIndex != -1);
     if(colIndex == -1)
         return;
     
@@ -362,7 +362,7 @@
 
 - (NSPopUpButtonCell *)popUpHeaderCell{
 	id headerCell = [[[[self tableView] tableColumns] objectAtIndex:0] headerCell];
-	OBASSERT([headerCell isKindOfClass:[NSPopUpButtonCell class]]);
+	BDSKASSERT([headerCell isKindOfClass:[NSPopUpButtonCell class]]);
 	return headerCell;
 }
 
@@ -374,12 +374,12 @@
 
 // this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
 - (NSString *)stringForObjectValue:(id)obj{
-    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
+    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
     return [obj respondsToSelector:@selector(name)] ? [[obj name] description] : [obj description];
 }
 
 - (NSString *)editingStringForObjectValue:(id)obj{
-    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
+    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
     id name = [obj name];
     return [name isKindOfClass:[BibAuthor class]] ? [name originalName] : [name description];
 }

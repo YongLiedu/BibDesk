@@ -383,8 +383,8 @@ typedef struct _BDSKSharingClientFlags {
 // monitor the TXT record in case the server changes password requirements
 - (void)netService:(NSNetService *)sender didUpdateTXTRecordData:(NSData *)data;
 {
-    OBASSERT(sender == service);
-    OBASSERT(data != nil);
+    BDSKASSERT(sender == service);
+    BDSKASSERT(data != nil);
     if(data){
         NSDictionary *dict = [NSNetService dictionaryFromTXTRecordData:data];
         int32_t val = [[NSString stringWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] intValue];

@@ -145,7 +145,7 @@
 	}else if(tv == groupTableView){
 		BDSKGroup *group = [groups objectAtIndex:row];
         // object is always a group, see BDSKGroupCellFormatter
-        OBASSERT([object isKindOfClass:[BDSKGroup class]]);
+        BDSKASSERT([object isKindOfClass:[BDSKGroup class]]);
         id newName = [object name];
 		if([[group name] isEqual:newName])
 			return;
@@ -479,7 +479,7 @@
     NSArray *pubs = nil;
     NSArray *additionalFilenames = nil;
     
-	OBPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
+	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
 
     docState.dragFromExternalGroups = NO;
 	
@@ -694,12 +694,12 @@
 		case BDSKBibTeXDragCopyType:
 			mainType = NSStringPboardType;
 			string = [self bibTeXStringForPublications:pubs];
-			OBASSERT(string != nil);
+			BDSKASSERT(string != nil);
 			break;
 		case BDSKCiteDragCopyType:
 			mainType = NSStringPboardType;
 			string = [self citeStringForPublications:pubs citeString:citeString];
-			OBASSERT(string != nil);
+			BDSKASSERT(string != nil);
 			break;
 		case BDSKPDFDragCopyType:
 			mainType = NSPDFPboardType;
@@ -714,7 +714,7 @@
 		case BDSKMinimalBibTeXDragCopyType:
 			mainType = NSStringPboardType;
 			string = [self bibTeXStringDroppingInternal:YES forPublications:pubs];
-			OBASSERT(string != nil);
+			BDSKASSERT(string != nil);
 			break;
 		case BDSKRISDragCopyType:
 			mainType = NSStringPboardType;
@@ -1221,7 +1221,7 @@
         NSString *basePath = [dropDestination path];
         int i = 0;
         
-        OBASSERT(isRemoteURLField || [fieldName isEqualToString:BDSKRemoteURLString]);
+        BDSKASSERT(isRemoteURLField || [fieldName isEqualToString:BDSKRemoteURLString]);
         
         while(rowIdx != NSNotFound){
             theBib = [shownPublications objectAtIndex:rowIdx];
@@ -1452,7 +1452,7 @@
         NSMutableArray *array = [NSMutableArray arrayWithCapacity:groupCount];
         BDSKGroup *group;
         
-		OBPRECONDITION(groupCount);
+		BDSKPRECONDITION(groupCount);
         for(i = 0; i < groupCount; i++){
 			group = [groups objectAtIndex:i];
             [array addObject:[group stringValue]];

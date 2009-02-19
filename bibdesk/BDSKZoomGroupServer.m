@@ -55,7 +55,7 @@ static NSString *BDSKMODSString = @"MODS";
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     [ZOOMRecord setFallbackEncoding:NSISOLatin1StringEncoding];
 }
 
@@ -176,7 +176,7 @@ static NSString *BDSKMODSString = @"MODS";
 
 - (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread inMainThread]);
     [group addPublications:pubs];
 }
 
@@ -186,7 +186,7 @@ static NSString *BDSKMODSString = @"MODS";
 {
     BDSKServerInfo *info = [self serverInfo];
     
-    OBASSERT([info host] != nil);
+    BDSKASSERT([info host] != nil);
     
     [connection release];
     if ([info host] != nil) {

@@ -125,7 +125,7 @@
 
 - (void)addObject:(id)object;
 {
-    OBASSERT(keysAreStrings ? [object isKindOfClass:[NSString class]] : 1);
+    BDSKASSERT(keysAreStrings ? [object isKindOfClass:[NSString class]] : 1);
     
     // each object starts with a count of 1
     CFIndex countOfObject = 1;
@@ -139,7 +139,7 @@
     
 - (void)removeObject:(id)object;
 {
-    OBASSERT(keysAreStrings ? [object isKindOfClass:[NSString class]] : 1);
+    BDSKASSERT(keysAreStrings ? [object isKindOfClass:[NSString class]] : 1);
 
     CFIndex countOfObject;
     if(CFDictionaryGetValueIfPresent(dictionary, (void *)object, (const void **)&countOfObject)){

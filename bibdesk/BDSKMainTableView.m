@@ -659,7 +659,7 @@ enum {
 
 - (void)importItem:(id)sender {
     int row = [self clickedRow];
-    OBASSERT(row != -1);
+    BDSKASSERT(row != -1);
     if (row == -1)
         return;
     if([[self delegate] respondsToSelector:@selector(tableView:importItemAtRow:)])
@@ -668,7 +668,7 @@ enum {
 
 - (void)openParentItem:(id)sender {
     int row = [self clickedRow];
-    OBASSERT(row != -1);
+    BDSKASSERT(row != -1);
     if (row == -1)
         return;
     if([[self delegate] respondsToSelector:@selector(tableView:openParentForItemAtRow:)])

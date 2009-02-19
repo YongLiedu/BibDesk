@@ -120,7 +120,7 @@ static void fixLegacyTableColumnIdentifiers()
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     // this loads the inital values for the prefs
     [BDSKPreferenceController sharedPreferenceController];
@@ -464,7 +464,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 }
 
 - (void)openRecentItemFromDock:(id)sender{
-    OBASSERT([sender isKindOfClass:[NSMenuItem class]]);
+    BDSKASSERT([sender isKindOfClass:[NSMenuItem class]]);
     NSURL *url = [sender representedObject];
     if(url == nil) 
         return NSBeep();
@@ -994,7 +994,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     NSArray *types;
     NSSet *items;
     BDSKTemplate *template = [BDSKTemplate templateForCiteService];
-    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
+    BDSKPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
     
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
@@ -1037,7 +1037,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     NSArray *types;
     NSSet *items;
     BDSKTemplate *template = [BDSKTemplate templateForTextService];
-    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
+    BDSKPRECONDITION(nil != template && ([template templateFormat] & BDSKPlainTextTemplateFormat));
     
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
@@ -1080,7 +1080,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     NSArray *types;
     NSSet *items;
     BDSKTemplate *template = [BDSKTemplate templateForRTFService];
-    OBPRECONDITION(nil != template && [template templateFormat] == BDSKRTFTemplateFormat);
+    BDSKPRECONDITION(nil != template && [template templateFormat] == BDSKRTFTemplateFormat);
     
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
@@ -1244,7 +1244,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
 
 - (void)privateRebuildMetadataCache:(id)userInfo{
     
-    OBPRECONDITION([NSThread inMainThread] == NO);
+    BDSKPRECONDITION([NSThread inMainThread] == NO);
     
     // we could unlock after checking the flag, but we don't want multiple threads writing to the cache directory at the same time, in case files have identical items
     [metadataCacheLock lock];

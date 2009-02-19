@@ -147,7 +147,7 @@
     NSEnumerator *e = [[self publications] objectEnumerator];
     BibItem *pub = nil;
     
-    OBPRECONDITION(nil != template);
+    BDSKPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
     id returnString = nil;
     NSAutoreleasePool *pool = nil;
@@ -168,11 +168,11 @@
                     parsedTemplate = [parsedTemplates objectForKey:BDSKTemplateDefaultItemString];
                     if (parsedTemplate == nil) {
                         parsedTemplate = [BDSKTemplateParser arrayByParsingTemplateString:[template stringForType:BDSKTemplateDefaultItemString]];
-                        OBPRECONDITION(nil != parsedTemplate);
+                        BDSKPRECONDITION(nil != parsedTemplate);
                         [parsedTemplates setObject:parsedTemplate forKey:BDSKTemplateDefaultItemString];
                     }
                 }
-                OBPRECONDITION(nil != parsedTemplate);
+                BDSKPRECONDITION(nil != parsedTemplate);
                 if (parsedTemplate)
                     [parsedTemplates setObject:parsedTemplate forKey:[pub pubType]];
             }

@@ -110,7 +110,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
 }
 
 - (id)initWithURL:(NSURL *)bdsksearchURL {
-    OBPRECONDITION([[bdsksearchURL scheme] isEqualToString:@"x-bdsk-search"]);
+    BDSKPRECONDITION([[bdsksearchURL scheme] isEqualToString:@"x-bdsk-search"]);
     
     NSString *aHost = [[bdsksearchURL host] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSString *aPort = [[bdsksearchURL port] stringValue];
@@ -352,7 +352,7 @@ NSString *BDSKSearchGroupDBLP = @"dblp";
     else if ([type isEqualToString:BDSKSearchGroupDBLP])
         serverClass = [BDSKDBLPGroupServer class];
     else
-        OBASSERT_NOT_REACHED("unknown search group type");
+        BDSKASSERT_NOT_REACHED("unknown search group type");
     server = [[serverClass alloc] initWithGroup:self serverInfo:info];
 }
 

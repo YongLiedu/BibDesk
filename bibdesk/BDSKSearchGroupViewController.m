@@ -60,7 +60,7 @@
 }
 
 - (void)updateSearchView {
-    OBASSERT(group);
+    BDSKASSERT(group);
     [self window];
     NSString *name = [[group serverInfo] name];
     [searchField setStringValue:[group searchTerm] ?: @""];
