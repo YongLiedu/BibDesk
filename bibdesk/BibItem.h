@@ -71,7 +71,7 @@ enum {
 @discussion This is the data model class that encapsulates each Bibtex entry. BibItems are created for each entry in a file, and a BibDocument keeps collections of BibItems. They are also created in response to drag-in or paste operations containing BibTeX source. Their textvalue method is used to provide the text that is written to a file on saves.
 
 */
-@interface BibItem : OFObject <NSCopying, NSCoding, BDSKParseableItem>{
+@interface BibItem : NSObject <NSCopying, NSCoding, BDSKParseableItem>{
     NSString *fileType;
     NSString *citeKey;
 	NSString *pubType;

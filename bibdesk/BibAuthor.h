@@ -63,7 +63,7 @@ enum {
     @abstract Modeling authors as objects that can have interesting relationships
     @discussion none.
 */
-@interface BibAuthor : OFObject <NSCopying, NSCoding> {
+@interface BibAuthor : NSObject <NSCopying, NSCoding> {
     NSString *originalName;
     NSString *name;
     NSString *firstName;
