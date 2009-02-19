@@ -253,8 +253,8 @@ static void fixLegacyTableColumnIdentifiers()
             [sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
             [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
         }else{
-            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_CiteKey"];
+            [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
+            [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.citekey"];
         }
     }
     
@@ -316,8 +316,8 @@ static void fixLegacyTableColumnIdentifiers()
         if (button == NSAlertDefaultReturn) {
             [sud setObject:fixedFormatString forKey:BDSKLocalFileFormatKey];
             [self setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:fixedFormatString]];
-            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+            [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
+            [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
         } else if (button == NSAlertAlternateReturn) {
             formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKLocalFileFormatKey];			
             [sud setObject:formatString forKey:BDSKLocalFileFormatKey];
@@ -808,8 +808,8 @@ static BOOL fileIsInTrash(NSURL *fileURL)
                            informativeTextWithFormat:NSLocalizedString(@"You appear to be using the BibDesk autocompletion plugin, and a newer version is available.  Would you like to open the completion preferences so that you can update the plugin?", @"Informative text in alert dialog")];
     int rv = [anAlert runModal];
     if(rv == NSAlertDefaultReturn){
-        [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
-        [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_InputManager"];
+        [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
+        [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.inputmanager"];
     }
     
 }

@@ -113,8 +113,8 @@ static BDSKFiler *sharedFiler = nil;
                                            otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog")];
 		if ([alert runModal] == NSAlertAlternateReturn){
-            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+            [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
+            [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
 		}
 		return;
 	}

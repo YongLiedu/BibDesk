@@ -290,8 +290,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 - (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSAlertDefaultReturn){
-        [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
-        [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
+        [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
+        [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.TeX"];
     }else{
 		[self hideWindow:nil];
 	}
