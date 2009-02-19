@@ -39,12 +39,12 @@
 
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
-#import <OmniFoundation/OFResourceFork.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKVersionNumber.h"
 #import "NSError_BDSKExtensions.h"
 #import <SkimNotes/SKNExtendedAttributeManager.h>
+#import <CoreServices/CoreServices.h>
 
 #define OPEN_META_TAGS_KEY @"com.apple.metadata:kOMUserTags"
 #define OPEN_META_RATING_KEY @"com.apple.metadata:kOMStarRating"
@@ -697,34 +697,66 @@ static OSType finderSignatureBytes = 'MACS';
     FSRef parentFileRef, newFileRef;
     success = CFURLGetFSRef((CFURLRef)parent, &parentFileRef);
     OSErr err = noErr;
-    if(success)    
+    if (success)    
         err = FSCreateFileUnicode(&parentFileRef, (UniCharCount)length, name, kFSCatInfoNone, NULL, &newFileRef, NULL);
     NSZoneFree(NULL, name);
-    if(noErr != err)
+    if (noErr != err)
         success = NO;
     
-    if(success){
-        NSURL *newFile = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), &newFileRef) autorelease];
-        OBASSERT([[newFile path] isEqual:fullPath]);
-        fullPath = [newFile path];
-                
-        OFResourceFork *resourceFork = [[OFResourceFork alloc] initWithContentsOfFile:fullPath forkType:OFResourceForkType createFork:YES];
-
+    // open the resource fork
+    HFSUniStr255 forkName;
+    SInt16 refNum;
+    
+    if (success)
+        err = FSGetResourceForkName(&forkName);
+    if (err != noErr)
+        success = NO;
+    
+    if (success) {
+        err = FSOpenResourceFile(&newFileRef, forkName.length, forkName.unicode, fsCurPerm, &refNum);
+        if (err != noErr) {
+            err = FSCreateResourceFork(&newFileRef, forkName.length, forkName.unicode, 0);
+            if (err == noErr)
+                err = FSOpenResourceFile(&newFileRef, forkName.length, forkName.unicode, fsCurPerm, &refNum);
+        }
+        if (err == noErr)
+            success = NO;
+    }
+    
+    if (success) {
+        // at this point we have opened the resource fork, remember the current resource file
+        SInt16 oldCurRsrcMap;
+        oldCurRsrcMap = CurResFile();
+        UseResFile(refNum);
+        
+        // get the data we should write to the resource fork
         NSString *urlString = [destURL absoluteString];
         NSData *data = [NSData dataWithBytes:[urlString UTF8String] length:strlen([urlString UTF8String])];
         NSMutableArray *entries = [[NSMutableArray alloc] initWithCapacity:2];
-
-        // write out the same data for text and url resources
-        [resourceFork setData:data forResourceType:'TEXT' resID:256];
-        [resourceFork setData:data forResourceType:'url ' resID:256];
-
+        NSData *entriesData;
+        
         [entries addObject:[WLDragMapEntry entryWithType:'TEXT' resID:256]];
         [entries addObject:[WLDragMapEntry entryWithType:'url ' resID:256]];
-
-        // add the drag map entry resources, since we get a corrupt file without them
-        [resourceFork setData:[WLDragMapEntry dragDataWithEntries:entries] forResourceType:'drag' resID:128];
+        entriesData = [WLDragMapEntry dragDataWithEntries:entries];
         [entries release];
-        [resourceFork release];
+        
+        Handle dataHandle;
+        Str255 dst;
+        
+        CFStringGetPascalString(CFSTR("BDSKResourceForkData"), dst, 256, kCFStringEncodingASCII);
+        
+        // write out the same data for text and url resources
+        PtrToHand((const void *)[data bytes], &dataHandle, [data length]);
+        AddResource(dataHandle, 'TEXT', 256, dst);
+        PtrToHand((const void *)[data bytes], &dataHandle, [data length]);
+        AddResource(dataHandle, 'url ', 256, dst);
+        PtrToHand((const void *)[entriesData bytes], &dataHandle, [entriesData length]);
+        AddResource(dataHandle, 'drag', 128, dst);
+        
+        // reset the current resource file and close the resource fork
+        UpdateResFile(refNum);
+        UseResFile(oldCurRsrcMap);
+        CloseResFile(refNum);
     }
         
     return success;
