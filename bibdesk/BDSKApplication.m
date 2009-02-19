@@ -40,6 +40,7 @@
 #import "BibDocument.h"
 #import "BDAlias.h"
 #import <OmniBase/OmniBase.h>
+#import <OmniFoundation/OmniFoundation.h>
 #import <Carbon/Carbon.h>
 
 
@@ -274,6 +275,37 @@
             [orderedDocuments removeObjectAtIndex:i];
     
     return orderedDocuments;
+}
+
+@end
+
+
+@implementation OFRunLoopQueueProcessor (BDSKExtensions)
+
+// This is copied from OAAppKitQueueProcessor, we need this as long as we use OmniFoundation
+
++ (NSArray *)mainThreadRunLoopModes {
+    return [NSArray arrayWithObjects: NSDefaultRunLoopMode, NSModalPanelRunLoopMode, NSEventTrackingRunLoopMode, nil];
+}
+
+// this overrides the implementation in OFRunLoopQueueProcessor, no need to use a separate class
+- (BOOL)shouldProcessQueueEnd {
+    // I don't think we actually use this anywhere, but OmniFoundation is so opaque...
+    [[NSThread currentThread] yieldMainThreadLock];
+    
+    // See Omni bug #1410:  This code apparently triggers a bug in Carbon events, causing a hang at:
+    //
+    // #0  0x737dacac in RetainEvent ()
+    // #1  0x737dcb00 in _NotifyEventLoopObservers ()
+    // #2  0x737e1178 in SendEventToEventTargetInternal ()
+    // #3  0x737e10e8 in SendEventToEventTarget ()
+    // #4  0x737e0f04 in ToolboxEventDispatcher ()
+    // #5  0x737e0eac in HLTBEventDispatcher ()
+    // #6  0x70d75c48 in _DPSNextEvent ()
+    // #7  0x70d756e8 in -[NSApplication nextEventMatchingMask:untilDate:inMode:dequeue:] ()
+    // #8  0x03264ea0 in -[OAAppKitQueueProcessor shouldProcessQueueEnd] (self=0x40b7b50, _cmd=0x1) at OAAppKitQueueProcessor.m:30
+
+    return nil != [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSEventTrackingRunLoopMode dequeue:NO];
 }
 
 @end
