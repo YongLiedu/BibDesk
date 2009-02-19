@@ -402,7 +402,6 @@
 		F9025DAC0969AB69008A551C /* BDSKStringNode.m in Sources */ = {isa = PBXBuildFile; fileRef = F9025DAA0969AB69008A551C /* BDSKStringNode.m */; };
 		F9025DCA0969AD2C008A551C /* NSCharacterSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9025DC80969AD2C008A551C /* NSCharacterSet_BDSKExtensions.m */; };
 		F9025F310969D66F008A551C /* CFString_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9025F2F0969D66F008A551C /* CFString_BDSKExtensions.m */; };
-		F90261AE096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F90261AC096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m */; };
 		F90B09420C283B5100144F1B /* BDSKLogUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = F90B09400C283B5100144F1B /* BDSKLogUtilities.m */; };
 		F90C4ACE0C7395FC0035DD50 /* BDSKSciFinderParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C4ACC0C7395FB0035DD50 /* BDSKSciFinderParser.m */; };
 		F90C64070AC62B7B008B2DDA /* BDSKShellCommandFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */; };
@@ -1450,8 +1449,6 @@
 		F9025DC80969AD2C008A551C /* NSCharacterSet_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSCharacterSet_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9025F2E0969D66F008A551C /* CFString_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CFString_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9025F2F0969D66F008A551C /* CFString_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CFString_BDSKExtensions.m; sourceTree = "<group>"; };
-		F90261AB096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OFCharacterSet_BDSKExtensions.h; sourceTree = "<group>"; };
-		F90261AC096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFCharacterSet_BDSKExtensions.m; sourceTree = "<group>"; };
 		F90B093F0C283B5100144F1B /* BDSKLogUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKLogUtilities.h; sourceTree = "<group>"; };
 		F90B09400C283B5100144F1B /* BDSKLogUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKLogUtilities.m; sourceTree = "<group>"; };
 		F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = latex2rtf.xcodeproj; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/latex2rtf.xcodeproj; sourceTree = "<group>"; };
@@ -2160,7 +2157,6 @@
 				F9463F4409436F7500CC4549 /* NSSet_BDSKExtensions.m */,
 				F9022C5A075802E300C3F701 /* NSTask_BDSKExtensions.m */,
 				F97AF8EE09575E8B00D1F1B0 /* NSURL_BDSKExtensions.m */,
-				F90261AC096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m */,
 			);
 			name = "Foundation Extensions";
 			sourceTree = "<group>";
@@ -2838,7 +2834,6 @@
 				CE7EA95A0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.h */,
 				F97073AD0911592000526FC8 /* NSWorkspace_BDSKExtensions.h */,
 				45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */,
-				F90261AB096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.h */,
 				F947A01A09AA80E4004C27FF /* PDFDocument_BDSKExtensions.h */,
 				F91F284609A661A700419960 /* PDFMetadata.h */,
 				CE05CF5C0D7743940034C2A8 /* WebURLsWithTitles.h */,
@@ -3729,7 +3724,6 @@
 				F9025DAC0969AB69008A551C /* BDSKStringNode.m in Sources */,
 				F9025DCA0969AD2C008A551C /* NSCharacterSet_BDSKExtensions.m in Sources */,
 				F9025F310969D66F008A551C /* CFString_BDSKExtensions.m in Sources */,
-				F90261AE096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m in Sources */,
 				CEAE613F097FF60A000B618C /* BDSKJSTORParser.m in Sources */,
 				F9E069B70981A03B00AEFBE7 /* BDSKWebOfScienceParser.m in Sources */,
 				F91F286A09A6684900419960 /* PDFMetadata.m in Sources */,

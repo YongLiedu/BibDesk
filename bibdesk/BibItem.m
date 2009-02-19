@@ -61,7 +61,6 @@
 #import "NSError_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKStringNode.h"
-#import "OFCharacterSet_BDSKExtensions.h"
 #import "PDFMetadata.h"
 #import "BDSKField.h"
 #import "BDSKTemplate.h"
@@ -2968,32 +2967,37 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
 	
 	// otherwise we have a multivalued string, we should parse to get the order and delimiters right
-    OFCharacterSet *delimiterCharSet = [[BDSKTypeManager sharedManager] separatorOFCharacterSetForField:field];
-    OFCharacterSet *whitespaceCharSet = [OFCharacterSet whitespaceCharacterSet];
+    NSCharacterSet *delimiterCharSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:field];
+    NSCharacterSet *nonDelimiterCharSet = [delimiterCharSet invertedSet];
+    NSCharacterSet *whitespaceCharSet = [NSCharacterSet whitespaceCharacterSet];
+    NSCharacterSet *nonWhitespaceCharSet = [NSCharacterSet nonWhitespaceCharacterSet];
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
 	
 	BOOL useDelimiters = NO;
-	if([oldString containsCharacterInOFCharacterSet:delimiterCharSet])
+	if ([oldString containsCharacterInSet:delimiterCharSet])
 		useDelimiters = YES;
-	
-	OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:oldString];
+    
+	NSScanner *scanner = [[NSScanner alloc] initWithString:oldString];
 	NSString *token;
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [groupName length] - 1];
 	BOOL addedToken = NO;
 	NSString *lastDelimiter = @"";
 	int startLocation, endLocation;
+    BOOL foundToken;
 	
-	scannerScanUpToCharacterNotInOFCharacterSet(scanner, whitespaceCharSet);
+    [scanner setCharactersToBeSkipped:nil];
+    
+    [scanner scanUpToCharactersFromSet:nonWhitespaceCharSet intoString:NULL];
 
 	do {
 		addedToken = NO;
 		if(useDelimiters)
-			token = [scanner readFullTokenWithDelimiterOFCharacterSet:delimiterCharSet];
+			foundToken = [scanner scanUpToCharactersFromSet:delimiterCharSet intoString:&token];
 		else
-			token = [scanner readFullTokenUpToString:@" and "];
-		if(token){
+			foundToken = [scanner scanUpToString:@" and " intoString:&token];
+		if(foundToken){
 			token = [token stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
-			if(![NSString isEmptyString:token] && [token caseInsensitiveCompare:groupName] != NSOrderedSame){
+			if([NSString isEmptyString:token] == NO && [token caseInsensitiveCompare:groupName] != NSOrderedSame){
 				[string appendString:lastDelimiter];
 				[string appendString:token];
 				addedToken = YES;
@@ -3002,15 +3006,15 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		// skip the delimiter or " and ", and any whitespace following it
 		startLocation = [scanner scanLocation];
 		if(useDelimiters)
-			scannerScanUpToCharacterNotInOFCharacterSet(scanner, delimiterCharSet);
-		else if(scannerHasData(scanner))
-			[scanner setScanLocation:scannerScanLocation(scanner) + 5];
-		scannerScanUpToCharacterNotInOFCharacterSet(scanner, whitespaceCharSet);
+            [scanner scanUpToCharactersFromSet:nonDelimiterCharSet intoString:NULL];
+		else if([scanner isAtEnd] == NO)
+			[scanner setScanLocation:[scanner scanLocation] + 5];
+        [scanner scanUpToCharactersFromSet:nonWhitespaceCharSet intoString:NULL];
 		endLocation = [scanner scanLocation];
 		if(addedToken == YES)
 			lastDelimiter = [oldString substringWithRange:NSMakeRange(startLocation, endLocation - startLocation)];
 		
-	} while(scannerHasData(scanner));
+	} while([scanner isAtEnd] == NO);
 	
 	[self setField:field toValue:string];
 	[scanner release];
@@ -3090,32 +3094,37 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     }
 	
 	// otherwise we have a multivalued string, we should parse to get the order and delimiters right
-    OFCharacterSet *delimiterCharSet = [[BDSKTypeManager sharedManager] separatorOFCharacterSetForField:field];
-    OFCharacterSet *whitespaceCharSet = [OFCharacterSet whitespaceCharacterSet];
+    NSCharacterSet *delimiterCharSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:field];
+    NSCharacterSet *nonDelimiterCharSet = [delimiterCharSet invertedSet];
+    NSCharacterSet *whitespaceCharSet = [NSCharacterSet whitespaceCharacterSet];
+    NSCharacterSet *nonWhitespaceCharSet = [NSCharacterSet nonWhitespaceCharacterSet];
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
 
 	BOOL useDelimiters = NO;
-	if([oldString containsCharacterInOFCharacterSet:delimiterCharSet])
+	if([oldString containsCharacterInSet:delimiterCharSet])
 		useDelimiters = YES;
 	
-	OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:oldString];
+	NSScanner *scanner = [[NSScanner alloc] initWithString:oldString];
 	NSString *token;
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [groupName length] - 1];
 	BOOL addedToken = NO;
 	NSString *lastDelimiter = @"";
 	int startLocation, endLocation;
+    BOOL foundToken;
 	
-	scannerScanUpToCharacterNotInOFCharacterSet(scanner, whitespaceCharSet);
+    [scanner setCharactersToBeSkipped:nil];
+	
+    [scanner scanUpToCharactersFromSet:nonWhitespaceCharSet intoString:NULL];
 
 	do {
 		addedToken = NO;
 		if(useDelimiters)
-			token = [scanner readFullTokenWithDelimiterOFCharacterSet:delimiterCharSet];
+			foundToken = [scanner scanUpToCharactersFromSet:delimiterCharSet intoString:&token];
 		else
-			token = [scanner readFullTokenUpToString:@" and "];
-		if(token){
+			foundToken = [scanner scanUpToString:@" and " intoString:&token];
+		if(foundToken){
 			token = [token stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
-			if(![NSString isEmptyString:token]){
+			if([NSString isEmptyString:token] == NO){
 				[string appendString:lastDelimiter];
 				if([token caseInsensitiveCompare:groupName] == NSOrderedSame)
 					[string appendString:newGroupName];
@@ -3127,15 +3136,15 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 		// skip the delimiter or " and ", and any whitespace following it
 		startLocation = [scanner scanLocation];
 		if(useDelimiters)
-			scannerScanUpToCharacterNotInOFCharacterSet(scanner, delimiterCharSet);
-		else if(scannerHasData(scanner))
-			[scanner setScanLocation:scannerScanLocation(scanner) + 5];
-		scannerScanUpToCharacterNotInOFCharacterSet(scanner, whitespaceCharSet);
+            [scanner scanUpToCharactersFromSet:nonDelimiterCharSet intoString:NULL];
+		else if([scanner isAtEnd] == NO)
+			[scanner setScanLocation:[scanner scanLocation] + 5];
+        [scanner scanUpToCharactersFromSet:nonWhitespaceCharSet intoString:NULL];
 		endLocation = [scanner scanLocation];
 		if(addedToken == YES)
 			lastDelimiter = [oldString substringWithRange:NSMakeRange(startLocation, endLocation - startLocation)];
 		
-	} while(scannerHasData(scanner));
+	} while([scanner isAtEnd] == NO);
 	
 	[self setField:field toValue:string];
 	[scanner release];

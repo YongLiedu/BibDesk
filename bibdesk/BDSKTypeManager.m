@@ -40,7 +40,6 @@
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
-#import "OFCharacterSet_BDSKExtensions.h"
 
 static void *BDSKTypeManagerDefaultsObservationContext = @"BDSKTypeManagerDefaultsObservationContext";
 
@@ -119,7 +118,6 @@ static BDSKTypeManager *sharedInstance = nil;
         strictInvalidGeneralCharSet = [[NSCharacterSet alloc] init];
         
         separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] copy];
-        separatorOFCharSet = [[OFCharacterSet alloc] initWithString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKGroupFieldSeparatorCharactersKey]];
         
         localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
         remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
@@ -723,10 +721,6 @@ static BDSKTypeManager *sharedInstance = nil;
 
 - (NSCharacterSet *)separatorCharacterSetForField:(NSString *)fieldName{
 	return [fieldName isCitationField] ? [NSCharacterSet commaCharacterSet] : separatorCharSet;
-}
-
-- (OFCharacterSet *)separatorOFCharacterSetForField:(NSString *)fieldName{
-	return [fieldName isCitationField] ? [OFCharacterSet commaCharacterSet] : separatorOFCharSet;
 }
 
 @end

@@ -382,36 +382,31 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 		// replace with "@type{FixMe,eol" (add the comma in, since we remove it if present)
 		NSCharacterSet *newlineCharacterSet = [NSCharacterSet newlineCharacterSet];
 		
-		// do not use NSCharacterSets with OFStringScanners!
-		OFCharacterSet *newlineOFCharset = [[[OFCharacterSet alloc] initWithCharacterSet:newlineCharacterSet] autorelease];
-		
-		OFStringScanner *scanner = [[[OFStringScanner alloc] initWithString:self] autorelease];
+		NSScanner *scanner = [NSScanner scannerWithString:self];
 		NSMutableString *mutableFileString = [NSMutableString stringWithCapacity:[self length]];
 		NSString *tmp = nil;
 		int scanLocation = 0;
         NSString *replaceRegex = [NSString stringWithFormat:@"$1%@,", tmpKey];
+        
+        [scanner setCharactersToBeSkipped:nil];
 		
 		// we scan up to an (newline@) sequence, then to a newline; we then replace only in that line using theRegex, which is much more efficient than using AGRegex to find/replace in the entire string
 		do {
 			// append the previous part to the mutable string
-			tmp = [scanner readFullTokenWithDelimiterCharacter:'@'];
-			if(tmp) [mutableFileString appendString:tmp];
+            if ([scanner scanUpToString:@"@" intoString:&tmp])
+                [mutableFileString appendString:tmp];
 			
-			scanLocation = scannerScanLocation(scanner);
+			scanLocation = [scanner scanLocation];
 			if(scanLocation == 0 || [newlineCharacterSet characterIsMember:[self characterAtIndex:scanLocation - 1]]){
-				
-				tmp = [scanner readFullTokenWithDelimiterOFCharacterSet:newlineOFCharset];
-				
 				// if we read something between the @ and newline, see if we can do the regex find/replace
-				if(tmp){
+				if([scanner scanUpToCharactersFromSet:newlineCharacterSet intoString:&tmp]){
 					// this should be a noop if the pattern isn't matched
-					tmp = [theRegex replaceWithString:replaceRegex inString:tmp];
-					[mutableFileString appendString:tmp]; // guaranteed non-nil result from AGRegex
+					[mutableFileString appendString:[theRegex replaceWithString:replaceRegex inString:tmp]]; // guaranteed non-nil result from AGRegex
 				}
 			} else
-				scannerReadCharacter(scanner);
+				[scanner scanCharacter:NULL];
                         
-		} while(scannerHasData(scanner));
+		} while([scanner isAtEnd] == NO);
 		
 		NSString *toReturn = [NSString stringWithString:mutableFileString];
 		
