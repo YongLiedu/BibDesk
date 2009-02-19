@@ -123,7 +123,7 @@
     [super dealloc];
 }
 
-static inline isEqualOrBothNil(id object1, id object2) {
+static inline BOOL isEqualOrBothNil(id object1, id object2) {
     return (object1 == nil && object2 == nil) || [object1 isEqual:object2];
 }
 
