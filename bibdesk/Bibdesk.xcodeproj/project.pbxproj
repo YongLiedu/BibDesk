@@ -263,7 +263,6 @@
 		CEE23BF30BFBA827002B746B /* style.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D690758073E00C3F701 /* style.cfg */; };
 		CEE8DD440E5C3F5B00EFA97F /* OmniBase.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
 		CEE8DD450E5C3F5B00EFA97F /* OmniFoundation.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
-		CEE8DD460E5C3F5B00EFA97F /* OmniAppKit.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */; };
 		CEE8DD470E5C3F5B00EFA97F /* yaz.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
 		CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
 		CEE8DD490E5C3F5B00EFA97F /* FileView.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
@@ -271,7 +270,6 @@
 		CEE8DD4B0E5C3F5B00EFA97F /* SkimNotes.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
 		CEE8DEC60E5C3FB700EFA97F /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
 		CEE8DEC70E5C3FB700EFA97F /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
-		CEE8DEC80E5C3FB700EFA97F /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */; };
 		CEE8DEC90E5C3FB700EFA97F /* yaz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
 		CEE8DECA0E5C3FB700EFA97F /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
 		CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
@@ -656,13 +654,6 @@
 			remoteGlobalIDString = 4A33D40608A0191B003A3FA5;
 			remoteInfo = OmniBase;
 		};
-		F9AF562F0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 4AA1E67A08AA764600E2FF6B;
-			remoteInfo = "OmniAppKit (Framework)";
-		};
 		F9AF56310BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
@@ -832,7 +823,6 @@
 			files = (
 				CEE8DD440E5C3F5B00EFA97F /* OmniBase.framework in Copy Files: Frameworks */,
 				CEE8DD450E5C3F5B00EFA97F /* OmniFoundation.framework in Copy Files: Frameworks */,
-				CEE8DD460E5C3F5B00EFA97F /* OmniAppKit.framework in Copy Files: Frameworks */,
 				CEE8DD470E5C3F5B00EFA97F /* yaz.framework in Copy Files: Frameworks */,
 				CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in Copy Files: Frameworks */,
 				CEE8DD490E5C3F5B00EFA97F /* FileView.framework in Copy Files: Frameworks */,
@@ -1759,7 +1749,6 @@
 				F98AACF50D43E13C00D3CD64 /* libcrypto.dylib in Frameworks */,
 				CEE8DEC60E5C3FB700EFA97F /* OmniBase.framework in Frameworks */,
 				CEE8DEC70E5C3FB700EFA97F /* OmniFoundation.framework in Frameworks */,
-				CEE8DEC80E5C3FB700EFA97F /* OmniAppKit.framework in Frameworks */,
 				CEE8DEC90E5C3FB700EFA97F /* yaz.framework in Frameworks */,
 				CEE8DECA0E5C3FB700EFA97F /* AGRegex.framework in Frameworks */,
 				CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */,
@@ -3036,7 +3025,6 @@
 			dependencies = (
 				F9AF562E0BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56320BEA4160009B16D5 /* PBXTargetDependency */,
-				F9AF56300BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56360BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56380BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */,
@@ -3974,11 +3962,6 @@
 			isa = PBXTargetDependency;
 			name = OmniBase;
 			targetProxy = F9AF562D0BEA4160009B16D5 /* PBXContainerItemProxy */;
-		};
-		F9AF56300BEA4160009B16D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "OmniAppKit (Framework)";
-			targetProxy = F9AF562F0BEA4160009B16D5 /* PBXContainerItemProxy */;
 		};
 		F9AF56320BEA4160009B16D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
