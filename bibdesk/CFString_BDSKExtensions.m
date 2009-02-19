@@ -667,7 +667,7 @@ CFStringRef __BDXMLCreateStringInCFEncoding(CFStringRef sourceString, CFStringEn
         badIndex = __BDIndexOfCharacterNotRepresentableInCFEncoding(sourceString, anEncoding, scanningRange);
         if (badIndex == NSNotFound) {
             if (scanningRange.location == 0) {
-                CFReletain(sourceString);
+                CFRetain(sourceString);
                 return sourceString;  // Shortcut for common case
             } else if (!resultString)
                 // Remainder of string has no characters needing quoting
@@ -707,7 +707,7 @@ CFStringRef __BDXMLCreateStringInCFEncoding(CFStringRef sourceString, CFStringEn
         }
         free(composedCharacter);
         composedCharacter = NULL;
-        scanningRange.location = CFRangeMax(composedRange);
+        scanningRange.location = composedRange.location + composedRange.length;
         scanningRange.length -= range.length + composedRange.length;
     }
 
@@ -880,7 +880,7 @@ CFStringRef BDXMLCreateStringWithEntityReferencesInCFEncoding(CFStringRef string
     CFStringRef tmpString = __BDXMLCreateStringWithEntityReferences(string);
     OBASSERT(tmpString);
     CFStringRef result = __BDXMLCreateStringInCFEncoding(tmpString, encoding);
-    CFrelease(tmpString);
+    CFRelease(tmpString);
     return result;
 }
 
