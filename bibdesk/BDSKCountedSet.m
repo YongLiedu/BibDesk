@@ -40,34 +40,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 #import "CFString_BDSKExtensions.h"
-
-const void *BDSKStringCopy(CFAllocatorRef allocator, const void *value)
-{
-    return CFStringCreateCopy(allocator, value); // should just retain for immutable strings
-}
-
-Boolean BDSKCaseInsensitiveStringIsEqual(const void *value1, const void *value2)
-{
-    return (CFStringCompareWithOptions(value1, value2, CFRangeMake(0, CFStringGetLength(value1)), kCFCompareCaseInsensitive) == kCFCompareEqualTo);
-}
-
-const CFDictionaryKeyCallBacks BDSKCaseInsensitiveStringKeyDictionaryCallBacks = {
-    0,
-    OFNSObjectRetain,
-    OFCFTypeRelease,
-    OFCFTypeCopyDescription,
-    BDSKCaseInsensitiveStringIsEqual,
-    BDCaseInsensitiveStringHash
-};
-
-const CFSetCallBacks BDSKCaseInsensitiveStringSetCallBacks = {
-    0,
-    BDSKStringCopy,
-    OFCFTypeRelease,
-    OFCFTypeCopyDescription,
-    BDSKCaseInsensitiveStringIsEqual,
-    BDCaseInsensitiveStringHash
-};
+#import "BDSKCFCallBacks.h"
 
 @implementation BDSKCountedSet
 
@@ -75,7 +48,7 @@ const CFSetCallBacks BDSKCaseInsensitiveStringSetCallBacks = {
 - (id)initWithKeyCallBacks:(const CFDictionaryKeyCallBacks *)keyCallBacks{
     
     if(self = [super init])
-        dictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, keyCallBacks, &OFIntegerDictionaryValueCallbacks);
+        dictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, keyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
     
     return self;
 }
@@ -93,9 +66,9 @@ const CFSetCallBacks BDSKCaseInsensitiveStringSetCallBacks = {
     keysAreStrings = YES;
 
     if(caseInsensitive)
-        return [self initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        return [self initWithKeyCallBacks:&kBDSKCaseInsensitiveStringDictionaryKeyCallBacks];
     else
-        return [self initWithKeyCallBacks:&OFNSObjectDictionaryKeyCallbacks];
+        return [self initWithKeyCallBacks:&kCFTypeDictionaryKeyCallBacks];
 
 }
 

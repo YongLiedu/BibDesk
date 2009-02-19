@@ -48,6 +48,7 @@
 #import "BDSKStringEncodingManager.h"
 #import "BDSKTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BDSKCFCallBacks.h"
 
 static NSString *yesString = nil;
 static NSString *noString = nil;
@@ -78,7 +79,7 @@ static int MAX_RATING = 5;
     NSParameterAssert(rating <= MAX_RATING);
     static CFMutableDictionaryRef ratings = NULL;
     if(ratings == NULL){
-        ratings = CFDictionaryCreateMutable(CFAllocatorGetDefault(), MAX_RATING + 1, &OFIntegerDictionaryKeyCallbacks, &OFNSObjectDictionaryValueCallbacks);
+        ratings = CFDictionaryCreateMutable(CFAllocatorGetDefault(), MAX_RATING + 1, &kBDSKIntegerDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         int i = 0;
         NSMutableString *ratingString = [NSMutableString string];
         do {

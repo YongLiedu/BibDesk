@@ -1636,14 +1636,14 @@
     NSZone *zone = [self zone];
     CFIndex countOfItems = 0;
     BibItem **pubs;
-    CFSetCallBacks callBacks = BDSKBibItemEqualityCallBacks;
+    CFSetCallBacks callBacks = kBDSKBibItemEqualityCallBacks;
     
     if ([self hasExternalGroupsSelected]) {
         countOfItems = [publications count];
         pubs = (BibItem **)NSZoneMalloc(zone, sizeof(BibItem *) * countOfItems);
         [publications getObjects:pubs];
         pubsToRemove = [[NSMutableArray alloc] initWithArray:groupedPublications];
-        callBacks = BDSKBibItemEquivalenceCallBacks;
+        callBacks = kBDSKBibItemEquivalenceCallBacks;
     } else {
         pubsToRemove = [[NSMutableArray alloc] initWithArray:publications];
         countOfItems = [publications count];

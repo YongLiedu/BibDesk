@@ -139,9 +139,9 @@ enum {
 
 @end
 
-extern const CFSetCallBacks BDSKAuthorFuzzySetCallbacks;
-extern const CFDictionaryKeyCallBacks BDSKFuzzyDictionaryKeyCallBacks;
-extern const CFArrayCallBacks BDSKAuthorFuzzyArrayCallBacks;
+extern const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks;
+extern const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks;
+extern const CFArrayCallBacks kBDSKAuthorFuzzyAuthorCallBacks;
 
 extern NSMutableSet *BDSKCreateFuzzyAuthorCompareMutableSet();
 

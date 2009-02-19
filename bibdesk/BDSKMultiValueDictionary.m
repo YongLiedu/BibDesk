@@ -38,6 +38,7 @@
 
 #import "BDSKMultiValueDictionary.h"
 #import "BDSKCountedSet.h"
+#import "BDSKCFCallBacks.h"
 
 
 @implementation BDSKMultiValueDictionary
@@ -48,7 +49,7 @@
 
 - (id)initWithCaseInsensitiveKeys:(BOOL)caseInsensitive {
     if (self = [super init]) {
-        dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, caseInsensitive ? &BDSKCaseInsensitiveStringKeyDictionaryCallBacks : &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, caseInsensitive ? &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks : &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     }
     return self;
 }

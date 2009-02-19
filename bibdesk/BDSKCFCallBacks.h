@@ -1,10 +1,10 @@
 //
-//  NSDictionary_BDSKExtensions.m
+//  BDSKCFCallBacks.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 8/5/06.
+//  Created by Christiaan Hofman on 2/19/09.
 /*
- This software is Copyright (c) 2006-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,31 +36,25 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "NSDictionary_BDSKExtensions.h"
-#import "BDSKCFCallBacks.h"
+#import <Cocoa/Cocoa.h>
 
+extern const void *BDSKNSObjectRetain(CFAllocatorRef allocator, const void *value);
+extern void BDSKNSObjectRelease(CFAllocatorRef allocator, const void *value);
+extern CFStringRef BDSKNSObjectCopyDescription(const void *value);
 
-@implementation NSMutableDictionary (BDSKExtensions)
+extern const void *BDSKIntegerRetain(CFAllocatorRef allocator, const void *value);
+extern void BDSKIntegerRelease(CFAllocatorRef allocator, const void *value);
+extern CFStringRef BDSKIntegerCopyDescription(const void *value);
+extern Boolean BDSKIntegerEqual(const void *value1, const void *value2);
+extern CFHashCode BDSKIntegerHash(const void *value);
 
-- (id)initForCaseInsensitiveKeys{
-	[[self init] release];
-    return (NSMutableDictionary *)CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-}
+Boolean BDSKCaseInsensitiveStringEqual(const void *value1, const void *value2);
 
-@end
+extern const CFDictionaryKeyCallBacks kBDSKIntegerDictionaryKeyCallBacks;
+extern const CFDictionaryKeyCallBacks kBDSKCaseInsensitiveStringDictionaryKeyCallBacks;
 
-@implementation NSDictionary (BDSKExtensions)
+extern const CFDictionaryValueCallBacks kBDSKIntegerDictionaryValueCallBacks;
 
-// ARM:  Apple's implementation of -[NSDictionary valueForKey:] doesn't check [key length]
-// before using characterAtIndex:, so an empty string will raise an exception.  We reimplement
-// it as specified in the docs to avoid this problem.  rdar://problem/4759413 (fixed on 10.5)
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-#warning fixed on 10.5
-#endif
+extern const CFArrayCallBacks kBDSKCaseInsensitiveStringArrayCallBacks;
 
-- (id)valueForKey:(NSString *)key
-{
-    return ([key length] && [key characterAtIndex:0] == '@') ? [super valueForKey:[key substringFromIndex:1]] : [self objectForKey:key];
-}
-
-@end
+extern const CFSetCallBacks kBDSKCaseInsensitiveStringSetCallBacks;

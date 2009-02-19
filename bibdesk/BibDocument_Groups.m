@@ -85,6 +85,7 @@
 #import "NSColor_BDSKExtensions.h"
 #import "NSView_BDSKExtensions.h"
 #import "BDSKApplication.h"
+#import "BDSKCFCallBacks.h"
 
 
 @implementation BibDocument (Groups)
@@ -680,9 +681,9 @@ The groupedPublications array is a subset of the publications array, developed b
     
     // group objects are either BibAuthors or NSStrings; we need to use case-insensitive or fuzzy author matching, since that's the way groups are checked for containment
     if([groupField isPersonField]){
-        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &BDSKFuzzyDictionaryKeyCallBacks, &OFIntegerDictionaryValueCallbacks);
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKAuthorFuzzyDictionaryKeyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
     } else {
-        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &BDSKCaseInsensitiveStringKeyDictionaryCallBacks, &OFIntegerDictionaryValueCallbacks);
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
     }
     
     unsigned int groupIndex = [categoryIndexes firstIndex];
@@ -1443,7 +1444,7 @@ The groupedPublications array is a subset of the publications array, developed b
     CFIndex countOfItems = [publications count];
     BibItem **pubs = (BibItem **)NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
     [publications getObjects:pubs];
-    NSSet *currentPubs = [(NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &BDSKBibItemEquivalenceCallBacks) autorelease];
+    NSSet *currentPubs = [(NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &kBDSKBibItemEquivalenceCallBacks) autorelease];
     NSZoneFree([self zone], pubs);
     
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[items count]];
@@ -1754,7 +1755,7 @@ The groupedPublications array is a subset of the publications array, developed b
     CFIndex countOfItems = [pubs count];
     BibItem **items = (BibItem **)NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
     [pubs getObjects:items];
-    NSSet *pubSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)items, countOfItems, &BDSKBibItemEquivalenceCallBacks);
+    NSSet *pubSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)items, countOfItems, &kBDSKBibItemEquivalenceCallBacks);
     NSZoneFree([self zone], items);
     
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];

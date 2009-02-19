@@ -52,7 +52,7 @@ static CFStringRef searchIndexDictionaryCopyDescription(const void *value)
 }
 static Boolean searchIndexDictionaryEqual(const void *value1, const void *value2) { return CFEqual(value1, value2); }
 
-const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
+const CFDictionaryValueCallBacks kBDSKSearchIndexDictionaryValueCallBacks = {
     0,
     searchIndexDictionaryRetain,
     searchIndexDictionaryRelease,
@@ -75,7 +75,7 @@ const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
 {
     self = [super init];
     if (self) {
-        searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &BDSKSearchIndexDictionaryValueCallBacks);
+        searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kBDSKSearchIndexDictionaryValueCallBacks);
         
         // pointer equality, nonretained; indexes are retained by the dictionary
         indexesToFlush = CFSetCreateMutable(NULL, 0, NULL);

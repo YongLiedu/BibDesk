@@ -831,5 +831,5 @@ enum {
 - (void)addPDFMetadataToFileForLocalURLField:(NSString *)field;
 @end
 
-extern const CFSetCallBacks BDSKBibItemEqualityCallBacks;
-extern const CFSetCallBacks BDSKBibItemEquivalenceCallBacks;
+extern const CFSetCallBacks kBDSKBibItemEqualityCallBacks;
+extern const CFSetCallBacks kBDSKBibItemEquivalenceCallBacks;

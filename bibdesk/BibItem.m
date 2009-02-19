@@ -172,7 +172,7 @@ Boolean BibItemEquivalenceTest(const void *value1, const void *value2)
 }
 
 // Values are BibItems; used to determine if pubs are duplicates.  Items must not be edited while contained in a set using these callbacks, so dispose of the set before any editing operations.
-const CFSetCallBacks BDSKBibItemEqualityCallBacks = {
+const CFSetCallBacks kBDSKBibItemEqualityCallBacks = {
     0,    // version
     OFNSObjectRetain,  // retain
     OFNSObjectRelease, // release
@@ -182,7 +182,7 @@ const CFSetCallBacks BDSKBibItemEqualityCallBacks = {
 };
 
 // Values are BibItems; used to determine if pubs are duplicates.  Items must not be edited while contained in a set using these callbacks, so dispose of the set before any editing operations.
-const CFSetCallBacks BDSKBibItemEquivalenceCallBacks = {
+const CFSetCallBacks kBDSKBibItemEquivalenceCallBacks = {
     0,    // version
     OFNSObjectRetain,  // retain
     OFNSObjectRelease, // release
@@ -225,7 +225,7 @@ static CFDictionaryRef selectorTable = NULL;
     [defaultStyle release];
     
     // Create a table of field/SEL pairs used for searching
-    CFMutableDictionaryRef table = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFCopyStringDictionaryKeyCallBacks, &OFNonOwnedPointerDictionaryValueCallbacks);
+    CFMutableDictionaryRef table = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFCopyStringDictionaryKeyCallBacks, NULL);
     
     CFDictionaryAddValue(table, (CFStringRef)BDSKTitleString, NSSelectorFromString(@"title"));
     CFDictionaryAddValue(table, (CFStringRef)BDSKAuthorString, NSSelectorFromString(@"bibTeXAuthorString"));

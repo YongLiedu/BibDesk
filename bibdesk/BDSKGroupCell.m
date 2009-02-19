@@ -43,6 +43,7 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
+#import "BDSKCFCallBacks.h"
 
 static CFMutableDictionaryRef integerStringDictionary = NULL;
 
@@ -62,7 +63,7 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
     OBINITIALIZE;
     
     if (NULL == integerStringDictionary) {
-        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &OFIntegerDictionaryKeyCallbacks, &kCFTypeDictionaryValueCallBacks);
+        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKIntegerDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         CFDictionaryAddValue(integerStringDictionary,  (const void *)0, CFSTR(""));
     }
     
