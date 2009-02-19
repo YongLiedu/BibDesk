@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
-#import <OmniFoundation/OmniFoundation.h>
+#import "BDSKSimpleLock.h"
 #import "BDSKOwnerProtocol.h"
 
 @class BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes, BDSKTask;
@@ -60,8 +60,8 @@ enum {
     BDSKTask *currentTask;
     NSString *workingDirPath;
     NSData *stdoutData;
-    OFSimpleLockType processingLock;    
-    OFSimpleLockType currentTaskLock;
+    BDSKSimpleLockType processingLock;    
+    BDSKSimpleLockType currentTaskLock;
     BDSKItemSearchIndexes *searchIndexes;
 }
 

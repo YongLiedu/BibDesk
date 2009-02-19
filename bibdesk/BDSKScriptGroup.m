@@ -122,8 +122,8 @@ static BDSKMessageQueue *messageQueue = nil;
         
         workingDirPath = [[[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil] retain];
         
-        OFSimpleLockInit(&processingLock);
-        OFSimpleLockInit(&currentTaskLock);
+        BDSKSimpleLockInit(&processingLock);
+        BDSKSimpleLockInit(&currentTaskLock);
         searchIndexes = [BDSKItemSearchIndexes new];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
@@ -164,8 +164,8 @@ static BDSKMessageQueue *messageQueue = nil;
     [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self terminate];
-    OFSimpleLockFree(&processingLock);
-    OFSimpleLockFree(&currentTaskLock);
+    BDSKSimpleLockFree(&processingLock);
+    BDSKSimpleLockFree(&currentTaskLock);
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [scriptPath release];
     [scriptArguments release];
@@ -448,12 +448,12 @@ static BDSKMessageQueue *messageQueue = nil;
     
     while ([self isProcessing]){
         // if the task is still running after 2 seconds, kill it; we can't sleep here, because the main thread (usually this one) may be updating the UI for a task
-        if([referenceDate timeIntervalSinceNow] > -2 && OFSimpleLockTry(&currentTaskLock)){
+        if([referenceDate timeIntervalSinceNow] > -2 && BDSKSimpleLockTry(&currentTaskLock)){
             if([currentTask isRunning])
                 [currentTask terminate];
             [currentTask release];
             currentTask = nil;
-            OFSimpleUnlock(&currentTaskLock);
+            BDSKSimpleUnlock(&currentTaskLock);
             break;
         } else if([referenceDate timeIntervalSinceNow] > -2.1){ // just in case this ever happens
             NSLog(@"%@ failed to lock for task %@", self, currentTask);
@@ -467,8 +467,8 @@ static BDSKMessageQueue *messageQueue = nil;
 
 - (BOOL)isProcessing{
 	// just see if we can get the lock, otherwise we are processing
-    if(OFSimpleLockTry(&processingLock)){
-		OFSimpleUnlock(&processingLock);
+    if(BDSKSimpleLockTry(&processingLock)){
+		BDSKSimpleUnlock(&processingLock);
 		return NO;
 	}
 	return YES;
@@ -481,7 +481,7 @@ static BDSKMessageQueue *messageQueue = nil;
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    OFSimpleLock(&processingLock);
+    BDSKSimpleLock(&processingLock);
     
     if (stdoutData) {
         [stdoutData autorelease];
@@ -502,7 +502,7 @@ static BDSKMessageQueue *messageQueue = nil;
     
     @try {
         
-        OFSimpleLock(&currentTaskLock);
+        BDSKSimpleLock(&currentTaskLock);
         currentTask = [[BDSKTask allocWithZone:[self zone]] init];    
         [currentTask setStandardError:[NSFileHandle fileHandleWithStandardError]];
         [currentTask setLaunchPath:path];
@@ -510,15 +510,15 @@ static BDSKMessageQueue *messageQueue = nil;
         [currentTask setStandardOutput:outputPipe];
         if ([args count])
             [currentTask setArguments:args];
-        OFSimpleUnlock(&currentTaskLock);        
+        BDSKSimpleUnlock(&currentTaskLock);        
     
         [nc addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
         [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:@"BDSKSpecialPipeServiceRunLoopMode"]];
     
-        OFSimpleLock(&currentTaskLock);
+        BDSKSimpleLock(&currentTaskLock);
         [currentTask launch];
         isRunning = [currentTask isRunning];
-        OFSimpleUnlock(&currentTaskLock);        
+        BDSKSimpleUnlock(&currentTaskLock);        
         
         if (isRunning) {
             
@@ -533,9 +533,9 @@ static BDSKMessageQueue *messageQueue = nil;
             if(outputString == nil)
                 outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:[NSString defaultCStringEncoding]];
             
-            OFSimpleLock(&currentTaskLock);
+            BDSKSimpleLock(&currentTaskLock);
             terminationStatus = [currentTask terminationStatus];
-            OFSimpleUnlock(&currentTaskLock);        
+            BDSKSimpleUnlock(&currentTaskLock);        
 
         } else {
             terminationStatus = 1;
@@ -545,10 +545,10 @@ static BDSKMessageQueue *messageQueue = nil;
     }
     @catch(id exception){
         terminationStatus = 1;
-        OFSimpleLock(&currentTaskLock);
+        BDSKSimpleLock(&currentTaskLock);
         if([currentTask isRunning])
             [currentTask terminate];
-        OFSimpleUnlock(&currentTaskLock);        
+        BDSKSimpleUnlock(&currentTaskLock);        
         
         [nc removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
 
@@ -560,10 +560,10 @@ static BDSKMessageQueue *messageQueue = nil;
     // reset signal handling to default behavior
     signal(SIGPIPE, previousSignalMask);
     
-    OFSimpleLock(&currentTaskLock);
+    BDSKSimpleLock(&currentTaskLock);
     [currentTask release];
     currentTask = nil;
-    OFSimpleUnlock(&currentTaskLock);        
+    BDSKSimpleUnlock(&currentTaskLock);        
     
     if (terminationStatus != EXIT_SUCCESS || nil == outputString) {
         if(error == nil)
@@ -575,7 +575,7 @@ static BDSKMessageQueue *messageQueue = nil;
     
     [outputString release];
     
-    OFSimpleUnlock(&processingLock);
+    BDSKSimpleUnlock(&processingLock);
 	[pool release];
 }
 

@@ -173,7 +173,7 @@ static double runLoopTimeout = 30;
         currentTask = nil;
         memset(&flags, 0, sizeof(flags));
 
-        OFSimpleLockInit(&processingLock);
+        BDSKSimpleLockInit(&processingLock);
         pthread_rwlock_init(&dataFileLock, NULL);
 	}
 	return self;
@@ -184,7 +184,7 @@ static double runLoopTimeout = 30;
     [texPath release];
     [taskShouldStartInvocation release];
     [taskFinishedInvocation release];
-    OFSimpleLockFree(&processingLock);
+    BDSKSimpleLockFree(&processingLock);
     pthread_rwlock_destroy(&dataFileLock);
 	[super dealloc];
 }
@@ -251,7 +251,7 @@ static double runLoopTimeout = 30;
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     int rv = 0;
 
-    if(!OFSimpleLockTry(&processingLock)){
+    if(!BDSKSimpleLockTry(&processingLock)){
         NSLog(@"%@ couldn't get processing lock", self);
 		[pool release];
         return NO;
@@ -263,7 +263,7 @@ static double runLoopTimeout = 30;
         [taskShouldStartInvocation getReturnValue:&shouldStart];
         
         if (NO == shouldStart) {
-            OFSimpleUnlock(&processingLock);
+            BDSKSimpleUnlock(&processingLock);
             [pool release];
             return NO;
         }
@@ -325,7 +325,7 @@ static double runLoopTimeout = 30;
         [taskFinishedInvocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:NO];
 	}
 
-	OFSimpleUnlock(&processingLock);
+	BDSKSimpleUnlock(&processingLock);
     
 	[pool release];
     return rv == 0;
@@ -446,8 +446,8 @@ static double runLoopTimeout = 30;
 
 - (BOOL)isProcessing{
 	// just see if we can get the lock, otherwise we are processing
-    if(OFSimpleLockTry(&processingLock)){
-		OFSimpleUnlock(&processingLock);
+    if(BDSKSimpleLockTry(&processingLock)){
+		BDSKSimpleUnlock(&processingLock);
 		return NO;
 	}
 	return YES;

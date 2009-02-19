@@ -290,6 +290,8 @@
 		CEED2E070F4DEB6A0078E87A /* BDSKQueueProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E050F4DEB6A0078E87A /* BDSKQueueProcessor.m */; };
 		CEED2E0B0F4DEB9E0078E87A /* BDSKMainQueueProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E090F4DEB9E0078E87A /* BDSKMainQueueProcessor.m */; };
 		CEED2E150F4DED830078E87A /* BDSKInvocation.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E130F4DED830078E87A /* BDSKInvocation.m */; };
+		CEED2EF00F4E03E10078E87A /* BDSKSimpleLock.h in Headers */ = {isa = PBXBuildFile; fileRef = CEED2EEE0F4E03E10078E87A /* BDSKSimpleLock.h */; };
+		CEED2EF10F4E03E10078E87A /* BDSKSimpleLock.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2EEF0F4E03E10078E87A /* BDSKSimpleLock.m */; };
 		CEEFDE010B03ED0200668BB0 /* BDSKScriptGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */; };
 		CEEFDE030B03ED0200668BB0 /* BDSKURLGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */; };
 		CEEFE2B30B03FAF500668BB0 /* BDSKScriptGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFE2B20B03FAF500668BB0 /* BDSKScriptGroupSheet.nib */; };
@@ -1275,6 +1277,8 @@
 		CEED2E090F4DEB9E0078E87A /* BDSKMainQueueProcessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMainQueueProcessor.m; sourceTree = "<group>"; };
 		CEED2E120F4DED830078E87A /* BDSKInvocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKInvocation.h; sourceTree = "<group>"; };
 		CEED2E130F4DED830078E87A /* BDSKInvocation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKInvocation.m; sourceTree = "<group>"; };
+		CEED2EEE0F4E03E10078E87A /* BDSKSimpleLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSimpleLock.h; sourceTree = "<group>"; };
+		CEED2EEF0F4E03E10078E87A /* BDSKSimpleLock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSimpleLock.m; sourceTree = "<group>"; };
 		CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroupSheetController.m; sourceTree = "<group>"; };
 		CEEFDDFE0B03ED0200668BB0 /* BDSKScriptGroupSheetController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroupSheetController.h; sourceTree = "<group>"; };
 		CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKURLGroupSheetController.m; sourceTree = "<group>"; };
@@ -2341,6 +2345,8 @@
 				CEED2E050F4DEB6A0078E87A /* BDSKQueueProcessor.m */,
 				CEED2E080F4DEB9E0078E87A /* BDSKMainQueueProcessor.h */,
 				CEED2E090F4DEB9E0078E87A /* BDSKMainQueueProcessor.m */,
+				CEED2EEE0F4E03E10078E87A /* BDSKSimpleLock.h */,
+				CEED2EEF0F4E03E10078E87A /* BDSKSimpleLock.m */,
 			);
 			name = Managers;
 			sourceTree = "<group>";
@@ -3022,6 +3028,7 @@
 				CE62DE4A0F4B788800BDF01E /* BDSKPreferenceIconCell.h in Headers */,
 				CEDBE0590F4CDAD900190AF5 /* NSView_BDSKExtensions.h in Headers */,
 				CEED2CBD0F4DAD2C0078E87A /* BDSKCFCallBacks.h in Headers */,
+				CEED2EF00F4E03E10078E87A /* BDSKSimpleLock.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3936,6 +3943,7 @@
 				CEED2E070F4DEB6A0078E87A /* BDSKQueueProcessor.m in Sources */,
 				CEED2E0B0F4DEB9E0078E87A /* BDSKMainQueueProcessor.m in Sources */,
 				CEED2E150F4DED830078E87A /* BDSKInvocation.m in Sources */,
+				CEED2EF10F4E03E10078E87A /* BDSKSimpleLock.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
