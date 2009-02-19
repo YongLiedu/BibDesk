@@ -169,7 +169,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
     
     NSRange startRange = [itemString rangeOfString:@"%" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"This is not a Refer string", @"Error description"), nil);
+        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"This is not a Refer string", @"Error description")];
         if(outError) *outError = error;
 		return returnArray;
     }

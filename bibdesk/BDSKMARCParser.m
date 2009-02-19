@@ -87,7 +87,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     
     if(match == nil){
         if(outError)
-            OFErrorWithInfo(outError, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown MARC format.", @"Error description"), nil);
+            *outError = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unknown MARC format.", @"Error description")];
         return [NSArray array];
     }
     
@@ -295,7 +295,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
         return [self itemsFromMARCXMLString:itemString error:outError];
     }else {
         if(outError)
-            OFErrorWithInfo(outError, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown MARC format.", @"Error description"), nil);
+            *outError = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unknown MARC format.", @"Error description")];
         return [NSArray array];
     }
 }

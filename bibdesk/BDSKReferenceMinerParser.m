@@ -84,7 +84,7 @@
         return [BDSKMARCParser itemsFromString:itemString error:outError];
     }else{
         if(outError)
-            OFErrorWithInfo(outError, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown Reference Miner format.", @"Error description"), nil);
+            *outError = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"Unknown Reference Miner format.", @"Error description")];
         return [NSArray array];
     }
 }
