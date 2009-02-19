@@ -94,7 +94,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 + (void)initialize {
     [self setKeys:[NSArray arrayWithObject:@"attributedString"] triggerChangeNotificationsForDependentKey:@"previewAttributedString"];
     
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
 	[NSValueTransformer setValueTransformer:[[[BDSKValueOrNoneTransformer alloc] init] autorelease]
 									forName:BDSKValueOrNoneTransformerName];
@@ -1515,7 +1515,7 @@ static void (*originalTextViewDidChangeSelection)(id, SEL, id) = NULL;
     originalTextViewDidChangeSelection = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(textViewDidChangeSelection:), @selector(replacementTextViewDidChangeSelection:));
     // if it was returning NULL nothing was replaced, so we just register the method because we want to use it
     if (originalTextViewDidChangeSelection == NULL)
-        OBRegisterInstanceMethodWithSelector(self, @selector(replacementTextViewDidChangeSelection:), @selector(textViewDidChangeSelection:));
+        BDSKAddInstanceMethodImplementationFromSelector(self, @selector(textViewDidChangeSelection:), @selector(replacementTextViewDidChangeSelection:));
 }
 
 @end
