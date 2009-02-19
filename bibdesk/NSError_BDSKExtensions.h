@@ -68,6 +68,7 @@ extern NSString *BDSKUnderlyingItemErrorKey;
 
 // returns BibDesk-specific errors that don't allow valueForKey: and setValue:forKey: usage
 + (id)localErrorWithCode:(int)code localizedDescription:(NSString *)description;
++ (id)localErrorWithCode:(int)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
 
 // returns BibDesk-specific errors that can allow valueForKey: and setValue:forKey: usage
 + (id)mutableErrorWithDomain:(NSString *)domain code:(int)code userInfo:(NSDictionary *)dict;

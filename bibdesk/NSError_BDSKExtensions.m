@@ -129,6 +129,12 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
     return [[[self alloc] initWithDomain:[NSError localErrorDomain] code:code userInfo:userInfo] autorelease];
 }
 
++ (id)localErrorWithCode:(int)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
+{
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, underlyingError, NSUnderlyingErrorKey, nil];
+    return [[[self alloc] initWithDomain:[NSError localErrorDomain] code:code userInfo:userInfo] autorelease];
+}
+
 + (id)mutableLocalErrorWithCode:(int)code localizedDescription:(NSString *)description;
 {
     return [[[BDSKMutableError alloc] initLocalErrorWithCode:code localizedDescription:description] autorelease];
