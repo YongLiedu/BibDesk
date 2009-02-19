@@ -77,6 +77,8 @@
 #import "BDSKMacro.h"
 #import "NSColor_BDSKExtensions.h"
 #import "BDSKTextWithIconCell.h"
+#import "CFString_BDSKExtensions.h"
+#import "BDSKCFCallBacks"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -133,7 +135,7 @@ enum {
 CFHashCode BibItemCaseInsensitiveCiteKeyHash(const void *item)
 {
     OBASSERT([(id)item isKindOfClass:[BibItem class]]);
-    return OFCaseInsensitiveStringHash([(BibItem *)item citeKey]);
+    return BDCaseInsensitiveStringHash([(BibItem *)item citeKey]);
 }
 
 CFHashCode BibItemEquivalenceHash(const void *item)
@@ -141,7 +143,7 @@ CFHashCode BibItemEquivalenceHash(const void *item)
     OBASSERT([(id)item isKindOfClass:[BibItem class]]);
     
     NSString *type = [(BibItem *)item pubType];
-    CFHashCode hash = type ? OFCaseInsensitiveStringHash(type) : 0;
+    CFHashCode hash = type ? BDCaseInsensitiveStringHash(type) : 0;
 	
 	// hash only the standard fields; are these all we should compare?
 	BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
@@ -174,9 +176,9 @@ Boolean BibItemEquivalenceTest(const void *value1, const void *value2)
 // Values are BibItems; used to determine if pubs are duplicates.  Items must not be edited while contained in a set using these callbacks, so dispose of the set before any editing operations.
 const CFSetCallBacks kBDSKBibItemEqualityCallBacks = {
     0,    // version
-    OFNSObjectRetain,  // retain
-    OFNSObjectRelease, // release
-    OFNSObjectCopyDescription,
+    BDSKNSObjectRetain,  // retain
+    BDSKNSObjectRelease, // release
+    BDSKNSObjectCopyDescription,
     BibItemEqualityTest,
     BibItemCaseInsensitiveCiteKeyHash,
 };
@@ -184,9 +186,9 @@ const CFSetCallBacks kBDSKBibItemEqualityCallBacks = {
 // Values are BibItems; used to determine if pubs are duplicates.  Items must not be edited while contained in a set using these callbacks, so dispose of the set before any editing operations.
 const CFSetCallBacks kBDSKBibItemEquivalenceCallBacks = {
     0,    // version
-    OFNSObjectRetain,  // retain
-    OFNSObjectRelease, // release
-    OFNSObjectCopyDescription,
+    BDSKNSObjectRetain,  // retain
+    BDSKNSObjectRelease, // release
+    BDSKNSObjectCopyDescription,
     BibItemEquivalenceTest,
     BibItemEquivalenceHash,
 };

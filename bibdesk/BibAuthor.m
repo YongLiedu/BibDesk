@@ -41,6 +41,7 @@
 #import "BDSKBibTeXParser.h"
 #import <BTParse/btparse.h>
 #import "BDSKErrorObjectController.h"
+#import "BDSKCFCallBacks.h"
 
 @interface BibAuthor (Private)
 
@@ -746,27 +747,27 @@ Boolean BibAuthorFuzzyEqual(const void *value1, const void *value2)
 
 const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks = {
     0,    // version
-    OFNSObjectRetain,  // retain
-    OFNSObjectRelease, // release
-    OFNSObjectCopyDescription,
+    BDSKNSObjectRetain,  // retain
+    BDSKNSObjectRelease, // release
+    BDSKNSObjectCopyDescription,
     BibAuthorFuzzyEqual,
     BibAuthorFuzzyHash,
 };
 
 const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks = {
     0,
-    OFNSObjectRetain,
-    OFNSObjectRelease,
-    OFNSObjectCopyDescription,
+    BDSKNSObjectRetain,
+    BDSKNSObjectRelease,
+    BDSKNSObjectCopyDescription,
     BibAuthorFuzzyEqual,
     BibAuthorFuzzyHash,
 };
 
 const CFArrayCallBacks kBDSKAuthorFuzzyAuthorCallBacks = {
     0,    // version
-    OFNSObjectRetain,  // retain
-    OFNSObjectRelease, // release
-    OFNSObjectCopyDescription,
+    BDSKNSObjectRetain,  // retain
+    BDSKNSObjectRelease, // release
+    BDSKNSObjectCopyDescription,
     BibAuthorFuzzyEqual,
 };
 
