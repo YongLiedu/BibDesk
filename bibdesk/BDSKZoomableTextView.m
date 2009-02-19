@@ -40,6 +40,7 @@
 #import <OmniAppKit/OmniAppKit.h>
 #import "BDSKHeaderPopUpButton.h"
 #import "NSScrollview_BDSKExtensions.h"
+#import "NSView_BDSKExtensions.h"
 
 
 @interface NSResponder (BDSKGesturesPrivate)

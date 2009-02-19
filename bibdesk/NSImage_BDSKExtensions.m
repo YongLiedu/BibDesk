@@ -96,6 +96,56 @@
     }
 }
 
++ (NSImage *)httpInternetLocationImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationHTTPIcon];
+        image = [[iconFamily imageWithAllReps] retain];
+        [iconFamily release];
+    }
+    return image;
+}
+
++ (NSImage *)ftpInternetLocationImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationFTPIcon];
+        image = [[iconFamily imageWithAllReps] retain];
+        [iconFamily release];
+    }
+    return image;
+}
+
++ (NSImage *)mailInternetLocationImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationMailIcon];
+        image = [[iconFamily imageWithAllReps] retain];
+        [iconFamily release];
+    }
+    return image;
+}
+
++ (NSImage *)newsInternetLocationImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationNewsIcon];
+        image = [[iconFamily imageWithAllReps] retain];
+        [iconFamily release];
+    }
+    return image;
+}
+
++ (NSImage *)genericInternetLocationImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationGenericIcon];
+        image = [[iconFamily imageWithAllReps] retain];
+        [iconFamily release];
+    }
+    return image;
+}
+
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code {
 	int width = iconSize.width;
 	int height = iconSize.height;
@@ -161,6 +211,10 @@
         return [self httpInternetLocationImage];
     else if([scheme isEqualToString:@"ftp"])
         return [self ftpInternetLocationImage];
+    else if([scheme isEqualToString:@"mailto"])
+        return [self mailInternetLocationImage];
+    else if([scheme isEqualToString:@"news"])
+        return [self newsInternetLocationImage];
     else return [self genericInternetLocationImage];
 }
 

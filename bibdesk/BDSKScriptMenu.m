@@ -67,7 +67,7 @@ static int recursionDepth = 0;
     NSString *scriptMenuTitle = @"Scripts";
     NSMenu *newMenu = [[self allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle];
     NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
-    [scriptItem setImage:[NSImage imageNamed:@"OAScriptMenu"]];
+    [scriptItem setImage:[NSImage imageNamed:@"ScriptMenu"]];
     [scriptItem setSubmenu:newMenu];
     [newMenu setDelegate:newMenu];
     [newMenu release];

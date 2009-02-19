@@ -39,6 +39,7 @@
 #import "NSScrollView_BDSKExtensions.h"
 #import <OmniBase/OmniBase.h>
 #import "BDSKEdgeView.h"
+#import "NSView_BDSKExtensions.h"
 
 
 @implementation NSScrollView (BDSKExtensions)
@@ -135,6 +136,14 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
     }
     
     [self tile];
+}
+
+- (NSPoint)scrollPositionAsPercentage {
+    return [[self documentView] scrollPositionAsPercentage];
+}
+
+- (void)setScrollPositionAsPercentage:(NSPoint)scrollPosition {
+    [[self documentView] setScrollPositionAsPercentage:scrollPosition];
 }
 
 @end

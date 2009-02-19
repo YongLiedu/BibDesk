@@ -83,6 +83,7 @@
 #import "BDSKSharingClient.h"
 #import "WebURLsWithTitles.h"
 #import "NSColor_BDSKExtensions.h"
+#import "NSView_BDSKExtensions.h"
 
 
 @implementation BibDocument (Groups)

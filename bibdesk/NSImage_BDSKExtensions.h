@@ -44,6 +44,12 @@
 
 + (void)makePreviewDisplayImages;
 
++ (NSImage *)httpInternetLocationImage;
++ (NSImage *)ftpInternetLocationImage;
++ (NSImage *)mailInternetLocationImage;
++ (NSImage *)newsInternetLocationImage;
++ (NSImage *)genericInternetLocationImage;
+
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code;
 + (NSImage *)imageWithSmallIconForToolboxCode:(OSType) code;
 + (NSImage *)smallMissingFileImage;

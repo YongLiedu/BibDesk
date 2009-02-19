@@ -124,6 +124,7 @@
 #import "NSImage_BDSKExtensions.h"
 #import <SkimNotes/SkimNotes.h>
 #import "NSWorkspace_BDSKExtensions.h"
+#import "NSView_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";

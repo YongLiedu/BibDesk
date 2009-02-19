@@ -60,6 +60,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
+#import "NSView_BDSKExtensions.h"
 
 #import "BDSKTypeManager.h"
 #import "BDSKScriptHookManager.h"

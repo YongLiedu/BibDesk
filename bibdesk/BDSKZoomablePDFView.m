@@ -44,6 +44,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSScrollView_BDSKExtensions.h"
+#import "NSView_BDSKExtensions.h"
 
 
 @interface NSResponder (BDSKGesturesPrivate)
