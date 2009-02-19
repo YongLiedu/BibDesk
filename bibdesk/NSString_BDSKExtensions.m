@@ -1256,7 +1256,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (NSString *)stringByEscapingBasicXMLEntitiesUsingUTF8;
 {
-    return [OFXMLCreateStringWithEntityReferencesInCFEncoding(self, OFXMLBasicEntityMask, nil, kCFStringEncodingUTF8) autorelease];
+    return [(NSString *)BDXMLCreateStringWithEntityReferencesInCFEncoding((CFStringRef)self, kCFStringEncodingUTF8) autorelease];
 }
     
 #define APPEND_PREVIOUS() \
