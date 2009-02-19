@@ -1,10 +1,10 @@
 //
-//  BDSKPublicationsArray.h
+//  BDSKMultiValueDictionary.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 10/25/06.
+//  Created by Christiaan Hofman on 2/19/09.
 /*
- This software is Copyright (c) 2006-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,23 +38,20 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKMultiValueDictionary, BibItem, BibAuthor;
 
-@interface BDSKPublicationsArray : NSMutableArray {
-    NSMutableArray *publications;
-    BDSKMultiValueDictionary *itemsForCiteKeys;
-    NSMutableDictionary *itemsForIdentifierURLs;
+@interface BDSKMultiValueDictionary : NSObject {
+    CFMutableDictionaryRef dictionary;
 }
 
-- (BibItem *)itemForCiteKey:(NSString *)key;
-- (NSArray *)allItemsForCiteKey:(NSString *)key;
-- (BOOL)citeKeyIsUsed:(NSString *)key byItemOtherThan:(BibItem *)anItem;
-- (void)changeCiteKey:(NSString *)oldKey toCiteKey:(NSString *)newKey forItem:(BibItem *)anItem;
+- (id)init;
+- (id)initWithCaseInsensitiveKeys:(BOOL)caseInsensitive;
 
-- (BOOL)citeKeyIsCrossreffed:(NSString *)key;
-- (id)itemForIdentifierURL:(NSURL *)aURL;
-- (NSArray *)itemsForAuthor:(BibAuthor *)anAuthor;
-- (NSArray *)itemsForEditor:(BibAuthor *)anEditor;
-- (NSArray *)itemsForPerson:(BibAuthor *)aPerson forField:(NSString *)field;
+- (NSArray *)allObjectsForKey:(id)key;
+- (id)firstObjectForKey:(id)key;
+- (id)lastObjectForKey:(id)key;
+- (void)addObject:(id)object forKey:(id)key;
+- (void)removeObject:(id)object forKey:(id)key;
+- (void)removeAllObjectsForKey:(id)key;
+- (void)removeAllObjects;
 
 @end

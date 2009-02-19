@@ -37,10 +37,9 @@
  */
 
 #import "BDSKPublicationsArray.h"
-#import "BDSKCountedSet.h"
+#import "BDSKMultiValueDictionary.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "NSObject_BDSKExtensions.h"
 
 
@@ -60,7 +59,7 @@
     if (self = [super init]) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] init];
-        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
     }
     return self;
@@ -72,7 +71,7 @@
     if (self = [super init]) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] initWithObjects:objects count:count];
-        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
         [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:publications];
         [self updateFileOrder];
@@ -85,7 +84,7 @@
     if (self = [super init]) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] initWithCapacity:numItems];
-        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] initWithCapacity:numItems];
     }
     return self;

@@ -283,6 +283,7 @@
 		CEEC70E2093B6EC200A64F54 /* BDSKDragImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEC70E0093B6EC200A64F54 /* BDSKDragImageView.m */; };
 		CEEC72F7093BDCA200A64F54 /* BibDesk.sdef in Resources */ = {isa = PBXBuildFile; fileRef = F9022FBF07580B9400C3F701 /* BibDesk.sdef */; };
 		CEED2AB40F4D89BC0078E87A /* IconFamily.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2A840F4D856E0078E87A /* IconFamily.m */; };
+		CEED2C150F4DA0E00078E87A /* BDSKMultiValueDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2C130F4DA0E00078E87A /* BDSKMultiValueDictionary.m */; };
 		CEEFDE010B03ED0200668BB0 /* BDSKScriptGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */; };
 		CEEFDE030B03ED0200668BB0 /* BDSKURLGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */; };
 		CEEFE2B30B03FAF500668BB0 /* BDSKScriptGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFE2B20B03FAF500668BB0 /* BDSKScriptGroupSheet.nib */; };
@@ -1256,6 +1257,8 @@
 		CEEC70E0093B6EC200A64F54 /* BDSKDragImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDragImageView.m; sourceTree = "<group>"; };
 		CEED2A830F4D856E0078E87A /* IconFamily.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IconFamily.h; sourceTree = "<group>"; };
 		CEED2A840F4D856E0078E87A /* IconFamily.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IconFamily.m; sourceTree = "<group>"; };
+		CEED2C120F4DA0E00078E87A /* BDSKMultiValueDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMultiValueDictionary.h; sourceTree = "<group>"; };
+		CEED2C130F4DA0E00078E87A /* BDSKMultiValueDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMultiValueDictionary.m; sourceTree = "<group>"; };
 		CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroupSheetController.m; sourceTree = "<group>"; };
 		CEEFDDFE0B03ED0200668BB0 /* BDSKScriptGroupSheetController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroupSheetController.h; sourceTree = "<group>"; };
 		CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKURLGroupSheetController.m; sourceTree = "<group>"; };
@@ -2269,6 +2272,8 @@
 				F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */,
 				CEDBDE490F4C863500190AF5 /* BDSKPreferenceRecord.h */,
 				CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */,
+				CEED2C120F4DA0E00078E87A /* BDSKMultiValueDictionary.h */,
+				CEED2C130F4DA0E00078E87A /* BDSKMultiValueDictionary.m */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -3898,6 +3903,7 @@
 				CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */,
 				CEDBE05A0F4CDAD900190AF5 /* NSView_BDSKExtensions.m in Sources */,
 				CEED2AB40F4D89BC0078E87A /* IconFamily.m in Sources */,
+				CEED2C150F4DA0E00078E87A /* BDSKMultiValueDictionary.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
