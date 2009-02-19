@@ -38,15 +38,15 @@
 #import "BDSKStringConstants.h"
 #import <OmniFoundation/OmniFoundation.h>
 #import <OmniAppKit/OmniAppKit.h>
-#import "BDSKTextViewFindController.h"
+//#import "BDSKTextViewFindController.h"
 #import "NSObject_BDSKExtensions.h"
 
 @implementation NSTextView (BDSKExtensions)
-
+/*
 - (IBAction)performFindPanelAction:(id)sender{
 	[[BDSKTextViewFindController sharedFindController] performFindPanelAction:sender];
 }
-
+*/
 // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
     // there is not original implementation

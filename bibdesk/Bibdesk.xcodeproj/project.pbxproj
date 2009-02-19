@@ -158,9 +158,7 @@
 		CE4B691C09E9235200CCA14F /* SmallLock_Locked.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE4B691A09E9235200CCA14F /* SmallLock_Locked.tiff */; };
 		CE4B691D09E9235200CCA14F /* SmallLock_Unlocked.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE4B691B09E9235200CCA14F /* SmallLock_Unlocked.tiff */; };
 		CE4D85290C3A8C8F002C20CB /* BDSKAutofileCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */; };
-		CE518F2809E526E000E97C3A /* BDSKTextViewFindController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE518F2609E526E000E97C3A /* BDSKTextViewFindController.m */; };
 		CE518F6609E52D6A00E97C3A /* BDSKTextViewFindPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE518F6409E52D6A00E97C3A /* BDSKTextViewFindPanel.nib */; };
-		CE51914C09E5615400E97C3A /* BDSKRegExFindPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */; };
 		CE51922109E5755600E97C3A /* BDSKFindFieldEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */; };
 		CE564D260AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE564D240AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m */; };
 		CE565BC00AEF848B002F0A24 /* BDSKPublicationsArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CE565BBE0AEF848B002F0A24 /* BDSKPublicationsArray.m */; };
@@ -3752,8 +3750,6 @@
 				F92ECBF509DF09DA00A244D0 /* BDSKPasswordController.m in Sources */,
 				CE6FB32309DFFCB5005E3E14 /* BDSKSharingBrowser.m in Sources */,
 				F92ED7CD09E0A93400A244D0 /* BDSKSharingServer.m in Sources */,
-				CE518F2809E526E000E97C3A /* BDSKTextViewFindController.m in Sources */,
-				CE51914C09E5615400E97C3A /* BDSKRegExFindPattern.m in Sources */,
 				CE51922109E5755600E97C3A /* BDSKFindFieldEditor.m in Sources */,
 				F92EF32309E6242200A244D0 /* BDSKSharedGroup.m in Sources */,
 				CE573D2709F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m in Sources */,

@@ -407,7 +407,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     }
     return nil;
 }
-
+/*
 // OAFindControllerAware informal protocol
 - (id <OAFindControllerTarget>)omniFindControllerTarget;
 {
@@ -454,5 +454,5 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
             break;
 	}
 }
-
+*/
 @end
