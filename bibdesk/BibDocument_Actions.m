@@ -299,8 +299,7 @@
 	}
 }
 
-// -delete:, -insertNewline:, -cut:, -copy: and -paste: are defined indirectly in NSTableView-OAExtensions using our dataSource method
-// Note: cut: calls delete:
+// -delete:,  -copy:, -cut:, -paste:, and -duplicate are defined in BDSKTableView using dataSource methods
 
 - (IBAction)alternateCut:(id)sender {
 	id firstResponder = [documentWindow firstResponder];
@@ -315,26 +314,6 @@
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
 	NSString *citeString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey];
 	[self writePublications:[self selectedPublications] forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
-}
-
-// Don't use the default action in NSTableView-OAExtensions here, as it uses another pasteboard and some more overhead
-- (IBAction)duplicate:(id)sender{
-	if ([documentWindow firstResponder] != tableView ||
-		[self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected] == YES) {
-		NSBeep();
-		return;
-	}
-	
-    NSArray *newPubs = [[NSArray alloc] initWithArray:[self selectedPublications] copyItems:YES];
-    
-    [self addPublications:newPubs]; // notification will take care of clearing the search/sorting
-    [self selectPublications:newPubs];
-    [newPubs release];
-	
-    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey]) {
-        [self editPubCmd:nil]; // this will aske the user when there are many pubs
-    }
 }
 
 - (BDSKEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew{
