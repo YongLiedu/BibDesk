@@ -36,7 +36,7 @@
 
 #import "BDSKDocumentController.h"
 #import "BDSKStringConstants.h"
-#import <OmniBase/OmniBase.h>
+#import "BDSKRuntime.h"
 #import <AGRegex/AGRegex.h>
 #import "BDSKStringEncodingManager.h"
 #import "BDSKAppController.h"
@@ -581,7 +581,7 @@ static BOOL (*originalCanShowGoTo)(id, SEL) = NULL;
 
 + (void)load
 {
-     originalCanShowGoTo = (BOOL (*)(id, SEL))OBReplaceMethodImplementationWithSelector(self, @selector(_canShowGoto), @selector(replacementCanShowGoto));
+     originalCanShowGoTo = (BOOL (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(_canShowGoto), @selector(replacementCanShowGoto));
 }
 
 @end

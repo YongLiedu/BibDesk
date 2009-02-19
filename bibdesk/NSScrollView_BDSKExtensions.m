@@ -37,7 +37,7 @@
  */
 
 #import "NSScrollView_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
+#import "BDSKRuntime.h"
 #import "BDSKEdgeView.h"
 #import "NSView_BDSKExtensions.h"
 
@@ -104,10 +104,10 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
 }
 
 + (void)load{
-    originalSetHasHorizontalScroller = (void (*)(id, SEL, BOOL))OBReplaceMethodImplementationWithSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
-    originalSetAutohidesScrollers = (void (*)(id, SEL, BOOL))OBReplaceMethodImplementationWithSelector(self, @selector(setAutohidesScrollers:), @selector(replacementSetAutohidesScrollers:));
-    originalDealloc = (void (*)(id, SEL))OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
-    originalTile = (void (*)(id, SEL))OBReplaceMethodImplementationWithSelector(self, @selector(tile), @selector(replacementTile));
+    originalSetHasHorizontalScroller = (void (*)(id, SEL, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
+    originalSetAutohidesScrollers = (void (*)(id, SEL, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setAutohidesScrollers:), @selector(replacementSetAutohidesScrollers:));
+    originalDealloc = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(dealloc), @selector(replacementDealloc));
+    originalTile = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(tile), @selector(replacementTile));
     
     // dictionary doesn't retain keys, so no retain cycles; pointer equality used to compare views
     scrollViewPlacards = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);

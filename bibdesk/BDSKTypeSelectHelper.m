@@ -37,7 +37,7 @@
  */
 
 #import "BDSKTypeSelectHelper.h"
-#import <OmniBase/OmniBase.h>
+#import "BDSKRuntime.h"
 
 #define REPEAT_CHARACTER 0x2F
 #define CANCEL_CHARACTER 0x1B
@@ -436,7 +436,7 @@ static BOOL (*originalMakeFirstResponder)(id, SEL, id) = NULL;
 }
 
 + (void)load {
-    originalMakeFirstResponder = (typeof(originalMakeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(makeFirstResponder:), @selector(replacementMakeFirstResponder:));
+    originalMakeFirstResponder = (typeof(originalMakeFirstResponder))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(makeFirstResponder:), @selector(replacementMakeFirstResponder:));
 }
 
 @end
