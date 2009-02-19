@@ -53,7 +53,6 @@
 #import "BibDocument_Groups.h"
 #import "BDSKMainTableView.h"
 #import "BDSKFindController.h"
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKSearchButtonController.h"
 #import "BDSKItemSearchIndexes.h"
 #import "NSArray_BDSKExtensions.h"

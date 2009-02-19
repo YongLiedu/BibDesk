@@ -40,7 +40,6 @@
 
 #import "BibPref_InputManager.h"
 #import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
 #import "NSImage_BDSKExtensions.h"

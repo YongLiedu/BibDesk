@@ -39,7 +39,6 @@
 
 #import "BDSKImagePopUpButton.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKImageFadeAnimation.h"
 
 @implementation BDSKImagePopUpButton

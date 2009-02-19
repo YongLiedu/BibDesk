@@ -42,7 +42,6 @@
 #import "BDSKTypeManager.h"
 #import "BDSKComplexStringEditor.h"
 #import "BDSKImagePopUpButton.h"
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKTypeSelectHelper.h"
 #import <WebKit/WebKit.h>
 #import <OmniFoundation/OmniFoundation.h>

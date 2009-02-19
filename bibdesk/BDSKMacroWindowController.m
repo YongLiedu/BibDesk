@@ -49,7 +49,6 @@
 #import "BibItem.h"
 #import "BDSKMacroResolver.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKTypeSelectHelper.h"
 #import "BibDocument.h"
 #import "BDSKMacro.h"

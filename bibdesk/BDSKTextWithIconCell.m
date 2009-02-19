@@ -40,7 +40,6 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSLayoutManager_BDSKExtensions.h"
-#import <OmniAppKit/OmniAppKit.h>
 
 NSString *BDSKTextWithIconCellStringKey = @"string";
 NSString *BDSKTextWithIconCellImageKey = @"image";

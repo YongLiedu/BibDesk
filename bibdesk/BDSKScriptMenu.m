@@ -39,7 +39,6 @@
 #import "BDSKScriptMenu.h"
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/OmniAppKit.h>
 #import "NSWorkspace_BDSKExtensions.h"
 
 @interface BDSKScriptMenu (Private)

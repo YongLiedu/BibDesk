@@ -35,7 +35,6 @@
 
 #import "BDSKMainTableView.h"
 #import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKStringConstants.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
