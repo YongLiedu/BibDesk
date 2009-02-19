@@ -78,7 +78,6 @@
 		CE023F5D0CC50F87003F52E5 /* Add_Small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */; };
 		CE071ED10F213EB300244F5C /* BDSKArxivParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */; };
 		CE09CEA70DDEF65E00F3F2FE /* BDSKCompletionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */; };
-		CE0B58AB0F2A237F00EA051F /* PreferenceSearchTerms.strings in Resources */ = {isa = PBXBuildFile; fileRef = CE0B58AA0F2A237F00EA051F /* PreferenceSearchTerms.strings */; };
 		CE0EB4440DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */; };
 		CE0ECDAB0DE78619006EEDDB /* BDSKSpiresParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE0ECDA90DE78619006EEDDB /* BDSKSpiresParser.m */; };
 		CE117D240D7047A5005BFCEB /* NSScriptClassDescription_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE117D220D7047A4005BFCEB /* NSScriptClassDescription_BDSKExtensions.m */; };
@@ -112,7 +111,6 @@
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
 		CE2C18920A0A43BE006F0A73 /* importFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */; };
-		CE2CE5B60F2A267400F07016 /* PreferenceSearchTerms.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE2CE5B50F2A267400F07016 /* PreferenceSearchTerms.plist */; };
 		CE2E78CD0D40F6BB00340B39 /* BDSKManyToManyDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2E78CB0D40F6BB00340B39 /* BDSKManyToManyDictionary.m */; };
 		CE3011A30D5CC41D00C0B7FA /* BDSKAddCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011A10D5CC41D00C0B7FA /* BDSKAddCommand.m */; };
 		CE3011AD0D5CC46F00C0B7FA /* BDSKRemoveCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3011AB0D5CC46F00C0B7FA /* BDSKRemoveCommand.m */; };
@@ -286,6 +284,7 @@
 		CEEC6C55093A411E00A64F54 /* BDSKCollapsibleView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */; };
 		CEEC70E2093B6EC200A64F54 /* BDSKDragImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEC70E0093B6EC200A64F54 /* BDSKDragImageView.m */; };
 		CEEC72F7093BDCA200A64F54 /* BibDesk.sdef in Resources */ = {isa = PBXBuildFile; fileRef = F9022FBF07580B9400C3F701 /* BibDesk.sdef */; };
+		CEED2AB40F4D89BC0078E87A /* IconFamily.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2A840F4D856E0078E87A /* IconFamily.m */; };
 		CEEFDE010B03ED0200668BB0 /* BDSKScriptGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */; };
 		CEEFDE030B03ED0200668BB0 /* BDSKURLGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */; };
 		CEEFE2B30B03FAF500668BB0 /* BDSKScriptGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFE2B20B03FAF500668BB0 /* BDSKScriptGroupSheet.nib */; };
@@ -960,8 +959,6 @@
 		CE071ECF0F213EB300244F5C /* BDSKArxivParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKArxivParser.m; sourceTree = "<group>"; };
 		CE09CEA40DDEF65E00F3F2FE /* BDSKCompletionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCompletionManager.h; sourceTree = "<group>"; };
 		CE09CEA50DDEF65E00F3F2FE /* BDSKCompletionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCompletionManager.m; sourceTree = "<group>"; };
-		CE0B58730F2A229F00EA051F /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/PreferenceSearchTerms.strings; sourceTree = "<group>"; };
-		CE0B58AC0F2A238600EA051F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/PreferenceSearchTerms.strings; sourceTree = "<group>"; };
 		CE0EB4410DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSInvocation_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE0EB4420DCFDE8A0034DF92 /* NSInvocation_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSInvocation_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE0ECDA80DE78619006EEDDB /* BDSKSpiresParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSpiresParser.h; sourceTree = "<group>"; };
@@ -1013,7 +1010,6 @@
 		CE2BB5920E0BE1370090E848 /* FileView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FileView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE2C16F80A0A149E006F0A73 /* gear2.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear2.tiff; sourceTree = "<group>"; };
 		CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = importFolderIcon.tiff; sourceTree = "<group>"; };
-		CE2CE5B50F2A267400F07016 /* PreferenceSearchTerms.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = PreferenceSearchTerms.plist; sourceTree = "<group>"; };
 		CE2E78CA0D40F6BB00340B39 /* BDSKManyToManyDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKManyToManyDictionary.h; sourceTree = "<group>"; };
 		CE2E78CB0D40F6BB00340B39 /* BDSKManyToManyDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKManyToManyDictionary.m; sourceTree = "<group>"; };
 		CE3011A00D5CC41C00C0B7FA /* BDSKAddCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAddCommand.h; sourceTree = "<group>"; };
@@ -1970,7 +1966,6 @@
 				F94AA3690BE8FD87007BCE2B /* Preferences.strings */,
 				CE8962C40CBEC0C500EA2D98 /* TemplateOptions.strings */,
 				CE8F5F830DEEB26800061148 /* ZoomValues.strings */,
-				CE0B58AA0F2A237F00EA051F /* PreferenceSearchTerms.strings */,
 				F9022CE50758050E00C3F701 /* Credits.rtf */,
 				F994B8F607F5F65F00751DA1 /* RelNotes.rtf */,
 				CE2941040A7F8F2900A46D05 /* ReadMe.rtf */,
@@ -1978,7 +1973,6 @@
 				F9022D1B0758066000C3F701 /* TypeInfo.plist */,
 				CE12A16F0B44AED100416D19 /* SearchGroupServers.plist */,
 				CE8962CA0CBEC10700EA2D98 /* TemplateOptions.plist */,
-				CE2CE5B50F2A267400F07016 /* PreferenceSearchTerms.plist */,
 				CE62DE4D0F4B790C00BDF01E /* Preferences.plist */,
 			);
 			includeInIndex = 1;
@@ -3482,8 +3476,6 @@
 				F9EF94EB0D16014000314058 /* BDSKFileMigration.nib in Resources */,
 				CEDB58F40D3692A400E40354 /* ComplexStringEditor.nib in Resources */,
 				CE8F5F840DEEB26800061148 /* ZoomValues.strings in Resources */,
-				CE0B58AB0F2A237F00EA051F /* PreferenceSearchTerms.strings in Resources */,
-				CE2CE5B60F2A267400F07016 /* PreferenceSearchTerms.plist in Resources */,
 				CE62DE4E0F4B790C00BDF01E /* Preferences.plist in Resources */,
 				CE62DE510F4B797B00BDF01E /* next.tiff in Resources */,
 				CE62DE520F4B797B00BDF01E /* previous.tiff in Resources */,
@@ -3923,6 +3915,7 @@
 				CE62E0C00F4C4A5500BDF01E /* BDSKOutlineView.m in Sources */,
 				CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */,
 				CEDBE05A0F4CDAD900190AF5 /* NSView_BDSKExtensions.m in Sources */,
+				CEED2AB40F4D89BC0078E87A /* IconFamily.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4102,15 +4095,6 @@
 				F9C7D3D90BE927E100D65C7F /* French */,
 			);
 			name = BDSKWebGroupView.nib;
-			sourceTree = "<group>";
-		};
-		CE0B58AA0F2A237F00EA051F /* PreferenceSearchTerms.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CE0B58730F2A229F00EA051F /* English */,
-				CE0B58AC0F2A238600EA051F /* French */,
-			);
-			name = PreferenceSearchTerms.strings;
 			sourceTree = "<group>";
 		};
 		CE2209A909363A05004D7D92 /* BDSKAlert.nib */ = {
