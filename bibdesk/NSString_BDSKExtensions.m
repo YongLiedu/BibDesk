@@ -781,22 +781,22 @@ http://home.planet.nl/~faase009/GNU.txt
 - (NSString *)stringByEscapingGroupPlistEntities{
 	NSMutableString *escapedValue = [self mutableCopy];
 	// escape braces as they can give problems with btparse
-	[escapedValue replaceAllOccurrencesOfString:@"%" withString:@"%25"]; // this should come first
-	[escapedValue replaceAllOccurrencesOfString:@"{" withString:@"%7B"];
-	[escapedValue replaceAllOccurrencesOfString:@"}" withString:@"%7D"];
-	[escapedValue replaceAllOccurrencesOfString:@"<" withString:@"%3C"];
-	[escapedValue replaceAllOccurrencesOfString:@">" withString:@"%3E"];
+	[escapedValue replaceOccurrencesOfString:@"%" withString:@"%25" options:0 range:NSMakeRange(0, [escapedValue length])]; // this should come first
+	[escapedValue replaceOccurrencesOfString:@"{" withString:@"%7B" options:0 range:NSMakeRange(0, [escapedValue length])];
+	[escapedValue replaceOccurrencesOfString:@"}" withString:@"%7D" options:0 range:NSMakeRange(0, [escapedValue length])];
+	[escapedValue replaceOccurrencesOfString:@"<" withString:@"%3C" options:0 range:NSMakeRange(0, [escapedValue length])];
+	[escapedValue replaceOccurrencesOfString:@">" withString:@"%3E" options:0 range:NSMakeRange(0, [escapedValue length])];
 	return [escapedValue autorelease];
 }
 
 - (NSString *)stringByUnescapingGroupPlistEntities{
 	NSMutableString *escapedValue = [self mutableCopy];
 	// escape braces as they can give problems with btparse, and angles as they can give problems with the plist xml
-	[escapedValue replaceAllOccurrencesOfString:@"%7B" withString:@"{"];
-	[escapedValue replaceAllOccurrencesOfString:@"%7D" withString:@"}"];
-	[escapedValue replaceAllOccurrencesOfString:@"%3C" withString:@"<"];
-	[escapedValue replaceAllOccurrencesOfString:@"%3E" withString:@">"];
-	[escapedValue replaceAllOccurrencesOfString:@"%25" withString:@"%"]; // this should come last
+	[escapedValue replaceOccurrencesOfString:@"%7B" withString:@"{" options:0 range:NSMakeRange(0, [escapedValue length])];
+	[escapedValue replaceOccurrencesOfString:@"%7D" withString:@"}" options:0 range:NSMakeRange(0, [escapedValue length])];
+	[escapedValue replaceOccurrencesOfString:@"%3C" withString:@"<" options:0 range:NSMakeRange(0, [escapedValue length])];
+	[escapedValue replaceOccurrencesOfString:@"%3E" withString:@">" options:0 range:NSMakeRange(0, [escapedValue length])];
+	[escapedValue replaceOccurrencesOfString:@"%25" withString:@"%" options:0 range:NSMakeRange(0, [escapedValue length])]; // this should come last
 	return [escapedValue autorelease];
 }
 
