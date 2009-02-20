@@ -37,7 +37,6 @@
  */
 
 #import "BDSKScriptMenu.h"
-#import <OmniBase/OmniBase.h>
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSMenu_BDSKExtensions.h"
 

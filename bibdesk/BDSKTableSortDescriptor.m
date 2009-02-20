@@ -37,7 +37,6 @@
  */
 
 #import "BDSKTableSortDescriptor.h"
-#import <OmniBase/OmniBase.h>
 #import "BDSKTypeManager.h"
 
 @interface NSArray (BibAuthorMultipleCompare)

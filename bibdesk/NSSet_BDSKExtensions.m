@@ -37,7 +37,6 @@
  */
 
 #import "NSSet_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
 #import "BDSKCFCallBacks.h"
 #import "BDSKTemplateParser.h"
 

@@ -40,7 +40,6 @@
 #import "BibDocument.h"
 #import "BDAlias.h"
 #import "BDSKRunTime.h"
-#import <OmniBase/OmniBase.h>
 #import <Carbon/Carbon.h>
 
 

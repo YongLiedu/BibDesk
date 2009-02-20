@@ -38,7 +38,6 @@
 
 #import "BDSKGroupCell.h"
 #import "BDSKGroup.h"
-#import <OmniBase/OmniBase.h>
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSGeometry_BDSKExtensions.h"

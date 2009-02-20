@@ -37,7 +37,6 @@
  */
 
 #import "BDSKRatingButton.h"
-#import <OmniBase/OmniBase.h>
 
 
 @implementation BDSKRatingButton

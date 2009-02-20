@@ -37,7 +37,6 @@
  */
 
 #import "BDSKWebParser.h"
-#import <OmniBase/OmniBase.h>
 #import "BDSKHCiteParser.h"
 #import "BDSKCiteULikeParser.h"
 #import "BDSKACMDLParser.h"

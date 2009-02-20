@@ -40,7 +40,6 @@
 #import "BibDocument.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
 #import "WebURLsWithTitles.h"
 
 

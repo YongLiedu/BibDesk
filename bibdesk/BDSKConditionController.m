@@ -42,7 +42,6 @@
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKBooleanValueTransformer.h"
 #import "BDSKRatingButton.h"
-#import <OmniBase/OmniBase.h>
 
 static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionControllerObservationContext";
 

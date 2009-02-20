@@ -37,7 +37,6 @@
  */
 
 #import "BDSKZoomablePDFView.h"
-#import <OmniBase/OmniBase.h>
 #import "BDSKHeaderPopUpButton.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"

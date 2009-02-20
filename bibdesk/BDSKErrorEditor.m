@@ -37,7 +37,6 @@
  */
 
 #import "BDSKErrorEditor.h"
-#import <OmniBase/OmniBase.h>
 #import "BDSKErrorManager.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"

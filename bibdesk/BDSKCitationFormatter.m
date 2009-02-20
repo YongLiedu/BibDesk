@@ -38,7 +38,6 @@
 
 #import "BDSKCitationFormatter.h"
 #import "BDSKTypeManager.h"
-#import <OmniBase/OmniBase.h>
 
 
 @implementation BDSKCitationFormatter

@@ -37,7 +37,6 @@
  */
 
 #import "BDSKGroupTableView.h"
-#import <OmniBase/OmniBase.h>
 #import "BDSKStringConstants.h"
 #import "BDSKHeaderPopUpButtonCell.h"
 #import "NSBezierPath_BDSKExtensions.h"

@@ -35,7 +35,6 @@
 
 #import "BDSKComplexString.h"
 #import "NSString_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
 #import "BDSKStringNode.h"
 #import "BDSKMacroResolver.h"
 #import "NSError_BDSKExtensions.h"

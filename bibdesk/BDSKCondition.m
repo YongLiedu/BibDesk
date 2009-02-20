@@ -40,7 +40,6 @@
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
 #import "BDSKTypeManager.h"
 #import "BDSKSmartGroup.h"
 #import "BDSKCondition+Scripting.h"
