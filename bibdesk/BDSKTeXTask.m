@@ -41,7 +41,6 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
 #import "BDSKAppController.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "UKDirectoryEnumerator.h"
 #import "BDSKShellCommandFormatter.h"
 #import <libkern/OSAtomic.h>

@@ -37,7 +37,6 @@
  */
 
 #import "CFString_BDSKExtensions.h"
-#import <OmniFoundation/OmniFoundation.h>
 
 // This object is a cache for our stop words, so we don't have to hit user defaults every time __BDDeleteArticlesForSorting() is called (which is fairly often).
 

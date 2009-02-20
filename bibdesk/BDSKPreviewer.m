@@ -41,7 +41,6 @@
 #import "BDSKAppController.h"
 #import "BDSKZoomableTextView.h"
 #import "BDSKZoomablePDFView.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BibDocument.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
@@ -349,7 +348,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 - (void)displayPreviewsForState:(BDSKPreviewState)state success:(BOOL)success{
 
-    NSAssert2([NSThread inMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
+    NSAssert2([NSThread isMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
     
     // From Shark: if we were waiting before, and we're still waiting, there's nothing to do.  This is a big performance win when scrolling the main tableview selection, primarily because changing the text storage of rtfPreviewView ends up calling fixFontAttributes.  This in turn causes a disk hit at the ATS cache due to +[NSFont coveredCharacterCache], and parsing the binary plist uses lots of memory.
     if (BDSKWaitingPreviewState == previewState && BDSKWaitingPreviewState == state)

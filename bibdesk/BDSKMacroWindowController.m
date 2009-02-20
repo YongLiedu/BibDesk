@@ -40,7 +40,6 @@
 #import "BDSKOwnerProtocol.h"
 #import "BDSKComplexString.h" // for BDSKMacroResolver protocol
 #import "BDSKStringConstants.h" // for notification name declarations
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKComplexStringEditor.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKBibTeXParser.h"
@@ -394,7 +393,7 @@
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     NSUndoManager *undoMan = [[self window] undoManager];
-	if([undoMan isUndoingOrRedoing]) return;
+	if([undoMan isUndoing] || [undoMan isRedoing]) return;
     NSArray *arrangedMacros = [arrayController arrangedObjects];
     NSParameterAssert(row >= 0 && row < (int)[arrangedMacros count]);    
     NSDictionary *macroDefinitions = [macroResolver macroDefinitions];

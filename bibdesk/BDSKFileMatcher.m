@@ -402,7 +402,7 @@ static NSString *titleStringWithPub(BibItem *pub)
 // caller is reponsible for releasing the array, since the autorelease pool on the main thread may pop before the invocation's return value is requested
 - (NSArray *)copyTreeNodesWithCurrentPublications;
 {
-    NSAssert([NSThread inMainThread], @"method must be called from the main thread");
+    NSAssert([NSThread isMainThread], @"method must be called from the main thread");
 
     NSEnumerator *pubE = [[self currentPublications] objectEnumerator];
     BibItem *pub;

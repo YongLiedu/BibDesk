@@ -45,6 +45,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 #import "UKDirectoryEnumerator.h"
 #import "BDSKMessageQueue.h"
 
@@ -83,7 +84,7 @@
 
 - (id)initWithDocument:(id)aDocument
 {
-    BDSKASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
 
     self = [super init];
         
@@ -152,7 +153,7 @@
 // cancel is always sent from the main thread
 - (void)cancelForDocumentURL:(NSURL *)documentURL
 {
-    NSParameterAssert([NSThread inMainThread]);
+    NSParameterAssert([NSThread isMainThread]);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     OSAtomicCompareAndSwap32Barrier(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
     
@@ -551,7 +552,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL
 {
-    NSParameterAssert([NSThread inMainThread]);
+    NSParameterAssert([NSThread isMainThread]);
     NSParameterAssert([setupLock condition] == INDEX_THREAD_DONE);
     
     // @@ temporary for testing
@@ -644,7 +645,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)searchIndexDidUpdate
 {
-    BDSKASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1) {
         // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes.  Even though this is always queued and supposed to be sent once, it can still be sent too often.
@@ -662,7 +663,7 @@ static void addItemFunction(const void *value, void *context) {
 // @@ only sent after the initial indexing so the controller knows to remove the progress bar; can possibly be removed entirely and delegate can check finishedInitialIndexing when it gets searchIndexDidUpdate:
 - (void)searchIndexDidFinish
 {
-    BDSKASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
         [delegate searchIndexDidFinish:self];
@@ -670,7 +671,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)processNotification:(NSNotification *)note
 {    
-    BDSKASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     // Forward the notification to the correct thread
     [notificationQueue addObject:note];
     [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
@@ -759,7 +760,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)handleMachMessage:(void *)msg
 {
-    BDSKASSERT([NSThread inMainThread] == NO);
+    BDSKASSERT([NSThread isMainThread] == NO);
 
     while ( [notificationQueue count] ) {
         NSNotification *note = [[notificationQueue objectAtIndex:0] retain];

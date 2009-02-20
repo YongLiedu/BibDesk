@@ -79,6 +79,7 @@
 #import "BDSKTextWithIconCell.h"
 #import "CFString_BDSKExtensions.h"
 #import "BDSKCFCallBacks.h"
+#import "NSCharacterSet_BDSKExtensions.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;

@@ -35,8 +35,9 @@
  */
 
 #import "NSString_BDSKExtensions.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import <Cocoa/Cocoa.h>
+#import "NSCharacterSet_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 #import <AGRegex/AGRegex.h>
 #import "BDSKStringConstants.h"
 #import "CFString_BDSKExtensions.h"
@@ -49,6 +50,7 @@
 #import "BDSKTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKCFCallBacks.h"
+#import "NSAttributedString_BDSKExtensions.h"
 
 static NSString *yesString = nil;
 static NSString *noString = nil;
@@ -72,7 +74,7 @@ static NSString *mixedString = nil;
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithCharacter:0x2026] retain];
+        string = [[self stringWithFormat:@"%C", 0x2026] retain];
     return string;
 }
 
@@ -80,7 +82,7 @@ static NSString *mixedString = nil;
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithCharacter:0x2014] retain];
+        string = [[self stringWithFormat:@"%C", 0x2014] retain];
     return string;
 }
 
@@ -88,7 +90,7 @@ static NSString *mixedString = nil;
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithCharacter:0x2013] retain];
+        string = [[self stringWithFormat:@"%C", 0x2013] retain];
     return string;
 }
 
@@ -96,7 +98,7 @@ static NSString *mixedString = nil;
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithCharacter:0x2318] retain];
+        string = [[self stringWithFormat:@"%C", 0x2318] retain];
     return string;
 }
 
@@ -104,7 +106,7 @@ static NSString *mixedString = nil;
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithCharacter:0x2303] retain];
+        string = [[self stringWithFormat:@"%C", 0x2303] retain];
     return string;
 }
 
@@ -112,7 +114,7 @@ static NSString *mixedString = nil;
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithCharacter:0x2325] retain];
+        string = [[self stringWithFormat:@"%C", 0x2325] retain];
     return string;
 }
 
@@ -120,7 +122,7 @@ static NSString *mixedString = nil;
 {
     static NSString *string = nil;
     if (string == nil)
-        string = [[self stringWithCharacter:0x21E7] retain];
+        string = [[self stringWithFormat:@"%C", 0x21E7] retain];
     return string;
 }
 
@@ -1376,7 +1378,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     if ([self rangeOfCharacterFromSet:unsafeCharacterSet].length == 0)
         return self;
     
-    NSData *utf8Data = [self dataUsingCFEncoding:kCFStringEncodingUTF8 allowLossyConversion:NO];
+    NSData *utf8Data = [self dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
     const unsigned char *source = [utf8Data bytes];
     unsigned int sourceSize = [utf8Data length];
     unsigned int destSize = sourceSize;

@@ -37,7 +37,6 @@
  */
 
 #import "BibPref_Crossref.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTypeNameFormatter.h"
 #import "BDSKStringConstants.h"
 

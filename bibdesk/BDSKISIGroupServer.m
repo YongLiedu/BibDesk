@@ -44,7 +44,6 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import <OmniFoundation/OmniFoundation.h>
 
 #define MAX_RESULTS 100
 #if(OMNI_FORCE_ASSERTIONS)
@@ -225,13 +224,13 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 - (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
 {
-    BDSKASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     [group addPublications:pubs];
 }
 
 - (void)setPublicationsOfGroup:(bycopy NSArray *)pubs;
 {
-    BDSKASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     [group setPublications:pubs];
 }
 

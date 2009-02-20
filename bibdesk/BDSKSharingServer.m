@@ -42,6 +42,7 @@
 #import "BDSKPasswordController.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "NSArray_BDSKExtensions.h"
+#import "NSData_BDSKExtensions.h"
 #import "BibItem.h"
 #import "BibDocument.h"
 #import <libkern/OSAtomic.h>

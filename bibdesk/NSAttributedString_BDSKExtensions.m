@@ -245,6 +245,17 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
 @end
 
 
+@implementation NSMutableAttributedString (BDSKExtensions)
+
+- (void)appendString:(NSString *)string attributes:(NSDictionary *)attributes {
+    NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:string attributes:attributes];
+    [self appendAttributedString:attrString];
+    [attrString release];
+}
+
+@end
+
+
 @implementation NSTextStorage (BDSKExtensions)
 
 - (id)scriptingRTF {

@@ -38,7 +38,6 @@
 
 #import "BDSKLinkedFile.h"
 #import <CoreServices/CoreServices.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKRuntime.h"
 #import "NSData_BDSKExtensions.h"
 

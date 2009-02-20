@@ -37,7 +37,6 @@
 #import <Foundation/Foundation.h>
 #import <AGRegex/AGRegex.h>
 #import <OmniBase/OmniBase.h>
-#import <OmniFoundation/OmniFoundation.h>
 
 @implementation BDSKRegExFindPattern
 

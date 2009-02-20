@@ -40,6 +40,7 @@
 #import "BDSKAsynchronousDOServer.h"
 #import "BDSKSharingServer.h"
 #import "BDSKPasswordController.h"
+#import "NSData_BDSKExtensions.h"
 
 typedef struct _BDSKSharingClientFlags {
     volatile int32_t isRetrieving;
@@ -327,7 +328,7 @@ typedef struct _BDSKSharingClientFlags {
 
 - (int)runPasswordPrompt;
 {
-    NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
+    NSAssert([NSThread isMainThread] == 1, @"password controller must be run from the main thread");
     BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
     int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
     [pwc close];
@@ -337,7 +338,7 @@ typedef struct _BDSKSharingClientFlags {
 
 - (int)runAuthenticationFailedAlert;
 {
-    NSAssert([NSThread inMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
+    NSAssert([NSThread isMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Authentication Failed", @"Message in alert dialog when authentication failed")
                                      defaultButton:nil
                                    alternateButton:nil

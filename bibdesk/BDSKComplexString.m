@@ -36,10 +36,10 @@
 #import "BDSKComplexString.h"
 #import "NSString_BDSKExtensions.h"
 #import <OmniBase/OmniBase.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringNode.h"
 #import "BDSKMacroResolver.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSCharacterSet_BDSKExtensions.h"
 
 static NSCharacterSet *macroCharSet = nil;
 static NSZone *complexStringExpansionZone = NULL;

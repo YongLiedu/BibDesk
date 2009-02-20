@@ -39,6 +39,8 @@
 #import "BDSKCompletionManager.h"
 #import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
+#import "NSArray_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 
 
 @implementation BDSKCompletionManager

@@ -45,7 +45,6 @@
 #import "BDSKBibTeXParser.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "NSObject_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 

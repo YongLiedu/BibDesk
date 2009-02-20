@@ -37,13 +37,13 @@
  */
 
 #import "BibPref_AutoFile.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKAlert.h"
 #import "BDSKFormatParser.h"
 #import "BDSKAppController.h"
 #import "BDSKPreviewItem.h"
 #import "BDSKStringConstants.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 #define MAX_PREVIEW_WIDTH	501.0
 #define MAX_FORMAT_WIDTH	288.0

@@ -38,7 +38,6 @@
  */
 
 #import "BibPref_Sharing.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BDSKSharingBrowser.h"
 #import <Security/Security.h>

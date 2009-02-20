@@ -39,7 +39,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKFormatParser.h"
 
 enum {

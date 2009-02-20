@@ -43,7 +43,6 @@
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKServerInfo.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKItemSearchIndexes.h"
 #import "BDSKISIGroupServer.h"
 #import "BDSKDBLPGroupServer.h"

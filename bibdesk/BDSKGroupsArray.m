@@ -51,7 +51,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKFilter.h"
-#import <OmniFoundation/OmniFoundation.h>
+#import "NSArray_BDSKExtensions.h"
 
 @interface BDSKGroupsArray (Private)
 

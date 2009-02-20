@@ -34,7 +34,6 @@
  */
 
 #import "BDSKMainTableView.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
@@ -58,6 +57,7 @@
 #import "NSImage_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 
 enum {
     BDSKColumnTypeText,

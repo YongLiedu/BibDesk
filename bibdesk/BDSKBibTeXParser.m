@@ -58,6 +58,8 @@
 #import "NSScanner_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKCompletionManager.h"
+#import "NSData_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 
 static NSLock *parserLock = nil;
 

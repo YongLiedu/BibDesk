@@ -64,7 +64,6 @@
 #import "BibAuthor+Scripting.h"
 #import "BDSKTypeManager.h"
 #import <Quartz/Quartz.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKCFCallBacks.h"
 
 

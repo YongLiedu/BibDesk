@@ -37,7 +37,6 @@
  */
 
 #import "BibPref_CiteKey.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BibItem.h"
 #import "NSImage_BDSKExtensions.h"

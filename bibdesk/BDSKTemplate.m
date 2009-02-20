@@ -40,6 +40,7 @@
 #import "BDAlias.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSCharacterSet_BDSKExtensions.h"
 
 // do not localized these strings
 NSString *BDSKTemplateRoleString = @"role";

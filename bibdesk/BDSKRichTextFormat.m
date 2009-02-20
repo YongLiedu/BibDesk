@@ -37,7 +37,7 @@
  */
 
 #import "BDSKRichTextFormat.h"
-#import <OmniFoundation/OmniFoundation.h>
+#import "NSData_BDSKExtensions.h"
 
 
 @implementation BDSKRichTextFormat
@@ -63,7 +63,7 @@
 }
 
 - (id)initWithName:(NSString *)aName {
-    NSData *aData = [[NSData alloc] initWithBase64String:aName];
+    NSData *aData = [[NSData alloc] initWithBase64String:aName withNewlines:NO];
     self = [self initWithData:aData];
     [aData release];
     return self;
@@ -80,7 +80,7 @@
 }
 
 - (NSString *)name {
-    return [data base64String];
+    return [data base64StringWithNewlines:NO];
 }
 
 - (NSTextStorage *)richText {

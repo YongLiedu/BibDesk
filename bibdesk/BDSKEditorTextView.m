@@ -39,7 +39,6 @@
 #import "BDSKEditorTextView.h"
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
-#import <OmniFoundation/OmniFoundation.h>
 
 static void *BDSKEditorTextViewDefaultsObservationContext = @"BDSKEditorTextViewDefaultsObservationContext";
 

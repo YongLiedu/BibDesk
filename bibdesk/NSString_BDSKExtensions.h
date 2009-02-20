@@ -35,10 +35,7 @@
  */
 
 #import <Foundation/Foundation.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import <CoreFoundation/CoreFoundation.h>
-#import "NSCharacterSet_BDSKExtensions.h"
-#import "CFString_BDSKExtensions.h"
 
 @interface NSString (BDSKExtensions)
 
@@ -454,6 +451,8 @@ An inline buffer is used for speed in accessing each character.
 - (NSString *)stringByRemovingReturns;
 
 - (NSString *)stringByRemovingString:(NSString *)removeString;
+
+- (NSString *)stringByReplacingAllOccurrencesOfString:(NSString *)stringToReplace withString:(NSString *)replacement;
 
 - (NSString *)stringByRemovingPrefix:(NSString *)prefix;
 - (NSString *)stringByRemovingSuffix:(NSString *)suffix;

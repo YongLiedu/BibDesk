@@ -886,7 +886,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 #pragma mark -
 
 - (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray{
-    if([NSThread inMainThread] == NO){
+    if([NSThread isMainThread] == NO){
         [self performSelectorOnMainThread:_cmd withObject:dstArray waitUntilDone:YES];
     } else {
         NSArray *array = [[NSArray alloc] initWithArray:[self publications] copyItems:YES];
@@ -896,7 +896,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 }
 
 - (void)getCopyOfMacrosOnMainThread:(NSMutableDictionary *)dstDict{
-    if([NSThread inMainThread] == NO){
+    if([NSThread isMainThread] == NO){
         [self performSelectorOnMainThread:_cmd withObject:dstDict waitUntilDone:YES];
     } else {
         NSDictionary *dict = [[NSDictionary alloc] initWithDictionary:[macroResolver macroDefinitions] copyItems:YES];
@@ -3101,7 +3101,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     if (docState.isDocumentClosed)
         return;
 
-    BDSKASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     
     //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
     [self updateBottomPreviewPane];

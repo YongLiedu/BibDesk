@@ -34,7 +34,6 @@
  */
 
 #import "BibPref_Defaults.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTypeInfoEditor.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKMacroResolver.h"

@@ -185,7 +185,7 @@
 
 - (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
 {
-    BDSKASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     [group addPublications:pubs];
 }
 

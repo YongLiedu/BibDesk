@@ -54,6 +54,14 @@
 
 @end
 
+
+@interface NSMutableAttributedString (BDSKExtensions)
+
+- (void)appendString:(NSString *)string attributes:(NSDictionary *)attributes;
+
+@end
+
+
 @interface NSTextStorage (BDSKExtensions)
 
 - (id)scriptingRTF;

@@ -44,7 +44,6 @@
 #import "BDSKImagePopUpButton.h"
 #import "BDSKTypeSelectHelper.h"
 #import <WebKit/WebKit.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCrossrefFormatter.h"
 #import "BDSKCiteKeyFormatter.h"

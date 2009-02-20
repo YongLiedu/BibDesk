@@ -39,8 +39,8 @@
 #import "BDSKApplication.h"
 #import "BibDocument.h"
 #import "BDAlias.h"
+#import "BDSKRunTime.h"
 #import <OmniBase/OmniBase.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import <Carbon/Carbon.h>
 
 
@@ -50,12 +50,19 @@
 - (void)redo:(id)obj;
 @end
 
+
+@interface NSThread (BDSKExtensions)
++ (void)assignMainThread;
+@end
+
+
 @implementation BDSKApplication
 
 + (id)sharedApplication {
     static id sharedApplication = nil;
     if (sharedApplication == nil) {
         sharedApplication = [super sharedApplication];
+        [NSThread assignMainThread];
         [OBObject self]; // Trigger +[OBPostLoader processClasses]
     }
     return sharedApplication;
@@ -280,6 +287,30 @@
 @end
 
 
+@implementation NSThread (BDSKExtensions)
+
+static NSThread *mainThread = nil;
+
++ (void)assignMainThread {
+    BDSKPRECONDITION(mainThread == nil);
+    mainThread = [[NSThread currentThread] retain];
+}
+
++ (BOOL)replacementIsMainThread {
+    if (mainThread == nil)
+        [self assignMainThread];
+    return [self currentThread] == mainThread;
+}
+
++ (void)load {
+    // this does nothing when +isMainThread is already implemented, that is, on Leopard
+    BDSKAddClassMethodImplementationFromSelector(self, @selector(isMainThread), @selector(replacementIsMainThread));
+}
+
+@end
+
+/*
+
 @implementation OFRunLoopQueueProcessor (BDSKExtensions)
 
 // This is copied from OAAppKitQueueProcessor, we need this as long as we use OmniFoundation
@@ -309,3 +340,4 @@
 }
 
 @end
+*/

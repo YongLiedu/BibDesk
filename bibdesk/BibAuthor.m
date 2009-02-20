@@ -36,12 +36,12 @@
 
 #import "BibAuthor.h"
 #import "BibItem.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BDSKBibTeXParser.h"
 #import <BTParse/btparse.h>
 #import "BDSKErrorObjectController.h"
 #import "BDSKCFCallBacks.h"
+#import "NSCharacterSet_BDSKExtensions.h"
 
 @interface BibAuthor (Private)
 

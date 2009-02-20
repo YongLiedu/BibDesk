@@ -62,6 +62,7 @@
 #import "NSViewAnimation_BDSKExtensions.h"
 #import "BDSKDocumentSearch.h"
 #import "NSView_BDSKExtensions.h"
+#import "NSDictionary_BDSKExtensions.h"
 
 @implementation BibDocument (Search)
 

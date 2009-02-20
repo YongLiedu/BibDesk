@@ -42,6 +42,7 @@
 #import "BDSKVersionNumber.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "BDSKMessageQueue.h"
+#import "NSAttributedString_BDSKExtensions.h"
 
 #define PROPERTY_LIST_URL @"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"
 #define DOWNLOAD_URL @"http://bibdesk.sourceforge.net/"

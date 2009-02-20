@@ -1236,15 +1236,13 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 #pragma mark Spotlight support
 
-OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
-
 - (void)rebuildMetadataCache:(id)userInfo{        
     [metadataMessageQueue queueSelector:@selector(privateRebuildMetadataCache:) forTarget:self withObject:userInfo];
 }
 
 - (void)privateRebuildMetadataCache:(id)userInfo{
     
-    BDSKPRECONDITION([NSThread inMainThread] == NO);
+    BDSKPRECONDITION([NSThread isMainThread] == NO);
     
     // we could unlock after checking the flag, but we don't want multiple threads writing to the cache directory at the same time, in case files have identical items
     [metadataCacheLock lock];

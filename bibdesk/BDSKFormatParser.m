@@ -37,12 +37,12 @@
  */
 
 #import "BDSKFormatParser.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BibAuthor.h"
 #import "BDSKConverter.h"
 #import "BDSKTypeManager.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSAttributedString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
 #import "NSScanner_BDSKExtensions.h"
 #import "BDSKStringNode.h"
