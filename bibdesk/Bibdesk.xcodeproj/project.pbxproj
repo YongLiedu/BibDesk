@@ -455,7 +455,6 @@
 		F95CC0C3087F5378002C5694 /* NSFileManager_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F95CC0C1087F5378002C5694 /* NSFileManager_BDSKExtensions.m */; };
 		F95D3FA709DDF51D00D793A6 /* BibPref_Sharing.nib in Resources */ = {isa = PBXBuildFile; fileRef = F95D3FA509DDF51D00D793A6 /* BibPref_Sharing.nib */; };
 		F95D3FAF09DDF6A900D793A6 /* BibPref_Sharing.m in Sources */ = {isa = PBXBuildFile; fileRef = F95D3FAD09DDF6A900D793A6 /* BibPref_Sharing.m */; };
-		F95ED68C0B07B87F00000BBF /* BDSKController.m in Sources */ = {isa = PBXBuildFile; fileRef = F95ED68A0B07B87F00000BBF /* BDSKController.m */; };
 		F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F95ED6910B07BA4E00000BBF /* ExceptionHandling.framework */; };
 		F963E4490A1D7E1300695DDC /* BibPref_Export.nib in Resources */ = {isa = PBXBuildFile; fileRef = F963E4470A1D7E1300695DDC /* BibPref_Export.nib */; };
 		F963E4500A1D81B000695DDC /* exportPrefs.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F963E44F0A1D81AF00695DDC /* exportPrefs.tiff */; };
@@ -3849,7 +3848,6 @@
 				CEEFDE010B03ED0200668BB0 /* BDSKScriptGroupSheetController.m in Sources */,
 				CEEFDE030B03ED0200668BB0 /* BDSKURLGroupSheetController.m in Sources */,
 				CEEFE6C20B0403E700668BB0 /* BDSKGroupsArray.m in Sources */,
-				F95ED68C0B07B87F00000BBF /* BDSKController.m in Sources */,
 				CE7A31400B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m in Sources */,
 				CE7A4A8F0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m in Sources */,
 				CE8C731F0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m in Sources */,

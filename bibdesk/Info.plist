@@ -445,8 +445,6 @@
 			</array>
 		</dict>
 	</array>
-	<key>OFControllerClass</key>
-	<string>BDSKController</string>
 	<key>OSAScriptingDefinition</key>
 	<string>BibDesk.sdef</string>
 	<key>UTExportedTypeDeclarations</key>
