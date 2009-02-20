@@ -532,6 +532,134 @@ static void destroyTemporaryDirectory()
     return [self copyPath:sourcePath toPath:targetPath handler:nil];
 }
 
+#pragma mark Creating paths
+
+- (BOOL)createPathToFile:(NSString *)path attributes:(NSDictionary *)attributes;
+    // Creates any directories needed to be able to create a file at the specified path.  Returns NO on failure.
+{
+    NSString *directory = [path stringByDeletingLastPathComponent];
+    BOOL isDir;
+    BOOL success = NO;
+    if ([directory length] == 0)
+        success = YES;
+    else if ([self fileExistsAtPath:directory isDirectory:&isDir] == NO)
+        success = [self createPathToFile:directory attributes:attributes] && [self createDirectoryAtPath:directory attributes:attributes];
+    else if (isDir == NO)
+        success = YES;
+    return success;
+}
+
+#pragma mark Resoving aliases
+
+- (NSString *)resolveAliasesInPath:(NSString *)originalPath
+{
+    FSRef ref, originalRefOfPath;
+    OSErr err;
+    char *buffer;
+    UInt32 bufferSize;
+    Boolean isFolder, wasAliased;
+    NSMutableArray *strippedComponents;
+    NSString *path;
+
+    if ([NSString isEmptyString:originalPath])
+        return nil;
+    
+    path = [originalPath stringByStandardizingPath]; // maybe use stringByExpandingTildeInPath instead?
+    strippedComponents = [[NSMutableArray alloc] init];
+    [strippedComponents autorelease];
+
+    /* First convert the path into an FSRef. If necessary, strip components from the end of the pathname until we reach a resolvable path. */
+    for(;;) {
+        bzero(&ref, sizeof(ref));
+        err = FSPathMakeRef((const unsigned char *)[path fileSystemRepresentation], &ref, &isFolder);
+        if (err == noErr)
+            break;  // We've resolved the first portion of the path to an FSRef.
+        else if (err == fnfErr || err == nsvErr || err == dirNFErr) {  // Not found --- try walking up the tree.
+            NSString *stripped;
+
+            stripped = [path lastPathComponent];
+            if ([NSString isEmptyString:stripped])
+                return nil;
+
+            [strippedComponents addObject:stripped];
+            path = [path stringByDeletingLastPathComponent];
+        } else
+            return nil;  // Some other error; return nil.
+    }
+    /* Stash a copy of the FSRef we got from 'path'. In the common case, we'll be converting this very same FSRef back into a path, in which case we can just re-use the original path. */
+    bcopy(&ref, &originalRefOfPath, sizeof(FSRef));
+
+    /* Repeatedly resolve aliases and add stripped path components until done. */
+    for(;;) {
+        
+        /* Resolve any aliases. */
+        /* TODO: Verify that we don't need to repeatedly call FSResolveAliasFile(). We're passing TRUE for resolveAliasChains, which suggests that the call will continue resolving aliases until it reaches a non-alias, but that parameter's meaning is not actually documented in the Apple File Manager API docs. However, I can't seem to get the finder to *create* an alias to an alias in the first place, so this probably isn't much of a problem.
+        (Why not simply call FSResolveAliasFile() repeatedly since I don't know if it's necessary? Because it can be a fairly time-consuming call if the volume is e.g. a remote WebDAVFS volume.) */
+        err = FSResolveAliasFile(&ref, TRUE, &isFolder, &wasAliased);
+        /* if it's a regular file and not an alias, FSResolveAliasFile() will return noErr and set wasAliased to false */
+        if (err != noErr)
+            return nil;
+
+        /* Append one stripped path component. */
+        if ([strippedComponents count] > 0) {
+            UniChar *componentName;
+            UniCharCount componentNameLength;
+            NSString *nextComponent;
+            FSRef newRef;
+            
+            if (!isFolder) {
+                // Whoa --- we've arrived at a non-folder. Can't continue.
+                // (A volume root is considered a folder, as you'd expect.)
+                return nil;
+            }
+            
+            nextComponent = [strippedComponents lastObject];
+            componentNameLength = [nextComponent length];
+            componentName = malloc(componentNameLength * sizeof(UniChar));
+            BDSKASSERT(sizeof(UniChar) == sizeof(unichar));
+            [nextComponent getCharacters:componentName];
+            bzero(&newRef, sizeof(newRef));
+            err = FSMakeFSRefUnicode(&ref, componentNameLength, componentName, kTextEncodingUnknown, &newRef);
+            free(componentName);
+
+            if (err == fnfErr) {
+                /* The current ref is a directory, but it doesn't contain anything with the name of the next component. Quit walking the filesystem and append the unresolved components to the name of the directory. */
+                break;
+            } else if (err != noErr) {
+                /* Some other error. Give up. */
+                return nil;
+            }
+
+            bcopy(&newRef, &ref, sizeof(ref));
+            [strippedComponents removeLastObject];
+        } else {
+            /* If we don't have any path components to re-resolve, we're done. */
+            break;
+        }
+    }
+
+    if (FSCompareFSRefs(&originalRefOfPath, &ref) != noErr) {
+        /* Convert our FSRef back into a path. */
+        /* PATH_MAX*4 is a generous guess as to the largest path we can expect. CoreFoundation appears to just use PATH_MAX, so I'm pretty confident this is big enough. */
+        buffer = malloc(bufferSize = (PATH_MAX * 4));
+        err = FSRefMakePath(&ref, (unsigned char *)buffer, bufferSize);
+        if (err == noErr) {
+            path = [NSString stringWithUTF8String:buffer];
+        } else {
+            path = nil;
+        }
+        free(buffer);
+    }
+
+    /* Append any unresolvable path components to the resolved directory. */
+    while ([strippedComponents count] > 0) {
+        path = [path stringByAppendingPathComponent:[strippedComponents lastObject]];
+        [strippedComponents removeLastObject];
+    }
+
+    return path;
+}
+
 #pragma mark Thread safe methods
 
 - (BOOL)createDirectoryAtPathWithNoAttributes:(NSString *)path

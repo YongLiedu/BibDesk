@@ -555,7 +555,7 @@ static BDSKFiler *sharedFiler = nil;
             NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] fileType];
  
             // create parent directories if necessary (OmniFoundation)
-            if (NO == [self createPathToFile:resolvedNewPath attributes:nil error:NULL]) {
+            if (NO == [self createPathToFile:resolvedNewPath attributes:nil]) {
                 status = NSLocalizedString(@"Unable to create parent directory.", @"AutoFile error message");
                 statusFlag = BDSKCannotCreateParentErrorMask;
             }

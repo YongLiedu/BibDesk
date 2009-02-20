@@ -101,6 +101,11 @@
 - (NSNumber *)openMetaRatingAtPath:(NSString *)path error:(NSError **)error;
 - (BOOL)setOpenMetaRating:(NSNumber *)rating atPath:(NSString *)path error:(NSError **)error;
 
+// uses createDirectoryAtPath:attributes: recursively for all parent components if necessary
+- (BOOL)createPathToFile:(NSString *)path attributes:(NSDictionary *)attributes;
+
+- (NSString *)resolveAliasesInPath:(NSString *)path;
+
 //
 // Thread safe API
 //

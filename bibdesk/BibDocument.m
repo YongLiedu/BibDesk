@@ -1333,7 +1333,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 
                 if ([fm fileExistsAtPath:targetPath])
                     targetPath = [fm uniqueFilePathWithName:[targetPath stringByDeletingLastPathComponent] atPath:[targetPath lastPathComponent]];
-                success = [fm createPathToFile:targetPath attributes:nil error:NULL];
+                success = [fm createPathToFile:targetPath attributes:nil];
                 if (success)
                 success = [fm copyPath:filePath toPath:targetPath handler:nil];
             }
