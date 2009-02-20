@@ -40,6 +40,7 @@
 #import <CoreServices/CoreServices.h>
 #import <OmniFoundation/OmniFoundation.h>
 #import "BDSKRuntime.h"
+#import "NSData_BDSKExtensions.h"
 
 static void BDSKDisposeAliasHandle(AliasHandle inAlias)
 {
@@ -378,7 +379,7 @@ static Class BDSKLinkedFileClass = Nil;
     if ([base64String rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location != NSNotFound || ([base64String length] % 4) != 0) {
         // make a valid base64 string: remove newline and white space characters, and add padding "=" if necessary
         NSMutableString *tmpString = [[base64String mutableCopy] autorelease];
-        [tmpString replaceAllOccurrencesOfCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] withString:@""];
+        [tmpString replaceOccurrencesOfCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] withString:@""];
         while (([tmpString length] % 4) != 0)
             [tmpString appendString:@"="];
         base64String = tmpString;
@@ -410,7 +411,7 @@ static Class BDSKLinkedFileClass = Nil;
     BDSKASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     
     NSString *basePath = [aDelegate basePathForLinkedFile:self];
-    NSString *relPath = [basePath relativePathToFilename:aPath];
+    NSString *relPath = [basePath relativePathToFile:aPath];
     AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
     
     if (self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate]) {
@@ -609,7 +610,7 @@ static Class BDSKLinkedFileClass = Nil;
 {
     NSData *data = [self aliasDataRelativeToPath:newBasePath];
     NSString *path = [self path];
-    path = path && newBasePath ? [newBasePath relativePathToFilename:path] : relativePath;
+    path = path && newBasePath ? [newBasePath relativePathToFile:path] : relativePath;
     NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil];
     return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
 }
@@ -687,7 +688,7 @@ static Class BDSKLinkedFileClass = Nil;
     
     // update the relative path
     [relativePath autorelease];
-    relativePath = [[basePath relativePathToFilename:path] retain];
+    relativePath = [[basePath relativePathToFile:path] retain];
 }
 
 @end

@@ -1312,7 +1312,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 if (filePath = [[file URL] path]) {
                     [localFiles addObject:filePath];
                     if (commonParent)
-                        commonParent = [NSString commonRootPathOfFilename:[filePath stringByDeletingLastPathComponent] andFilename:commonParent];
+                        commonParent = [[filePath stringByDeletingLastPathComponent] commonRootPathOfFile:commonParent];
                     else
                         commonParent = [filePath stringByDeletingLastPathComponent];
                 }
@@ -1328,7 +1328,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
         while (success && (filePath = [itemEnum nextObject])) {
             if ([fm fileExistsAtPath:filePath]) {
-                NSString *relativePath = commonParent ? [commonParent relativePathToFilename:filePath] : [filePath lastPathComponent];
+                NSString *relativePath = commonParent ? [commonParent relativePathToFile:filePath] : [filePath lastPathComponent];
                 NSString *targetPath = [path stringByAppendingPathComponent:relativePath];
                 
                 if ([fm fileExistsAtPath:targetPath])
@@ -1565,7 +1565,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         NSString *collapsedFrontMatter = [frontMatter stringByRemovingWhitespace];
         if([NSString isEmptyString:collapsedFrontMatter]){
             shouldAppendFrontMatter = NO;
-        }else if([collapsedTemplate containsString:collapsedFrontMatter]){
+        }else if([collapsedTemplate rangeOfString:collapsedFrontMatter].length){
             NSLog(@"*** WARNING! *** Found duplicate preamble %@.  Using template from preferences.", frontMatter);
             shouldAppendFrontMatter = NO;
         }
@@ -3817,7 +3817,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     BOOL isDir;
     if ([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir]) {
         NSString *filename = [path lastPathComponent];
-        NSString *relativePath = basePath ? [basePath relativePathToFilename:path] : filename;
+        NSString *relativePath = basePath ? [basePath relativePathToFile:path] : filename;
         NSFileWrapper *container = self;
         
         if ([relativePath isEqualToString:filename] == NO)

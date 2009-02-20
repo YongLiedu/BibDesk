@@ -144,6 +144,13 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
 
 @implementation NSAttributedString (BDSKExtensions)
 
+- (id)initWithString:(NSString *)string attributeName:(NSString *)attributeName attributeValue:(id)attributeValue{
+    NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:attributeValue, attributeName, nil];
+    self = [self initWithString:string attributes:attributes];
+    [attributes release];
+    return self;
+}
+
 - (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse{
 
     NSMutableAttributedString *mas;

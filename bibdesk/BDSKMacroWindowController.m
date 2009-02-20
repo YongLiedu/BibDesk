@@ -722,7 +722,7 @@
     
 	NSString *partialString = *partialStringPtr;
     
-    if( [partialString containsCharacterInSet:invalidMacroCharSet] ||
+    if( [partialString rangeOfCharacterFromSet:invalidMacroCharSet].length ||
 	    ([partialString length] && 
 		 [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) ){
         return NO;

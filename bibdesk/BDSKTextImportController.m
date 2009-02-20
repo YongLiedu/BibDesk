@@ -1309,7 +1309,7 @@
     }
     
     // convert newlines to a single space, then collapse (RFE #1480354)
-    if ([selKey isNoteField] == NO && [selString containsCharacterInSet:[NSCharacterSet newlineCharacterSet]] == YES) {
+    if ([selKey isNoteField] == NO && [selString rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].length) {
         selString = [selString stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
         selString = [selString fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
     }

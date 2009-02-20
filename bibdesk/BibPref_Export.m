@@ -65,7 +65,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         else
             fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"txt", @"rtf", @"rtfd", @"doc", nil];
         
-        roles = [[NSMutableArray alloc] initWithObjects:BDSKTemplateLocalizedMainPageString, BDSKTemplateLocalizedDefaultItemString, BDSKTemplateLocalizedAccessoryString, BDSKTemplateLocalizedScriptString, nil];
+        roles = [[NSMutableArray alloc] initWithObjects:[BDSKTemplate localizedMainPageString], [BDSKTemplate localizedDefaultItemString], [BDSKTemplate localizedAccessoryString], [BDSKTemplate localizedScriptString], nil];
         [roles addObjectsFromArray:[[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString]];
         
         templatePrefList = BDSKExportTemplateList;

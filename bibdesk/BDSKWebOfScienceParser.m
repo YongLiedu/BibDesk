@@ -89,7 +89,7 @@ static NSString *fixedAuthorName(NSString *name)
     
     unsigned idx, maxIdx = [firstNames length];
     for(idx = 0; idx < maxIdx; idx++){
-        [newName appendCharacter:[firstNames characterAtIndex:idx]];
+        [newName appendString:[firstNames substringWithRange:NSMakeRange(idx, 1)]];
         [newName appendString:(idx == maxIdx - 1 ? @"." : @". ")];
     }
     

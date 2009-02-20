@@ -64,6 +64,66 @@ static NSString *mixedString = nil;
     
 }
 
++ (BOOL)isEmptyString:(NSString *)string {
+    return string == nil || [string isEqualToString:@""];
+}
+
++ (NSString *)horizontalEllipsisString; // '...'
+{
+    static NSString *string = nil;
+    if (string == nil)
+        string = [[self stringWithCharacter:0x2026] retain];
+    return string;
+}
+
++ (NSString *)emdashString; // '---'
+{
+    static NSString *string = nil;
+    if (string == nil)
+        string = [[self stringWithCharacter:0x2014] retain];
+    return string;
+}
+
++ (NSString *)endashString; // '--'
+{
+    static NSString *string = nil;
+    if (string == nil)
+        string = [[self stringWithCharacter:0x2013] retain];
+    return string;
+}
+
++ (NSString *)commandKeyIndicatorString;
+{
+    static NSString *string = nil;
+    if (string == nil)
+        string = [[self stringWithCharacter:0x2318] retain];
+    return string;
+}
+
++ (NSString *)controlKeyIndicatorString;
+{
+    static NSString *string = nil;
+    if (string == nil)
+        string = [[self stringWithCharacter:0x2303] retain];
+    return string;
+}
+
++ (NSString *)alternateKeyIndicatorString;
+{
+    static NSString *string = nil;
+    if (string == nil)
+        string = [[self stringWithCharacter:0x2325] retain];
+    return string;
+}
+
++ (NSString *)shiftKeyIndicatorString;
+{
+    static NSString *string = nil;
+    if (string == nil)
+        string = [[self stringWithCharacter:0x21E7] retain];
+    return string;
+}
+
 + (NSString *)hexStringForCharacter:(unichar)ch{
     NSMutableString *string = [NSMutableString stringWithCapacity:4];
     [string appendFormat:@"%X", ch];
@@ -84,7 +144,7 @@ static int MAX_RATING = 5;
         NSMutableString *ratingString = [NSMutableString string];
         do {
             CFDictionaryAddValue(ratings, (const void *)i, (const void *)[[ratingString copy] autorelease]);
-            [ratingString appendCharacter:(0x278A + i)];
+            [ratingString appendFormat:@"%C", (0x278A + i)];
         } while(i++ < MAX_RATING);
         BDSKPOSTCONDITION((int)[(id)ratings count] == MAX_RATING + 1);
     }
@@ -971,6 +1031,10 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     }
 }
 
+- (unsigned int)unsignedIntValue {
+    return strtoul([self UTF8String], NULL, 10);
+}
+
 - (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength{
     NSMutableString *result = [NSMutableString string];
     NSArray *allComponents = [self componentsSeparatedByString:@" "]; // single whitespace
@@ -994,10 +1058,6 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 }
 
 #pragma mark -
-
-- (BOOL)containsString:(NSString *)searchString options:(unsigned int)mask range:(NSRange)aRange{
-    return !searchString || [searchString length] == 0 || [self rangeOfString:searchString options:mask range:aRange].length > 0;
-}
 
 - (BOOL)containsWord:(NSString *)aWord{
     
@@ -1069,7 +1129,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 - (NSArray *)componentsSeparatedByFieldSeparators;
 {
     NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:BDSKKeywordsString];
-    if([self containsCharacterInSet:acSet])
+    if([self rangeOfCharacterFromSet:acSet].length)
         return [self componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
     else 
         return [self componentsSeparatedByStringCaseInsensitive:@" and "];
@@ -1243,6 +1303,206 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return string ?: self;
 }
 
+- (NSString *)stringByDeletingCharactersInSet:(NSCharacterSet *)removeSet;
+{
+    if ([self rangeOfCharacterFromSet:removeSet].length == 0)
+        return self;
+    NSMutableString *string = [self mutableCopy];
+    [string deleteCharactersInCharacterSet:removeSet];
+    return [string autorelease];
+}
+
+- (NSString *)stringByReplacingCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString;
+{
+    if ([self rangeOfCharacterFromSet:set].length == 0)
+        return self;
+    NSMutableString *string = [self mutableCopy];
+    [string replaceOccurrencesOfCharactersInSet:set withString:replaceString];
+    return [string autorelease];
+}
+
+- (NSString *)stringByRemovingWhitespace {
+    return [self stringByDeletingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+}
+
+- (NSString *)stringByRemovingReturns {
+    return [self stringByDeletingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+}
+
+- (NSString *)stringByRemovingString:(NSString *)removeString {
+    if ([removeString length] == 0 || [self rangeOfString:removeString].length == 0)
+        return self;
+    return [[self componentsSeparatedByString:removeString] componentsJoinedByString:@""];
+}
+
+- (NSString *)stringByReplacingAllOccurrencesOfString:(NSString *)stringToReplace withString:(NSString *)replacement {
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
+        return [self stringByReplacingOccurrencesOfString:stringToReplace withString:replacement];
+    } else {
+        if ([stringToReplace length] == 0 || [self rangeOfString:stringToReplace].length == 0)
+            return self;
+        return [[self componentsSeparatedByString:stringToReplace] componentsJoinedByString:replacement];
+    }
+}
+
+- (NSString *)stringByRemovingPrefix:(NSString *)prefix {
+    unsigned int length = [prefix length];
+    if (length && [self hasPrefix:prefix])
+        return [self substringFromIndex:length];
+    return self;
+}
+
+- (NSString *)stringByRemovingSuffix:(NSString *)suffix {
+    unsigned int length = [suffix length];
+    if (length && [self hasSuffix:suffix])
+        return [self substringToIndex:[self length] - length];
+    return self;
+}
+
+- (NSString *)fullyEncodeAsIURI {
+    static const char hexDigits[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    static NSCharacterSet *unsafeCharacterSet = nil;
+    if (unsafeCharacterSet == nil) {
+        // unsafeCharacterSet is approximately the inverse of the set of characters that may appear in a URI according to RFC2396.  Note that it's a bit different from AcceptableCharacterSet; it has a different purpose.
+        NSMutableCharacterSet *tmpSet = [[NSMutableCharacterSet alloc] initWithString:@"!$%&'()*+,-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz~"];
+        // Note: RFC2396 requires us to escape backslashes, carets, and pipes, which we don't do because this prevents us from interoperating with some web servers which don't correctly decode their requests.  See <bug://bugs/4467>: Should we stop escaping the pipe | char in URLs? (breaks counters, lycos.de).
+        [tmpSet addCharactersInString:@"\\^|"];
+        [tmpSet invert];
+        unsafeCharacterSet = [tmpSet copy];
+        [tmpSet release];
+    }
+    
+    // Omni uses the inverse check here, which seems to completely negate the use of this method
+    if ([self rangeOfCharacterFromSet:unsafeCharacterSet].length == 0)
+        return self;
+    
+    NSData *utf8Data = [self dataUsingCFEncoding:kCFStringEncodingUTF8 allowLossyConversion:NO];
+    const unsigned char *source = [utf8Data bytes];
+    unsigned int sourceSize = [utf8Data length];
+    unsigned int destSize = sourceSize;
+    
+    if (destSize < 20)
+        destSize *= 3;
+    else
+        destSize += ( destSize >> 1 );
+    
+    unsigned char *dest = NSZoneMalloc(NULL, destSize);
+    unsigned int i, j = 0;
+    
+    for (i = 0; i < sourceSize; i++) {
+        unsigned char ch = source[i];
+        
+        // Headroom: we may insert up to three bytes into destination.
+        if (j + 3 >= destSize) {
+            int newSize = destSize + ( destSize >> 1 );
+            dest = NSZoneRealloc(NULL, dest, newSize);
+            destSize = newSize;
+        }
+        
+        if ([unsafeCharacterSet characterIsMember:ch]) {
+            dest[j++] = '%';
+            dest[j++] = (unichar)hexDigits[((ch & 0xF0) >> 4)];
+            dest[j++] = (unichar)hexDigits[(ch & 0x0F)];
+        } else {
+            dest[j++] = ch;
+        }
+    }
+    
+    NSString *resultString = (NSString *)CFStringCreateWithBytes(kCFAllocatorDefault, dest, j, kCFStringEncodingASCII, FALSE);
+    NSZoneFree(NULL, dest);
+    
+    return [resultString autorelease];
+}
+
+#pragma mark Paths
+
++ (NSString *)pathSeparator {
+    return [NSOpenStepRootDirectory() substringToIndex:1];
+}
+
+- (NSArray *)commonRootPathComponentsOfFilename:(NSString *)filename components:(NSArray **)components otherComponents:(NSArray **)otherComponents {
+    NSArray *array = [self pathComponents];
+    NSArray *otherArray = [[filename stringByStandardizingPath] pathComponents];
+    unsigned int i, minLength = MIN([array count], [otherArray count]);
+    NSMutableArray *resultArray = [NSMutableArray arrayWithCapacity:minLength];
+
+    for (i = 0; i < minLength; i++) {
+        if ([[array objectAtIndex:i] isEqualToString:[otherArray objectAtIndex:i]])
+            [resultArray addObject:[array objectAtIndex:i]];
+        else
+            break;
+    }
+        
+    if ([resultArray count] == 0)
+        return nil;
+
+    if (components)
+        *components = [array subarrayWithRange:NSMakeRange(i, [array count] - i)];
+    if (otherComponents)
+        *otherComponents = [otherArray subarrayWithRange:NSMakeRange(i, [otherArray count] - i)];
+    
+    return resultArray;
+}
+
+- (NSString *)commonRootPathOfFile:(NSString *)filename {
+    NSArray *components = [self commonRootPathComponentsOfFilename:filename components:NULL otherComponents:NULL];
+    return components ? [NSString pathWithComponents:components] : nil;
+}
+
+- (NSString *)relativePathToFile:(NSString *)otherFilename {
+    NSArray *commonRoot, *myUniquePart, *otherUniquePart;
+    int numberOfStepsUp, i;
+
+    otherFilename = [otherFilename stringByStandardizingPath];
+    commonRoot = [[self stringByStandardizingPath] commonRootPathComponentsOfFilename:otherFilename components:&myUniquePart otherComponents:&otherUniquePart];
+    if (commonRoot == nil || [commonRoot count] == 0)
+        return otherFilename;
+    
+    numberOfStepsUp = [myUniquePart count];
+    if (numberOfStepsUp == 0)
+        return [NSString pathWithComponents:otherUniquePart];
+    if ([[myUniquePart lastObject] isEqualToString:@""])
+        numberOfStepsUp --;
+    if (numberOfStepsUp == 0)
+        return [NSString pathWithComponents:otherUniquePart];
+    
+    NSMutableArray *stepsUpArray = [[otherUniquePart mutableCopy] autorelease];
+    for (i = 0; i < numberOfStepsUp; i++) {
+        NSString *steppingUpPast = [myUniquePart objectAtIndex:i];
+        if ([steppingUpPast isEqualToString:@".."]) {
+            if ([[stepsUpArray objectAtIndex:0] isEqualToString:@".."])
+                [stepsUpArray removeObjectAtIndex:0];
+            else {
+                // Gack! Just give up.
+                return nil;
+            }
+        } else
+            [stepsUpArray insertObject:@".." atIndex:0];
+    }
+
+    return [[NSString pathWithComponents:stepsUpArray] stringByStandardizingPath];
+}
+
+- (NSString *)stringByNormalizingPath {
+    // Split on slashes and chop out '.' and '..' correctly.
+    NSArray *pathElements = [self pathComponents];
+    unsigned int i, count = [pathElements count], preserveCount;
+    NSMutableArray *newPathElements = [NSMutableArray arrayWithCapacity:count];
+    if (count > 0 && [[pathElements objectAtIndex:0] isEqualToString:@"/"])
+        preserveCount = 1;
+    else
+        preserveCount = 0;
+    for (i = 0; i < count; i++) {
+        NSString *pathElement = [pathElements objectAtIndex:i];
+        if ([pathElement isEqualToString:@".."]) {
+            if (count > preserveCount)
+                [newPathElements removeLastObject];
+        } else if ([pathElement isEqualToString:@"."] == NO)
+            [newPathElements addObject:pathElement];
+    }
+    return [NSString pathWithComponents:newPathElements];
+}
+
 #pragma mark HTML/XML
 
 - (NSString *)stringByConvertingHTMLLineBreaks{
@@ -1266,7 +1526,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
                 begin = ptr + 1;
 
 // Stolen and modified from the OmniFoundation -htmlString.
-- (NSString *)xmlString;
+- (NSString *)htmlStringEscapingBreak:(BOOL)escapeBreak;
 {
     unichar *ptr, *begin, *end;
     NSMutableString *result;
@@ -1292,14 +1552,16 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
             APPEND_PREVIOUS();
             [result appendString:@"&quot;"];
         } else if (*ptr == '<') {
-            APPEND_PREVIOUS();
+             APPEND_PREVIOUS();
             [result appendString:@"&lt;"];
         } else if (*ptr == '>') {
             APPEND_PREVIOUS();
             [result appendString:@"&gt;"];
         } else if (*ptr == '\n') {
             APPEND_PREVIOUS();
-            if (ptr + 1 != end && *(ptr + 1) == '\n') {
+            if (escapeBreak == NO)
+                [result appendString:@"<br/>"];
+            else if (ptr + 1 != end && *(ptr + 1) == '\n') {
                 [result appendString:@"&lt;p&gt;"];
                 ptr++;
             } else
@@ -1310,6 +1572,14 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     APPEND_PREVIOUS();
     NSZoneFree([self zone], originalPtr);
     return result;
+}
+
+- (NSString *)htmlString {
+    return [self htmlStringEscapingBreak:NO];
+}
+
+- (NSString *)xmlString {
+    return [self htmlStringEscapingBreak:YES];
 }
 
 - (NSString *)csvString;
@@ -1329,7 +1599,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     isQuoted = length > 0 && (*ptr == ' ' || *(end-1) == ' ');
     needsSpace = NO;
     
-    if(isQuoted == NO && [self containsCharacterInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n\r\t\","]] == NO) {
+    if(isQuoted == NO && [self rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"\n\r\t\","]].length == 0) {
         NSZoneFree([self zone], originalPtr);
         return self;
     }
@@ -1368,7 +1638,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (NSString *)tsvString;
 {
-    if([self containsCharacterInSet:[NSCharacterSet characterSetWithCharactersInString:@"\t\n\r"]] == NO)
+    if([self rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"\t\n\r"]].length == 0)
         return self;
     
     unichar *ptr, *begin, *end;
@@ -1582,16 +1852,32 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [self stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 }
 
+- (unichar)firstCharacter{
+    return [self length] ? [self characterAtIndex:0] : '\0';
+}
+
+- (unichar)lastCharacter{
+    return [self length] ? [self characterAtIndex:[self length] - 1] : '\0';
+}
+
+- (NSString *)lowercaseFirst{
+    return [[[self substringToIndex:1] lowercaseString] stringByAppendingString:[self substringFromIndex:1]];
+}
+
+- (NSString *)uppercaseFirst{
+    return [[[self substringToIndex:1] uppercaseString] stringByAppendingString:[self substringFromIndex:1]];
+}
+
 @end
 
 
 @implementation NSMutableString (BDSKExtensions)
 
-- (BOOL)isMutableString;
-{
-    int isMutable = YES;
+- (BOOL)isMutableString {
+    BOOL isMutable = YES;
     @try{
-        [self appendCharacter:'X'];
+        unichar ch = 'X';
+        CFStringAppendCharacters((CFMutableStringRef)self, &ch, 1);
     }
     @catch(NSException *localException){
         if([[localException name] isEqual:NSInvalidArgumentException])
@@ -1607,9 +1893,24 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return isMutable;
 }
 
-- (void)deleteCharactersInCharacterSet:(NSCharacterSet *)characterSet;
-{
+- (void)deleteCharactersInCharacterSet:(NSCharacterSet *)characterSet {
     BDDeleteCharactersInCharacterSet((CFMutableStringRef)self, (CFCharacterSetRef)characterSet);
+}
+
+- (void)replaceOccurrencesOfCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString {
+    BDReplaceCharactersInCharacterSet((CFMutableStringRef)self, (CFCharacterSetRef)set, (CFStringRef)replaceString);
+}
+
+- (void)appendStrings:(NSString *)first, ... {
+    va_list argList;
+    NSString *next;
+    if (first == nil)
+        return;
+    [self appendString:first];
+    va_start(argList, first);
+    while ((next = va_arg(argList, NSString *)))
+        [self appendString:next];
+    va_end(argList);
 }
 
 @end

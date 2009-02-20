@@ -415,7 +415,7 @@ error:(NSError **)outError{
                         endOfValue = YES;
                 }
                 if (endOfValue == NO) // we don't include the outer braces or the separating commas
-                    [value appendCharacter:ch];
+                    [value appendFormat:@"%C", ch];
             }
             if(endOfValue == NO)
                 break;

@@ -2808,7 +2808,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	}else{
         NSArray *groupArray;   
         NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:field];
-        if([value containsCharacterInSet:acSet])
+        if([value rangeOfCharacterFromSet:acSet].length)
 			groupArray = [value componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
         else 
             groupArray = [value componentsSeparatedByStringCaseInsensitive:@" and "];
@@ -2976,7 +2976,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
 	
 	BOOL useDelimiters = NO;
-	if ([oldString containsCharacterInSet:delimiterCharSet])
+	if ([oldString rangeOfCharacterFromSet:delimiterCharSet].length)
 		useDelimiters = YES;
     
 	NSScanner *scanner = [[NSScanner alloc] initWithString:oldString];
@@ -3103,7 +3103,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
 
 	BOOL useDelimiters = NO;
-	if([oldString containsCharacterInSet:delimiterCharSet])
+	if([oldString rangeOfCharacterFromSet:delimiterCharSet].length)
 		useDelimiters = YES;
 	
 	NSScanner *scanner = [[NSScanner alloc] initWithString:oldString];

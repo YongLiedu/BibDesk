@@ -222,7 +222,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
             
 			[mutableValue setString:value];                
 			
-		} else if ([sourceLine isEqualToString:@""] || [sourceLine containsCharacterInSet:invertedWhitespaceAndNewlineSet] == NO) {
+		} else if ([sourceLine isEqualToString:@""] || [sourceLine rangeOfCharacterFromSet:invertedWhitespaceAndNewlineSet].length == 0) {
             
             // add the last line, if available; different from other parsers, since we don't have a real end tag
             if (tag && mutableValue) {

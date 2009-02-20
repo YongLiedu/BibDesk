@@ -42,6 +42,16 @@
 
 @interface NSString (BDSKExtensions)
 
++ (BOOL)isEmptyString:(NSString *)string;
+
++ (NSString *)horizontalEllipsisString; // '...'
++ (NSString *)emdashString; // '---'
++ (NSString *)endashString; // '--'
++ (NSString *)commandKeyIndicatorString;
++ (NSString *)controlKeyIndicatorString;
++ (NSString *)alternateKeyIndicatorString;
++ (NSString *)shiftKeyIndicatorString;
+
 /*!
     @method     hexStringForCharacter:
     @abstract   Returns the hex value of a unichar (useful for lookups in the character palette)
@@ -343,6 +353,8 @@ An inline buffer is used for speed in accessing each character.
  */
 - (NSCellStateValue)triStateValue;
 
+- (unsigned int)unsignedIntValue;
+
 - (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength;
 
 #pragma mark -
@@ -370,17 +382,6 @@ An inline buffer is used for speed in accessing each character.
 - (NSArray *)componentsSeparatedByComma;
 
 - (NSArray *)componentsSeparatedByFieldSeparators;
-
-/*!
-    @method     containsString:options:range:
-    @abstract   Determine whether a string contains searchString in aRange using mask as search options.
-    @discussion (comprehensive description)
-    @param      searchString (description)
-    @param      mask (description)
-    @param      aRange (description)
-    @result     (description)
-*/
-- (BOOL)containsString:(NSString *)searchString options:(unsigned int)mask range:(NSRange)aRange;
 
 /*!
 @method     containsWord:
@@ -446,10 +447,29 @@ An inline buffer is used for speed in accessing each character.
 */
 - (NSString *)titlecaseString;
 
+- (NSString *)stringByDeletingCharactersInSet:(NSCharacterSet *)removeSet;
+- (NSString *)stringByReplacingCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString;
+
+- (NSString *)stringByRemovingWhitespace;
+- (NSString *)stringByRemovingReturns;
+
+- (NSString *)stringByRemovingString:(NSString *)removeString;
+
+- (NSString *)stringByRemovingPrefix:(NSString *)prefix;
+- (NSString *)stringByRemovingSuffix:(NSString *)suffix;
+
+- (NSString *)fullyEncodeAsIURI;
+
++ (NSString *)pathSeparator;
+- (NSString *)commonRootPathOfFile:(NSString *)filename;
+- (NSString *)relativePathToFile:(NSString *)filename;
+- (NSString *)stringByNormalizingPath;
+
 #pragma mark HTML/XML
 
 - (NSString *)stringByConvertingHTMLLineBreaks;
 - (NSString *)stringByEscapingBasicXMLEntitiesUsingUTF8;
+- (NSString *)htmlString;
 - (NSString *)xmlString;
 
 - (NSString *)csvString;
@@ -479,11 +499,18 @@ An inline buffer is used for speed in accessing each character.
 - (NSString *)stringByAddingPercentEscapes;
 - (NSString *)stringByReplacingPercentEscapes;
 
+- (unichar)firstCharacter;
+- (unichar)lastCharacter;
+- (NSString *)lowercaseFirst;
+- (NSString *)uppercaseFirst;
+
 @end
 
 @interface NSMutableString (BDSKExtensions)
 
 - (BOOL)isMutableString;
 - (void)deleteCharactersInCharacterSet:(NSCharacterSet *)characterSet;
+- (void)replaceOccurrencesOfCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString;
+- (void)appendStrings:(NSString *)first, ...;
 
 @end

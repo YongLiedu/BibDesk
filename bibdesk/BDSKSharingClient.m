@@ -387,7 +387,7 @@ typedef struct _BDSKSharingClientFlags {
     BDSKASSERT(data != nil);
     if(data){
         NSDictionary *dict = [NSNetService dictionaryFromTXTRecordData:data];
-        int32_t val = [[NSString stringWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] intValue];
+        int32_t val = [[[[NSString alloc] initWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] autorelease] intValue];
         OSMemoryBarrier();
         int32_t oldVal = flags.needsAuthentication;
         OSAtomicCompareAndSwap32Barrier(oldVal, val, (int32_t *)&flags.needsAuthentication);

@@ -130,7 +130,7 @@
     [self setParsedString:nil];
     
     // convert newlines to a single space, then collapse (mainly for paste/drag text, RFE #1457532)
-    if([string containsCharacterInSet:[NSCharacterSet newlineCharacterSet]]){
+    if([string rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].length){
         string = [string stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
         string = [string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
     }

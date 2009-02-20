@@ -209,7 +209,7 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
 @implementation BDSKDragCopyCiteKeyFormatter
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    if([string containsString:@"~"]){
+    if([string rangeOfString:@"~"].length){
         // some people apparently can't see the checkbox for adding a tilde (bug #1422451)
         if(error) *error = NSLocalizedString(@"Use the checkbox below to prepend a tilde.", @"Error description");
         return NO;

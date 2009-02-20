@@ -520,6 +520,34 @@ __BDDeleteCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSetR
     CFRelease(myCopy); // dispose of our temporary copy
 }
 
+static inline void
+__BDReplaceCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSetRef charSet, CFStringRef replacement)
+{    
+    CFStringInlineBuffer inlineBuffer;
+    CFIndex length = CFStringGetLength(theString);
+    CFIndex replacementLength = CFStringGetLength(replacement);
+    CFIndex cnt = 0;
+    
+    // create an immutable copy to use with the inline buffer
+    CFStringRef myCopy = CFStringCreateCopy(kCFAllocatorDefault, theString);
+    CFStringInitInlineBuffer(myCopy, &inlineBuffer, CFRangeMake(0, length));
+    UniChar ch;
+    
+    CFIndex delCnt = 0;
+    while(cnt < length){
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
+        if(CFCharacterSetIsCharacterMember(charSet, ch)){
+            // replace in the mutable string; we have to keep track of our index in the copy and the original
+            CFStringReplace(theString, CFRangeMake(delCnt, 1), replacement);
+            delCnt += replacementLength;
+        } else {
+            delCnt++;
+        }
+        cnt++;
+    }
+    CFRelease(myCopy); // dispose of our temporary copy
+}
+
 /* This is very similar to CFStringTrimWhitespace from CF-368.1.  It takes a buffer of unichars, and removes the whitespace characters from each end, then returns the contents in the original buffer (the pointer is unchanged).  The length returned is the new length, and the length passed is the buffer length. */
 static inline CFIndex __BDCharactersTrimmingWhitespace(UniChar *chars, CFIndex length)
 {
@@ -891,7 +919,13 @@ void BDDeleteTeXForSorting(CFMutableStringRef mutableString){
     // get rid of braces and such...
     __BDDeleteTeXCharactersForSorting(mutableString);
 }
+
 void BDDeleteArticlesForSorting(CFMutableStringRef mutableString){ __BDDeleteArticlesForSorting(mutableString); }
+
 void BDDeleteCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet){
     __BDDeleteCharactersInCharacterSet(mutableString, charSet);
+}
+
+void BDReplaceCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet, CFStringRef replacement){
+    __BDReplaceCharactersInCharacterSet(mutableString, charSet, replacement);
 }
