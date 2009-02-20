@@ -41,7 +41,7 @@
 #import "BDSKTypeManager.h"
 #import "BibItem.h"
 #import "BDSKAppController.h"
-#import <OmniFoundation/OmniFoundation.h>
+#import "NSScanner_BDSKExtensions.h"
 #import <AGRegex/AGRegex.h>
 #import "NSError_BDSKExtensions.h"
 
@@ -306,7 +306,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 @implementation BDSKMARCParser (Private)
 
 static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict, NSString *tag, NSString *subFieldIndicator, BOOL isUNIMARC){
-	NSString *subTag = nil;
+	unichar subTag = 0;
     NSString *subValue = nil;
 	
     NSScanner *scanner = [[NSScanner alloc] initWithString:value];
@@ -314,12 +314,12 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict,
     [scanner setCharactersToBeSkipped:nil];
     
     while([scanner isAtEnd] == NO){
-        if(NO == [scanner scanString:subFieldIndicator intoString:NULL] || NO == [scanner scanStringOfLength:1 intoString:&subTag])
+        if(NO == [scanner scanString:subFieldIndicator intoString:NULL] || NO == [scanner scanCharacter:&subTag])
             break;
         
         if([scanner scanUpToString:subFieldIndicator intoString:&subValue]){
             subValue = [subValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            addSubstringToDictionary(subValue, pubDict, tag, subTag, isUNIMARC);
+            addSubstringToDictionary(subValue, pubDict, tag, [NSString stringWithFormat:@"%C", subTag], isUNIMARC);
         }
     }
     
