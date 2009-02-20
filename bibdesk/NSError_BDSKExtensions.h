@@ -57,6 +57,8 @@ enum {
     kBDSKFileOperationFailed,                    /* Generic file operation failure          */
     kBDSKURLOperationFailed,                     /* Generic URL operation failure           */
     kBDSKComplexStringError,                     /* Complex string parsing failed           */
+    kBDSKCannotFindTemporaryDirectoryError,      /* Cannot find temporary directory         */
+    kBDSKCannotCreateTemporaryFileError,         /* Cannot create a temporary file          */
 };
 
 extern NSString *BDSKUnderlyingItemErrorKey;

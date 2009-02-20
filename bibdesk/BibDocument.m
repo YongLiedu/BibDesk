@@ -1192,7 +1192,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
         // this will create a new file on the same volume as the original file, which we will overwrite
         // FSExchangeObjects requires both files to be on the same volume
-        NSString *tmpPath = [fileManager temporaryPathForWritingToPath:[absoluteURL path] allowOriginalDirectory:YES error:outError];
+        NSString *tmpPath = [fileManager temporaryPathForWritingToPath:[absoluteURL path] error:outError];
         NSURL *saveToURL = nil;
         
         // at this point, we're guaranteed that absoluteURL is non-nil and is a fileURL, but the file may not exist

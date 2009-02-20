@@ -241,7 +241,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification{
-    if ([[groups smartGroups] containsObjectIdenticalTo:[notification object]])
+    if (NSNotFound != [[groups smartGroups] indexOfObjectIdenticalTo:[notification object]])
         [self updateSmartGroupsCountAndContent:YES];
 }
 
@@ -313,7 +313,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleGroupNameChangedNotification:(NSNotification *)notification{
-    if([groups containsObjectIdenticalTo:[notification object]] == NO)
+    if([groups indexOfObjectIdenticalTo:[notification object]] == NSNotFound)
         return;
     if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
         [self sortGroupsByKey:sortGroupsKey];

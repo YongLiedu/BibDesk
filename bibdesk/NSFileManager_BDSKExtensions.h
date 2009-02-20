@@ -45,6 +45,7 @@
 - (NSString *)currentApplicationSupportPathForCurrentUser;
 - (NSString *)applicationSupportDirectory:(SInt16)domain;
 - (NSString *)applicationsDirectory;
+- (NSString *)desktopDirectory;
 - (NSURL *)downloadFolderURL;
 - (NSString *)newestLyXPipePath;
 
@@ -68,6 +69,8 @@
 */
 - (void)createWeblocFilesInBackgroundThread:(NSDictionary *)fullPathDict;
 - (void)copyFilesInBackgroundThread:(NSDictionary *)fullPathDict;
+
+- (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError;
 
 // creates a temporary directory with default attributes in a system temp location; this is thread safe
 - (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)fileName;

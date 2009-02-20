@@ -163,6 +163,11 @@
     return [self sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKTitleString ascending:YES], nil]];
 }
 
+- (NSString *)componentsJoinedByComma
+{
+    return [self componentsJoinedByString:@", "];
+}
+
 - (NSString *)componentsJoinedByAnd
 {
     return [self componentsJoinedByString:@" and "];
@@ -181,6 +186,21 @@
 - (NSString *)componentsJoinedByDefaultJoinString
 {
     return [self componentsJoinedByString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultArrayJoinStringKey]];
+}
+
+- (NSString *)componentsJoinedByCommaAndAnd
+{
+    unsigned count = [self count];
+    switch (count) {
+        case 0:
+            return @"";
+        case 1:
+            return [[self objectAtIndex:0] description];
+        case 2:
+            return [self componentsJoinedByString:@" and "];
+        default:
+            return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", and "] stringByAppendingString:[[self lastObject] description]];
+    }
 }
 
 - (NSString *)componentsJoinedByCommaAndAmpersand
@@ -357,6 +377,36 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     NSMutableArray *array = [self mutableCopy];
     [array mergeSortUsingDescriptors:sortDescriptors];
     return [array autorelease];
+}
+
+- (NSArray *)arrayByRemovingObject:(id)anObject {
+    if ([self containsObject:anObject])
+        return self;
+    NSMutableArray *tmpArray= [NSMutableArray arrayWithArray:self];
+    [tmpArray removeObject:anObject];
+    return tmpArray;
+}
+
+- (NSArray *)arrayByPerformingSelector:(SEL)aSelector {
+    return [self arrayByPerformingSelector:aSelector withObject:nil];
+}
+
+- (void)makeObjectsPerformSelector:(SEL)selector withObject:(id)arg1 withObject:(id)arg2 {
+    NSEnumerator *objEnum = [self objectEnumerator];
+    id object;
+    while (object = [objEnum nextObject])
+        objc_msgSend(object, selector, arg1, arg2);
+}
+
+- (NSArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)anObject {
+    NSMutableArray *array = [NSMutableArray array];
+    NSEnumerator *objEnum = [self objectEnumerator];
+    id object;
+    while (object = [objEnum nextObject]) {
+        if (object = [object performSelector:aSelector withObject:anObject])
+            [array addObject:object];
+    }
+    return array;
 }
 
 @end

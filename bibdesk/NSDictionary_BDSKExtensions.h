@@ -39,9 +39,36 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface NSMutableDictionary (BDSKExtensions)
-- (id)initForCaseInsensitiveKeys;
+@interface NSDictionary (BDSKExtensions)
+- (id)objectForKey:(NSString *)key defaultObject:(id)defaultObject;
+- (float)floatForKey:(NSString *)key defaultValue:(float)defaultValue;
+- (float)floatForKey:(NSString *)key;
+- (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue;
+- (double)doubleForKey:(NSString *)key;
+- (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue;
+- (NSPoint)pointForKey:(NSString *)key;
+- (NSSize)sizeForKey:(NSString *)key defaultValue:(NSSize)defaultValue;
+- (NSSize)sizeForKey:(NSString *)key;
+- (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue;
+- (NSRect)rectForKey:(NSString *)key;
+- (BOOL)boolForKey:(NSString *)key defaultValue:(BOOL)defaultValue;
+- (BOOL)boolForKey:(NSString *)key;
+- (int)intForKey:(NSString *)key defaultValue:(int)defaultValue;
+- (int)intForKey:(NSString *)key;
+- (unsigned int)unsignedIntForKey:(NSString *)key defaultValue:(unsigned int)defaultValue;
+- (unsigned int)unsignedIntForKey:(NSString *)key;
 @end
 
-@interface NSDictionary (BDSKExtensions)
+#pragma mark -
+
+@interface NSMutableDictionary (BDSKExtensions)
+- (id)initForCaseInsensitiveKeys;
+- (void)setFloatValue:(float)value forKey:(NSString *)key;
+- (void)setDoubleValue:(double)value forKey:(NSString *)key;
+- (void)setIntValue:(int)value forKey:(NSString *)key;
+- (void)setUnsignedIntValue:(unsigned int)value forKey:(NSString *)key;
+- (void)setBoolValue:(BOOL)value forKey:(NSString *)key;
+- (void)setPointValue:(NSPoint)value forKey:(NSString *)key;
+- (void)setSizeValue:(NSSize)value forKey:(NSString *)key;
+- (void)setRectValue:(NSRect)value forKey:(NSString *)key;
 @end

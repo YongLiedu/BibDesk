@@ -40,15 +40,6 @@
 #import "BDSKCFCallBacks.h"
 
 
-@implementation NSMutableDictionary (BDSKExtensions)
-
-- (id)initForCaseInsensitiveKeys{
-	[[self init] release];
-    return (NSMutableDictionary *)CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-}
-
-@end
-
 @implementation NSDictionary (BDSKExtensions)
 
 // ARM:  Apple's implementation of -[NSDictionary valueForKey:] doesn't check [key length]
@@ -56,11 +47,157 @@
 // it as specified in the docs to avoid this problem.  rdar://problem/4759413 (fixed on 10.5)
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
 #warning fixed on 10.5
+#else
+- (id)valueForKey:(NSString *)key {
+    return ([key length] && [key characterAtIndex:0] == '@') ? [super valueForKey:[key substringFromIndex:1]] : [self objectForKey:key];
+}
 #endif
 
-- (id)valueForKey:(NSString *)key
-{
-    return ([key length] && [key characterAtIndex:0] == '@') ? [super valueForKey:[key substringFromIndex:1]] : [self objectForKey:key];
+// This seems more convenient than having to write your own if statement a zillion times
+- (id)objectForKey:(NSString *)key defaultObject:(id)defaultObject {
+    return [self objectForKey:key] ?: defaultObject;
+}
+
+- (float)floatForKey:(NSString *)key defaultValue:(float)defaultValue {
+    id value = [self objectForKey:key];
+    return value ? [value floatValue] : defaultValue;
+}
+
+- (float)floatForKey:(NSString *)key {
+    return [self floatForKey:key defaultValue:0.0f];
+}
+
+- (double)doubleForKey:(NSString *)key defaultValue:(double)defaultValue {
+    id value = [self objectForKey:key];
+    return value ? [value doubleValue] : defaultValue;
+}
+
+- (double)doubleForKey:(NSString *)key {
+    return [self doubleForKey:key defaultValue:0.0];
+}
+
+- (NSPoint)pointForKey:(NSString *)key defaultValue:(NSPoint)defaultValue {
+    id value = [self objectForKey:key];
+    if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
+        return NSPointFromString(value);
+    else if ([value isKindOfClass:[NSValue class]])
+        return [value pointValue];
+    else
+        return defaultValue;
+}
+
+- (NSPoint)pointForKey:(NSString *)key {
+    return [self pointForKey:key defaultValue:NSZeroPoint];
+}
+
+- (NSSize)sizeForKey:(NSString *)key defaultValue:(NSSize)defaultValue {
+    id value = [self objectForKey:key];
+    if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
+        return NSSizeFromString(value);
+    else if ([value isKindOfClass:[NSValue class]])
+        return [value sizeValue];
+    else
+        return defaultValue;
+}
+
+- (NSSize)sizeForKey:(NSString *)key {
+    return [self sizeForKey:key defaultValue:NSZeroSize];
+}
+
+- (NSRect)rectForKey:(NSString *)key defaultValue:(NSRect)defaultValue {
+    id value = [self objectForKey:key];
+    if ([value isKindOfClass:[NSString class]] && NO == [NSString isEmptyString:value])
+        return NSRectFromString(value);
+    else if ([value isKindOfClass:[NSValue class]])
+        return [value rectValue];
+    else
+        return defaultValue;
+}
+
+- (NSRect)rectForKey:(NSString *)key {
+    return [self rectForKey:key defaultValue:NSZeroRect];
+}
+
+// Returns YES iff the value is YES, Y, yes, y, or 1.
+- (BOOL)boolForKey:(NSString *)key defaultValue:(BOOL)defaultValue {
+    id value = [self objectForKey:key];
+    return [value isKindOfClass:[NSString class]] || [value isKindOfClass:[NSNumber class]] ? [value boolValue] : defaultValue;
+}
+
+- (BOOL)boolForKey:(NSString *)key {
+    return [self boolForKey:key defaultValue:NO];
+}
+
+// Just to make life easier
+- (int)intForKey:(NSString *)key defaultValue:(int)defaultValue {
+    id value = [self objectForKey:key];
+    return value ? [value intValue] : defaultValue;
+}
+
+- (int)intForKey:(NSString *)key {
+    return [self intForKey:key defaultValue:0];
+}
+
+- (unsigned int)unsignedIntForKey:(NSString *)key defaultValue:(unsigned int)defaultValue {
+    id value = [self objectForKey:key];
+    return value ? [value unsignedIntValue] : defaultValue;
+}
+
+- (unsigned int)unsignedIntForKey:(NSString *)key {
+    return [self unsignedIntForKey:key defaultValue:0u];
+}
+
+@end
+
+#pragma mark -
+
+@implementation NSMutableDictionary (BDSKExtensions)
+
+- (id)initForCaseInsensitiveKeys{
+	[[self init] release];
+    return (NSMutableDictionary *)CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+}
+
+- (void)setFloatValue:(float)value forKey:(NSString *)key {
+    NSNumber *number = [[NSNumber alloc] initWithFloat:value];
+    [self setObject:number forKey:key];
+    [number release];
+}
+
+- (void)setDoubleValue:(double)value forKey:(NSString *)key {
+    NSNumber *number = [[NSNumber alloc] initWithDouble:value];
+    [self setObject:number forKey:key];
+    [number release];
+}
+
+- (void)setIntValue:(int)value forKey:(NSString *)key {
+    NSNumber *number = [[NSNumber alloc] initWithInt:value];
+    [self setObject:number forKey:key];
+    [number release];
+}
+
+- (void)setUnsignedIntValue:(unsigned int)value forKey:(NSString *)key {
+    NSNumber *number = [[NSNumber alloc] initWithUnsignedInt:value];
+    [self setObject:number forKey:key];
+    [number release];
+}
+
+- (void)setBoolValue:(BOOL)value forKey:(NSString *)key {
+    NSNumber *number = [[NSNumber alloc] initWithBool:value];
+    [self setObject:number forKey:key];
+    [number release];
+}
+
+- (void)setPointValue:(NSPoint)value forKey:(NSString *)key {
+    [self setObject:NSStringFromPoint(value) forKey:key];
+}
+
+- (void)setSizeValue:(NSSize)value forKey:(NSString *)key {
+    [self setObject:NSStringFromSize(value) forKey:key];
+}
+
+- (void)setRectValue:(NSRect)value forKey:(NSString *)key {
+    [self setObject:NSStringFromRect(value) forKey:key];
 }
 
 @end

@@ -294,6 +294,7 @@
 		CEED2EF10F4E03E10078E87A /* BDSKSimpleLock.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2EEF0F4E03E10078E87A /* BDSKSimpleLock.m */; };
 		CEED2F340F4E0C860078E87A /* BDSKRuntime.h in Headers */ = {isa = PBXBuildFile; fileRef = CEED2F320F4E0C860078E87A /* BDSKRuntime.h */; };
 		CEED2F350F4E0C860078E87A /* BDSKRuntime.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2F330F4E0C860078E87A /* BDSKRuntime.m */; };
+		CEED306C0F4ED3410078E87A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEED306B0F4ED3410078E87A /* libz.dylib */; };
 		CEEFDE010B03ED0200668BB0 /* BDSKScriptGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */; };
 		CEEFDE030B03ED0200668BB0 /* BDSKURLGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */; };
 		CEEFE2B30B03FAF500668BB0 /* BDSKScriptGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFE2B20B03FAF500668BB0 /* BDSKScriptGroupSheet.nib */; };
@@ -1283,6 +1284,7 @@
 		CEED2EEF0F4E03E10078E87A /* BDSKSimpleLock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSimpleLock.m; sourceTree = "<group>"; };
 		CEED2F320F4E0C860078E87A /* BDSKRuntime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRuntime.h; sourceTree = "<group>"; };
 		CEED2F330F4E0C860078E87A /* BDSKRuntime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRuntime.m; sourceTree = "<group>"; };
+		CEED306B0F4ED3410078E87A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroupSheetController.m; sourceTree = "<group>"; };
 		CEEFDDFE0B03ED0200668BB0 /* BDSKScriptGroupSheetController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroupSheetController.h; sourceTree = "<group>"; };
 		CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKURLGroupSheetController.m; sourceTree = "<group>"; };
@@ -1778,6 +1780,7 @@
 				CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */,
 				CEE8DECC0E5C3FB700EFA97F /* BTParse.framework in Frameworks */,
 				CEE8DECD0E5C3FB700EFA97F /* SkimNotes.framework in Frameworks */,
+				CEED306C0F4ED3410078E87A /* libz.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2066,6 +2069,7 @@
 			children = (
 				F98AACF40D43E13C00D3CD64 /* libcrypto.dylib */,
 				F98AACDD0D43DB5A00D3CD64 /* libssl.dylib */,
+				CEED306B0F4ED3410078E87A /* libz.dylib */,
 			);
 			name = "Linked Libraries";
 			sourceTree = "<group>";
