@@ -48,6 +48,7 @@ while ( object = mjtNextObjectIMP ## object(mjtForeachEnumerator ## object, mjtN
 #pragma mark ||  User Defaults Key String Declarations
 
 @interface NSString (BDSKStringConstants)
++ (void)initializeStringConstants;
 @end
 
 extern NSString *BDSKTeXBinPathKey;

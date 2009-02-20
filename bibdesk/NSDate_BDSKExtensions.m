@@ -39,31 +39,30 @@
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
 
-static NSDictionary *locale = nil;
-static CFDateFormatterRef dateFormatter = NULL;
-static CFDateFormatterRef numericDateFormatter = NULL;
 
 @implementation NSDate (BDSKExtensions)
-
-+ (void)didLoad
-{
+    
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+#warning fixme: uses deprecated API, use NSDateFormatter instead
+#endif
+- (id)initWithMonthDayYearString:(NSString *)dateString;
+{    
+    [[self init] release];
+    self = nil;
+    
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    
+    static NSDictionary *locale = nil;
     if(nil == locale){
         NSArray *monthNames = [NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil];
         NSArray *shortMonthNames = [NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil];
         
         locale = [[NSDictionary alloc] initWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, monthNames, NSMonthNameArray, shortMonthNames, NSShortMonthNameArray, nil];
     }
-    
-
-    // NB: CFDateFormatters are fairly expensive beasts to create, so we cache them here
-    
-    CFAllocatorRef alloc = CFAllocatorGetDefault();
-    
-    // use the en locale, since dates use en short names as keys in BibTeX
-    CFLocaleRef enLocale = CFLocaleCreate(alloc, CFSTR("en"));
-   
-    // Create a date formatter that accepts "text month-numeric day-numeric year", which is arguably the most common format in BibTeX
+    static CFDateFormatterRef dateFormatter = nil;
     if(NULL == dateFormatter){
+        // use the en locale, since dates use en short names as keys in BibTeX
+        CFLocaleRef enLocale = CFLocaleCreate(alloc, CFSTR("en"));
     
         // the formatter styles aren't used here, since we set an explicit format
         dateFormatter = CFDateFormatterCreate(alloc, enLocale, kCFDateFormatterLongStyle, kCFDateFormatterLongStyle);
@@ -73,29 +72,23 @@ static CFDateFormatterRef numericDateFormatter = NULL;
             CFDateFormatterSetFormat(dateFormatter, CFSTR("MMM-dd-yy"));
             CFDateFormatterSetProperty(dateFormatter, kCFDateFormatterIsLenient, kCFBooleanTrue);    
         }
+        
+        if(enLocale) CFRelease(enLocale);
     }
-    
+    static CFDateFormatterRef numericDateFormatter = nil;
     if(NULL == numericDateFormatter){
+        // use the en locale, since dates use en short names as keys in BibTeX
+        CFLocaleRef enLocale = CFLocaleCreate(alloc, CFSTR("en"));
         
         // the formatter styles aren't used here, since we set an explicit format
         numericDateFormatter = CFDateFormatterCreate(alloc, enLocale, kCFDateFormatterLongStyle, kCFDateFormatterLongStyle);
         
         // CFDateFormatter uses ICU formats: http://icu.sourceforge.net/userguide/formatDateTime.html
         CFDateFormatterSetFormat(numericDateFormatter, CFSTR("MM-dd-yy"));
-        CFDateFormatterSetProperty(dateFormatter, kCFDateFormatterIsLenient, kCFBooleanTrue);            
+        CFDateFormatterSetProperty(numericDateFormatter, kCFDateFormatterIsLenient, kCFBooleanTrue);            
+        
+        if(enLocale) CFRelease(enLocale);
     }
-    if(enLocale) CFRelease(enLocale);
-}
-    
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-#warning fixme: uses deprecated API, use NSDateFormatter instead
-#endif
-- (id)initWithMonthDayYearString:(NSString *)dateString;
-{    
-    [[self init] release];
-    self = nil;
-
-    CFAllocatorRef alloc = CFAllocatorGetDefault();
     
     CFDateRef date = CFDateFormatterCreateDateFromString(alloc, dateFormatter, (CFStringRef)dateString, NULL);
     

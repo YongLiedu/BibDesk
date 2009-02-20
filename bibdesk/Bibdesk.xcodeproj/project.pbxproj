@@ -261,14 +261,11 @@
 		CEE23BF10BFBA827002B746B /* fonts.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D510758073E00C3F701 /* fonts.cfg */; };
 		CEE23BF20BFBA827002B746B /* ignore.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D560758073E00C3F701 /* ignore.cfg */; };
 		CEE23BF30BFBA827002B746B /* style.cfg in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = F9022D690758073E00C3F701 /* style.cfg */; };
-		CEE8DD440E5C3F5B00EFA97F /* OmniBase.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
-		CEE8DD450E5C3F5B00EFA97F /* OmniFoundation.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */; };
 		CEE8DD470E5C3F5B00EFA97F /* yaz.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
 		CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
 		CEE8DD490E5C3F5B00EFA97F /* FileView.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
 		CEE8DD4A0E5C3F5B00EFA97F /* BTParse.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */; };
 		CEE8DD4B0E5C3F5B00EFA97F /* SkimNotes.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = CE7DC8DA0E0952BB00D6D76D /* SkimNotes.framework */; };
-		CEE8DEC60E5C3FB700EFA97F /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */; };
 		CEE8DEC90E5C3FB700EFA97F /* yaz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5950BEA3C9400D65C7F /* yaz.framework */; };
 		CEE8DECA0E5C3FB700EFA97F /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */; };
 		CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F911D6B40CFE8E420009C77B /* FileView.framework */; };
@@ -656,13 +653,6 @@
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = BTParse;
 		};
-		F9AF562D0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 4A33D40608A0191B003A3FA5;
-			remoteInfo = OmniBase;
-		};
 		F9AF56330BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
@@ -823,8 +813,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				CEE8DD440E5C3F5B00EFA97F /* OmniBase.framework in Copy Files: Frameworks */,
-				CEE8DD450E5C3F5B00EFA97F /* OmniFoundation.framework in Copy Files: Frameworks */,
 				CEE8DD470E5C3F5B00EFA97F /* yaz.framework in Copy Files: Frameworks */,
 				CEE8DD480E5C3F5B00EFA97F /* AGRegex.framework in Copy Files: Frameworks */,
 				CEE8DD490E5C3F5B00EFA97F /* FileView.framework in Copy Files: Frameworks */,
@@ -1764,7 +1752,6 @@
 				F95ED6950B07BA4E00000BBF /* ExceptionHandling.framework in Frameworks */,
 				F98AACDE0D43DB5A00D3CD64 /* libssl.dylib in Frameworks */,
 				F98AACF50D43E13C00D3CD64 /* libcrypto.dylib in Frameworks */,
-				CEE8DEC60E5C3FB700EFA97F /* OmniBase.framework in Frameworks */,
 				CEE8DEC90E5C3FB700EFA97F /* yaz.framework in Frameworks */,
 				CEE8DECA0E5C3FB700EFA97F /* AGRegex.framework in Frameworks */,
 				CEE8DECB0E5C3FB700EFA97F /* FileView.framework in Frameworks */,
@@ -3058,7 +3045,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				F9AF562E0BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56360BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56380BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */,
@@ -3997,11 +3983,6 @@
 			isa = PBXTargetDependency;
 			name = BTParse;
 			targetProxy = F9AF562B0BEA4160009B16D5 /* PBXContainerItemProxy */;
-		};
-		F9AF562E0BEA4160009B16D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = OmniBase;
-			targetProxy = F9AF562D0BEA4160009B16D5 /* PBXContainerItemProxy */;
 		};
 		F9AF56340BEA4160009B16D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

@@ -61,7 +61,7 @@ static void (*originalMouseDown)(id, SEL, id) = NULL;
 	originalMouseDown(self, _cmd, theEvent);
 }
 
-+ (void)didLoad {
++ (void)load {
     originalMouseDown = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
 }
 

@@ -62,7 +62,7 @@
     if (sharedApplication == nil) {
         sharedApplication = [super sharedApplication];
         [NSThread assignMainThread];
-        [OBObject self]; // Trigger +[OBPostLoader processClasses]
+        //[OBObject self]; // Trigger +[OBPostLoader processClasses]
     }
     return sharedApplication;
 }

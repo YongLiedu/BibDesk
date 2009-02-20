@@ -1091,10 +1091,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         BOOL update = (saveOperation == NSSaveOperation); // for saveTo we should update all items, as our path changes
         
         while(anItem = [pubsE nextObject]){
-            OMNI_POOL_START {
+            NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+            @try {
                 if(info = [anItem metadataCacheInfoForUpdate:update])
                     [pubsInfo addObject:info];
-            } OMNI_POOL_END;
+            }
+            @catch (id e) { @throw(e); }
+            @finally { [pool release]; }
         }
         
         NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", absoluteURL, @"fileURL", nil];

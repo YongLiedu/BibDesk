@@ -531,9 +531,6 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
 static id __sort = nil;
 static SEL __selector = NULL;
 
-// for thread safe usage of the cache (since we use static variables)
-static NSLock *sortingLock = nil;
-
 // typedef used for NSArray sorting category
 typedef NSComparisonResult (*comparatorIMP)(id, SEL, id, id);    
 static comparatorIMP __comparator = NULL;
@@ -608,15 +605,10 @@ static inline void __BDClearStatics()
     __comparator = NULL;
 }
 
-+ (void)didLoad
-{
-    if(nil == sortingLock)
-        sortingLock = [[NSLock alloc] init];
-}
-
 - (void)mergeSortUsingDescriptors:(NSArray *)sortDescriptors;
 {
-    [sortingLock lock];
+    // we use a static cache, so this is not thread safe
+    BDSKASSERT([NSThread isMainThread]);
     NSZone *zone = [self zone];
     size_t count = [self count];
     size_t size = sizeof(BDSortCacheValue);
@@ -699,7 +691,6 @@ static inline void __BDClearStatics()
     }
     
     NSZoneFree(zone, cache);
-    [sortingLock unlock];
 }
 
 @end

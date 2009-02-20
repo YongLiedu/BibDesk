@@ -52,18 +52,28 @@
 #import "BDSKCFCallBacks.h"
 #import "NSAttributedString_BDSKExtensions.h"
 
-static NSString *yesString = nil;
-static NSString *noString = nil;
-static NSString *mixedString = nil;
 
 @implementation NSString (BDSKExtensions)
 
-+ (void)didLoad
-{
-    yesString = [NSLocalizedString(@"Yes", @"") copy];
-    noString = [NSLocalizedString(@"No", @"") copy];
-    mixedString = [NSLocalizedString(@"-", @"indeterminate or mixed value indicator") copy];
-    
++ (NSString *)yesString {
+    static NSString *yesString = nil;
+    if (yesString == nil)
+        yesString = [NSLocalizedString(@"Yes", @"") copy];
+    return yesString;
+}
+
++ (NSString *)noString {
+    static NSString *noString = nil;
+    if (noString == nil)
+        noString = [NSLocalizedString(@"No", @"") copy];
+    return noString;
+}
+
++ (NSString *)mixedString {
+    static NSString *mixedString = nil;
+    if (mixedString == nil)
+        mixedString = [NSLocalizedString(@"-", @"indeterminate or mixed value indicator") copy];
+    return mixedString;
 }
 
 + (BOOL)isEmptyString:(NSString *)string {
@@ -154,7 +164,7 @@ static int MAX_RATING = 5;
 }
 
 + (NSString *)stringWithBool:(BOOL)boolValue {
-	return boolValue ? yesString : noString;
+	return boolValue ? [self yesString] : [self noString];
 }
 
 + (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
@@ -171,14 +181,14 @@ static int MAX_RATING = 5;
 + (NSString *)stringWithTriStateValue:(NSCellStateValue)triStateValue {
     switch (triStateValue) {
         case NSOffState:
-            return noString;
+            return [self noString];
             break;
         case NSOnState:
-            return yesString;
+            return [self yesString];
             break;
         case NSMixedState:
         default:
-            return mixedString;
+            return [self mixedString];
             break;
     }
 }

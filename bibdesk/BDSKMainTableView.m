@@ -391,7 +391,7 @@ enum {
     [[NSUserDefaults standardUserDefaults] setObject:[[identifiers arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
                                                       forKey:BDSKShownColsNamesKey];
     
-    if (BDSKDefaultAnimationTimeInterval > 0.0) {
+    if ([NSViewAnimation defaultAnimationTimeInterval] > 0.0) {
         NSView *cacheView = [self enclosingScrollView];
         NSImage *initialImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
         NSBitmapImageRep *imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
@@ -408,7 +408,7 @@ enum {
         [finalImage addRepresentation:imageRep];
         
         // block until this is done, so we can handle drawing manually
-        BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:BDSKDefaultAnimationTimeInterval animationCurve:NSAnimationEaseInOut];
+        BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:[NSViewAnimation defaultAnimationTimeInterval] animationCurve:NSAnimationEaseInOut];
         [animation setDelegate:self];
         [animation setAnimationBlockingMode:NSAnimationBlocking];
         

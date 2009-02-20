@@ -130,6 +130,8 @@ static void fixLegacyTableColumnIdentifiers()
 
     [NSDateFormatter setDefaultFormatterBehavior:NSDateFormatterBehavior10_4];
     
+    [NSString initializeStringConstants];
+    
     NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     
     // eliminate support for some legacy keys

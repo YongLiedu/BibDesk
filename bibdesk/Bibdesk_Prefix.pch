@@ -23,7 +23,6 @@
 
 #ifdef __OBJC__
     #import <Cocoa/Cocoa.h>
-    #import <OmniBase/OmniBase.h>
     #import "NSString_BDSKExtensions.h"
     #import "BDSKComplexString.h"
     #import "BDSKStringConstants.h"

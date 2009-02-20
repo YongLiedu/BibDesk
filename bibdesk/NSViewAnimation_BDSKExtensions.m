@@ -38,29 +38,30 @@
 
 #import "NSViewAnimation_BDSKExtensions.h"
 
-NSTimeInterval BDSKDefaultAnimationTimeInterval = 0.15;
-
+    
 @implementation NSViewAnimation (BDSKExtensions)
 
-+ (void)didLoad
-{    
-    NSNumber *n = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKDefaultAnimationTimeInterval"];
-    if (nil != n)
-        BDSKDefaultAnimationTimeInterval = [n floatValue];
++ (NSTimeInterval)defaultAnimationTimeInterval {    
+    static NSTimeInterval defaultAnimationTimeInterval = -1.0;
+    if (defaultAnimationTimeInterval < 0.0) {
+        NSNumber *n = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKDefaultAnimationTimeInterval"];
+        defaultAnimationTimeInterval = n ? [n floatValue] : 0.15;
+    }
+    return defaultAnimationTimeInterval;
 }
 
 + (void)animateWithViewAnimations:(NSArray *)viewAnimations {
     NSViewAnimation *animation = [[NSViewAnimation alloc] initWithViewAnimations:viewAnimations];
     
     [animation setAnimationBlockingMode:NSAnimationBlocking];
-    [animation setDuration:BDSKDefaultAnimationTimeInterval];
+    [animation setDuration:[self defaultAnimationTimeInterval]];
     [animation setAnimationCurve:NSAnimationEaseInOut];
     [animation startAnimation];
     [animation release];
 }
 
 + (void)animateResizeView:(NSView *)aView toRect:(NSRect)aRect {
-    if (BDSKDefaultAnimationTimeInterval > 0.0) {
+    if ([self defaultAnimationTimeInterval] > 0.0) {
         NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:aView, NSViewAnimationTargetKey, [NSValue valueWithRect:aRect], NSViewAnimationEndFrameKey, nil];
         [self animateWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]];
     } else {
@@ -69,7 +70,7 @@ NSTimeInterval BDSKDefaultAnimationTimeInterval = 0.15;
 }
 
 + (void)animateFadeOutView:(NSView *)fadeOutView fadeInView:(NSView *)fadeInView {
-    if (BDSKDefaultAnimationTimeInterval > 0.0) {
+    if ([self defaultAnimationTimeInterval] > 0.0) {
         NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:fadeOutView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
         NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:fadeInView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
         [self animateWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]];
