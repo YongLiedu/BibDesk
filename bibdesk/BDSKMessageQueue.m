@@ -217,7 +217,7 @@
 - (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget {
     if (aTarget) {
         BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector];
-        [self queueInvocation:invocation];
+        [self queueInvocationOnce:invocation];
         [invocation release];
     }
 }
@@ -233,7 +233,7 @@
 - (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject {
     if (aTarget) {
         BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject];
-        [self queueInvocation:invocation];
+        [self queueInvocationOnce:invocation];
         [invocation release];
     }
 }
@@ -249,7 +249,7 @@
 - (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2 {
     if (aTarget) {
         BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject1 withObject:anObject2];
-        [self queueInvocation:invocation];
+        [self queueInvocationOnce:invocation];
         [invocation release];
     }
 }

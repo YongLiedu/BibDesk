@@ -73,7 +73,7 @@ static inline NSUInteger BDSKHashUIntptr(uintptr_t v) {
 
 @implementation BDSKInvocation
 
-BDSKPlaceholderInvocation *placeholderInvocation = nil;
+static BDSKPlaceholderInvocation *placeholderInvocation = nil;
 
 + (void)initialize {
     if (placeholderInvocation == nil)
@@ -166,9 +166,9 @@ BDSKPlaceholderInvocation *placeholderInvocation = nil;
     return self;
 }
 
-- (void)release {
+- (void)dealloc {
     [target release];
-    [super release];
+    [super dealloc];
 }
 
 - (NSUInteger)hash {
@@ -218,9 +218,9 @@ BDSKPlaceholderInvocation *placeholderInvocation = nil;
     return self;
 }
 
-- (void)release {
+- (void)dealloc {
     [object1 release];
-    [super release];
+    [super dealloc];
 }
 
 - (NSUInteger)hash {
@@ -261,9 +261,9 @@ BDSKPlaceholderInvocation *placeholderInvocation = nil;
     return self;
 }
 
-- (void)release {
+- (void)dealloc {
     [object2 release];
-    [super release];
+    [super dealloc];
 }
 
 - (NSUInteger)hash {
