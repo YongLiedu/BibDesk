@@ -1534,8 +1534,6 @@
 		F95D3FA609DDF51D00D793A6 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibPref_Sharing.nib; sourceTree = "<group>"; };
 		F95D3FAC09DDF6A900D793A6 /* BibPref_Sharing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibPref_Sharing.h; sourceTree = "<group>"; };
 		F95D3FAD09DDF6A900D793A6 /* BibPref_Sharing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibPref_Sharing.m; sourceTree = "<group>"; };
-		F95ED6890B07B87F00000BBF /* BDSKController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKController.h; sourceTree = "<group>"; };
-		F95ED68A0B07B87F00000BBF /* BDSKController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKController.m; sourceTree = "<group>"; };
 		F95ED6910B07BA4E00000BBF /* ExceptionHandling.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExceptionHandling.framework; path = /System/Library/Frameworks/ExceptionHandling.framework; sourceTree = "<absolute>"; };
 		F963E42A0A1D7ADD00695DDC /* BDSKTreeNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTreeNode.h; sourceTree = "<group>"; };
 		F963E42B0A1D7ADD00695DDC /* BDSKTreeNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTreeNode.m; sourceTree = "<group>"; };
@@ -2168,7 +2166,6 @@
 				3D866C2708031CEC00FF1724 /* BDSKCharacterConversion.m */,
 				2730077A07CF20B500F2E485 /* BDSKComplexStringEditor.m */,
 				CE38FB85091D946A00BCB69D /* BDSKConditionController.m */,
-				F95ED68A0B07B87F00000BBF /* BDSKController.m */,
 				CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */,
 				CE56D6500A2DAB55003CE000 /* BDSKDocumentController.m */,
 				CE2391600A334890009F3A5B /* BDSKDocumentInfoWindowController.m */,
@@ -2609,7 +2606,6 @@
 				CE38FB84091D946A00BCB69D /* BDSKConditionController.h */,
 				CE34E9770A03C16B00222942 /* BDSKConditionsView.h */,
 				CE7595FD0ADDB0E0009C1329 /* BDSKContainerView.h */,
-				F95ED6890B07B87F00000BBF /* BDSKController.h */,
 				F9022C3A0758027800C3F701 /* BDSKConverter.h */,
 				F96769FE0916B63900B42F6A /* BDSKCountedSet.h */,
 				CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */,
