@@ -558,8 +558,8 @@ static inline NSComparisonResult compareSystemVersion(NSString *version, SInt32 
                 [records setObject:record forKey:identifier];
                 NSString *minimumSystemVersion = [paneDict valueForKey:MINIMUM_SYSTEM_VERSION_KEY];
                 NSString *maximumSystemVersion = [paneDict valueForKey:MAXIMUM_SYSTEM_VERSION_KEY];
-                if ((minimumSystemVersion == nil || compareSystemVersion(minimumSystemVersion, major, minor, bugfix) == NSOrderedDescending) &&
-                    (maximumSystemVersion == nil || compareSystemVersion(maximumSystemVersion, major, minor, bugfix) == NSOrderedAscending))
+                if ((minimumSystemVersion == nil || compareSystemVersion(minimumSystemVersion, major, minor, bugfix) != NSOrderedDescending) &&
+                    (maximumSystemVersion == nil || compareSystemVersion(maximumSystemVersion, major, minor, bugfix) != NSOrderedAscending))
                     [paneArray addObject:identifier];
             }
         }
