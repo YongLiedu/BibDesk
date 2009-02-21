@@ -387,7 +387,7 @@ static Class BDSKLinkedFileClass = Nil;
     NSData *data = nil;
     NSDictionary *dictionary = nil;
     @try {
-        data = [[NSData alloc] initWithBase64String:base64String];
+        data = [[NSData alloc] initWithBase64String:base64String withNewlines:NO];
     }
     @catch(id exception) {
         [data release];
@@ -611,7 +611,7 @@ static Class BDSKLinkedFileClass = Nil;
     NSString *path = [self path];
     path = path && newBasePath ? [newBasePath relativePathToFile:path] : relativePath;
     NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil];
-    return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
+    return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64StringWithNewlines:NO];
 }
 
 // this could be called when the document fileURL changes
