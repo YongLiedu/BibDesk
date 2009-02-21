@@ -162,7 +162,7 @@ static id sharedController = nil;
 }
 
 - (NSString *)defaultWindowTitle {
-    return [NSString stringWithFormat:NSLocalizedString(@"%@ BDSKPreferences", @""), [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]];
+    return [NSString stringWithFormat:NSLocalizedString(@"%@ Preferences", @""), [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]];
 }
 
 #pragma mark Actions
