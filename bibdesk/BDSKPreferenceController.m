@@ -119,7 +119,7 @@ static id sharedController = nil;
 - (void)windowDidLoad {
     [self setupToolbar];
     [[self window] setShowsToolbarButton:NO];
-    [self setWindowFrameAutosaveName:@"BDSKPreferencesWindow"]
+    [self setWindowFrameAutosaveName:@"BDSKPreferencesWindow"];
     
     [[self window] setTitle:[self defaultWindowTitle]];
     
