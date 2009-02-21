@@ -64,6 +64,8 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
 
 - (void)setTypeSelectHelper:(BDSKTypeSelectHelper *)newTypeSelectHelper {
     if (typeSelectHelper != newTypeSelectHelper) {
+        if ([typeSelectHelper dataSource] == self)
+            [typeSelectHelper setDataSource:nil];
         [typeSelectHelper release];
         typeSelectHelper = [newTypeSelectHelper retain];
         [typeSelectHelper setDataSource:self];
