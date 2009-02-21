@@ -242,29 +242,6 @@
     
     NSString *pathExtension = [path pathExtension];
     
-#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5  // Uses API deprecated on 10.5
-#warning Omni disables IconFamily on 10.5
-   // .app is a valid path extension to pass here, but we must not cache the icon based on that extension!
-    if(![pathExtension isEqualToString:@""] && ![@"app" isEqualToString:pathExtension]) {
-        image = [imageDictionary objectForKey:pathExtension];
-        if (image == nil) {
-            image = [[NSWorkspace sharedWorkspace] iconForFileType:pathExtension];
-            [image setFlipped:NO];
-            if (image == nil)
-                image = [NSNull null];
-            [imageDictionary setObject:image forKey:pathExtension];
-        }
-    } else {    
-        image = [imageDictionary objectForKey:path];
-        if (image == nil) {
-            image = [[NSWorkspace sharedWorkspace] iconForFile:path];
-            [image setFlipped:NO];
-            if (image == nil)
-                image = [NSNull null];
-            [imageDictionary setObject:image forKey:path];
-        }
-    }
-#else
     // .app is a valid path extension to pass here, but we must not cache the icon based on that extension!
     if(![pathExtension isEqualToString:@""] && ![@"app" isEqualToString:pathExtension]) {
         image = [imageDictionary objectForKey:pathExtension];
@@ -289,7 +266,6 @@
             [iconFamily release];
         }
     }
-#endif
     return image != [NSNull null] ? image : nil;
 }
 
