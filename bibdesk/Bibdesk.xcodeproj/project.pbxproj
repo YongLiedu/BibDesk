@@ -167,13 +167,9 @@
 		CE600E300AF405D6000B5680 /* BDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE600E2E0AF405D6000B5680 /* BDSKRISParser.m */; };
 		CE601A4F0AF4C488000B5680 /* BDSKReferenceMinerParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE601A4D0AF4C488000B5680 /* BDSKReferenceMinerParser.m */; };
 		CE602A600AF65A9C000B5680 /* BDSKStringParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE602A5F0AF65A9C000B5680 /* BDSKStringParser.m */; };
-		CE62DE340F4B75B400BDF01E /* BDSKPreferencePane.h in Headers */ = {isa = PBXBuildFile; fileRef = CE62DE320F4B75B400BDF01E /* BDSKPreferencePane.h */; };
 		CE62DE350F4B75B400BDF01E /* BDSKPreferencePane.m in Sources */ = {isa = PBXBuildFile; fileRef = CE62DE330F4B75B400BDF01E /* BDSKPreferencePane.m */; };
-		CE62DE3B0F4B777800BDF01E /* BDSKPreferenceWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = CE62DE390F4B777800BDF01E /* BDSKPreferenceWindow.h */; };
 		CE62DE3C0F4B777800BDF01E /* BDSKPreferenceWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = CE62DE3A0F4B777800BDF01E /* BDSKPreferenceWindow.m */; };
-		CE62DE420F4B77D600BDF01E /* BDSKPreferenceIconView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE62DE400F4B77D600BDF01E /* BDSKPreferenceIconView.h */; };
 		CE62DE430F4B77D600BDF01E /* BDSKPreferenceIconView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE62DE410F4B77D600BDF01E /* BDSKPreferenceIconView.m */; };
-		CE62DE4A0F4B788800BDF01E /* BDSKPreferenceIconCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE62DE480F4B788800BDF01E /* BDSKPreferenceIconCell.h */; };
 		CE62DE4B0F4B788800BDF01E /* BDSKPreferenceIconCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE62DE490F4B788800BDF01E /* BDSKPreferenceIconCell.m */; };
 		CE62DE4E0F4B790C00BDF01E /* Preferences.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE62DE4D0F4B790C00BDF01E /* Preferences.plist */; };
 		CE62DE510F4B797B00BDF01E /* next.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE62DE4F0F4B797B00BDF01E /* next.tiff */; };
@@ -247,7 +243,6 @@
 		CED65DCD0907A338003EED90 /* BDSKScriptHook+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */; };
 		CEDB58F40D3692A400E40354 /* ComplexStringEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEDB58F20D3692A400E40354 /* ComplexStringEditor.nib */; };
 		CEDBDE4C0F4C863500190AF5 /* BDSKPreferenceRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */; };
-		CEDBE0590F4CDAD900190AF5 /* NSView_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CEDBE0570F4CDAD900190AF5 /* NSView_BDSKExtensions.h */; };
 		CEDBE05A0F4CDAD900190AF5 /* NSView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEDBE0580F4CDAD900190AF5 /* NSView_BDSKExtensions.m */; };
 		CEDBE0900F4CE06600190AF5 /* ScriptMenu.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEDBE08F0F4CE06600190AF5 /* ScriptMenu.tiff */; };
 		CEE22B210BFB7DA8002B746B /* RelNotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F994B8F607F5F65F00751DA1 /* RelNotes.rtf */; };
@@ -280,15 +275,12 @@
 		CEEC72F7093BDCA200A64F54 /* BibDesk.sdef in Resources */ = {isa = PBXBuildFile; fileRef = F9022FBF07580B9400C3F701 /* BibDesk.sdef */; };
 		CEED2AB40F4D89BC0078E87A /* IconFamily.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2A840F4D856E0078E87A /* IconFamily.m */; };
 		CEED2C150F4DA0E00078E87A /* BDSKMultiValueDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2C130F4DA0E00078E87A /* BDSKMultiValueDictionary.m */; };
-		CEED2CBD0F4DAD2C0078E87A /* BDSKCFCallBacks.h in Headers */ = {isa = PBXBuildFile; fileRef = CEED2CBB0F4DAD2C0078E87A /* BDSKCFCallBacks.h */; };
 		CEED2CBE0F4DAD2C0078E87A /* BDSKCFCallBacks.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2CBC0F4DAD2C0078E87A /* BDSKCFCallBacks.m */; };
 		CEED2E030F4DEB550078E87A /* BDSKMessageQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E010F4DEB550078E87A /* BDSKMessageQueue.m */; };
 		CEED2E070F4DEB6A0078E87A /* BDSKQueueProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E050F4DEB6A0078E87A /* BDSKQueueProcessor.m */; };
 		CEED2E0B0F4DEB9E0078E87A /* BDSKMainQueueProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E090F4DEB9E0078E87A /* BDSKMainQueueProcessor.m */; };
 		CEED2E150F4DED830078E87A /* BDSKInvocation.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2E130F4DED830078E87A /* BDSKInvocation.m */; };
-		CEED2EF00F4E03E10078E87A /* BDSKSimpleLock.h in Headers */ = {isa = PBXBuildFile; fileRef = CEED2EEE0F4E03E10078E87A /* BDSKSimpleLock.h */; };
 		CEED2EF10F4E03E10078E87A /* BDSKSimpleLock.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2EEF0F4E03E10078E87A /* BDSKSimpleLock.m */; };
-		CEED2F340F4E0C860078E87A /* BDSKRuntime.h in Headers */ = {isa = PBXBuildFile; fileRef = CEED2F320F4E0C860078E87A /* BDSKRuntime.h */; };
 		CEED2F350F4E0C860078E87A /* BDSKRuntime.m in Sources */ = {isa = PBXBuildFile; fileRef = CEED2F330F4E0C860078E87A /* BDSKRuntime.m */; };
 		CEED306C0F4ED3410078E87A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEED306B0F4ED3410078E87A /* libz.dylib */; };
 		CEEFDE010B03ED0200668BB0 /* BDSKScriptGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */; };
@@ -3009,14 +3001,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CE62DE340F4B75B400BDF01E /* BDSKPreferencePane.h in Headers */,
-				CE62DE3B0F4B777800BDF01E /* BDSKPreferenceWindow.h in Headers */,
-				CE62DE420F4B77D600BDF01E /* BDSKPreferenceIconView.h in Headers */,
-				CE62DE4A0F4B788800BDF01E /* BDSKPreferenceIconCell.h in Headers */,
-				CEDBE0590F4CDAD900190AF5 /* NSView_BDSKExtensions.h in Headers */,
-				CEED2CBD0F4DAD2C0078E87A /* BDSKCFCallBacks.h in Headers */,
-				CEED2EF00F4E03E10078E87A /* BDSKSimpleLock.h in Headers */,
-				CEED2F340F4E0C860078E87A /* BDSKRuntime.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
