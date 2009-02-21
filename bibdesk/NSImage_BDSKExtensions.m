@@ -96,53 +96,45 @@
     }
 }
 
++ (NSImage *)systemIconWithCode:(OSType)code {
+    IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:code];
+    NSImage *image = [iconFamily imageWithAllReps];
+    [iconFamily release];
+    return image;
+}
+
 + (NSImage *)httpInternetLocationImage {
     static NSImage *image = nil;
-    if (image == nil) {
-        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationHTTPIcon];
-        image = [[iconFamily imageWithAllReps] retain];
-        [iconFamily release];
-    }
+    if (image == nil)
+        image = [[self systemIconWithCode:kInternetLocationHTTPIcon] retain];
     return image;
 }
 
 + (NSImage *)ftpInternetLocationImage {
     static NSImage *image = nil;
-    if (image == nil) {
-        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationFTPIcon];
-        image = [[iconFamily imageWithAllReps] retain];
-        [iconFamily release];
-    }
+    if (image == nil)
+        image = [[self systemIconWithCode:kInternetLocationFTPIcon] retain];
     return image;
 }
 
 + (NSImage *)mailInternetLocationImage {
     static NSImage *image = nil;
-    if (image == nil) {
-        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationMailIcon];
-        image = [[iconFamily imageWithAllReps] retain];
-        [iconFamily release];
-    }
+    if (image == nil)
+        image = [[self systemIconWithCode:kInternetLocationMailIcon] retain];
     return image;
 }
 
 + (NSImage *)newsInternetLocationImage {
     static NSImage *image = nil;
-    if (image == nil) {
-        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationNewsIcon];
-        image = [[iconFamily imageWithAllReps] retain];
-        [iconFamily release];
-    }
+    if (image == nil)
+        image = [[self systemIconWithCode:kInternetLocationNewsIcon] retain];
     return image;
 }
 
 + (NSImage *)genericInternetLocationImage {
     static NSImage *image = nil;
-    if (image == nil) {
-        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationGenericIcon];
-        image = [[iconFamily imageWithAllReps] retain];
-        [iconFamily release];
-    }
+    if (image == nil)
+        image = [[self systemIconWithCode:kInternetLocationGenericIcon] retain];
     return image;
 }
 
