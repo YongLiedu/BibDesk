@@ -42,6 +42,7 @@
 #import "BDSKPreferenceIconView.h"
 #import "BDSKOverlay.h"
 #import "BDSKSpotlightView.h"
+#import "BDSKVersionNumber.h"
 
 #define LOCALIZATION_TABLE @"Preferences"
 #define DEFAULTS_TABLE @"Preferences"
@@ -500,35 +501,6 @@ static id sharedController = nil;
 
 #pragma mark Private
 
-static inline NSComparisonResult compareSystemVersion(NSString *version, SInt32 major, SInt32 minor, SInt32 bugfix) {
-    NSArray *components = [version componentsSeparatedByString:@"."];
-    SInt32 versionMajor = 0, versionMinor = 0, versionBugfix = 0;
-    if ([components count] > 0) {
-        versionMajor = [[components objectAtIndex:0] intValue];
-        if ([components count] > 1) {
-            versionMinor = [[components objectAtIndex:1] intValue];
-            if ([components count] > 2)
-                versionBugfix = [[components objectAtIndex:2] intValue];
-        }
-    }
-    if ((versionMajor == 0 && versionMinor == 0 && versionBugfix == 0) || (major == 0 && minor == 0 && bugfix == 0))
-        return NSOrderedSame;
-    else if (versionMajor > major)
-        return NSOrderedDescending;
-    else if (versionMajor < major)
-        return NSOrderedAscending;
-    else if (versionMinor > minor)
-        return NSOrderedDescending;
-    else if (versionMinor < minor)
-        return NSOrderedAscending;
-    else if (versionBugfix > bugfix)
-        return NSOrderedDescending;
-    else if (versionBugfix < bugfix)
-        return NSOrderedAscending;
-    else
-        return NSOrderedSame;
-}
-
 - (void)loadPreferences {
     NSString *plistPath = [[NSBundle mainBundle] pathForResource:DEFAULTS_TABLE ofType:@"plist"];
     NSEnumerator *catEnum = [[NSArray arrayWithContentsOfFile:plistPath] objectEnumerator];
@@ -536,9 +508,9 @@ static inline NSComparisonResult compareSystemVersion(NSString *version, SInt32 
     NSMutableDictionary *initialValues = [NSMutableDictionary dictionary];
 	
     SInt32 major = 0, minor = 0, bugfix = 0;
-	Gestalt(gestaltSystemVersionMajor, &major);
-	Gestalt(gestaltSystemVersionMinor, &minor);
-	Gestalt(gestaltSystemVersionBugFix, &bugfix);
+	BDSKVersionNumber *systemVersion = nil;
+    if (noErr == Gestalt(gestaltSystemVersionMajor, &major) && noErr == Gestalt(gestaltSystemVersionMinor, &minor) && noErr == Gestalt(gestaltSystemVersionBugFix, &bugfix))
+        systemVersion = [BDSKVersionNumber versionNumberWithVersionString:[NSString stringWithFormat:@"%i.%i.%i", major, minor, bugfix]];
     
     while (dict = [catEnum nextObject]) {
         NSMutableArray *paneArray = [[NSMutableArray alloc] init];
@@ -556,10 +528,10 @@ static inline NSComparisonResult compareSystemVersion(NSString *version, SInt32 
                 NSLog(@"Could not get class of preference pane for %@", paneDict);
             } else {
                 [records setObject:record forKey:identifier];
-                NSString *minimumSystemVersion = [paneDict valueForKey:MINIMUM_SYSTEM_VERSION_KEY];
-                NSString *maximumSystemVersion = [paneDict valueForKey:MAXIMUM_SYSTEM_VERSION_KEY];
-                if ((minimumSystemVersion == nil || compareSystemVersion(minimumSystemVersion, major, minor, bugfix) != NSOrderedDescending) &&
-                    (maximumSystemVersion == nil || compareSystemVersion(maximumSystemVersion, major, minor, bugfix) != NSOrderedAscending))
+                BDSKVersionNumber *minimumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MINIMUM_SYSTEM_VERSION_KEY]];
+                BDSKVersionNumber *maximumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MAXIMUM_SYSTEM_VERSION_KEY]];
+                if ((minimumSystemVersion == nil || [systemVersion compareToVersionNumber:minimumSystemVersion] != NSOrderedAscending) &&
+                    (maximumSystemVersion == nil || [systemVersion compareToVersionNumber:maximumSystemVersion] != NSOrderedDescending))
                     [paneArray addObject:identifier];
             }
         }

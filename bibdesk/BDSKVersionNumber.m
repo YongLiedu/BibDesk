@@ -22,13 +22,18 @@
 
 // This allows version numbers like "1.3", "v1.3", "1.0b2", "1.0rc1", "198v3", "1.0-alpha-5", and ignores spaces
 
++ (id)versionNumberWithVersionString:(NSString *)versionString;
+{
+    return [versionString isKindOfClass:[NSString class]] ? [[[self alloc] initWithVersionString:versionString] autorelease] : nil;
+}
+
 // Initializes the receiver from a string representation of a version number.  The input string may have an optional leading 'v' or 'V' followed by a sequence of positive integers separated by '.'s.  Any trailing component of the input string that doesn't match this pattern is ignored.  If no portion of this string matches the pattern, nil is returned.
 - (id)initWithVersionString:(NSString *)versionString;
 {
     
     if (self = [super init]) {
         // Input might be from a NSBundle info dictionary that could be misconfigured, so check at runtime too
-        if (versionString == nil || [versionString isKindOfClass:[NSString class]] == NO) {
+        if ([versionString isKindOfClass:[NSString class]] == NO) {
             [self release];
             return nil;
         }
