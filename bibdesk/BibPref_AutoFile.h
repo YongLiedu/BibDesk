@@ -81,4 +81,6 @@
 - (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:(NSString *)message;
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
+- (void)updateUI;
+
 @end

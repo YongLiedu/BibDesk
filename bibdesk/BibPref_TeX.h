@@ -58,4 +58,6 @@
 - (IBAction)downloadTeX:(id)sender;
 - (IBAction)changeDefaultTeXEncoding:(id)sender;
 
+- (void)updateUI;
+
 @end

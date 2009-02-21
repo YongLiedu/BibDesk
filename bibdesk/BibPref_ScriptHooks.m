@@ -50,6 +50,7 @@
 	[tableView setDoubleAction:@selector(showOrChooseScriptFile:)];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
 	[self tableViewSelectionDidChange:nil];
+    [self updateUI];
 }
 
 - (void)updateUI{

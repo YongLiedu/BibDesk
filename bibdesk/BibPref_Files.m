@@ -48,6 +48,10 @@
 
 @implementation BibPref_Files
 
+- (void)awakeFromNib {
+    [self updateUI];
+}
+
 - (void)updateAutoSaveUI{
     // prefs time is in seconds, but we display in minutes
     NSTimeInterval saveDelay = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKAutosaveTimeIntervalKey] / 60;

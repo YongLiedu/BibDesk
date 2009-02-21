@@ -66,6 +66,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	[formatter release];
 	coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:BDSKCiteKeyString fileType:BDSKBibtexString];
     [previewDisplay setStringValue:[[BDSKPreviewItem sharedItem] displayText]];
+    [self updateUI];
 }
 
 // sheet's delegate must be connected to file's owner in IB

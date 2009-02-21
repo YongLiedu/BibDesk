@@ -198,6 +198,7 @@ static NSSet *alwaysDisabledFields = nil;
     }
     
     [pdfViewerPopup selectItemAtIndex:idx];
+    [self updateUI];
 }
 
 - (void)updatePrefs{

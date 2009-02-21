@@ -54,6 +54,7 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
     [sud addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
     [sud addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
     [self handleTemplatePrefsChanged];
+    [self updateUI];
 }
 
 - (void)updateStartupBehaviorUI {

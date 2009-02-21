@@ -60,6 +60,7 @@
 - (IBAction)setCitationBracketStyle:(id)sender;
 
 - (void)handleTemplatePrefsChanged;
+- (void)updateUI;
 
 @end
 

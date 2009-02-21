@@ -92,6 +92,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     [outlineView setDoubleAction:@selector(chooseFileDoubleAction:)];
     [outlineView setTarget:self];
+    
+    [self updateUI];
 }
 
 - (void)dealloc

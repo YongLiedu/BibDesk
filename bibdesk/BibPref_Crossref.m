@@ -51,6 +51,7 @@ static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossr
     [[[[tableView tableColumns] objectAtIndex:0] dataCell] setFormatter:typeNameFormatter];
     [typeNameFormatter release];
     
+    [self updateUI];
     [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnEditInheritedKey] options:0 context:BDSKBibPrefCrossrefDefaultsObservationContext];
 }
 

@@ -57,6 +57,8 @@
         [passwordField setStringValue:pwString];
         [pwString release];
     }    
+    
+    [self updateUI];
 }
 
 - (void)dealloc

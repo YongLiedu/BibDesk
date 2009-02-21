@@ -69,4 +69,6 @@
 - (IBAction)setShouldAutosave:(id)sender;
 - (IBAction)setAutosaveTime:(id)sender;
 
+- (void)updateUI;
+
 @end

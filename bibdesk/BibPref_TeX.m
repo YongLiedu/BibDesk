@@ -65,6 +65,8 @@ static NSSet *standardStyles = nil;
     [bibtexBinaryPathField setFormatter:formatter];
     [bibtexBinaryPathField setDelegate:self];
     [formatter release];
+    
+    [self updateUI];
 }
 
 - (void)updateTeXPathUI{

@@ -71,6 +71,8 @@
 - (void)updateFontPanel:(NSNotification *)notification;
 - (void)resetFontPanel:(NSNotification *)notification;
 
+- (void)updateUI;
+
 @end
 
 

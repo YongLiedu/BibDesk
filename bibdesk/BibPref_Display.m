@@ -47,6 +47,7 @@
 
 - (void)awakeFromNib{
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
+    [self updateUI];
 }
 
 - (void)updatePreviewDisplayUI{
