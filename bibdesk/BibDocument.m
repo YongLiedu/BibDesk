@@ -2975,7 +2975,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     
     
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
-    [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(handlePrivateBibItemChanged) forTarget:self];
+    [self queueSelectorOnce:@selector(handlePrivateBibItemChanged)];
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{
@@ -3121,7 +3121,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     // changed key, so we have to update all the previews each time.  This should be safer than using cancelPrevious... since those
     // don't get performed on the main thread (apparently), and can lead to problems.
     if (docState.isDocumentClosed == NO && [documentWindow isVisible])
-        [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(doUpdatePreviews) forTarget:self];
+        [self queueSelectorOnce:@selector(doUpdatePreviews)];
 }
 
 - (void)updatePreviewer:(BDSKPreviewer *)aPreviewer{

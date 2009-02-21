@@ -255,3 +255,57 @@
 }
 
 @end
+
+#pragma mark -
+
+@implementation NSObject (BDSKMessageQueue)
+
++ (void)queueSelector:(SEL)aSelector {
+    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self];
+}
+
++ (void)queueSelectorOnce:(SEL)aSelector {
+    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self];
+}
+
++ (void)queueSelector:(SEL)aSelector withObject:(id)anObject {
+    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self withObject:anObject];
+}
+
++ (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject {
+    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self withObject:anObject];
+}
+
++ (void)queueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
+    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
+}
+
++ (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
+    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
+}
+
+- (void)queueSelector:(SEL)aSelector {
+    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self];
+}
+
+- (void)queueSelectorOnce:(SEL)aSelector {
+    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self];
+}
+
+- (void)queueSelector:(SEL)aSelector withObject:(id)anObject {
+    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self withObject:anObject];
+}
+
+- (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject {
+    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self withObject:anObject];
+}
+
+- (void)queueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
+    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
+}
+
+- (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
+    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
+}
+
+@end

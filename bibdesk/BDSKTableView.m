@@ -76,7 +76,7 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
     [super reloadData];
     if (typeSelectHelper) {
         if ([[self class] shouldQueueTypeSelectHelper])
-            [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(rebuildTypeSelectSearchCache) forTarget:typeSelectHelper];
+            [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeSelectSearchCache)];
         else
             [typeSelectHelper rebuildTypeSelectSearchCache];
     }

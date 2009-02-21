@@ -340,12 +340,12 @@
 - (void)handleBibItemChanged:(NSNotification *)note{
     NSString *key = [[note userInfo] valueForKey:@"key"];
     if ([key isPersonField] || key == nil)
-        [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(setPublicationItems:) forTarget:self withObject:nil];
+        [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
 }
 
 - (void)handleBibItemAddDel:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    [[BDSKMessageQueue mainQueue] queueSelectorOnce:@selector(setPublicationItems:) forTarget:self withObject:nil];
+    [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
 }
 
 - (void)handleGroupWillBeRemoved:(NSNotification *)note{

@@ -69,3 +69,23 @@
 - (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2;
 
 @end
+
+#pragma mark -
+
+@interface NSObject (BDSKMessageQueue)
+
++ (void)queueSelector:(SEL)aSelector;
++ (void)queueSelectorOnce:(SEL)aSelector;
++ (void)queueSelector:(SEL)aSelector withObject:(id)anObject;
++ (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject;
++ (void)queueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
++ (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
+
+- (void)queueSelector:(SEL)aSelector;
+- (void)queueSelectorOnce:(SEL)aSelector;
+- (void)queueSelector:(SEL)aSelector withObject:(id)anObject;
+- (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject;
+- (void)queueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
+- (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
+
+@end

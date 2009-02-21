@@ -503,9 +503,9 @@ static id sharedInstance = nil;
     }
     
     if(remoteVersionForCurrentMajor && [remoteVersionForCurrentMajor compareToVersionNumber:localVersion] == NSOrderedDescending){
-        [[BDSKMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:alternativeVersion:) forTarget:self withObject:[remoteVersionForCurrentMajor cleanVersionString] withObject:[remoteVersion cleanVersionString]];
+        [self queueSelector:@selector(displayUpdateAvailableWindow:alternativeVersion:) withObject:[remoteVersionForCurrentMajor cleanVersionString] withObject:[remoteVersion cleanVersionString]];
     } else if(remoteVersion && [remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
-        [[BDSKMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:alternativeVersion:) forTarget:self withObject:[remoteVersion cleanVersionString] withObject:nil];
+        [self queueSelector:@selector(displayUpdateAvailableWindow:alternativeVersion:) withObject:[remoteVersion cleanVersionString] withObject:nil];
         
     } else if((nil == remoteVersionForCurrentMajor || nil == remoteVersion) && nil != error){
         // was showing an alert for this, but apparently it's really common for the check to fail
