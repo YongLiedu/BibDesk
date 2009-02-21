@@ -40,7 +40,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #define MASK_ALPHA 0.3
-#define CIRCLE_FACTOR 1.3
+#define CIRCLE_FACTOR 1.0
 #define MAXIMUM_BLUR 10U
 
 @implementation BDSKSpotlightView;
