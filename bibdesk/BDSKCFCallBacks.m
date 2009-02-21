@@ -78,12 +78,12 @@ Boolean BDSKCaseInsensitiveStringEqual(const void *value1, const void *value2) {
 }
 
 const CFDictionaryKeyCallBacks kBDSKIntegerDictionaryKeyCallBacks = {
-    0,   // version
-    BDSKIntegerRetain,
-    BDSKIntegerRelease,
+    0,    // version
+    NULL, // retain
+    NULL, // release
     BDSKIntegerCopyDescription,
-    BDSKIntegerEqual,
-    BDSKIntegerHash
+    NULL, // equal
+    NULL  // hash
 };
 
 const CFDictionaryKeyCallBacks kBDSKCaseInsensitiveStringDictionaryKeyCallBacks = {
@@ -96,11 +96,11 @@ const CFDictionaryKeyCallBacks kBDSKCaseInsensitiveStringDictionaryKeyCallBacks 
 };
 
 const CFDictionaryValueCallBacks kBDSKIntegerDictionaryValueCallBacks = {
-    0, // version
-    BDSKIntegerRetain,
-    BDSKIntegerRelease,
+    0,    // version
+    NULL, // retain
+    NULL, // release
     BDSKIntegerCopyDescription,
-    BDSKIntegerEqual
+    NULL  // equal
 };
 
 const CFArrayCallBacks kBDSKCaseInsensitiveStringArrayCallBacks = {
