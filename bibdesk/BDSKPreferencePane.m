@@ -44,7 +44,7 @@
 @implementation BDSKPreferencePane
 
 - (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
-    if (self = [super initWithWindowNibName:[record nibName] ?: [self windowNibName]]) {
+    if (self = [super initWithWindowNibName:[aRecord nibName] ?: [self windowNibName]]) {
         record = [aRecord retain];
         preferenceController = aController;
     }
