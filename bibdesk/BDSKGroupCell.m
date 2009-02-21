@@ -62,7 +62,7 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
     BDSKINITIALIZE;
     
     if (NULL == integerStringDictionary) {
-        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKIntegerDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);
         CFDictionaryAddValue(integerStringDictionary,  (const void *)0, CFSTR(""));
     }
     
