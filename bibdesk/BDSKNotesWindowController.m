@@ -233,14 +233,6 @@
 
 #pragma mark NSTokenField deldegate methods
 
-- (NSString *)tokenField:(NSTokenField *)tokenField editingStringForRepresentedObject:(id)representedObject {
-    return [representedObject stringByReplacingCharactersInSet:[NSCharacterSet whitespaceCharacterSet] withString:@"_"];
-}
-
-- (id)tokenField:(NSTokenField *)tokenField representedObjectForEditingString:(NSString *)editingString {
-    return [editingString stringByReplacingOccurrencesOfString:@"_" withString:@" "];
-}
-
 - (BOOL)tokenField:(NSTokenField *)tokenField writeRepresentedObjects:(NSArray *)objects toPasteboard:(NSPasteboard *)pboard {
     if (objects) {
         [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
