@@ -108,7 +108,7 @@
     [[self cornerView] setNeedsDisplay:YES];
 }
 
-- (void)tableViewFontChanged:(NSNotification *)note
+- (void)tableViewFontChanged
 {
     // overwrite this as we want to change the intercellspacing
     NSString *fontNamePrefKey = [self fontNamePreferenceKey];
