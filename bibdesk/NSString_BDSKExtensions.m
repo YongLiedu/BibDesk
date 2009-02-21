@@ -151,7 +151,7 @@ static int MAX_RATING = 5;
     NSParameterAssert(rating <= MAX_RATING);
     static CFMutableDictionaryRef ratings = NULL;
     if(ratings == NULL){
-        ratings = CFDictionaryCreateMutable(CFAllocatorGetDefault(), MAX_RATING + 1, &kBDSKIntegerDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        ratings = CFDictionaryCreateMutable(CFAllocatorGetDefault(), MAX_RATING + 1, NULL, &kCFTypeDictionaryValueCallBacks);
         int i = 0;
         NSMutableString *ratingString = [NSMutableString string];
         do {

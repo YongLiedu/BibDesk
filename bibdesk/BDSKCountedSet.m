@@ -46,7 +46,7 @@
 - (id)initWithKeyCallBacks:(const CFDictionaryKeyCallBacks *)keyCallBacks{
     
     if(self = [super init])
-        dictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, keyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
+        dictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, keyCallBacks, NULL);
     
     return self;
 }

@@ -681,9 +681,9 @@ The groupedPublications array is a subset of the publications array, developed b
     
     // group objects are either BibAuthors or NSStrings; we need to use case-insensitive or fuzzy author matching, since that's the way groups are checked for containment
     if([groupField isPersonField]){
-        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKAuthorFuzzyDictionaryKeyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKAuthorFuzzyDictionaryKeyCallBacks, NULL);
     } else {
-        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, NULL);
     }
     
     unsigned int groupIndex = [categoryIndexes firstIndex];

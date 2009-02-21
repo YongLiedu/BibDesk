@@ -51,40 +51,13 @@ CFStringRef BDSKNSObjectCopyDescription(const void *value) {
     return (CFStringRef)[[(id)value description] retain];
 }
 
-const void *BDSKIntegerRetain(CFAllocatorRef allocator, const void *value) {
-    int *intPtr = (int *)CFAllocatorAllocate(allocator, sizeof(int), 0);
-    *intPtr = *(int *)value;
-    return intPtr;
-}
-
-void BDSKIntegerRelease(CFAllocatorRef allocator, const void *value) {
-    CFAllocatorDeallocate(allocator, (int *)value);
-}
-
-CFStringRef BDSKIntegerCopyDescription(const void *value) {
-    return CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), *(int *)value);
-}
-
-Boolean BDSKIntegerEqual(const void *value1, const void *value2) {
-    return *(int *)value1 == *(int *)value2;
-}
-
-CFHashCode BDSKIntegerHash(const void *value) {
-    return (CFHashCode)*(int *)value;
-}
-
 Boolean BDSKCaseInsensitiveStringEqual(const void *value1, const void *value2) {
     return (CFStringCompareWithOptions(value1, value2, CFRangeMake(0, CFStringGetLength(value1)), kCFCompareCaseInsensitive) == kCFCompareEqualTo);
 }
 
-const CFDictionaryKeyCallBacks kBDSKIntegerDictionaryKeyCallBacks = {
-    0,    // version
-    NULL, // retain
-    NULL, // release
-    BDSKIntegerCopyDescription,
-    NULL, // equal
-    NULL  // hash
-};
+CFHashCode BDSKCaseInsensitiveStringHash(const void *value) {
+    return BDCaseInsensitiveStringHash(value);
+}
 
 const CFDictionaryKeyCallBacks kBDSKCaseInsensitiveStringDictionaryKeyCallBacks = {
     0,   // version
@@ -92,15 +65,7 @@ const CFDictionaryKeyCallBacks kBDSKCaseInsensitiveStringDictionaryKeyCallBacks 
     BDSKNSObjectRelease,
     BDSKNSObjectCopyDescription,
     BDSKCaseInsensitiveStringEqual,
-    BDCaseInsensitiveStringHash
-};
-
-const CFDictionaryValueCallBacks kBDSKIntegerDictionaryValueCallBacks = {
-    0,    // version
-    NULL, // retain
-    NULL, // release
-    BDSKIntegerCopyDescription,
-    NULL  // equal
+    BDSKCaseInsensitiveStringHash
 };
 
 const CFArrayCallBacks kBDSKCaseInsensitiveStringArrayCallBacks = {
@@ -117,5 +82,5 @@ const CFSetCallBacks kBDSKCaseInsensitiveStringSetCallBacks = {
     BDSKNSObjectRelease,
     BDSKNSObjectCopyDescription,
     BDSKCaseInsensitiveStringEqual,
-    BDCaseInsensitiveStringHash
+    BDSKCaseInsensitiveStringHash
 };
