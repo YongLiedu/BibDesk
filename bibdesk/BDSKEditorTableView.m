@@ -48,9 +48,9 @@
     NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     int clickedColumn = [self columnAtPoint:location];
     int clickedRow = [self rowAtPoint:location];
-    NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:clickedColumn];
     
     if (clickedRow != -1 && clickedColumn != -1) {
+        NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:clickedColumn];
         NSRect cellFrame = [self frameOfCellAtColumn:clickedColumn row:clickedRow];
         id cell = [tableColumn dataCellForRow:clickedRow];
         BOOL isEditable = [tableColumn isEditable] && 
