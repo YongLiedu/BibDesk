@@ -43,7 +43,7 @@
 
 + (void)makePreviewDisplayImages;
 
-+ (NSImage *)systemIconWithCode:(OSType)code {
++ (NSImage *)systemIconWithCode:(OSType)code;
 + (NSImage *)httpInternetLocationImage;
 + (NSImage *)ftpInternetLocationImage;
 + (NSImage *)mailInternetLocationImage;
