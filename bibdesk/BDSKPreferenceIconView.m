@@ -40,7 +40,7 @@
 #import "BDSKPreferenceController.h"
 #import "BDSKPreferenceIconCell.h"
 
-#define MINIMUM_ICON_WIDTH 82.0
+#define MINIMUM_ICON_WIDTH 0.0
 #define MINIMUM_ICON_HEIGHT 0.0
 #define MAXIMUM_ICON_WIDTH 200.0
 #define MAXIMUM_ICON_HEIGHT 200.0
