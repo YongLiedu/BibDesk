@@ -52,7 +52,7 @@ CFStringRef BDSKNSObjectCopyDescription(const void *value) {
 }
 
 const void *BDSKIntegerRetain(CFAllocatorRef allocator, const void *value) {
-    float *intPtr = (float *)CFAllocatorAllocate(allocator, sizeof(int), 0);
+    int *intPtr = (int *)CFAllocatorAllocate(allocator, sizeof(int), 0);
     *intPtr = *(int *)value;
     return intPtr;
 }
