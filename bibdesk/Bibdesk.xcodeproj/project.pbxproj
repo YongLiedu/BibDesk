@@ -313,9 +313,6 @@
 		EF1970D30F13B70900B87E59 /* TestBDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = EF1970D20F13B70900B87E59 /* TestBDSKTypeManager.m */; };
 		EF54ED180F1B5EDB00D59E07 /* TestBDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = EF54ED170F1B5EDB00D59E07 /* TestBDSKRISParser.m */; };
 		EF902B890F12343000E5DE14 /* TestBibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = EF902B880F12343000E5DE14 /* TestBibItem.m */; };
-		EF902C520F12406E00E5DE14 /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
-		EF902DA40F12410300E5DE14 /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
-		EF902DA50F12410300E5DE14 /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
 		EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE30758095000C3F701 /* AGRegex.framework */; };
 		EF902DA70F12410300E5DE14 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
 		EF90A8DD0F172ADD00EC79EA /* TestComplexString.m in Sources */ = {isa = PBXBuildFile; fileRef = EF90A8DC0F172ADD00EC79EA /* TestComplexString.m */; };
@@ -1757,9 +1754,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EF902DA40F12410300E5DE14 /* OmniBase.framework in Frameworks */,
-				EF902C520F12406E00E5DE14 /* OmniFoundation.framework in Frameworks */,
-				EF902DA50F12410300E5DE14 /* OmniAppKit.framework in Frameworks */,
 				EF902DA60F12410300E5DE14 /* AGRegex.framework in Frameworks */,
 				EF902DA70F12410300E5DE14 /* BTParse.framework in Frameworks */,
 			);

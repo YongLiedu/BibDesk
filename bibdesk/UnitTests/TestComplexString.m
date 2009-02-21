@@ -36,7 +36,6 @@
 */
 
 #import "TestComplexString.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKComplexString.h"
 #import "BDSKStringNode.h"
 #import "BDSKMacroResolver.h"

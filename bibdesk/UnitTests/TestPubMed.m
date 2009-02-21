@@ -36,7 +36,6 @@
 */
 
 #import "TestPubMed.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BibItem.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKStringConstants.h"
