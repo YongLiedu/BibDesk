@@ -85,8 +85,6 @@
     [[column dataCell] setFormatter:formatter];
     [formatter release];
     
-    [super awakeFromNib]; // this updates the font
-    
     BDSKPRECONDITION([[self enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleClipViewFrameChangedNotification:)

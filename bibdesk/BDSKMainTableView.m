@@ -103,8 +103,6 @@ enum {
 + (BOOL)shouldQueueTypeSelectHelper { return YES; }
 
 - (void)awakeFromNib{
-    [super awakeFromNib]; // this updates the font
-	
 	[self setHeaderView:[[[BDSKMainTableHeaderView alloc] initWithFrame:[[self headerView] frame]] autorelease]];	
     
     NSRect cornerViewFrame = [[self cornerView] frame];
