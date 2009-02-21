@@ -89,7 +89,7 @@ static NSString *fixedAuthorName(NSString *name)
     
     unsigned idx, maxIdx = [firstNames length];
     for(idx = 0; idx < maxIdx; idx++){
-        [newName appendCharacter:[firstNames characterAtIndex:idx]];
+        [newName appendString:[firstNames substringWithRange:NSMakeRange(idx, 1)]];
         [newName appendString:(idx == maxIdx - 1 ? @"." : @". ")];
     }
     
@@ -156,7 +156,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     // for now, we'll only support version 1.0
     NSRange startRange = [itemString rangeOfString:@"VR 1.0\n" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"This Web of Science version is not supported", @"Error description"), nil);
+        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"This Web of Science version is not supported", @"Error description")];
         if(outError) *outError = error;
 		return returnArray;
     }
@@ -187,7 +187,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     
     while(sourceLine = [sourceLineE nextObject]){
         
-        OBPRECONDITION([sourceLine hasPrefix:@"FN"] == NO && [sourceLine hasPrefix:@"VR"] == NO && [sourceLine hasPrefix:@"EF"] == NO);
+        BDSKPRECONDITION([sourceLine hasPrefix:@"FN"] == NO && [sourceLine hasPrefix:@"VR"] == NO && [sourceLine hasPrefix:@"EF"] == NO);
         
         if([sourceLine length] >= 2 && isTagLine(sourceLine)){
  			

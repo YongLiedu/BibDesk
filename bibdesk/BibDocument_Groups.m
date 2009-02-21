@@ -83,6 +83,9 @@
 #import "BDSKSharingClient.h"
 #import "WebURLsWithTitles.h"
 #import "NSColor_BDSKExtensions.h"
+#import "NSView_BDSKExtensions.h"
+#import "BDSKApplication.h"
+#import "BDSKCFCallBacks.h"
 
 
 @implementation BibDocument (Groups)
@@ -162,7 +165,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [self insertControlView:[searchGroupViewController view] atTop:NO];
     
     BDSKSearchGroup *group = [[self selectedGroups] firstObject];
-    OBASSERT([group isSearch]);
+    BDSKASSERT([group isSearch]);
     [searchGroupViewController setGroup:group];
 }
 
@@ -233,12 +236,12 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification{
     // use the most recently changed group as default for newly opened documents; could also store on a per-document basis
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
+    [[NSUserDefaults standardUserDefaults] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
 	[self updateCategoryGroupsPreservingSelection:NO];
 }
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification{
-    if ([[groups smartGroups] containsObjectIdenticalTo:[notification object]])
+    if (NSNotFound != [[groups smartGroups] indexOfObjectIdenticalTo:[notification object]])
         [self updateSmartGroupsCountAndContent:YES];
 }
 
@@ -310,7 +313,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleGroupNameChangedNotification:(NSNotification *)notification{
-    if([groups containsObjectIdenticalTo:[notification object]] == NO)
+    if([groups indexOfObjectIdenticalTo:[notification object]] == NSNotFound)
         return;
     if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
         [self sortGroupsByKey:sortGroupsKey];
@@ -612,7 +615,7 @@ The groupedPublications array is a subset of the publications array, developed b
         NSEnumerator *groupEnum;
         BDSKGroup *group;
         NSMutableArray *filteredArray = [NSMutableArray arrayWithCapacity:[publications count]];
-        BOOL intersectGroups = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKIntersectGroupsKey];
+        BOOL intersectGroups = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKIntersectGroupsKey];
         
         // to take union, we add the items contained in a selected group
         // to intersect, we remove the items not contained in a selected group
@@ -678,9 +681,9 @@ The groupedPublications array is a subset of the publications array, developed b
     
     // group objects are either BibAuthors or NSStrings; we need to use case-insensitive or fuzzy author matching, since that's the way groups are checked for containment
     if([groupField isPersonField]){
-        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &BDSKFuzzyDictionaryKeyCallBacks, &OFIntegerDictionaryValueCallbacks);
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKAuthorFuzzyDictionaryKeyCallBacks, NULL);
     } else {
-        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &BDSKCaseInsensitiveStringKeyDictionaryCallBacks, &OFIntegerDictionaryValueCallbacks);
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, NULL);
     }
     
     unsigned int groupIndex = [categoryIndexes firstIndex];
@@ -783,7 +786,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (NSMenu *)groupFieldsMenu {
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenuItem *menuItem;
-	NSEnumerator *fieldEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] objectEnumerator];
+	NSEnumerator *fieldEnum = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] objectEnumerator];
 	NSString *field;
 	
     [menu addItemWithTitle:NSLocalizedString(@"No Field", @"Menu item title") action:NULL keyEquivalent:@""];
@@ -862,9 +865,9 @@ The groupedPublications array is a subset of the publications array, developed b
 		return;
 	}
 	
-	NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+	NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
 	[array addObject:newGroupField];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];	
+	[[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];	
     
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldAddRemoveNotification
                                                         object:self
@@ -896,7 +899,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-	NSArray *groupFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey];
+	NSArray *groupFields = [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey];
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCrossrefString, nil]
                                               excluding:[[[typeMan invalidGroupFieldsSet] allObjects] arrayByAddingObjectsFromArray:groupFields]];
     
@@ -915,9 +918,9 @@ The groupedPublications array is a subset of the publications array, developed b
     if(returnCode == NSCancelButton || [NSString isEmptyString:oldGroupField])
         return;
     
-    NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+    NSMutableArray *array = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
     [array removeObject:oldGroupField];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];
+    [[NSUserDefaults standardUserDefaults] setObject:array forKey:BDSKGroupFieldsKey];
     [array release];
     
 	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
@@ -950,7 +953,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
-                                                                                                       fieldsArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey]];
+                                                                                                       fieldsArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGroupFieldsKey]];
 	[removeFieldController beginSheetModalForWindow:documentWindow
                                       modalDelegate:self
                                      didEndSelector:@selector(removeGroupFieldSheetDidEnd:returnCode:contextInfo:)
@@ -1183,7 +1186,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)editGroupAtRow:(int)row {
-	OBASSERT(row != -1);
+	BDSKASSERT(row != -1);
 	BDSKGroup *group = [groups objectAtIndex:row];
     
     if ([group isEditable] == NO) {
@@ -1198,7 +1201,7 @@ The groupedPublications array is a subset of the publications array, developed b
         [filterController release];
 	} else if ([group isCategory]) {
         // this must be a person field
-        OBASSERT([[group name] isKindOfClass:[BibAuthor class]]);
+        BDSKASSERT([[group name] isKindOfClass:[BibAuthor class]]);
 		[self showPerson:(BibAuthor *)[group name]];
 	} else if ([group isURL]) {
         BDSKURLGroupSheetController *sheetController = [(BDSKURLGroupSheetController *)[BDSKURLGroupSheetController alloc] initWithGroup:(BDSKURLGroup *)group];
@@ -1222,7 +1225,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	} 
 	
 	int row = [groupTableView selectedRow];
-	OBASSERT(row != -1);
+	BDSKASSERT(row != -1);
 	if(row > 0) [self editGroupAtRow:row];
 }
 
@@ -1233,7 +1236,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	} 
 	
 	int row = [groupTableView selectedRow];
-	OBASSERT(row != -1);
+	BDSKASSERT(row != -1);
 	if (row <= 0) return;
     
     if([self tableView:groupTableView shouldEditTableColumn:[[groupTableView tableColumns] objectAtIndex:0] row:row])
@@ -1298,15 +1301,15 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (IBAction)changeIntersectGroupsAction:(id)sender {
     BOOL flag = (BOOL)[sender tag];
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKIntersectGroupsKey] != flag) {
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:flag forKey:BDSKIntersectGroupsKey];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKIntersectGroupsKey] != flag) {
+        [[NSUserDefaults standardUserDefaults] setBool:flag forKey:BDSKIntersectGroupsKey];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupTableSelectionChangedNotification object:self];
     }
 }
 
 - (void)editGroupWithoutWarning:(BDSKGroup *)group {
     unsigned i = [groups indexOfObject:group];
-    OBASSERT(i != NSNotFound);
+    BDSKASSERT(i != NSNotFound);
     
     if(i != NSNotFound){
         [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
@@ -1441,7 +1444,7 @@ The groupedPublications array is a subset of the publications array, developed b
     CFIndex countOfItems = [publications count];
     BibItem **pubs = (BibItem **)NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
     [publications getObjects:pubs];
-    NSSet *currentPubs = [(NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &BDSKBibItemEquivalenceCallBacks) autorelease];
+    NSSet *currentPubs = [(NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &kBDSKBibItemEquivalenceCallBacks) autorelease];
     NSZoneFree([self zone], pubs);
     
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[items count]];
@@ -1475,7 +1478,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-	OBASSERT([group isSmart] == NO && [group isExternal] == NO && [group isEqual:[groups libraryGroup]] == NO && [group isEqual:[groups lastImportGroup]] == NO);
+	BDSKASSERT([group isSmart] == NO && [group isExternal] == NO && [group isEqual:[groups libraryGroup]] == NO && [group isEqual:[groups lastImportGroup]] == NO);
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
@@ -1495,7 +1498,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	int rv;
     
     while(pub = [pubEnum nextObject]){
-        OBASSERT([pub isKindOfClass:[BibItem class]]);        
+        BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
         
         if(field && [field isEqualToString:BDSKPubTypeString] == NO)
             oldValue = [[[pub valueOfField:field] retain] autorelease];
@@ -1580,7 +1583,7 @@ The groupedPublications array is a subset of the publications array, developed b
             continue;
         
 		while(pub = [pubEnum nextObject]){
-			OBASSERT([pub isKindOfClass:[BibItem class]]);        
+			BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
 			
             if(field)
                 oldValue = [[[pub valueOfField:field] retain] autorelease];
@@ -1648,7 +1651,7 @@ The groupedPublications array is a subset of the publications array, developed b
     NSString *field = [(BDSKCategoryGroup *)group key];
 	
 	while(pub = [pubEnum nextObject]){
-		OBASSERT([pub isKindOfClass:[BibItem class]]);        
+		BDSKASSERT([pub isKindOfClass:[BibItem class]]);        
 		
         oldValue = [[[pub valueOfField:field] retain] autorelease];
 		rv = [pub replaceGroup:group withGroupNamed:newGroupName handleInherited:handleInherited];
@@ -1752,7 +1755,7 @@ The groupedPublications array is a subset of the publications array, developed b
     CFIndex countOfItems = [pubs count];
     BibItem **items = (BibItem **)NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
     [pubs getObjects:items];
-    NSSet *pubSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)items, countOfItems, &BDSKBibItemEquivalenceCallBacks);
+    NSSet *pubSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)items, countOfItems, &kBDSKBibItemEquivalenceCallBacks);
     NSZoneFree([self zone], items);
     
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];

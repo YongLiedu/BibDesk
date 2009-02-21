@@ -2,9 +2,9 @@
 //  BDSKSplitView.m
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 31/10/05.
+//  Created by Christiaan Hofman on 2/18/09.
 /*
- This software is Copyright (c) 2005-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,163 +37,81 @@
  */
 
 #import "BDSKSplitView.h"
-#import "BDSKStatusBar.h"
-#import "NSBezierPath_CoreImageExtensions.h"
-#import "CIImage_BDSKExtensions.h"
 
-#define END_JOIN_WIDTH 3.0f
-#define END_JOIN_HEIGHT 20.0f
+// This class is basically a copy of OASplitView
 
-@interface BDSKSplitView (Private)
-
-- (float)horizontalFraction;
-- (void)setHorizontalFraction:(float)newFract;
-
-- (float)verticalFraction;
-- (void)setVerticalFraction:(float)newFract;
-
+@interface BDSKSplitView (BDSKPrivate)
+- (void)didResizeSubviews:(NSNotification *)notification;
 @end
+
 
 @implementation BDSKSplitView
 
-+ (CIColor *)startColor{
-    static CIColor *startColor = nil;
-    if (startColor == nil)
-        startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
-    return startColor;
-}
+#pragma mark AutosaveName
 
-+ (CIColor *)endColor{
-    static CIColor *endColor = nil;
-    if (endColor == nil)
-        endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
-    return endColor;
-}
-
-- (id)initWithFrame:(NSRect)frameRect{
+- (id)initWithFrame:(NSRect)frameRect {
     if (self = [super initWithFrame:frameRect]) {
-        blendStyle = 0;
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didResizeSubviews:) name:NSSplitViewDidResizeSubviewsNotification object:self];
     }
     return self;
+
+}
+
+- (id)initWithCoder:(NSCoder *)coder {
+    if (self = [super initWithCoder:coder]) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didResizeSubviews:) name:NSSplitViewDidResizeSubviewsNotification object:self];
+    }
+    return self;
+
 }
 
 - (void)dealloc {
-    CGLayerRelease(dividerLayer);
-    CGLayerRelease(minBlendLayer);
-    CGLayerRelease(maxBlendLayer);
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [positionAutosaveName release];
     [super dealloc];
 }
 
-- (void)drawDividerInRect:(NSRect)aRect {
-    // Draw gradient
-    CGContextRef currentContext = [[NSGraphicsContext currentContext] graphicsPort];
-    
-    if (NULL == dividerLayer) {
-        CGSize dividerSize = CGSizeMake(aRect.size.width, aRect.size.height);
-        dividerLayer = CGLayerCreateWithContext(currentContext, dividerSize, NULL);
-        [NSGraphicsContext saveGraphicsState];
-        NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(dividerLayer) flipped:NO];
-        [NSGraphicsContext setCurrentContext:nsContext];
-        NSRect rectToFill = aRect;
-        rectToFill.origin = NSZeroPoint;
-        [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:NO == [self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
-        [NSGraphicsContext restoreGraphicsState];
-    }
-    CGContextDrawLayerInRect(currentContext, *(CGRect *)&aRect, dividerLayer);
-    
-    if (blendStyle) {
-        NSRect endRect, ignored;
+- (NSString *)positionAutosaveName {
+    return positionAutosaveName;
+}
+
+- (NSString *)positionAutosaveKey {
+    return positionAutosaveName ? [@"BDSKSplitView Frame " stringByAppendingString:positionAutosaveName] : nil;
+}
+
+- (void)setPositionAutosaveName:(NSString *)name {
+    if (positionAutosaveName != name) {
+        [positionAutosaveName release];
+        positionAutosaveName = [name retain];
         
-        if (blendStyle & BDSKMinBlendStyleMask) {
-            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, [self isVertical] ? NSMinYEdge : NSMinXEdge);
-            if (NULL == minBlendLayer) {
-                CGSize blendSize = CGSizeMake(endRect.size.width, endRect.size.height);
-                minBlendLayer = CGLayerCreateWithContext(currentContext, blendSize, NULL);
-                [NSGraphicsContext saveGraphicsState];
-                NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(minBlendLayer) flipped:NO];
-                [NSGraphicsContext setCurrentContext:nsContext];
-                NSRect rectToFill = endRect;
-                rectToFill.origin = NSZeroPoint;
-                [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:[self isVertical] withStartColor:[[self class] endColor] endColor:[CIColor clearColor]];
-                [NSGraphicsContext restoreGraphicsState];
+        if ([NSString isEmptyString:positionAutosaveName] == NO) {
+            NSArray *frameStrings = [[NSUserDefaults standardUserDefaults] arrayForKey:[self positionAutosaveKey]];
+            if (frameStrings) {
+                NSArray *subviews = [self subviews];
+                unsigned int subviewCount = [subviews count];
+                unsigned int frameCount = [frameStrings count];
+                unsigned int i;
+
+                // Walk through our subviews re-applying frames so we don't explode in the event that the archived frame strings become out of sync with our subview count
+                for (i = 0; i < subviewCount && i < frameCount; i++)
+                    [[subviews objectAtIndex:i] setFrame:NSRectFromString([frameStrings objectAtIndex:i])];
             }
-            CGContextDrawLayerInRect(currentContext, *(CGRect *)&endRect, minBlendLayer);
-        }
-        
-        if (blendStyle & BDSKMaxBlendStyleMask) {
-            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, [self isVertical] ? NSMaxYEdge : NSMaxXEdge);
-            if (NULL == maxBlendLayer) {
-                CGSize blendSize = CGSizeMake(endRect.size.width, endRect.size.height);
-                maxBlendLayer = CGLayerCreateWithContext(currentContext, blendSize, NULL);
-                [NSGraphicsContext saveGraphicsState];
-                NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(maxBlendLayer) flipped:NO];
-                [NSGraphicsContext setCurrentContext:nsContext];
-                NSRect rectToFill = endRect;
-                rectToFill.origin = NSZeroPoint;
-                [[NSBezierPath bezierPathWithRect:rectToFill] fillPathVertically:[self isVertical] withStartColor:[CIColor clearColor] endColor:[[self class] startColor]];
-                [NSGraphicsContext restoreGraphicsState];
-            }
-            CGContextDrawLayerInRect(currentContext, *(CGRect *)&endRect, maxBlendLayer);
-        } else if ([self isVertical] && (blendStyle & BDSKStatusBarBlendStyleMask)) {
-            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_HEIGHT, NSMaxYEdge);
-            if (NULL == maxBlendLayer) {
-                CGSize blendSize = CGSizeMake(endRect.size.width, endRect.size.height);
-                maxBlendLayer = CGLayerCreateWithContext(currentContext, blendSize, NULL);
-                [NSGraphicsContext saveGraphicsState];
-                NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithGraphicsPort:CGLayerGetContext(maxBlendLayer) flipped:NO];
-                [NSGraphicsContext setCurrentContext:nsContext];
-                NSRect rectToFill = endRect;
-                rectToFill.origin = NSZeroPoint;
-                [[NSBezierPath bezierPathWithRect:rectToFill] fillPathWithHorizontalGradientFromColor:[[self class] startColor]
-                                                                                              toColor:[[self class] endColor]
-                                                                                         blendedAtTop:NO
-                                                                          ofVerticalGradientFromColor:[BDSKStatusBar upperColor]
-                                                                                              toColor:[BDSKStatusBar lowerColor]];
-                [NSGraphicsContext restoreGraphicsState];
-            }
-            CGContextDrawLayerInRect(currentContext, *(CGRect *)&endRect, maxBlendLayer);
         }
     }
-    // Draw dimple
-    [super drawDividerInRect:aRect];
 }
 
-- (float)dividerThickness {
-	return 6.0;
-}
-
-- (void)adjustSubviews {
-	// we send the notifications because NSSplitView doesn't and we need them for AutoSave of e.g. double click actions
-	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewWillResizeSubviewsNotification object:self];
-	[super adjustSubviews];
-	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:self];
-}
-
-- (int)blendStyle {
-    return blendStyle;
-}
-
-- (void)setBlendStyle:(int)mask {
-    if (blendStyle != mask) {
-        blendStyle = mask;
-        CGLayerRelease(minBlendLayer);
-        minBlendLayer = NULL;
-        CGLayerRelease(maxBlendLayer);
-        maxBlendLayer = NULL;
+- (void)didResizeSubviews:(NSNotification *)notification {
+    if ([NSString isEmptyString:positionAutosaveName] == NO) {
+        NSMutableArray *frameStrings = [NSMutableArray array];
+        NSArray *subviews = [self subviews];
+        unsigned int i, iMax = [subviews count];
+        for (i = 0; i < iMax; i++)
+            [frameStrings addObject:NSStringFromRect([[subviews objectAtIndex:i] frame])];
+        [[NSUserDefaults standardUserDefaults] setObject:frameStrings forKey:[self positionAutosaveKey]];
     }
 }
 
-- (void)setVertical:(BOOL)flag {
-    if ([self isVertical] != flag) {
-        CGLayerRelease(dividerLayer);
-        dividerLayer = NULL;
-        CGLayerRelease(minBlendLayer);
-        minBlendLayer = NULL;
-        CGLayerRelease(maxBlendLayer);
-        maxBlendLayer = NULL;
-    }
-    [super setVertical:flag];
-}
+#pragma mark Double-click support
 
 // arm: mouseDown: swallows mouseDragged: needlessly
 - (void)mouseDown:(NSEvent *)theEvent {
@@ -231,5 +149,83 @@
     }
 }
 
+#pragma mark Fraction
+
+- (float)horizontalDividerFraction {
+    NSRect topFrame, bottomFrame;
+    
+    if ([[self subviews] count] < 2)
+        return 0.0;
+    
+    topFrame = [[[self subviews] objectAtIndex:0] frame];
+    bottomFrame = [[[self subviews] objectAtIndex:1] frame];
+    return NSHeight(bottomFrame) / (NSHeight(bottomFrame) + NSHeight(topFrame));
+}
+
+- (void)setHorizontalDividerFraction:(float)newFraction {
+    NSRect topFrame, bottomFrame;
+    NSView *topSubView;
+    NSView *bottomSubView;
+    float totalHeight;
+    
+    if ([[self subviews] count] < 2)
+        return;
+    
+    topSubView = [[self subviews] objectAtIndex:0];
+    bottomSubView = [[self subviews] objectAtIndex:1];
+    topFrame = [topSubView frame];
+    bottomFrame = [bottomSubView frame];
+    totalHeight = NSHeight(bottomFrame) + NSHeight(topFrame);
+    bottomFrame.size.height = newFraction * totalHeight;
+    topFrame.size.height = totalHeight - NSHeight(bottomFrame);
+    [topSubView setFrame:topFrame];
+    [bottomSubView setFrame:bottomFrame];
+    [self adjustSubviews];
+    [self setNeedsDisplay:YES];
+}
+
+- (float)verticalDividerFraction {
+    NSRect leftFrame, rightFrame;
+    
+    if ([[self subviews] count] < 2)
+        return 0.0;
+    
+    leftFrame = [[[self subviews] objectAtIndex:0] frame];
+    rightFrame = [[[self subviews] objectAtIndex:1] frame];
+    return NSWidth(rightFrame) / (NSWidth(rightFrame) + NSWidth(leftFrame));
+}
+
+- (void)setVerticalDividerFraction:(float)newFraction {
+    NSRect leftFrame, rightFrame;
+    NSView *leftSubView;
+    NSView *rightSubView;
+    float totalWidth;
+    
+    if ([[self subviews] count] < 2)
+        return;
+    
+    leftSubView = [[self subviews] objectAtIndex:0];
+    rightSubView = [[self subviews] objectAtIndex:1];
+    leftFrame = [leftSubView frame];
+    rightFrame = [rightSubView frame];
+    totalWidth = NSWidth(rightFrame) + NSWidth(leftFrame);
+    rightFrame.size.width = newFraction * totalWidth;
+    leftFrame.size.width = totalWidth - NSWidth(rightFrame);
+    [leftSubView setFrame:leftFrame];
+    [rightSubView setFrame:rightFrame];
+    [self adjustSubviews];
+    [self setNeedsDisplay:YES];
+}
+
+- (float)fraction {
+    return [self isVertical] ? [self verticalDividerFraction] : [self horizontalDividerFraction];
+}
+
+- (void)setFraction:(float)newFraction {
+    if ([self isVertical])
+        [self setVerticalDividerFraction:newFraction];
+    else
+        [self setHorizontalDividerFraction:newFraction];
+}
 
 @end

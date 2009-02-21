@@ -37,10 +37,8 @@
  */
 
 #import "BDSKScriptMenu.h"
-#import <OmniBase/OmniBase.h>
-#import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/OmniAppKit.h>
 #import "NSWorkspace_BDSKExtensions.h"
+#import "NSMenu_BDSKExtensions.h"
 
 @interface BDSKScriptMenu (Private)
 - (NSArray *)scriptPaths;
@@ -57,7 +55,7 @@ static int recursionDepth = 0;
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     sortDescriptors = [[NSArray alloc] initWithObjects:[[[NSSortDescriptor alloc] initWithKey:@"filename" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease], nil];
 }
 
@@ -67,7 +65,7 @@ static int recursionDepth = 0;
     NSString *scriptMenuTitle = @"Scripts";
     NSMenu *newMenu = [[self allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle];
     NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[self menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
-    [scriptItem setImage:[NSImage imageNamed:@"OAScriptMenu"]];
+    [scriptItem setImage:[NSImage imageNamed:@"ScriptMenu"]];
     [scriptItem setSubmenu:newMenu];
     [newMenu setDelegate:newMenu];
     [newMenu release];

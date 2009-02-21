@@ -37,7 +37,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniFoundation/OmniFoundation.h>
 
 
 @interface NSColor (BDSKExtensions)

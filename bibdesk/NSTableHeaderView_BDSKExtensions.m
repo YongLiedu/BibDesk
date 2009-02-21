@@ -37,7 +37,7 @@
  */
 
 #import "NSTableHeaderView_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
+#import "BDSKRuntime.h"
 
 
 @implementation NSTableHeaderView (BDSKExtensions)
@@ -61,8 +61,8 @@ static void (*originalMouseDown)(id, SEL, id) = NULL;
 	originalMouseDown(self, _cmd, theEvent);
 }
 
-+ (void)didLoad {
-    originalMouseDown = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
++ (void)load {
+    originalMouseDown = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
 }
 
 @end

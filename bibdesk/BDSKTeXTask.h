@@ -38,7 +38,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniFoundation/OmniFoundation.h>
+#import "BDSKSimpleLock.h"
 
 enum {
 	BDSKGenerateLTB = 0,
@@ -68,7 +68,7 @@ typedef struct _BDSKTeXTaskFlags {
 	
     BDSKTeXTaskFlags flags;
 
-    OFSimpleLockType processingLock;    
+    BDSKSimpleLockType processingLock;    
     pthread_rwlock_t dataFileLock;
 }
 

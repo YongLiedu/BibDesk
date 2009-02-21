@@ -39,9 +39,10 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKSheetController.h"
 #import "BDSKOwnerProtocol.h"
+#import "BDSKTableView.h"
 
 @class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKImagePopUpButton, BDSKComplexStringEditor;
-@class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter, BDSKTypeSelectHelper;
+@class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter;
 
 @interface BDSKTextImportController : BDSKSheetController <BDSKOwner> {
     IBOutlet NSTextView* sourceTextView;
@@ -131,9 +132,7 @@
 
 #pragma mark -
 
-@interface TextImportItemTableView : NSTableView {
-    BDSKTypeSelectHelper *typeSelectHelper;
-}
+@interface TextImportItemTableView : BDSKTableView
 @end
 
 #pragma mark -

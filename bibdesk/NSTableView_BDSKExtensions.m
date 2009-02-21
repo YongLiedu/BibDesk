@@ -37,19 +37,13 @@
  */
 
 #import "NSTableView_BDSKExtensions.h"
-#import "BDSKStringConstants.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import "NSLayoutManager_BDSKExtensions.h"
 #import "BDSKFieldEditor.h"
-#import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/OmniAppKit.h>
+
+
+static void *BDSKTableViewFontDefaultsObservationContext = @"BDSKTableViewFontDefaultsObservationContext";
 
 @implementation NSTableView (BDSKExtensions)
-
-static BOOL (*originalBecomeFirstResponder)(id, SEL) = NULL;
-static void (*originalDealloc)(id self, SEL _cmd) = NULL;
-static void (*originalDraggedImageEndedAtOperation)(id self, SEL _cmd, id, NSPoint, NSDragOperation) = NULL;
-static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL, id, id, id, NSPointPointer) = NULL;
 
 - (BOOL)validateDelegatedMenuItem:(NSMenuItem *)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
 	SEL action = [menuItem action];
@@ -109,96 +103,6 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
     return YES; // we assume that any other implemented action is always valid
 }
 
-#pragma mark Font preferences methods
-
-- (NSString *)fontNamePreferenceKey{
-    if ([[self delegate] respondsToSelector:@selector(tableViewFontNamePreferenceKey:)])
-        return [[self delegate] tableViewFontNamePreferenceKey:self];
-    return nil;
-}
-
-- (NSString *)fontSizePreferenceKey{
-    if ([[self delegate] respondsToSelector:@selector(tableViewFontSizePreferenceKey:)])
-        return [[self delegate] tableViewFontSizePreferenceKey:self];
-    return nil;
-}
-
-- (void)awakeFromNib {
-    // there was no original awakeFromNib
-    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
-    [self tableViewFontChanged:nil];
-    if (fontNamePrefKey != nil) {
-        [OFPreference addObserver:self
-                         selector:@selector(tableViewFontChanged:)
-                    forPreference:[OFPreference preferenceForKey:fontNamePrefKey]];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(updateFontPanel:)
-                                                     name:NSWindowDidBecomeKeyNotification
-                                                   object:[self window]];
-    }
-}
-
-- (NSControlSize)cellControlSize {
-    NSCell *dataCell = [[[self tableColumns] lastObject] dataCell];
-    return nil == dataCell ? NSRegularControlSize : [dataCell controlSize];
-}
-
-- (void)changeFont:(id)sender {
-    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
-    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
-    if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
-        return;
-    NSFontManager *fontManager = [NSFontManager sharedFontManager];
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    
-    NSString *fontName = [pw objectForKey:fontNamePrefKey];
-    float fontSize = [pw floatForKey:fontSizePrefKey];
-	NSFont *font = nil;
-        
-    if(fontName != nil)
-        font = [NSFont fontWithName:fontName size:fontSize];
-    if(font == nil)
-        font = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:[self cellControlSize]]];
-    font = [fontManager convertFont:font];
-    
-    // set the name last, as that's what we observe
-    [pw setFloat:[font pointSize] forKey:fontSizePrefKey];
-    [pw setObject:[font fontName] forKey:fontNamePrefKey];
-}
-
-- (void)tableViewFontChanged:(NSNotification *)notification {
-    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
-    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
-    if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
-        return;
-
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
-	NSFont *font = nil;
-    
-    if(fontName != nil)
-        font = [NSFont fontWithName:fontName size:fontSize];
-    if(font == nil)
-        font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
-	
-	[self setFont:font];
-    [self setRowHeight:[NSLayoutManager defaultViewLineHeightForFont:font] + 2.0f];
-        
-	[self tile];
-    [self reloadData]; // othewise the change isn't immediately visible
-    
-}
-
-- (void)updateFontPanel:(NSNotification *)notification {
-    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
-    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
-    if ([[[self window] firstResponder] isEqual:self] && fontNamePrefKey != nil && fontSizePrefKey != nil) {
-        NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
-        float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
-        [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
-    }
-}
-
 - (IBAction)invertSelection:(id)sender;
 {
     NSIndexSet *selRows = [self selectedRowIndexes];
@@ -209,62 +113,6 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
     } else {
         NSBeep();
     }
-}
-
-@end
-
-#pragma mark -
-
-@implementation NSTableView (BDSKExtensionsPrivate)
-
-#pragma mark ToolTips for individual rows and columns
-
-#pragma mark Font preferences overrides
-
-- (BOOL)replacementBecomeFirstResponder {
-    [self updateFontPanel:nil];
-    return originalBecomeFirstResponder(self, _cmd);
-}
-
-- (void)replacementDealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [OFPreference removeObserver:self forPreference:nil];
-    originalDealloc(self, _cmd);
-}
-
-#pragma mark Dragging and drag image
-
-- (void)replacementDraggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
-    originalDraggedImageEndedAtOperation(self, _cmd, anImage, aPoint, operation);
-	
-    if([[self dataSource] respondsToSelector:@selector(tableView:concludeDragOperation:)]) 
-		[[self dataSource] tableView:self concludeDragOperation:operation];
-    
-    // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
-    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
-}
-
-- (NSImage *)replacementDragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent *)dragEvent offset:(NSPointPointer)dragImageOffset{
-   	if([[self dataSource] respondsToSelector:@selector(tableView:dragImageForRowsWithIndexes:)]) {
-		NSImage *image = [[self dataSource] tableView:self dragImageForRowsWithIndexes:dragRows];
-		if (image != nil)
-			return image;
-	}
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-        return originalDragImageForRowsWithIndexesTableColumnsEventOffset(self, _cmd, dragRows, tableColumns, dragEvent, dragImageOffset);
-    } else {
-        return nil;
-    }
-}
-
-#pragma mark Method swizzling
-
-+ (void)didLoad;
-{
-    originalBecomeFirstResponder = (typeof(originalBecomeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(becomeFirstResponder), @selector(replacementBecomeFirstResponder));
-    originalDealloc = (void (*)(id, SEL))OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
-    originalDraggedImageEndedAtOperation = (void (*)(id, SEL, id, NSPoint, NSDragOperation))OBReplaceMethodImplementationWithSelector(self, @selector(draggedImage:endedAt:operation:), @selector(replacementDraggedImage:endedAt:operation:));
-    originalDragImageForRowsWithIndexesTableColumnsEventOffset = (id (*)(id, SEL, id, id, id, NSPointPointer))OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRowsWithIndexes:tableColumns:event:offset:), @selector(replacementDragImageForRowsWithIndexes:tableColumns:event:offset:));
 }
 
 #pragma mark Drop highlight
@@ -314,3 +162,19 @@ static id (*originalDragImageForRowsWithIndexesTableColumnsEventOffset)(id, SEL,
 }
 
 @end
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
+@implementation NSTableColumn (BDSKExtensions)
+- (id)dataCellForRow:(NSInteger)row {
+    id cell = [self dataCell];
+    id tableView = [self tableView];
+    if ([tableView isKindOfClass:[NSOutlineView class]] && [[tableView delegate] respondsToSelector:@selector(outlineView:dataCellForTableColumn:item:)])
+        cell = [[tableView delegate] outlineView:tableView dataCellForTableColumn:self item:[tableView itemAtRow:row]];
+    else if ([tableView isKindOfClass:[NSTableView class]] && [[tableView delegate] respondsToSelector:@selector(tableView:dataCellForTableColumn:row:)])
+        cell = [[tableView delegate] tableView:tableView dataCellForTableColumn:self row:row];
+    return cell;
+}
+@end
+#else
+#warning fixme: remove NSTableColumn category
+#endif

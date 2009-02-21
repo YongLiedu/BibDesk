@@ -449,7 +449,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (NSTextStorage *)styledTextValue {
-    NSString *templateStyle = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKBottomPreviewDisplayTemplateKey];
+    NSString *templateStyle = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBottomPreviewDisplayTemplateKey];
     BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle] ?: [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
     
     NSAttributedString *attrString = nil;

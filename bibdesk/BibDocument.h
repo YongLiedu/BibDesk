@@ -47,7 +47,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BDSKEditor, BDSKMacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
-@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FileView;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKGradientSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView, FileView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
 @class BDSKItemSearchIndexes, BDSKFileMigrationController, BDSKDocumentSearch;
 
@@ -115,7 +115,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
     IBOutlet NSWindow *documentWindow;
     IBOutlet BDSKMainTableView *tableView;
-    IBOutlet BDSKSplitView *splitView;
+    IBOutlet BDSKGradientSplitView *splitView;
     IBOutlet BDSKColoredBox *mainBox;
     IBOutlet NSView *mainView;
     
@@ -132,7 +132,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 #pragma mark Group pane variables
 
     IBOutlet BDSKGroupTableView *groupTableView;
-    IBOutlet BDSKSplitView *groupSplitView;
+    IBOutlet BDSKGradientSplitView *groupSplitView;
     IBOutlet BDSKImagePopUpButton *groupActionButton;
     IBOutlet NSButton *groupAddButton;
     IBOutlet BDSKCollapsibleView *groupCollapsibleView;
@@ -448,10 +448,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (void)registerForNotifications;
 
-- (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification;
-- (void)handleUsesTeXChangedNotification:(NSNotification *)notification;
-- (void)handleIgnoredSortTermsChangedNotification:(NSNotification *)notification;
-- (void)handleNameDisplayChangedNotification:(NSNotification *)notification;
 - (void)handleFlagsChangedNotification:(NSNotification *)notification;
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification;
 - (void)handleTableSelectionChangedNotification:(NSNotification *)notification;

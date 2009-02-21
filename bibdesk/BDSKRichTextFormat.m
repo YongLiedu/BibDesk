@@ -37,7 +37,7 @@
  */
 
 #import "BDSKRichTextFormat.h"
-#import <OmniFoundation/OmniFoundation.h>
+#import "NSData_BDSKExtensions.h"
 
 
 @implementation BDSKRichTextFormat

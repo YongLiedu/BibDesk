@@ -115,12 +115,12 @@ struct BDSKDOServerFlags {
 // Access to these objects is limited to the creating threads (we assume that it's initially created on the main thread).  If you want to communicate with the server from yet another thread, that thread needs to create its own connection and proxy object(s), which would also require access to the server's connection ivars.  Possibly using -enableMultipleThreads on both connections would work, but the documentation is too vague to be useful.
 
 - (id)serverOnMainThread { 
-    OBASSERT([[NSThread currentThread] isEqual:serverThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:serverThread]);
     return serverOnMainThread; 
 }
 
 - (id)serverOnServerThread { 
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     return serverOnServerThread; 
 }
 
@@ -128,7 +128,7 @@ struct BDSKDOServerFlags {
 
 - (void)setLocalServer:(byref id)anObject;
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     [anObject setProtocolForProxy:[self protocolForServerThread]];
     serverOnServerThread = [anObject retain];
 }
@@ -168,7 +168,7 @@ struct BDSKDOServerFlags {
 #pragma mark Server Thread
 
 - (oneway void)stopRunning {
-    OBASSERT([[NSThread currentThread] isEqual:serverThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:serverThread]);
     // signal to stop running the run loop
     stopRunning = YES;
 }
@@ -176,7 +176,7 @@ struct BDSKDOServerFlags {
 - (void)runDOServerForPorts:(NSArray *)ports;
 {
     // detach a new thread to run this
-    NSAssert([NSThread inMainThread] == NO, @"do not run the server in the main thread");
+    NSAssert([NSThread isMainThread] == NO, @"do not run the server in the main thread");
     NSAssert(localThreadConnection == nil, @"server is already running");
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
@@ -253,7 +253,7 @@ struct BDSKDOServerFlags {
 
 - (void)startDOServerSync;
 {
-    OBASSERT([NSThread inMainThread]);   
+    BDSKASSERT([NSThread isMainThread]);   
     // no need for memory barrier functions here since there's no thread yet
     serverFlags->serverDidSetup = 0;
     [self startDOServer];
@@ -261,7 +261,7 @@ struct BDSKDOServerFlags {
 
 - (void)startDOServerAsync;
 {
-    OBASSERT([NSThread inMainThread]); 
+    BDSKASSERT([NSThread isMainThread]); 
     // no need for memory barrier functions here since there's no thread yet
     // set serverDidSetup to 1 so we don't wait in startDOServer
     serverFlags->serverDidSetup = 1;
@@ -270,7 +270,7 @@ struct BDSKDOServerFlags {
 
 - (void)stopDOServer;
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     // set the stop flag, so any long process (possibly with loops) knows it can return
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags->shouldKeepRunning);
     // this is mainly to tickle the runloop on the server thread so it will finish

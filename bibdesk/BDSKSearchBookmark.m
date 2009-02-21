@@ -73,7 +73,7 @@ static BDSKPlaceholderSearchBookmark *defaultPlaceholderSearchBookmark = nil;
 static Class BDSKSearchBookmarkClass = Nil;
 
 + (void)initialize {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     BDSKSearchBookmarkClass = self;
     defaultPlaceholderSearchBookmark = (BDSKPlaceholderSearchBookmark *)NSAllocateObject([BDSKPlaceholderSearchBookmark class], 0, NSDefaultMallocZone());
 }

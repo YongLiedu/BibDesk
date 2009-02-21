@@ -163,6 +163,11 @@
     return [self sortedArrayUsingMergesortWithDescriptors:[NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:BDSKTitleString ascending:YES], nil]];
 }
 
+- (NSString *)componentsJoinedByComma
+{
+    return [self componentsJoinedByString:@", "];
+}
+
 - (NSString *)componentsJoinedByAnd
 {
     return [self componentsJoinedByString:@" and "];
@@ -180,7 +185,22 @@
 
 - (NSString *)componentsJoinedByDefaultJoinString
 {
-    return [self componentsJoinedByString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultArrayJoinStringKey]];
+    return [self componentsJoinedByString:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultArrayJoinStringKey]];
+}
+
+- (NSString *)componentsJoinedByCommaAndAnd
+{
+    unsigned count = [self count];
+    switch (count) {
+        case 0:
+            return @"";
+        case 1:
+            return [[self objectAtIndex:0] description];
+        case 2:
+            return [self componentsJoinedByString:@" and "];
+        default:
+            return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", and "] stringByAppendingString:[[self lastObject] description]];
+    }
 }
 
 - (NSString *)componentsJoinedByCommaAndAmpersand
@@ -359,6 +379,36 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     return [array autorelease];
 }
 
+- (NSArray *)arrayByRemovingObject:(id)anObject {
+    if ([self containsObject:anObject])
+        return self;
+    NSMutableArray *tmpArray= [NSMutableArray arrayWithArray:self];
+    [tmpArray removeObject:anObject];
+    return tmpArray;
+}
+
+- (NSArray *)arrayByPerformingSelector:(SEL)aSelector {
+    return [self arrayByPerformingSelector:aSelector withObject:nil];
+}
+
+- (void)makeObjectsPerformSelector:(SEL)selector withObject:(id)arg1 withObject:(id)arg2 {
+    NSEnumerator *objEnum = [self objectEnumerator];
+    id object;
+    while (object = [objEnum nextObject])
+        objc_msgSend(object, selector, arg1, arg2);
+}
+
+- (NSArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)anObject {
+    NSMutableArray *array = [NSMutableArray array];
+    NSEnumerator *objEnum = [self objectEnumerator];
+    id object;
+    while (object = [objEnum nextObject]) {
+        if (object = [object performSelector:aSelector withObject:anObject])
+            [array addObject:object];
+    }
+    return array;
+}
+
 @end
 
 #pragma mark -
@@ -481,9 +531,6 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
 static id __sort = nil;
 static SEL __selector = NULL;
 
-// for thread safe usage of the cache (since we use static variables)
-static NSLock *sortingLock = nil;
-
 // typedef used for NSArray sorting category
 typedef NSComparisonResult (*comparatorIMP)(id, SEL, id, id);    
 static comparatorIMP __comparator = NULL;
@@ -558,15 +605,10 @@ static inline void __BDClearStatics()
     __comparator = NULL;
 }
 
-+ (void)didLoad
-{
-    if(nil == sortingLock)
-        sortingLock = [[NSLock alloc] init];
-}
-
 - (void)mergeSortUsingDescriptors:(NSArray *)sortDescriptors;
 {
-    [sortingLock lock];
+    // we use a static cache, so this is not thread safe
+    BDSKASSERT([NSThread isMainThread]);
     NSZone *zone = [self zone];
     size_t count = [self count];
     size_t size = sizeof(BDSortCacheValue);
@@ -649,7 +691,6 @@ static inline void __BDClearStatics()
     }
     
     NSZoneFree(zone, cache);
-    [sortingLock unlock];
 }
 
 @end

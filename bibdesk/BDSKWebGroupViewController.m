@@ -53,7 +53,7 @@
 @implementation BDSKWebGroupViewController
 
 + (void)initialize {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     static NSImage *backAdornImage = nil;
     static NSImage *forwardAdornImage = nil;
@@ -293,7 +293,7 @@
     
     if (frame == [sender mainFrame]) {
         
-        OBASSERT(loadingWebFrame == nil);
+        BDSKASSERT(loadingWebFrame == nil);
         
         [self setRetrieving:YES];
         [group setPublications:nil];

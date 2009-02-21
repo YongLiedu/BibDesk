@@ -38,7 +38,6 @@
  */
 
 #import "BDSKOverlay.h"
-#import <OmniAppKit/OmniAppKit.h>
 
 @implementation BDSKOverlay
 

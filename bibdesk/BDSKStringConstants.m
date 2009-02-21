@@ -39,7 +39,7 @@
 
 @implementation NSString (BDSKStringConstants)
 
-+ (void)didLoad
++ (void)initializeStringConstants
 {    
     // Hidden default to allow for JabRef interoperability; (RFE #1546931) this is an all-or-nothing switch.  Alternate would be to use a script hook to copy annote->review when closing an editor, but then you have lots of duplication.
     if ([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKAnnoteFieldName"] != nil)
@@ -333,6 +333,7 @@ NSString *BDSKDocumentControllerDidChangeMainDocumentNotification = @"BDSKDocume
 NSString *BDSKFileSearchIndexInfoChangedNotification = @"BDSKFileSearchIndexInfoChangedNotification";
 NSString *BDSKEncodingsListChangedNotification = @"BDSKEncodingsListChangedNotification";
 NSString *BDSKTemporaryFileMigrationNotification = @"BDSKTemporaryFileMigrationNotification";
+NSString *BDSKFlagsChangedNotification = @"BDSKFlagsChangedNotification";
 
 #pragma mark Exception name strings
 

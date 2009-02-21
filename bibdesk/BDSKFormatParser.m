@@ -37,12 +37,12 @@
  */
 
 #import "BDSKFormatParser.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BibAuthor.h"
 #import "BDSKConverter.h"
 #import "BDSKTypeManager.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSAttributedString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
 #import "NSScanner_BDSKExtensions.h"
 #import "BDSKStringNode.h"
@@ -63,7 +63,7 @@
 
 + (NSString *)parseFormatForLinkedFile:(BDSKLinkedFile *)file ofItem:(id <BDSKParseableItem>)pub
 {
-	NSString *localFileFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalFileFormatKey];
+	NSString *localFileFormat = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKLocalFileFormatKey];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
     
     NSString *oldPath = [[file URL] path];
@@ -793,7 +793,7 @@
 	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
 		return [pub isValidLocalFilePath:proposedStr];
 	}
-	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
+	else if ([[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
 		if ([NSString isEmptyString:proposedStr])
 			return NO;
 		return YES;
@@ -830,7 +830,7 @@
 		
 		return newString;
 	}
-	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
+	else if ([[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
 		
 		if ([NSString isEmptyString:string]) {
 			return @"";
@@ -853,7 +853,7 @@
 	int cleanOption = 0;
 
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
-		cleanOption = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKCiteKeyCleanOptionKey];
+		cleanOption = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKCiteKeyCleanOptionKey];
 		
 		if ([NSString isEmptyString:string]) {
 			return @"";
@@ -872,7 +872,7 @@
 		return newString;
 	}
 	else if ([fieldName isEqualToString:BDSKLocalFileString] || [fieldName isLocalFileField]) {
-		cleanOption = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKLocalFileCleanOptionKey];
+		cleanOption = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKLocalFileCleanOptionKey];
 		
 		if (cleanOption >= 3)
 			invalidCharSet = [[BDSKTypeManager sharedManager] veryStrictInvalidCharactersForField:fieldName inFileType:type];
@@ -892,7 +892,7 @@
 		
 		return newString;
 	}
-	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
+	else if ([[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
 		if ([NSString isEmptyString:string]) {
 			return @"";
 		}
@@ -1158,10 +1158,10 @@
 {
     // initWithFrame sets up the entire text system for us
     if(self = [super initWithFrame:frameRect]){
-        OBASSERT(field != nil);
+        BDSKASSERT(field != nil);
         parseField = [field copy];
         
-        OBASSERT(fileType != nil);
+        BDSKASSERT(fileType != nil);
         parseFileType = [fileType copy];
     }
     return self;
@@ -1226,10 +1226,10 @@
 - (id)initWithField:(NSString *)field fileType:(NSString *)fileType; {
     // initWithFrame sets up the entire text system for us
     if(self = [super init]){
-        OBASSERT(field != nil);
+        BDSKASSERT(field != nil);
         parseField = [field copy];
         
-        OBASSERT(fileType != nil);
+        BDSKASSERT(fileType != nil);
         parseFileType = [fileType copy];
     }
     return self;

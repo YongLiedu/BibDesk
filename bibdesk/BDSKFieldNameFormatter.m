@@ -54,7 +54,7 @@
 }
 
 - (void)setDelegate:(id)newDelegate {
-    OBPRECONDITION(newDelegate == nil || [newDelegate respondsToSelector:@selector(fieldNameFormatterKnownFieldNames:)]);
+    BDSKPRECONDITION(newDelegate == nil || [newDelegate respondsToSelector:@selector(fieldNameFormatterKnownFieldNames:)]);
     delegate = newDelegate;
 }
 
@@ -107,7 +107,7 @@
     if (r.location != NSNotFound) {
         if (error) *error = NSLocalizedString(@"The field name contains an invalid character", @"field name warning");
         NSMutableString *new = [[partialString mutableCopy] autorelease];
-        [new replaceAllOccurrencesOfCharactersInSet:invalidSet withString:@""];
+        [new replaceOccurrencesOfCharactersInSet:invalidSet withString:@""];
         if ([new length]) {
             *partialStringPtr = new;
             if (NSMaxRange(*proposedSelRangePtr) > [new length])

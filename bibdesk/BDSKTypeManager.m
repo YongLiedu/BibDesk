@@ -40,7 +40,8 @@
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
-#import "OFCharacterSet_BDSKExtensions.h"
+
+static void *BDSKTypeManagerDefaultsObservationContext = @"BDSKTypeManagerDefaultsObservationContext";
 
 static BDSKTypeManager *sharedInstance = nil;
 
@@ -48,7 +49,7 @@ static BDSKTypeManager *sharedInstance = nil;
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     [self sharedManager];
 }
 
@@ -116,8 +117,7 @@ static BDSKTypeManager *sharedInstance = nil;
         
         strictInvalidGeneralCharSet = [[NSCharacterSet alloc] init];
         
-        separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] copy];
-        separatorOFCharSet = [[OFCharacterSet alloc] initWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]];
+        separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] copy];
         
         localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
         remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
@@ -139,7 +139,10 @@ static BDSKTypeManager *sharedInstance = nil;
         NSEnumerator *prefKeyEnum = [[NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil] objectEnumerator];
         NSString *prefKey;
         while (prefKey = [prefKeyEnum nextObject])
-            [OFPreference addObserver:self selector:@selector(customFieldsDidChange:) forPreference:[OFPreference preferenceForKey:prefKey]];
+            [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self
+                forKeyPath:[@"values." stringByAppendingString:prefKey]
+                   options:0
+                   context:BDSKTypeManagerDefaultsObservationContext];
     }
 	return sharedInstance;
 }
@@ -207,15 +210,15 @@ static BDSKTypeManager *sharedInstance = nil;
         [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
         [allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
     }
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKDefaultFieldsKey]];
-    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKLocalFileFieldsKey]];
-    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKRemoteURLFieldsKey]];
-    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKBooleanFieldsKey]];
-    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKRatingFieldsKey]];
-    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKTriStateFieldsKey]];
-    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKCitationFieldsKey]];
-    [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKPersonFieldsKey]];
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
+    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKDefaultFieldsKey]];
+    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKLocalFileFieldsKey]];
+    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKRemoteURLFieldsKey]];
+    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKBooleanFieldsKey]];
+    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKRatingFieldsKey]];
+    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKTriStateFieldsKey]];
+    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKCitationFieldsKey]];
+    [allFields addObjectsFromArray:[sud stringArrayForKey:BDSKPersonFieldsKey]];
     
     [self setAllFieldNames:allFields];
 
@@ -226,8 +229,8 @@ static BDSKTypeManager *sharedInstance = nil;
     [remoteURLFieldsSet removeAllObjects];
     [allURLFieldsSet removeAllObjects];
     
-    [localFileFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey]];
-    [remoteURLFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey]];
+    [localFileFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKLocalFileFieldsKey]];
+    [remoteURLFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRemoteURLFieldsKey]];
     [allURLFieldsSet unionSet:remoteURLFieldsSet];
     [allURLFieldsSet unionSet:localFileFieldsSet];
 }
@@ -239,43 +242,50 @@ static BDSKTypeManager *sharedInstance = nil;
     [citationFieldsSet removeAllObjects];
     [personFieldsSet removeAllObjects];
     
-    [ratingFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey]];
-    [triStateFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey]];
-    [booleanFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey]];    
-    [citationFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKCitationFieldsKey]];   
-    [personFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKPersonFieldsKey]];
+    [ratingFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKRatingFieldsKey]];
+    [triStateFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKTriStateFieldsKey]];
+    [booleanFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKBooleanFieldsKey]];    
+    [citationFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKCitationFieldsKey]];   
+    [personFieldsSet addObjectsFromArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKPersonFieldsKey]];
 }
 
 - (void)reloadGroupFields{
     [invalidGroupFieldsSet removeAllObjects];
     
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
 	NSMutableSet *invalidFields = [NSMutableSet setWithObjects:
 		BDSKDateModifiedString, BDSKDateAddedString, BDSKDateString, 
 		BDSKTitleString, BDSKBooktitleString, BDSKVolumetitleString, BDSKContainerString, BDSKChapterString, 
 		BDSKVolumeString, BDSKNumberString, BDSKSeriesString, BDSKPagesString, BDSKItemNumberString, 
 		BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, nil];
-	[invalidFields addObjectsFromArray:[pw stringArrayForKey:BDSKLocalFileFieldsKey]];
-	[invalidFields addObjectsFromArray:[pw stringArrayForKey:BDSKRemoteURLFieldsKey]];
+	[invalidFields addObjectsFromArray:[sud stringArrayForKey:BDSKLocalFileFieldsKey]];
+	[invalidFields addObjectsFromArray:[sud stringArrayForKey:BDSKRemoteURLFieldsKey]];
     [invalidGroupFieldsSet unionSet:invalidFields];
     
     [singleValuedGroupFieldsSet removeAllObjects];
     NSMutableSet *singleValuedFields = [NSMutableSet setWithObjects:BDSKPubTypeString, BDSKTypeString, BDSKCrossrefString, BDSKJournalString, BDSKYearString, BDSKMonthString, BDSKPublisherString, BDSKAddressString, nil];
-	[singleValuedFields addObjectsFromArray:[pw stringArrayForKey:BDSKRatingFieldsKey]];
-	[singleValuedFields addObjectsFromArray:[pw stringArrayForKey:BDSKBooleanFieldsKey]];
-	[singleValuedFields addObjectsFromArray:[pw stringArrayForKey:BDSKTriStateFieldsKey]];  
+	[singleValuedFields addObjectsFromArray:[sud stringArrayForKey:BDSKRatingFieldsKey]];
+	[singleValuedFields addObjectsFromArray:[sud stringArrayForKey:BDSKBooleanFieldsKey]];
+	[singleValuedFields addObjectsFromArray:[sud stringArrayForKey:BDSKTriStateFieldsKey]];  
     [singleValuedGroupFieldsSet unionSet:singleValuedFields];
 }
 
-- (void)customFieldsDidChange:(NSNotification *)notification {
-	[self reloadAllFieldNames];
-    [self reloadURLFields];
-    [self reloadSpecialFields];
-    [self reloadGroupFields];
-    
-    // coalesce notifications; this is received once each OFPreference value that's set in BibPref_Defaults, but observers of BDSKCustomFieldsChangedNotification should only receive it once
-    NSNotification *note = [NSNotification notificationWithName:BDSKCustomFieldsChangedNotification object:self];
-    [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostASAP coalesceMask:NSNotificationCoalescingOnName forModes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
+
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == BDSKTypeManagerDefaultsObservationContext) {
+        [self reloadAllFieldNames];
+        [self reloadURLFields];
+        [self reloadSpecialFields];
+        [self reloadGroupFields];
+        
+        // coalesce notifications; this is received once each preference value that's set in BibPref_Defaults, but observers of BDSKCustomFieldsChangedNotification should only receive it once
+        NSNotification *note = [NSNotification notificationWithName:BDSKCustomFieldsChangedNotification object:self];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostASAP coalesceMask:NSNotificationCoalescingOnName forModes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 #pragma mark Setters
@@ -475,7 +485,7 @@ static BDSKTypeManager *sharedInstance = nil;
 }
 
 - (NSArray *)userDefaultFieldsForType:(NSString *)type{
-    return [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey];
+    return [[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKDefaultFieldsKey];
 }
 
 - (NSSet *)invalidGroupFieldsSet{
@@ -578,7 +588,7 @@ static BDSKTypeManager *sharedInstance = nil;
         if(name == nil)
             name = tag; // guard against a nil return; it turns out that not all WOS tags are documented
 	}
-    OBPOSTCONDITION(name);
+    BDSKPOSTCONDITION(name);
     return name;
 }
 
@@ -713,11 +723,9 @@ static BDSKTypeManager *sharedInstance = nil;
 	return [fieldName isCitationField] ? [NSCharacterSet commaCharacterSet] : separatorCharSet;
 }
 
-- (OFCharacterSet *)separatorOFCharacterSetForField:(NSString *)fieldName{
-	return [fieldName isCitationField] ? [OFCharacterSet commaCharacterSet] : separatorOFCharSet;
-}
-
 @end
+
+#pragma mark -
 
 @implementation NSString (BDSKTypeExtensions)
 

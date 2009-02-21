@@ -42,7 +42,7 @@
 #import "BibItem.h"
 #import "CFString_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
-#import "BDSKSplitView.h"
+#import "BDSKGradientSplitView.h"
 #import "BDSKFileContentSearchController.h"
 #import "BDSKGroupTableView.h"
 #import "NSTableView_BDSKExtensions.h"
@@ -53,7 +53,6 @@
 #import "BibDocument_Groups.h"
 #import "BDSKMainTableView.h"
 #import "BDSKFindController.h"
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKSearchButtonController.h"
 #import "BDSKItemSearchIndexes.h"
 #import "NSArray_BDSKExtensions.h"
@@ -62,11 +61,13 @@
 #import "BDSKOwnerProtocol.h"
 #import "NSViewAnimation_BDSKExtensions.h"
 #import "BDSKDocumentSearch.h"
+#import "NSView_BDSKExtensions.h"
+#import "NSDictionary_BDSKExtensions.h"
 
 @implementation BibDocument (Search)
 
 - (IBAction)changeSearchType:(id)sender{
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
+    [[NSUserDefaults standardUserDefaults] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
     [self search:searchField];
 }
 
@@ -97,7 +98,7 @@
 {
     NSString *field = [searchButtonController selectedItemIdentifier];
     if (searchButtonController && nil == field) {
-        OBASSERT_NOT_REACHED("the search button controller should always have a selected field");
+        BDSKASSERT_NOT_REACHED("the search button controller should always have a selected field");
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
         field = BDSKAllFieldsString;
     }
@@ -227,7 +228,7 @@ Ensure that views are always ordered vertically from top to bottom as
 NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 {
     // surround with wildcards for substring search; should we check for any operators?
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSearchMenuTagKey] == 0)
+    if ([[NSUserDefaults standardUserDefaults] integerForKey:BDSKSearchMenuTagKey] == 0)
         searchFieldString = [NSString stringWithFormat:@"*%@*", searchFieldString];
     return searchFieldString;
 }
@@ -406,7 +407,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     }
     return nil;
 }
-
+/*
 // OAFindControllerAware informal protocol
 - (id <OAFindControllerTarget>)omniFindControllerTarget;
 {
@@ -453,5 +454,5 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
             break;
 	}
 }
-
+*/
 @end

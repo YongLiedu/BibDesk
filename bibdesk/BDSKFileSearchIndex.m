@@ -45,7 +45,9 @@
 #import "NSObject_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 #import "UKDirectoryEnumerator.h"
+#import "BDSKMessageQueue.h"
 
 @interface BDSKFileSearchIndex (Private)
 
@@ -82,7 +84,7 @@
 
 - (id)initWithDocument:(id)aDocument
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
 
     self = [super init];
         
@@ -151,7 +153,7 @@
 // cancel is always sent from the main thread
 - (void)cancelForDocumentURL:(NSURL *)documentURL
 {
-    NSParameterAssert([NSThread inMainThread]);
+    NSParameterAssert([NSThread isMainThread]);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     OSAtomicCompareAndSwap32Barrier(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
     
@@ -307,7 +309,7 @@ static void addItemFunction(const void *value, void *context) {
     double totalObjectCount = [items count];
     double numberIndexed = 0;
     
-    OBPRECONDITION(items);
+    BDSKPRECONDITION(items);
     
     [items retain];
     
@@ -345,7 +347,7 @@ static void addItemFunction(const void *value, void *context) {
             pthread_rwlock_unlock(&rwlock);
         }
         
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+        [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
         
         NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
         NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
@@ -383,7 +385,7 @@ static void addItemFunction(const void *value, void *context) {
                     progressValue = (numberIndexed / totalObjectCount) * 100;
                 }
                 
-                [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+                [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
             }
             
             [pool release];
@@ -400,7 +402,7 @@ static void addItemFunction(const void *value, void *context) {
         }
         [URLsToRemove release];
         
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+        [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
         
         [items release];
         items = itemsToAdd;
@@ -427,11 +429,11 @@ static void addItemFunction(const void *value, void *context) {
         
         SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
         
-        OBPOSTCONDITION(skDocument);
+        BDSKPOSTCONDITION(skDocument);
         
         if (skDocument != NULL) {
             
-            OBASSERT(signature);
+            BDSKASSERT(signature);
             [signatures setObject:signature forKey:aURL];
             
             SKIndexAddDocument(index, skDocument, NULL, TRUE);
@@ -443,7 +445,7 @@ static void addItemFunction(const void *value, void *context) {
 - (void)removeFileURL:(NSURL *)aURL{
     SKDocumentRef skDocument = SKDocumentCreateWithURL((CFURLRef)aURL);
     
-    OBPOSTCONDITION(skDocument);
+    BDSKPOSTCONDITION(skDocument);
     
     if (skDocument != NULL) {
         [signatures removeObjectForKey:aURL];
@@ -474,7 +476,7 @@ static void addItemFunction(const void *value, void *context) {
         [pool release];
         pool = [NSAutoreleasePool new];
         
-        [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+        [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
         OSMemoryBarrier();
     }
         
@@ -485,9 +487,9 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)indexFileURLs:(NSSet *)urlsToAdd forIdentifierURL:(NSURL *)identifierURL
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
     
-    OBASSERT(identifierURL);
+    BDSKASSERT(identifierURL);
     
     NSEnumerator *urlEnumerator = [urlsToAdd objectEnumerator];
     NSURL *url = nil;
@@ -508,9 +510,9 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)removeFileURLs:(NSSet *)urlsToRemove forIdentifierURL:(NSURL *)identifierURL
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
-    OBASSERT(identifierURL);
+    BDSKASSERT(identifierURL);
         
     NSEnumerator *urlEnum = nil;
     NSURL *url = nil;
@@ -535,9 +537,9 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
     
-    OBASSERT(identifierURL);
+    BDSKASSERT(identifierURL);
     
     NSEnumerator *urlEnumerator = [urlsToReindex objectEnumerator];
     NSURL *url = nil;
@@ -550,7 +552,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)writeIndexToDiskForDocumentURL:(NSURL *)documentURL
 {
-    NSParameterAssert([NSThread inMainThread]);
+    NSParameterAssert([NSThread isMainThread]);
     NSParameterAssert([setupLock condition] == INDEX_THREAD_DONE);
     
     // @@ temporary for testing
@@ -643,7 +645,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)searchIndexDidUpdate
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1) {
         // Make sure we send frequently enough to update a progress bar, but not too frequently to avoid beachball on single-core systems; too many search updates slow down indexing due to repeated flushes.  Even though this is always queued and supposed to be sent once, it can still be sent too often.
@@ -661,7 +663,7 @@ static void addItemFunction(const void *value, void *context) {
 // @@ only sent after the initial indexing so the controller knows to remove the progress bar; can possibly be removed entirely and delegate can check finishedInitialIndexing when it gets searchIndexDidUpdate:
 - (void)searchIndexDidFinish
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     OSMemoryBarrier();
     if (flags.shouldKeepRunning == 1)
         [delegate searchIndexDidFinish:self];
@@ -669,7 +671,7 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)processNotification:(NSNotification *)note
 {    
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     // Forward the notification to the correct thread
     [notificationQueue addObject:note];
     [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
@@ -677,19 +679,19 @@ static void addItemFunction(const void *value, void *context) {
 
 - (void)handleDocAddItemNotification:(NSNotification *)note
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
 	NSArray *searchIndexInfo = [[note userInfo] valueForKey:@"searchIndexInfo"];
-    OBPRECONDITION(searchIndexInfo);
+    BDSKPRECONDITION(searchIndexInfo);
             
     // this will update the delegate when all is complete
     [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:1];        
-    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
 }
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
 
 	NSEnumerator *itemEnumerator = [[[note userInfo] valueForKey:@"searchIndexInfo"] objectEnumerator];
     id anItem;
@@ -707,12 +709,12 @@ static void addItemFunction(const void *value, void *context) {
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
 	
-    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
 {
-    OBASSERT([[NSThread currentThread] isEqual:notificationThread]);
+    BDSKASSERT([[NSThread currentThread] isEqual:notificationThread]);
     
     NSDictionary *item = [note userInfo];
     NSURL *identifierURL = [item objectForKey:@"identifierURL"];
@@ -753,12 +755,12 @@ static void addItemFunction(const void *value, void *context) {
     [addedURLs release];
     [sameURLs release];
     
-    [[OFMessageQueue mainQueue] queueSelectorOnce:@selector(searchIndexDidUpdate) forObject:self];
+    [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
 }    
 
 - (void)handleMachMessage:(void *)msg
 {
-    OBASSERT([NSThread inMainThread] == NO);
+    BDSKASSERT([NSThread isMainThread] == NO);
 
     while ( [notificationQueue count] ) {
         NSNotification *note = [[notificationQueue objectAtIndex:0] retain];

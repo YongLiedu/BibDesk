@@ -225,7 +225,7 @@
 				<key>groupMenu</key>
 				<string>NSMenu</string>
 				<key>groupSplitView</key>
-				<string>BDSKSplitView</string>
+				<string>BDSKGradientSplitView</string>
 				<key>groupTableView</key>
 				<string>BDSKGroupTableView</string>
 				<key>mainBox</key>
@@ -253,7 +253,7 @@
 				<key>sidePreviewTextView</key>
 				<string>NSTextView</string>
 				<key>splitView</key>
-				<string>BDSKSplitView</string>
+				<string>BDSKGradientSplitView</string>
 				<key>statusBar</key>
 				<string>BDSKStatusBar</string>
 				<key>tableView</key>
@@ -272,11 +272,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKEncodingPopUpButton</string>
+			<string>NSApplication</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSPopUpButton</string>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -293,6 +293,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKEncodingPopUpButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPopUpButton</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -397,14 +405,6 @@
 			<string>NSSplitView</string>
 		</dict>
 		<dict>
-			<key>CLASS</key>
-			<string>BDSKSplitView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>OASplitView</string>
-		</dict>
-		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key></key>
@@ -444,11 +444,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>BDSKGradientSplitView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OASplitView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>BDSKGroupTableView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>OAGradientTableView</string>
+			<string>BDSKGradientTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -457,6 +465,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKGradientTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -470,14 +486,6 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSPopUpButton</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>OAGradientTableView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

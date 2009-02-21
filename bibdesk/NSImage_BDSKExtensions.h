@@ -38,11 +38,16 @@
 
 #import <Cocoa/Cocoa.h>
 #import <ApplicationServices/ApplicationServices.h>
-#import <OmniAppKit/OmniAppKit.h>
 
 @interface NSImage (BDSKExtensions)
 
 + (void)makePreviewDisplayImages;
+
++ (NSImage *)httpInternetLocationImage;
++ (NSImage *)ftpInternetLocationImage;
++ (NSImage *)mailInternetLocationImage;
++ (NSImage *)newsInternetLocationImage;
++ (NSImage *)genericInternetLocationImage;
 
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code;
 + (NSImage *)imageWithSmallIconForToolboxCode:(OSType) code;
@@ -50,6 +55,7 @@
 
 + (NSImage *)imageForURL:(NSURL *)aURL;
 + (NSImage *)imageForFile:(NSString *)path;
++ (NSImage *)imageForFileType:(NSString *)fileType;
 + (NSImage *)paperclipImage;
 + (NSImage *)redPaperclipImage;
 
@@ -60,5 +66,8 @@
 - (NSImage *)dragImageWithCount:(int)count;
 - (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
 - (NSBitmapImageRep *)bestImageRepForSize:(NSSize)preferredSize device:(NSDictionary *)deviceDescription;
+
+- (void)drawFlippedInRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(float)delta;
+- (void)drawFlipped:(BOOL)isFlipped inRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(float)delta;
 
 @end

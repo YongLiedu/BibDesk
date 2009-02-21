@@ -35,9 +35,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKPreferencePane.h"
 
-@interface BibPref_General : OAPreferenceClient {
+@interface BibPref_General : BDSKPreferencePane {
     IBOutlet NSMatrix *startupBehaviorRadio;
     IBOutlet NSPopUpButton *emailTemplatePopup;
 	IBOutlet NSButton* editOnPasteButton;
@@ -65,7 +65,7 @@
 - (IBAction)changeAskToTrashFiles:(id)sender;
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)handleWarningPrefChanged:(NSNotification *)notification;
-- (void)handleTemplatePrefsChanged:(NSNotification *)notification;
+- (void)handleTemplatePrefsChanged;
+- (void)updateUI;
 
 @end

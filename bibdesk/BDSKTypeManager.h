@@ -66,7 +66,6 @@
 #define BIBTEX_TYPES_FOR_REFER_TYPES_KEY      @"BibTeXTypesForReferTypes"
 #define BIBTEX_TYPES_FOR_HCITE_TYPES_KEY      @"BibTeXTypesForHCiteTypes"
 
-@class OFCharacterSet;
 
 @interface BDSKTypeManager : NSObject {
 	NSDictionary *fileTypesDict;
@@ -103,7 +102,6 @@
 	NSCharacterSet *invalidGeneralCharSet;
 	NSCharacterSet *strictInvalidGeneralCharSet;
 	NSCharacterSet *separatorCharSet;
-	OFCharacterSet *separatorOFCharSet;
     
     NSMutableSet *localFileFieldsSet;
     NSMutableSet *remoteURLFieldsSet;
@@ -120,7 +118,6 @@
 
 - (void)reloadTypeInfo;
 - (void)reloadAllFieldNames;
-- (void)customFieldsDidChange:(NSNotification *)notification;
 - (void)reloadURLFields;
 - (void)reloadSpecialFields;
 - (void)reloadGroupFields;
@@ -295,7 +292,6 @@
 - (NSCharacterSet *)fragileCiteKeyCharacterSet;
 
 - (NSCharacterSet *)separatorCharacterSetForField:(NSString *)fieldName;
-- (OFCharacterSet *)separatorOFCharacterSetForField:(NSString *)fieldName;
 
 @end
 

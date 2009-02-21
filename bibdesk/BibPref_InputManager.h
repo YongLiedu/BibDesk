@@ -38,16 +38,20 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKPreferencePane.h"
 
-@interface BibPref_InputManager : OAPreferenceClient
+@class BDSKGradientTableView;
+
+@interface BibPref_InputManager : BDSKPreferencePane
 {
-    IBOutlet OAGradientTableView *tableView;
+    IBOutlet BDSKGradientTableView *tableView;
     IBOutlet NSButton *enableButton;
     IBOutlet NSArrayController *arrayController;
     NSString *inputManagerPath;
     NSMutableArray *applications;
 }
+
+- (void)updateUI;
 
 - (void)addApplicationsWithIdentifiers:(NSArray *)identifiers;
 - (void)synchronizePreferences;

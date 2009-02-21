@@ -37,24 +37,53 @@
  */
 
 #import "BDSKPreferenceController.h"
+#import "BDSKPreferenceRecord.h"
+#import "BDSKPreferencePane.h"
+#import "BDSKPreferenceIconView.h"
 #import "BDSKOverlay.h"
-#import <OmniAppKit/OmniAppKit.h>
-#import <OmniAppKit/OAPreferenceClientRecord.h> // this is not contained in OmniAppKit.h
-#import <OmniAppKit/OAPreferencesIconView.h> // this is not contained in OmniAppKit.h
+#import "BDSKSpotlightView.h"
+#import "BDSKVersionNumber.h"
+
+#define LOCALIZATION_TABLE @"Preferences"
+#define DEFAULTS_TABLE @"Preferences"
+#define IDENTIFIER_KEY @"identifier"
+#define TITLE_KEY @"title"
+#define INITIAL_VALUES_KEY @"initialValues"
+#define PANES_KEY @"panes"
+#define MINIMUM_SYSTEM_VERSION_KEY @"minimumSystemVersion"
+#define MAXIMUM_SYSTEM_VERSION_KEY @"maximumSystemVersion"
+
+static NSString *BDSKPreferencesToolbarIdentifier = @"BDSKPreferencesToolbarIdentifier";
+static NSString *BDSKPreferencesToolbarShowAllItemIdentifier = @"BDSKPreferencesToolbarShowAllItemIdentifier";
+static NSString *BDSKPreferencesToolbarPreviousItemIdentifier = @"BDSKPreferencesToolbarPreviousItemIdentifier";
+static NSString *BDSKPreferencesToolbarNextItemIdentifier = @"BDSKPreferencesToolbarNextItemIdentifier";
+static NSString *BDSKPreferencesToolbarSearchItemIdentifier = @"BDSKPreferencesToolbarSearchItemIdentifier";
 
 
-@interface OAPreferenceController (PrivateMethods)
-- (void)_showAllIcons:(id)sender;
+@interface BDSKPreferenceController (BDSKPrivate)
+- (void)iconViewShowPane:(id)sender;
+- (void)setSelectedPaneIdentifier:(NSString *)identifier;
+- (void)setupToolbar;
+- (void)loadPreferences;
+- (void)loadPanes;
+- (BDSKPreferenceIconView *)iconView;
+- (void)changeContentView:(NSView *)view display:(BOOL)display;
+- (void)updateSearchAndShowAll:(BOOL)showAll;
 @end
 
-static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
+
+@interface NSToolbar (BDSKPrivateDeclarations)
+- (void)_setCustomizesAlwaysOnClickAndDrag:(BOOL)flag;
+- (void)_setWantsToolbarContextMenu:(BOOL)flag;
+- (void)_setFirstMoveableItemIndex:(int)index;
+@end
+
 
 @implementation BDSKPreferenceController
 
 static id sharedController = nil;
 
-+ (id)sharedPreferenceController;
-{
++ (id)sharedPreferenceController {
     if (nil == sharedController)
         [[self alloc] init];
     return sharedController;
@@ -64,32 +93,18 @@ static id sharedController = nil;
     return sharedController ?: [super allocWithZone:zone];
 }
 
-- (id)init
-{
-    if ((sharedController == nil) && (sharedController = self = [super init])) {
-        isSearchActive = NO;
-        NSString *path = [[NSBundle mainBundle] pathForResource:@"PreferenceSearchTerms" ofType:@"plist"];
-        if(nil == path)
-            [NSException raise:NSInternalInconsistencyException format:@"unable to find search terms dictionary"];
-        clientIdentiferSearchTerms = [[NSDictionary alloc] initWithContentsOfFile:path];
-        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithContentsOfFile:path];
-        if(nil == tmpDict)
-            [NSException raise:NSInternalInconsistencyException format:@"unable to find search terms dictionary"];
-        NSEnumerator *keyEnum = [[tmpDict allKeys] objectEnumerator];
-        NSString *key;
-        while (key = [keyEnum nextObject]) {
-            NSMutableString *searchString = [[NSMutableString alloc] init];
-            NSEnumerator *stringEnum = [[tmpDict objectForKey:key] objectEnumerator];
-            NSString *string;
-            while (string = [stringEnum nextObject])
-                [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:@"PreferenceSearchTerms"], 0x1E];
-            [tmpDict setObject:searchString forKey:key];
-            [searchString release];
-        }
-        clientIdentiferSearchTerms = [tmpDict copy];
-        [tmpDict release];
+- (id)init {
+    if ((sharedController == nil) && (sharedController = self = [super initWithWindowNibName:@"Preferences"])) {
+        categories = [[NSMutableArray alloc] init];
+        categoryDicts = [[NSMutableDictionary alloc] init];
+        records = [[NSMutableDictionary alloc] init];
+        panes = [[NSMutableDictionary alloc] init];
+        identifierSearchTerms = [[NSMutableDictionary alloc] init];
+        selectedPaneIdentifier = [@"" retain];
+        helpBookName = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookName"] retain];
+        [self loadPreferences];
     }
-    return sharedController;
+    return self;
 }
 
 - (id)retain { return self; }
@@ -100,182 +115,530 @@ static id sharedController = nil;
 
 - (unsigned)retainCount { return UINT_MAX; }
 
-- (void)awakeFromNib;
-{
-    // OAPreferenceController may implement this in future
-    if ([OAPreferenceController instancesRespondToSelector:_cmd])
-        [super awakeFromNib];
+// windiwDidLoad comes after the window is already moved onscreen, I think that's wrong
+- (void)windowDidLoad {
+    [self setupToolbar];
+    [[self window] setShowsToolbarButton:NO];
+    [self setWindowFrameAutosaveName:@"BDSKPreferencesWindow"];
     
-    NSWindow *theWindow = [self window];
-    NSRect contentRect = [theWindow contentRectForFrameRect:[theWindow frame]];
-        
-    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:contentRect styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
-    [overlay setReleasedWhenClosed:NO];
-
-    NSView *view = [[BDSKSpotlightView alloc] initWithFrame:[[overlay contentView] frame] delegate:self];
-    [overlay setContentView:view];
-    [view setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-    [view release];
-    [overlay overlayView:[theWindow contentView]];
-    [theWindow setShowsToolbarButton:NO];
+    [[self window] setTitle:[self defaultWindowTitle]];
+    
+    [self loadPanes];
+    
+    iconView = [[BDSKPreferenceIconView alloc] initWithPreferenceController:self];
+    [iconView setAction:@selector(iconViewShowPane:)];
+    [iconView setTarget:self];
+    [self changeContentView:iconView display:NO];
+    
+    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:NSZeroRect styleMask:[[self window] styleMask] backing:[[self window] backingType] defer:YES];
+    BDSKSpotlightView *spotlightView = [[BDSKSpotlightView alloc] initFlipped:[iconView isFlipped]];
+    [spotlightView setDelegate:self];
+    [overlay setContentView:spotlightView];
+    [spotlightView release];
+    
+    [self setSelectedPaneIdentifier:@""];
+    
+    [helpButton setHidden:YES];
+    [revertButton setEnabled:NO];
 }
 
-- (void)iconView:(OAPreferencesIconView *)iconView buttonHitAtIndex:(unsigned int)idx;
-{
-    isSearchActive = NO;
-    [[overlay contentView] setNeedsDisplay:YES];
-    [super iconView:iconView buttonHitAtIndex:idx];
+- (BOOL)windowShouldClose:(id)window {
+    BDSKPreferencePane *pane = [self selectedPane];
+    return pane == nil || [pane shouldCloseWindow];
 }
 
-- (IBAction)showPreferencesPanel:(id)sender;
-{
-    [super showPreferencesPanel:sender];
-    [overlay orderFront:nil];
-    
-    // Sys Prefs gives focus to the search field when launching
-    NSEnumerator *tbEnumerator = [[[[self window] toolbar] items] objectEnumerator];
-    id anItem;
-    while(anItem = [tbEnumerator nextObject]){
-        if([[anItem itemIdentifier] isEqual:BDSKPreferencesSearchField])
-            [[self window] makeFirstResponder:[anItem view]];
+- (void)windowWillClose:(NSNotification *)notification {
+    if ([[[self window] firstResponder] isKindOfClass:[NSText class]])
+        [[self window] makeFirstResponder:nil];
+    [[self selectedPane] willCloseWindow];
+}
+
+- (void)showWindow:(id)sender {
+    BOOL wasVisible = [[self window] isVisible];
+    if (wasVisible == NO)
+        [[self selectedPane] willShowWindow];
+    [super showWindow:sender];
+    [self updateSearchAndShowAll:NO];
+    if (wasVisible == NO)
+        [[self selectedPane] didShowWindow];
+}
+
+- (NSString *)defaultWindowTitle {
+    return [NSString stringWithFormat:NSLocalizedString(@"%@ Preferences", @""), [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]];
+}
+
+#pragma mark Actions
+
+- (void)revertPaneSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertDefaultReturn) {
+        [[self selectedPane] revertDefaults];
     }
 }
 
-- (IBAction)showHelpForClient:(id)sender;
-{
-    // we override this since Omni's method uses the file URL name, which we generate dynamically
-    NSString *helpAnchor = [nonretained_currentClientRecord helpURL];
-    
-    // log an error is someone mistakenly passes a URL instead of an anchor
-    OBASSERT([helpAnchor rangeOfString:@".htm"].location == NSNotFound);
-    
-	NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-    OBASSERT(helpBookName);
-    
-	[[NSHelpManager sharedHelpManager] openHelpAnchor:helpAnchor inBook:helpBookName];
+- (IBAction)revertPaneDefaults:(id)sender {
+    NSString *label = [self localizedLabelForIdentifier:[self selectedPaneIdentifier]];
+    NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"Reset %@ preferences to their original values?", @"Message in alert dialog when pressing Reset All button"), label]
+                                     defaultButton:NSLocalizedString(@"Reset", @"Button title")
+                                   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                       otherButton:nil
+                         informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore all settings in this pane to the state they were in when the application was first installed.", @"Informative text in alert dialog when pressing Reset All button")];
+    [alert beginSheetModalForWindow:[self window]
+                      modalDelegate:self
+                     didEndSelector:@selector(revertPaneSheetDidEnd:returnCode:contextInfo:)
+                        contextInfo:NULL];
+
+
 }
 
-- (BOOL)isSearchActive { return isSearchActive; }
+- (void)revertAllSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertDefaultReturn) {
+        [[NSUserDefaultsController sharedUserDefaultsController] revertToInitialValues:nil];
+    }
+}
 
-- (NSArray *)highlightCirclesInScreenCoordinates;
-{
-    // we have an array of OAPreferencesIconViews; one per category (row)
-    NSEnumerator *viewE = [preferencesIconViews objectEnumerator];
-    OAPreferencesIconView *view;
-    NSMutableArray *rectArray = [NSMutableArray arrayWithCapacity:10];
-    NSWindow *theWindow = [self window];
+- (IBAction)revertAllDefaults:(id)sender {
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset all preferences to their original values?", @"Message in alert dialog when pressing Reset All button") 
+                                     defaultButton:NSLocalizedString(@"Reset", @"Button title")
+                                   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                       otherButton:nil
+                         informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore all settings to the state they were in when the application was first installed.", @"Informative text in alert dialog when pressing Reset All button")];
+    [alert beginSheetModalForWindow:[self window]
+                      modalDelegate:self
+                     didEndSelector:@selector(revertAllSheetDidEnd:returnCode:contextInfo:)
+                        contextInfo:NULL];
+}
+
+- (IBAction)showHelp:(id)sender {
+    NSString *helpAnchor;
+    NSURL *helpURL;
+    if (helpBookName && (helpAnchor = [[self selectedPane] helpAnchor]))
+        [[NSHelpManager sharedHelpManager] openHelpAnchor:helpAnchor inBook:helpBookName];
+    else if (helpURL = [[self selectedPane] helpURL])
+        [[NSWorkspace sharedWorkspace] openURL:helpURL];
+}
+
+- (IBAction)showAll:(id)sender {
+    [self selectPaneWithIdentifier:@""];
+}
+
+- (IBAction)showPane:(id)sender {
+    if ([sender respondsToSelector:@selector(itemIdentifier)])
+        [self selectPaneWithIdentifier:[sender itemIdentifier]];
+    else if ([sender respondsToSelector:@selector(representedObject)] && [sender representedObject])
+        [self selectPaneWithIdentifier:[sender representedObject]];
+    else if ([sender respondsToSelector:@selector(tag)] && (unsigned int)[sender tag] < [[self allPaneIdentifiers] count])
+        [self selectPaneWithIdentifier:[[self allPaneIdentifiers] objectAtIndex:[sender tag]]];
+}
+
+- (void)iconViewShowPane:(id)sender {
+    [self selectPaneWithIdentifier:[sender clickedIdentifier]];
+}
+
+- (IBAction)showNextPane:(id)sender {
+    BDSKPreferencePane *pane = [self selectedPane];
+    NSString *identifier = [pane identifier];
+    NSArray *allPanes = [self allPaneIdentifiers];
+    unsigned int idx = identifier ? [allPanes indexOfObject:identifier] : NSNotFound;
+    if (idx == NSNotFound || idx + 1 >= [allPanes count])
+        idx = 0;
+    else
+        idx++;
+    [self selectPaneWithIdentifier:[allPanes objectAtIndex:idx]];
+}
+
+- (IBAction)showPreviousPane:(id)sender {
+    BDSKPreferencePane *pane = [self selectedPane];
+    NSString *identifier = [pane identifier];
+    NSArray *allPanes = [self allPaneIdentifiers];
+    unsigned int idx = identifier ? [allPanes indexOfObject:identifier] : NSNotFound;
+    if (idx == NSNotFound || idx == 0)
+        idx = [allPanes count] - 1;
+    else
+        idx--;
+    [self selectPaneWithIdentifier:[allPanes objectAtIndex:idx]];
+}
+
+- (IBAction)search:(id)sender {
+    [self updateSearchAndShowAll:YES];
+}
+
+#pragma mark Categories and Panes
+
+- (NSArray *)categories {
+    return categories;
+}
+
+- (NSArray *)panesForCategory:(NSString *)category {
+    return [[categoryDicts objectForKey:category] valueForKey:PANES_KEY];
+}
+
+- (NSArray *)allPaneIdentifiers {
+    NSMutableArray *result = [NSMutableArray array];
+    NSEnumerator *catEnum = [categories objectEnumerator];
+    NSString *cat;
+    while (cat = [catEnum nextObject])
+        [result addObjectsFromArray:[self panesForCategory:cat]];
+    return result;
+}
+
+- (id)paneForIdentifier:(NSString *)identifier {
+    return [panes objectForKey:identifier];
+}
+
+- (NSString *)selectedPaneIdentifier {
+    return selectedPaneIdentifier;
+}
+
+- (void)setSelectedPaneIdentifier:(NSString *)identifier {
+    if (identifier != selectedPaneIdentifier) {
+        [selectedPaneIdentifier release];
+        selectedPaneIdentifier = [identifier retain];
+    }
+}
+
+- (id)selectedPane {
+    NSString *paneID = [self selectedPaneIdentifier];
+    return [paneID length] ? [self paneForIdentifier:paneID] : nil;
+}
+
+- (void)setDelayedPaneIdentifier:(NSString *)identifier {
+    if (identifier != delayedPaneIdentifier) {
+        [delayedPaneIdentifier release];
+        delayedPaneIdentifier = [identifier retain];
+    }
+}
+
+- (void)selectPaneWithIdentifier:(NSString *)identifier force:(BOOL)force {
+    if ([identifier isEqualToString:[self selectedPaneIdentifier]] == NO && (force || delayedPaneIdentifier == nil)) {
+        BDSKPreferencePane *pane = [self paneForIdentifier:identifier];
+        BDSKPreferencePane *oldPane = [self selectedPane];
+        NSView *view = pane ? [pane view] : [self iconView];
+        if ((pane || [identifier isEqualToString:@""]) && view) {
+            BDSKPreferencePaneUnselectReply shouldUnselect = (force == NO && pane) ? [pane shouldUnselect]  : BDSKPreferencePaneUnselectNow;
+            [self setDelayedPaneIdentifier:nil];
+            if (shouldUnselect == BDSKPreferencePaneUnselectNow) {
+                [oldPane willUnselect];
+                [pane willSelect];
+                if ([[[self window] firstResponder] isKindOfClass:[NSText class]])
+                    [[self window] makeFirstResponder:nil];
+                [self changeContentView:view display:[[self window] isVisible]];
+                [[self window] setTitle:pane ? [self localizedTitleForIdentifier:identifier] : [self defaultWindowTitle]];
+                [oldPane didUnselect];
+                [pane didSelect];
+                [self setSelectedPaneIdentifier:identifier];
+                [[[self window] toolbar] setSelectedItemIdentifier:pane ? identifier : BDSKPreferencesToolbarShowAllItemIdentifier];
+                [helpButton setHidden:(helpBookName == nil || [pane helpAnchor] == nil) && [pane helpURL] == nil];
+                [revertButton setEnabled:[[pane initialValues] count] > 0];
+                [self updateSearchAndShowAll:NO];
+            } else if (shouldUnselect == BDSKPreferencePaneUnselectLater) {
+                [self setDelayedPaneIdentifier:identifier];
+            }
+        }
+    }
+}
+
+- (void)selectPaneWithIdentifier:(NSString *)identifier {
+    [self selectPaneWithIdentifier:identifier force:NO];
+}
+
+- (void)replyToShouldUnselect:(BOOL)shouldUnselect {
+    if (shouldUnselect && delayedPaneIdentifier)
+        [self selectPaneWithIdentifier:delayedPaneIdentifier force:YES];
+    [self setDelayedPaneIdentifier:nil];
+}
+
+- (NSString *)localizedString:(NSString *)string {
+    return string ? [[NSBundle mainBundle] localizedStringForKey:string value:nil table:LOCALIZATION_TABLE] : nil;
+}
+
+- (NSString *)titleForCategory:(NSString *)category {
+    return [[categoryDicts objectForKey:category] valueForKey:TITLE_KEY] ?: category;
+}
+
+- (NSString *)localizedTitleForCategory:(NSString *)category {
+    return [self localizedString:[self titleForCategory:category]];
+}
+
+- (NSImage *)iconForIdentifier:(NSString *)identifier {
+    return [[self paneForIdentifier:identifier] icon];
+}
+
+- (NSString *)localizedTitleForIdentifier:(NSString *)identifier {
+    return [self localizedString:[[self paneForIdentifier:identifier] title]];
+}
+
+- (NSString *)localizedLabelForIdentifier:(NSString *)identifier {
+    return [self localizedString:[[self paneForIdentifier:identifier] label]];
+}
+
+- (NSString *)localizedToolTipForIdentifier:(NSString *)identifier {
+    return [self localizedString:[[self paneForIdentifier:identifier] toolTip]];
+}
+
+#pragma mark NSToolbar delegate
+
+- (void)setupToolbar {
+    NSToolbar *toolbar = [[NSToolbar alloc] initWithIdentifier:BDSKPreferencesToolbarIdentifier];
+    [toolbar setDelegate:self];
+    [toolbar setVisible:YES];
+    [toolbar setAllowsUserCustomization:YES];
+    //[toolbar setAutosavesConfiguration:YES];
+    if ([toolbar respondsToSelector:@selector(_setCustomizesAlwaysOnClickAndDrag:)])
+        [toolbar _setCustomizesAlwaysOnClickAndDrag:YES];
+    if ([toolbar respondsToSelector:@selector(_setWantsToolbarContextMenu:)])
+        [toolbar _setWantsToolbarContextMenu:NO];
+    if ([toolbar respondsToSelector:@selector(_setFirstMoveableItemIndex:)])
+        [toolbar _setFirstMoveableItemIndex:4];
+    [[self window] setToolbar:toolbar];
+    [toolbar setSelectedItemIdentifier:BDSKPreferencesToolbarShowAllItemIdentifier];
+}
+
+- (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag {
+    NSToolbarItem *item = [toolbarItems objectForKey:itemIdentifier];
+    if (item == nil) {
+        BDSKPreferencePane *pane;
+        if (toolbarItems == nil)
+            toolbarItems = [[NSMutableDictionary alloc] init];
+        if ([itemIdentifier isEqualToString:BDSKPreferencesToolbarShowAllItemIdentifier]) {
+            if (item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier]) {
+                [item setTarget:self];
+                [item setAction:@selector(showAll:)];
+                [item setImage:[NSImage imageNamed:@"NSApplicationIcon"]];
+                [item setLabel:NSLocalizedString(@"Show All", @"Toolbar item label")];
+            }
+        } else if ([itemIdentifier isEqualToString:BDSKPreferencesToolbarPreviousItemIdentifier]) {
+            if (item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier]) {
+                [item setTarget:self];
+                [item setAction:@selector(showPreviousPane:)];
+                [item setImage:[NSImage imageNamed:@"previous"]];
+                [item setLabel:NSLocalizedString(@"Previous", @"Toolbar item label")];
+            }
+        } else if ([itemIdentifier isEqualToString:BDSKPreferencesToolbarNextItemIdentifier]) {
+            if (item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier]) {
+                [item setTarget:self];
+                [item setAction:@selector(showNextPane:)];
+                [item setImage:[NSImage imageNamed:@"next"]];
+                [item setLabel:NSLocalizedString(@"Next", @"Toolbar item label")];
+            }
+        } else if ([itemIdentifier isEqualToString:BDSKPreferencesToolbarSearchItemIdentifier]) {
+            if (item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier]) {
+                [item setMinSize:[searchField frame].size];
+                [item setMaxSize:NSMakeSize(200.0, NSHeight([searchField frame]))];
+                [item setView:searchField];
+                [item setLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
+            }
+        } else if (pane = [self paneForIdentifier:itemIdentifier]) {
+            if (item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier]) {
+                [item setTarget:self];
+                [item setAction:@selector(showPane:)];
+                [item setImage:[pane icon]];
+                [item setLabel:[self localizedLabelForIdentifier:itemIdentifier]];
+            }
+        }
+        if (item) {
+            [toolbarItems setObject:item forKey:itemIdentifier];
+            [item release];
+        }
+    }
+    if (flag == NO)
+        item = [[item copy] autorelease];
+	return item;
+}
+
+- (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar *)toolbar {
+	NSMutableArray *identifiers = [NSMutableArray array];
+    [identifiers addObject:BDSKPreferencesToolbarShowAllItemIdentifier];
+    [identifiers addObject:BDSKPreferencesToolbarPreviousItemIdentifier];
+    [identifiers addObject:BDSKPreferencesToolbarNextItemIdentifier];
+    [identifiers addObject:NSToolbarSeparatorItemIdentifier];
+    [identifiers addObject:BDSKPreferencesToolbarSearchItemIdentifier];
+	return identifiers;
+}
+
+- (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar *)toolbar {
+	NSMutableArray *identifiers = [NSMutableArray array];
+    [identifiers addObject:BDSKPreferencesToolbarShowAllItemIdentifier];
+    [identifiers addObject:BDSKPreferencesToolbarPreviousItemIdentifier];
+    [identifiers addObject:BDSKPreferencesToolbarNextItemIdentifier];
+    [identifiers addObject:NSToolbarSeparatorItemIdentifier];
+    [identifiers addObject:BDSKPreferencesToolbarSearchItemIdentifier];
+    [identifiers addObjectsFromArray:[self allPaneIdentifiers]];
+	return identifiers;
+}
+
+- (NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)toolbar {
+	NSMutableArray *identifiers = [NSMutableArray array];
+    [identifiers addObject:BDSKPreferencesToolbarShowAllItemIdentifier];
+    [identifiers addObjectsFromArray:[self allPaneIdentifiers]];
+	return identifiers;
+}
+
+#pragma mark BDSKSpotlightView delegate
+
+- (NSArray *)spotlightViewCircleRects:(BDSKSpotlightView *)spotlightView {
+    if ([[searchField stringValue] length] == 0)
+        return nil;
     
-    while(view = [viewE nextObject]){
+    NSString *searchTerm = [searchField stringValue];
+    unsigned int i, iMax = [categories count];
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:iMax];
+    
+    for (i = 0; i < iMax; i++) {
+        NSArray *paneIDs = [self panesForCategory:[categories objectAtIndex:i]];
+        unsigned int j, jMax = [paneIDs count];
         
-        // get the preference client records; these are basically plists for each pref pane
-        NSArray *records = [view preferenceClientRecords];
-        unsigned i, numberOfRecords = [records count];
-        NSString *identifier;
-        
-        for(i = 0; i < numberOfRecords; i++){
-            
-            
-            NSString *string = nil;
-            identifier = [[records objectAtIndex:i] identifier];
-
-            OBPRECONDITION(identifier != nil);
-            if(nil != identifier)
-                string = [clientIdentiferSearchTerms objectForKey:identifier];
-            OBPOSTCONDITION(string != nil);
-            
-            if([string rangeOfString:searchTerm options:NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch].length > 0){
-                // this is a private method, but declared in the header
-                NSRect rect = [view _boundsForIndex:i];
-                
-                float radius = 0.4 * fmaxf(NSHeight(rect), NSWidth(rect));
-                NSPoint center = NSMakePoint(NSMidX(rect), NSMidY(rect));
-                center = [view convertPoint:center toView:nil];
-                center = [theWindow convertBaseToScreen:center];
-                
-                BDSKSpotlightCircle *circle = [[BDSKSpotlightCircle alloc] initWithCenterPoint:center radius:radius];                
-                [rectArray addObject:circle];
-                [circle release];
+        for (j = 0; j < jMax; j++) {
+            NSString *string = [identifierSearchTerms objectForKey:[paneIDs objectAtIndex:j]];
+            if ([string rangeOfString:searchTerm options:NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch].location != NSNotFound) {
+                // as the overlay exactly covers the iconView, and both the spotlightView and the iconView are flipped, they should use the same coordinate space
+                // don't go through screen coordinates, as the overlay may not have been put in place yet at this point
+                [array addObject:[NSValue valueWithRect:[[self iconView] iconFrameAtRow:i column:j]]];
             }
         }
     }
         
-    return rectArray;
-}
-
-- (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar *)tb;
-{
-    NSMutableArray *array = [NSMutableArray arrayWithArray:[super toolbarDefaultItemIdentifiers:tb]];
-    [array addObject:BDSKPreferencesSearchField];
     return array;
 }
 
-- (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar *)tb;
-{
-    NSMutableArray *array = [NSMutableArray arrayWithArray:[super toolbarAllowedItemIdentifiers:tb]];
-    [array addObject:BDSKPreferencesSearchField];
-    return array;
-}
+#pragma mark Private
 
-- (NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)tb;
-{
-    NSMutableArray *array = [NSMutableArray arrayWithArray:[super toolbarSelectableItemIdentifiers:tb]];
-    [array removeObject:BDSKPreferencesSearchField];
-    return array;
-}
-
-- (void)setSearchTerm:(NSString *)term;
-{
-    [searchTerm autorelease];
-    searchTerm = [term copy];
-}    
-
-- (void)search:(id)sender;
-{
-    NSString *term = [sender stringValue];
-
-    if([[[preferenceBox contentView] subviews] lastObject] != showAllIconsView){
-        // this method will lose our first responder
-        if([self respondsToSelector:@selector(_showAllIcons:)])
-            [self _showAllIcons:nil];
-        [[self window] makeFirstResponder:sender];
+- (void)loadPreferences {
+    NSString *plistPath = [[NSBundle mainBundle] pathForResource:DEFAULTS_TABLE ofType:@"plist"];
+    NSEnumerator *catEnum = [[NSArray arrayWithContentsOfFile:plistPath] objectEnumerator];
+    NSDictionary *dict;
+    NSMutableDictionary *initialValues = [NSMutableDictionary dictionary];
+	
+    SInt32 major = 0, minor = 0, bugfix = 0;
+	BDSKVersionNumber *systemVersion = nil;
+    if (noErr == Gestalt(gestaltSystemVersionMajor, &major) && noErr == Gestalt(gestaltSystemVersionMinor, &minor) && noErr == Gestalt(gestaltSystemVersionBugFix, &bugfix))
+        systemVersion = [BDSKVersionNumber versionNumberWithVersionString:[NSString stringWithFormat:@"%i.%i.%i", major, minor, bugfix]];
+    
+    while (dict = [catEnum nextObject]) {
+        NSMutableArray *paneArray = [[NSMutableArray alloc] init];
+        NSEnumerator *paneEnum = [[dict valueForKey:PANES_KEY] objectEnumerator];
+        NSDictionary *paneDict;
         
-        // we just lost the insertion point; if the user just started typing, it should be at the end
-        NSText *editor = (NSText *)[[self window] firstResponder];
-        if(nil != editor && [editor isKindOfClass:[NSText class]])
-            [editor setSelectedRange:NSMakeRange([term length], 0)];
+        while (paneDict = [paneEnum nextObject]) {
+            BDSKPreferenceRecord *record = [[BDSKPreferenceRecord alloc] initWithDictionary:paneDict];
+            NSString *identifier = [record identifier];
+            // should we register defaults for panes that are not loaded?
+            [initialValues addEntriesFromDictionary:[record initialValues]];
+            if (identifier == nil) {
+                NSLog(@"Could not get identifier of preference pane for %@", paneDict);
+            } else if ([record paneClass] == nil) {
+                NSLog(@"Could not get class of preference pane for %@", paneDict);
+            } else {
+                [records setObject:record forKey:identifier];
+                BDSKVersionNumber *minimumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MINIMUM_SYSTEM_VERSION_KEY]];
+                BDSKVersionNumber *maximumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MAXIMUM_SYSTEM_VERSION_KEY]];
+                if ((minimumSystemVersion == nil || [systemVersion compareToVersionNumber:minimumSystemVersion] != NSOrderedAscending) &&
+                    (maximumSystemVersion == nil || [systemVersion compareToVersionNumber:maximumSystemVersion] != NSOrderedDescending))
+                    [paneArray addObject:identifier];
+            }
+        }
+        
+        NSString *category = [dict valueForKey:IDENTIFIER_KEY];
+        if (category == nil) {
+            NSLog(@"Could not get identifier for category for %@", dict);
+        } else if ([paneArray count]) {
+            NSMutableDictionary *catDict = [[NSMutableDictionary alloc] init];
+            [catDict setValue:category forKey:IDENTIFIER_KEY];
+            [catDict setValue:[dict valueForKey:TITLE_KEY] forKey:TITLE_KEY];
+            [catDict setObject:paneArray forKey:PANES_KEY];
+            [categoryDicts setObject:catDict forKey:category];
+            [categories addObject:category];
+            [catDict release];
+            [initialValues addEntriesFromDictionary:[dict valueForKey:INITIAL_VALUES_KEY]];
+        }
+        [paneArray release];
     }
-
-    isSearchActive = ([term isEqualToString:@""] || nil == term) ? NO : YES;
-    [self setSearchTerm:[sender stringValue]];
     
-    // the view will now ask us which icons to highlight
-    [[overlay contentView] setNeedsDisplay:YES];
+    if ([initialValues count]) {
+        [[NSUserDefaults standardUserDefaults] registerDefaults:initialValues];
+        [[NSUserDefaultsController sharedUserDefaultsController] setInitialValues:initialValues];
+    }
 }
 
-- (NSToolbarItem *)toolbar:(NSToolbar *)tb itemForItemIdentifier:(NSString *)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag;
-{
-    NSToolbarItem *tbItem = nil;
-    if([itemIdentifier isEqual:BDSKPreferencesSearchField]){
-        tbItem = [[NSToolbarItem alloc] initWithItemIdentifier:BDSKPreferencesSearchField];
-        NSSearchField *searchField = [[NSSearchField alloc] initWithFrame:NSMakeRect(0, 0, 30, 22)];
-        [searchField setTarget:self];
-        [searchField setAction:@selector(search:)];
+- (void)loadPanes {
+    NSEnumerator *catEnum = [categories objectEnumerator];
+    NSString *category;
+	
+    while (category = [catEnum nextObject]) {
+        NSEnumerator *paneEnum = [[[categoryDicts objectForKey:category] valueForKey:PANES_KEY] objectEnumerator];
+        NSString *identifier;
         
-        [tbItem setAction:@selector(search:)];
-        [tbItem setTarget:self];
-        [tbItem setMinSize:NSMakeSize(60, NSHeight([searchField frame]))];
-        [tbItem setMaxSize:NSMakeSize(NSWidth([[self window] frame])/3,NSHeight([searchField frame]))];
-        [tbItem setView:searchField];
-        [searchField release];
-        
-        [tbItem setLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
-        [tbItem setPaletteLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
-        [tbItem setEnabled:YES];
-        [tbItem autorelease];
-    }        
-    else tbItem = [super toolbar:tb itemForItemIdentifier:itemIdentifier willBeInsertedIntoToolbar:flag];
+        while (identifier = [paneEnum nextObject]) {
+            BDSKPreferenceRecord *record = [records objectForKey:identifier];
+            BDSKPreferencePane *pane = [[[record paneClass] alloc] initWithRecord:record forPreferenceController:self];
+            if (pane == nil) {
+                NSLog(@"Could not create preference pane for %@", record);
+            } else {
+                [panes setObject:pane forKey:identifier];
+                [pane release];
+                NSArray *searchTerms = [record searchTerms];
+                if ([searchTerms count]) {
+                    NSMutableString *searchString = [[NSMutableString alloc] init];
+                    NSEnumerator *stringEnum = [searchTerms objectEnumerator];
+                    NSString *string;
+                    while (string = [stringEnum nextObject])
+                        [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:DEFAULTS_TABLE], 0x1E];
+                    [identifierSearchTerms setObject:searchString forKey:identifier];
+                    [searchString release];
+                }
+            }
+        }
+    }
+}
+
+- (BDSKPreferenceIconView *)iconView {
+    if (iconView == nil)
+        [self window];
+    return iconView;
+}
+
+- (void)changeContentView:(NSView *)view display:(BOOL)display {
+	NSRect viewFrame = [view frame];
+    NSSize winSize = NSMakeSize(fmaxf(NSWidth(viewFrame), 200.0), fmaxf(NSHeight(viewFrame), 100.0));
+    NSRect contentRect = [[[self window] contentView] bounds];
     
-    return tbItem;
+    if ([view isEqual:[self iconView]]) {
+        viewFrame.size.width = NSWidth(contentRect);
+        [controlView removeFromSuperview];
+        [view setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
+    } else {
+        NSRect controlRect;
+        NSDivideRect(contentRect, &controlRect, &contentRect, NSHeight([controlView frame]), NSMinYEdge);
+        winSize.height += NSHeight(controlRect);
+        [controlView setFrame:controlRect];
+        [[[self window] contentView] addSubview:controlView];
+        [view setAutoresizingMask:NSViewMaxXMargin | NSViewMinYMargin];
+        [overlay remove];
+    }
+    [[contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [contentView setFrame:contentRect];
+    viewFrame.origin = NSMakePoint(0.0, NSHeight(contentRect) - NSHeight(viewFrame));
+    [view setFrame:viewFrame];
+    [contentView addSubview:view];
+	
+    contentRect = [[self window] contentRectForFrameRect:[[self window] frame]];
+    contentRect.origin.y = NSMaxY(contentRect) - winSize.height;
+    contentRect.size = winSize;
+	[[self window] setFrame:[[self window] frameRectForContentRect:contentRect] display:display animate:display];
+}
+
+- (void)updateSearchAndShowAll:(BOOL)showAll {
+    if ([[searchField stringValue] length] > 0) {
+        if (showAll && [[self selectedPaneIdentifier] isEqualToString:@""] == NO) {
+            // this will call back to us to show the overlay
+            [self selectPaneWithIdentifier:@""];
+        } else if ([[[self iconView] window] isEqual:[self window]]) {
+            // the view will now ask us which icons to highlight
+            [[overlay contentView] setNeedsDisplay:YES];
+            [overlay overlayView:[self iconView]];
+        }
+    } else {
+        [overlay remove];
+    }
 }
 
 @end

@@ -14,19 +14,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSMenu</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSControl</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -75,19 +75,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKSplitView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>OASplitView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>FirstResponder</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKGradientSplitView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OASplitView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -132,7 +132,7 @@
 				<key>ownerController</key>
 				<string>NSObjectController</string>
 				<key>splitView</key>
-				<string>BDSKSplitView</string>
+				<string>BDSKGradientSplitView</string>
 				<key>tokenField</key>
 				<string>NSTokenField</string>
 			</dict>

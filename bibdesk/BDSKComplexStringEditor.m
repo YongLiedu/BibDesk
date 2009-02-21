@@ -38,7 +38,6 @@
 #import "BDSKComplexString.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKBackgroundView.h"
-#import <OmniBase/OmniBase.h>
 #import "NSWindowController_BDSKExtensions.h"
 
 @interface BDSKComplexStringEditor (Private)
@@ -259,7 +258,7 @@
 - (void)windowWillClose:(NSNotification *)notification {
 	// this gets called whenever an editor window closes
 	if ([self isEditing]){
-        OBASSERT_NOT_REACHED("macro textfield window closed while editing");
+        BDSKASSERT_NOT_REACHED("macro textfield window closed while editing");
 		[self endEditingAndOrderOut];
     }
 }

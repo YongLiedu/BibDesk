@@ -37,9 +37,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKPreferencePane.h"
+#import "BDSKPreferenceController.h"
 
-@interface BibPref_Display : OAPreferenceClient {
+@interface BibPref_Display : BDSKPreferencePane {
     IBOutlet NSComboBox *previewMaxNumberComboBox;
     
     IBOutlet NSPopUpButton *fontElementPopup;
@@ -70,10 +71,12 @@
 - (void)updateFontPanel:(NSNotification *)notification;
 - (void)resetFontPanel:(NSNotification *)notification;
 
+- (void)updateUI;
+
 @end
 
 
-@interface OAPreferenceController (BDSKFontExtension)
+@interface BDSKPreferenceController (BDSKFontExtension)
 
 - (void)localChangeFont:(id)sender;
 

@@ -37,7 +37,6 @@
  */
 
 #import "BDSKWebParser.h"
-#import <OmniBase/OmniBase.h>
 #import "BDSKHCiteParser.h"
 #import "BDSKCiteULikeParser.h"
 #import "BDSKACMDLParser.h"
@@ -46,6 +45,7 @@
 #import "BDSKSpiresParser.h"
 #import "BDSKArxivParser.h"
 #import "NSError_BDSKExtensions.h"
+#import "BDSKRuntime.h"
 
 @implementation BDSKWebParser
 
@@ -91,7 +91,7 @@ static Class webParserClassForType(int stringType)
 
 // entry point from view controller
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url error:(NSError **)outError{
-    OBASSERT(self == [BDSKWebParser class]);
+    BDSKASSERT(self == [BDSKWebParser class]);
     
     NSError *error = nil;    
     
@@ -117,7 +117,7 @@ static Class webParserClassForType(int stringType)
     
     Class parserClass = webParserClassForType(webType);
     
-    OBASSERT(parserClass != [BDSKWebParser class]);
+    BDSKASSERT(parserClass != [BDSKWebParser class]);
     
     // don't return nil here; this may be the Google Scholar homepage or something, and we don't want to display an error message for it
     // this may lead to some false negatives if the heuristics for canParseDocument::: change.
@@ -128,12 +128,12 @@ static Class webParserClassForType(int stringType)
 }
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
-    OBRequestConcreteImplementation(self, _cmd);
+    BDSKRequestConcreteImplementation(self, _cmd);
     return NO;
 }
 
 + (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
-    OBRequestConcreteImplementation(self, _cmd);
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 

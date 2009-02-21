@@ -37,16 +37,14 @@
  */
 
 #import "NSSet_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
-#import <OmniFoundation/OmniFoundation.h>
-#import "BDSKCountedSet.h"
+#import "BDSKCFCallBacks.h"
 #import "BDSKTemplateParser.h"
 
 @implementation NSSet (BDSKExtensions)
 
 + (id)caseInsensitiveStringSetWithObjects:(id)object, ...;
 {
-    CFMutableSetRef set = CFSetCreateMutable(CFAllocatorGetDefault(), 0, &BDSKCaseInsensitiveStringSetCallBacks);
+    CFMutableSetRef set = CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKCaseInsensitiveStringSetCallBacks);
     va_list objList;
     
     if(object != nil){
@@ -79,7 +77,7 @@
 
 + (id)caseInsensitiveStringSet;
 {
-    return [(id)CFSetCreateMutable(kCFAllocatorDefault, 0, &BDSKCaseInsensitiveStringSetCallBacks) autorelease];
+    return [(id)CFSetCreateMutable(kCFAllocatorDefault, 0, &kBDSKCaseInsensitiveStringSetCallBacks) autorelease];
 }
 
 - (id)initCaseInsensitive
@@ -92,7 +90,7 @@
 {
 	[[self init] release];
 	// ignore capacity, as it will fix the number of items we can use
-	self = (NSMutableSet *)CFSetCreateMutable(kCFAllocatorDefault, 0, &BDSKCaseInsensitiveStringSetCallBacks);
+	self = (NSMutableSet *)CFSetCreateMutable(kCFAllocatorDefault, 0, &kBDSKCaseInsensitiveStringSetCallBacks);
 	return self;
 }
 

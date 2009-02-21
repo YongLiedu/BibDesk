@@ -54,6 +54,7 @@
 #import "BibDocument_Search.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKTableView.h"
 
 
 @implementation BDSKFileContentSearchController
@@ -100,6 +101,9 @@
     [tableView setTarget:self];
     [tableView setDoubleAction:@selector(tableAction:)];
     
+    [tableView setFontNamePreferenceKey:BDSKFileContentSearchTableViewFontNameKey];
+    [tableView setFontSizePreferenceKey:BDSKFileContentSearchTableViewFontSizeKey];
+    
     BDSKLevelIndicatorCell *cell = [[tableView tableColumnWithIdentifier:@"score"] dataCell];
     [cell setEnabled:NO]; // this is required to make it non-editable
     [cell setMaxHeight:17.0 * 0.7];
@@ -107,7 +111,7 @@
     // set up the image/text cell combination
     [(BDSKTextWithIconCell *)[[tableView tableColumnWithIdentifier:@"title"] dataCell] setHasDarkHighlight:YES];
     
-    OBPRECONDITION([[tableView enclosingScrollView] contentView]);
+    BDSKPRECONDITION([[tableView enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleClipViewFrameChangedNotification:)
                                                  name:NSViewFrameDidChangeNotification
@@ -176,8 +180,8 @@
     BOOL isDir;
     NSURL *fileURL = [[[resultsArrayController arrangedObjects] objectAtIndex:row] URL];
     
-    OBASSERT(fileURL);
-    OBASSERT(searchField);
+    BDSKASSERT(fileURL);
+    BDSKASSERT(searchField);
 
     if(![[NSFileManager defaultManager] fileExistsAtPath:[fileURL path] isDirectory:&isDir]){
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"File Does Not Exist", @"Message in alert dialog when file could not be found")
@@ -418,7 +422,7 @@
 
 - (void)saveSortDescriptors
 {
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -445,22 +449,20 @@
     return [(id)displayName autorelease];
 }
 
-- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
-    return BDSKFileContentSearchTableViewFontNameKey;
-}
-
-- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
-    return BDSKFileContentSearchTableViewFontSizeKey;
-}
-
 - (void)tableView:(NSTableView *)tv insertNewline:(id)sender{
     if ([[self document] respondsToSelector:_cmd])
         [[self document] tableView:tv insertNewline:sender];
 }
 
-- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
+- (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
     if ([[self document] respondsToSelector:_cmd])
-        [[self document] tableView:tv deleteRows:rows];
+        [[self document] tableView:tv deleteRowsWithIndexes:rowIndexes];
+}
+
+- (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+    if ([[self document] respondsToSelector:_cmd])
+        return [[self document] tableView:tv canDeleteRowsWithIndexes:rowIndexes];
+    return NO;
 }
 
 @end

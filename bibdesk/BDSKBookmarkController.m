@@ -471,10 +471,13 @@ static id sharedBookmarkController = nil;
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
-    [self setDraggedBookmarks:[self minimumCoverForBookmarks:items]];
-    [pboard declareTypes:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, nil] owner:nil];
-    [pboard setData:[NSData data] forType:BDSKBookmarkRowsPboardType];
-    return YES;
+    if (pboard == [NSPasteboard pasteboardWithName:NSDragPboard]) {
+        [self setDraggedBookmarks:[self minimumCoverForBookmarks:items]];
+        [pboard declareTypes:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, nil] owner:nil];
+        [pboard setData:[NSData data] forType:BDSKBookmarkRowsPboardType];
+        return YES;
+    }
+    return NO;
 }
 
 - (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx {
@@ -554,8 +557,12 @@ static id sharedBookmarkController = nil;
     return NO;
 }
 
-- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation {
+- (void)outlineView:(NSOutlineView *)anOutlineView concludeDragOperation:(NSDragOperation)operation {
     [self setDraggedBookmarks:nil];
+}
+
+- (BOOL)outlineView:(NSOutlineView *)ov canCopyItems:(NSArray *)items {
+    return NO;
 }
 
 #pragma mark NSOutlineView delegate methods
@@ -588,14 +595,7 @@ static id sharedBookmarkController = nil;
     return nil;
 }
 
-- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows {
-    NSMutableArray *items = [NSMutableArray array];
-    NSEnumerator *rowEnum = [rows objectEnumerator];
-    NSNumber *row;
-    
-    while (row = [rowEnum nextObject])
-        [items addObject:[outlineView itemAtRow:[row intValue]]];
-    
+- (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items {
     NSEnumerator *itemEnum = [[self minimumCoverForBookmarks:items] reverseObjectEnumerator];
     BDSKBookmark *item;
     

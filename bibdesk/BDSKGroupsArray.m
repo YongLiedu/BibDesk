@@ -51,7 +51,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKFilter.h"
-#import <OmniFoundation/OmniFoundation.h>
+#import "NSArray_BDSKExtensions.h"
 
 @interface BDSKGroupsArray (Private)
 
@@ -67,7 +67,7 @@
     if(self = [super init]) {
         libraryGroup = [[BDSKGroup alloc] initLibraryGroup];
         [libraryGroup setDocument:aDocument];
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShowWebGroupPrefKey]){
+        if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShowWebGroupPrefKey]){
             webGroup = [[BDSKWebGroup alloc] initWithName:NSLocalizedString(@"Web", @"Web")];
             [webGroup setDocument:aDocument];
         }else{

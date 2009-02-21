@@ -42,7 +42,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BDSKMacroResolver.h"
-#import <OmniBase/OmniBase.h>
+#import "BDSKRuntime.h"
 
 
 static NSString *createUniqueID(void)
@@ -173,7 +173,7 @@ static NSString *createUniqueID(void)
 // "static" accessors
 
 - (NSImage *)icon {
-    OBRequestConcreteImplementation(self, _cmd);
+    BDSKRequestConcreteImplementation(self, _cmd);
 	return nil;
 }
 
@@ -250,7 +250,7 @@ static NSString *createUniqueID(void)
 static NSString *BDSKLibraryLocalizedString = nil;
 
 + (void)initialize{
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     BDSKLibraryLocalizedString = [NSLocalizedString(@"Library", @"Group name for library") copy];
 }
 

@@ -294,28 +294,32 @@ static float GROUP_ROW_HEIGHT = 24.0;
 #pragma mark Delegate display methods
 
 // return a larger row height for the items; tried using a spotlight controller image, but row size is too large to be practical
-- (float)outlineView:(NSOutlineView *)outlineView heightOfRowByItem:(id)item
+- (float)outlineView:(NSOutlineView *)ov heightOfRowByItem:(id)item
 {
     return [item isLeaf] ? LEAF_ROW_HEIGHT : GROUP_ROW_HEIGHT;
 }
 
-- (BOOL)outlineView:(NSOutlineView *)outlineView shouldSelectItem:(id)item;
+- (BOOL)outlineView:(NSOutlineView *)ov shouldSelectItem:(id)item;
 {
     return [item isLeaf];
 }
 
 // this allows us to return the count cell for top-level rows, since they have a count instead of a score
-- (NSCell *)tableView:(NSTableView *)tableView column:(OADataSourceTableColumn *)tableColumn dataCellForRow:(int)row;
+- (NSCell *)outlineView:(NSOutlineView *)ov dataCellForTableColumn:(NSTableColumn *)tableColumn item:(id)item
 {
-    NSCell *defaultCell = [tableColumn dataCell];
-    static NSCell *prototype = nil;
-    if (nil == prototype) {
-        prototype = [[BDSKCountOvalCell alloc] initTextCell:@""];
-        [prototype setFont:[tableView font]];
-        [prototype setBordered:NO];
-        [prototype setControlSize:[defaultCell controlSize]];
+    NSCell *cell = [tableColumn dataCell];
+    if ([[tableColumn identifier] isEqualToString:@"score"]) {
+        static id prototype = nil;
+        if (nil == prototype) {
+            prototype = [[BDSKCountOvalCell alloc] initTextCell:@""];
+            [prototype setFont:[outlineView font]];
+            [prototype setBordered:NO];
+            [prototype setControlSize:[cell controlSize]];
+        }
+        if ([item isLeaf])
+            cell = prototype;
     }
-    return [[(NSOutlineView *)tableView itemAtRow:row] isLeaf] ? defaultCell : [[prototype copy] autorelease];
+    return cell;
 }
 
 // change text appearance in top-level rows via a formatter, so we don't have to mess with custom text/icon cells
@@ -398,7 +402,7 @@ static NSString *titleStringWithPub(BibItem *pub)
 // caller is reponsible for releasing the array, since the autorelease pool on the main thread may pop before the invocation's return value is requested
 - (NSArray *)copyTreeNodesWithCurrentPublications;
 {
-    NSAssert([NSThread inMainThread], @"method must be called from the main thread");
+    NSAssert([NSThread isMainThread], @"method must be called from the main thread");
 
     NSEnumerator *pubE = [[self currentPublications] objectEnumerator];
     BibItem *pub;
@@ -452,7 +456,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
     [invocation getReturnValue:&treeNodes];
     [treeNodes autorelease];
     
-    OBPOSTCONDITION([treeNodes count]);
+    BDSKPOSTCONDITION([treeNodes count]);
         
     NSParameterAssert(NULL != searchIndex);
     SKIndexFlush(searchIndex);
@@ -698,15 +702,7 @@ static NSColor *fillColor = nil;
 
 @end
 
-/* Groups items under the top-level outline, and uses a gradient fill for the top level row background.  Grid lines are drawn when the outline has data.
-*/
-
-@interface BDSKGroupingOutlineView : NSOutlineView
-{
-    CIColor *topColor;
-    CIColor *bottomColor;
-}
-@end
+#pragma mark -
 
 @implementation BDSKGroupingOutlineView
 

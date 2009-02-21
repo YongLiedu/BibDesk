@@ -37,7 +37,6 @@
  */
 
 #import "BDSKRatingButton.h"
-#import <OmniBase/OmniBase.h>
 
 
 @implementation BDSKRatingButton
@@ -49,7 +48,7 @@
 // designated initializer
 - (id)initWithFrame:(NSRect)frameRect{
 	if ([super initWithFrame:frameRect]) {
-		OBPOSTCONDITION([self cell] == nil || [[self cell] isKindOfClass:[BDSKRatingButtonCell class]]);
+		BDSKPOSTCONDITION([self cell] == nil || [[self cell] isKindOfClass:[BDSKRatingButtonCell class]]);
 	}
 	return self;
 }
@@ -68,32 +67,32 @@
 			[self setCell:newCell];
 			[newCell release];
 		}
-		OBPOSTCONDITION([self cell] == nil || [[self cell] isKindOfClass:[BDSKRatingButtonCell class]]);
+		BDSKPOSTCONDITION([self cell] == nil || [[self cell] isKindOfClass:[BDSKRatingButtonCell class]]);
 	}
 	return self;
 }
 
 - (unsigned int)rating {
 	id cell = [self cell];
-    OBPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
+    BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
     return [cell rating];
 }
 
 - (void)setRating:(unsigned int)newRating {
 	id cell = [self cell];
-    OBPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
+    BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
 	[cell setRating:newRating];
 }
 
 - (unsigned int)maxRating {
 	id cell = [self cell];
-    OBPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
+    BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
     return [cell maxRating];
 }
 
 - (void)setMaxRating:(unsigned int)newRating {
 	id cell = [self cell];
-    OBPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
+    BDSKPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
     [cell setMaxRating:newRating];
 }
 

@@ -40,7 +40,6 @@
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
 #import "BDSKTypeManager.h"
 #import "BDSKSmartGroup.h"
 #import "BDSKCondition+Scripting.h"
@@ -147,8 +146,8 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
 		[self setKey:[decoder decodeObjectForKey:@"key"]];
 		[self setComparison:[decoder decodeIntForKey:@"comparison"]];
 		[self setValue:[decoder decodeObjectForKey:@"value"]];
-		OBASSERT(key != nil);
-		OBASSERT([self value] != nil);
+		BDSKASSERT(key != nil);
+		BDSKASSERT([self value] != nil);
 	}
 	return self;
 }
@@ -255,7 +254,7 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
         
     } else {
         
-        OBASSERT(stringValue != nil);
+        BDSKASSERT(stringValue != nil);
         
         if (stringComparison == BDSKGroupContain || stringComparison == BDSKGroupNotContain) {
             if ([key isEqualToString:BDSKAllFieldsString]) {
@@ -339,7 +338,7 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
         
     }
     
-    OBASSERT_NOT_REACHED("undefined comparison");
+    BDSKASSERT_NOT_REACHED("undefined comparison");
     return NO;
 }
 
@@ -419,13 +418,13 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
             case BDSKInLast: 
             case BDSKNotInLast: 
                 values = [newValue componentsSeparatedByString:@" "];
-                OBASSERT([values count] == 2);
+                BDSKASSERT([values count] == 2);
                 [self setNumberValue:[[values objectAtIndex:0] intValue]];
                 [self setPeriodValue:[[values objectAtIndex:1] intValue]];
                 break;
             case BDSKBetween: 
                 values = [newValue componentsSeparatedByString:@" "];
-                OBASSERT([values count] == 3);
+                BDSKASSERT([values count] == 3);
                 [self setNumberValue:[[values objectAtIndex:0] intValue]];
                 [self setAndNumberValue:[[values objectAtIndex:1] intValue]];
                 [self setPeriodValue:[[values objectAtIndex:2] intValue]];
@@ -437,7 +436,7 @@ static NSString *BDSKConditionObservationContext = @"BDSKConditionObservationCon
                 break;
             case BDSKInDateRange:
                 values = [newValue componentsSeparatedByString:@" to "];
-                OBASSERT([values count] == 2);
+                BDSKASSERT([values count] == 2);
                 [self setDateValue:[NSDate dateWithString:[values objectAtIndex:0]]];
                 [self setToDateValue:[NSDate dateWithString:[values objectAtIndex:1]]];
                 break;

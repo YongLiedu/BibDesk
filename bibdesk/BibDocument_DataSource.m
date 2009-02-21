@@ -77,6 +77,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import <FileView/FileView.h>
+#import "BDSKApplication.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -144,7 +145,7 @@
 	}else if(tv == groupTableView){
 		BDSKGroup *group = [groups objectAtIndex:row];
         // object is always a group, see BDSKGroupCellFormatter
-        OBASSERT([object isKindOfClass:[BDSKGroup class]]);
+        BDSKASSERT([object isKindOfClass:[BDSKGroup class]]);
         id newName = [object name];
 		if([[group name] isEqual:newName])
 			return;
@@ -189,7 +190,7 @@
 
 - (void)disableGroupRenameWarningAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if ([alert checkValue] == YES) {
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnRenameGroupKey];
+		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnRenameGroupKey];
 	}
 }
 
@@ -198,7 +199,7 @@
 		if ([[groups objectAtIndex:row] hasEditableName] == NO) 
 			return NO;
 		else if (NSLocationInRange(row, [groups rangeOfCategoryGroups]) &&
-				 [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRenameGroupKey]) {
+				 [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey]) {
 			
 			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
 												 defaultButton:NSLocalizedString(@"OK", @"Button title")
@@ -271,7 +272,7 @@
 }
 
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView{
-    NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
+    NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKColumnWidthsKey]];
     [defaultTableColumnWidths addEntriesFromDictionary:tableColumnWidths];
     return defaultTableColumnWidths;
 }
@@ -292,11 +293,11 @@
 	if([notification object] != tableView) return;
       
     // current setting will override those already in the prefs; we may not be displaying all the columns in prefs right now, but we want to preserve their widths
-    NSMutableDictionary *defaultWidths = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey] mutableCopy];
+    NSMutableDictionary *defaultWidths = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKColumnWidthsKey] mutableCopy];
     [tableColumnWidths release];
     tableColumnWidths = [[self currentTableColumnWidthsAndIdentifiers] retain];
     [defaultWidths addEntriesFromDictionary:tableColumnWidths];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:defaultWidths forKey:BDSKColumnWidthsKey];
+    [[NSUserDefaults standardUserDefaults] setObject:defaultWidths forKey:BDSKColumnWidthsKey];
     [defaultWidths release];
 }
 
@@ -304,7 +305,7 @@
 - (void)tableViewColumnDidMove:(NSNotification *)notification{
 	if([notification object] != tableView) return;
     
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
+    [[NSUserDefaults standardUserDefaults] setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
                                                       forKey:BDSKShownColsNamesKey];
 }
 
@@ -320,18 +321,18 @@
 
 }
 
-- (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column {
+- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(int)row {
     
     // autorelease when creating an instance, since there are multiple exit points from this method
 	NSMenu *menu = nil;
     NSMenuItem *item = nil;
     
-	if (column == -1 || row == -1) 
+	if (tableColumn == nil || row == -1) 
 		return nil;
 	
 	if(tv == tableView){
 		
-		NSString *tcId = [[[tableView tableColumns] objectAtIndex:column] identifier];
+		NSString *tcId = [tableColumn identifier];
         NSArray *linkedURLs;
         NSURL *theURL;
         
@@ -458,27 +459,9 @@
 }
 
 - (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv{
-	if (tv == groupTableView && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRenameGroupKey])
+	if (tv == groupTableView && [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey])
 		return NO;
 	return YES;
-}
-
-- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
-    if (tv == tableView)
-        return BDSKMainTableViewFontNameKey;
-    else if (tv == groupTableView)
-        return BDSKGroupTableViewFontNameKey;
-    else 
-        return nil;
-}
-
-- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
-    if (tv == tableView)
-        return BDSKMainTableViewFontSizeKey;
-    else if (tv == groupTableView)
-        return BDSKGroupTableViewFontSizeKey;
-    else 
-        return nil;
 }
 
 - (NSColor *)tableView:(NSTableView *)tv highlightColorForRow:(int)row {
@@ -487,22 +470,16 @@
 
 #pragma mark TableView dragging source
 
-// for 10.3 compatibility and OmniAppKit dataSource methods
-- (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray*)rows toPasteboard:(NSPasteboard*)pboard{
-	NSMutableIndexSet *rowIndexes = [NSIndexSet indexSetWithIndexesInArray:rows];
-	return [self tableView:tv writeRowsWithIndexes:rowIndexes toPasteboard:pboard];
-}
-
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
     NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
-	int dragCopyType = [pw integerForKey:dragCopyTypeKey];
+	int dragCopyType = [sud integerForKey:dragCopyTypeKey];
     BOOL success = NO;
-	NSString *citeString = [pw stringForKey:BDSKCiteStringKey];
+	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
     NSArray *additionalFilenames = nil;
     
-	OBPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
+	BDSKPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
 
     docState.dragFromExternalGroups = NO;
 	
@@ -691,7 +668,7 @@
     
     if (dragCopyType == BDSKTemplateDragCopyType) {
         NSString *dragCopyTemplateKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTemplateKey : BDSKDefaultDragCopyTemplateKey;
-        NSString *template = [pw stringForKey:dragCopyTemplateKey];
+        NSString *template = [sud stringForKey:dragCopyTemplateKey];
         unsigned templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
         if (templateIdx != NSNotFound)
             dragCopyType += templateIdx;
@@ -717,12 +694,12 @@
 		case BDSKBibTeXDragCopyType:
 			mainType = NSStringPboardType;
 			string = [self bibTeXStringForPublications:pubs];
-			OBASSERT(string != nil);
+			BDSKASSERT(string != nil);
 			break;
 		case BDSKCiteDragCopyType:
 			mainType = NSStringPboardType;
 			string = [self citeStringForPublications:pubs citeString:citeString];
-			OBASSERT(string != nil);
+			BDSKASSERT(string != nil);
 			break;
 		case BDSKPDFDragCopyType:
 			mainType = NSPDFPboardType;
@@ -737,7 +714,7 @@
 		case BDSKMinimalBibTeXDragCopyType:
 			mainType = NSStringPboardType;
 			string = [self bibTeXStringDroppingInternal:YES forPublications:pubs];
-			OBASSERT(string != nil);
+			BDSKASSERT(string != nil);
 			break;
 		case BDSKRISDragCopyType:
 			mainType = NSStringPboardType;
@@ -796,7 +773,7 @@
 }
 
 - (NSImage *)tableView:(NSTableView *)tv dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{
-    return [self dragImageForPromisedItemsUsingCiteString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]];
+    return [self dragImageForPromisedItemsUsingCiteString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey]];
 }
 
 - (NSImage *)dragImageForPromisedItemsUsingCiteString:(NSString *)citeString{
@@ -834,11 +811,11 @@
         isIcon = YES;
     
 	} else {
-		OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+		NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
 		NSMutableString *s = [NSMutableString string];
         NSString *dragCopyTypeKey = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? BDSKAlternateDragCopyTypeKey : BDSKDefaultDragCopyTypeKey;
         
-        dragCopyType = [pw integerForKey:dragCopyTypeKey];
+        dragCopyType = [sud integerForKey:dragCopyTypeKey];
         
 		// don't depend on this being non-zero; this method gets called for drags where promisedDraggedItems is nil
 		count = [promisedDraggedItems count];
@@ -1244,7 +1221,7 @@
         NSString *basePath = [dropDestination path];
         int i = 0;
         
-        OBASSERT(isRemoteURLField || [fieldName isEqualToString:BDSKRemoteURLString]);
+        BDSKASSERT(isRemoteURLField || [fieldName isEqualToString:BDSKRemoteURLString]);
         
         while(rowIdx != NSNotFound){
             theBib = [shownPublications objectAtIndex:rowIdx];
@@ -1327,15 +1304,15 @@
 
 // the next 3 are called from tableview actions defined in NSTableView_OAExtensions
 
-- (void)tableView:(NSTableView *)tv insertNewline:(id)sender{
+- (void)tableViewInsertNewline:(NSTableView *)tv {
 	if (tv == tableView || tv == [fileSearchController tableView]) {
-		[self editPubCmd:sender];
+		[self editPubCmd:nil];
 	} else if (tv == groupTableView) {
-		[self renameGroupAction:sender];
+		[self renameGroupAction:nil];
 	}
 }
 
-- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
+- (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
 	// the rows are always the selected rows
 	if (tv == tableView || tv == [fileSearchController tableView]) {
 		[self removeSelectedPubs:nil];
@@ -1344,19 +1321,61 @@
 	}
 }
 
-- (BOOL)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
-
-	if (tv != tableView) {
-		NSBeep();
-		return NO;
+- (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+	if (tv == tableView || tv == [fileSearchController tableView] || tv == groupTableView) {
+		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
 	}
-
-    NSError *error = nil;
-	if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&error] == NO) {
-        [tv presentError:error];
-	}
-    return YES;
+    return NO;
 }
+
+- (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
+	if (tv == tableView) {
+        NSError *error = nil;
+        if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES verbose:YES error:&error] == NO)
+            [tv presentError:error];
+    } else {
+		NSBeep();
+	}
+}
+
+- (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)tv {
+    if (tv == tableView) {
+        return [self hasExternalGroupsSelected] == NO;
+    }
+    return NO;
+}
+
+// Don't use the default copy+paste here, as it uses another pasteboard and some more overhead
+- (void)tableView:(NSTableView *)tv duplicateRowsWithIndexes:(NSIndexSet *)rowIndexes {
+	// the rows are always the selected rows
+	if (tv == tableView) {
+        NSArray *newPubs = [[NSArray alloc] initWithArray:[self selectedPublications] copyItems:YES];
+        
+        [self addPublications:newPubs]; // notification will take care of clearing the search/sorting
+        [self selectPublications:newPubs];
+        [newPubs release];
+        
+        if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey])
+            [self editPubCmd:nil]; // this will aske the user when there are many pubs
+    } else {
+        NSBeep();
+    }
+}
+
+- (BOOL)tableView:(NSTableView *)tv canDuplicateRowsWithIndexes:(NSIndexSet *)rowIndexes {
+    if (tv == tableView) {
+		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
+    }
+    return NO;
+}
+
+- (void)tableView:(NSTableView *)tv openParentForItemAtRow:(int)row{
+    BibItem *parent = [[shownPublications objectAtIndex:row] crossrefParent];
+    if (parent)
+        [self editPub:parent];
+}
+
+#pragma mark -
 
 // as the window delegate, we receive these from NSInputManager and doCommandBySelector:
 - (void)moveLeft:(id)sender{
@@ -1373,37 +1392,31 @@
         [self editPubCmd:nil];
 }
 
-- (void)tableView:(NSTableView *)tv openParentForItemAtRow:(int)row{
-    BibItem *parent = [[shownPublications objectAtIndex:row] crossrefParent];
-    if (parent)
-        [self editPub:parent];
-}
-
 #pragma mark -
 #pragma mark TypeSelectHelper delegate
 
 // used for status bar
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
+- (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
     if(searchString == nil || sortKey == nil)
         [self updateStatus]; // resets the status line to its default value
-    else if(typeSelectHelper == [tableView typeSelectHelper]) 
+    else if([tv isEqual:tableView]) 
         [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @"Status message:Finding item with [sorting field]: \"[search string]\""), [sortKey localizedFieldName], searchString]];
-    else if(typeSelectHelper == [groupTableView typeSelectHelper]) 
+    else if([tv isEqual:groupTableView]) 
         [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding group: \"%@\"", @"Status message:Finding group: \"[search string]\""), searchString]];
 }
 
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
+- (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
     if(sortKey == nil)
         [self updateStatus]; // resets the status line to its default value
-    else if(typeSelectHelper == [tableView typeSelectHelper]) 
+    else if([tv isEqual:tableView]) 
         [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"No item with %@: \"%@\"", @"Status message:No item with [sorting field]: \"[search string]\""), [sortKey localizedFieldName], searchString]];
-    else if(typeSelectHelper == [groupTableView typeSelectHelper]) 
+    else if([tv isEqual:groupTableView]) 
         [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"No group: \"%@\"", @"Status message:No group: \"[search string]\""), searchString]];
 }
 
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
-- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
-    if(typeSelectHelper == [tableView typeSelectHelper]){    
+- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
+    if([tv isEqual:tableView]){    
         
         // Some users seem to expect that the currently sorted table column is used for typeahead;
         // since the datasource method already knows how to convert columns to BibItem values, we
@@ -1432,14 +1445,14 @@
         }
         return a;
         
-    } else if(typeSelectHelper == [groupTableView typeSelectHelper]){
+    } else if([tv isEqual:groupTableView]){
         
         int i;
 		int groupCount = [groups count];
         NSMutableArray *array = [NSMutableArray arrayWithCapacity:groupCount];
         BDSKGroup *group;
         
-		OBPRECONDITION(groupCount);
+		BDSKPRECONDITION(groupCount);
         for(i = 0; i < groupCount; i++){
 			group = [groups objectAtIndex:i];
             [array addObject:[group stringValue]];
@@ -1447,28 +1460,6 @@
         return array;
         
     } else return [NSArray array];
-}
-
-// Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
-- (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
-    if(typeSelectHelper == [tableView typeSelectHelper]){   
-        return [[tableView selectedRowIndexes] lastIndex];
-    } else if(typeSelectHelper == [groupTableView typeSelectHelper]){
-        return [[groupTableView selectedRowIndexes] lastIndex];
-    } else return NSNotFound;
-}
-
-// We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
-    NSTableView *tv = nil;
-    if(typeSelectHelper == [tableView typeSelectHelper])
-        tv = tableView;
-    else if(typeSelectHelper == [groupTableView typeSelectHelper])
-        tv = groupTableView;
-    else
-        return;
-    [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
-    [tv scrollRowToVisible:itemIndex];
 }
 
 #pragma mark FileView data source and delegate

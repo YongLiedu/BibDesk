@@ -38,11 +38,11 @@
 
 #import "BDSKGroupCell.h"
 #import "BDSKGroup.h"
-#import <OmniBase/OmniBase.h>
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
+#import "BDSKCFCallBacks.h"
 
 static CFMutableDictionaryRef integerStringDictionary = NULL;
 
@@ -59,10 +59,10 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 
 + (void)initialize;
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     if (NULL == integerStringDictionary) {
-        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &OFIntegerDictionaryKeyCallbacks, &kCFTypeDictionaryValueCallBacks);
+        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);
         CFDictionaryAddValue(integerStringDictionary,  (const void *)0, CFSTR(""));
     }
     
@@ -158,7 +158,7 @@ static NSString *stringWithInteger(int count)
 
 - (void)setObjectValue:(id <NSObject, NSCopying>)obj {
     // we should not set a derived value such as the group name here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
-    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
+    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
     
     [super setObjectValue:obj];
     
@@ -277,10 +277,7 @@ static NSString *stringWithInteger(int count)
             NSImage *cautionImage = [NSImage imageNamed:@"BDSKSmallCautionIcon"];
             NSSize cautionImageSize = [cautionImage size];
             NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
-            if(controlViewIsFlipped)
-                [cautionImage drawFlippedInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
-            else
-                [cautionImage drawInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
+            [cautionImage drawFlipped:controlViewIsFlipped inRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
         } else if ([[self objectValue] count] > 0) {
             [NSGraphicsContext saveGraphicsState];
             [bgColor setFill];
@@ -295,10 +292,7 @@ static NSString *stringWithInteger(int count)
     NSRect imageRect = BDSKCenterRect([self iconRectForBounds:aRect], [self iconSizeForBounds:aRect], controlViewIsFlipped);
     [NSGraphicsContext saveGraphicsState];
     [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-	if (controlViewIsFlipped)
-		[[[self objectValue] icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
-	else
-		[[[self objectValue] icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [[[self objectValue] icon] drawFlipped:controlViewIsFlipped inRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [NSGraphicsContext restoreGraphicsState];
 }
 
@@ -327,7 +321,7 @@ static NSString *stringWithInteger(int count)
 
 - (void)recacheCountAttributes {
 	NSFont *countFont = [NSFont fontWithName:@"Helvetica-Bold" size:([[self font] pointSize] - 1)] ?: [NSFont boldSystemFontOfSize:([[self font] pointSize] - 1)];
-	OBPRECONDITION(countFont);     
+	BDSKPRECONDITION(countFont);     
 
 	[countAttributes removeAllObjects];
     [countAttributes setObject:[NSColor alternateSelectedControlTextColor] forKey:NSForegroundColorAttributeName];

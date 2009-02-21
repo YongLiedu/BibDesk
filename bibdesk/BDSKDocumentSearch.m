@@ -40,15 +40,16 @@
 #import "BibDocument.h"
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
+#import "BDSKMessageQueue.h"
 
-static OFMessageQueue *searchQueue = nil;
+static BDSKMessageQueue *searchQueue = nil;
 
 @implementation BDSKDocumentSearch
 
 + (void)initialize
 {
     if (nil == searchQueue) {
-        searchQueue = [[OFMessageQueue alloc] init];
+        searchQueue = [[BDSKMessageQueue alloc] init];
         [searchQueue startBackgroundProcessors:1];
     }
 }
@@ -96,7 +97,7 @@ static OFMessageQueue *searchQueue = nil;
 
 - (void)cancelSearch;
 {
-    [searchQueue queueSelector:@selector(_cancelSearch) forObject:self];
+    [searchQueue queueSelector:@selector(_cancelSearch) forTarget:self];
 }
 
 - (void)terminate;
@@ -233,7 +234,7 @@ static OFMessageQueue *searchQueue = nil;
             [self cancelSearch];
         
     // always queue a search, since the index content may be changing (in case of a search group)
-        [searchQueue queueSelector:@selector(backgroundSearchForString:indexArray:) forObject:self withObject:searchString withObject:[NSArray arrayWithObject:(id)skIndex]];
+        [searchQueue queueSelector:@selector(backgroundSearchForString:indexArray:) forTarget:self withObject:searchString withObject:[NSArray arrayWithObject:(id)skIndex]];
     }
 
 @end

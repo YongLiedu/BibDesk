@@ -41,6 +41,8 @@
 
 @interface NSAttributedString (BDSKExtensions)
 
+- (id)initWithString:(NSString *)string attributeName:(NSString *)attributeName attributeValue:(id)attributeValue;
+
 - (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse;
 
 - (NSRect)boundingRectForDrawingInViewWithSize:(NSSize)size;
@@ -51,6 +53,14 @@
 - (id)scriptingRtfDescriptor;
 
 @end
+
+
+@interface NSMutableAttributedString (BDSKExtensions)
+
+- (void)appendString:(NSString *)string attributes:(NSDictionary *)attributes;
+
+@end
+
 
 @interface NSTextStorage (BDSKExtensions)
 

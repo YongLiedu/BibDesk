@@ -42,6 +42,7 @@
 #import <Security/Security.h>
 #import "BDSKSharingBrowser.h"
 #import "BDSKSharingServer.h"
+#import "NSData_BDSKExtensions.h"
 
 NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 

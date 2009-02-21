@@ -37,10 +37,9 @@
  */
 
 #import "BDSKPublicationsArray.h"
-#import "BDSKCountedSet.h"
+#import "BDSKMultiValueDictionary.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "NSObject_BDSKExtensions.h"
 
 
@@ -60,7 +59,7 @@
     if (self = [super init]) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] init];
-        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
     }
     return self;
@@ -72,7 +71,7 @@
     if (self = [super init]) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] initWithObjects:objects count:count];
-        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
         [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:publications];
         [self updateFileOrder];
@@ -85,7 +84,7 @@
     if (self = [super init]) {
         NSZone *zone = [self zone];
         publications = [[NSMutableArray allocWithZone:zone] initWithCapacity:numItems];
-        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        itemsForCiteKeys = [[BDSKMultiValueDictionary allocWithZone:zone] initWithCaseInsensitiveKeys:YES];
         itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] initWithCapacity:numItems];
     }
     return self;
@@ -211,7 +210,7 @@
 	if ([NSString isEmptyString:key]) 
 		return nil;
     
-	NSArray *items = [itemsForCiteKeys arrayForKey:key];
+	NSArray *items = [itemsForCiteKeys allObjectsForKey:key];
 	
 	if ([items count] == 0)
 		return nil;
@@ -223,13 +222,13 @@
 {
 	NSArray *items = nil;
     if ([NSString isEmptyString:key] == NO) 
-		items = [itemsForCiteKeys arrayForKey:key];
+		items = [itemsForCiteKeys allObjectsForKey:key];
     return items ?: [NSArray array];
 }
 
 - (BOOL)citeKeyIsUsed:(NSString *)key byItemOtherThan:(BibItem *)anItem;
 {
-    NSArray *items = [itemsForCiteKeys arrayForKey:key];
+    NSArray *items = [itemsForCiteKeys allObjectsForKey:key];
     
 	if ([items count] > 1)
 		return YES;

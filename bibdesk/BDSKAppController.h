@@ -36,7 +36,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibDocument;
+@class BibDocument, BDSKMessageQueue;
 @protocol BDSKOwner;
 
 /*!
@@ -64,7 +64,7 @@
 
     NSLock *metadataCacheLock;
     int32_t canWriteMetadata;
-    OFMessageQueue *metadataMessageQueue;
+    BDSKMessageQueue *metadataMessageQueue;
     NSConnection *completionConnection;
 }
 

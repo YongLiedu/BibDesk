@@ -44,6 +44,19 @@ extern NSString *BDSKEncodingConversionException;
 
 + (NSData *)copySha1SignatureForFile:(NSString *)absolutePath;
 
+- (NSData *)sha1Signature;
+
+- (id)initWithBase64String:(NSString *)base64String withNewlines:(BOOL)encodedWithNewlines;
+- (id)initWithBase64String:(NSString *)base64String;
+- (NSString *)base64StringWithNewlines:(BOOL)encodeWithNewlines;
+- (NSString *)base64String;
+
+- (BOOL)mightBeCompressed;
+- (NSData *)compressedData;
+- (NSData *)decompressedData;
+
+- (FILE *)openReadOnlyStandardIOFile;
+
 @end
 
 @interface NSMutableData (BDSKExtensions)

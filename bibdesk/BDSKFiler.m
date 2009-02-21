@@ -42,13 +42,13 @@
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKPathColorTransformer.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAlert.h"
 #import "BDSKLinkedFile.h"
+#import "BDSKPreferenceController.h"
 
 // these keys should correspond to the table column identifiers
 #define FILE_KEY           @"file"
@@ -101,7 +101,7 @@ static BDSKFiler *sharedFiler = nil;
 
 - (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check{
 	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
+	NSString *papersFolderPath = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKPapersFolderPathKey];
 	BOOL isDir;
 
 	if(![NSString isEmptyString:papersFolderPath] && !([fm fileExistsAtPath:[fm resolveAliasesInPath:papersFolderPath] isDirectory:&isDir] && isDir)){
@@ -112,8 +112,8 @@ static BDSKFiler *sharedFiler = nil;
                                            otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog")];
 		if ([alert runModal] == NSAlertAlternateReturn){
-            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+            [[BDSKPreferenceController sharedPreferenceController] showWindow:self];
+            [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.autofile"];
 		}
 		return;
 	}
@@ -468,7 +468,7 @@ static BDSKFiler *sharedFiler = nil;
 	}
 }
 
-- (NSMenu *)tableView:(NSTableView *)tableView contextMenuForRow:(int)row column:(int)column{
+- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(int)rowIndex {
     return contextMenu;
 }
 
@@ -554,13 +554,13 @@ static BDSKFiler *sharedFiler = nil;
             NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] fileType];
  
             // create parent directories if necessary (OmniFoundation)
-            if (NO == [self createPathToFile:resolvedNewPath attributes:nil error:NULL]) {
+            if (NO == [self createPathToFile:resolvedNewPath attributes:nil]) {
                 status = NSLocalizedString(@"Unable to create parent directory.", @"AutoFile error message");
                 statusFlag = BDSKCannotCreateParentErrorMask;
             }
             if(statusFlag == BDSKNoError){
                 if([fileType isEqualToString:NSFileTypeDirectory] && [[NSWorkspace sharedWorkspace] isFilePackageAtPath:resolvedPath] == NO && force == NO && 
-                   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnMoveFolderKey]){
+                   [[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnMoveFolderKey]){
                     BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")
                                                          defaultButton:NSLocalizedString(@"Move", @"Button title")
                                                        alternateButton:NSLocalizedString(@"Don't Move", @"Button title") 
@@ -570,7 +570,7 @@ static BDSKFiler *sharedFiler = nil;
                     [alert setCheckValue:NO];
                     ignoreMove = (NSAlertAlternateReturn == [alert runModal]);
                     if([alert checkValue] == YES)
-                        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
+                        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
                 }
                 if(ignoreMove){
                     status = NSLocalizedString(@"Shouldn't move folder.", @"AutoFile error message");
@@ -581,7 +581,7 @@ static BDSKFiler *sharedFiler = nil;
                     NSString *pathContent = [self pathContentOfSymbolicLinkAtPath:resolvedPath];
                     if([pathContent isAbsolutePath] == NO){// it links to a relative path
                         pathContent = [[[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent] stringByStandardizingPath];
-                        pathContent = [[resolvedNewPath stringByDeletingLastPathComponent] relativePathToFilename:pathContent];
+                        pathContent = [[resolvedNewPath stringByDeletingLastPathComponent] relativePathToFile:pathContent];
                     }
                     if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
                         status = NSLocalizedString(@"Unable to move symbolic link.", @"AutoFile error message");

@@ -37,10 +37,9 @@
  */
 
 #import "BDSKTypeSelectHelper.h"
-#import <OmniFoundation/OmniFoundation.h>
-#import <OmniBase/OmniBase.h>
+#import "BDSKRuntime.h"
 
-#define REPEAT_CHARACTER '/'
+#define REPEAT_CHARACTER 0x2F
 #define CANCEL_CHARACTER 0x1B
 
 static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDidChangeFirstResponderNotification";
@@ -58,8 +57,7 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
 - (void)searchWithStickyMatch:(BOOL)allowUpdate;
 - (void)stopTimer;
 - (void)startTimer;
-- (void)typeSelectSearchTimeout;
-- (void)handleTimeoutNotification:(NSNotification *)notification;
+- (void)typeSelectSearchTimeout:(id)sender;
 - (NSTimeInterval)timeoutInterval;
 - (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
 
@@ -76,6 +74,8 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
         searchString = nil;
         cycleResults = YES;
         matchPrefix = YES;
+        processing = NO;
+        timer = nil;
     }
     return self;
 }
@@ -176,9 +176,9 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
     
     if (processing == NO) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:BDSKWindowDidChangeFirstResponderNotification object:window];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:NSWindowDidResignKeyNotification object:window];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:NSWindowWillCloseNotification object:window];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(typeSelectSearchTimeout:) name:BDSKWindowDidChangeFirstResponderNotification object:window];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(typeSelectSearchTimeout:) name:NSWindowDidResignKeyNotification object:window];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(typeSelectSearchTimeout:) name:NSWindowWillCloseNotification object:window];
         [fieldEditor setDelegate:self];
         [fieldEditor setString:@""];
     }
@@ -212,8 +212,8 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
 
 - (void)cancelSearch;
 {
-    if (timeoutEvent)
-        [self typeSelectSearchTimeout];
+    if (timer)
+        [self typeSelectSearchTimeout:timer];
 }
 
 - (BOOL)isTypeSelectEvent:(NSEvent *)keyEvent;
@@ -277,20 +277,19 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
 
 - (void)stopTimer;
 {
-    if (timeoutEvent != nil) {
-        [[OFScheduler mainScheduler] abortEvent:timeoutEvent];
-        [timeoutEvent release];
-        timeoutEvent = nil;
-    }
+    [timer invalidate];
+    [timer release];
+    timer = nil;
 }
 
 - (void)startTimer;
 {
     [self stopTimer];
-    timeoutEvent = [[[OFScheduler mainScheduler] scheduleSelector:@selector(typeSelectSearchTimeout) onObject:self afterTime:[self timeoutInterval]] retain];
+    timer = [[NSTimer alloc] initWithFireDate:[NSDate dateWithTimeIntervalSinceNow:[self timeoutInterval]] interval:0 target:self selector:@selector(typeSelectSearchTimeout:) userInfo:NULL repeats:NO];
+    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
 }
 
-- (void)typeSelectSearchTimeout;
+- (void)typeSelectSearchTimeout:(id)sender;
 {
     if([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
         [dataSource typeSelectHelper:self updateSearchString:nil];
@@ -299,26 +298,23 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
     processing = NO;
     
     NSTextView *fieldEditor = (NSTextView *)[[NSApp keyWindow] fieldEditor:YES forObject:self];
-    if ([fieldEditor delegate] == self && [fieldEditor hasMarkedText]) {
-        // we pass a dummy key event to the field editor to clear any hanging dead keys (marked text)
-        NSEvent *keyEvent = [NSEvent keyEventWithType:NSKeyDown
-                                             location:NSZeroPoint
-                                        modifierFlags:0
-                                            timestamp:0
-                                         windowNumber:0
-                                              context:nil
-                                           characters:@""
-                          charactersIgnoringModifiers:@""
-                                            isARepeat:NO
-                                              keyCode:0];
-        [fieldEditor interpretKeyEvents:[NSArray arrayWithObject:keyEvent]];
+    if ([fieldEditor delegate] == self) {
+        if ([fieldEditor hasMarkedText]) {
+            // we pass a dummy key event to the field editor to clear any hanging dead keys (marked text)
+            NSEvent *keyEvent = [NSEvent keyEventWithType:NSKeyDown
+                                                 location:NSZeroPoint
+                                            modifierFlags:0
+                                                timestamp:0
+                                             windowNumber:0
+                                                  context:nil
+                                               characters:@""
+                              charactersIgnoringModifiers:@""
+                                                isARepeat:NO
+                                                  keyCode:0];
+            [fieldEditor interpretKeyEvents:[NSArray arrayWithObject:keyEvent]];
+        }
         [fieldEditor setDelegate:nil];
     }
-}
-
-- (void)handleTimeoutNotification:(NSNotification *)notification;
-{
-    [self typeSelectSearchTimeout];
 }
 
 // See http://www.mactech.com/articles/mactech/Vol.18/18.10/1810TableTechniques/index.html
@@ -332,7 +328,7 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
 
 - (void)searchWithStickyMatch:(BOOL)sticky;
 {
-    OBPRECONDITION(dataSource != nil);
+    BDSKPRECONDITION(dataSource != nil);
     
     if ([searchString length]) {
         unsigned int selectedIndex, startIndex, foundIndex;
@@ -440,7 +436,7 @@ static BOOL (*originalMakeFirstResponder)(id, SEL, id) = NULL;
 }
 
 + (void)load {
-    originalMakeFirstResponder = (typeof(originalMakeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(makeFirstResponder:), @selector(replacementMakeFirstResponder:));
+    originalMakeFirstResponder = (typeof(originalMakeFirstResponder))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(makeFirstResponder:), @selector(replacementMakeFirstResponder:));
 }
 
 @end

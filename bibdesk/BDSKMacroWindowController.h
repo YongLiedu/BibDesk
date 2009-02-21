@@ -36,6 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import <Cocoa/Cocoa.h>
+#import "BDSKTableView.h"
 
 @class BDSKMacroResolver, BDSKComplexStringFormatter, BDSKComplexStringEditor;
 
@@ -92,9 +93,6 @@
 
 @end
 
-@class BDSKTypeSelectHelper;
 
-@interface BDSKMacroTableView : NSTableView{
-    BDSKTypeSelectHelper *typeSelectHelper;
-}
+@interface BDSKMacroTableView : BDSKTableView
 @end

@@ -44,6 +44,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import <SkimNotes/SkimNotes.h>
 #import "NSFileManager_BDSKExtensions.h"
+#import "NSAttributedString_BDSKExtensions.h"
 
 @implementation NSURL (BDSKExtensions)
 

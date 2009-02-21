@@ -39,7 +39,6 @@
 */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTypeManager.h"
 
 // The filename and keys used in the plist

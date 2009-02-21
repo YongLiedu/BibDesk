@@ -63,7 +63,7 @@ enum {
     @abstract Modeling authors as objects that can have interesting relationships
     @discussion none.
 */
-@interface BibAuthor : OFObject <NSCopying, NSCoding> {
+@interface BibAuthor : NSObject <NSCopying, NSCoding> {
     NSString *originalName;
     NSString *name;
     NSString *firstName;
@@ -139,9 +139,9 @@ enum {
 
 @end
 
-extern const CFSetCallBacks BDSKAuthorFuzzySetCallbacks;
-extern const CFDictionaryKeyCallBacks BDSKFuzzyDictionaryKeyCallBacks;
-extern const CFArrayCallBacks BDSKAuthorFuzzyArrayCallBacks;
+extern const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks;
+extern const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks;
+extern const CFArrayCallBacks kBDSKAuthorFuzzyAuthorCallBacks;
 
 extern NSMutableSet *BDSKCreateFuzzyAuthorCompareMutableSet();
 

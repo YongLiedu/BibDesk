@@ -49,7 +49,7 @@
 static NSData *MODSToMARCXSLTData = nil;
 
 + (void)initialize{
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     MODSToMARCXSLTData = [[NSData alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"MODS2MARC21slim" ofType:@"xsl"] options:NSMappedRead error:NULL];
 }
 

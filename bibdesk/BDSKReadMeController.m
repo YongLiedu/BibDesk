@@ -37,6 +37,7 @@
  */
 
 #import "BDSKReadMeController.h"
+#import "BDSKAppController.h"
 #include <sys/utsname.h>
 
 #define DOWNLOAD_URL @"http://bibdesk.sourceforge.net/"
@@ -141,12 +142,7 @@ static NSString *hostInfoString()
         [body appendFormat:@"\t ***** ERROR LOG ***** \n\nBibDesk version: %@ (%@)\n", shortVersion, version];
         [body appendFormat:@"Build details: %@\nHost: %@\n%@", build, hostInfoString(), [textView string]];
         
-        OAInternetConfig *ic = [OAInternetConfig internetConfig];
-        [ic launchMailTo:@"bibdesk-exceptions@lists.sourceforge.net"
-              carbonCopy:nil 
-                 subject:[NSString stringWithFormat:@"BibDesk %@ exception reported %@", version, [[NSDate date] description]]
-                    body:body
-                   error:NULL];
+        [[NSApp delegate] emailTo:@"bibdesk-exceptions@lists.sourceforge.net" subject:[NSString stringWithFormat:@"BibDesk %@ exception reported %@", version, [[NSDate date] description]] body:body attachments:nil];
     }
     @catch(id exception){
         NSLog(@"caught exception %@ in exception viewer", exception);

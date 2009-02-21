@@ -38,7 +38,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStatusBar.h"
 
 @class BibDocument;

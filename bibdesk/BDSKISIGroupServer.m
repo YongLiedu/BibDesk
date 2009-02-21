@@ -44,7 +44,6 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import <OmniFoundation/OmniFoundation.h>
 
 #define MAX_RESULTS 100
 #if(OMNI_FORCE_ASSERTIONS)
@@ -225,13 +224,13 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 - (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     [group addPublications:pubs];
 }
 
 - (void)setPublicationsOfGroup:(bycopy NSArray *)pubs;
 {
-    OBASSERT([NSThread inMainThread]);
+    BDSKASSERT([NSThread isMainThread]);
     [group setPublications:pubs];
 }
 
@@ -498,7 +497,7 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
     // this is now a field/value set for a particular publication record
     NSXMLNode *child = [record childCount] ? [record childAtIndex:0] : nil;
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
-    NSString *keywordSeparator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+    NSString *keywordSeparator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
     NSMutableDictionary *sourceTagValues = [NSMutableDictionary dictionary];
     NSString *isiURL = nil;
     

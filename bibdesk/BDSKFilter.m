@@ -40,8 +40,8 @@
 #import "BDSKCondition.h"
 #import "BibItem.h"
 #import "BDSKSmartGroup.h"
+#import "NSArray_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
-#import <OmniFoundation/OmniFoundation.h>
 
 
 @implementation BDSKFilter

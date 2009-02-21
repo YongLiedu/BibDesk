@@ -41,7 +41,6 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
 #import "BDSKAppController.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "UKDirectoryEnumerator.h"
 #import "BDSKShellCommandFormatter.h"
 #import <libkern/OSAtomic.h>
@@ -96,7 +95,7 @@
 static void upgradeTemplate()
 {
     NSString *texTemplatePath = [[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"previewtemplate.tex"];
-    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey];
+    NSStringEncoding encoding = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey];
     
     NSMutableString *texFile = [[NSMutableString alloc] initWithContentsOfFile:texTemplatePath encoding:encoding error:NULL];
     
@@ -120,7 +119,7 @@ static double runLoopTimeout = 30;
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
     // returns 0 if the key doesn't exist
     if ([[NSUserDefaults standardUserDefaults] floatForKey:@"BDSKTeXTaskRunLoopTimeout"] > 1)
@@ -173,7 +172,7 @@ static double runLoopTimeout = 30;
         currentTask = nil;
         memset(&flags, 0, sizeof(flags));
 
-        OFSimpleLockInit(&processingLock);
+        BDSKSimpleLockInit(&processingLock);
         pthread_rwlock_init(&dataFileLock, NULL);
 	}
 	return self;
@@ -184,14 +183,14 @@ static double runLoopTimeout = 30;
     [texPath release];
     [taskShouldStartInvocation release];
     [taskFinishedInvocation release];
-    OFSimpleLockFree(&processingLock);
+    BDSKSimpleLockFree(&processingLock);
     pthread_rwlock_destroy(&dataFileLock);
 	[super dealloc];
 }
 
 - (NSString *)description{
     NSMutableString *temporaryDescription = [[NSMutableString alloc] initWithString:[super description]];
-    [temporaryDescription appendFormat:@" {\nivars:\n\tdelegate = \"%@\"\n\tfile name = \"%@\"\n\ttemplate = \"%@\"\n\tTeX file = \"%@\"\n\tBibTeX file = \"%@\"\n\tTeX binary path = \"%@\"\n\tEncoding = \"%@\"\n\tBibTeX style = \"%@\"\n\tHelper files = %@\n\nenvironment:\n\tSHELL = \"%s\"\n\tBIBINPUTS = \"%s\"\n\tBSTINPUTS = \"%s\"\n\tPATH = \"%s\" }", delegate, [texPath baseNameWithoutExtension], texTemplatePath, [texPath texFilePath], [texPath bibFilePath], binDirPath, [NSString localizedNameOfStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]], [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey], [[self helperFilePaths] description], getenv("SHELL"), getenv("BIBINPUTS"), getenv("BSTINPUTS"), getenv("PATH")];
+    [temporaryDescription appendFormat:@" {\nivars:\n\tdelegate = \"%@\"\n\tfile name = \"%@\"\n\ttemplate = \"%@\"\n\tTeX file = \"%@\"\n\tBibTeX file = \"%@\"\n\tTeX binary path = \"%@\"\n\tEncoding = \"%@\"\n\tBibTeX style = \"%@\"\n\tHelper files = %@\n\nenvironment:\n\tSHELL = \"%s\"\n\tBIBINPUTS = \"%s\"\n\tBSTINPUTS = \"%s\"\n\tPATH = \"%s\" }", delegate, [texPath baseNameWithoutExtension], texTemplatePath, [texPath texFilePath], [texPath bibFilePath], binDirPath, [NSString localizedNameOfStringEncoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey]], [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey], [[self helperFilePaths] description], getenv("SHELL"), getenv("BIBINPUTS"), getenv("BSTINPUTS"), getenv("PATH")];
     NSString *description = [temporaryDescription copy];
     [temporaryDescription release];
     return [description autorelease];
@@ -251,7 +250,7 @@ static double runLoopTimeout = 30;
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     int rv = 0;
 
-    if(!OFSimpleLockTry(&processingLock)){
+    if(!BDSKSimpleLockTry(&processingLock)){
         NSLog(@"%@ couldn't get processing lock", self);
 		[pool release];
         return NO;
@@ -263,7 +262,7 @@ static double runLoopTimeout = 30;
         [taskShouldStartInvocation getReturnValue:&shouldStart];
         
         if (NO == shouldStart) {
-            OFSimpleUnlock(&processingLock);
+            BDSKSimpleUnlock(&processingLock);
             [pool release];
             return NO;
         }
@@ -275,7 +274,7 @@ static double runLoopTimeout = 30;
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasRTFData);
     
     // make sure the PATH environment variable is set correctly
-    NSString *pdfTeXBinPathDir = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey] stringByDeletingLastPathComponent];
+    NSString *pdfTeXBinPathDir = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey] stringByDeletingLastPathComponent];
 
     if(![pdfTeXBinPathDir isEqualToString:binDirPath]){
         [binDirPath release];
@@ -325,7 +324,7 @@ static double runLoopTimeout = 30;
         [taskFinishedInvocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:NO];
 	}
 
-	OFSimpleUnlock(&processingLock);
+	BDSKSimpleUnlock(&processingLock);
     
 	[pool release];
     return rv == 0;
@@ -361,7 +360,7 @@ static double runLoopTimeout = 30;
 - (NSString *)LTBString{
     NSString *string = nil;
     if([self hasLTB] && 0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
-        string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
+        string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
         pthread_rwlock_unlock(&dataFileLock);
         unsigned start, end;
         start = [string rangeOfString:@"\\bib{"].location;
@@ -375,7 +374,7 @@ static double runLoopTimeout = 30;
 - (NSString *)LaTeXString{
     NSString *string = nil;
     if([self hasLaTeX] && 0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
-        string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
+        string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
         pthread_rwlock_unlock(&dataFileLock);
         unsigned start, end;
         start = [string rangeOfString:@"\\bibitem"].location;
@@ -446,8 +445,8 @@ static double runLoopTimeout = 30;
 
 - (BOOL)isProcessing{
 	// just see if we can get the lock, otherwise we are processing
-    if(OFSimpleLockTry(&processingLock)){
-		OFSimpleUnlock(&processingLock);
+    if(BDSKSimpleLockTry(&processingLock)){
+		BDSKSimpleUnlock(&processingLock);
 		return NO;
 	}
 	return YES;
@@ -492,8 +491,8 @@ static double runLoopTimeout = 30;
 - (BOOL)writeTeXFileForCiteKeys:(NSArray *)citeKeys isLTB:(BOOL)ltb{
     
     NSMutableString *texFile = nil;
-    NSString *style = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey];
-    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey];
+    NSString *style = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey];
+    NSStringEncoding encoding = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey];
     NSError *error = nil;
     BOOL didWrite = NO;
 
@@ -530,15 +529,15 @@ static double runLoopTimeout = 30;
 
 - (BOOL)writeBibTeXFile:(NSString *)bibStr{
     
-    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey];
+    NSStringEncoding encoding = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey];
     NSError *error;
     
     // this should likely be the same encoding as our other files; presumably it's here because the user can have a default @preamble or something that's relevant?
     NSMutableString *bibTemplate = [[NSMutableString alloc] initWithContentsOfFile:
-                                    [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByStandardizingPath] encoding:encoding error:&error];
+                                    [[[NSUserDefaults standardUserDefaults] stringForKey:BDSKOutputTemplateFileKey] stringByStandardizingPath] encoding:encoding error:&error];
     
     if (nil == bibTemplate) {
-        NSLog(@"unable to read file %@ in task %@", [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey], self);
+        NSLog(@"unable to read file %@ in task %@", [[NSUserDefaults standardUserDefaults] stringForKey:BDSKOutputTemplateFileKey], self);
         NSLog(@"Foundation reported error %@", error);
         bibTemplate = [[NSMutableString alloc] init];
     }
@@ -658,7 +657,7 @@ static double runLoopTimeout = 30;
 }
 
 - (int)runPDFTeXTask{
-    NSString *command = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey];
+    NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey];
 
     NSArray *argArray = [BDSKShellCommandFormatter argumentsFromCommand:command];
     NSString *pdftexbinpath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
@@ -671,7 +670,7 @@ static double runLoopTimeout = 30;
 }
 
 - (int)runBibTeXTask{
-    NSString *command = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibTeXBinPathKey];
+    NSString *command = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBibTeXBinPathKey];
 	
     NSArray *argArray = [BDSKShellCommandFormatter argumentsFromCommand:command];
     NSString *bibtexbinpath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];

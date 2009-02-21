@@ -57,6 +57,8 @@ enum {
     kBDSKFileOperationFailed,                    /* Generic file operation failure          */
     kBDSKURLOperationFailed,                     /* Generic URL operation failure           */
     kBDSKComplexStringError,                     /* Complex string parsing failed           */
+    kBDSKCannotFindTemporaryDirectoryError,      /* Cannot find temporary directory         */
+    kBDSKCannotCreateTemporaryFileError,         /* Cannot create a temporary file          */
 };
 
 extern NSString *BDSKUnderlyingItemErrorKey;
@@ -68,6 +70,7 @@ extern NSString *BDSKUnderlyingItemErrorKey;
 
 // returns BibDesk-specific errors that don't allow valueForKey: and setValue:forKey: usage
 + (id)localErrorWithCode:(int)code localizedDescription:(NSString *)description;
++ (id)localErrorWithCode:(int)code localizedDescription:(NSString *)description underlyingError:(NSError *)underlyingError;
 
 // returns BibDesk-specific errors that can allow valueForKey: and setValue:forKey: usage
 + (id)mutableErrorWithDomain:(NSString *)domain code:(int)code userInfo:(NSDictionary *)dict;

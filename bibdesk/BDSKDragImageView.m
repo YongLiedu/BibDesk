@@ -38,7 +38,6 @@
 
 #import "BDSKDragImageView.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import <OmniAppKit/OmniAppKit.h>
 
 @implementation BDSKDragImageView
 
@@ -154,7 +153,7 @@
 
 // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
-    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
 }
 
 - (void)drawRect:(NSRect)aRect {

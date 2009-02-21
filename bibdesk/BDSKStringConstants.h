@@ -48,6 +48,7 @@ while ( object = mjtNextObjectIMP ## object(mjtForeachEnumerator ## object, mjtN
 #pragma mark ||  User Defaults Key String Declarations
 
 @interface NSString (BDSKStringConstants)
++ (void)initializeStringConstants;
 @end
 
 extern NSString *BDSKTeXBinPathKey;
@@ -313,6 +314,7 @@ extern NSString *BDSKDocumentControllerDidChangeMainDocumentNotification;
 extern NSString *BDSKFileSearchIndexInfoChangedNotification;
 extern NSString *BDSKEncodingsListChangedNotification;
 extern NSString *BDSKTemporaryFileMigrationNotification;
+extern NSString *BDSKFlagsChangedNotification;
 
 #pragma mark Exception name strings
 extern NSString *BDSKUnimplementedException;

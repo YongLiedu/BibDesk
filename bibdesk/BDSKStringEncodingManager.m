@@ -135,7 +135,7 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
 
 + (NSStringEncoding)defaultEncoding;
 {
-    return [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
+    return [[NSUserDefaults standardUserDefaults] integerForKey:BDSKDefaultStringEncodingKey];
 }
 
 + (id)allocWithZone:(NSZone *)zone {
@@ -285,7 +285,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
         kCFStringEncodingUTF8, kCFStringEncodingMacRoman, kCFStringEncodingWindowsLatin1, kCFStringEncodingASCII, kCFStringEncodingMacJapanese, kCFStringEncodingShiftJIS, kCFStringEncodingMacChineseTrad, kCFStringEncodingMacKorean, kCFStringEncodingMacChineseSimp, kCFStringEncodingGB_18030_2000, -1
     };
     if (encodings == nil) {
-        NSMutableArray *encs = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKStringEncodingsKey] mutableCopy];
+        NSMutableArray *encs = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKStringEncodingsKey] mutableCopy];
         if ([encs count] == 0) {
             NSStringEncoding defaultEncoding = [NSString defaultCStringEncoding];
             NSStringEncoding encoding;
@@ -309,7 +309,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 
 // Should be called after any customization to the encodings list. Writes the new list out to defaults; updates the UI; also posts notification to get all encoding popups to update.
 - (void)noteEncodingListChange:(BOOL)writeDefault updateList:(BOOL)updateList postNotification:(BOOL)post {
-    if (writeDefault) [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:encodings forKey:BDSKStringEncodingsKey];
+    if (writeDefault) [[NSUserDefaults standardUserDefaults] setObject:encodings forKey:BDSKStringEncodingsKey];
 
     if (updateList) {
         int cnt, numEncodings = [encodingMatrix numberOfRows];
@@ -373,7 +373,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 - (IBAction)revertToDefault:(id)sender {
     [encodings autorelease];
     encodings = nil;
-    [[OFPreference preferenceForKey:BDSKStringEncodingsKey] restoreDefaultValue];
+    [[NSUserDefaults standardUserDefaults] setObject:[[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKStringEncodingsKey] forKey:BDSKStringEncodingsKey];
     (void)[self enabledEncodings];					// Regenerate default list
     [self noteEncodingListChange:NO updateList:YES postNotification:YES];
 }

@@ -45,6 +45,7 @@
 - (NSString *)currentApplicationSupportPathForCurrentUser;
 - (NSString *)applicationSupportDirectory:(SInt16)domain;
 - (NSString *)applicationsDirectory;
+- (NSString *)desktopDirectory;
 - (NSURL *)downloadFolderURL;
 - (NSString *)newestLyXPipePath;
 
@@ -68,6 +69,8 @@
 */
 - (void)createWeblocFilesInBackgroundThread:(NSDictionary *)fullPathDict;
 - (void)copyFilesInBackgroundThread:(NSDictionary *)fullPathDict;
+
+- (NSString *)temporaryPathForWritingToPath:(NSString *)path error:(NSError **)outError;
 
 // creates a temporary directory with default attributes in a system temp location; this is thread safe
 - (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)fileName;
@@ -97,6 +100,11 @@
 - (BOOL)setOpenMetaTags:(NSArray *)tags atPath:(NSString *)path error:(NSError **)error;
 - (NSNumber *)openMetaRatingAtPath:(NSString *)path error:(NSError **)error;
 - (BOOL)setOpenMetaRating:(NSNumber *)rating atPath:(NSString *)path error:(NSError **)error;
+
+// uses createDirectoryAtPath:attributes: recursively for all parent components if necessary
+- (BOOL)createPathToFile:(NSString *)path attributes:(NSDictionary *)attributes;
+
+- (NSString *)resolveAliasesInPath:(NSString *)path;
 
 //
 // Thread safe API

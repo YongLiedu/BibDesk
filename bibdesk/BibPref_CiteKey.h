@@ -37,11 +37,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKPreferencePane.h"
 
 @class BDSKFormatStringFieldEditor;
 
-@interface BibPref_CiteKey : OAPreferenceClient
+@interface BibPref_CiteKey : BDSKPreferencePane
 {
     IBOutlet NSPanel *formatSheet;
     IBOutlet NSTextField *citeKeyLine;

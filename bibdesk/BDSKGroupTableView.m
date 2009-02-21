@@ -37,8 +37,6 @@
  */
 
 #import "BDSKGroupTableView.h"
-#import <OmniBase/OmniBase.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BDSKHeaderPopUpButtonCell.h"
 #import "NSBezierPath_BDSKExtensions.h"
@@ -60,7 +58,6 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [typeSelectHelper release];
     [super dealloc];
 }
 
@@ -69,7 +66,7 @@
     if([self numberOfColumns] == 0) 
 		[NSException raise:BDSKUnimplementedException format:@"%@ needs at least one column.", [self class]];
     NSTableColumn *column = [[self tableColumns] objectAtIndex:0];
-    OBPRECONDITION(column);
+    BDSKPRECONDITION(column);
  	
 	NSTableHeaderView *currentTableHeaderView = [self headerView];
 	BDSKGroupTableHeaderView *customTableHeaderView = [[BDSKGroupTableHeaderView alloc] initWithTableColumn:column];
@@ -88,48 +85,21 @@
     [[column dataCell] setFormatter:formatter];
     [formatter release];
     
-    [super awakeFromNib]; // this updates the font
-    
-    OBPRECONDITION([[self enclosingScrollView] contentView]);
+    BDSKPRECONDITION([[self enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleClipViewFrameChangedNotification:)
                                                  name:NSViewFrameDidChangeNotification
                                                object:[[self enclosingScrollView] contentView]];
     
-    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
-    [typeSelectHelper setDataSource:[self delegate]];
-    [typeSelectHelper setCyclesSimilarResults:NO];
-    [typeSelectHelper setMatchesPrefix:NO];
-}
-
-- (BDSKTypeSelectHelper *)typeSelectHelper{
-    return typeSelectHelper;
+    BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [aTypeSelectHelper setCyclesSimilarResults:NO];
+    [aTypeSelectHelper setMatchesPrefix:NO];
+    [self setTypeSelectHelper:aTypeSelectHelper];
+    [aTypeSelectHelper release];
 }
 
 - (NSPopUpButtonCell *)popUpHeaderCell{
 	return [(BDSKGroupTableHeaderView *)[self headerView] popUpHeaderCell];
-}
-
-- (void)reloadData{
-    [super reloadData];
-    [typeSelectHelper rebuildTypeSelectSearchCache]; // if we resorted or searched, the cache is stale
-}
-
-- (void)keyDown:(NSEvent *)theEvent
-{
-    if ([[theEvent characters] length] == 0)
-        return;
-	// modified from NSTableView-OAExtensions.h which uses a shared typeahead helper instance (which we can't access to force it to recache)
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableTypeAheadSelection"]) {
-
-        // @@ this is a hack; recaching in -reloadData doesn't work for us the first time around, but we don't want to recache on every keystroke
-        if([[typeSelectHelper valueForKey:@"searchCache"] count] == 0)
-            [typeSelectHelper rebuildTypeSelectSearchCache];
-
-        if ([typeSelectHelper processKeyDownEvent:theEvent])
-            return;
-	}
-    [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
 }
 
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note
@@ -145,8 +115,8 @@
     NSString *fontSizePrefKey = [self fontSizePreferenceKey];
     if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
         return;
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
+    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePrefKey];
+    float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePrefKey];
     NSFont *font = nil;
 
     if(nil != fontName)
@@ -269,7 +239,7 @@
         return;
     
     [super selectRowIndexes:indexes byExtendingSelection:shouldExtend];
-    // this is needed because we draw multiple selections differently and OAGradientTableView calls this only for deprecated 10.3 methods
+    // this is needed because we draw multiple selections differently and BDSKGradientTableView calls this only for deprecated 10.3 methods
     [self setNeedsDisplay:YES];
 }
 
@@ -341,7 +311,7 @@
     NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     
     int colIndex = [self columnAtPoint:location];
-    OBASSERT(colIndex != -1);
+    BDSKASSERT(colIndex != -1);
     if(colIndex == -1)
         return;
     
@@ -388,7 +358,7 @@
 
 - (NSPopUpButtonCell *)popUpHeaderCell{
 	id headerCell = [[[[self tableView] tableColumns] objectAtIndex:0] headerCell];
-	OBASSERT([headerCell isKindOfClass:[NSPopUpButtonCell class]]);
+	BDSKASSERT([headerCell isKindOfClass:[NSPopUpButtonCell class]]);
 	return headerCell;
 }
 
@@ -400,12 +370,12 @@
 
 // this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
 - (NSString *)stringForObjectValue:(id)obj{
-    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
+    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
     return [obj respondsToSelector:@selector(name)] ? [[obj name] description] : [obj description];
 }
 
 - (NSString *)editingStringForObjectValue:(id)obj{
-    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
+    BDSKASSERT([obj isKindOfClass:[BDSKGroup class]]);
     id name = [obj name];
     return [name isKindOfClass:[BibAuthor class]] ? [name originalName] : [name description];
 }

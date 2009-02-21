@@ -42,10 +42,8 @@
 #import "BDSKTypeManager.h"
 #import "BDSKComplexStringEditor.h"
 #import "BDSKImagePopUpButton.h"
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKTypeSelectHelper.h"
 #import <WebKit/WebKit.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCrossrefFormatter.h"
 #import "BDSKCiteKeyFormatter.h"
@@ -67,6 +65,7 @@
 #import "BDSKBookmarkController.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKCompletionManager.h"
+#import "BDSKApplication.h"
 
 @interface BDSKTextImportController (Private)
 
@@ -131,7 +130,7 @@
 }
 
 - (void)dealloc{
-    OBASSERT(download == nil);
+    BDSKASSERT(download == nil);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // next line is a workaround for a nasty webview crasher; looks like it messages a garbage pointer to its undo manager
     [webView setEditingDelegate:nil];
@@ -187,7 +186,7 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleFlagsChangedNotification:)
-                                                 name:OAFlagsChangedNotification
+                                                 name:BDSKFlagsChangedNotification
                                                object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleBibItemChangedNotification:)
@@ -268,7 +267,7 @@
     
     if ([item hasEmptyOrDefaultCiteKey])
         [item setCiteKey:[item suggestedCiteKey]];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] && [[item filesToBeFiled] count]){
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] && [[item filesToBeFiled] count]){
         NSEnumerator *fileEnum = [[item filesToBeFiled] objectEnumerator];
         BDSKLinkedFile *file;
         NSMutableArray *files = [NSMutableArray array];
@@ -339,7 +338,7 @@
 - (IBAction)changeTypeOfBibAction:(id)sender{
     NSString *type = [[sender selectedItem] title];
     [self setType:type];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:type
+    [[NSUserDefaults standardUserDefaults] setObject:type
                                                       forKey:BDSKPubTypeStringKey];
 
 	[[item undoManager] setActionName:NSLocalizedString(@"Change Type", @"Undo action name")];
@@ -495,7 +494,7 @@
 	if (canSet == NO){
 		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?", @"Informative text in alert");
 		NSString *otherButton = nil;
-		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+		if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey]){
 			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to file the paper now using the available fields, cancel autofile for this paper, or wait until the necessary fields are set?", @"Informative text in alert dialog"),
 			otherButton = NSLocalizedString(@"Wait", @"Button title");
 		}
@@ -769,7 +768,7 @@
     [itemTypeButton removeAllItems];
     [itemTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] bibTypesForFileType:[item fileType]]];
     
-    NSString *type = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPubTypeStringKey];
+    NSString *type = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKPubTypeStringKey];
     
     [self setType:type];
     
@@ -1304,12 +1303,12 @@
         if([selKey isPersonField])
             separator = @" and ";
         else
-            separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+            separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
         selString = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, selString];
     }
     
     // convert newlines to a single space, then collapse (RFE #1480354)
-    if ([selKey isNoteField] == NO && [selString containsCharacterInSet:[NSCharacterSet newlineCharacterSet]] == YES) {
+    if ([selKey isNoteField] == NO && [selString rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].length) {
         selString = [selString stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
         selString = [selString fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
     }
@@ -1351,7 +1350,7 @@
 
 - (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textview {
     if (control == itemTableView)
-		return [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorFormShouldAutoCompleteKey];
+		return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditorFormShouldAutoCompleteKey];
 	return NO;
 }
 
@@ -1428,7 +1427,7 @@
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
     [item setField:fieldName toValue:value];
 	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] &&
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey] &&
        [item canGenerateAndSetCiteKey]){
         [self generateCiteKey:nil];
         if ([item hasEmptyOrDefaultCiteKey] == NO)
@@ -1441,7 +1440,7 @@
 - (BOOL)autoFileLinkedFile:(BDSKLinkedFile *)file
 {
     // we can't autofile if it's disabled or there is nothing to file
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [file URL] == nil)
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [file URL] == nil)
 		return NO;
 	
 	if ([item canSetURLForLinkedFile:file]) {
@@ -1523,7 +1522,7 @@
             if([key isPersonField])
                 separator = @" and ";
             else
-                separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+                separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
             value = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, value];
         }
         
@@ -1532,8 +1531,7 @@
     return YES;
 }
 
-// this is used by the paste: action defined in NSTableView-OAExtensions
-- (BOOL)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
+- (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	int idx = [tv selectedRow];
 	NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
 	
@@ -1550,18 +1548,17 @@
             if([selKey isPersonField])
                 separator = @" and ";
             else
-                separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+                separator = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
             string = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, string];
         }
         
         [self recordChangingField:selKey toValue:string];
     }
-    return YES;
 }
 
-- (void)tableView:(NSTableView *)tableView deleteRows:(NSArray *)rows{
-    if([rows count]){
-        NSString *field = [fields objectAtIndex:[[rows objectAtIndex:0] intValue]];
+- (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+    if([rowIndexes count]){
+        NSString *field = [fields objectAtIndex:[rowIndexes firstIndex]];
         [self recordChangingField:field toValue:@""];
     }
 }
@@ -1592,37 +1589,20 @@
 
 #pragma mark || Methods to support the type-select selector.
 
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
+- (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
     if(!searchString)
         [statusLine setStringValue:[self isInTemporaryTypeSelectMode] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
     else
         [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @"Status message"), [searchString fieldName]]];
 }
 
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
+- (void)tableView:(NSTableView *)tv typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
     [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"No field:", @"Status message"), [searchString fieldName]]];
 }
 
-- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
+- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
     return fields;
 }
-    // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
-
-- (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
-    if([itemTableView numberOfSelectedRows] == 1)
-        return [itemTableView selectedRow];
-    else
-        return NSNotFound;
-}
-// Type-select behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
-
-// fixme -  also need to call the processkeychars in keydown...
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
-    OBPRECONDITION([[self window] firstResponder] == itemTableView);
-    [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
-    [itemTableView scrollRowToVisible:itemIndex];
-}
-// We call this when a type-select match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
 
 - (void)startTemporaryTypeSelectMode{
     if (temporaryTypeSelectMode == YES)

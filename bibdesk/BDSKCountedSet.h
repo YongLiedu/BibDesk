@@ -63,6 +63,3 @@
 - (unsigned)countForObject:(id)object;
 
 @end
-
-extern const CFDictionaryKeyCallBacks BDSKCaseInsensitiveStringKeyDictionaryCallBacks;
-extern const CFSetCallBacks BDSKCaseInsensitiveStringSetCallBacks;

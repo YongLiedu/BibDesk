@@ -570,7 +570,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 #pragma mark Paste/Duplicate support
 
 // used by OmniAppKit category methods
-- (BOOL)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard {
+- (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard {
     NSArray *pbtypes = [pboard types];
     if ([tv isEqual:typeTableView] && [pbtypes containsObject:BDSKTypeInfoPboardType]) {
         NSArray *newTypes = [pboard propertyListForType:BDSKTypeInfoPboardType];
@@ -599,9 +599,11 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
         [typeTableView editColumn:0 row:row withEvent:nil select:YES];
         
         [self setDocumentEdited:YES];
-        return YES;        
     }
-    return NO;
+}
+
+- (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)tv {
+    return [tv isEqual:typeTableView];
 }
 
 #pragma mark NSTableView dragging

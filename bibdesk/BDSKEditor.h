@@ -54,7 +54,7 @@
 @class BibAuthor;
 @class BDSKZoomablePDFView;
 @class FileView;
-@class BDSKSplitView;
+@class BDSKGradientSplitView;
 @class BDSKEditorTableView;
 
 /*!
@@ -63,8 +63,8 @@
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
 @interface BDSKEditor : NSWindowController {
-	IBOutlet BDSKSplitView *mainSplitView;
-	IBOutlet BDSKSplitView *fileSplitView;
+	IBOutlet BDSKGradientSplitView *mainSplitView;
+	IBOutlet BDSKGradientSplitView *fileSplitView;
     IBOutlet NSPopUpButton *bibTypeButton;
     IBOutlet BDSKEditorTableView *tableView;
     IBOutlet NSMatrix *matrix;

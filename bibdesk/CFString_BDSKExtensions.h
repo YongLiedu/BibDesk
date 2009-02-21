@@ -47,9 +47,12 @@ extern Boolean BDStringFindCharacter(CFStringRef string, UniChar character, CFRa
 extern void BDDeleteTeXForSorting(CFMutableStringRef mutableString);
 extern void BDDeleteArticlesForSorting(CFMutableStringRef mutableString);
 extern void BDDeleteCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet);
+extern void BDReplaceCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet, CFStringRef replacement);
 extern CFHashCode BDCaseInsensitiveStringHash(const void *value);
 extern Boolean  BDIsNewlineCharacter(UniChar c);
 extern Boolean BDStringHasAccentedCharacters(CFStringRef string);
+
+extern CFStringRef BDXMLCreateStringWithEntityReferencesInCFEncoding(CFStringRef string, CFStringEncoding encoding);
 
 static inline Boolean BDIsEmptyString(CFStringRef aString)
 { 

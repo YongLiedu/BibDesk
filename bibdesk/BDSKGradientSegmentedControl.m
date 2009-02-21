@@ -207,10 +207,7 @@
     NSRect fromRect = NSZeroRect;
     CGFloat f = [self isEnabledForSegment:segment] ? 1.0 : 0.5;
     fromRect.size = [image size];
-    if ([controlView isFlipped])
-        [image drawFlippedInRect:rect fromRect:fromRect operation:NSCompositeSourceOver fraction:f];
-    else
-        [image drawInRect:rect fromRect:fromRect operation:NSCompositeSourceOver fraction:f];
+    [image drawFlipped:[controlView isFlipped] inRect:rect fromRect:fromRect operation:NSCompositeSourceOver fraction:f];
     
     if ([self menuForSegment:segment]) {
         CGFloat x = NSMaxX(frame) - 2.0;

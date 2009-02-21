@@ -37,10 +37,13 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKOutlineView.h"
+
+@class BDSKGroupingOutlineView;
 
 @interface BDSKFileMatcher : NSWindowController
 {
-    IBOutlet NSOutlineView *outlineView;
+    IBOutlet BDSKGroupingOutlineView *outlineView;
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet NSTextField *statusField;
     IBOutlet NSButton *abortButton;
@@ -62,4 +65,14 @@
 - (IBAction)abort:(id)sender;
 - (IBAction)configure:(id)sender;
 
+@end
+
+/* Groups items under the top-level outline, and uses a gradient fill for the top level row background.  Grid lines are drawn when the outline has data.
+*/
+
+@interface BDSKGroupingOutlineView : BDSKOutlineView
+{
+    CIColor *topColor;
+    CIColor *bottomColor;
+}
 @end

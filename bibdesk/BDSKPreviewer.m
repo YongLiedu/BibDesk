@@ -41,7 +41,6 @@
 #import "BDSKAppController.h"
 #import "BDSKZoomableTextView.h"
 #import "BDSKZoomablePDFView.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BibDocument.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
@@ -51,6 +50,7 @@
 #import "BDSKDocumentController.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKPrintableView.h"
+#import "BDSKPreferenceController.h"
 
 static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
@@ -149,8 +149,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
         // overlay the progressIndicator over the contentView
         [progressOverlay overlayView:[[self window] contentView]];
         
-        pdfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
-        rtfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
+        pdfScaleFactor = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewPDFScaleFactorKey];
+        rtfScaleFactor = [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewRTFScaleFactorKey];
         
         // register to observe when the preview needs to be updated (handle this here rather than on a per document basis as the preview is currently global for the application)
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -184,8 +184,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 - (void)handleMainDocumentDidChangeNotification:(NSNotification *)notification
 {
-    OBASSERT([self isSharedPreviewer]);
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] && [self isWindowVisible])
+    BDSKASSERT([self isSharedPreviewer]);
+    if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] && [self isWindowVisible])
         [[[NSDocumentController sharedDocumentController] mainDocument] updatePreviewer:self];
 }
 
@@ -269,11 +269,11 @@ static BDSKPreviewer *sharedPreviewer = nil;
 #pragma mark Actions
 
 - (IBAction)showWindow:(id)sender{
-    OBASSERT([self isSharedPreviewer]);
+    BDSKASSERT([self isSharedPreviewer]);
 	[super showWindow:self];
 	[progressOverlay orderFront:sender];
 	[(BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument] updatePreviewer:self];
-    if(![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]){
+    if(![[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey]){
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Previewing is Disabled.", @"Message in alert dialog when showing preview with TeX preview disabled")
                                          defaultButton:NSLocalizedString(@"Yes", @"Button title")
                                        alternateButton:NSLocalizedString(@"No", @"Button title")
@@ -289,8 +289,8 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 - (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSAlertDefaultReturn){
-        [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
-        [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
+        [[BDSKPreferenceController sharedPreferenceController] showWindow:nil];
+        [[BDSKPreferenceController sharedPreferenceController] selectPaneWithIdentifier:@"edu.ucsd.cs.mmccrack.bibdesk.prefpane.TeX"];
     }else{
 		[self hideWindow:nil];
 	}
@@ -348,7 +348,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 
 - (void)displayPreviewsForState:(BDSKPreviewState)state success:(BOOL)success{
 
-    NSAssert2([NSThread inMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
+    NSAssert2([NSThread isMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
     
     // From Shark: if we were waiting before, and we're still waiting, there's nothing to do.  This is a big performance win when scrolling the main tableview selection, primarily because changing the text storage of rtfPreviewView ends up calling fixFontAttributes.  This in turn causes a disk hit at the ATS cache due to +[NSFont coveredCharacterCache], and parsing the binary plist uses lots of memory.
     if (BDSKWaitingPreviewState == previewState && BDSKWaitingPreviewState == state)
@@ -396,7 +396,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
             
             // now that we correctly check return codes from the NSTask, users blame us for TeX preview failures that have been failing all along, so we'll try to give them a clue to the error if possible (which may save a LART later on)
             NSSet *standardStyles = [NSSet setWithObjects:@"abbrv", @"acm", @"alpha", @"apalike", @"ieeetr", @"plain", @"siam", @"unsrt", nil];
-            NSString *btStyle = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey];
+            NSString *btStyle = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey];
             if([standardStyles containsObject:btStyle] == NO)
                 [errorString appendFormat:NSLocalizedString(@"***** WARNING: You are using a non-standard BibTeX style *****\nThe style \"%@\" may require additional \\usepackage commands to function correctly.\n\n", @"possible cause of TeX failure"), btStyle];
             
@@ -429,7 +429,7 @@ static BDSKPreviewer *sharedPreviewer = nil;
 		
 	}
 	
-	OBPOSTCONDITION(pdfData != nil);
+	BDSKPOSTCONDITION(pdfData != nil);
 	
 	// draw the PDF preview
     PDFDocument *pdfDocument = [[PDFDocument alloc] initWithData:pdfData];
@@ -512,18 +512,18 @@ static BDSKPreviewer *sharedPreviewer = nil;
 }
 
 - (void)handleApplicationWillTerminate:(NSNotification *)notification{
-    OBASSERT([self isSharedPreviewer]);
+    BDSKASSERT([self isSharedPreviewer]);
     
 	// save the visibility of the previewer
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[self isWindowVisible] forKey:BDSKShowingPreviewKey];
+	[[NSUserDefaults standardUserDefaults] setBool:[self isWindowVisible] forKey:BDSKShowingPreviewKey];
     // save the scalefactors of the views
     float scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
 
-	if (fabsf(scaleFactor - [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey]) > 0.01)
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
+	if (fabsf(scaleFactor - [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewPDFScaleFactorKey]) > 0.01)
+		[[NSUserDefaults standardUserDefaults] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
 	scaleFactor = [(BDSKZoomableTextView *)rtfPreviewView scaleFactor];
-	if (fabsf(scaleFactor - [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey]) > 0.01)
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
+	if (fabsf(scaleFactor - [[NSUserDefaults standardUserDefaults] floatForKey:BDSKPreviewRTFScaleFactorKey]) > 0.01)
+		[[NSUserDefaults standardUserDefaults] setFloat:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
     
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
     [server stopDOServer];

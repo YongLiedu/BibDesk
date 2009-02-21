@@ -64,16 +64,8 @@
 #import "BibAuthor+Scripting.h"
 #import "BDSKTypeManager.h"
 #import <Quartz/Quartz.h>
-#import <OmniFoundation/OmniFoundation.h>
+#import "BDSKCFCallBacks.h"
 
-
-const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
-    0,
-    OFNSObjectRetain,
-    OFCFTypeRelease,
-    OFCFTypeCopyDescription,
-    OFCaseInsensitiveStringIsEqual
-};
 
 @implementation BibDocument (Scripting)
 
@@ -252,7 +244,7 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     NSArray *names = [groups valueForKey:@"stringValue"];
     unsigned int idx = [names indexOfObject:name];
     if (idx == NSNotFound) {
-        NSMutableArray *fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &BDSKCaseInsensitiveStringArrayCallBacks);
+        NSMutableArray *fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKCaseInsensitiveStringArrayCallBacks);
         [fuzzyNames addObjectsFromArray:names];
         idx = [fuzzyNames indexOfObject:name];
         [fuzzyNames release];
@@ -406,10 +398,10 @@ const CFArrayCallBacks BDSKCaseInsensitiveStringArrayCallBacks = {
     id fuzzyName = name;
     NSMutableArray *fuzzyNames = nil;
     if ([field isPersonField]) {
-        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &BDSKAuthorFuzzyArrayCallBacks);
+        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKAuthorFuzzyAuthorCallBacks);
         fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name andPub:nil];
     } else {
-        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &BDSKCaseInsensitiveStringArrayCallBacks);
+        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKCaseInsensitiveStringArrayCallBacks);
     }
     [fuzzyNames addObjectsFromArray:names];
     unsigned int idx = [fuzzyNames indexOfObject:fuzzyName];

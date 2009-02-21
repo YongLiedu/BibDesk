@@ -115,7 +115,7 @@
             newString = [value copy];
         } else {
 			// append to old value, using separator from prefs
-            newString = [[NSString alloc] initWithFormat:@"%@%@%@", oldString, [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey], value];
+            newString = [[NSString alloc] initWithFormat:@"%@%@%@", oldString, [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultGroupFieldSeparatorKey], value];
 		}
     } else {
         // the default, just set the value
@@ -169,7 +169,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
     
     NSRange startRange = [itemString rangeOfString:@"%" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        OFErrorWithInfo(&error, kBDSKParserFailed, NSLocalizedDescriptionKey, NSLocalizedString(@"This is not a Refer string", @"Error description"), nil);
+        error = [NSError localErrorWithCode:kBDSKParserFailed localizedDescription:NSLocalizedString(@"This is not a Refer string", @"Error description")];
         if(outError) *outError = error;
 		return returnArray;
     }
@@ -222,7 +222,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
             
 			[mutableValue setString:value];                
 			
-		} else if ([sourceLine isEqualToString:@""] || [sourceLine containsCharacterInSet:invertedWhitespaceAndNewlineSet] == NO) {
+		} else if ([sourceLine isEqualToString:@""] || [sourceLine rangeOfCharacterFromSet:invertedWhitespaceAndNewlineSet].length == 0) {
             
             // add the last line, if available; different from other parsers, since we don't have a real end tag
             if (tag && mutableValue) {

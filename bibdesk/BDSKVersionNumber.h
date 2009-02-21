@@ -37,6 +37,8 @@ enum {
     int releaseType;
 }
 
++ (id)versionNumberWithVersionString:(NSString *)versionString;
+
 - (id)initWithVersionString:(NSString *)versionString;
 
 - (NSString *)originalVersionString;

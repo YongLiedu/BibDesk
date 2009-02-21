@@ -37,7 +37,7 @@
  */
 
 #import "PDFDocument_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
+#import "BDSKRuntime.h"
 
 
 @interface PDFDocument (BDSKPrivateDeclarations)
@@ -58,7 +58,7 @@ static id (*originalGetPrintOperationForPrintInfo)(id, SEL, id, BOOL) = NULL;
 }
 
 + (void)load {
-    originalGetPrintOperationForPrintInfo = (id (*)(id, SEL, id, BOOL))OBReplaceMethodImplementationWithSelector(self, @selector(getPrintOperationForPrintInfo:autoRotate:), @selector(replacementGetPrintOperationForPrintInfo:autoRotate:));
+    originalGetPrintOperationForPrintInfo = (id (*)(id, SEL, id, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(getPrintOperationForPrintInfo:autoRotate:), @selector(replacementGetPrintOperationForPrintInfo:autoRotate:));
 }
 
 + (NSData *)PDFDataWithPostScriptData:(NSData *)psData;

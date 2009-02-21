@@ -14,7 +14,7 @@ static NSString *BDSKISIEndpoint = nil;
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     BDSKISIEndpoint = [([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISIEndpoint"] ?: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve") copy];
     BDSKISINamespace = [([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISINamespace"] ?: @"http://esti.isinet.com/soap/search") copy];
 }

@@ -40,7 +40,6 @@
 #import "BibDocument.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
 #import "WebURLsWithTitles.h"
 
 
@@ -92,7 +91,7 @@
 }
 
 - (void)setDelegate:(id)newDelegate{
-    OBASSERT(newDelegate == nil || ([newDelegate respondsToSelector:@selector(pasteboardHelper:bibTeXStringForItems:)] && delegate == nil));
+    BDSKASSERT(newDelegate == nil || ([newDelegate respondsToSelector:@selector(pasteboardHelper:bibTeXStringForItems:)] && delegate == nil));
     if (newDelegate == nil && delegate != nil)
         [self absolveDelegateResponsibility];
     delegate = newDelegate;
@@ -202,19 +201,19 @@
         if(bibString != nil){
             int dragCopyType = [self promisedDragCopyTypeForPasteboard:pboard];
             if([type isEqualToString:NSPDFPboardType]){
-                OBASSERT(dragCopyType == BDSKPDFDragCopyType);
+                BDSKASSERT(dragCopyType == BDSKPDFDragCopyType);
                 NSData *data = nil;
                 if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGeneratePDF])
                     data = [texTask PDFData];
                 [pboard setData:data forType:NSPDFPboardType];
             }else if([type isEqualToString:NSRTFPboardType]){
-                OBASSERT(dragCopyType == BDSKRTFDragCopyType);
+                BDSKASSERT(dragCopyType == BDSKRTFDragCopyType);
                 NSData *data = nil;
                 if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGenerateRTF])
                     data = [texTask RTFData];
                 [pboard setData:data forType:NSRTFPboardType];
             }else if([type isEqualToString:NSStringPboardType]){
-                OBASSERT(dragCopyType == BDSKLTBDragCopyType || dragCopyType == BDSKLaTeXDragCopyType);
+                BDSKASSERT(dragCopyType == BDSKLTBDragCopyType || dragCopyType == BDSKLaTeXDragCopyType);
                 NSString *string = nil;
                 if(dragCopyType == BDSKLTBDragCopyType){
                     if([texTask runWithBibTeXString:bibString citeKeys:citeKeys generatedTypes:BDSKGenerateLTB])

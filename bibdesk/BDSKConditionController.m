@@ -42,7 +42,6 @@
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKBooleanValueTransformer.h"
 #import "BDSKRatingButton.h"
-#import <OmniBase/OmniBase.h>
 
 static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionControllerObservationContext";
 
@@ -304,7 +303,7 @@ static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionCont
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (context == BDSKConditionControllerObservationContext) {
-        OBASSERT(object == condition);
+        BDSKASSERT(object == condition);
         if(object == condition) {
             NSUndoManager *undoManager = [filterController undoManager];
             id oldValue = [change objectForKey:NSKeyValueChangeOldKey];

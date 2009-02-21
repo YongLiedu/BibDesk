@@ -77,7 +77,7 @@ static NSString *__documentTypeString = @"Doc-Type";
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     correctFields = [[NSSet alloc] initWithObjects:BDSKVolumeString, @"Language", BDSKAbstractString, nil];
     shortJournalNameString = [[[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKShortJournalNameField"] fieldName] copy];
 }

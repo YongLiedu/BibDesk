@@ -40,6 +40,7 @@
 #import "BDSKAsynchronousDOServer.h"
 #import "BDSKSharingServer.h"
 #import "BDSKPasswordController.h"
+#import "NSData_BDSKExtensions.h"
 
 typedef struct _BDSKSharingClientFlags {
     volatile int32_t isRetrieving;
@@ -327,7 +328,7 @@ typedef struct _BDSKSharingClientFlags {
 
 - (int)runPasswordPrompt;
 {
-    NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
+    NSAssert([NSThread isMainThread] == 1, @"password controller must be run from the main thread");
     BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
     int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
     [pwc close];
@@ -337,7 +338,7 @@ typedef struct _BDSKSharingClientFlags {
 
 - (int)runAuthenticationFailedAlert;
 {
-    NSAssert([NSThread inMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
+    NSAssert([NSThread isMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Authentication Failed", @"Message in alert dialog when authentication failed")
                                      defaultButton:nil
                                    alternateButton:nil
@@ -383,11 +384,11 @@ typedef struct _BDSKSharingClientFlags {
 // monitor the TXT record in case the server changes password requirements
 - (void)netService:(NSNetService *)sender didUpdateTXTRecordData:(NSData *)data;
 {
-    OBASSERT(sender == service);
-    OBASSERT(data != nil);
+    BDSKASSERT(sender == service);
+    BDSKASSERT(data != nil);
     if(data){
         NSDictionary *dict = [NSNetService dictionaryFromTXTRecordData:data];
-        int32_t val = [[NSString stringWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] intValue];
+        int32_t val = [[[[NSString alloc] initWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] autorelease] intValue];
         OSMemoryBarrier();
         int32_t oldVal = flags.needsAuthentication;
         OSAtomicCompareAndSwap32Barrier(oldVal, val, (int32_t *)&flags.needsAuthentication);

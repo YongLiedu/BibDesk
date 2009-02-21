@@ -37,14 +37,14 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import "BDSKPreferencePane.h"
 
 typedef enum {
     BDSKExportTemplateList = 0,
     BDSKServiceTemplateList = 1
 } BDSKTemplateListType;
 
-@interface BibPref_Export : OAPreferenceClient {
+@interface BibPref_Export : BDSKPreferencePane {
     IBOutlet NSOutlineView *outlineView;
     NSMutableArray *itemNodes;
     NSMutableArray *roles;    
@@ -73,5 +73,7 @@ typedef enum {
 - (IBAction)chooseFileDoubleAction:(id)sender;
 
 - (IBAction)dismissChooseMainPageSheet:(id)sender;
+
+- (void)updateUI;
 
 @end

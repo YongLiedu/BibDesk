@@ -38,7 +38,6 @@
 
 #import "BDSKStatusBar.h"
 #import "NSGeometry_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
 #import "CIImage_BDSKExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
 
@@ -155,10 +154,10 @@
 	float shiftHeight = NSHeight([self frame]) + offset;
 	statusRect.size.height = NSHeight([self frame]);
 	
-	OBASSERT(contentView != nil);
+	BDSKASSERT(contentView != nil);
 	
 	if ([self superview]) {
-		OBASSERT([[self superview] isEqual:contentView]);
+		BDSKASSERT([[self superview] isEqual:contentView]);
 		viewFrame.size.height += shiftHeight;
 		if ([contentView isFlipped] == NO)
 			viewFrame.origin.y -= shiftHeight;
@@ -187,7 +186,7 @@
 	NSView *view;
 	NSRect viewFrame;
 	
-	OBASSERT(contentView != nil);
+	BDSKASSERT(contentView != nil);
 	
 	if ([self superview])
 		shiftHeight = -shiftHeight;

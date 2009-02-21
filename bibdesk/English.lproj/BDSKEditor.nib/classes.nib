@@ -22,11 +22,11 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSMenu</string>
+			<string>NSApplication</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSObject</string>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -35,6 +35,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -164,6 +172,8 @@
 				<string>id</string>
 				<key>showPersonDetailCmd</key>
 				<string>id</string>
+				<key>tableButtonAction</key>
+				<string>id</string>
 				<key>toggleStatusBar</key>
 				<string>id</string>
 				<key>trashLinkedFiles</key>
@@ -200,11 +210,11 @@
 				<key>citeKeyWarningButton</key>
 				<string>NSButton</string>
 				<key>fileSplitView</key>
-				<string>BDSKSplitView</string>
+				<string>BDSKGradientSplitView</string>
 				<key>fileView</key>
 				<string>FileView</string>
 				<key>mainSplitView</key>
-				<string>BDSKSplitView</string>
+				<string>BDSKGradientSplitView</string>
 				<key>matrix</key>
 				<string>NSMatrix</string>
 				<key>notesView</key>
@@ -247,14 +257,6 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKSplitView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>OASplitView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>OASplitView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -276,6 +278,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSTextFieldCell</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKGradientSplitView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>OASplitView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

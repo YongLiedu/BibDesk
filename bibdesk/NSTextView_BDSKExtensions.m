@@ -36,21 +36,19 @@
 
 #import "NSTextView_BDSKExtensions.h"
 #import "BDSKStringConstants.h"
-#import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/OmniAppKit.h>
-#import "BDSKTextViewFindController.h"
+//#import "BDSKTextViewFindController.h"
 #import "NSObject_BDSKExtensions.h"
 
 @implementation NSTextView (BDSKExtensions)
-
+/*
 - (IBAction)performFindPanelAction:(id)sender{
 	[[BDSKTextViewFindController sharedFindController] performFindPanelAction:sender];
 }
-
+*/
 // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
     // there is not original implementation
-    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
 }
 
 - (void)selectLineNumber:(int) line;
@@ -81,13 +79,13 @@
 // allows persistent spell checking in text views
 
 - (void)toggleContinuousSpellChecking:(id)sender{
-    BOOL state = ![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    BOOL state = ![[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
     [sender setState:state];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:state forKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    [[NSUserDefaults standardUserDefaults] setBool:state forKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
 }
 
 - (BOOL)isContinuousSpellCheckingEnabled{
-    return [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    return [[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
 }
 
 - (void)highlightComponentsOfSearchString:(NSString *)searchString;
@@ -147,7 +145,7 @@
     
     // use the layout manager to add temporary attributes; the advantage for our purpose is that temporary attributes don't print
     NSLayoutManager *layoutManager = [self layoutManager];
-    OBPRECONDITION(layoutManager);
+    BDSKPRECONDITION(layoutManager);
     if(layoutManager == nil)
         return;
     

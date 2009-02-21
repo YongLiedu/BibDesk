@@ -40,7 +40,7 @@
 #import "BDSKAppController.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import "BDSKSplitView.h"
+#import "BDSKGradientSplitView.h"
 
 
 @interface BDSKNotesWindowController (Private)
@@ -83,7 +83,7 @@
 - (void)windowDidLoad {
     [self setWindowFrameAutosaveNameOrCascade:@"NotesWindow"];
     
-    [splitView setPositionAutosaveName:@"BDSKSplitView Frame BDSKNotesWindow"];
+    [splitView setPositionAutosaveName:@"BDSKNotesWindow"];
     if ([self windowFrameAutosaveName] == nil) {
         // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
         [splitView setPositionAutosaveName:nil];
@@ -233,14 +233,6 @@
 
 #pragma mark NSTokenField deldegate methods
 
-- (NSString *)tokenField:(NSTokenField *)tokenField editingStringForRepresentedObject:(id)representedObject {
-    return [representedObject stringByReplacingCharactersInSet:[NSCharacterSet whitespaceCharacterSet] withString:@"_"];
-}
-
-- (id)tokenField:(NSTokenField *)tokenField representedObjectForEditingString:(NSString *)editingString {
-    return [editingString stringByReplacingOccurrencesOfString:@"_" withString:@" "];
-}
-
 - (BOOL)tokenField:(NSTokenField *)tokenField writeRepresentedObjects:(NSArray *)objects toPasteboard:(NSPasteboard *)pboard {
     if (objects) {
         [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
@@ -252,7 +244,7 @@
 
 #pragma mark NSSplitView deldegate methods
 
-- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
+- (void)splitView:(BDSKGradientSplitView *)sender doubleClickedDividerAt:(int)offset {
     NSView *notesView = [[sender subviews] objectAtIndex:0]; // outlineView
     NSView *tagsView = [[sender subviews] objectAtIndex:1]; // tokenField
     NSRect notesFrame = [notesView frame];

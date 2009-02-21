@@ -39,7 +39,6 @@
 #import "BDSKStaticGroup.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BibItem.h"
-#import <OmniBase/OmniBase.h>
 
 
 @implementation BDSKStaticGroup
@@ -47,7 +46,7 @@
 static NSString *BDSKLastImportLocalizedString = nil;
 
 + (void)initialize{
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     BDSKLastImportLocalizedString = [NSLocalizedString(@"Last Import", @"Group name for last import") copy];
 }
 

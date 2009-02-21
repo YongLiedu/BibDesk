@@ -98,8 +98,6 @@
 */
 - (IBAction)copyAsAction:(id)sender;
 
-- (IBAction)duplicate:(id)sender;
-
 - (BDSKEditor *)editorForPublication:(BibItem *)pub create:(BOOL)createNew;
 
 /*!

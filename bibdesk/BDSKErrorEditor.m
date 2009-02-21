@@ -37,8 +37,6 @@
  */
 
 #import "BDSKErrorEditor.h"
-#import <OmniBase/OmniBase.h>
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKErrorManager.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
@@ -54,7 +52,7 @@ static NSString *BDSKErrorEditorObservationContext = @"BDSKErrorEditorObservatio
 
 + (void)initialize;
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     [self setKeys:[NSArray arrayWithObjects:@"manager", nil] triggerChangeNotificationsForDependentKey:@"displayName"];
 }
 
@@ -118,7 +116,7 @@ static NSString *BDSKErrorEditorObservationContext = @"BDSKErrorEditorObservatio
     
     NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
     
-    OBASSERT(fileName);
+    BDSKASSERT(fileName);
     [[self window] setRepresentedFilename:fileName];
 	[[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
     
@@ -219,13 +217,13 @@ static NSString *BDSKErrorEditorObservationContext = @"BDSKErrorEditorObservatio
 
 #pragma mark Editing
 
-- (id <OAFindControllerTarget>)omniFindControllerTarget { return textView; }
+//- (id <OAFindControllerTarget>)omniFindControllerTarget { return textView; }
 
 - (IBAction)loadFile:(id)sender{
     BibDocument *document = [manager sourceDocument];
     
     if(fileName == nil){
-        OBASSERT(data != nil && document != nil);
+        BDSKASSERT(data != nil && document != nil);
         [self setFileName:[[NSFileManager defaultManager] temporaryFileWithBasename:[document displayName]]];
         [data writeToFile:fileName atomically:YES];
         [data release];

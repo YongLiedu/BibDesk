@@ -37,9 +37,9 @@
  */
 
 #import "NSImage_BDSKExtensions.h"
-#import <OmniFoundation/OmniFoundation.h>
+#import "IconFamily.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import <OmniAppKit/IconFamily.h>
+#import "NSAttributedString_BDSKExtensions.h"
 
 @implementation NSImage (BDSKExtensions)
 
@@ -94,6 +94,56 @@
         [previewDisplayTeXImage unlockFocus];
         [previewDisplayTeXImage setName:@"BDSKPreviewDisplayTeX"];
     }
+}
+
++ (NSImage *)httpInternetLocationImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationHTTPIcon];
+        image = [[iconFamily imageWithAllReps] retain];
+        [iconFamily release];
+    }
+    return image;
+}
+
++ (NSImage *)ftpInternetLocationImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationFTPIcon];
+        image = [[iconFamily imageWithAllReps] retain];
+        [iconFamily release];
+    }
+    return image;
+}
+
++ (NSImage *)mailInternetLocationImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationMailIcon];
+        image = [[iconFamily imageWithAllReps] retain];
+        [iconFamily release];
+    }
+    return image;
+}
+
++ (NSImage *)newsInternetLocationImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationNewsIcon];
+        image = [[iconFamily imageWithAllReps] retain];
+        [iconFamily release];
+    }
+    return image;
+}
+
++ (NSImage *)genericInternetLocationImage {
+    static NSImage *image = nil;
+    if (image == nil) {
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:kInternetLocationGenericIcon];
+        image = [[iconFamily imageWithAllReps] retain];
+        [iconFamily release];
+    }
+    return image;
 }
 
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code {
@@ -161,6 +211,10 @@
         return [self httpInternetLocationImage];
     else if([scheme isEqualToString:@"ftp"])
         return [self ftpInternetLocationImage];
+    else if([scheme isEqualToString:@"mailto"])
+        return [self mailInternetLocationImage];
+    else if([scheme isEqualToString:@"news"])
+        return [self newsInternetLocationImage];
     else return [self genericInternetLocationImage];
 }
 
@@ -236,6 +290,27 @@
         }
     }
 #endif
+    return image != [NSNull null] ? image : nil;
+}
+
++ (NSImage *)imageForFileType:(NSString *)fileType {
+    static NSMutableDictionary *imageDictionary = nil;
+    
+    if (!fileType)
+        return nil;
+   
+    // if no file type, we'll just cache the path and waste some memory
+    if (imageDictionary == nil)
+        imageDictionary = [[NSMutableDictionary alloc] init];
+    
+    id image = [imageDictionary objectForKey:fileType];
+    if (image == nil) {
+        image = [[NSWorkspace sharedWorkspace] iconForFileType:fileType];
+        [image setFlipped:NO];
+        if (image == nil)
+            image = [NSNull null];
+        [imageDictionary setObject:image forKey:fileType];
+    }
     return image != [NSNull null] ? image : nil;
 }
 
@@ -430,6 +505,25 @@ static NSComparisonResult compareImageRepWidths(NSBitmapImageRep *r1, NSBitmapIm
     }
     [reps release];
     return toReturn;    
+}
+
+- (void)drawFlippedInRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(float)delta {
+    [NSGraphicsContext saveGraphicsState];
+    NSAffineTransform *transform = [NSAffineTransform transform];
+    [transform translateXBy:NSMaxX(dstRect) yBy:0.0];
+    [transform scaleXBy:-1.0 yBy:1.0];
+    [transform translateXBy:-NSMinX(dstRect) yBy:0.0];
+    [transform concat];
+    [self drawInRect:dstRect fromRect:srcRect operation:op fraction:delta];
+    [NSGraphicsContext restoreGraphicsState];
+}
+
+- (void)drawFlipped:(BOOL)isFlipped inRect:(NSRect)dstRect fromRect:(NSRect)srcRect operation:(NSCompositingOperation)op fraction:(float)delta {
+    if (isFlipped) {
+        [self drawFlippedInRect:dstRect fromRect:srcRect operation:op fraction:delta];
+    } else {
+        [self drawInRect:dstRect fromRect:srcRect operation:op fraction:delta];
+    }
 }
 
 @end

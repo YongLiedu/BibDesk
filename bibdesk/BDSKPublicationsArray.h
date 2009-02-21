@@ -38,11 +38,11 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class OFMultiValueDictionary, BibItem, BibAuthor;
+@class BDSKMultiValueDictionary, BibItem, BibAuthor;
 
 @interface BDSKPublicationsArray : NSMutableArray {
     NSMutableArray *publications;
-    OFMultiValueDictionary *itemsForCiteKeys;
+    BDSKMultiValueDictionary *itemsForCiteKeys;
     NSMutableDictionary *itemsForIdentifierURLs;
 }
 

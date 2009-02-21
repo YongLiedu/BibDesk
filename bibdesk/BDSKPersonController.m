@@ -48,7 +48,10 @@
 #import "BDSKPublicationsArray.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
+#import "BDSKSplitView.h"
+#import "BDSKTableView.h"
 #import <AddressBook/AddressBook.h>
+#import "BDSKMessageQueue.h"
 
 @implementation BDSKPersonController
 
@@ -87,10 +90,13 @@
 	if ([NSWindowController instancesRespondToSelector:@selector(awakeFromNib)]){
         [super awakeFromNib];
 	}
+    
+    [publicationTableView setFontNamePreferenceKey:BDSKPersonTableViewFontNameKey];
+    [publicationTableView setFontSizePreferenceKey:BDSKPersonTableViewFontSizeKey];
 	
 	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
 	[imageView setDelegate:self];
-	[splitView setPositionAutosaveName:@"OASplitView Position BibPersonView"];
+	[splitView setPositionAutosaveName:@"BibPersonView"];
 
     if (isEditable && nil != owner) {
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -425,20 +431,6 @@
     }
 }
 
-- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
-    if (tv == publicationTableView)
-        return BDSKPersonTableViewFontNameKey;
-    else 
-        return nil;
-}
-
-- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
-    if (tv == publicationTableView)
-        return BDSKPersonTableViewFontSizeKey;
-    else 
-        return nil;
-}
-
 #pragma mark Dragging delegate methods
 
 - (NSDragOperation)dragImageView:(BDSKDragImageView *)view validateDrop:(id <NSDraggingInfo>)sender {
@@ -489,7 +481,7 @@
 
 	// if we don't have a match in the address book, this will create a new person record
 	NSData *data = [[ABPerson personWithAuthor:person] vCardRepresentation];
-	OBPOSTCONDITION(data);
+	BDSKPOSTCONDITION(data);
 
 	if(data == nil)
 		return NO;
@@ -567,7 +559,7 @@
     [sender adjustSubviews];
 }
 
-- (void)splitView:(OASplitView *)sender multipleClick:(NSEvent *)mouseEvent{
+- (void)splitView:(BDSKSplitView *)sender doubleClickedDividerAt:(int)offset {
     if ([sender isEqual:splitView]) {
         
         NSView *pickerView = [[sender subviews] objectAtIndex:0];

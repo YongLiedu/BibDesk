@@ -47,7 +47,8 @@
 #import "BDSKTemplateParser.h"
 #import "BDSKTemplateTag.h"
 #import "NSString_BDSKExtensions.h"
-#import <OmniBase/OmniBase.h>
+#import "NSCharacterSet_BDSKExtensions.h"
+#import "BDSKRuntime.h"
 
 static float BDSKDefaultFontSizes[] = {8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0, 24.0, 28.0, 32.0, 48.0, 64.0};
 
@@ -94,7 +95,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 + (void)initialize {
     [self setKeys:[NSArray arrayWithObject:@"attributedString"] triggerChangeNotificationsForDependentKey:@"previewAttributedString"];
     
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     
 	[NSValueTransformer setValueTransformer:[[[BDSKValueOrNoneTransformer alloc] init] autorelease]
 									forName:BDSKValueOrNoneTransformerName];
@@ -1512,10 +1513,10 @@ static void (*originalTextViewDidChangeSelection)(id, SEL, id) = NULL;
 }
 
 + (void)load {
-    originalTextViewDidChangeSelection = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(textViewDidChangeSelection:), @selector(replacementTextViewDidChangeSelection:));
+    originalTextViewDidChangeSelection = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(textViewDidChangeSelection:), @selector(replacementTextViewDidChangeSelection:));
     // if it was returning NULL nothing was replaced, so we just register the method because we want to use it
     if (originalTextViewDidChangeSelection == NULL)
-        OBRegisterInstanceMethodWithSelector(self, @selector(replacementTextViewDidChangeSelection:), @selector(textViewDidChangeSelection:));
+        BDSKAddInstanceMethodImplementationFromSelector(self, @selector(textViewDidChangeSelection:), @selector(replacementTextViewDidChangeSelection:));
 }
 
 @end
@@ -1544,7 +1545,7 @@ static void (*originalSetObjectValue)(id, SEL, id) = NULL;
 + (void)load {
     // in later versions, messing with the binding info causes an infinite loop and crash 
     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        originalSetObjectValue = (void (*)(id, SEL, id))OBReplaceMethodImplementationWithSelector(self, @selector(setObjectValue:), @selector(replacementSetObjectValue:));
+        originalSetObjectValue = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setObjectValue:), @selector(replacementSetObjectValue:));
 }
 
 @end

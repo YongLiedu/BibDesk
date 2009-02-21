@@ -42,7 +42,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class OFScheduledEvent;
 
 @interface BDSKTypeSelectHelper : NSObject {
     id dataSource;
@@ -51,7 +50,7 @@
     
     NSArray *searchCache;
     NSString *searchString;
-    OFScheduledEvent *timeoutEvent;
+    NSTimer *timer;
     BOOL processing;
 }
 

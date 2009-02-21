@@ -215,7 +215,7 @@
         // get the initial XML document with our search parameters in it
         NSString *esearch = [[[self class] baseURLString] stringByAppendingFormat:@"/esearch.fcgi?db=%@&retmax=1&usehistory=y&term=%@&tool=bibdesk", [[self serverInfo] database], [[self searchTerm] stringByAddingPercentEscapesIncludingReserved]];
         NSURL *initialURL = [NSURL URLWithString:esearch]; 
-        OBPRECONDITION(initialURL);
+        BDSKPRECONDITION(initialURL);
         
         NSURLRequest *request = [NSURLRequest requestWithURL:initialURL];
         NSURLResponse *response;
@@ -268,7 +268,7 @@
     // need to escape queryKey, but the rest should be valid for a URL
     NSString *efetch = [[[self class] baseURLString] stringByAppendingFormat:@"/efetch.fcgi?rettype=medline&retmode=text&retstart=%d&retmax=%d&db=%@&query_key=%@&WebEnv=%@&tool=bibdesk", [self numberOfFetchedResults], numResults, [[self serverInfo] database], [[self queryKey] stringByAddingPercentEscapesIncludingReserved], [self webEnv]];
     NSURL *theURL = [NSURL URLWithString:efetch];
-    OBPOSTCONDITION(theURL);
+    BDSKPOSTCONDITION(theURL);
     
     [self setNumberOfFetchedResults:[self numberOfFetchedResults] + numResults];
     

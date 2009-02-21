@@ -37,8 +37,6 @@
  */
 
 #import "BDSKTableSortDescriptor.h"
-#import <OmniBase/OmniBase.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTypeManager.h"
 
 @interface NSArray (BibAuthorMultipleCompare)
@@ -206,7 +204,7 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
         
 	}
  
-    OBASSERT(sortDescriptor);
+    BDSKASSERT(sortDescriptor);
     return [sortDescriptor autorelease];
 }
 
@@ -323,7 +321,7 @@ static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id objec
 - (NSComparisonResult)compareObject:(id)object1 toObject:(id)object2 {
 
     id value1, value2;
-    OBASSERT_NOT_REACHED("Inefficient code path; use -[NSArray sortedArrayUsingMergesortWithDescriptors:] instead");
+    BDSKASSERT_NOT_REACHED("Inefficient code path; use -[NSArray sortedArrayUsingMergesortWithDescriptors:] instead");
     // get the values in bulk; since the same keypath is used for both objects, why compute it twice?
     __GetValuesUsingCache(self, object1, object2, &value1, &value2);
     return [self compareEndObject:value1 toEndObject:value2];

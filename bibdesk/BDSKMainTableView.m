@@ -34,8 +34,6 @@
  */
 
 #import "BDSKMainTableView.h"
-#import <OmniFoundation/OmniFoundation.h>
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKStringConstants.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
@@ -58,6 +56,8 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
+#import "NSMenu_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 
 enum {
     BDSKColumnTypeText,
@@ -100,9 +100,9 @@ enum {
 
 @implementation BDSKMainTableView
 
++ (BOOL)shouldQueueTypeSelectHelper { return YES; }
+
 - (void)awakeFromNib{
-    [super awakeFromNib]; // this updates the font
-	
 	[self setHeaderView:[[[BDSKMainTableHeaderView alloc] initWithFrame:[[self headerView] frame]] autorelease]];	
     
     NSRect cornerViewFrame = [[self cornerView] frame];
@@ -119,26 +119,16 @@ enum {
     [self setCornerView:cornerViewButton];
     [cornerViewButton release];
     
-    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
-    [typeSelectHelper setDataSource:[self delegate]]; // which is the bibdocument
-    [typeSelectHelper setCyclesSimilarResults:YES];
-    [typeSelectHelper setMatchesPrefix:NO];
+    BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [aTypeSelectHelper setCyclesSimilarResults:YES];
+    [aTypeSelectHelper setMatchesPrefix:NO];
+    [self setTypeSelectHelper:aTypeSelectHelper];
+    [aTypeSelectHelper release];
 }
 
 - (void)dealloc{
-    [typeSelectHelper setDataSource:nil];
-    [typeSelectHelper release];
     [alternatingRowBackgroundColors release];
     [super dealloc];
-}
-
-- (void)reloadData{
-    [super reloadData];
-    [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeSelectSearchCache)]; // if we resorted or searched, the cache is stale
-}
-
-- (BDSKTypeSelectHelper *)typeSelectHelper{
-    return typeSelectHelper;
 }
 
 - (void)keyDown:(NSEvent *)event{
@@ -175,8 +165,7 @@ enum {
 			row++;
         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
         [self scrollRowToVisible:row];
-    // pass it on the typeahead selector
-    }else if ([typeSelectHelper processKeyDownEvent:event] == NO){
+    }else {
         [super keyDown:event];
     }
 }
@@ -391,16 +380,16 @@ enum {
     [self performSelector:@selector(addTableColumn:) withObjectsFromArray:columns];
     [self selectRowIndexes:selectedRows byExtendingSelection:NO];
     [self setHighlightedTableColumn:highlightedColumn]; 
-    [self tableViewFontChanged:nil];
+    [self tableViewFontChanged];
     [self updateColumnsMenu];
 }
 
 - (void)changeTableColumnsWithIdentifiers:(NSArray *)identifiers {
     // Store the new column in the preferences
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[identifiers arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
+    [[NSUserDefaults standardUserDefaults] setObject:[[identifiers arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
                                                       forKey:BDSKShownColsNamesKey];
     
-    if (BDSKDefaultAnimationTimeInterval > 0.0) {
+    if ([NSViewAnimation defaultAnimationTimeInterval] > 0.0) {
         NSView *cacheView = [self enclosingScrollView];
         NSImage *initialImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
         NSBitmapImageRep *imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
@@ -417,7 +406,7 @@ enum {
         [finalImage addRepresentation:imageRep];
         
         // block until this is done, so we can handle drawing manually
-        BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:BDSKDefaultAnimationTimeInterval animationCurve:NSAnimationEaseInOut];
+        BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:[NSViewAnimation defaultAnimationTimeInterval] animationCurve:NSAnimationEaseInOut];
         [animation setDelegate:self];
         [animation setAnimationBlockingMode:NSAnimationBlocking];
         
@@ -538,7 +527,7 @@ enum {
 	static NSDictionary *headerImageCache = nil;
 	
 	if (headerImageCache == nil) {
-		NSDictionary *paths = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableHeaderImagesKey];
+		NSDictionary *paths = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTableHeaderImagesKey];
         NSImage *paperclip = [[[NSImage paperclipImage] copy] autorelease];
         [paperclip setScalesWhenResized:YES];
         [paperclip setSize:NSMakeSize(16, 16)];
@@ -569,7 +558,7 @@ enum {
 	
 	if (headerTitleCache == nil) {
         NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"@", BDSKUrlString, @"@", BDSKRemoteURLString, @"#", BDSKItemNumberString, @"#", BDSKImportOrderString, nil];
-		[tmpDict addEntriesFromDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableHeaderTitlesKey]];
+		[tmpDict addEntriesFromDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKTableHeaderTitlesKey]];
         headerTitleCache = [tmpDict copy];
         [tmpDict release];
 	}
@@ -668,7 +657,7 @@ enum {
 
 - (void)importItem:(id)sender {
     int row = [self clickedRow];
-    OBASSERT(row != -1);
+    BDSKASSERT(row != -1);
     if (row == -1)
         return;
     if([[self delegate] respondsToSelector:@selector(tableView:importItemAtRow:)])
@@ -677,7 +666,7 @@ enum {
 
 - (void)openParentItem:(id)sender {
     int row = [self clickedRow];
-    OBASSERT(row != -1);
+    BDSKASSERT(row != -1);
     if (row == -1)
         return;
     if([[self delegate] respondsToSelector:@selector(tableView:openParentForItemAtRow:)])

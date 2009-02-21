@@ -37,7 +37,7 @@
  */
 
 #import "BDSKFile.h"
-#import <OmniBase/OmniBase.h>
+#import "BDSKRuntime.h"
 #import "NSURL_BDSKExtensions.h"
 
 // private placeholder subclass
@@ -80,7 +80,7 @@ static Class BDSKFileClass = Nil;
 
 + (void)initialize
 {
-    OBINITIALIZE;
+    BDSKINITIALIZE;
     BDSKFileClass = self;
     defaultPlaceholderFile = (BDSKPlaceholderFile *)NSAllocateObject([BDSKPlaceholderFile class], 0, NSDefaultMallocZone());
 }
@@ -95,20 +95,20 @@ static Class BDSKFileClass = Nil;
 // returns an FSRef wrapper
 - (id)initWithFSRef:(FSRef *)aRef;
 {
-    OBRequestConcreteImplementation(self, _cmd);
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 // This is a common, convenient initializer, but we prefer to return the FSRef variant so we can use FSCompareFSRefs and survive external name changes.  If the file doesn't exist (yet), though, we return an NSURL variant.
 - (id)initWithURL:(NSURL *)aURL;
 {
-    OBRequestConcreteImplementation(self, _cmd);
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)initWithPath:(NSString *)aPath;
 {
-    OBRequestConcreteImplementation(self, _cmd);
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
@@ -146,13 +146,13 @@ static Class BDSKFileClass = Nil;
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    OBRequestConcreteImplementation(self, _cmd);
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    OBRequestConcreteImplementation(self, _cmd);
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
@@ -160,13 +160,13 @@ static Class BDSKFileClass = Nil;
 
 - (NSURL *)fileURL;
 {
-    OBRequestConcreteImplementation(self, _cmd);
+    BDSKRequestConcreteImplementation(self, _cmd);
     return nil;
 }
 
 - (const FSRef *)fsRef;
 {
-    OBRequestConcreteImplementation(self, _cmd);
+    BDSKRequestConcreteImplementation(self, _cmd);
     return NULL;
 }
 

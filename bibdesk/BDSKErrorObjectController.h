@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibDocument, BibItem, BDSKErrorObject, BDSKErrorManager, BDSKErrorEditor, BDSKFilteringArrayController;
+@class BibDocument, BibItem, BDSKErrorObject, BDSKErrorManager, BDSKErrorEditor, BDSKFilteringArrayController, BDSKTableView;
 
 @interface BDSKErrorObjectController : NSWindowController {
     NSMutableArray *errors;
@@ -48,7 +48,7 @@
     unsigned int lastIndex;
     
     // error-handling stuff:
-    IBOutlet NSTableView *errorTableView;
+    IBOutlet BDSKTableView *errorTableView;
     IBOutlet BDSKFilteringArrayController *errorsController;
     BOOL handledNonIgnorableError;
 }

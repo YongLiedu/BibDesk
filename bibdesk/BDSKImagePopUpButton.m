@@ -39,7 +39,6 @@
 
 #import "BDSKImagePopUpButton.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKImageFadeAnimation.h"
 
 @implementation BDSKImagePopUpButton
@@ -122,14 +121,14 @@
 }
 
 - (void)animationDidStop:(BDSKImageFadeAnimation *)anAnimation {
-    OBASSERT(anAnimation == animation);
+    BDSKASSERT(anAnimation == animation);
     [animation setDelegate:nil];
     [animation autorelease];
     animation = nil;
 }
 
 - (void)animationDidEnd:(BDSKImageFadeAnimation *)anAnimation {
-    OBASSERT(anAnimation == animation);
+    BDSKASSERT(anAnimation == animation);
     [self setIconImage:[anAnimation finalImage]];
     [animation setDelegate:nil];
     [animation autorelease];
@@ -242,7 +241,7 @@
 	if ([delegate respondsToSelector:@selector(imagePopUpButton:cleanUpAfterDragOperation:)])
 		[delegate imagePopUpButton:self cleanUpAfterDragOperation:operation];
     // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
-    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
 }
 
 #pragma mark Dragging destination

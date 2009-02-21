@@ -40,7 +40,6 @@
 #import "BDSKOwnerProtocol.h"
 #import "BDSKComplexString.h" // for BDSKMacroResolver protocol
 #import "BDSKStringConstants.h" // for notification name declarations
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKComplexStringEditor.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKBibTeXParser.h"
@@ -49,7 +48,6 @@
 #import "BibItem.h"
 #import "BDSKMacroResolver.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKTypeSelectHelper.h"
 #import "BibDocument.h"
 #import "BDSKMacro.h"
@@ -236,7 +234,7 @@
             NSString *key = [info objectForKey:@"macroKey"];
             if (key) {
                 unsigned idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
-                OBASSERT(idx != NSNotFound);
+                BDSKASSERT(idx != NSNotFound);
                 [self removeObjectFromMacrosAtIndex:idx];
             } else {
                 [self setMacros:[NSArray array]];
@@ -247,7 +245,7 @@
             NSString *oldKey = [info objectForKey:@"oldKey"];
             unsigned idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[oldKey lowercaseString]];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:newKey macroResolver:macroResolver];
-            OBASSERT(idx != NSNotFound);
+            BDSKASSERT(idx != NSNotFound);
             [self replaceObjectInMacrosAtIndex:idx withObject:macro];
             [macro release];
         }
@@ -259,7 +257,7 @@
 #pragma mark Actions
 
 - (IBAction)addMacro:(id)sender{
-    OBASSERT(isEditable);
+    BDSKASSERT(isEditable);
     NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
     // find a unique new macro key
     int i = 0;
@@ -276,7 +274,7 @@
 }
 
 - (IBAction)removeSelectedMacros:(id)sender{
-    OBASSERT(isEditable);
+    BDSKASSERT(isEditable);
     NSArray *macrosToRemove = [[[arrayController arrangedObjects] objectsAtIndexes:[tableView selectedRowIndexes]] valueForKey:@"name"];
     NSEnumerator *keyEnum = [macrosToRemove objectEnumerator];
     NSString *key;
@@ -395,7 +393,7 @@
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     NSUndoManager *undoMan = [[self window] undoManager];
-	if([undoMan isUndoingOrRedoing]) return;
+	if([undoMan isUndoing] || [undoMan isRedoing]) return;
     NSArray *arrangedMacros = [arrayController arrangedObjects];
     NSParameterAssert(row >= 0 && row < (int)[arrangedMacros count]);    
     NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
@@ -557,18 +555,24 @@
 }
 
 // called from tableView paste: action defined in NSTableView_OAExtensions
-- (BOOL)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
-    if(isEditable && [[pboard types] containsObject:NSStringPboardType]) {
-        NSString *pboardStr = [pboard stringForType:NSStringPboardType];
-        [self addMacrosFromBibTeXString:pboardStr];
+- (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
+    if(isEditable && [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]]) {
+        [self addMacrosFromBibTeXString:[pboard stringForType:NSStringPboardType]];
     }
-    return YES;
+}
+
+- (BOOL)tableViewCanPasteFromPasteboard:(NSTableView *)tv {
+    return isEditable;
 }
 
 // called from tableView delete: action defined in NSTableView_OAExtensions
 - (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
 	if (isEditable)
         [self removeSelectedMacros:nil];
+}
+
+- (BOOL)tableView:(NSTableView *)tv canDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+    return isEditable;
 }
 
 #pragma mark NSTableView delegate methods
@@ -607,6 +611,10 @@
     
     [arrayController rearrangeObjects];
     [tableView reloadData];
+}
+
+- (NSArray *)tableView:(NSTableView *)tv typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)aTypeSelectHelper {
+    return [arrayController arrangedObjects];
 }
 
 #pragma mark Support
@@ -681,25 +689,6 @@
     }
 }
 
-#pragma mark || Methods to support the type-ahead selector.
-
-- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
-    return [arrayController arrangedObjects];
-}
-// This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
-
-- (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
-    int row = [tableView selectedRow];
-    return row == -1 ? NSNotFound : row;
-}
-// Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
-
-- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
-    [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
-}
-// We call this when a type-ahead-selection match has been made; you should select the item based on its idx in the array you provided in -typeAheadSelectionItems.
-
-
 @end
 
 @implementation MacroKeyFormatter
@@ -732,7 +721,7 @@
     
 	NSString *partialString = *partialStringPtr;
     
-    if( [partialString containsCharacterInSet:invalidMacroCharSet] ||
+    if( [partialString rangeOfCharacterFromSet:invalidMacroCharSet].length ||
 	    ([partialString length] && 
 		 [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) ){
         return NO;
@@ -751,10 +740,11 @@
 }
 
 - (void)awakeFromNib{
-    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
-    [typeSelectHelper setDataSource:[self dataSource]];
-    [typeSelectHelper setCyclesSimilarResults:YES];
-    [typeSelectHelper setMatchesPrefix:NO];
+    BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [aTypeSelectHelper setCyclesSimilarResults:YES];
+    [aTypeSelectHelper setMatchesPrefix:NO];
+    [self setTypeSelectHelper:aTypeSelectHelper];
+    [aTypeSelectHelper release];
 }
 
 - (void)dealloc{

@@ -37,7 +37,6 @@
  */
 
 #import "BibPref_Files.h"
-#import <OmniFoundation/OmniFoundation.h>
 #import "BDSKStringConstants.h"
 #import "BDSKStringEncodingManager.h"
 #import "BDSKAppController.h"
@@ -49,13 +48,17 @@
 
 @implementation BibPref_Files
 
+- (void)awakeFromNib {
+    [self updateUI];
+}
+
 - (void)updateAutoSaveUI{
     // prefs time is in seconds, but we display in minutes
-    NSTimeInterval saveDelay = [defaults integerForKey:BDSKAutosaveTimeIntervalKey] / 60;
+    NSTimeInterval saveDelay = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKAutosaveTimeIntervalKey] / 60;
     [autosaveTimeField setIntValue:saveDelay];
     [autosaveTimeStepper setIntValue:saveDelay];
     
-    BOOL shouldAutosave = [defaults boolForKey:BDSKShouldAutosaveDocumentKey];
+    BOOL shouldAutosave = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldAutosaveDocumentKey];
     [autosaveDocumentButton setState:shouldAutosave ? NSOnState : NSOffState];
     [autosaveTimeField setEnabled:shouldAutosave];
     [autosaveTimeStepper setEnabled:shouldAutosave];
@@ -64,22 +67,20 @@
 - (void)updateUI{
     [self updateAutoSaveUI];
     
-    [encodingPopUp setEncoding:[defaults integerForKey:BDSKDefaultStringEncodingKey]];
-    [showErrorsCheckButton setState:[defaults boolForKey:BDSKShowWarningsKey] ? NSOnState : NSOffState  ];	
-    [shouldTeXifyCheckButton setState:[defaults boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] ? NSOnState : NSOffState];
-    [saveAnnoteAndAbstractAtEndButton setState:[defaults boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] ? NSOnState : NSOffState];
-    [useNormalizedNamesButton setState:[defaults boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] ? NSOnState : NSOffState];
-    [useTemplateFileButton setState:[defaults boolForKey:BDSKShouldUseTemplateFileKey] ? NSOnState : NSOffState];
+    [encodingPopUp setEncoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKDefaultStringEncodingKey]];
+    [showErrorsCheckButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKShowWarningsKey] ? NSOnState : NSOffState  ];	
+    [shouldTeXifyCheckButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] ? NSOnState : NSOffState];
+    [saveAnnoteAndAbstractAtEndButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] ? NSOnState : NSOffState];
+    [useNormalizedNamesButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] ? NSOnState : NSOffState];
+    [useTemplateFileButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldUseTemplateFileKey] ? NSOnState : NSOffState];
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
-    [defaults setInteger:[(BDSKEncodingPopUpButton *)sender encoding] forKey:BDSKDefaultStringEncodingKey];
-    [defaults autoSynchronize];
+    [[NSUserDefaults standardUserDefaults] setInteger:[(BDSKEncodingPopUpButton *)sender encoding] forKey:BDSKDefaultStringEncodingKey];
 }
 
 - (IBAction)toggleShowWarnings:(id)sender{
-    [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKShowWarningsKey];
-    [defaults autoSynchronize];
+    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKShowWarningsKey];
     if ([sender state] == NSOnState) {
         [[BDSKErrorObjectController sharedErrorObjectController] showWindow:self];
     }else{
@@ -88,28 +89,24 @@
 }
 
 - (IBAction)toggleShouldTeXify:(id)sender{
-    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
-    [defaults autoSynchronize];
+    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 }
 
 - (IBAction)toggleShouldUseNormalizedNames:(id)sender{
-    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
-    [defaults autoSynchronize];
+    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
 }
 
 - (IBAction)toggleSaveAnnoteAndAbstractAtEnd:(id)sender{
-    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey];
-    [defaults autoSynchronize];
+    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey];
 }
 
 - (IBAction)toggleShouldUseTemplateFile:(id)sender{
-    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldUseTemplateFileKey];
-    [defaults autoSynchronize];
+    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldUseTemplateFileKey];
 }
 
 - (IBAction)editTemplateFile:(id)sender{
-    if(![[NSWorkspace sharedWorkspace] openFile:[[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]])
-        if(![[NSWorkspace sharedWorkspace] openFile:[[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath] withApplication:@"TextEdit"])
+    if(![[NSWorkspace sharedWorkspace] openFile:[[[NSUserDefaults standardUserDefaults] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]])
+        if(![[NSWorkspace sharedWorkspace] openFile:[[[NSUserDefaults standardUserDefaults] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath] withApplication:@"TextEdit"])
             NSBeep();
 }
 
@@ -117,7 +114,7 @@
     if (returnCode == NSAlertAlternateReturn)
         return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *templateFilePath = [[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath];
+    NSString *templateFilePath = [[[NSUserDefaults standardUserDefaults] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath];
     if([fileManager fileExistsAtPath:templateFilePath])
         [fileManager removeFileAtPath:templateFilePath handler:nil];
     // copy template.txt file from the bundle
@@ -131,14 +128,14 @@
 								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
 									   otherButton:nil 
 						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore the original content of the template file.", @"Informative text in alert dialog")];
-	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+	[alert beginSheetModalForWindow:[[self view] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(templateAlertDidEnd:returnCode:contextInfo:) 
 						contextInfo:NULL];
 }
 
 - (IBAction)showConversionEditor:(id)sender{
-	[[BDSKCharacterConversion sharedConversionEditor] beginSheetModalForWindow:[[self controlBox] window]];
+	[[BDSKCharacterConversion sharedConversionEditor] beginSheetModalForWindow:[[self view] window]];
 }
 
 - (void)conversionsAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -158,7 +155,7 @@
 								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
 									   otherButton:nil 
 						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will erase all custom character conversions.", @"Informative text in alert dialog")];
-	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+	[alert beginSheetModalForWindow:[[self view] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(conversionsAlertDidEnd:returnCode:contextInfo:) 
 						contextInfo:NULL];
@@ -167,18 +164,16 @@
 - (IBAction)setAutosaveTime:(id)sender;
 {    
     NSTimeInterval saveDelay = [sender intValue] * 60; // convert to seconds
-    [defaults setInteger:saveDelay forKey:BDSKAutosaveTimeIntervalKey];
+    [[NSUserDefaults standardUserDefaults] setInteger:saveDelay forKey:BDSKAutosaveTimeIntervalKey];
     [[NSDocumentController sharedDocumentController] setAutosavingDelay:saveDelay];
     [self updateAutoSaveUI];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)setShouldAutosave:(id)sender;
 {
     BOOL shouldSave = ([sender state] == NSOnState);
-    [defaults setBool:shouldSave forKey:BDSKShouldAutosaveDocumentKey];
+    [[NSUserDefaults standardUserDefaults] setBool:shouldSave forKey:BDSKShouldAutosaveDocumentKey];
     [self updateAutoSaveUI];
-    [defaults autoSynchronize];
 }
 
 @end

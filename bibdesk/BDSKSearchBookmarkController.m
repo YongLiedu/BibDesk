@@ -79,7 +79,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 
 - (id)init {
     if ((sharedBookmarkController == nil) && (sharedBookmarkController = self = [super initWithWindowNibName:@"SearchBookmarksWindow"])) {
-        NSEnumerator *dictEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKSearchGroupBookmarksKey] objectEnumerator];
+        NSEnumerator *dictEnum = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKSearchGroupBookmarksKey] objectEnumerator];
         NSDictionary *dict;
         
         NSMutableArray *bookmarks = [NSMutableArray array];
@@ -149,7 +149,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 }
 
 - (void)saveBookmarks {
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[bookmarkRoot children] valueForKey:@"dictionaryValue"] forKey:BDSKSearchGroupBookmarksKey];
+    [[NSUserDefaults standardUserDefaults] setObject:[[bookmarkRoot children] valueForKey:@"dictionaryValue"] forKey:BDSKSearchGroupBookmarksKey];
 }
 
 #pragma mark Actions
@@ -357,10 +357,13 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
-    [self setDraggedBookmarks:[self minimumCoverForBookmarks:items]];
-    [pboard declareTypes:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil] owner:nil];
-    [pboard setData:[NSData data] forType:BDSKSearchBookmarkRowsPboardType];
-    return YES;
+    if (pboard == [NSPasteboard pasteboardWithName:NSDragPboard]) {
+        [self setDraggedBookmarks:[self minimumCoverForBookmarks:items]];
+        [pboard declareTypes:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil] owner:nil];
+        [pboard setData:[NSData data] forType:BDSKSearchBookmarkRowsPboardType];
+        return YES;
+    }
+    return NO;
 }
 
 - (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx {
@@ -411,8 +414,12 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     return NO;
 }
 
-- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation {
+- (void)outlineView:(NSOutlineView *)ov concludeDragOperation:(NSDragOperation)operation {
     [self setDraggedBookmarks:nil];
+}
+
+- (BOOL)outlineView:(NSOutlineView *)ov canCopyItems:(NSArray *)items {
+    return NO;
 }
 
 #pragma mark NSOutlineView delegate methods
@@ -430,14 +437,7 @@ static BDSKSearchBookmarkController *sharedBookmarkController = nil;
     return [[tableColumn identifier] isEqualToString:@"label"] && [item bookmarkType] != BDSKSearchBookmarkTypeSeparator;
 }
 
-- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows {
-    NSMutableArray *items = [NSMutableArray array];
-    NSEnumerator *rowEnum = [rows objectEnumerator];
-    NSNumber *row;
-    
-    while (row = [rowEnum nextObject])
-        [items addObject:[outlineView itemAtRow:[row intValue]]];
-    
+- (void)outlineView:(NSOutlineView *)ov deleteItems:(NSArray *)items {
     NSEnumerator *itemEnum = [[self minimumCoverForBookmarks:items] reverseObjectEnumerator];
     BDSKSearchBookmark *item;
     

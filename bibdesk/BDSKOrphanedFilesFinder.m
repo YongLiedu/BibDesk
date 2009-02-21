@@ -55,6 +55,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKLinkedFile.h"
 #import "BDSKAlert.h"
+#import "BDSKTableView.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
@@ -96,6 +97,8 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (void)awakeFromNib{
     [tableView setDoubleAction:@selector(showFile:)];
+    [tableView setFontNamePreferenceKey:BDSKOrphanedFilesTableViewFontNameKey];
+    [tableView setFontSizePreferenceKey:BDSKOrphanedFilesTableViewFontSizeKey];
     [progressIndicator setUsesThreadedAnimation:YES];
 }
 
@@ -129,7 +132,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (NSURL *)baseURL
 {
-    NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPapersFolderPathKey];
+    NSString *papersFolderPath = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKPapersFolderPathKey];
     
     // old prefs may not have a standarized path
     papersFolderPath = [papersFolderPath stringByStandardizingPath];
@@ -238,7 +241,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return [[[arrayController arrangedObjects] objectAtIndex:row] path];
 }
 
-- (NSMenu *)tableView:(NSTableView *)tableView contextMenuForRow:(int)row column:(int)column{
+- (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(int)rowIndex {
     return [[arrayController selectedObjects] count] ? contextMenu : nil;
 }
 
@@ -297,12 +300,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
                         contextInfo:[files retain]];
 }
 
-// for 10.3 compatibility and OmniAppKit dataSource methods
-- (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray*)rows toPasteboard:(NSPasteboard*)pboard{
-	NSIndexSet *rowIndexes = [NSIndexSet indexSetWithIndexesInArray:rows];
-	return [self tableView:tv writeRowsWithIndexes:rowIndexes toPasteboard:pboard];
-}
-
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     [draggedFiles release];
     draggedFiles = [[[arrayController arrangedObjects] objectsAtIndexes:rowIndexes] retain];
@@ -333,8 +330,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     draggedFiles = nil;
 }
 
-#pragma mark table dragimage
-
 - (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
     NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
@@ -349,16 +344,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     }
     
     return image ? [image dragImageWithCount:count] : nil;
-}
-
-#pragma mark table font
-
-- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
-    return BDSKOrphanedFilesTableViewFontNameKey;
-}
-
-- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
-    return BDSKOrphanedFilesTableViewFontSizeKey;
 }
 
 @end
