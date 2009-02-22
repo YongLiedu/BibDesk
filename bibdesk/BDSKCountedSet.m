@@ -46,7 +46,7 @@
 - (id)initWithKeyCallBacks:(const CFDictionaryKeyCallBacks *)keyCallBacks{
     
     if(self = [super init])
-        dictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, keyCallBacks, NULL);
+        dictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, keyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
     
     return self;
 }
@@ -96,10 +96,10 @@
 
 - (unsigned)countForObject:(id)object;
 {
-    CFIndex countOfObject = 0;
-    CFDictionaryGetValueIfPresent(dictionary, (const void *)object, (const void **)&countOfObject);
-    
-    return countOfObject;
+    int *intPtr;
+    if (CFDictionaryGetValueIfPresent(dictionary, (const void *)object, (const void **)&intPtr) == NO)
+        *intPtr = 0;
+    return *intPtr;
 }
 
 #pragma mark NSSet primitive methods
@@ -111,7 +111,7 @@
 
 - (id)member:(id)object;
 {
-    return (void *)CFDictionaryGetValue(dictionary, (void *)object);
+    return CFDictionaryContainsKey(dictionary, (void *)object) ? object : nil;
 }
 
 - (NSEnumerator *)objectEnumerator;
@@ -126,27 +126,29 @@
     BDSKASSERT(keysAreStrings ? [object isKindOfClass:[NSString class]] : 1);
     
     // each object starts with a count of 1
-    CFIndex countOfObject = 1;
-    if(CFDictionaryGetValueIfPresent(dictionary, (const void *)object, (const void **)&countOfObject)){
+    int *intPtr;
+    if(CFDictionaryGetValueIfPresent(dictionary, (const void *)object, (const void **)&intPtr)){
         // if it's already in the dictionary, increment the counter; the dictionary retains it for us
-        countOfObject++;
+        (*intPtr)++;
+    }else{
+        *intPtr = 1;
     }
     
-    CFDictionarySetValue(dictionary, object, (void *)countOfObject);
+    CFDictionarySetValue(dictionary, object, (void *)intPtr);
 }
     
 - (void)removeObject:(id)object;
 {
     BDSKASSERT(keysAreStrings ? [object isKindOfClass:[NSString class]] : 1);
 
-    CFIndex countOfObject;
-    if(CFDictionaryGetValueIfPresent(dictionary, (void *)object, (const void **)&countOfObject)){
-        countOfObject--;
+    int *intPtr;
+    if(CFDictionaryGetValueIfPresent(dictionary, (void *)object, (const void **)&intPtr)){
+        (*intPtr)--;
         // don't remove it until the count goes to zero; should lock here
-        if(countOfObject == 0)
+        if((*intPtr) == 0)
             CFDictionaryRemoveValue(dictionary, (const void *)object);
         else
-            CFDictionarySetValue(dictionary, object, (const void *)countOfObject);
+            CFDictionarySetValue(dictionary, object, (const void *)intPtr);
     }
     // no-op if the dictionary doesn't have this key
 }

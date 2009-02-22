@@ -681,17 +681,20 @@ The groupedPublications array is a subset of the publications array, developed b
     
     // group objects are either BibAuthors or NSStrings; we need to use case-insensitive or fuzzy author matching, since that's the way groups are checked for containment
     if([groupField isPersonField]){
-        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKAuthorFuzzyDictionaryKeyCallBacks, NULL);
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKAuthorFuzzyDictionaryKeyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
     } else {
-        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, NULL);
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
     }
     
     unsigned int groupIndex = [categoryIndexes firstIndex];
+    unsigned int *cntPtr;
     
     // exclude smart and shared groups
     while(groupIndex != NSNotFound){
-		if([visibleIndexes containsIndex:groupIndex])
-			CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:groupIndex] name], (void *)groupIndex);
+		if([visibleIndexes containsIndex:groupIndex]) {
+			cntPtr = &groupIndex;
+            CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:groupIndex] name], (void *)groupIndex);
+        }
         groupIndex = [visibleIndexes indexGreaterThanIndex:groupIndex];
     }
     
@@ -735,8 +738,8 @@ The groupedPublications array is a subset of the publications array, developed b
             
             while(groupCount--){
                 // The dictionary only has visible group rows, so not all of the keys (potential groups) will exist in the dictionary
-                if(CFDictionaryGetValueIfPresent(rowDict, (void *)*groupNamePtr++, (const void **)&cnt))
-                    [indexSet addIndex:cnt];
+                if(CFDictionaryGetValueIfPresent(rowDict, (void *)*groupNamePtr++, (const void **)&cntPtr))
+                    [indexSet addIndex:*cntPtr];
             }
         }
     }

@@ -62,8 +62,9 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
     BDSKINITIALIZE;
     
     if (NULL == integerStringDictionary) {
-        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);
-        CFDictionaryAddValue(integerStringDictionary,  (const void *)0, CFSTR(""));
+        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKIntegerDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        int zero = 0;
+        CFDictionaryAddValue(integerStringDictionary,  (const void *)&zero, CFSTR(""));
     }
     
 }
@@ -148,9 +149,9 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 static NSString *stringWithInteger(int count)
 {
     CFStringRef string;
-    if (CFDictionaryGetValueIfPresent(integerStringDictionary, (const void *)count, (const void **)&string) == FALSE) {
+    if (CFDictionaryGetValueIfPresent(integerStringDictionary, (const void *)&count, (const void **)&string) == FALSE) {
         string = CFStringCreateWithFormat(CFAllocatorGetDefault(), NULL, CFSTR("%d"), count);
-        CFDictionaryAddValue(integerStringDictionary, (const void *)count, (const void *)string);
+        CFDictionaryAddValue(integerStringDictionary, (const void *)&count, (const void *)string);
         CFRelease(string);
     }
     return (NSString *)string;

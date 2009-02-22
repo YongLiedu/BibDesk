@@ -40,6 +40,7 @@
 #import "BDSKRuntime.h"
 #import "BDSKEdgeView.h"
 #import "NSView_BDSKExtensions.h"
+#import "BDSKCFCallBacks.h"
 
 
 @implementation NSScrollView (BDSKExtensions)
@@ -110,7 +111,7 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
     originalTile = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(tile), @selector(replacementTile));
     
     // dictionary doesn't retain keys, so no retain cycles; pointer equality used to compare views
-    scrollViewPlacards = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, NULL, &kCFTypeDictionaryValueCallBacks);
+    scrollViewPlacards = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKNonOwnedObjectDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 }
 
 - (NSArray *)placards {
