@@ -53,11 +53,19 @@ static CFStringRef searchIndexDictionaryCopyDescription(const void *value)
 static Boolean searchIndexDictionaryEqual(const void *value1, const void *value2) { return CFEqual(value1, value2); }
 
 const CFDictionaryValueCallBacks kBDSKSearchIndexDictionaryValueCallBacks = {
-    0,
+    0, // version
     searchIndexDictionaryRetain,
     searchIndexDictionaryRelease,
     searchIndexDictionaryCopyDescription,
     searchIndexDictionaryEqual
+};
+
+const CFSetCallBacks kBDSKSearchIndexSetCallBacks = {
+    0,    // version
+    NULL, // retain
+    NULL, // release
+    searchIndexDictionaryCopyDescription,
+    NULL  // equal
 };
 
 @implementation BDSKItemSearchIndexes
@@ -75,10 +83,10 @@ const CFDictionaryValueCallBacks kBDSKSearchIndexDictionaryValueCallBacks = {
 {
     self = [super init];
     if (self) {
-        searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kBDSKSearchIndexDictionaryValueCallBacks);
+        searchIndexes = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFCopyStringDictionaryKeyCallBacks, &kBDSKSearchIndexDictionaryValueCallBacks);
         
         // pointer equality, nonretained; indexes are retained by the dictionary
-        indexesToFlush = CFSetCreateMutable(NULL, 0, NULL);
+        indexesToFlush = CFSetCreateMutable(kCFAllocatorDefault, 0, &kBDSKSearchIndexSetCallBacks);
         
         // ensure that we never hand out a NULL search index unless someone asks for a field that isn't indexed
         [self resetWithPublications:nil];
