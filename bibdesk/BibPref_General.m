@@ -46,26 +46,25 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
 @implementation BibPref_General
 
 - (void)awakeFromNib{
-    NSUserDefaultsController *sud = [NSUserDefaultsController sharedUserDefaultsController];
-    [sud addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnDeleteKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [sud addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRemovalFromGroupKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [sud addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRenameGroupKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [sud addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [sud addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [sud addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnDeleteKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRemovalFromGroupKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRenameGroupKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
     [self handleTemplatePrefsChanged];
     [self updateUI];
 }
 
 - (void)updateStartupBehaviorUI {
-    int startupBehavior = [[[NSUserDefaults standardUserDefaults] objectForKey:BDSKStartupBehaviorKey] intValue];
+    int startupBehavior = [[sud objectForKey:BDSKStartupBehaviorKey] intValue];
     [startupBehaviorRadio selectCellWithTag:startupBehavior];
     [defaultBibFileTextField setEnabled:startupBehavior == 3];
     [defaultBibFileButton setEnabled:startupBehavior == 3];
 }
 
 - (void)updateDefaultBibFileUI {
-    NSData *aliasData = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKDefaultBibFileAliasKey];
+    NSData *aliasData = [sud objectForKey:BDSKDefaultBibFileAliasKey];
     BDAlias *alias;
     if([aliasData length] && (alias = [BDAlias aliasWithData:aliasData]))
         [defaultBibFileTextField setStringValue:[[alias fullPath] stringByAbbreviatingWithTildeInPath]];
@@ -74,11 +73,11 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
 }
 
 - (void)updateWarningsUI {
-    [warnOnDeleteButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnDeleteKey] ? NSOnState : NSOffState];
-    [warnOnRemovalFromGroupButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRemovalFromGroupKey] ? NSOnState : NSOffState];
-    [warnOnRenameGroupButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnRenameGroupKey] ? NSOnState : NSOffState];
-    [warnOnGenerateCiteKeysButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKWarnOnCiteKeyChangeKey] ? NSOnState : NSOffState];
-    [askToTrashFilesButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKAskToTrashFilesKey] ? NSOnState : NSOffState];
+    [warnOnDeleteButton setState:[sud boolForKey:BDSKWarnOnDeleteKey] ? NSOnState : NSOffState];
+    [warnOnRemovalFromGroupButton setState:[sud boolForKey:BDSKWarnOnRemovalFromGroupKey] ? NSOnState : NSOffState];
+    [warnOnRenameGroupButton setState:[sud boolForKey:BDSKWarnOnRenameGroupKey] ? NSOnState : NSOffState];
+    [warnOnGenerateCiteKeysButton setState:[sud boolForKey:BDSKWarnOnCiteKeyChangeKey] ? NSOnState : NSOffState];
+    [askToTrashFilesButton setState:[sud boolForKey:BDSKAskToTrashFilesKey] ? NSOnState : NSOffState];
 }
 
 - (void)updateUI{
@@ -86,14 +85,14 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
     [self updateDefaultBibFileUI];
 	[self updateWarningsUI];
     
-    [editOnPasteButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
-    [checkForUpdatesButton selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKUpdateCheckIntervalKey]];
+    [editOnPasteButton setState:[sud boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
+    [checkForUpdatesButton selectItemWithTag:[sud integerForKey:BDSKUpdateCheckIntervalKey]];
 }
 
 // tags correspond to BDSKUpdateCheckInterval enum
 - (IBAction)changeUpdateInterval:(id)sender{
     BDSKUpdateCheckInterval interval = [[sender selectedItem] tag];
-    [[NSUserDefaults standardUserDefaults] setInteger:interval forKey:BDSKUpdateCheckIntervalKey];
+    [sud setInteger:interval forKey:BDSKUpdateCheckIntervalKey];
     
     // an annoying dialog to be seen by annoying users...
     if (BDSKCheckForUpdatesNever == interval || BDSKCheckForUpdatesMonthly == interval) {
@@ -107,13 +106,13 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
 - (IBAction)setAutoOpenFilePath:(id)sender{
     BDAlias *alias = [BDAlias aliasWithPath:[[sender stringValue] stringByStandardizingPath]];
     if(alias)
-        [[NSUserDefaults standardUserDefaults] setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+        [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
     [self updateDefaultBibFileUI];
 }
 
 - (IBAction)changeStartupBehavior:(id)sender{
     int n = [[sender selectedCell] tag];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
+    [sud setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
     [self updateStartupBehaviorUI];
     if(n == 3 && [[defaultBibFileTextField stringValue] isEqualToString:@""])
         [self chooseAutoOpenFile:nil];
@@ -139,8 +138,8 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
     
     BDAlias *alias = [BDAlias aliasWithURL:[sheet URL]];
     
-    [[NSUserDefaults standardUserDefaults] setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
+    [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+    [sud setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
     [self updateDefaultBibFileUI];
     [self updateStartupBehaviorUI];
 }
@@ -148,44 +147,43 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
 - (IBAction)changeEmailTemplate:(id)sender{
     int idx = [sender indexOfSelectedItem];
     NSString *style = idx == 0 ? @"" : [sender titleOfSelectedItem];
-    if ([style isEqualToString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKEmailTemplateKey]] == NO) {
-        [[NSUserDefaults standardUserDefaults] setObject:style forKey:BDSKEmailTemplateKey];
+    if ([style isEqualToString:[sud stringForKey:BDSKEmailTemplateKey]] == NO) {
+        [sud setObject:style forKey:BDSKEmailTemplateKey];
     }
 }
 
 - (IBAction)changeEditOnPaste:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKEditOnPasteKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKEditOnPasteKey];
 }
 
 - (IBAction)changeWarnOnDelete:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKWarnOnDeleteKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKWarnOnDeleteKey];
 }
 
 - (IBAction)changeWarnOnRemovalFromGroup:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRemovalFromGroupKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRemovalFromGroupKey];
 }
 
 - (IBAction)changeWarnOnRenameGroup:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRenameGroupKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRenameGroupKey];
 }
 
 - (IBAction)changeWarnOnGenerateCiteKeys:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKWarnOnCiteKeyChangeKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKWarnOnCiteKeyChangeKey];
 }
 
 - (IBAction)changeAskToTrashFiles:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKAskToTrashFilesKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKAskToTrashFilesKey];
 }
 
 - (void)dealloc{
-    NSUserDefaultsController *sud = [NSUserDefaultsController sharedUserDefaultsController];
     @try {
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnDeleteKey]];
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRemovalFromGroupKey]];
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRenameGroupKey]];
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey]];
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey]];
-        [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree]];
+        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnDeleteKey]];
+        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRemovalFromGroupKey]];
+        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnRenameGroupKey]];
+        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey]];
+        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey]];
+        [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree]];
     }
     @catch (id e) {}
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -193,7 +191,7 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
 }
 
 - (void)handleTemplatePrefsChanged {
-    NSString *currentStyle = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKEmailTemplateKey];
+    NSString *currentStyle = [sud stringForKey:BDSKEmailTemplateKey];
     NSArray *styles = [BDSKTemplate allStyleNames];
     [emailTemplatePopup removeAllItems];
     [emailTemplatePopup addItemWithTitle:NSLocalizedString(@"Default BibTeX Format", @"Popup menu title for email format")];
@@ -204,7 +202,7 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
         [emailTemplatePopup selectItemWithTitle:currentStyle];
     } else {
         [emailTemplatePopup selectItemAtIndex:0];
-        [[NSUserDefaults standardUserDefaults] setObject:[styles objectAtIndex:0] forKey:BDSKEmailTemplateKey];
+        [sud setObject:[styles objectAtIndex:0] forKey:BDSKEmailTemplateKey];
     }
 }
 

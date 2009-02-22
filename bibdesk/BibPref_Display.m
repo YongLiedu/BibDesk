@@ -51,7 +51,7 @@
 }
 
 - (void)updatePreviewDisplayUI{
-    int maxNumber = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKPreviewMaxNumberKey];
+    int maxNumber = [sud integerForKey:BDSKPreviewMaxNumberKey];
 	if (maxNumber == 0)
 		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"Display all items in preview")];
 	else 
@@ -59,7 +59,7 @@
 }
 
 - (void)updateAuthorNameDisplayUI{
-    int mask = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKAuthorNameDisplayKey];
+    int mask = [sud integerForKey:BDSKAuthorNameDisplayKey];
     [authorFirstNameButton setState:(mask & BDSKAuthorDisplayFirstNameMask) ? NSOnState : NSOffState];
     [authorAbbreviateButton setState:(mask & BDSKAuthorAbbreviateFirstNameMask) ? NSOnState : NSOffState];
     [authorLastNameFirstButton setState:(mask & BDSKAuthorLastNameFirstMask) ? NSOnState : NSOffState];
@@ -74,8 +74,8 @@
 
 - (IBAction)changePreviewMaxNumber:(id)sender{
     int maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
-    if(maxNumber != [[NSUserDefaults standardUserDefaults] integerForKey:BDSKPreviewMaxNumberKey]){
-		[[NSUserDefaults standardUserDefaults] setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
+    if(maxNumber != [sud integerForKey:BDSKPreviewMaxNumberKey]){
+		[sud setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
 	}
 }
@@ -86,30 +86,30 @@
 
 - (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
 {
-    return [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKIgnoredSortTermsKey] objectAtIndex:rowIndex];
+    return [[sud arrayForKey:BDSKIgnoredSortTermsKey] objectAtIndex:rowIndex];
 }
 
 - (int)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-    return [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKIgnoredSortTermsKey] count];
+    return [[sud arrayForKey:BDSKIgnoredSortTermsKey] count];
 }
 
 - (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
 {
-    NSMutableArray *mutableArray = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
+    NSMutableArray *mutableArray = [[sud arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
     [mutableArray replaceObjectAtIndex:rowIndex withObject:anObject];
-    [[NSUserDefaults standardUserDefaults] setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
+    [sud setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [mutableArray release];
     CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
 }
 
 - (IBAction)addTerm:(id)sender
 {
-    NSMutableArray *mutableArray = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
+    NSMutableArray *mutableArray = [[sud arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
     if(!mutableArray)
         mutableArray = [[NSMutableArray alloc] initWithCapacity:1];
     [mutableArray addObject:NSLocalizedString(@"Edit or delete this text", @"")];
-    [[NSUserDefaults standardUserDefaults] setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
+    [sud setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [tableView reloadData];
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:[mutableArray count] - 1] byExtendingSelection:NO];
     [tableView editColumn:0 row:[tableView selectedRow] withEvent:nil select:YES];
@@ -125,13 +125,13 @@
 - (IBAction)removeSelectedTerm:(id)sender
 {
     [[[self view] window] makeFirstResponder:tableView];  // end editing 
-    NSMutableArray *mutableArray = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
+    NSMutableArray *mutableArray = [[sud arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
     
     int selRow = [tableView selectedRow];
     NSAssert(selRow >= 0, @"row must be selected in order to delete");
     
     [mutableArray removeObjectAtIndex:selRow];
-    [[NSUserDefaults standardUserDefaults] setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
+    [sud setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [mutableArray release];
     [tableView reloadData];
     CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
@@ -140,12 +140,12 @@
 - (IBAction)changeAuthorDisplay:(id)sender;
 {
     int itemMask = 1 << [sender tag];
-    int prefMask = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKAuthorNameDisplayKey];
+    int prefMask = [sud integerForKey:BDSKAuthorNameDisplayKey];
     if([sender state] == NSOnState)
         prefMask |= itemMask;
     else
         prefMask &= ~itemMask;
-    [[NSUserDefaults standardUserDefaults] setInteger:prefMask forKey:BDSKAuthorNameDisplayKey];
+    [sud setInteger:prefMask forKey:BDSKAuthorNameDisplayKey];
     [self updateAuthorNameDisplayUI];
 }
 
@@ -173,7 +173,7 @@
         default:
             return nil;
     }
-    return [NSFont fontWithName:[[NSUserDefaults standardUserDefaults] objectForKey:fontNameKey] size:[[NSUserDefaults standardUserDefaults] floatForKey:fontSizeKey]];
+    return [NSFont fontWithName:[sud objectForKey:fontNameKey] size:[sud floatForKey:fontSizeKey]];
 }
 
 - (void)setCurrentFont:(NSFont *)font{
@@ -200,8 +200,8 @@
             return;
     }
     // set the name last, as that is observed for changes
-    [[NSUserDefaults standardUserDefaults] setFloat:[font pointSize] forKey:fontSizeKey];
-    [[NSUserDefaults standardUserDefaults] setObject:[font fontName] forKey:fontNameKey];
+    [sud setFloat:[font pointSize] forKey:fontSizeKey];
+    [sud setObject:[font fontName] forKey:fontNameKey];
 }
 
 - (void)changeFont:(id)sender{

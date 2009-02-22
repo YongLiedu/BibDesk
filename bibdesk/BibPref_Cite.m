@@ -53,33 +53,32 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
     
     [self handleTemplatePrefsChanged];
     [self updateUI];
-    [[NSUserDefaultsController sharedUserDefaultsController] addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:BDSKBibPrefCiteDefaultsObservationContext];
+    [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:BDSKBibPrefCiteDefaultsObservationContext];
 }
 
 - (void)dealloc{
-    NSUserDefaultsController *sud = [NSUserDefaultsController sharedUserDefaultsController];
-    @try { [sud removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree]]; }
+    @try { [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree]]; }
     @catch (id e) {}
     [super dealloc];
 }
 
 - (void)updateDragCopyUI{
-    [defaultDragCopyPopup selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKDefaultDragCopyTypeKey]];
-    [alternateDragCopyPopup selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKAlternateDragCopyTypeKey]];
-    [defaultDragCopyTemplatePopup setEnabled:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKDefaultDragCopyTypeKey] == BDSKTemplateDragCopyType];
-    [alternateDragCopyTemplatePopup setEnabled:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKAlternateDragCopyTypeKey] == BDSKTemplateDragCopyType];
+    [defaultDragCopyPopup selectItemWithTag:[sud integerForKey:BDSKDefaultDragCopyTypeKey]];
+    [alternateDragCopyPopup selectItemWithTag:[sud integerForKey:BDSKAlternateDragCopyTypeKey]];
+    [defaultDragCopyTemplatePopup setEnabled:[sud integerForKey:BDSKDefaultDragCopyTypeKey] == BDSKTemplateDragCopyType];
+    [alternateDragCopyTemplatePopup setEnabled:[sud integerForKey:BDSKAlternateDragCopyTypeKey] == BDSKTemplateDragCopyType];
 }
 
 - (void)updateCiteCommandUI{
-    NSString *citeString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStringKey];
-	NSString *startCiteBracket = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteStartBracketKey]; 
-	NSString *endCiteBracket = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteEndBracketKey]; 
-	BOOL prependTilde = [[NSUserDefaults standardUserDefaults] boolForKey:BDSKCitePrependTildeKey];
+    NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
+	NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
+	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
+	BOOL prependTilde = [sud boolForKey:BDSKCitePrependTildeKey];
 	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, startCiteBracket];
 	
-    [separateCiteCheckButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKSeparateCiteKey] ? NSOnState : NSOffState];
-    [prependTildeCheckButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
-    [citeBracketRadio selectCellWithTag:[[[NSUserDefaults standardUserDefaults] objectForKey:BDSKCiteStartBracketKey] isEqualToString:@"{"] ? 1 : 2];
+    [separateCiteCheckButton setState:[sud boolForKey:BDSKSeparateCiteKey] ? NSOnState : NSOffState];
+    [prependTildeCheckButton setState:[sud boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
+    [citeBracketRadio selectCellWithTag:[[sud objectForKey:BDSKCiteStartBracketKey] isEqualToString:@"{"] ? 1 : 2];
     [citeStringField setStringValue:[NSString stringWithFormat:@"\\%@", citeString]];
     if([separateCiteCheckButton state] == NSOnState){
         [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"%@key1%@%@key2%@", startCite, endCiteBracket, startCite, endCiteBracket]];
@@ -101,8 +100,8 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
 }
 
 - (void)handleTemplatePrefsChanged {
-    NSString *currentDefaultStyle = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultDragCopyTemplateKey];
-    NSString *currentAlternateStyle = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKAlternateDragCopyTemplateKey];
+    NSString *currentDefaultStyle = [sud stringForKey:BDSKDefaultDragCopyTemplateKey];
+    NSString *currentAlternateStyle = [sud stringForKey:BDSKAlternateDragCopyTemplateKey];
     NSArray *styles = [BDSKTemplate allStyleNames];
     [defaultDragCopyTemplatePopup removeAllItems];
     [defaultDragCopyTemplatePopup addItemsWithTitles:styles];
@@ -113,53 +112,53 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
     } else if ([styles count]) {
         [defaultDragCopyTemplatePopup selectItemAtIndex:0];
         currentDefaultStyle = [styles objectAtIndex:0];
-        [[NSUserDefaults standardUserDefaults] setObject:currentDefaultStyle forKey:BDSKDefaultDragCopyTemplateKey];
+        [sud setObject:currentDefaultStyle forKey:BDSKDefaultDragCopyTemplateKey];
     }
     if ([styles containsObject:currentAlternateStyle]) {
         [alternateDragCopyTemplatePopup selectItemWithTitle:currentAlternateStyle];
     } else if ([styles count]) {
         [alternateDragCopyTemplatePopup selectItemAtIndex:0];
         currentAlternateStyle = [styles objectAtIndex:0];
-        [[NSUserDefaults standardUserDefaults] setObject:currentAlternateStyle forKey:BDSKAlternateDragCopyTemplateKey];
+        [sud setObject:currentAlternateStyle forKey:BDSKAlternateDragCopyTemplateKey];
     }
 }
 
 - (IBAction)changeDefaultDragCopyFormat:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setInteger:[[sender selectedItem] tag] forKey:BDSKDefaultDragCopyTypeKey];
+    [sud setInteger:[[sender selectedItem] tag] forKey:BDSKDefaultDragCopyTypeKey];
     [self updateDragCopyUI];
 }
 
 - (IBAction)changeDefaultDragCopyTemplate:(id)sender{
     NSString *style = [sender title];
-    if ([style isEqualToString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKDefaultDragCopyTemplateKey]] == NO) {
-        [[NSUserDefaults standardUserDefaults] setObject:style forKey:BDSKDefaultDragCopyTemplateKey];
+    if ([style isEqualToString:[sud stringForKey:BDSKDefaultDragCopyTemplateKey]] == NO) {
+        [sud setObject:style forKey:BDSKDefaultDragCopyTemplateKey];
     }
 }
 
 - (IBAction)changeAlternateDragCopyFormat:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setInteger:[[sender selectedItem] tag] forKey:BDSKAlternateDragCopyTypeKey];
+    [sud setInteger:[[sender selectedItem] tag] forKey:BDSKAlternateDragCopyTypeKey];
     [self updateDragCopyUI];
 }
 
 - (IBAction)changeAlternateDragCopyTemplate:(id)sender{
     NSString *style = [sender title];
-    if ([style isEqualToString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKAlternateDragCopyTemplateKey]] == NO) {
-        [[NSUserDefaults standardUserDefaults] setObject:style forKey:BDSKAlternateDragCopyTemplateKey];
+    if ([style isEqualToString:[sud stringForKey:BDSKAlternateDragCopyTemplateKey]] == NO) {
+        [sud setObject:style forKey:BDSKAlternateDragCopyTemplateKey];
     }
 }
 
 - (IBAction)changeSeparateCite:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKSeparateCiteKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKSeparateCiteKey];
 	[self updateCiteCommandUI];
 }
 
 - (IBAction)changePrependTilde:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKCitePrependTildeKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKCitePrependTildeKey];
 	[self updateCiteCommandUI];
 }
 
 - (IBAction)citeStringFieldChanged:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setObject:[[sender stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\\"]]
+    [sud setObject:[[sender stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\\"]]
                  forKey:BDSKCiteStringKey];
 	[self updateCiteCommandUI];
 }
@@ -168,11 +167,11 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
 	// 1 - tex 2 - context
 	int tag = [[sender selectedCell] tag];
 	if(tag == 1){
-		[[NSUserDefaults standardUserDefaults] setObject:@"{" forKey:BDSKCiteStartBracketKey];
-		[[NSUserDefaults standardUserDefaults] setObject:@"}" forKey:BDSKCiteEndBracketKey];
+		[sud setObject:@"{" forKey:BDSKCiteStartBracketKey];
+		[sud setObject:@"}" forKey:BDSKCiteEndBracketKey];
 	}else if(tag == 2){
-		[[NSUserDefaults standardUserDefaults] setObject:@"[" forKey:BDSKCiteStartBracketKey];
-		[[NSUserDefaults standardUserDefaults] setObject:@"]" forKey:BDSKCiteEndBracketKey];
+		[sud setObject:@"[" forKey:BDSKCiteStartBracketKey];
+		[sud setObject:@"]" forKey:BDSKCiteEndBracketKey];
 	}
 	[self updateCiteCommandUI];
 }

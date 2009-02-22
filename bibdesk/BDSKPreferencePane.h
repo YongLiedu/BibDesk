@@ -51,6 +51,8 @@ typedef int BDSKPreferencePaneUnselectReply;
     IBOutlet NSView *view;
     BDSKPreferenceRecord *record;
     BDSKPreferenceController *preferenceController;
+    NSUserDefaults *sud;
+    NSUserDefaultsController *sudc;
 }
 
 - (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController;

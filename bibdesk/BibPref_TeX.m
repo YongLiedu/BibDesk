@@ -70,7 +70,7 @@ static NSSet *standardStyles = nil;
 }
 
 - (void)updateTeXPathUI{
-    NSString *teXPath = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKTeXBinPathKey];
+    NSString *teXPath = [sud objectForKey:BDSKTeXBinPathKey];
     [texBinaryPathField setStringValue:teXPath];
     if ([BDSKShellCommandFormatter isValidExecutableCommand:teXPath])
         [texBinaryPathField setTextColor:[NSColor blackColor]];
@@ -79,7 +79,7 @@ static NSSet *standardStyles = nil;
 }
 
 - (void)updateBibTeXPathUI{
-    NSString *bibTeXPath = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKBibTeXBinPathKey];
+    NSString *bibTeXPath = [sud objectForKey:BDSKBibTeXBinPathKey];
     [bibtexBinaryPathField setStringValue:bibTeXPath];
     if ([BDSKShellCommandFormatter isValidExecutableCommand:bibTeXPath])
         [bibtexBinaryPathField setTextColor:[NSColor blackColor]];
@@ -91,31 +91,31 @@ static NSSet *standardStyles = nil;
     [self updateTeXPathUI];
     [self updateBibTeXPathUI];
     
-    [usesTeXButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
+    [usesTeXButton setState:[sud boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
   
-    [bibTeXStyleField setStringValue:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey]];
-    [bibTeXStyleField setEnabled:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKUsesTeXKey]];
-    [encodingPopUpButton setEncoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey]];
+    [bibTeXStyleField setStringValue:[sud objectForKey:BDSKBTStyleKey]];
+    [bibTeXStyleField setEnabled:[sud boolForKey:BDSKUsesTeXKey]];
+    [encodingPopUpButton setEncoding:[sud integerForKey:BDSKTeXPreviewFileEncodingKey]];
 }
 
 -(IBAction)changeTexBinPath:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setObject:[sender stringValue] forKey:BDSKTeXBinPathKey];
+    [sud setObject:[sender stringValue] forKey:BDSKTeXBinPathKey];
     [self updateTeXPathUI];
 }
 
 - (IBAction)changeBibTexBinPath:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
+    [sud setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
     [self updateBibTeXPathUI];
 }
 
 - (IBAction)changeUsesTeX:(id)sender{
     if ([sender state] == NSOffState) {		
-        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:BDSKUsesTeXKey];
+        [sud setBool:NO forKey:BDSKUsesTeXKey];
 		
 		// hide preview panel if necessary
 		[[BDSKPreviewer sharedPreviewer] hideWindow:self];
     }else{
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:BDSKUsesTeXKey];
+        [sud setBool:YES forKey:BDSKUsesTeXKey];
     }
 }
 
@@ -135,9 +135,9 @@ static NSSet *standardStyles = nil;
 - (void)styleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSString *newStyle = [(id)contextInfo autorelease];
     if (NSAlertDefaultReturn == returnCode) {
-        [[NSUserDefaults standardUserDefaults] setObject:newStyle forKey:BDSKBTStyleKey];
+        [sud setObject:newStyle forKey:BDSKBTStyleKey];
     } else if (NSAlertAlternateReturn == returnCode) {
-        [bibTeXStyleField setStringValue:[[NSUserDefaults standardUserDefaults] objectForKey:BDSKBTStyleKey]];
+        [bibTeXStyleField setStringValue:[sud objectForKey:BDSKBTStyleKey]];
     } else {
         [self openTeXPreviewFile:self];
     }
@@ -151,10 +151,10 @@ static NSSet *standardStyles = nil;
 
 - (IBAction)changeStyle:(id)sender{
     NSString *newStyle = [sender stringValue];
-    NSString *oldStyle = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKBTStyleKey];
+    NSString *oldStyle = [sud stringForKey:BDSKBTStyleKey];
     if ([newStyle isEqualToString:oldStyle] == NO) {
         if ([standardStyles containsObject:newStyle]){
-            [[NSUserDefaults standardUserDefaults] setObject:[sender stringValue] forKey:BDSKBTStyleKey];
+            [sud setObject:[sender stringValue] forKey:BDSKBTStyleKey];
         } else {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"This is a not a standard BibTeX style", @"Message in alert dialog")
                                              defaultButton:NSLocalizedString(@"Use Anyway", @"Button title")
@@ -234,7 +234,7 @@ static NSSet *standardStyles = nil;
 }
 
 - (IBAction)changeDefaultTeXEncoding:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setInteger:[(BDSKEncodingPopUpButton *)sender encoding] forKey:BDSKTeXPreviewFileEncodingKey];        
+    [sud setInteger:[(BDSKEncodingPopUpButton *)sender encoding] forKey:BDSKTeXPreviewFileEncodingKey];        
 }
 
 

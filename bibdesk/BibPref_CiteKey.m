@@ -75,17 +75,17 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)updateUI{
-    NSString *citeKeyFormat = [formatSheetField currentEditor] ? [formatSheetField stringValue] : [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteKeyFormatKey];
+    NSString *citeKeyFormat = [formatSheetField currentEditor] ? [formatSheetField stringValue] : [sud stringForKey:BDSKCiteKeyFormatKey];
 	NSAttributedString *attrFormat = nil;
-    int citeKeyPresetChoice = [[NSUserDefaults standardUserDefaults] integerForKey:BDSKCiteKeyFormatPresetKey];
+    int citeKeyPresetChoice = [sud integerForKey:BDSKCiteKeyFormatPresetKey];
 	BOOL custom = (citeKeyPresetChoice == 0);
 	NSString *error = nil;
 	NSRect frame;
 	
 	// update the UI elements
-    [citeKeyAutogenerateCheckButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyAutogenerateKey] ? NSOnState : NSOffState];
-    [citeKeyLowercaseCheckButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKCiteKeyLowercaseKey] ? NSOnState : NSOffState];
-    [formatCleanRadio selectCellWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKCiteKeyCleanOptionKey]];
+    [citeKeyAutogenerateCheckButton setState:[sud boolForKey:BDSKCiteKeyAutogenerateKey] ? NSOnState : NSOffState];
+    [citeKeyLowercaseCheckButton setState:[sud boolForKey:BDSKCiteKeyLowercaseKey] ? NSOnState : NSOffState];
+    [formatCleanRadio selectCellWithTag:[sud integerForKey:BDSKCiteKeyCleanOptionKey]];
 	
 	if ([BDSKFormatParser validateFormat:&citeKeyFormat attributedFormat:&attrFormat forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
 		[self setCiteKeyFormatInvalidWarning:NO message:nil];
@@ -129,17 +129,17 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (IBAction)changeCiteKeyAutogenerate:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKCiteKeyAutogenerateKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKCiteKeyAutogenerateKey];
 	[self updateUI];
 }
 
 - (IBAction)changeCiteKeyLowercase:(id)sender{
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKCiteKeyLowercaseKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKCiteKeyLowercaseKey];
 	[self updateUI];
 }
 
 - (IBAction)setFormatCleanOption:(id)sender{
-	[[NSUserDefaults standardUserDefaults] setInteger:[[sender selectedCell] tag] forKey:BDSKCiteKeyCleanOptionKey];
+	[sud setInteger:[[sender selectedCell] tag] forKey:BDSKCiteKeyCleanOptionKey];
 }
 
 - (IBAction)citeKeyFormatAdd:(id)sender{
@@ -160,7 +160,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[formatSheetField setStringValue:[formatString stringByAppendingString:newSpecifier]];
 	}
 	
-	// this handles the new [NSUserDefaults standardUserDefaults] and the UI update
+	// this handles the new sud and the UI update
 	[self citeKeyFormatChanged:sender];
 	
 	// select the 'arbitrary' numbers
@@ -182,9 +182,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	
 	if (sender == formatPresetPopUp || sender == formatPresetSheetPopUp) {
 		presetChoice = [[sender selectedItem] tag];
-		if (presetChoice == [[NSUserDefaults standardUserDefaults] integerForKey:BDSKCiteKeyFormatPresetKey]) 
+		if (presetChoice == [sud integerForKey:BDSKCiteKeyFormatPresetKey]) 
 			return; // nothing changed
-		[[NSUserDefaults standardUserDefaults] setInteger:presetChoice forKey:BDSKCiteKeyFormatPresetKey];
+		[sud setInteger:presetChoice forKey:BDSKCiteKeyFormatPresetKey];
 		if (presetChoice > 0) {
 			formatString = presetFormatStrings[presetChoice - 1];
 		} else if (presetChoice == 0) {
@@ -195,15 +195,15 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 			return;
 		}
 		// this one is always valid
-		[[NSUserDefaults standardUserDefaults] setObject:formatString forKey:BDSKCiteKeyFormatKey];
+		[sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
 	}
 	else { //changed the text field or added from the repository
 		NSString *error = nil;
 		NSAttributedString *attrFormat = nil;
 		formatString = [formatSheetField stringValue];
-		//if ([formatString isEqualToString:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteKeyFormatKey]]) return; // nothing changed
+		//if ([formatString isEqualToString:[sud stringForKey:BDSKCiteKeyFormatKey]]) return; // nothing changed
 		if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
-			[[NSUserDefaults standardUserDefaults] setObject:formatString forKey:BDSKCiteKeyFormatKey];
+			[sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
 		}
 		else {
 			[self setCiteKeyFormatInvalidWarning:YES message:error];
@@ -249,7 +249,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) 
 		return YES;
 	
-	formatString = [[NSUserDefaults standardUserDefaults] stringForKey:BDSKCiteKeyFormatKey];
+	formatString = [sud stringForKey:BDSKCiteKeyFormatKey];
 	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:NULL]) {
 		// The currently set cite-key format is valid, so we can keep it 
 		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
@@ -266,8 +266,8 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[formatSheetField selectText:self];
 		return NO;
 	} else if (rv == NSAlertAlternateReturn){
-		formatString = [[[NSUserDefaultsController sharedUserDefaultsController] initialValues] objectForKey:BDSKCiteKeyFormatKey];
-		[[NSUserDefaults standardUserDefaults] setObject:formatString forKey:BDSKCiteKeyFormatKey];
+		formatString = [[sudc initialValues] objectForKey:BDSKCiteKeyFormatKey];
+		[sud setObject:formatString forKey:BDSKCiteKeyFormatKey];
 		[[NSApp delegate] setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 	}
 	[self updateUI];

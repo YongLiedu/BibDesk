@@ -47,6 +47,8 @@
     if (self = [super initWithWindowNibName:[aRecord nibName] ?: [self windowNibName]]) {
         record = [aRecord retain];
         preferenceController = aController;
+        sud = [NSUserDefaults standardUserDefaults];
+        sudc = [NSUserDefaultsController sharedUserDefaultsController];
     }
     return self;
 }

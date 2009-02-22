@@ -84,9 +84,9 @@
 
 	int row = [tableView selectedRow]; // cannot be -1
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey]];
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
 	[dict setObject:path forKey:name];
-	[[NSUserDefaults standardUserDefaults] setObject:dict forKey:BDSKScriptHooksKey];
+	[sud setObject:dict forKey:BDSKScriptHooksKey];
 	[self updateUI];
 }
 
@@ -95,9 +95,9 @@
 	if (row == -1) return;
 	
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey]];
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
 	[dict removeObjectForKey:name];
-	[[NSUserDefaults standardUserDefaults] setObject:dict forKey:BDSKScriptHooksKey];
+	[sud setObject:dict forKey:BDSKScriptHooksKey];
 	[self updateUI];
 }
 
@@ -108,7 +108,7 @@
 		return;
 	
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSString *path = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
+	NSString *path = [[sud dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	
 	if ([NSString isEmptyString:path]) {
 		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
@@ -135,7 +135,7 @@
 	if([colID isEqualToString:@"name"]){
 		return name;
 	}else{
-		return [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
+		return [[sud dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	}
 }
 
@@ -146,12 +146,12 @@
 		return nil;
 	
 	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSString *path = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
+	NSString *path = [[sud dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	
 	if ([NSString isEmptyString:path])
 		return NSLocalizedString(@"No script hook associated with this action. Doubleclick or use the \"+\" button to add one.", @"Tooltip message");
 	else
-		return [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
+		return [[sud dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
@@ -173,9 +173,9 @@
     if (type) {
         NSString *path = [[pboard propertyListForType:NSFilenamesPboardType] firstObject];
         NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey]];
+        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
         [dict setObject:path forKey:name];
-        [[NSUserDefaults standardUserDefaults] setObject:dict forKey:BDSKScriptHooksKey];
+        [sud setObject:dict forKey:BDSKScriptHooksKey];
         [self updateUI];
         return YES;
     }
@@ -197,13 +197,13 @@
 - (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
     if ([rowIndexes count]) {
         NSArray *names = [BDSKScriptHookManager scriptHookNames];
-        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKScriptHooksKey]];
+        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
         unsigned int row = [rowIndexes firstIndex];
         while (row != NSNotFound) {
             [dict removeObjectForKey:[names objectAtIndex:row]];
             row = [rowIndexes indexGreaterThanIndex:row];
         }
-        [[NSUserDefaults standardUserDefaults] setObject:dict forKey:BDSKScriptHooksKey];
+        [sud setObject:dict forKey:BDSKScriptHooksKey];
         [self updateUI];
     }
 }

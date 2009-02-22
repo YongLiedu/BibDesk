@@ -53,7 +53,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 - (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
 	if(self = [super initWithRecord:aRecord forPreferenceController:aController]){
         
-        NSData *data = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKExportTemplateTree];
+        NSData *data = [sud objectForKey:BDSKExportTemplateTree];
         if([data length])
             [self setItemNodes:[NSKeyedUnarchiver unarchiveObjectWithData:data]];
         else 
@@ -108,7 +108,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 {
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
     if(nil != data)
-        [[NSUserDefaults standardUserDefaults] setObject:data forKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
+        [sud setObject:data forKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
     else
         NSLog(@"Unable to archive %@", itemNodes);
 }
@@ -132,7 +132,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 - (IBAction)changePrefList:(id)sender{
     templatePrefList = [[sender selectedCell] tag];
-    NSData *data = [[NSUserDefaults standardUserDefaults] objectForKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
+    NSData *data = [sud objectForKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
     if([data length])
         [self setItemNodes:[NSKeyedUnarchiver unarchiveObjectWithData:data]];
     else if (templatePrefList == BDSKExportTemplateList)

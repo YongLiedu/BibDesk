@@ -70,13 +70,13 @@ static NSSet *alwaysDisabledFields = nil;
 
 - (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {
 	if(self = [super initWithRecord:aRecord forPreferenceController:aController]){
-        globalMacroFiles = [[NSMutableArray alloc] initWithArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:BDSKGlobalMacroFilesKey]];
+        globalMacroFiles = [[NSMutableArray alloc] initWithArray:[sud stringArrayForKey:BDSKGlobalMacroFilesKey]];
        
         customFieldsArray = [[NSMutableArray alloc] initWithCapacity:6];
 		customFieldsSet = [[NSMutableSet alloc] initWithCapacity:6];
 		
 		// initialize the default fields from the prefs
-		NSArray *defaultFields = [[NSUserDefaults standardUserDefaults] arrayForKey:BDSKDefaultFieldsKey];
+		NSArray *defaultFields = [sud arrayForKey:BDSKDefaultFieldsKey];
 		NSEnumerator *e;
 		NSString *field = nil;
 		NSMutableDictionary *dict = nil;
@@ -84,7 +84,7 @@ static NSSet *alwaysDisabledFields = nil;
 		NSNumber *isDefault;
 		
 		// Add Local File fields
-		e = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKLocalFileFieldsKey] objectEnumerator];
+		e = [[sud arrayForKey:BDSKLocalFileFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKLocalFileType];
 		while(field = [e nextObject]){
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
@@ -94,7 +94,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
 		
 		// Add Remote URL fields
-		e = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKRemoteURLFieldsKey] objectEnumerator];
+		e = [[sud arrayForKey:BDSKRemoteURLFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKRemoteURLType];
 		while(field = [e nextObject]){
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
@@ -104,7 +104,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
 		
 		// Add Boolean fields
-		e = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKBooleanFieldsKey] objectEnumerator];
+		e = [[sud arrayForKey:BDSKBooleanFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKBooleanType];
 		while(field = [e nextObject]){
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
@@ -114,7 +114,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
         // Add Tri-State fields
-		e = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKTriStateFieldsKey] objectEnumerator];
+		e = [[sud arrayForKey:BDSKTriStateFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKTriStateType];
 		while(field = [e nextObject]){
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
@@ -124,7 +124,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
 		// Add Rating fields
-		e = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKRatingFieldsKey] objectEnumerator];
+		e = [[sud arrayForKey:BDSKRatingFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKRatingType];
 		while(field = [e nextObject]){
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
@@ -134,7 +134,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
 		// Add Citation fields
-		e = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKCitationFieldsKey] objectEnumerator];
+		e = [[sud arrayForKey:BDSKCitationFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKCitationType];
 		while(field = [e nextObject]){
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
@@ -144,7 +144,7 @@ static NSSet *alwaysDisabledFields = nil;
 		}
         
 		// Add Person fields
-		e = [[[NSUserDefaults standardUserDefaults] arrayForKey:BDSKPersonFieldsKey] objectEnumerator];
+		e = [[sud arrayForKey:BDSKPersonFieldsKey] objectEnumerator];
 		type = [NSNumber numberWithInt:BDSKPersonType];
 		while(field = [e nextObject]){
 			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
@@ -176,7 +176,7 @@ static NSSet *alwaysDisabledFields = nil;
     
     NSWorkspace *sws = [NSWorkspace sharedWorkspace];
     NSArray *pdfViewers = [[NSWorkspace sharedWorkspace] editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
-    NSString *pdfViewerID = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
+    NSString *pdfViewerID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
     int i, iMax = [pdfViewers count];
     int idx = 0;
     
@@ -250,14 +250,14 @@ static NSSet *alwaysDisabledFields = nil;
                 [NSException raise:NSInvalidArgumentException format:@"Attempt to set unrecognized type"];
         }
 	}
-	[[NSUserDefaults standardUserDefaults] setObject:defaultFields forKey:BDSKDefaultFieldsKey];
-	[[NSUserDefaults standardUserDefaults] setObject:localFileFields forKey:BDSKLocalFileFieldsKey];
-	[[NSUserDefaults standardUserDefaults] setObject:remoteURLFields forKey:BDSKRemoteURLFieldsKey];
-    [[NSUserDefaults standardUserDefaults] setObject:ratingFields forKey:BDSKRatingFieldsKey];
-    [[NSUserDefaults standardUserDefaults] setObject:booleanFields forKey:BDSKBooleanFieldsKey];
-    [[NSUserDefaults standardUserDefaults] setObject:triStateFields forKey:BDSKTriStateFieldsKey];
-    [[NSUserDefaults standardUserDefaults] setObject:citationFields forKey:BDSKCitationFieldsKey];
-    [[NSUserDefaults standardUserDefaults] setObject:personFields forKey:BDSKPersonFieldsKey];
+	[sud setObject:defaultFields forKey:BDSKDefaultFieldsKey];
+	[sud setObject:localFileFields forKey:BDSKLocalFileFieldsKey];
+	[sud setObject:remoteURLFields forKey:BDSKRemoteURLFieldsKey];
+    [sud setObject:ratingFields forKey:BDSKRatingFieldsKey];
+    [sud setObject:booleanFields forKey:BDSKBooleanFieldsKey];
+    [sud setObject:triStateFields forKey:BDSKTriStateFieldsKey];
+    [sud setObject:citationFields forKey:BDSKCitationFieldsKey];
+    [sud setObject:personFields forKey:BDSKPersonFieldsKey];
     [defaultFields release];
     [localFileFields release];
     [remoteURLFields release];
@@ -274,11 +274,11 @@ static NSSet *alwaysDisabledFields = nil;
 }
 
 - (void)updateUI{	
-    [convertURLFieldsButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKAutomaticallyConvertURLFieldsKey] ? NSOnState : NSOffState];
-    [removeLocalFileFieldsButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveConvertedLocalFileFieldsKey] ? NSOnState : NSOffState];
-    [removeRemoteURLFieldsButton setState:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey] ? NSOnState : NSOffState];
-	[removeLocalFileFieldsButton setEnabled:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
-	[removeRemoteURLFieldsButton setEnabled:[[NSUserDefaults standardUserDefaults] boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
+    [convertURLFieldsButton setState:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey] ? NSOnState : NSOffState];
+    [removeLocalFileFieldsButton setState:[sud boolForKey:BDSKRemoveConvertedLocalFileFieldsKey] ? NSOnState : NSOffState];
+    [removeRemoteURLFieldsButton setState:[sud boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey] ? NSOnState : NSOffState];
+	[removeLocalFileFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
+	[removeRemoteURLFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
     
     int row = [defaultFieldsTableView selectedRow];
 	if(row == -1){
@@ -305,17 +305,17 @@ static NSSet *alwaysDisabledFields = nil;
 
 - (IBAction)changeConvertURLFields:(id)sender {
     BOOL autoConvert = [sender state] == NSOnState;
-    [[NSUserDefaults standardUserDefaults] setBool:autoConvert forKey:BDSKAutomaticallyConvertURLFieldsKey];
+    [sud setBool:autoConvert forKey:BDSKAutomaticallyConvertURLFieldsKey];
 	[removeLocalFileFieldsButton setEnabled:autoConvert];
 	[removeRemoteURLFieldsButton setEnabled:autoConvert];
 }
 
 - (IBAction)changeRemoveLocalFileFields:(id)sender {
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKRemoveConvertedLocalFileFieldsKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKRemoveConvertedLocalFileFieldsKey];
 }
 
 - (IBAction)changeRemoveRemoteURLFields:(id)sender {
-    [[NSUserDefaults standardUserDefaults] setBool:([sender state] == NSOnState) forKey:BDSKRemoveConvertedRemoteURLFieldsKey];
+    [sud setBool:([sender state] == NSOnState) forKey:BDSKRemoveConvertedRemoteURLFieldsKey];
 }
 
 #pragma mark TableView DataSource methods
@@ -378,7 +378,7 @@ static NSSet *alwaysDisabledFields = nil;
             [alert beginSheetModalForWindow:globalMacroFileSheet modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         } else {
             [globalMacroFiles replaceObjectAtIndex:row withObject:object];
-            [[NSUserDefaults standardUserDefaults] setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+            [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
         }
         [globalMacroFilesTableView reloadData];
     }
@@ -410,7 +410,7 @@ static NSSet *alwaysDisabledFields = nil;
             continue;
         [globalMacroFiles addObject:file];
     }
-    [[NSUserDefaults standardUserDefaults] setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+    [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
     
     [globalMacroFilesTableView reloadData];
     
@@ -469,7 +469,7 @@ static NSSet *alwaysDisabledFields = nil;
         [globalMacroFiles removeObjectsAtIndexes:rowIndexes];
         
         [globalMacroFilesTableView reloadData];
-        [[NSUserDefaults standardUserDefaults] setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+        [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
     }
 }
 
@@ -513,7 +513,7 @@ static NSSet *alwaysDisabledFields = nil;
     if (returnCode == NSOKButton)
         bundleID = [[NSBundle bundleWithPath:[panel filename]] bundleIdentifier];
     else
-        bundleID = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
+        bundleID = [[sud dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
     
     if([bundleID length]){
         int i, iMax = [pdfViewerPopup numberOfItems] - 2;
@@ -535,12 +535,12 @@ static NSSet *alwaysDisabledFields = nil;
     }else{
         [pdfViewerPopup selectItemAtIndex:0];
     }
-    NSMutableDictionary *defaultViewers = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
+    NSMutableDictionary *defaultViewers = [[sud dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
     if ([bundleID length])
         [defaultViewers setObject:bundleID forKey:@"pdf"];
     else
         [defaultViewers removeObjectForKey:@"pdf"];
-    [[NSUserDefaults standardUserDefaults] setObject:defaultViewers forKey:BDSKDefaultViewersKey];
+    [sud setObject:defaultViewers forKey:BDSKDefaultViewersKey];
     [defaultViewers release];
 }
 
@@ -560,12 +560,12 @@ static NSSet *alwaysDisabledFields = nil;
                               contextInfo:NULL];
     }else{
         NSString *bundleID = [[sender selectedItem] representedObject];
-        NSMutableDictionary *defaultViewers = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
+        NSMutableDictionary *defaultViewers = [[sud dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
         if ([bundleID length])
             [defaultViewers setObject:bundleID forKey:@"pdf"];
         else
             [defaultViewers removeObjectForKey:@"pdf"];
-        [[NSUserDefaults standardUserDefaults] setObject:defaultViewers forKey:BDSKDefaultViewersKey];
+        [sud setObject:defaultViewers forKey:BDSKDefaultViewersKey];
         [defaultViewers release];
     }
 }
@@ -614,7 +614,7 @@ static NSSet *alwaysDisabledFields = nil;
     
     [globalMacroFiles addNonDuplicateObjectsFromArray:[openPanel filenames]];
     [globalMacroFilesTableView reloadData];
-    [[NSUserDefaults standardUserDefaults] setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+    [sud setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
 }
 
 - (IBAction)delGlobalMacroFiles:(id)sender {
