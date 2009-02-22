@@ -30,17 +30,6 @@
 #define __FILENAMEASNSSTRING__ \
 [[NSString stringWithFileSystemRepresentation:__FILE__] lastPathComponent]
 
-#if defined(MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-#warning 10.5: remove ASL hacks
-#else
-BDSK_PRIVATE_EXTERN void BDSKLog(NSString *format, ...);
-BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList);
-
-// these are only needed on Tiger; Leopard logs to asl by default
-#define NSLog BDSKLog
-#define NSLogv BDSKLogv
-#endif
-
 #if defined (DEBUG)
 
 #define log_method() \
