@@ -382,7 +382,7 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
 - (NSArray *)arrayByRemovingObject:(id)anObject {
     if ([self containsObject:anObject])
         return self;
-    NSMutableArray *tmpArray= [NSMutableArray arrayWithArray:self];
+    NSMutableArray *tmpArray = [NSMutableArray arrayWithArray:self];
     [tmpArray removeObject:anObject];
     return tmpArray;
 }
@@ -395,7 +395,7 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     NSEnumerator *objEnum = [self objectEnumerator];
     id object;
     while (object = [objEnum nextObject])
-        objc_msgSend(object, selector, arg1, arg2);
+        [object methodForSelector:selector](object, selector, arg1, arg2);
 }
 
 - (NSArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)anObject {
