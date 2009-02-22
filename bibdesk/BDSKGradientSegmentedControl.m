@@ -43,7 +43,7 @@
 #import "NSImage_BDSKExtensions.h"
 
 
-#define SEGMENTED_CONTROL_HEIGHT 20.0
+#define SEGMENTED_CONTROL_HEIGHT 22.0
 #define SEGMENTED_CONTROL_MARGIN 2.0
 
 
