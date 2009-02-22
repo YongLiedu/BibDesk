@@ -102,6 +102,14 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>NSMenuItem</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -152,7 +160,7 @@
 			<key>OUTLETS</key>
 			<dict>
 				<key>errorTableView</key>
-				<string>NSTableView</string>
+				<string>BDSKTableView</string>
 				<key>errorsController</key>
 				<string>BDSKFilteringArrayController</string>
 			</dict>
