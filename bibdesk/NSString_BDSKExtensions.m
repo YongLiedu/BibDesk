@@ -76,7 +76,6 @@
 #import "BDSKStringEncodingManager.h"
 #import "BDSKTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "BDSKCFCallBacks.h"
 #import "NSAttributedString_BDSKExtensions.h"
 
 
@@ -175,19 +174,20 @@
 static int MAX_RATING = 5;
 + (NSString *)ratingStringWithInteger:(int)rating;
 {
-    NSParameterAssert(rating <= MAX_RATING);
-    static CFMutableDictionaryRef ratings = NULL;
-    if(ratings == NULL){
-        ratings = CFDictionaryCreateMutable(CFAllocatorGetDefault(), MAX_RATING + 1, &kBDSKIntegerDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    NSParameterAssert(rating >= 0 && rating <= MAX_RATING);
+    static NSString **ratingStrings = NULL;
+    if(ratingStrings == NULL){
+        ratingStrings = NSZoneMalloc(NULL, (MAX_RATING + 1) * sizeof(NSString *));
         int i = 0;
         NSMutableString *ratingString = [NSMutableString string];
         do {
-            CFDictionaryAddValue(ratings, (const void *)&i, (const void *)[[ratingString copy] autorelease]);
+            ratingStrings[rating] = [ratingString copy];
             [ratingString appendFormat:@"%C", (0x278A + i)];
         } while(i++ < MAX_RATING);
-        BDSKPOSTCONDITION((int)[(id)ratings count] == MAX_RATING + 1);
     }
-    return (NSString *)CFDictionaryGetValue(ratings, (const void *)&rating);
+    if (rating >= 0 && rating <= MAX_RATING)
+        return ratingStrings[rating];
+    return nil;
 }
 
 + (NSString *)stringWithBool:(BOOL)boolValue {
