@@ -41,63 +41,11 @@
 #import "BDSKFieldEditor.h"
 
 
-static void *BDSKTableViewFontDefaultsObservationContext = @"BDSKTableViewFontDefaultsObservationContext";
-
 @implementation NSTableView (BDSKExtensions)
-
-- (BOOL)validateDelegatedMenuItem:(NSMenuItem *)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
-	SEL action = [menuItem action];
-	
-	if ([_dataSource respondsToSelector:action]) {
-		if ([_dataSource respondsToSelector:@selector(validateMenuItem:)]) {
-			return [_dataSource validateMenuItem:menuItem];
-		} else {
-			return (action == @selector(paste:)) || ([self numberOfSelectedRows] > 0);
-		}
-	} else if ([_delegate respondsToSelector:action]) {
-		if ([_delegate respondsToSelector:@selector(validateMenuItem:)]) {
-			return [_delegate validateMenuItem:menuItem];
-		} else {
-			return (action == @selector(paste:)) || ([self numberOfSelectedRows] > 0);
-		}
-	} else if ([_dataSource respondsToSelector:dataSourceSelector]) {
-		if ([_dataSource respondsToSelector:@selector(validateMenuItem:)]) {
-			return [_dataSource validateMenuItem:menuItem];
-		} else {
-			return (action == @selector(paste:)) || ([self numberOfSelectedRows] > 0);
-		}
-	}else{
-		// no action implemented
-		return NO;
-	}
-}
 
 // this is necessary as the NSTableView-OAExtensions defines these actions accordingly
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
-	SEL action = [menuItem action];
-    BOOL isOutlineView = [self isKindOfClass:[NSOutlineView class]];
-	if (action == @selector(delete:)) {
-		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:@selector(tableView:deleteRows:)];
-	}
-	else if (action == @selector(deleteForward:)) {
-		return [_dataSource respondsToSelector:@selector(tableView:deleteRows:)];
-	}
-	else if (action == @selector(deleteBackward:)) {
-		return [_dataSource respondsToSelector:@selector(tableView:deleteRows:)];
-	}
-	else if (action == @selector(cut:)) {
-		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:isOutlineView ? @selector(outlineView:writeItems:toPasteboard:) : @selector(tableView:writeRows:toPasteboard:)];
-	}
-	else if (action == @selector(copy:)) {
-		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:isOutlineView ? @selector(outlineView:writeItems:toPasteboard:) : @selector(tableView:writeRows:toPasteboard:)];
-	}
-	else if (action == @selector(paste:)) {
-		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:@selector(tableView:addItemsFromPasteboard:)];
-	}
-	else if (action == @selector(duplicate:)) {
-		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:isOutlineView ? @selector(outlineView:writeItems:toPasteboard:) : @selector(tableView:writeRows:toPasteboard:)];
-	}
-	else if (action == @selector(invertSelection:)) {
+	if ([menuItem action] == @selector(invertSelection:)) {
 		return [self allowsMultipleSelection];
 	}
     return YES; // we assume that any other implemented action is always valid
