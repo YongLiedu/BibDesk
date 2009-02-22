@@ -147,7 +147,7 @@ static CGFunctionRef secondaryLinearBlendFunctionRef = NULL;
         // Draw a soft wash underneath it
         CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
         CGContextSaveGState(context); {
-            CGContextClipToRect(context, (CGRect){{NSMinX(washRect), NSMinY(washRect)}, {NSWidth(washRect), NSHeight(washRect)}});
+            CGContextClipToRect(context, *(CGRect*)&washRect);
             CGShadingRef cgShading = CGShadingCreateAxial(colorSpace, CGPointMake(0, NSMinY(washRect)), CGPointMake(0, NSMaxY(washRect)), functionRef, NO, NO);
             CGContextDrawShading(context, cgShading);
             CGShadingRelease(cgShading);
