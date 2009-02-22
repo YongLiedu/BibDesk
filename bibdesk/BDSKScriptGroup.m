@@ -122,7 +122,7 @@ static BDSKMessageQueue *messageQueue = nil;
         workingDirPath = [[[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil] retain];
         
         processingLock = [[NSLock alloc] init];
-        currentTaskLck = [[NSLock alloc] init];
+        currentTaskLock = [[NSLock alloc] init];
         searchIndexes = [BDSKItemSearchIndexes new];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
