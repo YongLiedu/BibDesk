@@ -55,7 +55,7 @@
 
 - (id)firstObject;
 {
-    return [self count] ? [self objectAtIndex:0] : nil;
+    return [self count] > 0 ? [self objectAtIndex:0] : nil;
 }
 
 - (id)secondObject;
@@ -140,12 +140,12 @@
 
 - (NSArray *)arrayDroppingFirstObject;
 {
-    return [self count] ? [self subarrayWithRange:NSMakeRange(1, [self count] - 1)] : self;
+    return [self count] > 0 ? [self subarrayWithRange:NSMakeRange(1, [self count] - 1)] : self;
 }
 
 - (NSArray *)arrayDroppingLastObject;
 {
-    return [self count] ? [self subarrayWithRange:NSMakeRange(0, [self count] - 1)] : self;
+    return [self count] > 0 ? [self subarrayWithRange:NSMakeRange(0, [self count] - 1)] : self;
 }
 
 - (NSArray *)arraySortedByAuthor;
@@ -190,32 +190,12 @@
 
 - (NSString *)componentsJoinedByCommaAndAnd
 {
-    unsigned count = [self count];
-    switch (count) {
-        case 0:
-            return @"";
-        case 1:
-            return [[self objectAtIndex:0] description];
-        case 2:
-            return [self componentsJoinedByString:@" and "];
-        default:
-            return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", and "] stringByAppendingString:[[self lastObject] description]];
-    }
+    return [self count] > 2 ? [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", and "] stringByAppendingString:[[self lastObject] description]] : [self componentsJoinedByString:@" and "];
 }
 
 - (NSString *)componentsJoinedByCommaAndAmpersand
 {
-    unsigned count = [self count];
-    switch (count) {
-        case 0:
-            return @"";
-        case 1:
-            return [[self objectAtIndex:0] description];
-        case 2:
-            return [self componentsJoinedByString:@" & "];
-        default:
-            return [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[[self lastObject] description]];
-    }
+    return [self count] > 2 ? [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[[self lastObject] description]] : [self componentsJoinedByString:@" & "];
 }
 
 - (NSString *)componentsWithEtAlAfterOne
