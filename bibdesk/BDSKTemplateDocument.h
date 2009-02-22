@@ -131,8 +131,6 @@ extern NSString *BDSKRichTextTemplateDocumentType;
     
     NSString *string;
     NSAttributedString *attributedString;
-    
-    CFArrayRef editors;
 }
 
 - (BDSKToken *)tokenForField:(NSString *)field;
@@ -186,8 +184,6 @@ extern NSString *BDSKRichTextTemplateDocumentType;
 - (NSAttributedString *)previewAttributedString;
 
 - (IBAction)addField:(id)sender;
-
-- (BOOL)commitEditing;
 
 @end
 

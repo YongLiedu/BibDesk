@@ -150,8 +150,6 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
         templateOptions = [tmpDict copy];
         [tmpDict release];
         
-        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
-        
         NSEnumerator *typeEnum = [[[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString] objectEnumerator];
         NSString *type;
         
@@ -207,7 +205,6 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
     [tokenFonts release];
     [string release];
     [attributedString release];
-    CFRelease(editors);
     [super dealloc];
 }
 
@@ -287,7 +284,7 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError {
     NSData *data = nil;
     
-    [self commitEditing];
+    [ownerController commitEditing];
     
     if (richText) {
         NSAttributedString *attrString = [self attributedString];
@@ -1214,29 +1211,6 @@ static inline unsigned int endOfLeadingEmptyLine(NSString *string, NSRange range
     } else {
         return proposedMax;
     }
-}
-
-#pragma mark NSEditorRegistration
-
-- (void)objectDidBeginEditing:(id)editor {
-    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
-		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (idx != -1)
-		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, idx);		
-}
-
-- (BOOL)commitEditing {
-    CFIndex idx = CFArrayGetCount(editors);
-    
-	while (idx--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
-			return NO;
-    
-    return YES;
 }
 
 #pragma mark Reading
