@@ -190,12 +190,12 @@
 
 - (NSString *)componentsJoinedByCommaAndAnd
 {
-    return [self count] > 2 ? [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", and "] stringByAppendingString:[[self lastObject] description]] : [self componentsJoinedByString:@" and "];
+    return [self count] > 2 ? [[[[self subarrayWithRange:NSMakeRange(0, [self count] - 1)] componentsJoinedByComma] stringByAppendingString:@", and "] stringByAppendingString:[[self lastObject] description]] : [self componentsJoinedByString:@" and "];
 }
 
 - (NSString *)componentsJoinedByCommaAndAmpersand
 {
-    return [self count] > 2 ? [[[[self subarrayWithRange:NSMakeRange(0, count - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[[self lastObject] description]] : [self componentsJoinedByString:@" & "];
+    return [self count] > 2 ? [[[[self subarrayWithRange:NSMakeRange(0, [self count] - 1)] componentsJoinedByComma] stringByAppendingString:@", & "] stringByAppendingString:[[self lastObject] description]] : [self componentsJoinedByString:@" & "];
 }
 
 - (NSString *)componentsWithEtAlAfterOne
