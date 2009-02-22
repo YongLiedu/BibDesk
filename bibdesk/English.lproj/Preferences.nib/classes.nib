@@ -66,8 +66,18 @@
 			<string>NSWindow</string>
 		</dict>
 		<dict>
+			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
 			<key>ACTIONS</key>
 			<dict>
+				<key>localChangeFont</key>
+				<string>id</string>
 				<key>revertAllDefaults</key>
 				<string>id</string>
 				<key>revertPaneDefaults</key>
