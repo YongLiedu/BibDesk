@@ -470,7 +470,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     // This must also be done before we resize the window and the splitViews
     [groupCollapsibleView setCollapseEdges:BDSKMinXEdgeMask];
-    [groupCollapsibleView setMinSize:NSMakeSize(56.0, 20.0)];
+    [groupCollapsibleView setMinSize:NSMakeSize(56.0, 22.0)];
     [groupGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     [groupGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
 
@@ -544,7 +544,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [bottomFileView setBackgroundColor:[[bottomFileView enclosingScrollView] backgroundColor]];
     
     [fileCollapsibleView setCollapseEdges:BDSKMaxXEdgeMask];
-    [fileCollapsibleView setMinSize:NSMakeSize(65.0, 20.0)];
+    [fileCollapsibleView setMinSize:NSMakeSize(65.0, 22.0)];
     [fileGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     [fileGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     
