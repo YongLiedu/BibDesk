@@ -693,7 +693,7 @@ The groupedPublications array is a subset of the publications array, developed b
     while(groupIndex != NSNotFound){
 		if([visibleIndexes containsIndex:groupIndex]) {
 			cntPtr = &groupIndex;
-            CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:groupIndex] name], (void *)groupIndex);
+            CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:groupIndex] name], (void *)cntPtr);
         }
         groupIndex = [visibleIndexes indexGreaterThanIndex:groupIndex];
     }

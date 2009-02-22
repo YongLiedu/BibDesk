@@ -127,13 +127,12 @@
     
     // each object starts with a count of 1
     int *intPtr;
-    if(CFDictionaryGetValueIfPresent(dictionary, (const void *)object, (const void **)&intPtr)){
+    int cnt = 0;
+    if(CFDictionaryGetValueIfPresent(dictionary, (const void *)object, (const void **)&intPtr))
         // if it's already in the dictionary, increment the counter; the dictionary retains it for us
-        (*intPtr)++;
-    }else{
-        *intPtr = 1;
-    }
-    
+        cnt = *intPtr;
+    cnt++;
+    intPtr = &cnt;
     CFDictionarySetValue(dictionary, object, (void *)intPtr);
 }
     
@@ -143,12 +142,14 @@
 
     int *intPtr;
     if(CFDictionaryGetValueIfPresent(dictionary, (void *)object, (const void **)&intPtr)){
-        (*intPtr)--;
+        int cnt = *intPtr;
         // don't remove it until the count goes to zero; should lock here
-        if((*intPtr) == 0)
+        if(--cnt <= 0) {
             CFDictionaryRemoveValue(dictionary, (const void *)object);
-        else
+        } else {
+            intPtr = &cnt;
             CFDictionarySetValue(dictionary, object, (const void *)intPtr);
+        }
     }
     // no-op if the dictionary doesn't have this key
 }
