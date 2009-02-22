@@ -2972,7 +2972,6 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	// otherwise we have a multivalued string, we should parse to get the order and delimiters right
     NSCharacterSet *delimiterCharSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:field];
     NSCharacterSet *nonDelimiterCharSet = [delimiterCharSet invertedSet];
-    NSCharacterSet *whitespaceCharSet = [NSCharacterSet whitespaceCharacterSet];
     NSCharacterSet *nonWhitespaceCharSet = [NSCharacterSet nonWhitespaceCharacterSet];
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
 	
@@ -3099,7 +3098,6 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	// otherwise we have a multivalued string, we should parse to get the order and delimiters right
     NSCharacterSet *delimiterCharSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:field];
     NSCharacterSet *nonDelimiterCharSet = [delimiterCharSet invertedSet];
-    NSCharacterSet *whitespaceCharSet = [NSCharacterSet whitespaceCharacterSet];
     NSCharacterSet *nonWhitespaceCharSet = [NSCharacterSet nonWhitespaceCharacterSet];
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
 

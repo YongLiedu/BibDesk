@@ -44,6 +44,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import <pthread.h>
 
 #define MAX_RESULTS 100
 #if(OMNI_FORCE_ASSERTIONS)

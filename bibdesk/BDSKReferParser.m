@@ -41,6 +41,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKTypeManager.h"
 #import "NSError_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 
 /*
  For format, see http://www.ecst.csuchico.edu/~jacobsd/bib/formats/endnote.html and the man page for refer(1).  There's apparently an old-style refer format, and one that's bastardized for EndNote.  I'm adding this parser solely because this file format is returned by AGU's search at the moment, so supporting the version described by the man page for refer(1) isn't a high priority.

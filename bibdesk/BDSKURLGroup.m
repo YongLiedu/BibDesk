@@ -51,6 +51,7 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKItemSearchIndexes.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BibItem.h"
 
 @implementation BDSKURLGroup
 

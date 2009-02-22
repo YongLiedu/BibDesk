@@ -41,6 +41,7 @@
 #import <unistd.h>
 #import <asl.h>
 #import <libkern/OSAtomic.h>
+#import <pthread.h>
 
 #define BDSK_ASL_SENDER "BibDesk"
 #define BDSK_ASL_FACILITY NULL

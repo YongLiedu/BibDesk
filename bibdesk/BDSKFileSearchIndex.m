@@ -48,6 +48,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "UKDirectoryEnumerator.h"
 #import "BDSKMessageQueue.h"
+#import <pthread.h>
 
 @interface BDSKFileSearchIndex (Private)
 

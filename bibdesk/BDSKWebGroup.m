@@ -42,6 +42,7 @@
 #import "BDSKMacroResolver.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKItemSearchIndexes.h"
+#import "BibItem.h"
 
 @implementation BDSKWebGroup
 - (id)initWithName:(NSString *)aName{

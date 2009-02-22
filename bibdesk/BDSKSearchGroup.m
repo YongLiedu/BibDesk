@@ -47,6 +47,7 @@
 #import "BDSKISIGroupServer.h"
 #import "BDSKDBLPGroupServer.h"
 #import "BDSKGroup+Scripting.h"
+#import "BibItem.h"
 
 NSString *BDSKSearchGroupEntrez = @"entrez";
 NSString *BDSKSearchGroupZoom = @"zoom";

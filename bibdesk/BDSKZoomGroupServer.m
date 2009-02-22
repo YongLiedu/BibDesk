@@ -41,7 +41,9 @@
 #import "BDSKStringParser.h"
 #import "BDSKServerInfo.h"
 #import "BibItem.h"
+#import "CFString_BDSKExtensions.h"
 #import <SystemConfiguration/SystemConfiguration.h>
+#import <pthread.h>
 
 #define MAX_RESULTS 100
 

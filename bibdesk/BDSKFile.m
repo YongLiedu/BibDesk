@@ -39,6 +39,7 @@
 #import "BDSKFile.h"
 #import "BDSKRuntime.h"
 #import "NSURL_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 
 // private placeholder subclass
 

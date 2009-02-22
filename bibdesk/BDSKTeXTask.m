@@ -47,6 +47,7 @@
 #import "NSSet_BDSKExtensions.h"
 #import "NSInvocation_BDSKExtensions.h"
 #import "BDSKTask.h"
+#import <pthread.h>
 
 @interface BDSKTeXPath : NSObject
 {

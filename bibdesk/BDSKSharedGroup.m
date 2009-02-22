@@ -45,6 +45,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKItemSearchIndexes.h"
+#import "BibItem.h"
 
 
 @implementation BDSKSharedGroup

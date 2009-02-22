@@ -37,6 +37,7 @@
  */
 
 #import "BDSKThreadSafeMutableDictionary.h"
+#import <pthread.h>
 
 @implementation BDSKThreadSafeMutableDictionary
 

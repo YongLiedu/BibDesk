@@ -42,6 +42,7 @@
 #import "BDSKAppController.h"
 #import <AGRegex/AGRegex.h>
 #import "NSString_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 
 
 @interface BDSKRISParser (Private)

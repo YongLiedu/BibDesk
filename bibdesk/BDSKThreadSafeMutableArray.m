@@ -37,6 +37,7 @@
  */
 
 #import "BDSKThreadSafeMutableArray.h"
+#import <pthread.h>
 
 
 @implementation BDSKThreadSafeMutableArray

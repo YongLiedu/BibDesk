@@ -273,15 +273,16 @@ static void destroyTemporaryDirectory()
 - (NSString *)desktopDirectory {
     FSRef foundRef;
     OSStatus err = FSFindFolder(kUserDomain, kDesktopFolderType, kCreateFolder, &foundRef);
+    NSString *path = nil;
     
     NSAssert1( err == noErr, @"Error %d:  the system was unable to find your Desktop folder.", err);
     
-    CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
-    NSString *path = nil;
-    
-    if(url != nil){
-        path = [(NSURL *)url path];
-        CFRelease(url);
+    if (err == noErr) {
+        CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
+        if(url != nil){
+            path = [(NSURL *)url path];
+            CFRelease(url);
+        }
     }
     
     return path;
@@ -292,14 +293,12 @@ static void destroyTemporaryDirectory()
 - (NSString *)uniqueFilenameFromName:(NSString *)filename error:(NSError **)outError;
 {
     // We either aren't allowing the original, or it exists.
-    NSString *directory = [filename stringByDeletingLastPathComponent];
     NSString *extension = [filename pathExtension];
     NSString *baseFilename = [filename stringByDeletingPathExtension];
     unsigned int triesLeft = 10;
     NSMutableString *tempFilename = [NSMutableString string];
     
     while (triesLeft--) {
-        NSString *result;
         unsigned int tempFilenameNumber = 1;
         
         [tempFilenameLock lock];
@@ -347,7 +346,6 @@ static void destroyTemporaryDirectory()
     OSErr err;
     FSRef ref;
     
-    NSString *stringValue = [stringValue stringByStandardizingPath];
     
     // The file in question might not exist yet.  This loop assumes that it will terminate due to '/' always being valid.
     NSString *attempt = path;
@@ -363,7 +361,7 @@ static void destroyTemporaryDirectory()
     if (err != noErr) {
         NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil]; // underlying error
         if(outError)
-            *outError = [NSError localErrorWithCode:kBDSKCannotFindTemporaryDirectoryError localizedDescription:[NSString stringWithFormat:@"Unable to get catalog info for '%@'", path]];
+            *outError = [NSError localErrorWithCode:kBDSKCannotFindTemporaryDirectoryError localizedDescription:[NSString stringWithFormat:@"Unable to get catalog info for '%@'", path] underlyingError:error];
         return nil;
     }
     
