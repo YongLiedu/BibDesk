@@ -1,10 +1,10 @@
 //
-//  BDSKThreadSafeMutableArray.h
+//  BDSKReadWriteLock.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 11/3/06.
+//  Created by Christiaan Hofman on 2/22/09.
 /*
- This software is Copyright (c) 2006-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -19,7 +19,7 @@
     the documentation and/or other materials provided with the
     distribution.
 
- - Neither the name of Adam Maxwell nor the names of any
+ - Neither the name of Christiaan Hofman nor the names of any
     contributors may be used to endorse or promote products derived
     from this software without specific prior written permission.
 
@@ -36,15 +36,18 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
+#import <pthread.h>
 
-@class BDSKReadWriteLock;
 
-@interface BDSKThreadSafeMutableArray : NSMutableArray {
-    NSMutableArray *embeddedArray;
-    BDSKReadWriteLock *rwLock;
+@interface BDSKReadWriteLock : NSObject <NSLocking> {
+    pthread_rwlock_t rwlock;
 }
-- (id)init;
-- (id)initWithCapacity:(unsigned)capacity;
-- (id)initWithArray:(NSArray *)array;
+- (void)lock;
+- (void)unlock;
+- (void)lockForReading;
+- (void)lockForWriting;
+- (BOOL)tryLock;
+- (BOOL)tryLockForReading;
+- (BOOL)tryLockForWriting;
 @end

@@ -45,6 +45,8 @@ typedef struct _BDSKISIGroupFlags {
     volatile int32_t failedDownload;
 } BDSKISIGroupFlags;
 
+@class BDSKReadWriteLock;
+
 @interface BDSKISIGroupServer : BDSKAsynchronousDOServer <BDSKSearchGroupServer> 
 {
     BDSKSearchGroup *group;
@@ -52,7 +54,7 @@ typedef struct _BDSKISIGroupFlags {
     int availableResults;
     int fetchedResults;
     BDSKISIGroupFlags flags;
-    pthread_rwlock_t infolock;
+    BDSKReadWriteLock *infoLock;
     NSLock *resultCounterLock;
 }
 

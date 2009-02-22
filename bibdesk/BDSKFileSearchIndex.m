@@ -48,7 +48,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "UKDirectoryEnumerator.h"
 #import "BDSKMessageQueue.h"
-#import <pthread.h>
+#import "BDSKReadWriteLock.h"
 
 @interface BDSKFileSearchIndex (Private)
 
@@ -117,7 +117,7 @@
         
         // maintain dictionaries mapping URL -> identifierURL, since SKIndex properties are slow; this should be accessed with the rwlock
         identifierURLs = [[BDSKManyToManyDictionary alloc] init];
-		pthread_rwlock_init(&rwlock, NULL);
+		rwLock = [[BDSKReadWriteLock alloc] init];
         
         progressValue = 0.0;
         
@@ -137,11 +137,11 @@
 
 - (void)dealloc
 {
-    pthread_rwlock_wrlock(&rwlock);
+    [rwLock lockForWriting];
 	[identifierURLs release];
     identifierURLs = nil;
-    pthread_rwlock_unlock(&rwlock);
-    pthread_rwlock_destroy(&rwlock);
+    [rwLock unlock];
+    [rwLock release];
     [notificationPort release];
     [notificationQueue release];
     [signatures release];
@@ -189,17 +189,17 @@
 
 - (NSURL *)identifierURLForURL:(NSURL *)theURL
 {
-    pthread_rwlock_rdlock(&rwlock);
+    [rwLock lockForReading];
     NSURL *identifierURL = [[[identifierURLs anyObjectForKey:theURL] retain] autorelease];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
     return identifierURL;
 }
 
 - (NSSet *)allIdentifierURLsForURL:(NSURL *)theURL
 {
-    pthread_rwlock_rdlock(&rwlock);
+    [rwLock lockForReading];
     NSSet *set = [[[identifierURLs allObjectsForKey:theURL] copy] autorelease];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
     return set;
 }
 
@@ -343,9 +343,9 @@ static void addItemFunction(const void *value, void *context) {
         // set the identifierURLs map, so we can build search results immediately; no problem if it contains URLs that were not indexed or are replaced, we know these URLs should be added eventually
         OSMemoryBarrier();
         if (flags.shouldKeepRunning == 1) {
-            pthread_rwlock_wrlock(&rwlock);
+            [rwLock lockForWriting];
             CFArrayApplyFunction((CFArrayRef)items, CFRangeMake(0, totalObjectCount), addItemFunction, (void *)identifierURLs);
-            pthread_rwlock_unlock(&rwlock);
+            [rwLock unlock];
         }
         
         [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
@@ -499,9 +499,9 @@ static void addItemFunction(const void *value, void *context) {
         // SKIndexSetProperties is more generally useful, but is really slow when creating the index
         // SKIndexRenameDocument changes the URL, so it's not useful
         
-        pthread_rwlock_wrlock(&rwlock);
+        [rwLock lockForWriting];
         [identifierURLs addObject:identifierURL forKey:url];
-        pthread_rwlock_unlock(&rwlock);
+        [rwLock unlock];
         
         [self indexFileURL:url];
     }
@@ -524,10 +524,10 @@ static void addItemFunction(const void *value, void *context) {
     // loop through the array of URLs, create a new SKDocumentRef, and try to remove it
     while (url = [urlEnum nextObject]) {
         
-        pthread_rwlock_wrlock(&rwlock);
+        [rwLock lockForWriting];
         [identifierURLs removeObject:identifierURL forKey:url];
         shouldBeRemoved = (0 == [identifierURLs countForKey:url]);
-        pthread_rwlock_unlock(&rwlock);
+        [rwLock unlock];
         
         if (shouldBeRemoved)
             [self removeFileURL:url];
@@ -703,9 +703,9 @@ static void addItemFunction(const void *value, void *context) {
     while (anItem = [itemEnumerator nextObject]) {
         identifierURL = [anItem valueForKey:@"identifierURL"];
         
-        pthread_rwlock_rdlock(&rwlock);
+        [rwLock lockForReading];
         urlsToRemove = [[[identifierURLs allKeysForObject:identifierURL] copy] autorelease];
-        pthread_rwlock_unlock(&rwlock);
+        [rwLock unlock];
        
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
@@ -726,9 +726,9 @@ static void addItemFunction(const void *value, void *context) {
     NSMutableSet *addedURLs;
     NSMutableSet *sameURLs;
     
-    pthread_rwlock_rdlock(&rwlock);
+    [rwLock lockForReading];
     oldURLs = [[identifierURLs allKeysForObject:identifierURL] copy];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
     newURLs = [[NSSet alloc] initWithArray:[item valueForKey:@"urls"]];
     
     removedURLs = [oldURLs mutableCopy];

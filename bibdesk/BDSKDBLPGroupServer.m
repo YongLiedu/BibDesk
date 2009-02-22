@@ -43,7 +43,7 @@
 #import "BDSKBibTeXParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
-# import <pthread.h>
+#import "BDSKReadWriteLock.h""
 
 // private protocols for inter-thread messaging
 @protocol BDSKDBLPGroupServerMainThread <BDSKAsyncDOServerMainThread>
@@ -91,7 +91,7 @@
         flags.isRetrieving = 0;
         availableResults = 0;
         fetchedResults = 0;
-        pthread_rwlock_init(&infolock, NULL);
+        infoLock = [[BDSKReadWriteLock alloc] init];
         
         [self startDOServerSync];
     }
@@ -99,7 +99,7 @@
 }
 
 - (void)dealloc {
-    pthread_rwlock_destroy(&infolock);
+    [infoLock release];
     [serverInfo release];
     serverInfo = nil;
     [scheduledService release];
@@ -141,19 +141,19 @@
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
-    pthread_rwlock_wrlock(&infolock);
+    [infoLock lockForWriting];
     if (serverInfo != info) {
         [serverInfo release];
         serverInfo = [info copy];
     }
-    pthread_rwlock_unlock(&infolock);
+    [infoLock unlock];
 }
 
 - (BDSKServerInfo *)serverInfo;
 {
-    pthread_rwlock_rdlock(&infolock);
+    [infoLock lockForReading];
     BDSKServerInfo *info = [[serverInfo copy] autorelease];
-    pthread_rwlock_unlock(&infolock);
+    [infoLock unlock];
     return info;
 }
 

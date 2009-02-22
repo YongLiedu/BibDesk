@@ -44,7 +44,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import <pthread.h>
+#import "BDSKReadWriteLock.h"
 
 #define MAX_RESULTS 100
 #if(OMNI_FORCE_ASSERTIONS)
@@ -122,7 +122,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
         flags.isRetrieving = 0;
         availableResults = 0;
         fetchedResults = 0;
-        pthread_rwlock_init(&infolock, NULL);
+        infoLock = [[BDSKReadWriteLock alloc] init];
         resultCounterLock = [[NSLock alloc] init];
     
         [self startDOServerSync];
@@ -131,7 +131,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 }
 
 - (void)dealloc {
-    pthread_rwlock_destroy(&infolock);
+    [infoLock release];
     [serverInfo release];
     serverInfo = nil;
     [resultCounterLock release];
@@ -170,19 +170,19 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
-    pthread_rwlock_wrlock(&infolock);
+    [infoLock lockForWriting];
     if (serverInfo != info) {
         [serverInfo release];
         serverInfo = [info copy];
     }
-    pthread_rwlock_unlock(&infolock);
+    [infoLock unlock];
 }
 
 - (BDSKServerInfo *)serverInfo;
 {
-    pthread_rwlock_rdlock(&infolock);
+    [infoLock lockForReading];
     BDSKServerInfo *info = [[serverInfo copy] autorelease];
-    pthread_rwlock_unlock(&infolock);
+    [infoLock unlock];
     return info;
 }
 

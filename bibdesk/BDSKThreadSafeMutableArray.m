@@ -37,7 +37,7 @@
  */
 
 #import "BDSKThreadSafeMutableArray.h"
-#import <pthread.h>
+#import "BDSKReadWriteLock.h"
 
 
 @implementation BDSKThreadSafeMutableArray
@@ -45,7 +45,7 @@
 - (id)init {
     if (self = [super init]) {
         embeddedArray = [[NSMutableArray allocWithZone:[self zone]] init];
-        pthread_rwlock_init(&rwlock, NULL);
+		rwLock = [[BDSKReadWriteLock alloc] init];
     }
     return self;
 }
@@ -53,7 +53,7 @@
 - (id)initWithCapacity:(unsigned)capacity {
     if (self = [super init]) {
         embeddedArray = [[NSMutableArray allocWithZone:[self zone]] initWithCapacity:capacity];
-        pthread_rwlock_init(&rwlock, NULL);
+		rwLock = [[BDSKReadWriteLock alloc] init];
     }
     return self;
 }
@@ -61,90 +61,90 @@
 - (id)initWithArray:(NSArray *)array {
     if (self = [super init]) {
         embeddedArray = [[NSMutableArray allocWithZone:[self zone]] initWithArray:array];
-        pthread_rwlock_init(&rwlock, NULL);
+		rwLock = [[BDSKReadWriteLock alloc] init];
     }
     return self;
 }
 
 - (id)copyWithZone:(NSZone *)zone {
 	id copy;
-    pthread_rwlock_rdlock(&rwlock);
+    [rwLock lockForReading];
 	copy = [embeddedArray copy];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
 	return copy;
 }
 
 - (id)mutableCopyWithZone:(NSZone *)zone {
 	id copy;
-    pthread_rwlock_rdlock(&rwlock);
+    [rwLock lockForReading];
 	copy = [[[self class] allocWithZone:zone] initWithArray:embeddedArray];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
 	return copy;
 }
 
 - (void)dealloc {
-    pthread_rwlock_wrlock(&rwlock);
+    [rwLock lockForWriting];
 	[embeddedArray release];
     embeddedArray = nil;
-    pthread_rwlock_unlock(&rwlock);
-    pthread_rwlock_destroy(&rwlock);
+    [rwLock unlock];
+    [rwLock release];
 	[super dealloc];
 }
 
 - (unsigned)count {
-    pthread_rwlock_rdlock(&rwlock);
+    [rwLock lockForReading];
 	unsigned count = [embeddedArray count];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
     return count;
 }
 
 - (id)objectAtIndex:(unsigned)idx {
-    pthread_rwlock_rdlock(&rwlock);
+    [rwLock lockForReading];
     id object = [[[embeddedArray objectAtIndex:idx] retain] autorelease];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
     return object;
 }
 
 - (void)insertObject:(id)object atIndex:(unsigned)idx {
-    pthread_rwlock_wrlock(&rwlock);
+    [rwLock lockForWriting];
     [object retain];
 	[embeddedArray insertObject:object atIndex:idx];
     [object release];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
 }
 
 - (void)addObject:object {
-    pthread_rwlock_wrlock(&rwlock);
+    [rwLock lockForWriting];
     [object retain];
 	[embeddedArray addObject:object];
     [object release];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
 }
 
 - (void)removeObjectAtIndex:(unsigned)idx {
-    pthread_rwlock_wrlock(&rwlock);
+    [rwLock lockForWriting];
     id obj = [[embeddedArray objectAtIndex:idx] retain];
 	[embeddedArray removeObjectAtIndex:idx];
     [obj autorelease];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
 }
 
 - (void)removeLastObject {
-    pthread_rwlock_wrlock(&rwlock);
+    [rwLock lockForWriting];
     id obj = [[embeddedArray lastObject] retain];
 	[embeddedArray removeLastObject];
     [obj autorelease];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
 }
 
 - (void)replaceObjectAtIndex:(unsigned)idx withObject:(id)object{
-    pthread_rwlock_wrlock(&rwlock);
+    [rwLock lockForWriting];
     [object retain];
     id objToReplace = [[embeddedArray objectAtIndex:idx] retain];
 	[embeddedArray replaceObjectAtIndex:idx withObject:object];
     [object release];
     [objToReplace autorelease];
-    pthread_rwlock_unlock(&rwlock);
+    [rwLock unlock];
 }
 
 @end

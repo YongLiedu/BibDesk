@@ -62,7 +62,7 @@ typedef struct _BDSKZoomGroupFlags {
 } BDSKZoomGroupFlags;    
 
 
-@class BDSKServerInfo;
+@class BDSKServerInfo, BDSKReadWriteLock;
 
 @interface BDSKZoomGroupServer : BDSKAsynchronousDOServer <BDSKSearchGroupServer, BDSKZoomGroupServerMainThread, BDSKZoomGroupServerLocalThread>
 {
@@ -72,7 +72,7 @@ typedef struct _BDSKZoomGroupFlags {
     int availableResults;
     int fetchedResults;
     BDSKZoomGroupFlags flags;
-    pthread_rwlock_t infolock;
+    BDSKReadWriteLock *infoLock;
 }
 + (NSArray *)supportedRecordSyntaxes;
 + (ZOOMSyntaxType)zoomRecordSyntaxForRecordSyntaxString:(NSString *)syntax;

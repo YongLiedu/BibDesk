@@ -1,10 +1,10 @@
 //
-//  BDSKThreadSafeMutableArray.h
+//  BDSKReadWriteLock.m
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 11/3/06.
+//  Created by Christiaan Hofman on 2/22/09.
 /*
- This software is Copyright (c) 2006-2009
+ This software is Copyright (c) 2009
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -19,7 +19,7 @@
     the documentation and/or other materials provided with the
     distribution.
 
- - Neither the name of Adam Maxwell nor the names of any
+ - Neither the name of Christiaan Hofman nor the names of any
     contributors may be used to endorse or promote products derived
     from this software without specific prior written permission.
 
@@ -36,15 +36,50 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
+#import "BDSKReadWriteLock.h"
 
-@class BDSKReadWriteLock;
 
-@interface BDSKThreadSafeMutableArray : NSMutableArray {
-    NSMutableArray *embeddedArray;
-    BDSKReadWriteLock *rwLock;
+@implementation BDSKReadWriteLock
+
+- (id)init {
+    if (self = [super init]) {
+		pthread_rwlock_init(&rwlock, NULL);
+    }
+    return self;
 }
-- (id)init;
-- (id)initWithCapacity:(unsigned)capacity;
-- (id)initWithArray:(NSArray *)array;
+
+- (void)dealloc {
+    pthread_rwlock_destroy(&rwlock);
+    [super dealloc];
+}
+
+- (void)lock {
+    [self lockForWriting];
+}
+
+- (void)unlock {
+    pthread_rwlock_unlock(&rwlock);
+}
+
+- (void)lockForReading {
+    pthread_rwlock_rdlock(&rwlock);
+}
+
+- (void)lockForWriting {
+    pthread_rwlock_wrlock(&rwlock);
+}
+
+- (BOOL)tryLock {
+    return [self tryLockForWriting];
+}
+
+- (BOOL)tryLockForReading {
+    return 0 == pthread_rwlock_tryrdlock(&rwlock);
+}
+
+- (BOOL)tryLockForWriting {
+    return 0 == pthread_rwlock_trywrlock(&rwlock);
+}
+
+
 @end

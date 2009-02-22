@@ -39,10 +39,11 @@
 
 #import <Foundation/Foundation.h>
 
+@class BDSKReadWriteLock;
 
 @interface BDSKThreadSafeMutableDictionary : NSMutableDictionary {
     NSMutableDictionary *embeddedDictionary;
-    pthread_rwlock_t rwlock;
+    BDSKReadWriteLock *rwLock;
 }
 - (id)init;
 - (id)initWithCapacity:(unsigned)capacity;

@@ -234,6 +234,7 @@
 		CEBA63D80A7CA0B500588BB7 /* BDSKCrossrefFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */; };
 		CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEBB8D8709C8B0D90074C79E /* Font.tiff */; };
 		CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */; };
+		CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */; };
 		CEC3158D0F24D0B9008D2C75 /* BDSKRichTextFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC3158B0F24D0B9008D2C75 /* BDSKRichTextFormat.m */; };
 		CED65AB70906BCC6003EED90 /* BDSKScriptHook.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */; };
 		CED65AB90906BCC6003EED90 /* BDSKScriptHookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */; };
@@ -1202,6 +1203,8 @@
 		CEBB8D8709C8B0D90074C79E /* Font.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Font.tiff; sourceTree = "<group>"; };
 		CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroupViewController.h; sourceTree = "<group>"; };
 		CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroupViewController.m; sourceTree = "<group>"; };
+		CEC1CEA50F51D2CE00D18921 /* BDSKReadWriteLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKReadWriteLock.h; sourceTree = "<group>"; };
+		CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKReadWriteLock.m; sourceTree = "<group>"; };
 		CEC3158A0F24D0B9008D2C75 /* BDSKRichTextFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRichTextFormat.h; sourceTree = "<group>"; };
 		CEC3158B0F24D0B9008D2C75 /* BDSKRichTextFormat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRichTextFormat.m; sourceTree = "<group>"; };
 		CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHook.h; sourceTree = "<group>"; };
@@ -2286,6 +2289,7 @@
 				CEED2E010F4DEB550078E87A /* BDSKMessageQueue.m */,
 				F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */,
 				CEED2E050F4DEB6A0078E87A /* BDSKQueueProcessor.m */,
+				CEC1CEA60F51D2CE00D18921 /* BDSKReadWriteLock.m */,
 				CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */,
 				CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */,
 				CE82B2D00D57AE0B00A2E8C5 /* BDSKSharingClient.m */,
@@ -2690,6 +2694,7 @@
 				CE392F5B08D04083001CEAC8 /* BDSKRatingButton.h */,
 				CE392ED208D034E4001CEAC8 /* BDSKRatingButtonCell.h */,
 				CE95A5790A88883300334DFA /* BDSKReadMeController.h */,
+				CEC1CEA50F51D2CE00D18921 /* BDSKReadWriteLock.h */,
 				F940D1070B5568E400B5917A /* BDSKReferParser.h */,
 				CE601A4C0AF4C488000B5680 /* BDSKReferenceMinerParser.h */,
 				CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */,
@@ -3898,6 +3903,7 @@
 				CEED2E0B0F4DEB9E0078E87A /* BDSKMainQueueProcessor.m in Sources */,
 				CEED2E150F4DED830078E87A /* BDSKInvocation.m in Sources */,
 				CEED2F350F4E0C860078E87A /* BDSKRuntime.m in Sources */,
+				CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

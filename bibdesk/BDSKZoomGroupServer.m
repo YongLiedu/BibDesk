@@ -43,7 +43,7 @@
 #import "BibItem.h"
 #import "CFString_BDSKExtensions.h"
 #import <SystemConfiguration/SystemConfiguration.h>
-#import <pthread.h>
+#import "BDSKReadWriteLock.h"
 
 #define MAX_RESULTS 100
 
@@ -87,7 +87,7 @@ static NSString *BDSKMODSString = @"MODS";
         flags.needsReset = 1;
         availableResults = 0;
         fetchedResults = 0;
-        pthread_rwlock_init(&infolock, NULL);
+        infoLock = [[BDSKReadWriteLock alloc] init];
         [self startDOServerSync];
     }
     return self;
@@ -95,7 +95,7 @@ static NSString *BDSKMODSString = @"MODS";
 
 - (void)dealloc
 {
-    pthread_rwlock_destroy(&infolock);
+    [infoLock release];
     group = nil;
     [connection release], connection = nil;
     [serverInfo release], serverInfo = nil;
@@ -131,20 +131,20 @@ static NSString *BDSKMODSString = @"MODS";
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
 {
-    pthread_rwlock_wrlock(&infolock);
+    [infoLock lockForWriting];
     if (serverInfo != info) {
         [serverInfo release];
         serverInfo = [info copy];
     }
-    pthread_rwlock_unlock(&infolock);
+    [infoLock unlock];
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.needsReset);
 }
 
 - (BDSKServerInfo *)serverInfo;
 {
-    pthread_rwlock_rdlock(&infolock);
+    [infoLock lockForReading];
     BDSKServerInfo *info = [[serverInfo copy] autorelease];
-    pthread_rwlock_unlock(&infolock);
+    [infoLock unlock];
     return info;
 }
 
