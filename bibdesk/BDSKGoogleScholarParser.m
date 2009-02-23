@@ -69,16 +69,18 @@
 
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
-    NSString *googSearchResultNodePath = @"//p[@class='g']";
+    
+    //searching recursivley to containing <p class=g> doesn't work anymore wince google degraded from xhtml to html
+    //NSString *googSearchResultNodePath = @"//p[@class='g']";
     
     NSString *BibTexLinkNodePath = @".//a[contains(text(),'BibTeX')]";
 	
-    NSString *targetUrlNodePath = @".//span[@class='w']/a";
+    //NSString *targetUrlNodePath = @".//span[@class='w']/a";
     
     NSError *error = nil;
             
     // fetch the google search results
-    NSArray *googSearchResults = [[xmlDocument rootElement] nodesForXPath:googSearchResultNodePath
+    NSArray *googSearchResults = [[xmlDocument rootElement] nodesForXPath:BibTexLinkNodePath
                                                                     error:&error];
     
     // bail out with an XML error if the Xpath query fails
@@ -100,6 +102,8 @@
     for(i=0; i < iMax; i++){
         
         NSXMLNode *googSearchResult = [googSearchResults objectAtIndex:i];
+        
+        /*
         
         NSString *targetUrlHrefValue = nil;
         
@@ -141,8 +145,9 @@
         }
         
         NSXMLNode *btlinknode = [BibTeXLinkNodes objectAtIndex:0];
+        */
         
-        NSString *hrefValue = [btlinknode stringValueOfAttribute:@"href"];
+        NSString *hrefValue = [googSearchResult stringValueOfAttribute:@"href"];
         
         
         NSURL *btURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [url host], hrefValue]];
@@ -197,7 +202,7 @@
 			}
             
             NSString *itemUrlField = [bibtexItem valueOfField:BDSKUrlString inherit:NO];
-            
+            /*
             if (
                 nil != targetUrlHrefValue &&
                 (nil == itemUrlField || 0 == [itemUrlField length])
@@ -206,6 +211,7 @@
                 // target url was found successfully & is not explicitly set in the entry
                 [bibtexItem setField:BDSKUrlString toValue:targetUrlHrefValue];
             }
+            */
         }
         else {
             // display a fake item in the table so the user knows one of the items failed to parse, but still gets the rest of the data
