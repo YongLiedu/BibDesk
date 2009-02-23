@@ -75,45 +75,9 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 @implementation NSData (BDSKExtensions)
 
 // avoids reading the entire file into memory at once
-+ (NSData *)copySha1SignatureForFile:(NSString *)absolutePath;
++ (NSData *)sha1SignatureForFile:(NSString *)absolutePath;
 {
-    
-    const char *path = [absolutePath fileSystemRepresentation];
-    
-    // early out in case we can't open the file
-    int fd = open(path, O_RDONLY);
-    if (fd == -1)
-        return nil;
-    
-    EVP_MD_CTX mdctx;
-    const EVP_MD *md = EVP_sha1();
-    int status;
-    EVP_MD_CTX_init(&mdctx);
-    
-    // NB: status == 1 for success
-    status = EVP_DigestInit_ex(&mdctx, md, NULL);
-    
-    // page size
-    char buffer[4096];
-
-    ssize_t bytesRead;
-    while ((bytesRead = read(fd, buffer, sizeof(buffer))) > 0)
-        status = EVP_DigestUpdate(&mdctx, buffer, bytesRead);
-    
-    close(fd);    
-    
-    unsigned char md_value[EVP_MAX_MD_SIZE];
-    unsigned int md_len;
-    status = EVP_DigestFinal_ex(&mdctx, md_value, &md_len);
-    status = EVP_MD_CTX_cleanup(&mdctx);
-
-    // return nil instead of a random hash if read() fails (it returns -1 for a directory) 
-    NSData *digest = -1 == bytesRead ? nil : [[NSData alloc] initWithBytes:md_value length:md_len];
-#if 0
-    NSData *omniDigest = [[NSData dataWithContentsOfFile:absolutePath] sha1Signature];
-    NSAssert([omniDigest isEqual:digest], @"sha1 signature not equal to OmniFoundation's");
-#endif
-    return digest;
+    return [[NSData dataWithContentsOfMappedFile:absolutePath] sha1Signature];
 }
 
 - (NSData *)sha1Signature {

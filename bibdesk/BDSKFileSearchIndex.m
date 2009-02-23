@@ -220,7 +220,7 @@
 // this can return any object conforming to NSCoding
 static inline id signatureForURL(NSURL *aURL) {
     // Use the SHA1 signature if we can get it
-    id signature = [NSData copySha1SignatureForFile:[aURL path]];
+    id signature = [NSData sha1SignatureForFile:[aURL path]];
     if (signature == nil) {
         // this could happen for packages, use a timestamp instead
         FSRef fileRef;
@@ -230,10 +230,10 @@ static inline id signatureForURL(NSURL *aURL) {
         if (CFURLGetFSRef((CFURLRef)aURL, &fileRef) &&
             noErr == FSGetCatalogInfo(&fileRef, kFSCatInfoContentMod, &info, NULL, NULL, NULL) &&
             noErr == UCConvertUTCDateTimeToCFAbsoluteTime(&info.contentModDate, &absoluteTime)) {
-            signature = [[NSDate alloc] initWithTimeIntervalSinceReferenceDate:(NSTimeInterval)absoluteTime];
+            signature = [NSDate dateWithTimeIntervalSinceReferenceDate:(NSTimeInterval)absoluteTime];
         }
     }
-    return signature ? [signature autorelease] : [NSData data];
+    return signature ? signature : [NSData data];
 }
 
 + (NSString *)indexCacheFolder
