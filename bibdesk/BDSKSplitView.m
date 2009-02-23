@@ -178,81 +178,45 @@
 
 #pragma mark Fraction
 
-- (float)horizontalDividerFraction {
-    NSRect topFrame, bottomFrame;
-    
-    if ([[self subviews] count] < 2)
-        return 0.0;
-    
-    topFrame = [[[self subviews] objectAtIndex:0] frame];
-    bottomFrame = [[[self subviews] objectAtIndex:1] frame];
-    return NSHeight(bottomFrame) / (NSHeight(bottomFrame) + NSHeight(topFrame));
-}
-
-- (void)setHorizontalDividerFraction:(float)newFraction {
-    NSRect topFrame, bottomFrame;
-    NSView *topSubView;
-    NSView *bottomSubView;
-    float totalHeight;
-    
-    if ([[self subviews] count] < 2)
-        return;
-    
-    topSubView = [[self subviews] objectAtIndex:0];
-    bottomSubView = [[self subviews] objectAtIndex:1];
-    topFrame = [topSubView frame];
-    bottomFrame = [bottomSubView frame];
-    totalHeight = NSHeight(bottomFrame) + NSHeight(topFrame);
-    bottomFrame.size.height = newFraction * totalHeight;
-    topFrame.size.height = totalHeight - NSHeight(bottomFrame);
-    [topSubView setFrame:topFrame];
-    [bottomSubView setFrame:bottomFrame];
-    [self adjustSubviews];
-    [self setNeedsDisplay:YES];
-}
-
-- (float)verticalDividerFraction {
-    NSRect leftFrame, rightFrame;
-    
-    if ([[self subviews] count] < 2)
-        return 0.0;
-    
-    leftFrame = [[[self subviews] objectAtIndex:0] frame];
-    rightFrame = [[[self subviews] objectAtIndex:1] frame];
-    return NSWidth(rightFrame) / (NSWidth(rightFrame) + NSWidth(leftFrame));
-}
-
-- (void)setVerticalDividerFraction:(float)newFraction {
-    NSRect leftFrame, rightFrame;
-    NSView *leftSubView;
-    NSView *rightSubView;
-    float totalWidth;
-    
-    if ([[self subviews] count] < 2)
-        return;
-    
-    leftSubView = [[self subviews] objectAtIndex:0];
-    rightSubView = [[self subviews] objectAtIndex:1];
-    leftFrame = [leftSubView frame];
-    rightFrame = [rightSubView frame];
-    totalWidth = NSWidth(rightFrame) + NSWidth(leftFrame);
-    rightFrame.size.width = newFraction * totalWidth;
-    leftFrame.size.width = totalWidth - NSWidth(rightFrame);
-    [leftSubView setFrame:leftFrame];
-    [rightSubView setFrame:rightFrame];
-    [self adjustSubviews];
-    [self setNeedsDisplay:YES];
-}
-
 - (float)fraction {
-    return [self isVertical] ? [self verticalDividerFraction] : [self horizontalDividerFraction];
+    if ([[self subviews] count] < 2)
+        return 0.0;
+    
+    NSRect firstFrame = [[[self subviews] objectAtIndex:0] frame];
+    NSRect secondFrame = [[[self subviews] objectAtIndex:1] frame];
+    
+    if ([self isVertical])
+        return NSWidth(secondFrame) / (NSWidth(secondFrame) + NSWidth(firstFrame));
+    else
+        return NSHeight(secondFrame) / (NSHeight(secondFrame) + NSHeight(firstFrame));
 }
 
 - (void)setFraction:(float)newFraction {
-    if ([self isVertical])
-        [self setVerticalDividerFraction:newFraction];
-    else
-        [self setHorizontalDividerFraction:newFraction];
+    NSRect firstFrame, secondFrame;
+    NSView *firstView;
+    NSView *secondView;
+    
+    if ([[self subviews] count] < 2)
+        return;
+    
+    firstView = [[self subviews] objectAtIndex:0];
+    secondView = [[self subviews] objectAtIndex:1];
+    firstFrame = [firstView frame];
+    secondFrame = [secondView frame];
+    if ([self isVertical]) {
+        float totalWidth = NSWidth(secondFrame) + NSWidth(firstFrame);
+        secondFrame.size.width = newFraction * totalWidth;
+        firstFrame.size.width = totalWidth - NSWidth(secondFrame);
+    } else {
+        float totalHeight = NSHeight(secondFrame) + NSHeight(firstFrame);
+        secondFrame.size.height = newFraction * totalHeight;
+        firstFrame.size.height = totalHeight - NSHeight(secondFrame);
+    }
+    [firstView setFrame:firstFrame];
+    [secondView setFrame:secondFrame];
+    
+    [self adjustSubviews];
+    [self setNeedsDisplay:YES];
 }
 
 @end
