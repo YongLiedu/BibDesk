@@ -130,8 +130,13 @@ static BDSKPlaceholderInvocation *placeholderInvocation = nil;
     return nil;
 }
 
-- (void)invoke {
+- (NSInvocation *)nsInvocation {
     [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+- (void)invoke {
+    [[self nsInvocation] invoke];
 }
 
 - (id)initWithTarget:(id)aTarget selector:(SEL)aSelector {
@@ -224,12 +229,16 @@ static BDSKPlaceholderInvocation *placeholderInvocation = nil;
     return nil;
 }
 
-- (void)invoke {
+- (NSInvocation *)nsInvocation {
     NSMethodSignature *ms = [target methodSignatureForSelector:selector];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:ms];
     [invocation setTarget:target];
     [invocation setSelector:selector];
-    [invocation invoke];
+    return invocation;
+}
+
+- (void)invoke {
+    [[self nsInvocation] invoke];
 }
 
 @end
@@ -266,13 +275,10 @@ static BDSKPlaceholderInvocation *placeholderInvocation = nil;
     return [super isEqual:other] && object1 == [other argumentAtIndex:0];
 }
 
-- (void)invoke {
-    NSMethodSignature *ms = [target methodSignatureForSelector:selector];
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:ms];
-    [invocation setTarget:target];
-    [invocation setSelector:selector];
+- (NSInvocation *)nsInvocation {
+    NSInvocation *invocation = [super nsInvocation];
     [invocation setArgument:&object1 atIndex:2];
-    [invocation invoke];
+    return invocation;
 }
 
 @end
@@ -302,21 +308,17 @@ static BDSKPlaceholderInvocation *placeholderInvocation = nil;
 }
 
 - (id)argumentAtIndex:(NSUInteger)anIndex {
-    return anIndex == 0 ? object1 : anIndex == 2 ? object2 : nil;
+    return anIndex == 0 ? object1 : anIndex == 1 ? object2 : nil;
 }
 
 - (BOOL)isEqual:(id)other {
     return [super isEqual:other] && object2 == [other argumentAtIndex:1];
 }
 
-- (void)invoke {
-    NSMethodSignature *ms = [target methodSignatureForSelector:selector];
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:ms];
-    [invocation setTarget:target];
-    [invocation setSelector:selector];
-    [invocation setArgument:&object1 atIndex:2];
+- (NSInvocation *)nsInvocation {
+    NSInvocation *invocation = [super nsInvocation];
     [invocation setArgument:&object2 atIndex:3];
-    [invocation invoke];
+    return invocation;
 }
 
 @end
