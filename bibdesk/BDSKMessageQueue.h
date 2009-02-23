@@ -89,13 +89,17 @@
 
 - (void)queueInvocation:(BDSKInvocation *)anInvocation;
 - (void)queueInvocationOnce:(BDSKInvocation *)anInvocation;
+- (void)dequeueInvocation:(BDSKInvocation *)anInvocation;
 
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget;
 - (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget;
+- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget;
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject;
 - (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject;
+- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject;
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2;
 - (void)queueSelectorOnce:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2;
+- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2;
 
 @end
 
@@ -103,18 +107,14 @@
 
 @interface NSObject (BDSKMessageQueue)
 
-+ (void)queueSelector:(SEL)aSelector;
-+ (void)queueSelectorOnce:(SEL)aSelector;
-+ (void)queueSelector:(SEL)aSelector withObject:(id)anObject;
-+ (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject;
-+ (void)queueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
-+ (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
-
 - (void)queueSelector:(SEL)aSelector;
 - (void)queueSelectorOnce:(SEL)aSelector;
+- (void)dequeueSelector:(SEL)aSelector;
 - (void)queueSelector:(SEL)aSelector withObject:(id)anObject;
 - (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject;
+- (void)dequeueSelector:(SEL)aSelector withObject:(id)anObject;
 - (void)queueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
 - (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
+- (void)dequeueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2;
 
 @end

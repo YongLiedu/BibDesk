@@ -233,6 +233,14 @@
         [self queueInvocation:anInvocation];
 }
 
+- (void)dequeueInvocation:(BDSKInvocation *)anInvocation {
+    [queueLock lock];
+    [queue removeObject:anInvocation];
+    if (queueSet)
+        [queueSet removeObject:anInvocation];
+    [queueLock unlock];
+}
+
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget {
     if (aTarget) {
         BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector];
@@ -245,6 +253,14 @@
     if (aTarget) {
         BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector];
         [self queueInvocationOnce:invocation];
+        [invocation release];
+    }
+}
+
+- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget {
+    if (aTarget) {
+        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector];
+        [self dequeueInvocation:invocation];
         [invocation release];
     }
 }
@@ -265,6 +281,14 @@
     }
 }
 
+- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject {
+    if (aTarget) {
+        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject];
+        [self dequeueInvocation:invocation];
+        [invocation release];
+    }
+}
+
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2 {
     if (aTarget) {
         BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject1 withObject:anObject2];
@@ -281,35 +305,19 @@
     }
 }
 
+- (void)dequeueSelector:(SEL)aSelector forTarget:(id)aTarget withObject:(id)anObject1 withObject:(id)anObject2 {
+    if (aTarget) {
+        BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector withObject:anObject1 withObject:anObject2];
+        [self dequeueInvocation:invocation];
+        [invocation release];
+    }
+}
+
 @end
 
 #pragma mark -
 
 @implementation NSObject (BDSKMessageQueue)
-
-+ (void)queueSelector:(SEL)aSelector {
-    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self];
-}
-
-+ (void)queueSelectorOnce:(SEL)aSelector {
-    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self];
-}
-
-+ (void)queueSelector:(SEL)aSelector withObject:(id)anObject {
-    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self withObject:anObject];
-}
-
-+ (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject {
-    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self withObject:anObject];
-}
-
-+ (void)queueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
-    [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
-}
-
-+ (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
-    [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
-}
 
 - (void)queueSelector:(SEL)aSelector {
     [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self];
@@ -317,6 +325,10 @@
 
 - (void)queueSelectorOnce:(SEL)aSelector {
     [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self];
+}
+
+- (void)dequeueSelector:(SEL)aSelector {
+    [[BDSKMessageQueue mainQueue] dequeueSelector:aSelector forTarget:self];
 }
 
 - (void)queueSelector:(SEL)aSelector withObject:(id)anObject {
@@ -327,12 +339,20 @@
     [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self withObject:anObject];
 }
 
+- (void)dequeueSelector:(SEL)aSelector withObject:(id)anObject {
+    [[BDSKMessageQueue mainQueue] dequeueSelector:aSelector forTarget:self withObject:anObject];
+}
+
 - (void)queueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
     [[BDSKMessageQueue mainQueue] queueSelector:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
 }
 
 - (void)queueSelectorOnce:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
     [[BDSKMessageQueue mainQueue] queueSelectorOnce:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
+}
+
+- (void)dequeueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
+    [[BDSKMessageQueue mainQueue] dequeueSelector:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
 }
 
 @end
