@@ -156,7 +156,6 @@
 		CE4B691C09E9235200CCA14F /* SmallLock_Locked.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE4B691A09E9235200CCA14F /* SmallLock_Locked.tiff */; };
 		CE4B691D09E9235200CCA14F /* SmallLock_Unlocked.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE4B691B09E9235200CCA14F /* SmallLock_Unlocked.tiff */; };
 		CE4D85290C3A8C8F002C20CB /* BDSKAutofileCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */; };
-		CE518F6609E52D6A00E97C3A /* BDSKTextViewFindPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE518F6409E52D6A00E97C3A /* BDSKTextViewFindPanel.nib */; };
 		CE51922109E5755600E97C3A /* BDSKFindFieldEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */; };
 		CE564D260AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE564D240AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m */; };
 		CE565BC00AEF848B002F0A24 /* BDSKPublicationsArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CE565BBE0AEF848B002F0A24 /* BDSKPublicationsArray.m */; };
@@ -1052,11 +1051,6 @@
 		CE4B691B09E9235200CCA14F /* SmallLock_Unlocked.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = SmallLock_Unlocked.tiff; sourceTree = "<group>"; };
 		CE4D85260C3A8C8E002C20CB /* BDSKAutofileCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAutofileCommand.h; sourceTree = "<group>"; };
 		CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAutofileCommand.m; sourceTree = "<group>"; };
-		CE518F2509E526E000E97C3A /* BDSKTextViewFindController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextViewFindController.h; sourceTree = "<group>"; };
-		CE518F2609E526E000E97C3A /* BDSKTextViewFindController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextViewFindController.m; sourceTree = "<group>"; };
-		CE518F6509E52D6A00E97C3A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKTextViewFindPanel.nib; sourceTree = "<group>"; };
-		CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKRegExFindPattern.m; sourceTree = "<group>"; };
-		CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKRegExFindPattern.h; sourceTree = "<group>"; };
 		CE51921E09E5755600E97C3A /* BDSKFindFieldEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFindFieldEditor.h; sourceTree = "<group>"; };
 		CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFindFieldEditor.m; sourceTree = "<group>"; };
 		CE564D230AECBA5B002F0A24 /* NSScanner_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSScanner_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -1628,7 +1622,6 @@
 		F9C7D3D30BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKScriptGroupSheet.nib; sourceTree = "<group>"; };
 		F9C7D3D40BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKSearchGroupSheet.nib; sourceTree = "<group>"; };
 		F9C7D3D50BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKSearchGroupView.nib; sourceTree = "<group>"; };
-		F9C7D3D60BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKTextViewFindPanel.nib; sourceTree = "<group>"; };
 		F9C7D3D70BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKTypeInfoEditor.nib; sourceTree = "<group>"; };
 		F9C7D3D80BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKURLGroupSheet.nib; sourceTree = "<group>"; };
 		F9C7D3D90BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
@@ -1893,7 +1886,6 @@
 				CE820EC20C8AE2F60020E6B0 /* BDSKPersonWindow.nib */,
 				CEEFE2B20B03FAF500668BB0 /* BDSKScriptGroupSheet.nib */,
 				CE76A53D0B430EA500E61066 /* BDSKSearchGroupSheet.nib */,
-				CE518F6409E52D6A00E97C3A /* BDSKTextViewFindPanel.nib */,
 				3D8663770802CF5C00FF1724 /* BDSKTypeInfoEditor.nib */,
 				CEEFE2B60B03FB0100668BB0 /* BDSKURLGroupSheet.nib */,
 				457538400B701ECD00C0E49B /* BDSKWebGroupView.nib */,
@@ -2182,7 +2174,6 @@
 				CE8961BB0CBEB5AC00EA2D98 /* BDSKTemplateDocument.m */,
 				27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */,
 				F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */,
-				CE518F2609E526E000E97C3A /* BDSKTextViewFindController.m */,
 				3D86633E0802C25800FF1724 /* BDSKTypeInfoEditor.m */,
 				CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */,
 				4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */,
@@ -2218,7 +2209,6 @@
 				CEDBDE4A0F4C863500190AF5 /* BDSKPreferenceRecord.m */,
 				CE3448000A11302F0026A92A /* BDSKPreviewItem.m */,
 				CE565BBE0AEF848B002F0A24 /* BDSKPublicationsArray.m */,
-				CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */,
 				CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */,
 				CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */,
 				CE8BE5BD0D99AF5000E314A4 /* BDSKSearchBookmark.m */,
@@ -2687,7 +2677,6 @@
 				CEC1CEA50F51D2CE00D18921 /* BDSKReadWriteLock.h */,
 				F940D1070B5568E400B5917A /* BDSKReferParser.h */,
 				CE601A4C0AF4C488000B5680 /* BDSKReferenceMinerParser.h */,
-				CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */,
 				CE3011AA0D5CC46F00C0B7FA /* BDSKRemoveCommand.h */,
 				CEC3158A0F24D0B9008D2C75 /* BDSKRichTextFormat.h */,
 				CE600E2D0AF405D6000B5680 /* BDSKRISParser.h */,
@@ -2738,7 +2727,6 @@
 				F9DB895A08A54BBA00CB3D53 /* BDSKTeXTask.h */,
 				27AFAF9A080D1E1B0096F5D2 /* BDSKTextImportController.h */,
 				F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */,
-				CE518F2509E526E000E97C3A /* BDSKTextViewFindController.h */,
 				F9DCEA4D094B7D1100AEE662 /* BDSKTextWithIconCell.h */,
 				CE8F83460AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.h */,
 				F916E68A07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.h */,
@@ -3342,7 +3330,6 @@
 				CEF7295D09CC890400802D48 /* RemoveFieldSheet.nib in Resources */,
 				F95D3FA709DDF51D00D793A6 /* BibPref_Sharing.nib in Resources */,
 				F92ECBF109DF09C200A244D0 /* BDSKPasswordController.nib in Resources */,
-				CE518F6609E52D6A00E97C3A /* BDSKTextViewFindPanel.nib in Resources */,
 				F963E4490A1D7E1300695DDC /* BibPref_Export.nib in Resources */,
 				CE23916A0A3348B2009F3A5B /* DocumentInfoWindow.nib in Resources */,
 				CE22E1D50A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib in Resources */,
@@ -4155,15 +4142,6 @@
 				CE4B5F110BF3DB1300A73E42 /* French */,
 			);
 			name = BibDocument.nib;
-			sourceTree = "<group>";
-		};
-		CE518F6409E52D6A00E97C3A /* BDSKTextViewFindPanel.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CE518F6509E52D6A00E97C3A /* English */,
-				F9C7D3D60BE927E000D65C7F /* French */,
-			);
-			name = BDSKTextViewFindPanel.nib;
 			sourceTree = "<group>";
 		};
 		CE62DE590F4B7C8300BDF01E /* Preferences.nib */ = {
