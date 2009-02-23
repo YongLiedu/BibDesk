@@ -479,18 +479,6 @@
     return ([self hasExternalGroupsSelected] == NO);
 }
 
-- (BOOL)validateFindPanelActionMenuItem:(NSMenuItem *)menuItem {
-	switch ([menuItem tag]) {
-        case NSFindPanelActionShowFindPanel:
-        case NSFindPanelActionNext:
-        case NSFindPanelActionPrevious:
-        case NSFindPanelActionSetFindString:
-			return YES;
-		default:
-			return NO;
-	}
-}
-
 - (BOOL)validateEditNewStaticGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
     NSString *s;
     if ([self hasExternalGroupsSelected])
@@ -803,9 +791,6 @@
     }
 	else if (act == @selector(selectIncompletePublications:)){
         return [self validateSelectIncompletePublicationsMenuItem:menuItem];
-    }
-	else if (act == @selector(performFindPanelAction:)){
-        return [self validateFindPanelActionMenuItem:menuItem];
     }
     else if (act == @selector(editNewCategoryGroupWithSelection:)){
         return [self validateEditNewCategoryGroupWithSelectionMenuItem:menuItem];

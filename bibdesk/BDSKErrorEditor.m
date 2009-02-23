@@ -217,8 +217,6 @@ static NSString *BDSKErrorEditorObservationContext = @"BDSKErrorEditorObservatio
 
 #pragma mark Editing
 
-//- (id <OAFindControllerTarget>)omniFindControllerTarget { return textView; }
-
 - (IBAction)loadFile:(id)sender{
     BibDocument *document = [manager sourceDocument];
     

@@ -407,52 +407,5 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     }
     return nil;
 }
-/*
-// OAFindControllerAware informal protocol
-- (id <OAFindControllerTarget>)omniFindControllerTarget;
-{
-    if (bottomPreviewDisplay == BDSKPreviewDisplayText)
-        return bottomPreviewTextView;
-    else if (sidePreviewDisplay == BDSKPreviewDisplayText)
-        return sidePreviewTextView;
-    else
-        return nil;
-}
 
-- (IBAction)performFindPanelAction:(id)sender{
-    NSString *selString = nil;
-
-	switch ([sender tag]) {
-        case NSFindPanelActionShowFindPanel:
-        case NSFindPanelActionNext:
-        case NSFindPanelActionPrevious:
-            if (bottomPreviewDisplay == BDSKPreviewDisplayText)
-                [bottomPreviewTextView performFindPanelAction:sender];
-            else if (sidePreviewDisplay == BDSKPreviewDisplayText)
-                [sidePreviewTextView performFindPanelAction:sender];
-            else
-                NSBeep();
-            break;
-		case NSFindPanelActionSetFindString:
-            selString = [self selectedStringForFind];
-            if ([NSString isEmptyString:selString])
-                return;
-            id firstResponder = [documentWindow firstResponder];
-            if (firstResponder == searchField || ([firstResponder isKindOfClass:[NSText class]] && [firstResponder delegate] == searchField)) {
-                [searchField setStringValue:selString];
-                [searchField selectText:nil];
-            } else {
-                [[BDSKFindController sharedFindController] setFindString:selString];
-                if (bottomPreviewDisplay == BDSKPreviewDisplayText)
-                    [bottomPreviewTextView performFindPanelAction:sender];
-                else if (sidePreviewDisplay == BDSKPreviewDisplayText)
-                    [sidePreviewTextView performFindPanelAction:sender];
-            }
-            break;
-        default:
-            NSBeep();
-            break;
-	}
-}
-*/
 @end

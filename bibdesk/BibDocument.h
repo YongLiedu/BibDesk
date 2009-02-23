@@ -625,6 +625,5 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)changeSearchType:(id)sender;
 - (IBAction)search:(id)sender;
 - (IBAction)searchByContent:(id)sender;
-- (IBAction)performFindPanelAction:(id)sender;
 
 @end
