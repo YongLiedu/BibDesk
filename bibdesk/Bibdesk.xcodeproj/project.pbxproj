@@ -444,7 +444,6 @@
 		F963E4500A1D81B000695DDC /* exportPrefs.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F963E44F0A1D81AF00695DDC /* exportPrefs.tiff */; };
 		F963E45B0A1D828100695DDC /* BDSKTreeNode.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E42B0A1D7ADD00695DDC /* BDSKTreeNode.m */; };
 		F963E45D0A1D828200695DDC /* BibPref_Export.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E4360A1D7B3600695DDC /* BibPref_Export.m */; };
-		F9676A010916B63900B42F6A /* BDSKCountedSet.m in Sources */ = {isa = PBXBuildFile; fileRef = F96769FF0916B63900B42F6A /* BDSKCountedSet.m */; };
 		F96F11970AAF4FD100815D06 /* NSData_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F96F11950AAF4FD100815D06 /* NSData_BDSKExtensions.m */; };
 		F9704FF10E6118080050F475 /* latex2rtf in Resources */ = {isa = PBXBuildFile; fileRef = F90B13010C298FC900144F1B /* latex2rtf */; };
 		F97073B00911592000526FC8 /* NSWorkspace_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F97073AE0911592000526FC8 /* NSWorkspace_BDSKExtensions.m */; };
@@ -1538,8 +1537,6 @@
 		F963E4360A1D7B3600695DDC /* BibPref_Export.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibPref_Export.m; sourceTree = "<group>"; };
 		F963E4480A1D7E1300695DDC /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibPref_Export.nib; sourceTree = "<group>"; };
 		F963E44F0A1D81AF00695DDC /* exportPrefs.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = exportPrefs.tiff; sourceTree = "<group>"; };
-		F96769FE0916B63900B42F6A /* BDSKCountedSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCountedSet.h; sourceTree = "<group>"; };
-		F96769FF0916B63900B42F6A /* BDSKCountedSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCountedSet.m; sourceTree = "<group>"; };
 		F96F11940AAF4FD100815D06 /* NSData_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSData_BDSKExtensions.h; sourceTree = "<group>"; };
 		F96F11950AAF4FD100815D06 /* NSData_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSData_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9706DB909102DA800526FC8 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
@@ -2201,7 +2198,6 @@
 				CEED2CBC0F4DAD2C0078E87A /* BDSKCFCallBacks.m */,
 				2730077807CF20B500F2E485 /* BDSKComplexString.m */,
 				CE38FB83091D946900BCB69D /* BDSKCondition.m */,
-				F96769FF0916B63900B42F6A /* BDSKCountedSet.m */,
 				F97198C00DADD32F00CA57AA /* BDSKDBLPGroupServer.m */,
 				F97198C20DADD32F00CA57AA /* BDSKDBLPWebServices.m */,
 				CE129A160B44088900416D19 /* BDSKEntrezGroupServer.m */,
@@ -2586,7 +2582,6 @@
 				CE34E9770A03C16B00222942 /* BDSKConditionsView.h */,
 				CE7595FD0ADDB0E0009C1329 /* BDSKContainerView.h */,
 				F9022C3A0758027800C3F701 /* BDSKConverter.h */,
-				F96769FE0916B63900B42F6A /* BDSKCountedSet.h */,
 				CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */,
 				CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */,
 				F97198BF0DADD32F00CA57AA /* BDSKDBLPGroupServer.h */,
@@ -3691,7 +3686,6 @@
 				F97073B00911592000526FC8 /* NSWorkspace_BDSKExtensions.m in Sources */,
 				CEF7A6690915115B00BE9E02 /* BDSKScriptMenu.m in Sources */,
 				CEF7AC070915929E00BE9E02 /* BDSKGradientSplitView.m in Sources */,
-				F9676A010916B63900B42F6A /* BDSKCountedSet.m in Sources */,
 				CE28346509176CA3006B4C63 /* BDSKGradientView.m in Sources */,
 				CE2837420917D31D006B4C63 /* BDSKEdgeView.m in Sources */,
 				CE30FAD80919713100CB1A19 /* BDSKStatusBar.m in Sources */,
