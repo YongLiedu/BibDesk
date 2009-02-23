@@ -61,9 +61,11 @@ static void _linearColorReleaseInfoFunction(void *info) { free(info); }
 static const CGFunctionCallbacks linearFunctionCallbacks = {0, &_linearColorBlendFunction, &_linearColorReleaseInfoFunction};
 
 static NSColor *highlightColor = nil;
+static NSColor *highlightLightColor = nil;
+static NSColor *highlightDarkColor = nil;
 static NSColor *secondaryHighlightColor = nil;
-static CGFunctionRef linearBlendFunctionRef = NULL;
-static CGFunctionRef secondaryLinearBlendFunctionRef = NULL;
+static NSColor *secondaryHighlightLightColor = nil;
+static NSColor *secondaryHighlightDarkColor = nil;
 
 + (void)initialize {
     
@@ -78,25 +80,11 @@ static CGFunctionRef secondaryLinearBlendFunctionRef = NULL;
     [[highlightColor colorUsingColorSpaceName:NSDeviceRGBColorSpace] getHue:&hue saturation:&saturation brightness:&brightness alpha:&alpha];
 
     // Create synthetic darker and lighter versions
-    // NSColor *lighterColor = [NSColor colorWithDeviceHue:hue - (1.0/120.0) saturation:MAX(0.0, saturation-0.12) brightness:MIN(1.0, brightness+0.045) alpha:alpha];
-    NSColor *lighterColor = [NSColor colorWithDeviceHue:hue saturation:MAX(0.0, saturation-.12) brightness:MIN(1.0, brightness+0.30) alpha:alpha];
-    NSColor *darkerColor = [NSColor colorWithDeviceHue:hue saturation:MIN(1.0, (saturation > .04) ? saturation+0.12 : 0.0) brightness:MAX(0.0, brightness-0.045) alpha:alpha];
-    NSColor *secondaryLighterColor = [[lighterColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace];
-    NSColor *secondaryDarkerColor = [[darkerColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace];
-    
-    // Set up the helper function for drawing washes
-    _twoColorsType *twoColors;
-    static const float domainAndRange[8] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-    
-    twoColors = malloc(sizeof(_twoColorsType)); // We malloc() the helper data because we may draw this wash during printing, in which case it won't necessarily be evaluated immediately. We need for all the data the shading function needs to draw to potentially outlive us.
-    [lighterColor getRed:&twoColors->red1 green:&twoColors->green1 blue:&twoColors->blue1 alpha:&twoColors->alpha1];
-    [darkerColor getRed:&twoColors->red2 green:&twoColors->green2 blue:&twoColors->blue2 alpha:&twoColors->alpha2];
-    linearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
-    
-    twoColors = malloc(sizeof(_twoColorsType)); // We malloc() the helper data because we may draw this wash during printing, in which case it won't necessarily be evaluated immediately. We need for all the data the shading function needs to draw to potentially outlive us.
-    [secondaryLighterColor getRed:&twoColors->red1 green:&twoColors->green1 blue:&twoColors->blue1 alpha:&twoColors->alpha1];
-    [secondaryDarkerColor getRed:&twoColors->red2 green:&twoColors->green2 blue:&twoColors->blue2 alpha:&twoColors->alpha2];
-    secondaryLinearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
+    // NSColor *highlightLightColor = [NSColor colorWithDeviceHue:hue - (1.0/120.0) saturation:MAX(0.0, saturation-0.12) brightness:MIN(1.0, brightness+0.045) alpha:alpha];
+    highlightLightColor = [[NSColor colorWithDeviceHue:hue saturation:MAX(0.0, saturation-.12) brightness:MIN(1.0, brightness+0.30) alpha:alpha] retain];
+    highlightDarkColor = [[NSColor colorWithDeviceHue:hue saturation:MIN(1.0, (saturation > .04) ? saturation+0.12 : 0.0) brightness:MAX(0.0, brightness-0.045) alpha:alpha] retain];
+    secondaryHighlightLightColor = [[[highlightLightColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
+    secondaryHighlightDarkColor = [[[highlightDarkColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
 }
 
 - (id)_highlightColorForCell:(NSCell *)cell { return nil; }
@@ -114,16 +102,25 @@ static CGFunctionRef secondaryLinearBlendFunctionRef = NULL;
 - (void)highlightSelectionInClipRect:(NSRect)rect {
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
-    NSColor *color;
-    CGFunctionRef functionRef;
+    NSColor *color, *lightColor, *darkColor;
+    CGFunctionRef linearBlendFunctionRef;
     
     if ([[self window] firstResponder] == self && [[self window] isKeyWindow]) {
         color = highlightColor;
-        functionRef = linearBlendFunctionRef;
+        lightColor = highlightLightColor;
+        darkColor = highlightDarkColor;
     } else {
         color = secondaryHighlightColor;
-        functionRef = secondaryLinearBlendFunctionRef;
+        lightColor = secondaryHighlightLightColor;
+        darkColor = secondaryHighlightDarkColor;
     }
+    
+    static const float domainAndRange[8] = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
+    
+    _twoColorsType *twoColors = malloc(sizeof(_twoColorsType)); // We malloc() the helper data because we may draw this wash during printing, in which case it won't necessarily be evaluated immediately. We need for all the data the shading function needs to draw to potentially outlive us.
+    [lightColor getRed:&twoColors->red1 green:&twoColors->green1 blue:&twoColors->blue1 alpha:&twoColors->alpha1];
+    [darkColor getRed:&twoColors->red2 green:&twoColors->green2 blue:&twoColors->blue2 alpha:&twoColors->alpha2];
+    linearBlendFunctionRef = CGFunctionCreate(twoColors, 1, domainAndRange, 4, domainAndRange, &linearFunctionCallbacks);
     
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
     unsigned int rowIndex = [selectedRowIndexes firstIndex];
@@ -146,15 +143,16 @@ static CGFunctionRef secondaryLinearBlendFunctionRef = NULL;
 
         // Draw a soft wash underneath it
         CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
-        CGContextSaveGState(context); {
-            CGContextClipToRect(context, *(CGRect*)&washRect);
-            CGShadingRef cgShading = CGShadingCreateAxial(colorSpace, CGPointMake(0, NSMinY(washRect)), CGPointMake(0, NSMaxY(washRect)), functionRef, NO, NO);
-            CGContextDrawShading(context, cgShading);
-            CGShadingRelease(cgShading);
-        } CGContextRestoreGState(context);
+        CGContextSaveGState(context);
+        CGContextClipToRect(context, *(CGRect*)&washRect);
+        CGShadingRef cgShading = CGShadingCreateAxial(colorSpace, CGPointMake(0, NSMinY(washRect)), CGPointMake(0, NSMaxY(washRect)), linearBlendFunctionRef, NO, NO);
+        CGContextDrawShading(context, cgShading);
+        CGShadingRelease(cgShading);
+        CGContextRestoreGState(context);
 
         rowIndex = newRowIndex;
     }
+    CGFunctionRelease(linearBlendFunctionRef);
     CGColorSpaceRelease(colorSpace);
 }
 
