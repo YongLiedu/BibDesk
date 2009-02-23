@@ -58,7 +58,6 @@
 #import "BDSKHeaderPopUpButtonCell.h"
 #import "BDSKGroupCell.h"
 #import "BDSKScriptHookManager.h"
-#import "BDSKCountedSet.h"
 #import "BDSKFilterController.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
