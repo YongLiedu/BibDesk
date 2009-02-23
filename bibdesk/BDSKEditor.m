@@ -2785,7 +2785,9 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         NSPasteboard *pboard = [info draggingPasteboard];
         NSString *field = [fields objectAtIndex:row];
         
-        if ([field isCitationField] || [field isEqualToString:BDSKCrossrefString]) {
+        if ([info draggingSource] == tableView) {
+            return NSDragOperationNone;
+        } else if ([field isCitationField] || [field isEqualToString:BDSKCrossrefString]) {
             if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, nil]])
                 return NSDragOperationEvery;
         } else if ([field isLocalFileField]) {
