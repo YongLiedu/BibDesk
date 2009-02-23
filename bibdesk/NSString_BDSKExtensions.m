@@ -1403,7 +1403,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 }
 
 - (NSString *)stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace {
-    return (NSString *)BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorGetDefault(), (CFStringRef)self);
+    return [(NSString *)BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
 }
 
 - (NSString *)fullyEncodeAsIURI {
