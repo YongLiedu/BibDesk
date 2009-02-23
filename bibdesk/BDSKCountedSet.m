@@ -43,19 +43,21 @@
 @implementation BDSKCountedSet
 
 // designated initializer
-- (id)initWithKeyCallBacks:(const CFDictionaryKeyCallBacks *)keyCallBacks{
+- (id)initWithCallBacks:(const CFSetCallBacks *)callBacks{
     
-    if(self = [super init])
-        dictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, keyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
-    
+    if(self = [super init]) {
+        set = CFSetCreateMutable(CFAllocatorGetDefault(), 0, callBacks);
+        bag = CFBagCreateMutable(CFAllocatorGetDefault(), 0, (const CFBagCallBacks *)callBacks); // CFSetCallBacks and CFBagCallBacks are compatible
+    }
     return self;
 }
 
 - (id)initWithCountedSet:(BDSKCountedSet *)countedSet {
     
-    if(self = [super init])
-        dictionary = CFDictionaryCreateMutableCopy(CFAllocatorGetDefault(), 0, countedSet->dictionary);
-    
+    if(self = [super init]) {
+        set = CFSetCreateMutableCopy(CFAllocatorGetDefault(), 0, countedSet->set);
+        bag = CFBagCreateMutableCopy(CFAllocatorGetDefault(), 0, countedSet->bag);
+    }
     return self;
 }
 
@@ -64,15 +66,15 @@
     keysAreStrings = YES;
 
     if(caseInsensitive)
-        return [self initWithKeyCallBacks:&kBDSKCaseInsensitiveStringDictionaryKeyCallBacks];
+        return [self initWithCallBacks:&kBDSKCaseInsensitiveStringSetCallBacks];
     else
-        return [self initWithKeyCallBacks:&kCFTypeDictionaryKeyCallBacks];
+        return [self initWithCallBacks:&kCFTypeSetCallBacks];
 
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [self mutableCopyWithZone:zone];
+    return [(NSSet *)set copyWithZone:zone];
 }
 
 - (id)mutableCopyWithZone:(NSZone *)zone
@@ -88,7 +90,8 @@
 
 - (void)dealloc
 {
-    if(dictionary) CFRelease(dictionary);
+    if(set) CFRelease(set);
+    if(bag) CFRelease(bag);
     [super dealloc];
 }
 
@@ -96,27 +99,24 @@
 
 - (unsigned)countForObject:(id)object;
 {
-    int *intPtr;
-    if (CFDictionaryGetValueIfPresent(dictionary, (const void *)object, (const void **)&intPtr) == NO)
-        *intPtr = 0;
-    return *intPtr;
+    return CFBagGetCountOfValue(bag, (const void *)object);
 }
 
 #pragma mark NSSet primitive methods
 
 - (unsigned)count;
 {
-    return CFDictionaryGetCount(dictionary);
+    return CFSetGetCount(set);
 }
 
 - (id)member:(id)object;
 {
-    return CFDictionaryContainsKey(dictionary, (void *)object) ? object : nil;
+    return (id)CFSetGetValue(set, (void *)object);
 }
 
 - (NSEnumerator *)objectEnumerator;
 {
-    return [(NSMutableDictionary *)dictionary keyEnumerator];
+    return [(NSSet *)set objectEnumerator];
 }
 
 #pragma mark NSMutableSet primitive methods
@@ -125,33 +125,17 @@
 {
     BDSKASSERT(keysAreStrings ? [object isKindOfClass:[NSString class]] : 1);
     
-    // each object starts with a count of 1
-    int *intPtr;
-    int cnt = 0;
-    if(CFDictionaryGetValueIfPresent(dictionary, (const void *)object, (const void **)&intPtr))
-        // if it's already in the dictionary, increment the counter; the dictionary retains it for us
-        cnt = *intPtr;
-    cnt++;
-    intPtr = &cnt;
-    CFDictionarySetValue(dictionary, object, (void *)intPtr);
+    CFSetAddValue(set, object);
+    CFBagAddValue(bag, object);
 }
     
 - (void)removeObject:(id)object;
 {
     BDSKASSERT(keysAreStrings ? [object isKindOfClass:[NSString class]] : 1);
 
-    int *intPtr;
-    if(CFDictionaryGetValueIfPresent(dictionary, (void *)object, (const void **)&intPtr)){
-        int cnt = *intPtr;
-        // don't remove it until the count goes to zero; should lock here
-        if(--cnt <= 0) {
-            CFDictionaryRemoveValue(dictionary, (const void *)object);
-        } else {
-            intPtr = &cnt;
-            CFDictionarySetValue(dictionary, object, (const void *)intPtr);
-        }
-    }
-    // no-op if the dictionary doesn't have this key
+    CFBagRemoveValue(bag, object);
+    if(CFBagGetCountOfValue(bag, (void *)object) == 0)
+        CFSetRemoveValue(set, object);
 }
 
 @end

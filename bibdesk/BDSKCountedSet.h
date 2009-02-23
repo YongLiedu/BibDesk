@@ -51,12 +51,13 @@
 
 
 @interface BDSKCountedSet : NSMutableSet {
-    CFMutableDictionaryRef dictionary;
+    CFMutableSetRef set;
+    CFMutableBagRef bag;
     BOOL keysAreStrings;
 }
 
 // designated initializer
-- (id)initWithKeyCallBacks:(const CFDictionaryKeyCallBacks *)keyCallBacks;
+- (id)initWithCallBacks:(const CFSetCallBacks *)ckeyCallBacks;
 - (id)initWithCountedSet:(BDSKCountedSet *)countedSet;
 - (id)initCaseInsensitive:(BOOL)caseInsensitive;
 

@@ -781,7 +781,7 @@ NSMutableSet *BDSKCreateFuzzyAuthorCompareMutableSet()
 
 - (id)initFuzzyAuthorCountedSet
 {
-    return [self initWithKeyCallBacks:&kBDSKAuthorFuzzyDictionaryKeyCallBacks];
+    return [self initWithCallBacks:&kBDSKAuthorFuzzySetCallBacks];
 }
 
 @end
