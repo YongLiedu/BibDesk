@@ -57,6 +57,12 @@
 - (NSArray *)tableColumnIdentifiers;
 - (void)scrollRowToCenter:(unsigned int)row;
 
+- (void)alternateDelete:(id)sender;
+- (void)alternateCut:(id)sender;
+
+- (BOOL)canAlternateDelete;
+- (BOOL)canAlternateCut;
+
 @end
 
 
@@ -65,6 +71,13 @@
 - (void)tableView:(NSTableView *)aTableView importItemAtRow:(int)rowIndex;
 - (void)tableView:(NSTableView *)aTableView openParentForItemAtRow:(int)rowIndex;
 - (NSColor *)tableView:(NSTableView *)aTableView highlightColorForRow:(int)rowIndex;
+@end
+
+
+@interface NSObject (BDSKMainTableViewDataSource)
+- (void)tableView:(NSTableView *)aTableView alternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
+- (BOOL)tableView:(NSTableView *)aTableView canAlternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes;
+- (void)tableView:(NSTableView *)aTableView alternateCutRowsWithIndexes:(NSIndexSet *)rowIndexes;
 @end
 
 
