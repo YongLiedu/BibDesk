@@ -95,9 +95,9 @@
 	if ((eventChar == NSEnterCharacter || eventChar == NSFormFeedCharacter || eventChar == NSNewlineCharacter || eventChar == NSCarriageReturnCharacter) && modifierFlags == 0) {
         [self insertNewline:self];
     } else if (eventChar == NSHomeFunctionKey && (modifierFlags & ~NSFunctionKeyMask) == 0) {
-        [self scrollToBeginningOfDocument:nil];
+        [self scrollToBeginningOfDocument:self];
     } else if (eventChar == NSEndFunctionKey && (modifierFlags & ~NSFunctionKeyMask) == 0) {
-        [self scrollToEndOfDocument:nil];
+        [self scrollToEndOfDocument:self];
     } else if ([typeSelectHelper processKeyDownEvent:theEvent] == NO) {
         [super keyDown:theEvent];
     }
@@ -346,6 +346,8 @@
         return [self allowsMultipleSelection];
     else if ([menuItem action] == @selector(deselectAll:))
         return [self allowsEmptySelection];
+    else if ([menuItem action] == @selector(insertNewline:))
+        return [[self delegate] respondsToSelector:@selector(tableViewInsertNewline:)];
     else if ([menuItem action] == @selector(invertSelection:))
         return [self allowsMultipleSelection];
     else if ([[BDSKOutlineView superclass] instancesRespondToSelector:@selector(validateMenuItem:)])

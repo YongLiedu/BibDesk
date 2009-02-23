@@ -131,21 +131,6 @@ enum {
     [super dealloc];
 }
 
-- (void)keyDown:(NSEvent *)event{
-    if ([[event characters] length] == 0)
-        return;
-    unichar c = [[event characters] characterAtIndex:0];
-    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
-    if (c == 0x0020){ // spacebar to page down in the lower pane of the BibDocument splitview, shift-space to page up
-        if(flags & NSShiftKeyMask)
-            [[self delegate] pageUpInPreview:nil];
-        else
-            [[self delegate] pageDownInPreview:nil];
-    }else {
-        [super keyDown:event];
-    }
-}
-
 - (BOOL)canAlternateDelete {
     if ([self numberOfSelectedRows] == 0 || [[self dataSource] respondsToSelector:@selector(tableView:alternateDeleteRowsWithIndexes:)] == NO)
         return NO;
@@ -231,6 +216,15 @@ enum {
             }
         }
     }
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem action] == @selector(alternateDelete:))
+        return [self canAlternateDelete];
+    else if ([menuItem action] == @selector(alternateCut:))
+        return [self canAlternateCut];
+    else
+        return [super validateMenuItem:menuItem];
 }
 
 #pragma mark Alternating row color

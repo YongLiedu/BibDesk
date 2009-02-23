@@ -1312,6 +1312,18 @@
 	}
 }
 
+- (void)tableViewInsertSpace:(NSTableView *)tv {
+	if (tv == tableView || tv == [fileSearchController tableView]) {
+		[self pageDownInPreview:nil];
+	}
+}
+
+- (void)tableViewInsertShiftSpace:(NSTableView *)tv {
+	if (tv == tableView || tv == [fileSearchController tableView]) {
+		[self pageUpInPreview:nil];
+	}
+}
+
 - (void)tableView:(NSTableView *)tv deleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
 	// the rows are always the selected rows
 	if (tv == tableView || tv == [fileSearchController tableView]) {

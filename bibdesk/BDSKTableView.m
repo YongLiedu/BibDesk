@@ -199,10 +199,14 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
     
 	if ((eventChar == NSEnterCharacter || eventChar == NSFormFeedCharacter || eventChar == NSNewlineCharacter || eventChar == NSCarriageReturnCharacter) && modifierFlags == 0) {
         [self insertNewline:self];
+    } else if (eventChar == 0x0020 && modifierFlags == 0) {
+        [self insertSpace:self];
+    } else if (eventChar== 0x0020 && modifierFlags == NSShiftKeyMask) {
+        [self insertShiftSpace:self];
     } else if (eventChar == NSHomeFunctionKey && (modifierFlags & ~NSFunctionKeyMask) == 0) {
-        [self scrollToBeginningOfDocument:nil];
+        [self scrollToBeginningOfDocument:self];
     } else if (eventChar == NSEndFunctionKey && (modifierFlags & ~NSFunctionKeyMask) == 0) {
-        [self scrollToEndOfDocument:nil];
+        [self scrollToEndOfDocument:self];
     } else if ([typeSelectHelper processKeyDownEvent:theEvent] == NO) {
         [super keyDown:theEvent];
     }
@@ -277,6 +281,20 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
 - (void)insertNewline:(id)sender {
     if ([[self delegate] respondsToSelector:@selector(tableViewInsertNewline:)])
         [[self delegate] tableViewInsertNewline:self];
+    else
+        NSBeep();
+}
+
+- (void)insertSpace:(id)sender {
+    if ([[self delegate] respondsToSelector:@selector(tableViewInsertSpace:)])
+        [[self delegate] tableViewInsertSpace:self];
+    else
+        NSBeep();
+}
+
+- (void)insertShiftSpace:(id)sender {
+    if ([[self delegate] respondsToSelector:@selector(tableViewInsertShiftSpace:)])
+        [[self delegate] tableViewInsertShiftSpace:self];
     else
         NSBeep();
 }
@@ -453,6 +471,12 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
         return [self allowsMultipleSelection];
     else if ([menuItem action] == @selector(deselectAll:))
         return [self allowsEmptySelection];
+    else if ([menuItem action] == @selector(insertNewline:))
+        return [[self delegate] respondsToSelector:@selector(tableViewInsertNewline:)];
+    else if ([menuItem action] == @selector(insertSpace:))
+        return [[self delegate] respondsToSelector:@selector(tableViewInsertSpace:)];
+    else if ([menuItem action] == @selector(alternateInsertSpace:))
+        return [[self delegate] respondsToSelector:@selector(tableViewAlternateInsertSpace:)];
     else if ([menuItem action] == @selector(invertSelection:))
         return [self allowsMultipleSelection];
     else if ([[BDSKTableView superclass] instancesRespondToSelector:@selector(validateMenuItem:)])
