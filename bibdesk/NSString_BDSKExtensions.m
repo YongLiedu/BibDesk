@@ -1398,6 +1398,14 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return self;
 }
 
+- (NSString *)stringByRemovingSurroundingWhitespace {
+    return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+}
+
+- (NSString *)stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace {
+    return (NSString *)BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorGetDefault(), (CFStringRef)self);
+}
+
 - (NSString *)fullyEncodeAsIURI {
     static const char hexDigits[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     static NSCharacterSet *unsafeCharacterSet = nil;

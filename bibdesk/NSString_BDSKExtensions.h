@@ -484,6 +484,9 @@ An inline buffer is used for speed in accessing each character.
 - (NSString *)stringByRemovingPrefix:(NSString *)prefix;
 - (NSString *)stringByRemovingSuffix:(NSString *)suffix;
 
+- (NSString *)stringByRemovingSurroundingWhitespace;
+- (NSString *)stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
+
 - (NSString *)fullyEncodeAsIURI;
 
 + (NSString *)pathSeparator;
