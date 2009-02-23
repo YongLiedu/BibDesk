@@ -75,22 +75,6 @@
 - (IBAction)removeSelectedPubs:(id)sender;
 
 /*!
-    @method alternateDelete:
-    @abstract General alternate delete action. Deletes the selected publications or the selected smart groups, depending on the selected tableView. 
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (void)alternateDelete:(id)sender;
-
-/*!
-    @method alternateCut:
-    @abstract Cuts using alternateDelete: action.
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (IBAction)alternateCut:(id)sender;
-
-/*!
     @method copyAsAction:
     @abstract copy items in a particular format, depending on the tag of the sender
     @discussion puts the format for the currently selected publications onto the general pasteboard.

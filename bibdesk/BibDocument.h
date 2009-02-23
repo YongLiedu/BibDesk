@@ -546,7 +546,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)newPub:(id)sender;
 - (IBAction)deleteSelectedPubs:(id)sender;
 - (IBAction)removeSelectedPubs:(id)sender;
-- (IBAction)alternateCut:(id)sender;
 - (IBAction)copyAsAction:(id)sender;
 - (IBAction)duplicate:(id)sender;
 - (IBAction)editPubCmd:(id)sender;

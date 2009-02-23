@@ -70,22 +70,6 @@
 	}
 }	
 
-- (BOOL) validateAlternateCutMenuItem:(NSMenuItem*) menuItem {
-    if ([documentWindow isKeyWindow] == NO)
-        return NO;
-	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder != tableView ||
-		[self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected] == YES) {
-		// no selection
-		return NO;
-	}
-	else {
-		// multiple selection
-		return YES;
-	}
-}	
-
 - (BOOL) validateCopyMenuItem:(NSMenuItem*) menuItem {
     if ([documentWindow isKeyWindow] == NO)
         return NO;
@@ -443,17 +427,6 @@
 	}
 }
 
-- (BOOL) validateAlternateDeleteMenuItem:(NSMenuItem*) menuItem {
-    if ([documentWindow isKeyWindow] == NO)
-        return NO;
-	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView || tableView == [fileSearchController tableView]) {
-		return [self validateDeleteSelectionMenuItem:menuItem];
-	} else {
-		return NO;
-	}
-}
-
 - (BOOL)validateSelectAllPublicationsMenuItem:(NSMenuItem *)menuItem{
     return ([documentWindow isKeyWindow] == YES);
 }
@@ -639,9 +612,6 @@
 	if (act == @selector(cut:)) {
 		return [self validateCutMenuItem:menuItem];
 	}
-	else if (act == @selector(alternateCut:)) {
-		return [self validateAlternateCutMenuItem:menuItem];
-	}
 	else if (act == @selector(copy:)) {
 		return [self validateCopyMenuItem:menuItem];
 	}
@@ -770,9 +740,6 @@
 	else if (act == @selector(delete:)) {
 		// called through NSTableView_BDSKExtensions
 		return [self validateDeleteMenuItem:menuItem];
-    }
-	else if (act == @selector(alternateDelete:)) {
-		return [self validateAlternateDeleteMenuItem:menuItem];
     }
 	else if (act == @selector(selectAllPublications:)){
         return [self validateSelectAllPublicationsMenuItem:menuItem];

@@ -1328,6 +1328,20 @@
     return NO;
 }
 
+- (void)tableView:(NSTableView *)tv alternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+	// the rows are always the selected rows
+	if (tv == tableView || tv == [fileSearchController tableView]) {
+		[self deleteSelectedPubs:nil];
+	}
+}
+
+- (BOOL)tableView:(NSTableView *)tv canAlternateDeleteRowsWithIndexes:(NSIndexSet *)rowIndexes {
+	if (tv == tableView || tv == [fileSearchController tableView] || tv == groupTableView) {
+		return [self hasExternalGroupsSelected] == NO && [rowIndexes count] > 0;
+	}
+    return NO;
+}
+
 - (void)tableView:(NSTableView *)tv pasteFromPasteboard:(NSPasteboard *)pboard{
 	if (tv == tableView) {
         NSError *error = nil;

@@ -293,22 +293,7 @@
     }
 }
 
-- (IBAction)alternateDelete:(id)sender {
-	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView || firstResponder == [fileSearchController tableView]) {
-		[self deleteSelectedPubs:sender];
-	}
-}
-
-// -delete:,  -copy:, -cut:, -paste:, and -duplicate are defined in BDSKTableView using dataSource methods
-
-- (IBAction)alternateCut:(id)sender {
-	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView) {
-		[tableView copy:sender];
-		[self alternateDelete:sender];
-	}
-}
+// -delete:,  -alternateDelete:, -copy:, -cut:, -alternateCut:, -paste:, and -duplicate are defined in BDSKTableView and BDSKMainTableView using dataSource methods
 
 - (IBAction)copyAsAction:(id)sender{
 	int copyType = [sender tag];

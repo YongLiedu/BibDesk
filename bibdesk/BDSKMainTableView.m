@@ -141,39 +141,70 @@ enum {
             [[self delegate] pageUpInPreview:nil];
         else
             [[self delegate] pageDownInPreview:nil];
-	// somehow alternate menu item shortcuts are not available globally, so we catch them here
-	}else if((c == NSDeleteCharacter) &&  (flags & NSAlternateKeyMask)) {
-		[[self delegate] alternateDelete:nil];
-    // following methods should solve the mysterious problem of arrow/page keys not working for some users
-    }else if(c == NSPageDownFunctionKey){
-        [[self enclosingScrollView] pageDown:self];
-    }else if(c == NSPageUpFunctionKey){
-        [[self enclosingScrollView] pageUp:self];
-    }else if(c == NSUpArrowFunctionKey){
-        int row = [[self selectedRowIndexes] firstIndex];
-		if (row == NSNotFound)
-			row = 0;
-		else if (row > 0)
-			row--;
-        [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
-        [self scrollRowToVisible:row];
-    }else if(c == NSDownArrowFunctionKey){
-        int row = [[self selectedRowIndexes] lastIndex];
-		if (row == NSNotFound)
-			row = 0;
-		else if (row < [self numberOfRows] - 1)
-			row++;
-        [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
-        [self scrollRowToVisible:row];
     }else {
         [super keyDown:event];
     }
 }
 
-- (IBAction)deleteForward:(id)sender{
-    // we use the same for Delete and the Backspace
-    // Omni's implementation of deleteForward: selects the next item, which selects the wrong item too early because we may delay for the warning
-    [self deleteBackward:sender];
+- (BOOL)canAlternateDelete {
+    if ([self numberOfSelectedRows] == 0 || [[self dataSource] respondsToSelector:@selector(tableView:alternateDeleteRowsWithIndexes:)] == NO)
+        return NO;
+    else if ([[self dataSource] respondsToSelector:@selector(tableView:canAlternateDeleteRowsWithIndexes:)])
+        return [[self dataSource] tableView:self canAlternateDeleteRowsWithIndexes:[self selectedRowIndexes]];
+    else
+        return YES;
+}
+
+- (void)alternateDelete:(id)sender {
+    if ([self canDelete]) {
+        unsigned int originalNumberOfRows = [self numberOfRows];
+        // -selectedRow is last row of multiple selection, no good for trying to select the row before the selection.
+        unsigned int selectedRow = [[self selectedRowIndexes] firstIndex];
+        [[self dataSource] tableView:self alternateDeleteRowsWithIndexes:[self selectedRowIndexes]];
+        [self reloadData];
+        unsigned int newNumberOfRows = [self numberOfRows];
+        
+        // Maintain an appropriate selection after deletions
+        if (originalNumberOfRows != newNumberOfRows) {
+            if (selectedRow == 0) {
+                if ([[self delegate] respondsToSelector:@selector(tableView:shouldSelectRow:)]) {
+                    if ([[self delegate] tableView:self shouldSelectRow:0])
+                        [self selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+                    else
+                        [self moveDown:nil];
+                } else {
+                    [self selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+                }
+            } else {
+                // Don't try to go past the new # of rows
+                selectedRow = MIN(selectedRow - 1, newNumberOfRows - 1);
+                
+                // Skip all unselectable rows if the delegate responds to -tableView:shouldSelectRow:
+                if ([[self delegate] respondsToSelector:@selector(tableView:shouldSelectRow:)]) {
+                    while (selectedRow > 0 && [[self delegate] tableView:self shouldSelectRow:selectedRow] == NO)
+                        selectedRow--;
+                }
+                
+                // If nothing was selected, move down (so that the top row is selected)
+                if (selectedRow < 0)
+                    [self moveDown:nil];
+                else
+                    [self selectRowIndexes:[NSIndexSet indexSetWithIndex:selectedRow] byExtendingSelection:NO];
+            }
+        }
+    } else
+        NSBeep();
+}
+
+- (BOOL)canAlternateCut {
+    return [self canAlternateDelete] && [self canCopy];
+}
+
+- (void)alternateCut:(id)sender {
+    if ([self canAlternateCut] && [[self dataSource] tableView:self writeRowsWithIndexes:[self selectedRowIndexes] toPasteboard:[NSPasteboard generalPasteboard]])
+        [self alternateDelete:sender];
+    else
+        NSBeep();
 }
 
 - (void)highlightSelectionInClipRect:(NSRect)clipRect{
