@@ -139,7 +139,7 @@ enum {
 @end
 
 extern const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks;
-extern const CFArrayCallBacks kBDSKAuthorFuzzyAuthorCallBacks;
+extern const CFArrayCallBacks kBDSKAuthorFuzzyArrayCallBacks;
 extern const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks;
 extern const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks;
 

@@ -398,7 +398,7 @@
     id fuzzyName = name;
     NSMutableArray *fuzzyNames = nil;
     if ([field isPersonField]) {
-        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKAuthorFuzzyAuthorCallBacks);
+        fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKAuthorFuzzyArrayCallBacks);
         fuzzyName = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name andPub:nil];
     } else {
         fuzzyNames = (NSMutableArray *)CFArrayCreateMutable(kCFAllocatorDefault, [names count], &kBDSKCaseInsensitiveStringArrayCallBacks);

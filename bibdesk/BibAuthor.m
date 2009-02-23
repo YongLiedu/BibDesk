@@ -760,7 +760,7 @@ const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks = {
     BibAuthorFuzzyHash,
 };
 
-const CFArrayCallBacks kBDSKAuthorFuzzyAuthorCallBacks = {
+const CFArrayCallBacks kBDSKAuthorFuzzyArrayCallBacks = {
     0,    // version
     BDSKNSObjectRetain,  // retain
     BDSKNSObjectRelease, // release
