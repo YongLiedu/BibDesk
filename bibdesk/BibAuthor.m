@@ -746,14 +746,10 @@ Boolean BibAuthorFuzzyEqual(const void *value1, const void *value2)
     return [(BibAuthor *)value1 fuzzyEqual:(BibAuthor *)value2];
 }
 
-const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks = {
-    0,    // version
-    BDSKNSObjectRetain,  // retain
-    BDSKNSObjectRelease, // release
-    BDSKNSObjectCopyDescription,
-    BibAuthorFuzzyEqual,
-    BibAuthorFuzzyHash,
-};
+NSMutableSet *BDSKCreateFuzzyAuthorCompareMutableSet()
+{
+    return (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKAuthorFuzzySetCallBacks);
+}
 
 const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks = {
     0,
@@ -772,19 +768,24 @@ const CFArrayCallBacks kBDSKAuthorFuzzyAuthorCallBacks = {
     BibAuthorFuzzyEqual,
 };
 
-NSMutableSet *BDSKCreateFuzzyAuthorCompareMutableSet()
-{
-    return (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKAuthorFuzzySetCallBacks);
-}
+const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks = {
+    0,    // version
+    BDSKNSObjectRetain,  // retain
+    BDSKNSObjectRelease, // release
+    BDSKNSObjectCopyDescription,
+    BibAuthorFuzzyEqual,
+    BibAuthorFuzzyHash,
+};
 
-@implementation BDSKCountedSet (BibAuthor)
+const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks = {
+    0,    // version
+    BDSKNSObjectRetain,  // retain
+    BDSKNSObjectRelease, // release
+    BDSKNSObjectCopyDescription,
+    BibAuthorFuzzyEqual,
+    BibAuthorFuzzyHash,
+};
 
-- (id)initFuzzyAuthorCountedSet
-{
-    return [self initWithCallBacks:&kBDSKAuthorFuzzySetCallBacks];
-}
-
-@end
 
 @implementation ABPerson (BibAuthor)
 

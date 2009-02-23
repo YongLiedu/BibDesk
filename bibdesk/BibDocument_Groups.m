@@ -55,7 +55,6 @@
 #import "BDSKWebGroup.h"
 #import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
-#import "BDSKCountedSet.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BDSKAppController.h"
@@ -478,6 +477,17 @@ The groupedPublications array is a subset of the publications array, developed b
 
 #pragma mark UI updating
 
+typedef struct _setAndBagContext {
+    CFMutableSetRef set;
+    CFMutableBagRef bag;
+} setAndBagContext;
+
+static void addObjectToSetAndBag(const void *value, void *context) {
+    setAndBagContext *ctxt = context;
+    CFSetAddValue(ctxt->set, value);
+    CFBagAddValue(ctxt->bag, value);
+}
+
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
 // and a count, and a group knows how to compare itself with other groups for sorting/equality, but doesn't know 
 // which pubs are associated with it
@@ -498,11 +508,14 @@ The groupedPublications array is a subset of the publications array, developed b
         
     } else {
         
-        BDSKCountedSet *countedSet;
-        if([groupField isPersonField])
-            countedSet = [[BDSKCountedSet alloc] initFuzzyAuthorCountedSet];
-        else
-            countedSet = [[BDSKCountedSet alloc] initCaseInsensitive:YES];
+        setAndBagContext setAndBag;
+        if([groupField isPersonField]) {
+            setAndBag.set = CFSetCreateMutable(kCFAllocatorDefault, 0, &kBDSKAuthorFuzzySetCallBacks);
+            setAndBag.bag = CFBagCreateMutable(kCFAllocatorDefault, 0, &kBDSKAuthorFuzzyBagCallBacks);
+        } else {
+            setAndBag.set = CFSetCreateMutable(kCFAllocatorDefault, 0, &kBDSKCaseInsensitiveStringSetCallBacks);
+            setAndBag.bag = CFBagCreateMutable(kCFAllocatorDefault, 0, &kBDSKCaseInsensitiveStringBagCallBacks);
+        }
         
         int emptyCount = 0;
         
@@ -513,20 +526,20 @@ The groupedPublications array is a subset of the publications array, developed b
         while(pub = [pubEnum nextObject]){
             tmpSet = [pub groupsForField:groupField];
             if([tmpSet count])
-                [countedSet unionSet:tmpSet];
+                CFSetApplyFunction((CFSetRef)tmpSet, addObjectToSetAndBag, &setAndBag);
             else
                 emptyCount++;
         }
         
-        NSMutableArray *mutableGroups = [[NSMutableArray alloc] initWithCapacity:[countedSet count] + 1];
-        NSEnumerator *groupEnum = [countedSet objectEnumerator];
+        NSMutableArray *mutableGroups = [[NSMutableArray alloc] initWithCapacity:CFSetGetCount(setAndBag.set) + 1];
+        NSEnumerator *groupEnum = [(NSSet *)(setAndBag.set) objectEnumerator];
         id groupName;
         BDSKGroup *group;
                 
         // now add the group names that we found from our BibItems, using a generic folder icon
         // use BDSKTextWithIconCell keys
         while(groupName = [groupEnum nextObject]){
-            group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:[countedSet countForObject:groupName]];
+            group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:CFBagGetCountOfValue(setAndBag.bag, groupName)];
             [mutableGroups addObject:group];
             [group release];
         }
@@ -545,7 +558,8 @@ The groupedPublications array is a subset of the publications array, developed b
         }
         
         [groups setCategoryGroups:mutableGroups];
-        [countedSet release];
+        CFRelease(setAndBag.set);
+        CFRelease(setAndBag.bag);
         [mutableGroups release];
         
     }

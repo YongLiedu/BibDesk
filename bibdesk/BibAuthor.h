@@ -38,7 +38,6 @@
     @discussion declares an interface to author model objects
 */
 #import <Cocoa/Cocoa.h>
-#import "BDSKCountedSet.h"
 #import <AddressBook/AddressBook.h>
 
 @class BDSKPersonController;
@@ -139,15 +138,12 @@ enum {
 
 @end
 
-extern const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks;
 extern const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks;
 extern const CFArrayCallBacks kBDSKAuthorFuzzyAuthorCallBacks;
+extern const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks;
+extern const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks;
 
 extern NSMutableSet *BDSKCreateFuzzyAuthorCompareMutableSet();
-
-@interface BDSKCountedSet (BibAuthor)
-- (id)initFuzzyAuthorCountedSet;
-@end
 
 @interface ABPerson (BibAuthor)
 + (ABPerson *)personWithAuthor:(BibAuthor *)author;

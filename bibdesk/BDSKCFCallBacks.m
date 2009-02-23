@@ -144,3 +144,12 @@ const CFSetCallBacks kBDSKCaseInsensitiveStringSetCallBacks = {
     BDSKCaseInsensitiveStringEqual,
     BDSKCaseInsensitiveStringHash
 };
+
+const CFBagCallBacks kBDSKCaseInsensitiveStringBagCallBacks = {
+    0,   // version
+    BDSKNSObjectRetain,
+    BDSKNSObjectRelease,
+    BDSKNSObjectCopyDescription,
+    BDSKCaseInsensitiveStringEqual,
+    BDSKCaseInsensitiveStringHash
+};
