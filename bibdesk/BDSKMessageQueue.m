@@ -241,6 +241,20 @@
     [queueLock unlock];
 }
 
+- (void)dequeueAllInvocationsForTarget:(id)aTarget {
+    [queueLock lock];
+    int i = [queue count];
+    while (i--) {
+        if ([[queue objectAtIndex:i] target] == aTarget)
+            [queue removeObjectAtIndex:i];
+    }
+    if (queueSet) {
+        [queueSet release];
+        queueSet = nil;
+    }
+    [queueLock unlock];
+}
+
 - (void)queueSelector:(SEL)aSelector forTarget:(id)aTarget {
     if (aTarget) {
         BDSKInvocation *invocation = [[BDSKInvocation alloc] initWithTarget:aTarget selector:aSelector];
@@ -353,6 +367,10 @@
 
 - (void)dequeueSelector:(SEL)aSelector withObject:(id)anObject1 withObject:(id)anObject2 {
     [[BDSKMessageQueue mainQueue] dequeueSelector:aSelector forTarget:self withObject:anObject1 withObject:anObject2];
+}
+
+- (void)dequeueAllInvocations {
+    [[BDSKMessageQueue mainQueue] dequeueAllInvocationsForTarget:self];
 }
 
 @end
