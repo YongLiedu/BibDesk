@@ -74,13 +74,76 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 
 @implementation NSData (BDSKExtensions)
 
-// avoids reading the entire file into memory at once
-+ (NSData *)sha1SignatureForFile:(NSString *)absolutePath;
-{
-    return [[NSData dataWithContentsOfMappedFile:absolutePath] sha1Signature];
+// context and read, seek, close functions for file reading
+typedef struct _BDSKFileContext {
+    int fd;
+} BDSKFileContext;
+
+static int _BDSKFile_readfn(void *_ctx, char *buf, int nbytes) {
+    BDSKFileContext *ctx = (BDSKFileContext *)_ctx;
+    return read(ctx->fd, buf, nbytes);
 }
 
-- (NSData *)sha1Signature {
+static fpos_t _BDSKFile_seekfn(void *_ctx, off_t offset, int whence) {
+    BDSKFileContext *ctx = (BDSKFileContext *)_ctx;
+    return lseek(ctx->fd, offset, whence);
+}
+
+static int _BDSKFile_closefn(void *_ctx) {
+    BDSKFileContext *ctx = (BDSKFileContext *)_ctx;
+    close(ctx->fd);
+    free(ctx);
+    return 0;
+}
+
+// context and read, seek, close functions for data as file reading
+typedef struct _BDSKDataFileContext {
+    NSData *data;
+    void   *bytes;
+    size_t  length;
+    size_t  position;
+} BDSKDataFileContext;
+
+static int _BDSKData_readfn(void *_ctx, char *buf, int nbytes) {
+    //fprintf(stderr, " read(ctx:%p buf:%p nbytes:%d)\n", _ctx, buf, nbytes);
+    BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
+    nbytes = MIN((unsigned)nbytes, ctx->length - ctx->position);
+    memcpy(buf, ctx->bytes + ctx->position, nbytes);
+    ctx->position += nbytes;
+    return nbytes;
+}
+
+static fpos_t _BDSKData_seekfn(void *_ctx, off_t offset, int whence) {
+    //fprintf(stderr, " seek(ctx:%p off:%qd whence:%d)\n", _ctx, offset, whence);
+    BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
+    size_t reference;
+    if (whence == SEEK_SET)
+        reference = 0;
+    else if (whence == SEEK_CUR)
+        reference = ctx->position;
+    else if (whence == SEEK_END)
+        reference = ctx->length;
+    else
+        return -1;
+    if (reference + offset >= 0 && reference + offset <= ctx->length) {
+        // position is a size_t (i.e., memory/vm sized) while the reference and offset are off_t (file system positioned).
+        // since we are refering to an NSData, this must be OK (and we checked 'reference + offset' vs. our length above).
+        ctx->position = (size_t)(reference + offset);
+        return ctx->position;
+    }
+    return -1;
+}
+
+static int _BDSKData_closefn(void *_ctx) {
+    //fprintf(stderr, "close(ctx:%p)\n", _ctx);
+    BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
+    [ctx->data release];
+    free(ctx);
+    return 0;
+}
+
+static NSData *sha1Signature(void *cookie, int (*readfn)(void *, char *, int), int (*closefn)(void *))
+{
     EVP_MD_CTX mdctx;
     const EVP_MD *md = EVP_sha1();
     int status;
@@ -89,21 +152,40 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
     // NB: status == 1 for success
     status = EVP_DigestInit_ex(&mdctx, md, NULL);
     
-    const unsigned char *buffer = [self bytes];
-    size_t currentBytes, bytesLeft = [self length];
-    while (bytesLeft > 0) {
-        currentBytes = MIN(bytesLeft, 4096u); 
-        status = EVP_DigestUpdate(&mdctx, buffer, currentBytes);
-        bytesLeft -= currentBytes;
-        buffer += currentBytes;
-    }
+    // page size
+    char buffer[4096];
+
+    ssize_t bytesRead;
+    while ((bytesRead = readfn(cookie, buffer, sizeof(buffer))) > 0)
+        status = EVP_DigestUpdate(&mdctx, buffer, bytesRead);
+    
+    closefn(cookie);    
     
     unsigned char md_value[EVP_MAX_MD_SIZE];
     unsigned int md_len;
     status = EVP_DigestFinal_ex(&mdctx, md_value, &md_len);
     status = EVP_MD_CTX_cleanup(&mdctx);
-    
-    return [NSData dataWithBytes:md_value length:md_len];
+
+    // return nil instead of a random hash if read() fails (it returns -1 for a directory) 
+    return -1 == bytesRead ? nil : [NSData dataWithBytes:md_value length:md_len];
+}
+
++ (NSData *)sha1SignatureForFile:(NSString *)absolutePath {
+    int fd = open([absolutePath fileSystemRepresentation], O_RDONLY);
+    // early out in case we can't open the file
+    if (fd == -1)
+        return nil;
+    BDSKFileContext *ctx = calloc(1, sizeof(BDSKFileContext));
+    ctx->fd = fd;
+    return sha1Signature(ctx, _BDSKFile_readfn, _BDSKFile_closefn);
+}
+
+- (NSData *)sha1Signature {
+    BDSKDataFileContext *ctx = calloc(1, sizeof(BDSKDataFileContext));
+    ctx->data = [self retain];
+    ctx->bytes = (void *)[self bytes];
+    ctx->length = [self length];
+    return sha1Signature(ctx, _BDSKData_readfn, _BDSKData_closefn);
 }
 
 // base 64 encoding/decoding methods modified from sample code on CocoaDev http://www.cocoadev.com/index.pl?BaseSixtyFour
@@ -259,56 +341,6 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 }
 
 /*" Creates a stdio FILE pointer for reading from the receiver via the funopen() BSD facility.  The receiver is automatically retained until the returned FILE is closed. "*/
-
-// Same context used for read and write.
-typedef struct _BDSKDataFileContext {
-    NSData *data;
-    void   *bytes;
-    size_t  length;
-    size_t  position;
-} BDSKDataFileContext;
-
-static int _BDSKData_readfn(void *_ctx, char *buf, int nbytes) {
-    //fprintf(stderr, " read(ctx:%p buf:%p nbytes:%d)\n", _ctx, buf, nbytes);
-    BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
-
-    nbytes = MIN((unsigned)nbytes, ctx->length - ctx->position);
-    memcpy(buf, ctx->bytes + ctx->position, nbytes);
-    ctx->position += nbytes;
-    return nbytes;
-}
-
-static fpos_t _BDSKData_seekfn(void *_ctx, off_t offset, int whence) {
-    //fprintf(stderr, " seek(ctx:%p off:%qd whence:%d)\n", _ctx, offset, whence);
-    BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
-
-    size_t reference;
-    if (whence == SEEK_SET)
-        reference = 0;
-    else if (whence == SEEK_CUR)
-        reference = ctx->position;
-    else if (whence == SEEK_END)
-        reference = ctx->length;
-    else
-        return -1;
-
-    if (reference + offset >= 0 && reference + offset <= ctx->length) {
-        // position is a size_t (i.e., memory/vm sized) while the reference and offset are off_t (file system positioned).
-        // since we are refering to an NSData, this must be OK (and we checked 'reference + offset' vs. our length above).
-        ctx->position = (size_t)(reference + offset);
-        return ctx->position;
-    }
-    return -1;
-}
-
-static int _BDSKData_closefn(void *_ctx) {
-    //fprintf(stderr, "close(ctx:%p)\n", _ctx);
-    BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
-    [ctx->data release];
-    free(ctx);
-    
-    return 0;
-}
 
 - (FILE *)openReadOnlyStandardIOFile {
     BDSKDataFileContext *ctx = calloc(1, sizeof(BDSKDataFileContext));
