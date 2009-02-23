@@ -87,6 +87,22 @@ static NSColor *secondaryHighlightDarkColor = nil;
     secondaryHighlightDarkColor = [[[highlightDarkColor colorUsingColorSpaceName:NSDeviceWhiteColorSpace] colorUsingColorSpaceName:NSDeviceRGBColorSpace] retain];
 }
 
+- (id)initWithFrame:(NSRect)frameRect {
+    if (self = [super initWithFrame:frameRect]) {
+        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
+            [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)coder {
+    if (self = [super initWithCoder:coder]) {
+        if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)])
+            [self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
+    }
+    return self;
+}
+
 - (id)_highlightColorForCell:(NSCell *)cell { return nil; }
 
 - (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)shouldExtend {
@@ -100,6 +116,11 @@ static NSColor *secondaryHighlightDarkColor = nil;
 }
 
 - (void)highlightSelectionInClipRect:(NSRect)rect {
+    if ([self respondsToSelector:@selector(setSelectionHighlightStyle:)]) {
+        [super highlightSelectionInClipRect:rect];
+        return;
+    }
+    
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
     NSColor *color, *lightColor, *darkColor;

@@ -269,7 +269,7 @@
 
 - (NSColor *)backgroundColor {
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableBackgroundColorForGroupTable"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableBackgroundColorForGroupTable"] || [self respondsToSelector:@selector(setSelectionHighlightStyle:)])
         return [super backgroundColor];
     
     static NSColor *backgroundColor = nil;
