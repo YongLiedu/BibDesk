@@ -79,17 +79,17 @@ typedef struct _BDSKFileContext {
     int fd;
 } BDSKFileContext;
 
-static int _BDSKFile_readfn(void *_ctx, char *buf, int nbytes) {
+static int _file_readfn(void *_ctx, char *buf, int nbytes) {
     BDSKFileContext *ctx = (BDSKFileContext *)_ctx;
     return read(ctx->fd, buf, nbytes);
 }
 
-static fpos_t _BDSKFile_seekfn(void *_ctx, off_t offset, int whence) {
+static fpos_t _file_seekfn(void *_ctx, off_t offset, int whence) {
     BDSKFileContext *ctx = (BDSKFileContext *)_ctx;
     return lseek(ctx->fd, offset, whence);
 }
 
-static int _BDSKFile_closefn(void *_ctx) {
+static int _file_closefn(void *_ctx) {
     BDSKFileContext *ctx = (BDSKFileContext *)_ctx;
     close(ctx->fd);
     free(ctx);
@@ -104,7 +104,7 @@ typedef struct _BDSKDataFileContext {
     size_t  position;
 } BDSKDataFileContext;
 
-static int _BDSKData_readfn(void *_ctx, char *buf, int nbytes) {
+static int _data_readfn(void *_ctx, char *buf, int nbytes) {
     //fprintf(stderr, " read(ctx:%p buf:%p nbytes:%d)\n", _ctx, buf, nbytes);
     BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
     nbytes = MIN((unsigned)nbytes, ctx->length - ctx->position);
@@ -113,7 +113,7 @@ static int _BDSKData_readfn(void *_ctx, char *buf, int nbytes) {
     return nbytes;
 }
 
-static fpos_t _BDSKData_seekfn(void *_ctx, off_t offset, int whence) {
+static fpos_t _data_seekfn(void *_ctx, off_t offset, int whence) {
     //fprintf(stderr, " seek(ctx:%p off:%qd whence:%d)\n", _ctx, offset, whence);
     BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
     size_t reference;
@@ -134,7 +134,7 @@ static fpos_t _BDSKData_seekfn(void *_ctx, off_t offset, int whence) {
     return -1;
 }
 
-static int _BDSKData_closefn(void *_ctx) {
+static int _data_closefn(void *_ctx) {
     //fprintf(stderr, "close(ctx:%p)\n", _ctx);
     BDSKDataFileContext *ctx = (BDSKDataFileContext *)_ctx;
     [ctx->data release];
@@ -177,7 +177,7 @@ static NSData *sha1Signature(void *cookie, int (*readfn)(void *, char *, int), i
         return nil;
     BDSKFileContext *ctx = calloc(1, sizeof(BDSKFileContext));
     ctx->fd = fd;
-    return sha1Signature(ctx, _BDSKFile_readfn, _BDSKFile_closefn);
+    return sha1Signature(ctx, _file_readfn, _file_closefn);
 }
 
 - (NSData *)sha1Signature {
@@ -185,7 +185,7 @@ static NSData *sha1Signature(void *cookie, int (*readfn)(void *, char *, int), i
     ctx->data = [self retain];
     ctx->bytes = (void *)[self bytes];
     ctx->length = [self length];
-    return sha1Signature(ctx, _BDSKData_readfn, _BDSKData_closefn);
+    return sha1Signature(ctx, _data_readfn, _data_closefn);
 }
 
 // base 64 encoding/decoding methods modified from sample code on CocoaDev http://www.cocoadev.com/index.pl?BaseSixtyFour
@@ -349,7 +349,7 @@ static NSData *sha1Signature(void *cookie, int (*readfn)(void *, char *, int), i
     ctx->length = [self length];
     //fprintf(stderr, "open read -> ctx:%p\n", ctx);
 
-    FILE *f = funopen(ctx, _BDSKData_readfn, NULL/*writefn*/, _BDSKData_seekfn, _BDSKData_closefn);
+    FILE *f = funopen(ctx, _data_readfn, NULL/*writefn*/, _data_seekfn, _data_closefn);
     if (f == NULL)
         [self release]; // Don't leak ourselves if funopen fails
     return f;
