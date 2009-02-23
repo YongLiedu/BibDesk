@@ -65,6 +65,8 @@
 
 #import <Cocoa/Cocoa.h>
 
+// This class should only be used as global object, as there are retain cycles between the queue and the processors, and moreover it cannot safely be stopped
+
 @class BDSKInvocation;
 
 @interface BDSKMessageQueue : NSObject {
