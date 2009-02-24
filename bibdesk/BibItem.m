@@ -174,7 +174,7 @@ Boolean BibItemEquivalenceTest(const void *value1, const void *value2)
 }
 
 // Values are BibItems; used to determine if pubs are duplicates.  Items must not be edited while contained in a set using these callbacks, so dispose of the set before any editing operations.
-const CFSetCallBacks kBDSKBibItemEqualityCallBacks = {
+const CFSetCallBacks kBDSKBibItemEqualitySetCallBacks = {
     0,    // version
     BDSKNSObjectRetain,  // retain
     BDSKNSObjectRelease, // release
@@ -184,7 +184,7 @@ const CFSetCallBacks kBDSKBibItemEqualityCallBacks = {
 };
 
 // Values are BibItems; used to determine if pubs are duplicates.  Items must not be edited while contained in a set using these callbacks, so dispose of the set before any editing operations.
-const CFSetCallBacks kBDSKBibItemEquivalenceCallBacks = {
+const CFSetCallBacks kBDSKBibItemEquivalenceSetCallBacks = {
     0,    // version
     BDSKNSObjectRetain,  // retain
     BDSKNSObjectRelease, // release
@@ -2801,10 +2801,10 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
 	
     if([field isSingleValuedGroupField]){
 		// types and journals should be added as a whole
-		mutableGroupSet = [[NSMutableSet alloc] initCaseInsensitiveWithCapacity:1];
+		mutableGroupSet = [[NSMutableSet alloc] initForCaseInsensitiveStrings];
 		[mutableGroupSet addObject:value];
 	}else if([field isPersonField]){
-		mutableGroupSet = BDSKCreateFuzzyAuthorCompareMutableSet();
+		mutableGroupSet = [[NSMutableSet alloc] initForFuzzyAuthors];
         [mutableGroupSet addObjectsFromArray:[self peopleArrayForField:field]];
 	}else{
         NSArray *groupArray;   
@@ -2814,7 +2814,7 @@ static void addURLForFieldToArrayIfNotNil(const void *key, void *context)
         else 
             groupArray = [value componentsSeparatedByStringCaseInsensitive:@" and "];
         
-		mutableGroupSet = [[NSMutableSet alloc] initCaseInsensitiveWithCapacity:3];
+		mutableGroupSet = [[NSMutableSet alloc] initForCaseInsensitiveStrings];
         [mutableGroupSet addObjectsFromArray:groupArray];
     }
 	

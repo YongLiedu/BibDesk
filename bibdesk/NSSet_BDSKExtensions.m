@@ -42,7 +42,7 @@
 
 @implementation NSSet (BDSKExtensions)
 
-+ (id)caseInsensitiveStringSetWithObjects:(id)object, ...;
++ (id)setForCaseInsensitiveStringsWithObjects:(id)object, ...;
 {
     CFMutableSetRef set = CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKCaseInsensitiveStringSetCallBacks);
     va_list objList;
@@ -75,18 +75,12 @@
 
 @implementation NSMutableSet (BDSKExtensions)
 
-+ (id)caseInsensitiveStringSet;
++ (id)setForCaseInsensitiveStrings;
 {
     return [(id)CFSetCreateMutable(kCFAllocatorDefault, 0, &kBDSKCaseInsensitiveStringSetCallBacks) autorelease];
 }
 
-- (id)initCaseInsensitive
-{
-	self = [self initCaseInsensitiveWithCapacity:0];
-	return self;
-}
-
-- (id)initCaseInsensitiveWithCapacity:(unsigned)numItems
+- (id)initForCaseInsensitiveStrings
 {
 	[[self init] release];
 	// ignore capacity, as it will fix the number of items we can use

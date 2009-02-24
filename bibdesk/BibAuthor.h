@@ -143,7 +143,10 @@ extern const CFArrayCallBacks kBDSKAuthorFuzzyArrayCallBacks;
 extern const CFSetCallBacks kBDSKAuthorFuzzySetCallBacks;
 extern const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks;
 
-extern NSMutableSet *BDSKCreateFuzzyAuthorCompareMutableSet();
+
+@interface NSMutableSet (BibAuthor)
+- (id)initForFuzzyAuthors;
+@end
 
 @interface ABPerson (BibAuthor)
 + (ABPerson *)personWithAuthor:(BibAuthor *)author;

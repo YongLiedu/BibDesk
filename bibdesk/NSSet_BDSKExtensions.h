@@ -40,7 +40,7 @@
 
 @interface NSSet (BDSKExtensions)
 
-+ (id)caseInsensitiveStringSetWithObjects:(id)firstObj, ...;
++ (id)setForCaseInsensitiveStringsWithObjects:(id)firstObj, ...;
 
 - (id)nonEmpty;
 
@@ -48,9 +48,8 @@
 
 @interface NSMutableSet (BDSKExtensions)
 
-+ (id)caseInsensitiveStringSet;
++ (id)setForCaseInsensitiveStrings;
 
-- (id)initCaseInsensitive;
-- (id)initCaseInsensitiveWithCapacity:(unsigned)numItems;
+- (id)initForCaseInsensitiveStrings;
 
 @end

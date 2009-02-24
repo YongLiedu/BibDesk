@@ -1161,7 +1161,7 @@
             // add a new static groups with the added items, use a common author name or keyword if available
             NSEnumerator *pubEnum = [pubs objectEnumerator];
             BibItem *pub = [pubEnum nextObject];
-            NSMutableSet *auths = BDSKCreateFuzzyAuthorCompareMutableSet();
+            NSMutableSet *auths = [[NSMutableSet alloc] initForFuzzyAuthors];
             NSMutableSet *keywords = [[NSMutableSet alloc] initWithSet:[pub groupsForField:BDSKKeywordsString]];
             [auths setSet:[pub allPeople]];
             while(pub = [pubEnum nextObject]){
@@ -1560,8 +1560,8 @@
         return NO;
         
     NSString *fileName = [fileNames lastObject];
-    NSSet *unreadableTypes = [NSSet caseInsensitiveStringSetWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
-    NSSet *readableTypes = [NSSet caseInsensitiveStringSetWithObjects:@"bib", @"aux", @"ris", @"fcgi", @"refman", nil];
+    NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
+    NSSet *readableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"bib", @"aux", @"ris", @"fcgi", @"refman", nil];
     
     if([unreadableTypes containsObject:[fileName pathExtension]])
         return YES;

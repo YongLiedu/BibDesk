@@ -746,11 +746,6 @@ Boolean BibAuthorFuzzyEqual(const void *value1, const void *value2)
     return [(BibAuthor *)value1 fuzzyEqual:(BibAuthor *)value2];
 }
 
-NSMutableSet *BDSKCreateFuzzyAuthorCompareMutableSet()
-{
-    return (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKAuthorFuzzySetCallBacks);
-}
-
 const CFDictionaryKeyCallBacks kBDSKAuthorFuzzyDictionaryKeyCallBacks = {
     0,
     BDSKNSObjectRetain,
@@ -785,6 +780,14 @@ const CFBagCallBacks kBDSKAuthorFuzzyBagCallBacks = {
     BibAuthorFuzzyEqual,
     BibAuthorFuzzyHash,
 };
+
+
+@implementation NSMutableSet (BibAuthor)
+- (id)initForFuzzyAuthors {
+    [[self init] release];
+    return (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKAuthorFuzzySetCallBacks);
+}
+@end
 
 
 @implementation ABPerson (BibAuthor)

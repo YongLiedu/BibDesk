@@ -2367,7 +2367,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     int type = BDSKUnknownStringType;
     
     // some common types that people might use as attachments; we don't need to sniff these
-    NSSet *unreadableTypes = [NSSet caseInsensitiveStringSetWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
+    NSSet *unreadableTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
     
     while(fileName = [e nextObject]){
         type = BDSKUnknownStringType;

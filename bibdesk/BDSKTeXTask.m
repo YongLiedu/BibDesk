@@ -463,7 +463,7 @@ static double runLoopTimeout = 30;
     [enumerator setDesiredInfo:kFSCatInfoNodeFlags];
     
 	NSString *path = nil;
-    NSSet *helperTypes = [NSSet caseInsensitiveStringSetWithObjects:@"cfg", @"sty", nil];
+    NSSet *helperTypes = [NSSet setForCaseInsensitiveStringsWithObjects:@"cfg", @"sty", nil];
     NSMutableArray *helperFiles = [NSMutableArray array];
     
 	// copy all user .cfg and .sty files from application support

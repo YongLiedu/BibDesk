@@ -88,7 +88,7 @@ static int tableIconSize = 24;
     NSString *bundleID;
 
     // use a set so we don't add duplicate items to the array (not that it's particularly harmful)
-    NSMutableSet *currentBundleIdentifiers = [NSMutableSet caseInsensitiveStringSet];
+    NSMutableSet *currentBundleIdentifiers = [NSMutableSet setForCaseInsensitiveStrings];
     [currentBundleIdentifiers addObjectsFromArray:[[arrayController content] valueForKey:BDSKTextWithIconCellStringKey]];
     
     NSEnumerator *identifierE = [identifiers objectEnumerator];
@@ -127,7 +127,7 @@ static int tableIconSize = 24;
 - (void)synchronizePreferences{
     
     // this should be a unique list of the identifiers that we previously had in prefs; bundles are compared case-insensitively
-    NSMutableSet *applicationSet = [NSMutableSet caseInsensitiveStringSet];
+    NSMutableSet *applicationSet = [NSMutableSet setForCaseInsensitiveStrings];
     [applicationSet addObjectsFromArray:[[arrayController content] valueForKey:BDSKBundleIdentifierKey]];
     
     CFPreferencesSetAppValue(BDSKInputManagerLoadableApplications, (CFArrayRef)[applicationSet allObjects], BDSKInputManagerID);

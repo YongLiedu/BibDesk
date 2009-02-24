@@ -591,7 +591,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     // this is only useful if everyone else uses the mutex, though...
     @synchronized([NSDocumentController sharedDocumentController]){
         NSEnumerator *docE = [[[[[NSDocumentController sharedDocumentController] documents] copy] autorelease] objectEnumerator];
-        set = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKBibItemEqualityCallBacks);
+        set = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKBibItemEqualitySetCallBacks);
         id document = nil;
         while(document = [docE nextObject]){
             [document getCopyOfPublicationsOnMainThread:pubs];

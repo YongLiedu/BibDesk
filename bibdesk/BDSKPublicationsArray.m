@@ -274,7 +274,7 @@
 
 - (NSArray *)itemsForPerson:(BibAuthor *)aPerson forField:(NSString *)field;
 {
-    NSMutableSet *auths = BDSKCreateFuzzyAuthorCompareMutableSet();
+    NSMutableSet *auths = [[NSMutableSet alloc] initForFuzzyAuthors];
     NSEnumerator *pubEnum = [publications objectEnumerator];
     BibItem *bi;
     NSMutableArray *thePubs = [NSMutableArray array];

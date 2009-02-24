@@ -193,7 +193,7 @@
     // @@ note that if a person is author and editor (in a collection, for instance), the same pub can appear twice in publicationItems
     
     NSMutableSet *theNames = [[NSMutableSet alloc] init];
-    NSMutableSet *peopleSet = BDSKCreateFuzzyAuthorCompareMutableSet();
+    NSMutableSet *peopleSet = [[NSMutableSet alloc] initForFuzzyAuthors];
     NSEnumerator *pubEnum = [[owner publications] objectEnumerator];
     BibItem *pub;
     

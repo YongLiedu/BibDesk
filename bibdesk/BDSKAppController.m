@@ -963,7 +963,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     // (we'll use a bunch of handy delimiters, including the first space, so it's flexible.)
     // alternatively we can just type the title, like we used to.
     [scanner setCharactersToBeSkipped:nil];
-    NSSet *citeKeyStrings = [NSSet caseInsensitiveStringSetWithObjects:@"cite key", @"citekey", @"cite-key", @"key", nil];
+    NSSet *citeKeyStrings = [NSSet setForCaseInsensitiveStringsWithObjects:@"cite key", @"citekey", @"cite-key", @"key", nil];
     
     while(![scanner isAtEnd]){
         // set these to nil explicitly, since we check for that later
