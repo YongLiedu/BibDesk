@@ -222,15 +222,34 @@
 }
 
 - (void)queueInvocationOnce:(BDSKInvocation *)anInvocation {
+    unsigned int queueCount;
     BOOL alreadyContainsObject;
-
+    
     [queueLock lock];
+    
     if (queueSet == nil)
         queueSet = [[NSMutableSet alloc] initWithArray:queue];
     alreadyContainsObject = [queueSet member:anInvocation] != nil;
-    [queueLock unlock];
-    if (alreadyContainsObject == NO)
-        [self queueInvocation:anInvocation];
+    
+    if (alreadyContainsObject) {
+        [queueLock unlock];
+    } else {
+        queueCount = [queue count];
+        [queue insertObject:anInvocation atIndex:queueCount];
+        queueCount++;
+        if (queueSet)
+            [queueSet addObject:anInvocation];
+        
+        if (isMain == NO)
+            // Create new processor if needed and we can
+            [self createProcessorsForQueueSize:queueCount];
+        
+        [queueLock unlockWithCondition:QUEUE_HAS_INVOCATIONS];
+        
+        // Tickle main thread processor if needed
+        if (isMain && queueCount == 1)
+            [[queueProcessors lastObject] continueProcessingQueue];
+    }
 }
 
 - (void)dequeueInvocation:(BDSKInvocation *)anInvocation {
