@@ -579,7 +579,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
     if (owner != newOwner) {
 		owner = newOwner;
         // !!! TODO: check this
-        [self createFilesArray];
+        if (owner)
+            [self createFilesArray];
 	}
 }
 
