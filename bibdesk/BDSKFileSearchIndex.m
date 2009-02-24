@@ -62,6 +62,7 @@
 - (void)removeFileURLs:(NSSet *)urlstoBeAdded forIdentifierURL:(NSURL *)identifierURL;
 - (void)reindexFileURLsIfNeeded:(NSSet *)urlsToReindex forIdentifierURL:(NSURL *)identifierURL;
 - (void)runIndexThreadWithInfo:(NSDictionary *)info;
+- (void)searchIndexDidUpdateOnMainThread;
 - (void)searchIndexDidUpdate;
 - (void)searchIndexDidFinish;
 - (void)processNotification:(NSNotification *)note;
@@ -157,6 +158,9 @@
     NSParameterAssert([NSThread isMainThread]);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     OSAtomicCompareAndSwap32Barrier(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
+    
+    // remove all pending invocations from the main message queue
+    [self dequeueAllInvocations];
     
     // wake the thread up so the runloop will exit; shouldKeepRunning may have already done that, so don't send if the port is already dead
     if ([notificationPort isValid])
@@ -348,7 +352,7 @@ static void addItemFunction(const void *value, void *context) {
             [rwLock unlock];
         }
         
-        [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
+        [self searchIndexDidUpdateOnMainThread];
         
         NSMutableSet *URLsToRemove = [[NSMutableSet alloc] initWithArray:[signatures allKeys]];
         NSMutableArray *itemsToAdd = [[NSMutableArray alloc] init];
@@ -386,7 +390,7 @@ static void addItemFunction(const void *value, void *context) {
                     progressValue = (numberIndexed / totalObjectCount) * 100;
                 }
                 
-                [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
+                [self searchIndexDidUpdateOnMainThread];
             }
             
             [pool release];
@@ -403,7 +407,7 @@ static void addItemFunction(const void *value, void *context) {
         }
         [URLsToRemove release];
         
-        [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
+        [self searchIndexDidUpdateOnMainThread];
         
         [items release];
         items = itemsToAdd;
@@ -477,7 +481,7 @@ static void addItemFunction(const void *value, void *context) {
         [pool release];
         pool = [NSAutoreleasePool new];
         
-        [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
+        [self searchIndexDidUpdateOnMainThread];
         OSMemoryBarrier();
     }
         
@@ -644,6 +648,12 @@ static void addItemFunction(const void *value, void *context) {
     }
 }
 
+- (void)searchIndexDidUpdateOnMainThread {
+    OSMemoryBarrier();
+    if (flags.shouldKeepRunning == 1)
+        [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
+}
+
 - (void)searchIndexDidUpdate
 {
     BDSKASSERT([NSThread isMainThread]);
@@ -687,7 +697,7 @@ static void addItemFunction(const void *value, void *context) {
             
     // this will update the delegate when all is complete
     [self indexFilesForItems:searchIndexInfo numberPreviouslyIndexed:0 totalCount:1];        
-    [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
+    [self searchIndexDidUpdateOnMainThread];
 }
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
@@ -710,7 +720,7 @@ static void addItemFunction(const void *value, void *context) {
         [self removeFileURLs:urlsToRemove forIdentifierURL:identifierURL];
 	}
 	
-    [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
+    [self searchIndexDidUpdateOnMainThread];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
@@ -756,7 +766,7 @@ static void addItemFunction(const void *value, void *context) {
     [addedURLs release];
     [sameURLs release];
     
-    [self queueSelectorOnce:@selector(searchIndexDidUpdate)];
+    [self searchIndexDidUpdateOnMainThread];
 }    
 
 - (void)handleMachMessage:(void *)msg

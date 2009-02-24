@@ -231,6 +231,9 @@ enum {
         
         docState.isDocumentClosed = NO;
         
+        // remove all invocations from the main message queue
+        [self dequeueAllInvocations];
+        
         // need to set this for new documents
         [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
         
@@ -654,9 +657,12 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
         [documentWindow endEditingFor:nil];
         [self invalidateSearchFieldCellTimer];
     }
-
+    
     docState.isDocumentClosed = YES;
-
+    
+    // remove all queued invocations to us from the main message queue
+    [self dequeueAllInvocations];
+    
     [documentSearch terminate];
     [fileSearchController terminate];
     
@@ -2974,7 +2980,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     
     
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
-    [self queueSelectorOnce:@selector(handlePrivateBibItemChanged)];
+    if (docState.isDocumentClosed == NO)
+        [self queueSelectorOnce:@selector(handlePrivateBibItemChanged)];
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{

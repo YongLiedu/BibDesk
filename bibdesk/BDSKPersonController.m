@@ -164,6 +164,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // make sure we won't try to access this, e.g. in a delayed setPublicationItems:
     owner = nil;
+    [self dequeueAllInvocations];
 }
 
 - (void)updateFilter {
@@ -339,13 +340,14 @@
 
 - (void)handleBibItemChanged:(NSNotification *)note{
     NSString *key = [[note userInfo] valueForKey:@"key"];
-    if ([key isPersonField] || key == nil)
+    if (([key isPersonField] || key == nil) && owner)
         [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
 }
 
 - (void)handleBibItemAddDel:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
+    if (owner)
+        [self queueSelectorOnce:@selector(setPublicationItems:) withObject:nil];
 }
 
 - (void)handleGroupWillBeRemoved:(NSNotification *)note{
