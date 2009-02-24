@@ -410,7 +410,7 @@ static Class BDSKLinkedFileClass = Nil;
     BDSKASSERT(nil == aDelegate || [aDelegate respondsToSelector:@selector(basePathForLinkedFile:)]);
     
     NSString *basePath = [aDelegate basePathForLinkedFile:self];
-    NSString *relPath = [basePath relativePathToFile:aPath];
+    NSString *relPath = [aPath relativePathFromPath:basePath];
     AliasHandle anAlias = BDSKPathToAliasHandle((CFStringRef)aPath, (CFStringRef)basePath);
     
     if (self = [self initWithAlias:anAlias relativePath:relPath delegate:aDelegate]) {
@@ -609,7 +609,7 @@ static Class BDSKLinkedFileClass = Nil;
 {
     NSData *data = [self aliasDataRelativeToPath:newBasePath];
     NSString *path = [self path];
-    path = path && newBasePath ? [newBasePath relativePathToFile:path] : relativePath;
+    path = path && newBasePath ? [path relativePathFromPath:newBasePath] : relativePath;
     NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:data, @"aliasData", path, @"relativePath", nil];
     return [[NSKeyedArchiver archivedDataWithRootObject:dictionary] base64String];
 }
@@ -687,7 +687,7 @@ static Class BDSKLinkedFileClass = Nil;
     
     // update the relative path
     [relativePath autorelease];
-    relativePath = [[basePath relativePathToFile:path] retain];
+    relativePath = [[path relativePathFromPath:basePath] retain];
 }
 
 @end

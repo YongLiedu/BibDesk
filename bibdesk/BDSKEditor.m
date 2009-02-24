@@ -2881,7 +2881,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
                         if (filename == nil)
                             filename = [url path];
                         if (basePath)
-                            filename = [basePath relativePathToFile:filename];
+                            filename = [filename relativePathFromPath:basePath];
                     } else if (mask == NSDragOperationCopy) {
                         if (filename == nil)
                             filename = [url path];

@@ -1336,7 +1336,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
         while (success && (filePath = [itemEnum nextObject])) {
             if ([fm fileExistsAtPath:filePath]) {
-                NSString *relativePath = commonParent ? [commonParent relativePathToFile:filePath] : [filePath lastPathComponent];
+                NSString *relativePath = commonParent ? [filePath relativePathFromPath:commonParent] : [filePath lastPathComponent];
                 NSString *targetPath = [path stringByAppendingPathComponent:relativePath];
                 
                 if ([fm fileExistsAtPath:targetPath])
@@ -3826,7 +3826,7 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     BOOL isDir;
     if ([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir]) {
         NSString *filename = [path lastPathComponent];
-        NSString *relativePath = basePath ? [basePath relativePathToFile:path] : filename;
+        NSString *relativePath = basePath ? [path relativePathFromPath:basePath] : filename;
         NSFileWrapper *container = self;
         
         if ([relativePath isEqualToString:filename] == NO)

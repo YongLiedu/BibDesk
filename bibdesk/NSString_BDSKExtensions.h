@@ -491,7 +491,7 @@ An inline buffer is used for speed in accessing each character.
 
 + (NSString *)pathSeparator;
 - (NSString *)commonRootPathOfFile:(NSString *)filename;
-- (NSString *)relativePathToFile:(NSString *)filename;
+- (NSString *)relativePathFromPath:(NSString *)basePath;
 - (NSString *)stringByNormalizingPath;
 
 #pragma mark HTML/XML

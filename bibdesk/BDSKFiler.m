@@ -581,7 +581,7 @@ static BDSKFiler *sharedFiler = nil;
                     NSString *pathContent = [self pathContentOfSymbolicLinkAtPath:resolvedPath];
                     if([pathContent isAbsolutePath] == NO){// it links to a relative path
                         pathContent = [[[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent] stringByStandardizingPath];
-                        pathContent = [[resolvedNewPath stringByDeletingLastPathComponent] relativePathToFile:pathContent];
+                        pathContent = [pathContent relativePathFromPath:[resolvedNewPath stringByDeletingLastPathComponent]];
                     }
                     if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
                         status = NSLocalizedString(@"Unable to move symbolic link.", @"AutoFile error message");

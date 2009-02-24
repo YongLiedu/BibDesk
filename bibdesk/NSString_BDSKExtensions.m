@@ -1496,26 +1496,26 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return components ? [NSString pathWithComponents:components] : nil;
 }
 
-- (NSString *)relativePathToFile:(NSString *)otherFilename {
-    NSArray *commonRoot, *myUniquePart, *otherUniquePart;
+- (NSString *)relativePathFromPath:(NSString *)basePath {
+    NSArray *commonRoot, *myUniquePart, *baseUniquePart;
     int numberOfStepsUp, i;
 
-    otherFilename = [otherFilename stringByStandardizingPath];
-    commonRoot = [[self stringByStandardizingPath] commonRootPathComponentsOfFilename:otherFilename components:&myUniquePart otherComponents:&otherUniquePart];
+    basePath = [basePath stringByStandardizingPath];
+    commonRoot = [[self stringByStandardizingPath] commonRootPathComponentsOfFilename:basePath components:&myUniquePart otherComponents:&baseUniquePart];
     if (commonRoot == nil || [commonRoot count] == 0)
-        return otherFilename;
+        return self;
     
-    numberOfStepsUp = [myUniquePart count];
+    numberOfStepsUp = [baseUniquePart count];
     if (numberOfStepsUp == 0)
-        return [NSString pathWithComponents:otherUniquePart];
-    if ([[myUniquePart lastObject] isEqualToString:@""])
+        return [NSString pathWithComponents:myUniquePart];
+    if ([[baseUniquePart lastObject] isEqualToString:@""])
         numberOfStepsUp --;
     if (numberOfStepsUp == 0)
-        return [NSString pathWithComponents:otherUniquePart];
+        return [NSString pathWithComponents:myUniquePart];
     
-    NSMutableArray *stepsUpArray = [[otherUniquePart mutableCopy] autorelease];
+    NSMutableArray *stepsUpArray = [[myUniquePart mutableCopy] autorelease];
     for (i = 0; i < numberOfStepsUp; i++) {
-        NSString *steppingUpPast = [myUniquePart objectAtIndex:i];
+        NSString *steppingUpPast = [baseUniquePart objectAtIndex:i];
         if ([steppingUpPast isEqualToString:@".."]) {
             if ([[stepsUpArray objectAtIndex:0] isEqualToString:@".."])
                 [stepsUpArray removeObjectAtIndex:0];
