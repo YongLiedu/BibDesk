@@ -677,113 +677,34 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 }
 
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
-   
     if([self numberOfSelectedPubs] == 0 || 
        [self hasExternalGroupsSelected] == YES)
         return [NSIndexSet indexSet];
     
-    // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
-    NSMutableIndexSet *visibleIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:indexRange];
-    [visibleIndexes removeIndexes:[groupTableView selectedRowIndexes]];
-    
-    NSMutableIndexSet *categoryIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:[groups rangeOfCategoryGroups]];
-    unsigned int cnt = [categoryIndexes count];
-    NSString *groupField = [self currentGroupField];
-
-    // Mutable dictionary with fixed capacity using NSObjects for keys with ints for values; this gives us a fast lookup of row name->index.  Dictionaries can use any pointer-size element for a key or value; see /Developer/Examples/CoreFoundation/Dictionary.  Keys are retained rather than copied for efficiency.  Shark says that BibAuthors are created with alloc/init when using the copy callbacks, so NSShouldRetainWithZone() must be returning NO?
-    CFMutableDictionaryRef rowDict;
-    
-    // group objects are either BibAuthors or NSStrings; we need to use case-insensitive or fuzzy author matching, since that's the way groups are checked for containment
-    if([groupField isPersonField]){
-        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKAuthorFuzzyDictionaryKeyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
-    } else {
-        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &kBDSKCaseInsensitiveStringDictionaryKeyCallBacks, &kBDSKIntegerDictionaryValueCallBacks);
-    }
-    
-    unsigned int groupIndex = [categoryIndexes firstIndex];
-    unsigned int *cntPtr;
-    
-    // exclude smart and shared groups
-    while(groupIndex != NSNotFound){
-		if([visibleIndexes containsIndex:groupIndex]) {
-			cntPtr = &groupIndex;
-            CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:groupIndex] name], (void *)cntPtr);
-        }
-        groupIndex = [visibleIndexes indexGreaterThanIndex:groupIndex];
-    }
-    
     // Use this for the indexes we're going to return
     NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
     
-    // Unfortunately, we have to check all of the items in the main table, since hidden items may have a visible group
+    // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
+    NSMutableIndexSet *visibleIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:indexRange];
+    [visibleIndexes removeIndexes:[groupTableView selectedRowIndexes]];
+    [visibleIndexes removeIndexesInRange:[groups rangeOfURLGroups]];
+    [visibleIndexes removeIndexesInRange:[groups rangeOfScriptGroups]];
+    [visibleIndexes removeIndexesInRange:[groups rangeOfSearchGroups]];
+    
     NSArray *selectedPubs = [self selectedPublications];
-    NSEnumerator *pubEnum = [selectedPubs objectEnumerator];
-    BibItem *pub;
-    CFSetRef possibleGroups;
+    unsigned int groupIndex = [visibleIndexes firstIndex];
     
-    id *groupNamePtr;
-    
-    // use a static pointer to a buffer, with initial size of 10
-    static id *groupValues = NULL;
-    static int groupValueMaxSize = 10;
-    if(NULL == groupValues)
-        groupValues = (id *)NSZoneMalloc(NSDefaultMallocZone(), groupValueMaxSize * sizeof(id));
-    int groupCount = 0;
-    
-    // we could iterate the dictionary in the outer loop and publications in the inner loop, but there are generally more publications than groups (and we only check visible groups), so this should be more efficient
-    while(pub = [pubEnum nextObject]){ 
-        
-        // here are all the groups that this item can be a part of
-        possibleGroups = (CFSetRef)[pub groupsForField:groupField];
-        
-        groupCount = CFSetGetCount(possibleGroups);
-        if(groupCount > groupValueMaxSize){
-            NSAssert1(groupCount < 1024, @"insane number of groups for %@", [pub citeKey]);
-            groupValues = NSZoneRealloc(NSDefaultMallocZone(), groupValues, sizeof(id) * groupCount);
-            groupValueMaxSize = groupCount;
-        }
-        
-        // get all the groups (authors or strings)
-        if(groupCount > 0){
-            
-            // this is the only way to enumerate a set with CF, apparently
-            CFSetGetValues(possibleGroups, (const void **)groupValues);
-            groupNamePtr = groupValues;
-            
-            while(groupCount--){
-                // The dictionary only has visible group rows, so not all of the keys (potential groups) will exist in the dictionary
-                if(CFDictionaryGetValueIfPresent(rowDict, (void *)*groupNamePtr++, (const void **)&cntPtr))
-                    [indexSet addIndex:*cntPtr];
+    while (groupIndex != NSNotFound) {
+        BDSKGroup *group = [groups objectAtIndex:groupIndex];
+        NSEnumerator *pubEnum = [selectedPubs objectEnumerator];
+        BibItem *pub;
+        while(pub = [pubEnum nextObject]){
+            if ([group containsItem:pub]) {
+                [indexSet addIndex:groupIndex];
+                break;
             }
         }
-    }
-    
-    CFRelease(rowDict);
-    
-    // handle smart and static groups separately, since they have a different approach to containment
-    NSMutableIndexSet *staticAndSmartIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:[groups rangeOfSmartGroups]];
-    [staticAndSmartIndexes addIndexesInRange:[groups rangeOfStaticGroups]];
-    
-    if([staticAndSmartIndexes count]){
-        groupIndex = [staticAndSmartIndexes firstIndex];
-        id aGroup;
-        
-        while(groupIndex != NSNotFound){
-            if([visibleIndexes containsIndex:groupIndex]){
-                
-                aGroup = [groups objectAtIndex:groupIndex];
-                pubEnum = [selectedPubs objectEnumerator];
-                
-                while(pub = [pubEnum nextObject]){
-                
-                    if([(BDSKGroup *)aGroup containsItem:pub]){
-                        [indexSet addIndex:groupIndex];
-                        break;
-                    }
-                }
-            }
-            groupIndex = [staticAndSmartIndexes indexGreaterThanIndex:groupIndex];
-        }
+        groupIndex = [visibleIndexes indexGreaterThanIndex:groupIndex];
     }
     
     return indexSet;
