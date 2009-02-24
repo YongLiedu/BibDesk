@@ -53,7 +53,7 @@ typedef struct _BDSKTeXTaskFlags {
     volatile int32_t hasRTFData;
 } BDSKTeXTaskFlags;
 
-@class BDSKTeXPath, BDSKTask;
+@class BDSKTeXPath, BDSKTask, BDSKReadWriteLock;
 
 @interface BDSKTeXTask : NSObject {	
     NSString *texTemplatePath;
@@ -68,7 +68,7 @@ typedef struct _BDSKTeXTaskFlags {
     BDSKTeXTaskFlags flags;
 
     NSLock *processingLock;    
-    pthread_rwlock_t dataFileLock;
+    BDSKReadWriteLock *dataFileLock;
 }
 
 - (id)init;

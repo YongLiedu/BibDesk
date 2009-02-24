@@ -47,7 +47,7 @@
 #import "NSSet_BDSKExtensions.h"
 #import "NSInvocation_BDSKExtensions.h"
 #import "BDSKTask.h"
-#import <pthread.h>
+#import "BDSKReadWriteLock.h"
 
 @interface BDSKTeXPath : NSObject
 {
@@ -174,7 +174,7 @@ static double runLoopTimeout = 30;
         memset(&flags, 0, sizeof(flags));
 
         processingLock = [[NSLock alloc] init];
-        pthread_rwlock_init(&dataFileLock, NULL);
+        dataFileLock = [[BDSKReadWriteLock alloc] init];
 	}
 	return self;
 }
@@ -185,7 +185,7 @@ static double runLoopTimeout = 30;
     [taskShouldStartInvocation release];
     [taskFinishedInvocation release];
     [processingLock release];
-    pthread_rwlock_destroy(&dataFileLock);
+    [dataFileLock release];
 	[super dealloc];
 }
 
@@ -336,12 +336,12 @@ static double runLoopTimeout = 30;
 - (NSString *)logFileString{
     NSString *logString = nil;
     NSString *blgString = nil;
-    if(0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
+    if([dataFileLock tryLockForReading]) {
         // @@ unclear if log files will always be written with ASCII encoding
         // these will be nil if the file doesn't exist
         logString = [NSString stringWithContentsOfFile:[texPath logFilePath] encoding:NSASCIIStringEncoding error:NULL];
         blgString = [NSString stringWithContentsOfFile:[texPath blgFilePath] encoding:NSASCIIStringEncoding error:NULL];
-        pthread_rwlock_unlock(&dataFileLock);
+        [dataFileLock unlock];
     }
     
     NSMutableString *toReturn = [NSMutableString string];
@@ -360,9 +360,9 @@ static double runLoopTimeout = 30;
 // which one was generated depends on the generatedTypes argument, and can be seen from the hasLTB and hasLaTeX flags
 - (NSString *)LTBString{
     NSString *string = nil;
-    if([self hasLTB] && 0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
+    if([self hasLTB] && [dataFileLock tryLockForReading]) {
         string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
-        pthread_rwlock_unlock(&dataFileLock);
+        [dataFileLock unlock];
         unsigned start, end;
         start = [string rangeOfString:@"\\bib{"].location;
         end = [string rangeOfString:@"\\end{biblist}" options:NSBackwardsSearch].location;
@@ -374,9 +374,9 @@ static double runLoopTimeout = 30;
 
 - (NSString *)LaTeXString{
     NSString *string = nil;
-    if([self hasLaTeX] && 0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
+    if([self hasLaTeX] && [dataFileLock tryLockForReading]) {
         string = [NSString stringWithContentsOfFile:[texPath bblFilePath] encoding:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
-        pthread_rwlock_unlock(&dataFileLock);
+        [dataFileLock unlock];
         unsigned start, end;
         start = [string rangeOfString:@"\\bibitem"].location;
         end = [string rangeOfString:@"\\end{thebibliography}" options:NSBackwardsSearch].location;
@@ -388,18 +388,18 @@ static double runLoopTimeout = 30;
 
 - (NSData *)PDFData{
     NSData *data = nil;
-    if ([self hasPDFData] && 0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
+    if ([self hasPDFData] && [dataFileLock tryLockForReading]) {
         data = [NSData dataWithContentsOfFile:[texPath pdfFilePath]];
-        pthread_rwlock_unlock(&dataFileLock);
+        [dataFileLock unlock];
     }
     return data;
 }
 
 - (NSData *)RTFData{
     NSData *data = nil;
-    if ([self hasRTFData] && 0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
+    if ([self hasRTFData] && [dataFileLock tryLockForReading]) {
         data = [NSData dataWithContentsOfFile:[texPath rtfFilePath]];
-        pthread_rwlock_unlock(&dataFileLock);
+        [dataFileLock unlock];
     }
     return data;
 }
@@ -583,15 +583,10 @@ static double runLoopTimeout = 30;
 }
 
 - (int)runTeXTasksForLaTeX{
-    volatile int lockStatus;
     volatile int rv;
     rv = 0;
     
-    lockStatus = pthread_rwlock_wrlock(&dataFileLock);
-    if(lockStatus){
-        NSLog(@"error %d occurred locking in %@", lockStatus, self);
-        return 2;
-    }
+    [dataFileLock lockForWriting];
 
     // nuke the log files in case the run fails without generating new ones (not very likely)
     [self removeFilesFromPreviousRun];
@@ -601,58 +596,36 @@ static double runLoopTimeout = 30;
        rv |= [self runBibTeXTask];
 	}
     
-    lockStatus = pthread_rwlock_unlock(&dataFileLock);
-    if(lockStatus){
-        NSLog(@"error %d occurred locking in %@", lockStatus, self);  
-        rv = 2;
-    }
+    [dataFileLock unlock];
     
 	return rv;
 }
 
 - (int)runTeXTasksForPDF{
-    volatile int lockStatus;
     volatile int rv;
     rv = 0;
     
-    lockStatus = pthread_rwlock_wrlock(&dataFileLock);
-    if(lockStatus){
-        NSLog(@"error %d occurred locking in %@", lockStatus, self);
-        return 2;
-    }
+    [dataFileLock lockForWriting];
     
     rv = [self runPDFTeXTask];
     if((rv & 2) == 0){
         rv |= [self runPDFTeXTask];
     }
     
-    lockStatus = pthread_rwlock_unlock(&dataFileLock);
-    if(lockStatus){
-        NSLog(@"error %d occurred locking in %@", lockStatus, self);  
-        rv = 2;
-    }
+    [dataFileLock unlock];
     
 	return rv;
 }
 
 - (int)runTeXTaskForRTF{
-    volatile int lockStatus;
     volatile int rv;
     rv = 0;
     
-    lockStatus = pthread_rwlock_wrlock(&dataFileLock);
-    if(lockStatus){
-        NSLog(@"error %d occurred locking in %@", lockStatus, self);
-        return 2;
-    }
+    [dataFileLock lockForWriting];
     
     rv = [self runLaTeX2RTFTask];
     
-    lockStatus = pthread_rwlock_unlock(&dataFileLock);
-    if(lockStatus){
-        NSLog(@"error %d occurred locking in %@", lockStatus, self);  
-        rv = 2;
-    }
+    [dataFileLock unlock];
     
 	return rv;
 }
