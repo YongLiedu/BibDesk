@@ -116,6 +116,7 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
 
 #define BORDER_BETWEEN_EDGE_AND_IMAGE (1.0)
 #define BORDER_BETWEEN_IMAGE_AND_TEXT (0.0)
+#define IMAGE_OFFSET (1.0)
 
 - (NSSize)cellSize;
 {
@@ -185,6 +186,7 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
     NSRect imageRect = [self iconRectForBounds:aRect];
     float imageHeight = NSHeight(aRect) - 1;
     imageRect = BDSKCenterRectVertically(imageRect, imageHeight, [controlView isFlipped]);
+    imageRect.origin.y += [controlView isFlipped] ? -IMAGE_OFFSET : IMAGE_OFFSET;
     [self drawIconWithFrame:imageRect inView:controlView];
 }
 
