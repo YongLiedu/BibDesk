@@ -57,8 +57,6 @@ extern CFHashCode BDSKCaseInsensitiveStringHash(const void *value);
 
 extern const CFDictionaryKeyCallBacks kBDSKIntegerDictionaryKeyCallBacks;
 
-extern const CFDictionaryValueCallBacks kBDSKIntegerDictionaryValueCallBacks;
-
 extern const CFDictionaryKeyCallBacks kBDSKNonOwnedObjectDictionaryKeyCallBacks;
 
 extern const CFDictionaryValueCallBacks kBDSKSELDictionaryValueCallBacks;

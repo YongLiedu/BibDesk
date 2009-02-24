@@ -94,14 +94,6 @@ const CFDictionaryKeyCallBacks kBDSKIntegerDictionaryKeyCallBacks = {
     BDSKIntegerHash
 };
 
-const CFDictionaryValueCallBacks kBDSKIntegerDictionaryValueCallBacks = {
-    0,   // version
-    BDSKIntegerRetain,
-    BDSKIntegerRelease,
-    BDSKIntegerCopyDescription,
-    BDSKIntegerEqual
-};
-
 const CFDictionaryKeyCallBacks kBDSKNonOwnedObjectDictionaryKeyCallBacks = {
     0,    // version
     NULL, // retain
