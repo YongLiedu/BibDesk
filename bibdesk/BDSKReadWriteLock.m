@@ -58,15 +58,18 @@
 }
 
 - (void)unlock {
-    pthread_rwlock_unlock(&rwlock);
+    if (0 != pthread_rwlock_unlock(&rwlock))
+        NSLog(@"failed to unlock rwlock");
 }
 
 - (void)lockForReading {
-    pthread_rwlock_rdlock(&rwlock);
+    if (0 != pthread_rwlock_rdlock(&rwlock))
+        NSLog(@"failed to lock rwlock for reading");
 }
 
 - (void)lockForWriting {
-    pthread_rwlock_wrlock(&rwlock);
+    if (0 != pthread_rwlock_wrlock(&rwlock))
+        NSLog(@"failed to lock rwlock for writing");
 }
 
 - (BOOL)tryLock {
