@@ -290,17 +290,12 @@
 		CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF181BD0CEB711700716E85 /* Bookmarks.plist in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF2EEE70F3462A900A7989E /* NSColor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */; };
-		CEF5C0320F5469E300DBC864 /* TestBDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0270F5469E300DBC864 /* TestBDSKRISParser.m */; };
-		CEF5C0330F5469E300DBC864 /* TestBDSKTypeManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF5C0280F5469E300DBC864 /* TestBDSKTypeManager.h */; };
-		CEF5C0340F5469E300DBC864 /* TestBDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0290F5469E300DBC864 /* TestBDSKTypeManager.m */; };
-		CEF5C0350F5469E300DBC864 /* TestBibItem.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF5C02A0F5469E300DBC864 /* TestBibItem.h */; };
-		CEF5C0360F5469E300DBC864 /* TestBibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02B0F5469E300DBC864 /* TestBibItem.m */; };
-		CEF5C0370F5469E300DBC864 /* TestComplexString.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF5C02C0F5469E300DBC864 /* TestComplexString.h */; };
-		CEF5C0380F5469E300DBC864 /* TestComplexString.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02D0F5469E300DBC864 /* TestComplexString.m */; };
-		CEF5C0390F5469E300DBC864 /* TestPubMed.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF5C02E0F5469E300DBC864 /* TestPubMed.h */; };
-		CEF5C03A0F5469E300DBC864 /* TestPubMed.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02F0F5469E300DBC864 /* TestPubMed.m */; };
-		CEF5C03B0F5469E300DBC864 /* TestUnitTest.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF5C0300F5469E300DBC864 /* TestUnitTest.h */; };
-		CEF5C03C0F5469E300DBC864 /* TestUnitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0310F5469E300DBC864 /* TestUnitTest.m */; };
+		CEF5C0420F546ADB00DBC864 /* TestBDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0270F5469E300DBC864 /* TestBDSKRISParser.m */; };
+		CEF5C0430F546ADC00DBC864 /* TestBDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0290F5469E300DBC864 /* TestBDSKTypeManager.m */; };
+		CEF5C0440F546ADC00DBC864 /* TestBibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02B0F5469E300DBC864 /* TestBibItem.m */; };
+		CEF5C0450F546ADD00DBC864 /* TestComplexString.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02D0F5469E300DBC864 /* TestComplexString.m */; };
+		CEF5C0460F546ADE00DBC864 /* TestPubMed.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02F0F5469E300DBC864 /* TestPubMed.m */; };
+		CEF5C0470F546ADF00DBC864 /* TestUnitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0310F5469E300DBC864 /* TestUnitTest.m */; };
 		CEF71ADB0B91BBCB003A2771 /* BDSKNotesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF71AD90B91BBCB003A2771 /* BDSKNotesWindowController.m */; };
 		CEF71B080B91BFFF003A2771 /* NotesWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF71B060B91BFFF003A2771 /* NotesWindow.nib */; };
 		CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7295509CC88AB00802D48 /* BDSKFieldSheetController.m */; };
@@ -2974,11 +2969,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
-				CEF5C0330F5469E300DBC864 /* TestBDSKTypeManager.h in Headers */,
-				CEF5C0350F5469E300DBC864 /* TestBibItem.h in Headers */,
-				CEF5C0370F5469E300DBC864 /* TestComplexString.h in Headers */,
-				CEF5C0390F5469E300DBC864 /* TestPubMed.h in Headers */,
-				CEF5C03B0F5469E300DBC864 /* TestUnitTest.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3889,12 +3879,6 @@
 				CEED2E150F4DED830078E87A /* BDSKInvocation.m in Sources */,
 				CEED2F350F4E0C860078E87A /* BDSKRuntime.m in Sources */,
 				CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */,
-				CEF5C0320F5469E300DBC864 /* TestBDSKRISParser.m in Sources */,
-				CEF5C0340F5469E300DBC864 /* TestBDSKTypeManager.m in Sources */,
-				CEF5C0360F5469E300DBC864 /* TestBibItem.m in Sources */,
-				CEF5C0380F5469E300DBC864 /* TestComplexString.m in Sources */,
-				CEF5C03A0F5469E300DBC864 /* TestPubMed.m in Sources */,
-				CEF5C03C0F5469E300DBC864 /* TestUnitTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3902,6 +3886,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CEF5C0420F546ADB00DBC864 /* TestBDSKRISParser.m in Sources */,
+				CEF5C0430F546ADC00DBC864 /* TestBDSKTypeManager.m in Sources */,
+				CEF5C0440F546ADC00DBC864 /* TestBibItem.m in Sources */,
+				CEF5C0450F546ADD00DBC864 /* TestComplexString.m in Sources */,
+				CEF5C0460F546ADE00DBC864 /* TestPubMed.m in Sources */,
+				CEF5C0470F546ADF00DBC864 /* TestUnitTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
