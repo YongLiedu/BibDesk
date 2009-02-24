@@ -84,11 +84,6 @@ static int _file_readfn(void *_ctx, char *buf, int nbytes) {
     return read(ctx->fd, buf, nbytes);
 }
 
-static fpos_t _file_seekfn(void *_ctx, off_t offset, int whence) {
-    BDSKFileContext *ctx = (BDSKFileContext *)_ctx;
-    return lseek(ctx->fd, offset, whence);
-}
-
 static int _file_closefn(void *_ctx) {
     BDSKFileContext *ctx = (BDSKFileContext *)_ctx;
     close(ctx->fd);

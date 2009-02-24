@@ -347,7 +347,7 @@
     else if ([menuItem action] == @selector(deselectAll:))
         return [self allowsEmptySelection];
     else if ([menuItem action] == @selector(insertNewline:))
-        return [[self delegate] respondsToSelector:@selector(tableViewInsertNewline:)];
+        return [[self delegate] respondsToSelector:@selector(outlineViewInsertNewline:)];
     else if ([menuItem action] == @selector(invertSelection:))
         return [self allowsMultipleSelection];
     else if ([[BDSKOutlineView superclass] instancesRespondToSelector:@selector(validateMenuItem:)])

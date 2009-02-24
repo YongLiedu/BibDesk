@@ -201,8 +201,8 @@
 				[mutableTitle release];
 			}
             
-            NSString *itemUrlField = [bibtexItem valueOfField:BDSKUrlString inherit:NO];
             /*
+            NSString *itemUrlField = [bibtexItem valueOfField:BDSKUrlString inherit:NO];
             if (
                 nil != targetUrlHrefValue &&
                 (nil == itemUrlField || 0 == [itemUrlField length])

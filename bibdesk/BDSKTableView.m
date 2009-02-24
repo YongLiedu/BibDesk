@@ -478,8 +478,8 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
         return [[self delegate] respondsToSelector:@selector(tableViewInsertNewline:)];
     else if ([menuItem action] == @selector(insertSpace:))
         return [[self delegate] respondsToSelector:@selector(tableViewInsertSpace:)];
-    else if ([menuItem action] == @selector(alternateInsertSpace:))
-        return [[self delegate] respondsToSelector:@selector(tableViewAlternateInsertSpace:)];
+    else if ([menuItem action] == @selector(insertShiftSpace:))
+        return [[self delegate] respondsToSelector:@selector(tableViewInsertShiftSpace:)];
     else if ([menuItem action] == @selector(invertSelection:))
         return [self allowsMultipleSelection];
     else if ([[BDSKTableView superclass] instancesRespondToSelector:@selector(validateMenuItem:)])
