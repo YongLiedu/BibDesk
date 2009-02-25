@@ -68,7 +68,8 @@ enum {
     BDSKColumnTypeTriState,
     BDSKColumnTypeCrossref,
     BDSKColumnTypeImportOrder,
-    BDSKColumnTypeRelevance
+    BDSKColumnTypeRelevance,
+    BDSKColumnTypeColor
 };
 
 @interface BDSKTableColumn : NSTableColumn {
@@ -268,6 +269,8 @@ enum {
         type = BDSKColumnTypeImportOrder;
     else if ([colName isEqualToString:BDSKRelevanceString])
         type = BDSKColumnTypeRelevance;
+    else if ([colName isEqualToString:BDSKColorString] || [colName isEqualToString:BDSKColorLabelString])
+        type = BDSKColumnTypeColor;
     else
         type = BDSKColumnTypeText;
     return type;
@@ -325,6 +328,9 @@ enum {
             [cell setMaxValue:(double)1.0];
             [cell setEnabled:NO];
             [(BDSKLevelIndicatorCell *)cell setMaxHeight:(17.0 * 0.7)];
+            break;
+        case BDSKColumnTypeColor: 
+            cell = [[[BDSKColorCell alloc] initImageCell:nil] autorelease];
             break;
         case BDSKColumnTypeText:
         default:
@@ -556,7 +562,10 @@ enum {
         NSImage *paperclip = [[[NSImage paperclipImage] copy] autorelease];
         [paperclip setScalesWhenResized:YES];
         [paperclip setSize:NSMakeSize(16, 16)];
-		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, [NSImage arrowImage], BDSKCrossrefString, nil];
+        NSImage *color = [[[NSImage imageNamed:@"colors"] copy] autorelease];
+        [color setScalesWhenResized:YES];
+        [color setSize:NSMakeSize(16, 16)];
+		NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSImage imageNamed:@"TinyFile"], BDSKLocalUrlString, paperclip, BDSKLocalFileString, [NSImage arrowImage], BDSKCrossrefString, color, BDSKColorString, color, BDSKColorLabelString, nil];
 		if (paths) {
 			NSEnumerator *keyEnum = [paths keyEnumerator];
 			NSString *key, *path;
@@ -608,7 +617,7 @@ enum {
 - (void)columnsMenuAddTableColumn:(id)sender{
     // first we fill the popup
 	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
-    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, BDSKCrossrefString, BDSKLocalFileString, BDSKRemoteURLString, nil]
+    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, BDSKCrossrefString, BDSKLocalFileString, BDSKRemoteURLString, BDSKColorLabelString, nil]
                                               excluding:[self tableColumnIdentifiers]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:", @"Label for adding column")
@@ -774,6 +783,29 @@ enum {
 #pragma mark -
 
 @implementation BDSKTextFieldCell
+
+- (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    return nil;
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKColorCell
+
+- (NSSize)cellSize {
+    return NSMakeSize(16.0, 16.0);
+}
+
+- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    NSColor *color = [self objectValue];
+    if ([color respondsToSelector:@selector(drawSwatchInRect:)]) {
+        NSRect rect, ignored;
+        NSDivideRect(cellFrame, &ignored, &rect, 1.0, [controlView isFlipped] ? NSMaxYEdge : NSMinYEdge);
+        [color drawSwatchInRect:rect];
+    }
+}
 
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     return nil;

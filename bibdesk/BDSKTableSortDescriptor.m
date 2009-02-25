@@ -197,6 +197,10 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
         
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"countOfRemoteURLsAsNumber" ascending:ascend selector:@selector(compare:)];
         
+    }else if([tcID isEqualToString:BDSKColorString] || [tcID isEqualToString:BDSKColorLabelString]){
+        
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"color" ascending:ascend selector:@selector(colorCompare:)];
+        
     }else {
         
         // this assumes that all other columns must be NSString objects

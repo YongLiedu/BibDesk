@@ -48,6 +48,8 @@
 
 - (BOOL)isBlackOrWhiteOrTransparentForMargin:(float)margin;
 
+- (NSComparisonResult)colorCompare:(id)other;
+
 + (id)scriptingRgbaColorWithDescriptor:(NSAppleEventDescriptor *)descriptor;
 - (id)scriptingRgbaColorDescriptor;
 

@@ -87,3 +87,7 @@
 
 @interface BDSKTextFieldCell : NSTextFieldCell
 @end
+
+
+@interface BDSKColorCell : NSCell
+@end

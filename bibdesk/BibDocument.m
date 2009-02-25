@@ -2435,7 +2435,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             
             // most reliable metadata should be our private EA
             if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKReadExtendedAttributesKey]){
-                NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
+                NSData *btData = [[SKNExtendedAttributeManager sharedNoSplitManager] extendedAttributeNamed:BDSK_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
                 if(btData){
                     NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
                     BOOL isPartialData;
@@ -2835,6 +2835,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return [key isEqualToString:BDSKAuthorString];
     else if([sortKey isEqualToString:BDSKFirstAuthorEditorString] || [sortKey isEqualToString:BDSKSecondAuthorEditorString] || [sortKey isEqualToString:BDSKThirdAuthorEditorString] || [sortKey isEqualToString:BDSKLastAuthorEditorString])
         return [key isEqualToString:BDSKAuthorString] || [key isEqualToString:BDSKEditorString];
+    else if([sortKey isEqualToString:BDSKColorString] || [sortKey isEqualToString:BDSKColorLabelString])
+        return [key isEqualToString:BDSKColorString] || [key isEqualToString:BDSKColorLabelString];
     else
         return [sortKey isEqualToString:key];
 }

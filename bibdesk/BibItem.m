@@ -1434,6 +1434,8 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
             cellDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSImage genericInternetLocationImage], BDSKTextWithIconCellImageKey, label, BDSKTextWithIconCellStringKey, nil];
         }
         return cellDictionary;
+    }else if([field isEqualToString:BDSKColorString] || [field isEqualToString:BDSKColorLabelString]){
+        return [self color];
     }else{
         // the tableColumn isn't something we handle in a custom way.
         return [self valueOfField:field];

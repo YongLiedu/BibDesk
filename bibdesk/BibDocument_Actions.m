@@ -92,6 +92,8 @@
 
 @implementation BibDocument (Actions)
 
+static BOOL changingColors = NO;
+
 #pragma mark -
 #pragma mark Publication actions
 
@@ -406,6 +408,15 @@
         NSArray *theURLs = [[pub remoteURLs] valueForKey:@"URL"];
         if ([theURLs count])
             [self openLinkedURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:(void *)[theURLs retain]];
+    } else if([colID isEqualToString:BDSKColorString] || [colID isEqualToString:BDSKColorLabelString]) {
+        int row = [tableView clickedRow];
+        NSColor *color = row != -1 ? [[[self shownPublications] objectAtIndex:row] color] : nil;
+        if (color) {
+            changingColors = YES;
+            [[NSColorPanel sharedColorPanel] setColor:color];
+            changingColors = NO;
+        }
+        [[NSColorPanel sharedColorPanel] makeKeyAndOrderFront:nil];
     } else {
         [self editPubCmd:sender];
     }
@@ -634,8 +645,10 @@
 }
 
 - (void)changeColor:(id)sender {
-    if ([self hasExternalGroupsSelected] == NO && [self isDisplayingFileContentSearch] == NO && [[self selectedPublications] count]) {
+    if ([self hasExternalGroupsSelected] == NO && [self isDisplayingFileContentSearch] == NO && [[self selectedPublications] count] && changingColors == NO) {
+        changingColors = YES;
         [[self selectedPublications] makeObjectsPerformSelector:@selector(setColor:) withObject:[sender color]];
+        changingColors = NO;
         [[self undoManager] setActionName:NSLocalizedString(@"Change Color", @"Undo action name")];
     }
 }

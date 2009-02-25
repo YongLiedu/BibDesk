@@ -210,6 +210,7 @@ extern NSString *BDSKEditorFileViewIconScaleKey;
 
 extern NSString *BDSKCiteKeyString;
 extern NSString *BDSKColorString;
+extern NSString *BDSKColorLabelString;
 extern NSString *BDSKLocalFileString;
 extern NSString *BDSKRemoteURLString;
 extern NSString *BDSKAnnoteString;
