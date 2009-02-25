@@ -763,8 +763,8 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
     
     BDSKChangeFieldSheetController *changeFieldController = [[BDSKChangeFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to change:", @"Label for changing field name")
                                                                                                        fieldsArray:fields
-                                                                                                         addedPrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
-                                                                                                    addedFieldsArray:fieldNames];
+                                                                                                     replacePrompt:NSLocalizedString(@"New field name:", @"Label for changing field name")
+                                                                                                replaceFieldsArray:fieldNames];
     if (field == nil)
         field = [tableView selectedRow] == -1 ? nil : [fields objectAtIndex:[tableView selectedRow]];
     
