@@ -35,6 +35,7 @@
 
 #import "BDSKComplexString.h"
 #import "NSString_BDSKExtensions.h"
+#import "CFString_BDSKExtensions.h"
 #import "BDSKStringNode.h"
 #import "BDSKMacroResolver.h"
 #import "NSError_BDSKExtensions.h"
