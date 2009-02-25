@@ -42,7 +42,7 @@
 #import "CIImage_BDSKExtensions.h"
 
 #define END_JOIN_WIDTH 3.0f
-#define END_JOIN_HEIGHT 20.0f
+#define END_JOIN_HEIGHT 22.0f
 
 @interface BDSKGradientSplitView (Private)
 
