@@ -552,7 +552,7 @@ static inline NSRange * __BDFindEqualRanges(BDSortCacheValue *buf, NSRange searc
     return equalRanges;
 }
 
-#if defined (OMNI_ASSERTIONS_ON)
+#ifdef DEBUG
 
 // for debugging only; prints a sort cache buffer (#ifdefed to avoid compiler warning)
 static void print_buffer(BDSortCacheValue *buf, unsigned count, NSString *msg){

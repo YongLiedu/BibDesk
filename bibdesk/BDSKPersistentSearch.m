@@ -102,7 +102,7 @@ static void *nullQueryMarker = @"Null MDQuery Marker"; /* any CFTypeRef would wo
             success = NO;
             // add the bogus query, so we don't keep trying; a user reported beachballs when creating the query with a bad spotlight cache, so we'll just log a message and leave out this functionality
             CFDictionaryAddValue(queries, (const void *)queryString, nullQueryMarker);
-#if OMNI_FORCE_ASSERTIONS
+#ifdef DEBUG
             // warning for developers, in case of using an incorrect query string
             NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Sorry, %@, I'm afraid I can't do that", NSUserName()]
                                              defaultButton:@"Doh!"

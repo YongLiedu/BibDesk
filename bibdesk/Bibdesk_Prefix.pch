@@ -19,7 +19,7 @@
 
 #endif
 
-#define OMNI_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
+#define BDSK_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
 
 #ifdef __OBJC__
     #import <Cocoa/Cocoa.h>
@@ -33,7 +33,7 @@
 #if defined (DEBUG)
 
 #define log_method() \
-    NSLog(@"%@[%@ %@] (%@ line %d)", [self class] == self ? @"+" : @"-", [self class], NSStringFromSelector(_cmd), __FILENAMEASNSSTRING__, __LINE__)
+    NSLog(@"%@[%@ %@] (%@ line %d)", (id)[self class] == (id)self ? @"+" : @"-", [self class], NSStringFromSelector(_cmd), __FILENAMEASNSSTRING__, __LINE__)
 
 #define log_function() \
     NSLog(@"%s (%@ line %d)", __PRETTY_FUNCTION__, __FILENAMEASNSSTRING__, __LINE__)

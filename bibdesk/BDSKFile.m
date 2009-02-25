@@ -282,7 +282,7 @@ static Class BDSKFileClass = Nil;
         // always return NO if comparing against an instance with a valid FSRef, since self isn't a valid file (or wasn't when instantiated) and hashes aren't guaranteed to be the same for differend subclasses
         isEqual = [fileURL isEqualToFileURL:[other fileURL]];
     }
-#if OMNI_FORCE_ASSERTIONS
+#ifdef DEBUG
     if(isEqual)
         NSAssert([self hash] == [other hash], @"inconsistent hash and isEqual:");
 #endif
@@ -345,7 +345,7 @@ static Class BDSKFileClass = Nil;
         // only compare with a subclass that has an fsRef; URL variant always returns NULL
         isEqual = (noErr == FSCompareFSRefs(fileRef, otherFSRef));
     }
-#if OMNI_FORCE_ASSERTIONS
+#ifdef DEBUG
     if(isEqual)
         NSAssert([self hash] == [other hash], @"inconsistent hash and isEqual:");
 #endif

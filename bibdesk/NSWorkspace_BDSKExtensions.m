@@ -361,7 +361,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
 {
     NSError *error;
     NSString *theUTI = [self UTIForURL:fileURL error:&error];
-#if defined (OMNI_ASSERTIONS_ON)
+#ifdef DEBUG
     if (nil == theUTI)
         NSLog(@"%@", error);
 #endif

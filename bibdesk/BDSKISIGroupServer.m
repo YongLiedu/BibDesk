@@ -47,7 +47,7 @@
 #import "BDSKReadWriteLock.h"
 
 #define MAX_RESULTS 100
-#if(OMNI_FORCE_ASSERTIONS)
+#ifdef DEBUG
 static BOOL addXMLStringToAnnote = YES;
 #else
 static BOOL addXMLStringToAnnote = NO;

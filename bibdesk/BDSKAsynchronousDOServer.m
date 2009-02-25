@@ -41,7 +41,7 @@
 struct BDSKDOServerFlags {
     volatile int32_t shouldKeepRunning;
     volatile int32_t serverDidSetup;
-#if OMNI_FORCE_ASSERTIONS
+#ifdef DEBUG
     volatile int32_t serverDidStart;
 #endif
 };
@@ -63,7 +63,7 @@ struct BDSKDOServerFlags {
 
 @implementation BDSKAsynchronousDOServer
 
-#if OMNI_FORCE_ASSERTIONS
+#ifdef DEBUG
 - (void)checkStartup:(NSTimer *)ignored
 {
     if (0 == serverFlags->serverDidStart)
@@ -78,7 +78,7 @@ struct BDSKDOServerFlags {
         serverFlags = NSZoneCalloc(NSDefaultMallocZone(), 1, sizeof(struct BDSKDOServerFlags));
         serverFlags->shouldKeepRunning = 1;
         serverFlags->serverDidSetup = 0;
-#if OMNI_FORCE_ASSERTIONS
+#ifdef DEBUG
         serverFlags->serverDidStart = 0;
 
         // check for absentminded developers; there's no actual requirement that startDOServer be called immediately
@@ -135,7 +135,7 @@ struct BDSKDOServerFlags {
 
 - (void)startDOServer;
 {
-#if OMNI_FORCE_ASSERTIONS
+#ifdef DEBUG
     serverFlags->serverDidStart = 1;
 #endif
     // set up a connection to communicate with the local background thread
