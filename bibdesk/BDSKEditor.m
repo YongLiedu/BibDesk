@@ -724,7 +724,7 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 
 - (void)changeFieldSheetDidEnd:(BDSKChangeFieldSheetController *)changeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [changeFieldController field];
-    NSString *newField = [changeFieldController newField];
+    NSString *newField = [changeFieldController replaceField];
     NSString *oldValue = [[[publication valueOfField:oldField inherit:NO] retain] autorelease];
     int autoGenerateStatus = 0;
     

@@ -156,26 +156,26 @@
 
 @implementation BDSKChangeFieldSheetController
 
-- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields addedPrompt:(NSString *)newPromptString addedFieldsArray:(NSArray *)newFields {
+- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields replacePrompt:(NSString *)newPromptString replaceFieldsArray:(NSArray *)newFields {
     if (self = [super initWithPrompt:promptString fieldsArray:fields]) {
         [self window]; // make sure the nib is loaded
         field = nil;
-        [self setAddedPrompt:newPromptString];
-        [self setAddedFieldsArray:newFields];
+        [self setReplacePrompt:newPromptString];
+        [self setReplaceFieldsArray:newFields];
     }
     return self;
 }
 
 - (void)dealloc {
-    [addedPrompt release];
-    [addedFieldsArray release];
-    [newField release];
+    [replacePrompt release];
+    [replaceFieldsArray release];
+    [replaceField release];
     [super dealloc];
 }
 
 - (void)awakeFromNib{
     BDSKFieldNameFormatter *formatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
-	[newFieldsComboBox setFormatter:formatter];
+	[replaceFieldsComboBox setFormatter:formatter];
     [formatter setDelegate:self];
 }
 
@@ -183,71 +183,71 @@
     return @"ChangeFieldSheet";
 }
 
-- (NSString *)newField{
-    return newField;
+- (NSString *)replaceField{
+    return replaceField;
 }
 
-- (void)setNewField:(NSString *)newNewField{
-    if (newField != newNewField) {
-        [newField release];
-        newField = [newNewField copy];
+- (void)setReplaceField:(NSString *)newNewField{
+    if (replaceField != newNewField) {
+        [replaceField release];
+        replaceField = [newNewField copy];
     }
 }
 
-- (NSArray *)addedFieldsArray{
-    return addedFieldsArray;
+- (NSArray *)replaceFieldsArray{
+    return replaceFieldsArray;
 }
 
-- (void)setAddedFieldsArray:(NSArray *)array{
-    if (addedFieldsArray != array) {
-        [addedFieldsArray release];
-        addedFieldsArray = [array retain];
+- (void)setReplaceFieldsArray:(NSArray *)array{
+    if (replaceFieldsArray != array) {
+        [replaceFieldsArray release];
+        replaceFieldsArray = [array retain];
     }
 }
 
-- (NSString *)addedPrompt{
-    return addedPrompt;
+- (NSString *)replacePrompt{
+    return replacePrompt;
 }
 
-- (void)setAddedPrompt:(NSString *)promptString{
-    if (addedPrompt != promptString) {
-        [addedPrompt release];
-        addedPrompt = [promptString retain];
+- (void)setReplacePrompt:(NSString *)promptString{
+    if (replacePrompt != promptString) {
+        [replacePrompt release];
+        replacePrompt = [promptString retain];
     }
 }
 
 - (void)prepare{
     NSRect fieldsFrame = [fieldsControl frame];
     NSRect oldPromptFrame = [promptField frame];
-    NSRect newFieldsFrame = [newFieldsComboBox frame];
-    NSRect oldNewPromptFrame = [newPromptField frame];
+    NSRect replaceFieldsFrame = [replaceFieldsComboBox frame];
+    NSRect oldReplacePromptFrame = [replacePromptField frame];
     [promptField setStringValue:(prompt)? prompt : @""];
     [promptField sizeToFit];
-    [newPromptField setStringValue:(addedPrompt)? addedPrompt : @""];
-    [newPromptField sizeToFit];
+    [replacePromptField setStringValue:replacePrompt ?: @""];
+    [replacePromptField sizeToFit];
     NSRect newPromptFrame = [promptField frame];
-    NSRect newNewPromptFrame = [newPromptField frame];
+    NSRect newReplacePromptFrame = [replacePromptField frame];
     float dw;
-    if (NSWidth(newPromptFrame) > NSWidth(newNewPromptFrame)) {
+    if (NSWidth(newPromptFrame) > NSWidth(newReplacePromptFrame)) {
         dw = NSWidth(newPromptFrame) - NSWidth(oldPromptFrame);
-        newNewPromptFrame.size.width = NSWidth(newPromptFrame);
-        [newPromptField setFrame:newNewPromptFrame];
+        newReplacePromptFrame.size.width = NSWidth(newPromptFrame);
+        [replacePromptField setFrame:newReplacePromptFrame];
     } else {
-        dw = NSWidth(newNewPromptFrame) - NSWidth(oldNewPromptFrame);
-        newPromptFrame.size.width = NSWidth(newNewPromptFrame);
+        dw = NSWidth(newReplacePromptFrame) - NSWidth(oldReplacePromptFrame);
+        newPromptFrame.size.width = NSWidth(newReplacePromptFrame);
         [promptField setFrame:newPromptFrame];
     }
     fieldsFrame.size.width -= dw;
     fieldsFrame.origin.x += dw;
-    newFieldsFrame.size.width -= dw;
-    newFieldsFrame.origin.x += dw;
+    replaceFieldsFrame.size.width -= dw;
+    replaceFieldsFrame.origin.x += dw;
     [fieldsControl setFrame:fieldsFrame];
-    [newFieldsComboBox setFrame:newFieldsFrame];
+    [replaceFieldsComboBox setFrame:replaceFieldsFrame];
 }
 
 - (NSArray *)fieldNameFormatterKnownFieldNames:(BDSKFieldNameFormatter *)formatter {
-    if (formatter == [(NSTextField *)newFieldsComboBox formatter])
-        return [self addedFieldsArray];
+    if (formatter == [(NSTextField *)replaceFieldsComboBox formatter])
+        return [self replaceFieldsArray];
     else
         return nil;
 }
