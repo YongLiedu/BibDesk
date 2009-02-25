@@ -2261,7 +2261,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [allFields addObjectsFromArray:[[BDSKTypeManager sharedManager] requiredFieldsForType:type]];
     [allFields addObjectsFromArray:[[BDSKTypeManager sharedManager] optionalFieldsForType:type]];
     [allFields addNonDuplicateObjectsFromArray:[[BDSKTypeManager sharedManager] userDefaultFieldsForType:type]];
-    [allFields addNonDuplicateObjectsFromArray:[self allFieldNames]];
+    [allFields addNonDuplicateObjectsFromArray:[[self allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]];
     return [[self fields] fieldsWithNames:allFields];
 }
 
