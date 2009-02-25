@@ -587,7 +587,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	[[groupActionMenuButton cell] setRefreshesMenu:NO];
 	
 	[groupActionButton setArrowImage:nil];
-	[groupActionButton setAlternateImage:[NSImage imageNamed:@"GroupAction_Pressed"]];
 	[groupActionButton setShowsMenuWhenIconClicked:YES];
 	[[groupActionButton cell] setAltersStateOfSelectedItem:NO];
 	[[groupActionButton cell] setAlwaysUsesFirstItemAsSelected:NO];

@@ -54,7 +54,6 @@
 		3D866C400803223900FF1724 /* BDSKCharacterConversion.nib in Resources */ = {isa = PBXBuildFile; fileRef = 3D866C3E0803223900FF1724 /* BDSKCharacterConversion.nib */; };
 		3D8A5520082D1F86008E818C /* BibDesk Help in Resources */ = {isa = PBXBuildFile; fileRef = 3D8A54F6082D1F86008E818C /* BibDesk Help */; };
 		3D8CA0A507CB625300460D07 /* AutoFileProgress.nib in Resources */ = {isa = PBXBuildFile; fileRef = 3D8CA0A307CB625300460D07 /* AutoFileProgress.nib */; };
-		3D8EA3E40788B9E300AAD253 /* cornerColumns_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3D8EA3E30788B9E300AAD253 /* cornerColumns_Pressed.tiff */; };
 		3D9EC25307C66B1E00DE459D /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D9EC25207C66B1E00DE459D /* WebKit.framework */; };
 		3DA82939083ECE9300321864 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3DA82938083ECE9300321864 /* Localizable.strings */; };
 		3DAEA2EE07703F6000AF111A /* BDSKUndoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAEA2EC07703F6000AF111A /* BDSKUndoManager.m */; };
@@ -363,9 +362,7 @@
 		F9022CEF0758050E00C3F701 /* Previewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9022CE70758050E00C3F701 /* Previewer.nib */; };
 		F9022D210758066000C3F701 /* CharacterConversion.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9022D150758066000C3F701 /* CharacterConversion.plist */; };
 		F9022D270758066000C3F701 /* TypeInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9022D1B0758066000C3F701 /* TypeInfo.plist */; };
-		F9022DBD0758088000C3F701 /* Action_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA20758088000C3F701 /* Action_Pressed.tiff */; };
 		F9022DBE0758088000C3F701 /* Action.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA30758088000C3F701 /* Action.tiff */; };
-		F9022DBF0758088000C3F701 /* Add_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA40758088000C3F701 /* Add_Pressed.tiff */; };
 		F9022DC00758088000C3F701 /* Add.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA50758088000C3F701 /* Add.tiff */; };
 		F9022DC20758088000C3F701 /* autofile.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA70758088000C3F701 /* autofile.tiff */; };
 		F9022DC30758088000C3F701 /* bibDocIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA80758088000C3F701 /* bibDocIcon.icns */; };
@@ -380,7 +377,6 @@
 		F9022DCC0758088000C3F701 /* key.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB10758088000C3F701 /* key.tiff */; };
 		F9022DCD0758088000C3F701 /* newdoc.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB20758088000C3F701 /* newdoc.tiff */; };
 		F9022DCE0758088000C3F701 /* preview.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB30758088000C3F701 /* preview.tiff */; };
-		F9022DD10758088000C3F701 /* Remove_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB60758088000C3F701 /* Remove_Pressed.tiff */; };
 		F9022DD20758088000C3F701 /* Remove.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB70758088000C3F701 /* Remove.tiff */; };
 		F9022DD30758088000C3F701 /* risDocIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB80758088000C3F701 /* risDocIcon.icns */; };
 		F9022DD50758088000C3F701 /* startup.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DBA0758088000C3F701 /* startup.tiff */; };
@@ -887,7 +883,6 @@
 		3D866C3F0803223900FF1724 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKCharacterConversion.nib; sourceTree = "<group>"; };
 		3D8A54F7082D1F86008E818C /* English */ = {isa = PBXFileReference; lastKnownFileType = folder; name = English; path = "English.lproj/BibDesk Help"; sourceTree = "<group>"; };
 		3D8CA0A407CB625300460D07 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/AutoFileProgress.nib; sourceTree = "<group>"; };
-		3D8EA3E30788B9E300AAD253 /* cornerColumns_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = cornerColumns_Pressed.tiff; sourceTree = "<group>"; };
 		3D9EC25207C66B1E00DE459D /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
 		3DAEA2EB07703F6000AF111A /* BDSKUndoManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKUndoManager.h; sourceTree = "<group>"; };
 		3DAEA2EC07703F6000AF111A /* BDSKUndoManager.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKUndoManager.m; sourceTree = "<group>"; };
@@ -1391,9 +1386,7 @@
 		F9022D510758073E00C3F701 /* fonts.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = fonts.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/fonts.cfg; sourceTree = SOURCE_ROOT; };
 		F9022D560758073E00C3F701 /* ignore.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ignore.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/ignore.cfg; sourceTree = SOURCE_ROOT; };
 		F9022D690758073E00C3F701 /* style.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = style.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/style.cfg; sourceTree = SOURCE_ROOT; };
-		F9022DA20758088000C3F701 /* Action_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Action_Pressed.tiff; sourceTree = "<group>"; };
 		F9022DA30758088000C3F701 /* Action.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Action.tiff; sourceTree = "<group>"; };
-		F9022DA40758088000C3F701 /* Add_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Add_Pressed.tiff; sourceTree = "<group>"; };
 		F9022DA50758088000C3F701 /* Add.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Add.tiff; sourceTree = "<group>"; };
 		F9022DA70758088000C3F701 /* autofile.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = autofile.tiff; sourceTree = "<group>"; };
 		F9022DA80758088000C3F701 /* bibDocIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = bibDocIcon.icns; sourceTree = "<group>"; };
@@ -1408,7 +1401,6 @@
 		F9022DB10758088000C3F701 /* key.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = key.tiff; sourceTree = "<group>"; };
 		F9022DB20758088000C3F701 /* newdoc.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = newdoc.tiff; sourceTree = "<group>"; };
 		F9022DB30758088000C3F701 /* preview.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = preview.tiff; sourceTree = "<group>"; };
-		F9022DB60758088000C3F701 /* Remove_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Remove_Pressed.tiff; sourceTree = "<group>"; };
 		F9022DB70758088000C3F701 /* Remove.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Remove.tiff; sourceTree = "<group>"; };
 		F9022DB80758088000C3F701 /* risDocIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = risDocIcon.icns; sourceTree = "<group>"; };
 		F9022DBA0758088000C3F701 /* startup.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = startup.tiff; sourceTree = "<group>"; };
@@ -2449,9 +2441,7 @@
 				CE2A195D0CE4969800A0499B /* NewFolder.tiff */,
 				CE2A195E0CE4969800A0499B /* NewSeparator.tiff */,
 				CE7E207D0A0BF833009D04C3 /* GroupAddSmart.tiff */,
-				F9022DA20758088000C3F701 /* Action_Pressed.tiff */,
 				F9022DA30758088000C3F701 /* Action.tiff */,
-				F9022DA40758088000C3F701 /* Add_Pressed.tiff */,
 				F9022DA50758088000C3F701 /* Add.tiff */,
 				CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */,
 				F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */,
@@ -2461,7 +2451,6 @@
 				F9DE8E55087F81A4006F0427 /* cacheDoc.icns */,
 				F9022DA90758088000C3F701 /* citation.tiff */,
 				3D5D34380770C8C3006AF48A /* cornerColumns.tiff */,
-				3D8EA3E30788B9E300AAD253 /* cornerColumns_Pressed.tiff */,
 				3D7C78E1084F4A3A0026D861 /* crossref.tiff */,
 				F9022DAA0758088000C3F701 /* defaults.tiff */,
 				F9022DAB0758088000C3F701 /* display.tiff */,
@@ -2485,7 +2474,6 @@
 				F9022DB20758088000C3F701 /* newdoc.tiff */,
 				F9022DB30758088000C3F701 /* preview.tiff */,
 				3DFF35620816B5780052F37C /* reload_small.tiff */,
-				F9022DB60758088000C3F701 /* Remove_Pressed.tiff */,
 				F9022DB70758088000C3F701 /* Remove.tiff */,
 				F9022DB80758088000C3F701 /* risDocIcon.icns */,
 				CE11B0050AE8FD53008C47AC /* scriptFolderIcon.tiff */,
@@ -3351,9 +3339,7 @@
 				CE12A1700B44AED200416D19 /* SearchGroupServers.plist in Resources */,
 				F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */,
 				CEEC72F7093BDCA200A64F54 /* BibDesk.sdef in Resources */,
-				F9022DBD0758088000C3F701 /* Action_Pressed.tiff in Resources */,
 				F9022DBE0758088000C3F701 /* Action.tiff in Resources */,
-				F9022DBF0758088000C3F701 /* Add_Pressed.tiff in Resources */,
 				F9022DC00758088000C3F701 /* Add.tiff in Resources */,
 				F9022DC20758088000C3F701 /* autofile.tiff in Resources */,
 				F9022DC30758088000C3F701 /* bibDocIcon.icns in Resources */,
@@ -3368,13 +3354,11 @@
 				F9022DCC0758088000C3F701 /* key.tiff in Resources */,
 				F9022DCD0758088000C3F701 /* newdoc.tiff in Resources */,
 				F9022DCE0758088000C3F701 /* preview.tiff in Resources */,
-				F9022DD10758088000C3F701 /* Remove_Pressed.tiff in Resources */,
 				F9022DD20758088000C3F701 /* Remove.tiff in Resources */,
 				F9022DD30758088000C3F701 /* risDocIcon.icns in Resources */,
 				F9022DD50758088000C3F701 /* startup.tiff in Resources */,
 				F9022DD60758088000C3F701 /* TinyFile.tiff in Resources */,
 				3D5D34390770C8C3006AF48A /* cornerColumns.tiff in Resources */,
-				3D8EA3E40788B9E300AAD253 /* cornerColumns_Pressed.tiff in Resources */,
 				F92F4E470788DEDD001B8F82 /* genericBibDocIcon.tiff in Resources */,
 				CEE22B210BFB7DA8002B746B /* RelNotes.rtf in Resources */,
 				3D4373AD07FB3E960007BA84 /* gear.tiff in Resources */,

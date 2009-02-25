@@ -111,7 +111,6 @@ enum {
     [cornerViewButton setIconSize:cornerViewFrame.size];
     [cornerViewButton setIconImage:[NSImage imageNamed:@"cornerColumns"]];
     [cornerViewButton setArrowImage:nil];
-    [cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
     [cornerViewButton setShowsMenuWhenIconClicked:YES];
     [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
     [[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];

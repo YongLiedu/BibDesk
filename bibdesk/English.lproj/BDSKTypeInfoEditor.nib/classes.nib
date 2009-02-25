@@ -120,6 +120,10 @@
 				<string>id</string>
 				<key>insertNewline</key>
 				<string>id</string>
+				<key>insertShiftSpace</key>
+				<string>id</string>
+				<key>insertSpace</key>
+				<string>id</string>
 				<key>invertSelection</key>
 				<string>id</string>
 				<key>moveDown</key>
@@ -155,6 +159,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

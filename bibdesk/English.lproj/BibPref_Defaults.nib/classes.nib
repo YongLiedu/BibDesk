@@ -106,7 +106,7 @@
 				<key>globalMacroFileSheet</key>
 				<string>NSWindow</string>
 				<key>globalMacroFilesTableView</key>
-				<string>NSTableView</string>
+				<string>BDSKTableView</string>
 				<key>pdfViewerPopup</key>
 				<string>NSPopUpButton</string>
 				<key>removeLocalFileFieldsButton</key>
@@ -131,6 +131,10 @@
 				<key>duplicate</key>
 				<string>id</string>
 				<key>insertNewline</key>
+				<string>id</string>
+				<key>insertShiftSpace</key>
+				<string>id</string>
+				<key>insertSpace</key>
 				<string>id</string>
 				<key>invertSelection</key>
 				<string>id</string>
@@ -167,6 +171,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

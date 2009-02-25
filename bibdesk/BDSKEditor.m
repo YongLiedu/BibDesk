@@ -3328,7 +3328,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)setupActionButton {
-	[actionButton setAlternateImage:[NSImage imageNamed:@"GroupAction_Pressed"]];
 	[actionButton setArrowImage:nil];
 	[actionButton setShowsMenuWhenIconClicked:YES];
 	[[actionButton cell] setAltersStateOfSelectedItem:NO];
