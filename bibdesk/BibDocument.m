@@ -3011,7 +3011,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         
         if (isOptionKeyState) {
             [groupAddButton setImage:[NSImage imageNamed:@"GroupAddSmart"]];
-            [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAddSmart_Pressed"]];
             [groupAddButton setToolTip:NSLocalizedString(@"Add new smart group.", @"Tool tip message")];
             
             static NSImage *alternateNewToolbarImage = nil;
@@ -3030,7 +3029,6 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             [toolbarItem setAction:@selector(createNewPubUsingCrossrefAction:)];
         } else {
             [groupAddButton setImage:[NSImage imageNamed:@"GroupAdd"]];
-            [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAdd_Pressed"]];
             [groupAddButton setToolTip:NSLocalizedString(@"Add new group.", @"Tool tip message")];
             
             [toolbarItem setLabel:NSLocalizedString(@"New", @"Toolbar item label")];
