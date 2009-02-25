@@ -54,6 +54,7 @@
 
 - (id)initWithDictionary:(NSDictionary *)aDictionary {
     if (self = [super init]) {
+        BDSKPRECONDITION(aDictionary != nil);
         identifier = [[aDictionary valueForKey:IDENTIFIER_KEY] retain];
         paneClass = NSClassFromString([aDictionary valueForKey:CLASS_KEY]);
         nibName = [[aDictionary valueForKey:NIB_NAME_KEY] retain];
@@ -66,6 +67,8 @@
         initialValues = [[aDictionary valueForKey:INITIAL_VALUES_KEY] retain];
         searchTerms = [[aDictionary valueForKey:SEARCH_TERMS_KEY] copy];
         dictionary = [aDictionary copy];
+        BDSKPOSTCONDITION(identifier != nil);
+        BDSKPOSTCONDITION(paneClass != Nil);
     }
     return self;
 }

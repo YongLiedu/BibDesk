@@ -523,33 +523,24 @@ static id sharedController = nil;
             NSString *identifier = [record identifier];
             // should we register defaults for panes that are not loaded?
             [initialValues addEntriesFromDictionary:[record initialValues]];
-            if (identifier == nil) {
-                NSLog(@"Could not get identifier of preference pane for %@", paneDict);
-            } else if ([record paneClass] == nil) {
-                NSLog(@"Could not get class of preference pane for %@", paneDict);
-            } else {
-                [records setObject:record forKey:identifier];
-                BDSKVersionNumber *minimumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MINIMUM_SYSTEM_VERSION_KEY]];
-                BDSKVersionNumber *maximumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MAXIMUM_SYSTEM_VERSION_KEY]];
-                if ((minimumSystemVersion == nil || [systemVersion compareToVersionNumber:minimumSystemVersion] != NSOrderedAscending) &&
-                    (maximumSystemVersion == nil || [systemVersion compareToVersionNumber:maximumSystemVersion] != NSOrderedDescending))
-                    [paneArray addObject:identifier];
-            }
+            [records setObject:record forKey:identifier];
+            BDSKVersionNumber *minimumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MINIMUM_SYSTEM_VERSION_KEY]];
+            BDSKVersionNumber *maximumSystemVersion = [BDSKVersionNumber versionNumberWithVersionString:[paneDict valueForKey:MAXIMUM_SYSTEM_VERSION_KEY]];
+            if ((minimumSystemVersion == nil || [systemVersion compareToVersionNumber:minimumSystemVersion] != NSOrderedAscending) &&
+                (maximumSystemVersion == nil || [systemVersion compareToVersionNumber:maximumSystemVersion] != NSOrderedDescending))
+                [paneArray addObject:identifier];
         }
         
         NSString *category = [dict valueForKey:IDENTIFIER_KEY];
-        if (category == nil) {
-            NSLog(@"Could not get identifier for category for %@", dict);
-        } else if ([paneArray count]) {
-            NSMutableDictionary *catDict = [[NSMutableDictionary alloc] init];
-            [catDict setValue:category forKey:IDENTIFIER_KEY];
-            [catDict setValue:[dict valueForKey:TITLE_KEY] forKey:TITLE_KEY];
-            [catDict setObject:paneArray forKey:PANES_KEY];
-            [categoryDicts setObject:catDict forKey:category];
-            [categories addObject:category];
-            [catDict release];
-            [initialValues addEntriesFromDictionary:[dict valueForKey:INITIAL_VALUES_KEY]];
-        }
+        BDSKPOSTCONDITION(category != nil);
+        NSMutableDictionary *catDict = [[NSMutableDictionary alloc] init];
+        [catDict setValue:category forKey:IDENTIFIER_KEY];
+        [catDict setValue:[dict valueForKey:TITLE_KEY] forKey:TITLE_KEY];
+        [catDict setObject:paneArray forKey:PANES_KEY];
+        [categoryDicts setObject:catDict forKey:category];
+        [categories addObject:category];
+        [catDict release];
+        [initialValues addEntriesFromDictionary:[dict valueForKey:INITIAL_VALUES_KEY]];
         [paneArray release];
     }
     
@@ -570,21 +561,18 @@ static id sharedController = nil;
         while (identifier = [paneEnum nextObject]) {
             BDSKPreferenceRecord *record = [records objectForKey:identifier];
             BDSKPreferencePane *pane = [[[record paneClass] alloc] initWithRecord:record forPreferenceController:self];
-            if (pane == nil) {
-                NSLog(@"Could not create preference pane for %@", record);
-            } else {
-                [panes setObject:pane forKey:identifier];
-                [pane release];
-                NSArray *searchTerms = [record searchTerms];
-                if ([searchTerms count]) {
-                    NSMutableString *searchString = [[NSMutableString alloc] init];
-                    NSEnumerator *stringEnum = [searchTerms objectEnumerator];
-                    NSString *string;
-                    while (string = [stringEnum nextObject])
-                        [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:DEFAULTS_TABLE], 0x1E];
-                    [identifierSearchTerms setObject:searchString forKey:identifier];
-                    [searchString release];
-                }
+            BDSKPOSTCONDITION(pane != nil);
+            [panes setObject:pane forKey:identifier];
+            [pane release];
+            NSArray *searchTerms = [record searchTerms];
+            if ([searchTerms count]) {
+                NSMutableString *searchString = [[NSMutableString alloc] init];
+                NSEnumerator *stringEnum = [searchTerms objectEnumerator];
+                NSString *string;
+                while (string = [stringEnum nextObject])
+                    [searchString appendFormat:@"%@%C", [[NSBundle mainBundle] localizedStringForKey:string value:@"" table:DEFAULTS_TABLE], 0x1E];
+                [identifierSearchTerms setObject:searchString forKey:identifier];
+                [searchString release];
             }
         }
     }
