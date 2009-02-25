@@ -57,7 +57,7 @@
         identifier = [[aDictionary valueForKey:IDENTIFIER_KEY] retain];
         paneClass = NSClassFromString([aDictionary valueForKey:CLASS_KEY]);
         nibName = [[aDictionary valueForKey:NIB_NAME_KEY] retain];
-        icon = [[aDictionary valueForKey:ICON_KEY] ? [NSImage imageNamed:[aDictionary valueForKey:ICON_KEY]] : nil retain];
+        icon = [aDictionary valueForKey:ICON_KEY] ? [[NSImage imageNamed:[aDictionary valueForKey:ICON_KEY]] retain] : nil;
         title = [[aDictionary valueForKey:TITLE_KEY] retain];
         label = [[aDictionary valueForKey:LABEL_KEY] retain];
         toolTip = [[aDictionary valueForKey:TOOL_TIP_KEY] retain];
