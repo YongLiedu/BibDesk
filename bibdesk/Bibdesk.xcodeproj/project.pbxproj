@@ -488,7 +488,6 @@
 		F9DB895D08A54BBA00CB3D53 /* BDSKTeXTask.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DB895B08A54BBA00CB3D53 /* BDSKTeXTask.m */; };
 		F9DCEA50094B7D1100AEE662 /* BDSKTextWithIconCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DCEA4E094B7D1100AEE662 /* BDSKTextWithIconCell.m */; };
 		F9DE8E56087F81A4006F0427 /* cacheDoc.icns in Resources */ = {isa = PBXBuildFile; fileRef = F9DE8E55087F81A4006F0427 /* cacheDoc.icns */; };
-		F9DE8E9808801F13006F0427 /* ArrowImage_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9DE8E9708801F13006F0427 /* ArrowImage_Pressed.tiff */; };
 		F9DF3BC209B7605E00342ADE /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9DF3BC109B7605E00342ADE /* SystemConfiguration.framework */; };
 		F9E069B70981A03B00AEFBE7 /* BDSKWebOfScienceParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E069B50981A03B00AEFBE7 /* BDSKWebOfScienceParser.m */; };
 		F9E07C8509202309007BCDD4 /* BibDocument_Groups.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E07C8309202309007BCDD4 /* BibDocument_Groups.m */; };
@@ -1665,7 +1664,6 @@
 		F9DCEA4D094B7D1100AEE662 /* BDSKTextWithIconCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextWithIconCell.h; sourceTree = "<group>"; };
 		F9DCEA4E094B7D1100AEE662 /* BDSKTextWithIconCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextWithIconCell.m; sourceTree = "<group>"; };
 		F9DE8E55087F81A4006F0427 /* cacheDoc.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cacheDoc.icns; sourceTree = "<group>"; };
-		F9DE8E9708801F13006F0427 /* ArrowImage_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = ArrowImage_Pressed.tiff; sourceTree = "<group>"; };
 		F9DF3BC109B7605E00342ADE /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
 		F9E069B40981A03B00AEFBE7 /* BDSKWebOfScienceParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKWebOfScienceParser.h; sourceTree = "<group>"; };
 		F9E069B50981A03B00AEFBE7 /* BDSKWebOfScienceParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKWebOfScienceParser.m; sourceTree = "<group>"; };
@@ -2457,7 +2455,6 @@
 				F9022DA50758088000C3F701 /* Add.tiff */,
 				CE023F5C0CC50F86003F52E5 /* Add_Small.tiff */,
 				F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */,
-				F9DE8E9708801F13006F0427 /* ArrowImage_Pressed.tiff */,
 				F9022DA70758088000C3F701 /* autofile.tiff */,
 				3DFF355E0816B5460052F37C /* back_small.tiff */,
 				F9022DA80758088000C3F701 /* bibDocIcon.icns */,
@@ -3388,7 +3385,6 @@
 				F9CE58EC0842411D0072DF55 /* ArrowImage.tiff in Resources */,
 				3D7C78E2084F4A3A0026D861 /* crossref.tiff in Resources */,
 				F9DE8E56087F81A4006F0427 /* cacheDoc.icns in Resources */,
-				F9DE8E9808801F13006F0427 /* ArrowImage_Pressed.tiff in Resources */,
 				F938408A0906DD1F00FC37F2 /* scripthook.tiff in Resources */,
 				F97BEBB5090886E50063504B /* genericFolderIcon.tiff in Resources */,
 				F97BF344090B19520063504B /* smartFolderIcon.tiff in Resources */,
