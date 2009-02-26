@@ -573,23 +573,17 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     [(BDSKZoomableTextView *)bottomPreviewTextView setScaleFactor:[xattrDefaults floatForKey:BDSKBottomPreviewScaleFactorKey defaultValue:1.0]];
     
 	// ImagePopUpButtons setup
-	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
-	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
 	[[actionMenuButton cell] setRefreshesMenu:YES];
 	[actionMenuButton setDelegate:self];
 	
-	[groupActionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[groupActionMenuButton cell] setAltersStateOfSelectedItem:NO];
-	[[groupActionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[groupActionMenuButton cell] setUsesItemFromMenu:NO];
 	[[groupActionMenuButton cell] setRefreshesMenu:NO];
 	
 	[groupActionButton setArrowImage:nil];
-	[groupActionButton setShowsMenuWhenIconClicked:YES];
 	[[groupActionButton cell] setAltersStateOfSelectedItem:NO];
-	[[groupActionButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[groupActionButton cell] setUsesItemFromMenu:NO];
 	[[groupActionButton cell] setRefreshesMenu:NO];
     

@@ -3329,9 +3329,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)setupActionButton {
 	[actionButton setArrowImage:nil];
-	[actionButton setShowsMenuWhenIconClicked:YES];
 	[[actionButton cell] setAltersStateOfSelectedItem:NO];
-	[[actionButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[actionButton cell] setUsesItemFromMenu:NO];
 	[[actionButton cell] setRefreshesMenu:NO];
 }    

@@ -108,12 +108,11 @@ enum {
     
     NSRect cornerViewFrame = [[self cornerView] frame];
     BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
+    [cornerViewButton setPullsDown:YES];
     [cornerViewButton setIconSize:cornerViewFrame.size];
     [cornerViewButton setIconImage:[NSImage imageNamed:@"cornerColumns"]];
     [cornerViewButton setArrowImage:nil];
-    [cornerViewButton setShowsMenuWhenIconClicked:YES];
     [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
-    [[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];
     [[cornerViewButton cell] setUsesItemFromMenu:NO];
     [cornerViewButton setRefreshesMenu:NO];
     [self setCornerView:cornerViewButton];

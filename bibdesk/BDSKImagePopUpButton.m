@@ -108,14 +108,6 @@
     [[self cell] setIconSize:iconSize];
 }
 
-- (BOOL)showsMenuWhenIconClicked{
-    return [[self cell] showsMenuWhenIconClicked];
-}
-
-- (void)setShowsMenuWhenIconClicked:(BOOL)showsMenuWhenIconClicked{
-    [[self cell] setShowsMenuWhenIconClicked: showsMenuWhenIconClicked];
-}
-
 - (NSImage *)iconImage{
     return [[self cell] iconImage];
 }
@@ -171,13 +163,6 @@
     [[self cell] setArrowImage: arrowImage];
 }
 
-- (BOOL)iconActionEnabled{
-    return [[self cell] iconActionEnabled];
-}
-
-- (void)setIconActionEnabled:(BOOL)iconActionEnabled{
-    [[self cell] setIconActionEnabled: iconActionEnabled];
-}
 - (BOOL)refreshesMenu{
     return [[self cell] refreshesMenu];
 }
@@ -193,88 +178,6 @@
 	} else {
 		return [cell menu];
 	}
-}
-
-#pragma mark Dragging source
-
-- (unsigned int)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return (isLocal) ? NSDragOperationEvery : NSDragOperationCopy;
-}
-
-- (BOOL)startDraggingWithEvent:(NSEvent *)theEvent {
-	NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-	
-	if ([delegate respondsToSelector:@selector(imagePopUpButton:writeDataToPasteboard:)] == NO ||
-		[delegate imagePopUpButton:self writeDataToPasteboard:pboard] == NO) 
-		return NO;
-		
-	NSImage *iconImage;
-	NSSize size = [[self cell] iconSize];
-	NSImage *dragImage = [[[NSImage alloc] initWithSize:size] autorelease];
-	NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	
-	mouseLoc.x -= 0.5f * size.width;
-	mouseLoc.y += 0.5f * size.height;
-	
-	if ([[self cell] usesItemFromMenu] == NO) {
-		iconImage = [self iconImage];
-	} else {
-		iconImage = [[self selectedItem] image];
-	}
-    NSSize srcSize = [iconImage size];
-	[dragImage lockFocus];
-    [iconImage drawInRect:NSMakeRect(0, 0, size.width, size.height) fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeCopy fraction:0.6];
-	[dragImage unlockFocus];
-
-	[self dragImage:dragImage at:mouseLoc offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES];
-	
-	return YES;
-}
-
-- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination {
-	if ([delegate respondsToSelector:@selector(imagePopUpButton:namesOfPromisedFilesDroppedAtDestination:)])
-		return [delegate imagePopUpButton:self namesOfPromisedFilesDroppedAtDestination:dropDestination];
-	return nil;
-}
-
-- (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
-	if ([delegate respondsToSelector:@selector(imagePopUpButton:cleanUpAfterDragOperation:)])
-		[delegate imagePopUpButton:self cleanUpAfterDragOperation:operation];
-    // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
-}
-
-#pragma mark Dragging destination
-
-- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
-    NSDragOperation dragOp = NSDragOperationNone;
-    if ([delegate respondsToSelector:@selector(imagePopUpButton:receiveDrag:)] && 
-        [delegate respondsToSelector:@selector(imagePopUpButton:canReceiveDrag:)]) {
-        
-        dragOp = [delegate imagePopUpButton:self canReceiveDrag:sender];
-        if (dragOp != NSDragOperationNone) {	
-            highlight = YES;
-            [self setNeedsDisplay:YES];
-        }
-    }
-    return dragOp;
-}
-
-- (void)draggingExited:(id <NSDraggingInfo>)sender {
-    highlight = NO;
-	[self setNeedsDisplay:YES];
-}
-
-- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender {
-	highlight = NO;
-	[self setNeedsDisplay:YES];
-	return YES;
-} 
-
-- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
-    if(delegate == nil) return NO;
-    
-    return [delegate imagePopUpButton:self receiveDrag:sender];
 }
 
 #pragma mark Drawing and Highlighting

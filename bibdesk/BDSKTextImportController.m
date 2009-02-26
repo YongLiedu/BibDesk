@@ -177,9 +177,7 @@
 	
     // Set the properties of actionMenuButton that cannot be set in IB
 	[actionMenuButton setArrowImage:nil];
-	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
-	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
 	[[actionMenuButton cell] setRefreshesMenu:NO];
     
