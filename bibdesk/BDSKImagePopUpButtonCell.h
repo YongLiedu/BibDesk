@@ -45,7 +45,6 @@
     NSSize iconSize;
     NSImage *iconImage;
     NSImage *arrowImage;
-	BOOL refreshesMenu;
 }
 
 - (NSSize)iconSize;
@@ -55,8 +54,5 @@
 - (void)setIconImage:(NSImage *)anImage;
 - (NSImage *) arrowImage;
 - (void)setArrowImage:(NSImage *)anImage;
-
-- (BOOL)refreshesMenu;
-- (void)setRefreshesMenu:(BOOL)flag;
 
 @end

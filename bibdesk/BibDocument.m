@@ -575,17 +575,13 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	// ImagePopUpButtons setup
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
-	[[actionMenuButton cell] setRefreshesMenu:YES];
-	[actionMenuButton setDelegate:self];
 	
 	[[groupActionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[groupActionMenuButton cell] setUsesItemFromMenu:NO];
-	[[groupActionMenuButton cell] setRefreshesMenu:NO];
 	
 	[groupActionButton setArrowImage:nil];
 	[[groupActionButton cell] setAltersStateOfSelectedItem:NO];
 	[[groupActionButton cell] setUsesItemFromMenu:NO];
-	[[groupActionButton cell] setRefreshesMenu:NO];
     
 	BDSKHeaderPopUpButtonCell *headerCell = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
 	[headerCell setAction:@selector(changeGroupFieldAction:)];
@@ -3470,27 +3466,6 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     return [tableView columnsMenu];
 }
 
-- (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
-    NSMenu *menu = actionMenu;
-    NSMenu *submenu = nil;
-    int i, count = [menu numberOfItems];
-    
-    for (i = 0; submenu == nil && i < count; i++)
-        submenu = [[menu itemAtIndex:i] submenu];
-    if (submenu) {
-        while ([submenu numberOfItems])
-            [submenu removeItemAtIndex:0];
-        NSArray *styles = [BDSKTemplate allStyleNames];
-        count = [styles count];
-        for (i = 0; i < count; i++) {
-            NSMenuItem *item = [submenu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
-            [item setTarget:self];
-            [item setTag:BDSKTemplateDragCopyType + i];
-        }
-    }
-    return menu;
-}
-
 #pragma mark Template Menu
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
@@ -3513,6 +3488,16 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
             [item setTarget:self];
             [item setTag:BDSKPreviewDisplayText];
             [item setRepresentedObject:style];
+        }
+    } else if (menu == copyAsMenu) {
+        while ([menu numberOfItems])
+            [menu removeItemAtIndex:0];
+        NSArray *styles = [BDSKTemplate allStyleNames];
+        unsigned int i, count = [styles count];
+        for (i = 0; i < count; i++) {
+            NSMenuItem *item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setTag:BDSKTemplateDragCopyType + i];
         }
     }
 }

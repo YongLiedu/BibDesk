@@ -68,7 +68,6 @@
         [cell release];
 		
 		iconSize = NSMakeSize(32.0, 32.0);
-		refreshesMenu = NO;
         
         static NSImage *defaultArrowImage = nil;
         if (defaultArrowImage == nil) {
@@ -96,7 +95,6 @@
         [self setButtonCell:[coder decodeObjectForKey:@"buttonCell"]];
 		
 		iconSize = [coder decodeSizeForKey:@"iconSize"];
-		refreshesMenu = [coder decodeBoolForKey:@"refreshesMenu"];
 		
 		[self setIconImage:[coder decodeObjectForKey:@"iconImage"]];
 		[self setArrowImage:[coder decodeObjectForKey:@"arrowImage"]];
@@ -112,7 +110,6 @@
 	[encoder encodeObject:buttonCell forKey:@"buttonCell"];
 	
 	[encoder encodeSize:iconSize forKey:@"iconSize"];
-	[encoder encodeBool:refreshesMenu forKey:@"refreshesMenu"];
 	
 	[encoder encodeObject:iconImage forKey:@"iconImage"];
 	
@@ -169,16 +166,6 @@
 	[buttonCell setImage:nil]; // invalidate the image
 }
 
-- (BOOL)refreshesMenu {
-    return refreshesMenu;
-}
-
-- (void)setRefreshesMenu:(BOOL)flag {
-    if (refreshesMenu != flag) {
-        refreshesMenu = flag;
-    }
-}
-
 - (BOOL)isEnabled {
 	return [buttonCell isEnabled];
 }
@@ -200,21 +187,6 @@
 	[buttonCell setImage:nil]; // invalidate the image
 }
 
-- (NSMenu *)menuForEvent:(NSEvent *)anEvent inRect:(NSRect)cellFrame ofView:(NSView *)aView {
-	if ([self refreshesMenu] && [[self controlView] respondsToSelector:@selector(menuForCell:)])
-		[self setMenu:[[self controlView] performSelector:@selector(menuForCell:) withObject:self]];
-    return [super menuForEvent:anEvent inRect:cellFrame ofView:aView];
-}
-/*
-- (void)performClick:(id)sender{
-    [buttonCell performClick: sender];
-    [super performClick: sender];
-    if ([self iconActionEnabled]) {
-        NSMenuItem *selectedItem = [self selectedItem];
-        [NSApp sendAction: [selectedItem action] to: [selectedItem target] from: selectedItem];
-    }
-}
-*/
 #pragma mark Drawing and highlighting
 
 - (NSSize)cellSize {

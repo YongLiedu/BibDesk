@@ -58,16 +58,7 @@
 - (NSImage *)arrowImage;
 - (void) setArrowImage:(NSImage *)arrowImage;
 
-- (BOOL)refreshesMenu;
-- (void)setRefreshesMenu:(BOOL)refreshesMenu;
-
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
 
-- (NSMenu *)menuForCell:(id)cell;
-
-@end
-
-@interface NSObject (BDSKImagePopUpButtonDelegate)
-- (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view;
 @end

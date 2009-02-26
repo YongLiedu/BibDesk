@@ -114,7 +114,6 @@ enum {
     [cornerViewButton setArrowImage:nil];
     [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
     [[cornerViewButton cell] setUsesItemFromMenu:NO];
-    [cornerViewButton setRefreshesMenu:NO];
     [self setCornerView:cornerViewButton];
     [cornerViewButton release];
     

@@ -179,7 +179,6 @@
 	[actionMenuButton setArrowImage:nil];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
-	[[actionMenuButton cell] setRefreshesMenu:NO];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleFlagsChangedNotification:)

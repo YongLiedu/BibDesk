@@ -3331,7 +3331,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[actionButton setArrowImage:nil];
 	[[actionButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionButton cell] setUsesItemFromMenu:NO];
-	[[actionButton cell] setRefreshesMenu:NO];
 }    
 
 - (void)setupTypePopUp{

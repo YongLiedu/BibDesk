@@ -163,23 +163,6 @@
     [[self cell] setArrowImage: arrowImage];
 }
 
-- (BOOL)refreshesMenu{
-    return [[self cell] refreshesMenu];
-}
-
-- (void)setRefreshesMenu:(BOOL)refreshesMenu{
-    [[self cell] setRefreshesMenu:refreshesMenu];
-}
-
-- (NSMenu *)menuForCell:(id)cell{
-	if ([self refreshesMenu] && 
-		[delegate respondsToSelector:@selector(menuForImagePopUpButton:)]) {
-		return [delegate menuForImagePopUpButton:self];
-	} else {
-		return [cell menu];
-	}
-}
-
 #pragma mark Drawing and Highlighting
 
 -(void)drawRect:(NSRect)rect {
