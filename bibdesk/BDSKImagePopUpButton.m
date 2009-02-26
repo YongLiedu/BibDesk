@@ -50,7 +50,6 @@
 - (id)initWithFrame:(NSRect)frameRect {
 	if (self = [super initWithFrame:frameRect]) {
 		highlight = NO;
-		delegate = nil;
 	}
 	return self;
 }
@@ -58,7 +57,6 @@
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
 		highlight = NO;
-		[self setDelegate:[coder decodeObjectForKey:@"delegate"]];
 		
 		if (![[self cell] isKindOfClass:[BDSKImagePopUpButtonCell class]]) {
 			BDSKImagePopUpButtonCell *cell = [[[BDSKImagePopUpButtonCell alloc] init] autorelease];
@@ -78,27 +76,7 @@
 	return self;
 }
 
-- (void)encodeWithCoder:(NSCoder *)encoder{
-	[super encodeWithCoder:encoder];
-	[encoder encodeConditionalObject:delegate forKey:@"delegate"];
-}
-
-- (void)dealloc{
-    [animation setDelegate:nil];
-    [animation stopAnimation];
-    [animation release];
-	[super dealloc];
-}
-
 #pragma mark Accessors
-
-- (id)delegate {
-    return delegate;
-}
-
-- (void)setDelegate:(id)newDelegate {
-	delegate = newDelegate;
-}
 
 - (NSSize)iconSize{
     return [[self cell] iconSize];
@@ -110,45 +88,6 @@
 
 - (NSImage *)iconImage{
     return [[self cell] iconImage];
-}
-
-- (void)animationDidStop:(BDSKImageFadeAnimation *)anAnimation {
-    BDSKASSERT(anAnimation == animation);
-    [animation setDelegate:nil];
-    [animation autorelease];
-    animation = nil;
-}
-
-- (void)animationDidEnd:(BDSKImageFadeAnimation *)anAnimation {
-    BDSKASSERT(anAnimation == animation);
-    [self setIconImage:[anAnimation finalImage]];
-    [animation setDelegate:nil];
-    [animation autorelease];
-    animation = nil;
-}
-
-- (void)imageAnimationDidUpdate:(BDSKImageFadeAnimation *)anAnimation {
-    [self setIconImage:[anAnimation currentImage]];
-}
-
-- (void)fadeIconImageToImage:(NSImage *)newImage {
-    
-    if ([animation isAnimating])
-        [animation stopAnimation];
-        
-    NSImage *iconImage = [self iconImage];
-    
-    if (nil != iconImage && nil != newImage) {
-        animation = [[BDSKImageFadeAnimation alloc] initWithDuration:1.0f animationCurve:NSAnimationEaseInOut];
-        [animation setDelegate:self];
-        [animation setAnimationBlockingMode:NSAnimationNonblocking];
-        
-        [animation setTargetImage:newImage];
-        [animation setStartingImage:iconImage];
-        [animation startAnimation];
-    } else {
-        [self setIconImage:newImage];
-    }
 }
 
 - (void)setIconImage:(NSImage *)iconImage{

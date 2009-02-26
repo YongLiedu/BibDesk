@@ -45,20 +45,14 @@
 @interface BDSKImagePopUpButton : NSPopUpButton
 {
 	BOOL highlight;
-	id delegate;
-    BDSKImageFadeAnimation *animation;
 }
 - (NSSize)iconSize;
 - (void)setIconSize:(NSSize)iconSize;
 
 - (NSImage *)iconImage;
 - (void)setIconImage:(NSImage *)iconImage;
-- (void)fadeIconImageToImage:(NSImage *)iconImage;
 
 - (NSImage *)arrowImage;
 - (void) setArrowImage:(NSImage *)arrowImage;
-
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
 
 @end
