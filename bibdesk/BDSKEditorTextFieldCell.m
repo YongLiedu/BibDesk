@@ -220,7 +220,7 @@
 // NSTextFieldCell draws this with the wrong baseline, or possibly it wraps lines even though the cell is set to clip
 - (void)drawWithExpansionFrame:(NSRect)cellFrame inView:(NSView *)view
 {
-    [[self attributedStringValue] drawInRect:cellFrame];
+    [[self attributedStringValue] drawInRect:NSInsetRect(cellFrame, 2.0, 0.0)];
 }
 
 // make sure it uses black text on Leopard when the row is selected (see bug #1866083)
@@ -231,7 +231,7 @@
 {
     NSSize cellSize = [super cellSize];
     if ([self hasButton] || [self URL])
-        cellSize.width += [buttonCell cellSize].width + BUTTON_MARGIN;
+        cellSize.width += BUTTON_SIZE.width + BUTTON_MARGIN;
     return cellSize;
 }
 
