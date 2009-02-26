@@ -38,6 +38,7 @@
 
 #import "BDSKTableSortDescriptor.h"
 #import "BDSKTypeManager.h"
+#import "NSColor_BDSKExtensions.h"
 
 @interface NSArray (BibAuthorMultipleCompare)
 @end
