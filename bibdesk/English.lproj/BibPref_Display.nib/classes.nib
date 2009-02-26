@@ -15,6 +15,8 @@
 				<string>id</string>
 				<key>changeFontElement</key>
 				<string>id</string>
+				<key>changeIgnoredSortTerms</key>
+				<string>id</string>
 				<key>changePreviewMaxNumber</key>
 				<string>id</string>
 				<key>removeSelectedTerm</key>
@@ -26,8 +28,6 @@
 			<string>ObjC</string>
 			<key>OUTLETS</key>
 			<dict>
-				<key>addButton</key>
-				<string>NSButton</string>
 				<key>authorAbbreviateButton</key>
 				<string>NSButton</string>
 				<key>authorFirstNameButton</key>
@@ -38,12 +38,10 @@
 				<string>NSButton</string>
 				<key>fontElementPopup</key>
 				<string>NSPopUpButton</string>
+				<key>ignoredSortTermsField</key>
+				<string>NSTextField</string>
 				<key>previewMaxNumberComboBox</key>
 				<string>NSComboBox</string>
-				<key>removeButton</key>
-				<string>NSButton</string>
-				<key>tableView</key>
-				<string>NSTableView</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>BDSKPreferencePane</string>
@@ -103,14 +101,6 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>NSScrollView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -150,21 +140,6 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSWindowController</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>changeFont</key>
-				<string>id</string>
-				<key>invertSelection</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>NSTableView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSControl</string>
 		</dict>
 	</array>
 	<key>IBVersion</key>

@@ -46,10 +46,7 @@
     IBOutlet NSPopUpButton *fontElementPopup;
     IBOutlet NSButton *fontButton;
     
-    // sorting
-    IBOutlet NSButton *addButton;
-    IBOutlet NSButton *removeButton;
-    IBOutlet NSTableView *tableView;
+    IBOutlet NSTextField *ignoredSortTermsField;
     
     IBOutlet NSButton *authorFirstNameButton;
     IBOutlet NSButton *authorAbbreviateButton;
@@ -58,10 +55,9 @@
 
 - (IBAction)changePreviewMaxNumber:(id)sender;
 
-- (IBAction)addTerm:(id)sender;
-- (IBAction)removeSelectedTerm:(id)sender;
-
 - (IBAction)changeAuthorDisplay:(id)sender;
+
+- (IBAction)changeIgnoredSortTerms:(id)sender;
 
 - (void)changeFont:(id)sender;
 - (IBAction)changeFontElement:(id)sender;

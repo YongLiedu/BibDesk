@@ -41,12 +41,14 @@
 #import "BibAuthor.h"
 #import "BDSKStringConstants.h"
 #import "BDSKPreferenceController.h"
+#import "BDSKStringArrayFormatter.h"
 
 
 @implementation BibPref_Display
 
 - (void)awakeFromNib{
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
+    [ignoredSortTermsField setFormatter:[[[BDSKStringArrayFormatter alloc] init] autorelease]];
     [self updateUI];
 }
 
@@ -67,10 +69,15 @@
     [authorLastNameFirstButton setEnabled:mask & BDSKAuthorDisplayFirstNameMask];
 }
 
+- (void)updateSortWordsDisplayUI{
+    [ignoredSortTermsField setObjectValue:[sud stringArrayForKey:BDSKIgnoredSortTermsKey]];
+}
+
 - (void)updateUI{
     [self updatePreviewDisplayUI];
     [self updateAuthorNameDisplayUI];
-}    
+    [self updateSortWordsDisplayUI];
+}
 
 - (IBAction)changePreviewMaxNumber:(id)sender{
     int maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
@@ -80,60 +87,8 @@
 	}
 }
 
-//
-// sorting prefs code
-//
-
-- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
-{
-    return [[sud arrayForKey:BDSKIgnoredSortTermsKey] objectAtIndex:rowIndex];
-}
-
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView
-{
-    return [[sud arrayForKey:BDSKIgnoredSortTermsKey] count];
-}
-
-- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
-{
-    NSMutableArray *mutableArray = [[sud arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
-    [mutableArray replaceObjectAtIndex:rowIndex withObject:anObject];
-    [sud setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
-    [mutableArray release];
-    CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
-}
-
-- (IBAction)addTerm:(id)sender
-{
-    NSMutableArray *mutableArray = [[sud arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
-    if(!mutableArray)
-        mutableArray = [[NSMutableArray alloc] initWithCapacity:1];
-    [mutableArray addObject:NSLocalizedString(@"Edit or delete this text", @"")];
-    [sud setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
-    [tableView reloadData];
-    [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:[mutableArray count] - 1] byExtendingSelection:NO];
-    [tableView editColumn:0 row:[tableView selectedRow] withEvent:nil select:YES];
-    [mutableArray release];
-    CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
-}
-
-- (void)tableViewSelectionDidChange:(NSNotification *)aNotification
-{
-    [removeButton setEnabled:([tableView numberOfSelectedRows] > 0)];
-}
-
-- (IBAction)removeSelectedTerm:(id)sender
-{
-    [[[self view] window] makeFirstResponder:tableView];  // end editing 
-    NSMutableArray *mutableArray = [[sud arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
-    
-    int selRow = [tableView selectedRow];
-    NSAssert(selRow >= 0, @"row must be selected in order to delete");
-    
-    [mutableArray removeObjectAtIndex:selRow];
-    [sud setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
-    [mutableArray release];
-    [tableView reloadData];
+- (IBAction)changeIgnoredSortTerms:(id)sender{
+    [sud setObject:[sender objectValue] forKey:BDSKIgnoredSortTermsKey];
     CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
 }
 
@@ -148,7 +103,6 @@
     [sud setInteger:prefMask forKey:BDSKAuthorNameDisplayKey];
     [self updateAuthorNameDisplayUI];
 }
-
 
 - (NSFont *)currentFont{
     NSString *fontNameKey = nil;

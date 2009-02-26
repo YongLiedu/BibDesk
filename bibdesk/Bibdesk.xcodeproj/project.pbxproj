@@ -286,6 +286,8 @@
 		CEF1817F0CEB702000716E85 /* Bookmarks.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF181BD0CEB711700716E85 /* Bookmarks.plist in Copy Files: Shared Support */ = {isa = PBXBuildFile; fileRef = CEF1817E0CEB701F00716E85 /* Bookmarks.plist */; };
 		CEF2EEE70F3462A900A7989E /* NSColor_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */; };
+		CEF5460F0F56BDDB008A630F /* BDSKStringArrayFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF5460D0F56BDDB008A630F /* BDSKStringArrayFormatter.h */; };
+		CEF546100F56BDDB008A630F /* BDSKStringArrayFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5460E0F56BDDB008A630F /* BDSKStringArrayFormatter.m */; };
 		CEF5C0420F546ADB00DBC864 /* TestBDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0270F5469E300DBC864 /* TestBDSKRISParser.m */; };
 		CEF5C0430F546ADC00DBC864 /* TestBDSKTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C0290F5469E300DBC864 /* TestBDSKTypeManager.m */; };
 		CEF5C0440F546ADC00DBC864 /* TestBibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF5C02B0F5469E300DBC864 /* TestBibItem.m */; };
@@ -1245,6 +1247,8 @@
 		CEF1817E0CEB701F00716E85 /* Bookmarks.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Bookmarks.plist; sourceTree = "<group>"; };
 		CEF2EEE40F3462A900A7989E /* NSColor_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSColor_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEF2EEE50F3462A900A7989E /* NSColor_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSColor_BDSKExtensions.m; sourceTree = "<group>"; };
+		CEF5460D0F56BDDB008A630F /* BDSKStringArrayFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringArrayFormatter.h; sourceTree = "<group>"; };
+		CEF5460E0F56BDDB008A630F /* BDSKStringArrayFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStringArrayFormatter.m; sourceTree = "<group>"; };
 		CEF5C0270F5469E300DBC864 /* TestBDSKRISParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestBDSKRISParser.m; sourceTree = "<group>"; };
 		CEF5C0280F5469E300DBC864 /* TestBDSKTypeManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestBDSKTypeManager.h; sourceTree = "<group>"; };
 		CEF5C0290F5469E300DBC864 /* TestBDSKTypeManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestBDSKTypeManager.m; sourceTree = "<group>"; };
@@ -2239,6 +2243,7 @@
 				CEF942100926458C00750FFA /* BDSKPathColorTransformer.m */,
 				CEF94340092656BB00750FFA /* BDSKPathIconTransformer.m */,
 				F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */,
+				CEF5460E0F56BDDB008A630F /* BDSKStringArrayFormatter.m */,
 				CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */,
 			);
 			name = "Data Handling";
@@ -2690,6 +2695,7 @@
 				F9A411EF0A0B1FEF008493C0 /* BDSKSpotlightView.h */,
 				CEFDBDC30AEA86F0009EE99D /* BDSKStaticGroup.h */,
 				CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */,
+				CEF5460D0F56BDDB008A630F /* BDSKStringArrayFormatter.h */,
 				F9022C930758038000C3F701 /* BDSKStringConstants.h */,
 				F9F78CD207D5320D004B68AF /* BDSKStringEncodingManager.h */,
 				F9025DA90969AB69008A551C /* BDSKStringNode.h */,
@@ -2948,6 +2954,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE424A450D0F123500F824E7 /* BDSKCompletionServerProtocol.h in Headers */,
+				CEF5460F0F56BDDB008A630F /* BDSKStringArrayFormatter.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3851,6 +3858,7 @@
 				CEED2E150F4DED830078E87A /* BDSKInvocation.m in Sources */,
 				CEED2F350F4E0C860078E87A /* BDSKRuntime.m in Sources */,
 				CEC1CEA80F51D2CE00D18921 /* BDSKReadWriteLock.m in Sources */,
+				CEF546100F56BDDB008A630F /* BDSKStringArrayFormatter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
