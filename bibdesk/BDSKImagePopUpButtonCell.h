@@ -43,16 +43,12 @@
 {
     NSButtonCell *buttonCell;
     NSSize iconSize;
-    NSImage *iconImage;
-    NSImage *arrowImage;
+    NSImage *image;
 }
+
++ (NSImage *)arrowImage;
 
 - (NSSize)iconSize;
 - (void)setIconSize:(NSSize)aSize;
-
-- (NSImage *)iconImage;
-- (void)setIconImage:(NSImage *)anImage;
-- (NSImage *) arrowImage;
-- (void)setArrowImage:(NSImage *)anImage;
 
 @end

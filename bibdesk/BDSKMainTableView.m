@@ -110,8 +110,8 @@ enum {
     BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
     [cornerViewButton setPullsDown:YES];
     [cornerViewButton setIconSize:cornerViewFrame.size];
-    [cornerViewButton setIconImage:[NSImage imageNamed:@"cornerColumns"]];
-    [cornerViewButton setArrowImage:nil];
+    [cornerViewButton setImage:[NSImage imageNamed:@"cornerColumns"]];
+    [[cornerViewButton cell] setArrowPosition:NSPopUpNoArrow];
     [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
     [[cornerViewButton cell] setUsesItemFromMenu:NO];
     [self setCornerView:cornerViewButton];
@@ -667,8 +667,11 @@ enum {
 		[item setState:NSOnState];
 	}
     
-	if([[self cornerView] isKindOfClass:[BDSKImagePopUpButton class]] && menu != nil)
-        [(BDSKImagePopUpButton *)[self cornerView] setMenu:[self columnsMenu]];
+	if([[self cornerView] isKindOfClass:[BDSKImagePopUpButton class]] && menu != nil) {
+        menu = [self columnsMenu]; // this is already a copy
+        [menu insertItemWithTitle:@"" action:NULL keyEquivalent:@"" atIndex:0];
+        [(BDSKImagePopUpButton *)[self cornerView] setMenu:menu];
+    }
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{

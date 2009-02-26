@@ -51,6 +51,23 @@
 
 @implementation BDSKImagePopUpButtonCell
 
++ (NSImage *)arrowImage {
+    static NSImage *arrowImage = nil;
+    if (arrowImage == nil) {
+        arrowImage = [[NSImage alloc] initWithSize:NSMakeSize(7.0, 5.0)];
+        [arrowImage lockFocus];
+        NSBezierPath *path = [NSBezierPath bezierPath];
+        [path moveToPoint:NSMakePoint(0.5, 5.0)];
+        [path lineToPoint:NSMakePoint(6.5, 5.0)];
+        [path lineToPoint:NSMakePoint(3.5, 0.0)];
+        [path closePath];
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.75] setFill];
+        [path fill];
+        [arrowImage unlockFocus];
+    }
+    return arrowImage;
+}
+
 // this used to be the designated intializer
 - (id)initTextCell:(NSString *)stringValue pullsDown:(BOOL)pullsDown{
     self = [self initImageCell:nil];
@@ -66,25 +83,8 @@
 		[cell setImagePosition: NSImageLeft];
         [self setButtonCell:cell];
         [cell release];
-		
 		iconSize = NSMakeSize(32.0, 32.0);
-        
-        static NSImage *defaultArrowImage = nil;
-        if (defaultArrowImage == nil) {
-            defaultArrowImage = [[NSImage alloc] initWithSize:NSMakeSize(7.0, 5.0)];
-            [defaultArrowImage lockFocus];
-            NSBezierPath *path = [NSBezierPath bezierPath];
-            [path moveToPoint:NSMakePoint(0.5, 5.0)];
-            [path lineToPoint:NSMakePoint(6.5, 5.0)];
-            [path lineToPoint:NSMakePoint(3.5, 0.0)];
-            [path closePath];
-            [[NSColor colorWithCalibratedWhite:0.0 alpha:0.75] setFill];
-            [path fill];
-            [defaultArrowImage unlockFocus];
-        }
-        
-		[self setIconImage: anImage];	
-		[self setArrowImage: defaultArrowImage];
+		[self setImage:anImage];	
     }
     
     return self;
@@ -93,12 +93,8 @@
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
         [self setButtonCell:[coder decodeObjectForKey:@"buttonCell"]];
-		
 		iconSize = [coder decodeSizeForKey:@"iconSize"];
-		
-		[self setIconImage:[coder decodeObjectForKey:@"iconImage"]];
-		[self setArrowImage:[coder decodeObjectForKey:@"arrowImage"]];
-		
+		[self setImage:[coder decodeObjectForKey:@"image"]];
 		// hack to always get regular controls in a toolbar customization palette, there should be a better way
 		[self setControlSize:NSRegularControlSize];
 	}
@@ -108,18 +104,13 @@
 - (void)encodeWithCoder:(NSCoder *)encoder{
 	[super encodeWithCoder:encoder];
 	[encoder encodeObject:buttonCell forKey:@"buttonCell"];
-	
 	[encoder encodeSize:iconSize forKey:@"iconSize"];
-	
-	[encoder encodeObject:iconImage forKey:@"iconImage"];
-	
-	[encoder encodeObject:arrowImage forKey:@"arrowImage"];
+	[encoder encodeObject:image forKey:@"image"];
 }
 
 - (void)dealloc{
     [self setButtonCell:nil]; // release the ivar and set to nil, or [super dealloc] causes a crash
-    [iconImage release];
-    [arrowImage release];
+    [image release];
     [super dealloc];
 }
 
@@ -134,30 +125,23 @@
 	[buttonCell setImage:nil]; // invalidate the image
 }
 
-- (NSImage *)iconImage{
-    return iconImage;
+- (NSImage *)image {
+    return image;
 }
 
-- (void)setIconImage:(NSImage *)anImage{
-    if (anImage != iconImage) {
-        [iconImage release];
-        iconImage = [anImage retain];
+- (void)setImage:(NSImage *)anImage{
+    if (image != anImage) {
+        [image release];
+        image = [anImage retain];
         [buttonCell setImage:nil]; // invalidate the image
         [(NSControl *)[self controlView] updateCell:self];
     }
 }
 
-- (NSImage *)arrowImage{
-    return arrowImage;
-}
-
-- (void)setArrowImage:(NSImage *)anImage{
-    if (anImage != iconImage) {
-        [arrowImage release];
-        arrowImage = [anImage retain];
-        [buttonCell setImage:nil]; // invalidate the image
-        [(NSControl *)[self controlView] updateCell:self];
-    }
+- (void)setArrowPosition:(NSPopUpArrowPosition)position {
+    [super setArrowPosition:position];
+    [buttonCell setImage:nil]; // invalidate the image
+    [(NSControl *)[self controlView] updateCell:self];
 }
 
 - (void)setAlternateImage:(NSImage *)anImage{
@@ -191,8 +175,8 @@
 
 - (NSSize)cellSize {
 	NSSize size = [self iconDrawSize];
-	if ([self arrowImage]) {
-		size.width += [[self arrowImage] size].width;
+	if ([self arrowPosition] != NSPopUpNoArrow) {
+		size.width += [[[self class] arrowImage] size].width;
 	}
 	return size;
 }
@@ -201,7 +185,7 @@
 	if ([buttonCell image] == nil || [self usesItemFromMenu]) {
 		// we need to redraw the image
 
-		NSImage *image = [self usesItemFromMenu] ? [[self selectedItem] image] : [self iconImage];
+		NSImage *img = [self usesItemFromMenu] ? [[self selectedItem] image] : [self image];
 				
 		NSSize drawSize = [self iconDrawSize];
 		NSRect iconRect = NSZeroRect;
@@ -209,10 +193,10 @@
 		NSRect arrowRect = NSZeroRect;
 		NSRect arrowDrawRect = NSZeroRect;
  		
-		iconRect.size = [image size];
+		iconRect.size = [img size];
 		iconDrawRect.size = drawSize;
-		if (arrowImage) {
-			arrowRect.size = arrowDrawRect.size = [arrowImage size];
+		if ([self arrowPosition] != NSPopUpNoArrow) {
+			arrowRect.size = arrowDrawRect.size = [[[self class] arrowImage] size];
 			arrowDrawRect.origin = NSMakePoint(NSWidth(iconDrawRect), 1.0);
 			drawSize.width += NSWidth(arrowRect);
 		}
@@ -220,10 +204,10 @@
 		NSImage *popUpImage = [[NSImage alloc] initWithSize: drawSize];
 		
 		[popUpImage lockFocus];
-		if (image)
-			[image drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
-		if (arrowImage)
-			[arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
+		if (img)
+			[img drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
+		if ([self arrowPosition] != NSPopUpNoArrow)
+			[[[self class] arrowImage] drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
 		[popUpImage unlockFocus];
 
 		[buttonCell setImage: popUpImage];
@@ -234,8 +218,8 @@
 			
 			[popUpImage lockFocus];
 			[[self alternateImage] drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
-			if (arrowImage)
-				[arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
+            if ([self arrowPosition] != NSPopUpNoArrow)
+				[[[self class] arrowImage] drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
 			[popUpImage unlockFocus];
 		
 			[buttonCell setAlternateImage: popUpImage];

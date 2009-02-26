@@ -176,7 +176,6 @@
     [self setWindowFrameAutosaveName:@"BDSKTextImportController Frame Autosave Name"];
 	
     // Set the properties of actionMenuButton that cannot be set in IB
-	[actionMenuButton setArrowImage:nil];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
     

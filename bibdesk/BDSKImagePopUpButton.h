@@ -40,19 +40,10 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKImagePopUpButtonCell.h"
 
-@class BDSKImageFadeAnimation;
 
 @interface BDSKImagePopUpButton : NSPopUpButton
-{
-	BOOL highlight;
-}
+
 - (NSSize)iconSize;
 - (void)setIconSize:(NSSize)iconSize;
-
-- (NSImage *)iconImage;
-- (void)setIconImage:(NSImage *)iconImage;
-
-- (NSImage *)arrowImage;
-- (void) setArrowImage:(NSImage *)arrowImage;
 
 @end

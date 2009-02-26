@@ -39,7 +39,7 @@
 
 #import "BDSKImagePopUpButton.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import "BDSKImageFadeAnimation.h"
+
 
 @implementation BDSKImagePopUpButton
 
@@ -47,27 +47,19 @@
     return [BDSKImagePopUpButtonCell class];
 }
 
-- (id)initWithFrame:(NSRect)frameRect {
-	if (self = [super initWithFrame:frameRect]) {
-		highlight = NO;
-	}
-	return self;
-}
-
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
-		highlight = NO;
-		
-		if (![[self cell] isKindOfClass:[BDSKImagePopUpButtonCell class]]) {
-			BDSKImagePopUpButtonCell *cell = [[[BDSKImagePopUpButtonCell alloc] init] autorelease];
+		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
+			id cell = [[[[[self class] cellClass] alloc] init] autorelease];
 			
-			if ([self image] != nil) {
-				[cell setIconImage:[self image]];
+            [cell setImage:[self image]];
+			if ([self image])
 				[cell setIconSize:[[self image] size]];
-			}
+			[cell setAlternateImage:[self alternateImage]];
+            [cell setArrowPosition:[[self cell] arrowPosition]];
 			if ([self menu] != nil) {
-				if ([self pullsDown])	
-					[[self menu] removeItemAtIndex:0];
+				//if ([self pullsDown])	
+				//	[[self menu] removeItemAtIndex:0];
 				[cell setMenu:[self menu]];
 			}
 			[self setCell:cell];
@@ -82,36 +74,8 @@
     return [[self cell] iconSize];
 }
 
-- (void) setIconSize:(NSSize)iconSize{
+- (void)setIconSize:(NSSize)iconSize{
     [[self cell] setIconSize:iconSize];
-}
-
-- (NSImage *)iconImage{
-    return [[self cell] iconImage];
-}
-
-- (void)setIconImage:(NSImage *)iconImage{
-    [[self cell] setIconImage: iconImage];
-}
-
-- (NSImage *)arrowImage{
-    return [[self cell] arrowImage];
-}
-
-- (void)setArrowImage:(NSImage *)arrowImage{
-    [[self cell] setArrowImage: arrowImage];
-}
-
-#pragma mark Drawing and Highlighting
-
--(void)drawRect:(NSRect)rect {
-	[super drawRect:rect];
-	
-	if (highlight)  {
-        [NSGraphicsContext saveGraphicsState];
-        [NSBezierPath drawHighlightInRect:[self bounds] radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
-        [NSGraphicsContext restoreGraphicsState];
-	}
 }
 
 @end

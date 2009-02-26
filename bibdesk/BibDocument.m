@@ -575,13 +575,15 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
 	// ImagePopUpButtons setup
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
+	[actionMenuButton setMenu:actionMenu];
 	
 	[[groupActionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[groupActionMenuButton cell] setUsesItemFromMenu:NO];
+	[groupActionMenuButton setMenu:groupMenu];
 	
-	[groupActionButton setArrowImage:nil];
 	[[groupActionButton cell] setAltersStateOfSelectedItem:NO];
 	[[groupActionButton cell] setUsesItemFromMenu:NO];
+	[groupActionButton setMenu:groupMenu];
     
 	BDSKHeaderPopUpButtonCell *headerCell = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
 	[headerCell setAction:@selector(changeGroupFieldAction:)];
