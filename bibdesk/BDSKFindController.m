@@ -797,16 +797,16 @@ enum {
 	// set string and/or node boundaries in the regex
 	switch(searchScope){
 		case FCContainsSearch:
-			regexFormat = (findAsMacro) ? @"(?<=^|\\s#\\s)%@(?=$|\\s#\\s)" : @"%@";
+			regexFormat = (findAsMacro) ? @"(?:?<=^|\\s#\\s)%@(?:?=$|\\s#\\s)" : @"%@";
 			break;
 		case FCStartsWithSearch:
-			regexFormat = (findAsMacro) ? @"(?<=^)%@(?=$|\\s#\\s)" : @"(?<=^)%@";
+			regexFormat = (findAsMacro) ? @"(?:?<=^)%@(?:?=$|\\s#\\s)" : @"(?:?<=^)%@";
 			break;
 		case FCWholeFieldSearch:
-			regexFormat = @"(?<=^)%@(?=$)";
+			regexFormat = @"(?:?<=^)%@(?:?=$)";
 			break;
 		case FCEndsWithSearch:
-			regexFormat = (findAsMacro) ? @"(?<=^|\\s#\\s)%@(?=$)" : @"%@(?=$)";
+			regexFormat = (findAsMacro) ? @"(?:?<=^|\\s#\\s)%@(?:?=$)" : @"%@(?:?=$)";
 			break;
 	}
 	
