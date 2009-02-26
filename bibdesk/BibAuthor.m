@@ -448,7 +448,7 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
     CFAllocatorRef alloc = CFAllocatorGetDefault();
     
     // we need to remove newlines and collapse whitespace before using bt_split_name 
-    newName = (NSString *)BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(alloc, (CFStringRef)newName);
+    newName = (NSString *)BDStringCreateByCollapsingAndTrimmingCharactersInSet(alloc, (CFStringRef)newName, (CFCharacterSetRef)[NSCharacterSet whitespaceAndNewlineCharacterSet]);
     
     // get the fastest encoding, since it usually allows us to get a pointer to the contents
     // the main reason for using CFString here is that it offers cString create/get for any encoding

@@ -108,7 +108,7 @@ static id sharedManager = nil;
     if([string isComplex]) string = [NSString stringWithString:string];
 
     if([entry isSingleValuedField]){ // add the whole string 
-        [completionSet addObject:[string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]];
+        [completionSet addObject:[string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
         return;
     }
     
@@ -117,9 +117,9 @@ static id sharedManager = nil;
         [completionSet addObjectsFromArray:[string componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES]];
     } else if([entry isEqualToString:BDSKKeywordsString]){
         // if it wasn't punctuated, try this; Elsevier uses "and" as a separator, and it's annoying to have the whole string autocomplete on you
-        [completionSet addObjectsFromArray:[[string componentsSeparatedByString:@" and "] arrayByPerformingSelector:@selector(fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace)]];
+        [completionSet addObjectsFromArray:[[string componentsSeparatedByString:@" and "] arrayByPerformingSelector:@selector(stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace)]];
     } else {
-        [completionSet addObject:[string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]];
+        [completionSet addObject:[string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     }
 }
 

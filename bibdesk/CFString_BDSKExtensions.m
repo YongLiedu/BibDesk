@@ -85,29 +85,26 @@ static inline CFIndex __BDSKGetStopwordCount(void) { return stopWordCache->numbe
 #define STACK_BUFFER_SIZE 256
 
 static CFCharacterSetRef whitespaceCharacterSet = NULL;
-static CFCharacterSetRef whitespaceAndNewlineCharacterSet = NULL;
 static CFCharacterSetRef punctuationCharacterSet = NULL;
 
 __attribute__((constructor))
 static void initializeStaticCharacterSets(void)
 {
     whitespaceCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
-    whitespaceAndNewlineCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
     punctuationCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetPunctuation));
+}
+
+static inline
+BOOL __BDCharacterIsContainedInASCIISet(UniChar c, CFCharacterSetRef charSet)
+{
+    // minor optimization: check for an ASCII character, since those are most common in TeX
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(charSet, c) );
 }
 
 static inline
 BOOL __BDCharacterIsWhitespace(UniChar c)
 {
-    // minor optimization: check for an ASCII character, since those are most common in TeX
-    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(whitespaceCharacterSet, c) );
-}
-
-static inline
-BOOL __BDCharacterIsWhitespaceOrNewline(UniChar c)
-{
-    // minor optimization: check for an ASCII character, since those are most common in TeX
-    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(whitespaceAndNewlineCharacterSet, c) );
+    return __BDCharacterIsContainedInASCIISet(c, whitespaceCharacterSet);
 }
 
 static inline
@@ -117,19 +114,20 @@ BOOL __BDCharacterIsPunctuation(UniChar c)
 }
 
 static inline
-Boolean __BDStringContainsWhitespace(CFStringRef string, CFIndex length)
+Boolean __BDStringContainsCharacterFromSet(CFStringRef string, CFIndex length, CFCharacterSetRef charSet)
 {
+    // we assume that charSet only contains ASCII characters to allow some optimzation; this is OK as we will only use this for whitespace and whitespaceAndNewlines
     const UniChar *ptr = CFStringGetCharactersPtr(string);
     if(ptr != NULL){
         while(length--)
-            if(__BDCharacterIsWhitespace(ptr[length]))
+            if(__BDCharacterIsContainedInASCIISet(ptr[length], charSet))
                 return TRUE;
     } else {
         CFStringInlineBuffer inlineBuffer;
         CFStringInitInlineBuffer(string, &inlineBuffer, CFRangeMake(0, length));
         
         while(length--)
-            if(__BDCharacterIsWhitespace(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, length)))
+            if(__BDCharacterIsContainedInASCIISet(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, length), charSet))
                 return TRUE;
     }
 
@@ -137,7 +135,7 @@ Boolean __BDStringContainsWhitespace(CFStringRef string, CFIndex length)
 }
 
 static inline
-CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef allocator, CFStringRef aString)
+CFStringRef __BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRef allocator, CFStringRef aString, CFCharacterSetRef charSet)
 {
     
     CFIndex length = CFStringGetLength(aString);
@@ -146,7 +144,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef all
         return CFRetain(CFSTR(""));
     
     // improves efficiency somewhat when adding autocomplete strings, since we can completely avoid allocation
-    if(__BDStringContainsWhitespace(aString, length) == FALSE)
+    if(__BDStringContainsCharacterFromSet(aString, length, charSet) == FALSE)
         return CFRetain(aString);
     
     // set up the buffer to fetch the characters
@@ -170,81 +168,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef all
     int bufCnt = 0;
     for(cnt = 0; cnt < length; cnt++){
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
-        if(!__BDCharacterIsWhitespace(ch)){
-            isFirst = YES;
-            buffer[bufCnt++] = ch; // not whitespace, so we want to keep it
-        } else {
-            if(isFirst){
-                buffer[bufCnt++] = ' '; // if it's the first whitespace, we add a single space
-                isFirst = NO;
-            }
-        }
-    }
-    
-    if(buffer[(bufCnt-1)] == ' ') // we've collapsed any trailing whitespace, so disregard it
-        bufCnt--;
-    
-    retStr = CFStringCreateWithCharacters(allocator, buffer, bufCnt);
-    if(buffer != stackBuffer) CFAllocatorDeallocate(allocator, buffer);
-    return retStr;
-}
-
-static inline
-Boolean __BDStringContainsWhitespaceOrNewline(CFStringRef string, CFIndex length)
-{
-    const UniChar *ptr = CFStringGetCharactersPtr(string);
-    if(ptr != NULL){
-        while(length--)
-            if(__BDCharacterIsWhitespaceOrNewline(ptr[length]))
-                return TRUE;
-    } else {
-        CFStringInlineBuffer inlineBuffer;
-        CFStringInitInlineBuffer(string, &inlineBuffer, CFRangeMake(0, length));
-        
-        while(length--)
-            if(__BDCharacterIsWhitespaceOrNewline(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, length)))
-                return TRUE;
-    }
-
-    return FALSE;
-}
-
-static inline
-CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef aString)
-{
-    
-    CFIndex length = CFStringGetLength(aString);
-    
-    if(length == 0)
-        return CFRetain(CFSTR(""));
-    
-    // improves efficiency somewhat when adding autocomplete strings, since we can completely avoid allocation
-    if(__BDStringContainsWhitespaceOrNewline(aString, length) == FALSE)
-        return CFRetain(aString);
-    
-    // set up the buffer to fetch the characters
-    CFIndex cnt = 0;
-    CFStringInlineBuffer inlineBuffer;
-    CFStringInitInlineBuffer(aString, &inlineBuffer, CFRangeMake(0, length));
-    UniChar ch;
-    UniChar *buffer, stackBuffer[STACK_BUFFER_SIZE];
-    CFStringRef retStr;
-
-    allocator = (allocator == NULL) ? CFGetAllocator(aString) : allocator;
-
-    if(length >= STACK_BUFFER_SIZE) {
-        buffer = (UniChar *)CFAllocatorAllocate(allocator, length * sizeof(UniChar), 0);
-    } else {
-        buffer = stackBuffer;
-    }
-    
-    NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %d", length);
-    
-    BOOL isFirst = NO;
-    int bufCnt = 0;
-    for(cnt = 0; cnt < length; cnt++){
-        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
-        if(!__BDCharacterIsWhitespaceOrNewline(ch)){
+        if(!__BDCharacterIsContainedInASCIISet(ch, charSet)){
             isFirst = YES;
             buffer[bufCnt++] = ch; // not whitespace, so we want to keep it
         } else {
@@ -859,9 +783,8 @@ CFHashCode BDCaseInsensitiveStringHash(const void *value)
     return hash;
 }
     
+CFStringRef BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorRef allocator, CFStringRef string, CFCharacterSetRef charSet){ return __BDStringCreateByCollapsingAndTrimmingCharactersInSet(allocator, string, charSet); }
 
-CFStringRef BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef allocator, CFStringRef string){ return __BDStringCreateByCollapsingAndTrimmingWhitespace(allocator, string); }
-CFStringRef BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef string){ return __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(allocator, string); }
 CFStringRef BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef string){ return __BDStringCreateByNormalizingWhitespaceAndNewlines(allocator, string); }
 
 // useful when you want the range of a single character without messing with character sets, or just to know if a character exists in a string (pass NULL for resultRange if you don't care where the result is located)

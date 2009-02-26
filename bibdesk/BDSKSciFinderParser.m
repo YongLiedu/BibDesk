@@ -97,7 +97,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
     // We could move some of this into TypeInfo.plist, but we only have three fields that don't need special handling, so it's not really worthwhile.  This function has multiple early returns, so be careful when debugging.
     
     if ([key isEqualToString:BDSKAuthorString]) {
-        value = [value stringByReplacingAllOccurrencesOfString:@"; " withString:@" and "];
+        value = [value stringByReplacingOccurrencesOfString:@"; " withString:@" and "];
         // this sucks; some entries have "Last, Middle, First.", and some have "Last, M. F."
         if ([value hasSuffix:@"."] && [value length] > 2 && 
             [[NSCharacterSet lowercaseLetterCharacterSet] characterIsMember:[value characterAtIndex:([value length] - 2)]])
@@ -155,7 +155,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
     else if ([key isEqualToString:@"Page"]) {
         key = BDSKPagesString;
         if ([value rangeOfString:@"--"].location == NSNotFound)
-            value = [value stringByReplacingAllOccurrencesOfString:@"-" withString:@"--"];
+            value = [value stringByReplacingOccurrencesOfString:@"-" withString:@"--"];
     }
     else if ([key isEqualToString:@"Issue"]) {
         key = BDSKNumberString;

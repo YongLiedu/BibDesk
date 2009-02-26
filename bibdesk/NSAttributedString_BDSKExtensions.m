@@ -159,7 +159,7 @@ static void BDSKApplyAttributesToString(const void *value, void *context)
     if(collapse){
         if([string isComplex])
             string = [NSString stringWithString:string];
-        string = [string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+        string = [string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     }
     
     NSMutableString *mutableString = [string mutableCopy];

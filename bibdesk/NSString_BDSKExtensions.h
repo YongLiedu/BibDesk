@@ -416,23 +416,7 @@ An inline buffer is used for speed in accessing each character.
 */
 - (BOOL)containsWord:(NSString *)aWord;
 
-/*!
-@method     fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace
-@abstract   Copy of one of the OmniFoundation methods, with CF calls to create and append to the mutable string instead of Cocoa methods.
-            Faster and more memory efficient than the OF equivalent.
-@discussion (comprehensive description)
-@result     (description)
-*/
-- (NSString *)fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
-
-/*!
-@method     fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines
-@abstract   Similar to fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace, but treats newlines the same as whitespace characters.
-            All newline characters will be replaced by a single whitespace. 
-@discussion (comprehensive description)
-@result     (description)
-*/
-- (NSString *)fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines;
+- (NSString *)stringByCollapsingAndTrimmingCharactersInSet:(NSCharacterSet *)charSet;
 
 - (BOOL)hasCaseInsensitivePrefix:(NSString *)prefix;
 
@@ -478,8 +462,6 @@ An inline buffer is used for speed in accessing each character.
 - (NSString *)stringByRemovingReturns;
 
 - (NSString *)stringByRemovingString:(NSString *)removeString;
-
-- (NSString *)stringByReplacingAllOccurrencesOfString:(NSString *)stringToReplace withString:(NSString *)replacement;
 
 - (NSString *)stringByRemovingPrefix:(NSString *)prefix;
 - (NSString *)stringByRemovingSuffix:(NSString *)suffix;

@@ -132,7 +132,7 @@
     // convert newlines to a single space, then collapse (mainly for paste/drag text, RFE #1457532)
     if([string rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].length){
         string = [string stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
-        string = [string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+        string = [string stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     }
     // remove control and other non-characters (mainly for paste/drag text, BUG #1481675)
     string = [string stringByReplacingCharactersInSet:[NSCharacterSet controlCharacterSet] withString:@""];

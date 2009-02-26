@@ -101,7 +101,7 @@
 		if (isAuthor) {
             newString = [[NSString alloc] initWithFormat:@"%@ and %@", oldString, value];
             // This next step isn't strictly necessary for splitting the names, since the name parsing will do it for us, but you still see duplicate whitespace when editing the author field
-            NSString *collapsedWhitespaceString = (NSString *)BDStringCreateByCollapsingAndTrimmingWhitespace(NULL, (CFStringRef)newString);
+            NSString *collapsedWhitespaceString = (NSString *)BDStringCreateByCollapsingAndTrimmingCharactersInSet(NULL, (CFStringRef)newString, (CFCharacterSetRef)[NSCharacterSet whitespaceCharacterSet]);
             [newString release];
             newString = collapsedWhitespaceString;
         } else if([key isSingleValuedField] || [key isURLField]) {

@@ -246,7 +246,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
             addStringToDictionary(value, pubDict, tag, subFieldIndicator, isUNIMARC);
             
             [formattedString appendStrings:tag, @" ", isControlField ? @"  " : [field substringToIndex:2], @" ", nil];
-            [formattedString appendStrings:[value stringByReplacingAllOccurrencesOfString:subFieldIndicator withString:@"$"], @"\n", nil];
+            [formattedString appendStrings:[value stringByReplacingOccurrencesOfString:subFieldIndicator withString:@"$"], @"\n", nil];
         }
         
         if([pubDict count] > 0){

@@ -77,6 +77,7 @@
 #import "BDSKTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
+#import "BDSKRuntime.h"
 
 
 @implementation NSString (BDSKExtensions)
@@ -307,7 +308,6 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     [self release];
     return string;
 }
-
 
 #pragma mark TeX cleaning
 
@@ -1184,14 +1184,9 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [self componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@","] trimWhitespace:YES];
 }
 
-- (NSString *)fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
+- (NSString *)stringByCollapsingAndTrimmingCharactersInSet:(NSCharacterSet *)charSet;
 {
-    return [(id)BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
-}
-
-- (NSString *)fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines;
-{
-    return [(id)BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
+    return [(id)BDStringCreateByCollapsingAndTrimmingCharactersInSet(CFAllocatorGetDefault(), (CFStringRef)self, (CFCharacterSetRef)charSet) autorelease];
 }
 
 - (NSString *)stringByNormalizingSpacesAndLineBreaks;
@@ -1374,16 +1369,6 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [[self componentsSeparatedByString:removeString] componentsJoinedByString:@""];
 }
 
-- (NSString *)stringByReplacingAllOccurrencesOfString:(NSString *)stringToReplace withString:(NSString *)replacement {
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) {
-        return [self stringByReplacingOccurrencesOfString:stringToReplace withString:replacement];
-    } else {
-        if ([stringToReplace length] == 0 || [self rangeOfString:stringToReplace].length == 0)
-            return self;
-        return [[self componentsSeparatedByString:stringToReplace] componentsJoinedByString:replacement];
-    }
-}
-
 - (NSString *)stringByRemovingPrefix:(NSString *)prefix {
     unsigned int length = [prefix length];
     if (length && [self hasPrefix:prefix])
@@ -1403,7 +1388,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 }
 
 - (NSString *)stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace {
-    return [(NSString *)BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
+    return [self stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 }
 
 - (NSString *)fullyEncodeAsIURI {
@@ -1914,6 +1899,21 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 - (NSString *)uppercaseFirst{
     return [[[self substringToIndex:1] uppercaseString] stringByAppendingString:[self substringFromIndex:1]];
 }
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
+- (NSString *)replacementStringByReplacingOccurrencesOfString:(NSString *)stringToReplace withString:(NSString *)replacement {
+    if ([stringToReplace length] == 0 || [self rangeOfString:stringToReplace].length == 0)
+        return self;
+    return [[self componentsSeparatedByString:stringToReplace] componentsJoinedByString:replacement];
+}
+
++ (void)load {
+    // this does nothing when the method is already defined, i.e. on Leopard
+    BDSKAddInstanceMethodImplementationFromSelector(self, @selector(stringByReplacingOccurrencesOfString:withString:), @selector(replacementStringByReplacingOccurrencesOfString:withString:));
+}
+#else
+#warning fixme: remove NSString category implementation
+#endif
 
 @end
 

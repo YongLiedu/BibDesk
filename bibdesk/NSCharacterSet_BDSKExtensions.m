@@ -92,6 +92,7 @@
     return nonDecimalDigitCharacterSet;
 }
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
 + (id)replacementNewlineCharacterSet;
 {
     static NSCharacterSet *newlineCharacterSet = nil;
@@ -114,5 +115,8 @@
     // this does nothing when the method is already defined, i.e. on Leopard
     BDSKAddClassMethodImplementationFromSelector(self, @selector(newlineCharacterSet), @selector(replacementNewlineCharacterSet));
 }
+#else
+#warning fixme: remove NSCharacterSet category implementation
+#endif
 
 @end

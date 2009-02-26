@@ -159,7 +159,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 					value = [value stringByConvertingHTMLToTeX];
 				
 				if([authorTags containsObject:tag])
-					value = [value stringByReplacingAllOccurrencesOfString:@";" withString:@" and "];
+					value = [value stringByReplacingOccurrencesOfString:@";" withString:@" and "];
 				
 				[pubDict setObject:value forKey:key];
 			}
@@ -224,7 +224,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 				value = [value stringByConvertingHTMLToTeX];
 			
 			if([authorTags containsObject:tag])
-				value = [value stringByReplacingAllOccurrencesOfString:@";" withString:@" and "];
+				value = [value stringByReplacingOccurrencesOfString:@";" withString:@" and "];
 			
 			[pubDict setObject:value forKey:key];
 			

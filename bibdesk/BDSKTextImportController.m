@@ -1133,7 +1133,7 @@
 	if ([NSString isEmptyString:selString] || selString == webSelection)
 		return;
 	[webSelection release];
-	webSelection = [[selString fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines] copy];
+	webSelection = [[selString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] copy];
 }
 
 #pragma mark WebFrameLoadDelegate methods
@@ -1309,7 +1309,7 @@
     // convert newlines to a single space, then collapse (RFE #1480354)
     if ([selKey isNoteField] == NO && [selString rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].length) {
         selString = [selString stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
-        selString = [selString fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+        selString = [selString stringByCollapsingAndTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     }
     
     [self recordChangingField:selKey toValue:selString];
