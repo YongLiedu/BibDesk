@@ -85,6 +85,7 @@
 #import "NSView_BDSKExtensions.h"
 #import "BDSKApplication.h"
 #import "BDSKCFCallBacks.h"
+#import "BDSKMessageQueue.h"
 
 
 @implementation BibDocument (Groups)
@@ -582,6 +583,20 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [groupTableView setDelegate:self];
 }
 
+- (void)updateCountForSmartGroup:(BDSKSmartGroup *)group {
+    int oldCount = [group count];
+    [group filterItems:publications];
+    if (oldCount != [group count]) {
+        if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
+            NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
+            [self sortGroupsByKey:sortGroupsKey];
+            [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+        } else {
+            [groupTableView reloadData];
+        }
+    }
+}
+
 // force the smart groups to refilter their items, so the group content and count get redisplayed
 // if this becomes slow, we could make filters thread safe and update them in the background
 - (void)updateSmartGroupsCountAndContent:(BOOL)shouldUpdate{
@@ -591,7 +606,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	BOOL needsUpdate = NO;
     
     while(NSLocationInRange(--row, smartRange)){
-		[(BDSKSmartGroup *)[groups objectAtIndex:row] filterItems:publications];
+		[self queueSelectorOnce:@selector(updateCountForSmartGroup:) withObject:(BDSKSmartGroup *)[groups objectAtIndex:row]];
 		if([groupTableView isRowSelected:row])
 			needsUpdate = shouldUpdate;
     }
