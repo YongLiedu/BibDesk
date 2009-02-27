@@ -64,11 +64,10 @@ static BDSKMessageQueue *messageQueue = nil;
 
 + (void)initialize
 {
-    if (nil == messageQueue) {
-        messageQueue = [[BDSKMessageQueue alloc] init];
-        // use a small pool of threads for running NSTasks
-        [messageQueue startBackgroundProcessors:2];
-    }
+    BDSKINITIALIZE;
+    messageQueue = [[BDSKMessageQueue alloc] init];
+    // use a small pool of threads for running NSTasks
+    [messageQueue startBackgroundProcessors:2];
 }
 
 // old designated initializer

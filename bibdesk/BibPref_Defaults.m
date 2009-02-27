@@ -64,8 +64,8 @@ static NSSet *alwaysDisabledFields = nil;
 @implementation BibPref_Defaults
 
 + (void)initialize {
-    if (nil == alwaysDisabledFields)
-        alwaysDisabledFields = [[NSSet alloc] initWithObjects:BDSKAuthorString, BDSKEditorString, nil];
+    BDSKINITIALIZE;
+    alwaysDisabledFields = [[NSSet alloc] initWithObjects:BDSKAuthorString, BDSKEditorString, nil];
 }
 
 - (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {

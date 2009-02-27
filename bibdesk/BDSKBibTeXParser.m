@@ -90,8 +90,8 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
 @implementation BDSKBibTeXParser
 
 + (void)initialize{
-    if(nil == parserLock)
-        parserLock = [[NSLock alloc] init];
+    BDSKINITIALIZE;
+    parserLock = [[NSLock alloc] init];
 }
 
 + (BOOL)canParseString:(NSString *)string{

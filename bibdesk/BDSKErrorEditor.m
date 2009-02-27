@@ -52,8 +52,8 @@ static NSString *BDSKErrorEditorObservationContext = @"BDSKErrorEditorObservatio
 
 + (void)initialize;
 {
-    BDSKINITIALIZE;
     [self setKeys:[NSArray arrayWithObjects:@"manager", nil] triggerChangeNotificationsForDependentKey:@"displayName"];
+    BDSKINITIALIZE;
 }
 
 - (id)initWithFileName:(NSString *)aFileName pasteDragData:(NSData *)aData;

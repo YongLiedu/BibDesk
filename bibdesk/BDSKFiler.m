@@ -63,6 +63,7 @@
 @implementation BDSKFiler
 
 + (void)initialize {
+    BDSKINITIALIZE;
 	// register transformer class
 	[NSValueTransformer setValueTransformer:[[[BDSKOldPathColorTransformer alloc] init] autorelease]
 									forName:@"BDSKOldPathColorTransformer"];

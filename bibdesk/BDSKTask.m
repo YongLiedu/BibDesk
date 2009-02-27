@@ -69,7 +69,7 @@ static int _kqueue = -1;
 
 + (void)initialize
 {
-    if ([BDSKTask class] != self) return;
+    BDSKINITIALIZE;
     _kqueue = kqueue();
     // persistent thread to watch all tasks
     [NSThread detachNewThreadSelector:@selector(_watchQueue) toTarget:self withObject:nil];

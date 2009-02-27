@@ -74,12 +74,11 @@ static NSConditionLock *detachThreadLock;
 static BDSKQueueProcessor *detachingQueueProcessor;
 
 + (void)initialize {
-    if (detachThreadLock == nil) {
-        detachThreadLock = [[NSConditionLock alloc] init];
-        detachingQueueProcessor = nil;
-        // This will trigger +[NSPort initialize], which registers for the NSBecomingMultiThreaded notification and avoids a race condition between NSThread and NSPort.
-        [NSPort class];
-    }
+    BDSKINITIALIZE;
+    detachThreadLock = [[NSConditionLock alloc] init];
+    detachingQueueProcessor = nil;
+    // This will trigger +[NSPort initialize], which registers for the NSBecomingMultiThreaded notification and avoids a race condition between NSThread and NSPort.
+    [NSPort class];
 }
 
 - (id)initForQueue:(BDSKMessageQueue *)aQueue {

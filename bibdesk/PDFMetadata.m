@@ -60,9 +60,9 @@ NSString *BDSKPDFDocumentKeywordsAttribute = @"Keywords";			    // NSArray of NS
 
 + (void)initialize
 {
+    BDSKINITIALIZE;
     // provides a dictionary of key paths matched to the PDFDocument keys
-    if(translator == nil)
-        translator = [[NSDictionary alloc] initWithObjectsAndKeys:@"pubAuthorsForDisplay", BDSKPDFDocumentAuthorAttribute, @"keywordsArray", BDSKPDFDocumentKeywordsAttribute, @"title.stringByRemovingTeX", BDSKPDFDocumentTitleAttribute, @"date", BDSKPDFDocumentCreationDateAttribute, nil];
+    translator = [[NSDictionary alloc] initWithObjectsAndKeys:@"pubAuthorsForDisplay", BDSKPDFDocumentAuthorAttribute, @"keywordsArray", BDSKPDFDocumentKeywordsAttribute, @"title.stringByRemovingTeX", BDSKPDFDocumentTitleAttribute, @"date", BDSKPDFDocumentCreationDateAttribute, nil];
 }
 
 // an "item" is some object that is KVC compliant for the keys in the translator; nominally a BibItem

@@ -59,6 +59,7 @@
 
 + (void)initialize{
     [self setKeys:[NSArray arrayWithObject:@"document"] triggerChangeNotificationsForDependentKey:@"publications"];
+    BDSKINITIALIZE;
 }
 
 - (NSString *)windowNibName{return @"BDSKPersonWindow";}

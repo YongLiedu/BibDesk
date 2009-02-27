@@ -56,6 +56,7 @@ static NSString *BDSKConditionControllerObservationContext = @"BDSKConditionCont
 
 + (void)initialize
 {
+    BDSKINITIALIZE;
     [NSValueTransformer setValueTransformer:[[[BDSKBooleanValueTransformer alloc] init] autorelease] forName:@"BDSKBooleanValueTransformer"];
     [NSValueTransformer setValueTransformer:[[[BDSKTriStateValueTransformer alloc] init] autorelease] forName:@"BDSKTriStateValueTransformer"];
 }

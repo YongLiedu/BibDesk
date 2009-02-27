@@ -52,10 +52,9 @@ static NSSet *standardStyles = nil;
 @implementation BibPref_TeX
 
 + (void)initialize{
-    
+    BDSKINITIALIZE;
     // contents of /usr/local/gwTeX/texmf.texlive/bibtex/bst/base
-    if (nil == standardStyles)
-        standardStyles = [[NSSet alloc] initWithObjects:@"abbrv", @"acm", @"alpha", @"apalike", @"ieeetr", @"plain", @"siam", @"unsrt", nil];
+    standardStyles = [[NSSet alloc] initWithObjects:@"abbrv", @"acm", @"alpha", @"apalike", @"ieeetr", @"plain", @"siam", @"unsrt", nil];
 }
 
 - (void)awakeFromNib{

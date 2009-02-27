@@ -48,10 +48,9 @@ static BDSKMessageQueue *searchQueue = nil;
 
 + (void)initialize
 {
-    if (nil == searchQueue) {
-        searchQueue = [[BDSKMessageQueue alloc] init];
-        [searchQueue startBackgroundProcessors:1];
-    }
+    BDSKINITIALIZE;
+    searchQueue = [[BDSKMessageQueue alloc] init];
+    [searchQueue startBackgroundProcessors:1];
 }
 
 - (id)initWithDocument:(id)doc;

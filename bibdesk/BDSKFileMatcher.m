@@ -625,16 +625,15 @@ static NSDictionary *attributes = nil;
 
 + (void)initialize
 {
-    if (nil == attributes) {
-        NSMutableDictionary *newAttrs = [[NSMutableDictionary alloc] initWithCapacity:10];
-        
-        [newAttrs setObject:[NSFont boldSystemFontOfSize:[NSFont systemFontSize]] forKey:NSFontAttributeName];
-        [newAttrs setObject:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] forKey:NSForegroundColorAttributeName];
-        [newAttrs setObject:[NSParagraphStyle defaultTruncatingTailParagraphStyle] forKey:NSParagraphStyleAttributeName];
+    BDSKINITIALIZE;
+    NSMutableDictionary *newAttrs = [[NSMutableDictionary alloc] initWithCapacity:10];
+    
+    [newAttrs setObject:[NSFont boldSystemFontOfSize:[NSFont systemFontSize]] forKey:NSFontAttributeName];
+    [newAttrs setObject:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] forKey:NSForegroundColorAttributeName];
+    [newAttrs setObject:[NSParagraphStyle defaultTruncatingTailParagraphStyle] forKey:NSParagraphStyleAttributeName];
 
-        attributes = [newAttrs copy];
-        [newAttrs release];
-    }
+    attributes = [newAttrs copy];
+    [newAttrs release];
 }
 
 - (NSAttributedString *)attributedStringForObjectValue:(id)obj withDefaultAttributes:(NSDictionary *)attrs;
@@ -665,8 +664,8 @@ static NSColor *fillColor = nil;
 
 + (void)initialize
 {
-    if (nil == fillColor)
-        fillColor = [[[NSColor keyboardFocusIndicatorColor] colorWithAlphaComponent:0.8] copy];
+    BDSKINITIALIZE;
+    fillColor = [[[NSColor keyboardFocusIndicatorColor] colorWithAlphaComponent:0.8] copy];
 }
 
 - (id)initTextCell:(NSString *)string;

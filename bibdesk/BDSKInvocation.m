@@ -103,8 +103,8 @@ static inline NSUInteger BDSKHashUIntptr(uintptr_t v) {
 static BDSKPlaceholderInvocation *placeholderInvocation = nil;
 
 + (void)initialize {
-    if (placeholderInvocation == nil)
-        placeholderInvocation = (BDSKPlaceholderInvocation *)NSAllocateObject([BDSKPlaceholderInvocation class], 0, NSDefaultMallocZone());
+    BDSKINITIALIZE;
+    placeholderInvocation = (BDSKPlaceholderInvocation *)NSAllocateObject([BDSKPlaceholderInvocation class], 0, NSDefaultMallocZone());
 }
 
 + (id)allocWithZone:(NSZone *)aZone {

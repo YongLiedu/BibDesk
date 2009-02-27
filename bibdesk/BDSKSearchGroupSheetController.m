@@ -66,6 +66,8 @@ static BOOL isSearchFileAtPath(NSString *path)
     [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"isi"];
     [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"dblp"];
     
+    BDSKINITIALIZE;
+    
     NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
     NSString *path = [[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"];
     

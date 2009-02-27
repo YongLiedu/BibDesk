@@ -96,6 +96,7 @@ static NSArray *replacePubsByField(NSArray *targetPubs, NSArray *sourcePubs, NSS
 
 + (void)initialize
 {
+    BDSKINITIALIZE;
     // this is messy, but may be useful for debugging
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKAddISIXMLStringToAnnote"])
         addXMLStringToAnnote = YES;
