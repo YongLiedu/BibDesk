@@ -61,7 +61,6 @@ static id sharedInstance = nil;
 // TXT record keys
 NSString *BDSKTXTAuthenticateKey = @"authenticate";
 NSString *BDSKTXTVersionKey = @"txtvers";
-NSString *BDSKTXTIdentifierKey = @"identifier";
 
 NSString *BDSKSharedArchivedDataKey = @"publications_v1";
 NSString *BDSKSharedArchivedMacroDataKey = @"macros_v1";
@@ -180,17 +179,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     return sharingName;
 }
 
-+ (NSString *)sharingIdentifier;
-{
-    static NSString *sharingIdentifier = nil;
-    if (sharingIdentifier == nil) {
-        CFUUIDRef uuid = CFUUIDCreate(NULL);
-        sharingIdentifier = (id)CFUUIDCreateString(NULL, uuid);
-        CFRelease(uuid);
-    }
-    return sharingIdentifier;
-}
-
 // If we introduce incompatible changes in future, bump this to avoid sharing breakage
 + (NSString *)supportedProtocolVersion { return @"0"; }
 
@@ -202,13 +190,19 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 }
 
 - (NSString *)sharingName {
-    return sharingName;
+    NSString *name = nil;
+    @synchronized(self) {
+        name = [[sharingName retain] autorelease];
+    }
+    return name;
 }
 
 - (void)setSharingName:(NSString *)newName {
-    if (sharingName != newName) {
-        [sharingName release];
-        sharingName = [newName retain];
+    @synchronized(self) {
+        if (sharingName != newName) {
+            [sharingName release];
+            sharingName = [newName retain];
+        }
     }
 }
 
@@ -292,7 +286,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [netService setDelegate:self];
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
     [dictionary setObject:[BDSKSharingServer supportedProtocolVersion] forKey:BDSKTXTVersionKey];
-    [dictionary setObject:[BDSKSharingServer sharingIdentifier] forKey:BDSKTXTIdentifierKey];
     [dictionary setObject:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKSharingRequiresPasswordKey] forKey:BDSKTXTAuthenticateKey];
     [netService setTXTRecordData:[NSNetService dataFromTXTRecordDictionary:dictionary]];
     
