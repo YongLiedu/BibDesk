@@ -5,10 +5,14 @@
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
 
-// docs say not to send [super initialize]
+// docs say not to send [super initialize], but that's a bug
 #if !defined(FVINITIALIZE)
 #define FVINITIALIZE(aClass) \
-do { if ([aClass self] != self) return; } while(0)
+    do { \
+        [super initialize]; \
+        if ([aClass self] != self) return; \
+    } while (0);
+#endif
 #endif /* FVINITIALIZE */
 
 // From NSObjCRuntime.h
