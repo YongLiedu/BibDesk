@@ -54,6 +54,9 @@ static Class FVIconClass = Nil;
 static Class FVQLIconClass = Nil;
 static NSURL *missingFileURL = nil;
 
+@interface FVPlaceholderIcon : FVIcon
+@end
+
 @implementation FVIcon
 
 + (void)initialize
@@ -66,26 +69,14 @@ static NSURL *missingFileURL = nil;
         [[NSBundle bundleWithPath:[frameworkBundle pathForResource:@"FileView-Leopard" ofType:@"bundle"]] load];
         FVQLIconClass = NSClassFromString(@"FVQuickLookIcon");
     }
-    defaultPlaceholderIcon = (FVIcon *)NSAllocateObject(FVIconClass, 0, [self zone]);
+    defaultPlaceholderIcon = (FVIcon *)NSAllocateObject([FVPlaceholderIcon class], 0, [self zone]);
     missingFileURL = [[NSURL alloc] initWithScheme:@"x-fileview" host:@"localhost" path:@"/missing"];
     [self _initializeCategory];
 }
 
 + (id)allocWithZone:(NSZone *)aZone
 {
-    return FVIconClass == self ? defaultPlaceholderIcon : NSAllocateObject(self, 0, aZone);
-}
-
-// ensure that alloc always calls through to allocWithZone:
-+ (id)alloc
-{
-    return [self allocWithZone:NULL];
-}
-
-- (void)dealloc
-{
-    if ([self class] != FVIconClass)
-        [super dealloc];
+    return FVIconClass == self ? defaultPlaceholderIcon : [super allocWithZone:aZone];
 }
 
 + (NSURL *)missingFileURL;
@@ -94,6 +85,64 @@ static NSURL *missingFileURL = nil;
 }
 
 + (id)iconWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
+{
+    return [[[self alloc] initWithURL:representedURL size:iconSize] autorelease];
+}
+
+// subclass responsibility, in particular FVPlaceholderIcon
+- (id)initWithURL:(NSURL *)representedURL size:(NSSize)iconSize {
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+// we only want to encode the public superclass
+- (Class)classForCoder { return FVIconClass; }
+
+// we don't implement NSCoding, so always return a distant object (unused)
+- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
+{
+    return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
+}
+
+// these methods are all required
+- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context { [self doesNotRecognizeSelector:_cmd]; }
+- (void)renderOffscreen { [self doesNotRecognizeSelector:_cmd]; }
+
+// trivial description
+- (NSString *)description
+{
+    NSMutableString *desc = [[super description] mutableCopy];
+    if ([self tryLock]) {
+        [desc appendFormat:@" \"%@\"", NSStringFromSize([self size])];
+        [self unlock];
+    }
+    return [desc autorelease];
+}
+
+// not all subclasses can release resources, and others may not be fully initialized
+- (BOOL)canReleaseResources { return NO; }
+
+// implement trivially so these are safe to call on the abstract class
+- (void)releaseResources { /* do nothing */ }
+- (BOOL)needsRenderForSize:(NSSize)size { return NO; }
+
+// this method is optional; some subclasses may not have a fast path
+- (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context { [self drawInRect:dstRect ofContext:context]; }
+
+@end
+
+@implementation FVIcon (Pages)
+
+- (NSUInteger)pageCount { return 1; }
+- (NSUInteger)currentPageIndex { return 1; }
+- (void)showNextPage { /* do nothing */ }
+- (void)showPreviousPage { /* do nothing */ }
+
+@end
+
+@implementation FVPlaceholderIcon
+
+- (id)initWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
 {
     // CFURLGetFSRef won't like a nil URL
     NSParameterAssert(nil != representedURL);
@@ -193,50 +242,15 @@ static NSURL *missingFileURL = nil;
     
     [(id)theUTI release];
     
-    return [anIcon autorelease];    
+    return anIcon;    
 }
 
-// we only want to encode the public superclass
-- (Class)classForCoder { return FVIconClass; }
+- (id)retain { return self; }
 
-// we don't implement NSCoding, so always return a distant object (unused)
-- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
-{
-    return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
-}
+- (id)autorelease { return self; }
 
-// these methods are all required
-- (void)drawInRect:(NSRect)dstRect ofContext:(CGContextRef)context { [self doesNotRecognizeSelector:_cmd]; }
-- (void)renderOffscreen { [self doesNotRecognizeSelector:_cmd]; }
+- (void)release {}
 
-// trivial description
-- (NSString *)description
-{
-    NSMutableString *desc = [[super description] mutableCopy];
-    if ([self tryLock]) {
-        [desc appendFormat:@" \"%@\"", NSStringFromSize([self size])];
-        [self unlock];
-    }
-    return [desc autorelease];
-}
-
-// not all subclasses can release resources, and others may not be fully initialized
-- (BOOL)canReleaseResources { return NO; }
-
-// implement trivially so these are safe to call on the abstract class
-- (void)releaseResources { /* do nothing */ }
-- (BOOL)needsRenderForSize:(NSSize)size { return NO; }
-
-// this method is optional; some subclasses may not have a fast path
-- (void)fastDrawInRect:(NSRect)dstRect ofContext:(CGContextRef)context { [self drawInRect:dstRect ofContext:context]; }
-
-@end
-
-@implementation FVIcon (Pages)
-
-- (NSUInteger)pageCount { return 1; }
-- (NSUInteger)currentPageIndex { return 1; }
-- (void)showNextPage { /* do nothing */ }
-- (void)showPreviousPage { /* do nothing */ }
+- (unsigned)retainCount { return UINT_MAX; }
 
 @end

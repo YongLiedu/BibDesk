@@ -52,6 +52,8 @@
 // Will accept any URL type and return a file thumbnail, file icon, or appropriate icon for the given URL scheme.
 + (id)iconWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
 
+- (id)initWithURL:(NSURL *)representedURL size:(NSSize)iconSize;
+
 // Possibly releases cached resources for icons that won't be displayed.  The only way to guarantee a decrease in memory usage is to release all references to the object, though, as this call may be a noop for some subclasses.
 - (void)releaseResources;
 - (BOOL)canReleaseResources;
