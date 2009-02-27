@@ -604,9 +604,13 @@ static void addObjectToSetAndBag(const void *value, void *context) {
 	NSRange smartRange = [groups rangeOfSmartGroups];
     unsigned int row = NSMaxRange(smartRange);
 	BOOL needsUpdate = NO;
+    BOOL hasManyGroups = smartRange.length > 10;
     
     while(NSLocationInRange(--row, smartRange)){
-		[self queueSelectorOnce:@selector(updateCountForSmartGroup:) withObject:(BDSKSmartGroup *)[groups objectAtIndex:row]];
+		if (hasManyGroups)
+            [self queueSelectorOnce:@selector(updateCountForSmartGroup:) withObject:(BDSKSmartGroup *)[groups objectAtIndex:row]];
+        else
+            [(BDSKSmartGroup *)[groups objectAtIndex:row] filterItems:publications];
 		if([groupTableView isRowSelected:row])
 			needsUpdate = shouldUpdate;
     }
