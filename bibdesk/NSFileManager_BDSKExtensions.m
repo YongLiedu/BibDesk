@@ -569,7 +569,7 @@ static void destroyTemporaryDirectory()
         success = YES;
     else if ([self fileExistsAtPath:directory isDirectory:&isDir] == NO)
         success = [self createPathToFile:directory attributes:attributes] && [self createDirectoryAtPath:directory attributes:attributes];
-    else if (isDir == NO)
+    else if (isDir)
         success = YES;
     return success;
 }
