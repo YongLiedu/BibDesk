@@ -866,7 +866,7 @@ enum {
             
         } else {
             
-            origStr = [bibItem valueOfField:field inherit:NO];
+            origStr = [bibItem stringValueOfField:field inherit:NO];
             
             if(origStr == nil || findAsMacro != [origStr isComplex])
                 continue; // we don't want to add a field or set it to nil, or find expanded values of a complex string, or interpret an ordinary string as a macro
@@ -916,7 +916,7 @@ enum {
             
         } else {
             
-            origStr = [bibItem valueOfField:field inherit:NO];
+            origStr = [bibItem stringValueOfField:field inherit:NO];
             
             if(origStr == nil || findAsMacro != [origStr isComplex])
                 continue; // we don't want to add a field or set it to nil, or find expanded values of a complex string, or interpret an ordinary string as a macro
@@ -1006,20 +1006,20 @@ enum {
             
         } else {
             
-            origStr = [bibItem valueOfField:field inherit:NO];
+            origStr = [bibItem stringValueOfField:field inherit:NO];
             
             if(origStr == nil || findAsMacro != [origStr isComplex])
                 continue; // we don't want to add a field or set it to nil, or replace expanded values of a complex string, or interpret an ordinary string as a macro
             
             if(searchScope == FCWholeFieldSearch){
                 if([findStr compareAsComplexString:origStr options:searchOpts] == NSOrderedSame){
-                    [bibItem setField:field toValue:replStr];
+                    [bibItem setField:field toStringValue:replStr];
                     number++;
                 }
             }else{
                 newStr = [origStr stringByReplacingOccurrencesOfString:findStr withString:replStr options:searchOpts replacements:&numRepl];
                 if(numRepl > 0){
-                    [bibItem setField:field toValue:newStr];
+                    [bibItem setField:field toStringValue:newStr];
                     number++;
                 }
             }
@@ -1076,7 +1076,7 @@ enum {
             
         } else {
             
-            origStr = [bibItem valueOfField:field inherit:NO];
+            origStr = [bibItem stringValueOfField:field inherit:NO];
             
             if(origStr == nil || findAsMacro != [origStr isComplex])
                 continue; // we don't want to add a field or set it to nil, or replace expanded values of a complex string, or interpret an ordinary string as a macro
@@ -1087,11 +1087,11 @@ enum {
                 origStr = [theRegex replaceWithString:replStr inString:origStr];
                 if(replaceAsMacro || findAsMacro){
                     if (complexStr = [NSString stringWithBibTeXString:origStr macroResolver:[theDocument macroResolver] error:NULL]) {
-                        [bibItem setField:field toValue:complexStr];
+                        [bibItem setField:field toStringValue:complexStr];
                         number++;
                     }
                 } else {
-                    [bibItem setField:field toValue:origStr];
+                    [bibItem setField:field toStringValue:origStr];
                     number++;
                 }            
             }
@@ -1145,14 +1145,14 @@ enum {
             
         } else {
             
-            origStr = [bibItem valueOfField:field inherit:NO];
+            origStr = [bibItem stringValueOfField:field inherit:NO];
             if(origStr == nil || [origStr isEqualAsComplexString:@""]){
                 if(shouldSetWhenEmpty == NO) continue;
                 origStr = @"";
             }
             
             if([replStr compareAsComplexString:origStr] != NSOrderedSame){
-                [bibItem setField:field toValue:replStr];
+                [bibItem setField:field toStringValue:replStr];
                 number++;
             }
             
@@ -1206,13 +1206,13 @@ enum {
             
         } else {
                 
-            origStr = [bibItem valueOfField:field inherit:NO];
+            origStr = [bibItem stringValueOfField:field inherit:NO];
             if(origStr == nil || [origStr isEqualAsComplexString:@""]){
                 if(shouldSetWhenEmpty == NO) continue;
                 origStr = @"";
             }
             
-            [bibItem setField:field toValue:[replStr complexStringByAppendingString:origStr]];
+            [bibItem setField:field toStringValue:[replStr complexStringByAppendingString:origStr]];
             number++;
             
         }
@@ -1265,13 +1265,13 @@ enum {
             
         } else {
                 
-            origStr = [bibItem valueOfField:field inherit:NO];
+            origStr = [bibItem stringValueOfField:field inherit:NO];
             if(origStr == nil || [origStr isEqualAsComplexString:@""]){
                 if(shouldSetWhenEmpty == NO) continue;
                 origStr = @"";
             }
             
-            [bibItem setField:field toValue:[origStr complexStringByAppendingString:replStr]];
+            [bibItem setField:field toStringValue:[origStr complexStringByAppendingString:replStr]];
             number++;
             
         }
