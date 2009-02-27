@@ -160,6 +160,11 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     return sharingClients != nil;
 }
 
+- (void)handleApplicationWillTerminate:(NSNotification *)note;
+{
+    [self disableSharedBrowsing];
+}
+
 - (void)enableSharedBrowsing;
 {
     if([self isBrowsing] == NO){
@@ -169,7 +174,9 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         [browser searchForServicesOfType:BDSKNetServiceDomain inDomain:@""];    
         unresolvedNetServices = [[NSMutableArray alloc] initWithCapacity:5];
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        [nc postNotificationName:BDSKSharingClientsChangedNotification object:self];
+        [nc addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
 }
 
@@ -184,7 +191,9 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         [unresolvedNetServices release];
         unresolvedNetServices = nil;
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        [nc postNotificationName:BDSKSharingClientsChangedNotification object:self];
+        [nc removeObserver:self name:NSApplicationWillTerminateNotification object:nil];
     }
 }
 

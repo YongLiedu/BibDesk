@@ -521,6 +521,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)serverDidFinish
 {
+    if (connection == nil)
+        return;
+    
     NSEnumerator *e = [remoteClients keyEnumerator];
     id proxyObject;
     NSString *key;
