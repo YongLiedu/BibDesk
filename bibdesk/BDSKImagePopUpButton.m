@@ -38,6 +38,7 @@
  */
 
 #import "BDSKImagePopUpButton.h"
+#import "BDSKImagePopUpButtonCell.h"
 #import "NSBezierPath_BDSKExtensions.h"
 
 
@@ -51,31 +52,27 @@
 	if (self = [super initWithCoder:coder]) {
 		if ([[self cell] isKindOfClass:[[self class] cellClass]] == NO) {
 			id cell = [[[[[self class] cellClass] alloc] init] autorelease];
-			
-            [cell setImage:[self image]];
-			if ([self image])
-				[cell setIconSize:[[self image] size]];
-			[cell setAlternateImage:[self alternateImage]];
-            [cell setArrowPosition:[[self cell] arrowPosition]];
-			if ([self menu] != nil) {
-				//if ([self pullsDown])	
-				//	[[self menu] removeItemAtIndex:0];
-				[cell setMenu:[self menu]];
-			}
+			id oldCell = [self cell];
+            
+            [cell setImage:[oldCell image]];
+            if ([oldCell image])
+                [cell setIconSize:[[oldCell image] size]];
+			[cell setAlternateImage:[oldCell alternateImage]];
+            [cell setArrowPosition:[oldCell arrowPosition]];
+			[cell setMenu:[oldCell menu]];
+            
 			[self setCell:cell];
 		}
 	}
 	return self;
 }
 
-#pragma mark Accessors
-
-- (NSSize)iconSize{
+- (NSSize)iconSize {
     return [[self cell] iconSize];
 }
 
-- (void)setIconSize:(NSSize)iconSize{
-    [[self cell] setIconSize:iconSize];
+- (void)setIconSize:(NSSize)newIconSize {
+    [[self cell] setIconSize:newIconSize];
 }
 
 @end

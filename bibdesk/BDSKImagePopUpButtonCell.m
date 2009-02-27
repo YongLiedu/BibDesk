@@ -39,15 +39,7 @@
 
 #import "BDSKImagePopUpButtonCell.h"
 #import "BDSKImagePopUpButton.h"
-#import "NSCharacterSet_BDSKExtensions.h"
 
-@interface BDSKImagePopUpButtonCell (Private)
-
-- (void)setButtonCell:(NSButtonCell *)buttonCell;
-//- (void)showMenuInView:(NSView *)controlView withEvent:(NSEvent *)event;
-- (NSSize)iconDrawSize;
-
-@end
 
 @implementation BDSKImagePopUpButtonCell
 
@@ -77,14 +69,12 @@
 // this is now the designated intializer
 - (id)initImageCell:(NSImage *)anImage{
     if (self = [super initTextCell:@"" pullsDown:YES]) {
-		NSButtonCell *cell = [[NSButtonCell alloc] initTextCell: @""];
-		[cell setBordered: NO];
-		[cell setHighlightsBy: NSContentsCellMask];
-		[cell setImagePosition: NSImageLeft];
-        [self setButtonCell:cell];
-        [cell release];
-		iconSize = NSMakeSize(32.0, 32.0);
-		[self setImage:anImage];	
+		buttonCell = [[NSButtonCell alloc] initTextCell: @""];
+		[buttonCell setBordered: NO];
+		[buttonCell setHighlightsBy: NSContentsCellMask];
+		[buttonCell setImagePosition: NSImageLeft];
+		image = [anImage retain];
+        iconSize = image ? [image size] : NSMakeSize(32.0, 32.0);
     }
     
     return self;
@@ -92,9 +82,9 @@
 
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
-        [self setButtonCell:[coder decodeObjectForKey:@"buttonCell"]];
+        buttonCell = [[coder decodeObjectForKey:@"buttonCell"] retain];
+		image = [[coder decodeObjectForKey:@"image"] retain];
 		iconSize = [coder decodeSizeForKey:@"iconSize"];
-		[self setImage:[coder decodeObjectForKey:@"image"]];
 		// hack to always get regular controls in a toolbar customization palette, there should be a better way
 		[self setControlSize:NSRegularControlSize];
 	}
@@ -104,25 +94,28 @@
 - (void)encodeWithCoder:(NSCoder *)encoder{
 	[super encodeWithCoder:encoder];
 	[encoder encodeObject:buttonCell forKey:@"buttonCell"];
-	[encoder encodeSize:iconSize forKey:@"iconSize"];
 	[encoder encodeObject:image forKey:@"image"];
+	[encoder encodeSize:iconSize forKey:@"iconSize"];
 }
 
 - (void)dealloc{
-    [self setButtonCell:nil]; // release the ivar and set to nil, or [super dealloc] causes a crash
+    [buttonCell release];
+    buttonCell = nil;
     [image release];
     [super dealloc];
 }
 
 #pragma mark Accessors
 
-- (NSSize)iconSize{
+- (NSSize)iconSize {
     return iconSize;
 }
 
-- (void)setIconSize:(NSSize)aSize{
-    iconSize = aSize;
-	[buttonCell setImage:nil]; // invalidate the image
+- (void)setIconSize:(NSSize)newIconSize {
+    if (NSEqualSizes(iconSize, newIconSize) == NO) {
+        iconSize = newIconSize;
+        [buttonCell setImage:nil];
+    }
 }
 
 - (NSImage *)image {
@@ -172,6 +165,15 @@
 }
 
 #pragma mark Drawing and highlighting
+
+- (NSSize)iconDrawSize {
+	NSSize size = iconSize;
+	if ([self controlSize] != NSRegularControlSize) {
+		// for small and mini controls we just scale the icon by 75% 
+		size = NSMakeSize(size.width * 0.75, size.height * 0.75);
+	}
+	return size;
+}
 
 - (NSSize)cellSize {
 	NSSize size = [self iconDrawSize];
@@ -234,26 +236,6 @@
 - (void)highlight:(BOOL)flag  withFrame:(NSRect)cellFrame  inView:(NSView *)controlView{
 	[buttonCell highlight: flag  withFrame: cellFrame  inView: controlView];
 	[super highlight: flag  withFrame: cellFrame  inView: controlView];
-}
-
-@end
-
-@implementation BDSKImagePopUpButtonCell (Private)
-
-- (void)setButtonCell:(NSButtonCell *)aCell{
-    if(aCell != buttonCell){
-        [buttonCell release];
-        buttonCell = [aCell retain];
-    }
-}
-
-- (NSSize)iconDrawSize {
-	NSSize size = [self iconSize];
-	if ([self controlSize] != NSRegularControlSize) {
-		// for small and mini controls we just scale the icon by 75% 
-		size = NSMakeSize(size.width * 0.75, size.height * 0.75);
-	}
-	return size;
 }
 
 @end

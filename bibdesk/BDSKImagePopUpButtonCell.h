@@ -42,13 +42,13 @@
 @interface BDSKImagePopUpButtonCell : NSPopUpButtonCell
 {
     NSButtonCell *buttonCell;
-    NSSize iconSize;
     NSImage *image;
+    NSSize iconSize;
 }
 
 + (NSImage *)arrowImage;
 
 - (NSSize)iconSize;
-- (void)setIconSize:(NSSize)aSize;
+- (void)setIconSize:(NSSize)newIconSize;
 
 @end

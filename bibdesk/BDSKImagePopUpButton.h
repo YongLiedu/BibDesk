@@ -38,12 +38,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKImagePopUpButtonCell.h"
 
 
 @interface BDSKImagePopUpButton : NSPopUpButton
-
 - (NSSize)iconSize;
-- (void)setIconSize:(NSSize)iconSize;
-
+- (void)setIconSize:(NSSize)newIconSize;
 @end
