@@ -60,7 +60,6 @@ typedef struct _BDSKSharingClientFlags {
 @protocol BDSKSharingClientServerMainThread <BDSKAsyncDOServerMainThread>
 
 - (oneway void)setArchivedPublications:(bycopy NSData *)publicationsArchive archivedMacros:(bycopy NSData *)macrosArchive;
-- (int)runPasswordPrompt;
 - (int)runAuthenticationFailedAlert;
 
 @end
@@ -326,14 +325,15 @@ typedef struct _BDSKSharingClientFlags {
 
 #pragma mark Authentication
 
-- (int)runPasswordPrompt;
+- (NSData *)runPasswordPrompt;
 {
     NSAssert([NSThread isMainThread] == 1, @"password controller must be run from the main thread");
     BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
-    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
-    [pwc close];
+    NSData *password = nil;
+    if (BDSKPasswordReturn == [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]])
+        password = [pwc passwordHashed];
     [pwc release];
-    return rv;
+    return password;
 }
 
 - (int)runAuthenticationFailedAlert;
@@ -365,11 +365,10 @@ typedef struct _BDSKSharingClientFlags {
     if(password == nil && [self shouldKeepRunning]){   
         
         // run the prompt on the main thread
-        rv = [[self serverOnMainThread] runPasswordPrompt];
+        password = [[self serverOnMainThread] runPasswordPrompt];
         
         // retry from the keychain
-        if (rv == BDSKPasswordReturn){
-            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]]];
+        if (password){
             // assume we succeeded; the exception handler for the connection will change it back if we fail again
             OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
         }else{

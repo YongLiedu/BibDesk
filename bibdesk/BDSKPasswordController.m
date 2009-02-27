@@ -46,60 +46,26 @@
 
 NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
+@interface BDSKPasswordController (Private)
+- (void)setName:(NSString *)aName;
+- (void)setStatus:(NSString *)status;
+@end
+
 @implementation BDSKPasswordController
 
-- (void)awakeFromNib
-{
+- (void)awakeFromNib {
     [self setStatus:@""];
 }
 
-- (void)dealloc
-{
+- (NSString *)windowNibName { return @"BDSKPasswordController"; }
+
+- (void)dealloc {
     [self setName:nil];
     [super dealloc];
 }
 
-- (void)setName:(NSString *)aName;
-{
-    if(name != aName){
-        [name release];
-        name = [aName retain];
-    }
-}
-
-- (BDSKPasswordControllerStatus)runModalForKeychainServiceName:(NSString *)aName message:(NSString *)status;
-{
-    [self setName:aName];    
-    [self window]; // load window before setStatus
-    [self setStatus:([NSString isEmptyString:status] ? @"" : status)];
-    int returnValue = [NSApp runModalForWindow:[self window]];
-    [[self window] orderOut:self];    
-    [self setName:nil];
-    
-    return returnValue;
-}
-
-- (void)setStatus:(NSString *)status { [statusField setStringValue:status]; }
-
-- (NSString *)windowNibName { return @"BDSKPasswordController"; }
-
-- (IBAction)buttonAction:(id)sender
-{    
-    int returnValue = [sender tag];
-    if (returnValue == BDSKPasswordReturn) {
-        NSAssert(name != nil, @"name is nil");
-        
-        NSString *password = [passwordField stringValue];
-        NSParameterAssert(password != nil);
-        
-        [BDSKPasswordController addOrModifyPassword:password name:name userName:nil];
-    }
-    [NSApp stopModalWithCode:returnValue];
-}
-
 // convenience method for keychain
-+ (NSData *)sharingPasswordForCurrentUserUnhashed;
-{
++ (NSData *)sharingPasswordForCurrentUserUnhashed {
     // find password from keychain
     OSStatus err;
     
@@ -117,8 +83,7 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
     return data;
 }
 
-+ (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
-{
++ (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName {
     // default is to use current user's username
     const char *userNameCString = userName == nil ? [NSUserName() UTF8String] : [userName UTF8String];
     
@@ -153,8 +118,7 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
         NSLog(@"Error %d occurred setting password", err);
 }
 
-+ (NSData *)passwordHashedForKeychainServiceName:(NSString *)name;
-{
++ (NSData *)passwordHashedForKeychainServiceName:(NSString *)name {
     // use the service name to get password from keychain and hash it with sha1 for comparison purposes
     OSStatus err;
     
@@ -174,9 +138,52 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
     return pwData;
 }
 
-+ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName;
-{
++ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName {
     return [NSString stringWithFormat:@"%@ - %@", computerName, BDSKServiceNameForKeychain];
+}
+
+- (void)setName:(NSString *)aName {
+    if(name != aName){
+        [name release];
+        name = [aName retain];
+    }
+}
+
+- (void)setStatus:(NSString *)status {  
+    [self window]; // load window before setStatus
+    [statusField setStringValue:status];
+}
+
+- (NSString *)password {
+    return [statusField stringValue];
+}
+
+- (NSData *)passwordHashed {
+    return [[[self password] dataUsingEncoding:NSUTF8StringEncoding] sha1Signature];
+}
+
+- (BDSKPasswordControllerStatus)runModalForKeychainServiceName:(NSString *)aName message:(NSString *)status {
+    [self setName:aName];    
+    [self setStatus:status ?: @""];
+    int returnValue = [NSApp runModalForWindow:[self window]];
+    [[self window] orderOut:self];    
+    [self setName:nil];
+    
+    return returnValue;
+}
+
+- (IBAction)buttonAction:(id)sender
+{    
+    int returnValue = [sender tag];
+    if (returnValue == BDSKPasswordReturn) {
+        NSAssert(name != nil, @"name is nil");
+        
+        NSString *password = [passwordField stringValue];
+        NSParameterAssert(password != nil);
+        
+        [BDSKPasswordController addOrModifyPassword:password name:name userName:nil];
+    }
+    [NSApp stopModalWithCode:returnValue];
 }
 
 @end

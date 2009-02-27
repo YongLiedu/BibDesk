@@ -53,14 +53,16 @@ typedef enum {
     IBOutlet NSSecureTextField *passwordField;
     IBOutlet NSTextField *statusField;
 }
-- (void)setName:(NSString *)aName;
-- (void)setStatus:(NSString *)status;
-- (BDSKPasswordControllerStatus)runModalForKeychainServiceName:(NSString *)aName message:(NSString *)status;
-- (IBAction)buttonAction:(id)sender;
 
 + (NSData *)sharingPasswordForCurrentUserUnhashed;
 + (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
 + (NSData *)passwordHashedForKeychainServiceName:(NSString *)name;
 + (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName;
+
+- (BDSKPasswordControllerStatus)runModalForKeychainServiceName:(NSString *)aName message:(NSString *)status;
+- (NSString *)password;
+- (NSData *)passwordHashed;
+
+- (IBAction)buttonAction:(id)sender;
 
 @end
