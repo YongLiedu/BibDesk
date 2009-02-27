@@ -151,10 +151,10 @@ static NSURL *missingFileURL = nil;
     
     // initWithURLScheme requires a scheme, so there's not much we can do without it
     if ([representedURL isEqual:missingFileURL] || nil == scheme) {
-        return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil] autorelease];
+        return [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil];
     }
     else if (NO == [representedURL isFileURL]) {
-        return [[[FVWebViewIcon allocWithZone:[self zone]] initWithURL:representedURL] autorelease];
+        return [[FVWebViewIcon allocWithZone:[self zone]] initWithURL:representedURL];
     }
     
     OSStatus err = noErr;
@@ -167,7 +167,7 @@ static NSURL *missingFileURL = nil;
     
     // return missing file icon if we can't convert the path to an FSRef
     if (noErr != err)
-        return [[[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil] autorelease];    
+        return [[FVFinderIcon allocWithZone:[self zone]] initWithFinderIconOfURL:nil];    
     
     // kLSItemContentType returns a CFStringRef, according to the header
     CFStringRef theUTI = NULL;
