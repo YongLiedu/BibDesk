@@ -39,7 +39,6 @@
 #import "BDSKSharedGroup.h"
 #import "BDSKSharingClient.h"
 #import "BDSKOwnerProtocol.h"
-#import "BDSKPasswordController.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
