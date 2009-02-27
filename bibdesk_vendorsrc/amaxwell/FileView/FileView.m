@@ -194,7 +194,8 @@ static CGColorRef _shadowColor = NULL;
     _timeOfLastOrigin = CFAbsoluteTimeGetCurrent();
     _trackingRectMap = CFDictionaryCreateMutable(alloc, 0, &FVIntegerKeyDictionaryCallBacks, &FVIntegerValueDictionaryCallBacks);
     
-    _iconIndexMap = CFDictionaryCreateMutable(alloc, 0, &FVIntegerKeyDictionaryCallBacks, NULL);
+    _iconIndexMap = CFDictionaryCreateMutable(alloc, 0, &FVIntegerKeyDictionaryCallBacks, &kCFTypeDictionaryValueCallBacks);
+    _iconURLMap = CFDictionaryCreateMutable(alloc, 0, &FVIntegerKeyDictionaryCallBacks, &kCFTypeDictionaryValueCallBacks);
     
     _leftArrow = [[FVArrowButtonCell alloc] initWithArrowDirection:FVArrowLeft];
     [_leftArrow setTarget:self];
@@ -251,6 +252,7 @@ static CGColorRef _shadowColor = NULL;
     [_rightArrow release];
     [_iconURLs release];
     CFRelease(_iconIndexMap);
+    CFRelease(_iconURLMap);
     CFRunLoopTimerInvalidate(_zombieTimer);
     CFRelease(_zombieTimer);
     [_iconCache release];
@@ -379,6 +381,7 @@ static CGColorRef _shadowColor = NULL;
     // convenient time to do this, although the timer would also handle it
     [_iconCache removeAllObjects];
     CFDictionaryRemoveAllValues(_iconIndexMap);
+    CFDictionaryRemoveAllValues(_iconURLMap);
     
     // make sure these get cleaned up; if the datasource is now nil, we're probably going to deallocate soon
     [self _cancelActiveDownloads];
@@ -620,6 +623,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
 - (void)_rebuildIconIndexMap
 {
     CFDictionaryRemoveAllValues(_iconIndexMap);
+    CFDictionaryRemoveAllValues(_iconURLMap);
     
     // -[FileView _cachedIconForURL:]
     id (*cachedIcon)(id, SEL, id);
@@ -636,6 +640,7 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
         FVIcon *icon = cachedIcon(self, @selector(_cachedIconForURL:), aURL);
         NSParameterAssert(nil != icon);
         CFDictionarySetValue(_iconIndexMap, (const void *)i, (const void *)icon);
+        CFDictionarySetValue(_iconURLMap, (const void *)i, (const void *)aURL ?: (const void *)[NSNull null]);
     }    
 }
 
@@ -1404,6 +1409,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
     CGFloat shadowBlur = 2.0 * [self iconScale];
     CGSize shadowOffset = CGSizeMake(0.0, -[self iconScale]);
     
+    BOOL iconIndexMapNeedsRebuild = NO;
+    
     // iterate each row/column to see if it's in the dirty rect, and evaluate the current cache state
     for (r = rMin; r < rMax; r++) 
     {
@@ -1417,6 +1424,8 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
                 NSRect fileRect = [self _rectOfIconInRow:r column:c];
                 
                 NSURL *aURL = [self iconURLAtIndex:i];
+                // sanity check, see if the cached icons are not stale
+                iconIndexMapNeedsRebuild = iconIndexMapNeedsRebuild || [(id)CFDictionaryGetValue(_iconURLMap, (const void *)i) isEqual:(id)aURL ?: (id)[NSNull null]] == NO;
                 
                 // allow some extra for the shadow (-5)
                 NSRect textRect = [self _rectOfTextForIconRect:fileRect];
@@ -1505,6 +1514,9 @@ static void _removeTrackingRectTagFromView(const void *key, const void *value, v
             }
         }
     }
+    
+    if (iconIndexMapNeedsRebuild)
+        [self _rebuildIconIndexMap];
     
     // avoid hitting the cache thread while a live resize is in progress, but allow cache updates while scrolling
     // use the same range criteria that we used in iterating icons
