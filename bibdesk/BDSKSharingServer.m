@@ -54,11 +54,14 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+#define MAX_TRY_COUNT 10
+
 static id sharedInstance = nil;
 
 // TXT record keys
 NSString *BDSKTXTAuthenticateKey = @"authenticate";
 NSString *BDSKTXTVersionKey = @"txtvers";
+NSString *BDSKTXTIdentifierKey = @"identifier";
 
 NSString *BDSKSharedArchivedDataKey = @"publications_v1";
 NSString *BDSKSharedArchivedMacroDataKey = @"macros_v1";
@@ -99,11 +102,14 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 #pragma mark -
 
 @interface BDSKSharingDOServer : BDSKAsynchronousDOServer <BDSKSharingServerLocalThread> {
+    NSString *sharingName;
     NSConnection *connection;
     BDSKThreadSafeMutableDictionary *remoteClients;
 }
 
 + (NSString *)requiredProtocolVersion;
+
+- (id)initWithSharingName:(NSString *)aName;
 
 - (unsigned int)numberOfConnections;
 - (void)notifyClientConnectionsChanged;
@@ -121,50 +127,48 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     BDSKINITIALIZE;
     
     // Ensure that computer name changes are propagated as future clients connect to a document.  Also, note that the OS will change the computer name to avoid conflicts by appending "(2)" or similar to the previous name, which is likely the most common scenario.
-    if(dynamicStore == NULL){
-        CFAllocatorRef alloc = CFAllocatorGetDefault();
-        CFRetain(alloc); // make sure this is maintained for the life of the program
-        SCDynamicStoreContext SCNSObjectContext = {
-            0,                         // version
-            (id)nil,                   // any NSCF type
-            &retainCallBack,
-            &releaseCallBack,
-            &copyDescriptionCallBack
-        };
-        CFBundleRef mainBundle = CFBundleGetMainBundle();
-        if (NULL == mainBundle) {
-            fprintf(stderr, "Unable to get main bundle; this should never happen\n");
-        }
-        else {
-            CFStringRef bundleID = CFBundleGetIdentifier(mainBundle);
-            dynamicStore = SCDynamicStoreCreate(alloc, bundleID, &SCDynamicStoreChanged, &SCNSObjectContext);
-            CFRunLoopSourceRef rlSource = SCDynamicStoreCreateRunLoopSource(alloc, dynamicStore, 0);
-            CFRunLoopAddSource(CFRunLoopGetCurrent(), rlSource, kCFRunLoopCommonModes);
-            CFRelease(rlSource);
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    CFRetain(alloc); // make sure this is maintained for the life of the program
+    SCDynamicStoreContext SCNSObjectContext = {
+        0,                         // version
+        (id)nil,                   // any NSCF type
+        &retainCallBack,
+        &releaseCallBack,
+        &copyDescriptionCallBack
+    };
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
+    if (NULL == mainBundle) {
+        fprintf(stderr, "Unable to get main bundle; this should never happen\n");
+    }
+    else {
+        CFStringRef bundleID = CFBundleGetIdentifier(mainBundle);
+        dynamicStore = SCDynamicStoreCreate(alloc, bundleID, &SCDynamicStoreChanged, &SCNSObjectContext);
+        CFRunLoopSourceRef rlSource = SCDynamicStoreCreateRunLoopSource(alloc, dynamicStore, 0);
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), rlSource, kCFRunLoopCommonModes);
+        CFRelease(rlSource);
+        
+        CFMutableArrayRef keys = CFArrayCreateMutable(alloc, 0, &kCFTypeArrayCallBacks);
+        
+        // use SCDynamicStore keys as NSNotification names; don't release them
+        CFStringRef key = SCDynamicStoreKeyCreateComputerName(alloc);
+        CFArrayAppendValue(keys, key);
+        BDSKComputerNameChangedNotification = (NSString *)key;
+        
+        key = SCDynamicStoreKeyCreateHostNames(alloc);
+        CFArrayAppendValue(keys, key);
+        BDSKHostNameChangedNotification = (NSString *)key;
+        
+        BDSKASSERT(BDSKComputerNameChangedNotification);
+        BDSKASSERT(BDSKHostNameChangedNotification);
             
-            CFMutableArrayRef keys = CFArrayCreateMutable(alloc, 0, &kCFTypeArrayCallBacks);
-            
-            // use SCDynamicStore keys as NSNotification names; don't release them
-            CFStringRef key = SCDynamicStoreKeyCreateComputerName(alloc);
-            CFArrayAppendValue(keys, key);
-            BDSKComputerNameChangedNotification = (NSString *)key;
-            
-            key = SCDynamicStoreKeyCreateHostNames(alloc);
-            CFArrayAppendValue(keys, key);
-            BDSKHostNameChangedNotification = (NSString *)key;
-            
-            BDSKASSERT(BDSKComputerNameChangedNotification);
-            BDSKASSERT(BDSKHostNameChangedNotification);
-                
-            if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
-                fprintf(stderr, "unable to register for dynamic store notifications.\n");
-            CFRelease(keys);
-        }
+        if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
+            fprintf(stderr, "unable to register for dynamic store notifications.\n");
+        CFRelease(keys);
     }
 }
 
 // base name for sharing (also used for storing remote host names in keychain)
-+ (NSString *)sharingName;
++ (NSString *)defaultSharingName;
 {
     // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
     NSString *sharingName = [[NSUserDefaults standardUserDefaults] objectForKey:BDSKSharingNameKey];
@@ -176,6 +180,17 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     return sharingName;
 }
 
++ (NSString *)sharingIdentifier;
+{
+    static NSString *sharingIdentifier = nil;
+    if (sharingIdentifier == nil) {
+        CFUUIDRef uuid = CFUUIDCreate(NULL);
+        sharingIdentifier = (id)CFUUIDCreateString(NULL, uuid);
+        CFRelease(uuid);
+    }
+    return sharingIdentifier;
+}
+
 // If we introduce incompatible changes in future, bump this to avoid sharing breakage
 + (NSString *)supportedProtocolVersion { return @"0"; }
 
@@ -184,6 +199,17 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     if(sharedInstance == nil)
         sharedInstance = [[self alloc] init];
     return sharedInstance;
+}
+
+- (NSString *)sharingName {
+    return sharingName;
+}
+
+- (void)setSharingName:(NSString *)newName {
+    if (sharingName != newName) {
+        [sharingName release];
+        sharingName = [newName retain];
+    }
 }
 
 - (unsigned int)numberOfConnections { 
@@ -227,7 +253,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [self restartSharingIfNeeded];
 }
 
-- (void)enableSharing
+- (void)_enableSharing
 {
     if(netService){
         // we're already sharing
@@ -262,14 +288,15 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
     
     // lazily instantiate the NSNetService object that will advertise on our behalf
-    netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[BDSKSharingServer sharingName] port:chosenPort];
+    netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[self sharingName] port:chosenPort];
     [netService setDelegate:self];
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
     [dictionary setObject:[BDSKSharingServer supportedProtocolVersion] forKey:BDSKTXTVersionKey];
+    [dictionary setObject:[BDSKSharingServer sharingIdentifier] forKey:BDSKTXTIdentifierKey];
     [dictionary setObject:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKSharingRequiresPasswordKey] forKey:BDSKTXTAuthenticateKey];
     [netService setTXTRecordData:[NSNetService dataFromTXTRecordDictionary:dictionary]];
     
-    server = [[BDSKSharingDOServer alloc] init];
+    server = [[BDSKSharingDOServer alloc] initWithSharingName:[self sharingName]];
     
     // our DO server will also use Bonjour, but this gives us a browseable name
     [netService publish];
@@ -315,6 +342,19 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
              object:nil];
 }
 
+- (void)enableSharing
+{
+    if(netService){
+        // we're already sharing
+        return;
+    }
+    
+    tryCount = 0;
+    [self setSharingName:[BDSKSharingServer defaultSharingName]];
+    
+    [self _enableSharing];
+}
+
 - (void)disableSharing
 {
     if(netService != nil && [server shouldKeepRunning]){
@@ -337,6 +377,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         [nc removeObserver:self name:BDSKDocDelItemNotification object:nil];
         [nc removeObserver:self name:NSApplicationWillTerminateNotification object:nil];
     }
+    
+    [self setSharingName:nil];
 }
 
 - (void)restartSharingIfNeeded;
@@ -391,8 +433,13 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
     [self disableSharing];
     
-    // show the error in a modal dialog
-    [NSApp presentError:error];
+    if (err == NSNetServicesCollisionError && tryCount < MAX_TRY_COUNT) {
+        [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
+        [self _enableSharing];
+    } else {
+        // show the error in a modal dialog
+        [NSApp presentError:error];
+    }
 }
 
 - (void)netServiceDidStop:(NSNetService *)sender
@@ -417,10 +464,11 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 // If we introduce incompatible changes in future, bump this to avoid sharing breakage
 + (NSString *)requiredProtocolVersion { return @"0"; }
 
-- (id)init
+- (id)initWithSharingName:(NSString *)aName
 {
     self = [super init];
     if (self) {
+        sharingName = [aName retain];
         remoteClients = [[BDSKThreadSafeMutableDictionary alloc] init];
         [self startDOServerAsync];
     }   
@@ -429,6 +477,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)dealloc
 {
+    [sharingName release];
     [remoteClients release];
     remoteClients = nil;
     [super dealloc];
@@ -458,8 +507,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     // setup our DO server that will handle requests for publications and passwords
     @try {
         NSPort *receivePort = [NSSocketPort port];
-        if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:[BDSKSharingServer sharingName]] == NO)
-            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
+        if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:sharingName] == NO)
+            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, sharingName];
         connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
         NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingProtocol)];
         [connection setRootObject:checker];
@@ -496,8 +545,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [remoteClients removeAllObjects];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
-    NSPort *port = [[NSSocketPortNameServer sharedInstance] portForName:[BDSKSharingServer sharingName]];
-    [[NSSocketPortNameServer sharedInstance] removePortForName:[BDSKSharingServer sharingName]];
+    NSPort *port = [[NSSocketPortNameServer sharedInstance] portForName:sharingName];
+    [[NSSocketPortNameServer sharedInstance] removePortForName:sharingName];
     [port invalidate];
     [connection setDelegate:nil];
     [connection setRootObject:nil];

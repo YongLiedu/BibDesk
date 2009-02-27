@@ -91,10 +91,19 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 {
     NSData *TXTData = [aNetService TXTRecordData];
     NSString *version = nil;
+    NSString *identifier = nil;
     // check the version for compatibility; this is our own versioning system
-    if(TXTData)
-        version = [[[NSString alloc] initWithData:[[NSNetService dictionaryFromTXTRecordData:TXTData] objectForKey:BDSKTXTVersionKey] encoding:NSUTF8StringEncoding] autorelease];
-    return [version numericCompare:[BDSKSharingBrowser requiredProtocolVersion]] != NSOrderedAscending;
+    if(TXTData) {
+        NSDictionary *dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
+        version = [[[NSString alloc] initWithData:[dictionary objectForKey:BDSKTXTVersionKey] encoding:NSUTF8StringEncoding] autorelease];
+        identifier = [[[NSString alloc] initWithData:[dictionary objectForKey:BDSKTXTIdentifierKey] encoding:NSUTF8StringEncoding] autorelease];
+    }
+    if ([version numericCompare:[BDSKSharingBrowser requiredProtocolVersion]] == NSOrderedAscending)
+        return NO;
+    // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
+    if ([identifier isEqualToString:[BDSKSharingServer sharingIdentifier]] && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelf"] == NO)
+        return NO;
+    return YES;
 }
 
 - (void)netServiceDidResolveAddress:(NSNetService *)aNetService
@@ -123,10 +132,6 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
 {
-    // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if([[BDSKSharingServer sharingName] isEqualToString:[aNetService name]] == YES && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelf"] == NO)
-        return;
-
     // set as delegate and resolve, so we can find out if this originated from the localhost or a remote machine
     // we can't access TXT records until the service is resolved (this is documented in CFNetService, not NSNetService)
     [aNetService setDelegate:self];

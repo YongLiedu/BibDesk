@@ -85,7 +85,7 @@
     [usePasswordButton setState:[sud boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
     [passwordField setEnabled:[sud boolForKey:BDSKSharingRequiresPasswordKey]];
     
-    [sharedNameField setStringValue:[BDSKSharingServer sharingName]];
+    [sharedNameField setStringValue:[BDSKSharingServer defaultSharingName]];
     NSString *statusMessage = nil;
     if([sud boolForKey:BDSKShouldShareFilesKey]){
         unsigned int number = [[BDSKSharingServer defaultServer] numberOfConnections];
