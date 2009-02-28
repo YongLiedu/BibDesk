@@ -607,10 +607,10 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     BOOL hasManyGroups = smartRange.length > 10;
     
     while(NSLocationInRange(--row, smartRange)){
-		if (hasManyGroups)
-            [self queueSelectorOnce:@selector(updateCountForSmartGroup:) withObject:(BDSKSmartGroup *)[groups objectAtIndex:row]];
-        else
+		if (hasManyGroups == NO)
             [(BDSKSmartGroup *)[groups objectAtIndex:row] filterItems:publications];
+        else if (docState.isDocumentClosed == NO)
+            [self queueSelectorOnce:@selector(updateCountForSmartGroup:) withObject:(BDSKSmartGroup *)[groups objectAtIndex:row]];
 		if([groupTableView isRowSelected:row])
 			needsUpdate = shouldUpdate;
     }
