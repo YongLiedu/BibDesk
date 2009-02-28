@@ -45,7 +45,7 @@
     
     IBOutlet NSTextField* citeBehaviorLine; /*! for feedback */
     IBOutlet NSTextField* citeStringField; /*! for user input */
-    IBOutlet NSButton* separateCiteCheckButton;
+    IBOutlet NSMatrix* separateCiteRadio;
     IBOutlet NSButton* prependTildeCheckButton;
 	IBOutlet NSMatrix* citeBracketRadio;
 }

@@ -2101,9 +2101,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString{
 	NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", ([sud boolForKey:BDSKCitePrependTildeKey] ? @"~" : @""), citeString, [sud stringForKey:BDSKCiteStartBracketKey]]; 
+    NSString *startBracket = [sud stringForKey:BDSKCiteStartBracketKey];
+	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", ([sud boolForKey:BDSKCitePrependTildeKey] ? @"~" : @""), citeString, startBracket]; 
 	NSString *endCite = [sud stringForKey:BDSKCiteEndBracketKey]; 
-	NSString *separator = [sud boolForKey:BDSKSeparateCiteKey] ? [endCite stringByAppendingString:startCite] : @",";
+	int separateCite = [sud integerForKey:BDSKSeparateCiteKey];
+    NSString *separator = separateCite == 1 ? [endCite stringByAppendingString:startCite] : separateCite == 2 ? [endCite stringByAppendingString:startBracket] : @",";
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     

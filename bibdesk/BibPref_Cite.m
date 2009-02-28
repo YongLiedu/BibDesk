@@ -76,14 +76,21 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
 	BOOL prependTilde = [sud boolForKey:BDSKCitePrependTildeKey];
 	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, startCiteBracket];
 	
-    [separateCiteCheckButton setState:[sud boolForKey:BDSKSeparateCiteKey] ? NSOnState : NSOffState];
+    [separateCiteRadio selectCellWithTag:[sud integerForKey:BDSKSeparateCiteKey]];
     [prependTildeCheckButton setState:[sud boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
     [citeBracketRadio selectCellWithTag:[[sud objectForKey:BDSKCiteStartBracketKey] isEqualToString:@"{"] ? 1 : 2];
     [citeStringField setStringValue:[NSString stringWithFormat:@"\\%@", citeString]];
-    if([separateCiteCheckButton state] == NSOnState){
+    switch([[separateCiteRadio selectedCell] tag]){
+        case 2:
+        [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"%@key1%@%@key2%@", startCite, endCiteBracket, startCiteBracket, endCiteBracket]];
+        break;
+        case 1:
         [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"%@key1%@%@key2%@", startCite, endCiteBracket, startCite, endCiteBracket]];
-	}else{
+        break;
+        case 0:
+        default:
 		[citeBehaviorLine setStringValue:[NSString stringWithFormat:@"%@key1,key2%@", startCite, endCiteBracket]];
+        break;
 	}
 	[citeBehaviorLine sizeToFit];
 	NSRect frame = [citeBehaviorLine frame];
@@ -148,7 +155,7 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
 }
 
 - (IBAction)changeSeparateCite:(id)sender{
-    [sud setBool:([sender state] == NSOnState) forKey:BDSKSeparateCiteKey];
+    [sud setInteger:[[sender selectedCell] tag] forKey:BDSKSeparateCiteKey];
 	[self updateCiteCommandUI];
 }
 
