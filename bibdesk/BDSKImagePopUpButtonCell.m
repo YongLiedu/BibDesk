@@ -143,19 +143,13 @@
 	[buttonCell setImage:nil]; // invalidate the image
 }
 
-- (BOOL)isEnabled {
-	return [buttonCell isEnabled];
-}
-
 - (void)setEnabled:(BOOL)flag {
+	[super setEnabled:flag];
 	[buttonCell setEnabled:flag];
 }
 
-- (BOOL)showsFirstResponder{
-	return [buttonCell showsFirstResponder];
-}
-
 - (void)setShowsFirstResponder:(BOOL)flag{
+	[super setShowsFirstResponder:flag];
 	[buttonCell setShowsFirstResponder:flag];
 }
 
