@@ -614,6 +614,8 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     [saveTextEncodingPopupButton setEncoding:0];
     
+    // this shouldn't be necessary
+    [documentWindow recalculateKeyViewLoop];
 }
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
