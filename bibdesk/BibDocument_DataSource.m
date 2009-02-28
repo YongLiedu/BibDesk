@@ -321,6 +321,16 @@
 
 }
 
+static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
+    int i = [menu numberOfItems];
+	while (--i >= 0) {
+        NSMenuItem *item = [menu itemAtIndex:i];
+        if ([item isSeparatorItem] == NO && [validator validateMenuItem:item])
+            return NO;
+    }
+    return YES;
+}
+
 - (NSMenu *)tableView:(NSTableView *)tv menuForTableColumn:(NSTableColumn *)tableColumn row:(int)row {
     
     // autorelease when creating an instance, since there are multiple exit points from this method
@@ -412,28 +422,14 @@
             [item setKeyEquivalentModifierMask:NSAlternateKeyMask];
             [item setAlternate:YES];
 		}else{
+            [self menuNeedsUpdate:copyAsMenu];
 			menu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
-            
-            NSMenu *submenu = nil;
-            int i, count = [menu numberOfItems];
-            
-            for (i = 0; submenu == nil && i < count; i++)
-                submenu = [[menu itemAtIndex:i] submenu];
-            if (submenu) {
-                while ([submenu numberOfItems])
-                    [submenu removeItemAtIndex:0];
-                NSArray *styles = [BDSKTemplate allStyleNames];
-                count = [styles count];
-                for (i = 0; i < count; i++) {
-                    item = [submenu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
-                    [item setTarget:self];
-                    [item setTag:BDSKTemplateDragCopyType + i];
-                }
-            }
+            [menu removeItemAtIndex:0];
 		}
 		
 	}else if (tv == groupTableView){
 		menu = [[groupMenu copyWithZone:[NSMenu menuZone]] autorelease];
+        [menu removeItemAtIndex:0];
 	}else{
 		return nil;
 	}
@@ -444,7 +440,7 @@
 	
 	while (--i >= 0) {
 		item = (NSMenuItem*)[menu itemAtIndex:i];
-		if ([self validateMenuItem:item] == NO || ((wasSeparator || i == 0) && [item isSeparatorItem]))
+		if ([self validateMenuItem:item] == NO || ((wasSeparator || i == 0) && [item isSeparatorItem]) || ([item submenu] && menuHasNoValidItems(self, [item submenu])))
 			[menu removeItem:item];
         else
             wasSeparator = [item isSeparatorItem];
