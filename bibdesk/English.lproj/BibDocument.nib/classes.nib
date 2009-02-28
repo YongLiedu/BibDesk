@@ -282,6 +282,14 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>BDSKEncodingPopUpButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPopUpButton</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>NSMenu</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -295,14 +303,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKEncodingPopUpButton</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSPopUpButton</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>

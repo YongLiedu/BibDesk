@@ -486,7 +486,6 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     [aController setWindowFrameAutosaveNameOrCascade:@"Main Window Frame Autosave" setFrame:frameRect];
             
-    [documentWindow setAutorecalculatesKeyViewLoop:YES];
     [documentWindow makeFirstResponder:tableView];	
     
     // SplitViews setup
