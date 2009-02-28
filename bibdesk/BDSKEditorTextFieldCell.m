@@ -246,6 +246,10 @@
     return nil;
 }
 
+- (NSColor *)textColor {
+    return [NSColor blackColor];
+}
+
 @end
 
 #define LABEL_EFFECTIVE_HEIGHT 20.0
@@ -268,6 +272,10 @@
 
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     return nil;
+}
+
+- (NSColor *)textColor {
+    return [NSColor blackColor];
 }
 
 @end
