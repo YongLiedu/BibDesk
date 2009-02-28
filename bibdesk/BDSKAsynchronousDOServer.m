@@ -204,21 +204,18 @@ struct BDSKDOServerFlags {
         [self serverDidSetup];
         OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags->serverDidSetup);
         
-        // the code in -serverDidSetup may decide to stop running immediately
-        if ([self shouldKeepRunning]) {
-            NSRunLoop *rl = [NSRunLoop currentRunLoop];
-            NSDate *distantFuture = [[NSDate distantFuture] retain];
-            BOOL didRun;
-            
-            // see http://lists.apple.com/archives/cocoa-dev/2006/Jun/msg01054.html for a helpful explanation of NSRunLoop
-            do {
-                [pool release];
-                pool = [NSAutoreleasePool new];
-                didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:distantFuture];
-            } while (stopRunning == NO && didRun);
-            
-            [distantFuture release];
-        }
+        NSRunLoop *rl = [NSRunLoop currentRunLoop];
+        NSDate *distantFuture = [[NSDate distantFuture] retain];
+        BOOL didRun;
+        
+        // see http://lists.apple.com/archives/cocoa-dev/2006/Jun/msg01054.html for a helpful explanation of NSRunLoop
+        do {
+            [pool release];
+            pool = [NSAutoreleasePool new];
+            didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:distantFuture];
+        } while (stopRunning == NO && didRun);
+        
+        [distantFuture release];
     }
     @catch(id exception) {
         NSLog(@"Exception \"%@\" raised in object %@", exception, self);
