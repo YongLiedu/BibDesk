@@ -281,6 +281,10 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         chosenPort = ntohs(serverAddress.sin_port);
     }
     
+    // try a different name if it's already taken
+    while ([[NSSocketPortNameServer sharedInstance] portForName:[self sharingName] host:@"*"] && tryCount < MAX_TRY_COUNT)
+        [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
+    
     // lazily instantiate the NSNetService object that will advertise on our behalf
     netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[self sharingName] port:chosenPort];
     [netService setDelegate:self];
@@ -387,49 +391,53 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (void)netService:(NSNetService *)sender didNotPublish:(NSDictionary *)errorDict
 {
     int err = [[errorDict objectForKey:NSNetServicesErrorCode] intValue];
-    NSString *errorMessage = nil;
-    switch(err){
-        case NSNetServicesUnknownError:
-            errorMessage = NSLocalizedString(@"Unknown net services error", @"Error description");
-            break;
-        case NSNetServicesCollisionError:
-            errorMessage = NSLocalizedString(@"Net services collision error", @"Error description");
-            break;
-        case NSNetServicesNotFoundError:
-            errorMessage = NSLocalizedString(@"Net services not found error", @"Error description");
-            break;
-        case NSNetServicesActivityInProgress:
-            errorMessage = NSLocalizedString(@"Net services reports activity in progress", @"Error description");
-            break;
-        case NSNetServicesBadArgumentError:
-            errorMessage = NSLocalizedString(@"Net services bad argument error", @"Error description");
-            break;
-        case NSNetServicesCancelledError:
-            errorMessage = NSLocalizedString(@"Cancelled net service", @"Error description");
-            break;
-        case NSNetServicesInvalidError:
-            errorMessage = NSLocalizedString(@"Net services invalid error", @"Error description");
-            break;
-        case NSNetServicesTimeoutError:
-            errorMessage = NSLocalizedString(@"Net services timeout error", @"Error description");
-            break;
-        default:
-            errorMessage = NSLocalizedString(@"Unrecognized error code from net services", @"Error description");
-            break;
-    }
     
-    NSLog(@"-[%@ %@] reports \"%@\"", [self class], NSStringFromSelector(_cmd), errorMessage);
-    
-    NSString *errorDescription = NSLocalizedString(@"Unable to Share Bibliographies Using Bonjour", @"Error description");
-    NSString *recoverySuggestion = NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @"Error informative text");
-    NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:errorDescription, NSLocalizedDescriptionKey, errorMessage, NSLocalizedFailureReasonErrorKey, recoverySuggestion, NSLocalizedRecoverySuggestionErrorKey, nil]];
-
     [self disableSharing];
     
     if (err == NSNetServicesCollisionError && tryCount < MAX_TRY_COUNT) {
+        
         [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
         [self _enableSharing];
+        
     } else {
+        
+        NSString *errorMessage = nil;
+        switch(err){
+            case NSNetServicesUnknownError:
+                errorMessage = NSLocalizedString(@"Unknown net services error", @"Error description");
+                break;
+            case NSNetServicesCollisionError:
+                errorMessage = NSLocalizedString(@"Net services collision error", @"Error description");
+                break;
+            case NSNetServicesNotFoundError:
+                errorMessage = NSLocalizedString(@"Net services not found error", @"Error description");
+                break;
+            case NSNetServicesActivityInProgress:
+                errorMessage = NSLocalizedString(@"Net services reports activity in progress", @"Error description");
+                break;
+            case NSNetServicesBadArgumentError:
+                errorMessage = NSLocalizedString(@"Net services bad argument error", @"Error description");
+                break;
+            case NSNetServicesCancelledError:
+                errorMessage = NSLocalizedString(@"Cancelled net service", @"Error description");
+                break;
+            case NSNetServicesInvalidError:
+                errorMessage = NSLocalizedString(@"Net services invalid error", @"Error description");
+                break;
+            case NSNetServicesTimeoutError:
+                errorMessage = NSLocalizedString(@"Net services timeout error", @"Error description");
+                break;
+            default:
+                errorMessage = NSLocalizedString(@"Unrecognized error code from net services", @"Error description");
+                break;
+        }
+        
+        NSLog(@"-[%@ %@] reports \"%@\"", [self class], NSStringFromSelector(_cmd), errorMessage);
+        
+        NSString *errorDescription = NSLocalizedString(@"Unable to Share Bibliographies Using Bonjour", @"Error description");
+        NSString *recoverySuggestion = NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @"Error informative text");
+        NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:errorDescription, NSLocalizedDescriptionKey, errorMessage, NSLocalizedFailureReasonErrorKey, recoverySuggestion, NSLocalizedRecoverySuggestionErrorKey, nil]];
+        
         // show the error in a modal dialog
         [NSApp presentError:error];
     }
