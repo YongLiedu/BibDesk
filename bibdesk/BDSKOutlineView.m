@@ -364,6 +364,8 @@
         int row = [self rowAtPoint:mouseLoc];
         int column = [self columnAtPoint:mouseLoc];
         if (row != -1 && column != -1) {
+            if ([self isRowSelected:row] == NO && ([[self delegate] respondsToSelector:@selector(outlineView:shouldSelectRow:)] == NO || [[self delegate] outlineView:self shouldSelectRow:row]))
+                [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
             menu = [[self delegate] outlineView:self menuForTableColumn:tableColumn item:[self itemAtRow:row]];
         }

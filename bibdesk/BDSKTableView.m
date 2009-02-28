@@ -496,6 +496,8 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
         int row = [self rowAtPoint:mouseLoc];
         int column = [self columnAtPoint:mouseLoc];
         if (row != -1 && column != -1) {
+            if ([self isRowSelected:row] == NO && ([[self delegate] respondsToSelector:@selector(tableView:shouldSelectRow:)] == NO || [[self delegate] tableView:self shouldSelectRow:row]))
+                [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
             menu = [[self delegate] tableView:self menuForTableColumn:tableColumn row:row];
         }
