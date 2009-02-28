@@ -104,7 +104,8 @@
 
 
 @interface NSSegmentedCell (BDSKApplePrivateDeclarations)
-- (int)_trackingSegment;
+- (NSInteger)_trackingSegment;
+- (NSInteger)_keySegment;
 - (NSRect)_boundsForCellFrame:(NSRect)frame;
 @end
 
@@ -122,7 +123,9 @@
 
 - (void)drawWithFrame:(NSRect)frame inView:(NSView *)controlView {
     NSRect rect = NSInsetRect(frame, SEGMENTED_CONTROL_MARGIN, 0.0);
-    NSUInteger i, count = [self segmentCount];
+    NSInteger i, count = [self segmentCount];
+    NSInteger keySegment = [self respondsToSelector:@selector(_keySegment)] && [[controlView window] isKeyWindow] && [[controlView window] firstResponder] == controlView ? [self _keySegment] : -1;
+    NSRect keyRect = NSZeroRect;
     
     [NSGraphicsContext saveGraphicsState];
     [[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] setFill];
@@ -132,8 +135,17 @@
     rect = NSInsetRect(rect, 1.0, 0.0);
     for (i = 0; i < count; i++) {
         rect.size.width = [self widthForSegment:i];
+        if (i == keySegment)
+            keyRect = rect;
         [self drawSegment:i inFrame:rect withView:controlView];
         rect.origin.x = NSMaxX(rect) + 1.0;
+    }
+    
+    if (NSIsEmptyRect(keyRect) == NO) {
+		[NSGraphicsContext saveGraphicsState];
+		NSSetFocusRingStyle(NSFocusRingOnly);
+        [NSBezierPath fillRect:keyRect];
+		[NSGraphicsContext restoreGraphicsState];
     }
 }
 
