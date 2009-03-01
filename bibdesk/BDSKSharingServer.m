@@ -54,7 +54,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-#define MAX_TRY_COUNT 10
+#define MAX_TRY_COUNT 20
 
 static id sharedInstance = nil;
 
@@ -100,15 +100,22 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 #pragma mark -
 
+enum {
+    BDSKSharingServerSuccess,
+    BDSKSharingServerNameConflict,
+    BDSKSharingServerOtherError
+};
+
 @interface BDSKSharingDOServer : BDSKAsynchronousDOServer <BDSKSharingServerLocalThread> {
     NSString *sharingName;
     NSConnection *connection;
     BDSKThreadSafeMutableDictionary *remoteClients;
+    volatile int32_t failureReason;
 }
 
 + (NSString *)requiredProtocolVersion;
 
-- (id)initWithSharingName:(NSString *)aName;
+- (id)initWithSharingName:(NSString *)aName failureReason:(int *)reason;
 
 - (unsigned int)numberOfConnections;
 - (void)notifyClientConnectionsChanged;
@@ -257,13 +264,13 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         
         if(bind(fdForListening, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
             close(fdForListening);
-            return;
+            return nil;
         }
         
         // Find out what port number was chosen for us.
         if(getsockname(fdForListening, (struct sockaddr *)&serverAddress, &namelen) < 0) {
             close(fdForListening);
-            return;
+            return nil;
         }
         
         chosenPort = ntohs(serverAddress.sin_port);
@@ -290,53 +297,67 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     while ([[NSSocketPortNameServer sharedInstance] portForName:[self sharingName] host:@"*"] && tryCount < MAX_TRY_COUNT)
         [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
     
-    // lazily instantiate the NSNetService object that will advertise on our behalf
-    netService = [self newNetServiceWithSharingName:[self sharingName]];
+    do {
+        int failureReason;
+        server = [[BDSKSharingDOServer alloc] initWithSharingName:[self sharingName] failureReason:&failureReason];
+        if (server == nil) {
+            if (failureReason == BDSKSharingServerNameConflict && tryCount < MAX_TRY_COUNT) // the server had a name conflict, try with a different name
+                [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
+            else // give up completely
+                break;
+        }
+    } while (server == nil);
     
-    server = [[BDSKSharingDOServer alloc] initWithSharingName:[self sharingName]];
-    
-    // our DO server will also use Bonjour, but this gives us a browseable name
-    [netService publish];
-    
-    // register for notifications
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    
-    BDSKASSERT(BDSKComputerNameChangedNotification);
-    
-    [nc addObserver:self
-           selector:@selector(handleComputerNameChangedNotification:)
-               name:BDSKComputerNameChangedNotification
-             object:nil];
-    
-    [nc addObserver:self
-           selector:@selector(handlePasswordChangedNotification:)
-               name:BDSKSharingPasswordChangedNotification
-             object:nil];
-    
-    [nc addObserver:self
-           selector:@selector(queueDataChangedNotification:)
-               name:BDSKDocumentControllerAddDocumentNotification
-             object:nil];
+    if (server) {
+        
+        // lazily instantiate the NSNetService object that will advertise on our behalf
+        netService = [self newNetServiceWithSharingName:[self sharingName]];
+        
+        if (netService) {
+            // our DO server will also use Bonjour, but this gives us a browseable name
+            [netService publish];
+            
+            // register for notifications
+            NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+            
+            BDSKASSERT(BDSKComputerNameChangedNotification);
+            
+            [nc addObserver:self
+                   selector:@selector(handleComputerNameChangedNotification:)
+                       name:BDSKComputerNameChangedNotification
+                     object:nil];
+            
+            [nc addObserver:self
+                   selector:@selector(handlePasswordChangedNotification:)
+                       name:BDSKSharingPasswordChangedNotification
+                     object:nil];
+            
+            [nc addObserver:self
+                   selector:@selector(queueDataChangedNotification:)
+                       name:BDSKDocumentControllerAddDocumentNotification
+                     object:nil];
 
-    [nc addObserver:self
-           selector:@selector(queueDataChangedNotification:)
-               name:BDSKDocumentControllerRemoveDocumentNotification
-             object:nil];                     
-                 
-    [nc addObserver:self
-           selector:@selector(queueDataChangedNotification:)
-               name:BDSKDocAddItemNotification
-             object:nil];
+            [nc addObserver:self
+                   selector:@selector(queueDataChangedNotification:)
+                       name:BDSKDocumentControllerRemoveDocumentNotification
+                     object:nil];                     
+                         
+            [nc addObserver:self
+                   selector:@selector(queueDataChangedNotification:)
+                       name:BDSKDocAddItemNotification
+                     object:nil];
 
-    [nc addObserver:self
-           selector:@selector(queueDataChangedNotification:)
-               name:BDSKDocDelItemNotification
-             object:nil];
-    
-    [nc addObserver:self
-           selector:@selector(handleApplicationWillTerminate:)
-               name:NSApplicationWillTerminateNotification
-             object:nil];
+            [nc addObserver:self
+                   selector:@selector(queueDataChangedNotification:)
+                       name:BDSKDocDelItemNotification
+                     object:nil];
+            
+            [nc addObserver:self
+                   selector:@selector(handleApplicationWillTerminate:)
+                       name:NSApplicationWillTerminateNotification
+                     object:nil];
+        }
+    }
 }
 
 - (void)enableSharing
@@ -465,13 +486,22 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 // If we introduce incompatible changes in future, bump this to avoid sharing breakage
 + (NSString *)requiredProtocolVersion { return @"0"; }
 
-- (id)initWithSharingName:(NSString *)aName
+- (id)initWithSharingName:(NSString *)aName failureReason:(int *)reason
 {
     self = [super init];
     if (self) {
         sharingName = [aName retain];
         remoteClients = [[BDSKThreadSafeMutableDictionary alloc] init];
+        failureReason = 0;
         [self startDOServerAsync];
+        OSMemoryBarrier();
+        if (failureReason != BDSKSharingServerSuccess) {
+            if (reason != NULL)
+                *reason = failureReason;
+            [self stopDOServer];
+            [self release];
+            self = nil;
+        }
     }   
     return self;
 }
@@ -508,8 +538,10 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     // setup our DO server that will handle requests for publications and passwords
     @try {
         NSPort *receivePort = [NSSocketPort port];
-        if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:sharingName] == NO)
+        if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:sharingName] == NO) {
+            OSAtomicCompareAndSwap32Barrier(0, BDSKSharingServerNameConflict, (int32_t *)&failureReason);
             @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, sharingName];
+        }
         connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
         NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingProtocol)];
         [connection setRootObject:checker];
@@ -520,10 +552,12 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
     @catch(id exception) {
         NSLog(@"%@", exception);
+        // this won't do anything if we already registered a name conflict failure
+        OSAtomicCompareAndSwap32Barrier(0, BDSKSharingServerOtherError, (int32_t *)&failureReason);
         // Use performSelectorOnMainThread: in case we don't have a main thread proxy.
         // Pass NO for waitUntilDone: since this thread will get a callback from stopDOServer
         // so we can't block the runloop.
-        [self performSelectorOnMainThread:@selector(stopDOServer) withObject:nil waitUntilDone:NO];
+        //[self performSelectorOnMainThread:@selector(stopDOServer) withObject:nil waitUntilDone:NO];
     }
 }
 
