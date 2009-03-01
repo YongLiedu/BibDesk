@@ -241,13 +241,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [self restartSharingIfNeeded];
 }
 
-- (void)_enableSharing
-{
-    if(netService){
-        // we're already sharing
-        return;
-    }
-    
+- (NSNetService *)newNetServiceWithSharingName:(NSString *)aSharingName {
     uint16_t chosenPort = 0;
     
     // Here, create the socket from traditional BSD socket calls
@@ -275,17 +269,29 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         chosenPort = ntohs(serverAddress.sin_port);
     }
     
+    NSNetService *aNetService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:aSharingName port:chosenPort];
+    [aNetService setDelegate:self];
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
+    [dictionary setObject:[BDSKSharingServer supportedProtocolVersion] forKey:BDSKTXTVersionKey];
+    [dictionary setObject:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKSharingRequiresPasswordKey] forKey:BDSKTXTAuthenticateKey];
+    [aNetService setTXTRecordData:[NSNetService dataFromTXTRecordDictionary:dictionary]];
+    
+    return aNetService;
+}
+
+- (void)_enableSharing
+{
+    if(netService){
+        // we're already sharing
+        return;
+    }
+    
     // try a different name if it's already taken
     while ([[NSSocketPortNameServer sharedInstance] portForName:[self sharingName] host:@"*"] && tryCount < MAX_TRY_COUNT)
         [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
     
     // lazily instantiate the NSNetService object that will advertise on our behalf
-    netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[self sharingName] port:chosenPort];
-    [netService setDelegate:self];
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
-    [dictionary setObject:[BDSKSharingServer supportedProtocolVersion] forKey:BDSKTXTVersionKey];
-    [dictionary setObject:[[NSUserDefaults standardUserDefaults] stringForKey:BDSKSharingRequiresPasswordKey] forKey:BDSKTXTAuthenticateKey];
-    [netService setTXTRecordData:[NSNetService dataFromTXTRecordDictionary:dictionary]];
+    netService = [self newNetServiceWithSharingName:[self sharingName]];
     
     server = [[BDSKSharingDOServer alloc] initWithSharingName:[self sharingName]];
     
@@ -544,6 +550,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
     NSPort *port = [[NSSocketPortNameServer sharedInstance] portForName:sharingName];
+    BDSKASSERT(port == [connection receivePort]);
     [[NSSocketPortNameServer sharedInstance] removePortForName:sharingName];
     [port invalidate];
     [connection setDelegate:nil];
