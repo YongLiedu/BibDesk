@@ -102,6 +102,7 @@
     [buttonCell release];
     buttonCell = nil;
     [image release];
+    image = nil;
     [super dealloc];
 }
 
@@ -127,14 +128,12 @@
         [image release];
         image = [anImage retain];
         [buttonCell setImage:nil]; // invalidate the image
-        [(NSControl *)[self controlView] updateCell:self];
     }
 }
 
 - (void)setArrowPosition:(NSPopUpArrowPosition)position {
     [super setArrowPosition:position];
     [buttonCell setImage:nil]; // invalidate the image
-    [(NSControl *)[self controlView] updateCell:self];
 }
 
 - (void)setAlternateImage:(NSImage *)anImage{
