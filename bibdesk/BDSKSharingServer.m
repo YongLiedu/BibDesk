@@ -190,19 +190,13 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 }
 
 - (NSString *)sharingName {
-    NSString *name = nil;
-    @synchronized(self) {
-        name = [[sharingName retain] autorelease];
-    }
-    return name;
+    return [[sharingName retain] autorelease];
 }
 
 - (void)setSharingName:(NSString *)newName {
-    @synchronized(self) {
-        if (sharingName != newName) {
-            [sharingName release];
-            sharingName = [newName retain];
-        }
+    if (sharingName != newName) {
+        [sharingName release];
+        sharingName = [newName retain];
     }
 }
 
