@@ -48,6 +48,7 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
 @interface BDSKPasswordController (Private)
 - (void)setName:(NSString *)aName;
+- (void)setPassword:(NSString *)aName;
 - (void)setStatus:(NSString *)status;
 @end
 
@@ -61,6 +62,7 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
 - (void)dealloc {
     [self setName:nil];
+    [self setPassword:nil];
     [super dealloc];
 }
 
@@ -155,11 +157,20 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 }
 
 - (NSString *)password {
-    return [statusField stringValue];
+    return password;
 }
 
 - (NSData *)passwordHashed {
-    return [[[self password] dataUsingEncoding:NSUTF8StringEncoding] sha1Signature];
+    // is this equivalent to dataUsingEncoding?
+    const void *passwordBytes = [[self password] UTF8String];
+    return [[NSData dataWithBytes:passwordBytes length:strlen(passwordBytes)] sha1Signature];
+}
+
+- (void)setPassword:(NSString *)aPassword {
+    if(password != aPassword){
+        [password release];
+        password = [aPassword retain];
+    }
 }
 
 - (BDSKPasswordControllerStatus)runModalForKeychainServiceName:(NSString *)aName message:(NSString *)status {
@@ -167,7 +178,6 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
     [self setStatus:status ?: @""];
     int returnValue = [NSApp runModalForWindow:[self window]];
     [[self window] orderOut:self];    
-    [self setName:nil];
     
     return returnValue;
 }
@@ -178,8 +188,8 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
     if (returnValue == BDSKPasswordReturn) {
         NSAssert(name != nil, @"name is nil");
         
-        NSString *password = [passwordField stringValue];
-        NSParameterAssert(password != nil);
+        [self setPassword:[passwordField stringValue]];
+        NSParameterAssert([self password] != nil);
         
         [BDSKPasswordController addOrModifyPassword:password name:name userName:nil];
     }

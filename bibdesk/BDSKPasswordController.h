@@ -50,6 +50,7 @@ typedef enum {
 @interface BDSKPasswordController : NSWindowController
 {
     NSString *name;
+    NSString *password;
     IBOutlet NSSecureTextField *passwordField;
     IBOutlet NSTextField *statusField;
 }
