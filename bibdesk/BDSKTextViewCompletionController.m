@@ -125,12 +125,20 @@ static id sharedController = nil;
 
 - (void)moveUp:(id)sender {
     movement = NSUpTextMovement;
-    [tableView moveUp:nil];
+    int row = [tableView selectedRow] - 1;
+    if (row >= 0 && [tableView numberOfRows] > 0) {
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [tableView scrollRowToVisible:row];
+    }
 }
 
 - (void)moveDown:(id)sender {
     movement = NSDownTextMovement;
-    [tableView moveDown:nil];
+    int row = [tableView selectedRow] + 1;
+    if (row < [tableView numberOfRows]) {
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [tableView scrollRowToVisible:row];
+    }
 }
 
 - (void)insertTab:(id)sender {
