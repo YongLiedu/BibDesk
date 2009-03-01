@@ -307,6 +307,7 @@ extern NSString *BDSKWebGroupUpdatedNotification;
 extern NSString *BDSKDidAddRemoveGroupNotification;
 extern NSString *BDSKWillAddRemoveGroupNotification;
 extern NSString *BDSKClientConnectionsChangedNotification;
+extern NSString *BDSKSharingStatusChangedNotification;
 extern NSString *BDSKSharingNameChangedNotification;
 extern NSString *BDSKSharingPasswordChangedNotification;
 extern NSString *BDSKDocumentControllerAddDocumentNotification;

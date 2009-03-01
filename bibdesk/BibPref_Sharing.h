@@ -59,6 +59,7 @@
 - (void)updateUI;
 
 - (void)handleSharingNameChanged:(NSNotification *)aNotification;
+- (void)handleSharingStatusChanged:(NSNotification *)aNotification;
 - (void)handleClientConnectionsChanged:(NSNotification *)aNotification;
 
 @end

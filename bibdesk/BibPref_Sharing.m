@@ -49,6 +49,7 @@
 - (void)awakeFromNib
 {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingNameChanged:) name:BDSKSharingNameChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingStatusChanged:) name:BDSKSharingStatusChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleClientConnectionsChanged:) name:BDSKClientConnectionsChangedNotification object:nil];
     
     NSData *pwData = [BDSKPasswordController sharingPasswordForCurrentUserUnhashed];
@@ -73,6 +74,12 @@
         [self updateUI];
 }
 
+- (void)handleSharingStatusChanged:(NSNotification *)aNotification;
+{
+    if([aNotification object] != self)
+        [self updateUI];
+}
+
 - (void)handleClientConnectionsChanged:(NSNotification *)aNotification;
 {
     [self updateUI];
@@ -89,10 +96,13 @@
     NSString *statusMessage = nil;
     if([sud boolForKey:BDSKShouldShareFilesKey]){
         unsigned int number = [[BDSKSharingServer defaultServer] numberOfConnections];
+        NSString *sharingName = [[BDSKSharingServer defaultServer] sharingName];
         if(number == 1)
-            statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
+            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, 1 user connected to %@", @"Bonjour sharing is on status message, single connection"), sharingName];
+        else if(sharingName)
+            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %i users connected to %@", @"Bonjour sharing is on status message, multiple connections"), number, sharingName];
         else
-            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %i users connected", @"Bonjour sharing is on status message, multiple connections"), number];
+            statusMessage = NSLocalizedString(@"On, not active", @"Bonjour sharing is on status message, no active connections");
     }else{
         statusMessage = NSLocalizedString(@"Off", @"Bonjour sharing is off status message");
     }

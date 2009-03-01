@@ -378,6 +378,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
     
     [self setSharingName:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
 }
 
 - (void)restartSharingIfNeeded;
@@ -388,6 +389,11 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         // give the server a moment to stop
         [self performSelector:@selector(enableSharing) withObject:nil afterDelay:3.0];
     }
+}
+
+- (void)netServiceDidPublish:(NSNetService *)sender
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
 }
 
 - (void)netService:(NSNetService *)sender didNotPublish:(NSDictionary *)errorDict
