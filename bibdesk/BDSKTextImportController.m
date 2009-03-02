@@ -1469,9 +1469,9 @@
         return [key localizedFieldName];
     }else if([tcID isEqualToString:@"Num"]){
         if(row < 10)
-            return [NSString stringWithFormat:@"%@%d", [NSString commandKeyIndicatorString], row];
+            return [NSString stringWithFormat:@"%@%d", [NSString commandKeyIndicatorString], (row + 1) % 10];
         else if(row < 20)
-            return [NSString stringWithFormat:@"%@%@%d", [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString], row - 10];
+            return [NSString stringWithFormat:@"%@%@%d", [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString], (row + 1) % 10];
         else return @"";
     }else{
         return [item valueOfField:key];
@@ -1866,7 +1866,7 @@
         
         if (c >= '0' && c <= '9') {
         
-            unsigned idx = (unsigned)(c - '0');
+            unsigned idx = c == '0' ? 10 : (unsigned)(c - '1');
             BOOL rv = YES;
             if (flags & NSAlternateKeyMask)
                 idx += 10;
@@ -1910,30 +1910,21 @@
         fieldNameCharSet = [[[[BDSKTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] invertedSet] copy];
     
     if ([[self dataSource] isInTemporaryTypeSelectMode]) {
-        if (c == NSDownArrowFunctionKey || c == NSUpArrowFunctionKey || c == NSDeleteCharacter || c == NSBackspaceCharacter) {
-            // we allow navigation in the table using arrow keys, as well as deleting entries
-        } else if (flags != 0) {
-            NSBeep();
-            return;
-        } else if (c == NSTabCharacter || c == 0x001b) {
+        if ((c == NSTabCharacter || c == 0x001b) && flags == 0) {
             [[self dataSource] endTemporaryTypeSelectModeAndSet:NO edit:NO];
             return;
-        } else if (c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) {
+        } else if ((c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) && flags == 0) {
             [[self dataSource] endTemporaryTypeSelectModeAndSet:YES edit:NO];
             return;
-        } else if ([fieldNameCharSet characterIsMember:c] == NO) {
+        } else if ([[self typeSelectHelper] isTypeSelectEvent:event] == NO && 
+            (c != NSDownArrowFunctionKey && c != NSUpArrowFunctionKey && c != NSHomeFunctionKey && c != NSEndFunctionKey)) {
+            // we allow navigation in the table using arrow keys
             NSBeep();
             return;
         }
     }
     
-    if ([fieldNameCharSet characterIsMember:c] && flags == 0) {
-        [typeSelectHelper searchWithEvent:event];
-    }else if([typeSelectHelper isCancelEvent:event]) {
-        [typeSelectHelper cancelSearch];
-    }else{
-        [super keyDown:event];
-    }
+    [super keyDown:event];
 }
 
 - (BOOL)resignFirstResponder {
@@ -1942,20 +1933,10 @@
 }
 
 - (void)awakeFromNib{
-    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
-    [typeSelectHelper setDataSource:[self dataSource]];
-    [typeSelectHelper setCyclesSimilarResults:YES];
-}
-
-- (void)dealloc{
-    [typeSelectHelper setDataSource:nil];
-    [typeSelectHelper release];
-    [super dealloc];
-}
-
-- (void)reloadData{
-    [super reloadData];
-    [typeSelectHelper rebuildTypeSelectSearchCache];
+    BDSKTypeSelectHelper *aTypeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [aTypeSelectHelper setCyclesSimilarResults:YES];
+    [self setTypeSelectHelper:aTypeSelectHelper];
+    [aTypeSelectHelper release];
 }
 
 - (BOOL)textViewShouldLinkKeys:(NSTextView *)textView{
