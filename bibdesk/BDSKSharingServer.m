@@ -622,7 +622,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
     NSPort *port = [[NSSocketPortNameServer sharedInstance] portForName:sharingName];
-    BDSKASSERT(port == [connection receivePort]);
     [[NSSocketPortNameServer sharedInstance] removePortForName:sharingName];
     [port invalidate];
     [connection setDelegate:nil];
