@@ -287,35 +287,29 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)_enableSharing
 {
-    if(server){
-        // we're already sharing
-        return;
+    if(server == nil){
+        // we're not yet sharing
+        
+        server = [[BDSKSharingDOServer alloc] initForSharingServer:self];
+        // the netService is created in the callback
     }
-    
-    // try a different name if it's already taken
-    while ([[NSSocketPortNameServer sharedInstance] portForName:[self sharingName] host:@"*"] && tryCount < MAX_TRY_COUNT)
-        [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
-    
-    server = [[BDSKSharingDOServer alloc] initForSharingServer:self];
-    
-    // the netService is created in the callback
 }
 
 - (void)enableSharing
 {
-    if(server){
-        // we're already sharing
-        return;
+    if(server == nil){
+        // we're not yet sharing
+        
+        tryCount = 0;
+        [self setSharingName:[BDSKSharingServer defaultSharingName]];
+        
+        [self _enableSharing];
     }
-    
-    tryCount = 0;
-    [self setSharingName:[BDSKSharingServer defaultSharingName]];
-    
-    [self _enableSharing];
 }
 
 - (void)disableSharing
 {
+    // CMH: is the check for shouldKeepRunning correct?
     if(server != nil && [server shouldKeepRunning]){
         [netService setDelegate:nil];
         [netService stop];
