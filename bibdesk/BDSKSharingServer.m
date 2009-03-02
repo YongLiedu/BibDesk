@@ -95,12 +95,14 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 @protocol BDSKSharingServerLocalThread <BDSKAsyncDOServerThread>
 
 - (oneway void)notifyClientsOfChange;
+- (oneway void)mainThreadServerDidSetup:(BOOL)success;
 
 @end
 
 #pragma mark -
 
 @interface BDSKSharingDOServer : BDSKAsynchronousDOServer <BDSKSharingServerLocalThread> {
+    BDSKSharingServer *sharingServer;
     NSString *sharingName;
     NSConnection *connection;
     BDSKThreadSafeMutableDictionary *remoteClients;
@@ -108,7 +110,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 + (NSString *)requiredProtocolVersion;
 
-- (id)initWithSharingName:(NSString *)aName;
+- (id)initForSharingServer:(BDSKSharingServer *)aSharingServer;
 
 - (unsigned int)numberOfConnections;
 - (void)notifyClientConnectionsChanged;
@@ -281,7 +283,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)_enableSharing
 {
-    if(netService){
+    if(server){
         // we're already sharing
         return;
     }
@@ -290,60 +292,14 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     while ([[NSSocketPortNameServer sharedInstance] portForName:[self sharingName] host:@"*"] && tryCount < MAX_TRY_COUNT)
         [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
     
-    server = [[BDSKSharingDOServer alloc] initWithSharingName:[self sharingName]];
+    server = [[BDSKSharingDOServer alloc] initForSharingServer:self];
     
-    // lazily instantiate the NSNetService object that will advertise on our behalf
-    netService = [self newNetServiceWithSharingName:[self sharingName]];
-    
-    if (netService) {
-        // our DO server will also use Bonjour, but this gives us a browseable name
-        [netService publish];
-        
-        // register for notifications
-        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        
-        BDSKASSERT(BDSKComputerNameChangedNotification);
-        
-        [nc addObserver:self
-               selector:@selector(handleComputerNameChangedNotification:)
-                   name:BDSKComputerNameChangedNotification
-                 object:nil];
-        
-        [nc addObserver:self
-               selector:@selector(handlePasswordChangedNotification:)
-                   name:BDSKSharingPasswordChangedNotification
-                 object:nil];
-        
-        [nc addObserver:self
-               selector:@selector(queueDataChangedNotification:)
-                   name:BDSKDocumentControllerAddDocumentNotification
-                 object:nil];
-
-        [nc addObserver:self
-               selector:@selector(queueDataChangedNotification:)
-                   name:BDSKDocumentControllerRemoveDocumentNotification
-                 object:nil];                     
-                     
-        [nc addObserver:self
-               selector:@selector(queueDataChangedNotification:)
-                   name:BDSKDocAddItemNotification
-                 object:nil];
-
-        [nc addObserver:self
-               selector:@selector(queueDataChangedNotification:)
-                   name:BDSKDocDelItemNotification
-                 object:nil];
-        
-        [nc addObserver:self
-               selector:@selector(handleApplicationWillTerminate:)
-                   name:NSApplicationWillTerminateNotification
-                 object:nil];
-    }
+    // the netService is created in the callback
 }
 
 - (void)enableSharing
 {
-    if(netService){
+    if(server){
         // we're already sharing
         return;
     }
@@ -356,7 +312,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)disableSharing
 {
-    if(netService != nil && [server shouldKeepRunning]){
+    if(server != nil && [server shouldKeepRunning]){
         [netService stop];
         [netService release];
         netService = nil;
@@ -388,6 +344,84 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         
         // give the server a moment to stop
         [self performSelector:@selector(enableSharing) withObject:nil afterDelay:3.0];
+    }
+}
+
+- (void)server:(BDSKSharingDOServer *)aServer didSetup:(BOOL)success {
+    BDSKASSERT(aServer == server || server == nil);
+    if (success) {
+        // the service was able to register the port
+        
+        BDSKPRECONDITION(netService == nil);
+        
+        // lazily instantiate the NSNetService object that will advertise on our behalf
+        netService = [self newNetServiceWithSharingName:[self sharingName]];
+        
+        BDSKPOSTCONDITION(netService != nil);
+        
+        if (netService) {
+            // our DO server will also use Bonjour, but this gives us a browseable name
+            [netService publish];
+            
+            // register for notifications
+            NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+            
+            BDSKASSERT(BDSKComputerNameChangedNotification);
+            
+            [nc addObserver:self
+                   selector:@selector(handleComputerNameChangedNotification:)
+                       name:BDSKComputerNameChangedNotification
+                     object:nil];
+            
+            [nc addObserver:self
+                   selector:@selector(handlePasswordChangedNotification:)
+                       name:BDSKSharingPasswordChangedNotification
+                     object:nil];
+            
+            [nc addObserver:self
+                   selector:@selector(queueDataChangedNotification:)
+                       name:BDSKDocumentControllerAddDocumentNotification
+                     object:nil];
+
+            [nc addObserver:self
+                   selector:@selector(queueDataChangedNotification:)
+                       name:BDSKDocumentControllerRemoveDocumentNotification
+                     object:nil];                     
+                         
+            [nc addObserver:self
+                   selector:@selector(queueDataChangedNotification:)
+                       name:BDSKDocAddItemNotification
+                     object:nil];
+
+            [nc addObserver:self
+                   selector:@selector(queueDataChangedNotification:)
+                       name:BDSKDocDelItemNotification
+                     object:nil];
+            
+            [nc addObserver:self
+                   selector:@selector(handleApplicationWillTerminate:)
+                       name:NSApplicationWillTerminateNotification
+                     object:nil];
+        } else {
+            [self disableSharing];
+        }
+        
+    } else {
+        // the service was not able to register the port
+        
+        // shouldn't happen
+        if (server != aServer)
+            [aServer stopDOServer];
+        
+        [server stopDOServer];
+        [server release];
+        server = nil;
+        
+        // try again with a different name
+        if (tryCount < MAX_TRY_COUNT) {
+            [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
+            [self _enableSharing];
+        }
     }
 }
 
@@ -473,11 +507,12 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 // If we introduce incompatible changes in future, bump this to avoid sharing breakage
 + (NSString *)requiredProtocolVersion { return @"0"; }
 
-- (id)initWithSharingName:(NSString *)aName
+- (id)initForSharingServer:(BDSKSharingServer *)aSharingServer
 {
     self = [super init];
     if (self) {
-        sharingName = [aName retain];
+        sharingServer = aSharingServer;
+        sharingName = [[sharingServer sharingName] retain];
         remoteClients = [[BDSKThreadSafeMutableDictionary alloc] init];
         [self startDOServerAsync];
     }   
@@ -486,6 +521,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)dealloc
 {
+    sharingServer = nil;
     [sharingName release];
     [remoteClients release];
     remoteClients = nil;
@@ -500,9 +536,20 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 #pragma mark Main Thread
 
+- (void)stopDOServer {
+    // make sure we don't message our sharingServer
+    sharingServer = nil;
+    [super stopDOServer];
+}
+
 - (void)notifyClientConnectionsChanged;
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKClientConnectionsChangedNotification object:nil];
+}
+
+- (void)mainThreadServerDidSetup:(BOOL)success
+{
+    [sharingServer server:(BDSKSharingDOServer *)self didSetup:success];
 }
 
 #pragma mark Server Thread
@@ -514,6 +561,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (void)serverDidSetup
 {
     // setup our DO server that will handle requests for publications and passwords
+    BOOL success = YES;
     @try {
         NSPort *receivePort = [NSSocketPort port];
         if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:sharingName] == NO)
@@ -524,14 +572,17 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         
         // so we get connection:shouldMakeNewConnection: messages
         [connection setDelegate:self];
-                    
     }
     @catch(id exception) {
         NSLog(@"%@", exception);
+        success = NO;
         // Use performSelectorOnMainThread: in case we don't have a main thread proxy.
         // Pass NO for waitUntilDone: since this thread will get a callback from stopDOServer
         // so we can't block the runloop.
         //[self performSelectorOnMainThread:@selector(stopDOServer) withObject:nil waitUntilDone:NO];
+    }
+    @finally {
+        [[self serverOnMainThread] mainThreadServerDidSetup:success];
     }
 }
 
