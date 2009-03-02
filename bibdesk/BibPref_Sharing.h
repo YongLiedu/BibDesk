@@ -48,6 +48,7 @@
     IBOutlet NSSecureTextField *passwordField;
     IBOutlet NSTextField *sharedNameField;
     IBOutlet NSTextField *statusField;
+    IBOutlet NSTextField *usedNameField;
 }
 
 - (IBAction)changePassword:(id)sender;

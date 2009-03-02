@@ -108,17 +108,15 @@
     NSString *statusMessage = nil;
     if([sud boolForKey:BDSKShouldShareFilesKey]){
         unsigned int number = [[BDSKSharingServer defaultServer] numberOfConnections];
-        NSString *sharingName = [[BDSKSharingServer defaultServer] sharingName];
         if(number == 1)
-            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, 1 user connected to %@", @"Bonjour sharing is on status message, single connection"), sharingName];
-        else if(sharingName)
-            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %i users connected to %@", @"Bonjour sharing is on status message, multiple connections"), number, sharingName];
+            statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
         else
-            statusMessage = NSLocalizedString(@"On, not active", @"Bonjour sharing is on status message, no active connections");
+            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %i users connected", @"Bonjour sharing is on status message, multiple connections"), number];
     }else{
         statusMessage = NSLocalizedString(@"Off", @"Bonjour sharing is off status message");
     }
     [statusField setStringValue:statusMessage];
+    [usedNameField setStringValue:[[BDSKSharingServer defaultServer] sharingName] ?: @""];
 }
 
 - (void)updateUI
