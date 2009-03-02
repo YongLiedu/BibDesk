@@ -124,7 +124,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
 {
     // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if ([[aNetService name] isEqualToString:[[BDSKSharingServer defaultServer] sharingName]] && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelf"] == NO)
+    if ([[aNetService name] isEqualToString:[[BDSKSharingServer defaultServer] sharingName]] && [[BDSKSharingServer defaultServer] isSharing] && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelf"] == NO)
         return;
     // set as delegate and resolve, so we can find out if this originated from the localhost or a remote machine
     // we can't access TXT records until the service is resolved (this is documented in CFNetService, not NSNetService)

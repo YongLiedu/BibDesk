@@ -70,6 +70,7 @@ extern NSString *BDSKHostNameChangedNotification;
     NSNetService *netService;
     id server;
     NSString *sharingName;
+    BOOL isSharing;
     int tryCount;
 }
 
@@ -78,6 +79,7 @@ extern NSString *BDSKHostNameChangedNotification;
 + (NSString *)supportedProtocolVersion;
 
 - (NSString *)sharingName;
+- (BOOL)isSharing;
 
 - (unsigned int)numberOfConnections;
 

@@ -202,6 +202,10 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
 }
 
+- (BOOL)isSharing {
+    return isSharing;
+}
+
 - (unsigned int)numberOfConnections { 
     // minor thread-safety issue here; this may be off by one
     return [server numberOfConnections]; 
@@ -313,6 +317,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (void)disableSharing
 {
     if(server != nil && [server shouldKeepRunning]){
+        [netService setDelegate:nil];
         [netService stop];
         [netService release];
         netService = nil;
@@ -334,6 +339,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
     
     [self setSharingName:nil];
+    isSharing = NO;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
 }
 
@@ -425,6 +431,12 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
 }
 
+- (void)netServiceWillPublish:(NSNetService *)sender
+{
+    isSharing = YES;
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
+}
+
 - (void)netServiceDidPublish:(NSNetService *)sender
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
@@ -488,6 +500,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (void)netServiceDidStop:(NSNetService *)sender
 {
     // We'll need to release the NSNetService sending this, since we want to recreate it in sync with the socket at the other end. Since there's only the one NSNetService in this server, we can just release it.
+    [netService setDelegate:nil];
     [netService release];
     netService = nil;
 }
