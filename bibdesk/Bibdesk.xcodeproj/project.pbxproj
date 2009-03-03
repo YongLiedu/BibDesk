@@ -498,7 +498,6 @@
 		F9E43AD808AD8BDB00A0354B /* BDSKErrorObjectController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E43AD608AD8BDB00A0354B /* BDSKErrorObjectController.m */; };
 		F9E43B1308AD918800A0354B /* BDSKErrorPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9E43B1108AD918800A0354B /* BDSKErrorPanel.nib */; };
 		F9E5F6D90A96ABF1004A6D79 /* BDSKFile.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E5F6D80A96ABF1004A6D79 /* BDSKFile.m */; };
-		F9EA8FCB0ADE01F9005EFBE4 /* BDSKUpdateChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EA8FC90ADE01F9005EFBE4 /* BDSKUpdateChecker.m */; };
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B908B1572600AAC9A9 /* BDSKScrollableTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */; };
 		F9EF94E60D15FE7400314058 /* BDSKFileMigrationController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF94E40D15FE7400314058 /* BDSKFileMigrationController.m */; };
@@ -3815,7 +3814,6 @@
 				F9937E2B0AD826AE001D1DFB /* NSBezierPath_CoreImageExtensions.m in Sources */,
 				CE95AF180ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m in Sources */,
 				CE7596000ADDB0E1009C1329 /* BDSKContainerView.m in Sources */,
-				F9EA8FCB0ADE01F9005EFBE4 /* BDSKUpdateChecker.m in Sources */,
 				F9A2245D0AE02C8E0046CA3D /* BDSKFileSearch.m in Sources */,
 				CE5C29CE0AE14FEC00C3E6B5 /* BibDocument_Actions.m in Sources */,
 				F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */,

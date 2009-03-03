@@ -66,7 +66,6 @@
 #import "BDSKReadMeController.h"
 #import "BDSKOrphanedFilesFinder.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import "BDSKUpdateChecker.h"
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
@@ -358,8 +357,6 @@ static void fixLegacyTableColumnIdentifiers()
     if([[NSUserDefaults standardUserDefaults] objectForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
         [self showReadMeFile:nil];
     [[NSUserDefaults standardUserDefaults] setObject:versionString forKey:BDSKLastVersionLaunchedKey];
-    
-    [[BDSKUpdateChecker sharedChecker] scheduleUpdateCheckIfNeeded];
     
     BOOL inputManagerIsCurrent;
     if([self isInputManagerInstalledAndCurrent:&inputManagerIsCurrent] && inputManagerIsCurrent == NO)
@@ -760,12 +757,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
             [theURLs addObject:[aDoc fileURL]];
     }
     return theURLs;
-}
-
-#pragma mark Version checking
-
-- (IBAction)checkForUpdates:(id)sender{
-    [[BDSKUpdateChecker sharedChecker] checkForUpdates:sender];  
 }
 
 #pragma mark Input manager

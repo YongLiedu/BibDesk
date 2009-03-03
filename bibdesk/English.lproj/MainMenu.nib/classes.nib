@@ -200,6 +200,8 @@
 				<string>NSTabView</string>
 				<key>bottomPreviewTextView</key>
 				<string>NSTextView</string>
+				<key>copyAsMenu</key>
+				<string>NSMenu</string>
 				<key>documentWindow</key>
 				<string>NSWindow</string>
 				<key>exportAccessoryView</key>
@@ -223,7 +225,7 @@
 				<key>groupMenu</key>
 				<string>NSMenu</string>
 				<key>groupSplitView</key>
-				<string>BDSKSplitView</string>
+				<string>BDSKGradientSplitView</string>
 				<key>groupTableView</key>
 				<string>BDSKGroupTableView</string>
 				<key>mainBox</key>
@@ -251,7 +253,7 @@
 				<key>sidePreviewTextView</key>
 				<string>NSTextView</string>
 				<key>splitView</key>
-				<string>BDSKSplitView</string>
+				<string>BDSKGradientSplitView</string>
 				<key>statusBar</key>
 				<string>BDSKStatusBar</string>
 				<key>tableView</key>
@@ -304,14 +306,6 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>BDSKEncodingPopUpButton</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSPopUpButton</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
 			<string>NSMenu</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -325,6 +319,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKEncodingPopUpButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPopUpButton</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -426,7 +428,7 @@
 				<key>globalMacroFileSheet</key>
 				<string>NSWindow</string>
 				<key>globalMacroFilesTableView</key>
-				<string>NSTableView</string>
+				<string>BDSKTableView</string>
 				<key>pdfViewerPopup</key>
 				<string>NSPopUpButton</string>
 				<key>removeLocalFileFieldsButton</key>
@@ -435,7 +437,7 @@
 				<string>NSButton</string>
 			</dict>
 			<key>SUPERCLASS</key>
-			<string>OAPreferenceClient</string>
+			<string>BDSKPreferencePane</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -444,6 +446,63 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>BDSKContainerView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>changeFont</key>
+				<string>id</string>
+				<key>copy</key>
+				<string>id</string>
+				<key>cut</key>
+				<string>id</string>
+				<key>delete</key>
+				<string>id</string>
+				<key>duplicate</key>
+				<string>id</string>
+				<key>insertNewline</key>
+				<string>id</string>
+				<key>insertShiftSpace</key>
+				<string>id</string>
+				<key>insertSpace</key>
+				<string>id</string>
+				<key>invertSelection</key>
+				<string>id</string>
+				<key>moveDown</key>
+				<string>id</string>
+				<key>moveUp</key>
+				<string>id</string>
+				<key>paste</key>
+				<string>id</string>
+				<key>scrollToBeginningOfDocument</key>
+				<string>id</string>
+				<key>scrollToEndOfDocument</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>checkForUpdates</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>SUUpdater</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>delegate</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -508,6 +567,8 @@
 				<string>id</string>
 				<key>showPersonDetail</key>
 				<string>id</string>
+				<key>tableButtonAction</key>
+				<string>id</string>
 				<key>toggleStatusBar</key>
 				<string>id</string>
 				<key>trashLinkedFiles</key>
@@ -542,11 +603,11 @@
 				<key>citeKeyWarningButton</key>
 				<string>NSButton</string>
 				<key>fileSplitView</key>
-				<string>BDSKSplitView</string>
+				<string>BDSKGradientSplitView</string>
 				<key>fileView</key>
 				<string>FileView</string>
 				<key>mainSplitView</key>
-				<string>BDSKSplitView</string>
+				<string>BDSKGradientSplitView</string>
 				<key>matrix</key>
 				<string>NSMatrix</string>
 				<key>notesView</key>
@@ -578,6 +639,45 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>BDSKContainerView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>copy</key>
+				<string>id</string>
+				<key>cut</key>
+				<string>id</string>
+				<key>delete</key>
+				<string>id</string>
+				<key>duplicate</key>
+				<string>id</string>
+				<key>insertNewline</key>
+				<string>id</string>
+				<key>moveDown</key>
+				<string>id</string>
+				<key>moveUp</key>
+				<string>id</string>
+				<key>paste</key>
+				<string>id</string>
+				<key>scrollToBeginningOfDocument</key>
+				<string>id</string>
+				<key>scrollToEndOfDocument</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKOutlineView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSOutlineView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -628,12 +728,19 @@
 			<string>NSTableView</string>
 		</dict>
 		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>alternateCut</key>
+				<string>id</string>
+				<key>alternateDelete</key>
+				<string>id</string>
+			</dict>
 			<key>CLASS</key>
 			<string>BDSKMainTableView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSTableView</string>
+			<string>BDSKTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -641,7 +748,7 @@
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>OASplitView</string>
+			<string>NSSplitView</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -996,11 +1103,19 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>BDSKGradientSplitView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKSplitView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>BDSKGroupTableView</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>OAGradientTableView</string>
+			<string>BDSKGradientTableView</string>
 		</dict>
 		<dict>
 			<key>ACTIONS</key>
@@ -1059,6 +1174,58 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSWindowController</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>localChangeFont</key>
+				<string>id</string>
+				<key>revertAllDefaults</key>
+				<string>id</string>
+				<key>revertPaneDefaults</key>
+				<string>id</string>
+				<key>search</key>
+				<string>id</string>
+				<key>showAll</key>
+				<string>id</string>
+				<key>showHelp</key>
+				<string>id</string>
+				<key>showNextPane</key>
+				<string>id</string>
+				<key>showPane</key>
+				<string>id</string>
+				<key>showPreviousPane</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKPreferenceController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>contentView</key>
+				<string>NSView</string>
+				<key>controlView</key>
+				<string>NSView</string>
+				<key>helpButton</key>
+				<string>NSButton</string>
+				<key>revertAllButton</key>
+				<string>NSButton</string>
+				<key>revertButton</key>
+				<string>NSButton</string>
+				<key>searchField</key>
+				<string>NSSearchField</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKGradientTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -1140,7 +1307,7 @@
 			<key>OUTLETS</key>
 			<dict>
 				<key>errorTableView</key>
-				<string>NSTableView</string>
+				<string>BDSKTableView</string>
 				<key>errorsController</key>
 				<string>BDSKFilteringArrayController</string>
 			</dict>
@@ -1192,6 +1359,19 @@
 				<string>NSButton</string>
 				<key>tableView</key>
 				<string>NSTableView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKPreferencePane</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>view</key>
+				<string>NSView</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSWindowController</string>

@@ -37,15 +37,17 @@
 #import "BibPref_General.h"
 #import "BDSKStringConstants.h"
 #import "BDSKAppController.h"
-#import "BDSKUpdateChecker.h"
 #import "BDSKTemplate.h"
 #import "BDAlias.h"
+#import <Sparkle/Sparkle.h>
 
 static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneralDefaultsObservationContext";
+static void *BDSKBibPrefGeneralUpdaterObservationContext = @"BDSKBibPrefGeneralUpdaterObservationContext";
 
 
 @interface BibPref_General (Private)
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)updateUpdaterUI;
 - (void)updateEmailTemplateUI;
 - (void)updateStartupBehaviorUI;
 - (void)updateDefaultBibFileUI;
@@ -62,10 +64,13 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
+    [[SUUpdater sharedUpdater] addObserver:self forKeyPath:@"automaticallyChecksForUpdates" options:0 context:BDSKBibPrefGeneralUpdaterObservationContext];
+    [[SUUpdater sharedUpdater] addObserver:self forKeyPath:@"updateCheckInterval" options:0 context:BDSKBibPrefGeneralUpdaterObservationContext];
     [self updateEmailTemplateUI];
     [self updateStartupBehaviorUI];
     [self updateDefaultBibFileUI];
 	[self updateWarningsUI];
+	[self updateUpdaterUI];
     
     [editOnPasteButton setState:[sud boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
     [checkForUpdatesButton selectItemWithTag:[sud integerForKey:BDSKUpdateCheckIntervalKey]];
@@ -95,18 +100,38 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
     [askToTrashFilesButton setState:[sud boolForKey:BDSKAskToTrashFilesKey] ? NSOnState : NSOffState];
 }
 
+- (void)updateUpdaterUI {
+    int interval = 0;
+    if ([[SUUpdater sharedUpdater] automaticallyChecksForUpdates])
+        interval = [[SUUpdater sharedUpdater] updateCheckInterval];
+    if (NO == [checkForUpdatesButton selectItemWithTag:interval]) {
+        int i, iMax = [checkForUpdatesButton numberOfItems];
+        for (i = 1; i < iMax; i++) {
+            if (interval > [[checkForUpdatesButton itemAtIndex:i] tag] / 2) {
+                [checkForUpdatesButton selectItemAtIndex:i];
+                break;
+            }
+        }
+        if (i == iMax)
+            [checkForUpdatesButton selectItemAtIndex:iMax - 1];
+        [self changeUpdateInterval:checkForUpdatesButton];
+    }
+}
+
+- (void)revertDefaults {
+    [super revertDefaults];
+    NSTimeInterval interval = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUScheduledCheckInterval"] doubleValue];
+    [[SUUpdater sharedUpdater] setUpdateCheckInterval:interval];
+    [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:interval > 0.0];
+}
+
+
 // tags correspond to BDSKUpdateCheckInterval enum
 - (IBAction)changeUpdateInterval:(id)sender{
-    BDSKUpdateCheckInterval interval = [[sender selectedItem] tag];
-    [sud setInteger:interval forKey:BDSKUpdateCheckIntervalKey];
-    
-    // an annoying dialog to be seen by annoying users...
-    if (BDSKCheckForUpdatesNever == interval || BDSKCheckForUpdatesMonthly == interval) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Are you sure this is wise?", @"Message in alert dialog when setting long auto-update interval") 
-                                         defaultButton:nil alternateButton:nil otherButton:nil 
-                             informativeTextWithFormat:NSLocalizedString(@"Some BibDesk users complain of too-frequent updates.  However, updates generally fix bugs that affect the integrity of your data.  If you value your data, a daily or weekly interval is a better choice.", @"Informative text in alert dialog")];
-        [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-    }
+    int interval = [[sender selectedItem] tag];
+    if (interval > 0)
+        [[SUUpdater sharedUpdater] setUpdateCheckInterval:interval];
+    [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:interval > 0];
 }
 
 - (IBAction)setAutoOpenFilePath:(id)sender{
@@ -190,6 +215,8 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
         [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey]];
         [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey]];
         [sudc removeObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree]];
+        [[SUUpdater sharedUpdater] removeObserver:self forKeyPath:@"automaticallyChecksForUpdates"];
+        [[SUUpdater sharedUpdater] removeObserver:self forKeyPath:@"updateCheckInterval"];
     }
     @catch (id e) {}
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -224,6 +251,8 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
         } else if ([key isEqualToString:BDSKExportTemplateTree]) {
             [self updateEmailTemplateUI];
         }
+    } else if (context == BDSKBibPrefGeneralUpdaterObservationContext) {
+        [self updateUpdaterUI];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }

@@ -84,8 +84,6 @@
 - (IBAction)reportBug:(id)sender;
 - (IBAction)requestFeature:(id)sender;
 
-- (IBAction)checkForUpdates:(id)sender;
-
 - (IBAction)showPreferencePanel:(id)sender;
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)toggleShowingPreviewPanel:(id)sender;

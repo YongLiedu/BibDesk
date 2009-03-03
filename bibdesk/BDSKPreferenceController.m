@@ -43,6 +43,7 @@
 #import "BDSKOverlay.h"
 #import "BDSKSpotlightView.h"
 #import "BDSKVersionNumber.h"
+#import <Sparkle/Sparkle.h>
 
 #define LOCALIZATION_TABLE @"Preferences"
 #define DEFAULTS_TABLE @"Preferences"
@@ -193,6 +194,9 @@ static id sharedController = nil;
 - (void)revertAllSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertDefaultReturn) {
         [[NSUserDefaultsController sharedUserDefaultsController] revertToInitialValues:nil];
+        NSTimeInterval interval = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUScheduledCheckInterval"] doubleValue];
+        [[SUUpdater sharedUpdater] setUpdateCheckInterval:interval];
+        [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:interval > 0.0];
     }
 }
 
