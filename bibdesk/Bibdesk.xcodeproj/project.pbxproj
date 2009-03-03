@@ -543,6 +543,34 @@
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = SkimNotes;
 		};
+		CEB34BA10F5CB2CC0037E086 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CEB34B980F5CB2CC0037E086 /* Sparkle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216 /* Sparkle.framework */;
+			remoteInfo = Sparkle;
+		};
+		CEB34BA30F5CB2CC0037E086 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CEB34B980F5CB2CC0037E086 /* Sparkle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 61B5F90209C4CEE200B25A18 /* Sparkle Test App.app */;
+			remoteInfo = "Sparkle Test App";
+		};
+		CEB34BA50F5CB2CC0037E086 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CEB34B980F5CB2CC0037E086 /* Sparkle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DAAEFC960DA571DF0051E0D0 /* relaunch */;
+			remoteInfo = "relaunch tool";
+		};
+		CEB34BA70F5CB2CC0037E086 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CEB34B980F5CB2CC0037E086 /* Sparkle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 612279D90DB5470200AB99EA /* Sparkle Unit Tests.octest */;
+			remoteInfo = "Sparkle Unit Tests";
+		};
 		CEDB9BC70E2F405F0057FD09 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
@@ -1177,6 +1205,7 @@
 		CEAC51550A97730800B8DF43 /* BDSKExportUsingTemplateCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKExportUsingTemplateCommand.m; sourceTree = "<group>"; };
 		CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKJSTORParser.h; sourceTree = "<group>"; };
 		CEAE613D097FF60A000B618C /* BDSKJSTORParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKJSTORParser.m; sourceTree = "<group>"; };
+		CEB34B980F5CB2CC0037E086 /* Sparkle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Sparkle.xcodeproj; path = vendorsrc/andymatuschak/Sparkle/Sparkle.xcodeproj; sourceTree = "<group>"; };
 		CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSAttributedString_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAttributedString_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEBA3F450A73CCAF00588BB7 /* BDSKSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSheetController.h; sourceTree = "<group>"; };
@@ -2363,6 +2392,17 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		CEB34B990F5CB2CC0037E086 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CEB34BA20F5CB2CC0037E086 /* Sparkle.framework */,
+				CEB34BA40F5CB2CC0037E086 /* Sparkle Test App.app */,
+				CEB34BA60F5CB2CC0037E086 /* relaunch */,
+				CEB34BA80F5CB2CC0037E086 /* Sparkle Unit Tests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		CEE23BAE0BFBA5FE002B746B /* Shared Support */ = {
 			isa = PBXGroup;
 			children = (
@@ -2864,9 +2904,6 @@
 		F98F307A088E0F2800C1427D /* Subprojects */ = {
 			isa = PBXGroup;
 			children = (
-				F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */,
-				F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */,
-				F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */,
 				F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */,
 				F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */,
 				F911D6A80CFE8E420009C77B /* FileView.xcodeproj */,
@@ -2875,7 +2912,11 @@
 				F90B12F90C298FC900144F1B /* latex2rtf.xcodeproj */,
 				F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */,
 				F98C6FC80CDD30A2002FCAD8 /* QuickLook-BibDesk.xcodeproj */,
+				CEB34B980F5CB2CC0037E086 /* Sparkle.xcodeproj */,
 				F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */,
+				F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */,
+				F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */,
+				F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */,
 			);
 			name = Subprojects;
 			sourceTree = "<group>";
@@ -3074,6 +3115,10 @@
 					ProjectRef = CE7DC8CF0E0952BA00D6D76D /* SkimNotes.xcodeproj */;
 				},
 				{
+					ProductGroup = CEB34B990F5CB2CC0037E086 /* Products */;
+					ProjectRef = CEB34B980F5CB2CC0037E086 /* Sparkle.xcodeproj */;
+				},
+				{
 					ProductGroup = F9C7E5900BEA3C9400D65C7F /* Products */;
 					ProjectRef = F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */;
 				},
@@ -3108,6 +3153,34 @@
 			fileType = "compiled.mach-o.executable";
 			path = skimnotes;
 			remoteRef = CE7DC8DB0E0952BB00D6D76D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CEB34BA20F5CB2CC0037E086 /* Sparkle.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Sparkle.framework;
+			remoteRef = CEB34BA10F5CB2CC0037E086 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CEB34BA40F5CB2CC0037E086 /* Sparkle Test App.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "Sparkle Test App.app";
+			remoteRef = CEB34BA30F5CB2CC0037E086 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CEB34BA60F5CB2CC0037E086 /* relaunch */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = relaunch;
+			remoteRef = CEB34BA50F5CB2CC0037E086 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CEB34BA80F5CB2CC0037E086 /* Sparkle Unit Tests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "Sparkle Unit Tests.octest";
+			remoteRef = CEB34BA70F5CB2CC0037E086 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CEDB9BC80E2F405F0057FD09 /* SkimNotesTest.app */ = {
