@@ -59,9 +59,6 @@
 - (IBAction)citeStringFieldChanged:(id)sender;
 - (IBAction)setCitationBracketStyle:(id)sender;
 
-- (void)handleTemplatePrefsChanged;
-- (void)updateUI;
-
 @end
 
 @interface BDSKDragCopyCiteKeyFormatter : NSFormatter

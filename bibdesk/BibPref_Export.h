@@ -61,19 +61,13 @@ typedef enum {
 
 - (IBAction)resetDefaultFiles:(id)sender;
 
-- (void)setItemNodes:(NSArray *)array;
-
 - (IBAction)addNode:(id)sender;
 - (IBAction)removeNode:(id)sender;
-- (BOOL)canAddItem;
-- (BOOL)canDeleteSelectedItem;
 
 - (IBAction)revealInFinder:(id)sender;
 - (IBAction)chooseFile:(id)sender;
 - (IBAction)chooseFileDoubleAction:(id)sender;
 
 - (IBAction)dismissChooseMainPageSheet:(id)sender;
-
-- (void)updateUI;
 
 @end

@@ -43,6 +43,13 @@
 
 static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaultsObservationContext";
 
+
+@interface BibPref_Cite (Private)
+- (void)handleTemplatePrefsChanged;
+- (void)updateUI;
+@end
+
+
 @implementation BibPref_Cite
 
 - (void)awakeFromNib{

@@ -48,6 +48,13 @@
 #define MAX_PREVIEW_WIDTH	481
 #define MAX_FORMAT_WIDTH	266
 
+
+@interface BibPref_CiteKey (Private)
+- (void)updateUI;
+- (void)setCiteKeyFormatInvalidWarning:(BOOL)set message:(NSString *)message;
+@end
+
+
 @implementation BibPref_CiteKey
 
 // these should correspond to the items in the popups set in IB

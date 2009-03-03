@@ -57,8 +57,4 @@
 - (IBAction)togglePassword:(id)sender;
 - (IBAction)toggleSharing:(id)sender;
 
-- (void)handleSharingNameChanged:(NSNotification *)aNotification;
-- (void)handleSharingStatusChanged:(NSNotification *)aNotification;
-- (void)handleClientConnectionsChanged:(NSNotification *)aNotification;
-
 @end

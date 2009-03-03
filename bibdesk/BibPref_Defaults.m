@@ -61,6 +61,13 @@ enum {
 
 static NSSet *alwaysDisabledFields = nil;
 
+
+@interface BibPref_Defaults (Private)
+- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)updateUI;
+@end
+
+
 @implementation BibPref_Defaults
 
 + (void)initialize {

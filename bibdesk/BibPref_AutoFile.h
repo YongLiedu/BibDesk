@@ -78,9 +78,5 @@
 - (IBAction)localUrlHelp:(id)sender;
 - (IBAction)formatHelp:(id)sender;
 - (IBAction)showLocalUrlFormatWarning:(id)sender;
-- (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:(NSString *)message;
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-
-- (void)updateUI;
 
 @end

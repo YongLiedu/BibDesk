@@ -64,7 +64,6 @@
 - (IBAction)delSelectedDefaultField:(id)sender;
 - (IBAction)addDefaultField:(id)sender;
 - (IBAction)showTypeInfoEditor:(id)sender;
-- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)showMacrosWindow:(id)sender;
 - (IBAction)showMacroFileWindow:(id)sender;
@@ -72,7 +71,5 @@
 - (IBAction)addGlobalMacroFile:(id)sender;
 - (IBAction)delGlobalMacroFiles:(id)sender;
 - (IBAction)changeDefaultPDFViewer:(id)sender;
-
-- (void)updateUI;
 
 @end

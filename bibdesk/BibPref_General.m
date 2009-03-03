@@ -43,6 +43,14 @@
 
 static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneralDefaultsObservationContext";
 
+
+@interface BibPref_General (Private)
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)handleTemplatePrefsChanged;
+- (void)updateUI;
+@end
+
+
 @implementation BibPref_General
 
 - (void)awakeFromNib{

@@ -42,6 +42,12 @@
 
 static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossrefDefaultsObservationContext";
 
+
+@interface BibPref_Crossref (Private)
+- (void)updateUI;
+@end
+
+
 @implementation BibPref_Crossref
 
 - (void)awakeFromNib{

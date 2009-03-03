@@ -51,6 +51,14 @@
 
 @interface BDSKFolderPathFormatter : NSFormatter @end
 
+
+@interface BibPref_AutoFile (Private)
+- (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:(NSString *)message;
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)updateUI;
+@end
+
+
 @implementation BibPref_AutoFile
 
 // these should correspond to the items in the popups set in IB

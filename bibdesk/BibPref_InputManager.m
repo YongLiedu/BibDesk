@@ -56,6 +56,15 @@ CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles th
 static NSString *BDSKBundleIdentifierKey = @"bundleIdentifierKey";
 static int tableIconSize = 24;
 
+
+@interface BibPref_InputManager (Private)
+- (void)updateUI;
+- (void)addApplicationsWithIdentifiers:(NSArray *)identifiers;
+- (void)synchronizePreferences;
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+@end
+
+
 @implementation BibPref_InputManager
 
 - (void)awakeFromNib{

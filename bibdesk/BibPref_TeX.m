@@ -49,6 +49,11 @@
 
 static NSSet *standardStyles = nil;
 
+
+@interface BibPref_TeX (Private)
+- (void)updateUI;
+@end
+
 @implementation BibPref_TeX
 
 + (void)initialize{

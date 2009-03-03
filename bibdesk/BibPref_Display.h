@@ -59,15 +59,8 @@
 
 - (IBAction)changeIgnoredSortTerms:(id)sender;
 
-- (void)changeFont:(id)sender;
+- (IBAction)changeFont:(id)sender;
 - (IBAction)changeFontElement:(id)sender;
-
-- (NSFont *)currentFont;
-- (void)setCurrentFont:(NSFont *)font;
-- (void)updateFontPanel:(NSNotification *)notification;
-- (void)resetFontPanel:(NSNotification *)notification;
-
-- (void)updateUI;
 
 @end
 

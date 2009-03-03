@@ -48,7 +48,5 @@
 - (IBAction)addScriptHook:(id)sender;
 - (IBAction)removeScriptHook:(id)sender;
 - (void)showOrChooseScriptFile:(id)sender;
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)updateUI;
 
 @end

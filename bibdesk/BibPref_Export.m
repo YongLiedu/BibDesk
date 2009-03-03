@@ -48,6 +48,15 @@
 
 static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
+
+@interface BibPref_Export (Private)
+- (void)updateUI;
+- (void)setItemNodes:(NSArray *)array;
+- (BOOL)canAddItem;
+- (BOOL)canDeleteSelectedItem;
+@end
+
+
 @implementation BibPref_Export
 
 - (id)initWithRecord:(BDSKPreferenceRecord *)aRecord forPreferenceController:(BDSKPreferenceController *)aController {

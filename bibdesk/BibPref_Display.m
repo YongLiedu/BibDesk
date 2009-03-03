@@ -44,6 +44,15 @@
 #import "BDSKStringArrayFormatter.h"
 
 
+@interface BibPref_Display (Private)
+- (void)updateUI;
+- (NSFont *)currentFont;
+- (void)setCurrentFont:(NSFont *)font;
+- (void)updateFontPanel:(NSNotification *)notification;
+- (void)resetFontPanel:(NSNotification *)notification;
+@end
+
+
 @implementation BibPref_Display
 
 - (void)awakeFromNib{
@@ -158,7 +167,7 @@
     [sud setObject:[font fontName] forKey:fontNameKey];
 }
 
-- (void)changeFont:(id)sender{
+- (IBAction)changeFont:(id)sender{
 	NSFontManager *fontManager = [NSFontManager sharedFontManager];
 	NSFont *font = [self currentFont] ?: [NSFont systemFontOfSize:[NSFont systemFontSize]];
     font = [fontManager convertFont:font];

@@ -44,12 +44,17 @@
 #import "BDSKSharingServer.h"
 #import "BDSKPasswordController.h"
 
+
 @interface BibPref_Sharing (Private)
 - (void)updateSettingsUI;
 - (void)updateNameUI;
 - (void)updateMessagesUI;
 - (void)updateUI;
+- (void)handleSharingNameChanged:(NSNotification *)aNotification;
+- (void)handleSharingStatusChanged:(NSNotification *)aNotification;
+- (void)handleClientConnectionsChanged:(NSNotification *)aNotification;
 @end
+
 
 @implementation BibPref_Sharing
 

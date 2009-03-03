@@ -43,6 +43,12 @@
 #import "NSArray_BDSKExtensions.h"
 
 
+@interface BibPref_ScriptHooks (Private)
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)updateUI;
+@end
+
+
 @implementation BibPref_ScriptHooks
 
 - (void)awakeFromNib{

@@ -46,6 +46,11 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 
+
+@interface BibPref_Files (Private)
+- (void)updateUI;
+@end
+
 @implementation BibPref_Files
 
 - (void)awakeFromNib {

@@ -68,8 +68,6 @@
 - (IBAction)changeCiteKeyAutogenerate:(id)sender;
 - (IBAction)changeCiteKeyLowercase:(id)sender;
 - (IBAction)setFormatCleanOption:(id)sender;
-- (void)updateUI;
 - (IBAction)showCiteKeyFormatWarning:(id)sender;
-- (void)setCiteKeyFormatInvalidWarning:(BOOL)set message:(NSString *)message;
 
 @end

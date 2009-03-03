@@ -51,7 +51,6 @@
 	NSMutableArray *typesArray;
 }
 
-- (void)updateUI;
 - (IBAction)changeAutoSort:(id)sender;
 - (IBAction)changeWarnOnEditInherited:(id)sender;
 - (IBAction)changeDuplicateBooktitle:(id)sender;

@@ -51,15 +51,8 @@
     NSMutableArray *applications;
 }
 
-- (void)updateUI;
-
-- (void)addApplicationsWithIdentifiers:(NSArray *)identifiers;
-- (void)synchronizePreferences;
-
 - (IBAction)enableAutocompletion:(id)sender;
 - (IBAction)addApplication:(id)sender;
 - (IBAction)removeApplication:(id)sender;
-
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 @end
