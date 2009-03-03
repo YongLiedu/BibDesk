@@ -6,11 +6,11 @@
 	<array>
 		<dict>
 			<key>CLASS</key>
-			<string>NSControl</string>
+			<string>NSApplication</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
-			<string>NSView</string>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -19,6 +19,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -41,6 +49,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -225,6 +241,14 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSDocument</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKTokenField</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTokenField</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

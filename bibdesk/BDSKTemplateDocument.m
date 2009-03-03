@@ -67,10 +67,6 @@ static NSString *BDSKValueOrNoneTransformerName = @"BDSKValueOrNone";
 
 @interface BDSKFlippedClipView : NSClipView @end
 
-@interface NSTokenFieldCell (BDSKPrivateDeclarations)
-+ (id)_sharedFieldEditor;
-@end
-
 @interface BDSKTemplateDocument (BDSKPrivate)
 - (void)updateTextViews;
 - (void)updateTokenFields;
@@ -1475,48 +1471,13 @@ static inline unsigned int endOfLeadingEmptyLine(NSString *string, NSRange range
 
 #pragma mark -
 
-@implementation NSTokenField (BDSKExtensions)
+@implementation BDSKTokenField
 
-static void (*original_textViewDidChangeSelection)(id, SEL, id) = NULL;
-
-- (void)replacement_textViewDidChangeSelection:(NSNotification *)notification {
-    if (original_textViewDidChangeSelection != NULL)
-        original_textViewDidChangeSelection(self, _cmd, notification);
+- (void)textViewDidChangeSelection:(NSNotification *)notification {
+    if ([[BDSKTokenField superclass] instancesRespondToSelector:_cmd])
+        [super textViewDidChangeSelection:notification];
     if ([[self delegate] respondsToSelector:@selector(tokenField:textViewDidChangeSelection:)])
         [[self delegate] tokenField:self textViewDidChangeSelection:[notification object]];
-}
-
-+ (void)load {
-    original_textViewDidChangeSelection = (void (*)(id, SEL, id))BDSKSetInstanceMethodImplementationFromSelector(self, @selector(textViewDidChangeSelection:), @selector(replacement_textViewDidChangeSelection:));
-}
-
-@end
-
-#pragma mark -
-
-@interface NSTokenFieldCell (BDSKExtensions)
-@end
-
-@implementation NSTokenFieldCell (BDSKExtensions)
-
-static void (*original_setObjectValue)(id, SEL, id) = NULL;
-
-- (void)replacement_setObjectValue:(id)value {
-    original_setObjectValue(self, _cmd, value);
-    // updating in NSTokenField binding does not work for drop of tokens
-	NSDictionary *valueBindingInformation = [[self controlView] infoForBinding:@"value"];
-	if (valueBindingInformation != nil) {
-		id valueBindingObject = [valueBindingInformation objectForKey:NSObservedObjectKey];
-		NSString *valueBindingKeyPath = [valueBindingInformation objectForKey:NSObservedKeyPathKey];
-		
-		[valueBindingObject setValue:[self objectValue] forKeyPath:valueBindingKeyPath];
-	}
-}
-
-+ (void)load {
-    // in later versions, messing with the binding info causes an infinite loop and crash 
-    if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        original_setObjectValue = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setObjectValue:), @selector(replacement_setObjectValue:));
 }
 
 @end
