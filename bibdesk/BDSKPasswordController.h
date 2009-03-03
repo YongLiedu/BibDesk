@@ -41,16 +41,9 @@
 
 extern NSString *BDSKServiceNameForKeychain;
 
-typedef enum {
-    BDSKPasswordCancel = 0,
-    BDSKPasswordReturn = 1
-} BDSKPasswordControllerStatus;
-
 
 @interface BDSKPasswordController : NSWindowController
 {
-    NSString *name;
-    NSString *password;
     IBOutlet NSSecureTextField *passwordField;
     IBOutlet NSTextField *statusField;
 }
@@ -60,9 +53,7 @@ typedef enum {
 + (NSData *)passwordHashedForKeychainServiceName:(NSString *)name;
 + (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName;
 
-- (BDSKPasswordControllerStatus)runModalForKeychainServiceName:(NSString *)aName message:(NSString *)status;
-- (NSString *)password;
-- (NSData *)passwordHashed;
++ (NSData *)runModalPanelForKeychainServiceName:(NSString *)aName message:(NSString *)status;
 
 - (IBAction)buttonAction:(id)sender;
 

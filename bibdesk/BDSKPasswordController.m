@@ -46,25 +46,10 @@
 
 NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
-@interface BDSKPasswordController (Private)
-- (void)setName:(NSString *)aName;
-- (void)setPassword:(NSString *)aName;
-- (void)setStatus:(NSString *)status;
-@end
 
 @implementation BDSKPasswordController
 
-- (void)awakeFromNib {
-    [self setStatus:@""];
-}
-
 - (NSString *)windowNibName { return @"BDSKPasswordController"; }
-
-- (void)dealloc {
-    [self setName:nil];
-    [self setPassword:nil];
-    [super dealloc];
-}
 
 // convenience method for keychain
 + (NSData *)sharingPasswordForCurrentUserUnhashed {
@@ -144,56 +129,31 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
     return [NSString stringWithFormat:@"%@ - %@", computerName, BDSKServiceNameForKeychain];
 }
 
-- (void)setName:(NSString *)aName {
-    if(name != aName){
-        [name release];
-        name = [aName retain];
-    }
-}
-
-- (void)setStatus:(NSString *)status {  
-    [self window]; // load window before setStatus
+- (NSData *)runModalForKeychainServiceName:(NSString *)name message:(NSString *)status {
+    NSString *password = nil;
+    [self window]; // load window before seting the status
     [statusField setStringValue:status];
-}
-
-- (NSString *)password {
-    return password;
-}
-
-- (NSData *)passwordHashed {
-    // is this equivalent to dataUsingEncoding?
-    const void *passwordBytes = [[self password] UTF8String];
+    if (NSOKButton == [NSApp runModalForWindow:[self window]]) {
+        NSAssert(name != nil, @"name is nil");
+        password = [[[passwordField stringValue] retain] autorelease];
+        NSParameterAssert(password != nil);
+        [[self class] addOrModifyPassword:password name:name userName:nil];
+    }
+    [[self window] orderOut:self];    
+    
+    if (password == nil)
+        return nil;
+    const void *passwordBytes = [password UTF8String];
     return [[NSData dataWithBytes:passwordBytes length:strlen(passwordBytes)] sha1Signature];
 }
 
-- (void)setPassword:(NSString *)aPassword {
-    if(password != aPassword){
-        [password release];
-        password = [aPassword retain];
-    }
++ (NSData *)runModalPanelForKeychainServiceName:(NSString *)name message:(NSString *)status {
+    BDSKPasswordController *pwc = [[[self alloc] init] autorelease];
+    return [pwc runModalForKeychainServiceName:name message:status];
 }
 
-- (BDSKPasswordControllerStatus)runModalForKeychainServiceName:(NSString *)aName message:(NSString *)status {
-    [self setName:aName];    
-    [self setStatus:status ?: @""];
-    int returnValue = [NSApp runModalForWindow:[self window]];
-    [[self window] orderOut:self];    
-    
-    return returnValue;
-}
-
-- (IBAction)buttonAction:(id)sender
-{    
-    int returnValue = [sender tag];
-    if (returnValue == BDSKPasswordReturn) {
-        NSAssert(name != nil, @"name is nil");
-        
-        [self setPassword:[passwordField stringValue]];
-        NSParameterAssert([self password] != nil);
-        
-        [BDSKPasswordController addOrModifyPassword:password name:name userName:nil];
-    }
-    [NSApp stopModalWithCode:returnValue];
+- (IBAction)buttonAction:(id)sender {    
+    [NSApp stopModalWithCode:[sender tag]];
 }
 
 @end

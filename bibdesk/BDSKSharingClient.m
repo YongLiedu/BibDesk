@@ -328,12 +328,7 @@ typedef struct _BDSKSharingClientFlags {
 - (NSData *)runPasswordPrompt;
 {
     NSAssert([NSThread isMainThread] == 1, @"password controller must be run from the main thread");
-    BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
-    NSData *password = nil;
-    if (BDSKPasswordReturn == [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]])
-        password = [pwc passwordHashed];
-    [pwc release];
-    return password;
+    return [BDSKPasswordController runModalPanelForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
 }
 
 - (int)runAuthenticationFailedAlert;
