@@ -563,10 +563,10 @@
 
 @implementation NSSavePanel (BDSKAppleBugFixes)
 
-static BOOL (*originalCanShowGoTo)(id, SEL) = NULL;
+static BOOL (*original_canShowGoTo)(id, SEL) = NULL;
 
 // hack around an acknowledged Apple bug (http://www.cocoabuilder.com/archive/message/cocoa/2006/4/14/161080) that causes the goto panel to be displayed when trying to enter a leading / in "Open Using Filter" accessory view (our bug #1480815)
-- (BOOL)replacementCanShowGoto;
+- (BOOL)replacement_canShowGoto;
 {
     id firstResponder = [self firstResponder];
     // this is likely a field editor, but we have to make sure
@@ -576,12 +576,13 @@ static BOOL (*originalCanShowGoTo)(id, SEL) = NULL;
         if (accessoryView != nil && [accessoryView ancestorSharedWithView:[firstResponder delegate]] == accessoryView)
             return NO;
     }
-    return originalCanShowGoTo(self, _cmd);
+    return original_canShowGoTo(self, _cmd);
 }
 
 + (void)load
 {
-     originalCanShowGoTo = (BOOL (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(_canShowGoto), @selector(replacementCanShowGoto));
+     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+        original_canShowGoTo = (BOOL (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(_canShowGoto), @selector(replacement_canShowGoto));
 }
 
 @end

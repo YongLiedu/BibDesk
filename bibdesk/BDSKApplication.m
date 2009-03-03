@@ -295,7 +295,7 @@ static NSThread *mainThread = nil;
     mainThread = [[NSThread currentThread] retain];
 }
 
-+ (BOOL)replacementIsMainThread {
++ (BOOL)Tiger_isMainThread {
     if (mainThread == nil)
         [self assignMainThread];
     return [self currentThread] == mainThread;
@@ -303,7 +303,7 @@ static NSThread *mainThread = nil;
 
 + (void)load {
     // this does nothing when +isMainThread is already implemented, that is, on Leopard
-    BDSKAddClassMethodImplementationFromSelector(self, @selector(isMainThread), @selector(replacementIsMainThread));
+    BDSKAddClassMethodImplementationFromSelector(self, @selector(isMainThread), @selector(Tiger_isMainThread));
 }
 
 @end

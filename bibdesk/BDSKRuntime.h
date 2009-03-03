@@ -51,10 +51,14 @@ extern IMP BDSKReplaceInstanceMethodImplementation(Class aClass, SEL aSelector, 
 extern IMP BDSKReplaceClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp);
 extern void BDSKAddInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types);
 extern void BDSKAddClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types);
+extern IMP BDSKSetInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types);
+extern IMP BDSKSetClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types);
 
 extern IMP BDSKReplaceInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
 extern IMP BDSKReplaceClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
 extern void BDSKAddInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
 extern void BDSKAddClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
+extern IMP BDSKSetInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
+extern IMP BDSKSetClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector);
 
 extern void BDSKRequestConcreteImplementation(id self, SEL aSelector);

@@ -42,9 +42,9 @@
 
 @implementation NSTableHeaderView (BDSKExtensions)
 
-static void (*originalMouseDown)(id, SEL, id) = NULL;
+static void (*original_mouseDown)(id, SEL, id) = NULL;
 
-- (void)replacementMouseDown:(NSEvent *)theEvent{
+- (void)replacement_mouseDown:(NSEvent *)theEvent{
     // mouseDown in the table header has peculiar behavior for a double-click if you use -[NSTableView setDoubleAction:] on the
     // tableview itself.  The header sends a double-click action to the tableview row/cell that's selected.  
     // Since none of Apple's apps does this, we'll follow suit and just resort.
@@ -58,11 +58,11 @@ static void (*originalMouseDown)(id, SEL, id) = NULL;
                                    eventNumber:[theEvent eventNumber]
                                     clickCount:1
                                       pressure:[theEvent pressure]];
-	originalMouseDown(self, _cmd, theEvent);
+	original_mouseDown(self, _cmd, theEvent);
 }
 
 + (void)load {
-    originalMouseDown = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
+    original_mouseDown = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(mouseDown:), @selector(replacement_mouseDown:));
 }
 
 @end

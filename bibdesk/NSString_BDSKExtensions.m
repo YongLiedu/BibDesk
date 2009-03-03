@@ -1901,7 +1901,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 }
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-- (NSString *)replacementStringByReplacingOccurrencesOfString:(NSString *)stringToReplace withString:(NSString *)replacement {
+- (NSString *)Tiger_stringByReplacingOccurrencesOfString:(NSString *)stringToReplace withString:(NSString *)replacement {
     if ([stringToReplace length] == 0 || [self rangeOfString:stringToReplace].length == 0)
         return self;
     return [[self componentsSeparatedByString:stringToReplace] componentsJoinedByString:replacement];
@@ -1909,7 +1909,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 + (void)load {
     // this does nothing when the method is already defined, i.e. on Leopard
-    BDSKAddInstanceMethodImplementationFromSelector(self, @selector(stringByReplacingOccurrencesOfString:withString:), @selector(replacementStringByReplacingOccurrencesOfString:withString:));
+    BDSKAddInstanceMethodImplementationFromSelector(self, @selector(stringByReplacingOccurrencesOfString:withString:), @selector(Tiger_stringByReplacingOccurrencesOfString:withString:));
 }
 #else
 #warning fixme: remove NSString category implementation

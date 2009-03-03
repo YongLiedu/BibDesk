@@ -163,6 +163,14 @@ void BDSKAddClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp, co
     BDSKSetMethodImplementation(aClass, aSelector, anImp, types, NO, BDSKAddOnly);
 }
 
+IMP BDSKSetClassMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types) {
+    return BDSKSetMethodImplementation(aClass, aSelector, anImp, types, NO, BDSKAddOrReplace);
+}
+
+IMP BDSKSetInstanceMethodImplementation(Class aClass, SEL aSelector, IMP anImp, const char *types) {
+    return BDSKSetMethodImplementation(aClass, aSelector, anImp, types, YES, BDSKAddOrReplace);
+}
+
 IMP BDSKReplaceInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector) {
     return BDSKSetMethodImplementationFromSelector(aClass, aSelector, impSelector, YES, BDSKReplaceOnly);
 }
@@ -177,6 +185,14 @@ void BDSKAddInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector
 
 void BDSKAddClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector) {
     BDSKSetMethodImplementationFromSelector(aClass, aSelector, impSelector, NO, BDSKAddOnly);
+}
+
+IMP BDSKSetInstanceMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector) {
+    return BDSKSetMethodImplementationFromSelector(aClass, aSelector, impSelector, YES, BDSKAddOrReplace);
+}
+
+IMP BDSKSetClassMethodImplementationFromSelector(Class aClass, SEL aSelector, SEL impSelector) {
+    return BDSKSetMethodImplementationFromSelector(aClass, aSelector, impSelector, NO, BDSKAddOrReplace);
 }
 
 void BDSKRequestConcreteImplementation(id self, SEL aSelector) {

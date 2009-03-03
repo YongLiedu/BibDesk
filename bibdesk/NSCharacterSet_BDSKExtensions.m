@@ -93,7 +93,7 @@
 }
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
-+ (id)replacementNewlineCharacterSet;
++ (id)Tiger_newlineCharacterSet;
 {
     static NSCharacterSet *newlineCharacterSet = nil;
     if (newlineCharacterSet == nil) {
@@ -113,7 +113,7 @@
 
 + (void)load {
     // this does nothing when the method is already defined, i.e. on Leopard
-    BDSKAddClassMethodImplementationFromSelector(self, @selector(newlineCharacterSet), @selector(replacementNewlineCharacterSet));
+    BDSKAddClassMethodImplementationFromSelector(self, @selector(newlineCharacterSet), @selector(Tiger_newlineCharacterSet));
 }
 #else
 #warning fixme: remove NSCharacterSet category implementation

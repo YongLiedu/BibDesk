@@ -1477,20 +1477,17 @@ static inline unsigned int endOfLeadingEmptyLine(NSString *string, NSRange range
 
 @implementation NSTokenField (BDSKExtensions)
 
-static void (*originalTextViewDidChangeSelection)(id, SEL, id) = NULL;
+static void (*original_textViewDidChangeSelection)(id, SEL, id) = NULL;
 
-- (void)replacementTextViewDidChangeSelection:(NSNotification *)notification {
-    if (originalTextViewDidChangeSelection != NULL)
-        originalTextViewDidChangeSelection(self, _cmd, notification);
+- (void)replacement_textViewDidChangeSelection:(NSNotification *)notification {
+    if (original_textViewDidChangeSelection != NULL)
+        original_textViewDidChangeSelection(self, _cmd, notification);
     if ([[self delegate] respondsToSelector:@selector(tokenField:textViewDidChangeSelection:)])
         [[self delegate] tokenField:self textViewDidChangeSelection:[notification object]];
 }
 
 + (void)load {
-    originalTextViewDidChangeSelection = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(textViewDidChangeSelection:), @selector(replacementTextViewDidChangeSelection:));
-    // if it was returning NULL nothing was replaced, so we just register the method because we want to use it
-    if (originalTextViewDidChangeSelection == NULL)
-        BDSKAddInstanceMethodImplementationFromSelector(self, @selector(textViewDidChangeSelection:), @selector(replacementTextViewDidChangeSelection:));
+    original_textViewDidChangeSelection = (void (*)(id, SEL, id))BDSKSetInstanceMethodImplementationFromSelector(self, @selector(textViewDidChangeSelection:), @selector(replacement_textViewDidChangeSelection:));
 }
 
 @end
@@ -1502,10 +1499,10 @@ static void (*originalTextViewDidChangeSelection)(id, SEL, id) = NULL;
 
 @implementation NSTokenFieldCell (BDSKExtensions)
 
-static void (*originalSetObjectValue)(id, SEL, id) = NULL;
+static void (*original_setObjectValue)(id, SEL, id) = NULL;
 
-- (void)replacementSetObjectValue:(id)value {
-    originalSetObjectValue(self, _cmd, value);
+- (void)replacement_setObjectValue:(id)value {
+    original_setObjectValue(self, _cmd, value);
     // updating in NSTokenField binding does not work for drop of tokens
 	NSDictionary *valueBindingInformation = [[self controlView] infoForBinding:@"value"];
 	if (valueBindingInformation != nil) {
@@ -1519,7 +1516,7 @@ static void (*originalSetObjectValue)(id, SEL, id) = NULL;
 + (void)load {
     // in later versions, messing with the binding info causes an infinite loop and crash 
     if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
-        originalSetObjectValue = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setObjectValue:), @selector(replacementSetObjectValue:));
+        original_setObjectValue = (void (*)(id, SEL, id))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setObjectValue:), @selector(replacement_setObjectValue:));
 }
 
 @end

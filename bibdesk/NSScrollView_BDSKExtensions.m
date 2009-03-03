@@ -45,33 +45,33 @@
 
 @implementation NSScrollView (BDSKExtensions)
 
-static void (*originalSetHasHorizontalScroller)(id, SEL, BOOL) = NULL;
-static void (*originalSetAutohidesScrollers)(id, SEL, BOOL) = NULL;
-static void (*originalDealloc)(id, SEL) = NULL;
-static void (*originalTile)(id, SEL) = NULL;
+static void (*original_setHasHorizontalScroller)(id, SEL, BOOL) = NULL;
+static void (*original_setAutohidesScrollers)(id, SEL, BOOL) = NULL;
+static void (*original_dealloc)(id, SEL) = NULL;
+static void (*original_tile)(id, SEL) = NULL;
 
 static CFMutableDictionaryRef scrollViewPlacards = NULL;
 
-- (void)replacementDealloc;
+- (void)replacement_dealloc;
 {
     CFDictionaryRemoveValue(scrollViewPlacards, self);
-    originalDealloc(self, _cmd);
+    original_dealloc(self, _cmd);
 }
 
-- (void)replacementSetHasHorizontalScroller:(BOOL)flag;
+- (void)replacement_setHasHorizontalScroller:(BOOL)flag;
 {
     if ([[self placards] count] == 0)
-        originalSetHasHorizontalScroller(self, _cmd, flag);
+        original_setHasHorizontalScroller(self, _cmd, flag);
 }
 
-- (void)replacementSetAutohidesScrollers:(BOOL)flag;
+- (void)replacement_setAutohidesScrollers:(BOOL)flag;
 {
     if ([[self placards] count] == 0)
-        originalSetAutohidesScrollers(self, _cmd, flag);
+        original_setAutohidesScrollers(self, _cmd, flag);
 }
 
-- (void)replacementTile {
-    originalTile(self, _cmd);
+- (void)replacement_tile {
+    original_tile(self, _cmd);
     
     NSArray *placards = [self placards];
     
@@ -105,10 +105,10 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
 }
 
 + (void)load{
-    originalSetHasHorizontalScroller = (void (*)(id, SEL, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
-    originalSetAutohidesScrollers = (void (*)(id, SEL, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setAutohidesScrollers:), @selector(replacementSetAutohidesScrollers:));
-    originalDealloc = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(dealloc), @selector(replacementDealloc));
-    originalTile = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(tile), @selector(replacementTile));
+    original_setHasHorizontalScroller = (void (*)(id, SEL, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setHasHorizontalScroller:), @selector(replacement_setHasHorizontalScroller:));
+    original_setAutohidesScrollers = (void (*)(id, SEL, BOOL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(setAutohidesScrollers:), @selector(replacement_setAutohidesScrollers:));
+    original_dealloc = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(dealloc), @selector(replacement_dealloc));
+    original_tile = (void (*)(id, SEL))BDSKReplaceInstanceMethodImplementationFromSelector(self, @selector(tile), @selector(replacement_tile));
     
     // dictionary doesn't retain keys, so no retain cycles; pointer equality used to compare views
     scrollViewPlacards = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kBDSKNonOwnedObjectDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
@@ -129,8 +129,8 @@ static CFMutableDictionaryRef scrollViewPlacards = NULL;
     [placards setArray:newPlacards];
     
     if ([placards count] != 0) {
-        originalSetHasHorizontalScroller(self, @selector(setHasHorizontalScroller:), YES);
-        originalSetAutohidesScrollers(self, @selector(setAutohidesScrollers:), NO);
+        original_setHasHorizontalScroller(self, @selector(setHasHorizontalScroller:), YES);
+        original_setAutohidesScrollers(self, @selector(setAutohidesScrollers:), NO);
     } else if (placards) {
         CFDictionaryRemoveValue(scrollViewPlacards, self);
         placards = nil;
