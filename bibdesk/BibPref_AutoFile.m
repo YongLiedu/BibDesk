@@ -54,8 +54,9 @@
 
 @interface BibPref_AutoFile (Private)
 - (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:(NSString *)message;
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)updateUI;
+- (void)updatePapersFolderUI;
+- (void)updateFormatPresetUI;
+- (void)updateFormatPreviewUI;
 @end
 
 
@@ -76,11 +77,22 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	BDSKFormatStringFormatter *formatter = [[BDSKFormatStringFormatter alloc] initWithField:BDSKLocalFileString fileType:BDSKBibtexString];
     [formatSheetField setFormatter:formatter];
 	[formatter release];
+    
     coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:BDSKLocalFileString fileType:BDSKBibtexString];
+    
     [papersFolderLocationTextField setFormatter:[[[BDSKFolderPathFormatter alloc] init] autorelease]];
+    
     [previewDisplay setStringValue:[[BDSKPreviewItem sharedItem] displayText]];
     [previewDisplay sizeToFit];
-    [self updateUI];
+    
+    [filePapersAutomaticallyCheckButton setState:[sud boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
+    [warnOnMoveFolderCheckButton setState:[sud boolForKey:BDSKWarnOnMoveFolderKey] ? NSOnState : NSOffState];
+    
+    [formatLowercaseCheckButton setState:[sud boolForKey:BDSKLocalFileLowercaseKey] ? NSOnState : NSOffState];
+    [formatCleanRadio selectCellWithTag:[sud integerForKey:BDSKLocalFileCleanOptionKey]];
+    
+    [self updatePapersFolderUI];
+    [self updateFormatPresetUI];
 }
 
 // sheet's delegate must be connected to file's owner in IB
@@ -88,18 +100,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     return (anObject == formatSheetField ? coloringEditor : nil);
 }
 
-- (void)updateUI{
-    NSString *formatString = [formatSheetField currentEditor] ? [formatSheetField stringValue] : [sud stringForKey:BDSKLocalFileFormatKey];
-	NSAttributedString *attrFormat = nil;
-    int formatPresetChoice = [sud integerForKey:BDSKLocalFileFormatPresetKey];
-	BOOL custom = (formatPresetChoice == 0);
-    NSString * error;
+- (void)updatePapersFolderUI{
 	NSString *papersFolder = [[sud objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath];
-	NSRect frame;
 	
-    [filePapersAutomaticallyCheckButton setState:[sud boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
-    [warnOnMoveFolderCheckButton setState:[sud boolForKey:BDSKWarnOnMoveFolderKey] ? NSOnState : NSOffState];
-
     if ([NSString isEmptyString:papersFolder]) {
 		[papersFolderLocationTextField setStringValue:USE_DOCUMENT_FOLDER];
 		[papersFolderLocationTextField setEnabled:NO];
@@ -111,9 +114,28 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[choosePapersFolderLocationButton setEnabled:YES];
 		[papersFolderLocationRadio selectCellWithTag:0];
 	}
+    
+    [self updateFormatPreviewUI];
+}
 
-    [formatLowercaseCheckButton setState:[sud boolForKey:BDSKLocalFileLowercaseKey] ? NSOnState : NSOffState];
-    [formatCleanRadio selectCellWithTag:[sud integerForKey:BDSKLocalFileCleanOptionKey]];
+- (void)updateFormatPresetUI{
+    int formatPresetChoice = [sud integerForKey:BDSKLocalFileFormatPresetKey];
+	BOOL custom = (formatPresetChoice == 0);
+	
+    [formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:formatPresetChoice]];
+	[formatPresetSheetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:formatPresetChoice]];
+	
+    [formatSheetField setEnabled:custom];
+	[formatRepositoryPopUp setHidden:NO == custom];
+    
+    [self updateFormatPreviewUI];
+}
+
+- (void)updateFormatPreviewUI{
+    NSString *formatString = [formatSheetField currentEditor] ? [formatSheetField stringValue] : [sud stringForKey:BDSKLocalFileFormatKey];
+	NSAttributedString *attrFormat = nil;
+    NSString * error;
+	NSRect frame;
 	
 	if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalFileString inFileType:BDSKBibtexString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
@@ -132,8 +154,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		if (NO == [formatSheet isVisible])
 			[self showFormatSheet:self];
 	}
-	[formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:formatPresetChoice]];
-	[formatPresetSheetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:formatPresetChoice]];
 	[formatField setAttributedStringValue:attrFormat];
 	[formatField sizeToFit];
 	frame = [formatField frame];
@@ -142,13 +162,19 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[formatField setFrame:frame];
 	}
 	[formatSheetField setAttributedStringValue:attrFormat];
-	[formatSheetField setEnabled:custom];
-	[formatRepositoryPopUp setHidden:!custom];
 }
 
 - (IBAction)setPapersFolderPathFromTextField:(id)sender{
     [sud setObject:[[sender stringValue] stringByStandardizingPath] forKey:BDSKPapersFolderPathKey];
-    [self updateUI];
+    [self updatePapersFolderUI];
+}
+
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if (returnCode == NSOKButton) {
+		NSString *path = [[sheet filenames] objectAtIndex: 0];
+		[sud setObject:path forKey:BDSKPapersFolderPathKey];
+	}
+	[self updatePapersFolderUI];
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender{
@@ -168,27 +194,19 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 						  contextInfo:NULL];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if (returnCode == NSOKButton) {
-		NSString *path = [[sheet filenames] objectAtIndex: 0];
-		[sud setObject:path forKey:BDSKPapersFolderPathKey];
-	}
-	[self updateUI];
-}
-
 - (IBAction)papersFolderLocationAction:(id)sender{
 	if ([[sender selectedCell] tag] == 0) {
         if ([NSString isEmptyString:lastPapersFolderPath]) {
             [self choosePapersFolderLocationAction:sender];
         } else {
             [sud setObject:lastPapersFolderPath forKey:BDSKPapersFolderPathKey];
-            [self updateUI];
+            [self updatePapersFolderUI];
         }
 	} else {
         [lastPapersFolderPath release];
         lastPapersFolderPath = [[sud objectForKey:BDSKPapersFolderPathKey] retain];
 		[sud setObject:@"" forKey:BDSKPapersFolderPathKey];
-		[self updateUI];
+		[self updatePapersFolderUI];
 	}
 }
 
@@ -229,7 +247,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 
 - (IBAction)changeLocalUrlLowercase:(id)sender{
     [sud setBool:([sender state] == NSOnState) forKey:BDSKLocalFileLowercaseKey];
-	[self updateUI];
+	[self updateFormatPreviewUI];
 }
 
 - (IBAction)setFormatCleanOption:(id)sender{
@@ -310,7 +328,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		}
 	}
 	[[NSApp delegate] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-    [self updateUI];
+    [self updateFormatPresetUI];
 }
 
 #pragma mark Format sheet stuff
@@ -368,7 +386,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[sud setObject:formatString forKey:BDSKLocalFileFormatKey];
 		[[NSApp delegate] setRequiredFieldsForLocalFile: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 	}
-	[self updateUI];
+	[self updateFormatPreviewUI];
 	return YES;
 }
 
