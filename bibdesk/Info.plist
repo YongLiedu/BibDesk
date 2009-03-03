@@ -447,6 +447,14 @@
 	</array>
 	<key>OSAScriptingDefinition</key>
 	<string>BibDesk.sdef</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>http://bibdesk.sourceforge.net/bibdesk.xml</string>
+	<key>SUPublicDSAKeyFile</key>
+	<string>dsa_pub.pem</string>
+	<key>SUScheduledCheckInterval</key>
+    <integer>86400</integer>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
