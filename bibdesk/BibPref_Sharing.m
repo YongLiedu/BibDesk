@@ -49,7 +49,6 @@
 - (void)updateSettingsUI;
 - (void)updateNameUI;
 - (void)updateMessagesUI;
-- (void)updateUI;
 - (void)handleSharingNameChanged:(NSNotification *)aNotification;
 - (void)handleSharingStatusChanged:(NSNotification *)aNotification;
 - (void)handleClientConnectionsChanged:(NSNotification *)aNotification;
@@ -71,7 +70,9 @@
         [pwString release];
     }    
     
-    [self updateUI];
+    [self updateSettingsUI];
+    [self updateNameUI];
+    [self updateMessagesUI];
 }
 
 - (void)dealloc
@@ -122,13 +123,6 @@
     }
     [statusField setStringValue:statusMessage];
     [usedNameField setStringValue:[[BDSKSharingServer defaultServer] sharingName] ?: @""];
-}
-
-- (void)updateUI
-{
-    [self updateSettingsUI];
-    [self updateNameUI];
-    [self updateMessagesUI];
 }
 
 - (IBAction)togglePassword:(id)sender

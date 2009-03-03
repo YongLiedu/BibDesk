@@ -64,7 +64,7 @@ static NSSet *alwaysDisabledFields = nil;
 
 @interface BibPref_Defaults (Private)
 - (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)updateUI;
+- (void)updateDeleteButton;
 @end
 
 
@@ -205,7 +205,14 @@ static NSSet *alwaysDisabledFields = nil;
     }
     
     [pdfViewerPopup selectItemAtIndex:idx];
-    [self updateUI];
+    
+    [convertURLFieldsButton setState:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey] ? NSOnState : NSOffState];
+    [removeLocalFileFieldsButton setState:[sud boolForKey:BDSKRemoveConvertedLocalFileFieldsKey] ? NSOnState : NSOffState];
+    [removeRemoteURLFieldsButton setState:[sud boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey] ? NSOnState : NSOffState];
+	[removeLocalFileFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
+	[removeRemoteURLFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
+    
+    [self updateDeleteButton];
 }
 
 - (void)updatePrefs{
@@ -275,28 +282,17 @@ static NSSet *alwaysDisabledFields = nil;
     [personFields release];
     
 	[defaultFieldsTableView reloadData];
-	[self updateUI];
+	[self updateDeleteButton];
 	
     // !!! notification of these changes is posted by the type manager, which observes the pref keys; this ensures that the type manager gets notified first, so notification observers don't get stale data; as a consequence, if you add another custom field type, the type manager needs to observe it in -init
 }
-
-- (void)updateUI{	
-    [convertURLFieldsButton setState:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey] ? NSOnState : NSOffState];
-    [removeLocalFileFieldsButton setState:[sud boolForKey:BDSKRemoveConvertedLocalFileFieldsKey] ? NSOnState : NSOffState];
-    [removeRemoteURLFieldsButton setState:[sud boolForKey:BDSKRemoveConvertedRemoteURLFieldsKey] ? NSOnState : NSOffState];
-	[removeLocalFileFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
-	[removeRemoteURLFieldsButton setEnabled:[sud boolForKey:BDSKAutomaticallyConvertURLFieldsKey]];
     
+- (void)updateDeleteButton{	
+	BOOL shouldEnable = NO;
     int row = [defaultFieldsTableView selectedRow];
-	if(row == -1){
-		[delSelectedDefaultFieldButton setEnabled:NO];
-		return;
-	}
-	NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
-	if([alwaysDisabledFields containsObject:field])
-		[delSelectedDefaultFieldButton setEnabled:NO];
-	else
-		[delSelectedDefaultFieldButton setEnabled:YES];
+    if(row >= 0)
+        shouldEnable = NO == [alwaysDisabledFields containsObject:[[customFieldsArray objectAtIndex:row] objectForKey:@"field"]];
+    [delSelectedDefaultFieldButton setEnabled:shouldEnable];
 }
 
 - (void)dealloc{

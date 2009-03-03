@@ -44,7 +44,8 @@ static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossr
 
 
 @interface BibPref_Crossref (Private)
-- (void)updateUI;
+- (void)updateDuplicateBooktitleUI;
+- (void)updateDuplicateTypes;
 @end
 
 
@@ -57,7 +58,11 @@ static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossr
     [[[[tableView tableColumns] objectAtIndex:0] dataCell] setFormatter:typeNameFormatter];
     [typeNameFormatter release];
     
-    [self updateUI];
+    [self updateDuplicateBooktitleUI];
+    [self updateDuplicateTypes];
+    [warnOnEditInheritedCheckButton setState:[sud boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
+    [autoSortCheckButton setState:[sud boolForKey:BDSKAutoSortForCrossrefsKey] ? NSOnState : NSOffState];
+    
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnEditInheritedKey] options:0 context:BDSKBibPrefCrossrefDefaultsObservationContext];
 }
 
@@ -81,13 +86,6 @@ static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossr
 	[tableView setEnabled:duplicate];
 	[addTypeButton setEnabled:duplicate];
 	[deleteTypeButton setEnabled:duplicate];
-}
-
-- (void)updateUI{
-    [self updateDuplicateBooktitleUI];
-    [self updateDuplicateTypes];
-    [warnOnEditInheritedCheckButton setState:[sud boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
-    [autoSortCheckButton setState:[sud boolForKey:BDSKAutoSortForCrossrefsKey] ? NSOnState : NSOffState];
 }
 
 - (IBAction)changeAutoSort:(id)sender{

@@ -46,8 +46,10 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
 
 @interface BibPref_General (Private)
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)handleTemplatePrefsChanged;
-- (void)updateUI;
+- (void)updateEmailTemplateUI;
+- (void)updateStartupBehaviorUI;
+- (void)updateDefaultBibFileUI;
+- (void)updateWarningsUI;
 @end
 
 
@@ -60,8 +62,13 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnCiteKeyChangeKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKAskToTrashFilesKey] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:BDSKBibPrefGeneralDefaultsObservationContext];
-    [self handleTemplatePrefsChanged];
-    [self updateUI];
+    [self updateEmailTemplateUI];
+    [self updateStartupBehaviorUI];
+    [self updateDefaultBibFileUI];
+	[self updateWarningsUI];
+    
+    [editOnPasteButton setState:[sud boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
+    [checkForUpdatesButton selectItemWithTag:[sud integerForKey:BDSKUpdateCheckIntervalKey]];
 }
 
 - (void)updateStartupBehaviorUI {
@@ -86,15 +93,6 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
     [warnOnRenameGroupButton setState:[sud boolForKey:BDSKWarnOnRenameGroupKey] ? NSOnState : NSOffState];
     [warnOnGenerateCiteKeysButton setState:[sud boolForKey:BDSKWarnOnCiteKeyChangeKey] ? NSOnState : NSOffState];
     [askToTrashFilesButton setState:[sud boolForKey:BDSKAskToTrashFilesKey] ? NSOnState : NSOffState];
-}
-
-- (void)updateUI{
-    [self updateStartupBehaviorUI];
-    [self updateDefaultBibFileUI];
-	[self updateWarningsUI];
-    
-    [editOnPasteButton setState:[sud boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
-    [checkForUpdatesButton selectItemWithTag:[sud integerForKey:BDSKUpdateCheckIntervalKey]];
 }
 
 // tags correspond to BDSKUpdateCheckInterval enum
@@ -198,7 +196,7 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
     [super dealloc];
 }
 
-- (void)handleTemplatePrefsChanged {
+- (void)updateEmailTemplateUI {
     NSString *currentStyle = [sud stringForKey:BDSKEmailTemplateKey];
     NSArray *styles = [BDSKTemplate allStyleNames];
     [emailTemplatePopup removeAllItems];
@@ -224,7 +222,7 @@ static void *BDSKBibPrefGeneralDefaultsObservationContext = @"BDSKBibPrefGeneral
             [key isEqualToString:BDSKAskToTrashFilesKey]) {
             [self updateWarningsUI];
         } else if ([key isEqualToString:BDSKExportTemplateTree]) {
-            [self handleTemplatePrefsChanged];
+            [self updateEmailTemplateUI];
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

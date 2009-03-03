@@ -43,12 +43,6 @@
 #import "NSArray_BDSKExtensions.h"
 
 
-@interface BibPref_ScriptHooks (Private)
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)updateUI;
-@end
-
-
 @implementation BibPref_ScriptHooks
 
 - (void)awakeFromNib{
@@ -56,10 +50,22 @@
 	[tableView setDoubleAction:@selector(showOrChooseScriptFile:)];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
 	[self tableViewSelectionDidChange:nil];
-    [self updateUI];
+	[tableView reloadData];
 }
 
-- (void)updateUI{
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSCancelButton)
+        return;
+    
+	NSString *path = [[sheet filenames] objectAtIndex: 0];
+	if (path == nil)
+		return;
+
+	int row = [tableView selectedRow]; // cannot be -1
+	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
+	[dict setObject:path forKey:name];
+	[sud setObject:dict forKey:BDSKScriptHooksKey];
 	[tableView reloadData];
 }
 
@@ -80,22 +86,6 @@
 						  contextInfo:NULL];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSCancelButton)
-        return;
-    
-	NSString *path = [[sheet filenames] objectAtIndex: 0];
-	if (path == nil)
-		return;
-
-	int row = [tableView selectedRow]; // cannot be -1
-	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
-	[dict setObject:path forKey:name];
-	[sud setObject:dict forKey:BDSKScriptHooksKey];
-	[self updateUI];
-}
-
 - (IBAction)removeScriptHook:(id)sender{
 	int row = [tableView selectedRow];
 	if (row == -1) return;
@@ -104,7 +94,7 @@
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
 	[dict removeObjectForKey:name];
 	[sud setObject:dict forKey:BDSKScriptHooksKey];
-	[self updateUI];
+	[tableView reloadData];
 }
 
 - (void)showOrChooseScriptFile:(id)sender {
@@ -182,7 +172,7 @@
         NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[sud dictionaryForKey:BDSKScriptHooksKey]];
         [dict setObject:path forKey:name];
         [sud setObject:dict forKey:BDSKScriptHooksKey];
-        [self updateUI];
+        [tableView reloadData];
         return YES;
     }
     return NO;
@@ -210,7 +200,7 @@
             row = [rowIndexes indexGreaterThanIndex:row];
         }
         [sud setObject:dict forKey:BDSKScriptHooksKey];
-        [self updateUI];
+        [tableView reloadData];
     }
 }
 

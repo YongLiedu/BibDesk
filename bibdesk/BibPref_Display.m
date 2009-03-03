@@ -45,7 +45,9 @@
 
 
 @interface BibPref_Display (Private)
-- (void)updateUI;
+- (void)updatePreviewDisplayUI;
+- (void)updateAuthorNameDisplayUI;
+- (void)updateSortWordsDisplayUI;
 - (NSFont *)currentFont;
 - (void)setCurrentFont:(NSFont *)font;
 - (void)updateFontPanel:(NSNotification *)notification;
@@ -58,7 +60,9 @@
 - (void)awakeFromNib{
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
     [ignoredSortTermsField setFormatter:[[[BDSKStringArrayFormatter alloc] init] autorelease]];
-    [self updateUI];
+    [self updatePreviewDisplayUI];
+    [self updateAuthorNameDisplayUI];
+    [self updateSortWordsDisplayUI];
 }
 
 - (void)updatePreviewDisplayUI{
@@ -80,12 +84,6 @@
 
 - (void)updateSortWordsDisplayUI{
     [ignoredSortTermsField setObjectValue:[sud stringArrayForKey:BDSKIgnoredSortTermsKey]];
-}
-
-- (void)updateUI{
-    [self updatePreviewDisplayUI];
-    [self updateAuthorNameDisplayUI];
-    [self updateSortWordsDisplayUI];
 }
 
 - (IBAction)changePreviewMaxNumber:(id)sender{

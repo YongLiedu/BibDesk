@@ -48,13 +48,20 @@
 
 
 @interface BibPref_Files (Private)
-- (void)updateUI;
+- (void)updateAutoSaveUI;
 @end
 
 @implementation BibPref_Files
 
 - (void)awakeFromNib {
-    [self updateUI];
+    [self updateAutoSaveUI];
+    
+    [encodingPopUp setEncoding:[sud integerForKey:BDSKDefaultStringEncodingKey]];
+    [showErrorsCheckButton setState:[sud boolForKey:BDSKShowWarningsKey] ? NSOnState : NSOffState  ];	
+    [shouldTeXifyCheckButton setState:[sud boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] ? NSOnState : NSOffState];
+    [saveAnnoteAndAbstractAtEndButton setState:[sud boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] ? NSOnState : NSOffState];
+    [useNormalizedNamesButton setState:[sud boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] ? NSOnState : NSOffState];
+    [useTemplateFileButton setState:[sud boolForKey:BDSKShouldUseTemplateFileKey] ? NSOnState : NSOffState];
 }
 
 - (void)updateAutoSaveUI{
@@ -67,17 +74,6 @@
     [autosaveDocumentButton setState:shouldAutosave ? NSOnState : NSOffState];
     [autosaveTimeField setEnabled:shouldAutosave];
     [autosaveTimeStepper setEnabled:shouldAutosave];
-}
-
-- (void)updateUI{
-    [self updateAutoSaveUI];
-    
-    [encodingPopUp setEncoding:[sud integerForKey:BDSKDefaultStringEncodingKey]];
-    [showErrorsCheckButton setState:[sud boolForKey:BDSKShowWarningsKey] ? NSOnState : NSOffState  ];	
-    [shouldTeXifyCheckButton setState:[sud boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] ? NSOnState : NSOffState];
-    [saveAnnoteAndAbstractAtEndButton setState:[sud boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] ? NSOnState : NSOffState];
-    [useNormalizedNamesButton setState:[sud boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] ? NSOnState : NSOffState];
-    [useTemplateFileButton setState:[sud boolForKey:BDSKShouldUseTemplateFileKey] ? NSOnState : NSOffState];
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    

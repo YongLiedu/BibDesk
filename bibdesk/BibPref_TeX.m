@@ -51,8 +51,10 @@ static NSSet *standardStyles = nil;
 
 
 @interface BibPref_TeX (Private)
-- (void)updateUI;
+- (void)updateTeXPathUI;
+- (void)updateBibTeXPathUI;
 @end
+
 
 @implementation BibPref_TeX
 
@@ -70,7 +72,14 @@ static NSSet *standardStyles = nil;
     [bibtexBinaryPathField setDelegate:self];
     [formatter release];
     
-    [self updateUI];
+    [self updateTeXPathUI];
+    [self updateBibTeXPathUI];
+    
+    [usesTeXButton setState:[sud boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
+  
+    [bibTeXStyleField setStringValue:[sud objectForKey:BDSKBTStyleKey]];
+    [bibTeXStyleField setEnabled:[sud boolForKey:BDSKUsesTeXKey]];
+    [encodingPopUpButton setEncoding:[sud integerForKey:BDSKTeXPreviewFileEncodingKey]];
 }
 
 - (void)updateTeXPathUI{
@@ -89,17 +98,6 @@ static NSSet *standardStyles = nil;
         [bibtexBinaryPathField setTextColor:[NSColor blackColor]];
     else
         [bibtexBinaryPathField setTextColor:[NSColor redColor]];
-}
-
-- (void)updateUI{
-    [self updateTeXPathUI];
-    [self updateBibTeXPathUI];
-    
-    [usesTeXButton setState:[sud boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
-  
-    [bibTeXStyleField setStringValue:[sud objectForKey:BDSKBTStyleKey]];
-    [bibTeXStyleField setEnabled:[sud boolForKey:BDSKUsesTeXKey]];
-    [encodingPopUpButton setEncoding:[sud integerForKey:BDSKTeXPreviewFileEncodingKey]];
 }
 
 -(IBAction)changeTexBinPath:(id)sender{

@@ -45,8 +45,9 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
 
 
 @interface BibPref_Cite (Private)
-- (void)handleTemplatePrefsChanged;
-- (void)updateUI;
+- (void)updateTemplates;
+- (void)updateDragCopyUI;
+- (void)updateCiteCommandUI;
 @end
 
 
@@ -58,8 +59,9 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
     [citeStringField setDelegate:self];
     [formatter release];
     
-    [self handleTemplatePrefsChanged];
-    [self updateUI];
+    [self updateTemplates];
+    [self updateDragCopyUI];
+    [self updateCiteCommandUI];
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKExportTemplateTree] options:0 context:BDSKBibPrefCiteDefaultsObservationContext];
 }
 
@@ -108,12 +110,7 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
 	[[self view] setNeedsDisplay:YES];
 }
 
-- (void)updateUI{
-    [self updateDragCopyUI];
-    [self updateCiteCommandUI];
-}
-
-- (void)handleTemplatePrefsChanged {
+- (void)updateTemplates {
     NSString *currentDefaultStyle = [sud stringForKey:BDSKDefaultDragCopyTemplateKey];
     NSString *currentAlternateStyle = [sud stringForKey:BDSKAlternateDragCopyTemplateKey];
     NSArray *styles = [BDSKTemplate allStyleNames];
@@ -208,7 +205,7 @@ static void *BDSKBibPrefCiteDefaultsObservationContext = @"BDSKBibPrefCiteDefaul
     if (context == BDSKBibPrefCiteDefaultsObservationContext) {
         NSString *key = [keyPath substringFromIndex:7];
         if ([key isEqualToString:BDSKExportTemplateTree]) {
-            [self handleTemplatePrefsChanged];
+            [self updateTemplates];
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
