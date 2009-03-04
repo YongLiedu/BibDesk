@@ -94,10 +94,6 @@ typedef struct _BDSKSharingClientFlags {
 
 @implementation BDSKSharingClient
 
-+ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName {
-    return [NSString stringWithFormat:@"%@ - %@", computerName, BDSKServiceNameForKeychain];
-}
-
 #pragma mark Init and dealloc
 
 - (id)initWithService:(NSNetService *)aService {
@@ -190,6 +186,10 @@ typedef struct _BDSKSharingClientFlags {
 
 // If we introduce incompatible changes in future, bump this to avoid sharing breakage
 + (NSString *)supportedProtocolVersion { return @"0"; }
+
++ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName {
+    return [NSString stringWithFormat:@"%@ - %@", computerName, BDSKServiceNameForKeychain];
+}
 
 - (id)initWithClient:(BDSKSharingClient *)aClient andService:(NSNetService *)aService;
 {
