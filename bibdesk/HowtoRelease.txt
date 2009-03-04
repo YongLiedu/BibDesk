@@ -1,10 +1,6 @@
 How To Release BibDesk
 
-- make sure that the BibDesk source directory has a copy of (unzipped) BibDesk.dmg
-  *  the disk image has been prepared so that it opens in icon view
-  *  the disk image has a background
-- clean the project in Release configuration
-- make sure vendor source is up to date and rebuild as necessary
+- clean the project in Release configuration, make sure you also clean the depdendencies and precompiled header
 - change version numbers
   *  Info.plist
   *  version.texi
@@ -15,14 +11,14 @@ How To Release BibDesk
 - commit changes
 - tag the source using `svn copy -m "Tag for release" https://bibdesk.svn.sourceforge.net/svnroot/bibdesk/trunk https://bibdesk.svn.sourceforge.net/svnroot/bibdesk/tags/REL_1_x_x` where REL_1_x_x is the new version number
 - recompile the "BibDesk" target in Release configuration
-- build the "DiskImage" target, which should drop a disk image on your desktop
-- rename the disk image as e.g. BibDesk-1.x.x.dmg
+- build the "DiskImage" target, which should drop a disk image and an appcast XML on your desktop
 - follow the sf.net release instructions
   *  you want to use "Add Release" for BibDesk
   *  name the release the same as the disk image (without the dmg part)
 - edit the web page (sidebar.html) to point to the new release
   *  download URL
   *  release notes URL
-- edit bibdesk-versions-xml.txt on the web server
+- update the release notes lines in the appcast XML using <li> elements
+- insert the <item> from the appcast XML in bibdesk.xml on the web server
 - test the new download from the home page
 - post appropriate messages to bibdesk-announce and bibdesk-users (someone should also post to macosx-tex)
