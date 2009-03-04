@@ -73,7 +73,6 @@ static void *BDSKBibPrefGeneralUpdaterObservationContext = @"BDSKBibPrefGeneralU
 	[self updateUpdaterUI];
     
     [editOnPasteButton setState:[sud boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
-    [checkForUpdatesButton selectItemWithTag:[sud integerForKey:BDSKUpdateCheckIntervalKey]];
 }
 
 - (void)updateStartupBehaviorUI {
@@ -126,7 +125,6 @@ static void *BDSKBibPrefGeneralUpdaterObservationContext = @"BDSKBibPrefGeneralU
 }
 
 
-// tags correspond to BDSKUpdateCheckInterval enum
 - (IBAction)changeUpdateInterval:(id)sender{
     int interval = [[sender selectedItem] tag];
     if (interval > 0)

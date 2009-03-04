@@ -89,6 +89,7 @@
 #import "BDSKWebGroupViewController.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "BDSKMessageQueue.h"
+#import <Sparkle/Sparkle.h>
 
 #define WEB_URL @"http://bibdesk.sourceforge.net/"
 #define WIKI_URL @"http://apps.sourceforge.net/mediawiki/bibdesk/"
@@ -518,6 +519,17 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (void)applicationDidBecomeActive:(NSNotification *)aNotification{
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFlagsChangedNotification object:NSApp];
+}
+
+#pragma mark Updater
+
+- (BOOL)updaterShouldPromptForPermissionToCheckForUpdates:(SUUpdater *)updater {
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKUpdateCheckIntervalKey"]) {
+        // the user already used an older version of BibDesk
+        [updater setAutomaticallyChecksForUpdates:[[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKUpdateCheckIntervalKey"] >= 0];
+        return NO;
+    }
+    return YES;
 }
 
 #pragma mark Menu stuff

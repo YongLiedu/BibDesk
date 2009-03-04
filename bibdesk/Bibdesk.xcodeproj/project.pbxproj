@@ -1715,8 +1715,6 @@
 		F9E5F6D80A96ABF1004A6D79 /* BDSKFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFile.m; sourceTree = "<group>"; };
 		F9E5F6DC0A96AC01004A6D79 /* BDSKFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFile.h; sourceTree = "<group>"; };
 		F9E6C5970999323D00A8B97D /* BDSKStringParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringParser.h; sourceTree = "<group>"; };
-		F9EA8FC80ADE01F9005EFBE4 /* BDSKUpdateChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKUpdateChecker.h; sourceTree = "<group>"; };
-		F9EA8FC90ADE01F9005EFBE4 /* BDSKUpdateChecker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKUpdateChecker.m; sourceTree = "<group>"; };
 		F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextField.h; sourceTree = "<group>"; };
 		F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextField.m; sourceTree = "<group>"; };
 		F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextFieldCell.h; sourceTree = "<group>"; };
@@ -2309,7 +2307,6 @@
 				F9022C980758038000C3F701 /* BDSKTypeManager.m */,
 				F9022CA30758038000C3F701 /* BDSKTypeSelectHelper.m */,
 				3DAEA2EC07703F6000AF111A /* BDSKUndoManager.m */,
-				F9EA8FC90ADE01F9005EFBE4 /* BDSKUpdateChecker.m */,
 			);
 			name = Managers;
 			sourceTree = "<group>";
@@ -2773,7 +2770,6 @@
 				F9022CA20758038000C3F701 /* BDSKTypeSelectHelper.h */,
 				CE8961870CBEB59800EA2D98 /* BDSKTypeTemplate.h */,
 				3DAEA2EB07703F6000AF111A /* BDSKUndoManager.h */,
-				F9EA8FC80ADE01F9005EFBE4 /* BDSKUpdateChecker.h */,
 				F9F5ECCF0AE5E7C8007EBB31 /* BDSKURLGroup.h */,
 				CEEFDE000B03ED0200668BB0 /* BDSKURLGroupSheetController.h */,
 				CE38FEFC0D4E7EC700D0A886 /* BDSKVersionNumber.h */,

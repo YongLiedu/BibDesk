@@ -208,9 +208,6 @@ NSString *BDSKShouldLookForSharedFilesKey = @"BDSKShouldLookForSharedFilesKey";
 NSString *BDSKSharingRequiresPasswordKey = @"BDSKBrowsingRequiresPasswordKey";
 NSString *BDSKSharingNameKey = @"BDSKSharingNameKey";
 NSString *BDSKWarnOnCiteKeyChangeKey = @"BDSKWarnOnCiteKeyChangeKey";
-NSString *BDSKUpdateCheckIntervalKey = @"BDSKUpdateCheckIntervalKey";
-NSString *BDSKUpdateCheckLastDateKey = @"BDSKUpdateCheckLastDateKey";
-NSString *BDSKUpdateLatestNotifiedVersionKey = @"BDSKUpdateLatestNotifiedVersionKey";
 NSString *BDSKSpotlightVersionInfoKey = @"BDSKSpotlightVersionInfo";
 
 NSString *BDSKShouldShowWebGroupPrefKey = @"BDSKShouldShowWebGroup";
