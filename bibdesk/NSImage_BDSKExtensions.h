@@ -69,6 +69,7 @@
 @interface NSImage (BDSKExtensions)
 
 + (void)makePreviewDisplayImages;
++ (void)makeBookmarkImages;
 
 + (NSImage *)systemIconWithCode:(OSType)code;
 + (NSImage *)httpInternetLocationImage;

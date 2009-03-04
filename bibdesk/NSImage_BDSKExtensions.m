@@ -70,6 +70,38 @@
 
 @implementation NSImage (BDSKExtensions)
 
++ (void)drawAddBadgeAtPoint:(NSPoint)point {
+    NSBezierPath *path = [NSBezierPath bezierPath];
+    [path moveToPoint:NSMakePoint(point.x + 2.5, point.y + 6.5)];
+    [path relativeLineToPoint:NSMakePoint(4.0, 0.0)];
+    [path relativeLineToPoint:NSMakePoint(0.0, -4.0)];
+    [path relativeLineToPoint:NSMakePoint(3.0, 0.0)];
+    [path relativeLineToPoint:NSMakePoint(0.0, 4.0)];
+    [path relativeLineToPoint:NSMakePoint(4.0, 0.0)];
+    [path relativeLineToPoint:NSMakePoint(0.0, 3.0)];
+    [path relativeLineToPoint:NSMakePoint(-4.0, 0.0)];
+    [path relativeLineToPoint:NSMakePoint(0.0, 4.0)];
+    [path relativeLineToPoint:NSMakePoint(-3.0, 0.0)];
+    [path relativeLineToPoint:NSMakePoint(0.0, -4.0)];
+    [path relativeLineToPoint:NSMakePoint(-4.0, 0.0)];
+    [path closePath];
+    
+    NSShadow *shadow1 = [[NSShadow alloc] init];
+    [shadow1 setShadowBlurRadius:1.0];
+    [shadow1 setShadowOffset:NSMakeSize(0.0, 0.0)];
+    [shadow1 setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5]];
+    
+    [NSGraphicsContext saveGraphicsState];
+    [[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] setFill];
+    [path fill];
+    [shadow1 set];
+    [[NSColor colorWithCalibratedRed:0.257 green:0.351 blue:0.553 alpha:1.0] setStroke];
+    [path stroke];
+    [NSGraphicsContext restoreGraphicsState];
+    
+    [shadow1 release];
+}
+
 + (void)makePreviewDisplayImages {
     static NSImage *previewDisplayTextImage = nil;
     static NSImage *previewDisplayFilesImage = nil;
@@ -121,6 +153,53 @@
         [previewDisplayTeXImage unlockFocus];
         [previewDisplayTeXImage setName:@"BDSKPreviewDisplayTeX"];
     }
+}
+
++ (void)makeBookmarkImages {
+    static NSImage *newFolderImage = nil;
+    static NSImage *newSeparatorImage = nil;
+    static NSImage *smallFolderImage = nil;
+    
+    if (newFolderImage)
+        return;
+    
+    newFolderImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] retain];
+    [newFolderImage lockFocus];
+    [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 18.0)];
+    [newFolderImage unlockFocus];
+    [newFolderImage setName:@"NewFolder"];
+    
+    newSeparatorImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+    [newSeparatorImage lockFocus];
+    [NSGraphicsContext saveGraphicsState];
+    [[NSColor clearColor] setFill];
+    NSRectFill(NSMakeRect(0.0, 0.0, 32.0, 32.0));
+    NSShadow *shadow1 = [[[NSShadow alloc] init] autorelease];
+    [shadow1 setShadowBlurRadius:2.0];
+    [shadow1 setShadowOffset:NSMakeSize(0.0, -1.0)];
+    [shadow1 setShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5]];
+    [shadow1 set];
+    [[NSColor colorWithCalibratedWhite:0.35 alpha:1.0] setFill];
+    NSBezierPath *path = [NSBezierPath bezierPathWithRect:NSMakeRect(2.0, 14.0, 28.0, 4.0)];
+    [path fill];
+    [NSGraphicsContext restoreGraphicsState];
+    [NSGraphicsContext saveGraphicsState];
+    [[NSColor colorWithCalibratedWhite:0.65 alpha:1.0] setFill];
+    path = [NSBezierPath bezierPathWithRect:NSMakeRect(3.0, 15.0, 26.0, 2.0)];
+    [path fill];
+    [[NSColor colorWithCalibratedWhite:0.8 alpha:1.0] setFill];
+    path = [NSBezierPath bezierPathWithRect:NSMakeRect(4.0, 16.0, 24.0, 1.0)];
+    [path fill];
+    [[NSColor colorWithCalibratedWhite:0.45 alpha:1.0] setFill];
+    path = [NSBezierPath bezierPathWithRect:NSMakeRect(3.0, 17.0, 26.0, 1.0)];
+    [path fill];
+    [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 14.0)];
+    [NSGraphicsContext restoreGraphicsState];
+    [newSeparatorImage unlockFocus];
+    [newSeparatorImage setName:@"NewSeparator"];
+    
+    smallFolderImage = [[self iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kGenericFolderIcon] retain];
+    [smallFolderImage setName:@"SmallFolder"];
 }
 
 + (NSImage *)systemIconWithCode:(OSType)code {
