@@ -194,6 +194,7 @@ static void removeFromIndex(const void *key, const void *value, void *context)
 {
     
     CFDictionaryRemoveAllValues(searchIndexes);
+    CFSetRemoveAllValues(indexesToFlush);
     
     CFMutableDataRef indexData;
     SKIndexRef skIndex;
