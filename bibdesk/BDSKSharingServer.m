@@ -343,9 +343,10 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 {
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldShareFilesKey]){
         [self disableSharing];
-        
-        // give the server a moment to stop
-        [self performSelector:@selector(enableSharing) withObject:nil afterDelay:3.0];
+        // only restart when there's something to share, the next document that's opened will otherwise call enableSharing
+        if ([[NSApp orderedDocuments] count])
+            // give the server a moment to stop
+            [self performSelector:@selector(enableSharing) withObject:nil afterDelay:3.0];
     }
 }
 
