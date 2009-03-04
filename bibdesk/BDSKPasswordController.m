@@ -40,34 +40,31 @@
 
 #import "BDSKPasswordController.h"
 #import <Security/Security.h>
-#import "BDSKSharingBrowser.h"
-#import "BDSKSharingServer.h"
 #import "NSData_BDSKExtensions.h"
-
-NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
 
 @implementation BDSKPasswordController
 
-- (NSString *)windowNibName { return @"BDSKPasswordController"; }
-
-// convenience method for keychain
-+ (NSData *)sharingPasswordForCurrentUserUnhashed {
-    // find password from keychain
++ (NSData *)passwordForKeychainServiceName:(NSString *)name {
+    // use the service name to get password from keychain and hash it with sha1 for comparison purposes
     OSStatus err;
     
-    void *passwordData = NULL;
+    const char *nameCString = [name UTF8String];
+    void *password = NULL;
     UInt32 passwordLength = 0;
-    NSData *data = nil;
+    NSData *pwData = nil;
     
-    const char *serviceName = [BDSKServiceNameForKeychain UTF8String];
-    const char *userName = [NSUserName() UTF8String];
-    
-    err = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(userName), userName, &passwordLength, &passwordData, NULL);
-    data = [NSData dataWithBytes:passwordData length:passwordLength];
-    SecKeychainItemFreeContent(NULL, passwordData);
-    
-    return data;
+    err = SecKeychainFindGenericPassword(NULL, strlen(nameCString), nameCString, 0, NULL, &passwordLength, &password, NULL);
+    if(err == noErr){
+        pwData = [NSData dataWithBytes:password length:passwordLength];
+        SecKeychainItemFreeContent(NULL, password);
+    }
+    return pwData;
+}
+
+// hash it for comparison, since we hash before putting it in the TXT
++ (NSData *)passwordHashedForKeychainServiceName:(NSString *)name {
+    return [[self passwordForKeychainServiceName:name] sha1Signature];
 }
 
 + (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName {
@@ -105,30 +102,6 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
         NSLog(@"Error %d occurred setting password", err);
 }
 
-+ (NSData *)passwordHashedForKeychainServiceName:(NSString *)name {
-    // use the service name to get password from keychain and hash it with sha1 for comparison purposes
-    OSStatus err;
-    
-    const char *nameCString = [name UTF8String];
-    void *password = NULL;
-    UInt32 passwordLength = 0;
-    NSData *pwData = nil;
-    
-    err = SecKeychainFindGenericPassword(NULL, strlen(nameCString), nameCString, 0, NULL, &passwordLength, &password, NULL);
-    if(err == noErr){
-        pwData = [NSData dataWithBytes:password length:passwordLength];
-        SecKeychainItemFreeContent(NULL, password);
-        
-        // hash it for comparison, since we hash before putting it in the TXT
-        pwData = [pwData sha1Signature];
-    }
-    return pwData;
-}
-
-+ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName {
-    return [NSString stringWithFormat:@"%@ - %@", computerName, BDSKServiceNameForKeychain];
-}
-
 - (NSData *)runModalForKeychainServiceName:(NSString *)name message:(NSString *)status {
     NSString *password = nil;
     [self window]; // load window before seting the status
@@ -148,7 +121,7 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 }
 
 + (NSData *)runModalPanelForKeychainServiceName:(NSString *)name message:(NSString *)status {
-    BDSKPasswordController *pwc = [[[self alloc] init] autorelease];
+    BDSKPasswordController *pwc = [[[self alloc] initWithWindowNibName:@"BDSKPasswordController"] autorelease];
     return [pwc runModalForKeychainServiceName:name message:status];
 }
 

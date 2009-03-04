@@ -94,6 +94,10 @@ typedef struct _BDSKSharingClientFlags {
 
 @implementation BDSKSharingClient
 
++ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName {
+    return [NSString stringWithFormat:@"%@ - %@", computerName, BDSKServiceNameForKeychain];
+}
+
 #pragma mark Init and dealloc
 
 - (id)initWithService:(NSNetService *)aService {
@@ -328,7 +332,7 @@ typedef struct _BDSKSharingClientFlags {
 - (NSData *)runPasswordPrompt;
 {
     NSAssert([NSThread isMainThread] == 1, @"password controller must be run from the main thread");
-    return [BDSKPasswordController runModalPanelForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
+    return [BDSKPasswordController runModalPanelForKeychainServiceName:[[self class] keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
 }
 
 - (int)runAuthenticationFailedAlert;
@@ -355,7 +359,7 @@ typedef struct _BDSKSharingClientFlags {
     int rv = 1;
     OSMemoryBarrier();
     if(flags.authenticationFailed == 0)
-        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]]];
+        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[[self class] keychainServiceNameWithComputerName:[service name]]];
     
     if(password == nil && [self shouldKeepRunning]){   
         

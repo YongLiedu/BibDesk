@@ -39,8 +39,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern NSString *BDSKServiceNameForKeychain;
-
 
 @interface BDSKPasswordController : NSWindowController
 {
@@ -48,10 +46,10 @@ extern NSString *BDSKServiceNameForKeychain;
     IBOutlet NSTextField *statusField;
 }
 
-+ (NSData *)sharingPasswordForCurrentUserUnhashed;
-+ (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
++ (NSData *)passwordForKeychainServiceName:(NSString *)name;
 + (NSData *)passwordHashedForKeychainServiceName:(NSString *)name;
-+ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName;
+
++ (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
 
 + (NSData *)runModalPanelForKeychainServiceName:(NSString *)aName message:(NSString *)status;
 

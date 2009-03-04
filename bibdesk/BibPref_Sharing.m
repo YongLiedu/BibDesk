@@ -63,7 +63,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingStatusChanged:) name:BDSKSharingStatusChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleClientConnectionsChanged:) name:BDSKClientConnectionsChangedNotification object:nil];
     
-    NSData *pwData = [BDSKPasswordController sharingPasswordForCurrentUserUnhashed];
+    NSData *pwData = [BDSKPasswordController passwordForKeychainServiceName:BDSKServiceNameForKeychain];
     if(pwData != nil){
         NSString *pwString = [[NSString alloc] initWithData:pwData encoding:NSUTF8StringEncoding];
         [passwordField setStringValue:pwString];

@@ -68,6 +68,8 @@ NSString *BDSKSharedArchivedMacroDataKey = @"macros_v1";
 NSString *BDSKComputerNameChangedNotification = nil;
 NSString *BDSKHostNameChangedNotification = nil;
 
+NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
+
 static SCDynamicStoreRef dynamicStore = NULL;
 static const void *retainCallBack(const void *info) { return [(id)info retain]; }
 static void releaseCallBack(const void *info) { [(id)info release]; }
@@ -649,7 +651,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 {
     BOOL status = YES;
     if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKSharingRequiresPasswordKey]){
-        NSData *myPasswordHashed = [[BDSKPasswordController sharingPasswordForCurrentUserUnhashed] sha1Signature];
+        NSData *myPasswordHashed = [BDSKPasswordController passwordHashedForKeychainServiceName:BDSKServiceNameForKeychain];
         status = [authenticationData isEqual:myPasswordHashed];
     }
     return status;

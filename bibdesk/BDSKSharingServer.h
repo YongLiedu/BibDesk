@@ -47,6 +47,8 @@ extern NSString *BDSKSharedArchivedMacroDataKey;
 extern NSString *BDSKComputerNameChangedNotification;
 extern NSString *BDSKHostNameChangedNotification;
 
+extern NSString *BDSKServiceNameForKeychain;
+
 // implemented by the shared group
 @protocol BDSKClientProtocol
 
