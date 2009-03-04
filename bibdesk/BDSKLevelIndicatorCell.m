@@ -41,9 +41,6 @@
 
 /* Subclass of NSLevelIndicatorCell.  The default relevancy cell draws bars the entire vertical height of the table row, which looks bad.  Using setControlSize: seems to have no effect.
 */
-@interface NSLevelIndicatorCell (BDSKPrivateOverrideBecauseApplesSubclassingIsBroken)
-- (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-@end
 
 @implementation BDSKLevelIndicatorCell
 
@@ -119,6 +116,12 @@
     return layer;    
 }
 
+- (void)setDoubleValue:(double)v
+{
+    NSParameterAssert(isfinite(v));
+    [super setDoubleValue:v];
+}
+
 /*
  This method and -drawingRectForBounds: are never called as of 10.4.8 rdar://problem/4998206
  
@@ -148,8 +151,8 @@
     
     // Could happen if the search scores have issues?  See bug #1932040.
     double ratio = [self doubleValue] / [self maxValue];
-    if (ratio > 1) {
-        NSLog(@"BDSKLevelIndicatorCell: doubleValue / maxValue = %.2f, clipping to 1.0", ratio);
+    if (ratio > 1 || isfinite(ratio) == false) {
+        NSLog(@"BDSKLevelIndicatorCell: %.3f / %.3f = %.3f, clipping to 1.0", [self doubleValue], [self maxValue], ratio);
         ratio = 1.0;
     }
     
