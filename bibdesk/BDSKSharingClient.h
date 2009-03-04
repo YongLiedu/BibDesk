@@ -49,8 +49,6 @@
     BDSKSharingClientServer *server;
 }
 
-+ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName;
-
 - (id)initWithService:(NSNetService *)aService;
 
 - (NSData *)archivedPublications;
