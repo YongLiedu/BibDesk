@@ -224,7 +224,7 @@ static void removeFromIndex(const void *key, const void *value, void *context)
         SKIndexFlush(anIndex);
         CFSetRemoveValue(indexesToFlush, anIndex);
     }
-    return anIndex;
+    return (SKIndexRef)[[(id)anIndex retain] autorelease];
 }
 
 @end
