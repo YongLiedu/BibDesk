@@ -321,7 +321,7 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSImage *)icon {
-    return [NSImage imageNamed:@"SmallBookmark"];
+    return [NSImage imageNamed:@"TinyBookmark"];
 }
 
 @end
@@ -362,7 +362,7 @@ static Class BDSKBookmarkClass = Nil;
 }
 
 - (NSImage *)icon {
-    return [NSImage imageNamed:@"SmallFolder"];
+    return [NSImage imageNamed:@"TinyFolder"];
 }
 
 - (NSString *)name {

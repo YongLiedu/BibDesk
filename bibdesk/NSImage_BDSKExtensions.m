@@ -156,12 +156,21 @@
 }
 
 + (void)makeBookmarkImages {
+    static NSImage *newBookmarkImage = nil;
     static NSImage *newFolderImage = nil;
     static NSImage *newSeparatorImage = nil;
-    static NSImage *smallFolderImage = nil;
+    static NSImage *tinyBookmarkImage = nil;
+    static NSImage *tinyFolderImage = nil;
+    static NSImage *tinySearchBookmarkImage = nil;
     
     if (newFolderImage)
         return;
+    
+    newBookmarkImage = [[self imageNamed:@"Bookmark"] copy];
+    [newBookmarkImage lockFocus];
+    [[self class] drawAddBadgeAtPoint:NSMakePoint(18.0, 18.0)];
+    [newBookmarkImage unlockFocus];
+    [newBookmarkImage setName:@"NewBookmark"];
     
     newFolderImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] retain];
     [newFolderImage lockFocus];
@@ -198,8 +207,22 @@
     [newSeparatorImage unlockFocus];
     [newSeparatorImage setName:@"NewSeparator"];
     
-    smallFolderImage = [[self iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kGenericFolderIcon] retain];
-    [smallFolderImage setName:@"SmallFolder"];
+    tinyFolderImage = [[self iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kGenericFolderIcon] retain];
+    [tinyFolderImage setName:@"TinyFolder"];
+    
+    tinyBookmarkImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+    [tinyBookmarkImage lockFocus];
+    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+    [[self imageNamed:@"Bookmark"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeCopy fraction:1.0];
+    [tinyBookmarkImage unlockFocus];
+    [tinyBookmarkImage setName:@"TinyBookmark"];
+    
+    tinySearchBookmarkImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
+    [tinySearchBookmarkImage lockFocus];
+    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+    [[self imageNamed:@"searchFolderIcon"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeCopy fraction:1.0];
+    [tinySearchBookmarkImage unlockFocus];
+    [tinySearchBookmarkImage setName:@"TinySearchBookmark"];
 }
 
 + (NSImage *)systemIconWithCode:(OSType)code {

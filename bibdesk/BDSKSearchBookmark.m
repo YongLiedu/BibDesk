@@ -284,17 +284,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (NSImage *)icon {
-    static NSImage *smallSearchBookmarkIcon = nil;
-    if (smallSearchBookmarkIcon == nil) {
-        NSImage *image = [NSImage imageNamed:@"searchFolderIcon"];
-        NSRect rect = {NSZeroPoint, [image size]};
-        smallSearchBookmarkIcon = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
-        [smallSearchBookmarkIcon lockFocus];
-        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-        [image drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:rect operation:NSCompositeCopy fraction:1.0];
-        [smallSearchBookmarkIcon unlockFocus];
-    }
-    return smallSearchBookmarkIcon;
+    return [NSImage imageNamed:@"TinySearchBookmark"];
 }
 
 @end
@@ -346,7 +336,7 @@ static Class BDSKSearchBookmarkClass = Nil;
 }
 
 - (NSImage *)icon {
-    return [NSImage imageNamed:@"SmallFolder"];
+    return [NSImage imageNamed:@"TinyFolder"];
 }
 
 - (NSArray *)children {
