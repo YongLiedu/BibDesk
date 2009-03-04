@@ -152,10 +152,9 @@ static BDSKMessageQueue *searchQueue = nil;
     NSParameterAssert(NULL == search);
     search = SKSearchCreate(skIndex, (CFStringRef)searchString, kSKSearchOptionDefault);
     
-    SKDocumentID documents[SEARCH_BUFFER_MAX];
-    float scores[SEARCH_BUFFER_MAX];
+    SKDocumentID documents[SEARCH_BUFFER_MAX] = { 0 };
+    float scores[SEARCH_BUFFER_MAX] = { 0.0 };
     CFIndex i, foundCount;
-    NSMutableSet *foundURLSet = [NSMutableSet set];
     
     Boolean more, keepGoing;
     maxScore = 0.0f;
@@ -166,15 +165,24 @@ static BDSKMessageQueue *searchQueue = nil;
         
         more = SKSearchFindMatches(search, SEARCH_BUFFER_MAX, documents, scores, 1.0, &foundCount);
         
-        if (foundCount) {
-            CFURLRef documentURLs[SEARCH_BUFFER_MAX];
-            SKIndexCopyDocumentURLsForDocumentIDs(skIndex, foundCount, documents, documentURLs);
+        NSMutableSet *foundURLSet = nil;
+
+        if (foundCount > 0) {
+            
+            NSParameterAssert(foundCount <= SEARCH_BUFFER_MAX);
+            id documentURLs[SEARCH_BUFFER_MAX] = { nil };
+            SKIndexCopyDocumentURLsForDocumentIDs(skIndex, foundCount, documents, (CFURLRef *)documentURLs);
+            foundURLSet = [NSMutableSet setWithCapacity:foundCount];
             
             for (i = 0; i < foundCount; i++) {
-                [foundURLSet addObject:(id)documentURLs[i]];
-                [originalScores setObject:[NSNumber numberWithFloat:scores[i]] forKey:(id)documentURLs[i]];
-                CFRelease(documentURLs[i]);
-                maxScore = MAX(maxScore, scores[i]);
+                
+                // Array may contain NULL values from initialization; before adding the initialization step, it was possible to pass garbage pointers as documentURL (bug #2124370) and non-finite values for the score (bug #1932040).  This is actually a gap in the returned values, so appears to be a Search Kit bug.
+                if (documentURLs[i] != nil) {
+                    [originalScores setObject:[NSNumber numberWithFloat:scores[i]] forKey:documentURLs[i]];
+                    [foundURLSet addObject:documentURLs[i]];
+                    [documentURLs[i] release];
+                    maxScore = MAX(maxScore, scores[i]);
+                }
             }
         }
         
@@ -191,9 +199,7 @@ static BDSKMessageQueue *searchQueue = nil;
             [callback setArgument:&normalizedScores atIndex:3];
             [callback performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
         }
-        
-        [foundURLSet removeAllObjects];
-        
+                
         [searchLock lock];
         keepGoing = (nil != callback && [searchString isEqualToString:currentSearchString]);
         [searchLock unlock];
