@@ -125,7 +125,6 @@ static void appendNormalizedNames(const void *value, void *context)
 {
     NSEnumerator *pubsEnum = [pubs objectEnumerator];
     BibItem *pub;
-    NSMutableString *names = [[NSMutableString alloc] initWithCapacity:100];
     
     while (pub = [pubsEnum nextObject]) {
         SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[pub identifierURL]);
@@ -152,11 +151,12 @@ static void appendNormalizedNames(const void *value, void *context)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
             
             // just remove curly braces from names
-            [names replaceCharactersInRange:NSMakeRange(0, [names length]) withString:@""];
+            NSMutableString *names = [[NSMutableString alloc] initWithCapacity:100];
             CFSetApplyFunction((CFSetRef)[pub allPeople], appendNormalizedNames, names);
             skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKPersonString);
             if (skIndex)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)names, TRUE);  
+            [names release];
             
             skIndex = (void *)CFDictionaryGetValue(searchIndexes, (CFStringRef)BDSKSkimNotesString);
             if (skimNotes && skIndex)
@@ -167,7 +167,6 @@ static void appendNormalizedNames(const void *value, void *context)
         
     }
     
-    [names release];
     [self scheduleIndexFlush];
 }
 
