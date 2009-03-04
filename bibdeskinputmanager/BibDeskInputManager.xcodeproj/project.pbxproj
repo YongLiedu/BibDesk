@@ -81,7 +81,7 @@
 		F972E8B9098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPluginTextViewCompletionController.m; sourceTree = "<group>"; };
 		F9BEBE1C06B42D3C00AA486C /* BD Input Manager.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "BD Input Manager.icns"; sourceTree = "<group>"; };
 		F9BFE18A06FA98910019E8AB /* Bibdesk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Bibdesk_Prefix.pch; sourceTree = "<group>"; };
-		F9C7D5C50BE9415600D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F9C7D5C50BE9415600D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F9D86A0006B33E2000F2DE7D /* Bibdesk.scpt */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.scpt; path = Bibdesk.scpt; sourceTree = "<group>"; };
 		F9D86A0106B33E2000F2DE7D /* NSTextView_Bibdesk.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSTextView_Bibdesk.h; sourceTree = "<group>"; };
 		F9D86A0206B33E2000F2DE7D /* NSTextView_Bibdesk.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSTextView_Bibdesk.m; sourceTree = "<group>"; };
