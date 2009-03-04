@@ -167,7 +167,8 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)enableSharedBrowsing;
 {
-    if([self isBrowsing] == NO){
+    // only restart when there's a document to display the shared groups, the next document that's opened will otherwise call again if necessary
+    if([self isBrowsing] == NO && [[NSApp orderedDocuments] count] > 0){
         sharingClients = [[NSMutableSet alloc] initWithCapacity:5];
         browser = [[NSNetServiceBrowser alloc] init];
         [browser setDelegate:self];
