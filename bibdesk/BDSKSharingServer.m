@@ -611,7 +611,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         @catch (id exception) {
             NSLog(@"%@: ignoring exception \"%@\" raised while invalidating client %@", [self class], exception, proxyObject);
         }
-        [[proxyObject connectionForProxy] invalidate];
+        @finally {
+            [[proxyObject connectionForProxy] invalidate];
+        }
     }
     [remoteClients removeAllObjects];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
