@@ -97,6 +97,7 @@ static void addIndexToSet(const void *key, const void *value, void *context)
 // Index flushing is fairly expensive, especially with thousands of pubs added; here we just mark all indexes as dirty (which is negligible) and flush each index when requested.
 - (void)scheduleIndexFlush
 {
+    CFSetRemoveAllValues(indexesToFlush);
     CFDictionaryApplyFunction(searchIndexes, addIndexToSet, indexesToFlush);    
 }
 
