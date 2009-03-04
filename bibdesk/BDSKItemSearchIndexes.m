@@ -40,33 +40,13 @@
 #import "BibAuthor.h"
 #import "BibItem.h"
 
-static CFTypeRef searchIndexDictionaryRetain(CFAllocatorRef alloc, const void *value) { return CFRetain(value); }
-// Note: SKIndexClose() is supposed to dispose of indexes.  However, it leaks on both Tiger and Leopard unless you're using GC on Leopard.  For non-GC apps, we need to use CFRelease() on Leopard, according to the response to my bug report on the leaks.  This is still not documented, though.
-static void searchIndexDictionaryRelease(CFAllocatorRef alloc, const void *value) { CFRelease((SKIndexRef)value); }
-static CFStringRef searchIndexDictionaryCopyDescription(const void *value)
+static CFStringRef searchIndexCopyDescription(const void *value)
 {
     CFStringRef cfDesc = CFCopyDescription(value);
     CFStringRef desc = (CFStringRef)[[NSString alloc] initWithFormat:@"%@: type %d, %d documents", cfDesc, SKIndexGetIndexType((SKIndexRef)value), SKIndexGetDocumentCount((SKIndexRef)value)];
     CFRelease(cfDesc);
     return desc;
 }
-static Boolean searchIndexDictionaryEqual(const void *value1, const void *value2) { return CFEqual(value1, value2); }
-
-const CFDictionaryValueCallBacks kBDSKSearchIndexDictionaryValueCallBacks = {
-    0, // version
-    searchIndexDictionaryRetain,
-    searchIndexDictionaryRelease,
-    searchIndexDictionaryCopyDescription,
-    searchIndexDictionaryEqual
-};
-
-const CFSetCallBacks kBDSKSearchIndexSetCallBacks = {
-    0,    // version
-    NULL, // retain
-    NULL, // release
-    searchIndexDictionaryCopyDescription,
-    NULL  // equal
-};
 
 @implementation BDSKItemSearchIndexes
 
@@ -83,10 +63,18 @@ const CFSetCallBacks kBDSKSearchIndexSetCallBacks = {
 {
     self = [super init];
     if (self) {
-        searchIndexes = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFCopyStringDictionaryKeyCallBacks, &kBDSKSearchIndexDictionaryValueCallBacks);
         
-        // pointer equality, nonretained; indexes are retained by the dictionary
-        indexesToFlush = CFSetCreateMutable(kCFAllocatorDefault, 0, &kBDSKSearchIndexSetCallBacks);
+        // Note: SKIndexClose() is supposed to dispose of indexes, which was the original reason for using these custom callbacks.  However, it leaks on both Tiger and Leopard unless you're using GC on Leopard.  For non-GC apps, we need to use CFRelease() on Leopard, according to the response to my bug report on the leaks.  This is still not documented, though.
+        CFDictionaryValueCallBacks dcb = kCFTypeDictionaryValueCallBacks;
+        dcb.copyDescription = searchIndexCopyDescription;
+        searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &dcb);        
+        
+        // pointer equality set
+        CFSetCallBacks scb = kCFTypeSetCallBacks;
+        scb.copyDescription = searchIndexCopyDescription;
+        scb.equal = NULL;
+        scb.hash = NULL;
+        indexesToFlush = CFSetCreateMutable(NULL, 0, &scb);
         
         // ensure that we never hand out a NULL search index unless someone asks for a field that isn't indexed
         [self resetWithPublications:nil];
