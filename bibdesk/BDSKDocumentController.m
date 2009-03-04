@@ -62,9 +62,6 @@
 - (id)init
 {
     if(self = [super init]){
-		if([[NSUserDefaults standardUserDefaults] boolForKey:BDSKShouldAutosaveDocumentKey])
-		    [self setAutosavingDelay:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKAutosaveTimeIntervalKey]];
-        
 		[[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleWindowDidBecomeMainNotification:)
                                                      name:NSWindowDidBecomeMainNotification

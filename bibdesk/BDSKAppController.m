@@ -118,60 +118,6 @@ static void fixLegacyTableColumnIdentifiers()
         [sud setObject:fixedTableColumnIdentifiers forKey:BDSKShownColsNamesKey];
 }
 
-+ (void)initialize
-{
-    BDSKINITIALIZE;
-    
-    // this loads the inital values for the prefs
-    [BDSKPreferenceController sharedPreferenceController];
-    
-    // make sure we use Spotlight's plugins on 10.4 and later
-    SKLoadDefaultExtractorPlugIns();
-
-    [NSDateFormatter setDefaultFormatterBehavior:NSDateFormatterBehavior10_4];
-    
-    [NSString initializeStringConstants];
-    
-    NSUserDefaults*sud = [NSUserDefaults standardUserDefaults];
-    
-    // eliminate support for some legacy keys
-    fixLegacyTableColumnIdentifiers();
-    
-    // legacy pref key removed prior to release of 1.3.1 (stored path instead of alias)
-    NSString *filePath = [sud objectForKey:@"Default Bib File"];
-    if(filePath) {
-        BDAlias *alias = [BDAlias aliasWithPath:filePath];
-        if(alias)
-            [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
-        [sud removeObjectForKey:@"Default Bib File"];
-    }
-    
-    // enforce Author and Editor as person fields
-    NSArray *personFields = [sud stringArrayForKey:BDSKPersonFieldsKey];
-    int idx = 0;
-    if ([personFields containsObject:BDSKAuthorString] == NO || [personFields containsObject:BDSKEditorString] == NO) {
-        personFields  = [personFields mutableCopy];
-        if ([personFields containsObject:BDSKAuthorString] == NO)
-            [(NSMutableArray *)personFields insertObject:BDSKAuthorString atIndex:idx++];
-        if ([personFields containsObject:BDSKEditorString] == NO)
-            [(NSMutableArray *)personFields insertObject:BDSKEditorString atIndex:idx];
-        [sud setObject:personFields forKey:BDSKPersonFieldsKey];
-        [personFields release];
-    }
-    
-    // name image to make it available app wide, also in IB
-    static NSImage *nsCautionIcon = nil;
-    nsCautionIcon = [[NSImage iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kAlertCautionIcon] retain];
-    [nsCautionIcon setName:@"BDSKSmallCautionIcon"];
-    
-    [NSImage makeBookmarkImages];
-    
-    // register NSURL as conversion handler for file types
-    [NSAppleEventDescriptor registerConversionHandler:[NSURL class]
-                                             selector:@selector(fileURLWithAEDesc:)
-                                   forDescriptorTypes:typeFileURL, typeFSS, typeAlias, typeFSRef, nil];
-}
-
 - (id)init
 {
     if(self = [super init]){
@@ -334,6 +280,57 @@ static void fixLegacyTableColumnIdentifiers()
 
 
 #pragma mark Application delegate
+
+- (void)applicationWillFinishLaunching:(NSNotification *)aNotification{
+    NSUserDefaults *sud = [NSUserDefaults standardUserDefaults];
+    
+    if([sud boolForKey:BDSKShouldAutosaveDocumentKey])
+        [[NSDocumentController sharedDocumentController] setAutosavingDelay:[[NSUserDefaults standardUserDefaults] integerForKey:BDSKAutosaveTimeIntervalKey]];
+    
+    // make sure we use Spotlight's plugins on 10.4 and later
+    SKLoadDefaultExtractorPlugIns();
+
+    [NSDateFormatter setDefaultFormatterBehavior:NSDateFormatterBehavior10_4];
+    
+    [NSString initializeStringConstants];
+    
+    // eliminate support for some legacy keys
+    fixLegacyTableColumnIdentifiers();
+    
+    // legacy pref key removed prior to release of 1.3.1 (stored path instead of alias)
+    NSString *filePath = [sud objectForKey:@"Default Bib File"];
+    if(filePath) {
+        BDAlias *alias = [BDAlias aliasWithPath:filePath];
+        if(alias)
+            [sud setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+        [sud removeObjectForKey:@"Default Bib File"];
+    }
+    
+    // enforce Author and Editor as person fields
+    NSArray *personFields = [sud stringArrayForKey:BDSKPersonFieldsKey];
+    int idx = 0;
+    if ([personFields containsObject:BDSKAuthorString] == NO || [personFields containsObject:BDSKEditorString] == NO) {
+        personFields  = [personFields mutableCopy];
+        if ([personFields containsObject:BDSKAuthorString] == NO)
+            [(NSMutableArray *)personFields insertObject:BDSKAuthorString atIndex:idx++];
+        if ([personFields containsObject:BDSKEditorString] == NO)
+            [(NSMutableArray *)personFields insertObject:BDSKEditorString atIndex:idx];
+        [sud setObject:personFields forKey:BDSKPersonFieldsKey];
+        [personFields release];
+    }
+    
+    // name image to make it available app wide, also in IB
+    static NSImage *nsCautionIcon = nil;
+    nsCautionIcon = [[NSImage iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kAlertCautionIcon] retain];
+    [nsCautionIcon setName:@"BDSKSmallCautionIcon"];
+    
+    [NSImage makeBookmarkImages];
+    
+    // register NSURL as conversion handler for file types
+    [NSAppleEventDescriptor registerConversionHandler:[NSURL class]
+                                             selector:@selector(fileURLWithAEDesc:)
+                                   forDescriptorTypes:typeFileURL, typeFSS, typeAlias, typeFSRef, nil];
+}
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification{
     // validate the Cite Key and LocalUrl format strings
@@ -848,10 +845,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [NSURL URLWithString:WIKI_URL]]){
         NSBeep();
     }
-}
-
-- (IBAction)showPreferencePanel:(id)sender{
-    [[BDSKPreferenceController sharedPreferenceController] showWindow:sender];
 }
 
 - (IBAction)toggleShowingErrorPanel:(id)sender{
