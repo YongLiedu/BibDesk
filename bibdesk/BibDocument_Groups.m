@@ -351,6 +351,10 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
+    
+    if ([[groups sharedGroups] containsObject:group] == NO)
+        return; /// must be from another document
+    
     BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
@@ -1716,9 +1720,12 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSZoneFree([self zone], items);
     
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
+    unsigned int idx;
     
     if (aGroup) {
-        [indexes addIndex:[groups indexOfObjectIdenticalTo:aGroup]];
+        idx = [groups indexOfObjectIdenticalTo:aGroup];
+        if (idx != NSNotFound)
+            [indexes addIndex:idx];
     } else {
         if ([groups webGroup])
             [indexes addIndex:1];
@@ -1728,7 +1735,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
         [indexes addIndexesInRange:[groups rangeOfSearchGroups]];
     }
     
-    unsigned idx = [indexes firstIndex];
+    idx = [indexes firstIndex];
     
     while (idx != NSNotFound) {
         id group = [groups objectAtIndex:idx];
