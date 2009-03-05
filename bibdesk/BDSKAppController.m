@@ -1412,7 +1412,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [scriptString appendFormat:@"set m to make new draft window with properties {subject: \"%@\"}\n", subject ?: @""];
         [scriptString appendString:@"tell m\n"];
         if (receiver)
-            [scriptString appendFormat:@"make new to recipient at end with properties {address: \"%@\"}\n", receiver];
+            [scriptString appendFormat:@"set recipient to {address:{address: \"%@\", display name: \"%@\"}, recipient type:to recipient}}\n", receiver, receiver];
         if (body)
             [scriptString appendFormat:@"set content to \"%@\"\n", body];
         while (fileName = [fileEnum  nextObject])
@@ -1438,7 +1438,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [scriptString appendFormat:@"set m to make new outgoing message with properties {subject: \"%@\", visible:true}\n", subject ?: @""];
         [scriptString appendString:@"tell m\n"];
         if (receiver)
-            [scriptString appendFormat:@"set recipient to {address:{address: \"%@\", display name: \"%@\"}, recipient type:to recipient}}\n", receiver, receiver];
+            [scriptString appendFormat:@"make new to recipient at end of to recipients with properties {address: \"%@\"}\n", receiver];
         if (body)
             [scriptString appendFormat:@"set content to \"%@\"\n", body];
         [scriptString appendString:@"tell its content\n"];

@@ -498,7 +498,7 @@ static BOOL changingColors = NO;
     // escape double quotes
     [body replaceOccurrencesOfString:@"\"" withString:@"\\\"" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
 
-    [[NSApp delegate] emailTo:@"" subject:@"BibDesk references" body:body attachments:files];
+    [[NSApp delegate] emailTo:nil subject:@"BibDesk references" body:body attachments:files];
 }
 
 - (IBAction)sendToLyX:(id)sender {
