@@ -572,7 +572,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     @try {
         NSPort *receivePort = [NSSocketPort port];
         if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:sharingName] == NO)
-            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, sharingName];
+            @throw [NSString stringWithFormat:@"*** BDSKSharingDOServer: Unable to register, socket port = %p, name = '%@'", receivePort, sharingName];
+        
         connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
         NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingServer)];
         [connection setRootObject:checker];
@@ -583,10 +584,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     @catch(id exception) {
         NSLog(@"%@", exception);
         success = NO;
-        // Use performSelectorOnMainThread: in case we don't have a main thread proxy.
-        // Pass NO for waitUntilDone: since this thread will get a callback from stopDOServer
-        // so we can't block the runloop.
-        //[self performSelectorOnMainThread:@selector(stopDOServer) withObject:nil waitUntilDone:NO];
+        // the callback from the delegate should stop the DO server, and may try again with a different name
     }
     @finally {
         [[self serverOnMainThread] mainThreadServerDidSetup:success];
