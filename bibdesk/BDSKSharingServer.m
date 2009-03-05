@@ -677,9 +677,10 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
 {
     NSParameterAssert(identifier != nil);
-    id proxyObject = [[remoteClients objectForKey:identifier] objectForKey:@"object"];
-    [[proxyObject connectionForProxy] invalidate];
+    id proxyObject = [[[remoteClients objectForKey:identifier] objectForKey:@"object"] retain];
     [remoteClients removeObjectForKey:identifier];
+    [[proxyObject connectionForProxy] invalidate];
+    [proxyObject release];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
 
