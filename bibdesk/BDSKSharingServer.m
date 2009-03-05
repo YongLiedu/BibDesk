@@ -311,8 +311,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)disableSharing
 {
-    // CMH: is the check for shouldKeepRunning correct?
-    if(server != nil && [server shouldKeepRunning]){
+    if(server != nil){
         [netService setDelegate:nil];
         [netService stop];
         [netService release];
