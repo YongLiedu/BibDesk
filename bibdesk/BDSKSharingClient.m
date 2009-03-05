@@ -68,11 +68,12 @@ typedef struct _BDSKSharingClientFlags {
 
 // private class for DO server. We have it as a separate object so we don't get a retain loop, we remove it from the thread runloop in the client's dealloc
 @interface BDSKSharingClientServer : BDSKAsynchronousDOServer <BDSKSharingClientServerLocalThread, BDSKSharingClientServerMainThread, BDSKClientProtocol> {
-    NSNetService *service;              // service with information about the remote server (BDSKSharingServer)
-    BDSKSharingClient *client;             // the owner of the local server (BDSKSharingClient)
-    id remoteServer;
-    BDSKSharingClientFlags flags;         // state variables
-    NSString *uniqueIdentifier;         // used by the remote server
+    NSNetService *service;          // service with information about the remote server (BDSKSharingServer)
+    BDSKSharingClient *client;      // the owner of the local server (BDSKSharingClient)
+    id remoteServer;                // proxy for the remote sharing server to which we connect
+    id protocolChecker;             // proxy wrapping self for security
+    BDSKSharingClientFlags flags;   // state variables
+    NSString *uniqueIdentifier;     // used by the remote server
 }
 
 + (NSString *)supportedProtocolVersion;
@@ -311,8 +312,8 @@ typedef struct _BDSKSharingClientFlags {
             uniqueIdentifier = (id)CFUUIDCreateString(NULL, uuid);
             CFRelease(uuid);
             @try {
-                NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKClientProtocol)];
-                [proxy registerClient:checker forIdentifier:uniqueIdentifier version:[BDSKSharingClientServer supportedProtocolVersion]];
+                protocolChecker = [[NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKClientProtocol)] retain];
+                [proxy registerClient:protocolChecker forIdentifier:uniqueIdentifier version:[BDSKSharingClientServer supportedProtocolVersion]];
             }
             @catch(id exception) {
                 [uniqueIdentifier release];
@@ -470,6 +471,8 @@ typedef struct _BDSKSharingClientFlags {
         [conn invalidate];
         [remoteServer release];
         remoteServer = nil;
+        [protocolChecker release];
+        protocolChecker = nil;
     }
 }
 
