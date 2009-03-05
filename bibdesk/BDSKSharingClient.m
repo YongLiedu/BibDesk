@@ -110,8 +110,7 @@ typedef struct _BDSKSharingClientFlags {
 }
 
 - (void)dealloc {
-    [server stopDOServer];
-    [server release];
+    [self terminate];
     [archivedPublications release];
     [archivedMacros release];
     [name release];
@@ -120,6 +119,12 @@ typedef struct _BDSKSharingClientFlags {
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@ %p>: {\n\tneeds update: %@\n\tname: %@\n }", [self class], self, (needsUpdate ? @"yes" : @"no"), name];
+}
+
+- (void)terminate {
+    [server stopDOServer];
+    [server release];
+    server = nil;
 }
 
 - (void)retrievePublications {
