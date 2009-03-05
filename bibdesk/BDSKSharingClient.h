@@ -67,4 +67,6 @@
 
 - (void)retrievePublications;
 
+- (void)terminate;
+
 @end

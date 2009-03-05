@@ -149,6 +149,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
                 break;
         }
         if(client != nil){
+            [client terminate];
             [sharingClients removeObject:client];
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingClientsChangedNotification object:self];
         }
@@ -184,6 +185,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 - (void)disableSharedBrowsing;
 {
     if([self isBrowsing]){
+        [sharingClients makeObjectsPerformSelector:@selector(terminate)];
         [sharingClients release];
         sharingClients = nil;
         [browser release];
