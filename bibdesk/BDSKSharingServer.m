@@ -37,16 +37,15 @@
  */
 
 #import "BDSKSharingServer.h"
-#import "BDSKSharedGroup.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKPasswordController.h"
+#import "BDSKSharingClient.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "NSArray_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
 #import "BibItem.h"
 #import "BibDocument.h"
 #import <libkern/OSAtomic.h>
-#import "BDSKSharedGroup.h"
 #import "BDSKAsynchronousDOServer.h"
 #import "BDSKThreadSafeMutableDictionary.h"
 
@@ -103,7 +102,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 #pragma mark -
 
-@interface BDSKSharingDOServer : BDSKAsynchronousDOServer <BDSKSharingServerLocalThread> {
+@interface BDSKSharingDOServer : BDSKAsynchronousDOServer <BDSKSharingServerLocalThread, BDSKSharingServer> {
     BDSKSharingServer *sharingServer;
     NSString *sharingName;
     NSConnection *connection;
@@ -575,7 +574,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:sharingName] == NO)
             @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, sharingName];
         connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
-        NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingProtocol)];
+        NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingServer)];
         [connection setRootObject:checker];
         
         // so we get connection:shouldMakeNewConnection: messages
@@ -666,13 +665,13 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     if([version numericCompare:[BDSKSharingDOServer requiredProtocolVersion]] == NSOrderedAscending)
         return;
     
-    [clientObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
+    [clientObject setProtocolForProxy:@protocol(BDSKSharingClient)];
     NSDictionary *clientInfo = [NSDictionary dictionaryWithObjectsAndKeys:clientObject, @"object", version, @"version", nil];
     [remoteClients setObject:clientInfo forKey:identifier];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
 
-#pragma mark | BDSKSharingProtocol
+#pragma mark | BDSKSharingServer
 
 - (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
 {

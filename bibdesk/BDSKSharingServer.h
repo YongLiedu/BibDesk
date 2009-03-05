@@ -49,8 +49,8 @@ extern NSString *BDSKHostNameChangedNotification;
 
 extern NSString *BDSKServiceNameForKeychain;
 
-// implemented by the shared group
-@protocol BDSKClientProtocol
+// implemented by the client
+@protocol BDSKSharingClient
 
 - (oneway void)setNeedsUpdate:(BOOL)flag;
 - (BOOL)isAlive;
@@ -59,7 +59,7 @@ extern NSString *BDSKServiceNameForKeychain;
 @end
 
 // implemented by the server
-@protocol BDSKSharingProtocol
+@protocol BDSKSharingServer
 
 - (bycopy NSData *)archivedSnapshotOfPublications;
 - (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier version:(bycopy NSString *)version;

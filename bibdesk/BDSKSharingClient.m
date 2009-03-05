@@ -67,7 +67,7 @@ typedef struct _BDSKSharingClientFlags {
 #pragma mark -
 
 // private class for DO server. We have it as a separate object so we don't get a retain loop, we remove it from the thread runloop in the client's dealloc
-@interface BDSKSharingClientServer : BDSKAsynchronousDOServer <BDSKSharingClientServerLocalThread, BDSKSharingClientServerMainThread, BDSKClientProtocol> {
+@interface BDSKSharingClientServer : BDSKAsynchronousDOServer <BDSKSharingClientServerLocalThread, BDSKSharingClientServerMainThread, BDSKSharingClient> {
     NSNetService *service;          // service with information about the remote server (BDSKSharingServer)
     BDSKSharingClient *client;      // the owner of the local server (BDSKSharingClient)
     id remoteServer;                // proxy for the remote sharing server to which we connect
@@ -85,7 +85,7 @@ typedef struct _BDSKSharingClientFlags {
 - (BOOL)failedDownload;
 
 // proxy object for messaging the remote server
-- (id <BDSKSharingProtocol>)remoteServer;
+- (id <BDSKSharingServer>)remoteServer;
 
 - (void)retrievePublicationsInBackground;
 
@@ -231,7 +231,7 @@ typedef struct _BDSKSharingClientFlags {
 
 #pragma mark Accessors
 
-// BDSKClientProtocol
+// BDSKSharingClient
 - (oneway void)setNeedsUpdate:(BOOL)flag { 
     // don't message the client during cleanup
     if([self shouldKeepRunning])
@@ -257,7 +257,7 @@ typedef struct _BDSKSharingClientFlags {
 
 #pragma mark Proxies
 
-- (id <BDSKSharingProtocol>)remoteServer;
+- (id <BDSKSharingServer>)remoteServer;
 {
     if (remoteServer != nil)
         return remoteServer;
@@ -304,7 +304,7 @@ typedef struct _BDSKSharingClientFlags {
     }
 
     if (proxy != nil) {
-        [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
+        [proxy setProtocolForProxy:@protocol(BDSKSharingServer)];
         
         if(uniqueIdentifier == nil){
             // use uniqueIdentifier as the notification identifier for this host on the other end
@@ -312,7 +312,7 @@ typedef struct _BDSKSharingClientFlags {
             uniqueIdentifier = (id)CFUUIDCreateString(NULL, uuid);
             CFRelease(uuid);
             @try {
-                protocolChecker = [[NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKClientProtocol)] retain];
+                protocolChecker = [[NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingClient)] retain];
                 [proxy registerClient:protocolChecker forIdentifier:uniqueIdentifier version:[BDSKSharingClientServer supportedProtocolVersion]];
             }
             @catch(id exception) {

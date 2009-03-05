@@ -38,7 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-
 @class BDSKSharingClientServer;
 
 @interface BDSKSharingClient : NSObject {
