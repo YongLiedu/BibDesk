@@ -380,7 +380,7 @@ static void *BDSKTableViewFontDefaultsObservationContext = (void *)@"BDSKTableVi
 }
 
 - (BOOL)canPaste {
-    if ([self numberOfSelectedRows] == 0 || [[self dataSource] respondsToSelector:@selector(tableView:pasteFromPasteboard:)] == NO)
+    if ([[self dataSource] respondsToSelector:@selector(tableView:pasteFromPasteboard:)] == NO)
         return NO;
     else if ([[self dataSource] respondsToSelector:@selector(tableViewCanPasteFromPasteboard:)])
         return [[self dataSource] tableViewCanPasteFromPasteboard:self];
