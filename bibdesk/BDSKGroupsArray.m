@@ -247,6 +247,10 @@
     return NSMakeRange(NSMaxRange([self rangeOfStaticGroups]), [categoryGroups count]);
 }
 
+- (NSRange)rangeOfExternalGroups{
+    return NSMakeRange(1, NSMaxRange([self rangeOfSearchGroups]) - 1);
+}
+
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes{
     return [indexes numberOfIndexesInRange:[self rangeOfSharedGroups]];
 }
@@ -273,6 +277,10 @@
 
 - (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes{
     return [indexes numberOfIndexesInRange:[self rangeOfCategoryGroups]];
+}
+
+- (unsigned int)numberOfExternalGroupsAtIndexes:(NSIndexSet *)indexes{
+    return [indexes numberOfIndexesInRange:[self rangeOfExternalGroups]];
 }
 
 - (BOOL)hasWebGroupAtIndexes:(NSIndexSet *)indexes{
@@ -317,7 +325,8 @@
 }
 
 - (BOOL)hasExternalGroupsAtIndexes:(NSIndexSet *)indexes{
-    return [self hasSharedGroupsAtIndexes:indexes] || [self hasURLGroupsAtIndexes:indexes] || [self hasScriptGroupsAtIndexes:indexes] || [self hasSearchGroupsAtIndexes:indexes] || [self hasWebGroupAtIndexes:indexes];
+    NSRange externalRange = [self rangeOfExternalGroups];
+    return [indexes intersectsIndexesInRange:externalRange];
 }
 
 #pragma mark Mutable accessors

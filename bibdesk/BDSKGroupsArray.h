@@ -75,6 +75,7 @@ enum {
 - (NSRange)rangeOfSmartGroups;
 - (NSRange)rangeOfStaticGroups;
 - (NSRange)rangeOfCategoryGroups;
+- (NSRange)rangeOfExternalGroups;
 
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfURLGroupsAtIndexes:(NSIndexSet *)indexes;
@@ -83,6 +84,7 @@ enum {
 - (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfExternalGroupsAtIndexes:(NSIndexSet *)indexes;
 
 - (BOOL)hasWebGroupAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes;

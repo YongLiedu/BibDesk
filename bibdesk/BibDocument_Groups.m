@@ -710,9 +710,7 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
     NSMutableIndexSet *visibleIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:indexRange];
     [visibleIndexes removeIndexes:[groupTableView selectedRowIndexes]];
-    [visibleIndexes removeIndexesInRange:[groups rangeOfURLGroups]];
-    [visibleIndexes removeIndexesInRange:[groups rangeOfScriptGroups]];
-    [visibleIndexes removeIndexesInRange:[groups rangeOfSearchGroups]];
+    [visibleIndexes removeIndexesInRange:[groups rangeOfExternalGroups]];
     
     NSArray *selectedPubs = [self selectedPublications];
     unsigned int groupIndex = [visibleIndexes firstIndex];
@@ -1719,20 +1717,17 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     NSSet *pubSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)items, countOfItems, &kBDSKBibItemEquivalenceSetCallBacks);
     NSZoneFree([self zone], items);
     
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
+    NSIndexSet *indexes;
     unsigned int idx;
     
     if (aGroup) {
         idx = [groups indexOfObjectIdenticalTo:aGroup];
         if (idx != NSNotFound)
-            [indexes addIndex:idx];
+            indexes = [NSIndexSet indexSetWithIndex:idx]; 
+        else
+            indexes = [NSIndexSet indexSet];
     } else {
-        if ([groups webGroup])
-            [indexes addIndex:1];
-        [indexes addIndexesInRange:[groups rangeOfSharedGroups]];
-        [indexes addIndexesInRange:[groups rangeOfURLGroups]];
-        [indexes addIndexesInRange:[groups rangeOfScriptGroups]];
-        [indexes addIndexesInRange:[groups rangeOfSearchGroups]];
+        indexes = [NSIndexSet indexSetWithIndexesInRange:[groups rangeOfExternalGroups]]; 
     }
     
     idx = [indexes firstIndex];
