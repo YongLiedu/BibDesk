@@ -325,6 +325,7 @@ static void fixLegacyTableColumnIdentifiers()
     [nsCautionIcon setName:@"BDSKSmallCautionIcon"];
     
     [NSImage makeBookmarkImages];
+    [NSImage makeFolderImages];
     
     // register NSURL as conversion handler for file types
     [NSAppleEventDescriptor registerConversionHandler:[NSURL class]

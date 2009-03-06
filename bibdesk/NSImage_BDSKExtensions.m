@@ -67,6 +67,7 @@
 #import "IconFamily.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
+#import <QuartzCore/QuartzCore.h>
 
 @implementation NSImage (BDSKExtensions)
 
@@ -223,6 +224,46 @@
     [[self imageNamed:@"searchFolderIcon"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeCopy fraction:1.0];
     [tinySearchBookmarkImage unlockFocus];
     [tinySearchBookmarkImage setName:@"TinySearchBookmark"];
+}
+    
++ (void)makeFolderImages {
+    static NSImage *genericFolderIconImage = nil;
+    static NSImage *staticFolderIconImage = nil;
+    static NSImage *smartFolderIconImage = nil;
+    static NSImage *importFolderIconImage = nil;
+    
+    if (genericFolderIconImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+        return;
+    
+    CIImage *ciImage = [CIImage imageWithData:[[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] TIFFRepresentation]];
+    CIFilter *filter = [CIFilter filterWithName:@"CIHueAdjust"];
+    [filter setValue:ciImage forKey:@"inputImage"];
+    [filter setValue:[NSNumber numberWithFloat:-2.62] forKey:@"inputAngle"];
+    ciImage = [filter valueForKey:@"outputImage"];
+    filter = [CIFilter filterWithName:@"CIColorControls"];
+    [filter setValue:ciImage forKey:@"inputImage"];
+    [filter setDefaults];
+    [filter setValue:[NSNumber numberWithFloat:3.0] forKey:@"inputSaturation"];
+    [filter setValue:[NSNumber numberWithFloat:0.3] forKey:@"inputBrightness"];
+    ciImage = [filter valueForKey:@"outputImage"];
+    
+    genericFolderIconImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+    [genericFolderIconImage lockFocus];
+    [[[NSGraphicsContext currentContext] CIContext] drawImage:ciImage inRect:CGRectMake(0, 0, 32.0, 32.0) fromRect:CGRectMake(0, 0, 32.0, 32.0)];
+    [genericFolderIconImage unlockFocus];
+    [genericFolderIconImage setName:@"genericFolderIcon"];
+    
+    staticFolderIconImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
+    [staticFolderIconImage setName:@"staticFolderIcon"];
+    
+    smartFolderIconImage = [[NSImage imageNamed:@"NSFolderSmart"] copy];
+    [smartFolderIconImage setName:@"smartFolderIcon"];
+    
+    importFolderIconImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
+    [importFolderIconImage lockFocus];
+    [[NSImage imageNamed:@"importBadge"] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [importFolderIconImage unlockFocus];
+    [importFolderIconImage setName:@"importFolderIcon"];
 }
 
 + (NSImage *)systemIconWithCode:(OSType)code {
