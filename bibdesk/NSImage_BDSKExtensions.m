@@ -235,16 +235,16 @@
     if (genericFolderIconImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
         return;
     
-    CIImage *ciImage = [CIImage imageWithData:[[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] TIFFRepresentation]];
+    CIImage *ciImage = [CIImage imageWithData:[[NSImage imageNamed:@"NSFolderSmart"] TIFFRepresentation]];
     CIFilter *filter = [CIFilter filterWithName:@"CIHueAdjust"];
     [filter setValue:ciImage forKey:@"inputImage"];
-    [filter setValue:[NSNumber numberWithFloat:-2.62] forKey:@"inputAngle"];
+    [filter setValue:[NSNumber numberWithFloat:3.0] forKey:@"inputAngle"];
     ciImage = [filter valueForKey:@"outputImage"];
     filter = [CIFilter filterWithName:@"CIColorControls"];
     [filter setValue:ciImage forKey:@"inputImage"];
     [filter setDefaults];
-    [filter setValue:[NSNumber numberWithFloat:3.0] forKey:@"inputSaturation"];
-    [filter setValue:[NSNumber numberWithFloat:0.3] forKey:@"inputBrightness"];
+    [filter setValue:[NSNumber numberWithFloat:2.5] forKey:@"inputSaturation"];
+    [filter setValue:[NSNumber numberWithFloat:0.5] forKey:@"inputBrightness"];
     ciImage = [filter valueForKey:@"outputImage"];
     
     genericFolderIconImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
