@@ -55,6 +55,7 @@
     IBOutlet NSButton *clearButton;
     IBOutlet NSPopUpButton* itemTypeButton;
     IBOutlet BDSKImagePopUpButton *actionMenuButton;
+    IBOutlet NSMenu *actionMenu;
     IBOutlet NSSplitView* splitView;
     IBOutlet NSBox* sourceBox;
     IBOutlet WebView* webView;

@@ -113,14 +113,6 @@
 			<string>NSView</string>
 		</dict>
 		<dict>
-			<key>CLASS</key>
-			<string>TextImportItemTableView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>BDSKTableView</string>
-		</dict>
-		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>makePlainText</key>
@@ -132,6 +124,14 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSTextView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>TextImportItemTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>BDSKTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
@@ -231,6 +231,8 @@
 			<string>ObjC</string>
 			<key>OUTLETS</key>
 			<dict>
+				<key>actionMenu</key>
+				<string>NSMenu</string>
 				<key>actionMenuButton</key>
 				<string>BDSKImagePopUpButton</string>
 				<key>addAndCloseButton</key>

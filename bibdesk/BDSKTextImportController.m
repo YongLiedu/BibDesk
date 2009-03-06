@@ -178,6 +178,7 @@
     // Set the properties of actionMenuButton that cannot be set in IB
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
+    [actionMenuButton setMenu:actionMenu];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleFlagsChangedNotification:)
