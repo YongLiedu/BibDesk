@@ -208,9 +208,10 @@ static NSString *stringWithInteger(int count)
     }
     NSRect countRect, ignored;
     // set countRect origin to the string drawing origin (number has countSep on either side for oval padding)
-    NSDivideRect(aRect, &countRect, &ignored, countSize.width + countSep + BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
+    NSDivideRect(aRect, &ignored, &countRect, countSep + BORDER_BETWEEN_EDGE_AND_COUNT, NSMaxXEdge);
+    NSDivideRect(countRect, &countRect, &ignored, countSize.width, NSMaxXEdge);
     // now set the size of it to the string size
-    countRect.size = countSize;
+    countRect = BDSKCenterRect(countRect, countSize, YES);
     return countRect;
 }    
 

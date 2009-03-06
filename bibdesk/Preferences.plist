@@ -426,7 +426,7 @@
 				<key>title</key>
 				<string>Sharing [LONG]</string>
 				<key>icon</key>
-				<string>networkIcon</string>
+				<string>sharing</string>
 				<key>helpAnchor</key>
 				<string>SharingPreferences</string>
 				<key>initialValues</key>

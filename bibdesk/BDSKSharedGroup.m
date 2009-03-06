@@ -63,7 +63,8 @@ static NSImage *unlockedIcon = nil;
 + (NSImage *)lockedIcon {
     if(lockedIcon == nil){
         NSRect iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
-        NSRect badgeRect = NSMakeRect(7.0, 0.0, 11.0, 11.0);
+        NSRect badgeRect = NSMakeRect(10.0, 0.0, 6.0, 8.0);
+        NSRect badgeSrcRect = NSMakeRect(0.0, 0.0, 9.0, 12.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
         NSImage *badge = [NSImage imageNamed:@"SmallLock_Locked"];
         NSSize srcSize = [[self icon] size];
@@ -71,7 +72,7 @@ static NSImage *unlockedIcon = nil;
         [image lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [[self icon] drawInRect:iconRect fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeSourceOver  fraction:1.0];
-        [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver  fraction:0.65];
         [image unlockFocus];
         
         lockedIcon = image;
@@ -82,7 +83,8 @@ static NSImage *unlockedIcon = nil;
 + (NSImage *)unlockedIcon {
     if(unlockedIcon == nil){
         NSRect iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
-        NSRect badgeRect = NSMakeRect(6.0, 0.0, 11.0, 11.0);
+        NSRect badgeRect = NSMakeRect(10.0, 0.0, 6.0, 8.0);
+        NSRect badgeSrcRect = NSMakeRect(0.0, 0.0, 9.0, 12.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
         NSImage *badge = [NSImage imageNamed:@"SmallLock_Unlocked"];
         NSSize srcSize = [[self icon] size];
@@ -90,7 +92,7 @@ static NSImage *unlockedIcon = nil;
         [image lockFocus];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [[self icon] drawInRect:iconRect fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeSourceOver  fraction:1.0];
-        [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:badgeSrcRect operation:NSCompositeSourceOver  fraction:0.65];
         [image unlockFocus];
         
         unlockedIcon = image;
