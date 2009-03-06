@@ -381,6 +381,10 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     return [self canDeleteSelectedItem];
 }
 
+- (BOOL)outlineView:(NSOutlineView *)ov isGroupItem:(id)item {
+    return [item isLeaf] == NO;
+}
+
 #pragma mark Drag / drop
 
 - (BOOL)outlineView:(NSOutlineView *)ov writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard{
