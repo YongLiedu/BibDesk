@@ -390,7 +390,7 @@ static NSString *searchStringWithPub(BibItem *pub)
     NSMutableString *searchString = [NSMutableString stringWithString:[[pub title] stringByRemovingTeX]];
     NSString *name = [[pub firstAuthorOrEditor] lastName];
     if (name)
-        [searchString appendFormat:@" AND %@", [[pub firstAuthor] lastName]];
+        [searchString appendStrings:@" AND ", name, nil];
     return searchString;
 }
 
