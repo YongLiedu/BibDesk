@@ -66,6 +66,8 @@
 
 - (CIImage *)croppedImageWithRect:(CGRect)aRect;
 
+- (CIImage *)imageWithAdjustedHueAngle:(float)hue saturationFactor:(float)saturation brightnessBias:(float)brightness;
+
 @end
 
 

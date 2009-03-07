@@ -239,6 +239,26 @@ static NSString *endColorKey = @"inputColor1";
     return [cropFilter valueForKey:@"outputImage"];
 }
 
+- (CIImage *)imageWithAdjustedHueAngle:(float)hue saturationFactor:(float)saturation brightnessBias:(float)brightness;
+{
+    static CIFilter *hueAdjustFilter = nil;
+    static CIFilter *colorControlsFilter = nil;
+    if (hueAdjustFilter == nil)
+        hueAdjustFilter = [[CIFilter filterWithName:@"CIHueAdjust"] retain];    
+    if (colorControlsFilter == nil)
+        colorControlsFilter = [[CIFilter filterWithName:@"CIColorControls"] retain];    
+    
+    [hueAdjustFilter setValue:[NSNumber numberWithFloat:hue * M_PI] forKey:@"inputAngle"];
+    [hueAdjustFilter setValue:self forKey:@"inputImage"];
+    
+    [colorControlsFilter setDefaults];
+    [colorControlsFilter setValue:[NSNumber numberWithFloat:saturation] forKey:@"inputSaturation"];
+    [colorControlsFilter setValue:[NSNumber numberWithFloat:brightness] forKey:@"inputBrightness"];
+    [colorControlsFilter setValue:[hueAdjustFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
+    
+    return [colorControlsFilter valueForKey:@"outputImage"];
+}
+
 @end 
 
 
