@@ -4180,15 +4180,15 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @item fileOrder
 @tab 
 @item localUrlPath
-@tab deprecated, use the localURLs collection key
+@tab deprecated, use the localFiles collection key
 @item localURL
-@tab deprecated, use the localURLs collection key
+@tab deprecated, use the localFiles collection key
 @item remoteURL
 @tab deprecated, use the remoteURLs collection key
 @item textSkimNotes
-@tab deprecated, use the localURLs collection key
+@tab deprecated, use the localFiles collection key
 @item richTextSkimNotes
-@tab deprecated, use the localURLs collection key
+@tab deprecated, use the localFiles collection key
 @item fields.FieldName
 @tab FieldName can be the name of any field
 @item urls.FieldName
