@@ -249,7 +249,7 @@
     
     genericFolderIconImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
     [genericFolderIconImage lockFocus];
-    [[[NSGraphicsContext currentContext] CIContext] drawImage:ciImage inRect:CGRectMake(0, 0, 32.0, 32.0) fromRect:CGRectMake(0, 0, 32.0, 32.0)];
+    [ciImage drawInRect:NSMakeRect(0, 0, 32.0, 32.0) fromRect:NSMakeRect(0, 0, 32.0, 32.0) operation:NSCompositeSourceOver fraction:1.0];
     [genericFolderIconImage unlockFocus];
     [genericFolderIconImage setName:@"genericFolderIcon"];
     

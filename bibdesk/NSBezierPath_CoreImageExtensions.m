@@ -50,24 +50,24 @@
 
 - (void)fillPathVertically:(BOOL)isVertical withStartColor:(CIColor *)startColor endColor:(CIColor *)endColor;
 {
-    NSRect bounds = [self bounds];
-    CGRect aRect = *(CGRect*)&bounds;
-    CGPoint startPoint = aRect.origin;
+    NSRect rect = [self bounds];
+    CGRect ciRect = *(CGRect*)&rect;
+    CGPoint startPoint = ciRect.origin;
     CGPoint endPoint = startPoint;
     
     if(isVertical)
-        endPoint.y += CGRectGetHeight(aRect);
+        endPoint.y += CGRectGetHeight(ciRect);
     else
-        endPoint.x += CGRectGetWidth(aRect);
+        endPoint.x += CGRectGetWidth(ciRect);
         
-    CIImage *image = [CIImage imageInRect:aRect withLinearGradientFromPoint:startPoint toPoint:endPoint fromColor:startColor toColor:endColor];
+    CIImage *image = [CIImage imageInRect:ciRect withLinearGradientFromPoint:startPoint toPoint:endPoint fromColor:startColor toColor:endColor];
     
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];
     
 	[self addClip];
 	
-    [[nsContext CIContext] drawImage:image atPoint:aRect.origin fromRect:aRect];
+    [image drawAtPoint:rect.origin fromRect:rect operation:NSCompositeSourceOver fraction:1.0];
     
     [nsContext restoreGraphicsState];
 }
@@ -79,51 +79,48 @@
 
 - (void)fillPathWithHorizontalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
-    NSRect bounds = [self bounds];
-    CGRect aRect = *(CGRect*)&bounds;
+    NSRect rect = [self bounds];
     
-    CIImage *image = [CIImage imageInRect:aRect withHorizontalGradientFromColor:fgStartColor toColor:fgEndColor blendedAtTop:top ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
+    CIImage *image = [CIImage imageInRect:*(CGRect*)&rect withHorizontalGradientFromColor:fgStartColor toColor:fgEndColor blendedAtTop:top ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
     
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];
     
 	[self addClip];
 	
-    [[nsContext CIContext] drawImage:image atPoint:aRect.origin fromRect:aRect];
+    [image drawAtPoint:rect.origin fromRect:rect operation:NSCompositeSourceOver fraction:1.0];
     
     [nsContext restoreGraphicsState];
 }
 
 - (void)fillPathWithVerticalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
-    NSRect bounds = [self bounds];
-    CGRect aRect = *(CGRect*)&bounds;
+    NSRect rect = [self bounds];
     
-    CIImage *image = [CIImage imageInRect:aRect withVerticalGradientFromColor:fgStartColor toColor:fgEndColor blendedAtRight:right ofHorizontalGradientFromColor:bgStartColor toColor:bgEndColor];
+    CIImage *image = [CIImage imageInRect:*(CGRect*)&rect withVerticalGradientFromColor:fgStartColor toColor:fgEndColor blendedAtRight:right ofHorizontalGradientFromColor:bgStartColor toColor:bgEndColor];
     
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];
     
 	[self addClip];
 	
-    [[nsContext CIContext] drawImage:image atPoint:aRect.origin fromRect:aRect];
+    [image drawAtPoint:rect.origin fromRect:rect operation:NSCompositeSourceOver fraction:1.0];
     
     [nsContext restoreGraphicsState];
 }
 
 - (void)fillPathWithColor:(CIColor *)fgColor blendedAtRight:(BOOL)right ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
-    NSRect bounds = [self bounds];
-    CGRect aRect = *(CGRect*)&bounds;
+    NSRect rect = [self bounds];
     
-    CIImage *image = [CIImage imageInRect:aRect withColor:fgColor blendedAtRight:right ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
+    CIImage *image = [CIImage imageInRect:*(CGRect*)&rect withColor:fgColor blendedAtRight:right ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
     
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];
     
 	[self addClip];
 	
-    [[nsContext CIContext] drawImage:image atPoint:aRect.origin fromRect:aRect];
+    [image drawAtPoint:rect.origin fromRect:rect operation:NSCompositeSourceOver fraction:1.0];
     
     [nsContext restoreGraphicsState];
 }

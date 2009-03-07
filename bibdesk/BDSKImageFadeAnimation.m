@@ -103,15 +103,16 @@
 - (NSImage *)currentImage;
 { 
     NSImage *nsImage = nil;
-    CIImage *image = [filter valueForKey:@"outputImage"];
-    if (nil != image) {
-        CGRect rect = [image extent];
-    
-        nsImage = [[NSImage alloc] initWithSize:((NSRect *)&rect)->size];
+    CIImage *ciImage = [filter valueForKey:@"outputImage"];
+    if (nil != ciImage) {
+        CGRect extent = [ciImage extent];
+        NSRect sourceRect = *(NSRect *)&extent;
+        NSRect targetRect = sourceRect;
+        targetRect.origin = NSZeroPoint;
+        
+        nsImage = [[NSImage alloc] initWithSize:targetRect.size];
         [nsImage lockFocus];
-        CIContext *ciContext = [[NSGraphicsContext currentContext] CIContext];
-        CGRect r = CGRectMake(0,0,rect.size.width, rect.size.height);
-        [ciContext drawImage:image inRect:r fromRect:r];
+        [ciImage drawInRect:targetRect fromRect:sourceRect operation:NSCompositeSourceOver fraction:1.0];
         [nsImage unlockFocus];
     }
     return [nsImage autorelease];

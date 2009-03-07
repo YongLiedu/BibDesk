@@ -463,7 +463,8 @@ enum {
     // we're drawing the scrollview as well as the tableview
     NSRect frameRect = [scrollView convertRect:[scrollView frame] toView:nil];
     CIImage *ciImage = [anAnimation currentCIImage];
-    [[ctxt CIContext] drawImage:ciImage atPoint:*(CGPoint *)&(frameRect.origin) fromRect:[ciImage extent]];
+    CGRect rect = [ciImage extent];
+    [ciImage drawAtPoint:frameRect.origin fromRect:*(NSRect *)&rect operation:NSCompositeSourceOver fraction:1.0];
     [ctxt flushGraphics];
     [ctxt restoreGraphicsState];
 }
