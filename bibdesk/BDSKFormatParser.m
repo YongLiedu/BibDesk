@@ -1019,13 +1019,12 @@
 				errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C must be followed by a {'field'} name.", @"Error description"), specifier];
 				break;
 			}
-			string = [self stringBySanitizingString:string forField:BDSKCiteKeyString inFileType:type]; // cite-key sanitization is strict, so we use that for fieldnames
-			if ([string caseInsensitiveCompare:BDSKCiteKeyString] == NSOrderedSame || [string caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame || [string caseInsensitiveCompare:@"Citekey"] == NSOrderedSame)
+            if ([string caseInsensitiveCompare:BDSKCiteKeyString] == NSOrderedSame || [string caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame || [string caseInsensitiveCompare:@"Citekey"] == NSOrderedSame)
 				string = BDSKCiteKeyString;
 			else if ([string caseInsensitiveCompare:BDSKPubTypeString] == NSOrderedSame)
 				string = BDSKPubTypeString;
             else
-                string = [string fieldName]; // we need to have BibTeX field names capitalized
+                string = [[self stringBySanitizingString:string forField:BDSKCiteKeyString inFileType:type] fieldName]; // cite-key sanitization is strict, so we use that for fieldnames
 			AppendStringToFormatStrings(@"{", specAttr);
 			AppendStringToFormatStrings(string, argAttr);
 			AppendStringToFormatStrings(@"}", specAttr);
