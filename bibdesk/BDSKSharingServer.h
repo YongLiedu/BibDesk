@@ -67,12 +67,19 @@ extern NSString *BDSKServiceNameForKeychain;
 
 @end
 
+enum {
+    BDSKSharingStatusOff,
+    BDSKSharingStatusStarting,
+    BDSKSharingStatusPublishing,
+    BDSKSharingStatusSharing
+};
+typedef int BDSKSharingStatus;
 
 @interface BDSKSharingServer : NSObject {    
     NSNetService *netService;
     id server;
     NSString *sharingName;
-    BOOL isSharing;
+    BDSKSharingStatus status;
     int tryCount;
 }
 
@@ -81,7 +88,7 @@ extern NSString *BDSKServiceNameForKeychain;
 + (NSString *)supportedProtocolVersion;
 
 - (NSString *)sharingName;
-- (BOOL)isSharing;
+- (BDSKSharingStatus)status;
 
 - (unsigned int)numberOfConnections;
 

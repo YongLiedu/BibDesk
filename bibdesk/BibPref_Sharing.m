@@ -119,11 +119,11 @@
         unsigned int number = [server numberOfConnections];
         if(number == 1)
             statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
-        else if([server isSharing])
+        else if([server status] >= BDSKSharingStatusPublishing)
             statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %i users connected", @"Bonjour sharing is on status message, zero or multiple connections"), number];
         else
             statusMessage = [NSString stringWithFormat:NSLocalizedString(@"Standby", @"Bonjour sharing is standby status message"), number];
-        if ([server isSharing])
+        if ([server status] >= BDSKSharingStatusPublishing)
             sharingName = [server sharingName];
     }else{
         statusMessage = NSLocalizedString(@"Off", @"Bonjour sharing is off status message");

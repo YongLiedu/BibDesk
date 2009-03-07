@@ -203,8 +203,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     }
 }
 
-- (BOOL)isSharing {
-    return isSharing;
+- (BDSKSharingStatus)status {
+    return status;
 }
 
 - (unsigned int)numberOfConnections { 
@@ -288,18 +288,21 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)_enableSharing
 {
-    if(server == nil){
+    if(status == BDSKSharingStatusOff){
         // we're not yet sharing
         
         server = [[BDSKSharingDOServer alloc] initForSharingServer:self];
         // the netService is created in the callback
+        
+        status = BDSKSharingStatusStarting;
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
     }
 }
 
 - (void)enableSharing
 {
     // only restart when there's something to share, the next document that's opened will otherwise call again if necessary
-    if(server == nil && [[NSApp orderedDocuments] count] > 0){
+    if(status == BDSKSharingStatusOff && [[NSApp orderedDocuments] count] > 0){
         // we're not yet sharing and we've got something to share
         
         tryCount = 0;
@@ -311,7 +314,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void)disableSharing
 {
-    if(server != nil){
+    if(status != BDSKSharingStatusOff){
         [netService setDelegate:nil];
         [netService stop];
         [netService release];
@@ -331,11 +334,12 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         [nc removeObserver:self name:BDSKDocAddItemNotification object:nil];
         [nc removeObserver:self name:BDSKDocDelItemNotification object:nil];
         [nc removeObserver:self name:NSApplicationWillTerminateNotification object:nil];
+        
+        [self setSharingName:nil];
+        
+        status = BDSKSharingStatusOff;
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
     }
-    
-    [self setSharingName:nil];
-    isSharing = NO;
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
 }
 
 - (void)restartSharingIfNeeded;
@@ -416,22 +420,29 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         [server release];
         server = nil;
         
+        [self setSharingName:nil];
+        
+        status = BDSKSharingStatusOff;
+        
         // try again with a different name
         if (tryCount < MAX_TRY_COUNT) {
             [self setSharingName:[NSString stringWithFormat:@"%@-%i", [BDSKSharingServer defaultSharingName], ++tryCount]];
             [self _enableSharing];
+        } else {
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
         }
     }
 }
 
 - (void)netServiceWillPublish:(NSNetService *)sender
 {
-    isSharing = YES;
+    status = BDSKSharingStatusPublishing;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
 }
 
 - (void)netServiceDidPublish:(NSNetService *)sender
 {
+    status = BDSKSharingStatusSharing;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingStatusChangedNotification object:nil];
 }
 
