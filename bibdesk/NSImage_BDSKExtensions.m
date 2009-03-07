@@ -243,8 +243,8 @@
     filter = [CIFilter filterWithName:@"CIColorControls"];
     [filter setValue:ciImage forKey:@"inputImage"];
     [filter setDefaults];
-    [filter setValue:[NSNumber numberWithFloat:2.5] forKey:@"inputSaturation"];
-    [filter setValue:[NSNumber numberWithFloat:0.5] forKey:@"inputBrightness"];
+    [filter setValue:[NSNumber numberWithFloat:1.0] forKey:@"inputSaturation"];
+    [filter setValue:[NSNumber numberWithFloat:0.3] forKey:@"inputBrightness"];
     ciImage = [filter valueForKey:@"outputImage"];
     
     genericFolderIconImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
