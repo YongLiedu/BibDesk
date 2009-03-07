@@ -214,11 +214,16 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         [sharingClients makeObjectsPerformSelector:@selector(terminate)];
         [sharingClients release];
         sharingClients = nil;
+        
         [browser release];
         browser = nil;
+        
         [unresolvedNetServices makeObjectsPerformSelector:@selector(setDelegate:) withObject:nil];
         [unresolvedNetServices release];
         unresolvedNetServices = nil;
+        
+        if ([undecidedNetServices count])
+            [[self class] cancelPreviousPerformRequestsWithTarget:self];
         [undecidedNetServices release];
         undecidedNetServices = nil;
         
