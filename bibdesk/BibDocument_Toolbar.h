@@ -1,4 +1,4 @@
-//  BibDocumentView_Toolbar.h
+//  BibDocument_Toolbar.h
 //  Created by Michael McCracken on Wed Jul 03 2002.
 /*
  This software is Copyright (c) 2002-2009
@@ -34,7 +34,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BibDocument+Menus.h"
+#import "BibDocument.h"
 
 @interface BibDocument (Toolbar)
 

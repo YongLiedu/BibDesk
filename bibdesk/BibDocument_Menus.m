@@ -1,5 +1,5 @@
 //
-//  BibDocument+Menus.m
+//  BibDocument_Menus.m
 //  BibDesk
 //
 //  Created by Sven-S. Porst on Fri Jul 30 2004.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDocument+Menus.h"
+#import "BibDocument_Menus.h"
 #import "BDSKGroupCell.h"
 #import "BDSKGroup.h"
 #import "BibDocument_Groups.h"

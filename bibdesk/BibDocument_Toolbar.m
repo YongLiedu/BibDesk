@@ -1,4 +1,4 @@
-//  BibDocumentView_Toolbar.m
+//  BibDocument_Toolbar.m
 
 //  Created by Michael McCracken on Wed Jul 03 2002.
 /*
@@ -34,7 +34,8 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDocumentView_Toolbar.h"
+#import "BibDocument_Toolbar.h"
+#import "BibDocument_Menus.h"
 #import "BibDocument_Search.h"
 #import "BDSKAppController.h"
 #import "NSImage_BDSKExtensions.h"

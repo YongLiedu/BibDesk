@@ -1,4 +1,4 @@
-//  BibDocument+Menus.h
+//  BibDocument_Menus.h
 //  BibDesk
 //
 //  Created by Sven-S. Porst on Fri Jul 30 2004.
