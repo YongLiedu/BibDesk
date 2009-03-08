@@ -60,5 +60,5 @@
 
 @end
 
-@interface NSTableView (BDSKDisablingTableView)
+@interface BDSKDisablingTableView : NSTableView
 @end

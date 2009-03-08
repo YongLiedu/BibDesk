@@ -58,10 +58,14 @@ static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossr
     [[[[tableView tableColumns] objectAtIndex:0] dataCell] setFormatter:typeNameFormatter];
     [typeNameFormatter release];
     
-    [self updateDuplicateBooktitleUI];
-    [self updateDuplicateTypes];
     [warnOnEditInheritedCheckButton setState:[sud boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
     [autoSortCheckButton setState:[sud boolForKey:BDSKAutoSortForCrossrefsKey] ? NSOnState : NSOffState];
+    
+    [duplicateBooktitleCheckButton setState:[sud boolForKey:BDSKDuplicateBooktitleKey] ? NSOnState : NSOffState];
+    [forceDuplicateBooktitleCheckButton setState:[sud boolForKey:BDSKForceDuplicateBooktitleKey] ? NSOnState : NSOffState];
+    
+    [self updateDuplicateBooktitleUI];
+    [self updateDuplicateTypes];
     
     [sudc addObserver:self forKeyPath:[@"values." stringByAppendingString:BDSKWarnOnEditInheritedKey] options:0 context:BDSKBibPrefCrossrefDefaultsObservationContext];
 }
@@ -80,12 +84,10 @@ static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossr
 
 - (void)updateDuplicateBooktitleUI{
 	BOOL duplicate = [sud boolForKey:BDSKDuplicateBooktitleKey];
-    [duplicateBooktitleCheckButton setState:duplicate ? NSOnState : NSOffState];
-    [forceDuplicateBooktitleCheckButton setState:[sud boolForKey:BDSKForceDuplicateBooktitleKey] ? NSOnState : NSOffState];
     [forceDuplicateBooktitleCheckButton setEnabled:duplicate];
 	[tableView setEnabled:duplicate];
 	[addTypeButton setEnabled:duplicate];
-	[deleteTypeButton setEnabled:duplicate];
+	[deleteTypeButton setEnabled:duplicate && [tableView numberOfSelectedRows] > 0];
 }
 
 - (IBAction)changeAutoSort:(id)sender{
@@ -151,6 +153,10 @@ static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossr
 	return [tv isEnabled];
 }
 
+- (void)tableViewSelectionDidChange:(NSTableView *)tv{
+    [self updateDuplicateBooktitleUI];
+}
+
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -166,15 +172,15 @@ static void *BDSKBibPrefCrossrefDefaultsObservationContext = @"BDSKBibPrefCrossr
 
 @end
 
-@implementation NSTableView (BDSKDisablingTableView)
+@implementation BDSKDisablingTableView
 
 - (void)setEnabled:(BOOL)flag{
 	[super setEnabled:flag];
-	if (!flag) [self deselectAll:nil];
+	if (flag == NO) [self deselectAll:nil];
 }
 
 - (BOOL)acceptsFirstResponder{
-	return [self isEnabled];
+	return [self isEnabled] && [super acceptsFirstResponder];
 }
 
 @end
