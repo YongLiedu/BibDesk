@@ -616,6 +616,7 @@ static void replaceSplitViewSubview(NSView *view, NSSplitView *splitView, NSInte
     
     // this shouldn't be necessary
     [documentWindow recalculateKeyViewLoop];
+    [documentWindow makeFirstResponder:tableView];
 }
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
