@@ -84,6 +84,7 @@ static int tableIconSize = 24;
     [cell setHasDarkHighlight:YES];
     [[tableView tableColumnWithIdentifier:@"AppList"] setDataCell:cell];
     [tableView setRowHeight:(tableIconSize + 2)];
+    [tableView setBackgroundColor:[NSColor controlBackgroundColor]];
 
     NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:BDSKTextWithIconCellStringKey ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
     [arrayController setSortDescriptors:[NSArray arrayWithObject:sort]];
