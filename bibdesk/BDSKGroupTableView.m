@@ -149,7 +149,8 @@
         NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
         if (NSPointInRect(point, iconRect)) {
             if ([theEvent clickCount] == 2) {
-                [[self delegate] tableView:self doubleClickedOnIconOfRow:row];
+                if ([[self delegate] respondsToSelector:@selector(tableView:doubleClickedOnIconOfRow:)])
+                    [[self delegate] tableView:self doubleClickedOnIconOfRow:row];
                 return;
             } else if ([self isRowSelected:row]) {
                 return;
@@ -211,26 +212,21 @@
 {
     [super highlightSelectionInClipRect:clipRect];
     // check this in case it's been disconnected in one of our reloading optimizations
-    id delegate = [self delegate];
-    if(delegate != nil)
-        [self drawHighlightOnRows:[delegate indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect] tableView:self] usingColor:[NSColor disabledControlTextColor]];
-}
-
-- (void)setDelegate:(id <BDSKGroupTableDelegate>)aDelegate
-{
-    NSAssert1(aDelegate == nil || [(id)aDelegate conformsToProtocol:@protocol(BDSKGroupTableDelegate)], @"%@ does not conform to BDSKGroupTableDelegate protocol", [aDelegate class]);
-    [super setDelegate:aDelegate];
+    if([[self delegate] respondsToSelector:@selector(tableView:indexesOfRowsToHighlightInRange:)])
+        [self drawHighlightOnRows:[[self delegate] tableView:self indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect]] usingColor:[NSColor disabledControlTextColor]];
 }
 
 // make sure that certain rows are only selected as a single selection
 - (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)shouldExtend{
-    NSIndexSet *singleIndexes = [[self delegate] tableViewSingleSelectionIndexes:self];
+    NSIndexSet *singleIndexes = nil;
+    if ([[self delegate] respondsToSelector:@selector(tableViewSingleSelectionIndexes:)])
+        singleIndexes = [[self delegate] tableViewSingleSelectionIndexes:self];
     
     // don't extend rows that should be in single selection
-    if (shouldExtend == YES && [[self selectedRowIndexes] intersectsIndexSet:singleIndexes])
+    if (shouldExtend == YES && singleIndexes && [[self selectedRowIndexes] intersectsIndexSet:singleIndexes])
         return;
     // remove single selection rows from multiple selections
-    if ((shouldExtend == YES || [indexes count] > 1) && [indexes intersectsIndexSet:singleIndexes]) {
+    if ((shouldExtend == YES || [indexes count] > 1) && singleIndexes && [indexes intersectsIndexSet:singleIndexes]) {
         NSMutableIndexSet *mutableIndexes = [[indexes mutableCopy] autorelease];
         [mutableIndexes removeIndexes:singleIndexes];
         indexes = mutableIndexes;
@@ -299,11 +295,6 @@
     [cell release];
     
     return self;
-}
-
-- (void)dealloc
-{
-    [super dealloc];
 }
 
 - (void)mouseDown:(NSEvent *)theEvent

@@ -39,9 +39,6 @@
 */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKGroupTableView.h"
-#import "BDSKFileContentSearchController.h"
-#import "BDSKTemplateParser.h"
 #import "BDSKOwnerProtocol.h"
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
@@ -109,7 +106,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion This is the document class. It keeps an array of BibItems (called (NSMutableArray *)publications) and handles the quick search box. It delegates PDF generation to a BDSKPreviewer.
 */
 
-@interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView, BDSKOwner>
+@interface BibDocument : NSDocument <BDSKOwner>
 {
 #pragma mark Main tableview pane variables
 

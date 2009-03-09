@@ -101,7 +101,6 @@
 @end
 
 
-@protocol BDSKSearchContentView <NSObject>
-// Single method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the views and resetting search field target/action.  It is sent to the document in response to a search field action with an empty string as search string.
+@interface NSObject (BDSKSearchControllerDocument)
 - (void)removeFileContentSearch:(BDSKFileContentSearchController *)fileContentSearchController;
 @end

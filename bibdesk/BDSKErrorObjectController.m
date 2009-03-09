@@ -49,6 +49,7 @@
 #import "BDSKEditor.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKTableView.h"
 
 // put it here because IB chokes on it
 @interface BDSKLineNumberTransformer : NSValueTransformer @end

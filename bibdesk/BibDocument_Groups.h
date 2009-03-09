@@ -135,7 +135,4 @@
 
 - (void)setImported:(BOOL)flag forPublications:(NSArray *)pubs inGroup:(BDSKGroup *)aGroup;
 
-- (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview;
-- (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview;
-
 @end

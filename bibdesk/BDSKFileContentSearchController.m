@@ -72,7 +72,7 @@
         
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     
-    NSParameterAssert([aDocument conformsToProtocol:@protocol(BDSKSearchContentView)]);
+    NSParameterAssert([aDocument respondsToSelector:@selector(removeFileContentSearch:)]);
     [self setDocument:aDocument];
     
     searchIndex = [[BDSKFileSearchIndex alloc] initWithDocument:aDocument];

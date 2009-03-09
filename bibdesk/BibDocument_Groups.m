@@ -86,6 +86,7 @@
 #import "BDSKApplication.h"
 #import "BDSKCFCallBacks.h"
 #import "BDSKMessageQueue.h"
+#import "BDSKFileContentSearchController.h"
 
 
 @implementation BibDocument (Groups)
@@ -699,49 +700,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     return [self selectGroups:[NSArray arrayWithObject:aGroup]];
 }
 
-- (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
-    if([self numberOfSelectedPubs] == 0 || 
-       [self hasExternalGroupsSelected] == YES)
-        return [NSIndexSet indexSet];
-    
-    // Use this for the indexes we're going to return
-    NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
-    
-    // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
-    NSMutableIndexSet *visibleIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:indexRange];
-    [visibleIndexes removeIndexes:[groupTableView selectedRowIndexes]];
-    [visibleIndexes removeIndexesInRange:[groups rangeOfExternalGroups]];
-    
-    NSArray *selectedPubs = [self selectedPublications];
-    unsigned int groupIndex = [visibleIndexes firstIndex];
-    
-    while (groupIndex != NSNotFound) {
-        BDSKGroup *group = [groups objectAtIndex:groupIndex];
-        NSEnumerator *pubEnum = [selectedPubs objectEnumerator];
-        BibItem *pub;
-        while(pub = [pubEnum nextObject]){
-            if ([group containsItem:pub]) {
-                [indexSet addIndex:groupIndex];
-                break;
-            }
-        }
-        groupIndex = [visibleIndexes indexGreaterThanIndex:groupIndex];
-    }
-    
-    return indexSet;
-}
-
-- (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview{
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:[groups rangeOfSharedGroups]];
-    [indexes addIndexesInRange:[groups rangeOfURLGroups]];
-    [indexes addIndexesInRange:[groups rangeOfScriptGroups]];
-    [indexes addIndexesInRange:[groups rangeOfSearchGroups]];
-    [indexes addIndex:0];
-    if ([groups webGroup])
-        [indexes addIndex:1];
-    return indexes;
-}
-
 - (NSMenu *)groupFieldsMenu {
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenuItem *menuItem;
@@ -772,13 +730,6 @@ static void addObjectToSetAndBag(const void *value, void *context) {
     [menuItem release];
 	
 	return [menu autorelease];
-}
-
-- (NSMenu *)tableView:(BDSKGroupTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)tableColumn onPopUp:(BOOL)flag{
-	if ([[tableColumn identifier] isEqualToString:@"group"] && flag == NO) {
-		return [[NSApp delegate] groupSortMenu];
-	}
-	return nil;
 }
 
 #pragma mark Actions

@@ -3760,18 +3760,6 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
     [self privateRemoveFileContentSearch:controller]; 
 }
 
-- (NSIndexSet *)indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
-    return [self _indexesOfRowsToHighlightInRange:indexRange tableView:tview];
-}
-
-- (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview{
-    return [self _tableViewSingleSelectionIndexes:tview];
-}
-
-- (void)tableView:(BDSKGroupTableView *)tview doubleClickedOnIconOfRow:(int)row{
-    [self editGroupAtRow:row];
-}
-
 #pragma mark DisplayName KVO
 
 - (void)setFileURL:(NSURL *)absoluteURL{ 

@@ -41,33 +41,24 @@
 
 @class BDSKGroupTableView;
 
-@protocol BDSKGroupTableDelegate <NSObject>
-
-- (NSIndexSet *)indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview;
-- (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview;
-- (void)tableView:(BDSKGroupTableView *)tview doubleClickedOnIconOfRow:(int)row;
-
-@end
-
 @interface BDSKGroupTableView : BDSKGradientTableView
 - (NSPopUpButtonCell *)popUpHeaderCell;
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 - (void)updateHighlights;
-
 @end
 
-///////////
+#pragma mark -
 
-@interface BDSKGroupTableHeaderView : NSTableHeaderView {
-}
-
+@interface BDSKGroupTableHeaderView : NSTableHeaderView
 - (id)initWithTableColumn:(NSTableColumn *)tableColumn;
 - (NSPopUpButtonCell *)popUpHeaderCell;
-
 @end
 
-///////////
+#pragma mark -
 
 @interface NSObject (BDSKGroupTableViewDelegate)
+- (NSIndexSet *)tableView:(BDSKGroupTableView *)aTableView indexesOfRowsToHighlightInRange:(NSRange)indexRange;
+- (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)aTableView;
+- (void)tableView:(BDSKGroupTableView *)aTableView doubleClickedOnIconOfRow:(int)row;
 - (NSMenu *)tableView:(BDSKGroupTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn onPopUp:(BOOL)flag;
 @end
