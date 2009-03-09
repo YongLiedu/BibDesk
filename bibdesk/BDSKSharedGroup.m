@@ -127,6 +127,7 @@ static NSImage *unlockedIcon = nil;
 - (void)dealloc;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [client release];
     [publications release];
     [macroResolver release];
