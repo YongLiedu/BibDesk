@@ -346,9 +346,10 @@ static CFDictionaryRef selectorTable = NULL;
             macroResolver = [container macroResolver];
         theCopy = [self copyWithMacroResolver:macroResolver];
     } else {
-        // We set isNew to YES as copied items are always added as new items to a document, e.g. for duplicates and text import, so the Date-Added should be reset.  Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
+        // We set isNew to NO because this is used before archiving for sharing, and we want to keey the Date-Modified and Date-Added for shared items, for duplicated items the Date-Added is reset explicitly
+        // Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
         NSArray *filesCopy = [[NSArray allocWithZone: zone] initWithArray:files copyItems:YES];
-        theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields files:filesCopy isNew:YES];
+        theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields files:filesCopy isNew:NO];
         [filesCopy release];
         [theCopy setDate: pubDate];
     }
@@ -1261,6 +1262,10 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 
 - (id)valueForUndefinedKey:(NSString *)key{
     return [self stringValueOfField:key];
+}
+
+- (void)setDateAddedField:(NSString *)value {
+    [self setField:BDSKDateAddedString toValue:value];
 }
 
 - (NSString *)stringValueOfField:(NSString *)field {

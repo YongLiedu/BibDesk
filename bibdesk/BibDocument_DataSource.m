@@ -1373,6 +1373,7 @@ static BOOL menuHasNoValidItems(id validator, NSMenu *menu) {
 	if (tv == tableView) {
         NSArray *newPubs = [[NSArray alloc] initWithArray:[self selectedPublications] copyItems:YES];
         
+        [newPubs makeObjectsPerformSelector:@selector(setDateAddedField:) withObject:[[NSCalendarDate date] description]];
         [self addPublications:newPubs]; // notification will take care of clearing the search/sorting
         [self selectPublications:newPubs];
         [newPubs release];
