@@ -83,7 +83,7 @@
 // increment if incompatible changes are introduced
 #define CACHE_VERSION @"1"
 
-- (id)initWithDocument:(id)aDocument
+- (id)initForDocument:(BibDocument *)aDocument
 {
     BDSKASSERT([NSThread isMainThread]);
 

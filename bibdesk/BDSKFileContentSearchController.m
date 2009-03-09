@@ -51,6 +51,7 @@
 #import "BDSKFileSearch.h"
 #import "BDSKFileSearchResult.h"
 #import "BDSKLevelIndicatorCell.h"
+#import "BibDocument.h"
 #import "BibDocument_Search.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
@@ -59,7 +60,7 @@
 
 @implementation BDSKFileContentSearchController
 
-- (id)initForDocument:(id)aDocument
+- (id)initForDocument:(BibDocument *)aDocument
 {    
     self = [super init];
     if(!self) return nil;
@@ -75,7 +76,7 @@
     NSParameterAssert([aDocument respondsToSelector:@selector(removeFileContentSearch:)]);
     [self setDocument:aDocument];
     
-    searchIndex = [[BDSKFileSearchIndex alloc] initWithDocument:aDocument];
+    searchIndex = [[BDSKFileSearchIndex alloc] initForDocument:aDocument];
     search = [[BDSKFileSearch alloc] initWithIndex:searchIndex delegate:self];
     searchFieldDidEndEditing = NO;
     

@@ -40,7 +40,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKFileSearch.h"
 
-@class BDSKFileSearchIndex, BDSKTableView, BDSKCollapsibleView, BDSKEdgeView;
+@class BDSKFileSearchIndex, BDSKTableView, BDSKCollapsibleView, BDSKEdgeView, BibDicument;
 
 @interface BDSKSelectionPreservingArrayController : NSArrayController
 @end
@@ -66,7 +66,7 @@
 }
 
 // Use this method to instantiate a search controller for use within a document window
-- (id)initForDocument:(id)aDocument;
+- (id)initForDocument:(BibDocument *)aDocument;
 - (NSView *)controlView;
 - (NSTableView *)tableView;
 // Use this to connect a search field and initiate a search
