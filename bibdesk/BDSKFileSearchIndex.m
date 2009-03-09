@@ -40,7 +40,6 @@
 #import "BibDocument.h"
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
-#import "BDSKThreadSafeMutableArray.h"
 #import "BDSKManyToManyDictionary.h"
 #import "NSObject_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
@@ -145,6 +144,7 @@
     [rwLock release];
     [notificationPort release];
     [notificationQueue release];
+    [noteLock release];
     [signatures release];
     if(index) CFRelease(index);
     if(indexData) CFRelease(indexData);
@@ -600,7 +600,9 @@ static void addItemFunction(const void *value, void *context) {
     [notificationPort setDelegate:self];
     [[NSRunLoop currentRunLoop] addPort:notificationPort forMode:NSDefaultRunLoopMode];
     
-    notificationQueue = [[BDSKThreadSafeMutableArray alloc] initWithCapacity:5];
+    notificationQueue = [[NSMutableArray alloc] initWithCapacity:5];
+    noteLock = [[NSLock alloc] init];
+    
     [setupLock unlockWithCondition:INDEX_STARTUP_COMPLETE];
     
     [setupLock lockWhenCondition:INDEX_THREAD_WORKING];
@@ -684,7 +686,9 @@ static void addItemFunction(const void *value, void *context) {
 {    
     BDSKASSERT([NSThread isMainThread]);
     // Forward the notification to the correct thread
+    [noteLock lock];
     [notificationQueue addObject:note];
+    [noteLock unlock];
     [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
 }
 
@@ -769,14 +773,24 @@ static void addItemFunction(const void *value, void *context) {
     [self searchIndexDidUpdateOnMainThread];
 }    
 
+- (NSNotification *)newNotification {
+    NSNotification *note = nil;
+    [noteLock lock];
+    if ([notificationQueue count]) {
+        note = [[notificationQueue objectAtIndex:0] retain];
+        [notificationQueue removeObjectAtIndex:0];
+    }
+    [noteLock unlock];
+    return note;
+}
+
 - (void)handleMachMessage:(void *)msg
 {
     BDSKASSERT([NSThread isMainThread] == NO);
-
-    while ( [notificationQueue count] ) {
-        NSNotification *note = [[notificationQueue objectAtIndex:0] retain];
+    NSNotification *note;
+    
+    while (note = [self newNotification]) {
         NSString *name = [note name];
-        [notificationQueue removeObjectAtIndex:0];
         // this is a background thread that can handle these notifications
         if([name isEqualToString:BDSKFileSearchIndexInfoChangedNotification])
             [self handleSearchIndexInfoChangedNotification:note];

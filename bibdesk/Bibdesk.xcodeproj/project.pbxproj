@@ -211,7 +211,6 @@
 		CE8BE5BF0D99AF5000E314A4 /* BDSKSearchBookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8BE5BD0D99AF5000E314A4 /* BDSKSearchBookmark.m */; };
 		CE8C731F0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */; };
 		CE8F5F840DEEB26800061148 /* ZoomValues.strings in Resources */ = {isa = PBXBuildFile; fileRef = CE8F5F830DEEB26800061148 /* ZoomValues.strings */; };
-		CE8F83490AFB989C009EE6F9 /* BDSKThreadSafeMutableArray.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8F83470AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.m */; };
 		CE92CE5E0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */; };
 		CE95A57C0A88883300334DFA /* BDSKReadMeController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE95A57A0A88883300334DFA /* BDSKReadMeController.m */; };
 		CE95AF180ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = CE95AF160ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m */; };
@@ -1183,8 +1182,6 @@
 		CE8C731D0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSObject_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE8F5F800DEEB24700061148 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/ZoomValues.strings; sourceTree = "<group>"; };
 		CE8F5F850DEEB27600061148 /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/ZoomValues.strings; sourceTree = "<group>"; };
-		CE8F83460AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKThreadSafeMutableArray.h; sourceTree = "<group>"; };
-		CE8F83470AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKThreadSafeMutableArray.m; sourceTree = "<group>"; };
 		CE92CE5B0D7D860E0031CA86 /* BDSKGradientSegmentedControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGradientSegmentedControl.h; sourceTree = "<group>"; };
 		CE92CE5C0D7D860E0031CA86 /* BDSKGradientSegmentedControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGradientSegmentedControl.m; sourceTree = "<group>"; };
 		CE95A5790A88883300334DFA /* BDSKReadMeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKReadMeController.h; sourceTree = "<group>"; };
@@ -2239,7 +2236,6 @@
 				CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */,
 				F98DB3160A23C7730040D347 /* BDSKTemplate.m */,
 				CE95AF160ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m */,
-				CE8F83470AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.m */,
 				CE8961860CBEB59800EA2D98 /* BDSKToken.m */,
 				F963E42B0A1D7ADD00695DDC /* BDSKTreeNode.m */,
 				CE8961880CBEB59800EA2D98 /* BDSKTypeTemplate.m */,
@@ -2746,7 +2742,6 @@
 				27AFAF9A080D1E1B0096F5D2 /* BDSKTextImportController.h */,
 				F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */,
 				F9DCEA4D094B7D1100AEE662 /* BDSKTextWithIconCell.h */,
-				CE8F83460AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.h */,
 				F963E42A0A1D7ADD00695DDC /* BDSKTreeNode.h */,
 				CE8961850CBEB59800EA2D98 /* BDSKToken.h */,
 				CE6DACC20A503ECF00123185 /* BDSKToolbarItem.h */,
@@ -3810,7 +3805,6 @@
 				F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */,
 				CE602A600AF65A9C000B5680 /* BDSKStringParser.m in Sources */,
 				CE27D95C0AF92BFD00419879 /* BDSKZoomableTextView.m in Sources */,
-				CE8F83490AFB989C009EE6F9 /* BDSKThreadSafeMutableArray.m in Sources */,
 				CEEFDE010B03ED0200668BB0 /* BDSKScriptGroupSheetController.m in Sources */,
 				CEEFDE030B03ED0200668BB0 /* BDSKURLGroupSheetController.m in Sources */,
 				CEEFE6C20B0403E700668BB0 /* BDSKGroupsArray.m in Sources */,

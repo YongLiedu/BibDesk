@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKFileSearchIndex, BDSKThreadSafeMutableArray, BDSKManyToManyDictionary, BDSKReadWriteLock;
+@class BDSKFileSearchIndex, BDSKManyToManyDictionary, BDSKReadWriteLock;
 
 @protocol BDSKFileSearchIndexDelegate <NSObject>
 
@@ -64,7 +64,8 @@ typedef struct _BDSKSearchIndexFlags
     
     BDSKReadWriteLock *rwLock;
     
-    BDSKThreadSafeMutableArray *notificationQueue;
+    NSMutableArray *notificationQueue;
+    NSLock *noteLock;
     NSMachPort *notificationPort;
     NSThread *notificationThread;
     NSConditionLock *setupLock;
