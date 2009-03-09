@@ -44,12 +44,6 @@
 
 - (void)endEditingAndOrderOut;
 
-- (void)attachWindow;
-- (void)hideWindow;
-
-- (NSRect)currentCellFrame;
-- (id)currentCell;
-
 - (void)setExpandedValue:(NSString *)expandedValue;
 - (void)setErrorReason:(NSString *)reason errorMessage:(NSString *)message;
 
@@ -65,21 +59,22 @@
 @implementation BDSKComplexStringEditor
 
 - (id)init {
-	if (self = [super initWithWindowNibName:[self windowNibName]]) {
+	if (self = [super initWithWindowNibName:@"ComplexStringEditor"]) {
 		tableView = nil;
         formatter = nil;
 		row = -1;
 		column = -1;
+        editable = YES;
 	}
 	return self;
 }
 
-- (void)dealloc {
-	[super dealloc];
+- (BOOL)isEditable {
+    return editable;
 }
 
-- (NSString *)windowNibName {
-    return @"ComplexStringEditor";
+- (void)setEditable:(BOOL)flag {
+    editable = flag;
 }
 
 - (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString formatter:(BDSKComplexStringFormatter *)aFormatter {
@@ -93,7 +88,7 @@
 	
 	[self window]; // make sure we loaded the nib
 	
-	[tableView scrollRectToVisible:[self currentCellFrame]];
+	[tableView scrollRowToVisible:row];
 	[self setExpandedValue:aString];
 	[self cellWindowDidBecomeKey:nil]; //draw the focus ring we are covering
 	[self cellFrameDidChange:nil]; // reset the frame and show the window
@@ -171,7 +166,8 @@
 - (void)endEditingAndOrderOut {
     // we're going away now, so we can unregister for the notifications we registered for earlier
 	[self unregisterForNotifications];
-    [self hideWindow];
+    [[tableView window] removeChildWindow:[self window]];
+    [[self window] orderOut:self];
 	
 	// release the temporary objects
 	[tableView release];
@@ -180,24 +176,6 @@
 	formatter = nil;
 	row = -1;
 	column = -1;
-}
-
-- (void)attachWindow {
-	[[tableView window] addChildWindow:[self window] ordered:NSWindowAbove];
-    [[self window] orderFront:self];
-}
-
-- (void)hideWindow {
-    [[tableView window] removeChildWindow:[self window]];
-    [[self window] orderOut:self];
-}
-
-- (id)currentCell {
-    return [[[tableView tableColumns] objectAtIndex:column] dataCellForRow:row];
-}
-
-- (NSRect)currentCellFrame {
-	return [tableView frameOfCellAtColumn:column row:row];
 }
 
 - (void)setExpandedValue:(NSString *)expandedValue {
@@ -225,12 +203,14 @@
 	float minWidth = 16.0; // minimal width of the window without margins, so subviews won't get shifted
 	NSView *contentView = (NSView *)[[tableView enclosingScrollView] contentView] ?: (NSView *)tableView;
 	
-	NSDivideRect([self currentCellFrame], &lowerEdgeRect, &ignored, 1.0, lowerEdge);
+	NSDivideRect([tableView frameOfCellAtColumn:column row:row], &lowerEdgeRect, &ignored, 1.0, lowerEdge);
 	lowerEdgeRect = NSIntersectionRect(lowerEdgeRect, [contentView visibleRect]);
 	// see if the cell's lower edge is scrolled out of sight
 	if (NSIsEmptyRect(lowerEdgeRect)) {
-		if ([self isWindowVisible] == YES) 
-			[self hideWindow];
+		if ([self isWindowVisible] == YES) {
+            [[tableView window] removeChildWindow:[self window]];
+            [[self window] orderOut:self];
+        }
 		return;
 	}
 	
@@ -241,12 +221,14 @@
 	winFrame = NSInsetRect(winFrame, -margin, 0.0);
 	[[self window] setFrame:winFrame display:YES];
 	
-	if ([self isWindowVisible] == NO) 
-		[self attachWindow];
+	if ([self isWindowVisible] == NO) {
+    	[[tableView window] addChildWindow:[self window] ordered:NSWindowAbove];
+        [[self window] orderFront:self];
+    }
 }
 
 - (void)cellWindowDidBecomeKey:(NSNotification *)notification {
-	[backgroundView setShowFocusRing:[[self currentCell] isEditable]];
+	[backgroundView setShowFocusRing:[self isEditable]];
 }
 
 - (void)cellWindowDidResignKey:(NSNotification *)notification {

@@ -347,8 +347,10 @@
     int row = [tableView selectedRow];
 	if ([complexStringEditor isEditing] || row == -1) 
 		return NO;
-	if(complexStringEditor == nil)
+	if(complexStringEditor == nil) {
         complexStringEditor = [[BDSKComplexStringEditor alloc] init];
+        [complexStringEditor isEditable:isEditable];
+    }
     BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
 	NSString *value = [macro value];
 	NSText *fieldEditor = [tableView currentEditor];

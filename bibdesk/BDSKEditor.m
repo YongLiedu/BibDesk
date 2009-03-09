@@ -1735,9 +1735,11 @@ static NSString * const recentDownloadsQuery = @"(kMDItemContentTypeTree = 'publ
 	int row = [tableView selectedRow];
 	if ([complexStringEditor isEditing] || row == -1) 
 		return NO;
-	if (complexStringEditor == nil)
+	if (complexStringEditor == nil) {
     	complexStringEditor = [[BDSKComplexStringEditor alloc] init];
-	NSString *value = [publication valueOfField:[fields objectAtIndex:row]];
+        [complexStringEditor setEditable:isEditable];
+	}
+    NSString *value = [publication valueOfField:[fields objectAtIndex:row]];
 	NSText *fieldEditor = [tableView currentEditor];
 	[tableCellFormatter setEditAsComplexString:YES];
 	if (fieldEditor) {

@@ -48,9 +48,12 @@
     BDSKComplexStringFormatter *formatter;
 	int row;
 	int column;
+    BOOL editable;
 }
 
 - (BOOL)attachToTableView:(NSTableView *)aTableView atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString formatter:(BDSKComplexStringFormatter *)aFormatter;
 - (BOOL)isEditing;
+- (BOOL)isEditable;
+- (void)setEditable:(BOOL)flag;
 
 @end
