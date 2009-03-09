@@ -403,6 +403,9 @@ The groupedPublications array is a subset of the publications array, developed b
     [currentGroups release];
     
     [groupTableView reloadData];
+    
+	// reset ourself as delegate
+    [groupTableView setDelegate:self];
 	
 	// select the current groups, if still around. Otherwise this selects Library
     [self selectGroups:selectedGroups];
@@ -411,9 +414,6 @@ The groupedPublications array is a subset of the publications array, developed b
     [self displaySelectedGroups]; 
         
     // Don't flag as imported here, since that forces a (re)load of the shared groups, and causes the spinners to start when just opening a document.  The handleSharedGroupUpdatedNotification: should be enough.
-    
-	// reset ourself as delegate
-    [groupTableView setDelegate:self];
 }
 
 - (void)handleURLGroupUpdatedNotification:(NSNotification *)notification{
