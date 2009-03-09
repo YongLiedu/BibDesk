@@ -63,8 +63,6 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
 - (IBAction)searchByContent:(id)sender;
 
-- (void)privateRemoveFileContentSearch:(BDSKFileContentSearchController *)controller;
-
 #pragma mark Find panel
 
 - (NSString *)selectedStringForFind;

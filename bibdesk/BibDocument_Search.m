@@ -337,8 +337,8 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [self handleTableSelectionChangedNotification:nil];
 }
 
-// Method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
-- (void)privateRemoveFileContentSearch:(BDSKFileContentSearchController *)controller
+// Method required by the BDSKFileContentSearchController; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
+- (void)removeFileContentSearch:(BDSKFileContentSearchController *)controller
 {
     NSView *oldView = [[fileSearchController tableView] enclosingScrollView];
     NSView *newView = [tableView enclosingScrollView];
@@ -354,7 +354,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [searchField setTarget:self];
     [searchField setDelegate:self];
     
-    // privateRemoveFileContentSearch may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list.  Otherwise, select the pubs corresponding to the file content selection.
+    // removeFileContentSearch may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list.  Otherwise, select the pubs corresponding to the file content selection.
     if ([[searchField stringValue] isEqualToString:@""]) {
         [self hideSearchButtonView];
         

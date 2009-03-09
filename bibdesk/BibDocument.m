@@ -3752,14 +3752,6 @@ static void addAllFileViewObjectsForItemToArray(const void *value, void *context
 	}
 }
 
-#pragma mark -
-#pragma mark Protocols forwarding
-
-// Declaring protocol conformance in the category headers shuts the compiler up, but causes a hang in -[NSObject conformsToProtocol:], which sucks.  Therefore, we use wrapper methods here to call the real (category) implementations.
-- (void)removeFileContentSearch:(BDSKFileContentSearchController *)controller{ 
-    [self privateRemoveFileContentSearch:controller]; 
-}
-
 #pragma mark DisplayName KVO
 
 - (void)setFileURL:(NSURL *)absoluteURL{ 
