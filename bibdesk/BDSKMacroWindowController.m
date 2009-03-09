@@ -349,7 +349,7 @@
 		return NO;
 	if(complexStringEditor == nil) {
         complexStringEditor = [[BDSKComplexStringEditor alloc] init];
-        [complexStringEditor isEditable:isEditable];
+        [complexStringEditor setEditable:isEditable];
     }
     BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
 	NSString *value = [macro value];
