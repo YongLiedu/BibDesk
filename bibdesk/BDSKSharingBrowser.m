@@ -159,8 +159,9 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing
 {
-    [undecidedNetServices removeObject:aNetService];
-    if([unresolvedNetServices containsObject:aNetService]){
+    if([undecidedNetServices containsObject:aNetService]){
+        [undecidedNetServices removeObject:aNetService];
+    }else if([unresolvedNetServices containsObject:aNetService]){
         [aNetService setDelegate:nil];
         [unresolvedNetServices removeObject:aNetService];
     }else{
