@@ -419,7 +419,6 @@ static inline NSCalendarDate *ensureCalendarDate(NSDate *date) {
 }
 
 - (void)dealloc{
-    [[self undoManager] removeAllActionsWithTarget:self];
     [pubFields release];
     [people release];
 	[groups release];
