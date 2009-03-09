@@ -47,7 +47,7 @@
 #import "BibDocument.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKAsynchronousDOServer.h"
-#import "BDSKThreadSafeMutableDictionary.h"
+#import "BDSKReadWriteLock.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -106,7 +106,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     BDSKSharingServer *sharingServer;
     NSString *sharingName;
     NSConnection *connection;
-    BDSKThreadSafeMutableDictionary *remoteClients;
+    NSMutableDictionary *remoteClients;
+    unsigned int numberOfConnections;
+    BDSKReadWriteLock *rwLock;
 }
 
 + (NSString *)requiredProtocolVersion;
@@ -114,7 +116,10 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (id)initForSharingServer:(BDSKSharingServer *)aSharingServer;
 
 - (unsigned int)numberOfConnections;
+- (void)setNumberOfConnections;
+
 - (void)notifyClientConnectionsChanged;
+
 - (NSArray *)copyPublicationsFromOpenDocuments;
 - (NSDictionary *)copyMacrosFromOpenDocuments;
 
@@ -530,7 +535,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     if (self) {
         sharingServer = aSharingServer;
         sharingName = [[sharingServer sharingName] retain];
-        remoteClients = [[BDSKThreadSafeMutableDictionary alloc] init];
+        remoteClients = [[NSMutableDictionary alloc] init];
+        numberOfConnections = 0;
+        rwLock = [[BDSKReadWriteLock alloc] init];
         [self startDOServerAsync];
     }   
     return self;
@@ -542,13 +549,24 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [sharingName release];
     [remoteClients release];
     remoteClients = nil;
+    [rwLock release];
+    rwLock = nil;
     [super dealloc];
 }
 
 #pragma mark Thread Safe
 
-- (unsigned int)numberOfConnections { 
-    return [remoteClients count]; 
+- (unsigned int)numberOfConnections {
+    [rwLock lockForReading];
+    unsigned int count = numberOfConnections; 
+    [rwLock unlock];
+    return count;
+}
+
+- (void)setNumberOfConnections:(unsigned int)count {
+    [rwLock lockForWriting];
+    numberOfConnections = count;
+    [rwLock unlock];
 }
 
 #pragma mark Main Thread
@@ -606,12 +624,13 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     if (connection == nil)
         return;
     
-    NSEnumerator *e = [remoteClients keyEnumerator];
+    // don't use [remoteClients objectEnumerator], because the remoteClients may change during enumeration
+    NSEnumerator *e = [[remoteClients allValues] objectEnumerator];
     id proxyObject;
-    NSString *key;
+    NSDictionary *dict;
     
-    while(key = [e nextObject]){
-        proxyObject = [[remoteClients objectForKey:key] objectForKey:@"object"];
+    while(dict = [e nextObject]){
+        proxyObject = [dict objectForKey:@"object"];
         @try {
             [proxyObject invalidate];
         }
@@ -623,6 +642,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         }
     }
     [remoteClients removeAllObjects];
+    [self setNumberOfConnections:0];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
     NSPort *port = [[NSSocketPortNameServer sharedInstance] portForName:sharingName];
@@ -676,6 +696,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [clientObject setProtocolForProxy:@protocol(BDSKSharingClient)];
     NSDictionary *clientInfo = [NSDictionary dictionaryWithObjectsAndKeys:clientObject, @"object", version, @"version", nil];
     [remoteClients setObject:clientInfo forKey:identifier];
+    [self setNumberOfConnections:[remoteClients count]];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
 
@@ -686,6 +707,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     NSParameterAssert(identifier != nil);
     id proxyObject = [[[remoteClients objectForKey:identifier] objectForKey:@"object"] retain];
     [remoteClients removeObjectForKey:identifier];
+    [self setNumberOfConnections:[remoteClients count]];
     [[proxyObject connectionForProxy] invalidate];
     [proxyObject release];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];

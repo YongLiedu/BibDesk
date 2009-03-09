@@ -398,7 +398,6 @@
 		F90C4ACE0C7395FC0035DD50 /* BDSKSciFinderParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C4ACC0C7395FB0035DD50 /* BDSKSciFinderParser.m */; };
 		F90C64070AC62B7B008B2DDA /* BDSKShellCommandFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */; };
 		F911D7120CFE90050009C77B /* BDSKLinkedFile.m in Sources */ = {isa = PBXBuildFile; fileRef = F911D7110CFE90050009C77B /* BDSKLinkedFile.m */; };
-		F916E69607A9F9AB009EF011 /* BDSKThreadSafeMutableDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = F916E68F07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.m */; };
 		F91B7F28092BEB5A00976F6F /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F91B7F27092BEB5A00976F6F /* AddressBook.framework */; };
 		F91F286A09A6684900419960 /* PDFMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = F91F284709A661A700419960 /* PDFMetadata.m */; };
 		F9201E020B72504C007E45BB /* BDSKMacro.m in Sources */ = {isa = PBXBuildFile; fileRef = F9201E000B72504C007E45BB /* BDSKMacro.m */; };
@@ -1471,8 +1470,6 @@
 		F911D6A80CFE8E420009C77B /* FileView.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = FileView.xcodeproj; path = vendorsrc/amaxwell/FileView/FileView.xcodeproj; sourceTree = "<group>"; };
 		F911D7100CFE90050009C77B /* BDSKLinkedFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKLinkedFile.h; sourceTree = "<group>"; };
 		F911D7110CFE90050009C77B /* BDSKLinkedFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKLinkedFile.m; sourceTree = "<group>"; };
-		F916E68A07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKThreadSafeMutableDictionary.h; sourceTree = "<group>"; };
-		F916E68F07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKThreadSafeMutableDictionary.m; sourceTree = "<group>"; };
 		F91B5CC7076579830011ED22 /* previewtemplate.tex */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = previewtemplate.tex; sourceTree = "<group>"; };
 		F91B5CE407657A200011ED22 /* template.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = template.txt; sourceTree = "<group>"; };
 		F91B7F27092BEB5A00976F6F /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = /System/Library/Frameworks/AddressBook.framework; sourceTree = "<absolute>"; };
@@ -2243,7 +2240,6 @@
 				F98DB3160A23C7730040D347 /* BDSKTemplate.m */,
 				CE95AF160ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m */,
 				CE8F83470AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.m */,
-				F916E68F07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.m */,
 				CE8961860CBEB59800EA2D98 /* BDSKToken.m */,
 				F963E42B0A1D7ADD00695DDC /* BDSKTreeNode.m */,
 				CE8961880CBEB59800EA2D98 /* BDSKTypeTemplate.m */,
@@ -2751,7 +2747,6 @@
 				F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */,
 				F9DCEA4D094B7D1100AEE662 /* BDSKTextWithIconCell.h */,
 				CE8F83460AFB989B009EE6F9 /* BDSKThreadSafeMutableArray.h */,
-				F916E68A07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.h */,
 				F963E42A0A1D7ADD00695DDC /* BDSKTreeNode.h */,
 				CE8961850CBEB59800EA2D98 /* BDSKToken.h */,
 				CE6DACC20A503ECF00123185 /* BDSKToolbarItem.h */,
@@ -3679,7 +3674,6 @@
 				3DD300F6075C054D003FD2D7 /* BDSKField.m in Sources */,
 				3DAEA2EE07703F6000AF111A /* BDSKUndoManager.m in Sources */,
 				F92F4E4F0788DEFC001B8F82 /* BibPref_Files.m in Sources */,
-				F916E69607A9F9AB009EF011 /* BDSKThreadSafeMutableDictionary.m in Sources */,
 				2730077E07CF20B500F2E485 /* BDSKBorderlessKeyWindow.m in Sources */,
 				2730077F07CF20B500F2E485 /* BDSKComplexString.m in Sources */,
 				2730078107CF20B500F2E485 /* BDSKComplexStringEditor.m in Sources */,
