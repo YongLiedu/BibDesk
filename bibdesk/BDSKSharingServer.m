@@ -116,7 +116,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
 - (id)initForSharingServer:(BDSKSharingServer *)aSharingServer;
 
 - (unsigned int)numberOfConnections;
-- (void)setNumberOfConnections;
+- (void)setNumberOfConnections:(unsigned int)count;
 
 - (void)notifyClientConnectionsChanged;
 
