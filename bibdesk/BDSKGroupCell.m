@@ -69,7 +69,7 @@ NSString *BDSKGroupCellIsRetrievingKey = @"isRetrieving";
 }
 
 - (id)init {
-    if (self = [super initTextCell:[[[BDSKGroup alloc] initWithName:@"" count:0] autorelease]]) {
+    if (self = [super initTextCell:[NSDictionary dictionaryWithObjectsAndKeys:@"", BDSKGroupCellStringKey, nil]]) {
         
         [self setEditable:YES];
         [self setScrollable:YES];
@@ -163,7 +163,7 @@ static NSString *countStringWithNumber(NSNumber *number)
 
 - (void)setObjectValue:(id <NSCopying>)obj {
     // we should not set a derived value such as the group name here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
-    BDSKASSERT([(id)obj isKindOfClass:[NSDictionary class]]);
+    //BDSKASSERT([(id)obj isKindOfClass:[NSDictionary class]]);
     
     [super setObjectValue:obj];
     

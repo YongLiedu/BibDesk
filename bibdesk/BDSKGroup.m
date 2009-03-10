@@ -101,7 +101,7 @@ static NSString *createUniqueID(void)
 }
 
 - (NSDictionary *)cellValue {
-    return [NSDictionary dictionaryWithValuesForKeys:[NSArray arrayWithObjects:@"stringValue", @"editingStringValue", @"icon", @"numberValue", @"failedDownload", @"isRetrieving", nil]];
+    return [self dictionaryWithValuesForKeys:[NSArray arrayWithObjects:@"stringValue", @"editingStringValue", @"icon", @"numberValue", @"failedDownload", @"isRetrieving", nil]];
 }
 
 // NSCoding protocol, should never be used
