@@ -37,7 +37,6 @@
  */
 #import "BDSKTextWithIconCell.h"
 #import "NSGeometry_BDSKExtensions.h"
-#import "NSFileManager_BDSKExtensions.h"
 #import "NSImage_BDSKExtensions.h"
 #import "NSLayoutManager_BDSKExtensions.h"
 
@@ -238,90 +237,6 @@ NSString *BDSKTextWithIconCellImageKey = @"image";
 - (void)setHasDarkHighlight:(BOOL)flag;
 {
     hasDarkHighlight = flag;
-}
-
-@end
-
-
-@implementation BDSKFilePathCell
-
-- (id)init;
-{
-    if (self = [super init]) {
-        [self setDisplayType:BDSKFilePathDisplayTildeAbbreviatedPath];
-        [self setLineBreakMode:NSLineBreakByTruncatingMiddle];
-    }
-    return self;
-}
-
-- (id)initWithCoder:(NSCoder *)coder;
-{
-    if (self = [super initWithCoder:coder]) {
-        [self setDisplayType:BDSKFilePathDisplayTildeAbbreviatedPath];
-    }
-    return self;
-}
-
-- (id)copyWithZone:(NSZone *)zone;
-{
-    BDSKFilePathCell *copy = (BDSKFilePathCell *)[super copyWithZone:zone];
-    [copy setDisplayType:displayType];
-    return copy;
-}
-
-- (int)displayType { return displayType; }
-
-- (void)setDisplayType:(int)type { displayType = type; }
-
-- (void)setObjectValue:(id <NSObject, NSCopying>)obj;
-{
-    NSString *path = nil;
-    NSImage *image = nil;
-    
-    if ([obj isKindOfClass:[NSString class]]) {
-        path = [(NSString *)obj stringByStandardizingPath];
-        if(path && [[NSFileManager defaultManager] fileExistsAtPath:path])
-            image = [NSImage imageForFile:path];
-    } else if ([obj isKindOfClass:[NSURL class]]) {
-        NSURL *fileURL = (NSURL *)obj;
-        path = [fileURL path];
-        if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL])
-            image = [NSImage imageForURL:fileURL];
-    } else if ([obj isKindOfClass:[NSDictionary class]]) {
-        NSDictionary *dict = (NSDictionary *)obj;
-        if ([[dict objectForKey:BDSKTextWithIconCellStringKey] isKindOfClass:[NSString class]]) {
-            path = [[dict objectForKey:BDSKTextWithIconCellStringKey] stringByStandardizingPath];
-            image = [dict objectForKey:BDSKTextWithIconCellImageKey];
-            if(image == nil && path && [[NSFileManager defaultManager] fileExistsAtPath:path])
-                image = [NSImage imageForFile:path];
-        } else {
-            [super setObjectValue:dict];
-            return;
-        }
-    } else {
-        [super setObjectValue:obj];
-        return;
-    }
-    
-	NSString *displayPath = path;
-    switch (displayType) {
-        case BDSKFilePathDisplayFullPath:
-            displayPath = path;
-            break;
-        case BDSKFilePathDisplayTildeAbbreviatedPath:
-            displayPath = [path stringByAbbreviatingWithTildeInPath];
-            break;
-        case BDSKFilePathDisplayFilename:
-            displayPath = [path lastPathComponent];
-    }
-	if(image && displayPath){
-		NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                displayPath, BDSKTextWithIconCellStringKey, 
-                                image, BDSKTextWithIconCellImageKey, nil];
-        [super setObjectValue:dict];
-	} else {
-        [super setObjectValue:displayPath];
-	}
 }
 
 @end
