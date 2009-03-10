@@ -47,10 +47,6 @@
 #import "BDSKGroup.h"
 #import "BDSKGroupCell.h"
 
-@interface BDSKGroupCellFormatter : NSFormatter
-@end
-
-#pragma mark
 
 @implementation BDSKGroupTableView
 
@@ -75,14 +71,6 @@
 	
 	[self setHeaderView:customTableHeaderView];	
     [customTableHeaderView release];
-    
-    BDSKGroupCell *cell = [[BDSKGroupCell alloc] init];
-    [column setDataCell:cell];
-    [cell release];
-    
-    BDSKGroupCellFormatter *formatter = [[BDSKGroupCellFormatter alloc] init];
-    [[column dataCell] setFormatter:formatter];
-    [formatter release];
     
     BDSKPRECONDITION([[self enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -350,28 +338,6 @@
 	id headerCell = [[[[self tableView] tableColumns] objectAtIndex:0] headerCell];
 	BDSKASSERT([headerCell isKindOfClass:[NSPopUpButtonCell class]]);
 	return headerCell;
-}
-
-@end
-
-#pragma mark -
-
-@implementation BDSKGroupCellFormatter
-
-// this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
-- (NSString *)stringForObjectValue:(id)obj{
-    BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
-    return [obj valueForKey:BDSKGroupCellStringKey];
-}
-
-- (NSString *)editingStringForObjectValue:(id)obj{
-    BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
-    return [obj valueForKey:BDSKGroupCellEditingStringKey] ?: [obj valueForKey:BDSKGroupCellStringKey];
-}
-
-- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    *obj = [NSDictionary dictionaryWithObjectsAndKeys:string, BDSKGroupCellStringKey, string, BDSKGroupCellEditingStringKey, nil];
-    return YES;
 }
 
 @end

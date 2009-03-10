@@ -43,8 +43,6 @@
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSParagraphStyle_BDSKExtensions.h"
 
-static NSMutableDictionary *countStringDictionary = NULL;
-
 // names of these globals were changed to support key-value coding on BDSKGroup
 NSString *BDSKGroupCellStringKey = @"stringValue";
 NSString *BDSKGroupCellEditingStringKey = @"editingStringValue";
@@ -53,11 +51,18 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 NSString *BDSKGroupCellFailedDownloadKey = @"failedDownload";
 NSString *BDSKGroupCellIsRetrievingKey = @"isRetrieving";
 
+@interface BDSKGroupCellFormatter : NSFormatter
+@end
+
 @interface BDSKGroupCell (Private)
 - (void)recacheCountAttributes;
 @end
 
 @implementation BDSKGroupCell
+
+static NSMutableDictionary *countStringDictionary = NULL;
+
+static BDSKGroupCellFormatter *groupCellFormatter = NULL;
 
 + (void)initialize;
 {
@@ -65,11 +70,12 @@ NSString *BDSKGroupCellIsRetrievingKey = @"isRetrieving";
     
     if (NULL == countStringDictionary)
         countStringDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys:@"", [NSNumber numberWithInt:0], nil];
+    groupCellFormatter = [[BDSKGroupCellFormatter alloc] init];
     
 }
 
 - (id)init {
-    if (self = [super initTextCell:[NSDictionary dictionaryWithObjectsAndKeys:@"", BDSKGroupCellStringKey, nil]]) {
+    if (self = [super initTextCell:@""]) {
         
         [self setEditable:YES];
         [self setScrollable:YES];
@@ -79,6 +85,8 @@ NSString *BDSKGroupCellIsRetrievingKey = @"isRetrieving";
         
         countAttributes = [[NSMutableDictionary alloc] initWithCapacity:5];
         [self recacheCountAttributes];
+        
+        [self setFormatter:groupCellFormatter];
 
     }
     return self;
@@ -95,6 +103,10 @@ NSString *BDSKGroupCellIsRetrievingKey = @"isRetrieving";
         // could encode these, but presumably we want a fresh string
         label = [[NSMutableAttributedString alloc] initWithString:@""];
         countString = [[NSMutableAttributedString alloc] initWithString:@""];
+        
+        if ([self formatter] == nil)
+            [self setFormatter:groupCellFormatter];
+        
 	}
 	return self;
 }
@@ -162,9 +174,8 @@ static NSString *countStringWithNumber(NSNumber *number)
 }
 
 - (void)setObjectValue:(id <NSCopying>)obj {
-    // we should not set a derived value such as the group name here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
-    //BDSKASSERT([(id)obj isKindOfClass:[NSDictionary class]]);
-    
+    if ([(id)obj isKindOfClass:[NSString class]])
+        obj = [NSDictionary dictionaryWithObjectsAndKeys:obj, BDSKGroupCellStringKey, nil];
     [super setObjectValue:obj];
     
     [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:[self objectValueForKey:BDSKGroupCellStringKey] ?: @""];
@@ -350,6 +361,28 @@ static NSString *countStringWithNumber(NSNumber *number)
     [countAttributes setObject:countFont forKey:NSFontAttributeName];
     [countAttributes setObject:[NSNumber numberWithFloat:-1.0] forKey:NSKernAttributeName];
     [countAttributes setObject:[NSParagraphStyle defaultClippingParagraphStyle] forKey:NSParagraphStyleAttributeName];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKGroupCellFormatter
+
+// this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
+- (NSString *)stringForObjectValue:(id)obj{
+    BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
+    return [obj valueForKey:BDSKGroupCellStringKey];
+}
+
+- (NSString *)editingStringForObjectValue:(id)obj{
+    BDSKASSERT([obj isKindOfClass:[NSDictionary class]]);
+    return [obj valueForKey:BDSKGroupCellEditingStringKey] ?: [obj valueForKey:BDSKGroupCellStringKey];
+}
+
+- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+    *obj = [NSDictionary dictionaryWithObjectsAndKeys:string, BDSKGroupCellStringKey, string, BDSKGroupCellEditingStringKey, nil];
+    return YES;
 }
 
 @end
