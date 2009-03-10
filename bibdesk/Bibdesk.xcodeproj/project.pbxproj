@@ -307,7 +307,6 @@
 		CEF83F380C77911F00A3AD51 /* BDSKBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF83F360C77911F00A3AD51 /* BDSKBookmarkController.m */; };
 		CEF83F4E0C7792D300A3AD51 /* BookmarksWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF83F4C0C7792D300A3AD51 /* BookmarksWindow.nib */; };
 		CEF942120926458C00750FFA /* BDSKPathColorTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF942100926458C00750FFA /* BDSKPathColorTransformer.m */; };
-		CEF94342092656BB00750FFA /* BDSKPathIconTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94340092656BB00750FFA /* BDSKPathIconTransformer.m */; };
 		CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */; };
 		CEFA07F50AF0E52100A3B4B1 /* BDSKApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */; };
 		CEFA2F130CC0272C002A8262 /* BDSKTemplateTag.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA2F110CC0272C002A8262 /* BDSKTemplateTag.m */; };
@@ -1314,8 +1313,6 @@
 		CEF83F5F0C77948F00A3AD51 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BookmarksWindow.nib; sourceTree = "<group>"; };
 		CEF9420F0926458C00750FFA /* BDSKPathColorTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPathColorTransformer.h; sourceTree = "<group>"; };
 		CEF942100926458C00750FFA /* BDSKPathColorTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPathColorTransformer.m; sourceTree = "<group>"; };
-		CEF9433F092656BB00750FFA /* BDSKPathIconTransformer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPathIconTransformer.h; sourceTree = "<group>"; };
-		CEF94340092656BB00750FFA /* BDSKPathIconTransformer.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPathIconTransformer.m; sourceTree = "<group>"; };
 		CEF94412092668EA00750FFA /* BDSKTableSortDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTableSortDescriptor.h; sourceTree = "<group>"; };
 		CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTableSortDescriptor.m; sourceTree = "<group>"; };
 		CEFA07F20AF0E52100A3B4B1 /* BDSKApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKApplication.h; sourceTree = "<group>"; };
@@ -2268,7 +2265,6 @@
 				F9022C450758027800C3F701 /* BDSKFieldNameFormatter.m */,
 				3D7406920849F5430081EC6F /* BDSKTypeNameFormatter.m */,
 				CEF942100926458C00750FFA /* BDSKPathColorTransformer.m */,
-				CEF94340092656BB00750FFA /* BDSKPathIconTransformer.m */,
 				F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */,
 				CEF5460E0F56BDDB008A630F /* BDSKStringArrayFormatter.m */,
 				CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */,
@@ -2674,7 +2670,6 @@
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
 				CED65DC60907A2FD003EED90 /* BDSKParseFormatCommand.h */,
 				F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */,
-				CEF9433F092656BB00750FFA /* BDSKPathIconTransformer.h */,
 				CEF9420F0926458C00750FFA /* BDSKPathColorTransformer.h */,
 				F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */,
 				F9022C71075802E300C3F701 /* BDSKPersonController.h */,
@@ -3728,7 +3723,6 @@
 				CE21D10B09208B9D0075E607 /* BDSKGroup.m in Sources */,
 				CE77A7FE0923BEBA0019D901 /* NSTableView_BDSKExtensions.m in Sources */,
 				CEF942120926458C00750FFA /* BDSKPathColorTransformer.m in Sources */,
-				CEF94342092656BB00750FFA /* BDSKPathIconTransformer.m in Sources */,
 				CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */,
 				CE969E340931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m in Sources */,
 				CE2209A8093639B0004D7D92 /* BDSKAlert.m in Sources */,
