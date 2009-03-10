@@ -90,7 +90,7 @@
 
 // note that pointer equality is used for these groups, so names can overlap
 
-- (NSImage *)icon { return [NSImage imageNamed:@"webFolderIcon"]; }
+- (NSImage *)icon { return [NSImage imageNamed:@"webGroup"]; }
 
 - (BOOL)isSearch { return NO; }
 

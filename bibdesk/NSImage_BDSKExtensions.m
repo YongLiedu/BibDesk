@@ -221,39 +221,39 @@
     tinySearchBookmarkImage = [[NSImage alloc] initWithSize:NSMakeSize(16.0, 16.0)];
     [tinySearchBookmarkImage lockFocus];
     [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-    [[self imageNamed:@"searchFolderIcon"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeCopy fraction:1.0];
+    [[self imageNamed:@"searchGroup"] drawInRect:NSMakeRect(0.0, 0.0, 16.0, 16.0) fromRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) operation:NSCompositeCopy fraction:1.0];
     [tinySearchBookmarkImage unlockFocus];
     [tinySearchBookmarkImage setName:@"TinySearchBookmark"];
 }
     
 + (void)makeFolderImages {
-    static NSImage *genericFolderIconImage = nil;
-    static NSImage *staticFolderIconImage = nil;
-    static NSImage *smartFolderIconImage = nil;
-    static NSImage *importFolderIconImage = nil;
+    static NSImage *genericGroupImage = nil;
+    static NSImage *staticGroupImage = nil;
+    static NSImage *smartGroupImage = nil;
+    static NSImage *importGroupImage = nil;
     
-    if (genericFolderIconImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
+    if (genericGroupImage || floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_4)
         return;
     
-    genericFolderIconImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
-    [genericFolderIconImage lockFocus];
+    genericGroupImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
+    [genericGroupImage lockFocus];
     CIImage *ciImage = [CIImage imageWithData:[[NSImage imageNamed:@"NSFolderSmart"] TIFFRepresentation]];
     ciImage = [ciImage imageWithAdjustedHueAngle:3.0 saturationFactor:1.2 brightnessBias:0.3];
     [ciImage drawInRect:NSMakeRect(0, 0, 32.0, 32.0) fromRect:NSMakeRect(0, 0, 32.0, 32.0) operation:NSCompositeSourceOver fraction:1.0];
-    [genericFolderIconImage unlockFocus];
-    [genericFolderIconImage setName:@"genericFolderIcon"];
+    [genericGroupImage unlockFocus];
+    [genericGroupImage setName:@"genericGroup"];
     
-    staticFolderIconImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
-    [staticFolderIconImage setName:@"staticFolderIcon"];
+    staticGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
+    [staticGroupImage setName:@"staticGroup"];
     
-    smartFolderIconImage = [[NSImage imageNamed:@"NSFolderSmart"] copy];
-    [smartFolderIconImage setName:@"smartFolderIcon"];
+    smartGroupImage = [[NSImage imageNamed:@"NSFolderSmart"] copy];
+    [smartGroupImage setName:@"smartGroup"];
     
-    importFolderIconImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
-    [importFolderIconImage lockFocus];
+    importGroupImage = [[self imageWithSmallIconForToolboxCode:kGenericFolderIcon] copy];
+    [importGroupImage lockFocus];
     [[NSImage imageNamed:@"importBadge"] drawInRect:NSMakeRect(0.0, 0.0, 32.0, 32.0) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [importFolderIconImage unlockFocus];
-    [importFolderIconImage setName:@"importFolderIcon"];
+    [importGroupImage unlockFocus];
+    [importGroupImage setName:@"importGroup"];
 }
 
 + (NSImage *)systemIconWithCode:(OSType)code {

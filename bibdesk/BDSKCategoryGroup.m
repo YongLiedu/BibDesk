@@ -128,7 +128,7 @@
 }
 
 - (NSImage *)icon {
-	return [NSImage imageNamed:@"genericFolderIcon"];
+	return [NSImage imageNamed:@"genericGroup"];
 }
 
 - (void)setName:(id)newName {
@@ -158,7 +158,7 @@
     static NSImage *image = nil;
     if(image == nil){
         image = [[NSImage alloc] initWithSize:NSMakeSize(32.0, 32.0)];
-        NSImage *genericImage = [NSImage imageNamed:@"genericFolderIcon"];
+        NSImage *genericImage = [NSImage imageNamed:@"genericGroup"];
         NSImage *questionMark = [NSImage iconWithSize:NSMakeSize(20.0, 20.0) forToolboxCode:kQuestionMarkIcon];
         unsigned i;
         [image lockFocus];

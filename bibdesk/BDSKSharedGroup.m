@@ -57,7 +57,7 @@ static NSImage *lockedIcon = nil;
 static NSImage *unlockedIcon = nil;
 
 + (NSImage *)icon{
-    return [NSImage imageNamed:@"sharedFolderIcon"];
+    return [NSImage imageNamed:@"sharedGroup"];
 }
 
 + (NSImage *)lockedIcon {
@@ -66,7 +66,7 @@ static NSImage *unlockedIcon = nil;
         NSRect badgeRect = NSMakeRect(10.0, 0.0, 6.0, 8.0);
         NSRect badgeSrcRect = NSMakeRect(0.0, 0.0, 9.0, 12.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
-        NSImage *badge = [NSImage imageNamed:@"SmallLock_Locked"];
+        NSImage *badge = [NSImage imageNamed:@"locked"];
         NSSize srcSize = [[self icon] size];
         
         [image lockFocus];
@@ -86,7 +86,7 @@ static NSImage *unlockedIcon = nil;
         NSRect badgeRect = NSMakeRect(10.0, 0.0, 6.0, 8.0);
         NSRect badgeSrcRect = NSMakeRect(0.0, 0.0, 9.0, 12.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
-        NSImage *badge = [NSImage imageNamed:@"SmallLock_Unlocked"];
+        NSImage *badge = [NSImage imageNamed:@"unlocked"];
         NSSize srcSize = [[self icon] size];
         
         [image lockFocus];

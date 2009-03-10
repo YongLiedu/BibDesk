@@ -327,7 +327,7 @@
 // BDSKGroup overrides
 
 - (NSImage *)icon {
-    return [NSImage imageNamed:@"urlFolderIcon"];
+    return [NSImage imageNamed:@"urlGroup"];
 }
 
 - (BOOL)isURL { return YES; }
