@@ -156,30 +156,35 @@ static NSString *countStringWithNumber(NSNumber *number)
     return string;
 }
 
+- (id)objectValueForKey:(NSString *)key {
+    id value = [[self objectValue] valueForKey:key];
+    return [value isEqual:[NSNull null]] ? nil : value;
+}
+
 - (void)setObjectValue:(id <NSCopying>)obj {
     // we should not set a derived value such as the group name here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
     BDSKASSERT([(id)obj isKindOfClass:[NSDictionary class]]);
     
     [super setObjectValue:obj];
     
-    [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:([(id)obj valueForKey:BDSKGroupCellStringKey] ?: @"")];
-    [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:countStringWithNumber([(id)obj valueForKey:BDSKGroupCellImageKey])];
+    [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:[self objectValueForKey:BDSKGroupCellStringKey] ?: @""];
+    [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:countStringWithNumber([self objectValueForKey:BDSKGroupCellCountKey])];
 }
 
 - (NSImage *)icon {
-    return [[self objectValue] valueForKey:BDSKGroupCellImageKey];
+    return [self objectValueForKey:BDSKGroupCellImageKey];
 }
 
 - (int)count {
-    return [[[self objectValue] valueForKey:BDSKGroupCellCountKey] intValue];
+    return [[self objectValueForKey:BDSKGroupCellCountKey] intValue];
 }
 
 - (BOOL)failedDownload {
-    return [[[self objectValue] valueForKey:BDSKGroupCellFailedDownloadKey] boolValue];
+    return [[self objectValueForKey:BDSKGroupCellFailedDownloadKey] boolValue];
 }
 
 - (BOOL)isRetrieving {
-    return [[[self objectValue] valueForKey:BDSKGroupCellIsRetrievingKey] boolValue];
+    return [[self objectValueForKey:BDSKGroupCellIsRetrievingKey] boolValue];
 }
 
 #pragma mark Drawing
