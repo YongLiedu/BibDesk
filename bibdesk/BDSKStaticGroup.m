@@ -83,6 +83,10 @@ static NSString *BDSKLastImportLocalizedString = nil;
     return [NSDictionary dictionaryWithObjectsAndKeys:aName, @"group name", keys, @"keys", nil];
 }
 
+- (id)copyWithZone:(NSZone *)aZone {
+    return [[[self class] allocWithZone:aZone] initWithName:name publications:publications];
+}
+
 - (void)dealloc {
 	[[self undoManager] removeAllActionsWithTarget:self];
     [publications release];

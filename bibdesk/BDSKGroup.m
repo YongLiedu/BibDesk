@@ -120,10 +120,10 @@ static NSString *createUniqueID(void)
     [coder encodeInt:count forKey:@"count"];
 }
 
-// NSCopying protocol, may be used in -[NSCell setObjectValue:] at some point
+// NSCopying protocol, may be used by the scripting duplicate command
 
 - (id)copyWithZone:(NSZone *)aZone {
-	return [self retain];
+    return [[[self class] allocWithZone:aZone] initWithName:name count:count];
 }
 
 - (void)dealloc {

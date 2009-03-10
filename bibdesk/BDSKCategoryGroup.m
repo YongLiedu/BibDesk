@@ -95,6 +95,10 @@
     [coder encodeObject:key forKey:@"key"];
 }
 
+- (id)copyWithZone:(NSZone *)aZone {
+    return [[[self class] allocWithZone:aZone] initWithName:name key:key count:count];
+}
+
 - (void)dealloc {
     [key release];
     [super dealloc];
